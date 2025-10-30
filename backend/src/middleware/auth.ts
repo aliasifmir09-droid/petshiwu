@@ -4,6 +4,8 @@ import User, { IUser } from '../models/User';
 
 export interface AuthRequest extends Request {
   user?: IUser;
+  // Optional cookie bag added for type-safety where cookie-parser populates req.cookies
+  cookies?: Record<string, any>;
 }
 
 export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
