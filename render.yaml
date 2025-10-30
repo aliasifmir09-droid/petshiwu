@@ -17,22 +17,22 @@ services:
         # Update these after your first deploy with actual Render URLs
         value: https://pet-shop-frontend.onrender.com,https://pet-shop-admin.onrender.com
 
-  - type: static_site
+  - type: static
     name: pet-shop-frontend
     rootDir: frontend
     buildCommand: npm ci && npm run build
-    publishPath: frontend/dist
+    publishPath: dist
     plan: free
     envVars:
       - key: VITE_API_URL
         # Update with actual API URL after backend deploy if different
         value: https://pet-shop-api.onrender.com/api
 
-  - type: static_site
+  - type: static
     name: pet-shop-admin
     rootDir: admin
     buildCommand: npm ci && npm run build
-    publishPath: admin/dist
+    publishPath: dist
     plan: free
     envVars:
       - key: VITE_API_URL
