@@ -1,0 +1,118 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { CartItem, Product, ProductVariant } from '@/types';
+
+interface CartState {
+  items: CartItem[];
+  addToCart: (product: Product, variant?: ProductVariant, quantity?: number) => void;
+  removeFromCart: (productId: string, variantSku?: string) => void;
+  updateQuantity: (productId: string, quantity: number, variantSku?: string) => void;
+  clearCart: () => void;
+  getTotalItems: () => number;
+  getTotalPrice: () => number;
+}
+
+export const useCartStore = create<CartState>()(
+  persist(
+    (set, get) => ({
+      items: [],
+
+      addToCart: (product, variant, quantity = 1) => {
+        // Check if product/variant has stock
+        const availableStock = variant?.stock || 0;
+        
+        // Silently reject if out of stock (UI already shows "Out of Stock" button disabled)
+        if (availableStock === 0) {
+          return;
+        }
+
+        const items = get().items;
+        const existingItemIndex = items.findIndex(
+          (item) =>
+            item.product._id === product._id &&
+            item.variant?.sku === variant?.sku
+        );
+
+        if (existingItemIndex > -1) {
+          const currentQuantity = items[existingItemIndex].quantity;
+          const newQuantity = currentQuantity + quantity;
+          
+          // Check if new quantity exceeds available stock
+          if (newQuantity > availableStock) {
+            // Silently prevent exceeding stock
+            return;
+          }
+          
+          const newItems = [...items];
+          newItems[existingItemIndex].quantity = newQuantity;
+          set({ items: newItems });
+        } else {
+          // Check if requested quantity exceeds available stock
+          if (quantity > availableStock) {
+            // Silently prevent exceeding stock
+            return;
+          }
+          
+          set({ items: [...items, { product, variant, quantity }] });
+        }
+      },
+
+      removeFromCart: (productId, variantSku) => {
+        set({
+          items: get().items.filter(
+            (item) =>
+              !(item.product._id === productId && item.variant?.sku === variantSku)
+          )
+        });
+      },
+
+      updateQuantity: (productId, quantity, variantSku) => {
+        if (quantity <= 0) {
+          get().removeFromCart(productId, variantSku);
+          return;
+        }
+
+        const items = get().items;
+        const itemIndex = items.findIndex(
+          (item) =>
+            item.product._id === productId &&
+            item.variant?.sku === variantSku
+        );
+
+        if (itemIndex > -1) {
+          const item = items[itemIndex];
+          const availableStock = item.variant?.stock || 0;
+          
+          // Check if new quantity exceeds available stock
+          if (quantity > availableStock) {
+            // Silently prevent exceeding stock (cart UI shows max stock)
+            return;
+          }
+          
+          const newItems = [...items];
+          newItems[itemIndex].quantity = quantity;
+          set({ items: newItems });
+        }
+      },
+
+      clearCart: () => set({ items: [] }),
+
+      getTotalItems: () => {
+        return get().items.reduce((total, item) => total + item.quantity, 0);
+      },
+
+      getTotalPrice: () => {
+        return get().items.reduce((total, item) => {
+          const price = item.variant?.price || item.product.basePrice;
+          return total + price * item.quantity;
+        }, 0);
+      }
+    }),
+    {
+      name: 'cart-storage'
+    }
+  )
+);
+
+
+

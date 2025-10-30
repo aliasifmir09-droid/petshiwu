@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Order Creation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        .step {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #2196F3;
+        }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #1976D2; }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success { background: #e8f5e9; border-left: 4px solid #4CAF50; }
+        .error { background: #ffebee; border-left: 4px solid #f44336; }
+        .info { background: #e3f2fd; border-left: 4px solid #2196F3; }
+        .warning { background: #fff3e0; border-left: 4px solid #ff9800; }
+        .token-display {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow-wrap: break-word;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Order Creation Debugger</h1>
+        
+        <div class="step">
+            <h3>Step 1: Login</h3>
+            <button onclick="testLogin()" id="loginBtn">Login as Test Customer</button>
+            <div id="loginResult"></div>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Get Products</h3>
+            <button onclick="getProducts()" id="productsBtn" disabled>Fetch Available Products</button>
+            <div id="productsResult"></div>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Fill Order Details</h3>
+            <div id="orderForm" style="display: none;">
+                <div class="form-group">
+                    <label>First Name:</label>
+                    <input type="text" id="firstName" value="John">
+                </div>
+                <div class="form-group">
+                    <label>Last Name:</label>
+                    <input type="text" id="lastName" value="Doe">
+                </div>
+                <div class="form-group">
+                    <label>Phone:</label>
+                    <input type="text" id="phone" value="+1-555-0100">
+                </div>
+                <div class="form-group">
+                    <label>Street Address:</label>
+                    <input type="text" id="street" value="123 Main Street">
+                </div>
+                <div class="form-group">
+                    <label>City:</label>
+                    <input type="text" id="city" value="New York">
+                </div>
+                <div class="form-group">
+                    <label>State:</label>
+                    <input type="text" id="state" value="NY">
+                </div>
+                <div class="form-group">
+                    <label>ZIP Code:</label>
+                    <input type="text" id="zipCode" value="10001">
+                </div>
+                <div class="form-group">
+                    <label>Country:</label>
+                    <input type="text" id="country" value="USA">
+                </div>
+                <div class="form-group">
+                    <label>Select Product:</label>
+                    <select id="productSelect"></select>
+                </div>
+                <div class="form-group">
+                    <label>Quantity:</label>
+                    <input type="number" id="quantity" value="1" min="1">
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Create Order</h3>
+            <button onclick="createOrder()" id="orderBtn" disabled>Create Test Order</button>
+            <button onclick="createOrderWithValidation()" id="validateBtn" disabled>Create Order (Show Validation)</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let authToken = null;
+        let products = [];
+        let selectedProduct = null;
+
+        async function testLogin() {
+            const loginBtn = document.getElementById('loginBtn');
+            const loginResult = document.getElementById('loginResult');
+            const productsBtn = document.getElementById('productsBtn');
+            
+            loginBtn.disabled = true;
+            loginResult.innerHTML = '<div class="info">Logging in...</div>';
+
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'customer@test.com',
+                        password: 'password123'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    authToken = data.token;
+                    productsBtn.disabled = false;
+                    loginResult.innerHTML = `<div class="success">✅ Login successful!<div class="token-display">Token: ${authToken.substring(0, 20)}...</div></div>`;
+                } else {
+                    loginResult.innerHTML = `<div class="error">❌ Login failed: ${data.message}</div>`;
+                }
+            } catch (error) {
+                loginResult.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            } finally {
+                loginBtn.disabled = false;
+            }
+        }
+
+        async function getProducts() {
+            const productsBtn = document.getElementById('productsBtn');
+            const productsResult = document.getElementById('productsResult');
+            const orderForm = document.getElementById('orderForm');
+            const orderBtn = document.getElementById('orderBtn');
+            const validateBtn = document.getElementById('validateBtn');
+            
+            productsBtn.disabled = true;
+            productsResult.innerHTML = '<div class="info">Fetching products...</div>';
+
+            try {
+                const response = await fetch('http://localhost:5000/api/products?limit=10', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    products = data.data;
+                    const productSelect = document.getElementById('productSelect');
+                    productSelect.innerHTML = products.map(p => 
+                        `<option value="${p._id}">${p.name} - $${p.basePrice}</option>`
+                    ).join('');
+                    
+                    selectedProduct = products[0];
+                    orderForm.style.display = 'block';
+                    orderBtn.disabled = false;
+                    validateBtn.disabled = false;
+                    
+                    productsResult.innerHTML = `<div class="success">✅ Loaded ${products.length} products</div>`;
+                } else {
+                    productsResult.innerHTML = `<div class="error">❌ Failed: ${data.message}</div>`;
+                }
+            } catch (error) {
+                productsResult.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            } finally {
+                productsBtn.disabled = false;
+            }
+        }
+
+        function getOrderData() {
+            const productId = document.getElementById('productSelect').value;
+            const product = products.find(p => p._id === productId);
+            const quantity = parseInt(document.getElementById('quantity').value);
+            
+            const itemPrice = product.basePrice;
+            const itemsPrice = itemPrice * quantity;
+            const shippingPrice = itemsPrice > 49 ? 0 : 5.99;
+            const taxPrice = itemsPrice * 0.08;
+            const totalPrice = itemsPrice + shippingPrice + taxPrice;
+
+            return {
+                items: [{
+                    product: product._id,
+                    name: product.name,
+                    image: product.images[0] || 'https://via.placeholder.com/150',
+                    price: itemPrice,
+                    quantity: quantity
+                }],
+                shippingAddress: {
+                    firstName: document.getElementById('firstName').value,
+                    lastName: document.getElementById('lastName').value,
+                    street: document.getElementById('street').value,
+                    city: document.getElementById('city').value,
+                    state: document.getElementById('state').value,
+                    zipCode: document.getElementById('zipCode').value,
+                    country: document.getElementById('country').value,
+                    phone: document.getElementById('phone').value
+                },
+                paymentMethod: 'cod',
+                itemsPrice: parseFloat(itemsPrice.toFixed(2)),
+                shippingPrice: parseFloat(shippingPrice.toFixed(2)),
+                taxPrice: parseFloat(taxPrice.toFixed(2)),
+                totalPrice: parseFloat(totalPrice.toFixed(2))
+            };
+        }
+
+        async function createOrder() {
+            const orderBtn = document.getElementById('orderBtn');
+            const result = document.getElementById('result');
+            
+            orderBtn.disabled = true;
+            result.innerHTML = '<div class="info">Creating order...</div>';
+
+            const orderData = getOrderData();
+
+            try {
+                const response = await fetch('http://localhost:5000/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    result.innerHTML = `
+                        <div class="success">
+                            <strong>✅ ORDER CREATED SUCCESSFULLY!</strong><br><br>
+                            Order Number: ${data.data.orderNumber}<br>
+                            Order ID: ${data.data._id}<br>
+                            Total: $${data.data.totalPrice}<br>
+                            Status: ${data.data.orderStatus}<br><br>
+                            <strong>Full Response:</strong><br>
+                            ${JSON.stringify(data, null, 2)}
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = `
+                        <div class="error">
+                            <strong>❌ ORDER CREATION FAILED!</strong><br><br>
+                            Status: ${response.status}<br>
+                            Message: ${data.message || 'Unknown error'}<br><br>
+                            <strong>Errors:</strong><br>
+                            ${JSON.stringify(data.errors || data, null, 2)}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="error">
+                        <strong>❌ REQUEST ERROR!</strong><br><br>
+                        ${error.message}
+                    </div>
+                `;
+            } finally {
+                orderBtn.disabled = false;
+            }
+        }
+
+        async function createOrderWithValidation() {
+            const validateBtn = document.getElementById('validateBtn');
+            const result = document.getElementById('result');
+            
+            validateBtn.disabled = true;
+
+            const orderData = getOrderData();
+
+            result.innerHTML = `
+                <div class="info">
+                    <strong>📋 Order Data Being Sent:</strong><br><br>
+                    ${JSON.stringify(orderData, null, 2)}
+                </div>
+            `;
+
+            // Validate locally first
+            const validationIssues = [];
+
+            if (!orderData.items || orderData.items.length === 0) {
+                validationIssues.push('No items in order');
+            }
+
+            orderData.items.forEach((item, idx) => {
+                if (!item.product) validationIssues.push(`Item ${idx}: Missing product ID`);
+                if (!item.name) validationIssues.push(`Item ${idx}: Missing name`);
+                if (!item.image) validationIssues.push(`Item ${idx}: Missing image`);
+                if (item.price === undefined) validationIssues.push(`Item ${idx}: Missing price`);
+                if (!item.quantity) validationIssues.push(`Item ${idx}: Missing quantity`);
+            });
+
+            const addr = orderData.shippingAddress;
+            if (!addr.firstName || addr.firstName.length < 2) validationIssues.push('First name too short (min 2 chars)');
+            if (!addr.lastName || addr.lastName.length < 2) validationIssues.push('Last name too short (min 2 chars)');
+            if (!addr.street || addr.street.length < 5) validationIssues.push('Street address too short (min 5 chars)');
+            if (!addr.city || addr.city.length < 2) validationIssues.push('City too short (min 2 chars)');
+            if (!addr.state || addr.state.length < 2) validationIssues.push('State too short (min 2 chars)');
+            if (!addr.zipCode || !/^\d{5}(-\d{4})?$/.test(addr.zipCode)) validationIssues.push('Invalid ZIP code (use 12345 or 12345-6789)');
+            if (!addr.country) validationIssues.push('Country is required');
+            if (!addr.phone) validationIssues.push('Phone is required');
+
+            if (validationIssues.length > 0) {
+                result.innerHTML += `
+                    <div class="warning">
+                        <strong>⚠️ VALIDATION ISSUES FOUND:</strong><br><br>
+                        ${validationIssues.map(issue => `• ${issue}`).join('<br>')}
+                        <br><br>
+                        <strong>Fix these issues and try again!</strong>
+                    </div>
+                `;
+                validateBtn.disabled = false;
+                return;
+            }
+
+            result.innerHTML += '<div class="success"><strong>✅ Local validation passed!</strong><br>Sending to server...</div>';
+
+            // Now try to create order
+            await createOrder();
+            validateBtn.disabled = false;
+        }
+
+        // Auto-update selected product when dropdown changes
+        document.addEventListener('DOMContentLoaded', () => {
+            const productSelect = document.getElementById('productSelect');
+            if (productSelect) {
+                productSelect.addEventListener('change', (e) => {
+                    selectedProduct = products.find(p => p._id === e.target.value);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+

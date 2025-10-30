@@ -1,0 +1,20 @@
+﻿# Node
+node_modules/
+**/node_modules/
+
+# Builds
+/dist/
+**/dist/
+*.log
+
+# Env & secrets
+.env
+**/.env
+.env.*.local
+
+# Local tooling
+.vscode/
+.DS_Store
+
+# Runtime uploads/media
+backend/uploads/

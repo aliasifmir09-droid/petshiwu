@@ -1,0 +1,10 @@
+# Robots.txt for petshiwu.com
+# Allow all crawlers
+
+User-agent: *
+Allow: /
+
+# Disallow admin and checkout pages
+Disallow: /checkout
+Disallow: /profile
+Distml:parameter name="parameter_name">$PARAMETER_VALUE

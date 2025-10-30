@@ -1,0 +1,65 @@
+import { LucideIcon } from 'lucide-react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
+
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  icon: LucideIcon;
+  trend?: {
+    value: string;
+    isPositive: boolean;
+  };
+  color?: 'blue' | 'green' | 'yellow' | 'red';
+}
+
+const StatCard = ({ title, value, icon: Icon, trend, color = 'blue' }: StatCardProps) => {
+  const gradientClasses = {
+    blue: 'from-blue-500 to-indigo-600',
+    green: 'from-green-500 to-emerald-600',
+    yellow: 'from-yellow-500 to-orange-500',
+    red: 'from-red-500 to-pink-600'
+  };
+
+  const iconBgClasses = {
+    blue: 'bg-gradient-to-br from-blue-100 to-indigo-100',
+    green: 'bg-gradient-to-br from-green-100 to-emerald-100',
+    yellow: 'bg-gradient-to-br from-yellow-100 to-orange-100',
+    red: 'bg-gradient-to-br from-red-100 to-pink-100'
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 p-6 border border-gray-100 hover:border-blue-200 hover-lift animate-fade-in-up group relative overflow-hidden">
+      {/* Decorative gradient background */}
+      <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${gradientClasses[color]}`}></div>
+      
+      <div className="flex items-center justify-between relative z-10">
+        <div className="flex-1">
+          <p className="text-gray-500 text-sm font-semibold mb-2 uppercase tracking-wider">{title}</p>
+          <h3 className="text-4xl font-black text-gray-900 mb-3 animate-count-up">{value}</h3>
+          {trend && (
+            <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold ${
+              trend.isPositive 
+                ? 'bg-green-50 text-green-700 border border-green-200' 
+                : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              {trend.isPositive ? (
+                <TrendingUp size={16} className="animate-pulse-slow" />
+              ) : (
+                <TrendingDown size={16} className="animate-pulse-slow" />
+              )}
+              <span>{trend.value}</span>
+            </div>
+          )}
+        </div>
+        <div className={`p-5 rounded-2xl ${iconBgClasses[color]} group-hover:scale-110 transition-transform duration-300 shadow-md`}>
+          <Icon size={32} className={`bg-gradient-to-br ${gradientClasses[color]} bg-clip-text text-transparent`} strokeWidth={2.5} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default StatCard;
+
+
+

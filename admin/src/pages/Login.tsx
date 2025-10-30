@@ -1,0 +1,124 @@
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { adminService } from '@/services/adminService';
+import Toast from '@/components/Toast';
+import { useToast } from '@/hooks/useToast';
+
+interface LoginProps {
+  onLogin: (user: any) => void;
+}
+
+const Login = ({ onLogin }: LoginProps) => {
+  const { toast, showToast, hideToast } = useToast();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+
+  const loginMutation = useMutation({
+    mutationFn: () => {
+      return adminService.login(formData.email, formData.password);
+    },
+    onSuccess: async () => {
+      try {
+        // Small delay to ensure token is saved
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const user = await adminService.getMe();
+        
+        if (!user || (user.role !== 'admin' && user.role !== 'staff')) {
+          showToast('Access denied. Admin or staff account required.', 'error');
+          localStorage.removeItem('adminToken');
+          return;
+        }
+        
+        onLogin(user);
+        // Force reload to ensure App.tsx picks up the token
+        window.location.href = '/';
+      } catch (error) {
+        showToast('Error fetching user information. Please try again.', 'error');
+        localStorage.removeItem('adminToken');
+      }
+    },
+    onError: (error: any) => {
+      showToast(error.response?.data?.message || 'Login failed', 'error');
+    }
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    loginMutation.mutate();
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="max-w-md w-full">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <img 
+              src="/logo.png" 
+              alt="petshiwu Logo" 
+              className="h-16 w-16 object-contain drop-shadow-lg"
+            />
+            <h1 className="text-4xl font-black bg-gradient-to-r from-gray-900 via-primary-600 to-gray-900 bg-clip-text text-transparent" style={{ fontFamily: "'Poppins', 'Inter', sans-serif" }}>
+              petshiwu
+            </h1>
+          </div>
+          <p className="text-gray-600 text-lg">Admin Dashboard</p>
+          <p className="text-gray-500 text-sm">Sign in to continue</p>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-lg p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium mb-2">Email Address</label>
+              <input
+                type="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="admin@example.com"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Password</label>
+              <input
+                type="password"
+                required
+                minLength={8}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="••••••••"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loginMutation.isPending}
+              className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50"
+            >
+              {loginMutation.isPending ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
+
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <p className="text-sm text-blue-800 font-medium mb-2">Access Information:</p>
+            <p className="text-sm text-blue-700">Enter your admin credentials to access the dashboard</p>
+            <p className="text-sm text-gray-500 mt-1">Note: Staff accounts can be created by administrators in Settings</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Toast Notification */}
+      <Toast toast={toast} onClose={hideToast} />
+    </div>
+  );
+};
+
+export default Login;
+
+
+
