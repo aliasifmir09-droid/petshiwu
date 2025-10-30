@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: pet-shop-api
+    env: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        # Update these after your first deploy with actual Render URLs
+        value: https://pet-shop-frontend.onrender.com,https://pet-shop-admin.onrender.com
+
+  - type: static_site
+    name: pet-shop-frontend
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    publishPath: frontend/dist
+    plan: free
+    envVars:
+      - key: VITE_API_URL
+        # Update with actual API URL after backend deploy if different
+        value: https://pet-shop-api.onrender.com/api
+
+  - type: static_site
+    name: pet-shop-admin
+    rootDir: admin
+    buildCommand: npm ci && npm run build
+    publishPath: admin/dist
+    plan: free
+    envVars:
+      - key: VITE_API_URL
+        # Update with actual API URL after backend deploy if different
+        value: https://pet-shop-api.onrender.com/api
