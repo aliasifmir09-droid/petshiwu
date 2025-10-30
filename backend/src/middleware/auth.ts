@@ -4,8 +4,6 @@ import User, { IUser } from '../models/User';
 
 export interface AuthRequest extends Request {
   user?: IUser;
-  // Optional cookie bag added for type-safety where cookie-parser populates req.cookies
-  cookies?: Record<string, any>;
 }
 
 export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -14,8 +12,8 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
 
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
-    } else if (req.cookies?.token) {
-      token = req.cookies.token;
+    } else if ((req as any).cookies?.token) {
+      token = (req as any).cookies.token;
     }
 
     if (!token) {
