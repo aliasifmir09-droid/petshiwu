@@ -427,8 +427,8 @@ const Header = () => {
         </div>
       )}
 
-      {/* Navigation */}
-      <nav className="bg-white border-t border-gray-200 relative w-full overflow-x-hidden overflow-y-visible">
+      {/* Navigation - Desktop Only */}
+      <nav className="hidden lg:block bg-white border-t border-gray-200 relative w-full overflow-x-hidden overflow-y-visible">
         <div className="w-full max-w-full overflow-x-hidden overflow-y-visible">
           <div className="container mx-auto px-2 lg:px-3 max-w-full overflow-x-hidden overflow-y-visible">
             <div className="flex items-center justify-start py-2 lg:py-2.5 relative overflow-x-hidden overflow-y-visible min-w-0">
