@@ -786,7 +786,7 @@ const seedData = async () => {
         description: 'Professional slicker brush with self-cleaning button. Removes loose hair and prevents matting. Retractable pins for easy cleaning.',
         shortDescription: 'Self-cleaning slicker brush',
         brand: 'GroomPro',
-        category: catGrooming._id,
+        category: catSupplies._id, // Grooming is now under Supplies for cats
         images: ['https://via.placeholder.com/500x500?text=Cat+Grooming+1'],
         variants: [
           { size: 'Standard', price: 14.99, stock: 120, sku: 'BRUSH-SLICKER' }
