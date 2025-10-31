@@ -145,6 +145,12 @@ app.use(cors({
   credentials: true
 }));
 
+// Request logging middleware (always enabled for debugging)
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl || req.url}`);
+  next();
+});
+
 // Dev logging middleware
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -155,6 +161,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Mount routers
 app.use('/api/auth', authRoutes);
+console.log('✓ Auth routes mounted at /api/auth');
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
@@ -191,6 +198,35 @@ app.get('/api/health', (req, res) => {
     message: 'Server is running',
     timestamp: new Date().toISOString()
   });
+});
+
+// Debug: List all registered routes
+app.get('/api/routes', (req, res) => {
+  const routes: string[] = [];
+  app._router?.stack?.forEach((middleware: any) => {
+    if (middleware.route) {
+      routes.push(`${Object.keys(middleware.route.methods).join(', ').toUpperCase()} ${middleware.route.path}`);
+    } else if (middleware.name === 'router') {
+      middleware.handle.stack?.forEach((handler: any) => {
+        if (handler.route) {
+          routes.push(`${Object.keys(handler.route.methods).join(', ').toUpperCase()} /api${middleware.regexp.source.replace(/\\\//g, '/').replace(/\^\//, '').replace(/\/\$/, '')}${handler.route.path}`);
+        }
+      });
+    }
+  });
+  res.json({ routes });
+});
+
+// Catch-all for debugging unmatched routes (before notFound)
+app.use((req, res, next) => {
+  console.log('Unmatched route:', {
+    method: req.method,
+    originalUrl: req.originalUrl,
+    url: req.url,
+    path: req.path,
+    baseUrl: req.baseUrl
+  });
+  next();
 });
 
 // Error handler (must be last)
