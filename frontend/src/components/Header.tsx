@@ -255,10 +255,10 @@ const Header = () => {
     <header className="bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] sticky top-0 z-50 shadow-xl w-full overflow-x-hidden animate-fade-in-up">
       {/* Main Header */}
       <div className="w-full max-w-full overflow-x-hidden">
-        <div className="container mx-auto px-4 py-3 max-w-full overflow-x-hidden">
-          <div className="flex items-center justify-between gap-4 min-w-0">
-          {/* Logo with Enhanced Animation */}
-          <Link to="/" className="flex items-center gap-3 flex-shrink-0 group">
+        <div className="container mx-auto px-3 lg:px-4 py-2 lg:py-3 max-w-full overflow-x-hidden">
+          <div className="flex items-center justify-between gap-2 lg:gap-4 min-w-0">
+            {/* Logo with Enhanced Animation */}
+            <Link to="/" className="flex items-center gap-2 lg:gap-3 flex-shrink-0 group">
             <div className="relative">
               <img 
                 src="/logo.png" 
@@ -268,15 +268,15 @@ const Header = () => {
               {/* Glow effect on hover */}
               <div className="absolute inset-0 bg-white/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             </div>
-            <span className="text-2xl md:text-3xl font-black text-white tracking-tight group-hover:tracking-wide transition-all duration-300 relative" style={{ fontFamily: "'Poppins', 'Inter', sans-serif" }}>
-              petshiwu
-              {/* Underline animation */}
-              <span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-yellow-300 to-pink-300 group-hover:w-full transition-all duration-500 rounded-full"></span>
-            </span>
-          </Link>
+              <span className="text-xl lg:text-2xl xl:text-3xl font-black text-white tracking-tight group-hover:tracking-wide transition-all duration-300 relative" style={{ fontFamily: "'Poppins', 'Inter', sans-serif" }}>
+                petshiwu
+                {/* Underline animation */}
+                <span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-yellow-300 to-pink-300 group-hover:w-full transition-all duration-500 rounded-full"></span>
+              </span>
+            </Link>
 
-          {/* Search Bar - Desktop with Enhanced Design */}
-          <form onSubmit={handleSearch} className="hidden lg:flex flex-1 max-w-2xl">
+            {/* Search Bar - Desktop with Enhanced Design */}
+            <form onSubmit={handleSearch} className="hidden lg:flex flex-1 max-w-xl xl:max-w-2xl mx-2 lg:mx-4 min-w-0">
             <div className="relative w-full group">
               <input
                 type="text"
@@ -295,140 +295,144 @@ const Header = () => {
             </div>
           </form>
 
-              {/* Right Side Actions */}
-              <div className="flex items-center gap-3 lg:gap-4 text-white">
-                {/* USA Flag - Desktop */}
-                <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-white/10 transition-colors cursor-pointer">
-                  <img 
-                    src="https://flagcdn.com/w40/us.png" 
-                    alt="USA Flag" 
-                    className="w-6 h-4 object-cover rounded-sm"
-                  />
-                  <span className="text-sm font-semibold">USA</span>
-                  <ChevronDown size={14} className="opacity-80" />
-                </div>
+            {/* Right Side Actions */}
+            <div className="flex items-center gap-2 lg:gap-3 text-white flex-shrink-0">
+              {/* USA Flag - Desktop */}
+              <div className="hidden lg:flex items-center gap-2 px-2 lg:px-3 py-1.5 rounded-md hover:bg-white/10 transition-colors cursor-pointer">
+                <img 
+                  src="https://flagcdn.com/w40/us.png" 
+                  alt="USA Flag" 
+                  className="w-5 h-4 lg:w-6 lg:h-4 object-cover rounded-sm"
+                />
+                <span className="text-xs lg:text-sm font-semibold">USA</span>
+                <ChevronDown size={12} className="opacity-80" />
+              </div>
 
-                {/* 24/7 Help - Desktop with Dropdown */}
-                <div className="hidden lg:block relative group z-[100]">
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-white/10 transition-colors cursor-pointer">
-                    <Phone size={18} />
-                    <span className="text-sm font-semibold">24/7 Help</span>
-                    <ChevronDown size={14} className="opacity-80" />
-                  </div>
-                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg py-4 px-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all text-gray-900 z-[100]">
-                    <div className="space-y-3">
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer Support</p>
-                      <div className="flex items-start gap-3 text-[#1E3A8A]">
-                        <Phone size={20} className="mt-1 flex-shrink-0" />
-                        <div>
-                          <p className="text-sm font-bold mb-1">24/7 Support Available</p>
-                          <p className="text-xs text-gray-600 mb-2">Call us anytime, day or night</p>
-                          <a 
-                            href="tel:1-800-672-4399" 
-                            className="text-xl font-bold hover:underline block"
-                          >
-                            Call Toll-Free
-                          </a>
-                          <a 
-                            href="tel:1-800-672-4399" 
-                            className="text-2xl font-black text-[#1E3A8A] hover:text-blue-700 block"
-                          >
-                            1-800-672-4399
-                          </a>
-                        </div>
+              {/* 24/7 Help - Desktop with Dropdown */}
+              <div className="hidden lg:block relative group z-[100]">
+                <div className="flex items-center gap-1.5 lg:gap-2 px-2 lg:px-3 py-1.5 rounded-md hover:bg-white/10 transition-colors cursor-pointer">
+                  <Phone size={16} className="lg:w-[18px] lg:h-[18px]" />
+                  <span className="text-xs lg:text-sm font-semibold">24/7 Help</span>
+                  <ChevronDown size={12} className="opacity-80" />
+                </div>
+                <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg py-4 px-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all text-gray-900 z-[100]">
+                  <div className="space-y-3">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer Support</p>
+                    <div className="flex items-start gap-3 text-[#1E3A8A]">
+                      <Phone size={20} className="mt-1 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-bold mb-1">24/7 Support Available</p>
+                        <p className="text-xs text-gray-600 mb-2">Call us anytime, day or night</p>
+                        <a 
+                          href="tel:1-800-672-4399" 
+                          className="text-xl font-bold hover:underline block"
+                        >
+                          Call Toll-Free
+                        </a>
+                        <a 
+                          href="tel:1-800-672-4399" 
+                          className="text-2xl font-black text-[#1E3A8A] hover:text-blue-700 block"
+                        >
+                          1-800-672-4399
+                        </a>
                       </div>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Sign In / User Dropdown */}
-                {isAuthenticated ? (
-                  <div className="relative group z-[100]">
-                    <button className="flex items-center gap-1.5 hover:opacity-80 px-2.5 py-1.5 rounded-md hover:bg-white/10 transition-colors">
-                      <User size={20} />
-                      <span className="hidden lg:block text-sm font-semibold">{user?.firstName}</span>
-                      <ChevronDown size={16} className="hidden lg:block" />
+              {/* Sign In / User Dropdown */}
+              {isAuthenticated ? (
+                <div className="relative group z-[100]">
+                  <button className="flex items-center gap-1 lg:gap-1.5 hover:opacity-80 px-1.5 lg:px-2.5 py-1.5 rounded-md hover:bg-white/10 transition-colors">
+                    <User size={18} className="lg:w-5 lg:h-5" />
+                    <span className="hidden xl:block text-xs lg:text-sm font-semibold">{user?.firstName}</span>
+                    <ChevronDown size={14} className="hidden xl:block" />
+                  </button>
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all text-gray-900 z-[100]">
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2.5 hover:bg-gray-100 font-medium"
+                    >
+                      My Profile
+                    </Link>
+                    <Link
+                      to="/orders"
+                      className="block px-4 py-2.5 hover:bg-gray-100 font-medium"
+                    >
+                      My Orders
+                    </Link>
+                    <button
+                      onClick={() => setShowLogoutModal(true)}
+                      className="block w-full text-left px-4 py-2.5 hover:bg-gray-100 font-medium"
+                    >
+                      Logout
                     </button>
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all text-gray-900 z-[100]">
-                      <Link
-                        to="/profile"
-                        className="block px-4 py-2.5 hover:bg-gray-100 font-medium"
-                      >
-                        My Profile
-                      </Link>
-                      <Link
-                        to="/orders"
-                        className="block px-4 py-2.5 hover:bg-gray-100 font-medium"
-                      >
-                        My Orders
-                      </Link>
-                      <button
-                        onClick={() => setShowLogoutModal(true)}
-                        className="block w-full text-left px-4 py-2.5 hover:bg-gray-100 font-medium"
-                      >
-                        Logout
-                      </button>
-                    </div>
                   </div>
-                ) : (
-                  <Link
-                    to="/login"
-                    className="flex items-center gap-1.5 hover:opacity-80 px-2.5 py-1.5 rounded-md hover:bg-white/10 transition-colors"
-                  >
-                    <User size={20} />
-                    <span className="hidden lg:block text-sm font-semibold">Sign In</span>
-                    <ChevronDown size={16} className="hidden lg:block" />
-                  </Link>
-                )}
-
-                {/* Cart with Enhanced Animation */}
-                <Link to="/cart" className="relative group px-2.5 py-2 rounded-xl hover:bg-white/15 transition-all hover:scale-110">
-                  <ShoppingCart size={24} className="group-hover:animate-wiggle" />
-                  {getTotalItems() > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-600 text-white text-xs rounded-full min-w-[22px] h-[22px] flex items-center justify-center font-black shadow-lg animate-pulse-slow border-2 border-white">
-                      {getTotalItems()}
-                    </span>
-                  )}
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className="flex items-center gap-1 lg:gap-1.5 hover:opacity-80 px-1.5 lg:px-2.5 py-1.5 rounded-md hover:bg-white/10 transition-colors"
+                >
+                  <User size={18} className="lg:w-5 lg:h-5" />
+                  <span className="hidden xl:block text-xs lg:text-sm font-semibold">Sign In</span>
+                  <ChevronDown size={14} className="hidden xl:block" />
                 </Link>
+              )}
 
-            {/* Mobile Menu Toggle */}
-            <button
-              className="lg:hidden p-1.5 rounded-md hover:bg-white/10 transition-colors"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+              {/* Cart with Enhanced Animation */}
+              <Link to="/cart" className="relative group px-1.5 lg:px-2.5 py-1.5 lg:py-2 rounded-xl hover:bg-white/15 transition-all hover:scale-110">
+                <ShoppingCart size={20} className="lg:w-6 lg:h-6 group-hover:animate-wiggle" />
+                {getTotalItems() > 0 && (
+                  <span className="absolute -top-1 -right-1 lg:-top-2 lg:-right-2 bg-gradient-to-r from-red-500 to-pink-600 text-white text-[10px] lg:text-xs rounded-full min-w-[18px] lg:min-w-[22px] h-[18px] lg:h-[22px] flex items-center justify-center font-black shadow-lg animate-pulse-slow border-2 border-white">
+                    {getTotalItems()}
+                  </span>
+                )}
+              </Link>
+
+              {/* Mobile Menu Toggle */}
+              <button
+                className="lg:hidden p-1.5 rounded-md hover:bg-white/10 transition-colors ml-1"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-            {/* Search Bar - Mobile */}
-            <form onSubmit={handleSearch} className="lg:hidden mt-3">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search for products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-2.5 pr-12 rounded-md focus:outline-none focus:ring-2 focus:ring-white shadow-sm"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-900 transition-colors"
-                  aria-label="Search"
-                >
-                  <Search size={20} />
-                </button>
-              </div>
-            </form>
-          </div>
+      {/* Search Bar - Mobile */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden px-3 pb-3">
+          <form onSubmit={handleSearch}>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search for products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2.5 pr-12 rounded-md focus:outline-none focus:ring-2 focus:ring-white shadow-sm"
+              />
+              <button
+                type="submit"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-900 transition-colors"
+                aria-label="Search"
+              >
+                <Search size={20} />
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Navigation */}
-          <nav className="bg-white border-t border-gray-200 relative w-full overflow-x-hidden overflow-y-visible">
-            <div className="w-full max-w-full overflow-x-hidden overflow-y-visible">
-              <div className="container mx-auto px-3 lg:px-4 max-w-full overflow-x-hidden overflow-y-visible">
-                <div className="flex items-center justify-start py-3 relative overflow-x-hidden overflow-y-visible min-w-0">
-                  <ul className="flex items-center gap-2 lg:gap-3 text-sm font-semibold text-gray-700 overflow-x-hidden flex-nowrap">
+      <nav className="bg-white border-t border-gray-200 relative w-full overflow-x-hidden overflow-y-visible">
+        <div className="w-full max-w-full overflow-x-hidden overflow-y-visible">
+          <div className="container mx-auto px-2 lg:px-3 max-w-full overflow-x-hidden overflow-y-visible">
+            <div className="flex items-center justify-start py-2 lg:py-2.5 relative overflow-x-hidden overflow-y-visible min-w-0">
+              <ul className="flex items-center gap-1.5 lg:gap-2.5 text-xs lg:text-sm font-semibold text-gray-700 overflow-x-hidden flex-nowrap">
                   {/* Dynamic Pet Types with Dropdowns */}
                   {petTypes.map((petType: any) => {
                     const petCategories = getCategoriesForPetType(petType.slug);
@@ -440,9 +444,9 @@ const Header = () => {
                       <li key={petType.slug} className="relative group flex-shrink-0">
                         <Link 
                           to={`/products?petType=${petType.slug}`} 
-                          className="flex items-center gap-1 hover:text-[#1E3A8A] transition-colors py-2 px-1.5 whitespace-nowrap"
+                          className="flex items-center gap-0.5 lg:gap-1 hover:text-[#1E3A8A] transition-colors py-1.5 lg:py-2 px-1 lg:px-1.5 whitespace-nowrap"
                         >
-                          <span className="text-sm lg:text-base flex-shrink-0">{petType.icon}</span>
+                          <span className="text-sm lg:text-base flex-shrink-0 leading-none">{petType.icon}</span>
                           <span className="text-xs lg:text-sm whitespace-nowrap">{petType.name}</span>
                           {(petCategories.length > 0 || isSpecialDogMenu || isSpecialCatMenu || isSpecialOtherAnimalsMenu) && (
                             <ChevronDown size={14} className="opacity-60 group-hover:opacity-100 transition-opacity" />
@@ -660,27 +664,27 @@ const Header = () => {
                     );
                   })}
                   
-                    {/* Today's Deals */}
-                    <li className="flex-shrink-0">
-                      <Link to="/products?featured=true" className="flex items-center gap-1 bg-red-500 text-white px-2 lg:px-3 py-1.5 rounded-full hover:bg-red-600 transition-colors shadow-md hover:shadow-lg font-semibold whitespace-nowrap text-xs lg:text-sm">
-                        <span className="text-xs lg:text-sm">🔥</span>
-                        <span>Today's Deals</span>
-                      </Link>
-                    </li>
-                    
-                    {/* Pharmacy */}
-                    <li className="flex-shrink-0">
-                      <Link to="/products" className="hover:text-[#1E3A8A] transition-colors py-2 px-1.5 whitespace-nowrap text-xs lg:text-sm">
-                        Pharmacy
-                      </Link>
-                    </li>
-                    
-                    {/* About */}
-                    <li className="flex-shrink-0">
-                      <Link to="/about" className="hover:text-[#1E3A8A] transition-colors py-2 px-1.5 whitespace-nowrap text-xs lg:text-sm">
-                        About
-                      </Link>
-                    </li>
+                {/* Today's Deals */}
+                <li className="flex-shrink-0">
+                  <Link to="/products?featured=true" className="flex items-center gap-0.5 lg:gap-1 bg-red-500 text-white px-1.5 lg:px-2.5 py-1 lg:py-1.5 rounded-full hover:bg-red-600 transition-colors shadow-md hover:shadow-lg font-semibold whitespace-nowrap text-[10px] lg:text-xs">
+                    <span className="text-[10px] lg:text-xs">🔥</span>
+                    <span>Today's Deals</span>
+                  </Link>
+                </li>
+                
+                {/* Pharmacy */}
+                <li className="flex-shrink-0">
+                  <Link to="/products" className="hover:text-[#1E3A8A] transition-colors py-1.5 lg:py-2 px-1 lg:px-1.5 whitespace-nowrap text-xs lg:text-sm">
+                    Pharmacy
+                  </Link>
+                </li>
+                
+                {/* About */}
+                <li className="flex-shrink-0">
+                  <Link to="/about" className="hover:text-[#1E3A8A] transition-colors py-1.5 lg:py-2 px-1 lg:px-1.5 whitespace-nowrap text-xs lg:text-sm">
+                    About
+                  </Link>
+                </li>
                   </ul>
                 </div>
               </div>
