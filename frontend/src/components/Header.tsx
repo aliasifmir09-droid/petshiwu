@@ -4,10 +4,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import api, { API_URL } from '@/services/api';
 import ConfirmationModal from './ConfirmationModal';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -22,7 +20,7 @@ const Header = () => {
   const { data: petTypesResponse, isError: petTypesError } = useQuery({
     queryKey: ['pet-types'],
     queryFn: async () => {
-      const response = await axios.get(`${API_URL}/pet-types`);
+      const response = await api.get('/pet-types');
       // Save to localStorage when successfully fetched
       if (response.data?.data) {
         localStorage.setItem('cached_petTypes', JSON.stringify(response.data.data));
