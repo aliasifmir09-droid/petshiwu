@@ -99,7 +99,7 @@ const Dashboard = () => {
   // Check if user has permission issues
   const hasPermissionError = !hasAnalyticsPermission;
 
-  // Mock data for charts
+  // Mock data for sales chart
   const salesData = [
     { month: 'Jan', sales: 4000 },
     { month: 'Feb', sales: 3000 },
@@ -109,12 +109,49 @@ const Dashboard = () => {
     { month: 'Jun', sales: 5500 }
   ];
 
-  const categoryData = [
-    { name: 'Dog Food', value: 4000 },
-    { name: 'Cat Food', value: 3000 },
-    { name: 'Toys', value: 2000 },
-    { name: 'Accessories', value: 2780 }
-  ];
+  // Generate category data from actual navigation menu categories
+  const categoryData = (() => {
+    if (!categoriesData?.data) {
+      // Fallback mock data if categories not loaded yet
+      return [
+        { name: 'Dog Food', value: 4000 },
+        { name: 'Cat Food', value: 3000 },
+        { name: 'Toys', value: 2000 },
+        { name: 'Accessories', value: 2780 }
+      ];
+    }
+
+    const allCategories = categoriesData.data;
+    const categoryCounts: { [key: string]: number } = {};
+
+    // Count main categories (level 1) by name, grouped by pet type
+    allCategories.forEach((category: any) => {
+      if (!category.parentCategory && category.level === 1) {
+        const petTypePrefix = category.petType === 'dog' ? '🐕 ' : 
+                             category.petType === 'cat' ? '🐱 ' : 
+                             category.petType === 'other-animals' ? '🐾 ' : '';
+        const displayName = `${petTypePrefix}${category.name}`;
+        
+        // Count subcategories for each main category (for chart value)
+        const subcategoryCount = allCategories.filter((cat: any) => 
+          (cat.parentCategory?._id === category._id || cat.parentCategory === category._id) && cat.level === 2
+        ).length;
+        
+        // Use subcategory count as value, or default to 1 if no subcategories
+        categoryCounts[displayName] = Math.max(subcategoryCount, 1);
+      }
+    });
+
+    // Convert to array format for chart, sorted by value (descending)
+    const chartData = Object.entries(categoryCounts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 12); // Top 12 categories
+
+    return chartData.length > 0 ? chartData : [
+      { name: 'Loading...', value: 0 }
+    ];
+  })();
 
   return (
     <div className="space-y-8">
