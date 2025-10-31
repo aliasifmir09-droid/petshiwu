@@ -275,14 +275,19 @@ const CategoriesNew = () => {
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-gray-900">{category.name}</h3>
+              {level === 0 && (
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
+                  Main Category
+                </span>
+              )}
               {level === 1 && (
-                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                  Level 2
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-semibold">
+                  Subcategory
                 </span>
               )}
               {level === 2 && (
-                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
-                  Level 3
+                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-semibold">
+                  Sub-Subcategory
                 </span>
               )}
               {!category.isActive && (
