@@ -140,8 +140,14 @@ const Dashboard = () => {
 
     // Process root categories (main categories, level 1)
     rootCategories.forEach((category: any) => {
-      // Only process main categories (level 1)
-      if (category.level === 1 || (!category.parentCategory && category.level !== undefined)) {
+      // Main categories are those without parentCategory (backend returns hierarchical structure)
+      // So rootCategories array contains only main categories with their subcategories
+      const isMainCategory = !category.parentCategory || 
+                            category.parentCategory === null ||
+                            (typeof category.parentCategory === 'object' && !category.parentCategory._id) ||
+                            category.level === 1;
+
+      if (isMainCategory) {
         // Determine pet type icon/prefix
         const petTypePrefix = category.petType === 'dog' ? '🐕 ' : 
                              category.petType === 'cat' ? '🐱 ' : 
@@ -154,6 +160,13 @@ const Dashboard = () => {
         // Use subcategory count as value, or default to 1 if no subcategories
         categoryCounts[displayName] = Math.max(subcategoryCount, 1);
       }
+    });
+
+    // Debug logging
+    console.log('Category Chart Data:', {
+      rootCategoriesCount: rootCategories.length,
+      categoryCounts,
+      chartData: Object.entries(categoryCounts).map(([name, value]) => ({ name, value }))
     });
 
     // Convert to array format for chart, sorted by value (descending)
