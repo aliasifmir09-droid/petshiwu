@@ -423,9 +423,9 @@ const Header = () => {
 
           {/* Navigation */}
           <nav className="bg-white border-t border-gray-200 relative overflow-x-hidden">
-            <div className="container mx-auto px-6 lg:px-8 max-w-full overflow-x-hidden">
-              <div className="flex items-center justify-between py-3 relative overflow-x-hidden">
-                <ul className="flex items-center gap-6 text-sm font-semibold text-gray-700 overflow-x-hidden">
+            <div className="container mx-auto px-4 lg:px-6 max-w-full overflow-x-hidden">
+              <div className="flex items-center justify-between py-3 relative overflow-x-hidden min-w-0">
+                <ul className="flex items-center gap-3 lg:gap-4 text-sm font-semibold text-gray-700 overflow-x-hidden flex-nowrap whitespace-nowrap">
                   {/* Dynamic Pet Types with Dropdowns */}
                   {petTypes.map((petType: any) => {
                     const petCategories = getCategoriesForPetType(petType.slug);
@@ -434,13 +434,13 @@ const Header = () => {
                     const isSpecialOtherAnimalsMenu = petType.slug === 'other-animals';
                     
                     return (
-                      <li key={petType.slug} className="relative group">
+                      <li key={petType.slug} className="relative group flex-shrink-0">
                         <Link 
                           to={`/products?petType=${petType.slug}`} 
-                          className="flex items-center gap-1.5 hover:text-[#1E3A8A] transition-colors py-2 px-1.5"
+                          className="flex items-center gap-1.5 hover:text-[#1E3A8A] transition-colors py-2 px-1.5 whitespace-nowrap"
                         >
-                          <span className="text-base">{petType.icon}</span>
-                          <span>{petType.name}</span>
+                          <span className="text-base flex-shrink-0">{petType.icon}</span>
+                          <span className="whitespace-nowrap">{petType.name}</span>
                           {(petCategories.length > 0 || isSpecialDogMenu || isSpecialCatMenu || isSpecialOtherAnimalsMenu) && (
                             <ChevronDown size={14} className="opacity-60 group-hover:opacity-100 transition-opacity" />
                           )}
@@ -658,23 +658,23 @@ const Header = () => {
                   })}
                   
                   {/* Today's Deals */}
-                  <li>
-                    <Link to="/products?featured=true" className="flex items-center gap-1.5 bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition-colors shadow-md hover:shadow-lg font-semibold">
+                  <li className="flex-shrink-0">
+                    <Link to="/products?featured=true" className="flex items-center gap-1.5 bg-red-500 text-white px-3 lg:px-4 py-2 rounded-full hover:bg-red-600 transition-colors shadow-md hover:shadow-lg font-semibold whitespace-nowrap">
                       <span className="text-base">🔥</span>
                       <span>Today's Deals</span>
                     </Link>
                   </li>
                   
                   {/* Pharmacy */}
-                  <li>
-                    <Link to="/products" className="hover:text-[#1E3A8A] transition-colors py-2 px-1.5">
+                  <li className="flex-shrink-0">
+                    <Link to="/products" className="hover:text-[#1E3A8A] transition-colors py-2 px-1.5 whitespace-nowrap">
                       Pharmacy
                     </Link>
                   </li>
                   
                   {/* About */}
-                  <li>
-                    <Link to="/about" className="hover:text-[#1E3A8A] transition-colors py-2 px-1.5">
+                  <li className="flex-shrink-0">
+                    <Link to="/about" className="hover:text-[#1E3A8A] transition-colors py-2 px-1.5 whitespace-nowrap">
                       About
                     </Link>
                   </li>
