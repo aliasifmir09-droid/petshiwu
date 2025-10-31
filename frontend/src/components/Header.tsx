@@ -68,9 +68,21 @@ const Header = () => {
   };
 
   // Use actual database data, or cached data if database is down
-  const petTypes = petTypesError 
+  let petTypes = petTypesError 
     ? getCachedPetTypes() 
     : (petTypesResponse?.data || getCachedPetTypes());
+
+  // Fallback pet types if none are loaded
+  if (!petTypes || petTypes.length === 0) {
+    petTypes = [
+      { name: 'Dog', slug: 'dog', icon: '🐕' },
+      { name: 'Cat', slug: 'cat', icon: '🐱' },
+      { name: 'Other Animals', slug: 'other-animals', icon: '🐾' }
+    ];
+    console.log('Using fallback pet types:', petTypes);
+  } else {
+    console.log('Pet types loaded from API:', petTypes);
+  }
   
   const categories = categoriesError 
     ? getCachedCategories() 
@@ -412,7 +424,7 @@ const Header = () => {
           {/* Navigation */}
           <nav className="bg-white border-t border-gray-200 relative">
             <div className="container mx-auto px-6 lg:px-8">
-              <div className="hidden md:flex items-center justify-between py-3 relative">
+              <div className="flex items-center justify-between py-3 relative">
                 <ul className="flex items-center gap-6 text-sm font-semibold text-gray-700">
                   {/* Dynamic Pet Types with Dropdowns */}
                   {petTypes.map((petType: any) => {
