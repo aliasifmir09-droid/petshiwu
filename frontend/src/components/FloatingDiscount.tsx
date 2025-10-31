@@ -1,24 +1,32 @@
 import { X, Gift } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const FloatingDiscount = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isClosed, setIsClosed] = useState(false);
 
   useEffect(() => {
+    // Check if popup was previously closed
+    const wasClosed = localStorage.getItem('firstOrderPopupClosed') === 'true';
+    if (wasClosed) {
+      setIsClosed(true);
+      return;
+    }
+
     // Show after 5 seconds
     const timer = setTimeout(() => {
-      if (!isClosed) {
-        setIsVisible(true);
-      }
+      setIsVisible(true);
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, [isClosed]);
+  }, []);
 
   const handleClose = () => {
     setIsVisible(false);
     setIsClosed(true);
+    // Save closed state to localStorage so it doesn't show again
+    localStorage.setItem('firstOrderPopupClosed', 'true');
   };
 
   if (!isVisible || isClosed) return null;
@@ -48,9 +56,13 @@ const FloatingDiscount = () => {
             <div className="bg-white text-gray-900 px-4 py-2 rounded-lg font-mono font-bold text-center mb-3 border-2 border-dashed border-yellow-300">
               FIRST10
             </div>
-            <button className="w-full bg-white text-red-600 font-bold py-2 px-4 rounded-lg hover:bg-gray-100 transition-all transform hover:scale-105">
+            <Link
+              to="/products"
+              onClick={handleClose}
+              className="block w-full bg-white text-red-600 font-bold py-2 px-4 rounded-lg hover:bg-gray-100 transition-all transform hover:scale-105 text-center"
+            >
               Shop Now →
-            </button>
+            </Link>
           </div>
         </div>
 
