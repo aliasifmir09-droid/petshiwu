@@ -270,6 +270,16 @@ const Header = () => {
       <div className="w-full">
         <div className="container mx-auto px-3 lg:px-4 py-2 lg:py-3">
           <div className="flex items-center justify-between gap-2 lg:gap-4">
+            {/* Hamburger Menu Button - Desktop Only, Visible When Scrolled */}
+            {isScrolled && (
+              <button
+                onClick={() => setIsLeftSidebarOpen(true)}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                aria-label="Open Menu"
+              >
+                <Menu size={28} className="text-white" />
+              </button>
+            )}
             {/* Logo with Enhanced Animation */}
             <Link to="/" className="flex items-center gap-2 lg:gap-3 flex-shrink-0 group">
             <div className="relative">
