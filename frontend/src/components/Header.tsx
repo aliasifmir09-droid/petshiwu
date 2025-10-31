@@ -252,9 +252,9 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] sticky top-0 z-50 shadow-xl overflow-visible animate-fade-in-up">
+    <header className="bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] sticky top-0 z-50 shadow-xl overflow-x-hidden animate-fade-in-up">
       {/* Main Header */}
-      <div className="container mx-auto px-4 py-3">
+      <div className="container mx-auto px-4 py-3 max-w-full overflow-x-hidden">
         <div className="flex items-center justify-between gap-4">
           {/* Logo with Enhanced Animation */}
           <Link to="/" className="flex items-center gap-3 flex-shrink-0 group">
@@ -685,9 +685,9 @@ const Header = () => {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-t shadow-lg">
-          <div className="container mx-auto px-4 py-4">
-            <ul className="space-y-1 text-gray-700">
+        <div className="lg:hidden bg-white border-t shadow-lg overflow-x-hidden">
+          <div className="container mx-auto px-4 py-4 max-w-full overflow-x-hidden">
+            <ul className="space-y-1 text-gray-700 overflow-x-hidden">
               {/* Dynamic Pet Types with Categories */}
               {petTypes.map((petType: any) => {
                 const petCategories = getCategoriesForPetType(petType.slug);
@@ -703,11 +703,11 @@ const Header = () => {
                       <>
                         <button
                           onClick={() => toggleMobilePetType(petType.slug)}
-                          className="w-full flex items-center justify-between gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                          className="w-full flex items-center justify-between gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors overflow-hidden"
                         >
-                          <div className="flex items-center gap-3">
-                            <span className="text-xl">{petType.icon}</span>
-                            <span>{petType.name}</span>
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <span className="text-xl flex-shrink-0">{petType.icon}</span>
+                            <span className="truncate">{petType.name}</span>
                           </div>
                           <ChevronRight 
                             size={18} 
@@ -717,7 +717,7 @@ const Header = () => {
                         
                         {/* Categories dropdown */}
                         {isExpanded && (
-                          <div className="ml-6 mt-2 space-y-2">
+                          <div className="ml-6 mt-2 space-y-2 overflow-x-hidden max-w-full">
                             {isSpecialDogMenu ? (
                               // Special hardcoded Dog menu
                               <>
@@ -732,7 +732,7 @@ const Header = () => {
                                           key={itemIdx}
                                           to={`/products?petType=dog&search=${encodeURIComponent(item)}`}
                                           onClick={() => setMobileMenuOpen(false)}
-                                          className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                                          className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                         >
                                           {item}
                                         </Link>
@@ -748,7 +748,7 @@ const Header = () => {
                                       key={idx}
                                       to={`/products?petType=dog`}
                                       onClick={() => setMobileMenuOpen(false)}
-                                      className="block py-2 px-3 text-sm font-semibold text-[#1E3A8A] hover:underline"
+                                      className="block py-2 px-3 text-sm font-semibold text-[#1E3A8A] hover:underline truncate overflow-hidden"
                                     >
                                       {link} →
                                     </Link>
@@ -769,7 +769,7 @@ const Header = () => {
                                           key={itemIdx}
                                           to={`/products?petType=cat&search=${encodeURIComponent(item)}`}
                                           onClick={() => setMobileMenuOpen(false)}
-                                          className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                                          className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                         >
                                           {item}
                                         </Link>
@@ -785,7 +785,7 @@ const Header = () => {
                                       key={idx}
                                       to={`/products?petType=cat`}
                                       onClick={() => setMobileMenuOpen(false)}
-                                      className="block py-2 px-3 text-sm font-semibold text-[#1E3A8A] hover:underline"
+                                      className="block py-2 px-3 text-sm font-semibold text-[#1E3A8A] hover:underline truncate overflow-hidden"
                                     >
                                       {link} →
                                     </Link>
@@ -806,7 +806,7 @@ const Header = () => {
                                           key={itemIdx}
                                           to={`/products?petType=other-animals&search=${encodeURIComponent(item)}`}
                                           onClick={() => setMobileMenuOpen(false)}
-                                          className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                                          className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                         >
                                           {item}
                                         </Link>
@@ -826,7 +826,7 @@ const Header = () => {
                                       <Link
                                         to={`/products?category=${category.slug}`}
                                         onClick={() => setMobileMenuOpen(false)}
-                                        className="block py-2 px-3 text-sm font-semibold text-gray-900 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                                        className="block py-2 px-3 text-sm font-semibold text-gray-900 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                       >
                                         {category.name}
                                       </Link>
@@ -841,7 +841,7 @@ const Header = () => {
                                                 <Link
                                                   to={`/products?category=${sub.slug}`}
                                                   onClick={() => setMobileMenuOpen(false)}
-                                                  className="block py-1.5 px-3 text-sm text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors font-medium"
+                                                  className="block py-1.5 px-3 text-sm text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors font-medium truncate overflow-hidden"
                                                 >
                                                   {sub.name}
                                                 </Link>
@@ -854,7 +854,7 @@ const Header = () => {
                                                         key={subSub._id}
                                                         to={`/products?category=${subSub.slug}`}
                                                         onClick={() => setMobileMenuOpen(false)}
-                                                        className="block py-1 px-3 text-xs text-gray-500 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                                                        className="block py-1 px-3 text-xs text-gray-500 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                                       >
                                                         • {subSub.name}
                                                       </Link>
@@ -874,7 +874,7 @@ const Header = () => {
                                 <Link
                                   to={`/products?petType=${petType.slug}`}
                                   onClick={() => setMobileMenuOpen(false)}
-                                  className="block py-2 px-3 text-sm font-semibold text-[#1E3A8A] hover:underline"
+                                  className="block py-2 px-3 text-sm font-semibold text-[#1E3A8A] hover:underline truncate overflow-hidden"
                                 >
                                   View All {petType.name} Products →
                                 </Link>
@@ -887,11 +887,11 @@ const Header = () => {
                       // Pet type without categories - direct link
                       <Link
                         to={`/products?petType=${petType.slug}`}
-                        className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                        className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors overflow-hidden"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        <span className="text-xl">{petType.icon}</span>
-                        <span>{petType.name}</span>
+                        <span className="text-xl flex-shrink-0">{petType.icon}</span>
+                        <span className="truncate">{petType.name}</span>
                       </Link>
                     )}
                   </li>
