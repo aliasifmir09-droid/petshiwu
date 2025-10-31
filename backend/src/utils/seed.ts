@@ -40,8 +40,10 @@ const seedData = async () => {
 
     console.log('Users created');
 
-    // Create categories
-    const dogCategory = await Category.create({
+    // ===== CREATE CATEGORIES =====
+    
+    // Dog Categories
+    const dogFood = await Category.create({
       name: 'Dog Food',
       slug: 'dog-food',
       description: 'Premium dog food for all breeds and sizes',
@@ -49,15 +51,15 @@ const seedData = async () => {
       isActive: true
     });
 
-    const catCategory = await Category.create({
-      name: 'Cat Food',
-      slug: 'cat-food',
-      description: 'Nutritious cat food for all life stages',
-      petType: 'cat',
+    const dogTreats = await Category.create({
+      name: 'Dog Treats',
+      slug: 'dog-treats',
+      description: 'Delicious treats and snacks for dogs',
+      petType: 'dog',
       isActive: true
     });
 
-    const dogToysCategory = await Category.create({
+    const dogToys = await Category.create({
       name: 'Dog Toys',
       slug: 'dog-toys',
       description: 'Fun and durable toys for dogs',
@@ -65,7 +67,48 @@ const seedData = async () => {
       isActive: true
     });
 
-    const catToysCategory = await Category.create({
+    const dogHealth = await Category.create({
+      name: 'Dog Health & Pharmacy',
+      slug: 'dog-health-pharmacy',
+      description: 'Health products and medications for dogs',
+      petType: 'dog',
+      isActive: true
+    });
+
+    const dogSupplies = await Category.create({
+      name: 'Dog Supplies',
+      slug: 'dog-supplies',
+      description: 'Essential supplies for dogs',
+      petType: 'dog',
+      isActive: true
+    });
+
+    const dogGrooming = await Category.create({
+      name: 'Dog Grooming',
+      slug: 'dog-grooming',
+      description: 'Grooming products for dogs',
+      petType: 'dog',
+      isActive: true
+    });
+
+    // Cat Categories
+    const catFood = await Category.create({
+      name: 'Cat Food',
+      slug: 'cat-food',
+      description: 'Nutritious cat food for all life stages',
+      petType: 'cat',
+      isActive: true
+    });
+
+    const catTreats = await Category.create({
+      name: 'Cat Treats',
+      slug: 'cat-treats',
+      description: 'Tasty treats for cats',
+      petType: 'cat',
+      isActive: true
+    });
+
+    const catToys = await Category.create({
       name: 'Cat Toys',
       slug: 'cat-toys',
       description: 'Interactive toys for cats',
@@ -73,18 +116,44 @@ const seedData = async () => {
       isActive: true
     });
 
-    console.log('Categories created');
+    const catHealth = await Category.create({
+      name: 'Cat Health & Pharmacy',
+      slug: 'cat-health-pharmacy',
+      description: 'Health products for cats',
+      petType: 'cat',
+      isActive: true
+    });
 
-    // Create sample products
+    const catLitter = await Category.create({
+      name: 'Cat Litter & Accessories',
+      slug: 'cat-litter-accessories',
+      description: 'Litter and litter box accessories',
+      petType: 'cat',
+      isActive: true
+    });
+
+    const catGrooming = await Category.create({
+      name: 'Cat Grooming',
+      slug: 'cat-grooming',
+      description: 'Grooming products for cats',
+      petType: 'cat',
+      isActive: true
+    });
+
+    console.log('Categories created (11 total)');
+
+    // ===== CREATE PRODUCTS =====
+    
     const products = [
+      // DOG FOOD
       {
         name: 'Premium Dry Dog Food - Chicken & Rice',
         slug: 'premium-dry-dog-food-chicken-rice',
-        description: 'High-quality dry dog food made with real chicken and wholesome rice. Perfect for adult dogs of all breeds. Contains essential nutrients, vitamins, and minerals for optimal health.',
+        description: 'High-quality dry dog food made with real chicken and wholesome rice. Perfect for adult dogs of all breeds. Contains essential nutrients, vitamins, and minerals for optimal health. Supports healthy digestion and maintains ideal weight.',
         shortDescription: 'Premium chicken & rice formula for adult dogs',
         brand: 'PawPremium',
-        category: dogCategory._id,
-        images: ['https://via.placeholder.com/500x500?text=Dog+Food'],
+        category: dogFood._id,
+        images: ['https://via.placeholder.com/500x500?text=Dog+Food+1'],
         variants: [
           { size: '5 lbs', price: 24.99, compareAtPrice: 29.99, stock: 50, sku: 'DF-CR-5LB' },
           { size: '15 lbs', price: 49.99, compareAtPrice: 59.99, stock: 30, sku: 'DF-CR-15LB' },
@@ -102,13 +171,240 @@ const seedData = async () => {
         autoshipDiscount: 10
       },
       {
+        name: 'Grain-Free Puppy Food - Lamb & Sweet Potato',
+        slug: 'grain-free-puppy-food-lamb-sweet-potato',
+        description: 'Grain-free puppy food with lamb and sweet potato. Formulated specifically for growing puppies with DHA for brain development and balanced nutrition for healthy growth.',
+        shortDescription: 'Grain-free formula for growing puppies',
+        brand: 'PuppyPower',
+        category: dogFood._id,
+        images: ['https://via.placeholder.com/500x500?text=Dog+Food+2'],
+        variants: [
+          { size: '4 lbs', price: 22.99, compareAtPrice: 27.99, stock: 45, sku: 'PF-LSP-4LB' },
+          { size: '12 lbs', price: 54.99, compareAtPrice: 64.99, stock: 28, sku: 'PF-LSP-12LB' }
+        ],
+        basePrice: 22.99,
+        compareAtPrice: 27.99,
+        petType: 'dog',
+        tags: ['grain-free', 'puppy', 'lamb', 'sweet potato'],
+        features: ['DHA for brain development', 'Grain-free formula', 'Small kibble size', 'Easy to digest'],
+        ingredients: 'Lamb, Sweet Potatoes, Peas, Lamb Meal, Natural Flavors, DHA, Vitamins',
+        isActive: true,
+        isFeatured: true,
+        autoshipEligible: true,
+        autoshipDiscount: 10
+      },
+      {
+        name: 'Wet Dog Food - Beef Stew',
+        slug: 'wet-dog-food-beef-stew',
+        description: 'Premium wet dog food with real beef chunks in a savory gravy. High moisture content helps keep dogs hydrated. Perfect as a meal or topper.',
+        shortDescription: 'Premium wet food with real beef chunks',
+        brand: 'CanineCuisine',
+        category: dogFood._id,
+        images: ['https://via.placeholder.com/500x500?text=Dog+Food+3'],
+        variants: [
+          { size: '12.5 oz (12 pack)', price: 34.99, compareAtPrice: 42.99, stock: 60, sku: 'WF-BS-12PK' },
+          { size: '12.5 oz (24 pack)', price: 64.99, compareAtPrice: 79.99, stock: 40, sku: 'WF-BS-24PK' }
+        ],
+        basePrice: 34.99,
+        compareAtPrice: 42.99,
+        petType: 'dog',
+        tags: ['wet food', 'beef', 'gravy', 'high moisture'],
+        features: ['Real beef chunks', 'High moisture content', 'No fillers', 'Complete nutrition'],
+        ingredients: 'Beef, Water, Carrots, Peas, Rice, Natural Flavors, Vitamins',
+        isActive: true,
+        isFeatured: false,
+        autoshipEligible: true,
+        autoshipDiscount: 5
+      },
+
+      // DOG TREATS
+      {
+        name: 'Puppy Training Treats - Chicken Flavor',
+        slug: 'puppy-training-treats-chicken',
+        description: 'Soft, bite-sized training treats perfect for puppies. Made with real chicken and designed to be low in calories. Ideal for positive reinforcement training.',
+        shortDescription: 'Soft training treats for puppies',
+        brand: 'PawPremium',
+        category: dogTreats._id,
+        images: ['https://via.placeholder.com/500x500?text=Dog+Treats+1'],
+        variants: [
+          { size: '6 oz', price: 7.99, stock: 200, sku: 'TREAT-PT-6OZ' },
+          { size: '16 oz', price: 14.99, stock: 150, sku: 'TREAT-PT-16OZ' }
+        ],
+        basePrice: 7.99,
+        petType: 'dog',
+        tags: ['treats', 'training', 'puppy', 'chicken'],
+        features: ['Real chicken', 'Low calorie', 'Soft texture', 'Perfect for training'],
+        ingredients: 'Chicken, Wheat Flour, Vegetable Glycerin, Natural Flavors, Vitamins',
+        isActive: true,
+        isFeatured: true,
+        autoshipEligible: true,
+        autoshipDiscount: 5
+      },
+      {
+        name: 'Dental Chew Bones - Large',
+        slug: 'dental-chew-bones-large',
+        description: 'Hard dental chews that help clean teeth and freshen breath. Made with natural ingredients and designed to last. Promotes dental health through chewing action.',
+        shortDescription: 'Dental chews for teeth cleaning',
+        brand: 'Dentasticks',
+        category: dogTreats._id,
+        images: ['https://via.placeholder.com/500x500?text=Dog+Treats+2'],
+        variants: [
+          { size: '8 count', price: 12.99, stock: 120, sku: 'DCB-L-8' },
+          { size: '16 count', price: 22.99, stock: 90, sku: 'DCB-L-16' }
+        ],
+        basePrice: 12.99,
+        petType: 'dog',
+        tags: ['dental', 'chews', 'bones', 'teeth cleaning'],
+        features: ['Cleans teeth', 'Freshens breath', 'Long-lasting', 'Natural ingredients'],
+        ingredients: 'Wheat Flour, Rice Flour, Glycerin, Natural Flavors, Sodium Tripolyphosphate',
+        isActive: true,
+        isFeatured: false,
+        autoshipEligible: true,
+        autoshipDiscount: 5
+      },
+
+      // DOG TOYS
+      {
+        name: 'Durable Rope Tug Toy',
+        slug: 'durable-rope-tug-toy',
+        description: 'Heavy-duty rope toy perfect for tugging and interactive play. Made from durable cotton fibers that help clean teeth during play. Great for medium to large dogs.',
+        shortDescription: 'Durable rope toy for interactive play',
+        brand: 'PlayPup',
+        category: dogToys._id,
+        images: ['https://via.placeholder.com/500x500?text=Dog+Toy+1'],
+        variants: [
+          { size: 'Medium', price: 12.99, stock: 100, sku: 'TOY-RT-M' },
+          { size: 'Large', price: 16.99, stock: 75, sku: 'TOY-RT-L' }
+        ],
+        basePrice: 12.99,
+        petType: 'dog',
+        tags: ['toy', 'rope', 'tug', 'interactive'],
+        features: ['Durable cotton rope', 'Teeth cleaning action', 'Interactive play', 'Machine washable'],
+        isActive: true,
+        isFeatured: false,
+        autoshipEligible: false
+      },
+      {
+        name: 'Interactive Puzzle Feeder',
+        slug: 'interactive-puzzle-feeder',
+        description: 'Mental stimulation toy that makes mealtime fun. Slow-feeding design prevents gulping and promotes healthy eating habits. Adjustable difficulty levels.',
+        shortDescription: 'Puzzle feeder for mental stimulation',
+        brand: 'BrainyBites',
+        category: dogToys._id,
+        images: ['https://via.placeholder.com/500x500?text=Dog+Toy+2'],
+        variants: [
+          { size: 'Medium', price: 24.99, stock: 85, sku: 'TOY-PF-M' },
+          { size: 'Large', price: 29.99, stock: 60, sku: 'TOY-PF-L' }
+        ],
+        basePrice: 24.99,
+        petType: 'dog',
+        tags: ['puzzle', 'feeder', 'interactive', 'slow feed'],
+        features: ['Mental stimulation', 'Slow feeding', 'Adjustable difficulty', 'Dishwasher safe'],
+        isActive: true,
+        isFeatured: true,
+        autoshipEligible: false
+      },
+      {
+        name: 'Indestructible Ball - Tennis Style',
+        slug: 'indestructible-ball-tennis',
+        description: 'Ultra-durable ball designed for heavy chewers. Made from tough rubber material that resists punctures and tears. Perfect for fetch and play.',
+        shortDescription: 'Durable ball for heavy chewers',
+        brand: 'ToughPup',
+        category: dogToys._id,
+        images: ['https://via.placeholder.com/500x500?text=Dog+Toy+3'],
+        variants: [
+          { size: 'Standard', price: 9.99, stock: 150, sku: 'TOY-BALL-STD' },
+          { size: 'Large', price: 14.99, stock: 100, sku: 'TOY-BALL-L' }
+        ],
+        basePrice: 9.99,
+        petType: 'dog',
+        tags: ['ball', 'fetch', 'durable', 'tennis'],
+        features: ['Ultra-durable', 'Puncture resistant', 'Bounces well', 'Easy to clean'],
+        isActive: true,
+        isFeatured: false,
+        autoshipEligible: false
+      },
+
+      // DOG HEALTH
+      {
+        name: 'Flea & Tick Prevention - Monthly Treatment',
+        slug: 'flea-tick-prevention-monthly',
+        description: 'Topical flea and tick prevention that lasts up to 30 days. Kills fleas, ticks, and chewing lice. Waterproof formula stays effective even after bathing.',
+        shortDescription: 'Monthly flea and tick prevention',
+        brand: 'PetGuard',
+        category: dogHealth._id,
+        images: ['https://via.placeholder.com/500x500?text=Dog+Health+1'],
+        variants: [
+          { size: 'Small (5-22 lbs)', price: 24.99, stock: 80, sku: 'FT-SM' },
+          { size: 'Medium (23-44 lbs)', price: 29.99, stock: 75, sku: 'FT-MD' },
+          { size: 'Large (45-88 lbs)', price: 34.99, stock: 70, sku: 'FT-LG' },
+          { size: 'Extra Large (89+ lbs)', price: 39.99, stock: 65, sku: 'FT-XL' }
+        ],
+        basePrice: 24.99,
+        petType: 'dog',
+        tags: ['flea', 'tick', 'prevention', 'monthly'],
+        features: ['30-day protection', 'Waterproof', 'Kills fleas and ticks', 'Easy to apply'],
+        isActive: true,
+        isFeatured: true,
+        autoshipEligible: true,
+        autoshipDiscount: 15
+      },
+
+      // DOG SUPPLIES
+      {
+        name: 'Adjustable Dog Harness - Reflective',
+        slug: 'adjustable-dog-harness-reflective',
+        description: 'Comfortable no-pull harness with reflective strips for safety. Adjustable straps fit multiple sizes. Front and back attachment points for training.',
+        shortDescription: 'No-pull harness with reflective strips',
+        brand: 'WalkSafe',
+        category: dogSupplies._id,
+        images: ['https://via.placeholder.com/500x500?text=Dog+Supply+1'],
+        variants: [
+          { size: 'Small', price: 19.99, stock: 95, sku: 'HARN-S' },
+          { size: 'Medium', price: 24.99, stock: 85, sku: 'HARN-M' },
+          { size: 'Large', price: 29.99, stock: 75, sku: 'HARN-L' },
+          { size: 'Extra Large', price: 34.99, stock: 65, sku: 'HARN-XL' }
+        ],
+        basePrice: 19.99,
+        petType: 'dog',
+        tags: ['harness', 'walking', 'reflective', 'no-pull'],
+        features: ['No-pull design', 'Reflective strips', 'Adjustable', 'Comfortable padding'],
+        isActive: true,
+        isFeatured: false,
+        autoshipEligible: false
+      },
+
+      // DOG GROOMING
+      {
+        name: 'Deshedding Brush - Double Sided',
+        slug: 'deshedding-brush-double-sided',
+        description: 'Professional deshedding tool with two sides - one for removing loose hair and undercoat, another for finishing. Reduces shedding by up to 90%.',
+        shortDescription: 'Double-sided deshedding brush',
+        brand: 'ShedBuster',
+        category: dogGrooming._id,
+        images: ['https://via.placeholder.com/500x500?text=Dog+Grooming+1'],
+        variants: [
+          { size: 'Medium', price: 16.99, stock: 110, sku: 'BRUSH-M' },
+          { size: 'Large', price: 19.99, stock: 90, sku: 'BRUSH-L' }
+        ],
+        basePrice: 16.99,
+        petType: 'dog',
+        tags: ['brush', 'deshedding', 'grooming', 'shedding'],
+        features: ['Reduces shedding 90%', 'Dual-sided design', 'Ergonomic handle', 'Safe for all coats'],
+        isActive: true,
+        isFeatured: false,
+        autoshipEligible: false
+      },
+
+      // CAT FOOD
+      {
         name: 'Grain-Free Cat Food - Salmon Formula',
         slug: 'grain-free-cat-food-salmon',
         description: 'Grain-free cat food with real salmon as the first ingredient. Specially formulated for adult cats with sensitive stomachs. Rich in omega-3 and omega-6 fatty acids.',
         shortDescription: 'Grain-free salmon formula for cats',
         brand: 'FelineFresh',
-        category: catCategory._id,
-        images: ['https://via.placeholder.com/500x500?text=Cat+Food'],
+        category: catFood._id,
+        images: ['https://via.placeholder.com/500x500?text=Cat+Food+1'],
         variants: [
           { size: '3 lbs', price: 19.99, compareAtPrice: 24.99, stock: 40, sku: 'CF-SF-3LB' },
           { size: '7 lbs', price: 34.99, compareAtPrice: 42.99, stock: 35, sku: 'CF-SF-7LB' },
@@ -126,33 +422,62 @@ const seedData = async () => {
         autoshipDiscount: 10
       },
       {
-        name: 'Durable Rope Tug Toy',
-        slug: 'durable-rope-tug-toy',
-        description: 'Heavy-duty rope toy perfect for tugging and interactive play. Made from durable cotton fibers that help clean teeth during play. Great for medium to large dogs.',
-        shortDescription: 'Durable rope toy for interactive play',
-        brand: 'PlayPup',
-        category: dogToysCategory._id,
-        images: ['https://via.placeholder.com/500x500?text=Dog+Toy'],
+        name: 'Wet Cat Food - Chicken Pate (Variety Pack)',
+        slug: 'wet-cat-food-chicken-pate-variety',
+        description: 'Premium wet cat food in smooth pate texture. Variety pack includes chicken, turkey, and fish flavors. High moisture content supports urinary health.',
+        shortDescription: 'Wet food variety pack in pate texture',
+        brand: 'FelineFresh',
+        category: catFood._id,
+        images: ['https://via.placeholder.com/500x500?text=Cat+Food+2'],
         variants: [
-          { size: 'Medium', price: 12.99, stock: 100, sku: 'TOY-RT-M' },
-          { size: 'Large', price: 16.99, stock: 75, sku: 'TOY-RT-L' }
+          { size: '3 oz (24 pack)', price: 28.99, compareAtPrice: 34.99, stock: 50, sku: 'CF-VP-24' },
+          { size: '3 oz (48 pack)', price: 52.99, compareAtPrice: 64.99, stock: 35, sku: 'CF-VP-48' }
         ],
-        basePrice: 12.99,
-        petType: 'dog',
-        tags: ['toy', 'rope', 'tug', 'interactive'],
-        features: ['Durable cotton rope', 'Teeth cleaning action', 'Interactive play', 'Machine washable'],
+        basePrice: 28.99,
+        compareAtPrice: 34.99,
+        petType: 'cat',
+        tags: ['wet food', 'pate', 'variety', 'high moisture'],
+        features: ['Smooth pate texture', 'Variety of flavors', 'High moisture', 'Complete nutrition'],
+        ingredients: 'Chicken, Water, Liver, Natural Flavors, Vitamins & Minerals',
+        isActive: true,
+        isFeatured: true,
+        autoshipEligible: true,
+        autoshipDiscount: 10
+      },
+
+      // CAT TREATS
+      {
+        name: 'Crunchy Cat Treats - Tuna Flavor',
+        slug: 'crunchy-cat-treats-tuna',
+        description: 'Crunchy baked treats with real tuna. Helps maintain dental health through chewing action. Low calorie - perfect for training or rewards.',
+        shortDescription: 'Crunchy tuna-flavored treats',
+        brand: 'KittySnacks',
+        category: catTreats._id,
+        images: ['https://via.placeholder.com/500x500?text=Cat+Treats+1'],
+        variants: [
+          { size: '2.5 oz', price: 4.99, stock: 180, sku: 'CT-TU-2.5' },
+          { size: '6 oz', price: 9.99, stock: 140, sku: 'CT-TU-6' }
+        ],
+        basePrice: 4.99,
+        petType: 'cat',
+        tags: ['treats', 'crunchy', 'tuna', 'dental'],
+        features: ['Real tuna', 'Dental health', 'Low calorie', 'Crunchy texture'],
+        ingredients: 'Tuna, Rice Flour, Wheat Flour, Natural Flavors, Vitamins',
         isActive: true,
         isFeatured: false,
-        autoshipEligible: false
+        autoshipEligible: true,
+        autoshipDiscount: 5
       },
+
+      // CAT TOYS
       {
         name: 'Interactive Feather Wand',
         slug: 'interactive-feather-wand',
         description: 'Exciting feather wand toy that engages your cat\'s natural hunting instincts. Features colorful feathers and a flexible wand for dynamic play. Hours of entertainment guaranteed!',
         shortDescription: 'Feather wand for interactive cat play',
         brand: 'KittyPlay',
-        category: catToysCategory._id,
-        images: ['https://via.placeholder.com/500x500?text=Cat+Toy'],
+        category: catToys._id,
+        images: ['https://via.placeholder.com/500x500?text=Cat+Toy+1'],
         variants: [
           { size: 'Standard', price: 8.99, stock: 150, sku: 'TOY-FW-STD' }
         ],
@@ -165,41 +490,128 @@ const seedData = async () => {
         autoshipEligible: false
       },
       {
-        name: 'Puppy Training Treats - Chicken Flavor',
-        slug: 'puppy-training-treats-chicken',
-        description: 'Soft, bite-sized training treats perfect for puppies. Made with real chicken and designed to be low in calories. Ideal for positive reinforcement training.',
-        shortDescription: 'Soft training treats for puppies',
-        brand: 'PawPremium',
-        category: dogCategory._id,
-        images: ['https://via.placeholder.com/500x500?text=Dog+Treats'],
+        name: 'Catnip-Infused Mouse Toy (3 Pack)',
+        slug: 'catnip-mouse-toy-3pack',
+        description: 'Realistic mouse toys filled with premium catnip. Encourages natural hunting and play behavior. Machine washable and refillable with catnip.',
+        shortDescription: 'Catnip-filled mouse toys',
+        brand: 'KittyPlay',
+        category: catToys._id,
+        images: ['https://via.placeholder.com/500x500?text=Cat+Toy+2'],
         variants: [
-          { size: '6 oz', price: 7.99, stock: 200, sku: 'TREAT-PT-6OZ' },
-          { size: '16 oz', price: 14.99, stock: 150, sku: 'TREAT-PT-16OZ' }
+          { size: '3 Pack', price: 12.99, stock: 130, sku: 'TOY-MOUSE-3' }
         ],
-        basePrice: 7.99,
-        petType: 'dog',
-        tags: ['treats', 'training', 'puppy', 'chicken'],
-        features: ['Real chicken', 'Low calorie', 'Soft texture', 'Perfect for training'],
-        ingredients: 'Chicken, Wheat Flour, Vegetable Glycerin, Natural Flavors, Vitamins',
+        basePrice: 12.99,
+        petType: 'cat',
+        tags: ['toy', 'catnip', 'mouse', 'interactive'],
+        features: ['Premium catnip', 'Realistic design', 'Machine washable', 'Refillable'],
+        isActive: true,
+        isFeatured: true,
+        autoshipEligible: false
+      },
+      {
+        name: 'Automatic Laser Toy',
+        slug: 'automatic-laser-toy',
+        description: 'Interactive laser toy that moves automatically. Multiple pattern modes keep cats engaged. Auto-shutoff after 15 minutes for safety. Perfect for exercise.',
+        shortDescription: 'Automatic laser toy for cats',
+        brand: 'TechKitty',
+        category: catToys._id,
+        images: ['https://via.placeholder.com/500x500?text=Cat+Toy+3'],
+        variants: [
+          { size: 'Standard', price: 34.99, stock: 70, sku: 'TOY-LASER-AUTO' }
+        ],
+        basePrice: 34.99,
+        petType: 'cat',
+        tags: ['laser', 'automatic', 'interactive', 'exercise'],
+        features: ['Multiple patterns', 'Auto-shutoff', 'Battery powered', 'Safe laser'],
+        isActive: true,
+        isFeatured: true,
+        autoshipEligible: false
+      },
+
+      // CAT HEALTH
+      {
+        name: 'Cat Flea & Tick Prevention - Topical',
+        slug: 'cat-flea-tick-prevention-topical',
+        description: 'Monthly topical flea and tick prevention for cats. Kills fleas and ticks for up to 30 days. Waterproof and fast-acting.',
+        shortDescription: 'Monthly flea and tick prevention',
+        brand: 'PetGuard',
+        category: catHealth._id,
+        images: ['https://via.placeholder.com/500x500?text=Cat+Health+1'],
+        variants: [
+          { size: '5-9 lbs (3 pack)', price: 32.99, stock: 75, sku: 'FT-CAT-S' },
+          { size: '9+ lbs (3 pack)', price: 37.99, stock: 70, sku: 'FT-CAT-L' }
+        ],
+        basePrice: 32.99,
+        petType: 'cat',
+        tags: ['flea', 'tick', 'prevention', 'monthly'],
+        features: ['30-day protection', 'Waterproof', 'Kills fleas and ticks', 'Easy application'],
         isActive: true,
         isFeatured: true,
         autoshipEligible: true,
-        autoshipDiscount: 5
+        autoshipDiscount: 15
+      },
+
+      // CAT LITTER
+      {
+        name: 'Clumping Cat Litter - Unscented',
+        slug: 'clumping-cat-litter-unscented',
+        description: 'Premium clumping cat litter with odor control. Forms tight clumps for easy scooping. Low dust formula. Unscented for sensitive noses.',
+        shortDescription: 'Premium clumping litter',
+        brand: 'FreshPaws',
+        category: catLitter._id,
+        images: ['https://via.placeholder.com/500x500?text=Cat+Litter+1'],
+        variants: [
+          { size: '20 lbs', price: 18.99, stock: 100, sku: 'LITTER-20' },
+          { size: '40 lbs', price: 32.99, stock: 80, sku: 'LITTER-40' }
+        ],
+        basePrice: 18.99,
+        petType: 'cat',
+        tags: ['litter', 'clumping', 'unscented', 'odor control'],
+        features: ['Tight clumping', 'Odor control', 'Low dust', 'Unscented'],
+        isActive: true,
+        isFeatured: false,
+        autoshipEligible: true,
+        autoshipDiscount: 10
+      },
+
+      // CAT GROOMING
+      {
+        name: 'Self-Cleaning Slicker Brush',
+        slug: 'self-cleaning-slicker-brush',
+        description: 'Professional slicker brush with self-cleaning button. Removes loose hair and prevents matting. Retractable pins for easy cleaning.',
+        shortDescription: 'Self-cleaning slicker brush',
+        brand: 'GroomPro',
+        category: catGrooming._id,
+        images: ['https://via.placeholder.com/500x500?text=Cat+Grooming+1'],
+        variants: [
+          { size: 'Standard', price: 14.99, stock: 120, sku: 'BRUSH-SLICKER' }
+        ],
+        basePrice: 14.99,
+        petType: 'cat',
+        tags: ['brush', 'slicker', 'grooming', 'self-cleaning'],
+        features: ['Self-cleaning button', 'Prevents matting', 'Removes loose hair', 'Ergonomic handle'],
+        isActive: true,
+        isFeatured: false,
+        autoshipEligible: false
       }
     ];
 
     await Product.insertMany(products);
 
-    console.log('Products created');
+    console.log('Products created (20 total)');
     console.log('\n=== Seed Data Summary ===');
     console.log('Admin User:');
-    console.log('  Email: admin@petstore.com');
+    console.log('  Email: admin@petshiwu.com');
     console.log('  Password: admin123');
     console.log('\nCustomer User:');
     console.log('  Email: customer@example.com');
     console.log('  Password: password123');
-    console.log('\nCategories: 4');
-    console.log('Products: 5');
+    console.log('\nCategories: 11');
+    console.log('  - Dog: Food, Treats, Toys, Health & Pharmacy, Supplies, Grooming');
+    console.log('  - Cat: Food, Treats, Toys, Health & Pharmacy, Litter & Accessories, Grooming');
+    console.log('\nProducts: 20');
+    console.log('  - Dog Products: 10');
+    console.log('  - Cat Products: 10');
     console.log('\n=== Seeding Complete ===');
 
     await mongoose.connection.close();
@@ -211,6 +623,3 @@ const seedData = async () => {
 };
 
 seedData();
-
-
-
