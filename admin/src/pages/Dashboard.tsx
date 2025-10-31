@@ -310,33 +310,61 @@ const Dashboard = () => {
         {/* Category Chart */}
         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition-all hover-lift animate-fade-in-up">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-black text-gray-900">Sales by Category</h2>
+            <h2 className="text-2xl font-black text-gray-900">Navigation Menu Categories</h2>
             <div className="bg-gradient-to-r from-green-100 to-emerald-100 px-4 py-2 rounded-lg">
-              <p className="text-sm font-bold text-green-800">Top Categories</p>
+              <p className="text-sm font-bold text-green-800">Main Categories by Pet Type</p>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={categoryData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="name" style={{ fontSize: '12px', fontWeight: 'bold' }} />
-              <YAxis style={{ fontSize: '12px' }} />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#fff', 
-                  border: '2px solid #3b82f6', 
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                }} 
-              />
-              <Bar dataKey="value" fill="url(#colorGradient)" radius={[8, 8, 0, 0]} />
-              <defs>
-                <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3b82f6" />
-                  <stop offset="100%" stopColor="#6366f1" />
-                </linearGradient>
-              </defs>
-            </BarChart>
-          </ResponsiveContainer>
+          {!categoriesData ? (
+            <div className="flex items-center justify-center h-[300px]">
+              <div className="text-center text-gray-500">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+                <p>Loading categories...</p>
+              </div>
+            </div>
+          ) : categoryData.length === 0 || (categoryData.length === 1 && categoryData[0].name === 'Loading...') ? (
+            <div className="flex items-center justify-center h-[300px]">
+              <p className="text-gray-500">No categories found</p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={categoryData} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis 
+                  dataKey="name" 
+                  angle={-45}
+                  textAnchor="end"
+                  height={100}
+                  style={{ fontSize: '11px', fontWeight: 'bold' }}
+                />
+                <YAxis 
+                  style={{ fontSize: '12px' }}
+                  label={{ value: 'Subcategories', angle: -90, position: 'insideLeft' }}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#fff', 
+                    border: '2px solid #3b82f6', 
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                  formatter={(value: any) => [`${value} subcategories`, 'Count']}
+                />
+                <Bar 
+                  dataKey="value" 
+                  fill="url(#colorGradient)" 
+                  radius={[8, 8, 0, 0]}
+                  label={{ position: 'top', formatter: (value: any) => `${value}` }}
+                />
+                <defs>
+                  <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3b82f6" />
+                    <stop offset="100%" stopColor="#6366f1" />
+                  </linearGradient>
+                </defs>
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
 
