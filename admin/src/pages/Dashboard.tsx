@@ -111,31 +111,48 @@ const Dashboard = () => {
 
   // Generate category data from actual navigation menu categories
   const categoryData = (() => {
-    if (!categoriesData?.data) {
+    if (!categoriesData?.data || !Array.isArray(categoriesData.data)) {
       // Fallback mock data if categories not loaded yet
       return [
-        { name: 'Dog Food', value: 4000 },
-        { name: 'Cat Food', value: 3000 },
-        { name: 'Toys', value: 2000 },
-        { name: 'Accessories', value: 2780 }
+        { name: 'Loading...', value: 0 }
       ];
     }
 
     const allCategories = categoriesData.data;
     const categoryCounts: { [key: string]: number } = {};
 
-    // Count main categories (level 1) by name, grouped by pet type
+    // Helper function to count subcategories (handles both flat and hierarchical structures)
+    const countSubcategories = (category: any, allCats: any[]): number => {
+      // If category has subcategories array (hierarchical)
+      if (category.subcategories && Array.isArray(category.subcategories)) {
+        return category.subcategories.length;
+      }
+      
+      // Otherwise, count by parentCategory reference (flat structure)
+      return allCats.filter((cat: any) => {
+        const parentId = cat.parentCategory?._id || cat.parentCategory;
+        const categoryId = category._id;
+        return parentId && parentId.toString() === categoryId.toString() && cat.level === 2;
+      }).length;
+    };
+
+    // Process all categories to find main categories (level 1, no parent)
     allCategories.forEach((category: any) => {
-      if (!category.parentCategory && category.level === 1) {
+      // Check if it's a main category (level 1, no parent category)
+      const isMainCategory = (!category.parentCategory || 
+                             category.parentCategory === null || 
+                             (typeof category.parentCategory === 'object' && !category.parentCategory._id)) &&
+                             category.level === 1;
+
+      if (isMainCategory) {
+        // Determine pet type icon/prefix
         const petTypePrefix = category.petType === 'dog' ? '🐕 ' : 
                              category.petType === 'cat' ? '🐱 ' : 
                              category.petType === 'other-animals' ? '🐾 ' : '';
         const displayName = `${petTypePrefix}${category.name}`;
         
-        // Count subcategories for each main category (for chart value)
-        const subcategoryCount = allCategories.filter((cat: any) => 
-          (cat.parentCategory?._id === category._id || cat.parentCategory === category._id) && cat.level === 2
-        ).length;
+        // Count subcategories for this main category
+        const subcategoryCount = countSubcategories(category, allCategories);
         
         // Use subcategory count as value, or default to 1 if no subcategories
         categoryCounts[displayName] = Math.max(subcategoryCount, 1);
@@ -146,10 +163,10 @@ const Dashboard = () => {
     const chartData = Object.entries(categoryCounts)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
-      .slice(0, 12); // Top 12 categories
+      .slice(0, 15); // Top 15 categories
 
     return chartData.length > 0 ? chartData : [
-      { name: 'Loading...', value: 0 }
+      { name: 'No categories found', value: 0 }
     ];
   })();
 
