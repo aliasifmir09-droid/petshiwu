@@ -118,33 +118,30 @@ const Dashboard = () => {
       ];
     }
 
-    const allCategories = categoriesData.data;
+    const rootCategories = categoriesData.data; // Backend returns hierarchical structure (root categories with subcategories)
     const categoryCounts: { [key: string]: number } = {};
 
-    // Helper function to count subcategories (handles both flat and hierarchical structures)
-    const countSubcategories = (category: any, allCats: any[]): number => {
-      // If category has subcategories array (hierarchical)
-      if (category.subcategories && Array.isArray(category.subcategories)) {
-        return category.subcategories.length;
+    // Helper function to recursively count all subcategories at any level
+    const countAllSubcategories = (category: any): number => {
+      if (!category.subcategories || !Array.isArray(category.subcategories) || category.subcategories.length === 0) {
+        return 0;
       }
       
-      // Otherwise, count by parentCategory reference (flat structure)
-      return allCats.filter((cat: any) => {
-        const parentId = cat.parentCategory?._id || cat.parentCategory;
-        const categoryId = category._id;
-        return parentId && parentId.toString() === categoryId.toString() && cat.level === 2;
-      }).length;
+      let count = category.subcategories.length;
+      // Also count nested subcategories (level 3)
+      category.subcategories.forEach((subcat: any) => {
+        if (subcat.subcategories && Array.isArray(subcat.subcategories)) {
+          count += subcat.subcategories.length;
+        }
+      });
+      
+      return count;
     };
 
-    // Process all categories to find main categories (level 1, no parent)
-    allCategories.forEach((category: any) => {
-      // Check if it's a main category (level 1, no parent category)
-      const isMainCategory = (!category.parentCategory || 
-                             category.parentCategory === null || 
-                             (typeof category.parentCategory === 'object' && !category.parentCategory._id)) &&
-                             category.level === 1;
-
-      if (isMainCategory) {
+    // Process root categories (main categories, level 1)
+    rootCategories.forEach((category: any) => {
+      // Only process main categories (level 1)
+      if (category.level === 1 || (!category.parentCategory && category.level !== undefined)) {
         // Determine pet type icon/prefix
         const petTypePrefix = category.petType === 'dog' ? '🐕 ' : 
                              category.petType === 'cat' ? '🐱 ' : 
@@ -152,7 +149,7 @@ const Dashboard = () => {
         const displayName = `${petTypePrefix}${category.name}`;
         
         // Count subcategories for this main category
-        const subcategoryCount = countSubcategories(category, allCategories);
+        const subcategoryCount = countAllSubcategories(category);
         
         // Use subcategory count as value, or default to 1 if no subcategories
         categoryCounts[displayName] = Math.max(subcategoryCount, 1);
