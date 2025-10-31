@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { orderService } from '@/services/orders';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
-import { normalizeImageUrl } from '@/utils/imageUtils';
+import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 
 const Checkout = () => {
   const navigate = useNavigate();
