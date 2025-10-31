@@ -252,10 +252,11 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] sticky top-0 z-50 shadow-xl overflow-x-hidden animate-fade-in-up">
+    <header className="bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] sticky top-0 z-50 shadow-xl w-full overflow-x-hidden animate-fade-in-up">
       {/* Main Header */}
-      <div className="container mx-auto px-4 py-3 max-w-full overflow-x-hidden">
-        <div className="flex items-center justify-between gap-4">
+      <div className="w-full max-w-full overflow-x-hidden">
+        <div className="container mx-auto px-4 py-3 max-w-full overflow-x-hidden">
+          <div className="flex items-center justify-between gap-4 min-w-0">
           {/* Logo with Enhanced Animation */}
           <Link to="/" className="flex items-center gap-3 flex-shrink-0 group">
             <div className="relative">
@@ -399,6 +400,7 @@ const Header = () => {
             </button>
           </div>
         </div>
+      </div>
 
             {/* Search Bar - Mobile */}
             <form onSubmit={handleSearch} className="lg:hidden mt-3">
@@ -419,13 +421,14 @@ const Header = () => {
                 </button>
               </div>
             </form>
-      </div>
+          </div>
 
-          {/* Navigation */}
-          <nav className="bg-white border-t border-gray-200 relative overflow-x-hidden overflow-y-visible">
-            <div className="container mx-auto px-4 lg:px-6 max-w-full overflow-x-hidden overflow-y-visible">
-              <div className="flex items-center justify-between py-3 relative overflow-x-hidden overflow-y-visible min-w-0">
-                <ul className="flex items-center gap-3 lg:gap-4 text-sm font-semibold text-gray-700 overflow-x-hidden flex-nowrap whitespace-nowrap">
+      {/* Navigation */}
+          <nav className="bg-white border-t border-gray-200 relative w-full overflow-x-hidden overflow-y-visible">
+            <div className="w-full max-w-full overflow-x-hidden overflow-y-visible">
+              <div className="container mx-auto px-3 lg:px-4 max-w-full overflow-x-hidden overflow-y-visible">
+                <div className="flex items-center justify-start py-3 relative overflow-x-hidden overflow-y-visible min-w-0">
+                  <ul className="flex items-center gap-2 lg:gap-3 text-sm font-semibold text-gray-700 overflow-x-hidden flex-nowrap">
                   {/* Dynamic Pet Types with Dropdowns */}
                   {petTypes.map((petType: any) => {
                     const petCategories = getCategoriesForPetType(petType.slug);
@@ -437,10 +440,10 @@ const Header = () => {
                       <li key={petType.slug} className="relative group flex-shrink-0">
                         <Link 
                           to={`/products?petType=${petType.slug}`} 
-                          className="flex items-center gap-1.5 hover:text-[#1E3A8A] transition-colors py-2 px-1.5 whitespace-nowrap"
+                          className="flex items-center gap-1 hover:text-[#1E3A8A] transition-colors py-2 px-1.5 whitespace-nowrap"
                         >
-                          <span className="text-base flex-shrink-0">{petType.icon}</span>
-                          <span className="whitespace-nowrap">{petType.name}</span>
+                          <span className="text-sm lg:text-base flex-shrink-0">{petType.icon}</span>
+                          <span className="text-xs lg:text-sm whitespace-nowrap">{petType.name}</span>
                           {(petCategories.length > 0 || isSpecialDogMenu || isSpecialCatMenu || isSpecialOtherAnimalsMenu) && (
                             <ChevronDown size={14} className="opacity-60 group-hover:opacity-100 transition-opacity" />
                           )}
@@ -657,28 +660,29 @@ const Header = () => {
                     );
                   })}
                   
-                  {/* Today's Deals */}
-                  <li className="flex-shrink-0">
-                    <Link to="/products?featured=true" className="flex items-center gap-1.5 bg-red-500 text-white px-3 lg:px-4 py-2 rounded-full hover:bg-red-600 transition-colors shadow-md hover:shadow-lg font-semibold whitespace-nowrap">
-                      <span className="text-base">🔥</span>
-                      <span>Today's Deals</span>
-                    </Link>
-                  </li>
-                  
-                  {/* Pharmacy */}
-                  <li className="flex-shrink-0">
-                    <Link to="/products" className="hover:text-[#1E3A8A] transition-colors py-2 px-1.5 whitespace-nowrap">
-                      Pharmacy
-                    </Link>
-                  </li>
-                  
-                  {/* About */}
-                  <li className="flex-shrink-0">
-                    <Link to="/about" className="hover:text-[#1E3A8A] transition-colors py-2 px-1.5 whitespace-nowrap">
-                      About
-                    </Link>
-                  </li>
-                </ul>
+                    {/* Today's Deals */}
+                    <li className="flex-shrink-0">
+                      <Link to="/products?featured=true" className="flex items-center gap-1 bg-red-500 text-white px-2 lg:px-3 py-1.5 rounded-full hover:bg-red-600 transition-colors shadow-md hover:shadow-lg font-semibold whitespace-nowrap text-xs lg:text-sm">
+                        <span className="text-xs lg:text-sm">🔥</span>
+                        <span>Today's Deals</span>
+                      </Link>
+                    </li>
+                    
+                    {/* Pharmacy */}
+                    <li className="flex-shrink-0">
+                      <Link to="/products" className="hover:text-[#1E3A8A] transition-colors py-2 px-1.5 whitespace-nowrap text-xs lg:text-sm">
+                        Pharmacy
+                      </Link>
+                    </li>
+                    
+                    {/* About */}
+                    <li className="flex-shrink-0">
+                      <Link to="/about" className="hover:text-[#1E3A8A] transition-colors py-2 px-1.5 whitespace-nowrap text-xs lg:text-sm">
+                        About
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </nav>
