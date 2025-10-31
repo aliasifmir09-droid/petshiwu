@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import api, { API_URL } from '@/services/api';
+import api from '@/services/api';
 import ConfirmationModal from './ConfirmationModal';
 
 const Header = () => {
@@ -36,7 +36,7 @@ const Header = () => {
   const { data: categoriesResponse, isError: categoriesError } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await axios.get(`${API_URL}/categories`);
+      const response = await api.get('/categories');
       // Save to localStorage when successfully fetched
       if (response.data?.data) {
         localStorage.setItem('cached_categories', JSON.stringify(response.data.data));
