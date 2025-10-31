@@ -172,7 +172,7 @@ const Home = () => {
                 { 
                   name: 'Horse', 
                   petType: 'other-animals', 
-                  image: 'https://images.unsplash.com/photo-1551195136-3f4d6ad78c03?w=400&h=400&fit=crop&q=90'
+                  image: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?w=400&h=400&fit=crop&q=90&auto=format'
                 },
                 { 
                   name: 'Wild bird', 
@@ -207,12 +207,12 @@ const Home = () => {
                 { 
                   name: 'Reptile', 
                   petType: 'other-animals', 
-                  image: 'https://images.unsplash.com/photo-1562820083-8ab578462cc0?w=400&h=400&fit=crop&q=90'
+                  image: 'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e?w=400&h=400&fit=crop&q=90&auto=format'
                 },
                 { 
                   name: 'Fish', 
                   petType: 'other-animals', 
-                  image: 'https://images.unsplash.com/photo-1520990203732-1b45ccb0abc5?w=400&h=400&fit=crop&q=90'
+                  image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=400&fit=crop&q=90&auto=format'
                 }
               ].map((category, index) => (
                 <Link
@@ -228,6 +228,12 @@ const Home = () => {
                           src={category.image} 
                           alt={category.name}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            // Fallback to placeholder if image fails to load
+                            const target = e.currentTarget;
+                            target.src = `https://via.placeholder.com/400x400/cccccc/666666?text=${encodeURIComponent(category.name)}`;
+                          }}
+                          loading="lazy"
                         />
                       </div>
                       {/* Decorative overlay on hover */}
