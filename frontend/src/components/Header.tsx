@@ -422,9 +422,9 @@ const Header = () => {
       </div>
 
           {/* Navigation */}
-          <nav className="bg-white border-t border-gray-200 relative overflow-x-hidden">
-            <div className="container mx-auto px-4 lg:px-6 max-w-full overflow-x-hidden">
-              <div className="flex items-center justify-between py-3 relative overflow-x-hidden min-w-0">
+          <nav className="bg-white border-t border-gray-200 relative overflow-x-hidden overflow-y-visible">
+            <div className="container mx-auto px-4 lg:px-6 max-w-full overflow-x-hidden overflow-y-visible">
+              <div className="flex items-center justify-between py-3 relative overflow-x-hidden overflow-y-visible min-w-0">
                 <ul className="flex items-center gap-3 lg:gap-4 text-sm font-semibold text-gray-700 overflow-x-hidden flex-nowrap whitespace-nowrap">
                   {/* Dynamic Pet Types with Dropdowns */}
                   {petTypes.map((petType: any) => {
@@ -448,7 +448,7 @@ const Header = () => {
                         
                         {/* Special Dog Mega Menu */}
                         {isSpecialDogMenu && (
-                          <div className="absolute left-0 top-full mt-0 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 max-w-[90vw] w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
+                          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
                             <div className="grid grid-cols-4 gap-6">
                               {dogMegaMenu.map((section, idx) => (
                                 <div key={idx} className="space-y-2">
@@ -488,7 +488,7 @@ const Header = () => {
 
                         {/* Special Cat Mega Menu */}
                         {isSpecialCatMenu && (
-                          <div className="absolute left-0 top-full mt-0 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 max-w-[90vw] w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
+                          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
                             <div className="grid grid-cols-4 gap-6">
                               {catMegaMenu.map((section, idx) => (
                                 <div key={idx} className="space-y-2">
@@ -528,7 +528,7 @@ const Header = () => {
 
                         {/* Special Other Animals Mega Menu */}
                         {isSpecialOtherAnimalsMenu && (
-                          <div className="absolute left-0 top-full mt-0 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 max-w-[90vw] w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
+                          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
                             <div className="grid grid-cols-4 gap-6">
                               {otherAnimalsMegaMenu.map((section, idx) => (
                                 <div key={idx} className="space-y-2">
@@ -555,7 +555,7 @@ const Header = () => {
                         
                         {/* Regular Dropdown Mega Menu for other pet types */}
                         {!isSpecialDogMenu && !isSpecialCatMenu && !isSpecialOtherAnimalsMenu && petCategories.length > 0 && (
-                          <div className="absolute left-0 top-full mt-0 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 min-w-[280px] max-w-sm max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
+                          <div className="absolute left-0 top-full mt-1 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 min-w-[280px] max-w-sm max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
                             {false ? (
                               // Special display for "Other Animals" - show categories as animal types
                               <div className="space-y-3">
