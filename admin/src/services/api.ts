@@ -3,6 +3,11 @@ import axios from 'axios';
 // Use relative URL to leverage Vite proxy in development
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
+// Log API URL in development/debugging (will be removed in production build)
+if (typeof window !== 'undefined') {
+  console.log('Admin API Base URL:', API_URL);
+}
+
 const api = axios.create({
   baseURL: API_URL,
   headers: {
