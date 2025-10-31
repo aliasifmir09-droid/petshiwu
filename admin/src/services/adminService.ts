@@ -86,6 +86,11 @@ export const adminService = {
     return response.data.data;
   },
 
+  getAllCategoriesAdmin: async () => {
+    const response = await api.get('/categories/admin/all');
+    return response.data;
+  },
+
   createCategory: async (data: any) => {
     const response = await api.post('/categories', data);
     return response.data.data;
