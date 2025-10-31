@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, ChevronDown, ChevronRight, Search, Menu, X, LogOut, Phone } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/services/api';
 import ConfirmationModal from './ConfirmationModal';
@@ -15,6 +15,19 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [expandedMobilePetTypes, setExpandedMobilePetTypes] = useState<Set<string>>(new Set());
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
+
+  // Detect scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsScrolled(scrollPosition > 100); // Show hamburger menu after 100px scroll
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Fetch pet types with error handling and localStorage caching
   const { data: petTypesResponse, isError: petTypesError } = useQuery({
@@ -456,7 +469,17 @@ const Header = () => {
         <div className="relative w-full">
           <div className="container mx-auto px-2 lg:px-3">
             <div className="flex items-center justify-start py-2 lg:py-2.5">
-              <ul className="flex items-center gap-1.5 lg:gap-2.5 text-xs lg:text-sm font-semibold text-gray-700 flex-nowrap">
+              {/* Hamburger Menu Button for Scrolled State */}
+              {isScrolled && (
+                <button
+                  onClick={() => setIsLeftSidebarOpen(true)}
+                  className="mr-3 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label="Open Menu"
+                >
+                  <Menu size={24} className="text-gray-700" />
+                </button>
+              )}
+              <ul className={`flex items-center gap-1.5 lg:gap-2.5 text-xs lg:text-sm font-semibold text-gray-700 flex-nowrap ${isScrolled ? 'hidden' : ''}`}>
                   {/* Dynamic Pet Types with Dropdowns */}
                   {petTypes.map((petType: any) => {
                     const petCategories = getCategoriesForPetType(petType.slug);
@@ -1005,6 +1028,203 @@ const Header = () => {
             </ul>
           </div>
         </div>
+      )}
+
+      {/* Left Sidebar for Desktop Navigation (when scrolled) */}
+      {isLeftSidebarOpen && (
+        <>
+          {/* Overlay */}
+          <div 
+            className="fixed inset-0 bg-black/50 z-50 lg:block hidden"
+            onClick={() => setIsLeftSidebarOpen(false)}
+          />
+          {/* Sidebar */}
+          <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-2xl z-[60] transform transition-transform duration-300 ease-in-out overflow-y-auto">
+            <div className="p-6">
+              {/* Sidebar Header */}
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Shop by Category</h2>
+                <button
+                  onClick={() => setIsLeftSidebarOpen(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label="Close Menu"
+                >
+                  <X size={24} className="text-gray-700" />
+                </button>
+              </div>
+
+              {/* Navigation Items */}
+              <ul className="space-y-1">
+                {petTypes.map((petType: any) => {
+                  const petCategories = getCategoriesForPetType(petType.slug);
+                  const isExpanded = expandedMobilePetTypes.has(petType.slug);
+                  const isSpecialDogMenu = petType.slug === 'dog';
+                  const isSpecialCatMenu = petType.slug === 'cat';
+                  const isSpecialOtherAnimalsMenu = petType.slug === 'other-animals';
+
+                  return (
+                    <li key={petType.slug}>
+                      {(petCategories.length > 0 || isSpecialDogMenu || isSpecialCatMenu || isSpecialOtherAnimalsMenu) ? (
+                        <>
+                          <button
+                            onClick={() => toggleMobilePetType(petType.slug)}
+                            className="w-full flex items-center justify-between gap-3 py-3 px-4 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="text-xl">{petType.icon}</span>
+                              <span>{petType.name}</span>
+                            </div>
+                            <ChevronRight 
+                              size={18} 
+                              className={`transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                            />
+                          </button>
+
+                          {/* Categories dropdown */}
+                          {isExpanded && (
+                            <div className="ml-6 mt-2 space-y-2">
+                              {isSpecialDogMenu ? (
+                                <>
+                                  {dogMegaMenu.map((section, idx) => (
+                                    <div key={idx} className="space-y-1 mb-3">
+                                      <p className="text-sm font-bold text-gray-900 px-3">
+                                        {section.title}
+                                      </p>
+                                      <div className="space-y-1">
+                                        {section.items.map((item, itemIdx) => (
+                                          <Link
+                                            key={itemIdx}
+                                            to={`/products?petType=dog&search=${encodeURIComponent(item)}`}
+                                            onClick={() => setIsLeftSidebarOpen(false)}
+                                            className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                                          >
+                                            {item}
+                                          </Link>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </>
+                              ) : isSpecialCatMenu ? (
+                                <>
+                                  {catMegaMenu.map((section, idx) => (
+                                    <div key={idx} className="space-y-1 mb-3">
+                                      <p className="text-sm font-bold text-gray-900 px-3">
+                                        {section.title}
+                                      </p>
+                                      <div className="space-y-1">
+                                        {section.items.map((item, itemIdx) => (
+                                          <Link
+                                            key={itemIdx}
+                                            to={`/products?petType=cat&search=${encodeURIComponent(item)}`}
+                                            onClick={() => setIsLeftSidebarOpen(false)}
+                                            className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                                          >
+                                            {item}
+                                          </Link>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </>
+                              ) : isSpecialOtherAnimalsMenu ? (
+                                <>
+                                  {otherAnimalsMegaMenu.map((section, idx) => (
+                                    <div key={idx} className="space-y-1 mb-3">
+                                      <p className="text-sm font-bold text-gray-900 px-3">
+                                        {section.title}
+                                      </p>
+                                      <div className="space-y-1">
+                                        {section.items.map((item, itemIdx) => (
+                                          <Link
+                                            key={itemIdx}
+                                            to={`/products?petType=other-animals&search=${encodeURIComponent(item)}`}
+                                            onClick={() => setIsLeftSidebarOpen(false)}
+                                            className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                                          >
+                                            {item}
+                                          </Link>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </>
+                              ) : (
+                                petCategories.map((category: any) => {
+                                  const subcategories = getSubcategories(category._id);
+                                  return (
+                                    <div key={category._id} className="space-y-1">
+                                      <Link
+                                        to={`/products?category=${category.slug}`}
+                                        onClick={() => setIsLeftSidebarOpen(false)}
+                                        className="block py-2 px-3 font-semibold text-gray-900 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                                      >
+                                        {category.name}
+                                      </Link>
+                                      {subcategories.length > 0 && (
+                                        <div className="ml-3 space-y-1">
+                                          {subcategories.map((sub: any) => (
+                                            <Link
+                                              key={sub._id}
+                                              to={`/products?category=${sub.slug}`}
+                                              onClick={() => setIsLeftSidebarOpen(false)}
+                                              className="block py-1.5 px-3 text-sm text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                                            >
+                                              {sub.name}
+                                            </Link>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })
+                              )}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <Link
+                          to={`/products?petType=${petType.slug}`}
+                          onClick={() => setIsLeftSidebarOpen(false)}
+                          className="flex items-center gap-3 py-3 px-4 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                        >
+                          <span className="text-xl">{petType.icon}</span>
+                          <span>{petType.name}</span>
+                        </Link>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+
+              {/* Additional Links */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <Link
+                  to="/products?featured=true"
+                  onClick={() => setIsLeftSidebarOpen(false)}
+                  className="flex items-center gap-3 py-3 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold mb-3"
+                >
+                  <span>🔥</span>
+                  <span>Today's Deals</span>
+                </Link>
+                <Link
+                  to="/products"
+                  onClick={() => setIsLeftSidebarOpen(false)}
+                  className="block py-3 px-4 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                >
+                  Pharmacy
+                </Link>
+                <Link
+                  to="/about"
+                  onClick={() => setIsLeftSidebarOpen(false)}
+                  className="block py-3 px-4 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                >
+                  About
+                </Link>
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Logout Confirmation Modal */}
