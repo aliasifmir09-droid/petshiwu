@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { adminService } from '@/services/adminService';
 import StatCard from '@/components/StatCard';
 import { DollarSign, Package, ShoppingCart, TrendingUp, AlertTriangle, ExternalLink, FolderTree, ChevronRight } from 'lucide-react';
+import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import {
   LineChart,
   Line,
@@ -274,8 +275,9 @@ const Dashboard = () => {
                   <div key={product._id} className="flex items-center justify-between bg-white p-4 rounded-lg border-2 border-red-200 hover:border-red-400 transition-all hover-lift shadow-sm">
                     <div className="flex items-center gap-3">
                       <img
-                        src={product.images[0]}
+                        src={normalizeImageUrl(product.images?.[0])}
                         alt={product.name}
+                        onError={(e) => handleImageError(e, product.name)}
                         className="w-14 h-14 object-cover rounded-lg shadow-md"
                       />
                       <div>

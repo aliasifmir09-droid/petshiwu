@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
+import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import {
   Line,
   BarChart,
@@ -643,8 +644,9 @@ const Analytics = () => {
                       <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
                       <div className="flex items-center gap-3">
                         <img
-                          src={product.images?.[0] || '/placeholder.png'}
+                          src={normalizeImageUrl(product.images?.[0])}
                           alt={product.name}
+                          onError={(e) => handleImageError(e, product.name)}
                           className="w-10 h-10 rounded object-cover"
                         />
                         <div>

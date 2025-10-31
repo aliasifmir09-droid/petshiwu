@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
-import { X, Plus, Trash2, Upload } from 'lucide-react';
+import { X, Plus, Trash2, Upload, Link2 } from 'lucide-react';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
+import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 
 interface ProductFormProps {
   product?: any;
@@ -39,6 +40,8 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
 
   const [imageUrls, setImageUrls] = useState<string[]>(product?.images || []);
   const [uploading, setUploading] = useState(false);
+  const [imageUrlInput, setImageUrlInput] = useState('');
+  const [showUrlInput, setShowUrlInput] = useState(false);
   
   // Category and Pet Type Management
   const [showNewCategory, setShowNewCategory] = useState(false);
@@ -113,6 +116,25 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
 
   const removeImage = (index: number) => {
     setImageUrls(imageUrls.filter((_: string, i: number) => i !== index));
+  };
+
+  const handleAddImageUrl = () => {
+    if (!imageUrlInput.trim()) {
+      showToast('Please enter a valid image URL', 'warning');
+      return;
+    }
+
+    // Basic URL validation
+    const urlPattern = /^(https?:\/\/|data:image\/|\/uploads\/)/i;
+    if (!urlPattern.test(imageUrlInput.trim())) {
+      showToast('Please enter a valid URL (must start with http://, https://, or /uploads/)', 'warning');
+      return;
+    }
+
+    setImageUrls([...imageUrls, imageUrlInput.trim()]);
+    setImageUrlInput('');
+    setShowUrlInput(false);
+    showToast('Image URL added successfully', 'success');
   };
 
   const addVariant = () => {
@@ -368,10 +390,15 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
           {/* Images */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Product Images *</h3>
-            <div className="mb-4">
-              <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:border-primary-500">
-                <Upload size={20} />
-                <span>{uploading ? 'Uploading...' : 'Click to upload images'}</span>
+            
+            {/* Add Image Options */}
+            <div className="mb-4 flex gap-3">
+              {/* Upload Image Option */}
+              <label className="flex-1 flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:border-primary-500 hover:bg-gray-50 transition-colors">
+                <Upload size={20} className="text-gray-600" />
+                <span className="text-sm font-medium text-gray-700">
+                  {uploading ? 'Uploading...' : 'Upload Images'}
+                </span>
                 <input
                   type="file"
                   accept="image/*"
@@ -381,21 +408,95 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                   disabled={uploading}
                 />
               </label>
+
+              {/* Add URL Option */}
+              <button
+                type="button"
+                onClick={() => setShowUrlInput(!showUrlInput)}
+                className="flex-1 flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-primary-500 hover:bg-gray-50 transition-colors"
+              >
+                <Link2 size={20} className="text-gray-600" />
+                <span className="text-sm font-medium text-gray-700">
+                  {showUrlInput ? 'Cancel' : 'Add Image URL'}
+                </span>
+              </button>
             </div>
-            <div className="grid grid-cols-4 gap-4">
-              {imageUrls.map((url, index) => (
-                <div key={index} className="relative aspect-square border rounded-lg overflow-hidden">
-                  <img src={url} alt={`Product ${index + 1}`} className="w-full h-full object-cover" />
+
+            {/* URL Input Field */}
+            {showUrlInput && (
+              <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={imageUrlInput}
+                    onChange={(e) => setImageUrlInput(e.target.value)}
+                    placeholder="Enter image URL (https://example.com/image.jpg or /uploads/image.jpg)"
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleAddImageUrl();
+                      }
+                    }}
+                  />
                   <button
                     type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                    onClick={handleAddImageUrl}
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
                   >
-                    <X size={16} />
+                    Add URL
                   </button>
                 </div>
-              ))}
-            </div>
+                <p className="mt-2 text-xs text-gray-500">
+                  Supports: https://, http://, or /uploads/ paths
+                </p>
+              </div>
+            )}
+
+            {/* Image Grid */}
+            {imageUrls.length > 0 && (
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">
+                  {imageUrls.length} {imageUrls.length === 1 ? 'image' : 'images'} added
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {imageUrls.map((url, index) => (
+                    <div key={index} className="relative aspect-square border-2 border-gray-200 rounded-lg overflow-hidden group">
+                      <img 
+                        src={normalizeImageUrl(url)} 
+                        alt={`Product Image ${index + 1}`} 
+                        onError={(e) => handleImageError(e, `Product Image ${index + 1}`)}
+                        className="w-full h-full object-cover" 
+                      />
+                      {/* Image Index Badge */}
+                      <div className="absolute top-2 left-2 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded">
+                        #{index + 1}
+                      </div>
+                      {/* Remove Button */}
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                        title="Remove image"
+                      >
+                        <X size={14} />
+                      </button>
+                      {/* URL Type Indicator */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] px-2 py-1 truncate">
+                        {url.startsWith('http') ? '🌐 External URL' : url.startsWith('/uploads/') ? '📁 Uploaded' : '🔗 Custom'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {imageUrls.length === 0 && (
+              <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
+                <p className="text-gray-500 mb-2">No images added yet</p>
+                <p className="text-xs text-gray-400">Upload images or add image URLs above</p>
+              </div>
+            )}
           </div>
 
           {/* Pricing & Variants */}

@@ -8,6 +8,7 @@ import { useWishlistStore } from '@/stores/wishlistStore';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ProductCard from '@/components/ProductCard';
 import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles } from 'lucide-react';
+import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -94,13 +95,14 @@ const ProductDetail = () => {
         <div>
           <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
             <img
-              src={product.images[selectedImage]}
+              src={normalizeImageUrl(product.images?.[selectedImage])}
               alt={product.name}
+              onError={(e) => handleImageError(e, product.name)}
               className="w-full h-full object-cover"
             />
           </div>
           <div className="grid grid-cols-4 gap-2">
-            {product.images.map((image, index) => (
+            {product.images?.map((image, index) => (
               <button
                 key={index}
                 onClick={() => setSelectedImage(index)}
@@ -108,7 +110,12 @@ const ProductDetail = () => {
                   selectedImage === index ? 'border-primary-600' : 'border-transparent'
                 }`}
               >
-                <img src={image} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
+                <img 
+                  src={normalizeImageUrl(image)} 
+                  alt={`${product.name} ${index + 1}`} 
+                  onError={(e) => handleImageError(e, `${product.name} ${index + 1}`)}
+                  className="w-full h-full object-cover" 
+                />
               </button>
             ))}
           </div>

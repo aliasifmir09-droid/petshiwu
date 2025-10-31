@@ -4,6 +4,7 @@ import { Product } from '@/types';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useCartStore } from '@/stores/cartStore';
 import { memo, useCallback, useMemo, useState } from 'react';
+import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 
 interface ProductCardProps {
   product: Product;
@@ -65,9 +66,10 @@ const ProductCard = memo(({ product }: ProductCardProps) => {
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
         <img
-          src={product.images[0]}
+          src={normalizeImageUrl(product.images?.[0])}
           alt={product.name}
           loading="lazy"
+          onError={(e) => handleImageError(e, product.name)}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
         

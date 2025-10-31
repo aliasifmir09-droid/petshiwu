@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCartStore } from '@/stores/cartStore';
 import { Trash2, ShoppingBag, AlertTriangle } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
+import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -67,8 +68,9 @@ const Cart = () => {
                   {/* Image */}
                   <Link to={`/products/${item.product.slug}`} className="flex-shrink-0">
                     <img
-                      src={item.product.images[0]}
+                      src={normalizeImageUrl(item.product.images?.[0])}
                       alt={item.product.name}
+                      onError={(e) => handleImageError(e, item.product.name)}
                       className="w-24 h-24 object-cover rounded-lg"
                     />
                   </Link>

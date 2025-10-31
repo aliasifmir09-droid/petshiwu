@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { orderService } from '@/services/orders';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
+import { normalizeImageUrl } from '@/utils/imageUtils';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -67,7 +68,7 @@ const Checkout = () => {
       items: items.map(item => ({
         product: item.product._id,
         name: item.product.name,
-        image: item.product.images[0],
+        image: normalizeImageUrl(item.product.images?.[0]),
         price: item.variant?.price || item.product.basePrice,
         quantity: item.quantity,
         variant: item.variant ? {
@@ -247,8 +248,9 @@ const Checkout = () => {
                   return (
                     <div key={`${item.product._id}-${item.variant?.sku}`} className="flex gap-3">
                       <img
-                        src={item.product.images[0]}
+                        src={normalizeImageUrl(item.product.images?.[0])}
                         alt={item.product.name}
+                        onError={(e) => handleImageError(e, item.product.name)}
                         className="w-16 h-16 object-cover rounded"
                       />
                       <div className="flex-1">

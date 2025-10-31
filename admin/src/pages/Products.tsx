@@ -7,6 +7,7 @@ import ConfirmationModal from '@/components/ConfirmationModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import Dropdown from '@/components/Dropdown';
+import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 
 const Products = () => {
   const queryClient = useQueryClient();
@@ -172,8 +173,9 @@ const Products = () => {
                     >
                       <div className="flex items-center gap-3 flex-1">
                         <img
-                          src={product.images[0]}
+                          src={normalizeImageUrl(product.images?.[0])}
                           alt={product.name}
+                          onError={(e) => handleImageError(e, product.name)}
                           className="w-10 h-10 object-cover rounded"
                         />
                         <div className="flex-1 min-w-0">
@@ -255,8 +257,9 @@ const Products = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <img
-                          src={product.images[0]}
+                          src={normalizeImageUrl(product.images?.[0])}
                           alt={product.name}
+                          onError={(e) => handleImageError(e, product.name)}
                           className="w-12 h-12 object-cover rounded"
                         />
                         <div>
