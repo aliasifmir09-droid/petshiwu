@@ -149,6 +149,27 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/pet-types', petTypeRoutes);
 
+// Root route - API information
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Pet Shop API Server',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      products: '/api/products',
+      categories: '/api/categories',
+      orders: '/api/orders',
+      reviews: '/api/reviews',
+      users: '/api/users',
+      upload: '/api/upload',
+      petTypes: '/api/pet-types'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.status(200).json({
