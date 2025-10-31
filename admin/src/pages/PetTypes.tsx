@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Edit, Trash2, GripVertical, X } from 'lucide-react';
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { adminService } from '@/services/adminService';
+import Toast from '@/components/Toast';
+import { useToast } from '@/hooks/useToast';
 
 interface PetType {
   _id: string;
@@ -16,40 +16,6 @@ interface PetType {
   createdAt: string;
   updatedAt: string;
 }
-
-const useToast = () => {
-  const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({
-    show: false,
-    message: '',
-    type: 'success'
-  });
-
-  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-    setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
-  };
-
-  const hideToast = () => setToast({ show: false, message: '', type: 'success' });
-
-  return { toast, showToast, hideToast };
-};
-
-const Toast = ({ toast, onClose }: any) => {
-  if (!toast.show) return null;
-
-  return (
-    <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg ${
-      toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    } text-white animate-fadeIn`}>
-      <div className="flex items-center gap-3">
-        <span>{toast.message}</span>
-        <button onClick={onClose} className="hover:opacity-75">
-          <X size={18} />
-        </button>
-      </div>
-    </div>
-  );
-};
 
 const PetTypes = () => {
   const queryClient = useQueryClient();
@@ -71,66 +37,47 @@ const PetTypes = () => {
   // Fetch pet types
   const { data: petTypesResponse, isLoading } = useQuery({
     queryKey: ['admin-pet-types'],
-    queryFn: async () => {
-      const response = await axios.get(`${API_URL}/pet-types/admin/all`, {
-        withCredentials: true
-      });
-      return response.data;
-    }
+    queryFn: adminService.getAllPetTypesAdmin
   });
 
   const petTypes: PetType[] = petTypesResponse?.data || [];
 
   // Create pet type mutation
   const createMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await axios.post(`${API_URL}/pet-types`, data, {
-        withCredentials: true
-      });
-      return response.data;
-    },
+    mutationFn: adminService.createPetType,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-pet-types'] });
       showToast('Pet type created successfully!', 'success');
       handleCloseModal();
     },
     onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to create pet type', 'error');
+      showToast(error?.message || error?.response?.data?.message || 'Failed to create pet type', 'error');
     }
   });
 
   // Update pet type mutation
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const response = await axios.put(`${API_URL}/pet-types/${id}`, data, {
-        withCredentials: true
-      });
-      return response.data;
-    },
+    mutationFn: ({ id, data }: { id: string; data: any }) => adminService.updatePetType(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-pet-types'] });
       showToast('Pet type updated successfully!', 'success');
       handleCloseModal();
     },
     onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to update pet type', 'error');
+      showToast(error?.message || error?.response?.data?.message || 'Failed to update pet type', 'error');
     }
   });
 
   // Delete pet type mutation
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      await axios.delete(`${API_URL}/pet-types/${id}`, {
-        withCredentials: true
-      });
-    },
+    mutationFn: adminService.deletePetType,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-pet-types'] });
       showToast('Pet type deleted successfully!', 'success');
       setDeleteConfirm({ isOpen: false });
     },
     onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to delete pet type', 'error');
+      showToast(error?.message || error?.response?.data?.message || 'Failed to delete pet type', 'error');
     }
   });
 
@@ -205,9 +152,9 @@ const PetTypes = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Pet Types</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Navigation Menu - Pet Types</h1>
           <p className="text-gray-600 mt-1">
-            Manage pet types available for products and categories
+            Manage pet types for the navigation menu (Dog, Cat, Other Animals, etc.)
           </p>
         </div>
         <button

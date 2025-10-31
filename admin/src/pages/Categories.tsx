@@ -379,10 +379,10 @@ const CategoriesNew = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
               <FolderTree size={32} className="text-primary-600" />
-              Categories & Subcategories
+              Navigation Menu - Categories
             </h1>
             <p className="text-gray-600 mt-1">
-              Organize your products with up to 3 levels: Main categories, subcategories, and sub-subcategories
+              Manage navigation menu structure: Main Categories → Subcategories → Sub-Subcategories (3 levels max)
             </p>
           </div>
           <button

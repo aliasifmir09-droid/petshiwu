@@ -154,6 +154,42 @@ export const adminService = {
   getCustomerOrders: async (customerId: string) => {
     const response = await api.get(`/users/customers/${customerId}/orders`);
     return response.data;
+  },
+
+  // Pet Types
+  getPetTypes: async () => {
+    const response = await api.get('/pet-types');
+    return response.data;
+  },
+
+  getAllPetTypesAdmin: async () => {
+    const response = await api.get('/pet-types/admin/all');
+    return response.data;
+  },
+
+  getPetType: async (slug: string) => {
+    const response = await api.get(`/pet-types/${slug}`);
+    return response.data.data;
+  },
+
+  createPetType: async (data: any) => {
+    const response = await api.post('/pet-types', data);
+    return response.data.data;
+  },
+
+  updatePetType: async (id: string, data: any) => {
+    const response = await api.put(`/pet-types/${id}`, data);
+    return response.data.data;
+  },
+
+  deletePetType: async (id: string) => {
+    const response = await api.delete(`/pet-types/${id}`);
+    return response.data;
+  },
+
+  reorderPetTypes: async (petTypeIds: string[]) => {
+    const response = await api.post('/pet-types/reorder', { petTypeIds });
+    return response.data;
   }
 };
 
