@@ -9,8 +9,10 @@ import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
 import xss from 'xss-clean';
 import compression from 'compression';
+import mongoose from 'mongoose';
 import { connectDatabase } from './utils/database';
 import { errorHandler, notFound } from './middleware/errorHandler';
+import User from './models/User';
 
 // Load env vars
 dotenv.config();
@@ -27,6 +29,47 @@ import petTypeRoutes from './routes/petTypes';
 
 // Connect to database
 connectDatabase();
+
+// Auto-create admin user if it doesn't exist
+const ensureAdminUser = async () => {
+  try {
+    // Wait for MongoDB connection to be ready
+    if (mongoose.connection.readyState !== 1) {
+      // Connection not ready yet, wait a bit and retry
+      setTimeout(ensureAdminUser, 1000);
+      return;
+    }
+
+    const adminEmail = 'admin@petshiwu.com';
+    const existingAdmin = await User.findOne({ email: adminEmail });
+    
+    if (!existingAdmin) {
+      await User.create({
+        firstName: 'Admin',
+        lastName: 'User',
+        email: adminEmail,
+        password: 'admin123',
+        role: 'admin',
+        phone: '+1234567890'
+      });
+      console.log('\n✅ Admin user created automatically');
+      console.log(`   Email: ${adminEmail}`);
+      console.log('   Password: admin123');
+      console.log('   You can now login to the admin dashboard\n');
+    } else {
+      console.log('✓ Admin user already exists');
+    }
+  } catch (error: any) {
+    console.error('Error ensuring admin user:', error.message);
+    // Retry after a delay if error occurred
+    setTimeout(ensureAdminUser, 2000);
+  }
+};
+
+// Run after a short delay to ensure DB connection is ready
+setTimeout(() => {
+  ensureAdminUser();
+}, 2000);
 
 const app: Application = express();
 
