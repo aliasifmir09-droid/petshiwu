@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orderService } from '@/services/orders';
 import ProductReviewForm from '@/components/ProductReviewForm';
@@ -10,7 +10,6 @@ import { useToast } from '@/hooks/useToast';
 
 const OrderDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -353,7 +352,7 @@ const OrderDetail = () => {
         confirmText="Yes, Cancel Order"
         cancelText="Keep Order"
         onConfirm={handleCancelOrder}
-        onCancel={() => setShowCancelModal(false)}
+        onClose={() => setShowCancelModal(false)}
         isLoading={cancelOrderMutation.isPending}
       />
 

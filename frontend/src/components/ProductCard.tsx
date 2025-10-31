@@ -86,7 +86,7 @@ const ProductCard = memo(({ product }: ProductCardProps) => {
               🔄 Autoship
             </span>
           )}
-          {product.featured && (
+          {product.isFeatured && (
             <span className="bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
               ⭐ Featured
             </span>
