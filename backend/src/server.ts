@@ -73,6 +73,10 @@ setTimeout(() => {
 
 const app: Application = express();
 
+// Trust proxy - Required for Render.com (uses reverse proxy)
+// This allows Express to correctly identify client IPs behind proxy
+app.set('trust proxy', 1);
+
 // Security middleware - Helmet for secure headers
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
