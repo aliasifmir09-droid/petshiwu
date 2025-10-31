@@ -479,17 +479,7 @@ const Header = () => {
         <div className="relative w-full">
           <div className="container mx-auto px-2 lg:px-3">
             <div className="flex items-center justify-start py-2 lg:py-2.5">
-              {/* Hamburger Menu Button for Scrolled State */}
-              {isScrolled && (
-                <button
-                  onClick={() => setIsLeftSidebarOpen(true)}
-                  className="mr-3 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  aria-label="Open Menu"
-                >
-                  <Menu size={24} className="text-gray-700" />
-                </button>
-              )}
-              <ul className={`flex items-center gap-1.5 lg:gap-2.5 text-xs lg:text-sm font-semibold text-gray-700 flex-nowrap ${isScrolled ? 'hidden' : ''}`}>
+              <ul className="flex items-center gap-1.5 lg:gap-2.5 text-xs lg:text-sm font-semibold text-gray-700 flex-nowrap">
                   {/* Dynamic Pet Types with Dropdowns */}
                   {petTypes.map((petType: any) => {
                     const petCategories = getCategoriesForPetType(petType.slug);
