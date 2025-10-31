@@ -3,6 +3,7 @@ import { connectDatabase } from './database';
 import User from '../models/User';
 import Category from '../models/Category';
 import Product from '../models/Product';
+import PetType from '../models/PetType';
 import mongoose from 'mongoose';
 
 dotenv.config();
@@ -15,8 +16,39 @@ const seedData = async () => {
     await User.deleteMany({});
     await Category.deleteMany({});
     await Product.deleteMany({});
+    await PetType.deleteMany({});
 
     console.log('Existing data cleared');
+
+    // ===== CREATE PET TYPES =====
+    const dogPetType = await PetType.create({
+      name: 'Dog',
+      slug: 'dog',
+      icon: '🐕',
+      description: 'Everything for your dog',
+      isActive: true,
+      order: 1
+    });
+
+    const catPetType = await PetType.create({
+      name: 'Cat',
+      slug: 'cat',
+      icon: '🐱',
+      description: 'Everything for your cat',
+      isActive: true,
+      order: 2
+    });
+
+    const otherPetType = await PetType.create({
+      name: 'Other Animals',
+      slug: 'other-animals',
+      icon: '🐾',
+      description: 'Birds, Fish, Small Pets, Reptiles & More',
+      isActive: true,
+      order: 3
+    });
+
+    console.log('Pet types created (3 total)');
 
     // Create admin user
     const admin = await User.create({
@@ -606,6 +638,10 @@ const seedData = async () => {
     console.log('\nCustomer User:');
     console.log('  Email: customer@example.com');
     console.log('  Password: password123');
+    console.log('\nPet Types: 3');
+    console.log('  - Dog 🐕');
+    console.log('  - Cat 🐱');
+    console.log('  - Other Animals 🐾');
     console.log('\nCategories: 11');
     console.log('  - Dog: Food, Treats, Toys, Health & Pharmacy, Supplies, Grooming');
     console.log('  - Cat: Food, Treats, Toys, Health & Pharmacy, Litter & Accessories, Grooming');
@@ -613,6 +649,7 @@ const seedData = async () => {
     console.log('  - Dog Products: 10');
     console.log('  - Cat Products: 10');
     console.log('\n=== Seeding Complete ===');
+    console.log('\n✅ Navigation menu will now display Dog, Cat, and Other Animals');
 
     await mongoose.connection.close();
     process.exit(0);
