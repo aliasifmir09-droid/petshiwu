@@ -4,7 +4,7 @@ import { Plus, Edit, Trash2, X, Save, ChevronRight, ChevronDown, FolderTree } fr
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
-import { API_URL } from '@/services/api';
+import { adminService } from '@/services/adminService';
 
 interface Category {
   _id: string;
@@ -39,30 +39,34 @@ const CategoriesNew = () => {
   const [showGuide, setShowGuide] = useState(true);
 
   // Fetch hierarchical categories
-  const { data: categoriesResponse, isLoading } = useQuery({
+  const { data: categoriesResponse, isLoading, error } = useQuery({
     queryKey: ['admin-categories'],
-    queryFn: async () => {
-      const response = await fetch(`${API_URL}/categories/admin/all`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        }
-      });
-      if (!response.ok) throw new Error('Failed to fetch categories');
-      return response.json();
-    }
+    queryFn: adminService.getAllCategoriesAdmin,
+    retry: 2
   });
 
   // Fetch pet types
   const { data: petTypesResponse } = useQuery({
     queryKey: ['pet-types'],
-    queryFn: async () => {
-      const response = await fetch(`${API_URL}/pet-types`);
-      if (!response.ok) throw new Error('Failed to fetch pet types');
-      return response.json();
-    }
+    queryFn: adminService.getPetTypes,
+    retry: 2
   });
 
   const categories = categoriesResponse?.data || [];
+  
+  // Debug logging
+  if (categoriesResponse) {
+    console.log('Categories Response:', {
+      hasData: !!categoriesResponse.data,
+      dataLength: categoriesResponse.data?.length,
+      total: categoriesResponse.total,
+      categories: categoriesResponse.data
+    });
+  }
+  
+  if (error) {
+    console.error('Error fetching categories:', error);
+  }
 
   // Get flat list of all categories for parent selection
   const flatCategories = () => {
@@ -80,18 +84,7 @@ const CategoriesNew = () => {
   };
 
   const createMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await fetch(`${API_URL}/categories`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) throw new Error('Failed to create category');
-      return response.json();
-    },
+    mutationFn: adminService.createCategory,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
       showToast('Category created successfully!', 'success');
@@ -103,18 +96,7 @@ const CategoriesNew = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const response = await fetch(`${API_URL}/categories/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) throw new Error('Failed to update category');
-      return response.json();
-    },
+    mutationFn: ({ id, data }: { id: string; data: any }) => adminService.updateCategory(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
       showToast('Category updated successfully!', 'success');
@@ -126,16 +108,7 @@ const CategoriesNew = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await fetch(`${API_URL}/categories/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        }
-      });
-      if (!response.ok) throw new Error('Failed to delete category');
-      return response.json();
-    },
+    mutationFn: adminService.deleteCategory,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
       showToast('Category deleted successfully!', 'success');
@@ -469,7 +442,23 @@ const CategoriesNew = () => {
 
       {/* Categories Tree */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-        {categories.length === 0 ? (
+        {isLoading ? (
+          <div className="p-12 text-center text-gray-500">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+            <p className="text-lg font-medium">Loading categories...</p>
+          </div>
+        ) : error ? (
+          <div className="p-12 text-center text-red-500">
+            <p className="text-lg font-medium">Error loading categories</p>
+            <p className="text-sm mt-2">{error instanceof Error ? error.message : 'Unknown error'}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+            >
+              Retry
+            </button>
+          </div>
+        ) : categories.length === 0 ? (
           <div className="p-12 text-center text-gray-500">
             <FolderTree size={48} className="mx-auto mb-4 text-gray-400" />
             <p className="text-lg font-medium">No categories yet</p>
