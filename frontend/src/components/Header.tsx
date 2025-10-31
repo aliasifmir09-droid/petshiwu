@@ -252,11 +252,11 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] sticky top-0 z-40 shadow-xl w-full overflow-x-hidden overflow-y-visible animate-fade-in-up">
+    <header className="bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] sticky top-0 z-40 shadow-xl w-full">
       {/* Main Header */}
-      <div className="w-full max-w-full overflow-x-hidden">
-        <div className="container mx-auto px-3 lg:px-4 py-2 lg:py-3 max-w-full overflow-x-hidden">
-          <div className="flex items-center justify-between gap-2 lg:gap-4 min-w-0">
+      <div className="w-full">
+        <div className="container mx-auto px-3 lg:px-4 py-2 lg:py-3">
+          <div className="flex items-center justify-between gap-2 lg:gap-4">
             {/* Logo with Enhanced Animation */}
             <Link to="/" className="flex items-center gap-2 lg:gap-3 flex-shrink-0 group">
             <div className="relative">
@@ -428,11 +428,11 @@ const Header = () => {
       )}
 
       {/* Navigation - Desktop Only */}
-      <nav className="hidden lg:block bg-white border-t border-gray-200 relative w-full overflow-visible z-40">
-        <div className="w-full max-w-full overflow-visible">
-          <div className="container mx-auto px-2 lg:px-3 max-w-full overflow-visible">
-            <div className="flex items-center justify-start py-2 lg:py-2.5 relative overflow-visible min-w-0">
-              <ul className="flex items-center gap-1.5 lg:gap-2.5 text-xs lg:text-sm font-semibold text-gray-700 overflow-visible flex-nowrap">
+      <nav className="hidden lg:block bg-white border-t border-gray-200 relative w-full z-40">
+        <div className="w-full">
+          <div className="container mx-auto px-2 lg:px-3">
+            <div className="flex items-center justify-start py-2 lg:py-2.5 relative">
+              <ul className="flex items-center gap-1.5 lg:gap-2.5 text-xs lg:text-sm font-semibold text-gray-700 flex-nowrap">
                   {/* Dynamic Pet Types with Dropdowns */}
                   {petTypes.map((petType: any) => {
                     const petCategories = getCategoriesForPetType(petType.slug);
