@@ -371,14 +371,27 @@ const Header = () => {
                   </div>
                 </div>
               ) : (
-                <Link
-                  to="/login"
-                  className="flex items-center gap-1 lg:gap-1.5 hover:opacity-80 px-1.5 lg:px-2.5 py-1.5 rounded-md hover:bg-white/10 transition-colors"
-                >
-                  <User size={18} className="lg:w-5 lg:h-5" />
-                  <span className="hidden xl:block text-xs lg:text-sm font-semibold">Sign In</span>
-                  <ChevronDown size={14} className="hidden xl:block" />
-                </Link>
+                <div className="relative group z-[100]">
+                  <button className="flex items-center gap-1 lg:gap-1.5 hover:opacity-80 px-1.5 lg:px-2.5 py-1.5 rounded-md hover:bg-white/10 transition-colors">
+                    <User size={18} className="lg:w-5 lg:h-5" />
+                    <span className="hidden xl:block text-xs lg:text-sm font-semibold">Sign In</span>
+                    <ChevronDown size={14} className="hidden xl:block" />
+                  </button>
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all text-gray-900 z-[100]">
+                    <Link
+                      to="/login"
+                      className="block px-4 py-2.5 hover:bg-gray-100 font-medium"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="block px-4 py-2.5 hover:bg-gray-100 font-medium"
+                    >
+                      Create an Account
+                    </Link>
+                  </div>
+                </div>
               )}
 
               {/* Cart with Enhanced Animation */}
