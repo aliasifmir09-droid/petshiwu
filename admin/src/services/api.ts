@@ -1,7 +1,14 @@
 import axios from 'axios';
 
 // Use relative URL to leverage Vite proxy in development
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+// Normalize the URL: remove trailing slashes and ensure /api is included
+let API_URL = import.meta.env.VITE_API_URL || '/api';
+// Remove trailing slash if present
+API_URL = API_URL.replace(/\/+$/, '');
+// If it's a full URL and doesn't end with /api, add it
+if (API_URL.startsWith('http') && !API_URL.endsWith('/api')) {
+  API_URL = `${API_URL}/api`;
+}
 
 // Log API URL in development/debugging (will be removed in production build)
 if (typeof window !== 'undefined') {
