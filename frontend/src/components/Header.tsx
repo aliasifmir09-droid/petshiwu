@@ -455,7 +455,7 @@ const Header = () => {
                         
                         {/* Special Dog Mega Menu */}
                         {isSpecialDogMenu && (
-                          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50" style={{ position: 'absolute', top: '100%' }}>
+                          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                             <div className="grid grid-cols-4 gap-6">
                               {dogMegaMenu.map((section, idx) => (
                                 <div key={idx} className="space-y-2">
@@ -495,7 +495,7 @@ const Header = () => {
 
                         {/* Special Cat Mega Menu */}
                         {isSpecialCatMenu && (
-                          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50" style={{ position: 'absolute', top: '100%' }}>
+                          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                             <div className="grid grid-cols-4 gap-6">
                               {catMegaMenu.map((section, idx) => (
                                 <div key={idx} className="space-y-2">
@@ -535,7 +535,7 @@ const Header = () => {
 
                         {/* Special Other Animals Mega Menu */}
                         {isSpecialOtherAnimalsMenu && (
-                          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50" style={{ position: 'absolute', top: '100%' }}>
+                          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                             <div className="grid grid-cols-4 gap-6">
                               {otherAnimalsMegaMenu.map((section, idx) => (
                                 <div key={idx} className="space-y-2">
@@ -562,7 +562,7 @@ const Header = () => {
                         
                         {/* Regular Dropdown Mega Menu for other pet types */}
                         {!isSpecialDogMenu && !isSpecialCatMenu && !isSpecialOtherAnimalsMenu && petCategories.length > 0 && (
-                          <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 min-w-[280px] max-w-sm max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50" style={{ position: 'absolute', top: '100%' }}>
+                          <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 min-w-[280px] max-w-sm max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                             {false ? (
                               // Special display for "Other Animals" - show categories as animal types
                               <div className="space-y-3">
