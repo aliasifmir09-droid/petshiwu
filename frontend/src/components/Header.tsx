@@ -252,7 +252,7 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] sticky top-0 z-50 shadow-xl w-full overflow-x-hidden animate-fade-in-up">
+    <header className="bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] sticky top-0 z-40 shadow-xl w-full overflow-x-hidden overflow-y-visible animate-fade-in-up">
       {/* Main Header */}
       <div className="w-full max-w-full overflow-x-hidden">
         <div className="container mx-auto px-3 lg:px-4 py-2 lg:py-3 max-w-full overflow-x-hidden">
