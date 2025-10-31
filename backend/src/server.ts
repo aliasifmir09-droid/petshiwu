@@ -162,6 +162,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // Mount routers
 app.use('/api/auth', authRoutes);
 console.log('✓ Auth routes mounted at /api/auth');
+
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
@@ -200,21 +201,14 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Debug: List all registered routes
-app.get('/api/routes', (req, res) => {
-  const routes: string[] = [];
-  app._router?.stack?.forEach((middleware: any) => {
-    if (middleware.route) {
-      routes.push(`${Object.keys(middleware.route.methods).join(', ').toUpperCase()} ${middleware.route.path}`);
-    } else if (middleware.name === 'router') {
-      middleware.handle.stack?.forEach((handler: any) => {
-        if (handler.route) {
-          routes.push(`${Object.keys(handler.route.methods).join(', ').toUpperCase()} /api${middleware.regexp.source.replace(/\\\//g, '/').replace(/\^\//, '').replace(/\/\$/, '')}${handler.route.path}`);
-        }
-      });
-    }
+// Debug: Test auth route directly (before other routes)
+app.post('/api/auth/test', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'Auth route test endpoint works',
+    body: req.body,
+    timestamp: new Date().toISOString()
   });
-  res.json({ routes });
 });
 
 // Catch-all for debugging unmatched routes (before notFound)
