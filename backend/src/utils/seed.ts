@@ -72,107 +72,280 @@ const seedData = async () => {
 
     console.log('Users created');
 
-    // ===== CREATE CATEGORIES =====
+    // ===== CREATE CATEGORIES FROM NAVIGATION MENU =====
     
-    // Dog Categories
+    // Dog Categories from navigation menu
     const dogFood = await Category.create({
-      name: 'Dog Food',
+      name: 'Food',
       slug: 'dog-food',
       description: 'Premium dog food for all breeds and sizes',
       petType: 'dog',
-      isActive: true
+      isActive: true,
+      level: 1
     });
 
+    // Dog Food Subcategories
+    const dogFoodSubcategories = await Category.insertMany([
+      { name: 'Dry Food', slug: 'dog-dry-food', petType: 'dog', parentCategory: dogFood._id, isActive: true, level: 2 },
+      { name: 'Wet Food', slug: 'dog-wet-food', petType: 'dog', parentCategory: dogFood._id, isActive: true, level: 2 },
+      { name: 'Fresh Food & Toppers', slug: 'dog-fresh-food-toppers', petType: 'dog', parentCategory: dogFood._id, isActive: true, level: 2 },
+      { name: 'Veterinary Diets', slug: 'dog-veterinary-diets', petType: 'dog', parentCategory: dogFood._id, isActive: true, level: 2 },
+      { name: 'Science-Backed Formulas', slug: 'dog-science-formulas', petType: 'dog', parentCategory: dogFood._id, isActive: true, level: 2 },
+      { name: 'Puppy Food', slug: 'dog-puppy-food', petType: 'dog', parentCategory: dogFood._id, isActive: true, level: 2 }
+    ]);
+
     const dogTreats = await Category.create({
-      name: 'Dog Treats',
+      name: 'Treats',
       slug: 'dog-treats',
       description: 'Delicious treats and snacks for dogs',
       petType: 'dog',
-      isActive: true
+      isActive: true,
+      level: 1
     });
 
-    const dogToys = await Category.create({
-      name: 'Dog Toys',
-      slug: 'dog-toys',
-      description: 'Fun and durable toys for dogs',
-      petType: 'dog',
-      isActive: true
-    });
+    // Dog Treats Subcategories
+    await Category.insertMany([
+      { name: 'Bones, Bully Sticks & Naturals', slug: 'dog-bones-bully-sticks', petType: 'dog', parentCategory: dogTreats._id, isActive: true, level: 2 },
+      { name: 'Soft & Chewy Treats', slug: 'dog-soft-chewy-treats', petType: 'dog', parentCategory: dogTreats._id, isActive: true, level: 2 },
+      { name: 'Dental Treats', slug: 'dog-dental-treats', petType: 'dog', parentCategory: dogTreats._id, isActive: true, level: 2 },
+      { name: 'Biscuits & Cookies', slug: 'dog-biscuits-cookies', petType: 'dog', parentCategory: dogTreats._id, isActive: true, level: 2 },
+      { name: 'Long-Lasting Chews', slug: 'dog-long-lasting-chews', petType: 'dog', parentCategory: dogTreats._id, isActive: true, level: 2 },
+      { name: 'Jerky Treats', slug: 'dog-jerky-treats', petType: 'dog', parentCategory: dogTreats._id, isActive: true, level: 2 },
+      { name: 'Freeze-Dried & Dehydrated', slug: 'dog-freeze-dried', petType: 'dog', parentCategory: dogTreats._id, isActive: true, level: 2 }
+    ]);
 
     const dogHealth = await Category.create({
-      name: 'Dog Health & Pharmacy',
+      name: 'Health & Pharmacy',
       slug: 'dog-health-pharmacy',
       description: 'Health products and medications for dogs',
       petType: 'dog',
-      isActive: true
+      isActive: true,
+      level: 1
     });
 
+    // Dog Health Subcategories
+    await Category.insertMany([
+      { name: 'Flea & Tick', slug: 'dog-flea-tick', petType: 'dog', parentCategory: dogHealth._id, isActive: true, level: 2 },
+      { name: 'Vitamins & Supplements', slug: 'dog-vitamins-supplements', petType: 'dog', parentCategory: dogHealth._id, isActive: true, level: 2 },
+      { name: 'Allergy & Itch Relief', slug: 'dog-allergy-itch-relief', petType: 'dog', parentCategory: dogHealth._id, isActive: true, level: 2 },
+      { name: 'Heartworm & Dewormers', slug: 'dog-heartworm-dewormers', petType: 'dog', parentCategory: dogHealth._id, isActive: true, level: 2 },
+      { name: 'Pharmacy & Prescriptions', slug: 'dog-pharmacy-prescriptions', petType: 'dog', parentCategory: dogHealth._id, isActive: true, level: 2 },
+      { name: 'Anxiety & Calming Care', slug: 'dog-anxiety-calming', petType: 'dog', parentCategory: dogHealth._id, isActive: true, level: 2 },
+      { name: 'DNA Testing Kits', slug: 'dog-dna-testing', petType: 'dog', parentCategory: dogHealth._id, isActive: true, level: 2 }
+    ]);
+
     const dogSupplies = await Category.create({
-      name: 'Dog Supplies',
+      name: 'Supplies',
       slug: 'dog-supplies',
       description: 'Essential supplies for dogs',
       petType: 'dog',
-      isActive: true
+      isActive: true,
+      level: 1
     });
 
+    // Dog Supplies Subcategories
+    await Category.insertMany([
+      { name: 'Crates, Pens & Gates', slug: 'dog-crates-pens-gates', petType: 'dog', parentCategory: dogSupplies._id, isActive: true, level: 2 },
+      { name: 'Beds', slug: 'dog-beds', petType: 'dog', parentCategory: dogSupplies._id, isActive: true, level: 2 },
+      { name: 'Tech & Smart Home', slug: 'dog-tech-smart-home', petType: 'dog', parentCategory: dogSupplies._id, isActive: true, level: 2 },
+      { name: 'Leashes, Collars & Harnesses', slug: 'dog-leashes-collars-harnesses', petType: 'dog', parentCategory: dogSupplies._id, isActive: true, level: 2 },
+      { name: 'Bowls & Feeders', slug: 'dog-bowls-feeders', petType: 'dog', parentCategory: dogSupplies._id, isActive: true, level: 2 },
+      { name: 'Clothing & Accessories', slug: 'dog-clothing-accessories', petType: 'dog', parentCategory: dogSupplies._id, isActive: true, level: 2 },
+      { name: 'Carriers & Travel', slug: 'dog-carriers-travel', petType: 'dog', parentCategory: dogSupplies._id, isActive: true, level: 2 },
+      { name: 'Training & Behavior', slug: 'dog-training-behavior', petType: 'dog', parentCategory: dogSupplies._id, isActive: true, level: 2 }
+    ]);
+
+    const dogToys = await Category.create({
+      name: 'Toys',
+      slug: 'dog-toys',
+      description: 'Fun and durable toys for dogs',
+      petType: 'dog',
+      isActive: true,
+      level: 1
+    });
+
+    // Dog Toys Subcategories
+    await Category.insertMany([
+      { name: 'Plush Toys', slug: 'dog-plush-toys', petType: 'dog', parentCategory: dogToys._id, isActive: true, level: 2 },
+      { name: 'Chew Toys', slug: 'dog-chew-toys', petType: 'dog', parentCategory: dogToys._id, isActive: true, level: 2 },
+      { name: 'Fetch Toys', slug: 'dog-fetch-toys', petType: 'dog', parentCategory: dogToys._id, isActive: true, level: 2 },
+      { name: 'Treat Dispensing Toys', slug: 'dog-treat-dispensing-toys', petType: 'dog', parentCategory: dogToys._id, isActive: true, level: 2 },
+      { name: 'Puzzle Toys', slug: 'dog-puzzle-toys', petType: 'dog', parentCategory: dogToys._id, isActive: true, level: 2 },
+      { name: 'Rope & Tug Toys', slug: 'dog-rope-tug-toys', petType: 'dog', parentCategory: dogToys._id, isActive: true, level: 2 }
+    ]);
+
+    const dogCleaning = await Category.create({
+      name: 'Cleaning & Potty',
+      slug: 'dog-cleaning-potty',
+      description: 'Cleaning and potty supplies for dogs',
+      petType: 'dog',
+      isActive: true,
+      level: 1
+    });
+
+    // Dog Cleaning Subcategories
+    await Category.insertMany([
+      { name: 'Pee Pads & Diapers', slug: 'dog-pee-pads-diapers', petType: 'dog', parentCategory: dogCleaning._id, isActive: true, level: 2 },
+      { name: 'Poop Bags & Scoopers', slug: 'dog-poop-bags-scoopers', petType: 'dog', parentCategory: dogCleaning._id, isActive: true, level: 2 },
+      { name: 'Cleaners & Stain Removers', slug: 'dog-cleaners-stain-removers', petType: 'dog', parentCategory: dogCleaning._id, isActive: true, level: 2 },
+      { name: 'Vacuums & Steam Cleaners', slug: 'dog-vacuums-steam-cleaners', petType: 'dog', parentCategory: dogCleaning._id, isActive: true, level: 2 }
+    ]);
+
     const dogGrooming = await Category.create({
-      name: 'Dog Grooming',
+      name: 'Grooming',
       slug: 'dog-grooming',
       description: 'Grooming products for dogs',
       petType: 'dog',
-      isActive: true
+      isActive: true,
+      level: 1
     });
 
-    // Cat Categories
+    // Dog Grooming Subcategories
+    await Category.insertMany([
+      { name: 'Brushes & Combs', slug: 'dog-brushes-combs', petType: 'dog', parentCategory: dogGrooming._id, isActive: true, level: 2 },
+      { name: 'Shampoos & Conditioners', slug: 'dog-shampoos-conditioners', petType: 'dog', parentCategory: dogGrooming._id, isActive: true, level: 2 },
+      { name: 'Grooming Tools', slug: 'dog-grooming-tools', petType: 'dog', parentCategory: dogGrooming._id, isActive: true, level: 2 },
+      { name: 'Paw & Nail Care', slug: 'dog-paw-nail-care', petType: 'dog', parentCategory: dogGrooming._id, isActive: true, level: 2 },
+      { name: 'Ear Care', slug: 'dog-ear-care', petType: 'dog', parentCategory: dogGrooming._id, isActive: true, level: 2 },
+      { name: 'Skin Care', slug: 'dog-skin-care', petType: 'dog', parentCategory: dogGrooming._id, isActive: true, level: 2 }
+    ]);
+
+    // Cat Categories from navigation menu
     const catFood = await Category.create({
-      name: 'Cat Food',
+      name: 'Food',
       slug: 'cat-food',
       description: 'Nutritious cat food for all life stages',
       petType: 'cat',
-      isActive: true
+      isActive: true,
+      level: 1
     });
 
+    // Cat Food Subcategories
+    const catFoodSubcategories = await Category.insertMany([
+      { name: 'Wet Food', slug: 'cat-wet-food', petType: 'cat', parentCategory: catFood._id, isActive: true, level: 2 },
+      { name: 'Dry Food', slug: 'cat-dry-food', petType: 'cat', parentCategory: catFood._id, isActive: true, level: 2 },
+      { name: 'Science-Backed Formulas', slug: 'cat-science-formulas', petType: 'cat', parentCategory: catFood._id, isActive: true, level: 2 },
+      { name: 'Veterinary Diets', slug: 'cat-veterinary-diets', petType: 'cat', parentCategory: catFood._id, isActive: true, level: 2 },
+      { name: 'Highest Quality Food', slug: 'cat-highest-quality-food', petType: 'cat', parentCategory: catFood._id, isActive: true, level: 2 },
+      { name: 'Food Toppers', slug: 'cat-food-toppers', petType: 'cat', parentCategory: catFood._id, isActive: true, level: 2 },
+      { name: 'Kitten Food', slug: 'cat-kitten-food', petType: 'cat', parentCategory: catFood._id, isActive: true, level: 2 }
+    ]);
+
+    const catLitter = await Category.create({
+      name: 'Litter',
+      slug: 'cat-litter',
+      description: 'Litter and litter box accessories',
+      petType: 'cat',
+      isActive: true,
+      level: 1
+    });
+
+    // Cat Litter Subcategories
+    await Category.insertMany([
+      { name: 'Clumping', slug: 'cat-litter-clumping', petType: 'cat', parentCategory: catLitter._id, isActive: true, level: 2 },
+      { name: 'Scented', slug: 'cat-litter-scented', petType: 'cat', parentCategory: catLitter._id, isActive: true, level: 2 },
+      { name: 'Unscented', slug: 'cat-litter-unscented', petType: 'cat', parentCategory: catLitter._id, isActive: true, level: 2 },
+      { name: 'Natural', slug: 'cat-litter-natural', petType: 'cat', parentCategory: catLitter._id, isActive: true, level: 2 },
+      { name: 'Lightweight', slug: 'cat-litter-lightweight', petType: 'cat', parentCategory: catLitter._id, isActive: true, level: 2 }
+    ]);
+
     const catTreats = await Category.create({
-      name: 'Cat Treats',
+      name: 'Treats',
       slug: 'cat-treats',
       description: 'Tasty treats for cats',
       petType: 'cat',
-      isActive: true
+      isActive: true,
+      level: 1
     });
 
-    const catToys = await Category.create({
-      name: 'Cat Toys',
-      slug: 'cat-toys',
-      description: 'Interactive toys for cats',
+    // Cat Treats Subcategories
+    await Category.insertMany([
+      { name: 'Crunchy Treats', slug: 'cat-crunchy-treats', petType: 'cat', parentCategory: catTreats._id, isActive: true, level: 2 },
+      { name: 'Lickable Treats', slug: 'cat-lickable-treats', petType: 'cat', parentCategory: catTreats._id, isActive: true, level: 2 },
+      { name: 'Soft & Chewy Treats', slug: 'cat-soft-chewy-treats', petType: 'cat', parentCategory: catTreats._id, isActive: true, level: 2 },
+      { name: 'Dental Treats', slug: 'cat-dental-treats', petType: 'cat', parentCategory: catTreats._id, isActive: true, level: 2 },
+      { name: 'Catnip', slug: 'cat-catnip', petType: 'cat', parentCategory: catTreats._id, isActive: true, level: 2 },
+      { name: 'Cat Grass', slug: 'cat-cat-grass', petType: 'cat', parentCategory: catTreats._id, isActive: true, level: 2 }
+    ]);
+
+    const catSupplies = await Category.create({
+      name: 'Supplies',
+      slug: 'cat-supplies',
+      description: 'Essential supplies for cats',
       petType: 'cat',
-      isActive: true
+      isActive: true,
+      level: 1
     });
+
+    // Cat Supplies Subcategories
+    await Category.insertMany([
+      { name: 'Litter Boxes & Accessories', slug: 'cat-litter-boxes-accessories', petType: 'cat', parentCategory: catSupplies._id, isActive: true, level: 2 },
+      { name: 'Tech & Smart Home', slug: 'cat-tech-smart-home', petType: 'cat', parentCategory: catSupplies._id, isActive: true, level: 2 },
+      { name: 'Beds', slug: 'cat-beds', petType: 'cat', parentCategory: catSupplies._id, isActive: true, level: 2 },
+      { name: 'Carriers & Travel', slug: 'cat-carriers-travel', petType: 'cat', parentCategory: catSupplies._id, isActive: true, level: 2 },
+      { name: 'Bowls & Feeders', slug: 'cat-bowls-feeders', petType: 'cat', parentCategory: catSupplies._id, isActive: true, level: 2 },
+      { name: 'Grooming', slug: 'cat-grooming-supplies', petType: 'cat', parentCategory: catSupplies._id, isActive: true, level: 2 },
+      { name: 'Collars, Leashes & Harnesses', slug: 'cat-collars-leashes-harnesses', petType: 'cat', parentCategory: catSupplies._id, isActive: true, level: 2 }
+    ]);
 
     const catHealth = await Category.create({
-      name: 'Cat Health & Pharmacy',
+      name: 'Health & Pharmacy',
       slug: 'cat-health-pharmacy',
       description: 'Health products for cats',
       petType: 'cat',
-      isActive: true
+      isActive: true,
+      level: 1
     });
 
-    const catLitter = await Category.create({
-      name: 'Cat Litter & Accessories',
-      slug: 'cat-litter-accessories',
-      description: 'Litter and litter box accessories',
+    // Cat Health Subcategories
+    await Category.insertMany([
+      { name: 'Flea & Tick', slug: 'cat-flea-tick', petType: 'cat', parentCategory: catHealth._id, isActive: true, level: 2 },
+      { name: 'Vitamins & Supplements', slug: 'cat-vitamins-supplements', petType: 'cat', parentCategory: catHealth._id, isActive: true, level: 2 },
+      { name: 'Allergy & Itch Relief', slug: 'cat-allergy-itch-relief', petType: 'cat', parentCategory: catHealth._id, isActive: true, level: 2 },
+      { name: 'Pharmacy & Prescriptions', slug: 'cat-pharmacy-prescriptions', petType: 'cat', parentCategory: catHealth._id, isActive: true, level: 2 },
+      { name: 'Anxiety & Calming Care', slug: 'cat-anxiety-calming', petType: 'cat', parentCategory: catHealth._id, isActive: true, level: 2 },
+      { name: 'Urinary Tract & Kidneys', slug: 'cat-urinary-tract-kidneys', petType: 'cat', parentCategory: catHealth._id, isActive: true, level: 2 },
+      { name: 'Test Kits', slug: 'cat-test-kits', petType: 'cat', parentCategory: catHealth._id, isActive: true, level: 2 }
+    ]);
+
+    const catTrees = await Category.create({
+      name: 'Trees, Condos & Scratchers',
+      slug: 'cat-trees-condos-scratchers',
+      description: 'Cat trees, condos, and scratching posts',
       petType: 'cat',
-      isActive: true
+      isActive: true,
+      level: 1
     });
 
-    const catGrooming = await Category.create({
-      name: 'Cat Grooming',
-      slug: 'cat-grooming',
-      description: 'Grooming products for cats',
+    // Cat Trees Subcategories
+    await Category.insertMany([
+      { name: 'Trees & Condos', slug: 'cat-trees-condos', petType: 'cat', parentCategory: catTrees._id, isActive: true, level: 2 },
+      { name: 'Scratchers & Scratching Posts', slug: 'cat-scratchers-posts', petType: 'cat', parentCategory: catTrees._id, isActive: true, level: 2 },
+      { name: 'Wall Shelves', slug: 'cat-wall-shelves', petType: 'cat', parentCategory: catTrees._id, isActive: true, level: 2 },
+      { name: 'Window Perches', slug: 'cat-window-perches', petType: 'cat', parentCategory: catTrees._id, isActive: true, level: 2 }
+    ]);
+
+    const catToys = await Category.create({
+      name: 'Toys',
+      slug: 'cat-toys',
+      description: 'Interactive toys for cats',
       petType: 'cat',
-      isActive: true
+      isActive: true,
+      level: 1
     });
 
-    console.log('Categories created (11 total)');
+    // Cat Toys Subcategories
+    await Category.insertMany([
+      { name: 'Interactive & Electronic Toys', slug: 'cat-interactive-electronic-toys', petType: 'cat', parentCategory: catToys._id, isActive: true, level: 2 },
+      { name: 'Scratchers', slug: 'cat-toys-scratchers', petType: 'cat', parentCategory: catToys._id, isActive: true, level: 2 },
+      { name: 'Teasers & Wands', slug: 'cat-teasers-wands', petType: 'cat', parentCategory: catToys._id, isActive: true, level: 2 },
+      { name: 'Balls & Chasers', slug: 'cat-balls-chasers', petType: 'cat', parentCategory: catToys._id, isActive: true, level: 2 },
+      { name: 'Catnip Toys', slug: 'cat-catnip-toys', petType: 'cat', parentCategory: catToys._id, isActive: true, level: 2 },
+      { name: 'Plush & Mice Toys', slug: 'cat-plush-mice-toys', petType: 'cat', parentCategory: catToys._id, isActive: true, level: 2 }
+    ]);
+
+    const totalCategories = await Category.countDocuments();
+    console.log(`Categories created (${totalCategories} total - includes main categories and subcategories)`);
 
     // ===== CREATE PRODUCTS =====
     
@@ -184,7 +357,7 @@ const seedData = async () => {
         description: 'High-quality dry dog food made with real chicken and wholesome rice. Perfect for adult dogs of all breeds. Contains essential nutrients, vitamins, and minerals for optimal health. Supports healthy digestion and maintains ideal weight.',
         shortDescription: 'Premium chicken & rice formula for adult dogs',
         brand: 'PawPremium',
-        category: dogFood._id,
+        category: dogFoodSubcategories[0]._id, // Dry Food subcategory
         images: ['https://via.placeholder.com/500x500?text=Dog+Food+1'],
         variants: [
           { size: '5 lbs', price: 24.99, compareAtPrice: 29.99, stock: 50, sku: 'DF-CR-5LB' },
@@ -208,7 +381,7 @@ const seedData = async () => {
         description: 'Grain-free puppy food with lamb and sweet potato. Formulated specifically for growing puppies with DHA for brain development and balanced nutrition for healthy growth.',
         shortDescription: 'Grain-free formula for growing puppies',
         brand: 'PuppyPower',
-        category: dogFood._id,
+        category: dogFoodSubcategories[5]._id, // Puppy Food subcategory
         images: ['https://via.placeholder.com/500x500?text=Dog+Food+2'],
         variants: [
           { size: '4 lbs', price: 22.99, compareAtPrice: 27.99, stock: 45, sku: 'PF-LSP-4LB' },
@@ -231,7 +404,7 @@ const seedData = async () => {
         description: 'Premium wet dog food with real beef chunks in a savory gravy. High moisture content helps keep dogs hydrated. Perfect as a meal or topper.',
         shortDescription: 'Premium wet food with real beef chunks',
         brand: 'CanineCuisine',
-        category: dogFood._id,
+        category: dogFoodSubcategories[1]._id, // Wet Food subcategory
         images: ['https://via.placeholder.com/500x500?text=Dog+Food+3'],
         variants: [
           { size: '12.5 oz (12 pack)', price: 34.99, compareAtPrice: 42.99, stock: 60, sku: 'WF-BS-12PK' },
@@ -435,7 +608,7 @@ const seedData = async () => {
         description: 'Grain-free cat food with real salmon as the first ingredient. Specially formulated for adult cats with sensitive stomachs. Rich in omega-3 and omega-6 fatty acids.',
         shortDescription: 'Grain-free salmon formula for cats',
         brand: 'FelineFresh',
-        category: catFood._id,
+        category: catFoodSubcategories[1]._id, // Dry Food subcategory
         images: ['https://via.placeholder.com/500x500?text=Cat+Food+1'],
         variants: [
           { size: '3 lbs', price: 19.99, compareAtPrice: 24.99, stock: 40, sku: 'CF-SF-3LB' },
@@ -459,7 +632,7 @@ const seedData = async () => {
         description: 'Premium wet cat food in smooth pate texture. Variety pack includes chicken, turkey, and fish flavors. High moisture content supports urinary health.',
         shortDescription: 'Wet food variety pack in pate texture',
         brand: 'FelineFresh',
-        category: catFood._id,
+        category: catFoodSubcategories[0]._id, // Wet Food subcategory
         images: ['https://via.placeholder.com/500x500?text=Cat+Food+2'],
         variants: [
           { size: '3 oz (24 pack)', price: 28.99, compareAtPrice: 34.99, stock: 50, sku: 'CF-VP-24' },
@@ -642,9 +815,13 @@ const seedData = async () => {
     console.log('  - Dog 🐕');
     console.log('  - Cat 🐱');
     console.log('  - Other Animals 🐾');
-    console.log('\nCategories: 11');
-    console.log('  - Dog: Food, Treats, Toys, Health & Pharmacy, Supplies, Grooming');
-    console.log('  - Cat: Food, Treats, Toys, Health & Pharmacy, Litter & Accessories, Grooming');
+    const mainCategoriesCount = await Category.countDocuments({ level: 1 });
+    const subcategoriesCount = await Category.countDocuments({ level: 2 });
+    console.log(`\nCategories: ${totalCategories} total`);
+    console.log(`  - Main Categories (Level 1): ${mainCategoriesCount}`);
+    console.log(`  - Subcategories (Level 2): ${subcategoriesCount}`);
+    console.log('  - Dog: Food (6 subcategories), Treats (7), Health & Pharmacy (7), Supplies (8), Toys (6), Cleaning & Potty (4), Grooming (6)');
+    console.log('  - Cat: Food (7 subcategories), Litter (5), Treats (6), Supplies (7), Health & Pharmacy (7), Trees/Condos/Scratchers (4), Toys (6)');
     console.log('\nProducts: 20');
     console.log('  - Dog Products: 10');
     console.log('  - Cat Products: 10');
