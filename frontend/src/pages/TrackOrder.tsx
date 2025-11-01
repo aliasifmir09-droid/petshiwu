@@ -8,7 +8,7 @@ const TrackOrder = () => {
   const [orderId, setOrderId] = useState('');
   const [searchOrderId, setSearchOrderId] = useState('');
 
-  const { data: order, isLoading, error, refetch } = useQuery({
+  const { data: order, isLoading, error } = useQuery({
     queryKey: ['trackOrder', searchOrderId],
     queryFn: () => orderService.trackOrder(searchOrderId),
     enabled: !!searchOrderId,
