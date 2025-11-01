@@ -233,23 +233,31 @@ const HeroSlideshow = () => {
           {/* Hey Friend Card - Enhanced */}
           <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 group hover:scale-105 min-h-[100px]">
             <div className="absolute top-0 right-0 w-24 h-24 bg-blue-200 rounded-full -mr-12 -mt-12 opacity-20 group-hover:scale-150 transition-transform duration-500 overflow-hidden"></div>
-            <div className="relative z-10 flex items-center justify-between gap-3">
-              <h2 className="text-xl md:text-2xl font-black text-gray-800 flex items-center gap-2 whitespace-nowrap">
+            <div className="relative z-10">
+              <h2 className="text-xl md:text-2xl font-black text-gray-800 flex items-center gap-2 mb-3">
                 <span className="text-2xl">👋</span> Hey, friend!
               </h2>
-              <Link
-                to="/login"
-                className="inline-block bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-full font-bold text-sm hover:from-blue-700 hover:to-blue-800 transition-all shadow-sm hover:shadow-md transform hover:-translate-y-0.5 duration-300 whitespace-nowrap"
-              >
-                Sign in
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Link
+                  to="/login"
+                  className="inline-block bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-full font-bold text-sm hover:from-blue-700 hover:to-blue-800 transition-all shadow-sm hover:shadow-md transform hover:-translate-y-0.5 duration-300 whitespace-nowrap text-center"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  to="/register"
+                  className="inline-block bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-full font-bold text-sm hover:from-purple-700 hover:to-purple-800 transition-all shadow-sm hover:shadow-md transform hover:-translate-y-0.5 duration-300 whitespace-nowrap text-center"
+                >
+                  Create Account
+                </Link>
+              </div>
             </div>
           </div>
 
           {/* Autoship Promo - Enhanced */}
           <Link
             to="/products"
-            className="relative bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-blue-200 group hover:scale-105 min-h-[100px]"
+            className="hidden md:block relative bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-blue-200 group hover:scale-105 min-h-[100px]"
           >
             <div className="absolute top-0 right-0 w-24 h-24 bg-blue-300 rounded-full -mr-12 -mt-12 opacity-20 group-hover:scale-150 transition-transform duration-500 overflow-hidden"></div>
             <div className="absolute top-2 right-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md z-20">
@@ -275,7 +283,7 @@ const HeroSlideshow = () => {
           {/* Pharmacy Promo - Enhanced */}
           <Link
             to="/products?search=pharmacy"
-            className="relative bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-purple-200 group hover:scale-105 min-h-[100px]"
+            className="hidden md:block relative bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-purple-200 group hover:scale-105 min-h-[100px]"
           >
             <div className="absolute top-0 right-0 w-24 h-24 bg-purple-300 rounded-full -mr-12 -mt-12 opacity-20 group-hover:scale-150 transition-transform duration-500 overflow-hidden"></div>
             <div className="absolute top-2 right-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md z-20">
