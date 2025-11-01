@@ -51,7 +51,7 @@ const ProductCard = memo(({ product }: ProductCardProps) => {
       to={`/products/${product.slug || product._id}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-blue-300 hover:-translate-y-2 relative animate-fade-in-up hover-lift"
+      className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-blue-300 hover:-translate-y-2 relative animate-fade-in-up hover-lift flex flex-col h-full"
     >
       {/* Trending Badge - Top Right Corner */}
       {product.totalReviews > 50 && (
@@ -116,7 +116,7 @@ const ProductCard = memo(({ product }: ProductCardProps) => {
       </div>
 
       {/* Content */}
-      <div className="p-5 space-y-3">
+      <div className="p-5 space-y-3 flex flex-col flex-grow">
         {/* Brand */}
         <p className="text-xs text-blue-600 font-extrabold uppercase tracking-widest mb-1 group-hover:text-blue-700 transition-colors">
           {product.brand}
@@ -230,7 +230,7 @@ const ProductCard = memo(({ product }: ProductCardProps) => {
         <button
           onClick={handleAddToCart}
           disabled={!product.inStock}
-          className={`w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm transition-all transform active:scale-95 btn-ripple relative overflow-hidden ${
+          className={`w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm transition-all transform active:scale-95 btn-ripple relative overflow-hidden mt-auto ${
             product.inStock
               ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-2xl hover:scale-105'
               : 'bg-gray-200 text-gray-400 cursor-not-allowed'

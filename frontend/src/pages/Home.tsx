@@ -307,8 +307,10 @@ const Home = () => {
                   `}</style>
                   <div className="flex gap-4 md:gap-5">
                     {featuredProducts?.data.map((product) => (
-                      <div key={product._id} className="flex-shrink-0 w-56 md:w-60 lg:w-64 animate-fade-in-up">
-                        <ProductCard product={product} />
+                      <div key={product._id} className="flex-shrink-0 w-56 md:w-60 lg:w-64 animate-fade-in-up h-full">
+                        <div className="h-full flex flex-col">
+                          <ProductCard product={product} />
+                        </div>
                       </div>
                     ))}
                   </div>
