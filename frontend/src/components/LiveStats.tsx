@@ -22,7 +22,7 @@ const LiveStats = () => {
   }, []);
 
   return (
-    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 overflow-hidden">
+    <div className="hidden md:block bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-center gap-8 md:gap-12 flex-wrap">
           {/* Users Online */}
