@@ -40,10 +40,6 @@ const Checkout = () => {
       navigate(`/orders/${order._id}`);
     },
     onError: (error: any) => {
-      console.error('Order creation error:', error);
-      console.error('Error response:', error.response);
-      console.error('Error data:', error.response?.data);
-      
       const errorMessage = error.response?.data?.message || 'Failed to create order';
       const errorDetails = error.response?.data?.errors;
       
@@ -94,7 +90,6 @@ const Checkout = () => {
       totalPrice: total
     };
 
-    console.log('Creating order with data:', JSON.stringify(orderData, null, 2));
     createOrderMutation.mutate(orderData);
   };
 

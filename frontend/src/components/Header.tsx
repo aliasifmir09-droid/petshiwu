@@ -92,9 +92,6 @@ const Header = () => {
       { name: 'Cat', slug: 'cat', icon: '🐱' },
       { name: 'Other Animals', slug: 'other-animals', icon: '🐾' }
     ];
-    console.log('Using fallback pet types:', petTypes);
-  } else {
-    console.log('Pet types loaded from API:', petTypes);
   }
   
   const categories = categoriesError 

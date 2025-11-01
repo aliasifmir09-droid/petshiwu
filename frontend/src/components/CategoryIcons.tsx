@@ -34,8 +34,7 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
                 src={category.image} 
                 alt={category.title}
                 className="w-full h-full object-contain object-center p-1"
-                onError={(e) => {
-                  console.error(`Failed to load image: ${category.image}`, e);
+                onError={() => {
                   setImageError(true);
                 }}
                 onLoad={() => {
