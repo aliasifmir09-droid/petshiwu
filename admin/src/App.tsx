@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { adminService } from './services/adminService';
 import Sidebar from './components/Sidebar';
-import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import Orders from './pages/Orders';
@@ -92,13 +91,11 @@ function App() {
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
         ) : (
-          <div className="flex flex-col min-h-screen">
-            <Header onLogout={handleLogout} />
-            <div className="flex flex-1 overflow-hidden">
-              <Sidebar />
-              <main className="flex-1 bg-gradient-to-br from-gray-50 via-white to-gray-50 p-6 lg:p-8 overflow-auto">
-                <PasswordExpiryWarning />
-                <Routes>
+          <div className="flex min-h-screen">
+            <Sidebar onLogout={handleLogout} />
+            <main className="flex-1 bg-gradient-to-br from-gray-50 via-white to-gray-50 p-6 lg:p-8 overflow-auto min-h-screen">
+              <PasswordExpiryWarning />
+              <Routes>
                 <Route 
                   path="/" 
                   element={
@@ -160,9 +157,8 @@ function App() {
                   element={<Settings />} 
                 />
                 <Route path="*" element={<Navigate to={getDefaultPage()} replace />} />
-                </Routes>
-              </main>
-            </div>
+              </Routes>
+            </main>
           </div>
         )}
       </BrowserRouter>

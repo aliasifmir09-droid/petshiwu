@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
@@ -9,11 +10,18 @@ import {
   FolderTree,
   Layers,
   BarChart3,
-  Settings
+  Settings,
+  LogOut
 } from 'lucide-react';
+import ConfirmationModal from './ConfirmationModal';
 
-const Sidebar = () => {
+interface SidebarProps {
+  onLogout: () => void;
+}
+
+const Sidebar = ({ onLogout }: SidebarProps) => {
   const location = useLocation();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   // Get user info and permissions
   const { data: userData } = useQuery({
@@ -134,6 +142,33 @@ const Sidebar = () => {
         </ul>
       </nav>
 
+      {/* Logout */}
+      <div className="p-4 border-t border-white/20 relative z-10">
+        <button
+          onClick={() => setShowLogoutModal(true)}
+          className="flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:bg-white/10 hover:text-white w-full transition-all duration-300 hover:shadow-lg font-medium"
+        >
+          <LogOut size={20} />
+          <span>Logout</span>
+        </button>
+      </div>
+
+      {/* Logout Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={onLogout}
+        title="Confirm Logout"
+        message="Are you sure you want to log out? You'll need to sign in again to access the admin dashboard."
+        confirmText="Logout"
+        cancelText="Stay Logged In"
+        confirmButtonClass="bg-red-600 hover:bg-red-700"
+        icon={
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+            <LogOut className="text-red-600" size={32} />
+          </div>
+        }
+      />
     </aside>
   );
 };
