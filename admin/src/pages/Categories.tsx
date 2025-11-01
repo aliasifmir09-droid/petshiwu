@@ -489,11 +489,12 @@ const CategoriesNew = () => {
                 </h2>
                 {!editingCategory && formData.parentCategory && (() => {
                   const parentCat = flatCategories().find((c: any) => c._id === formData.parentCategory);
-                  return parentCat ? (
+                  if (!parentCat) return null;
+                  return (
                     <p className="text-sm text-gray-600 mt-1">
                       Adding subcategory under: <span className="font-semibold text-green-600">{parentCat.name}</span>
                     </p>
-                  ) : null;
+                  );
                 })()}
               </div>
               <button
@@ -678,5 +679,5 @@ const CategoriesNew = () => {
   );
 };
 
-export default CategoriesNew as typeof CategoriesNew;
+export default CategoriesNew;
 
