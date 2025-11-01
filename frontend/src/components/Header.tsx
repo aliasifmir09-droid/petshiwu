@@ -448,29 +448,7 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Search Bar - Mobile */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden px-3 pb-3">
-          <form onSubmit={handleSearch}>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search for products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2.5 pr-12 rounded-md focus:outline-none focus:ring-2 focus:ring-white shadow-sm"
-              />
-              <button
-                type="submit"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-900 transition-colors"
-                aria-label="Search"
-              >
-                <Search size={20} />
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+      {/* Search Bar - Mobile - Now inside fixed menu */}
     </header>
 
     {/* Navigation - Desktop Only */}
@@ -758,6 +736,25 @@ const Header = () => {
             </button>
           </div>
           <div className="px-4 py-4 overflow-x-hidden">
+            {/* Search Bar in Mobile Menu */}
+            <form onSubmit={handleSearch} className="mb-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search for products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-4 py-2.5 pr-12 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                />
+                <button
+                  type="submit"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-900 transition-colors"
+                  aria-label="Search"
+                >
+                  <Search size={20} />
+                </button>
+              </div>
+            </form>
             <ul className="space-y-1 text-gray-700 overflow-x-hidden">
               {/* Dynamic Pet Types with Categories */}
               {petTypes.map((petType: any) => {
