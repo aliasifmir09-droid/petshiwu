@@ -272,7 +272,7 @@ const Header = () => {
             {isScrolled && (
               <button
                 onClick={() => setIsLeftSidebarOpen(true)}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                className="hidden lg:flex items-center justify-center p-2 hover:bg-white/10 rounded-lg transition-colors"
                 aria-label="Open Menu"
               >
                 <Menu size={28} className="text-white" />
@@ -1029,7 +1029,7 @@ const Header = () => {
         </div>
       )}
 
-    {/* Left Sidebar for Desktop Navigation (when scrolled) */}
+    {/* Left Sidebar for Desktop Navigation (when scrolled) - Hidden on Mobile */}
     {isLeftSidebarOpen && (
       <>
         {/* Overlay */}
