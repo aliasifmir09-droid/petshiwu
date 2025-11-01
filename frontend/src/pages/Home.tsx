@@ -10,6 +10,7 @@ import LiveStats from '@/components/LiveStats';
 import CountdownTimer from '@/components/CountdownTimer';
 import TrustBadges from '@/components/TrustBadges';
 import FloatingDiscount from '@/components/FloatingDiscount';
+import CategoryIcons from '@/components/CategoryIcons';
 import { ChevronRight, ChevronLeft, Star, Shield, TrendingUp } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 
@@ -257,6 +258,9 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Category Icons - Find all your pet's must-haves */}
+      <CategoryIcons />
 
       {/* Featured Products with Enhanced Design */}
       <section className="py-16 bg-gradient-to-b from-white via-blue-50 to-white relative overflow-hidden">
