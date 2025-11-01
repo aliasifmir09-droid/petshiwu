@@ -376,51 +376,50 @@ const CategoriesNew = () => {
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-300 opacity-10 rounded-full blur-3xl"></div>
       </div>
 
-        {/* Quick Guide */}
-        {showGuide && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-            <div className="flex items-start gap-3">
-              <div className="text-blue-600 mt-0.5 flex-shrink-0">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                </svg>
+      {/* Quick Guide */}
+      {showGuide && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4 animate-fade-in-up">
+          <div className="flex items-start gap-3">
+            <div className="text-blue-600 mt-0.5 flex-shrink-0">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <div className="flex items-start justify-between mb-2">
+                <h3 className="font-semibold text-blue-900">Category Structure (Up to 3 Levels):</h3>
+                <button
+                  onClick={() => setShowGuide(false)}
+                  className="text-blue-400 hover:text-blue-600 transition-colors -mt-1"
+                  title="Dismiss guide"
+                >
+                  <X size={18} />
+                </button>
               </div>
-              <div className="flex-1">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-semibold text-blue-900">Category Structure (Up to 3 Levels):</h3>
-                  <button
-                    onClick={() => setShowGuide(false)}
-                    className="text-blue-400 hover:text-blue-600 transition-colors -mt-1"
-                    title="Dismiss guide"
-                  >
-                    <X size={18} />
-                  </button>
-                </div>
-                <div className="text-sm text-blue-800 space-y-1.5">
-                  <p><strong>📂 Level 1 - Main Categories:</strong> Create with "Add Main Category" button. These can have subcategories.</p>
-                  <p><strong>📄 Level 2 - Subcategories:</strong> Click the green <span className="inline-flex items-center px-2 py-0.5 bg-green-600 text-white text-xs rounded font-medium">+ Add Sub</span> button on any category to add a subcategory under it.</p>
-                  <p><strong>📄 Level 3 - Sub-subcategories:</strong> Click <span className="inline-flex items-center px-2 py-0.5 bg-green-600 text-white text-xs rounded font-medium">+ Add Sub</span> on a subcategory to create deeper nesting (maximum 3 levels total).</p>
-                  <p className="mt-2 pt-2 border-t border-blue-200 text-blue-700"><strong>🐾 "Other Animals" Special:</strong> For the "Other Animals" pet type, create main categories for each animal type (e.g., "Hamster", "Rabbit", "Guinea Pig"). These will appear as individual animal types in the website menu!</p>
-                  <p className="text-blue-700">💡 <strong>Tip:</strong> Click the arrow (▶) to expand/collapse categories with subcategories.</p>
-                </div>
+              <div className="text-sm text-blue-800 space-y-1.5">
+                <p><strong>📂 Level 1 - Main Categories:</strong> Create with "Add Main Category" button. These can have subcategories.</p>
+                <p><strong>📄 Level 2 - Subcategories:</strong> Click the green <span className="inline-flex items-center px-2 py-0.5 bg-green-600 text-white text-xs rounded font-medium">+ Add Sub</span> button on any category to add a subcategory under it.</p>
+                <p><strong>📄 Level 3 - Sub-subcategories:</strong> Click <span className="inline-flex items-center px-2 py-0.5 bg-green-600 text-white text-xs rounded font-medium">+ Add Sub</span> on a subcategory to create deeper nesting (maximum 3 levels total).</p>
+                <p className="mt-2 pt-2 border-t border-blue-200 text-blue-700"><strong>🐾 "Other Animals" Special:</strong> For the "Other Animals" pet type, create main categories for each animal type (e.g., "Hamster", "Rabbit", "Guinea Pig"). These will appear as individual animal types in the website menu!</p>
+                <p className="text-blue-700">💡 <strong>Tip:</strong> Click the arrow (▶) to expand/collapse categories with subcategories.</p>
               </div>
             </div>
           </div>
-        )}
-        
-        {/* Show Guide Button (when dismissed) */}
-        {!showGuide && (
-          <button
-            onClick={() => setShowGuide(true)}
-            className="mt-2 text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-            </svg>
-            Show guide
-          </button>
-        )}
-      </div>
+        </div>
+      )}
+      
+      {/* Show Guide Button (when dismissed) */}
+      {!showGuide && (
+        <button
+          onClick={() => setShowGuide(true)}
+          className="mt-2 text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+        >
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+          </svg>
+          Show guide
+        </button>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
