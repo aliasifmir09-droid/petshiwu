@@ -64,7 +64,7 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
   };
 
   return (
-    <aside className="w-64 bg-gradient-to-b from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] text-white min-h-screen flex flex-col shadow-2xl relative overflow-hidden">
+    <aside className="w-64 bg-gradient-to-b from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] text-white h-screen flex flex-col shadow-2xl relative overflow-hidden sticky top-0">
       {/* Decorative background elements */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-300 opacity-10 rounded-full blur-3xl"></div>
@@ -139,19 +139,19 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
               </li>
             );
           })}
+          
+          {/* Logout - After Settings */}
+          <li className="animate-fade-in-up mt-2">
+            <button
+              onClick={() => setShowLogoutModal(true)}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:bg-white/10 hover:text-white w-full transition-all duration-300 hover:shadow-lg font-medium"
+            >
+              <LogOut size={20} />
+              <span>Logout</span>
+            </button>
+          </li>
         </ul>
       </nav>
-
-      {/* Logout */}
-      <div className="p-4 border-t border-white/20 relative z-10">
-        <button
-          onClick={() => setShowLogoutModal(true)}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:bg-white/10 hover:text-white w-full transition-all duration-300 hover:shadow-lg font-medium"
-        >
-          <LogOut size={20} />
-          <span>Logout</span>
-        </button>
-      </div>
 
       {/* Logout Confirmation Modal */}
       <ConfirmationModal
