@@ -102,16 +102,16 @@ const HeroSlideshow = () => {
       {/* Top Promotional Banner - Matching Slideshow Width */}
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
         <Link to="/products">
-          <div className="relative overflow-hidden bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 py-1.5 md:py-2 text-center rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border-2 border-emerald-400/30 w-full">
+          <div className="relative overflow-hidden bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 py-1 md:py-1.5 text-center rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border-2 border-emerald-400/30 w-full">
             {/* Animated background overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-300/20 via-transparent to-yellow-300/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             
             {/* Sparkle decorations */}
-            <div className="absolute top-2 left-4 text-2xl animate-pulse opacity-70">✨</div>
-            <div className="absolute top-2 right-4 text-2xl animate-pulse opacity-70" style={{ animationDelay: '0.5s' }}>✨</div>
+            <div className="absolute top-1 left-3 text-lg md:text-xl animate-pulse opacity-70">✨</div>
+            <div className="absolute top-1 right-3 text-lg md:text-xl animate-pulse opacity-70" style={{ animationDelay: '0.5s' }}>✨</div>
             
             {/* Main text */}
-            <p className="text-sm md:text-base lg:text-lg font-black text-white drop-shadow-lg relative z-10 tracking-wide">
+            <p className="text-xs md:text-sm lg:text-base font-black text-white drop-shadow-lg relative z-10 tracking-wide whitespace-nowrap px-8 md:px-4 overflow-hidden">
               🎁 FREE $20 eGift Card with $49+ Order • Limited Time! 🎁
             </p>
             
