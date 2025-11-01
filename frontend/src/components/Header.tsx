@@ -474,14 +474,15 @@ const Header = () => {
           </form>
         </div>
       )}
+    </header>
 
-      {/* Navigation - Desktop Only */}
-      <nav className="hidden lg:block bg-white border-t border-gray-200 w-full z-40">
-        <div className="relative w-full">
-          <div className="container mx-auto px-2 lg:px-3">
-            <div className="flex items-center justify-start py-2 lg:py-2.5">
-              <ul className="flex items-center gap-1.5 lg:gap-2.5 text-xs lg:text-sm font-semibold text-gray-700 flex-nowrap">
-                  {/* Dynamic Pet Types with Dropdowns */}
+    {/* Navigation - Desktop Only */}
+    <nav className="hidden lg:block bg-white border-t border-gray-200 w-full z-40">
+      <div className="relative w-full">
+        <div className="container mx-auto px-2 lg:px-3">
+          <div className="flex items-center justify-start py-2 lg:py-2.5">
+            <ul className="flex items-center gap-1.5 lg:gap-2.5 text-xs lg:text-sm font-semibold text-gray-700 flex-nowrap">
+                {/* Dynamic Pet Types with Dropdowns */}
                   {petTypes.map((petType: any) => {
                     const petCategories = getCategoriesForPetType(petType.slug);
                     const isSpecialDogMenu = petType.slug === 'dog';
@@ -739,8 +740,8 @@ const Header = () => {
             </div>
           </nav>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
+    {/* Mobile Menu */}
+    {mobileMenuOpen && (
         <div className="lg:hidden bg-white border-t shadow-lg overflow-x-hidden">
           <div className="container mx-auto px-4 py-4 max-w-full overflow-x-hidden">
             <ul className="space-y-1 text-gray-700 overflow-x-hidden">
@@ -1030,7 +1031,6 @@ const Header = () => {
           </div>
         </div>
       )}
-    </header>
 
     {/* Left Sidebar for Desktop Navigation (when scrolled) */}
     {isLeftSidebarOpen && (
