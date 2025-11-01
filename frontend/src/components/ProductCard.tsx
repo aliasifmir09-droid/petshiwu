@@ -9,9 +9,10 @@ import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 interface ProductCardProps {
   product: Product;
   hideCartButton?: boolean;
+  hideAutoship?: boolean;
 }
 
-const ProductCard = memo(({ product, hideCartButton = false }: ProductCardProps) => {
+const ProductCard = memo(({ product, hideCartButton = false, hideAutoship = false }: ProductCardProps) => {
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
   const { addToCart } = useCartStore();
   const inWishlist = isInWishlist(product._id);
@@ -84,7 +85,7 @@ const ProductCard = memo(({ product, hideCartButton = false }: ProductCardProps)
               🔥 SAVE {discountPercent}%
             </span>
           )}
-          {product.autoshipEligible && (
+          {product.autoshipEligible && !hideAutoship && (
             <span className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
               🔄 Autoship
             </span>
@@ -170,7 +171,7 @@ const ProductCard = memo(({ product, hideCartButton = false }: ProductCardProps)
           </div>
 
           {/* Autoship Price with Special Badge */}
-          {product.autoshipEligible && product.autoshipDiscount && (
+          {product.autoshipEligible && product.autoshipDiscount && !hideAutoship && (
             <div className="flex items-center gap-1.5 mt-2 p-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-md">
               <Zap size={14} className="text-white" />
               <p className="text-xs text-white font-bold">
