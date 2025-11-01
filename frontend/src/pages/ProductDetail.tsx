@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/products';
 import { reviewService } from '@/services/reviews';
@@ -82,9 +82,9 @@ const ProductDetail = () => {
       {/* Breadcrumb */}
       <nav className="text-sm mb-6">
         <ol className="flex items-center gap-2">
-          <li><a href="/" className="text-gray-600 hover:text-primary-600">Home</a></li>
+          <li><Link to="/" className="text-gray-600 hover:text-primary-600">Home</Link></li>
           <li>/</li>
-          <li><a href="/products" className="text-gray-600 hover:text-primary-600">Products</a></li>
+          <li><Link to="/products" className="text-gray-600 hover:text-primary-600">Products</Link></li>
           <li>/</li>
           <li className="text-gray-900">{product.name}</li>
         </ol>
