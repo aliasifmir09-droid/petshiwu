@@ -71,17 +71,23 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
       
       {/* Logo */}
       <div className="p-6 border-b border-white/20 relative z-10">
-        <div className="flex items-center gap-3 mb-1">
-          <img 
-            src="/logo.png" 
-            alt="petshiwu Logo" 
-            className="h-10 w-10 object-contain drop-shadow-lg"
-          />
-          <h1 className="text-2xl font-black text-white" style={{ fontFamily: "'Poppins', 'Inter', sans-serif" }}>
+        <Link to="/" className="flex items-center gap-3 mb-1 group">
+          <div className="relative">
+            <img 
+              src="/logo.png" 
+              alt="petshiwu Logo" 
+              className="h-12 w-12 object-contain transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 drop-shadow-2xl relative z-10"
+            />
+            {/* Glow effect on hover */}
+            <div className="absolute inset-0 bg-white/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          </div>
+          <span className="text-2xl font-black text-white tracking-tight group-hover:tracking-wide transition-all duration-300 relative" style={{ fontFamily: "'Poppins', 'Inter', sans-serif" }}>
             petshiwu
-          </h1>
-        </div>
-        <p className="text-xs text-blue-200 ml-12">Admin Dashboard</p>
+            {/* Underline animation */}
+            <span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-yellow-300 to-pink-300 group-hover:w-full transition-all duration-500 rounded-full"></span>
+          </span>
+        </Link>
+        <p className="text-xs text-blue-200 ml-16 mt-1">Admin Dashboard</p>
         {userData && (
           <div className="mt-3 pt-3 border-t border-white/20">
             <p className="text-sm text-white font-semibold">
