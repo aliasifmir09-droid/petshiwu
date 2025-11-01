@@ -305,12 +305,10 @@ const Home = () => {
                       display: none;
                     }
                   `}</style>
-                  <div className="flex gap-4 md:gap-5">
+                  <div className="flex gap-4 md:gap-5 items-stretch">
                     {featuredProducts?.data.map((product) => (
-                      <div key={product._id} className="flex-shrink-0 w-56 md:w-60 lg:w-64 animate-fade-in-up h-full">
-                        <div className="h-full flex flex-col">
-                          <ProductCard product={product} hideCartButton={true} hideAutoship={true} />
-                        </div>
+                      <div key={product._id} className="flex-shrink-0 w-56 md:w-60 lg:w-64 animate-fade-in-up">
+                        <ProductCard product={product} hideCartButton={true} hideAutoship={true} />
                       </div>
                     ))}
                   </div>
