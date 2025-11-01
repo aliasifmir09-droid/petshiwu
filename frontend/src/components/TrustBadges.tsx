@@ -35,7 +35,7 @@ const TrustBadges = () => {
   ];
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-blue-50 py-8 border-y border-gray-200">
+    <div className="hidden md:block bg-gradient-to-br from-gray-50 to-blue-50 py-8 border-y border-gray-200">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {badges.map((badge, index) => {
