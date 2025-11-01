@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirecting...</title>
+    <title>petshiwu - Everything Your Pet Needs</title>
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <meta name="description" content="Shop premium pet food, toys, and supplies for dogs, cats, and more at petshiwu. Fast shipping and great prices!">
     <script>
-        // Redirect to index.html to let React Router handle the routing
-        sessionStorage.redirect = location.href;
-        location.replace(location.pathname.split('/').slice(0, -1).join('/') + '/index.html');
+        // Simply redirect to root index.html to let React Router handle the routing
+        window.location.replace('/index.html');
     </script>
 </head>
 <body>
