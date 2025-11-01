@@ -124,7 +124,7 @@ const Dropdown = ({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-auto">
+        <div className="absolute z-[100] w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-auto">
           <div className="py-1">
             {options.map((option) => (
               <button
