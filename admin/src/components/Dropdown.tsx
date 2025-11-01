@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, Check } from 'lucide-react';
 
 interface DropdownOption {
@@ -33,13 +34,20 @@ const Dropdown = ({
 }: DropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const selectedOption = options.find(opt => opt.value === value);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        dropdownRef.current && 
+        !dropdownRef.current.contains(target) &&
+        menuRef.current &&
+        !menuRef.current.contains(target)
+      ) {
         setIsOpen(false);
       }
     };
@@ -74,6 +82,33 @@ const Dropdown = ({
     onChange(optionValue);
     setIsOpen(false);
   };
+
+  // Calculate dropdown menu position
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0 });
+
+  useEffect(() => {
+    if (isOpen && dropdownRef.current) {
+      const updatePosition = () => {
+        if (dropdownRef.current) {
+          const rect = dropdownRef.current.getBoundingClientRect();
+          setMenuPosition({
+            top: rect.bottom + window.scrollY + 8,
+            left: rect.left + window.scrollX,
+            width: rect.width
+          });
+        }
+      };
+
+      updatePosition();
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
+
+      return () => {
+        window.removeEventListener('scroll', updatePosition, true);
+        window.removeEventListener('resize', updatePosition);
+      };
+    }
+  }, [isOpen]);
 
   const sizeClasses = {
     sm: 'px-3 py-1.5 text-sm',
@@ -122,9 +157,18 @@ const Dropdown = ({
         />
       </button>
 
-      {/* Dropdown Menu */}
-      {isOpen && (
-        <div className="absolute z-[100] w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-auto">
+      {/* Dropdown Menu - Rendered as Portal to avoid overflow issues */}
+      {isOpen && typeof document !== 'undefined' && createPortal(
+        <div 
+          ref={menuRef}
+          className="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-xl max-h-64 overflow-auto"
+          style={{
+            top: `${menuPosition.top}px`,
+            left: `${menuPosition.left}px`,
+            width: `${menuPosition.width}px`,
+            minWidth: '200px'
+          }}
+        >
           <div className="py-1">
             {options.map((option) => (
               <button
@@ -154,7 +198,8 @@ const Dropdown = ({
               </button>
             ))}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
