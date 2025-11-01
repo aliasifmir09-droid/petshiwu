@@ -737,10 +737,27 @@ const Header = () => {
             </div>
           </nav>
 
-    {/* Mobile Menu */}
+    {/* Mobile Menu - Fixed position for visibility at any scroll */}
     {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-t shadow-lg overflow-x-hidden">
-          <div className="container mx-auto px-4 py-4 max-w-full overflow-x-hidden">
+      <>
+        {/* Overlay */}
+        <div 
+          className="fixed inset-0 bg-black/50 z-[45] lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+        {/* Mobile Menu Panel */}
+        <div className="fixed top-0 right-0 h-full w-[85vw] max-w-sm bg-white shadow-2xl z-[50] lg:hidden overflow-y-auto">
+          <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between z-10">
+            <h2 className="text-lg font-bold text-gray-900">Menu</h2>
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Close Menu"
+            >
+              <X size={24} className="text-gray-700" />
+            </button>
+          </div>
+          <div className="px-4 py-4 overflow-x-hidden">
             <ul className="space-y-1 text-gray-700 overflow-x-hidden">
               {/* Dynamic Pet Types with Categories */}
               {petTypes.map((petType: any) => {
@@ -1027,6 +1044,7 @@ const Header = () => {
             </ul>
           </div>
         </div>
+      </>
       )}
 
     {/* Left Sidebar for Desktop Navigation (when scrolled) - Hidden on Mobile */}
