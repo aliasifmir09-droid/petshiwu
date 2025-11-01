@@ -678,5 +678,5 @@ const CategoriesNew = () => {
   );
 };
 
-export default CategoriesNew;
+export default CategoriesNew as typeof CategoriesNew;
 
