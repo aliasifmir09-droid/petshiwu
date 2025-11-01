@@ -53,42 +53,42 @@ const CategoryIcons = () => {
       title: 'Dog food',
       link: '/products?petType=dog&category=Food',
       color: 'from-blue-500 to-blue-600',
-      image: '/category-dog-food.png'
+      image: '/category-dog-food.avif'
     },
     {
       icon: HeartPulse,
       title: 'Health & pharmacy',
       link: '/products?search=pharmacy',
       color: 'from-green-500 to-emerald-600',
-      image: '/category-health-pharmacy.png'
+      image: '/category-health-pharmacy.avif'
     },
     {
       icon: Cookie,
       title: 'Dog treats',
       link: '/products?petType=dog&search=treats',
       color: 'from-pink-500 to-rose-600',
-      image: '/category-dog-treats.png'
+      image: '/category-dog-treats.avif'
     },
     {
       icon: Fish,
       title: 'Cat food',
       link: '/products?petType=cat&category=Food',
       color: 'from-purple-500 to-purple-600',
-      image: '/category-cat-food.png'
+      image: '/category-cat-food.avif'
     },
     {
       icon: Box,
       title: 'Cat litter',
       link: '/products?petType=cat&search=litter',
       color: 'from-teal-500 to-cyan-600',
-      image: '/category-cat-litter.png'
+      image: '/category-cat-litter.avif'
     },
     {
       icon: Tag,
       title: 'Deals',
       link: '/products?featured=true',
       color: 'from-orange-500 to-red-600',
-      image: '/category-deals.png'
+      image: '/category-deals.avif'
     }
   ];
 
