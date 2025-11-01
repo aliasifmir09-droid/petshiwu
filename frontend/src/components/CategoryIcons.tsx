@@ -20,13 +20,13 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
       className="flex flex-col items-center text-center group"
     >
       {/* Circular Icon/Image with Light Blue Background */}
-      <div className="relative w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mb-3 group-hover:scale-110 transition-all duration-300 shadow-md group-hover:shadow-xl overflow-hidden">
+      <div className="relative w-28 h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 xl:w-40 xl:h-40 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mb-3 group-hover:scale-110 transition-all duration-300 shadow-md group-hover:shadow-xl overflow-hidden">
         {category.image ? (
           /* Image Display - Always try to show image first */
           <>
             {/* Hidden fallback icon for error case */}
             <div className={`absolute inset-0 w-full h-full rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center ${imageError ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              <Icon size={32} className="text-white md:w-10 md:h-10 lg:w-12 lg:h-12" />
+              <Icon size={40} className="text-white md:w-12 md:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16" />
             </div>
             {/* Image that should be visible */}
             <div className={`w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center ${imageError ? 'opacity-0 absolute' : 'opacity-100 relative'}`}>
@@ -53,7 +53,7 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
         )}
       </div>
       {/* Label */}
-      <p className="text-sm md:text-base font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
+      <p className="text-base md:text-lg lg:text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
         {category.title}
       </p>
     </Link>
