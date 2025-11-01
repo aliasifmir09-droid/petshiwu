@@ -47,8 +47,8 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
           </>
         ) : (
           /* Icon Display - Only if no image path */
-          <div className={`w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center`}>
-            <Icon size={32} className="text-white md:w-10 md:h-10 lg:w-12 lg:h-12" />
+          <div className={`w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 xl:w-36 xl:h-36 rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center`}>
+            <Icon size={40} className="text-white md:w-12 md:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16" />
           </div>
         )}
       </div>
