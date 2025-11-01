@@ -9,7 +9,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  AreaChart,
   Area,
   ComposedChart,
   XAxis,
