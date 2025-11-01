@@ -118,135 +118,139 @@ const ProductCard = memo(({ product, hideCartButton = false, hideAutoship = fals
       </div>
 
       {/* Content */}
-      <div className="p-5 space-y-3 flex flex-col flex-grow">
-        {/* Brand */}
-        <p className="text-xs text-blue-600 font-extrabold uppercase tracking-widest mb-1 group-hover:text-blue-700 transition-colors">
-          {product.brand}
-        </p>
+      <div className="p-5 flex flex-col flex-grow">
+        <div className="space-y-3 flex-grow">
+          {/* Brand */}
+          <p className="text-xs text-blue-600 font-extrabold uppercase tracking-widest mb-1 group-hover:text-blue-700 transition-colors">
+            {product.brand}
+          </p>
 
-        {/* Name */}
-        <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 min-h-[3rem] text-base group-hover:text-blue-700 transition-colors leading-tight">
-          {product.name}
-        </h3>
+          {/* Name */}
+          <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 min-h-[3rem] text-base group-hover:text-blue-700 transition-colors leading-tight">
+            {product.name}
+          </h3>
 
-        {/* Rating with Progress Bar */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star 
-                    key={i} 
-                    size={14} 
-                    className={`${
-                      i < Math.floor(product.averageRating) 
-                        ? 'text-amber-400 fill-amber-400' 
-                        : 'text-gray-300'
-                    }`} 
-                  />
-                ))}
+          {/* Rating with Progress Bar */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <div className="flex items-center">
+                  {[...Array(5)].map((_, i) => (
+                    <Star 
+                      key={i} 
+                      size={14} 
+                      className={`${
+                        i < Math.floor(product.averageRating) 
+                          ? 'text-amber-400 fill-amber-400' 
+                          : 'text-gray-300'
+                      }`} 
+                    />
+                  ))}
+                </div>
+                <span className="text-sm font-bold text-gray-800">{product.averageRating.toFixed(1)}</span>
               </div>
-              <span className="text-sm font-bold text-gray-800">{product.averageRating.toFixed(1)}</span>
+              <span className="text-xs text-gray-500">({product.totalReviews} reviews)</span>
             </div>
-            <span className="text-xs text-gray-500">({product.totalReviews} reviews)</span>
           </div>
-        </div>
 
-        {/* Price Section with Enhanced Design */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-lg border border-blue-100">
-          <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl font-black text-gray-900 tracking-tight">
-              ${product.basePrice.toFixed(2)}
-            </span>
-            {product.compareAtPrice && (
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500 line-through">
-                  ${product.compareAtPrice.toFixed(2)}
-                </span>
-                <span className="text-[10px] text-green-600 font-bold">
-                  YOU SAVE ${(product.compareAtPrice - product.basePrice).toFixed(2)}
-                </span>
+          {/* Price Section with Enhanced Design */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-lg border border-blue-100">
+            <div className="flex items-baseline gap-2 mb-1">
+              <span className="text-2xl font-black text-gray-900 tracking-tight">
+                ${product.basePrice.toFixed(2)}
+              </span>
+              {product.compareAtPrice && (
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500 line-through">
+                    ${product.compareAtPrice.toFixed(2)}
+                  </span>
+                  <span className="text-[10px] text-green-600 font-bold">
+                    YOU SAVE ${(product.compareAtPrice - product.basePrice).toFixed(2)}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Autoship Price with Special Badge */}
+            {product.autoshipEligible && product.autoshipDiscount && !hideAutoship && (
+              <div className="flex items-center gap-1.5 mt-2 p-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-md">
+                <Zap size={14} className="text-white" />
+                <p className="text-xs text-white font-bold">
+                  ${(product.basePrice * (1 - product.autoshipDiscount / 100)).toFixed(2)} with Autoship - Save {product.autoshipDiscount}%!
+                </p>
               </div>
             )}
           </div>
 
-          {/* Autoship Price with Special Badge */}
-          {product.autoshipEligible && product.autoshipDiscount && !hideAutoship && (
-            <div className="flex items-center gap-1.5 mt-2 p-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-md">
-              <Zap size={14} className="text-white" />
-              <p className="text-xs text-white font-bold">
-                ${(product.basePrice * (1 - product.autoshipDiscount / 100)).toFixed(2)} with Autoship - Save {product.autoshipDiscount}%!
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Urgency Indicator with Animations */}
-        <div className="mb-2">
-          {urgencyLevel === 'critical' && (
-            <div className="bg-red-50 border-2 border-red-500 rounded-lg p-2.5 animate-pulse-slow">
-              <div className="flex items-center gap-2">
-                <Clock size={16} className="text-red-600 animate-wiggle" />
-                <div className="flex-1">
-                  <p className="text-xs font-black text-red-700 uppercase">
-                    ⚡ ALMOST GONE!
-                  </p>
-                  <p className="text-xs text-red-600 font-bold">
-                    Only {product.totalStock} left in stock
-                  </p>
+          {/* Urgency Indicator with Animations */}
+          <div className="mb-2 min-h-[2rem]">
+            {urgencyLevel === 'critical' && (
+              <div className="bg-red-50 border-2 border-red-500 rounded-lg p-2.5 animate-pulse-slow">
+                <div className="flex items-center gap-2">
+                  <Clock size={16} className="text-red-600 animate-wiggle" />
+                  <div className="flex-1">
+                    <p className="text-xs font-black text-red-700 uppercase">
+                      ⚡ ALMOST GONE!
+                    </p>
+                    <p className="text-xs text-red-600 font-bold">
+                      Only {product.totalStock} left in stock
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-          {urgencyLevel === 'high' && (
-            <div className="bg-orange-50 border border-orange-300 rounded-lg p-2 flex items-center gap-2">
-              <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
-              <span className="text-xs text-orange-700 font-bold">
-                Hurry! Only {product.totalStock} left
-              </span>
-            </div>
-          )}
-          {urgencyLevel === 'medium' && (
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-              <span className="text-xs text-yellow-700 font-semibold">
-                Low stock - {product.totalStock} remaining
-              </span>
-            </div>
-          )}
-          {urgencyLevel === 'low' && product.inStock && (
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-              <span className="text-xs text-green-700 font-semibold">In Stock & Ready to Ship</span>
-            </div>
-          )}
-          {urgencyLevel === 'out' && (
-            <div className="bg-gray-100 border border-gray-300 rounded-lg p-2 flex items-center gap-2">
-              <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-              <span className="text-xs text-red-600 font-bold">Currently Unavailable</span>
-            </div>
-          )}
+            )}
+            {urgencyLevel === 'high' && (
+              <div className="bg-orange-50 border border-orange-300 rounded-lg p-2 flex items-center gap-2">
+                <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
+                <span className="text-xs text-orange-700 font-bold">
+                  Hurry! Only {product.totalStock} left
+                </span>
+              </div>
+            )}
+            {urgencyLevel === 'medium' && (
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                <span className="text-xs text-yellow-700 font-semibold">
+                  Low stock - {product.totalStock} remaining
+                </span>
+              </div>
+            )}
+            {urgencyLevel === 'low' && product.inStock && (
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span className="text-xs text-green-700 font-semibold">In Stock & Ready to Ship</span>
+              </div>
+            )}
+            {urgencyLevel === 'out' && (
+              <div className="bg-gray-100 border border-gray-300 rounded-lg p-2 flex items-center gap-2">
+                <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                <span className="text-xs text-red-600 font-bold">Currently Unavailable</span>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Add to Cart Button with Enhanced Design */}
+        {/* Add to Cart Button with Enhanced Design - Always at bottom */}
         {!hideCartButton && (
-          <button
-            onClick={handleAddToCart}
-            disabled={!product.inStock}
-            className={`w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm transition-all transform active:scale-95 btn-ripple relative overflow-hidden mt-auto ${
-              product.inStock
-                ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-2xl hover:scale-105'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            <ShoppingCart size={20} strokeWidth={2.5} />
-            <span className="relative z-10">
-              {product.inStock ? 'Add to Cart' : 'Out of Stock'}
-            </span>
-            {product.inStock && (
-              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-            )}
-          </button>
+          <div className="mt-auto pt-3">
+            <button
+              onClick={handleAddToCart}
+              disabled={!product.inStock}
+              className={`w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm transition-all transform active:scale-95 btn-ripple relative overflow-hidden ${
+                product.inStock
+                  ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-2xl hover:scale-105'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              <ShoppingCart size={20} strokeWidth={2.5} />
+              <span className="relative z-10">
+                {product.inStock ? 'Add to Cart' : 'Out of Stock'}
+              </span>
+              {product.inStock && (
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              )}
+            </button>
+          </div>
         )}
 
         {/* Quick View Hint (appears on hover) */}
