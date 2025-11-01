@@ -11,6 +11,7 @@ import {
   Cell,
   AreaChart,
   Area,
+  ComposedChart,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -251,15 +252,18 @@ const Analytics = () => {
 
   // Order status distribution
   const generateOrderStatusData = () => {
-    if (!orderStats) return [];
+    if (!orderStats || !orderStats.statusBreakdown) return [];
 
-    return [
-      { name: 'Pending', value: orderStats.statusBreakdown?.pending || 0, color: '#f59e0b' },
-      { name: 'Processing', value: orderStats.statusBreakdown?.processing || 0, color: '#3b82f6' },
-      { name: 'Shipped', value: orderStats.statusBreakdown?.shipped || 0, color: '#8b5cf6' },
-      { name: 'Delivered', value: orderStats.statusBreakdown?.delivered || 0, color: '#10b981' },
-      { name: 'Cancelled', value: orderStats.statusBreakdown?.cancelled || 0, color: '#ef4444' }
+    const data = [
+      { name: 'Pending', value: orderStats.statusBreakdown.pending || 0, color: '#f59e0b' },
+      { name: 'Processing', value: orderStats.statusBreakdown.processing || 0, color: '#3b82f6' },
+      { name: 'Shipped', value: orderStats.statusBreakdown.shipped || 0, color: '#8b5cf6' },
+      { name: 'Delivered', value: orderStats.statusBreakdown.delivered || 0, color: '#10b981' },
+      { name: 'Cancelled', value: orderStats.statusBreakdown.cancelled || 0, color: '#ef4444' }
     ];
+
+    // Filter out zero values for cleaner display
+    return data.filter(item => item.value > 0);
   };
 
   const statusData = generateOrderStatusData();
@@ -347,43 +351,48 @@ const Analytics = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Analytics Dashboard</h1>
-          <div className="flex items-center gap-2 text-gray-600">
-            <Calendar size={16} />
-            <p>{getTimeRangeLabel()}</p>
+      {/* Header Section with Gradient */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 lg:p-8 shadow-xl animate-fade-in-up">
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-4xl font-black text-white mb-2">Analytics Dashboard</h1>
+            <div className="flex items-center gap-2 text-blue-100">
+              <Calendar size={18} />
+              <p className="text-lg">{getTimeRangeLabel()}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <button 
+              onClick={exportAnalytics}
+              className="flex items-center gap-2 bg-white text-[#1E3A8A] px-6 py-3 rounded-xl hover:bg-blue-50 font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 btn-ripple"
+            >
+              <Download size={20} />
+              <span>Export Data</span>
+            </button>
+            <Dropdown
+              options={[
+                { value: '1d', label: 'Last 24 Hours', description: 'Hourly breakdown' },
+                { value: '7d', label: 'Last 7 Days', description: 'Daily breakdown' },
+                { value: '30d', label: 'Last 30 Days', description: 'Daily breakdown' },
+                { value: '90d', label: 'Last 90 Days', description: 'Weekly breakdown' },
+                { value: '1y', label: 'Last Year', description: 'Monthly breakdown' },
+                { value: 'all', label: 'All Time', description: 'Full history' }
+              ]}
+              value={timeRange}
+              onChange={setTimeRange}
+              icon={<Calendar size={18} />}
+              className="w-64"
+            />
           </div>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          <button 
-            onClick={exportAnalytics}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <Download size={18} />
-            <span>Export Data</span>
-          </button>
-          <Dropdown
-            options={[
-              { value: '1d', label: 'Last 24 Hours', description: 'Hourly breakdown' },
-              { value: '7d', label: 'Last 7 Days', description: 'Daily breakdown' },
-              { value: '30d', label: 'Last 30 Days', description: 'Daily breakdown' },
-              { value: '90d', label: 'Last 90 Days', description: 'Weekly breakdown' },
-              { value: '1y', label: 'Last Year', description: 'Monthly breakdown' },
-              { value: 'all', label: 'All Time', description: 'Full history' }
-            ]}
-            value={timeRange}
-            onChange={setTimeRange}
-            icon={<Calendar size={18} />}
-            className="w-64"
-          />
-        </div>
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-300 opacity-10 rounded-full blur-3xl"></div>
       </div>
 
       {/* Key Metrics */}
       {calculateMetrics && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-animation">
           <MetricCard
             title="Total Revenue"
             value={calculateMetrics.revenue.current}
@@ -413,8 +422,18 @@ const Analytics = () => {
         </div>
       )}
 
+      {/* Show message if no metrics available */}
+      {!calculateMetrics && !loadingOrders && (
+        <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100 text-center">
+          <TrendingUp className="mx-auto mb-4 text-gray-400" size={48} />
+          <h3 className="text-xl font-bold text-gray-900 mb-2">No Analytics Data Available</h3>
+          <p className="text-gray-600">Start receiving orders to see analytics and insights here.</p>
+        </div>
+      )}
+
       {/* Revenue & Orders Trend */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      {generateRevenueTrend.length > 0 && (
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all animate-fade-in-up">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-xl font-bold text-gray-900">Revenue & Orders Trend</h2>
@@ -434,7 +453,7 @@ const Analytics = () => {
           </div>
         </div>
         <ResponsiveContainer width="100%" height={350}>
-          <AreaChart data={generateRevenueTrend}>
+          <ComposedChart data={generateRevenueTrend}>
             <defs>
               <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#0284c7" stopOpacity={0.3}/>
@@ -484,14 +503,25 @@ const Analytics = () => {
               dot={{ fill: '#10b981', r: generateRevenueTrend.length < 15 ? 4 : 0 }}
               name="Orders"
             />
-          </AreaChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
+      )}
+
+      {/* Show message if no trend data */}
+      {generateRevenueTrend.length === 0 && !loadingOrders && (
+        <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100 text-center animate-fade-in-up">
+          <TrendingUp className="mx-auto mb-4 text-gray-400" size={48} />
+          <h3 className="text-xl font-bold text-gray-900 mb-2">No Revenue Data Available</h3>
+          <p className="text-gray-600">Revenue trends will appear here once you have orders in the selected time period.</p>
+        </div>
+      )}
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Order Status Distribution */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        {statusData.length > 0 && (
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all animate-fade-in-up">
           <div className="mb-6">
             <h2 className="text-xl font-bold text-gray-900">Order Status Distribution</h2>
             <p className="text-sm text-gray-600">Current order statuses</p>
@@ -516,9 +546,19 @@ const Analytics = () => {
             </PieChart>
           </ResponsiveContainer>
         </div>
+        )}
+
+        {/* Show message if no status data */}
+        {statusData.length === 0 && !loadingOrders && (
+          <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100 text-center animate-fade-in-up">
+            <ShoppingCart className="mx-auto mb-4 text-gray-400" size={48} />
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No Order Status Data</h3>
+            <p className="text-gray-600">Order status distribution will appear here once you have orders.</p>
+          </div>
+        )}
 
         {/* Category Performance */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all animate-fade-in-up">
           <div className="mb-6">
             <h2 className="text-xl font-bold text-gray-900">Top Categories</h2>
             <p className="text-sm text-gray-600">Revenue by product category for {getTimeRangeLabel().toLowerCase()}</p>
@@ -620,7 +660,8 @@ const Analytics = () => {
       )}
 
       {/* Top Products */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+      {productStats?.popularProducts && productStats.popularProducts.length > 0 && (
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 animate-fade-in-up">
         <div className="p-6 border-b">
           <h2 className="text-xl font-bold text-gray-900">Top Products</h2>
           <p className="text-sm text-gray-600">Best performing products by revenue</p>
@@ -683,6 +724,16 @@ const Analytics = () => {
           </table>
         </div>
       </div>
+      )}
+
+      {/* Show message if no product data */}
+      {(!productStats?.popularProducts || productStats.popularProducts.length === 0) && !loadingProducts && (
+        <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100 text-center animate-fade-in-up">
+          <Package className="mx-auto mb-4 text-gray-400" size={48} />
+          <h3 className="text-xl font-bold text-gray-900 mb-2">No Product Data Available</h3>
+          <p className="text-gray-600">Top products will appear here once you have product sales data.</p>
+        </div>
+      )}
     </div>
   );
 };
