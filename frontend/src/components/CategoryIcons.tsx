@@ -23,11 +23,11 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
       <div className="relative w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mb-3 group-hover:scale-110 transition-all duration-300 shadow-md group-hover:shadow-xl overflow-hidden">
         {category.image && !imageError ? (
           /* Image Display */
-          <div className="w-full h-full rounded-full overflow-hidden">
+          <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
             <img 
               src={category.image} 
               alt={category.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain object-center p-1"
               onError={() => setImageError(true)}
             />
           </div>
@@ -53,37 +53,42 @@ const CategoryIcons = () => {
       title: 'Dog food',
       link: '/products?petType=dog&category=Food',
       color: 'from-blue-500 to-blue-600',
-      image: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=400&fit=crop&q=90'
+      image: '/category-dog-food.png'
     },
     {
       icon: HeartPulse,
       title: 'Health & pharmacy',
       link: '/products?search=pharmacy',
-      color: 'from-green-500 to-emerald-600'
+      color: 'from-green-500 to-emerald-600',
+      image: '/category-health-pharmacy.png'
     },
     {
       icon: Cookie,
       title: 'Dog treats',
       link: '/products?petType=dog&search=treats',
-      color: 'from-pink-500 to-rose-600'
+      color: 'from-pink-500 to-rose-600',
+      image: '/category-dog-treats.png'
     },
     {
       icon: Fish,
       title: 'Cat food',
       link: '/products?petType=cat&category=Food',
-      color: 'from-purple-500 to-purple-600'
+      color: 'from-purple-500 to-purple-600',
+      image: '/category-cat-food.png'
     },
     {
       icon: Box,
       title: 'Cat litter',
       link: '/products?petType=cat&search=litter',
-      color: 'from-teal-500 to-cyan-600'
+      color: 'from-teal-500 to-cyan-600',
+      image: '/category-cat-litter.png'
     },
     {
       icon: Tag,
       title: 'Deals',
       link: '/products?featured=true',
-      color: 'from-orange-500 to-red-600'
+      color: 'from-orange-500 to-red-600',
+      image: '/category-deals.png'
     }
   ];
 
