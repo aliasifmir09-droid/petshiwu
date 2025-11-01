@@ -106,12 +106,8 @@ const HeroSlideshow = () => {
             {/* Animated background overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-300/20 via-transparent to-yellow-300/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             
-            {/* Sparkle decorations */}
-            <div className="absolute top-1 left-3 text-lg md:text-xl animate-pulse opacity-70">✨</div>
-            <div className="absolute top-1 right-3 text-lg md:text-xl animate-pulse opacity-70" style={{ animationDelay: '0.5s' }}>✨</div>
-            
             {/* Main text */}
-            <p className="text-xs md:text-sm lg:text-base font-black text-white drop-shadow-lg relative z-10 tracking-wide whitespace-nowrap px-8 md:px-4 overflow-hidden">
+            <p className="text-[10px] sm:text-xs md:text-sm lg:text-base font-black text-white drop-shadow-lg relative z-10 tracking-tight whitespace-nowrap px-2 overflow-hidden text-ellipsis">
               🎁 FREE $20 eGift Card with $49+ Order • Limited Time! 🎁
             </p>
             
