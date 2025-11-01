@@ -14,6 +14,11 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
   const [imageError, setImageError] = useState(false);
   const Icon = category.icon;
 
+  // Debug: Log image path
+  if (category.image) {
+    console.log(`Loading category image: ${category.image} for ${category.title}`);
+  }
+
   return (
     <Link
       to={category.link}
