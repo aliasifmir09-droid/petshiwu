@@ -237,20 +237,12 @@ const HeroSlideshow = () => {
               <h2 className="text-xl md:text-2xl font-black text-gray-800 flex items-center gap-2 mb-3">
                 <span className="text-2xl">👋</span> Hey, friend!
               </h2>
-              <div className="flex flex-row gap-2">
-                <Link
-                  to="/login"
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-2 rounded-full font-bold text-xs sm:text-sm hover:from-blue-700 hover:to-blue-800 transition-all shadow-sm hover:shadow-md transform hover:-translate-y-0.5 duration-300 whitespace-nowrap text-center"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  to="/register"
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 text-white px-3 py-2 rounded-full font-bold text-xs sm:text-sm hover:from-purple-700 hover:to-purple-800 transition-all shadow-sm hover:shadow-md transform hover:-translate-y-0.5 duration-300 whitespace-nowrap text-center"
-                >
-                  Create Account
-                </Link>
-              </div>
+              <Link
+                to="/login"
+                className="block w-full bg-gradient-to-r from-blue-600 via-purple-600 to-purple-700 text-white px-4 py-3 rounded-full font-bold text-sm sm:text-base hover:from-blue-700 hover:via-purple-700 hover:to-purple-800 transition-all shadow-sm hover:shadow-md transform hover:-translate-y-0.5 duration-300 text-center"
+              >
+                Sign In or Create Account
+              </Link>
             </div>
           </div>
 
