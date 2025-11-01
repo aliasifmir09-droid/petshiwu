@@ -290,10 +290,29 @@ const Home = () => {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 stagger-animation mb-8">
-                {featuredProducts?.data.map((product) => (
-                  <ProductCard key={product._id} product={product} />
-                ))}
+              {/* Horizontal Scrolling Container */}
+              <div className="relative mb-8">
+                <div 
+                  className="overflow-x-auto scrollbar-hide pb-4" 
+                  style={{ 
+                    scrollbarWidth: 'none', 
+                    msOverflowStyle: 'none',
+                    WebkitOverflowScrolling: 'touch'
+                  }}
+                >
+                  <style>{`
+                    .scrollbar-hide::-webkit-scrollbar {
+                      display: none;
+                    }
+                  `}</style>
+                  <div className="flex gap-4 md:gap-5">
+                    {featuredProducts?.data.map((product) => (
+                      <div key={product._id} className="flex-shrink-0 w-56 md:w-60 lg:w-64 animate-fade-in-up">
+                        <ProductCard product={product} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* View All Button */}
