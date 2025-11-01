@@ -37,7 +37,7 @@ const FloatingDiscount = () => {
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="absolute top-2 right-2 p-1 hover:bg-white/20 rounded-full transition-all"
+          className="absolute top-2 right-2 p-1 hover:bg-white/20 rounded-full transition-all z-10"
           aria-label="Close"
         >
           <X size={18} />
