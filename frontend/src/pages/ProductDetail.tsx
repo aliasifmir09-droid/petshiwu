@@ -501,9 +501,11 @@ const ProductDetail = () => {
           <p className="text-gray-600 mb-6">
             Similar products based on category and pet type
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {relatedProducts.data.map((relatedProduct) => (
-              <ProductCard key={relatedProduct._id} product={relatedProduct} />
+              <div key={relatedProduct._id} className="flex">
+                <ProductCard product={relatedProduct} />
+              </div>
             ))}
           </div>
         </div>
