@@ -81,7 +81,7 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
             {/* Glow effect on hover */}
             <div className="absolute inset-0 bg-white/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           </div>
-          <span className="text-2xl font-black text-white tracking-tight group-hover:tracking-wide transition-all duration-300 relative" style={{ fontFamily: "'Comfortaa', cursive" }}>
+          <span className="text-2xl font-black text-white tracking-tight group-hover:tracking-wide transition-all duration-300 relative" style={{ fontFamily: "'Nunito', sans-serif" }}>
             petshiwu
             {/* Underline animation */}
             <span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-yellow-300 to-pink-300 group-hover:w-full transition-all duration-500 rounded-full"></span>
