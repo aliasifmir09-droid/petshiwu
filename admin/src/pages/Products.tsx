@@ -79,22 +79,28 @@ const Products = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Products</h1>
-          <p className="text-gray-600">Manage your product catalog</p>
+      {/* Header Section with Gradient */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 lg:p-8 shadow-xl animate-fade-in-up">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-4xl font-black text-white mb-2">Products</h1>
+            <p className="text-blue-100 text-lg">Manage your product catalog</p>
+          </div>
+          <button
+            onClick={handleCreate}
+            className="flex items-center gap-2 bg-white text-[#1E3A8A] px-6 py-3 rounded-xl hover:bg-blue-50 font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 btn-ripple"
+          >
+            <Plus size={20} />
+            Add Product
+          </button>
         </div>
-        <button
-          onClick={handleCreate}
-          className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
-        >
-          <Plus size={20} />
-          Add Product
-        </button>
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-300 opacity-10 rounded-full blur-3xl"></div>
       </div>
 
       {/* Search & Filters */}
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all animate-fade-in-up">
         <div className="flex items-center gap-2 mb-4">
           <Filter size={20} className="text-gray-600" />
           <h3 className="font-semibold">Filters & Search</h3>
@@ -150,8 +156,10 @@ const Products = () => {
 
       {/* Out of Stock Notification Bar */}
       {!dismissedNotification && outOfStockData && outOfStockData.data.length > 0 && (
-        <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 shadow-md">
-          <div className="flex items-start justify-between gap-4">
+        <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 border-l-4 border-red-600 rounded-xl p-6 shadow-xl animate-fade-in-up relative overflow-hidden">
+          {/* Pulsing background effect */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-red-200 opacity-20 rounded-full blur-2xl animate-pulse-slow"></div>
+          <div className="flex items-start justify-between gap-4 relative z-10">
             <div className="flex items-start gap-3 flex-1">
               <AlertTriangle className="text-red-600 flex-shrink-0 mt-1" size={24} />
               <div className="flex-1">

@@ -64,26 +64,30 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
   };
 
   return (
-    <aside className="w-64 bg-gray-900 text-white min-h-screen flex flex-col">
+    <aside className="w-64 bg-gradient-to-b from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] text-white min-h-screen flex flex-col shadow-2xl relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-300 opacity-10 rounded-full blur-3xl"></div>
+      
       {/* Logo */}
-      <div className="p-6 border-b border-gray-800">
+      <div className="p-6 border-b border-white/20 relative z-10">
         <div className="flex items-center gap-3 mb-1">
           <img 
             src="/logo.png" 
             alt="petshiwu Logo" 
             className="h-10 w-10 object-contain drop-shadow-lg"
           />
-          <h1 className="text-2xl font-black bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent" style={{ fontFamily: "'Poppins', 'Inter', sans-serif" }}>
+          <h1 className="text-2xl font-black text-white" style={{ fontFamily: "'Poppins', 'Inter', sans-serif" }}>
             petshiwu
           </h1>
         </div>
-        <p className="text-xs text-gray-400 ml-12">Admin Dashboard</p>
+        <p className="text-xs text-blue-200 ml-12">Admin Dashboard</p>
         {userData && (
-          <div className="mt-3 pt-3 border-t border-gray-700">
-            <p className="text-sm text-gray-300">
+          <div className="mt-3 pt-3 border-t border-white/20">
+            <p className="text-sm text-white font-semibold">
               {userData.firstName} {userData.lastName}
             </p>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-blue-200 mt-1">
               {userData.role === 'admin' ? '👑 Super Admin' : '👤 Staff Member'}
             </p>
           </div>
@@ -91,7 +95,7 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
       </div>
 
       {/* Menu */}
-      <nav className="flex-1 p-4">
+      <nav className="flex-1 p-4 relative z-10 overflow-y-auto scrollbar-hide">
         <ul className="space-y-2">
           {menuItems.map((item: any) => {
             // Check if user has permission to see this menu item
@@ -103,21 +107,25 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
             const isActive = location.pathname === item.path;
             
             return (
-              <li key={item.path}>
+              <li key={item.path} className="animate-fade-in-up">
                 <Link
                   to={item.path}
-                  className={`flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
+                  className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 ${
                     isActive
-                      ? 'bg-primary-600 text-white'
-                      : 'text-gray-300 hover:bg-gray-800'
+                      ? 'bg-white text-[#1E3A8A] shadow-xl transform scale-105 font-bold'
+                      : 'text-white/90 hover:bg-white/10 hover:text-white hover:shadow-lg'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon size={20} />
+                    <Icon size={20} className={isActive ? 'text-[#1E3A8A]' : ''} />
                     <span>{item.label}</span>
                   </div>
                   {item.badge !== undefined && item.badge > 0 && (
-                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[24px] text-center">
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full min-w-[24px] text-center ${
+                      isActive 
+                        ? 'bg-gradient-to-r from-red-500 to-pink-600 text-white' 
+                        : 'bg-gradient-to-r from-red-500 to-pink-600 text-white animate-pulse-slow'
+                    }`}>
                       {item.badge}
                     </span>
                   )}
@@ -129,10 +137,10 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
       </nav>
 
       {/* Logout */}
-      <div className="p-4 border-t border-gray-800">
+      <div className="p-4 border-t border-white/20 relative z-10">
         <button
           onClick={() => setShowLogoutModal(true)}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 w-full transition-colors"
+          className="flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:bg-white/10 hover:text-white w-full transition-all duration-300 hover:shadow-lg font-medium"
         >
           <LogOut size={20} />
           <span>Logout</span>

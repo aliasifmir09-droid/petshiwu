@@ -351,26 +351,30 @@ const CategoriesNew = () => {
     <div className="p-6">
       <Toast toast={toast} onClose={hideToast} />
 
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
+      {/* Header Section with Gradient */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 lg:p-8 shadow-xl mb-6 animate-fade-in-up">
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-              <FolderTree size={32} className="text-primary-600" />
+            <h1 className="text-4xl font-black text-white mb-2 flex items-center gap-3">
+              <FolderTree size={36} className="text-white" />
               Navigation Menu - Categories
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-blue-100 text-lg">
               Manage navigation menu structure: Main Categories → Subcategories → Sub-Subcategories (3 levels max)
             </p>
           </div>
           <button
             onClick={() => handleOpenModal()}
-            className="flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors shadow-md z-10 relative"
+            className="flex items-center gap-2 bg-white text-[#1E3A8A] px-6 py-3 rounded-xl hover:bg-blue-50 font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 btn-ripple z-10 relative"
           >
             <Plus size={20} />
             Add Main Category
           </button>
         </div>
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-300 opacity-10 rounded-full blur-3xl"></div>
+      </div>
 
         {/* Quick Guide */}
         {showGuide && (

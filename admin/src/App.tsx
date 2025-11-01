@@ -73,8 +73,11 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="text-xl font-semibold text-gray-700">Loading...</div>
+        </div>
       </div>
     );
   }
@@ -88,9 +91,9 @@ function App() {
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
         ) : (
-          <div className="flex">
+          <div className="flex min-h-screen">
             <Sidebar onLogout={handleLogout} />
-            <main className="flex-1 bg-gray-100 p-8 overflow-auto min-h-screen">
+            <main className="flex-1 bg-gradient-to-br from-gray-50 via-white to-gray-50 p-6 lg:p-8 overflow-auto min-h-screen">
               <PasswordExpiryWarning />
               <Routes>
                 <Route 
