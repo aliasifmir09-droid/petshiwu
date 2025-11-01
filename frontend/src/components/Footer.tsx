@@ -14,7 +14,7 @@ const Footer = () => {
                 alt="petshiwu Logo" 
                 className="h-14 w-14 object-contain drop-shadow-lg"
               />
-              <h3 className="text-xl font-black bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent" style={{ fontFamily: "'Cookie', cursive" }}>
+              <h3 className="text-xl font-black bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent" style={{ fontFamily: "'Comfortaa', cursive" }}>
                 petshiwu
               </h3>
             </div>
