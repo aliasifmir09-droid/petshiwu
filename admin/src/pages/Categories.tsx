@@ -54,15 +54,6 @@ const CategoriesNew = () => {
 
   const categories = categoriesResponse?.data || [];
   
-  // Debug logging
-  if (categoriesResponse) {
-    console.log('Categories Response:', {
-      hasData: !!categoriesResponse.data,
-      dataLength: categoriesResponse.data?.length,
-      total: categoriesResponse.total,
-      categories: categoriesResponse.data
-    });
-  }
   
   if (error) {
     console.error('Error fetching categories:', error);

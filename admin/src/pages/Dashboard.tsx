@@ -163,12 +163,6 @@ const Dashboard = () => {
       }
     });
 
-    // Debug logging
-    console.log('Category Chart Data:', {
-      rootCategoriesCount: rootCategories.length,
-      categoryCounts,
-      chartData: Object.entries(categoryCounts).map(([name, value]) => ({ name, value }))
-    });
 
     // Convert to array format for chart, sorted by value (descending)
     const chartData = Object.entries(categoryCounts)
