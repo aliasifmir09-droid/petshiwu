@@ -99,15 +99,27 @@ const HeroSlideshow = () => {
 
   return (
     <div className="w-full mt-4">
-      {/* Top Promotional Banner - Slim Version */}
-      <Link to="/products">
-        <div className="relative overflow-hidden bg-gradient-to-r from-emerald-400 via-green-400 to-teal-400 py-2.5 text-center shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
-          <div className="absolute inset-0 bg-gradient-to-r from-yellow-200 via-transparent to-yellow-200 opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
-          <p className="text-sm md:text-base font-semibold text-white drop-shadow-sm relative z-10">
-            🎁 FREE $20 eGift Card with $49+ Order • Limited Time! 🎁
-          </p>
-        </div>
-      </Link>
+      {/* Top Promotional Banner - Matching Slideshow Width */}
+      <div className="container mx-auto px-4 md:px-6 lg:px-8">
+        <Link to="/products">
+          <div className="relative overflow-hidden bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 py-3.5 md:py-4 text-center rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border-2 border-emerald-400/30">
+            {/* Animated background overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-300/20 via-transparent to-yellow-300/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            
+            {/* Sparkle decorations */}
+            <div className="absolute top-2 left-4 text-2xl animate-pulse opacity-70">✨</div>
+            <div className="absolute top-2 right-4 text-2xl animate-pulse opacity-70" style={{ animationDelay: '0.5s' }}>✨</div>
+            
+            {/* Main text */}
+            <p className="text-base md:text-lg lg:text-xl font-black text-white drop-shadow-lg relative z-10 tracking-wide">
+              🎁 FREE $20 eGift Card with $49+ Order • Limited Time! 🎁
+            </p>
+            
+            {/* Bottom shine effect */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+          </div>
+        </Link>
+      </div>
 
       {/* Main Slideshow */}
       <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-4">
