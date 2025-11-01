@@ -76,7 +76,7 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
             <img 
               src="/logo.png" 
               alt="petshiwu Logo" 
-              className="h-12 w-12 object-contain transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 drop-shadow-2xl relative z-10"
+              className="h-16 w-16 object-contain transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 drop-shadow-2xl relative z-10"
             />
             {/* Glow effect on hover */}
             <div className="absolute inset-0 bg-white/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -87,7 +87,7 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
             <span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-yellow-300 to-pink-300 group-hover:w-full transition-all duration-500 rounded-full"></span>
           </span>
         </Link>
-        <p className="text-xs text-blue-200 ml-16 mt-1">Admin Dashboard</p>
+        <p className="text-xs text-blue-200 ml-20 mt-1">Admin Dashboard</p>
         {userData && (
           <div className="mt-3 pt-3 border-t border-white/20">
             <p className="text-sm text-white font-semibold">
