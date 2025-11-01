@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 import Order from '../models/Order';
 import Product from '../models/Product';
 import { AuthRequest } from '../middleware/auth';
@@ -343,6 +344,67 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
         totalRevenue,
         recentOrders
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Track order by ID (Public - no authentication required)
+export const trackOrder = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid order ID format'
+      });
+    }
+
+    const order = await Order.findById(id)
+      .populate('user', 'firstName lastName email')
+      .select('-billingAddress'); // Don't expose billing address
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    // Return limited order info for tracking (public)
+    const trackingInfo = {
+      _id: order._id,
+      orderNumber: order.orderNumber,
+      orderStatus: order.orderStatus,
+      paymentStatus: order.paymentStatus,
+      trackingNumber: order.trackingNumber,
+      items: order.items.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price
+      })),
+      shippingAddress: {
+        firstName: order.shippingAddress.firstName,
+        lastName: order.shippingAddress.lastName,
+        city: order.shippingAddress.city,
+        state: order.shippingAddress.state,
+        zipCode: order.shippingAddress.zipCode
+      },
+      itemsPrice: order.itemsPrice,
+      shippingPrice: order.shippingPrice,
+      taxPrice: order.taxPrice,
+      totalPrice: order.totalPrice,
+      createdAt: order.createdAt,
+      isDelivered: order.isDelivered,
+      deliveredAt: order.deliveredAt
+    };
+
+    res.status(200).json({
+      success: true,
+      data: trackingInfo
     });
   } catch (error) {
     next(error);

@@ -33,6 +33,26 @@ export const orderService = {
   cancelOrder: async (id: string) => {
     const response = await api.put<ApiResponse<Order>>(`/orders/${id}/cancel`);
     return response.data;
+  },
+
+  trackOrder: async (id: string) => {
+    // Public endpoint - no auth required
+    // Create a new axios instance without interceptors for public requests
+    const axios = (await import('axios')).default;
+    let apiUrl = import.meta.env.VITE_API_URL || '/api';
+    apiUrl = apiUrl.replace(/\/+$/, '');
+    if (apiUrl.startsWith('http') && !apiUrl.endsWith('/api')) {
+      apiUrl = `${apiUrl}/api`;
+    }
+    apiUrl = apiUrl.replace(/\/+$/, '');
+    
+    const response = await axios.get<ApiResponse<Order>>(`${apiUrl}/orders/track/${id}`, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      withCredentials: true
+    });
+    return response.data.data;
   }
 };
 

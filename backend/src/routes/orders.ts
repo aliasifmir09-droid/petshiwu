@@ -7,7 +7,8 @@ import {
   updateOrderStatus,
   updatePaymentStatus,
   getOrderStats,
-  cancelOrder
+  cancelOrder,
+  trackOrder
 } from '../controllers/orderController';
 import { protect, authorize } from '../middleware/auth';
 import { checkPermission } from '../middleware/permissions';
@@ -18,6 +19,9 @@ import {
 } from '../middleware/validation';
 
 const router = express.Router();
+
+// Public route for order tracking (no authentication required)
+router.get('/track/:id', validateObjectId(), trackOrder);
 
 router.post('/', protect, createOrderValidation, createOrder);
 router.get('/myorders', protect, paginationValidation, getMyOrders);
