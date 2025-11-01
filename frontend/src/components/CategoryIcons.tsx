@@ -1,5 +1,50 @@
 import { Link } from 'react-router-dom';
 import { UtensilsCrossed, HeartPulse, Cookie, Fish, Box, Tag } from 'lucide-react';
+import { useState } from 'react';
+
+interface CategoryItem {
+  icon: any;
+  title: string;
+  link: string;
+  color: string;
+  image?: string;
+}
+
+const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
+  const [imageError, setImageError] = useState(false);
+  const Icon = category.icon;
+
+  return (
+    <Link
+      to={category.link}
+      className="flex flex-col items-center text-center group"
+    >
+      {/* Circular Icon/Image with Light Blue Background */}
+      <div className="relative w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mb-3 group-hover:scale-110 transition-all duration-300 shadow-md group-hover:shadow-xl overflow-hidden">
+        {category.image && !imageError ? (
+          /* Image Display */
+          <div className="w-full h-full rounded-full overflow-hidden">
+            <img 
+              src={category.image} 
+              alt={category.title}
+              className="w-full h-full object-cover"
+              onError={() => setImageError(true)}
+            />
+          </div>
+        ) : (
+          /* Icon Display */
+          <div className={`w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center`}>
+            <Icon size={32} className="text-white md:w-10 md:h-10 lg:w-12 lg:h-12" />
+          </div>
+        )}
+      </div>
+      {/* Label */}
+      <p className="text-sm md:text-base font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
+        {category.title}
+      </p>
+    </Link>
+  );
+};
 
 const CategoryIcons = () => {
   const categories = [
@@ -7,7 +52,8 @@ const CategoryIcons = () => {
       icon: UtensilsCrossed,
       title: 'Dog food',
       link: '/products?petType=dog&category=Food',
-      color: 'from-blue-500 to-blue-600'
+      color: 'from-blue-500 to-blue-600',
+      image: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=400&fit=crop&q=90'
     },
     {
       icon: HeartPulse,
@@ -51,28 +97,9 @@ const CategoryIcons = () => {
         </div>
         
         <div className="grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-6">
-          {categories.map((category, index) => {
-            const Icon = category.icon;
-            return (
-              <Link
-                key={index}
-                to={category.link}
-                className="flex flex-col items-center text-center group"
-              >
-                {/* Circular Icon with Light Blue Background */}
-                <div className="relative w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mb-3 group-hover:scale-110 transition-all duration-300 shadow-md group-hover:shadow-xl">
-                  {/* Inner Gradient Circle */}
-                  <div className={`w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center`}>
-                    <Icon size={32} className="text-white md:w-10 md:h-10 lg:w-12 lg:h-12" />
-                  </div>
-                </div>
-                {/* Label */}
-                <p className="text-sm md:text-base font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                  {category.title}
-                </p>
-              </Link>
-            );
-          })}
+          {categories.map((category, index) => (
+            <CategoryItemComponent key={index} category={category} />
+          ))}
         </div>
       </div>
     </section>
