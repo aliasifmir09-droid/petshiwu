@@ -102,7 +102,7 @@ const HeroSlideshow = () => {
       {/* Top Promotional Banner - Matching Slideshow Width */}
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
         <Link to="/products">
-          <div className="relative overflow-hidden bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 py-3.5 md:py-4 text-center rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border-2 border-emerald-400/30">
+          <div className="relative overflow-hidden bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 py-3.5 md:py-4 text-center rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border-2 border-emerald-400/30 max-w-2xl mx-auto">
             {/* Animated background overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-300/20 via-transparent to-yellow-300/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             
