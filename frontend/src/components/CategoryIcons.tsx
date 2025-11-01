@@ -12,7 +12,6 @@ interface CategoryItem {
 
 const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
   const [imageError, setImageError] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
   const Icon = category.icon;
 
   return (
@@ -22,30 +21,33 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
     >
       {/* Circular Icon/Image with Light Blue Background */}
       <div className="relative w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mb-3 group-hover:scale-110 transition-all duration-300 shadow-md group-hover:shadow-xl overflow-hidden">
-        {category.image && !imageError ? (
-          /* Image Display */
+        {category.image ? (
+          /* Image Display - Always try to show image first */
           <>
-            {!imageLoaded && (
-              <div className={`absolute inset-0 w-full h-full rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center`}>
-                <Icon size={32} className="text-white md:w-10 md:h-10 lg:w-12 lg:h-12 animate-pulse" />
-              </div>
-            )}
-            <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
+            {/* Hidden fallback icon for error case */}
+            <div className={`absolute inset-0 w-full h-full rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center ${imageError ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+              <Icon size={32} className="text-white md:w-10 md:h-10 lg:w-12 lg:h-12" />
+            </div>
+            {/* Image that should be visible */}
+            <div className={`w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center ${imageError ? 'opacity-0 absolute' : 'opacity-100 relative'}`}>
               <img 
                 src={category.image} 
                 alt={category.title}
-                className={`w-full h-full object-contain object-center ${imageLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
-                onLoad={() => setImageLoaded(true)}
-                onError={() => {
+                className="w-full h-full object-contain object-center p-1"
+                onError={(e) => {
+                  console.error(`Failed to load image: ${category.image}`, e);
                   setImageError(true);
-                  setImageLoaded(false);
+                }}
+                onLoad={() => {
+                  setImageError(false);
                 }}
                 loading="eager"
+                style={{ display: imageError ? 'none' : 'block' }}
               />
             </div>
           </>
         ) : (
-          /* Icon Display - Fallback */
+          /* Icon Display - Only if no image path */
           <div className={`w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center`}>
             <Icon size={32} className="text-white md:w-10 md:h-10 lg:w-12 lg:h-12" />
           </div>
