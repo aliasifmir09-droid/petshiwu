@@ -309,7 +309,7 @@ const Home = () => {
                     {featuredProducts?.data.map((product) => (
                       <div key={product._id} className="flex-shrink-0 w-56 md:w-60 lg:w-64 animate-fade-in-up h-full">
                         <div className="h-full flex flex-col">
-                          <ProductCard product={product} />
+                          <ProductCard product={product} hideCartButton={true} />
                         </div>
                       </div>
                     ))}

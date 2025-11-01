@@ -8,9 +8,10 @@ import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 
 interface ProductCardProps {
   product: Product;
+  hideCartButton?: boolean;
 }
 
-const ProductCard = memo(({ product }: ProductCardProps) => {
+const ProductCard = memo(({ product, hideCartButton = false }: ProductCardProps) => {
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
   const { addToCart } = useCartStore();
   const inWishlist = isInWishlist(product._id);
@@ -227,23 +228,25 @@ const ProductCard = memo(({ product }: ProductCardProps) => {
         </div>
 
         {/* Add to Cart Button with Enhanced Design */}
-        <button
-          onClick={handleAddToCart}
-          disabled={!product.inStock}
-          className={`w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm transition-all transform active:scale-95 btn-ripple relative overflow-hidden mt-auto ${
-            product.inStock
-              ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-2xl hover:scale-105'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          <ShoppingCart size={20} strokeWidth={2.5} />
-          <span className="relative z-10">
-            {product.inStock ? 'Add to Cart' : 'Out of Stock'}
-          </span>
-          {product.inStock && (
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-          )}
-        </button>
+        {!hideCartButton && (
+          <button
+            onClick={handleAddToCart}
+            disabled={!product.inStock}
+            className={`w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm transition-all transform active:scale-95 btn-ripple relative overflow-hidden mt-auto ${
+              product.inStock
+                ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-2xl hover:scale-105'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            <ShoppingCart size={20} strokeWidth={2.5} />
+            <span className="relative z-10">
+              {product.inStock ? 'Add to Cart' : 'Out of Stock'}
+            </span>
+            {product.inStock && (
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+            )}
+          </button>
+        )}
 
         {/* Quick View Hint (appears on hover) */}
         {isHovered && product.inStock && (
