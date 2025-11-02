@@ -807,10 +807,8 @@ const seedData = async () => {
     console.log('\n=== Seed Data Summary ===');
     console.log('Admin User:');
     console.log('  Email: admin@petshiwu.com');
-    console.log('  Password: admin123');
     console.log('\nCustomer User:');
     console.log('  Email: customer@example.com');
-    console.log('  Password: password123');
     console.log('\nPet Types: 3');
     console.log('  - Dog 🐕');
     console.log('  - Cat 🐱');

@@ -55,9 +55,6 @@ const CategoriesNew = () => {
   const categories = categoriesResponse?.data || [];
   
   
-  if (error) {
-    console.error('Error fetching categories:', error);
-  }
 
   // Get flat list of all categories for parent selection
   const flatCategories = () => {

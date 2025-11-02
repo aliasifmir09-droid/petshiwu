@@ -78,8 +78,6 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       data: order
     });
   } catch (error: any) {
-    console.error('Order creation error:', error);
-    
     // Handle validation errors
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).map((err: any) => err.message);

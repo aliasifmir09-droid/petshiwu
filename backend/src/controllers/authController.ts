@@ -36,8 +36,6 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   try {
     const { email, password } = req.body;
 
-    console.log('Login attempt:', { email, hasPassword: !!password });
-
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -48,29 +46,22 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
-      console.log('Login failed: User not found for email:', email);
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
       });
     }
-
-    console.log('User found:', { id: user._id, email: user.email, role: user.role });
 
     const isPasswordMatch = await user.comparePassword(password);
 
     if (!isPasswordMatch) {
-      console.log('Login failed: Password mismatch for email:', email);
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
       });
     }
-
-    console.log('Login successful for email:', email);
     sendTokenResponse((user._id as any).toString(), 200, res);
   } catch (error: any) {
-    console.error('Login error:', error.message);
     next(error);
   }
 };

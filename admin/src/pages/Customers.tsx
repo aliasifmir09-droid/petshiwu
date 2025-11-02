@@ -75,7 +75,6 @@ const Customers = () => {
         const response = await adminService.getCustomerOrders(selectedCustomer._id);
         return response.data || [];
       } catch (error) {
-        console.error('Error fetching customer orders:', error);
         return [];
       }
     },

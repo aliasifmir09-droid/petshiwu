@@ -18,7 +18,6 @@ const createCustomer = async () => {
       console.log('✅ Test customer already exists!');
       console.log('\n📧 Login Credentials:');
       console.log('   Email: customer@test.com');
-      console.log('   Password: password123');
       console.log('\n🌐 Login at: http://localhost:5173/login\n');
       await mongoose.connection.close();
       process.exit(0);
@@ -37,7 +36,6 @@ const createCustomer = async () => {
     console.log('✅ Test customer created successfully!\n');
     console.log('📧 Login Credentials:');
     console.log('   Email: customer@test.com');
-    console.log('   Password: password123');
     console.log('\n👤 Customer Details:');
     console.log(`   Name: ${customer.firstName} ${customer.lastName}`);
     console.log(`   Email: ${customer.email}`);
@@ -54,6 +52,7 @@ const createCustomer = async () => {
 };
 
 createCustomer();
+
 
 
 

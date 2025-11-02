@@ -52,12 +52,11 @@ const ensureAdminUser = async () => {
         role: 'admin',
         phone: '+1234567890'
       });
-      console.log('\n✅ Admin user created automatically');
-      console.log(`   Email: ${adminEmail}`);
-      console.log('   Password: admin123');
-      console.log('   You can now login to the admin dashboard\n');
-    } else {
-      console.log('✓ Admin user already exists');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('\n✅ Admin user created automatically');
+        console.log(`   Email: ${adminEmail}`);
+        console.log('   You can now login to the admin dashboard\n');
+      }
     }
   } catch (error: any) {
     console.error('Error ensuring admin user:', error.message);
@@ -139,21 +138,25 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.includes(origin) || allowedOrigins.some(allowed => origin?.startsWith(allowed))) {
-      callback(null, true);
-    } else {
-      console.warn(`CORS blocked origin: ${origin}`);
-      callback(null, true); // Allow anyway in production to avoid blocking
-    }
+      if (allowedOrigins.includes(origin) || allowedOrigins.some(allowed => origin?.startsWith(allowed))) {
+        callback(null, true);
+      } else {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`CORS blocked origin: ${origin}`);
+        }
+        callback(null, true); // Allow anyway in production to avoid blocking
+      }
   },
   credentials: true
 }));
 
-// Request logging middleware (always enabled for debugging)
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl || req.url}`);
-  next();
-});
+// Request logging middleware (development only)
+if (process.env.NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl || req.url}`);
+    next();
+  });
+}
 
 // Dev logging middleware
 if (process.env.NODE_ENV === 'development') {
@@ -165,7 +168,6 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Mount routers
 app.use('/api/auth', authRoutes);
-console.log('✓ Auth routes mounted at /api/auth');
 
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -205,27 +207,19 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Debug: Test auth route directly (before other routes)
-app.post('/api/auth/test', (req, res) => {
-  res.json({ 
-    success: true, 
-    message: 'Auth route test endpoint works',
-    body: req.body,
-    timestamp: new Date().toISOString()
+// Catch-all for debugging unmatched routes (development only)
+if (process.env.NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    console.log('Unmatched route:', {
+      method: req.method,
+      originalUrl: req.originalUrl,
+      url: req.url,
+      path: req.path,
+      baseUrl: req.baseUrl
+    });
+    next();
   });
-});
-
-// Catch-all for debugging unmatched routes (before notFound)
-app.use((req, res, next) => {
-  console.log('Unmatched route:', {
-    method: req.method,
-    originalUrl: req.originalUrl,
-    url: req.url,
-    path: req.path,
-    baseUrl: req.baseUrl
-  });
-  next();
-});
+}
 
 // Error handler (must be last)
 app.use(notFound);
