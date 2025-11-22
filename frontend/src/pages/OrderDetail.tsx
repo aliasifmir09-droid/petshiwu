@@ -283,6 +283,14 @@ const OrderDetail = () => {
                   <span className="text-gray-600">Tax</span>
                   <span className="font-medium">${order.taxPrice.toFixed(2)}</span>
                 </div>
+                {order.donationAmount && order.donationAmount > 0 && (
+                  <div className="flex justify-between text-pink-600">
+                    <span className="flex items-center gap-1">
+                      <span>💝 Donation</span>
+                    </span>
+                    <span className="font-medium">${order.donationAmount.toFixed(2)}</span>
+                  </div>
+                )}
                 {order.discount && order.discount > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Discount</span>

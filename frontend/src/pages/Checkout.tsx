@@ -7,6 +7,7 @@ import { orderService } from '@/services/orders';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
+import CheckoutDonationModal from '@/components/CheckoutDonationModal';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -27,11 +28,14 @@ const Checkout = () => {
   });
 
   const [paymentMethod] = useState<'cod'>('cod');
+  const [donationAmount, setDonationAmount] = useState<number>(0);
+  const [showDonationModal, setShowDonationModal] = useState(false);
+  const [pendingOrderData, setPendingOrderData] = useState<any>(null);
 
   const subtotal = getTotalPrice();
   const shipping = subtotal > 49 ? 0 : 5.99;
   const tax = subtotal * 0.08;
-  const total = subtotal + shipping + tax;
+  const total = subtotal + shipping + tax + donationAmount;
 
   const createOrderMutation = useMutation({
     mutationFn: orderService.createOrder,
@@ -60,6 +64,7 @@ const Checkout = () => {
       return;
     }
 
+    // Prepare order data
     const orderData = {
       items: items.map(item => ({
         product: item.product._id,
@@ -87,10 +92,38 @@ const Checkout = () => {
       itemsPrice: subtotal,
       shippingPrice: shipping,
       taxPrice: tax,
-      totalPrice: total
+      donationAmount: donationAmount > 0 ? donationAmount : undefined,
+      totalPrice: subtotal + shipping + tax + donationAmount
     };
 
-    createOrderMutation.mutate(orderData);
+    // Show donation modal before submitting
+    setPendingOrderData(orderData);
+    setShowDonationModal(true);
+  };
+
+  const handleDonationConfirm = (amount: number) => {
+    setDonationAmount(amount);
+    setShowDonationModal(false);
+    
+    // Update order data with donation
+    if (pendingOrderData) {
+      const updatedOrderData = {
+        ...pendingOrderData,
+        donationAmount: amount > 0 ? amount : undefined,
+        totalPrice: subtotal + shipping + tax + amount
+      };
+      createOrderMutation.mutate(updatedOrderData);
+      setPendingOrderData(null);
+    }
+  };
+
+  const handleDonationSkip = () => {
+    setShowDonationModal(false);
+    // Submit order without donation
+    if (pendingOrderData) {
+      createOrderMutation.mutate(pendingOrderData);
+      setPendingOrderData(null);
+    }
   };
 
   if (items.length === 0) {
@@ -282,6 +315,14 @@ const Checkout = () => {
                   <span className="text-gray-600">Tax</span>
                   <span className="font-medium">${tax.toFixed(2)}</span>
                 </div>
+                {donationAmount > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 flex items-center gap-1">
+                      <span>💝 Donation</span>
+                    </span>
+                    <span className="font-medium text-pink-600">${donationAmount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="border-t pt-3 flex justify-between text-lg font-bold">
                   <span>Total</span>
                   <span>${total.toFixed(2)}</span>
@@ -299,6 +340,13 @@ const Checkout = () => {
           </div>
         </div>
       </form>
+
+      {/* Donation Modal */}
+      <CheckoutDonationModal
+        isOpen={showDonationModal}
+        onClose={handleDonationSkip}
+        onConfirm={handleDonationConfirm}
+      />
 
       {/* Toast Notification */}
       {toast.isVisible && (

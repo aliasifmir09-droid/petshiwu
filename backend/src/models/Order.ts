@@ -37,6 +37,7 @@ export interface IOrder extends Document {
   itemsPrice: number;
   shippingPrice: number;
   taxPrice: number;
+  donationAmount?: number;
   totalPrice: number;
   discount?: number;
   couponCode?: string;
@@ -146,6 +147,11 @@ const orderSchema = new Schema<IOrder>(
     taxPrice: {
       type: Number,
       required: true,
+      default: 0,
+      min: 0
+    },
+    donationAmount: {
+      type: Number,
       default: 0,
       min: 0
     },

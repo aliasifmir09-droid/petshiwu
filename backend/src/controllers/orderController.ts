@@ -15,6 +15,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       itemsPrice,
       shippingPrice,
       taxPrice,
+      donationAmount,
       totalPrice
     } = req.body;
 
@@ -60,6 +61,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       itemsPrice,
       shippingPrice,
       taxPrice,
+      donationAmount: donationAmount || 0,
       totalPrice
     });
 
@@ -325,6 +327,38 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
     const paidOrders = await Order.find({ paymentStatus: 'paid' });
     const totalRevenue = paidOrders.reduce((sum, order) => sum + order.totalPrice, 0);
 
+    // Calculate donation statistics
+    const ordersWithDonations = await Order.find({ donationAmount: { $gt: 0 } });
+    const totalDonations = ordersWithDonations.reduce((sum, order) => sum + (order.donationAmount || 0), 0);
+    const donationCount = ordersWithDonations.length;
+    const averageDonation = donationCount > 0 ? totalDonations / donationCount : 0;
+
+    // Monthly donation breakdown (last 12 months)
+    const monthlyDonations = await Order.aggregate([
+      {
+        $match: {
+          donationAmount: { $gt: 0 },
+          createdAt: { $gte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          total: { $sum: '$donationAmount' },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { '_id.year': 1, '_id.month': 1 }
+      },
+      {
+        $limit: 12
+      }
+    ]);
+
     // Get recent orders
     const recentOrders = await Order.find()
       .populate('user', 'firstName lastName email')
@@ -340,6 +374,10 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
         shippedOrders,
         deliveredOrders,
         totalRevenue,
+        totalDonations,
+        donationCount,
+        averageDonation,
+        monthlyDonations,
         recentOrders
       }
     });

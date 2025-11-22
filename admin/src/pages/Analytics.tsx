@@ -28,7 +28,8 @@ import {
   Download,
   Calendar,
   Package,
-  TrendingDown
+  TrendingDown,
+  Heart
 } from 'lucide-react';
 import Dropdown from '@/components/Dropdown';
 
@@ -79,6 +80,8 @@ const Analytics = () => {
     // Current period orders
     const currentOrders = orders.filter((o: any) => new Date(o.createdAt) > currentPeriodStart);
     const currentRevenue = currentOrders.reduce((sum: number, o: any) => sum + o.totalPrice, 0);
+    const currentDonations = currentOrders.reduce((sum: number, o: any) => sum + (o.donationAmount || 0), 0);
+    const currentDonationCount = currentOrders.filter((o: any) => (o.donationAmount || 0) > 0).length;
     
     // Previous period orders (for comparison)
     const previousOrders = orders.filter((o: any) => {
@@ -86,6 +89,8 @@ const Analytics = () => {
       return date > previousPeriodStart && date <= currentPeriodStart;
     });
     const previousRevenue = previousOrders.reduce((sum: number, o: any) => sum + o.totalPrice, 0);
+    const previousDonations = previousOrders.reduce((sum: number, o: any) => sum + (o.donationAmount || 0), 0);
+    const previousDonationCount = previousOrders.filter((o: any) => (o.donationAmount || 0) > 0).length;
 
     // Calculate growth percentages
     const revenueGrowth = previousRevenue > 0 
@@ -94,6 +99,9 @@ const Analytics = () => {
     const orderGrowth = previousOrders.length > 0
       ? ((currentOrders.length - previousOrders.length) / previousOrders.length) * 100
       : currentOrders.length > 0 ? 100 : 0;
+    const donationGrowth = previousDonations > 0
+      ? ((currentDonations - previousDonations) / previousDonations) * 100
+      : currentDonations > 0 ? 100 : 0;
 
     // Average order value
     const avgOrderValue = currentOrders.length > 0 
@@ -133,6 +141,14 @@ const Analytics = () => {
         current: uniqueCustomers,
         previous: prevUniqueCustomers,
         growth: customerGrowth
+      },
+      donations: {
+        current: currentDonations,
+        previous: previousDonations,
+        growth: donationGrowth,
+        count: currentDonationCount,
+        previousCount: previousDonationCount,
+        average: currentDonationCount > 0 ? currentDonations / currentDonationCount : 0
       }
     };
   }, [ordersData, timeRange]);
@@ -163,12 +179,14 @@ const Analytics = () => {
         });
 
         const revenue = dayOrders.reduce((sum: number, o: any) => sum + o.totalPrice, 0);
+        const donations = dayOrders.reduce((sum: number, o: any) => sum + (o.donationAmount || 0), 0);
 
         data.push({
           date: days === 1 
             ? dayStart.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
             : dayStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
           revenue: Math.round(revenue * 100) / 100,
+          donations: Math.round(donations * 100) / 100,
           orders: dayOrders.length
         });
       }
@@ -184,10 +202,12 @@ const Analytics = () => {
         });
 
         const revenue = weekOrders.reduce((sum: number, o: any) => sum + o.totalPrice, 0);
+        const donations = weekOrders.reduce((sum: number, o: any) => sum + (o.donationAmount || 0), 0);
 
         data.push({
           date: `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`,
           revenue: Math.round(revenue * 100) / 100,
+          donations: Math.round(donations * 100) / 100,
           orders: weekOrders.length
         });
       }
@@ -204,10 +224,12 @@ const Analytics = () => {
         });
 
         const revenue = monthOrders.reduce((sum: number, o: any) => sum + o.totalPrice, 0);
+        const donations = monthOrders.reduce((sum: number, o: any) => sum + (o.donationAmount || 0), 0);
 
         data.push({
           date: monthStart.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
           revenue: Math.round(revenue * 100) / 100,
+          donations: Math.round(donations * 100) / 100,
           orders: monthOrders.length
         });
       }
@@ -418,6 +440,25 @@ const Analytics = () => {
             growth={calculateMetrics.customers.growth}
             icon={Users}
           />
+          {calculateMetrics.donations && (
+            <>
+              <MetricCard
+                title="Total Donations"
+                value={calculateMetrics.donations.current}
+                growth={calculateMetrics.donations.growth}
+                icon={Heart}
+                format="currency"
+              />
+              <MetricCard
+                title="Donation Orders"
+                value={calculateMetrics.donations.count}
+                growth={calculateMetrics.donations.previousCount > 0 
+                  ? ((calculateMetrics.donations.count - calculateMetrics.donations.previousCount) / calculateMetrics.donations.previousCount) * 100
+                  : calculateMetrics.donations.count > 0 ? 100 : 0}
+                icon={Package}
+              />
+            </>
+          )}
         </div>
       )}
 
@@ -449,6 +490,10 @@ const Analytics = () => {
               <div className="w-3 h-3 rounded-full bg-green-600"></div>
               <span className="text-gray-600">Orders</span>
             </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-pink-600"></div>
+              <span className="text-gray-600">Donations</span>
+            </div>
           </div>
         </div>
         <ResponsiveContainer width="100%" height={350}>
@@ -457,6 +502,10 @@ const Analytics = () => {
               <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#0284c7" stopOpacity={0.3}/>
                 <stop offset="95%" stopColor="#0284c7" stopOpacity={0}/>
+              </linearGradient>
+              <linearGradient id="colorDonations" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#ec4899" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="#ec4899" stopOpacity={0}/>
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -478,7 +527,7 @@ const Analytics = () => {
                 boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
               }}
               formatter={(value: any, name: string) => {
-                if (name === 'Revenue ($)') return [`$${value.toFixed(2)}`, name];
+                if (name === 'Revenue ($)' || name === 'Donations ($)') return [`$${value.toFixed(2)}`, name];
                 return [value, name];
               }}
             />
@@ -492,6 +541,16 @@ const Analytics = () => {
               fill="url(#colorRevenue)" 
               strokeWidth={2}
               name="Revenue ($)"
+            />
+            <Area 
+              yAxisId="left"
+              type="monotone" 
+              dataKey="donations" 
+              stroke="#ec4899" 
+              fillOpacity={1}
+              fill="url(#colorDonations)" 
+              strokeWidth={2}
+              name="Donations ($)"
             />
             <Line 
               yAxisId="right"
@@ -553,6 +612,68 @@ const Analytics = () => {
             <ShoppingCart className="mx-auto mb-4 text-gray-400" size={48} />
             <h3 className="text-xl font-bold text-gray-900 mb-2">No Order Status Data</h3>
             <p className="text-gray-600">Order status distribution will appear here once you have orders.</p>
+          </div>
+        )}
+
+        {/* Donation Trends Chart */}
+        {generateRevenueTrend.length > 0 && calculateMetrics?.donations && (
+          <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all animate-fade-in-up">
+            <div className="mb-6">
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <Heart className="text-pink-500" size={24} />
+                Donation Trends
+              </h2>
+              <p className="text-sm text-gray-600">Donations received over time</p>
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={generateRevenueTrend.filter((d: any) => d.donations > 0)}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis 
+                  dataKey="date" 
+                  stroke="#6b7280" 
+                  fontSize={12}
+                  angle={generateRevenueTrend.length > 20 ? -45 : 0}
+                  textAnchor={generateRevenueTrend.length > 20 ? "end" : "middle"}
+                  height={generateRevenueTrend.length > 20 ? 80 : 30}
+                />
+                <YAxis stroke="#ec4899" fontSize={12} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#fff', 
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}
+                  formatter={(value: any) => [`$${value.toFixed(2)}`, 'Donations']}
+                />
+                <Bar 
+                  dataKey="donations" 
+                  fill="#ec4899" 
+                  radius={[8, 8, 0, 0]}
+                  name="Donations ($)"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+            <div className="mt-4 grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Total Donations</p>
+                <p className="text-xl font-bold text-pink-600">
+                  ${calculateMetrics.donations.current.toFixed(2)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Donation Orders</p>
+                <p className="text-xl font-bold text-gray-900">
+                  {calculateMetrics.donations.count}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Avg Donation</p>
+                <p className="text-xl font-bold text-gray-900">
+                  ${calculateMetrics.donations.average.toFixed(2)}
+                </p>
+              </div>
+            </div>
           </div>
         )}
 

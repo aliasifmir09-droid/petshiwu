@@ -135,6 +135,7 @@ export interface Order {
   itemsPrice: number;
   shippingPrice: number;
   taxPrice: number;
+  donationAmount?: number;
   totalPrice: number;
   discount?: number;
   couponCode?: string;

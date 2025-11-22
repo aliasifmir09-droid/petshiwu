@@ -9,6 +9,7 @@ interface CreateOrderData {
   itemsPrice: number;
   shippingPrice: number;
   taxPrice: number;
+  donationAmount?: number;
   totalPrice: number;
 }
 
