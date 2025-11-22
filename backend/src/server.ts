@@ -26,6 +26,7 @@ import reviewRoutes from './routes/reviews';
 import uploadRoutes from './routes/upload';
 import userRoutes from './routes/users';
 import petTypeRoutes from './routes/petTypes';
+import donationRoutes from './routes/donations';
 
 // Connect to database
 connectDatabase();
@@ -176,6 +177,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/pet-types', petTypeRoutes);
+app.use('/api/donations', donationRoutes);
 
 // Root route - API information
 app.get('/', (req, res) => {
@@ -192,7 +194,8 @@ app.get('/', (req, res) => {
       reviews: '/api/reviews',
       users: '/api/users',
       upload: '/api/upload',
-      petTypes: '/api/pet-types'
+      petTypes: '/api/pet-types',
+      donations: '/api/donations'
     },
     timestamp: new Date().toISOString()
   });

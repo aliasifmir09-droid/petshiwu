@@ -20,6 +20,7 @@ const Profile = lazy(() => import('./pages/Profile'));
 const MyOrders = lazy(() => import('./pages/MyOrders'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail'));
 const TrackOrder = lazy(() => import('./pages/TrackOrder'));
+const Donate = lazy(() => import('./pages/Donate'));
 
 // Optimize React Query with better defaults
 const queryClient = new QueryClient({
@@ -78,6 +79,7 @@ function App() {
                 <Route path="/orders" element={<MyOrders />} />
                 <Route path="/orders/:id" element={<OrderDetail />} />
                 <Route path="/track-order" element={<TrackOrder />} />
+                <Route path="/donate" element={<Donate />} />
                 <Route path="*" element={<Navigate to="/" />} />
               </Routes>
             </Suspense>
