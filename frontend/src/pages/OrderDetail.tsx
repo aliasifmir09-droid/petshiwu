@@ -17,6 +17,12 @@ const OrderDetail = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showDonationModal, setShowDonationModal] = useState(false);
 
+  const { data: order, isLoading } = useQuery({
+    queryKey: ['order', id],
+    queryFn: () => orderService.getOrder(id!),
+    enabled: !!id
+  });
+
   // Check if this is a new order and show donation modal
   useEffect(() => {
     const isNewOrder = searchParams.get('newOrder') === 'true';
@@ -31,12 +37,6 @@ const OrderDetail = () => {
       return () => clearTimeout(timer);
     }
   }, [order, isLoading, searchParams, setSearchParams]);
-
-  const { data: order, isLoading } = useQuery({
-    queryKey: ['order', id],
-    queryFn: () => orderService.getOrder(id!),
-    enabled: !!id
-  });
 
   const cancelOrderMutation = useMutation({
     mutationFn: orderService.cancelOrder,

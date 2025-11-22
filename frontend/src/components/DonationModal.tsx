@@ -9,7 +9,6 @@ interface DonationModalProps {
 
 const DonationModal = ({ isOpen, onClose }: DonationModalProps) => {
   const navigate = useNavigate();
-  const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
 
   const presetAmounts = [10, 20, 100];
 
@@ -64,11 +63,7 @@ const DonationModal = ({ isOpen, onClose }: DonationModalProps) => {
               <button
                 key={amount}
                 onClick={() => handleDonate(amount)}
-                className={`py-4 px-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 ${
-                  selectedAmount === amount
-                    ? 'bg-gradient-to-r from-pink-500 to-red-500 text-white shadow-lg'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                className="py-4 px-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:bg-gradient-to-r hover:from-pink-500 hover:to-red-500 hover:text-white hover:shadow-lg"
               >
                 ${amount}
               </button>
