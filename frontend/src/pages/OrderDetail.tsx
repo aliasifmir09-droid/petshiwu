@@ -1,18 +1,36 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orderService } from '@/services/orders';
 import ProductReviewForm from '@/components/ProductReviewForm';
 import { Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ConfirmationModal from '@/components/ConfirmationModal';
+import DonationModal from '@/components/DonationModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 
 const OrderDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showDonationModal, setShowDonationModal] = useState(false);
+
+  // Check if this is a new order and show donation modal
+  useEffect(() => {
+    const isNewOrder = searchParams.get('newOrder') === 'true';
+    if (isNewOrder && order && !isLoading) {
+      // Show modal after a short delay for better UX
+      const timer = setTimeout(() => {
+        setShowDonationModal(true);
+        // Remove the query parameter from URL
+        searchParams.delete('newOrder');
+        setSearchParams(searchParams, { replace: true });
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [order, isLoading, searchParams, setSearchParams]);
 
   const { data: order, isLoading } = useQuery({
     queryKey: ['order', id],
@@ -343,6 +361,12 @@ const OrderDetail = () => {
           </p>
         </div>
       </div>
+
+      {/* Donation Modal */}
+      <DonationModal
+        isOpen={showDonationModal}
+        onClose={() => setShowDonationModal(false)}
+      />
 
       {/* Cancel Order Confirmation Modal */}
       <ConfirmationModal
