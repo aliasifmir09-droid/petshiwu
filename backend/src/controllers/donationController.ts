@@ -18,7 +18,7 @@ try {
 }
 
 // Create payment intent for donation
-export const createDonationIntent = async (req: Request, res: Response, next: NextFunction) => {
+export const createDonationIntent = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { amount, paymentMethod, email, firstName, lastName } = req.body;
 
