@@ -19,11 +19,12 @@ const createAdminUser = async () => {
     }
 
     // Create admin user (password will be hashed by the User model pre-save hook)
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
     const admin = await User.create({
       firstName: 'Admin',
       lastName: 'User',
       email: 'admin@petshiwu.com',
-      password: 'admin123',
+      password: adminPassword,
       role: 'admin',
       phone: '+1234567890',
       addresses: []
@@ -32,7 +33,10 @@ const createAdminUser = async () => {
     console.log('\n✅ Admin user created successfully!');
     console.log('═══════════════════════════════════');
     console.log('Email:', admin.email);
-    console.log('Password: admin123');
+    console.log('Password:', adminPassword);
+    if (!process.env.ADMIN_PASSWORD) {
+      console.log('⚠️  WARNING: Using default password. Set ADMIN_PASSWORD env var for production!');
+    }
     console.log('Role:', admin.role);
     console.log('═══════════════════════════════════');
     console.log('\nYou can now login to the admin dashboard at:');

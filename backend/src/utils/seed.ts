@@ -55,17 +55,22 @@ const seedData = async () => {
       firstName: 'Admin',
       lastName: 'User',
       email: 'admin@petshiwu.com',
-      password: 'admin123',
+      password: process.env.ADMIN_PASSWORD || 'admin123',
       role: 'admin',
       phone: '555-0100'
     });
+
+    if (process.env.NODE_ENV === 'production' && !process.env.ADMIN_PASSWORD) {
+      console.warn('⚠️  WARNING: Using default password for admin user in production!');
+      console.warn('   Please set ADMIN_PASSWORD environment variable and change the password immediately.');
+    }
 
     // Create demo customer
     const customer = await User.create({
       firstName: 'John',
       lastName: 'Doe',
       email: 'customer@example.com',
-      password: 'password123',
+      password: process.env.DEMO_CUSTOMER_PASSWORD || 'password123',
       role: 'customer',
       phone: '555-0200'
     });

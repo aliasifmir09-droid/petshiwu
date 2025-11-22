@@ -2,7 +2,10 @@ import jwt from 'jsonwebtoken';
 import { Response } from 'express';
 
 export const generateToken = (id: string) => {
-  const secret: string = process.env.JWT_SECRET || 'fallback-secret-key';
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET is not configured. Please set JWT_SECRET in your environment variables.');
+  }
   const expiresIn = process.env.JWT_EXPIRE || '30d';
   return jwt.sign({ id }, secret, { expiresIn: expiresIn as any });
 };

@@ -12,10 +12,14 @@ import compression from 'compression';
 import mongoose from 'mongoose';
 import { connectDatabase } from './utils/database';
 import { errorHandler, notFound } from './middleware/errorHandler';
+import { validateEnv } from './utils/validateEnv';
 import User from './models/User';
 
 // Load env vars
 dotenv.config();
+
+// Validate required environment variables
+validateEnv();
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -41,22 +45,29 @@ const ensureAdminUser = async () => {
       return;
     }
 
-    const adminEmail = 'admin@petshiwu.com';
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@petshiwu.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || (process.env.NODE_ENV === 'development' ? 'admin123' : undefined);
     const existingAdmin = await User.findOne({ email: adminEmail });
     
     if (!existingAdmin) {
+      if (!adminPassword) {
+        console.warn('\n⚠️  ADMIN_PASSWORD not set. Skipping auto-creation of admin user.');
+        console.warn('   Please create an admin user manually or set ADMIN_PASSWORD in environment variables.\n');
+        return;
+      }
+      
       await User.create({
         firstName: 'Admin',
         lastName: 'User',
         email: adminEmail,
-        password: 'admin123',
+        password: adminPassword,
         role: 'admin',
         phone: '+1234567890'
       });
       if (process.env.NODE_ENV === 'development') {
         console.log('\n✅ Admin user created automatically');
         console.log(`   Email: ${adminEmail}`);
-        console.log('   You can now login to the admin dashboard\n');
+        console.log('   ⚠️  Please change the default password after first login!\n');
       }
     }
   } catch (error: any) {

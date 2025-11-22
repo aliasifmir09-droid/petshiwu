@@ -24,7 +24,14 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || '') as { id: string };
+      const secret = process.env.JWT_SECRET;
+      if (!secret) {
+        return res.status(500).json({
+          success: false,
+          message: 'Server configuration error'
+        });
+      }
+      const decoded = jwt.verify(token, secret) as { id: string };
       
       // Don't select password field for security
       const user = await User.findById(decoded.id);
