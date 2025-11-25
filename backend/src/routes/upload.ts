@@ -92,44 +92,81 @@ router.post('/single', protect, authorize('admin'), upload.single('image'), hand
       file.secure_url || 
       file.url || 
       file.public_id ||
-      (file.path && file.path.includes('cloudinary.com'))
+      (file.path && file.path.includes('cloudinary.com')) ||
+      (file as any).result ||
+      (file as any).response
     );
     
     if (isCloudinary) {
-      // Cloudinary file structure
-      const cloudinaryFile = file as CloudinaryFile;
+      // Cloudinary file structure - multer-storage-cloudinary stores result in different places
+      const cloudinaryFile = file as any;
       
-      // Extract URL from Cloudinary response
-      const imageUrl = cloudinaryFile.secure_url || cloudinaryFile.url;
+      // Extract URL from Cloudinary response - check multiple possible locations
+      let imageUrl = null;
+      
+      // Check direct properties first
+      if (cloudinaryFile.secure_url) {
+        imageUrl = cloudinaryFile.secure_url;
+      } else if (cloudinaryFile.url) {
+        imageUrl = cloudinaryFile.url;
+      }
+      // Check result object (common in multer-storage-cloudinary)
+      else if (cloudinaryFile.result) {
+        imageUrl = cloudinaryFile.result.secure_url || cloudinaryFile.result.url;
+      }
+      // Check response object
+      else if (cloudinaryFile.response) {
+        imageUrl = cloudinaryFile.response.secure_url || cloudinaryFile.response.url;
+      }
+      // Check if path contains cloudinary.com
+      else if (cloudinaryFile.path && cloudinaryFile.path.includes('cloudinary.com')) {
+        imageUrl = cloudinaryFile.path;
+      }
       
       if (!imageUrl) {
-        console.error('Cloudinary upload failed - no URL in response. File object:', JSON.stringify(cloudinaryFile, null, 2));
+        console.error('❌ Cloudinary upload - no URL found. Checking all possible locations...');
         console.error('File object keys:', Object.keys(cloudinaryFile));
-        console.error('File object values:', {
+        console.error('Direct properties:', {
           secure_url: cloudinaryFile.secure_url,
           url: cloudinaryFile.url,
+          path: cloudinaryFile.path,
           public_id: cloudinaryFile.public_id,
-          resource_type: cloudinaryFile.resource_type,
-          bytes: cloudinaryFile.bytes,
-          size: (cloudinaryFile as any).size
+          resource_type: cloudinaryFile.resource_type
         });
+        console.error('Result object:', cloudinaryFile.result);
+        console.error('Response object:', cloudinaryFile.response);
+        console.error('Full file object (first 1000 chars):', JSON.stringify(cloudinaryFile, null, 2).substring(0, 1000));
+        
+        // Try to get public_id from multiple locations
+        let publicId = cloudinaryFile.public_id || 
+                      cloudinaryFile.result?.public_id || 
+                      cloudinaryFile.response?.public_id;
         
         // Try to construct URL from public_id if available
-        if (cloudinaryFile.public_id) {
+        if (publicId) {
           try {
-            const constructedUrl = getCloudinaryUrl(cloudinaryFile.public_id, (cloudinaryFile.resource_type || 'image') as 'image' | 'video');
+            const resourceType = (cloudinaryFile.resource_type || 
+                                 cloudinaryFile.result?.resource_type || 
+                                 cloudinaryFile.response?.resource_type || 
+                                 'image') as 'image' | 'video';
+            
+            const constructedUrl = getCloudinaryUrl(publicId, resourceType);
             if (constructedUrl && constructedUrl.includes('cloudinary.com')) {
               console.log('✅ Constructed Cloudinary URL from public_id:', constructedUrl);
+              
+              // Get other properties from result/response if available
+              const result = cloudinaryFile.result || cloudinaryFile.response || cloudinaryFile;
+              
               const responseData = {
-                filename: cloudinaryFile.public_id,
+                filename: publicId,
                 path: constructedUrl,
                 url: constructedUrl,
-                mimetype: cloudinaryFile.mimetype,
-                size: cloudinaryFile.bytes || cloudinaryFile.size || 0,
-                resource_type: cloudinaryFile.resource_type || 'image',
-                format: cloudinaryFile.format,
-                width: cloudinaryFile.width,
-                height: cloudinaryFile.height
+                mimetype: cloudinaryFile.mimetype || result.mimetype,
+                size: result.bytes || cloudinaryFile.bytes || cloudinaryFile.size || 0,
+                resource_type: resourceType,
+                format: result.format || cloudinaryFile.format,
+                width: result.width || cloudinaryFile.width,
+                height: result.height || cloudinaryFile.height
               };
               return res.status(200).json({
                 success: true,
@@ -141,21 +178,22 @@ router.post('/single', protect, authorize('admin'), upload.single('image'), hand
           }
         }
         
-        // Check if we have the full Cloudinary result object
-        const cloudinaryResult = (file as any).result || (file as any).response;
-        if (cloudinaryResult && (cloudinaryResult.secure_url || cloudinaryResult.url)) {
-          const finalUrl = cloudinaryResult.secure_url || cloudinaryResult.url;
-          console.log('✅ Found URL in Cloudinary result object:', finalUrl);
+        // Final check - look for any URL-like string in the entire object
+        const fileString = JSON.stringify(cloudinaryFile);
+        const urlMatch = fileString.match(/https?:\/\/[^\s"']+cloudinary\.com[^\s"']+/);
+        if (urlMatch) {
+          const foundUrl = urlMatch[0];
+          console.log('✅ Found Cloudinary URL in object string:', foundUrl);
           const responseData = {
-            filename: cloudinaryResult.public_id || cloudinaryFile.originalname,
-            path: finalUrl,
-            url: finalUrl,
+            filename: publicId || cloudinaryFile.originalname,
+            path: foundUrl,
+            url: foundUrl,
             mimetype: cloudinaryFile.mimetype,
-            size: cloudinaryResult.bytes || cloudinaryFile.bytes || 0,
-            resource_type: cloudinaryResult.resource_type || cloudinaryFile.resource_type || 'image',
-            format: cloudinaryResult.format || cloudinaryFile.format,
-            width: cloudinaryResult.width || cloudinaryFile.width,
-            height: cloudinaryResult.height || cloudinaryFile.height
+            size: cloudinaryFile.bytes || cloudinaryFile.size || 0,
+            resource_type: cloudinaryFile.resource_type || 'image',
+            format: cloudinaryFile.format,
+            width: cloudinaryFile.width,
+            height: cloudinaryFile.height
           };
           return res.status(200).json({
             success: true,
@@ -179,19 +217,23 @@ router.post('/single', protect, authorize('admin'), upload.single('image'), hand
         });
       }
       
+      // Get other properties from result/response if available, otherwise use direct properties
+      const result = cloudinaryFile.result || cloudinaryFile.response || cloudinaryFile;
+      const publicId = result.public_id || cloudinaryFile.public_id;
+      
       const responseData = {
-        filename: cloudinaryFile.public_id || cloudinaryFile.originalname,
+        filename: publicId || cloudinaryFile.originalname,
         path: imageUrl,
         url: imageUrl,
-        mimetype: cloudinaryFile.mimetype,
-        size: cloudinaryFile.bytes || cloudinaryFile.size || 0,
-        resource_type: cloudinaryFile.resource_type || 'image',
-        format: cloudinaryFile.format,
-        width: cloudinaryFile.width,
-        height: cloudinaryFile.height
+        mimetype: cloudinaryFile.mimetype || result.mimetype,
+        size: result.bytes || cloudinaryFile.bytes || cloudinaryFile.size || 0,
+        resource_type: result.resource_type || cloudinaryFile.resource_type || 'image',
+        format: result.format || cloudinaryFile.format,
+        width: result.width || cloudinaryFile.width,
+        height: result.height || cloudinaryFile.height
       };
       
-      console.log('Cloudinary upload successful:', responseData.url);
+      console.log('✅ Cloudinary upload successful! URL:', responseData.url);
       
       return res.status(200).json({
         success: true,
