@@ -44,6 +44,10 @@ const Checkout = () => {
       navigate(`/orders/${order._id}?newOrder=true`);
     },
     onError: (error: any) => {
+      console.error('Order creation error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error request data:', error.config?.data);
+      
       const errorMessage = error.response?.data?.message || 'Failed to create order';
       const errorDetails = error.response?.data?.errors;
       
@@ -66,18 +70,22 @@ const Checkout = () => {
 
     // Prepare order data
     const orderData = {
-      items: items.map(item => ({
-        product: item.product._id,
-        name: item.product.name,
-        image: normalizeImageUrl(item.product.images?.[0]),
-        price: item.variant?.price || item.product.basePrice,
-        quantity: item.quantity,
-        variant: item.variant ? {
-          size: item.variant.size,
-          weight: item.variant.weight,
-          sku: item.variant.sku
-        } : undefined
-      })),
+      items: items.map(item => {
+        // Convert product._id to string if it's an ObjectId object
+        const productId = item.product._id ? String(item.product._id) : item.product._id;
+        return {
+          product: productId,
+          name: item.product.name,
+          image: normalizeImageUrl(item.product.images?.[0]),
+          price: item.variant?.price || item.product.basePrice,
+          quantity: item.quantity,
+          variant: item.variant ? {
+            size: item.variant.size,
+            weight: item.variant.weight,
+            sku: item.variant.sku
+          } : undefined
+        };
+      }),
       shippingAddress: {
         firstName: shippingInfo.firstName,
         lastName: shippingInfo.lastName,
@@ -112,6 +120,7 @@ const Checkout = () => {
         donationAmount: amount > 0 ? amount : undefined,
         totalPrice: subtotal + shipping + tax + amount
       };
+      console.log('Creating order with donation:', updatedOrderData);
       createOrderMutation.mutate(updatedOrderData);
       setPendingOrderData(null);
     }
@@ -121,6 +130,7 @@ const Checkout = () => {
     setShowDonationModal(false);
     // Submit order without donation
     if (pendingOrderData) {
+      console.log('Creating order without donation:', pendingOrderData);
       createOrderMutation.mutate(pendingOrderData);
       setPendingOrderData(null);
     }

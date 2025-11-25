@@ -7,6 +7,13 @@ import { AuthRequest } from '../middleware/auth';
 // Create new order
 export const createOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    console.log('Order creation request received:', {
+      itemsCount: req.body.items?.length,
+      hasShippingAddress: !!req.body.shippingAddress,
+      paymentMethod: req.body.paymentMethod,
+      userId: req.user?._id
+    });
+    
     const {
       items,
       shippingAddress,
@@ -35,13 +42,32 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       });
     }
 
+    // Validate shipping address
+    if (!shippingAddress || !shippingAddress.street || !shippingAddress.city || !shippingAddress.state || !shippingAddress.zipCode) {
+      return res.status(400).json({
+        success: false,
+        message: 'Shipping address is incomplete',
+        errors: ['Street, city, state, and zip code are required']
+      });
+    }
+
     // Verify stock availability
     for (const item of items) {
-      const product = await Product.findById(item.product);
+      // Convert product ID to string if it's an object
+      const productId = item.product ? String(item.product) : item.product;
+      
+      if (!productId) {
+        return res.status(400).json({
+          success: false,
+          message: `Product ID is missing for item: ${item.name || 'Unknown'}`
+        });
+      }
+      
+      const product = await Product.findById(productId);
       if (!product) {
         return res.status(400).json({
           success: false,
-          message: `Product ${item.name} not found`
+          message: `Product ${item.name || productId} not found`
         });
       }
       if (!product.inStock) {
@@ -52,9 +78,15 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       }
     }
 
+    // Convert product IDs in items to strings (MongoDB will convert them to ObjectIds)
+    const normalizedItems = items.map((item: any) => ({
+      ...item,
+      product: item.product ? String(item.product) : item.product
+    }));
+
     const order = await Order.create({
       user: req.user._id,
-      items,
+      items: normalizedItems,
       shippingAddress,
       billingAddress: billingAddress || shippingAddress,
       paymentMethod,
