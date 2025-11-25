@@ -19,11 +19,20 @@ export const normalizeImageUrl = (imageUrl: string | undefined | null): string =
 };
 
 /**
- * Gets a placeholder image URL
+ * Gets a placeholder image URL using SVG data URI (no external requests)
  */
 export const getPlaceholderImage = (text: string = 'Product Image'): string => {
-  // Use a reliable placeholder service
-  return `https://via.placeholder.com/500x500/cccccc/ffffff?text=${encodeURIComponent(text)}`;
+  // Use SVG data URI - always available, no external requests
+  const svg = `
+    <svg width="500" height="500" xmlns="http://www.w3.org/2000/svg">
+      <rect width="500" height="500" fill="#f3f4f6"/>
+      <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="#6b7280" text-anchor="middle" dy=".3em">
+        ${text}
+      </text>
+    </svg>
+  `.trim().replace(/\s+/g, ' ');
+  
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
 };
 
 /**

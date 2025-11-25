@@ -232,7 +232,9 @@ const Home = () => {
                           onError={(e) => {
                             // Fallback to placeholder if image fails to load
                             const target = e.currentTarget;
-                            target.src = `https://via.placeholder.com/400x400/cccccc/666666?text=${encodeURIComponent(category.name)}`;
+                            // Use SVG data URI - no external requests needed
+                            const svg = `<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="16" fill="#6b7280" text-anchor="middle" dy=".3em">${category.name}</text></svg>`;
+                            target.src = `data:image/svg+xml;base64,${btoa(svg)}`;
                           }}
                           loading="lazy"
                         />
