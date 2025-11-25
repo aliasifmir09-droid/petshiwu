@@ -3,7 +3,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import { upload } from '../middleware/upload';
 import { protect, authorize } from '../middleware/auth';
-import { isCloudinaryConfigured } from '../utils/cloudinary';
+import { isCloudinaryConfigured, getCloudinaryUrl } from '../utils/cloudinary';
 
 // Type for multer file (local storage)
 interface LocalFile {
@@ -81,7 +81,8 @@ router.post('/single', protect, authorize('admin'), upload.single('image'), hand
       hasPath: !!file.path,
       hasFilename: !!file.filename,
       fileKeys: Object.keys(file),
-      mimetype: file.mimetype
+      mimetype: file.mimetype,
+      fullFileObject: JSON.stringify(file, null, 2)
     });
 
     // Check if using Cloudinary or local storage
@@ -102,25 +103,41 @@ router.post('/single', protect, authorize('admin'), upload.single('image'), hand
       const imageUrl = cloudinaryFile.secure_url || cloudinaryFile.url;
       
       if (!imageUrl) {
-        console.error('Cloudinary upload failed - no URL in response:', cloudinaryFile);
-        // Fallback to local storage if Cloudinary didn't provide URL
-        const localFile = file as any;
-        const responseData = {
-          filename: localFile.filename || cloudinaryFile.originalname,
-          path: `/uploads/${localFile.filename || cloudinaryFile.originalname}`,
-          url: `/uploads/${localFile.filename || cloudinaryFile.originalname}`,
-          mimetype: cloudinaryFile.mimetype,
-          size: cloudinaryFile.bytes || cloudinaryFile.size || 0,
-          resource_type: cloudinaryFile.resource_type || 'image',
-          format: cloudinaryFile.format,
-          width: cloudinaryFile.width,
-          height: cloudinaryFile.height
-        };
+        console.error('Cloudinary upload failed - no URL in response. File object:', JSON.stringify(cloudinaryFile, null, 2));
         
-        console.log('Cloudinary upload failed, using fallback:', responseData.url);
-        return res.status(200).json({
-          success: true,
-          data: responseData
+        // Try to construct URL from public_id if available
+        if (cloudinaryFile.public_id) {
+          const constructedUrl = getCloudinaryUrl(cloudinaryFile.public_id, (cloudinaryFile.resource_type || 'image') as 'image' | 'video');
+          if (constructedUrl) {
+            console.log('Constructed Cloudinary URL from public_id:', constructedUrl);
+            const responseData = {
+              filename: cloudinaryFile.public_id,
+              path: constructedUrl,
+              url: constructedUrl,
+              mimetype: cloudinaryFile.mimetype,
+              size: cloudinaryFile.bytes || cloudinaryFile.size || 0,
+              resource_type: cloudinaryFile.resource_type || 'image',
+              format: cloudinaryFile.format,
+              width: cloudinaryFile.width,
+              height: cloudinaryFile.height
+            };
+            return res.status(200).json({
+              success: true,
+              data: responseData
+            });
+          }
+        }
+        
+        // Final fallback - return error
+        return res.status(500).json({
+          success: false,
+          message: 'Cloudinary upload failed - no URL returned. Please check Cloudinary configuration.',
+          debug: process.env.NODE_ENV === 'development' ? {
+            hasSecureUrl: !!cloudinaryFile.secure_url,
+            hasUrl: !!cloudinaryFile.url,
+            hasPublicId: !!cloudinaryFile.public_id,
+            fileKeys: Object.keys(cloudinaryFile)
+          } : undefined
         });
       }
       
