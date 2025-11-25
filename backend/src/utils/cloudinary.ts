@@ -27,30 +27,39 @@ const storage = new CloudinaryStorage({
     const isVideo = file.mimetype.startsWith('video/');
     const resourceType = isVideo ? 'video' : 'image';
     
-    // Create folder structure: pet-shop/{resource-type}/{optional-subfolder}
+    // Create folder structure: pet-shop/{resource-type}
     const folder = `pet-shop/${resourceType}`;
     
-    // Generate unique filename
+    // Generate unique filename with original extension
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const filename = `${file.fieldname}-${uniqueSuffix}`;
+    const originalExt = file.originalname.split('.').pop() || '';
+    const filename = `${file.fieldname}-${uniqueSuffix}${originalExt ? '.' + originalExt : ''}`;
     
-    return {
+    const params: any = {
       folder: folder,
       public_id: filename,
       resource_type: resourceType,
-      // Image transformations
-      transformation: resourceType === 'image' ? [
+      overwrite: false,
+      invalidate: true,
+    };
+    
+    // Image transformations
+    if (resourceType === 'image') {
+      params.transformation = [
         {
           quality: 'auto',
           fetch_format: 'auto',
         }
-      ] : undefined,
-      // Video transformations
-      ...(resourceType === 'video' ? {
-        format: 'mp4',
-        quality: 'auto',
-      } : {}),
-    };
+      ];
+    }
+    
+    // Video transformations
+    if (resourceType === 'video') {
+      params.format = 'mp4';
+      params.quality = 'auto';
+    }
+    
+    return params;
   },
 });
 

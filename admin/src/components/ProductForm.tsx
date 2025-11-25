@@ -99,18 +99,35 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     setUploading(true);
     try {
       const uploadPromises = Array.from(files).map(async (file) => {
-        const result = await adminService.uploadImage(file);
-        // Use url (Cloudinary) or path (local fallback) from response
-        return result.url || result.path;
+        try {
+          const result = await adminService.uploadImage(file);
+          // Use url (Cloudinary) or path (local fallback) from response
+          const imageUrl = result.url || result.path;
+          if (!imageUrl) {
+            throw new Error('No image URL returned from server');
+          }
+          return imageUrl;
+        } catch (error: any) {
+          console.error('Upload error for file:', file.name, error);
+          throw error;
+        }
       });
 
       const uploadedUrls = await Promise.all(uploadPromises);
       setImageUrls([...imageUrls, ...uploadedUrls]);
       showToast(`Successfully uploaded ${uploadedUrls.length} image(s)`, 'success');
     } catch (error: any) {
-      showToast(error.response?.data?.message || 'Failed to upload images', 'error');
+      console.error('Image upload error:', error);
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Failed to upload images. Please check your Cloudinary configuration.';
+      showToast(errorMessage, 'error');
     } finally {
       setUploading(false);
+      // Reset file input
+      if (e.target) {
+        e.target.value = '';
+      }
     }
   };
 
