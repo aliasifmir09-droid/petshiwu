@@ -2,9 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User, { IUser } from '../models/User';
 
-export interface AuthRequest extends Request {
+// Use type intersection to ensure all Request properties are included
+export type AuthRequest = Request & {
   user?: IUser;
-}
+};
 
 export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {

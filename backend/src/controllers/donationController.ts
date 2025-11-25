@@ -8,13 +8,15 @@ let stripe: any = null;
 try {
   if (process.env.STRIPE_SECRET_KEY) {
     // Dynamic import to avoid errors if stripe package isn't installed
+    // @ts-ignore - Stripe may not be installed, handled in try-catch
     const Stripe = require('stripe');
     stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2024-11-20.acacia',
     });
   }
 } catch (error) {
-  console.warn('Stripe package not installed. Install with: npm install stripe');
+  // Stripe package not installed - donations will not work
+  // This is okay if donations are not being used
 }
 
 // Create payment intent for donation
