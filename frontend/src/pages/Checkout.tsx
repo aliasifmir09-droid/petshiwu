@@ -76,54 +76,119 @@ const Checkout = () => {
       return;
     }
 
+    // Helper function to extract product ID from various formats
+    const extractProductId = (product: any): string | null => {
+      // Try _id first
+      let rawId = product._id;
+      
+      // If _id doesn't exist, try id (for cases where it might be stored differently)
+      if (!rawId && (product as any).id) {
+        rawId = (product as any).id;
+      }
+      
+      if (!rawId) {
+        return null;
+      }
+      
+      // If it's already a string, validate and return
+      if (typeof rawId === 'string') {
+        // Validate it's a MongoDB ObjectId format
+        if (/^[0-9a-fA-F]{24}$/.test(rawId)) {
+          return rawId;
+        }
+        return rawId; // Return anyway, backend will validate
+      }
+      
+      // If it's an object, try to extract the ID
+      if (typeof rawId === 'object' && rawId !== null) {
+        // Try toString() method
+        if (typeof rawId.toString === 'function') {
+          const idStr = rawId.toString();
+          if (idStr && idStr !== '[object Object]' && /^[0-9a-fA-F]{24}$/.test(idStr)) {
+            return idStr;
+          }
+        }
+        
+        // Try accessing common ObjectId properties
+        const possibleProps = ['id', '_id', '_str', '$oid', 'oid', 'value', 'hex'];
+        for (const prop of possibleProps) {
+          if (rawId[prop] && typeof rawId[prop] === 'string') {
+            const idStr = rawId[prop];
+            if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
+              return idStr;
+            }
+          }
+        }
+        
+        // Try valueOf()
+        if (typeof rawId.valueOf === 'function') {
+          const value = rawId.valueOf();
+          if (typeof value === 'string' && /^[0-9a-fA-F]{24}$/.test(value)) {
+            return value;
+          }
+        }
+        
+        // Try JSON.stringify to see if it's a serialized ObjectId
+        try {
+          const jsonStr = JSON.stringify(rawId);
+          const parsed = JSON.parse(jsonStr);
+          if (parsed.$oid && /^[0-9a-fA-F]{24}$/.test(parsed.$oid)) {
+            return parsed.$oid;
+          }
+          if (parsed.oid && /^[0-9a-fA-F]{24}$/.test(parsed.oid)) {
+            return parsed.oid;
+          }
+          if (typeof parsed === 'string' && /^[0-9a-fA-F]{24}$/.test(parsed)) {
+            return parsed;
+          }
+        } catch (e) {
+          // JSON operations failed
+        }
+        
+        // Last resort: check all string properties
+        for (const key in rawId) {
+          if (Object.prototype.hasOwnProperty.call(rawId, key)) {
+            const value = rawId[key];
+            if (typeof value === 'string' && /^[0-9a-fA-F]{24}$/.test(value)) {
+              return value;
+            }
+          }
+        }
+      }
+      
+      return null;
+    };
+
     // Prepare order data
     const orderData = {
       items: items.map(item => {
-        // Convert product._id to string if it's an ObjectId object
-        let productId: string | null = null;
-        const rawId = item.product._id;
+        const productId = extractProductId(item.product);
         
-        if (!rawId) {
-          console.error('Product ID is missing:', item.product);
-          throw new Error(`Product ID is missing for item: ${item.product.name}`);
+        if (!productId) {
+          console.error('Failed to extract product ID:', { 
+            product: item.product,
+            productName: item.product.name,
+            _id: item.product._id,
+            id: (item.product as any).id,
+            _idType: typeof item.product._id,
+            idType: typeof (item.product as any).id
+          });
+          throw new Error(`Invalid product ID for item: ${item.product.name}. Please refresh the page and try again.`);
         }
         
-        // Handle different types of product IDs
-        if (typeof rawId === 'string') {
-          productId = rawId;
-        } else if (typeof rawId === 'object' && rawId !== null) {
-          // Handle ObjectId objects - check for toString method
-          if ('toString' in rawId && typeof (rawId as any).toString === 'function') {
-            productId = (rawId as any).toString();
-          } else if ('_id' in rawId) {
-            // Nested object with _id
-            productId = String((rawId as any)._id);
-          } else {
-            // Try to stringify the object
-            productId = String(rawId);
-          }
-        } else {
-          productId = String(rawId);
-        }
-        
-        // Validate the product ID is not empty or "[object Object]"
-        if (!productId || productId === '[object Object]' || productId.trim() === '') {
-          console.error('Invalid product ID conversion:', { 
+        // Validate MongoDB ObjectId format (24 hex characters)
+        if (!/^[0-9a-fA-F]{24}$/.test(productId)) {
+          console.error('Product ID is not a valid MongoDB ObjectId:', { 
             productId, 
-            rawId, 
-            rawIdType: typeof rawId,
             productName: item.product.name,
             product: item.product
           });
-          throw new Error(`Invalid product ID for item: ${item.product.name}`);
+          throw new Error(`Invalid product ID format for item: ${item.product.name}. Please refresh the page and try again.`);
         }
         
         console.log('Order item prepared:', { 
           productId, 
-          productName: item.product.name, 
-          originalId: rawId, 
-          originalIdType: typeof rawId,
-          isValid: productId.length === 24 && /^[0-9a-fA-F]{24}$/.test(productId)
+          productName: item.product.name
         });
         
         return {
