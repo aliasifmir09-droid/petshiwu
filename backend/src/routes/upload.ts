@@ -1,5 +1,6 @@
 /// <reference types="node" />
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
+import multer from 'multer';
 import { upload } from '../middleware/upload';
 import { protect, authorize } from '../middleware/auth';
 import { isCloudinaryConfigured } from '../utils/cloudinary';
@@ -34,8 +35,32 @@ interface CloudinaryFile {
 
 const router = express.Router();
 
+// Error handler for multer uploads
+const handleUploadError = (error: any, req: Request, res: Response, next: NextFunction) => {
+  console.error('Multer upload error:', error);
+  if (error instanceof multer.MulterError) {
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({
+        success: false,
+        message: 'File too large. Maximum size is 100MB.'
+      });
+    }
+    return res.status(400).json({
+      success: false,
+      message: error.message || 'File upload error'
+    });
+  }
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message || 'File upload failed'
+    });
+  }
+  next();
+};
+
 // Upload single file (image or video)
-router.post('/single', protect, authorize('admin'), upload.single('image'), (req: Request, res: Response) => {
+router.post('/single', protect, authorize('admin'), upload.single('image'), handleUploadError, (req: Request, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({

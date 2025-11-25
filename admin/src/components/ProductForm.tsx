@@ -100,15 +100,27 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     try {
       const uploadPromises = Array.from(files).map(async (file) => {
         try {
+          console.log('Uploading file:', file.name, file.type, file.size);
           const result = await adminService.uploadImage(file);
+          console.log('Upload result:', result);
+          
           // Use url (Cloudinary) or path (local fallback) from response
-          const imageUrl = result.url || result.path;
+          const imageUrl = result?.url || result?.path;
+          
           if (!imageUrl) {
-            throw new Error('No image URL returned from server');
+            console.error('No URL in result:', result);
+            throw new Error(`No image URL returned from server. Response: ${JSON.stringify(result)}`);
           }
+          
+          console.log('Uploaded image URL:', imageUrl);
           return imageUrl;
         } catch (error: any) {
           console.error('Upload error for file:', file.name, error);
+          console.error('Error details:', {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status
+          });
           throw error;
         }
       });
@@ -120,7 +132,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       console.error('Image upload error:', error);
       const errorMessage = error.response?.data?.message || 
                           error.message || 
-                          'Failed to upload images. Please check your Cloudinary configuration.';
+                          'Failed to upload images. Please check your Cloudinary configuration and server logs.';
       showToast(errorMessage, 'error');
     } finally {
       setUploading(false);

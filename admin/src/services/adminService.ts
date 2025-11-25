@@ -110,14 +110,32 @@ export const adminService = {
   uploadImage: async (file: File) => {
     const formData = new FormData();
     formData.append('image', file);
-    const response = await api.post('/upload/single', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
+    
+    try {
+      const response = await api.post('/upload/single', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      // Log response for debugging
+      console.log('Upload response:', response.data);
+      
+      // Handle different response structures
+      const data = response.data?.data || response.data;
+      
+      if (!data) {
+        throw new Error('Invalid response structure from server');
       }
-    });
-    // Response includes: { url, path, filename, mimetype, size, ... }
-    // url is Cloudinary URL, path is fallback for local storage
-    return response.data.data;
+      
+      // Response includes: { url, path, filename, mimetype, size, ... }
+      // url is Cloudinary URL, path is fallback for local storage
+      return data;
+    } catch (error: any) {
+      console.error('Upload API error:', error);
+      console.error('Error response:', error.response?.data);
+      throw error;
+    }
   },
 
   // User Management (Admin Only)
