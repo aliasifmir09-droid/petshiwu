@@ -68,6 +68,14 @@ const Checkout = () => {
       return;
     }
 
+    // Validate all items have product IDs
+    const itemsWithoutIds = items.filter(item => !item.product._id);
+    if (itemsWithoutIds.length > 0) {
+      console.error('Items without product IDs:', itemsWithoutIds);
+      showToast('Some products are missing IDs. Please refresh the page and try again.', 'error');
+      return;
+    }
+
     // Prepare order data
     const orderData = {
       items: items.map(item => {
