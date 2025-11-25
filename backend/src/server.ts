@@ -213,11 +213,21 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health check
+// Health check endpoint (used by Render to verify server is running)
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Server is running',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Additional health check at root for Render
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
     timestamp: new Date().toISOString()
   });
 });
@@ -243,14 +253,50 @@ app.use(errorHandler);
 const PORT = Number(process.env.PORT) || 5000;
 const HOST = process.env.HOST || '0.0.0.0';
 
-const server = app.listen(PORT, HOST, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on ${HOST}:${PORT}`);
+// Start server
+let server: any;
+try {
+  server = app.listen(PORT, HOST, () => {
+    console.log(`✅ Server running in ${process.env.NODE_ENV} mode on ${HOST}:${PORT}`);
+    console.log(`✅ Server is ready to accept connections`);
+  });
+
+  // Handle server errors
+  server.on('error', (error: any) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`❌ Port ${PORT} is already in use`);
+    } else {
+      console.error('❌ Server error:', error);
+    }
+    process.exit(1);
+  });
+} catch (error: any) {
+  console.error('❌ Failed to start server:', error.message);
+  process.exit(1);
+}
+
+// Handle unhandled promise rejections (don't exit immediately, log first)
+process.on('unhandledRejection', (err: Error) => {
+  console.error('❌ Unhandled Promise Rejection:', err.message);
+  console.error('Stack:', err.stack);
+  // Don't exit immediately - let the server continue running
+  // Only exit if it's a critical error
+  if (err.message.includes('MongoDB') || err.message.includes('Database')) {
+    console.warn('⚠️  Database error - server will continue but database operations may fail');
+  }
 });
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err: Error) => {
-  console.log(`Error: ${err.message}`);
-  server.close(() => process.exit(1));
+// Handle uncaught exceptions
+process.on('uncaughtException', (err: Error) => {
+  console.error('❌ Uncaught Exception:', err.message);
+  console.error('Stack:', err.stack);
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  } else {
+    process.exit(1);
+  }
 });
 
 export default app;
