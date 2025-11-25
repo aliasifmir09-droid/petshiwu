@@ -41,7 +41,6 @@ Quick step-by-step checklist for deploying to a new Render account.
 - [ ] **Backend Environment Variables Set**
   ```env
   NODE_ENV=production
-  PORT=5000
   MONGODB_URI=✅ (your MongoDB connection string)
   JWT_SECRET=✅ (your 32+ char secret)
   CORS_ORIGIN=✅ (placeholder URLs - update after frontend/admin deploy)

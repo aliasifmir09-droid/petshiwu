@@ -131,13 +131,14 @@ Click **"Environment"** tab and add these variables:
 
 ```env
 NODE_ENV=production
-PORT=5000
 MONGODB_URI=mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/petshop?retryWrites=true&w=majority
 JWT_SECRET=your-32-character-secret-key-here
 CORS_ORIGIN=https://pet-shop-frontend.onrender.com,https://pet-shop-admin.onrender.com
 ADMIN_EMAIL=admin@petshiwu.com
 ADMIN_PASSWORD=your-secure-admin-password-here
 ```
+
+**Note:** `PORT` is automatically set by Render - you don't need to set it manually.
 
 **For Stripe (Optional):**
 ```env
@@ -323,12 +324,13 @@ npm run seed
 
 ### Backend (Required)
 - ✅ `NODE_ENV=production`
-- ✅ `PORT=5000`
 - ✅ `MONGODB_URI` - Your MongoDB connection string
 - ✅ `JWT_SECRET` - 32+ character secret
 - ✅ `CORS_ORIGIN` - Comma-separated frontend/admin URLs
 - ✅ `ADMIN_EMAIL` - Admin login email
 - ✅ `ADMIN_PASSWORD` - Admin login password
+
+**Note:** `PORT` is automatically set by Render - you don't need to configure it.
 
 ### Backend (Optional - For Donations)
 - ⚪ `STRIPE_SECRET_KEY` - Stripe secret key

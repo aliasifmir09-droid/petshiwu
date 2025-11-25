@@ -23,13 +23,14 @@
 ### Backend (Required)
 ```env
 NODE_ENV=production
-PORT=5000
 MONGODB_URI=your-mongodb-connection-string
 JWT_SECRET=your-32-character-secret
 CORS_ORIGIN=https://frontend-url.onrender.com,https://admin-url.onrender.com
 ADMIN_EMAIL=admin@petshiwu.com
 ADMIN_PASSWORD=your-secure-password
 ```
+
+**Note:** `PORT` is automatically set by Render - no need to configure it.
 
 ### Backend (Optional - Stripe)
 ```env
