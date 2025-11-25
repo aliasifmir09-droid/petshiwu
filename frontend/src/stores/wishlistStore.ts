@@ -26,21 +26,33 @@ export const useWishlistStore = create<WishlistState>()(
         }
         
         const currentItems = get().items;
+        console.log('Adding to wishlist:', { productId, currentItems, alreadyInList: currentItems.includes(productId) });
+        
         if (!currentItems.includes(productId)) {
           // Update local state immediately
-          set({ items: [...currentItems, productId] });
+          const newItems = [...currentItems, productId];
+          set({ items: newItems });
+          console.log('Updated local wishlist:', newItems);
           
           // Sync with backend if user is authenticated
           const { isAuthenticated } = useAuthStore.getState();
+          console.log('User authenticated:', isAuthenticated);
+          
           if (isAuthenticated) {
             try {
-              await wishlistService.addToWishlist(productId);
-            } catch (error) {
+              const result = await wishlistService.addToWishlist(productId);
+              console.log('Backend wishlist update successful:', result);
+            } catch (error: any) {
               // Revert on error
               set({ items: currentItems });
-              console.error('Failed to add to wishlist:', error);
+              console.error('Failed to add to wishlist backend:', error);
+              console.error('Error details:', error.response?.data || error.message);
             }
+          } else {
+            console.log('User not authenticated, saved to local storage only');
           }
+        } else {
+          console.log('Product already in wishlist');
         }
       },
 
