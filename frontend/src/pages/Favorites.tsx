@@ -26,20 +26,33 @@ const Favorites = () => {
         // Get from backend
         try {
           const products = await wishlistService.getWishlist();
-          return products || [];
+          console.log('Fetched wishlist from backend:', products);
+          // Ensure all products have _id as string
+          const normalizedProducts = (products || []).map((product: any) => ({
+            ...product,
+            _id: product._id ? String(product._id) : product._id
+          }));
+          return normalizedProducts;
         } catch (error: any) {
           console.error('Failed to fetch wishlist from backend:', error);
           // If 404 or other error, fallback to local storage
           if (items.length === 0) return [];
           try {
-            // Filter out null, undefined, or invalid IDs
-            const validItems = items.filter((id) => id && typeof id === 'string' && id.trim() !== '');
+            // Filter out null, undefined, or invalid IDs and convert to strings
+            const validItems = items
+              .map(id => String(id))
+              .filter((id) => id && id.trim() !== '');
             if (validItems.length === 0) return [];
             
             const products = await Promise.all(
               validItems.map((id) => productService.getProduct(id).catch(() => null))
             );
-            return products.filter((p) => p !== null);
+            const validProducts = products.filter((p) => p !== null);
+            // Normalize _id to strings
+            return validProducts.map((product: any) => ({
+              ...product,
+              _id: product._id ? String(product._id) : product._id
+            }));
           } catch {
             return [];
           }
@@ -48,14 +61,21 @@ const Favorites = () => {
         // Get from local storage (for guest users)
         if (items.length === 0) return [];
         try {
-          // Filter out null, undefined, or invalid IDs
-          const validItems = items.filter((id) => id && typeof id === 'string' && id.trim() !== '');
+          // Filter out null, undefined, or invalid IDs and convert to strings
+          const validItems = items
+            .map(id => String(id))
+            .filter((id) => id && id.trim() !== '');
           if (validItems.length === 0) return [];
           
           const products = await Promise.all(
             validItems.map((id) => productService.getProduct(id).catch(() => null))
           );
-          return products.filter((p) => p !== null);
+          const validProducts = products.filter((p) => p !== null);
+          // Normalize _id to strings
+          return validProducts.map((product: any) => ({
+            ...product,
+            _id: product._id ? String(product._id) : product._id
+          }));
         } catch {
           return [];
         }
