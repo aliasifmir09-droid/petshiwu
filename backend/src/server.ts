@@ -19,8 +19,13 @@ import User from './models/User';
 // Load env vars
 dotenv.config();
 
-// Validate required environment variables
-validateEnv();
+// Validate required environment variables (but don't exit - let server start)
+try {
+  validateEnv();
+} catch (error: any) {
+  console.error('⚠️  Environment validation error:', error.message);
+  console.warn('⚠️  Server will start but may not function correctly');
+}
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -250,29 +255,54 @@ if (process.env.NODE_ENV === 'development') {
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = Number(process.env.PORT) || 5000;
+let PORT = Number(process.env.PORT) || 5000;
 const HOST = process.env.HOST || '0.0.0.0';
 
-// Start server
+// Ensure PORT is valid
+if (!PORT || isNaN(PORT) || PORT < 1 || PORT > 65535) {
+  console.error(`❌ Invalid PORT: ${process.env.PORT}. Using default 5000`);
+  PORT = 5000;
+}
+
+console.log(`🚀 Starting server on ${HOST}:${PORT}...`);
+console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+console.log(`🔑 MongoDB URI: ${process.env.MONGODB_URI ? 'Set' : 'NOT SET'}`);
+console.log(`🔐 JWT Secret: ${process.env.JWT_SECRET ? 'Set' : 'NOT SET'}`);
+
+// Start server - MUST start even if there are errors
 let server: any;
 try {
   server = app.listen(PORT, HOST, () => {
-    console.log(`✅ Server running in ${process.env.NODE_ENV} mode on ${HOST}:${PORT}`);
-    console.log(`✅ Server is ready to accept connections`);
+    console.log(`\n✅✅✅ SERVER SUCCESSFULLY STARTED ✅✅✅`);
+    console.log(`✅ Server running in ${process.env.NODE_ENV || 'development'} mode`);
+    console.log(`✅ Listening on ${HOST}:${PORT}`);
+    console.log(`✅ Server is ready to accept connections\n`);
   });
 
   // Handle server errors
   server.on('error', (error: any) => {
+    console.error('❌ Server error event:', error);
     if (error.code === 'EADDRINUSE') {
       console.error(`❌ Port ${PORT} is already in use`);
     } else {
-      console.error('❌ Server error:', error);
+      console.error('❌ Server error details:', error.message);
     }
-    process.exit(1);
+    // Don't exit immediately - let Render see the error
+    setTimeout(() => process.exit(1), 1000);
   });
+
+  // Log when server is actually listening
+  server.on('listening', () => {
+    const addr = server.address();
+    console.log(`✅ Server is listening on ${typeof addr === 'string' ? addr : `${addr?.address}:${addr?.port}`}`);
+  });
+
 } catch (error: any) {
-  console.error('❌ Failed to start server:', error.message);
-  process.exit(1);
+  console.error('❌ CRITICAL: Failed to start server:', error);
+  console.error('Error details:', error.message);
+  console.error('Stack:', error.stack);
+  // Exit after a delay to allow logging
+  setTimeout(() => process.exit(1), 2000);
 }
 
 // Handle unhandled promise rejections (don't exit immediately, log first)
