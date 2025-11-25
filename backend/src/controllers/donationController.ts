@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import Donation from '../models/Donation';

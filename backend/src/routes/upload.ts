@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import express, { Request, Response } from 'express';
 import { upload } from '../middleware/upload';
 import { protect, authorize } from '../middleware/auth';
