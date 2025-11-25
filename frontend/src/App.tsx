@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
 import { authService } from './services/auth';
@@ -21,6 +21,8 @@ const MyOrders = lazy(() => import('./pages/MyOrders'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail'));
 const TrackOrder = lazy(() => import('./pages/TrackOrder'));
 const Donate = lazy(() => import('./pages/Donate'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const Forbidden = lazy(() => import('./pages/Forbidden'));
 
 // Optimize React Query with better defaults
 const queryClient = new QueryClient({
@@ -80,7 +82,9 @@ function App() {
                 <Route path="/orders/:id" element={<OrderDetail />} />
                 <Route path="/track-order" element={<TrackOrder />} />
                 <Route path="/donate" element={<Donate />} />
-                <Route path="*" element={<Navigate to="/" />} />
+                <Route path="/403" element={<Forbidden />} />
+                <Route path="/404" element={<NotFound />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
           </main>

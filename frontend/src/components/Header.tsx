@@ -247,8 +247,7 @@ const Header = () => {
   };
 
   const handleLogout = () => {
-    logout();
-    navigate('/');
+    logout(); // This will reload the page automatically
     setMobileMenuOpen(false);
   };
 

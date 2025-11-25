@@ -43,7 +43,16 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Redirect to login or reload if already on login page
+      if (window.location.hash !== '#/login' && window.location.hash !== '#/register') {
+        window.location.href = '/#/login';
+      }
+    } else if (error.response?.status === 403) {
+      // Redirect to 403 page
+      window.location.href = '/#/403';
+    } else if (error.response?.status === 404) {
+      // Redirect to 404 page
+      window.location.href = '/#/404';
     }
     return Promise.reject(error);
   }
