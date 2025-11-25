@@ -41,6 +41,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Don't redirect for certain endpoints that might legitimately return 404
+    const url = error.config?.url || '';
+    const isWishlistEndpoint = url.includes('/wishlist');
+    const isProductEndpoint = url.includes('/products/');
+    
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       // Redirect to login or reload if already on login page
@@ -50,8 +55,9 @@ api.interceptors.response.use(
     } else if (error.response?.status === 403) {
       // Redirect to 403 page
       window.location.href = '/#/403';
-    } else if (error.response?.status === 404) {
-      // Redirect to 404 page
+    } else if (error.response?.status === 404 && !isWishlistEndpoint && !isProductEndpoint) {
+      // Only redirect to 404 page for non-resource endpoints
+      // Wishlist and product endpoints might legitimately return 404
       window.location.href = '/#/404';
     }
     return Promise.reject(error);
