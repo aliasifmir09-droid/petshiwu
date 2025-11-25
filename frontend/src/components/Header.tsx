@@ -422,6 +422,15 @@ const Header = () => {
                       My Profile
                     </Link>
                     <Link
+                      to="/favorites"
+                      className="block px-4 py-2.5 hover:bg-pink-50 hover:text-pink-600 font-medium"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Heart size={18} className="text-pink-500" fill="currentColor" />
+                        My Favorites
+                      </div>
+                    </Link>
+                    <Link
                       to="/orders"
                       className="block px-4 py-2.5 hover:bg-gray-100 font-medium"
                     >
@@ -1094,6 +1103,14 @@ const Header = () => {
                     >
                       <User size={20} />
                       <span>My Profile</span>
+                    </Link>
+                    <Link
+                      to="/favorites"
+                      className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors mt-1"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Heart size={20} className="text-pink-500" fill="currentColor" />
+                      <span>My Favorites</span>
                     </Link>
                     <Link
                       to="/orders"

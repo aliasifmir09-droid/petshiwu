@@ -256,6 +256,121 @@ export const getCustomerOrders = async (req: AuthRequest, res: Response, next: N
   }
 };
 
+// Add product to wishlist
+export const addToWishlist = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { productId } = req.body;
+    const userId = req.user?._id;
+
+    if (!productId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Product ID is required'
+      });
+    }
+
+    // Dynamically import Product model to avoid circular dependency
+    const Product = (await import('../models/Product')).default;
+
+    // Verify product exists
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+
+    // Add to wishlist if not already there
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    if (!user.wishlist.includes(productId as any)) {
+      user.wishlist.push(productId as any);
+      await user.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Product added to wishlist',
+      data: user.wishlist
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Remove product from wishlist
+export const removeFromWishlist = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { productId } = req.body;
+    const userId = req.user?._id;
+
+    if (!productId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Product ID is required'
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    user.wishlist = user.wishlist.filter(
+      (id) => id.toString() !== productId
+    );
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Product removed from wishlist',
+      data: user.wishlist
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get user wishlist with products
+export const getWishlist = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user?._id;
+
+    const user = await User.findById(userId).populate({
+      path: 'wishlist',
+      select: 'name slug images basePrice compareAtPrice brand averageRating totalReviews inStock isActive',
+      match: { isActive: true } // Only get active products
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Filter out null products (in case some were deleted)
+    const wishlistProducts = user.wishlist.filter((product: any) => product !== null);
+
+    res.status(200).json({
+      success: true,
+      data: wishlistProducts
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Get database statistics (admin only)
 export const getDatabaseStats = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {

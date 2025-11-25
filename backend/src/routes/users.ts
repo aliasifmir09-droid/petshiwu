@@ -7,7 +7,10 @@ import {
   getMyPermissions,
   getCustomers,
   getCustomerOrders,
-  getDatabaseStats
+  getDatabaseStats,
+  addToWishlist,
+  removeFromWishlist,
+  getWishlist
 } from '../controllers/userController';
 import { protect } from '../middleware/auth';
 import { isAdmin, hasPermission } from '../middleware/permissions';
@@ -33,6 +36,11 @@ router.get('/customers/:customerId/orders', protect, hasPermission('canManageCus
 
 // Get database statistics (admin only)
 router.get('/database/stats', protect, isAdmin, getDatabaseStats);
+
+// Wishlist routes (authenticated users)
+router.post('/wishlist', protect, addToWishlist);
+router.delete('/wishlist', protect, removeFromWishlist);
+router.get('/wishlist', protect, getWishlist);
 
 export default router;
 

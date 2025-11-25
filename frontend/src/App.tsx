@@ -2,6 +2,7 @@ import { useEffect, lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
+import { useWishlistStore } from './stores/wishlistStore';
 import { authService } from './services/auth';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -21,6 +22,7 @@ const MyOrders = lazy(() => import('./pages/MyOrders'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail'));
 const TrackOrder = lazy(() => import('./pages/TrackOrder'));
 const Donate = lazy(() => import('./pages/Donate'));
+const Favorites = lazy(() => import('./pages/Favorites'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const Forbidden = lazy(() => import('./pages/Forbidden'));
 
@@ -38,6 +40,7 @@ const queryClient = new QueryClient({
 
 function App() {
   const { setUser, setLoading } = useAuthStore();
+  const { syncWithBackend } = useWishlistStore();
 
   useEffect(() => {
     const loadUser = async () => {
@@ -46,6 +49,8 @@ function App() {
         try {
           const user = await authService.getMe();
           setUser(user);
+          // Sync wishlist with backend after user loads
+          await syncWithBackend();
         } catch (error) {
           localStorage.removeItem('token');
           setUser(null);
@@ -56,7 +61,7 @@ function App() {
     };
 
     loadUser();
-  }, [setUser, setLoading]);
+  }, [setUser, setLoading, syncWithBackend]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -82,6 +87,7 @@ function App() {
                 <Route path="/orders/:id" element={<OrderDetail />} />
                 <Route path="/track-order" element={<TrackOrder />} />
                 <Route path="/donate" element={<Donate />} />
+                <Route path="/favorites" element={<Favorites />} />
                 <Route path="/403" element={<Forbidden />} />
                 <Route path="/404" element={<NotFound />} />
                 <Route path="*" element={<NotFound />} />

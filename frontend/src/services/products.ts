@@ -29,6 +29,11 @@ export const productService = {
     return response.data.data;
   },
 
+  getProductById: async (id: string) => {
+    const response = await api.get<ApiResponse<Product>>(`/products/${id}`);
+    return response.data.data;
+  },
+
   getRelatedProducts: async (productId: string, limit = 8) => {
     const response = await api.get<PaginatedResponse<Product>>(`/products/${productId}/related`, {
       params: { limit }
