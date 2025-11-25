@@ -256,3 +256,75 @@ export const getCustomerOrders = async (req: AuthRequest, res: Response, next: N
   }
 };
 
+// Get database statistics (admin only)
+export const getDatabaseStats = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    // Dynamically import models to avoid circular dependencies
+    const Order = (await import('../models/Order')).default;
+    const Product = (await import('../models/Product')).default;
+    const Category = (await import('../models/Category')).default;
+    const Review = (await import('../models/Review')).default;
+    const Donation = (await import('../models/Donation')).default;
+
+    // Get counts for all collections
+    const stats = {
+      users: {
+        total: await User.countDocuments(),
+        customers: await User.countDocuments({ role: 'customer' }),
+        admins: await User.countDocuments({ role: 'admin' }),
+        staff: await User.countDocuments({ role: 'staff' }),
+        active: await User.countDocuments({ isActive: true }),
+        inactive: await User.countDocuments({ isActive: false })
+      },
+      products: {
+        total: await Product.countDocuments(),
+        active: await Product.countDocuments({ isActive: true }),
+        inactive: await Product.countDocuments({ isActive: false }),
+        inStock: await Product.countDocuments({ 'variants.0.stock': { $gt: 0 } }),
+        outOfStock: await Product.countDocuments({ 'variants.0.stock': { $lte: 0 } })
+      },
+      orders: {
+        total: await Order.countDocuments(),
+        pending: await Order.countDocuments({ orderStatus: 'pending' }),
+        processing: await Order.countDocuments({ orderStatus: 'processing' }),
+        shipped: await Order.countDocuments({ orderStatus: 'shipped' }),
+        delivered: await Order.countDocuments({ orderStatus: 'delivered' }),
+        cancelled: await Order.countDocuments({ orderStatus: 'cancelled' })
+      },
+      categories: {
+        total: await Category.countDocuments(),
+        active: await Category.countDocuments({ isActive: true })
+      },
+      reviews: {
+        total: await Review.countDocuments(),
+        approved: await Review.countDocuments({ isApproved: true }),
+        pending: await Review.countDocuments({ isApproved: false })
+      },
+      donations: {
+        total: await Donation.countDocuments(),
+        completed: await Donation.countDocuments({ status: 'completed' }),
+        pending: await Donation.countDocuments({ status: 'pending' })
+      }
+    };
+
+    // Calculate total revenue from paid orders
+    const paidOrders = await Order.find({ paymentStatus: 'paid' }).select('totalPrice donationAmount');
+    const totalRevenue = paidOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+    const totalDonations = paidOrders.reduce((sum, order) => sum + (order.donationAmount || 0), 0);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        ...stats,
+        financial: {
+          totalRevenue,
+          totalDonations,
+          totalWithDonations: totalRevenue + totalDonations
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+

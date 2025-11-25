@@ -254,6 +254,12 @@ export const adminService = {
   reorderPetTypes: async (petTypeIds: string[]) => {
     const response = await api.post('/pet-types/reorder', { petTypeIds });
     return response.data;
+  },
+
+  // Database Statistics
+  getDatabaseStats: async () => {
+    const response = await api.get('/users/database/stats');
+    return response.data.data;
   }
 };
 

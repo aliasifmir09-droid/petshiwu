@@ -6,7 +6,8 @@ import {
   deleteStaffUser,
   getMyPermissions,
   getCustomers,
-  getCustomerOrders
+  getCustomerOrders,
+  getDatabaseStats
 } from '../controllers/userController';
 import { protect } from '../middleware/auth';
 import { isAdmin, hasPermission } from '../middleware/permissions';
@@ -29,6 +30,9 @@ router.delete('/staff/:id', protect, isAdmin, validateObjectId(), deleteStaffUse
 // Customer management routes (admin or staff with permission)
 router.get('/customers', protect, hasPermission('canManageCustomers'), getCustomers);
 router.get('/customers/:customerId/orders', protect, hasPermission('canManageCustomers'), getCustomerOrders);
+
+// Get database statistics (admin only)
+router.get('/database/stats', protect, isAdmin, getDatabaseStats);
 
 export default router;
 
