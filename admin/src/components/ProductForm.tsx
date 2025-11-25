@@ -102,20 +102,48 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
         try {
           console.log('Uploading file:', file.name, file.type, file.size);
           const result = await adminService.uploadImage(file);
-          console.log('Upload result:', result);
+          console.log('Upload result (full):', JSON.stringify(result, null, 2));
           
-          // Use url (Cloudinary) or path (local fallback) from response
-          const imageUrl = result?.url || result?.path;
+          // Extract URL from response - check multiple possible locations
+          let imageUrl = null;
+          
+          // Try different possible response structures
+          if (typeof result === 'string') {
+            // If result is already a URL string
+            imageUrl = result;
+          } else if (result?.url) {
+            // Cloudinary URL
+            imageUrl = result.url;
+          } else if (result?.path) {
+            // Local storage path or Cloudinary path
+            imageUrl = result.path;
+          } else if (result?.secure_url) {
+            // Cloudinary secure_url
+            imageUrl = result.secure_url;
+          } else if (result?.data?.url) {
+            // Nested data structure
+            imageUrl = result.data.url;
+          } else if (result?.data?.path) {
+            // Nested data structure with path
+            imageUrl = result.data.path;
+          }
           
           if (!imageUrl) {
-            console.error('No URL in result:', result);
+            console.error('No URL found in result. Full result:', JSON.stringify(result, null, 2));
             throw new Error(`No image URL returned from server. Response: ${JSON.stringify(result)}`);
           }
           
-          console.log('Uploaded image URL:', imageUrl);
+          // Ensure URL is a string and is valid
+          imageUrl = String(imageUrl).trim();
+          
+          if (!imageUrl || imageUrl === 'undefined' || imageUrl === 'null') {
+            throw new Error('Invalid URL returned from server');
+          }
+          
+          console.log('✅ Uploaded image URL:', imageUrl);
           return imageUrl;
         } catch (error: any) {
-          console.error('Upload error for file:', file.name, error);
+          console.error('❌ Upload error for file:', file.name, error);
           console.error('Error details:', {
             message: error.message,
             response: error.response?.data,
@@ -126,8 +154,21 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       });
 
       const uploadedUrls = await Promise.all(uploadPromises);
-      setImageUrls([...imageUrls, ...uploadedUrls]);
-      showToast(`Successfully uploaded ${uploadedUrls.length} image(s)`, 'success');
+      console.log('All uploaded URLs:', uploadedUrls);
+      
+      // Filter out any invalid URLs
+      const validUrls = uploadedUrls.filter(url => url && url.trim() && url !== 'undefined' && url !== 'null');
+      
+      if (validUrls.length === 0) {
+        throw new Error('No valid URLs returned from upload');
+      }
+      
+      // Add URLs to the image list
+      const newImageUrls = [...imageUrls, ...validUrls];
+      console.log('Setting image URLs. Old:', imageUrls.length, 'New:', newImageUrls.length);
+      setImageUrls(newImageUrls);
+      
+      showToast(`Successfully uploaded ${validUrls.length} image(s)`, 'success');
     } catch (error: any) {
       console.error('Image upload error:', error);
       const errorMessage = error.response?.data?.message || 
