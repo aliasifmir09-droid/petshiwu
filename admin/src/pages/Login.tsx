@@ -16,17 +16,39 @@ const Login = ({ onLogin }: LoginProps) => {
   });
 
   const loginMutation = useMutation({
-    mutationFn: () => {
-      return adminService.login(formData.email, formData.password);
+    mutationFn: async () => {
+      const response = await adminService.login(formData.email, formData.password);
+      
+      // Verify token was saved
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        throw new Error('Token not saved after login');
+      }
+      
+      // Wait a bit to ensure token is available
+      await new Promise(resolve => setTimeout(resolve, 150));
+      
+      return response;
     },
     onSuccess: async () => {
       try {
-        // Small delay to ensure token is saved
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Verify token exists before making request
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+          showToast('Login failed: Token not found', 'error');
+          return;
+        }
         
+        // Fetch user information
         const user = await adminService.getMe();
         
-        if (!user || (user.role !== 'admin' && user.role !== 'staff')) {
+        if (!user) {
+          showToast('Error fetching user information. Please try again.', 'error');
+          localStorage.removeItem('adminToken');
+          return;
+        }
+        
+        if (user.role !== 'admin' && user.role !== 'staff') {
           showToast('Access denied. Admin or staff account required.', 'error');
           localStorage.removeItem('adminToken');
           return;
@@ -35,13 +57,22 @@ const Login = ({ onLogin }: LoginProps) => {
         onLogin(user);
         // Force reload to ensure App.tsx picks up the token
         window.location.href = '/';
-      } catch (error) {
-        showToast('Error fetching user information. Please try again.', 'error');
+      } catch (error: any) {
+        console.error('Error after login:', error);
+        const errorMessage = error.response?.data?.message || 
+                           error.message || 
+                           'Error fetching user information. Please try again.';
+        showToast(errorMessage, 'error');
         localStorage.removeItem('adminToken');
       }
     },
     onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Login failed', 'error');
+      console.error('Login error:', error);
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Login failed. Please check your credentials.';
+      showToast(errorMessage, 'error');
+      localStorage.removeItem('adminToken');
     }
   });
 

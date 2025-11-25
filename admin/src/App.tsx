@@ -43,10 +43,15 @@ function App() {
             setUser(userData);
           } else {
             localStorage.removeItem('adminToken');
+            setUser(null);
           }
-        } catch (error) {
+        } catch (error: any) {
+          console.error('Error loading user:', error);
           localStorage.removeItem('adminToken');
+          setUser(null);
         }
+      } else {
+        setUser(null);
       }
       setLoading(false);
     };
@@ -66,11 +71,20 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await adminService.logout();
+      // Clear token first to prevent any subsequent requests
+      localStorage.removeItem('adminToken');
+      
+      // Then call logout endpoint (don't wait for it)
+      adminService.logout().catch(() => {
+        // Silently handle logout errors
+      });
     } catch (error) {
       // Silently handle logout errors
+    } finally {
+      // Always clear user state and redirect
+      setUser(null);
+      window.location.href = '/login';
     }
-    setUser(null);
   };
 
   // Loading component for Suspense fallback

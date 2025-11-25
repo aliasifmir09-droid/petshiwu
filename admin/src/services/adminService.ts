@@ -3,19 +3,58 @@ import api from './api';
 export const adminService = {
   // Auth
   login: async (email: string, password: string) => {
-    const response = await api.post('/auth/login', { email, password });
-    
-    if (response.data?.success && response.data?.token) {
-      localStorage.setItem('adminToken', response.data.token);
-    } else if (response.data?.success && response.data?.data?.token) {
-      localStorage.setItem('adminToken', response.data.data.token);
+    try {
+      // Clear any existing token first
+      localStorage.removeItem('adminToken');
+      
+      const response = await api.post('/auth/login', { email, password });
+      
+      // Extract token from response
+      let token = null;
+      if (response.data?.success && response.data?.token) {
+        token = response.data.token;
+      } else if (response.data?.success && response.data?.data?.token) {
+        token = response.data.data.token;
+      }
+      
+      if (!token) {
+        throw new Error('No token received from server');
+      }
+      
+      // Save token to localStorage
+      localStorage.setItem('adminToken', token);
+      
+      // Verify token was saved
+      const savedToken = localStorage.getItem('adminToken');
+      if (savedToken !== token) {
+        throw new Error('Failed to save token');
+      }
+      
+      return response.data;
+    } catch (error: any) {
+      // Ensure token is cleared on error
+      localStorage.removeItem('adminToken');
+      throw error;
     }
-    return response.data;
   },
 
   getMe: async () => {
-    const response = await api.get('/auth/me');
-    return response.data.data;
+    // Verify token exists before making request
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    
+    try {
+      const response = await api.get('/auth/me');
+      return response.data.data;
+    } catch (error: any) {
+      // If 401, clear token and rethrow
+      if (error.response?.status === 401) {
+        localStorage.removeItem('adminToken');
+      }
+      throw error;
+    }
   },
 
   logout: async () => {
