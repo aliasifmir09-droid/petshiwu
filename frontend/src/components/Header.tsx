@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, ChevronDown, ChevronRight, Search, Menu, X, LogOut, Phone, Heart } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
+import { useWishlistStore } from '@/stores/wishlistStore';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/services/api';
@@ -13,6 +14,7 @@ const Header = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuthStore();
   const { getTotalItems } = useCartStore();
+  const { items: wishlistItems } = useWishlistStore();
   const { toast, hideToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -251,9 +253,6 @@ const Header = () => {
     setMobileMenuOpen(false);
   };
 
-  const handleDonate = (amount: number) => {
-    navigate(`/donate?amount=${amount}`);
-  };
 
   const toggleMobilePetType = (petTypeSlug: string) => {
     setExpandedMobilePetTypes(prev => {
@@ -368,43 +367,25 @@ const Header = () => {
                 </div>
               </div>
 
-              {/* Donate Button */}
-              <div className="relative group z-[100]">
-                <button className="flex items-center gap-1 lg:gap-1.5 hover:opacity-80 px-1.5 lg:px-2.5 py-1.5 rounded-md hover:bg-white/10 transition-colors">
-                  <Heart size={18} className="lg:w-5 lg:h-5" />
-                  <span className="hidden xl:block text-xs lg:text-sm font-semibold">Donate</span>
-                  <ChevronDown size={14} className="hidden xl:block" />
-                </button>
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all text-gray-900 z-[100]">
-                  <button
-                    onClick={() => handleDonate(10)}
-                    className="block w-full text-left px-4 py-2.5 hover:bg-pink-50 hover:text-pink-600 font-medium transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold">$10</span>
-                      <span className="text-xs text-gray-500">Help a Pet Today</span>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => handleDonate(20)}
-                    className="block w-full text-left px-4 py-2.5 hover:bg-pink-50 hover:text-pink-600 font-medium transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold">$20</span>
-                      <span className="text-xs text-gray-500">Make a Difference</span>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => handleDonate(100)}
-                    className="block w-full text-left px-4 py-2.5 hover:bg-pink-50 hover:text-pink-600 font-medium transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold">$100</span>
-                      <span className="text-xs text-gray-500">Transform Lives</span>
-                    </div>
-                  </button>
+              {/* Favorites Button */}
+              <Link
+                to="/favorites"
+                className="relative flex items-center gap-1 lg:gap-1.5 hover:opacity-80 px-1.5 lg:px-2.5 py-1.5 rounded-md hover:bg-white/10 transition-colors"
+              >
+                <div className="relative">
+                  <Heart 
+                    size={18} 
+                    className="lg:w-5 lg:h-5"
+                    fill={wishlistItems.length > 0 ? 'currentColor' : 'none'}
+                  />
+                  {wishlistItems.length > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {wishlistItems.length > 9 ? '9+' : wishlistItems.length}
+                    </span>
+                  )}
                 </div>
-              </div>
+                <span className="hidden xl:block text-xs lg:text-sm font-semibold">Favorites</span>
+              </Link>
 
               {/* Sign In / User Dropdown */}
               {isAuthenticated ? (
@@ -1050,52 +1031,9 @@ const Header = () => {
                   <span>About Us</span>
                 </Link>
               </li>
-              <li className="border-t pt-3 mt-3">
-                {/* Donate Section */}
-                <div className="mb-3">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 mb-2">Support Our Mission</p>
-                  <button
-                    onClick={() => {
-                      handleDonate(10);
-                      setMobileMenuOpen(false);
-                    }}
-                    className="flex items-center justify-between w-full text-left py-2.5 px-3 font-semibold hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Heart size={20} className="text-pink-500" />
-                      <span>$10</span>
-                    </div>
-                    <span className="text-xs text-gray-500 font-normal">Help a Pet Today</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleDonate(20);
-                      setMobileMenuOpen(false);
-                    }}
-                    className="flex items-center justify-between w-full text-left py-2.5 px-3 font-semibold hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors mt-1"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Heart size={20} className="text-pink-500" />
-                      <span>$20</span>
-                    </div>
-                    <span className="text-xs text-gray-500 font-normal">Make a Difference</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleDonate(100);
-                      setMobileMenuOpen(false);
-                    }}
-                    className="flex items-center justify-between w-full text-left py-2.5 px-3 font-semibold hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors mt-1"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Heart size={20} className="text-pink-500" />
-                      <span>$100</span>
-                    </div>
-                    <span className="text-xs text-gray-500 font-normal">Transform Lives</span>
-                  </button>
-                </div>
-                {isAuthenticated ? (
-                  <>
+              {isAuthenticated ? (
+                <>
+                  <li>
                     <Link
                       to="/profile"
                       className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
@@ -1104,34 +1042,42 @@ const Header = () => {
                       <User size={20} />
                       <span>My Profile</span>
                     </Link>
+                  </li>
+                  <li>
                     <Link
                       to="/favorites"
-                      className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors mt-1"
+                      className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Heart size={20} className="text-pink-500" fill="currentColor" />
                       <span>My Favorites</span>
                     </Link>
+                  </li>
+                  <li>
                     <Link
                       to="/orders"
-                      className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors mt-1"
+                      className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <ShoppingCart size={20} />
                       <span>My Orders</span>
                     </Link>
+                  </li>
+                  <li>
                     <button
                       onClick={() => {
                         setShowLogoutModal(true);
                         setMobileMenuOpen(false);
                       }}
-                      className="flex items-center gap-3 w-full text-left py-3 px-3 font-semibold hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors mt-1"
+                      className="flex items-center gap-3 w-full text-left py-3 px-3 font-semibold hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
                     >
                       <span className="text-xl">🚪</span>
                       <span>Logout</span>
                     </button>
-                  </>
-                ) : (
+                  </li>
+                </>
+              ) : (
+                <li>
                   <Link
                     to="/login"
                     className="flex items-center gap-3 py-3 px-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold"
@@ -1140,8 +1086,8 @@ const Header = () => {
                     <User size={20} />
                     <span>Sign In / Register</span>
                   </Link>
-                )}
-              </li>
+                </li>
+              )}
             </ul>
           </div>
         </div>
