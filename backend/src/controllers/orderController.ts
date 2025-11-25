@@ -54,26 +54,59 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
     // Verify stock availability
     for (const item of items) {
       // Convert product ID to string if it's an object
-      const productId = item.product ? String(item.product) : item.product;
+      let productId: string | null = null;
+      const rawProductId = item.product;
       
-      if (!productId) {
+      if (!rawProductId) {
+        console.error('Product ID is missing in item:', item);
         return res.status(400).json({
           success: false,
-          message: `Product ID is missing for item: ${item.name || 'Unknown'}`
+          message: `Product ID is missing for item: ${item.name || 'Unknown'}`,
+          errors: [`Item "${item.name || 'Unknown'}" has no product ID`]
         });
       }
       
-      const product = await Product.findById(productId);
-      if (!product) {
+      // Handle different types of product IDs
+      if (typeof rawProductId === 'string') {
+        productId = rawProductId;
+      } else if (typeof rawProductId === 'object' && rawProductId !== null) {
+        // Handle ObjectId objects
+        if ('toString' in rawProductId && typeof (rawProductId as any).toString === 'function') {
+          productId = (rawProductId as any).toString();
+        } else if ('_id' in rawProductId) {
+          productId = String((rawProductId as any)._id);
+        } else {
+          productId = String(rawProductId);
+        }
+      } else {
+        productId = String(rawProductId);
+      }
+      
+      // Validate MongoDB ObjectId format
+      if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
+        console.error('Invalid product ID format:', { productId, rawProductId, itemName: item.name });
         return res.status(400).json({
           success: false,
-          message: `Product ${item.name || productId} not found`
+          message: `Invalid product ID for item: ${item.name || 'Unknown'}`,
+          errors: [`Product ID "${productId}" is not a valid MongoDB ObjectId`]
+        });
+      }
+      
+      console.log('Looking up product:', { productId, itemName: item.name });
+      const product = await Product.findById(productId);
+      if (!product) {
+        console.error('Product not found:', { productId, itemName: item.name });
+        return res.status(400).json({
+          success: false,
+          message: `Product ${item.name || productId} not found`,
+          errors: [`Product with ID "${productId}" does not exist in database`]
         });
       }
       if (!product.inStock) {
         return res.status(400).json({
           success: false,
-          message: `Product ${item.name} is out of stock`
+          message: `Product ${item.name} is out of stock`,
+          errors: [`Product "${item.name}" is currently out of stock`]
         });
       }
     }

@@ -75,21 +75,48 @@ const Checkout = () => {
         let productId: string | null = null;
         const rawId = item.product._id;
         
-        if (rawId) {
-          // Handle both ObjectId objects and strings
-          if (typeof rawId === 'object' && rawId !== null && 'toString' in rawId) {
-            productId = (rawId as any).toString();
-          } else {
-            productId = String(rawId);
-          }
-        }
-        
-        if (!productId) {
-          console.error('Product ID is missing or invalid:', item.product);
+        if (!rawId) {
+          console.error('Product ID is missing:', item.product);
           throw new Error(`Product ID is missing for item: ${item.product.name}`);
         }
         
-        console.log('Order item:', { productId, productName: item.product.name, originalId: rawId, type: typeof rawId });
+        // Handle different types of product IDs
+        if (typeof rawId === 'string') {
+          productId = rawId;
+        } else if (typeof rawId === 'object' && rawId !== null) {
+          // Handle ObjectId objects - check for toString method
+          if ('toString' in rawId && typeof (rawId as any).toString === 'function') {
+            productId = (rawId as any).toString();
+          } else if ('_id' in rawId) {
+            // Nested object with _id
+            productId = String((rawId as any)._id);
+          } else {
+            // Try to stringify the object
+            productId = String(rawId);
+          }
+        } else {
+          productId = String(rawId);
+        }
+        
+        // Validate the product ID is not empty or "[object Object]"
+        if (!productId || productId === '[object Object]' || productId.trim() === '') {
+          console.error('Invalid product ID conversion:', { 
+            productId, 
+            rawId, 
+            rawIdType: typeof rawId,
+            productName: item.product.name,
+            product: item.product
+          });
+          throw new Error(`Invalid product ID for item: ${item.product.name}`);
+        }
+        
+        console.log('Order item prepared:', { 
+          productId, 
+          productName: item.product.name, 
+          originalId: rawId, 
+          originalIdType: typeof rawId,
+          isValid: productId.length === 24 && /^[0-9a-fA-F]{24}$/.test(productId)
+        });
         
         return {
           product: productId,
