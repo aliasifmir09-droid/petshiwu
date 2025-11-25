@@ -13,27 +13,52 @@ const Favorites = () => {
   const { items, removeFromWishlist } = useWishlistStore();
 
   // Fetch wishlist products
-  const { data: wishlistProducts, isLoading, refetch } = useQuery({
-    queryKey: ['wishlist-products', items],
+  const { data: wishlistProducts, isLoading, refetch, error: queryError } = useQuery({
+    queryKey: ['wishlist-products', items, isAuthenticated],
     queryFn: async () => {
       if (isAuthenticated) {
         // Get from backend
-        return await wishlistService.getWishlist();
+        try {
+          const products = await wishlistService.getWishlist();
+          return products || [];
+        } catch (error: any) {
+          console.error('Failed to fetch wishlist from backend:', error);
+          // If 404 or other error, fallback to local storage
+          if (items.length === 0) return [];
+          try {
+            const products = await Promise.all(
+              items.map((id) => productService.getProduct(id).catch(() => null))
+            );
+            return products.filter((p) => p !== null);
+          } catch {
+            return [];
+          }
+        }
       } else {
         // Get from local storage (for guest users)
         if (items.length === 0) return [];
-        const products = await Promise.all(
-          items.map((id) => productService.getProduct(id).catch(() => null))
-        );
-        return products.filter((p) => p !== null);
+        try {
+          const products = await Promise.all(
+            items.map((id) => productService.getProduct(id).catch(() => null))
+          );
+          return products.filter((p) => p !== null);
+        } catch {
+          return [];
+        }
       }
     },
-    enabled: items.length > 0 || isAuthenticated
+    enabled: true, // Always enabled so we can show empty state
+    retry: 1,
+    retryOnMount: false
   });
 
   const handleRemoveFromWishlist = async (productId: string) => {
-    await removeFromWishlist(productId);
-    refetch();
+    try {
+      await removeFromWishlist(productId);
+      refetch();
+    } catch (error) {
+      console.error('Failed to remove from wishlist:', error);
+    }
   };
 
   if (isLoading) {
@@ -42,6 +67,11 @@ const Favorites = () => {
         <LoadingSpinner size="lg" />
       </div>
     );
+  }
+
+  // Handle errors gracefully
+  if (queryError) {
+    console.error('Error loading favorites:', queryError);
   }
 
   const products = wishlistProducts || [];
