@@ -4,12 +4,19 @@ import { Request, Response, NextFunction } from 'express';
 /**
  * Sanitize response data to prevent data leakage
  * Removes sensitive fields from API responses
+ * 
+ * Note: Authentication endpoints (login/register) are allowed to return tokens
  */
 export const sanitizeResponse = (req: Request, res: Response, next: NextFunction) => {
   // Can be disabled via environment variable if needed
   if (process.env.DISABLE_RESPONSE_SANITIZATION === 'true') {
     return next();
   }
+  
+  // Check if this is an authentication endpoint that needs to return tokens
+  const isAuthEndpoint = req.path.includes('/auth/login') || 
+                         req.path.includes('/auth/register') ||
+                         req.path.includes('/auth/updatepassword');
   
   const originalJson = res.json;
   
@@ -21,7 +28,8 @@ export const sanitizeResponse = (req: Request, res: Response, next: NextFunction
   res.json = function (data: any) {
     try {
       if (data && typeof data === 'object') {
-        data = sanitizeObject(data);
+        // For auth endpoints, allow token field but still sanitize other sensitive data
+        data = sanitizeObject(data, new WeakSet(), 0, isAuthEndpoint);
       }
     } catch (error) {
       // If sanitization fails, log and return original data (don't crash)
@@ -41,8 +49,9 @@ export const sanitizeResponse = (req: Request, res: Response, next: NextFunction
 /**
  * Recursively sanitize object to prevent data leakage
  * Includes depth limit and circular reference protection
+ * @param allowToken - If true, allows 'token' field (for auth endpoints)
  */
-function sanitizeObject(obj: any, visited = new WeakSet(), depth = 0): any {
+function sanitizeObject(obj: any, visited = new WeakSet(), depth = 0, allowToken = false): any {
   // Prevent infinite recursion
   if (depth > 10) {
     return '[Max Depth Reached]';
@@ -62,7 +71,7 @@ function sanitizeObject(obj: any, visited = new WeakSet(), depth = 0): any {
   
   // Handle arrays
   if (Array.isArray(obj)) {
-    return obj.map(item => sanitizeObject(item, visited, depth + 1));
+    return obj.map(item => sanitizeObject(item, visited, depth + 1, allowToken));
   }
   
   // Handle Date, RegExp, and other special objects
@@ -82,7 +91,6 @@ function sanitizeObject(obj: any, visited = new WeakSet(), depth = 0): any {
   
   const sensitiveFields = [
     'password',
-    'token',
     'secret',
     'apiKey',
     'api_key',
@@ -105,6 +113,11 @@ function sanitizeObject(obj: any, visited = new WeakSet(), depth = 0): any {
     'socialSecurityNumber'
   ];
   
+  // Add 'token' to sensitive fields only if not allowed
+  const fieldsToSanitize = allowToken 
+    ? sensitiveFields 
+    : [...sensitiveFields, 'token'];
+  
   const sanitized: any = {};
   
   for (const key in obj) {
@@ -112,7 +125,7 @@ function sanitizeObject(obj: any, visited = new WeakSet(), depth = 0): any {
       const lowerKey = key.toLowerCase();
       
       // Skip sensitive fields
-      if (sensitiveFields.some(field => lowerKey.includes(field.toLowerCase()))) {
+      if (fieldsToSanitize.some(field => lowerKey.includes(field.toLowerCase()))) {
         continue;
       }
       
@@ -123,7 +136,7 @@ function sanitizeObject(obj: any, visited = new WeakSet(), depth = 0): any {
       
       // Recursively sanitize nested objects
       try {
-        sanitized[key] = sanitizeObject(obj[key], visited, depth + 1);
+        sanitized[key] = sanitizeObject(obj[key], visited, depth + 1, allowToken);
       } catch (e) {
         // If recursion fails, skip this property
         continue;
