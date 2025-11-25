@@ -10,6 +10,7 @@ interface WishlistState {
   isInWishlist: (productId: string) => boolean;
   clearWishlist: () => void;
   syncWithBackend: () => Promise<void>;
+  cleanup: () => void;
 }
 
 export const useWishlistStore = create<WishlistState>()(
@@ -18,6 +19,12 @@ export const useWishlistStore = create<WishlistState>()(
       items: [],
 
       addToWishlist: async (productId: string) => {
+        // Validate productId
+        if (!productId || typeof productId !== 'string' || productId.trim() === '') {
+          console.error('Invalid product ID:', productId);
+          return;
+        }
+        
         const currentItems = get().items;
         if (!currentItems.includes(productId)) {
           // Update local state immediately
@@ -62,6 +69,15 @@ export const useWishlistStore = create<WishlistState>()(
       },
 
       clearWishlist: () => set({ items: [] }),
+      
+      // Clean up invalid items from wishlist
+      cleanup: () => {
+        const currentItems = get().items;
+        const validItems = currentItems.filter((id) => id && typeof id === 'string' && id.trim() !== '');
+        if (validItems.length !== currentItems.length) {
+          set({ items: validItems });
+        }
+      },
 
       syncWithBackend: async () => {
         const { isAuthenticated } = useAuthStore.getState();
@@ -69,7 +85,9 @@ export const useWishlistStore = create<WishlistState>()(
 
         try {
           const wishlistProducts = await wishlistService.getWishlist();
-          const productIds = wishlistProducts.map((product: any) => product._id || product.id);
+          const productIds = wishlistProducts
+            .map((product: any) => product._id || product.id)
+            .filter((id: any) => id && typeof id === 'string' && id.trim() !== ''); // Filter out invalid IDs
           set({ items: productIds });
         } catch (error) {
           console.error('Failed to sync wishlist:', error);

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Trash2 } from 'lucide-react';
@@ -10,7 +11,12 @@ import { productService } from '@/services/products';
 
 const Favorites = () => {
   const { isAuthenticated } = useAuthStore();
-  const { items, removeFromWishlist } = useWishlistStore();
+  const { items, removeFromWishlist, cleanup } = useWishlistStore();
+  
+  // Clean up invalid items on mount
+  useEffect(() => {
+    cleanup();
+  }, [cleanup]);
 
   // Fetch wishlist products
   const { data: wishlistProducts, isLoading, refetch, error: queryError } = useQuery({
@@ -26,8 +32,12 @@ const Favorites = () => {
           // If 404 or other error, fallback to local storage
           if (items.length === 0) return [];
           try {
+            // Filter out null, undefined, or invalid IDs
+            const validItems = items.filter((id) => id && typeof id === 'string' && id.trim() !== '');
+            if (validItems.length === 0) return [];
+            
             const products = await Promise.all(
-              items.map((id) => productService.getProduct(id).catch(() => null))
+              validItems.map((id) => productService.getProduct(id).catch(() => null))
             );
             return products.filter((p) => p !== null);
           } catch {
@@ -38,8 +48,12 @@ const Favorites = () => {
         // Get from local storage (for guest users)
         if (items.length === 0) return [];
         try {
+          // Filter out null, undefined, or invalid IDs
+          const validItems = items.filter((id) => id && typeof id === 'string' && id.trim() !== '');
+          if (validItems.length === 0) return [];
+          
           const products = await Promise.all(
-            items.map((id) => productService.getProduct(id).catch(() => null))
+            validItems.map((id) => productService.getProduct(id).catch(() => null))
           );
           return products.filter((p) => p !== null);
         } catch {
