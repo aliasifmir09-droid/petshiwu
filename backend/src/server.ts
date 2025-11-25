@@ -122,7 +122,8 @@ app.use(helmet({
       imgSrc: ["'self'", "data:", "https:", "http:", "https://res.cloudinary.com"],
       scriptSrc: ["'self'", "https://embed.tawk.to"],
       connectSrc: ["'self'", "https://embed.tawk.to", "https://api.tawk.to"],
-      frameSrc: ["'self'", "https://embed.tawk.to"]
+      frameSrc: ["'self'", "https://embed.tawk.to"],
+      frameAncestors: ["'self'"] // Replaces X-Frame-Options
     }
   },
   hsts: {
@@ -130,9 +131,10 @@ app.use(helmet({
     includeSubDomains: true,
     preload: true
   },
-  noSniff: true,
-  xssFilter: true,
-  referrerPolicy: { policy: "strict-origin-when-cross-origin" }
+  noSniff: true, // Sets x-content-type-options: nosniff
+  xssFilter: false, // Disable deprecated X-XSS-Protection header (CSP handles this)
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  frameguard: false // Disable X-Frame-Options (using CSP frame-ancestors instead)
 }));
 
 // Rate limiting - Prevent brute force attacks
@@ -238,8 +240,40 @@ if (process.env.NODE_ENV === 'development') {
 // Serve static files (fallback for local storage - Cloudinary is preferred)
 // This is kept for backward compatibility with existing local uploads
 if (!isCloudinaryConfigured()) {
-  app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+  app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+    maxAge: '1d', // Cache static files for 1 day
+    etag: true,
+    lastModified: true
+  }));
 }
+
+// Set proper content-type with charset for all responses
+app.use((req, res, next) => {
+  // Set charset=utf-8 for text/html and application/json
+  const contentType = res.getHeader('content-type');
+  if (!contentType || typeof contentType === 'string') {
+    if (req.path?.endsWith('.html') || !contentType) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    } else if (contentType && typeof contentType === 'string' && contentType.includes('application/json')) {
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    }
+  }
+  next();
+});
+
+// Set Cache-Control headers for API responses
+app.use('/api', (req, res, next) => {
+  // Don't cache API responses by default (except for GET requests to static data)
+  if (req.method === 'GET' && (req.path?.includes('/products') || req.path?.includes('/categories'))) {
+    // Cache product/category data for 5 minutes
+    res.setHeader('Cache-Control', 'public, max-age=300');
+  } else {
+    // No cache for other API endpoints
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+  }
+  next();
+});
 
 // Mount routers
 app.use('/api/auth', authRoutes);
