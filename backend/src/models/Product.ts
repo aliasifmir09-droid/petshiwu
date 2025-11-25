@@ -182,24 +182,12 @@ productSchema.pre('save', function (next) {
 
 // Indexes for performance optimization
 productSchema.index({ name: 'text', description: 'text', brand: 'text', tags: 'text' }); // Text search
-// Performance indexes
 productSchema.index({ category: 1, isActive: 1 }); // For filtering active products by category
 productSchema.index({ petType: 1, isActive: 1 }); // For filtering by pet type
-productSchema.index({ isFeatured: 1, isActive: 1 }); // For featured products
-productSchema.index({ averageRating: -1 }); // For sorting by rating
-productSchema.index({ createdAt: -1 }); // For sorting by newest
-productSchema.index({ basePrice: 1 }); // For price range queries
-productSchema.index({ 'variants.sku': 1 }); // For SKU lookups
-// Note: slug index is created automatically by unique: true
-productSchema.index({ category: 1 }); // Category filter
-productSchema.index({ petType: 1 }); // Pet type filter
 productSchema.index({ brand: 1 }); // Brand filter
-productSchema.index({ basePrice: 1 }); // Price sorting
-productSchema.index({ averageRating: -1 }); // Rating sorting
-productSchema.index({ createdAt: -1 }); // Date sorting
-productSchema.index({ isFeatured: 1, isActive: 1 }); // Featured products query
 productSchema.index({ totalStock: 1, isActive: 1 }); // Stock filtering
 productSchema.index({ petType: 1, category: 1, isActive: 1 }); // Compound index for common queries
+// Note: slug, variants.sku, basePrice, averageRating, createdAt, isFeatured+isActive indexes already exist in schema
 
 export default mongoose.model<IProduct>('Product', productSchema);
 

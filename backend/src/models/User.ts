@@ -169,9 +169,9 @@ userSchema.methods.getDaysUntilPasswordExpires = function (): number {
 };
 
 // Performance indexes
-userSchema.index({ email: 1 }); // Index for email lookups (unique already creates index)
 userSchema.index({ role: 1, isActive: 1 }); // For filtering users by role
 userSchema.index({ createdAt: -1 }); // For sorting by registration date
+// Note: email index is created automatically by unique: true
 
 export default mongoose.model<IUser>('User', userSchema);
 

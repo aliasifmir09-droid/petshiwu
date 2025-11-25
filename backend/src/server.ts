@@ -44,12 +44,25 @@ import donationRoutes from './routes/donations';
 connectDatabase();
 
 // Auto-create admin user if it doesn't exist
+let adminUserCheckAttempts = 0;
+const MAX_ADMIN_CHECK_ATTEMPTS = 5;
+
 const ensureAdminUser = async () => {
   try {
+    // Prevent infinite retries
+    if (adminUserCheckAttempts >= MAX_ADMIN_CHECK_ATTEMPTS) {
+      console.warn('⚠️  Max attempts reached for admin user creation. Skipping.');
+      return;
+    }
+    
+    adminUserCheckAttempts++;
+    
     // Wait for MongoDB connection to be ready
     if (mongoose.connection.readyState !== 1) {
       // Connection not ready yet, wait a bit and retry
-      setTimeout(ensureAdminUser, 1000);
+      if (adminUserCheckAttempts < MAX_ADMIN_CHECK_ATTEMPTS) {
+        setTimeout(ensureAdminUser, 2000);
+      }
       return;
     }
 
@@ -80,15 +93,17 @@ const ensureAdminUser = async () => {
     }
   } catch (error: any) {
     console.error('Error ensuring admin user:', error.message);
-    // Retry after a delay if error occurred
-    setTimeout(ensureAdminUser, 2000);
+    // Retry after a delay if error occurred (but limit attempts)
+    if (adminUserCheckAttempts < MAX_ADMIN_CHECK_ATTEMPTS) {
+      setTimeout(ensureAdminUser, 3000);
+    }
   }
 };
 
 // Run after a short delay to ensure DB connection is ready
 setTimeout(() => {
   ensureAdminUser();
-}, 2000);
+}, 3000);
 
 const app: Application = express();
 

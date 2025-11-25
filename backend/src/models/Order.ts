@@ -196,16 +196,12 @@ orderSchema.pre('save', async function (next) {
 
 // Indexes for performance optimization
 orderSchema.index({ user: 1, createdAt: -1 }); // User's orders sorted by date
-// Performance indexes
-orderSchema.index({ user: 1, createdAt: -1 }); // For user order history
-orderSchema.index({ status: 1, createdAt: -1 }); // For filtering orders by status
-orderSchema.index({ createdAt: -1 }); // For recent orders
-orderSchema.index({ 'paymentIntent.paymentIntentId': 1 }); // For payment lookups
-// Note: orderNumber index is created automatically by unique: true
-orderSchema.index({ orderStatus: 1 }); // Status filtering
+orderSchema.index({ orderStatus: 1, createdAt: -1 }); // For filtering orders by status
 orderSchema.index({ paymentStatus: 1 }); // Payment status filtering
-orderSchema.index({ createdAt: -1 }); // Date sorting
+orderSchema.index({ 'paymentIntent.paymentIntentId': 1 }); // For payment lookups
 orderSchema.index({ user: 1, orderStatus: 1 }); // User orders by status
+// Note: orderNumber index is created automatically by unique: true
+// Note: createdAt index already exists above
 
 export default mongoose.model<IOrder>('Order', orderSchema);
 
