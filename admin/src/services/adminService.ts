@@ -9,16 +9,32 @@ export const adminService = {
       
       const response = await api.post('/auth/login', { email, password });
       
-      // Extract token from response
-      let token = null;
-      if (response.data?.success && response.data?.token) {
-        token = response.data.token;
-      } else if (response.data?.success && response.data?.data?.token) {
-        token = response.data.data.token;
+      // Check if request was successful
+      if (!response || !response.data) {
+        throw new Error('No response received from server');
       }
       
-      if (!token) {
-        throw new Error('No token received from server');
+      // Check for error response
+      if (response.data.success === false) {
+        const errorMessage = response.data.message || 'Login failed';
+        throw new Error(errorMessage);
+      }
+      
+      // Extract token from response
+      // Standard response format: { success: true, token: "..." }
+      const token = response.data.token;
+      
+      if (!token || typeof token !== 'string') {
+        // Log the actual response structure for debugging
+        console.error('Token extraction failed. Response structure:', {
+          status: response.status,
+          success: response.data.success,
+          hasToken: !!response.data.token,
+          hasData: !!response.data.data,
+          responseKeys: Object.keys(response.data),
+          tokenType: typeof response.data.token
+        });
+        throw new Error('No token received from server. Please check server response.');
       }
       
       // Save token to localStorage
@@ -27,14 +43,28 @@ export const adminService = {
       // Verify token was saved
       const savedToken = localStorage.getItem('adminToken');
       if (savedToken !== token) {
-        throw new Error('Failed to save token');
+        throw new Error('Failed to save token to localStorage');
       }
       
       return response.data;
     } catch (error: any) {
       // Ensure token is cleared on error
       localStorage.removeItem('adminToken');
-      throw error;
+      
+      // Improve error message
+      if (error.response) {
+        // Server responded with error
+        const errorMessage = error.response.data?.message || 
+                           error.response.statusText || 
+                           `Server error: ${error.response.status}`;
+        throw new Error(errorMessage);
+      } else if (error.request) {
+        // Request was made but no response received
+        throw new Error('No response from server. Please check your connection.');
+      } else {
+        // Error in request setup
+        throw error;
+      }
     }
   },
 
