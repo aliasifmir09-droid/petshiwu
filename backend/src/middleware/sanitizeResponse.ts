@@ -129,8 +129,12 @@ function sanitizeObject(obj: any, visited = new WeakSet(), depth = 0, allowToken
         continue;
       }
       
-      // Skip Mongoose internal properties
-      if (key.startsWith('_') || key === '__v' || key === '$__' || key === 'isNew') {
+      // Skip Mongoose internal properties (but keep _id which is needed)
+      if (key === '__v' || key === '$__' || key === 'isNew' || key === '$__isNew' || key === '$__parent') {
+        continue;
+      }
+      // Skip other internal Mongoose properties that start with $ but keep _id
+      if (key.startsWith('$') && key !== '_id') {
         continue;
       }
       
