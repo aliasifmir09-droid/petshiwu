@@ -23,43 +23,51 @@ export const isCloudinaryConfigured = (): boolean => {
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
-    // Determine resource type based on file mimetype
-    const isVideo = file.mimetype.startsWith('video/');
-    const resourceType = isVideo ? 'video' : 'image';
-    
-    // Create folder structure: pet-shop/{resource-type}
-    const folder = `pet-shop/${resourceType}`;
-    
-    // Generate unique filename with original extension
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const originalExt = file.originalname.split('.').pop() || '';
-    const filename = `${file.fieldname}-${uniqueSuffix}${originalExt ? '.' + originalExt : ''}`;
-    
-    const params: any = {
-      folder: folder,
-      public_id: filename,
-      resource_type: resourceType,
-      overwrite: false,
-      invalidate: true,
-    };
-    
-    // Image transformations
-    if (resourceType === 'image') {
-      params.transformation = [
-        {
-          quality: 'auto',
-          fetch_format: 'auto',
-        }
-      ];
+    try {
+      // Determine resource type based on file mimetype
+      const isVideo = file.mimetype.startsWith('video/');
+      const resourceType = isVideo ? 'video' : 'image';
+      
+      // Create folder structure: pet-shop/{resource-type}
+      const folder = `pet-shop/${resourceType}`;
+      
+      // Generate unique filename with original extension
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const originalExt = file.originalname.split('.').pop() || '';
+      const filename = `${file.fieldname}-${uniqueSuffix}${originalExt ? '.' + originalExt : ''}`;
+      
+      const params: any = {
+        folder: folder,
+        public_id: filename,
+        resource_type: resourceType,
+        overwrite: false,
+        invalidate: true,
+        // Ensure we get the URL back
+        return_delete_token: false,
+      };
+      
+      // Image transformations
+      if (resourceType === 'image') {
+        params.transformation = [
+          {
+            quality: 'auto',
+            fetch_format: 'auto',
+          }
+        ];
+      }
+      
+      // Video transformations
+      if (resourceType === 'video') {
+        params.format = 'mp4';
+        params.quality = 'auto';
+      }
+      
+      console.log('Cloudinary upload params:', params);
+      return params;
+    } catch (error) {
+      console.error('Error in Cloudinary storage params:', error);
+      throw error;
     }
-    
-    // Video transformations
-    if (resourceType === 'video') {
-      params.format = 'mp4';
-      params.quality = 'auto';
-    }
-    
-    return params;
   },
 });
 

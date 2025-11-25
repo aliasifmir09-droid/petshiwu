@@ -104,39 +104,77 @@ router.post('/single', protect, authorize('admin'), upload.single('image'), hand
       
       if (!imageUrl) {
         console.error('Cloudinary upload failed - no URL in response. File object:', JSON.stringify(cloudinaryFile, null, 2));
+        console.error('File object keys:', Object.keys(cloudinaryFile));
+        console.error('File object values:', {
+          secure_url: cloudinaryFile.secure_url,
+          url: cloudinaryFile.url,
+          public_id: cloudinaryFile.public_id,
+          resource_type: cloudinaryFile.resource_type,
+          bytes: cloudinaryFile.bytes,
+          size: (cloudinaryFile as any).size
+        });
         
         // Try to construct URL from public_id if available
         if (cloudinaryFile.public_id) {
-          const constructedUrl = getCloudinaryUrl(cloudinaryFile.public_id, (cloudinaryFile.resource_type || 'image') as 'image' | 'video');
-          if (constructedUrl) {
-            console.log('Constructed Cloudinary URL from public_id:', constructedUrl);
-            const responseData = {
-              filename: cloudinaryFile.public_id,
-              path: constructedUrl,
-              url: constructedUrl,
-              mimetype: cloudinaryFile.mimetype,
-              size: cloudinaryFile.bytes || cloudinaryFile.size || 0,
-              resource_type: cloudinaryFile.resource_type || 'image',
-              format: cloudinaryFile.format,
-              width: cloudinaryFile.width,
-              height: cloudinaryFile.height
-            };
-            return res.status(200).json({
-              success: true,
-              data: responseData
-            });
+          try {
+            const constructedUrl = getCloudinaryUrl(cloudinaryFile.public_id, (cloudinaryFile.resource_type || 'image') as 'image' | 'video');
+            if (constructedUrl && constructedUrl.includes('cloudinary.com')) {
+              console.log('✅ Constructed Cloudinary URL from public_id:', constructedUrl);
+              const responseData = {
+                filename: cloudinaryFile.public_id,
+                path: constructedUrl,
+                url: constructedUrl,
+                mimetype: cloudinaryFile.mimetype,
+                size: cloudinaryFile.bytes || cloudinaryFile.size || 0,
+                resource_type: cloudinaryFile.resource_type || 'image',
+                format: cloudinaryFile.format,
+                width: cloudinaryFile.width,
+                height: cloudinaryFile.height
+              };
+              return res.status(200).json({
+                success: true,
+                data: responseData
+              });
+            }
+          } catch (error) {
+            console.error('Error constructing URL from public_id:', error);
           }
         }
         
-        // Final fallback - return error
+        // Check if we have the full Cloudinary result object
+        const cloudinaryResult = (file as any).result || (file as any).response;
+        if (cloudinaryResult && (cloudinaryResult.secure_url || cloudinaryResult.url)) {
+          const finalUrl = cloudinaryResult.secure_url || cloudinaryResult.url;
+          console.log('✅ Found URL in Cloudinary result object:', finalUrl);
+          const responseData = {
+            filename: cloudinaryResult.public_id || cloudinaryFile.originalname,
+            path: finalUrl,
+            url: finalUrl,
+            mimetype: cloudinaryFile.mimetype,
+            size: cloudinaryResult.bytes || cloudinaryFile.bytes || 0,
+            resource_type: cloudinaryResult.resource_type || cloudinaryFile.resource_type || 'image',
+            format: cloudinaryResult.format || cloudinaryFile.format,
+            width: cloudinaryResult.width || cloudinaryFile.width,
+            height: cloudinaryResult.height || cloudinaryFile.height
+          };
+          return res.status(200).json({
+            success: true,
+            data: responseData
+          });
+        }
+        
+        // Final fallback - return error with detailed info
         return res.status(500).json({
           success: false,
-          message: 'Cloudinary upload failed - no URL returned. Please check Cloudinary configuration.',
+          message: 'Cloudinary upload failed - no URL returned. Please check Cloudinary configuration and credentials.',
           debug: process.env.NODE_ENV === 'development' ? {
             hasSecureUrl: !!cloudinaryFile.secure_url,
             hasUrl: !!cloudinaryFile.url,
             hasPublicId: !!cloudinaryFile.public_id,
-            fileKeys: Object.keys(cloudinaryFile)
+            hasResult: !!(file as any).result,
+            hasResponse: !!(file as any).response,
+            fileKeys: Object.keys(file),
+            cloudinaryConfigured: isCloudinaryConfigured()
           } : undefined
         });
       }
