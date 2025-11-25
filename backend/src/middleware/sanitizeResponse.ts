@@ -6,8 +6,8 @@ import { Request, Response, NextFunction } from 'express';
  * Removes sensitive fields from API responses
  */
 export const sanitizeResponse = (req: Request, res: Response, next: NextFunction) => {
-  // Only sanitize in production or when explicitly enabled
-  if (process.env.NODE_ENV !== 'production' && !process.env.ENABLE_RESPONSE_SANITIZATION) {
+  // Can be disabled via environment variable if needed
+  if (process.env.DISABLE_RESPONSE_SANITIZATION === 'true') {
     return next();
   }
   
@@ -24,8 +24,10 @@ export const sanitizeResponse = (req: Request, res: Response, next: NextFunction
         data = sanitizeObject(data);
       }
     } catch (error) {
-      // If sanitization fails, log and return original data
-      console.error('Response sanitization error:', error);
+      // If sanitization fails, log and return original data (don't crash)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Response sanitization error:', error);
+      }
     }
     return originalJson.call(this, data);
   };
