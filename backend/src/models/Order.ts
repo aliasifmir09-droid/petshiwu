@@ -196,6 +196,11 @@ orderSchema.pre('save', async function (next) {
 
 // Indexes for performance optimization
 orderSchema.index({ user: 1, createdAt: -1 }); // User's orders sorted by date
+// Performance indexes
+orderSchema.index({ user: 1, createdAt: -1 }); // For user order history
+orderSchema.index({ status: 1, createdAt: -1 }); // For filtering orders by status
+orderSchema.index({ createdAt: -1 }); // For recent orders
+orderSchema.index({ 'paymentIntent.paymentIntentId': 1 }); // For payment lookups
 // Note: orderNumber index is created automatically by unique: true
 orderSchema.index({ orderStatus: 1 }); // Status filtering
 orderSchema.index({ paymentStatus: 1 }); // Payment status filtering

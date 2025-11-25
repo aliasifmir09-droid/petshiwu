@@ -79,7 +79,8 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       .populate('category', 'name slug')
       .sort(sortOptions)
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean(); // Use lean() for better performance (returns plain JS objects)
 
     const total = await Product.countDocuments(query);
 
@@ -105,12 +106,16 @@ export const getProduct = async (req: Request, res: Response, next: NextFunction
     let product;
 
     // Try to find by slug first, then by ID if slug doesn't match
-    product = await Product.findOne({ slug: identifier }).populate('category', 'name slug');
+    product = await Product.findOne({ slug: identifier })
+      .populate('category', 'name slug')
+      .lean(); // Use lean() for better performance
     
     if (!product) {
       // Try finding by ID if it's a valid MongoDB ObjectId
       try {
-        product = await Product.findById(identifier).populate('category', 'name slug');
+        product = await Product.findById(identifier)
+          .populate('category', 'name slug')
+          .lean(); // Use lean() for better performance
       } catch (err) {
         // Invalid ObjectId, product not found
       }

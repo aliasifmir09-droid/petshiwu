@@ -73,17 +73,19 @@ router.post('/single', protect, authorize('admin'), upload.single('image'), hand
     const file = req.file as any;
     const cloudinaryConfigured = isCloudinaryConfigured();
     
-    console.log('Upload Debug:', {
-      cloudinaryConfigured,
-      hasSecureUrl: !!file.secure_url,
-      hasUrl: !!file.url,
-      hasPublicId: !!file.public_id,
-      hasPath: !!file.path,
-      hasFilename: !!file.filename,
-      fileKeys: Object.keys(file),
-      mimetype: file.mimetype,
-      fullFileObject: JSON.stringify(file, null, 2)
-    });
+    // Safe logging - don't log full file object in production
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Upload Debug:', {
+        cloudinaryConfigured,
+        hasSecureUrl: !!file.secure_url,
+        hasUrl: !!file.url,
+        hasPublicId: !!file.public_id,
+        hasPath: !!file.path,
+        hasFilename: !!file.filename,
+        fileKeys: Object.keys(file),
+        mimetype: file.mimetype
+      });
+    }
 
     // Check if using Cloudinary or local storage
     // CloudinaryStorage adds properties directly to req.file

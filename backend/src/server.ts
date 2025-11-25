@@ -15,6 +15,7 @@ import { connectDatabase } from './utils/database';
 import { errorHandler, notFound } from './middleware/errorHandler';
 import { validateEnv } from './utils/validateEnv';
 import { isCloudinaryConfigured } from './utils/cloudinary';
+import { sanitizeResponse } from './middleware/sanitizeResponse';
 import User from './models/User';
 
 // Load env vars
@@ -103,20 +104,54 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:", "http:"],
-      scriptSrc: ["'self'"],
-      connectSrc: ["'self'"]
+      imgSrc: ["'self'", "data:", "https:", "http:", "https://res.cloudinary.com"],
+      scriptSrc: ["'self'", "https://embed.tawk.to"],
+      connectSrc: ["'self'", "https://embed.tawk.to", "https://api.tawk.to"],
+      frameSrc: ["'self'", "https://embed.tawk.to"]
     }
-  }
+  },
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true
+  },
+  noSniff: true,
+  xssFilter: true,
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" }
 }));
 
 // Rate limiting - Prevent brute force attacks
-const limiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
 });
-app.use('/api/', limiter);
+
+// Stricter rate limiting for auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 login attempts per windowMs
+  message: 'Too many login attempts, please try again after 15 minutes.',
+  skipSuccessfulRequests: true, // Don't count successful requests
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Stricter rate limiting for upload endpoints
+const uploadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 20, // limit each IP to 20 uploads per hour
+  message: 'Too many upload requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/', generalLimiter);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+app.use('/api/upload', uploadLimiter);
 
 // Body parser with size limits to prevent DoS attacks
 app.use(express.json({ limit: '10mb' }));
@@ -143,6 +178,9 @@ app.use(compression({
 
 // Cookie parser
 app.use(cookieParser());
+
+// Response sanitization - Remove sensitive data from responses
+app.use(sanitizeResponse);
 
 // Enable CORS
 const allowedOrigins = [

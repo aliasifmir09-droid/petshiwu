@@ -182,6 +182,14 @@ productSchema.pre('save', function (next) {
 
 // Indexes for performance optimization
 productSchema.index({ name: 'text', description: 'text', brand: 'text', tags: 'text' }); // Text search
+// Performance indexes
+productSchema.index({ category: 1, isActive: 1 }); // For filtering active products by category
+productSchema.index({ petType: 1, isActive: 1 }); // For filtering by pet type
+productSchema.index({ isFeatured: 1, isActive: 1 }); // For featured products
+productSchema.index({ averageRating: -1 }); // For sorting by rating
+productSchema.index({ createdAt: -1 }); // For sorting by newest
+productSchema.index({ basePrice: 1 }); // For price range queries
+productSchema.index({ 'variants.sku': 1 }); // For SKU lookups
 // Note: slug index is created automatically by unique: true
 productSchema.index({ category: 1 }); // Category filter
 productSchema.index({ petType: 1 }); // Pet type filter
