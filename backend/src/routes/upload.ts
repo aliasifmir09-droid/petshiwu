@@ -97,12 +97,39 @@ router.post('/single', protect, authorize('admin'), upload.single('image'), hand
     if (isCloudinary) {
       // Cloudinary file structure
       const cloudinaryFile = file as CloudinaryFile;
+      
+      // Extract URL from Cloudinary response
+      const imageUrl = cloudinaryFile.secure_url || cloudinaryFile.url;
+      
+      if (!imageUrl) {
+        console.error('Cloudinary upload failed - no URL in response:', cloudinaryFile);
+        // Fallback to local storage if Cloudinary didn't provide URL
+        const localFile = file as any;
+        const responseData = {
+          filename: localFile.filename || cloudinaryFile.originalname,
+          path: `/uploads/${localFile.filename || cloudinaryFile.originalname}`,
+          url: `/uploads/${localFile.filename || cloudinaryFile.originalname}`,
+          mimetype: cloudinaryFile.mimetype,
+          size: cloudinaryFile.bytes || cloudinaryFile.size || 0,
+          resource_type: cloudinaryFile.resource_type || 'image',
+          format: cloudinaryFile.format,
+          width: cloudinaryFile.width,
+          height: cloudinaryFile.height
+        };
+        
+        console.log('Cloudinary upload failed, using fallback:', responseData.url);
+        return res.status(200).json({
+          success: true,
+          data: responseData
+        });
+      }
+      
       const responseData = {
         filename: cloudinaryFile.public_id || cloudinaryFile.originalname,
-        path: cloudinaryFile.secure_url || cloudinaryFile.url,
-        url: cloudinaryFile.secure_url || cloudinaryFile.url,
+        path: imageUrl,
+        url: imageUrl,
         mimetype: cloudinaryFile.mimetype,
-        size: cloudinaryFile.bytes || cloudinaryFile.size,
+        size: cloudinaryFile.bytes || cloudinaryFile.size || 0,
         resource_type: cloudinaryFile.resource_type || 'image',
         format: cloudinaryFile.format,
         width: cloudinaryFile.width,
@@ -118,12 +145,21 @@ router.post('/single', protect, authorize('admin'), upload.single('image'), hand
     } else {
       // Local storage
       const localFile = file as LocalFile;
+      
+      if (!localFile.filename) {
+        console.error('Local storage upload failed - no filename:', localFile);
+        return res.status(500).json({
+          success: false,
+          message: 'File upload failed - no filename generated'
+        });
+      }
+      
       const responseData = {
         filename: localFile.filename,
         path: `/uploads/${localFile.filename}`,
         url: `/uploads/${localFile.filename}`,
         mimetype: localFile.mimetype,
-        size: localFile.size
+        size: localFile.size || 0
       };
       
       console.log('Local storage upload successful:', responseData.url);
