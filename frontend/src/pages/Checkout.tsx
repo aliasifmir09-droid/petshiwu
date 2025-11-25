@@ -72,7 +72,25 @@ const Checkout = () => {
     const orderData = {
       items: items.map(item => {
         // Convert product._id to string if it's an ObjectId object
-        const productId = item.product._id ? String(item.product._id) : item.product._id;
+        let productId: string | null = null;
+        const rawId = item.product._id;
+        
+        if (rawId) {
+          // Handle both ObjectId objects and strings
+          if (typeof rawId === 'object' && rawId !== null && 'toString' in rawId) {
+            productId = (rawId as any).toString();
+          } else {
+            productId = String(rawId);
+          }
+        }
+        
+        if (!productId) {
+          console.error('Product ID is missing or invalid:', item.product);
+          throw new Error(`Product ID is missing for item: ${item.product.name}`);
+        }
+        
+        console.log('Order item:', { productId, productName: item.product.name, originalId: rawId, type: typeof rawId });
+        
         return {
           product: productId,
           name: item.product.name,
