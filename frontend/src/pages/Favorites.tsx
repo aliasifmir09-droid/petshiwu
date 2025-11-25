@@ -130,19 +130,23 @@ const Favorites = () => {
         <>
           {/* Products Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product: any) => (
-              <div key={product._id || product.id} className="relative group">
+            {products.map((product: any) => {
+              const productId = product._id ? String(product._id) : (product.id ? String(product.id) : null);
+              if (!productId) return null;
+              return (
+              <div key={productId} className="relative group">
                 <ProductCard product={product} />
                 {/* Remove Button Overlay */}
                 <button
-                  onClick={() => handleRemoveFromWishlist(product._id || product.id)}
+                  onClick={() => handleRemoveFromWishlist(productId)}
                   className="absolute top-2 left-2 p-2 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 z-10"
                   aria-label="Remove from favorites"
                 >
                   <Trash2 className="text-red-600" size={18} />
                 </button>
               </div>
-            ))}
+            );
+            })}
           </div>
 
           {/* Action Buttons */}

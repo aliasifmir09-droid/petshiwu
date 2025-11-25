@@ -15,7 +15,8 @@ interface ProductCardProps {
 const ProductCard = memo(({ product, hideCartButton = false, hideAutoship = false }: ProductCardProps) => {
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
   const { addToCart } = useCartStore();
-  const productId = product._id;
+  // Convert _id to string if it's an object (MongoDB ObjectId)
+  const productId = product._id ? String(product._id) : null;
   const inWishlist = productId ? isInWishlist(productId) : false;
   const [isHovered, setIsHovered] = useState(false);
 

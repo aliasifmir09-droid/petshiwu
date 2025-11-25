@@ -60,7 +60,8 @@ const ProductDetail = () => {
     );
   }
 
-  const productId = product._id;
+  // Convert _id to string if it's an object (MongoDB ObjectId)
+  const productId = product._id ? String(product._id) : null;
   const inWishlist = productId ? isInWishlist(productId) : false;
   const selectedVariantData = product.variants[selectedVariant];
   const price = selectedVariantData?.price || product.basePrice;
