@@ -29,7 +29,7 @@ const ProductDetail = () => {
   const { data: reviews } = useQuery({
     queryKey: ['reviews', product?._id],
     queryFn: () => reviewService.getProductReviews(product!._id),
-    enabled: !!product
+    enabled: !!product && !!product._id
   });
 
   const { data: relatedProducts } = useQuery({
@@ -60,7 +60,8 @@ const ProductDetail = () => {
     );
   }
 
-  const inWishlist = isInWishlist(product._id);
+  const productId = product._id;
+  const inWishlist = productId ? isInWishlist(productId) : false;
   const selectedVariantData = product.variants[selectedVariant];
   const price = selectedVariantData?.price || product.basePrice;
 
@@ -70,10 +71,14 @@ const ProductDetail = () => {
   };
 
   const handleWishlistToggle = () => {
+    if (!productId) {
+      console.error('Product ID is missing:', product);
+      return;
+    }
     if (inWishlist) {
-      removeFromWishlist(product._id);
+      removeFromWishlist(productId);
     } else {
-      addToWishlist(product._id);
+      addToWishlist(productId);
     }
   };
 

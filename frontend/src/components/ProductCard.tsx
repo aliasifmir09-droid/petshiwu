@@ -15,17 +15,22 @@ interface ProductCardProps {
 const ProductCard = memo(({ product, hideCartButton = false, hideAutoship = false }: ProductCardProps) => {
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
   const { addToCart } = useCartStore();
-  const inWishlist = isInWishlist(product._id);
+  const productId = product._id;
+  const inWishlist = productId ? isInWishlist(productId) : false;
   const [isHovered, setIsHovered] = useState(false);
 
   const handleWishlistToggle = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    if (inWishlist) {
-      removeFromWishlist(product._id);
-    } else {
-      addToWishlist(product._id);
+    if (!productId) {
+      console.error('Product ID is missing:', product);
+      return;
     }
-  }, [inWishlist, product._id, addToWishlist, removeFromWishlist]);
+    if (inWishlist) {
+      removeFromWishlist(productId);
+    } else {
+      addToWishlist(productId);
+    }
+  }, [inWishlist, productId, addToWishlist, removeFromWishlist]);
 
   const handleAddToCart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
