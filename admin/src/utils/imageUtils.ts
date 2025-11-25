@@ -2,7 +2,7 @@ import { API_URL } from '@/services/api';
 
 /**
  * Normalizes image URLs to full URLs
- * - If already a full URL (http/https), returns as-is
+ * - If already a full URL (http/https), returns as-is (including Cloudinary URLs)
  * - If relative path starting with /uploads, prepends backend API URL
  * - Otherwise returns a placeholder or fallback
  */
@@ -11,7 +11,7 @@ export const normalizeImageUrl = (imageUrl: string | undefined | null): string =
     return getPlaceholderImage();
   }
 
-  // Already a full URL (http:// or https://)
+  // Already a full URL (http:// or https://) - includes Cloudinary URLs
   if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
     return imageUrl;
   }

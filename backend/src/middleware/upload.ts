@@ -2,14 +2,15 @@
 import multer, { FileFilterCallback } from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { cloudinaryUpload, isCloudinaryConfigured } from '../utils/cloudinary';
 
-// Ensure uploads directory exists
+// Fallback to local storage if Cloudinary is not configured
 const uploadsDir = path.join(__dirname, '../../uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
+const localStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadsDir);
   },
@@ -20,24 +21,31 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req: any, file: { fieldname: string; originalname: string; mimetype: string }, cb: FileFilterCallback) => {
-  const allowedTypes = /jpeg|jpg|png|gif|webp/;
-  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowedTypes.test(file.mimetype);
-
-  if (mimetype && extname) {
+  // Allow images and videos
+  const allowedImageTypes = /jpeg|jpg|png|gif|webp|svg/;
+  const allowedVideoTypes = /mp4|webm|ogg|mov|avi/;
+  
+  const extname = file.originalname.toLowerCase();
+  const isImage = allowedImageTypes.test(extname) || file.mimetype.startsWith('image/');
+  const isVideo = allowedVideoTypes.test(extname) || file.mimetype.startsWith('video/');
+  
+  if (isImage || isVideo) {
     return cb(null, true);
   } else {
-    cb(new Error('Only image files are allowed (jpeg, jpg, png, gif, webp)'));
+    cb(new Error('Only image and video files are allowed'));
   }
 };
 
-export const upload = multer({
-  storage,
+const localUpload = multer({
+  storage: localStorage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB max file size
+    fileSize: 100 * 1024 * 1024 // 100MB max file size (for videos)
   }
 });
+
+// Use Cloudinary if configured, otherwise fall back to local storage
+export const upload = isCloudinaryConfigured() ? cloudinaryUpload : localUpload;
 
 
 
