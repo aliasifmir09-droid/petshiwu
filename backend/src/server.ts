@@ -14,6 +14,7 @@ import mongoose from 'mongoose';
 import { connectDatabase } from './utils/database';
 import { errorHandler, notFound } from './middleware/errorHandler';
 import { validateEnv } from './utils/validateEnv';
+import { isCloudinaryConfigured } from './utils/cloudinary';
 import User from './models/User';
 
 // Load env vars
@@ -181,8 +182,11 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Serve static files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Serve static files (fallback for local storage - Cloudinary is preferred)
+// This is kept for backward compatibility with existing local uploads
+if (!isCloudinaryConfigured()) {
+  app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+}
 
 // Mount routers
 app.use('/api/auth', authRoutes);

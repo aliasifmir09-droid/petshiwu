@@ -99,16 +99,16 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     setUploading(true);
     try {
       const uploadPromises = Array.from(files).map(async (file) => {
-        const formData = new FormData();
-        formData.append('image', file);
         const result = await adminService.uploadImage(file);
-        return result.path;
+        // Use url (Cloudinary) or path (local fallback) from response
+        return result.url || result.path;
       });
 
-      const uploadedPaths = await Promise.all(uploadPromises);
-      setImageUrls([...imageUrls, ...uploadedPaths]);
-    } catch (error) {
-      showToast('Failed to upload images', 'error');
+      const uploadedUrls = await Promise.all(uploadPromises);
+      setImageUrls([...imageUrls, ...uploadedUrls]);
+      showToast(`Successfully uploaded ${uploadedUrls.length} image(s)`, 'success');
+    } catch (error: any) {
+      showToast(error.response?.data?.message || 'Failed to upload images', 'error');
     } finally {
       setUploading(false);
     }
@@ -124,10 +124,10 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       return;
     }
 
-    // Basic URL validation
-    const urlPattern = /^(https?:\/\/|data:image\/|\/uploads\/)/i;
+    // Basic URL validation - accept any valid URL (Cloudinary, external, etc.)
+    const urlPattern = /^(https?:\/\/|data:image\/)/i;
     if (!urlPattern.test(imageUrlInput.trim())) {
-      showToast('Please enter a valid URL (must start with http://, https://, or /uploads/)', 'warning');
+      showToast('Please enter a valid URL (must start with http:// or https://)', 'warning');
       return;
     }
 
@@ -430,7 +430,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                     type="text"
                     value={imageUrlInput}
                     onChange={(e) => setImageUrlInput(e.target.value)}
-                    placeholder="Enter image URL (https://example.com/image.jpg or /uploads/image.jpg)"
+                    placeholder="Enter image URL (https://example.com/image.jpg or Cloudinary URL)"
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                     onKeyPress={(e) => {
                       if (e.key === 'Enter') {
@@ -447,7 +447,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                   </button>
                 </div>
                 <p className="mt-2 text-xs text-gray-500">
-                  Supports: https://, http://, or /uploads/ paths
+                  Supports: https:// or http:// URLs (including Cloudinary URLs)
                 </p>
               </div>
             )}
@@ -482,7 +482,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                       </button>
                       {/* URL Type Indicator */}
                       <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] px-2 py-1 truncate">
-                        {url.startsWith('http') ? '🌐 External URL' : url.startsWith('/uploads/') ? '📁 Uploaded' : '🔗 Custom'}
+                        {url.startsWith('https://res.cloudinary.com') ? '☁️ Cloudinary' : url.startsWith('http') ? '🌐 External URL' : '🔗 Custom'}
                       </div>
                     </div>
                   ))}

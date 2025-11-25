@@ -1,9 +1,7 @@
-import { API_URL } from '@/services/api';
-
 /**
  * Normalizes image URLs to full URLs
  * - If already a full URL (http/https), returns as-is (including Cloudinary URLs)
- * - If relative path starting with /uploads, prepends backend API URL
+ * - Cloudinary URLs are preferred and returned as-is
  * - Otherwise returns a placeholder or fallback
  */
 export const normalizeImageUrl = (imageUrl: string | undefined | null): string => {
@@ -16,20 +14,7 @@ export const normalizeImageUrl = (imageUrl: string | undefined | null): string =
     return imageUrl;
   }
 
-  // Relative path starting with /uploads
-  if (imageUrl.startsWith('/uploads/')) {
-    // Get backend URL without /api suffix
-    const backendUrl = API_URL.replace(/\/api$/, '');
-    return `${backendUrl}${imageUrl}`;
-  }
-
-  // Relative path without leading slash
-  if (imageUrl.startsWith('uploads/')) {
-    const backendUrl = API_URL.replace(/\/api$/, '');
-    return `${backendUrl}/${imageUrl}`;
-  }
-
-  // Fallback to placeholder
+  // Fallback to placeholder for invalid URLs
   return getPlaceholderImage();
 };
 
@@ -54,6 +39,7 @@ export const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event
  */
 export const isValidImageUrl = (url: string): boolean => {
   if (!url) return false;
-  return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/uploads/');
+  // Only accept full URLs (http/https) - Cloudinary URLs included
+  return url.startsWith('http://') || url.startsWith('https://');
 };
 

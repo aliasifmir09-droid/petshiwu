@@ -106,7 +106,7 @@ export const adminService = {
     return response.data;
   },
 
-  // Upload
+  // Upload image to Cloudinary (or local storage fallback)
   uploadImage: async (file: File) => {
     const formData = new FormData();
     formData.append('image', file);
@@ -115,6 +115,8 @@ export const adminService = {
         'Content-Type': 'multipart/form-data'
       }
     });
+    // Response includes: { url, path, filename, mimetype, size, ... }
+    // url is Cloudinary URL, path is fallback for local storage
     return response.data.data;
   },
 
