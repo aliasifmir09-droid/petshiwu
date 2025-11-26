@@ -2,6 +2,24 @@ import { Request, Response, NextFunction } from 'express';
 import Product from '../models/Product';
 import { AuthRequest } from '../middleware/auth';
 
+// Helper function to normalize product _id to string
+const normalizeProductId = (product: any): any => {
+  if (!product) return product;
+  
+  // Convert to plain object if it's a Mongoose document
+  const plainProduct = product.toObject ? product.toObject() : product;
+  
+  return {
+    ...plainProduct,
+    _id: plainProduct._id ? String(plainProduct._id) : plainProduct._id
+  };
+};
+
+// Helper function to normalize array of products
+const normalizeProducts = (products: any[]): any[] => {
+  return products.map(normalizeProductId);
+};
+
 // Get all products with filters
 export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -84,9 +102,12 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
 
     const total = await Product.countDocuments(query);
 
+    // Normalize _id to string for all products
+    const normalizedProducts = normalizeProducts(products);
+
     res.status(200).json({
       success: true,
-      data: products,
+      data: normalizedProducts,
       pagination: {
         page,
         limit,
@@ -128,9 +149,12 @@ export const getProduct = async (req: Request, res: Response, next: NextFunction
       });
     }
 
+    // Normalize _id to string
+    const normalizedProduct = normalizeProductId(product);
+
     res.status(200).json({
       success: true,
-      data: product
+      data: normalizedProduct
     });
   } catch (error) {
     next(error);
@@ -195,9 +219,12 @@ export const getRelatedProducts = async (req: Request, res: Response, next: Next
       relatedProducts = [...exactMatches, ...partialMatches];
     }
 
+    // Normalize _id to string for all related products
+    const normalizedRelatedProducts = normalizeProducts(relatedProducts);
+
     res.status(200).json({
       success: true,
-      data: relatedProducts,
+      data: normalizedRelatedProducts,
       pagination: {
         page: 1,
         limit,
@@ -215,9 +242,12 @@ export const createProduct = async (req: AuthRequest, res: Response, next: NextF
   try {
     const product = await Product.create(req.body);
 
+    // Normalize _id to string
+    const normalizedProduct = normalizeProductId(product);
+
     res.status(201).json({
       success: true,
-      data: product
+      data: normalizedProduct
     });
   } catch (error) {
     next(error);
@@ -242,9 +272,12 @@ export const updateProduct = async (req: AuthRequest, res: Response, next: NextF
     // Save to trigger pre-save middleware
     await product.save();
 
+    // Normalize _id to string
+    const normalizedProduct = normalizeProductId(product);
+
     res.status(200).json({
       success: true,
-      data: product
+      data: normalizedProduct
     });
   } catch (error) {
     next(error);
