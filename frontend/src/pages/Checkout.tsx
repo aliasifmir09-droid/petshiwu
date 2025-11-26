@@ -4,6 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { orderService } from '@/services/orders';
+import { productService } from '@/services/products';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
@@ -31,6 +32,126 @@ const Checkout = () => {
   const [donationAmount, setDonationAmount] = useState<number>(0);
   const [showDonationModal, setShowDonationModal] = useState(false);
   const [pendingOrderData, setPendingOrderData] = useState<any>(null);
+
+  // Helper function to normalize product ID (same as in cartStore)
+  const normalizeId = (id: any): string | null => {
+    if (!id) return null;
+    if (typeof id === 'string') {
+      // Validate it's a MongoDB ObjectId format
+      if (/^[0-9a-fA-F]{24}$/.test(id)) {
+        return id;
+      }
+      return id; // Return anyway, backend will validate
+    }
+    if (id && typeof id === 'object') {
+      // Try toString() method
+      if (typeof id.toString === 'function') {
+        const str = id.toString();
+        if (str && str !== '[object Object]' && /^[0-9a-fA-F]{24}$/.test(str)) {
+          return str;
+        }
+      }
+      // Try common ObjectId properties
+      const possibleProps = ['id', '_id', '_str', '$oid', 'oid', 'value', 'hex'];
+      for (const prop of possibleProps) {
+        if (id[prop] && typeof id[prop] === 'string' && /^[0-9a-fA-F]{24}$/.test(id[prop])) {
+          return id[prop];
+        }
+      }
+      // Try valueOf()
+      if (typeof id.valueOf === 'function') {
+        const value = id.valueOf();
+        if (typeof value === 'string' && /^[0-9a-fA-F]{24}$/.test(value)) {
+          return value;
+        }
+      }
+      // Try JSON.stringify
+      try {
+        const jsonStr = JSON.stringify(id);
+        const parsed = JSON.parse(jsonStr);
+        if (parsed.$oid && /^[0-9a-fA-F]{24}$/.test(parsed.$oid)) {
+          return parsed.$oid;
+        }
+        if (parsed.oid && /^[0-9a-fA-F]{24}$/.test(parsed.oid)) {
+          return parsed.oid;
+        }
+        if (typeof parsed === 'string' && /^[0-9a-fA-F]{24}$/.test(parsed)) {
+          return parsed;
+        }
+      } catch (e) {
+        // JSON operations failed
+      }
+      // Check all string properties
+      for (const key in id) {
+        if (Object.prototype.hasOwnProperty.call(id, key)) {
+          const value = id[key];
+          if (typeof value === 'string' && /^[0-9a-fA-F]{24}$/.test(value)) {
+            return value;
+          }
+        }
+      }
+    }
+    return null;
+  };
+
+  // Function to refresh product data from API
+  const refreshCartProducts = async () => {
+    try {
+      const updatedItems = await Promise.all(
+        items.map(async (item) => {
+          // Try to get a valid product ID
+          let productId = normalizeId(item.product._id);
+          
+          // If we can't normalize it, try to extract from product object
+          if (!productId) {
+            // Log the structure for debugging
+            console.log('Attempting to extract product ID from:', {
+              product: item.product,
+              _id: item.product._id,
+              _idType: typeof item.product._id,
+              keys: item.product._id && typeof item.product._id === 'object' ? Object.keys(item.product._id) : []
+            });
+            
+            // Try to find the ID in the product object itself
+            const possibleIdFields = ['_id', 'id', '$oid', 'oid'];
+            for (const field of possibleIdFields) {
+              const value = (item.product as any)[field];
+              if (value) {
+                productId = normalizeId(value);
+                if (productId) break;
+              }
+            }
+          }
+          
+          if (!productId) {
+            console.error('Cannot extract product ID for:', item.product);
+            return item; // Return original item if we can't get ID
+          }
+          
+          // Fetch fresh product data from API
+          try {
+            const freshProduct = await productService.getProduct(productId);
+            return {
+              ...item,
+              product: freshProduct
+            };
+          } catch (error) {
+            console.error('Failed to refresh product:', productId, error);
+            return item; // Return original item if fetch fails
+          }
+        })
+      );
+      
+      // Update cart with refreshed products
+      const { setItems } = useCartStore.getState();
+      setItems(updatedItems);
+      
+      showToast('Cart products refreshed successfully', 'success');
+    } catch (error) {
+      console.error('Error refreshing cart products:', error);
+      showToast('Failed to refresh cart products', 'error');
+    }
+  };
 
   const subtotal = getTotalPrice();
   const shipping = subtotal > 49 ? 0 : 5.99;
@@ -60,7 +181,7 @@ const Checkout = () => {
     }
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!isAuthenticated) {
@@ -68,82 +189,52 @@ const Checkout = () => {
       return;
     }
 
-    // Helper function to normalize product ID (same as in cartStore)
-    const normalizeId = (id: any): string | null => {
-      if (!id) return null;
-      if (typeof id === 'string') {
-        // Validate it's a MongoDB ObjectId format
-        if (/^[0-9a-fA-F]{24}$/.test(id)) {
-          return id;
-        }
-        return id; // Return anyway, backend will validate
-      }
-      if (id && typeof id === 'object') {
-        // Try toString() method
-        if (typeof id.toString === 'function') {
-          const str = id.toString();
-          if (str && str !== '[object Object]' && /^[0-9a-fA-F]{24}$/.test(str)) {
-            return str;
-          }
-        }
-        // Try common ObjectId properties
-        const possibleProps = ['id', '_id', '_str', '$oid', 'oid', 'value', 'hex'];
-        for (const prop of possibleProps) {
-          if (id[prop] && typeof id[prop] === 'string' && /^[0-9a-fA-F]{24}$/.test(id[prop])) {
-            return id[prop];
-          }
-        }
-        // Try valueOf()
-        if (typeof id.valueOf === 'function') {
-          const value = id.valueOf();
-          if (typeof value === 'string' && /^[0-9a-fA-F]{24}$/.test(value)) {
-            return value;
-          }
-        }
-        // Try JSON.stringify
-        try {
-          const jsonStr = JSON.stringify(id);
-          const parsed = JSON.parse(jsonStr);
-          if (parsed.$oid && /^[0-9a-fA-F]{24}$/.test(parsed.$oid)) {
-            return parsed.$oid;
-          }
-          if (parsed.oid && /^[0-9a-fA-F]{24}$/.test(parsed.oid)) {
-            return parsed.oid;
-          }
-          if (typeof parsed === 'string' && /^[0-9a-fA-F]{24}$/.test(parsed)) {
-            return parsed;
-          }
-        } catch (e) {
-          // JSON operations failed
-        }
-        // Check all string properties
-        for (const key in id) {
-          if (Object.prototype.hasOwnProperty.call(id, key)) {
-            const value = id[key];
-            if (typeof value === 'string' && /^[0-9a-fA-F]{24}$/.test(value)) {
-              return value;
-            }
-          }
-        }
-      }
-      return null;
-    };
-
+    // Get current items (may be refreshed)
+    let currentItems = items;
+    
     // Validate all items have product IDs
-    const itemsWithoutIds = items.filter(item => {
+    const itemsWithoutIds = currentItems.filter((item: any) => {
       const id = normalizeId(item.product._id);
       return !id || !/^[0-9a-fA-F]{24}$/.test(id);
     });
     
     if (itemsWithoutIds.length > 0) {
       console.error('Items without valid product IDs:', itemsWithoutIds);
-      showToast('Some products have invalid IDs. Please remove them from cart and add again.', 'error');
-      return;
+      console.error('Detailed product structure:', itemsWithoutIds.map((item: any) => ({
+        productName: item.product.name,
+        _id: item.product._id,
+        _idType: typeof item.product._id,
+        _idValue: item.product._id,
+        _idStringified: JSON.stringify(item.product._id),
+        productKeys: Object.keys(item.product),
+        _idKeys: item.product._id && typeof item.product._id === 'object' ? Object.keys(item.product._id) : []
+      })));
+      
+      // Try to auto-refresh products
+      showToast('Some products have invalid IDs. Attempting to refresh...', 'warning');
+      await refreshCartProducts();
+      
+      // Get refreshed items
+      currentItems = useCartStore.getState().items;
+      
+      // Re-check after refresh
+      const stillInvalid = currentItems.filter((item: any) => {
+        const id = normalizeId(item.product._id);
+        return !id || !/^[0-9a-fA-F]{24}$/.test(id);
+      });
+      
+      if (stillInvalid.length > 0) {
+        showToast('Some products still have invalid IDs. Please remove them from cart and add again.', 'error');
+        return;
+      }
+      
+      // If refresh worked, continue with refreshed items
+      // The items will be re-validated in the map function below
     }
 
     // Prepare order data
     const orderData = {
-      items: items.map(item => {
+      items: currentItems.map((item: any) => {
         // Use the normalizeId function which is more reliable
         const productId = normalizeId(item.product._id);
         
