@@ -287,7 +287,16 @@ export const updateProduct = async (req: AuthRequest, res: Response, next: NextF
 // Delete product (Admin)
 export const deleteProduct = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    // Ensure ID is a valid MongoDB ObjectId
+    const productId = String(req.params.id);
+    if (!/^[0-9a-fA-F]{24}$/.test(productId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid product ID format'
+      });
+    }
+    
+    const product = await Product.findByIdAndDelete(productId);
 
     if (!product) {
       return res.status(404).json({

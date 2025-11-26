@@ -114,7 +114,12 @@ export const adminService = {
   },
 
   deleteProduct: async (id: string) => {
-    const response = await api.delete(`/products/${id}`);
+    // Ensure ID is a string and valid MongoDB ObjectId format
+    const productId = String(id);
+    if (!/^[0-9a-fA-F]{24}$/.test(productId)) {
+      throw new Error('Invalid product ID format');
+    }
+    const response = await api.delete(`/products/${productId}`);
     return response.data;
   },
 

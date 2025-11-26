@@ -62,7 +62,9 @@ const Products = () => {
 
   const handleConfirmDelete = () => {
     if (deleteConfirm.productId) {
-      deleteMutation.mutate(deleteConfirm.productId);
+      // Ensure product ID is a string
+      const productId = String(deleteConfirm.productId);
+      deleteMutation.mutate(productId);
     }
     setDeleteConfirm({ isOpen: false });
   };
@@ -303,11 +305,15 @@ const Products = () => {
                           <Edit size={18} />
                         </button>
                         <button
-                          onClick={() => setDeleteConfirm({
-                            isOpen: true,
-                            productId: product._id,
-                            productName: product.name
-                          })}
+                          onClick={() => {
+                            // Normalize product ID to string
+                            const productId = product._id ? String(product._id) : product._id;
+                            setDeleteConfirm({
+                              isOpen: true,
+                              productId: productId,
+                              productName: product.name
+                            });
+                          }}
                           className="p-2 text-red-600 hover:bg-red-50 rounded"
                         >
                           <Trash2 size={18} />
