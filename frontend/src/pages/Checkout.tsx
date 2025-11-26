@@ -157,10 +157,6 @@ const Checkout = () => {
       navigate(`/orders/${order._id}?newOrder=true`);
     },
     onError: (error: any) => {
-      console.error('Order creation error:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error request data:', error.config?.data);
-      
       const errorMessage = error.response?.data?.message || 'Failed to create order';
       const errorDetails = error.response?.data?.errors;
       
