@@ -73,20 +73,16 @@ const ProductDetail = () => {
 
   const handleWishlistToggle = async () => {
     if (!productId) {
-      console.error('Product ID is missing:', product);
       return;
     }
-    console.log('Wishlist toggle clicked:', { productId, inWishlist, product });
     try {
       if (inWishlist) {
         await removeFromWishlist(productId);
-        console.log('Removed from wishlist');
       } else {
         await addToWishlist(productId);
-        console.log('Added to wishlist');
       }
     } catch (error) {
-      console.error('Wishlist toggle error:', error);
+      // Silent fail
     }
   };
 

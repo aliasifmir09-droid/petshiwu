@@ -92,10 +92,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         });
       }
       
-      console.log('Looking up product:', { productId, itemName: item.name });
       const product = await Product.findById(productId);
       if (!product) {
-        console.error('Product not found:', { productId, itemName: item.name });
         return res.status(400).json({
           success: false,
           message: `Product ${item.name || productId} not found`,

@@ -33,33 +33,22 @@ export const useWishlistStore = create<WishlistState>()(
         const currentItemsStr = currentItems.map(item => String(item));
         const alreadyInList = currentItemsStr.includes(productIdStr);
         
-        console.log('Adding to wishlist:', { productId: productIdStr, currentItems: currentItemsStr, alreadyInList });
-        
         if (!alreadyInList) {
           // Update local state immediately (store as string)
           const newItems = [...currentItemsStr, productIdStr];
           set({ items: newItems });
-          console.log('Updated local wishlist:', newItems);
           
           // Sync with backend if user is authenticated
           const { isAuthenticated } = useAuthStore.getState();
-          console.log('User authenticated:', isAuthenticated);
           
           if (isAuthenticated) {
             try {
-              const result = await wishlistService.addToWishlist(productIdStr);
-              console.log('Backend wishlist update successful:', result);
+              await wishlistService.addToWishlist(productIdStr);
             } catch (error: any) {
               // Revert on error
               set({ items: currentItems });
-              console.error('Failed to add to wishlist backend:', error);
-              console.error('Error details:', error.response?.data || error.message);
             }
-          } else {
-            console.log('User not authenticated, saved to local storage only');
           }
-        } else {
-          console.log('Product already in wishlist');
         }
       },
 
@@ -79,18 +68,15 @@ export const useWishlistStore = create<WishlistState>()(
         
         // Update local state immediately
         set({ items: newItems });
-        console.log('Removed from wishlist:', { productId: productIdStr, remainingItems: newItems });
         
         // Sync with backend if user is authenticated
         const { isAuthenticated } = useAuthStore.getState();
         if (isAuthenticated) {
           try {
             await wishlistService.removeFromWishlist(productIdStr);
-            console.log('Backend wishlist removal successful');
           } catch (error) {
             // Revert on error
             set({ items: currentItems });
-            console.error('Failed to remove from wishlist backend:', error);
           }
         }
       },
@@ -130,9 +116,8 @@ export const useWishlistStore = create<WishlistState>()(
             })
             .filter((id: any): id is string => id && typeof id === 'string' && id.trim() !== ''); // Filter out invalid IDs
           set({ items: productIds });
-          console.log('Synced wishlist from backend:', productIds);
         } catch (error) {
-          console.error('Failed to sync wishlist:', error);
+          // Silent fail - wishlist will remain in local storage
         }
       }
     }),

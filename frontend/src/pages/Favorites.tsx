@@ -26,7 +26,6 @@ const Favorites = () => {
         // Get from backend
         try {
           const products = await wishlistService.getWishlist();
-          console.log('Fetched wishlist from backend:', products);
           // Ensure all products have _id as string
           const normalizedProducts = (products || []).map((product: any) => ({
             ...product,

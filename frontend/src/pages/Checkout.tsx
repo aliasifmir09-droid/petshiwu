@@ -104,14 +104,6 @@ const Checkout = () => {
           
           // If we can't normalize it, try to extract from product object
           if (!productId) {
-            // Log the structure for debugging
-            console.log('Attempting to extract product ID from:', {
-              product: item.product,
-              _id: item.product._id,
-              _idType: typeof item.product._id,
-              keys: item.product._id && typeof item.product._id === 'object' ? Object.keys(item.product._id) : []
-            });
-            
             // Try to find the ID in the product object itself
             const possibleIdFields = ['_id', 'id', '$oid', 'oid'];
             for (const field of possibleIdFields) {
@@ -146,7 +138,7 @@ const Checkout = () => {
       const { setItems } = useCartStore.getState();
       setItems(updatedItems);
       
-      showToast('Cart products refreshed successfully', 'success');
+      // Products refreshed silently
     } catch (error) {
       console.error('Error refreshing cart products:', error);
       showToast('Failed to refresh cart products', 'error');
@@ -199,19 +191,8 @@ const Checkout = () => {
     });
     
     if (itemsWithoutIds.length > 0) {
-      console.error('Items without valid product IDs:', itemsWithoutIds);
-      console.error('Detailed product structure:', itemsWithoutIds.map((item: any) => ({
-        productName: item.product.name,
-        _id: item.product._id,
-        _idType: typeof item.product._id,
-        _idValue: item.product._id,
-        _idStringified: JSON.stringify(item.product._id),
-        productKeys: Object.keys(item.product),
-        _idKeys: item.product._id && typeof item.product._id === 'object' ? Object.keys(item.product._id) : []
-      })));
-      
       // Try to auto-refresh products
-      showToast('Some products have invalid IDs. Attempting to refresh...', 'warning');
+      showToast('Refreshing cart items...', 'info');
       await refreshCartProducts();
       
       // Get refreshed items
@@ -239,21 +220,8 @@ const Checkout = () => {
         const productId = normalizeId(item.product._id);
         
         if (!productId || !/^[0-9a-fA-F]{24}$/.test(productId)) {
-          console.error('Failed to extract valid product ID:', { 
-            product: item.product,
-            productName: item.product.name,
-            _id: item.product._id,
-            _idType: typeof item.product._id,
-            normalizedId: productId
-          });
           throw new Error(`Invalid product ID for item: ${item.product.name}. Please remove this item from cart and add it again.`);
         }
-        
-        console.log('Order item prepared:', { 
-          productId, 
-          productName: item.product.name,
-          isValid: /^[0-9a-fA-F]{24}$/.test(productId)
-        });
         
         return {
           product: productId,
