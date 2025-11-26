@@ -68,69 +68,41 @@ const Checkout = () => {
       return;
     }
 
-    // Validate all items have product IDs
-    const itemsWithoutIds = items.filter(item => !item.product._id);
-    if (itemsWithoutIds.length > 0) {
-      console.error('Items without product IDs:', itemsWithoutIds);
-      showToast('Some products are missing IDs. Please refresh the page and try again.', 'error');
-      return;
-    }
-
-    // Helper function to extract product ID from various formats
-    const extractProductId = (product: any): string | null => {
-      // Try _id first
-      let rawId = product._id;
-      
-      // If _id doesn't exist, try id (for cases where it might be stored differently)
-      if (!rawId && (product as any).id) {
-        rawId = (product as any).id;
-      }
-      
-      if (!rawId) {
-        return null;
-      }
-      
-      // If it's already a string, validate and return
-      if (typeof rawId === 'string') {
+    // Helper function to normalize product ID (same as in cartStore)
+    const normalizeId = (id: any): string | null => {
+      if (!id) return null;
+      if (typeof id === 'string') {
         // Validate it's a MongoDB ObjectId format
-        if (/^[0-9a-fA-F]{24}$/.test(rawId)) {
-          return rawId;
+        if (/^[0-9a-fA-F]{24}$/.test(id)) {
+          return id;
         }
-        return rawId; // Return anyway, backend will validate
+        return id; // Return anyway, backend will validate
       }
-      
-      // If it's an object, try to extract the ID
-      if (typeof rawId === 'object' && rawId !== null) {
+      if (id && typeof id === 'object') {
         // Try toString() method
-        if (typeof rawId.toString === 'function') {
-          const idStr = rawId.toString();
-          if (idStr && idStr !== '[object Object]' && /^[0-9a-fA-F]{24}$/.test(idStr)) {
-            return idStr;
+        if (typeof id.toString === 'function') {
+          const str = id.toString();
+          if (str && str !== '[object Object]' && /^[0-9a-fA-F]{24}$/.test(str)) {
+            return str;
           }
         }
-        
-        // Try accessing common ObjectId properties
+        // Try common ObjectId properties
         const possibleProps = ['id', '_id', '_str', '$oid', 'oid', 'value', 'hex'];
         for (const prop of possibleProps) {
-          if (rawId[prop] && typeof rawId[prop] === 'string') {
-            const idStr = rawId[prop];
-            if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
-              return idStr;
-            }
+          if (id[prop] && typeof id[prop] === 'string' && /^[0-9a-fA-F]{24}$/.test(id[prop])) {
+            return id[prop];
           }
         }
-        
         // Try valueOf()
-        if (typeof rawId.valueOf === 'function') {
-          const value = rawId.valueOf();
+        if (typeof id.valueOf === 'function') {
+          const value = id.valueOf();
           if (typeof value === 'string' && /^[0-9a-fA-F]{24}$/.test(value)) {
             return value;
           }
         }
-        
-        // Try JSON.stringify to see if it's a serialized ObjectId
+        // Try JSON.stringify
         try {
-          const jsonStr = JSON.stringify(rawId);
+          const jsonStr = JSON.stringify(id);
           const parsed = JSON.parse(jsonStr);
           if (parsed.$oid && /^[0-9a-fA-F]{24}$/.test(parsed.$oid)) {
             return parsed.$oid;
@@ -144,51 +116,52 @@ const Checkout = () => {
         } catch (e) {
           // JSON operations failed
         }
-        
-        // Last resort: check all string properties
-        for (const key in rawId) {
-          if (Object.prototype.hasOwnProperty.call(rawId, key)) {
-            const value = rawId[key];
+        // Check all string properties
+        for (const key in id) {
+          if (Object.prototype.hasOwnProperty.call(id, key)) {
+            const value = id[key];
             if (typeof value === 'string' && /^[0-9a-fA-F]{24}$/.test(value)) {
               return value;
             }
           }
         }
       }
-      
       return null;
     };
+
+    // Validate all items have product IDs
+    const itemsWithoutIds = items.filter(item => {
+      const id = normalizeId(item.product._id);
+      return !id || !/^[0-9a-fA-F]{24}$/.test(id);
+    });
+    
+    if (itemsWithoutIds.length > 0) {
+      console.error('Items without valid product IDs:', itemsWithoutIds);
+      showToast('Some products have invalid IDs. Please remove them from cart and add again.', 'error');
+      return;
+    }
 
     // Prepare order data
     const orderData = {
       items: items.map(item => {
-        const productId = extractProductId(item.product);
+        // Use the normalizeId function which is more reliable
+        const productId = normalizeId(item.product._id);
         
-        if (!productId) {
-          console.error('Failed to extract product ID:', { 
+        if (!productId || !/^[0-9a-fA-F]{24}$/.test(productId)) {
+          console.error('Failed to extract valid product ID:', { 
             product: item.product,
             productName: item.product.name,
             _id: item.product._id,
-            id: (item.product as any).id,
             _idType: typeof item.product._id,
-            idType: typeof (item.product as any).id
+            normalizedId: productId
           });
-          throw new Error(`Invalid product ID for item: ${item.product.name}. Please refresh the page and try again.`);
-        }
-        
-        // Validate MongoDB ObjectId format (24 hex characters)
-        if (!/^[0-9a-fA-F]{24}$/.test(productId)) {
-          console.error('Product ID is not a valid MongoDB ObjectId:', { 
-            productId, 
-            productName: item.product.name,
-            product: item.product
-          });
-          throw new Error(`Invalid product ID format for item: ${item.product.name}. Please refresh the page and try again.`);
+          throw new Error(`Invalid product ID for item: ${item.product.name}. Please remove this item from cart and add it again.`);
         }
         
         console.log('Order item prepared:', { 
           productId, 
-          productName: item.product.name
+          productName: item.product.name,
+          isValid: /^[0-9a-fA-F]{24}$/.test(productId)
         });
         
         return {

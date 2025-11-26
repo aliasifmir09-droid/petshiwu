@@ -26,10 +26,32 @@ export const useCartStore = create<CartState>()(
           return;
         }
 
+        // Normalize product ID to string to prevent ObjectId issues
+        const normalizeId = (id: any): string => {
+          if (typeof id === 'string') return id;
+          if (id && typeof id === 'object') {
+            if (typeof id.toString === 'function') {
+              const str = id.toString();
+              if (str && str !== '[object Object]') return str;
+            }
+            if (id._id) return normalizeId(id._id);
+            if (id.id) return normalizeId(id.id);
+            if (id.$oid) return String(id.$oid);
+            if (id.oid) return String(id.oid);
+          }
+          return String(id);
+        };
+
+        // Create normalized product with string _id
+        const normalizedProduct = {
+          ...product,
+          _id: normalizeId(product._id)
+        };
+
         const items = get().items;
         const existingItemIndex = items.findIndex(
           (item) =>
-            item.product._id === product._id &&
+            normalizeId(item.product._id) === normalizedProduct._id &&
             item.variant?.sku === variant?.sku
         );
 
@@ -53,15 +75,30 @@ export const useCartStore = create<CartState>()(
             return;
           }
           
-          set({ items: [...items, { product, variant, quantity }] });
+          set({ items: [...items, { product: normalizedProduct, variant, quantity }] });
         }
       },
 
       removeFromCart: (productId, variantSku) => {
+        const normalizeId = (id: any): string => {
+          if (typeof id === 'string') return id;
+          if (id && typeof id === 'object') {
+            if (typeof id.toString === 'function') {
+              const str = id.toString();
+              if (str && str !== '[object Object]') return str;
+            }
+            if (id._id) return normalizeId(id._id);
+            if (id.id) return normalizeId(id.id);
+            if (id.$oid) return String(id.$oid);
+            if (id.oid) return String(id.oid);
+          }
+          return String(id);
+        };
+        
         set({
           items: get().items.filter(
             (item) =>
-              !(item.product._id === productId && item.variant?.sku === variantSku)
+              !(normalizeId(item.product._id) === normalizeId(productId) && item.variant?.sku === variantSku)
           )
         });
       },
@@ -72,10 +109,25 @@ export const useCartStore = create<CartState>()(
           return;
         }
 
+        const normalizeId = (id: any): string => {
+          if (typeof id === 'string') return id;
+          if (id && typeof id === 'object') {
+            if (typeof id.toString === 'function') {
+              const str = id.toString();
+              if (str && str !== '[object Object]') return str;
+            }
+            if (id._id) return normalizeId(id._id);
+            if (id.id) return normalizeId(id.id);
+            if (id.$oid) return String(id.$oid);
+            if (id.oid) return String(id.oid);
+          }
+          return String(id);
+        };
+
         const items = get().items;
         const itemIndex = items.findIndex(
           (item) =>
-            item.product._id === productId &&
+            normalizeId(item.product._id) === normalizeId(productId) &&
             item.variant?.sku === variantSku
         );
 
