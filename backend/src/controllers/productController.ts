@@ -26,9 +26,15 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
     const skip = (page - 1) * limit;
+    
+    // Check if this is an admin request (has auth token) and wants to include deleted
+    const includeDeleted = req.query.includeDeleted === 'true' && req.headers.authorization;
 
-    // Build query
+    // Build query - exclude soft-deleted products unless admin requests them
     const query: any = { isActive: true };
+    if (!includeDeleted) {
+      query.deletedAt = null;
+    }
 
     // Filter by category
     if (req.query.category) {
@@ -127,14 +133,15 @@ export const getProduct = async (req: Request, res: Response, next: NextFunction
     let product;
 
     // Try to find by slug first, then by ID if slug doesn't match
-    product = await Product.findOne({ slug: identifier })
+    // Exclude soft-deleted products
+    product = await Product.findOne({ slug: identifier, deletedAt: null })
       .populate('category', 'name slug')
       .lean(); // Use lean() for better performance
     
     if (!product) {
       // Try finding by ID if it's a valid MongoDB ObjectId
       try {
-        product = await Product.findById(identifier)
+        product = await Product.findOne({ _id: identifier, deletedAt: null })
           .populate('category', 'name slug')
           .lean(); // Use lean() for better performance
       } catch (err) {
@@ -187,8 +194,10 @@ export const getRelatedProducts = async (req: Request, res: Response, next: Next
     }
 
     // Find products that match both category AND petType first
+    // Exclude soft-deleted products
     const exactMatches = await Product.find({
       isActive: true,
+      deletedAt: null,
       _id: { $ne: currentProduct._id },
       category: currentProduct.category,
       petType: currentProduct.petType
@@ -203,6 +212,7 @@ export const getRelatedProducts = async (req: Request, res: Response, next: Next
       const remainingLimit = limit - exactMatches.length;
       const partialMatches = await Product.find({
         isActive: true,
+        deletedAt: null,
         _id: { 
           $ne: currentProduct._id,
           $nin: exactMatches.map(p => p._id)
@@ -284,7 +294,7 @@ export const updateProduct = async (req: AuthRequest, res: Response, next: NextF
   }
 };
 
-// Delete product (Admin)
+// Delete product (Admin) - Soft delete
 export const deleteProduct = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     // Ensure ID is a valid MongoDB ObjectId
@@ -296,7 +306,12 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
       });
     }
     
-    const product = await Product.findByIdAndDelete(productId);
+    // Soft delete: mark as deleted instead of actually deleting
+    const product = await Product.findByIdAndUpdate(
+      productId,
+      { deletedAt: new Date(), isActive: false },
+      { new: true }
+    );
 
     if (!product) {
       return res.status(404).json({
@@ -307,7 +322,44 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
 
     res.status(200).json({
       success: true,
-      message: 'Product deleted successfully'
+      message: 'Product deleted successfully',
+      data: normalizeProductId(product)
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Restore product (Admin)
+export const restoreProduct = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    // Ensure ID is a valid MongoDB ObjectId
+    const productId = String(req.params.id);
+    if (!/^[0-9a-fA-F]{24}$/.test(productId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid product ID format'
+      });
+    }
+    
+    // Restore: remove deletedAt and set isActive to true
+    const product = await Product.findByIdAndUpdate(
+      productId,
+      { deletedAt: null, isActive: true },
+      { new: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Product restored successfully',
+      data: normalizeProductId(product)
     });
   } catch (error) {
     next(error);

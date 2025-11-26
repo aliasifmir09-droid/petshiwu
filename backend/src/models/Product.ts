@@ -32,6 +32,7 @@ export interface IProduct extends Document {
   totalStock: number;
   autoshipEligible: boolean;
   autoshipDiscount?: number;
+  deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -148,6 +149,10 @@ const productSchema = new Schema<IProduct>(
       type: Number,
       min: 0,
       max: 100
+    },
+    deletedAt: {
+      type: Date,
+      default: null
     }
   },
   {
@@ -182,11 +187,12 @@ productSchema.pre('save', function (next) {
 
 // Indexes for performance optimization
 productSchema.index({ name: 'text', description: 'text', brand: 'text', tags: 'text' }); // Text search
-productSchema.index({ category: 1, isActive: 1 }); // For filtering active products by category
-productSchema.index({ petType: 1, isActive: 1 }); // For filtering by pet type
-productSchema.index({ brand: 1 }); // Brand filter
-productSchema.index({ totalStock: 1, isActive: 1 }); // Stock filtering
-productSchema.index({ petType: 1, category: 1, isActive: 1 }); // Compound index for common queries
+productSchema.index({ category: 1, isActive: 1, deletedAt: 1 }); // For filtering active products by category
+productSchema.index({ petType: 1, isActive: 1, deletedAt: 1 }); // For filtering by pet type
+productSchema.index({ brand: 1, deletedAt: 1 }); // Brand filter
+productSchema.index({ totalStock: 1, isActive: 1, deletedAt: 1 }); // Stock filtering
+productSchema.index({ petType: 1, category: 1, isActive: 1, deletedAt: 1 }); // Compound index for common queries
+productSchema.index({ deletedAt: 1 }); // For soft delete queries
 // Note: slug, variants.sku, basePrice, averageRating, createdAt, isFeatured+isActive indexes already exist in schema
 
 export default mongoose.model<IProduct>('Product', productSchema);

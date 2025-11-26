@@ -123,6 +123,16 @@ export const adminService = {
     return response.data;
   },
 
+  restoreProduct: async (id: string) => {
+    // Ensure ID is a string and valid MongoDB ObjectId format
+    const productId = String(id);
+    if (!/^[0-9a-fA-F]{24}$/.test(productId)) {
+      throw new Error('Invalid product ID format');
+    }
+    const response = await api.post(`/products/${productId}/restore`);
+    return response.data;
+  },
+
   getProductStats: async () => {
     const response = await api.get('/products/stats');
     return response.data.data;

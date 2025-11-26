@@ -6,6 +6,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  restoreProduct,
   getProductStats
 } from '../controllers/productController';
 import { protect, authorize } from '../middleware/auth';
@@ -25,6 +26,7 @@ router.get('/:id', getProduct);
 router.post('/', protect, checkPermission('canManageProducts'), createProductValidation, createProduct);
 router.put('/:id', protect, checkPermission('canManageProducts'), validateObjectId(), updateProduct);
 router.delete('/:id', protect, checkPermission('canManageProducts'), validateObjectId(), deleteProduct);
+router.post('/:id/restore', protect, checkPermission('canManageProducts'), validateObjectId(), restoreProduct);
 
 export default router;
 
