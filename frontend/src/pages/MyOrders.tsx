@@ -57,7 +57,7 @@ const extractOrderId = (id: any): string => {
       // Try buffer as array-like object (check for length property)
       if (id.buffer.length !== undefined) {
         try {
-          const bufferArray = Array.from(id.buffer);
+          const bufferArray = Array.from(id.buffer as ArrayLike<number>);
           const hexString = bufferArray
             .filter((b: any): b is number => typeof b === 'number')
             .map((b: number) => {
@@ -77,6 +77,7 @@ const extractOrderId = (id: any): string => {
       if (id.buffer instanceof Uint8Array) {
         try {
           const hexString = Array.from(id.buffer)
+            .filter((b: any): b is number => typeof b === 'number')
             .map((b: number) => {
               const hex = b.toString(16);
               return hex.length === 1 ? '0' + hex : hex;
