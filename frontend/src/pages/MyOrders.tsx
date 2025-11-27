@@ -39,9 +39,10 @@ const extractOrderId = (id: any): string => {
       // Try to get hex string from buffer.data array
       if (id.buffer.data && Array.isArray(id.buffer.data)) {
         try {
-          const hexString = id.buffer.data.map((b: number) => 
-            b.toString(16).padStart(2, '0')
-          ).join('');
+          const hexString = id.buffer.data
+            .filter((b): b is number => typeof b === 'number')
+            .map((b: number) => b.toString(16).padStart(2, '0'))
+            .join('');
           if (hexString && hexString.length === 24) {
             return hexString;
           }
@@ -52,9 +53,11 @@ const extractOrderId = (id: any): string => {
       // Try buffer as Uint8Array or similar
       if (id.buffer instanceof Uint8Array || (Array.isArray(id.buffer) && id.buffer.length === 12)) {
         try {
-          const hexString = Array.from(id.buffer).map((b: number) => 
-            b.toString(16).padStart(2, '0')
-          ).join('');
+          const bufferArray = Array.isArray(id.buffer) ? id.buffer : Array.from(id.buffer);
+          const hexString = bufferArray
+            .filter((b): b is number => typeof b === 'number')
+            .map((b: number) => b.toString(16).padStart(2, '0'))
+            .join('');
           if (hexString && hexString.length === 24) {
             return hexString;
           }
