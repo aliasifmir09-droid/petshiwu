@@ -223,12 +223,21 @@ export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFun
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const orders = await Order.find({ user: req.user?._id })
+    // Validate user is authenticated
+    if (!req.user?._id) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated'
+      });
+    }
+
+    const orders = await Order.find({ user: req.user._id })
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean(); // Use lean() to get plain JavaScript objects instead of Mongoose documents
 
-    const total = await Order.countDocuments({ user: req.user?._id });
+    const total = await Order.countDocuments({ user: req.user._id });
 
     // Normalize order IDs to strings
     const normalizedOrders = normalizeOrders(orders);
@@ -243,7 +252,8 @@ export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFun
         pages: Math.ceil(total / limit)
       }
     });
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Error in getMyOrders:', error);
     next(error);
   }
 };
