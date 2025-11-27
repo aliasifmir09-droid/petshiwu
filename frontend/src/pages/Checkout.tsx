@@ -154,7 +154,9 @@ const Checkout = () => {
     mutationFn: orderService.createOrder,
     onSuccess: (order) => {
       clearCart();
-      navigate(`/orders/${order._id}?newOrder=true`);
+      // Ensure order ID is a string
+      const orderId = String(order._id || order.id || '');
+      navigate(`/orders/${orderId}?newOrder=true`);
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || 'Failed to create order';

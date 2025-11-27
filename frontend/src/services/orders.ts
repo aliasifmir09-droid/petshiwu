@@ -27,7 +27,9 @@ export const orderService = {
   },
 
   getOrder: async (id: string) => {
-    const response = await api.get<ApiResponse<Order>>(`/orders/${id}`);
+    // Ensure ID is a string and URL encoded
+    const orderId = String(id).trim();
+    const response = await api.get<ApiResponse<Order>>(`/orders/${encodeURIComponent(orderId)}`);
     return response.data.data;
   },
 

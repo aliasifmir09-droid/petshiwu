@@ -19,7 +19,11 @@ const OrderDetail = () => {
 
   const { data: order, isLoading } = useQuery({
     queryKey: ['order', id],
-    queryFn: () => orderService.getOrder(id!),
+    queryFn: () => {
+      // Ensure ID is a string
+      const orderId = String(id || '');
+      return orderService.getOrder(orderId);
+    },
     enabled: !!id
   });
 

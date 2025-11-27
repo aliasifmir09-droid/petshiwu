@@ -119,7 +119,7 @@ const MyOrders = () => {
                       </div>
                     </div>
                     <Link
-                      to={`/orders/${order._id}`}
+                      to={`/orders/${String(order._id || order.id || '')}`}
                       className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium"
                     >
                       <Eye size={18} />

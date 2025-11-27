@@ -157,6 +157,34 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
   }
 };
 
+// Helper function to normalize order IDs to strings
+const normalizeOrderId = (order: any): any => {
+  if (!order) return order;
+  const normalized = order.toObject ? order.toObject() : { ...order };
+  if (normalized._id) {
+    normalized._id = String(normalized._id);
+  }
+  if (normalized.user && typeof normalized.user === 'object') {
+    if (normalized.user._id) {
+      normalized.user._id = String(normalized.user._id);
+    }
+  }
+  if (normalized.items && Array.isArray(normalized.items)) {
+    normalized.items = normalized.items.map((item: any) => {
+      if (item.product && typeof item.product === 'object' && item.product._id) {
+        item.product = String(item.product._id);
+      }
+      return item;
+    });
+  }
+  return normalized;
+};
+
+// Helper function to normalize array of orders
+const normalizeOrders = (orders: any[]): any[] => {
+  return orders.map(normalizeOrderId);
+};
+
 // Get user orders
 export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -171,9 +199,12 @@ export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFun
 
     const total = await Order.countDocuments({ user: req.user?._id });
 
+    // Normalize order IDs to strings
+    const normalizedOrders = normalizeOrders(orders);
+
     res.status(200).json({
       success: true,
-      data: orders,
+      data: normalizedOrders,
       pagination: {
         page,
         limit,
@@ -205,6 +236,9 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
         message: 'Not authorized to access this order'
       });
     }
+
+    // Normalize order ID to string
+    const normalizedOrder = normalizeOrderId(order);
 
     res.status(200).json({
       success: true,
