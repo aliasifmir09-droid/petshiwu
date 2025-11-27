@@ -73,7 +73,9 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   const createMutation = useMutation({
     mutationFn: adminService.createProduct,
     onSuccess: () => {
+      // Invalidate all product-related queries
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.refetchQueries({ queryKey: ['products'] });
       showToast('Product created successfully!', 'success');
       onClose();
     },
@@ -111,7 +113,9 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   const updateMutation = useMutation({
     mutationFn: (data: any) => adminService.updateProduct(product._id, data),
     onSuccess: () => {
+      // Invalidate all product-related queries
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.refetchQueries({ queryKey: ['products'] });
       showToast('Product updated successfully!', 'success');
       onClose();
     },

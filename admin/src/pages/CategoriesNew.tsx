@@ -81,7 +81,10 @@ const CategoriesNew = () => {
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate all category-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.refetchQueries({ queryKey: ['admin-categories'] });
       showToast('Category created successfully!', 'success');
       handleCloseModal();
     },
@@ -104,7 +107,10 @@ const CategoriesNew = () => {
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate all category-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.refetchQueries({ queryKey: ['admin-categories'] });
       showToast('Category updated successfully!', 'success');
       handleCloseModal();
     },
@@ -137,7 +143,10 @@ const CategoriesNew = () => {
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate all category-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.refetchQueries({ queryKey: ['admin-categories'] });
       showToast('Category deleted successfully!', 'success');
       setDeleteConfirm({ isOpen: false });
     },

@@ -74,7 +74,10 @@ const CategoriesNew = () => {
   const createMutation = useMutation({
     mutationFn: adminService.createCategory,
     onSuccess: () => {
+      // Invalidate all category-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.refetchQueries({ queryKey: ['admin-categories'] });
       showToast('Category created successfully!', 'success');
       handleCloseModal();
     },
@@ -86,7 +89,10 @@ const CategoriesNew = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => adminService.updateCategory(id, data),
     onSuccess: () => {
+      // Invalidate all category-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.refetchQueries({ queryKey: ['admin-categories'] });
       showToast('Category updated successfully!', 'success');
       handleCloseModal();
     },
@@ -98,7 +104,10 @@ const CategoriesNew = () => {
   const deleteMutation = useMutation({
     mutationFn: adminService.deleteCategory,
     onSuccess: () => {
+      // Invalidate all category-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.refetchQueries({ queryKey: ['admin-categories'] });
       showToast('Category deleted successfully!', 'success');
       setDeleteConfirm({ isOpen: false });
     },
