@@ -294,17 +294,31 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
     }
 
     // Get order user ID - handle both ObjectId and string
-    const orderUserId = orderRaw.user ? String(orderRaw.user) : '';
-    const currentUserId = String(req.user._id);
+    // Convert both to strings and normalize for comparison
+    const orderUserId = orderRaw.user 
+      ? (orderRaw.user.toString ? orderRaw.user.toString() : String(orderRaw.user))
+      : '';
+    const currentUserId = req.user._id 
+      ? (req.user._id.toString ? req.user._id.toString() : String(req.user._id))
+      : '';
     
     console.log('getOrder - Order User ID:', orderUserId);
     console.log('getOrder - Current User ID:', currentUserId);
     console.log('getOrder - User Role:', req.user.role);
+    console.log('getOrder - Order User ID type:', typeof orderRaw.user);
+    console.log('getOrder - Current User ID type:', typeof req.user._id);
     console.log('getOrder - IDs match:', orderUserId === currentUserId);
 
     // Make sure user can only access their own orders (unless admin)
-    if (req.user.role !== 'admin' && orderUserId !== currentUserId) {
+    // Use both string comparison and ObjectId comparison for safety
+    const isAuthorized = req.user.role === 'admin' || 
+      orderUserId === currentUserId ||
+      (orderRaw.user && req.user._id && orderRaw.user.equals && orderRaw.user.equals(req.user._id));
+    
+    if (!isAuthorized) {
       console.log('getOrder - Authorization failed: User does not own this order');
+      console.log('getOrder - Order belongs to:', orderUserId);
+      console.log('getOrder - Current user is:', currentUserId);
       return res.status(403).json({
         success: false,
         message: 'Not authorized to access this order'
