@@ -218,7 +218,19 @@ const normalizeOrders = (orders: any[]): any[] => {
   if (!Array.isArray(orders)) {
     return [];
   }
-  return orders.map(normalizeOrderId).filter((order: any) => order !== null && order !== undefined);
+  return orders.map((order: any) => {
+    try {
+      const normalized = normalizeOrderId(order);
+      // Double-check _id is a string
+      if (normalized && normalized._id && typeof normalized._id !== 'string') {
+        normalized._id = normalized._id.toString ? normalized._id.toString() : String(normalized._id);
+      }
+      return normalized;
+    } catch (error) {
+      console.error('Error normalizing order in array:', error);
+      return order;
+    }
+  }).filter((order: any) => order !== null && order !== undefined);
 };
 
 // Get user orders

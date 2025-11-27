@@ -41,28 +41,70 @@ const extractOrderId = (id: any): string => {
         try {
           const hexString = id.buffer.data
             .filter((b: any): b is number => typeof b === 'number')
-            .map((b: number) => b.toString(16).padStart(2, '0'))
+            .map((b: number) => {
+              const hex = b.toString(16);
+              return hex.length === 1 ? '0' + hex : hex;
+            })
             .join('');
           if (hexString && hexString.length === 24) {
             return hexString;
           }
         } catch (e) {
-          // Ignore
+          console.warn('extractOrderId: buffer.data conversion failed', e);
         }
       }
-      // Try buffer as Uint8Array or similar
-      if (id.buffer instanceof Uint8Array || (Array.isArray(id.buffer) && id.buffer.length === 12)) {
+      
+      // Try buffer as array-like object (check for length property)
+      if (id.buffer.length !== undefined) {
         try {
-          const bufferArray = Array.isArray(id.buffer) ? id.buffer : Array.from(id.buffer);
+          const bufferArray = Array.from(id.buffer);
           const hexString = bufferArray
             .filter((b: any): b is number => typeof b === 'number')
-            .map((b: number) => b.toString(16).padStart(2, '0'))
+            .map((b: number) => {
+              const hex = b.toString(16);
+              return hex.length === 1 ? '0' + hex : hex;
+            })
             .join('');
           if (hexString && hexString.length === 24) {
             return hexString;
           }
         } catch (e) {
-          // Ignore
+          console.warn('extractOrderId: buffer array conversion failed', e);
+        }
+      }
+      
+      // Try buffer as Uint8Array
+      if (id.buffer instanceof Uint8Array) {
+        try {
+          const hexString = Array.from(id.buffer)
+            .map((b: number) => {
+              const hex = b.toString(16);
+              return hex.length === 1 ? '0' + hex : hex;
+            })
+            .join('');
+          if (hexString && hexString.length === 24) {
+            return hexString;
+          }
+        } catch (e) {
+          console.warn('extractOrderId: Uint8Array conversion failed', e);
+        }
+      }
+      
+      // Try to access buffer properties directly (for serialized ObjectId)
+      if (id.buffer.type === 'Buffer' && Array.isArray(id.buffer.data)) {
+        try {
+          const hexString = id.buffer.data
+            .filter((b: any): b is number => typeof b === 'number')
+            .map((b: number) => {
+              const hex = b.toString(16);
+              return hex.length === 1 ? '0' + hex : hex;
+            })
+            .join('');
+          if (hexString && hexString.length === 24) {
+            return hexString;
+          }
+        } catch (e) {
+          console.warn('extractOrderId: Buffer type conversion failed', e);
         }
       }
     }
