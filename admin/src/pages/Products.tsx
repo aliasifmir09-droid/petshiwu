@@ -54,9 +54,9 @@ const Products = () => {
     onSuccess: () => {
       // Invalidate all product-related queries
       queryClient.invalidateQueries({ queryKey: ['products'] });
-      // Force refetch with current filters (excluding deleted products if showDeleted is false)
+      // Force refetch with current filters
       queryClient.refetchQueries({ 
-        queryKey: ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter, showDeleted] 
+        queryKey: ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter] 
       });
       showToast('Product deleted successfully!', 'success');
     },
