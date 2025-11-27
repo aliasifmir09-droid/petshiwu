@@ -14,13 +14,26 @@ const extractOrderId = (id: any): string => {
   // If already a string, return it (trimmed)
   if (typeof id === 'string') {
     const trimmed = id.trim();
-    if (trimmed && trimmed !== '[object Object]') {
+    if (trimmed && trimmed !== '[object Object]' && trimmed.length === 24) {
       return trimmed;
     }
   }
   
   // If it's an object
   if (typeof id === 'object' && id !== null) {
+    // Handle MongoDB ObjectId with buffer property
+    if (id.buffer && Buffer.isBuffer && Buffer.isBuffer(id.buffer)) {
+      // Convert buffer to hex string (ObjectId format)
+      try {
+        const hexString = id.buffer.toString('hex');
+        if (hexString && hexString.length === 24) {
+          return hexString;
+        }
+      } catch (e) {
+        console.warn('extractOrderId: buffer conversion failed', e);
+      }
+    }
+    
     // Try toString() method first (for ObjectId)
     if (typeof id.toString === 'function') {
       try {
@@ -50,11 +63,28 @@ const extractOrderId = (id: any): string => {
     if (typeof id.valueOf === 'function') {
       try {
         const value = id.valueOf();
-        if (typeof value === 'string' && value !== '[object Object]') {
+        if (typeof value === 'string' && value !== '[object Object]' && value.length === 24) {
           return value;
         }
       } catch (e) {
         console.warn('extractOrderId: valueOf() failed', e);
+      }
+    }
+    
+    // Try to extract from buffer object if it exists
+    if (id.buffer && typeof id.buffer === 'object') {
+      // Try to get hex string from buffer
+      if (id.buffer.data && Array.isArray(id.buffer.data)) {
+        try {
+          const hexString = id.buffer.data.map((b: number) => 
+            b.toString(16).padStart(2, '0')
+          ).join('');
+          if (hexString && hexString.length === 24) {
+            return hexString;
+          }
+        } catch (e) {
+          // Ignore
+        }
       }
     }
   }
@@ -66,6 +96,8 @@ const extractOrderId = (id: any): string => {
     return '';
   }
   
+  // If string conversion worked but it's not 24 chars, still return it
+  // (might be a different ID format)
   return str;
 };
 

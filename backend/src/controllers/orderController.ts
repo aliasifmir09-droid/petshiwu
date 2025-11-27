@@ -172,9 +172,14 @@ const normalizeOrderId = (order: any): any => {
       normalized = { ...order };
     }
     
-    // Normalize _id
+    // Normalize _id - ensure it's a string
     if (normalized._id) {
-      normalized._id = String(normalized._id);
+      // Handle ObjectId objects properly
+      if (normalized._id.toString && typeof normalized._id.toString === 'function') {
+        normalized._id = normalized._id.toString();
+      } else {
+        normalized._id = String(normalized._id);
+      }
     }
     
     // Normalize user._id if user is populated
