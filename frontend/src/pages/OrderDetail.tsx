@@ -17,14 +17,35 @@ const OrderDetail = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showDonationModal, setShowDonationModal] = useState(false);
 
+  // Helper function to extract order ID as string
+  const extractOrderId = (id: any): string => {
+    if (!id) return '';
+    if (typeof id === 'string') return id;
+    if (typeof id === 'object' && id !== null) {
+      // Try toString() method
+      if (typeof id.toString === 'function') {
+        const str = id.toString();
+        if (str && str !== '[object Object]') return str;
+      }
+      // Try _id property
+      if (id._id) return String(id._id);
+      // Try id property
+      if (id.id) return String(id.id);
+    }
+    return String(id);
+  };
+
   const { data: order, isLoading } = useQuery({
     queryKey: ['order', id],
     queryFn: () => {
-      // Ensure ID is a string
-      const orderId = String(id || '');
+      // Ensure ID is a string, handle [object Object] case
+      const orderId = extractOrderId(id);
+      if (!orderId || orderId === '[object Object]') {
+        throw new Error('Invalid order ID');
+      }
       return orderService.getOrder(orderId);
     },
-    enabled: !!id
+    enabled: !!id && id !== '[object Object]'
   });
 
   // Check if this is a new order and show donation modal

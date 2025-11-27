@@ -27,8 +27,29 @@ export const orderService = {
   },
 
   getOrder: async (id: string) => {
-    // Ensure ID is a string and URL encoded
-    const orderId = String(id).trim();
+    // Helper to extract order ID as string
+    const extractId = (idValue: any): string => {
+      if (!idValue) return '';
+      if (typeof idValue === 'string') return idValue.trim();
+      if (typeof idValue === 'object' && idValue !== null) {
+        // Try toString() method
+        if (typeof idValue.toString === 'function') {
+          const str = idValue.toString();
+          if (str && str !== '[object Object]') return str.trim();
+        }
+        // Try _id property
+        if (idValue._id) return String(idValue._id).trim();
+        // Try id property
+        if (idValue.id) return String(idValue.id).trim();
+      }
+      const str = String(idValue).trim();
+      return str === '[object Object]' ? '' : str;
+    };
+    
+    const orderId = extractId(id);
+    if (!orderId || orderId === '[object Object]') {
+      throw new Error('Invalid order ID format');
+    }
     const response = await api.get<ApiResponse<Order>>(`/orders/${encodeURIComponent(orderId)}`);
     return response.data.data;
   },
