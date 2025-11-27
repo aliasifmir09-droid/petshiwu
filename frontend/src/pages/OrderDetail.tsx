@@ -35,17 +35,22 @@ const OrderDetail = () => {
     return String(id);
   };
 
-  const { data: order, isLoading } = useQuery({
+  const { data: order, isLoading, error } = useQuery({
     queryKey: ['order', id],
     queryFn: () => {
       // Ensure ID is a string, handle [object Object] case
       const orderId = extractOrderId(id);
+      console.log('OrderDetail - Extracted order ID:', orderId);
+      console.log('OrderDetail - Original id from params:', id);
+      
       if (!orderId || orderId === '[object Object]') {
+        console.error('OrderDetail - Invalid order ID:', orderId);
         throw new Error('Invalid order ID');
       }
       return orderService.getOrder(orderId);
     },
-    enabled: !!id && id !== '[object Object]'
+    enabled: !!id && id !== '[object Object]',
+    retry: false // Don't retry on error
   });
 
   // Check if this is a new order and show donation modal
@@ -127,11 +132,28 @@ const OrderDetail = () => {
     );
   }
 
-  if (!order) {
+  if (error) {
+    console.error('OrderDetail - Error loading order:', error);
+    const errorMessage = (error as any)?.response?.data?.message || (error as any)?.message || 'Failed to load order';
+    return (
+      <div className="container mx-auto px-4 lg:px-8 py-8">
+        <div className="text-center py-20">
+          <h2 className="text-2xl font-bold mb-4 text-red-600">Error Loading Order</h2>
+          <p className="text-gray-600 mb-4">{errorMessage}</p>
+          <Link to="/orders" className="text-primary-600 hover:text-primary-700">
+            Back to Orders
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!order && !isLoading) {
     return (
       <div className="container mx-auto px-4 lg:px-8 py-8">
         <div className="text-center py-20">
           <h2 className="text-2xl font-bold mb-4">Order Not Found</h2>
+          <p className="text-gray-600 mb-4">The order you're looking for doesn't exist or you don't have permission to view it.</p>
           <Link to="/orders" className="text-primary-600 hover:text-primary-700">
             Back to Orders
           </Link>
