@@ -288,8 +288,15 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
       query.user = req.user._id;
     }
 
+    console.log('getOrder - Query:', JSON.stringify(query));
+    console.log('getOrder - User role:', req.user.role);
+    console.log('getOrder - User _id type:', typeof req.user._id);
+    console.log('getOrder - User _id value:', req.user._id);
+
     // Find order with user filter (Mongoose handles ObjectId comparison automatically)
     const order = await Order.findOne(query).populate('user', 'firstName lastName email').lean();
+    
+    console.log('getOrder - Order found:', !!order);
     
     if (!order) {
       // Check if order exists at all (for better error message)
@@ -302,8 +309,12 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
         });
       } else {
         console.log('getOrder - Order exists but user does not have permission');
-        console.log('getOrder - Order user:', orderExists.user);
-        console.log('getOrder - Current user:', req.user._id);
+        console.log('getOrder - Order user ID:', orderExists.user);
+        console.log('getOrder - Order user ID type:', typeof orderExists.user);
+        console.log('getOrder - Order user ID string:', String(orderExists.user));
+        console.log('getOrder - Current user ID:', req.user._id);
+        console.log('getOrder - Current user ID string:', String(req.user._id));
+        console.log('getOrder - IDs match:', String(orderExists.user) === String(req.user._id));
         return res.status(403).json({
           success: false,
           message: 'Not authorized to access this order'

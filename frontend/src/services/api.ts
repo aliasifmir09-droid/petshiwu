@@ -53,8 +53,12 @@ api.interceptors.response.use(
         window.location.href = '/#/login';
       }
     } else if (error.response?.status === 403) {
-      // Redirect to 403 page
-      window.location.href = '/#/403';
+      // Don't redirect for order endpoints - let the component handle the error
+      const isOrderEndpoint = url.includes('/orders/');
+      if (!isOrderEndpoint) {
+        // Redirect to 403 page for other endpoints
+        window.location.href = '/#/403';
+      }
     } else if (error.response?.status === 404 && !isWishlistEndpoint && !isProductEndpoint) {
       // Only redirect to 404 page for non-resource endpoints
       // Wishlist and product endpoints might legitimately return 404
