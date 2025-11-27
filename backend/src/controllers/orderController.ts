@@ -261,7 +261,24 @@ export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFun
 // Get single order
 export const getOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const order = await Order.findById(req.params.id).populate('user', 'firstName lastName email');
+    // Validate user is authenticated
+    if (!req.user?._id) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated'
+      });
+    }
+
+    // Validate order ID format
+    const orderId = String(req.params.id).trim();
+    if (!orderId || !/^[0-9a-fA-F]{24}$/.test(orderId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid order ID format'
+      });
+    }
+
+    const order = await Order.findById(orderId).populate('user', 'firstName lastName email').lean();
 
     if (!order) {
       return res.status(404).json({
@@ -271,7 +288,12 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
     }
 
     // Make sure user can only access their own orders (unless admin)
-    if (req.user?.role !== 'admin' && order.user._id.toString() !== (req.user?._id as any)?.toString()) {
+    const orderUserId = order.user && typeof order.user === 'object' && '_id' in order.user 
+      ? String(order.user._id) 
+      : String(order.user);
+    const currentUserId = String(req.user._id);
+
+    if (req.user.role !== 'admin' && orderUserId !== currentUserId) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to access this order'
@@ -283,9 +305,10 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
 
     res.status(200).json({
       success: true,
-      data: order
+      data: normalizedOrder
     });
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Error in getOrder:', error);
     next(error);
   }
 };
