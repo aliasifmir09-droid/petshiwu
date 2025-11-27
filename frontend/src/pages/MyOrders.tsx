@@ -4,6 +4,24 @@ import { Link } from 'react-router-dom';
 import { orderService } from '@/services/orders';
 import { Package, Truck, CheckCircle, Clock, XCircle, Eye, ChevronRight } from 'lucide-react';
 
+// Helper function to extract order ID as string
+const extractOrderId = (id: any): string => {
+  if (!id) return '';
+  if (typeof id === 'string') return id;
+  if (typeof id === 'object' && id !== null) {
+    // Try toString() method
+    if (typeof id.toString === 'function') {
+      const str = id.toString();
+      if (str && str !== '[object Object]') return str;
+    }
+    // Try _id property
+    if (id._id) return String(id._id);
+    // Try id property
+    if (id.id) return String(id.id);
+  }
+  return String(id);
+};
+
 const MyOrders = () => {
   const [page, setPage] = useState(1);
 
