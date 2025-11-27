@@ -28,7 +28,8 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     const skip = (page - 1) * limit;
     
     // Check if this is an admin request (has auth token) and wants to include deleted
-    const includeDeleted = (req.query.includeDeleted === 'true' || req.query.includeDeleted === true) && req.headers.authorization;
+    const includeDeletedParam = req.query.includeDeleted;
+    const includeDeleted = (includeDeletedParam === 'true' || String(includeDeletedParam) === 'true') && req.headers.authorization;
 
     // Build query - exclude soft-deleted products unless admin requests them
     const query: any = {};
