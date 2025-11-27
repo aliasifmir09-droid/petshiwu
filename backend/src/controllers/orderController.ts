@@ -271,6 +271,10 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
 
     // Validate order ID format
     const orderId = String(req.params.id).trim();
+    console.log('getOrder - Order ID:', orderId);
+    console.log('getOrder - User ID:', req.user._id);
+    console.log('getOrder - User Role:', req.user.role);
+    
     if (!orderId || !/^[0-9a-fA-F]{24}$/.test(orderId)) {
       return res.status(400).json({
         success: false,
@@ -278,6 +282,46 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
       });
     }
 
+    // First find without populate to get the raw user ID
+    const orderRaw = await Order.findById(orderId).lean();
+    
+    if (!orderRaw) {
+      console.log('getOrder - Order not found in database');
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    console.log('getOrder - Order found, user field:', orderRaw.user);
+    console.log('getOrder - Order user type:', typeof orderRaw.user);
+
+    // Extract order user ID (could be ObjectId or string)
+    let orderUserId: string;
+    if (orderRaw.user && typeof orderRaw.user === 'object' && '_id' in orderRaw.user) {
+      orderUserId = String(orderRaw.user._id);
+    } else if (orderRaw.user && typeof orderRaw.user === 'object' && 'toString' in orderRaw.user) {
+      orderUserId = String(orderRaw.user);
+    } else {
+      orderUserId = String(orderRaw.user);
+    }
+
+    const currentUserId = String(req.user._id);
+    
+    console.log('getOrder - Order User ID:', orderUserId);
+    console.log('getOrder - Current User ID:', currentUserId);
+    console.log('getOrder - IDs match:', orderUserId === currentUserId);
+
+    // Make sure user can only access their own orders (unless admin)
+    if (req.user.role !== 'admin' && orderUserId !== currentUserId) {
+      console.log('getOrder - Authorization failed: User does not own this order');
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to access this order'
+      });
+    }
+
+    // Now populate and get full order details
     const order = await Order.findById(orderId).populate('user', 'firstName lastName email').lean();
 
     if (!order) {
@@ -287,22 +331,10 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
       });
     }
 
-    // Make sure user can only access their own orders (unless admin)
-    const orderUserId = order.user && typeof order.user === 'object' && '_id' in order.user 
-      ? String(order.user._id) 
-      : String(order.user);
-    const currentUserId = String(req.user._id);
-
-    if (req.user.role !== 'admin' && orderUserId !== currentUserId) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to access this order'
-      });
-    }
-
     // Normalize order ID to string
     const normalizedOrder = normalizeOrderId(order);
 
+    console.log('getOrder - Returning order successfully');
     res.status(200).json({
       success: true,
       data: normalizedOrder
