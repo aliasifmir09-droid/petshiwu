@@ -76,7 +76,12 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       onClose();
     },
     onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to create product', 'error');
+      console.error('Product creation error:', error);
+      const errorMessage = error.response?.data?.message 
+        || error.response?.data?.error 
+        || error.message 
+        || 'Failed to create product. Please check all fields and try again.';
+      showToast(errorMessage, 'error');
     }
   });
 
@@ -246,47 +251,94 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate images
     if (imageUrls.length === 0) {
       showToast('Please upload at least one product image', 'warning');
       return;
     }
 
-    if (!formData.category) {
+    // Validate category
+    if (!formData.category || formData.category.trim() === '') {
       showToast('Please select a category', 'warning');
       return;
     }
 
+    // Validate category is a valid ObjectId format
+    const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+    if (!objectIdPattern.test(String(formData.category))) {
+      showToast('Invalid category selected. Please select a valid category.', 'error');
+      return;
+    }
+
+    // Validate base price
+    const basePrice = parseFloat(String(formData.basePrice));
+    if (isNaN(basePrice) || basePrice < 0) {
+      showToast('Please enter a valid base price', 'warning');
+      return;
+    }
+
+    // Validate variants
+    const validatedVariants = variants.map((v: any, index: number) => {
+      const price = parseFloat(String(v.price));
+      const stock = parseInt(String(v.stock), 10);
+      
+      if (isNaN(price) || price < 0) {
+        throw new Error(`Variant ${index + 1}: Please enter a valid price`);
+      }
+      
+      if (isNaN(stock) || stock < 0) {
+        throw new Error(`Variant ${index + 1}: Please enter a valid stock quantity`);
+      }
+
+      // Generate unique SKU if not provided
+      const sku = v.sku && v.sku.trim() 
+        ? v.sku.trim() 
+        : `SKU-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${index}`;
+
+      return {
+        size: v.size && v.size.trim() ? v.size.trim() : undefined,
+        weight: v.weight && v.weight.trim() ? v.weight.trim() : undefined,
+        price: price,
+        compareAtPrice: v.compareAtPrice ? parseFloat(String(v.compareAtPrice)) : undefined,
+        stock: stock,
+        sku: sku
+      };
+    });
+
+    if (validatedVariants.length === 0) {
+      showToast('Please add at least one product variant', 'warning');
+      return;
+    }
+
+    // Build product data
     const productData = {
-      name: formData.name,
-      description: formData.description,
-      shortDescription: formData.shortDescription,
-      brand: formData.brand,
-      category: formData.category,
-      petType: formData.petType,
-      images: imageUrls,
-      basePrice: parseFloat(formData.basePrice as any),
-      compareAtPrice: formData.compareAtPrice ? parseFloat(formData.compareAtPrice as any) : undefined,
+      name: formData.name.trim(),
+      description: formData.description.trim(),
+      shortDescription: formData.shortDescription?.trim() || undefined,
+      brand: formData.brand.trim(),
+      category: String(formData.category).trim(), // Ensure it's a string
+      petType: formData.petType.trim().toLowerCase(),
+      images: imageUrls.map(url => url.trim()).filter(url => url),
+      basePrice: basePrice,
+      compareAtPrice: formData.compareAtPrice ? parseFloat(String(formData.compareAtPrice)) : undefined,
       tags: formData.tags ? formData.tags.split(',').map((t: string) => t.trim()).filter((t: string) => t) : [],
       features: formData.features ? formData.features.split('\n').map((f: string) => f.trim()).filter((f: string) => f) : [],
-      ingredients: formData.ingredients || undefined,
+      ingredients: formData.ingredients?.trim() || undefined,
       isActive: formData.isActive,
       isFeatured: formData.isFeatured,
       autoshipEligible: formData.autoshipEligible,
-      autoshipDiscount: formData.autoshipDiscount ? parseFloat(formData.autoshipDiscount as any) : undefined,
-      variants: variants.map((v: any) => ({
-        size: v.size || undefined,
-        weight: v.weight || undefined,
-        price: parseFloat(v.price as any),
-        compareAtPrice: v.compareAtPrice ? parseFloat(v.compareAtPrice as any) : undefined,
-        stock: parseInt(v.stock as any),
-        sku: v.sku || `SKU-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-      }))
+      autoshipDiscount: formData.autoshipDiscount ? parseFloat(String(formData.autoshipDiscount)) : undefined,
+      variants: validatedVariants
     };
 
-    if (isEditing) {
-      updateMutation.mutate(productData);
-    } else {
-      createMutation.mutate(productData);
+    try {
+      if (isEditing) {
+        updateMutation.mutate(productData);
+      } else {
+        createMutation.mutate(productData);
+      }
+    } catch (error: any) {
+      showToast(error.message || 'Failed to submit product', 'error');
     }
   };
 
@@ -377,23 +429,28 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                   <div className="flex gap-2">
                     <select
                       required={!showNewCategory}
-                      value={formData.category}
+                      value={formData.category || ''}
                       onChange={(e) => {
-                        if (e.target.value === 'new') {
+                        const selectedValue = e.target.value;
+                        if (selectedValue === 'new') {
                           setShowNewCategory(true);
                           setFormData({ ...formData, category: '' });
-                        } else {
-                          setFormData({ ...formData, category: e.target.value });
+                        } else if (selectedValue) {
+                          setFormData({ ...formData, category: selectedValue });
                         }
                       }}
                       className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                       <option value="">Select a category</option>
-                      {categories?.map((cat: any) => (
-                        <option key={cat._id} value={cat._id}>
-                          {cat.name}
-                        </option>
-                      ))}
+                      {categories && categories.length > 0 ? (
+                        categories.map((cat: any) => (
+                          <option key={cat._id} value={String(cat._id)}>
+                            {cat.name}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>Loading categories...</option>
+                      )}
                       <option value="new">➕ Add New Category</option>
                     </select>
                   </div>

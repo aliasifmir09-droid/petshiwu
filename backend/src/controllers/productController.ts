@@ -250,6 +250,38 @@ export const getRelatedProducts = async (req: Request, res: Response, next: Next
 // Create product (Admin)
 export const createProduct = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    // Validate required fields before attempting to create
+    if (!req.body.category) {
+      return res.status(400).json({
+        success: false,
+        message: 'Category is required'
+      });
+    }
+
+    // Validate category is a valid ObjectId
+    if (!/^[0-9a-fA-F]{24}$/.test(String(req.body.category))) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid category ID format'
+      });
+    }
+
+    // Validate variants
+    if (!req.body.variants || !Array.isArray(req.body.variants) || req.body.variants.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'At least one product variant is required'
+      });
+    }
+
+    // Validate images
+    if (!req.body.images || !Array.isArray(req.body.images) || req.body.images.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'At least one product image is required'
+      });
+    }
+
     const product = await Product.create(req.body);
 
     // Normalize _id to string
@@ -259,7 +291,16 @@ export const createProduct = async (req: AuthRequest, res: Response, next: NextF
       success: true,
       data: normalizedProduct
     });
-  } catch (error) {
+  } catch (error: any) {
+    // If it's a validation error, provide more details
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((err: any) => err.message).join(', ');
+      return res.status(400).json({
+        success: false,
+        message: messages || 'Validation error',
+        error: error.errors
+      });
+    }
     next(error);
   }
 };
