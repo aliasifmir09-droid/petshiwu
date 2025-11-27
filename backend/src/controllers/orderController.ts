@@ -282,8 +282,8 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
       });
     }
 
-    // First find without populate to get the raw user ID
-    const orderRaw = await Order.findById(orderId).lean();
+    // Find order first to check if it exists and get user ID
+    const orderRaw = await Order.findById(orderId);
     
     if (!orderRaw) {
       console.log('getOrder - Order not found in database');
@@ -293,23 +293,13 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
       });
     }
 
-    console.log('getOrder - Order found, user field:', orderRaw.user);
-    console.log('getOrder - Order user type:', typeof orderRaw.user);
-
-    // Extract order user ID (could be ObjectId or string)
-    let orderUserId: string;
-    if (orderRaw.user && typeof orderRaw.user === 'object' && '_id' in orderRaw.user) {
-      orderUserId = String(orderRaw.user._id);
-    } else if (orderRaw.user && typeof orderRaw.user === 'object' && 'toString' in orderRaw.user) {
-      orderUserId = String(orderRaw.user);
-    } else {
-      orderUserId = String(orderRaw.user);
-    }
-
+    // Get order user ID - handle both ObjectId and string
+    const orderUserId = orderRaw.user ? String(orderRaw.user) : '';
     const currentUserId = String(req.user._id);
     
     console.log('getOrder - Order User ID:', orderUserId);
     console.log('getOrder - Current User ID:', currentUserId);
+    console.log('getOrder - User Role:', req.user.role);
     console.log('getOrder - IDs match:', orderUserId === currentUserId);
 
     // Make sure user can only access their own orders (unless admin)
@@ -321,7 +311,7 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
       });
     }
 
-    // Now populate and get full order details
+    // Now populate and get full order details with lean
     const order = await Order.findById(orderId).populate('user', 'firstName lastName email').lean();
 
     if (!order) {
