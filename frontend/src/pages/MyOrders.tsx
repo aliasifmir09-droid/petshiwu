@@ -40,7 +40,7 @@ const extractOrderId = (id: any): string => {
       if (id.buffer.data && Array.isArray(id.buffer.data)) {
         try {
           const hexString = id.buffer.data
-            .filter((b): b is number => typeof b === 'number')
+            .filter((b: any): b is number => typeof b === 'number')
             .map((b: number) => b.toString(16).padStart(2, '0'))
             .join('');
           if (hexString && hexString.length === 24) {
@@ -55,7 +55,7 @@ const extractOrderId = (id: any): string => {
         try {
           const bufferArray = Array.isArray(id.buffer) ? id.buffer : Array.from(id.buffer);
           const hexString = bufferArray
-            .filter((b): b is number => typeof b === 'number')
+            .filter((b: any): b is number => typeof b === 'number')
             .map((b: number) => b.toString(16).padStart(2, '0'))
             .join('');
           if (hexString && hexString.length === 24) {
