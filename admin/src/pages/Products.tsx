@@ -66,19 +66,6 @@ const Products = () => {
     }
   });
 
-  const restoreMutation = useMutation({
-    mutationFn: adminService.restoreProduct,
-    onSuccess: () => {
-      // Invalidate and refetch all product-related queries
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      queryClient.refetchQueries({ queryKey: ['products'] });
-      showToast('Product restored successfully!', 'success');
-    },
-    onError: () => {
-      showToast('Failed to restore product. Please try again.', 'error');
-    }
-  });
-
   const handleConfirmDelete = () => {
     if (deleteConfirm.productId) {
       // Ensure product ID is a string
