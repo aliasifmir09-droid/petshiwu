@@ -160,29 +160,60 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
 // Helper function to normalize order IDs to strings
 const normalizeOrderId = (order: any): any => {
   if (!order) return order;
-  const normalized = order.toObject ? order.toObject() : { ...order };
-  if (normalized._id) {
-    normalized._id = String(normalized._id);
-  }
-  if (normalized.user && typeof normalized.user === 'object') {
-    if (normalized.user._id) {
-      normalized.user._id = String(normalized.user._id);
+  
+  try {
+    // Convert Mongoose document to plain object
+    let normalized: any;
+    if (order.toObject && typeof order.toObject === 'function') {
+      normalized = order.toObject();
+    } else if (order.toJSON && typeof order.toJSON === 'function') {
+      normalized = order.toJSON();
+    } else {
+      normalized = { ...order };
     }
-  }
-  if (normalized.items && Array.isArray(normalized.items)) {
-    normalized.items = normalized.items.map((item: any) => {
-      if (item.product && typeof item.product === 'object' && item.product._id) {
-        item.product = String(item.product._id);
+    
+    // Normalize _id
+    if (normalized._id) {
+      normalized._id = String(normalized._id);
+    }
+    
+    // Normalize user._id if user is populated
+    if (normalized.user && typeof normalized.user === 'object' && normalized.user !== null) {
+      if (normalized.user._id) {
+        normalized.user._id = String(normalized.user._id);
       }
-      return item;
-    });
+    }
+    
+    // Normalize product IDs in items
+    if (normalized.items && Array.isArray(normalized.items)) {
+      normalized.items = normalized.items.map((item: any) => {
+        if (item && typeof item === 'object') {
+          const normalizedItem = { ...item };
+          if (normalizedItem.product && typeof normalizedItem.product === 'object' && normalizedItem.product !== null) {
+            if (normalizedItem.product._id) {
+              normalizedItem.product = String(normalizedItem.product._id);
+            }
+          }
+          return normalizedItem;
+        }
+        return item;
+      });
+    }
+    
+    return normalized;
+  } catch (error) {
+    console.error('Error normalizing order:', error);
+    // Return original order if normalization fails
+    return order;
   }
-  return normalized;
 };
 
 // Helper function to normalize array of orders
 const normalizeOrders = (orders: any[]): any[] => {
-  return orders.map(normalizeOrderId);
+  if (!Array.isArray(orders)) {
+    return [];
+  }
+  return orders.map(normalizeOrderId).filter((order: any) => order !== null && order !== undefined);
 };
 
 // Get user orders
