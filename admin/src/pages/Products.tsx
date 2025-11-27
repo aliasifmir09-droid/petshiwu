@@ -55,7 +55,9 @@ const Products = () => {
   const deleteMutation = useMutation({
     mutationFn: adminService.deleteProduct,
     onSuccess: () => {
+      // Invalidate and refetch all product-related queries
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.refetchQueries({ queryKey: ['products'] });
       showToast('Product deleted successfully!', 'success');
     },
     onError: () => {
@@ -66,7 +68,9 @@ const Products = () => {
   const restoreMutation = useMutation({
     mutationFn: adminService.restoreProduct,
     onSuccess: () => {
+      // Invalidate and refetch all product-related queries
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.refetchQueries({ queryKey: ['products'] });
       showToast('Product restored successfully!', 'success');
     },
     onError: () => {

@@ -46,7 +46,10 @@ const PetTypes = () => {
   const createMutation = useMutation({
     mutationFn: adminService.createPetType,
     onSuccess: () => {
+      // Invalidate and refetch all pet type-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-pet-types'] });
+      queryClient.invalidateQueries({ queryKey: ['pet-types'] });
+      queryClient.refetchQueries({ queryKey: ['admin-pet-types'] });
       showToast('Pet type created successfully!', 'success');
       handleCloseModal();
     },
@@ -59,7 +62,10 @@ const PetTypes = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => adminService.updatePetType(id, data),
     onSuccess: () => {
+      // Invalidate and refetch all pet type-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-pet-types'] });
+      queryClient.invalidateQueries({ queryKey: ['pet-types'] });
+      queryClient.refetchQueries({ queryKey: ['admin-pet-types'] });
       showToast('Pet type updated successfully!', 'success');
       handleCloseModal();
     },
@@ -72,7 +78,10 @@ const PetTypes = () => {
   const deleteMutation = useMutation({
     mutationFn: adminService.deletePetType,
     onSuccess: () => {
+      // Invalidate and refetch all pet type-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-pet-types'] });
+      queryClient.invalidateQueries({ queryKey: ['pet-types'] });
+      queryClient.refetchQueries({ queryKey: ['admin-pet-types'] });
       showToast('Pet type deleted successfully!', 'success');
       setDeleteConfirm({ isOpen: false });
     },

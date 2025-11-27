@@ -43,7 +43,9 @@ const Orders = () => {
     mutationFn: ({ id, data }: { id: string; data: any }) =>
       adminService.updateOrderStatus(id, data),
     onSuccess: () => {
+      // Invalidate and refetch all order-related queries
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.refetchQueries({ queryKey: ['orders'] });
       showToast('Order status updated successfully', 'success');
       setShowStatusConfirm(false);
       setPendingStatusChange(null);
@@ -72,7 +74,9 @@ const Orders = () => {
   const handlePaymentUpdate = () => {
     adminService.updatePaymentStatus(selectedOrder._id, { paymentStatus: 'paid' })
       .then(() => {
+        // Invalidate and refetch all order-related queries
         queryClient.invalidateQueries({ queryKey: ['orders'] });
+        queryClient.refetchQueries({ queryKey: ['orders'] });
         setShowDetailsModal(false);
         setShowPaymentConfirm(false);
         showToast('Payment status updated successfully', 'success');

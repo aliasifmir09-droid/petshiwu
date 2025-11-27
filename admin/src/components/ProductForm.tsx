@@ -57,7 +57,10 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   const createCategoryMutation = useMutation({
     mutationFn: adminService.createCategory,
     onSuccess: (newCategory) => {
+      // Invalidate and refetch all category-related queries
       queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.refetchQueries({ queryKey: ['categories'] });
       // Ensure _id is a string
       const categoryId = String(newCategory._id || '');
       setFormData({ ...formData, category: categoryId });
