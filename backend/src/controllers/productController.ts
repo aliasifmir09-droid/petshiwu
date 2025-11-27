@@ -26,6 +26,33 @@ const normalizeProducts = (products: any[]): any[] => {
 };
 
 // CSV Import function
+interface CSVRow {
+  name?: string;
+  description?: string;
+  shortDescription?: string;
+  brand?: string;
+  category?: string;
+  basePrice?: string | number;
+  compareAtPrice?: string | number;
+  petType?: string;
+  images?: string;
+  tags?: string;
+  features?: string;
+  ingredients?: string;
+  isActive?: string;
+  isFeatured?: string;
+  inStock?: string;
+  stock?: string | number;
+  autoshipEligible?: string;
+  variants?: string;
+  variantSize?: string;
+  variantPrice?: string | number;
+  variantCompareAtPrice?: string | number;
+  variantStock?: string | number;
+  variantSku?: string;
+  sku?: string;
+}
+
 export const importProductsFromCSV = async (req: AuthRequest, res: Response, next: NextFunction) => {
   let csvFilePath: string | null = null;
   
@@ -47,7 +74,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
       skip_empty_lines: true,
       trim: true,
       cast: true
-    });
+    }) as CSVRow[];
 
     if (!records || records.length === 0) {
       return res.status(400).json({

@@ -16,6 +16,7 @@ const Products = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
+  const [showCSVImport, setShowCSVImport] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [categoryFilter, setCategoryFilter] = useState('');
   const [petTypeFilter, setPetTypeFilter] = useState('');
