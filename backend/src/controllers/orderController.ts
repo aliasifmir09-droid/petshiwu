@@ -282,51 +282,41 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
       });
     }
 
-    // First, check if order exists
-    const orderExists = await Order.findById(orderId);
+    // Use the same approach as getMyOrders - query with user filter for non-admin users
+    // This ensures Mongoose handles ObjectId comparison correctly
+    let order;
     
-    if (!orderExists) {
-      console.log('getOrder - Order not found in database');
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found'
-      });
+    if (req.user.role === 'admin') {
+      // Admin can view any order
+      order = await Order.findById(orderId).populate('user', 'firstName lastName email').lean();
+    } else {
+      // Regular users can only view their own orders - use same filter as getMyOrders
+      order = await Order.findOne({ 
+        _id: orderId,
+        user: req.user._id  // Mongoose will handle ObjectId comparison
+      }).populate('user', 'firstName lastName email').lean();
     }
-
-    // Check authorization - user must own the order or be admin
-    // Use toString() method for ObjectId to ensure consistent conversion
-    const orderUserId = orderExists.user 
-      ? (orderExists.user.toString ? orderExists.user.toString() : String(orderExists.user))
-      : '';
-    const currentUserId = req.user._id 
-      ? (req.user._id.toString ? req.user._id.toString() : String(req.user._id))
-      : '';
     
-    // Normalize both IDs (trim whitespace, convert to lowercase for comparison)
-    const normalizedOrderUserId = orderUserId.trim().toLowerCase();
-    const normalizedCurrentUserId = currentUserId.trim().toLowerCase();
-    
-    console.log('getOrder - Order User ID (raw):', orderUserId);
-    console.log('getOrder - Current User ID (raw):', currentUserId);
-    console.log('getOrder - Order User ID (normalized):', normalizedOrderUserId);
-    console.log('getOrder - Current User ID (normalized):', normalizedCurrentUserId);
-    console.log('getOrder - User Role:', req.user.role);
-    console.log('getOrder - IDs match (raw):', orderUserId === currentUserId);
-    console.log('getOrder - IDs match (normalized):', normalizedOrderUserId === normalizedCurrentUserId);
-    console.log('getOrder - Is Admin:', req.user.role === 'admin');
-
-    // Allow access if user is admin OR if user owns the order
-    // Use normalized comparison for reliability
-    if (req.user.role !== 'admin' && normalizedOrderUserId !== normalizedCurrentUserId) {
-      console.log('getOrder - Authorization failed: User does not own this order');
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to access this order'
-      });
+    if (!order) {
+      // Check if order exists at all (for better error message)
+      const orderExists = await Order.findById(orderId);
+      if (!orderExists) {
+        console.log('getOrder - Order not found in database');
+        return res.status(404).json({
+          success: false,
+          message: 'Order not found'
+        });
+      } else {
+        console.log('getOrder - Order exists but user does not have permission');
+        console.log('getOrder - Order user:', orderExists.user);
+        console.log('getOrder - Current user:', req.user._id);
+        console.log('getOrder - User role:', req.user.role);
+        return res.status(403).json({
+          success: false,
+          message: 'Not authorized to access this order'
+        });
+      }
     }
-
-    // User is authorized, get the full order with populated user
-    const order = await Order.findById(orderId).populate('user', 'firstName lastName email').lean();
     
     if (!order) {
       // This shouldn't happen since we already checked, but just in case
