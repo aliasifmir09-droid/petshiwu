@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
-import { Plus, Edit, Trash2, Search, Filter, AlertTriangle, X, FolderTree, Layers, Package } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Filter, AlertTriangle, X, FolderTree, Layers, Package, Upload } from 'lucide-react';
 import ProductForm from '@/components/ProductForm';
+import CSVImport from '@/components/CSVImport';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
@@ -107,13 +108,22 @@ const Products = () => {
             <h1 className="text-4xl font-black text-white mb-2">Products</h1>
             <p className="text-blue-100 text-lg">Manage your product catalog</p>
           </div>
-          <button
-            onClick={handleCreate}
-            className="flex items-center gap-2 bg-white text-[#1E3A8A] px-6 py-3 rounded-xl hover:bg-blue-50 font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 btn-ripple"
-          >
-            <Plus size={20} />
-            Add Product
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowCSVImport(true)}
+              className="flex items-center gap-2 bg-white/90 text-[#1E3A8A] px-6 py-3 rounded-xl hover:bg-white font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+            >
+              <Upload size={20} />
+              Import CSV
+            </button>
+            <button
+              onClick={handleCreate}
+              className="flex items-center gap-2 bg-white text-[#1E3A8A] px-6 py-3 rounded-xl hover:bg-blue-50 font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 btn-ripple"
+            >
+              <Plus size={20} />
+              Add Product
+            </button>
+          </div>
         </div>
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
@@ -378,6 +388,15 @@ const Products = () => {
             setShowModal(false);
             setEditingProduct(null);
             // Refetch products when modal closes (in case product was created/updated)
+            refetch();
+          }}
+        />
+      )}
+
+      {showCSVImport && (
+        <CSVImport
+          onClose={() => {
+            setShowCSVImport(false);
             refetch();
           }}
         />

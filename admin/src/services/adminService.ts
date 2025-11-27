@@ -1,6 +1,38 @@
 import api from './api';
 
 export const adminService = {
+  // CSV Import
+  importProductsFromCSV: async (file: File) => {
+    const formData = new FormData();
+    formData.append('csv', file);
+    
+    const response = await api.post('/products/import', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    
+    return response.data;
+  },
+
+  downloadCSVTemplate: async () => {
+    // Create CSV template content
+    const csvContent = `name,description,shortDescription,brand,category,basePrice,compareAtPrice,petType,images,tags,features,ingredients,isActive,isFeatured,inStock,stock,autoshipEligible
+Example Product,This is a detailed description of the product,Short description,Brand Name,Dog Food,29.99,39.99,dog,https://example.com/image1.jpg,https://example.com/image2.jpg,tag1,tag2,feature1,feature2,Ingredients list,true,false,true,100,false
+Another Product,Another detailed description,Another short description,Another Brand,Cat Food,19.99,,cat,https://example.com/cat1.jpg,https://example.com/cat2.jpg,cat-tag,cat-feature,Some ingredients,true,true,true,50,true`;
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'product-import-template.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  },
   // Auth
   login: async (email: string, password: string) => {
     try {

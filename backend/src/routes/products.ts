@@ -7,7 +7,8 @@ import {
   updateProduct,
   deleteProduct,
   restoreProduct,
-  getProductStats
+  getProductStats,
+  importProductsFromCSV
 } from '../controllers/productController';
 import { protect, authorize } from '../middleware/auth';
 import { checkPermission } from '../middleware/permissions';
@@ -16,6 +17,7 @@ import {
   validateObjectId,
   paginationValidation
 } from '../middleware/validation';
+import { csvUpload } from '../middleware/csvUpload';
 
 const router = express.Router();
 
@@ -24,6 +26,7 @@ router.get('/stats', protect, checkPermission('canViewAnalytics'), getProductSta
 router.get('/:id/related', getRelatedProducts);
 router.get('/:id', getProduct);
 router.post('/', protect, checkPermission('canManageProducts'), createProductValidation, createProduct);
+router.post('/import', protect, checkPermission('canManageProducts'), csvUpload.single('csv'), importProductsFromCSV);
 router.put('/:id', protect, checkPermission('canManageProducts'), validateObjectId(), updateProduct);
 router.delete('/:id', protect, checkPermission('canManageProducts'), validateObjectId(), deleteProduct);
 router.post('/:id/restore', protect, checkPermission('canManageProducts'), validateObjectId(), restoreProduct);

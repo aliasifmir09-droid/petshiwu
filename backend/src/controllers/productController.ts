@@ -1,6 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import Product from '../models/Product';
+import Category from '../models/Category';
 import { AuthRequest } from '../middleware/auth';
+import { parse } from 'csv-parse/sync';
+import fs from 'fs';
+import path from 'path';
+import mongoose from 'mongoose';
 
 // Helper function to normalize product _id to string
 const normalizeProductId = (product: any): any => {
@@ -18,6 +23,204 @@ const normalizeProductId = (product: any): any => {
 // Helper function to normalize array of products
 const normalizeProducts = (products: any[]): any[] => {
   return products.map(normalizeProductId);
+};
+
+// CSV Import function
+export const importProductsFromCSV = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  let csvFilePath: string | null = null;
+  
+  try {
+    // Check if file was uploaded
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'CSV file is required'
+      });
+    }
+
+    csvFilePath = req.file.path;
+
+    // Read and parse CSV file
+    const csvContent = fs.readFileSync(csvFilePath, 'utf-8');
+    const records = parse(csvContent, {
+      columns: true,
+      skip_empty_lines: true,
+      trim: true,
+      cast: true
+    });
+
+    if (!records || records.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'CSV file is empty or invalid'
+      });
+    }
+
+    const results = {
+      success: 0,
+      failed: 0,
+      errors: [] as Array<{ row: number; error: string }>
+    };
+
+    // Process each row
+    for (let i = 0; i < records.length; i++) {
+      const row = records[i];
+      const rowNumber = i + 2; // +2 because row 1 is header, and arrays are 0-indexed
+
+      try {
+        // Validate required fields
+        if (!row.name || !row.description || !row.brand || !row.category || !row.basePrice || !row.petType) {
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            error: 'Missing required fields: name, description, brand, category, basePrice, or petType'
+          });
+          continue;
+        }
+
+        // Find category by name or ID
+        let category;
+        if (mongoose.Types.ObjectId.isValid(row.category)) {
+          category = await Category.findById(row.category);
+        } else {
+          // Try to find by name (case-insensitive)
+          category = await Category.findOne({
+            name: { $regex: new RegExp(`^${row.category}$`, 'i') },
+            isActive: true
+          });
+        }
+
+        if (!category) {
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            error: `Category not found: ${row.category}`
+          });
+          continue;
+        }
+
+        // Parse images (comma-separated URLs)
+        const images = row.images 
+          ? row.images.split(',').map((img: string) => img.trim()).filter((img: string) => img.length > 0)
+          : [];
+
+        if (images.length === 0) {
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            error: 'At least one image URL is required'
+          });
+          continue;
+        }
+
+        // Parse variants if provided (JSON string or comma-separated)
+        let variants: any[] = [];
+        if (row.variants) {
+          try {
+            // Try to parse as JSON first
+            if (row.variants.startsWith('[') || row.variants.startsWith('{')) {
+              variants = JSON.parse(row.variants);
+            } else {
+              // If not JSON, create a single variant from the row data
+              variants = [{
+                size: row.variantSize || '',
+                price: parseFloat(row.variantPrice || row.basePrice),
+                compareAtPrice: row.variantCompareAtPrice ? parseFloat(row.variantCompareAtPrice) : undefined,
+                stock: parseInt(row.variantStock || row.stock || '0'),
+                sku: row.variantSku || row.sku || `${row.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
+              }];
+            }
+          } catch (e) {
+            // If parsing fails, create default variant
+            variants = [{
+              size: '',
+              price: parseFloat(row.basePrice),
+              stock: parseInt(row.stock || '0'),
+              sku: `${row.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
+            }];
+          }
+        } else {
+          // No variants specified, create default variant
+          variants = [{
+            size: '',
+            price: parseFloat(row.basePrice),
+            stock: parseInt(row.stock || '0'),
+            sku: `${row.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
+          }];
+        }
+
+        // Parse tags and features (comma-separated)
+        const tags = row.tags 
+          ? row.tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0)
+          : [];
+        
+        const features = row.features
+          ? row.features.split(',').map((feature: string) => feature.trim()).filter((feature: string) => feature.length > 0)
+          : [];
+
+        // Create product data
+        const productData: any = {
+          name: row.name.trim(),
+          description: row.description.trim(),
+          shortDescription: row.shortDescription?.trim() || '',
+          brand: row.brand.trim(),
+          category: category._id,
+          images: images,
+          variants: variants,
+          basePrice: parseFloat(row.basePrice),
+          compareAtPrice: row.compareAtPrice ? parseFloat(row.compareAtPrice) : undefined,
+          petType: row.petType.toLowerCase().trim(),
+          tags: tags,
+          features: features,
+          ingredients: row.ingredients?.trim() || '',
+          isActive: row.isActive === 'false' ? false : true,
+          isFeatured: row.isFeatured === 'true' ? true : false,
+          inStock: row.inStock === 'false' ? false : true,
+          autoshipEligible: row.autoshipEligible === 'true' ? true : false
+        };
+
+        // Create product
+        const product = await Product.create(productData);
+        results.success++;
+
+      } catch (error: any) {
+        results.failed++;
+        results.errors.push({
+          row: rowNumber,
+          error: error.message || 'Unknown error'
+        });
+      }
+    }
+
+    // Clean up uploaded file
+    if (csvFilePath && fs.existsSync(csvFilePath)) {
+      fs.unlinkSync(csvFilePath);
+    }
+
+    // Return results
+    res.status(200).json({
+      success: true,
+      message: `Import completed: ${results.success} succeeded, ${results.failed} failed`,
+      data: {
+        total: records.length,
+        succeeded: results.success,
+        failed: results.failed,
+        errors: results.errors
+      }
+    });
+
+  } catch (error: any) {
+    // Clean up uploaded file on error
+    if (csvFilePath && fs.existsSync(csvFilePath)) {
+      try {
+        fs.unlinkSync(csvFilePath);
+      } catch (e) {
+        // Ignore cleanup errors
+      }
+    }
+
+    next(error);
+  }
 };
 
 // Get all products with filters
@@ -49,54 +252,33 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     // Filter by price range
     if (req.query.minPrice || req.query.maxPrice) {
       query.basePrice = {};
-      if (req.query.minPrice) query.basePrice.$gte = parseFloat(req.query.minPrice as string);
-      if (req.query.maxPrice) query.basePrice.$lte = parseFloat(req.query.maxPrice as string);
+      if (req.query.minPrice) {
+        query.basePrice.$gte = parseFloat(req.query.minPrice as string);
+      }
+      if (req.query.maxPrice) {
+        query.basePrice.$lte = parseFloat(req.query.maxPrice as string);
+      }
     }
 
-    // Search
+    // Filter by in stock
+    if (req.query.inStock !== undefined) {
+      query.inStock = req.query.inStock === 'true';
+    }
+
+    // Search by name, description, brand, or tags
     if (req.query.search) {
-      query.$text = { $search: req.query.search as string };
+      query.$or = [
+        { name: { $regex: req.query.search, $options: 'i' } },
+        { description: { $regex: req.query.search, $options: 'i' } },
+        { brand: { $regex: req.query.search, $options: 'i' } },
+        { tags: { $in: [new RegExp(req.query.search as string, 'i')] } }
+      ];
     }
 
-    // Filter by featured
-    if (req.query.featured === 'true') {
-      query.isFeatured = true;
-    }
-
-    // Filter by stock status
-    if (req.query.inStock === 'true') {
-      query.totalStock = { $gt: 0 };
-    } else if (req.query.inStock === 'false') {
-      query.totalStock = { $lte: 0 };
-    }
-
-    // Filter by minimum rating
-    if (req.query.minRating) {
-      query.averageRating = { $gte: parseFloat(req.query.minRating as string) };
-    }
-
-    // Sort
-    let sortOptions: any = {};
-    switch (req.query.sort) {
-      case 'price-asc':
-        sortOptions = { basePrice: 1 };
-        break;
-      case 'price-desc':
-        sortOptions = { basePrice: -1 };
-        break;
-      case 'rating':
-        sortOptions = { averageRating: -1 };
-        break;
-      case 'newest':
-        sortOptions = { createdAt: -1 };
-        break;
-      default:
-        sortOptions = { createdAt: -1 };
-    }
-
+    // Get products with pagination
     const products = await Product.find(query)
       .populate('category', 'name slug')
-      .sort(sortOptions)
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean(); // Use lean() for better performance (returns plain JS objects)
@@ -250,49 +432,47 @@ export const createProduct = async (req: AuthRequest, res: Response, next: NextF
       });
     }
 
-    // Validate category is a valid ObjectId
-    if (!/^[0-9a-fA-F]{24}$/.test(String(req.body.category))) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid category ID format'
-      });
-    }
-
-    // Validate variants
     if (!req.body.variants || !Array.isArray(req.body.variants) || req.body.variants.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'At least one product variant is required'
+        message: 'At least one variant is required'
       });
     }
 
-    // Validate images
     if (!req.body.images || !Array.isArray(req.body.images) || req.body.images.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'At least one product image is required'
+        message: 'At least one image is required'
       });
     }
 
     const product = await Product.create(req.body);
 
-    // Normalize _id to string
-    const normalizedProduct = normalizeProductId(product);
-
     res.status(201).json({
       success: true,
-      data: normalizedProduct
+      message: 'Product created successfully',
+      data: normalizeProductId(product)
     });
   } catch (error: any) {
-    // If it's a validation error, provide more details
+    // Handle Mongoose validation errors
     if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map((err: any) => err.message).join(', ');
+      const errors = Object.values(error.errors).map((err: any) => err.message);
       return res.status(400).json({
         success: false,
-        message: messages || 'Validation error',
-        error: error.errors
+        message: 'Validation error',
+        errors: errors
       });
     }
+
+    // Handle duplicate key errors (e.g., duplicate slug)
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({
+        success: false,
+        message: `${field} already exists`
+      });
+    }
+
     next(error);
   }
 };
@@ -300,7 +480,11 @@ export const createProduct = async (req: AuthRequest, res: Response, next: NextF
 // Update product (Admin)
 export const updateProduct = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    ).populate('category', 'name slug');
 
     if (!product) {
       return res.status(404).json({
@@ -309,164 +493,124 @@ export const updateProduct = async (req: AuthRequest, res: Response, next: NextF
       });
     }
 
-    // Update fields
-    Object.assign(product, req.body);
-    
-    // Save to trigger pre-save middleware
-    await product.save();
-
-    // Normalize _id to string
-    const normalizedProduct = normalizeProductId(product);
-
     res.status(200).json({
       success: true,
-      data: normalizedProduct
+      message: 'Product updated successfully',
+      data: normalizeProductId(product)
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map((err: any) => err.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors: errors
+      });
+    }
+
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({
+        success: false,
+        message: `${field} already exists`
+      });
+    }
+
     next(error);
   }
 };
 
-// Helper function to extract public_id from Cloudinary URL
-const extractCloudinaryPublicId = (url: string): string | null => {
-  try {
-    // Cloudinary URL format: https://res.cloudinary.com/{cloud_name}/{resource_type}/upload/{version}/{public_id}.{format}
-    // or: https://res.cloudinary.com/{cloud_name}/{resource_type}/upload/v{version}/{public_id}.{format}
-    const cloudinaryPattern = /res\.cloudinary\.com\/[^/]+\/(image|video)\/upload\/(?:v\d+\/)?(.+?)(?:\.[^.]+)?$/;
-    const match = url.match(cloudinaryPattern);
-    if (match) {
-      // Extract public_id (which includes the folder path)
-      return match[2];
-    }
-    return null;
-  } catch (error) {
-    console.error('Error extracting Cloudinary public_id:', error);
-    return null;
-  }
-};
-
-// Delete product (Admin) - Permanent delete with Cloudinary cleanup
+// Delete product (Admin) - Hard delete with Cloudinary cleanup
 export const deleteProduct = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    // Ensure ID is a valid MongoDB ObjectId
-    const productId = String(req.params.id);
-    if (!/^[0-9a-fA-F]{24}$/.test(productId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid product ID format'
-      });
-    }
-    
-    // Find product before deleting to get image URLs
+    const productId = req.params.id;
+
+    // Fetch product to get image URLs
     const product = await Product.findById(productId);
+    
     if (!product) {
-      // Product already deleted or doesn't exist - return success to avoid confusion
+      // Return success even if product doesn't exist (idempotent)
       return res.status(200).json({
         success: true,
-        message: 'Product not found or already deleted'
+        message: 'Product deleted successfully'
       });
     }
 
-    // Delete images from Cloudinary if configured
-    const { deleteFromCloudinary, isCloudinaryConfigured } = await import('../utils/cloudinary');
-    
-    if (isCloudinaryConfigured() && product.images && product.images.length > 0) {
-      const deletePromises = product.images.map(async (imageUrl: string) => {
-        try {
-          const publicId = extractCloudinaryPublicId(imageUrl);
+    // Extract Cloudinary public_ids from image URLs and delete from Cloudinary
+    const { deleteFromCloudinary } = await import('../utils/cloudinary');
+    const imageDeletionPromises = product.images.map(async (imageUrl: string) => {
+      try {
+        // Extract public_id from Cloudinary URL
+        // Cloudinary URLs format: https://res.cloudinary.com/{cloud_name}/image/upload/{version}/{public_id}.{format}
+        const urlParts = imageUrl.split('/upload/');
+        if (urlParts.length > 1) {
+          const pathPart = urlParts[1];
+          // Remove version prefix if present (v1234567890/)
+          const pathWithoutVersion = pathPart.replace(/^v\d+\//, '');
+          // Extract public_id (remove file extension)
+          const publicId = pathWithoutVersion.replace(/\.[^/.]+$/, '');
+          
           if (publicId) {
-            // Determine resource type from URL
-            const resourceType = imageUrl.includes('/video/upload/') ? 'video' : 'image';
-            await deleteFromCloudinary(publicId, resourceType);
-            console.log(`Deleted from Cloudinary: ${publicId}`);
-          } else {
-            console.log(`Skipping non-Cloudinary URL: ${imageUrl}`);
+            await deleteFromCloudinary(publicId);
           }
-        } catch (error: any) {
-          // Log error but don't fail the entire operation
-          console.error(`Failed to delete image from Cloudinary: ${imageUrl}`, error.message);
         }
-      });
+      } catch (error) {
+        // Log but don't fail the entire deletion if one image fails
+        // Error is already handled in deleteFromCloudinary
+      }
+    });
 
-      // Wait for all deletions to complete (or fail gracefully)
-      await Promise.allSettled(deletePromises);
-    }
+    // Wait for all image deletions to complete (using allSettled to not fail on individual errors)
+    await Promise.allSettled(imageDeletionPromises);
 
-    // Permanently delete the product from database
+    // Permanently delete product from database
     await Product.findByIdAndDelete(productId);
 
     res.status(200).json({
       success: true,
-      message: 'Product and associated images deleted successfully'
-    });
-  } catch (error: any) {
-    console.error('Delete product error:', error);
-    next(error);
-  }
-};
-
-// Restore product (Admin)
-export const restoreProduct = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    // Ensure ID is a valid MongoDB ObjectId
-    const productId = String(req.params.id);
-    if (!/^[0-9a-fA-F]{24}$/.test(productId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid product ID format'
-      });
-    }
-    
-    // Restore: remove deletedAt and set isActive to true
-    const product = await Product.findByIdAndUpdate(
-      productId,
-      { deletedAt: null, isActive: true },
-      { new: true }
-    );
-
-    if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: 'Product not found'
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Product restored successfully',
-      data: normalizeProductId(product)
+      message: 'Product deleted successfully'
     });
   } catch (error) {
     next(error);
   }
 };
 
-// Get product stats (Admin)
-export const getProductStats = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const totalProducts = await Product.countDocuments();
-    const activeProducts = await Product.countDocuments({ isActive: true });
-    const outOfStock = await Product.countDocuments({ inStock: false });
-    const featuredProducts = await Product.countDocuments({ isFeatured: true });
+// Restore product (Admin) - No longer needed since we use hard delete
+export const restoreProduct = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  return res.status(410).json({
+    success: false,
+    message: 'Product restore is no longer available. Products are permanently deleted.'
+  });
+};
 
-    // Get total inventory value
-    const products = await Product.find();
-    const totalValue = products.reduce((sum, product) => sum + (product.basePrice * product.totalStock), 0);
+// Get product statistics (Admin)
+export const getProductStats = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const totalProducts = await Product.countDocuments({ isActive: true });
+    const outOfStockProducts = await Product.countDocuments({ inStock: false, isActive: true });
+    const featuredProducts = await Product.countDocuments({ isFeatured: true, isActive: true });
+    
+    // Get products by category
+    const productsByCategory = await Product.aggregate([
+      { $match: { isActive: true } },
+      { $group: { _id: '$category', count: { $sum: 1 } } },
+      { $lookup: { from: 'categories', localField: '_id', foreignField: '_id', as: 'categoryInfo' } },
+      { $unwind: '$categoryInfo' },
+      { $project: { categoryName: '$categoryInfo.name', count: 1 } },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
 
     res.status(200).json({
       success: true,
       data: {
         totalProducts,
-        activeProducts,
-        outOfStock,
+        outOfStockProducts,
         featuredProducts,
-        totalInventoryValue: totalValue
+        productsByCategory
       }
     });
   } catch (error) {
     next(error);
   }
 };
-
-
-
