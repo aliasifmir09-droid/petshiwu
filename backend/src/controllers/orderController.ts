@@ -256,8 +256,30 @@ export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFun
 
     const total = await Order.countDocuments({ user: req.user._id });
 
-    // Normalize order IDs to strings
-    const normalizedOrders = normalizeOrders(orders);
+    // Normalize order IDs to strings - ensure _id is always a string
+    const normalizedOrders = orders.map((order: any) => {
+      // Force _id to be a string
+      if (order._id) {
+        // Handle ObjectId with buffer or other formats
+        if (order._id.toString && typeof order._id.toString === 'function') {
+          order._id = order._id.toString();
+        } else if (order._id.buffer) {
+          // If it has a buffer, try to extract from it
+          try {
+            if (order._id.buffer.data && Array.isArray(order._id.buffer.data)) {
+              order._id = order._id.buffer.data
+                .map((b: number) => b.toString(16).padStart(2, '0'))
+                .join('');
+            }
+          } catch (e) {
+            order._id = String(order._id);
+          }
+        } else {
+          order._id = String(order._id);
+        }
+      }
+      return normalizeOrderId(order);
+    }).filter((order: any) => order !== null && order !== undefined);
 
     res.status(200).json({
       success: true,
