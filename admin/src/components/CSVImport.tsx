@@ -191,25 +191,58 @@ const CSVImport = ({ onClose }: CSVImportProps) => {
             )}
           </div>
 
-          {/* Required Fields Info */}
-          <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-            <p className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-              <AlertCircle className="text-yellow-600" size={18} />
-              Required CSV Columns:
-            </p>
-            <ul className="text-sm text-gray-700 list-disc list-inside space-y-1">
-              <li><strong>name</strong> - Product name</li>
-              <li><strong>description</strong> - Product description</li>
-              <li><strong>brand</strong> - Brand name</li>
-              <li><strong>category</strong> - Category name or ID</li>
-              <li><strong>basePrice</strong> - Base price (number)</li>
-              <li><strong>petType</strong> - Pet type (dog, cat, etc.)</li>
-              <li><strong>images</strong> - Comma-separated image URLs</li>
-            </ul>
-            <p className="text-sm text-gray-600 mt-2">
-              Optional: shortDescription, compareAtPrice, tags (comma-separated), features (comma-separated), 
-              ingredients, isActive, isFeatured, inStock, stock, variants (JSON or use variantSize, variantPrice, variantStock, variantSku)
-            </p>
+          {/* Instructions and Field Guide */}
+          <div className="mt-6 space-y-4">
+            <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+              <p className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <AlertCircle className="text-yellow-600" size={18} />
+                Required CSV Columns:
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
+                <div><strong>name</strong> - Product name (required)</div>
+                <div><strong>description</strong> - Full product description (required)</div>
+                <div><strong>brand</strong> - Brand name (required)</div>
+                <div><strong>category</strong> - Category name as it appears in system (required)</div>
+                <div><strong>basePrice</strong> - Base price in numbers, e.g., 29.99 (required)</div>
+                <div><strong>petType</strong> - Use: dog, cat, bird, fish, small-pet, reptile (required)</div>
+                <div><strong>images</strong> - Comma-separated URLs, e.g., url1.jpg,url2.jpg (required)</div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+              <p className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <CheckCircle className="text-green-600" size={18} />
+                Optional Columns:
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
+                <div><strong>shortDescription</strong> - Brief product summary</div>
+                <div><strong>compareAtPrice</strong> - Original/compare price</div>
+                <div><strong>tags</strong> - Comma-separated, e.g., premium,organic</div>
+                <div><strong>features</strong> - Comma-separated, e.g., durable,waterproof</div>
+                <div><strong>ingredients</strong> - Product ingredients list</div>
+                <div><strong>isActive</strong> - true or false (default: true)</div>
+                <div><strong>isFeatured</strong> - true or false (default: false)</div>
+                <div><strong>inStock</strong> - true or false (default: true)</div>
+                <div><strong>stock</strong> - Total stock quantity (number)</div>
+                <div><strong>autoshipEligible</strong> - true or false (default: false)</div>
+                <div><strong>variantSize</strong> - Size for variant (e.g., 5kg, Small)</div>
+                <div><strong>variantPrice</strong> - Price for this variant</div>
+                <div><strong>variantStock</strong> - Stock for this variant</div>
+                <div><strong>variantSku</strong> - SKU for this variant</div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="font-semibold text-gray-800 mb-2">💡 Tips:</p>
+              <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
+                <li>Download the template above to see complete examples</li>
+                <li>Remove comment lines (starting with #) from the template before importing</li>
+                <li>Category names are case-insensitive but must match exactly</li>
+                <li>Use commas to separate multiple images, tags, or features</li>
+                <li>For products without variants, leave variant columns empty</li>
+                <li>Boolean values (isActive, isFeatured, etc.) should be "true" or "false"</li>
+              </ul>
+            </div>
           </div>
 
           {/* Import Results */}
