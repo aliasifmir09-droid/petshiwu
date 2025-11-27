@@ -295,7 +295,8 @@ const MyOrders = () => {
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
 
             {/* Pagination */}
             {ordersData && ordersData.pagination.pages > 1 && (
