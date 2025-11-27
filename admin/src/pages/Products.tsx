@@ -37,7 +37,7 @@ const Products = () => {
       category: categoryFilter || undefined,
       petType: petTypeFilter || undefined,
       inStock: stockFilter === 'in-stock' ? true : stockFilter === 'out-of-stock' ? false : undefined,
-      includeDeleted: showDeleted
+      includeDeleted: showDeleted ? 'true' : 'false' // Convert boolean to string for backend
     })
   });
 

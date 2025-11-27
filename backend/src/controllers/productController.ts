@@ -28,12 +28,17 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     const skip = (page - 1) * limit;
     
     // Check if this is an admin request (has auth token) and wants to include deleted
-    const includeDeleted = req.query.includeDeleted === 'true' && req.headers.authorization;
+    const includeDeleted = (req.query.includeDeleted === 'true' || req.query.includeDeleted === true) && req.headers.authorization;
 
     // Build query - exclude soft-deleted products unless admin requests them
-    const query: any = { isActive: true };
+    const query: any = {};
     if (!includeDeleted) {
+      // Exclude deleted products: both deletedAt must be null AND isActive should be true
       query.deletedAt = null;
+      query.isActive = true;
+    } else {
+      // When including deleted, we want all products (both active and deleted)
+      // Don't filter by isActive or deletedAt
     }
 
     // Filter by category
@@ -347,10 +352,22 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
       });
     }
     
+    // Check if product exists
+    const existingProduct = await Product.findById(productId);
+    if (!existingProduct) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+
     // Soft delete: mark as deleted instead of actually deleting
     const product = await Product.findByIdAndUpdate(
       productId,
-      { deletedAt: new Date(), isActive: false },
+      { 
+        deletedAt: new Date(), 
+        isActive: false 
+      },
       { new: true }
     );
 
@@ -366,7 +383,8 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
       message: 'Product deleted successfully',
       data: normalizeProductId(product)
     });
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Delete product error:', error);
     next(error);
   }
 };
