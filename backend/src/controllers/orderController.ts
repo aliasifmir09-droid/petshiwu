@@ -7,13 +7,6 @@ import { AuthRequest } from '../middleware/auth';
 // Create new order
 export const createOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    console.log('Order creation request received:', {
-      itemsCount: req.body.items?.length,
-      hasShippingAddress: !!req.body.shippingAddress,
-      paymentMethod: req.body.paymentMethod,
-      userId: req.user?._id
-    });
-    
     const {
       items,
       shippingAddress,
@@ -58,7 +51,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       const rawProductId = item.product;
       
       if (!rawProductId) {
-        console.error('Product ID is missing in item:', item);
+        // Product ID validation failed
         return res.status(400).json({
           success: false,
           message: `Product ID is missing for item: ${item.name || 'Unknown'}`,
@@ -84,7 +77,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       
       // Validate MongoDB ObjectId format
       if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
-        console.error('Invalid product ID format:', { productId, rawProductId, itemName: item.name });
+        // Invalid product ID format
         return res.status(400).json({
           success: false,
           message: `Invalid product ID for item: ${item.name || 'Unknown'}`,
@@ -207,7 +200,7 @@ const normalizeOrderId = (order: any): any => {
     
     return normalized;
   } catch (error) {
-    console.error('Error normalizing order:', error);
+    // Error normalizing order
     // Return original order if normalization fails
     return order;
   }
@@ -227,7 +220,7 @@ const normalizeOrders = (orders: any[]): any[] => {
       }
       return normalized;
     } catch (error) {
-      console.error('Error normalizing order in array:', error);
+      // Error normalizing order in array
       return order;
     }
   }).filter((order: any) => order !== null && order !== undefined);
@@ -292,7 +285,7 @@ export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFun
       }
     });
   } catch (error: any) {
-    console.error('Error in getMyOrders:', error);
+    // Error in getMyOrders
     next(error);
   }
 };
