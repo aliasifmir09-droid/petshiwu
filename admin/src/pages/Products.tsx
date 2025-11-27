@@ -55,13 +55,17 @@ const Products = () => {
   const deleteMutation = useMutation({
     mutationFn: adminService.deleteProduct,
     onSuccess: () => {
-      // Invalidate and refetch all product-related queries
+      // Invalidate all product-related queries
       queryClient.invalidateQueries({ queryKey: ['products'] });
-      queryClient.refetchQueries({ queryKey: ['products'] });
+      // Force refetch with current filters (excluding deleted products if showDeleted is false)
+      queryClient.refetchQueries({ 
+        queryKey: ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter, showDeleted] 
+      });
       showToast('Product deleted successfully!', 'success');
     },
-    onError: () => {
-      showToast('Failed to delete product. Please try again.', 'error');
+    onError: (error: any) => {
+      console.error('Delete product error:', error);
+      showToast(error?.response?.data?.message || 'Failed to delete product. Please try again.', 'error');
     }
   });
 
