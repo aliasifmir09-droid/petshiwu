@@ -128,7 +128,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
 
         // Parse images (comma-separated URLs)
         const images = row.images 
-          ? row.images.split(',').map((img: string) => img.trim()).filter((img: string) => img.length > 0)
+          ? String(row.images).split(',').map((img: string) => img.trim()).filter((img: string) => img.length > 0)
           : [];
 
         if (images.length === 0) {
@@ -144,66 +144,67 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
         let variants: any[] = [];
         if (row.variants) {
           try {
+            const variantsStr = String(row.variants);
             // Try to parse as JSON first
-            if (row.variants.startsWith('[') || row.variants.startsWith('{')) {
-              variants = JSON.parse(row.variants);
+            if (variantsStr.startsWith('[') || variantsStr.startsWith('{')) {
+              variants = JSON.parse(variantsStr);
             } else {
               // If not JSON, create a single variant from the row data
               variants = [{
-                size: row.variantSize || '',
-                price: parseFloat(row.variantPrice || row.basePrice),
-                compareAtPrice: row.variantCompareAtPrice ? parseFloat(row.variantCompareAtPrice) : undefined,
-                stock: parseInt(row.variantStock || row.stock || '0'),
-                sku: row.variantSku || row.sku || `${row.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
+                size: row.variantSize ? String(row.variantSize) : '',
+                price: parseFloat(String(row.variantPrice || row.basePrice || '0')),
+                compareAtPrice: row.variantCompareAtPrice ? parseFloat(String(row.variantCompareAtPrice)) : undefined,
+                stock: parseInt(String(row.variantStock || row.stock || '0')),
+                sku: row.variantSku ? String(row.variantSku) : (row.sku ? String(row.sku) : `${String(row.name).toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`)
               }];
             }
           } catch (e) {
             // If parsing fails, create default variant
             variants = [{
               size: '',
-              price: parseFloat(row.basePrice),
-              stock: parseInt(row.stock || '0'),
-              sku: `${row.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
+              price: parseFloat(String(row.basePrice || '0')),
+              stock: parseInt(String(row.stock || '0')),
+              sku: `${String(row.name).toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
             }];
           }
         } else {
           // No variants specified, create default variant
           variants = [{
             size: '',
-            price: parseFloat(row.basePrice),
-            stock: parseInt(row.stock || '0'),
-            sku: `${row.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
+            price: parseFloat(String(row.basePrice || '0')),
+            stock: parseInt(String(row.stock || '0')),
+            sku: `${String(row.name).toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
           }];
         }
 
         // Parse tags and features (comma-separated)
         const tags = row.tags 
-          ? row.tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0)
+          ? String(row.tags).split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0)
           : [];
         
         const features = row.features
-          ? row.features.split(',').map((feature: string) => feature.trim()).filter((feature: string) => feature.length > 0)
+          ? String(row.features).split(',').map((feature: string) => feature.trim()).filter((feature: string) => feature.length > 0)
           : [];
 
         // Create product data
         const productData: any = {
-          name: row.name.trim(),
-          description: row.description.trim(),
-          shortDescription: row.shortDescription?.trim() || '',
-          brand: row.brand.trim(),
+          name: String(row.name).trim(),
+          description: String(row.description).trim(),
+          shortDescription: row.shortDescription ? String(row.shortDescription).trim() : '',
+          brand: String(row.brand).trim(),
           category: category._id,
           images: images,
           variants: variants,
-          basePrice: parseFloat(row.basePrice),
-          compareAtPrice: row.compareAtPrice ? parseFloat(row.compareAtPrice) : undefined,
-          petType: row.petType.toLowerCase().trim(),
+          basePrice: parseFloat(String(row.basePrice || '0')),
+          compareAtPrice: row.compareAtPrice ? parseFloat(String(row.compareAtPrice)) : undefined,
+          petType: String(row.petType).toLowerCase().trim(),
           tags: tags,
           features: features,
-          ingredients: row.ingredients?.trim() || '',
-          isActive: row.isActive === 'false' ? false : true,
-          isFeatured: row.isFeatured === 'true' ? true : false,
-          inStock: row.inStock === 'false' ? false : true,
-          autoshipEligible: row.autoshipEligible === 'true' ? true : false
+          ingredients: row.ingredients ? String(row.ingredients).trim() : '',
+          isActive: String(row.isActive || 'true').toLowerCase() === 'false' ? false : true,
+          isFeatured: String(row.isFeatured || 'false').toLowerCase() === 'true' ? true : false,
+          inStock: String(row.inStock || 'true').toLowerCase() === 'false' ? false : true,
+          autoshipEligible: String(row.autoshipEligible || 'false').toLowerCase() === 'true' ? true : false
         };
 
         // Create product
