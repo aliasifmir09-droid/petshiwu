@@ -313,7 +313,9 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
     // Use both string comparison and ObjectId comparison for safety
     const isAuthorized = req.user.role === 'admin' || 
       orderUserId === currentUserId ||
-      (orderRaw.user && req.user._id && orderRaw.user.equals && orderRaw.user.equals(req.user._id));
+      (orderRaw.user && req.user._id && 
+       typeof orderRaw.user.equals === 'function' && 
+       orderRaw.user.equals(req.user._id as mongoose.Types.ObjectId));
     
     if (!isAuthorized) {
       console.log('getOrder - Authorization failed: User does not own this order');
