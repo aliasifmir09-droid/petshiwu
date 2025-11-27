@@ -137,10 +137,12 @@ const CategoriesNew = () => {
   const toggleExpand = (categoryId: string) => {
     setExpandedCategories(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(categoryId)) {
-        newSet.delete(categoryId);
+      // Ensure categoryId is a string
+      const id = String(categoryId || '');
+      if (newSet.has(id)) {
+        newSet.delete(id);
       } else {
-        newSet.add(categoryId);
+        newSet.add(id);
       }
       return newSet;
     });
@@ -153,7 +155,7 @@ const CategoriesNew = () => {
         name: category.name,
         description: category.description || '',
         petType: category.petType,
-        parentCategory: category.parentCategory?._id || '',
+        parentCategory: category.parentCategory?._id ? String(category.parentCategory._id) : '',
         isActive: category.isActive
       });
     } else {
@@ -189,32 +191,38 @@ const CategoriesNew = () => {
     };
 
     if (editingCategory) {
-      updateMutation.mutate({ id: editingCategory._id, data: submitData });
+      // Ensure _id is a string
+      const categoryId = String(editingCategory._id || '');
+      updateMutation.mutate({ id: categoryId, data: submitData });
     } else {
       createMutation.mutate(submitData);
     }
   };
 
   const handleDelete = (category: any) => {
+    // Ensure _id is a string
+    const categoryId = String(category._id || '');
     setDeleteConfirm({
       isOpen: true,
-      categoryId: category._id,
+      categoryId: categoryId,
       categoryName: category.name
     });
   };
 
   const confirmDelete = () => {
     if (deleteConfirm.categoryId) {
-      deleteMutation.mutate(deleteConfirm.categoryId);
+      // Ensure ID is a string before sending
+      const categoryId = String(deleteConfirm.categoryId);
+      deleteMutation.mutate(categoryId);
     }
   };
 
   const renderCategory = (category: Category, level = 0) => {
     const hasSubcategories = category.subcategories && category.subcategories.length > 0;
-    const isExpanded = expandedCategories.has(category._id);
+    const isExpanded = expandedCategories.has(String(category._id || ''));
 
     return (
-      <div key={category._id}>
+      <div key={String(category._id || '')}>
         {/* Main Category Row */}
         <div
           className={`flex items-center gap-3 p-4 bg-white border-b hover:bg-gray-50 transition-colors ${
@@ -225,7 +233,7 @@ const CategoriesNew = () => {
           {/* Expand/Collapse Button */}
           {hasSubcategories ? (
             <button
-              onClick={() => toggleExpand(category._id)}
+              onClick={() => toggleExpand(String(category._id || ''))}
               className="p-1 hover:bg-gray-200 rounded transition-colors"
             >
               {isExpanded ? (
@@ -301,7 +309,7 @@ const CategoriesNew = () => {
             </button>
             <button
               onClick={() => {
-                setFormData({ ...formData, parentCategory: category._id });
+                setFormData({ ...formData, parentCategory: String(category._id || '') });
                 handleOpenModal();
               }}
               className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
@@ -427,9 +435,9 @@ const CategoriesNew = () => {
                 >
                   <option value="">None (Main Category)</option>
                   {flatCategories()
-                    .filter(cat => editingCategory ? cat._id !== editingCategory._id : true)
+                    .filter(cat => editingCategory ? String(cat._id || '') !== String(editingCategory._id || '') : true)
                     .map((cat: any) => (
-                      <option key={cat._id} value={cat._id}>
+                      <option key={cat._id} value={String(cat._id)}>
                         {'—'.repeat(cat.level || 0)} {cat.name}
                       </option>
                     ))}

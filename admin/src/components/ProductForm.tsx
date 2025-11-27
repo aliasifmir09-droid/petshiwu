@@ -21,7 +21,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     description: product?.description || '',
     shortDescription: product?.shortDescription || '',
     brand: product?.brand || '',
-    category: product?.category?._id || product?.category || '',
+    category: product?.category?._id ? String(product.category._id) : (product?.category ? String(product.category) : ''),
     petType: product?.petType || 'dog',
     basePrice: product?.basePrice || '',
     compareAtPrice: product?.compareAtPrice || '',
@@ -58,7 +58,9 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     mutationFn: adminService.createCategory,
     onSuccess: (newCategory) => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
-      setFormData({ ...formData, category: newCategory._id });
+      // Ensure _id is a string
+      const categoryId = String(newCategory._id || '');
+      setFormData({ ...formData, category: categoryId });
       setShowNewCategory(false);
       setNewCategoryName('');
       showToast('Category created successfully!', 'success');

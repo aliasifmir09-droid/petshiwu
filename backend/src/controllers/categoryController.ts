@@ -2,6 +2,39 @@ import { Request, Response, NextFunction } from 'express';
 import Category from '../models/Category';
 import { AuthRequest } from '../middleware/auth';
 
+// Helper function to normalize category _id to string
+const normalizeCategoryId = (category: any): any => {
+  if (!category) return category;
+  
+  // Convert to plain object if it's a Mongoose document
+  const plainCategory = category.toObject ? category.toObject() : category;
+  
+  const normalized: any = {
+    ...plainCategory,
+    _id: plainCategory._id ? String(plainCategory._id) : plainCategory._id
+  };
+  
+  // Normalize parentCategory _id if it exists
+  if (normalized.parentCategory && normalized.parentCategory._id) {
+    normalized.parentCategory = {
+      ...normalized.parentCategory,
+      _id: String(normalized.parentCategory._id)
+    };
+  }
+  
+  // Normalize subcategories recursively
+  if (normalized.subcategories && Array.isArray(normalized.subcategories)) {
+    normalized.subcategories = normalized.subcategories.map(normalizeCategoryId);
+  }
+  
+  return normalized;
+};
+
+// Helper function to normalize array of categories
+const normalizeCategories = (categories: any[]): any[] => {
+  return categories.map(normalizeCategoryId);
+};
+
 // Get all categories (public - only active)
 export const getCategories = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -13,11 +46,15 @@ export const getCategories = async (req: Request, res: Response, next: NextFunct
 
     const categories = await Category.find(query)
       .populate('parentCategory', 'name slug')
-      .sort({ name: 1 });
+      .sort({ name: 1 })
+      .lean(); // Use lean() for better performance
+
+    // Normalize _id to string for all categories
+    const normalizedCategories = normalizeCategories(categories);
 
     res.status(200).json({
       success: true,
-      data: categories
+      data: normalizedCategories
     });
   } catch (error) {
     next(error);
@@ -68,9 +105,12 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
       }
     });
 
+    // Normalize all category IDs to strings
+    const normalizedRootCategories = normalizeCategories(rootCategories);
+
     res.status(200).json({
       success: true,
-      data: rootCategories,
+      data: normalizedRootCategories,
       total: categories.length
     });
   } catch (error) {
@@ -83,7 +123,9 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
   try {
     const category = await Category.findOne({
       $or: [{ _id: req.params.id }, { slug: req.params.id }]
-    }).populate('parentCategory', 'name slug');
+    })
+      .populate('parentCategory', 'name slug')
+      .lean(); // Use lean() for better performance
 
     if (!category) {
       return res.status(404).json({
@@ -92,9 +134,12 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
       });
     }
 
+    // Normalize _id to string
+    const normalizedCategory = normalizeCategoryId(category);
+
     res.status(200).json({
       success: true,
-      data: category
+      data: normalizedCategory
     });
   } catch (error) {
     next(error);
@@ -106,9 +151,12 @@ export const createCategory = async (req: AuthRequest, res: Response, next: Next
   try {
     const category = await Category.create(req.body);
 
+    // Normalize _id to string
+    const normalizedCategory = normalizeCategoryId(category);
+
     res.status(201).json({
       success: true,
-      data: category
+      data: normalizedCategory
     });
   } catch (error) {
     next(error);
@@ -133,9 +181,12 @@ export const updateCategory = async (req: AuthRequest, res: Response, next: Next
     // Save to trigger pre-save middleware
     await category.save();
 
+    // Normalize _id to string
+    const normalizedCategory = normalizeCategoryId(category);
+
     res.status(200).json({
       success: true,
-      data: category
+      data: normalizedCategory
     });
   } catch (error) {
     next(error);
