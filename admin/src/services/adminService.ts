@@ -16,10 +16,29 @@ export const adminService = {
   },
 
   downloadCSVTemplate: async () => {
-    // Create CSV template content
-    const csvContent = `name,description,shortDescription,brand,category,basePrice,compareAtPrice,petType,images,tags,features,ingredients,isActive,isFeatured,inStock,stock,autoshipEligible
-Example Product,This is a detailed description of the product,Short description,Brand Name,Dog Food,29.99,39.99,dog,https://example.com/image1.jpg,https://example.com/image2.jpg,tag1,tag2,feature1,feature2,Ingredients list,true,false,true,100,false
-Another Product,Another detailed description,Another short description,Another Brand,Cat Food,19.99,,cat,https://example.com/cat1.jpg,https://example.com/cat2.jpg,cat-tag,cat-feature,Some ingredients,true,true,true,50,true`;
+    // Create comprehensive CSV template with detailed examples and instructions
+    const csvContent = `# PRODUCT IMPORT TEMPLATE
+# Instructions:
+# 1. Required fields: name, description, brand, category, basePrice, petType, images
+# 2. Optional fields: shortDescription, compareAtPrice, tags, features, ingredients, isActive, isFeatured, inStock, stock, autoshipEligible
+# 3. Images: Separate multiple URLs with commas (no spaces)
+# 4. Tags & Features: Separate multiple values with commas
+# 5. Pet Types: Use lowercase (dog, cat, bird, fish, small-pet, reptile)
+# 6. Category: Use exact category name as it appears in your system (case-insensitive)
+# 7. Boolean fields: Use "true" or "false" (case-insensitive)
+# 8. Variants: For simple products, leave variants empty. For products with sizes/variants, use variantSize, variantPrice, variantStock, variantSku columns
+#
+# Remove this comment section (lines starting with #) before importing
+
+name,description,shortDescription,brand,category,basePrice,compareAtPrice,petType,images,tags,features,ingredients,isActive,isFeatured,inStock,stock,autoshipEligible,variantSize,variantPrice,variantStock,variantSku
+Premium Dog Food,High-quality premium dog food with natural ingredients for all dog breeds. Rich in protein and essential nutrients to keep your dog healthy and active.,Premium nutrition for your furry friend,PetBrand,Dog Food,49.99,59.99,dog,https://example.com/dog-food-1.jpg,https://example.com/dog-food-2.jpg,premium,healthy,nutrition,Natural chicken, brown rice, vegetables,true,true,true,100,true,5kg,49.99,50,DOG-FOOD-5KG-001
+Organic Cat Litter,100% natural and biodegradable cat litter. Odor-free and clumping formula for easy cleanup.,Eco-friendly cat litter,OrganicPet,Cat Litter,24.99,,cat,https://example.com/cat-litter-1.jpg,organic,eco-friendly,biodegradable,Natural clay,true,false,true,75,false,10lb,24.99,75,CAT-LITTER-10LB-001
+Bird Seed Mix,Delicious seed mix for all types of birds. Contains sunflower seeds, millet, and other nutritious grains.,Nutritious seed blend for birds,BirdCare,Bird Food,12.99,15.99,bird,https://example.com/bird-seed-1.jpg,bird-food,seeds,nutrition,Sunflower seeds, millet, corn,true,false,true,200,false,2lb,12.99,200,BIRD-SEED-2LB-001
+Fish Tank Filter,High-performance aquarium filter with 3-stage filtration system. Suitable for tanks up to 50 gallons.,Advanced filtration system,AquaTech,Fish Supplies,89.99,109.99,fish,https://example.com/filter-1.jpg,filter,aquarium,equipment,Plastic, carbon filter, true,true,true,30,false,,
+Small Pet Bedding,Soft and comfortable bedding for hamsters, rabbits, and guinea pigs. Absorbent and easy to clean.,Comfortable bedding for small pets,SmallPetCo,Small Pet Supplies,8.99,,small-pet,https://example.com/bedding-1.jpg,bedding,comfort,absorbent,Recycled paper,true,false,true,150,false,,
+Reptile Heat Lamp,Full-spectrum heat lamp for reptiles. Provides UVB and heat for optimal reptile health.,Essential heating for reptiles,ReptilePro,Reptile Supplies,34.99,44.99,reptile,https://example.com/heat-lamp-1.jpg,heating,uvb,reptile-care,Glass, ceramic,true,true,true,25,false,,
+Dog Toy Rope,Interactive rope toy for dogs. Great for tug-of-war and fetch games. Durable and safe for all dog sizes.,Fun interactive toy for dogs,ToyBrand,Dog Toys,14.99,19.99,dog,https://example.com/toy-1.jpg,https://example.com/toy-2.jpg,toy,interactive,durable,Cotton rope,true,false,true,80,true,,
+Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging toys and a cozy perch on top.,Multi-level cat activity center,CatFurniture,Cat Furniture,79.99,99.99,cat,https://example.com/scratch-post-1.jpg,https://example.com/scratch-post-2.jpg,furniture,scratching,activity,Sisal rope, carpet,true,true,true,20,false,,`;
 
     // Create blob and download
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });

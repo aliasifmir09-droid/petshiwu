@@ -100,22 +100,33 @@ const CSVImport = ({ onClose }: CSVImportProps) => {
             </button>
           </div>
 
-          {/* Download Template Section */}
-          <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <FileText className="text-blue-600" size={20} />
-                <div>
-                  <p className="font-semibold text-gray-800">Need a template?</p>
-                  <p className="text-sm text-gray-600">Download our CSV template with example data</p>
+          {/* Download Template Section - Prominent */}
+          <div className="mb-6 p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-300 shadow-md">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-start gap-4 flex-1">
+                <div className="bg-blue-100 p-3 rounded-lg">
+                  <FileText className="text-blue-600" size={28} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg text-gray-900 mb-1">📥 Download CSV Template</h3>
+                  <p className="text-sm text-gray-700 mb-2">
+                    Get a ready-to-use template with example data and detailed instructions. 
+                    This will help you format your CSV file correctly for bulk product import.
+                  </p>
+                  <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
+                    <li>Includes all required and optional columns</li>
+                    <li>Multiple example rows for different pet types</li>
+                    <li>Detailed instructions in the CSV file</li>
+                    <li>Ready to fill in with your product data</li>
+                  </ul>
                 </div>
               </div>
               <button
                 onClick={handleDownloadTemplate}
                 disabled={downloadTemplateMutation.isPending}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none whitespace-nowrap"
               >
-                <Download size={18} />
+                <Download size={20} />
                 {downloadTemplateMutation.isPending ? 'Downloading...' : 'Download Template'}
               </button>
             </div>
