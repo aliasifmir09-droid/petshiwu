@@ -294,17 +294,30 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
     }
 
     // Check authorization - user must own the order or be admin
-    const orderUserId = orderExists.user ? String(orderExists.user) : '';
-    const currentUserId = req.user._id ? String(req.user._id) : '';
+    // Use toString() method for ObjectId to ensure consistent conversion
+    const orderUserId = orderExists.user 
+      ? (orderExists.user.toString ? orderExists.user.toString() : String(orderExists.user))
+      : '';
+    const currentUserId = req.user._id 
+      ? (req.user._id.toString ? req.user._id.toString() : String(req.user._id))
+      : '';
     
-    console.log('getOrder - Order User ID:', orderUserId);
-    console.log('getOrder - Current User ID:', currentUserId);
+    // Normalize both IDs (trim whitespace, convert to lowercase for comparison)
+    const normalizedOrderUserId = orderUserId.trim().toLowerCase();
+    const normalizedCurrentUserId = currentUserId.trim().toLowerCase();
+    
+    console.log('getOrder - Order User ID (raw):', orderUserId);
+    console.log('getOrder - Current User ID (raw):', currentUserId);
+    console.log('getOrder - Order User ID (normalized):', normalizedOrderUserId);
+    console.log('getOrder - Current User ID (normalized):', normalizedCurrentUserId);
     console.log('getOrder - User Role:', req.user.role);
-    console.log('getOrder - IDs match:', orderUserId === currentUserId);
+    console.log('getOrder - IDs match (raw):', orderUserId === currentUserId);
+    console.log('getOrder - IDs match (normalized):', normalizedOrderUserId === normalizedCurrentUserId);
     console.log('getOrder - Is Admin:', req.user.role === 'admin');
 
     // Allow access if user is admin OR if user owns the order
-    if (req.user.role !== 'admin' && orderUserId !== currentUserId) {
+    // Use normalized comparison for reliability
+    if (req.user.role !== 'admin' && normalizedOrderUserId !== normalizedCurrentUserId) {
       console.log('getOrder - Authorization failed: User does not own this order');
       return res.status(403).json({
         success: false,
