@@ -360,9 +360,10 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
     // Find product before deleting to get image URLs
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: 'Product not found'
+      // Product already deleted or doesn't exist - return success to avoid confusion
+      return res.status(200).json({
+        success: true,
+        message: 'Product not found or already deleted'
       });
     }
 

@@ -62,6 +62,18 @@ const Products = () => {
     },
     onError: (error: any) => {
       console.error('Delete product error:', error);
+      
+      // If product is already deleted (404), treat it as success and update UI
+      if (error?.response?.status === 404) {
+        // Product already deleted, just update the UI
+        queryClient.invalidateQueries({ queryKey: ['products'] });
+        queryClient.refetchQueries({ 
+          queryKey: ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter] 
+        });
+        showToast('Product has been deleted', 'success');
+        return;
+      }
+      
       showToast(error?.response?.data?.message || 'Failed to delete product. Please try again.', 'error');
     }
   });

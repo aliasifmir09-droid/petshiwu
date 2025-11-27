@@ -122,12 +122,20 @@ export const adminService = {
 
   deleteProduct: async (id: string) => {
     // Ensure ID is a string and valid MongoDB ObjectId format
-    const productId = String(id);
+    const productId = String(id).trim();
     if (!/^[0-9a-fA-F]{24}$/.test(productId)) {
       throw new Error('Invalid product ID format');
     }
-    const response = await api.delete(`/products/${productId}`);
-    return response.data;
+    try {
+      const response = await api.delete(`/products/${encodeURIComponent(productId)}`);
+      return response.data;
+    } catch (error: any) {
+      // If 404, the product might already be deleted - still throw to let UI handle it
+      if (error.response?.status === 404) {
+        throw error;
+      }
+      throw error;
+    }
   },
 
   restoreProduct: async (id: string) => {
