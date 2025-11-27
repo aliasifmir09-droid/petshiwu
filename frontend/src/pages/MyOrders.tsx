@@ -6,20 +6,67 @@ import { Package, Truck, CheckCircle, Clock, XCircle, Eye, ChevronRight } from '
 
 // Helper function to extract order ID as string
 const extractOrderId = (id: any): string => {
-  if (!id) return '';
-  if (typeof id === 'string') return id;
-  if (typeof id === 'object' && id !== null) {
-    // Try toString() method
-    if (typeof id.toString === 'function') {
-      const str = id.toString();
-      if (str && str !== '[object Object]') return str;
-    }
-    // Try _id property
-    if (id._id) return String(id._id);
-    // Try id property
-    if (id.id) return String(id.id);
+  if (!id) {
+    console.warn('extractOrderId: id is null or undefined');
+    return '';
   }
-  return String(id);
+  
+  // If already a string, return it (trimmed)
+  if (typeof id === 'string') {
+    const trimmed = id.trim();
+    if (trimmed && trimmed !== '[object Object]') {
+      return trimmed;
+    }
+  }
+  
+  // If it's an object
+  if (typeof id === 'object' && id !== null) {
+    // Try toString() method first (for ObjectId)
+    if (typeof id.toString === 'function') {
+      try {
+        const str = id.toString();
+        if (str && str !== '[object Object]' && str.length === 24) {
+          // MongoDB ObjectId is 24 characters
+          return str;
+        }
+      } catch (e) {
+        console.warn('extractOrderId: toString() failed', e);
+      }
+    }
+    
+    // Try _id property (nested object)
+    if (id._id) {
+      const nestedId = extractOrderId(id._id);
+      if (nestedId) return nestedId;
+    }
+    
+    // Try id property
+    if (id.id) {
+      const nestedId = extractOrderId(id.id);
+      if (nestedId) return nestedId;
+    }
+    
+    // Try valueOf() method
+    if (typeof id.valueOf === 'function') {
+      try {
+        const value = id.valueOf();
+        if (typeof value === 'string' && value !== '[object Object]') {
+          return value;
+        }
+      } catch (e) {
+        console.warn('extractOrderId: valueOf() failed', e);
+      }
+    }
+  }
+  
+  // Last resort: try String() conversion
+  const str = String(id);
+  if (str === '[object Object]' || str === 'null' || str === 'undefined') {
+    console.error('extractOrderId: Failed to extract valid ID from:', id);
+    return '';
+  }
+  
+  return str;
 };
 
 const MyOrders = () => {
@@ -117,8 +164,16 @@ const MyOrders = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            {ordersData?.data.map((order: any) => (
-              <div key={order._id} className="bg-white rounded-lg shadow overflow-hidden">
+            {ordersData?.data.map((order: any) => {
+              // Ensure we have a valid order ID for the key
+              const orderId = extractOrderId(order._id);
+              if (!orderId) {
+                console.error('MyOrders: Invalid order ID:', order._id);
+                return null;
+              }
+              
+              return (
+              <div key={orderId} className="bg-white rounded-lg shadow overflow-hidden">
                 {/* Order Header */}
                 <div className="bg-gray-50 px-6 py-4 border-b">
                   <div className="flex flex-wrap items-center justify-between gap-4">
@@ -137,7 +192,7 @@ const MyOrders = () => {
                       </div>
                     </div>
                     <Link
-                      to={`/orders/${extractOrderId(order._id)}`}
+                      to={`/orders/${orderId}`}
                       className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium"
                     >
                       <Eye size={18} />
