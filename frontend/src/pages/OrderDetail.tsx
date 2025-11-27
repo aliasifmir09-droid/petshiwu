@@ -40,11 +40,8 @@ const OrderDetail = () => {
     queryFn: () => {
       // Ensure ID is a string, handle [object Object] case
       const orderId = extractOrderId(id);
-      console.log('OrderDetail - Extracted order ID:', orderId);
-      console.log('OrderDetail - Original id from params:', id);
       
       if (!orderId || orderId === '[object Object]') {
-        console.error('OrderDetail - Invalid order ID:', orderId);
         throw new Error('Invalid order ID');
       }
       return orderService.getOrder(orderId);
@@ -133,7 +130,6 @@ const OrderDetail = () => {
   }
 
   if (error) {
-    console.error('OrderDetail - Error loading order:', error);
     const errorMessage = (error as any)?.response?.data?.message || (error as any)?.message || 'Failed to load order';
     return (
       <div className="container mx-auto px-4 lg:px-8 py-8">

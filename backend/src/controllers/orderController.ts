@@ -310,9 +310,6 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
 
     // Validate order ID format
     const orderId = String(req.params.id).trim();
-    console.log('getOrder - Order ID:', orderId);
-    console.log('getOrder - User ID:', req.user._id);
-    console.log('getOrder - User Role:', req.user.role);
     
     if (!orderId || !/^[0-9a-fA-F]{24}$/.test(orderId)) {
       return res.status(400).json({
@@ -337,25 +334,17 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
         _id: orderId,
         user: req.user._id  // Mongoose will handle ObjectId comparison automatically
       }).populate('user', 'firstName lastName email').lean();
-      
-      console.log('getOrder - Customer query:', { _id: orderId, user: req.user._id });
-      console.log('getOrder - Order found:', !!order);
     }
     
     if (!order) {
       // Check if order exists at all (for better error message)
       const orderExists = await Order.findById(orderId);
       if (!orderExists) {
-        console.log('getOrder - Order not found in database');
         return res.status(404).json({
           success: false,
           message: 'Order not found'
         });
       } else {
-        console.log('getOrder - Order exists but user does not have permission');
-        console.log('getOrder - Order user:', orderExists.user);
-        console.log('getOrder - Current user:', req.user._id);
-        console.log('getOrder - User role:', req.user.role);
         return res.status(403).json({
           success: false,
           message: 'Not authorized to access this order'
@@ -381,13 +370,11 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
     // Normalize order ID to string
     const normalizedOrder = normalizeOrderId(order);
 
-    console.log('getOrder - Returning order successfully');
     res.status(200).json({
       success: true,
       data: normalizedOrder
     });
   } catch (error: any) {
-    console.error('Error in getOrder:', error);
     next(error);
   }
 };

@@ -7,7 +7,6 @@ import { Package, Truck, CheckCircle, Clock, XCircle, Eye, ChevronRight } from '
 // Helper function to extract order ID as string
 const extractOrderId = (id: any): string => {
   if (!id) {
-    console.warn('extractOrderId: id is null or undefined');
     return '';
   }
   
@@ -30,7 +29,7 @@ const extractOrderId = (id: any): string => {
           return str;
         }
       } catch (e) {
-        console.warn('extractOrderId: toString() failed', e);
+        // Ignore toString() errors
       }
     }
     
@@ -50,7 +49,7 @@ const extractOrderId = (id: any): string => {
             return hexString;
           }
         } catch (e) {
-          console.warn('extractOrderId: buffer.data conversion failed', e);
+          // Ignore buffer conversion errors
         }
       }
       
@@ -69,7 +68,7 @@ const extractOrderId = (id: any): string => {
             return hexString;
           }
         } catch (e) {
-          console.warn('extractOrderId: buffer array conversion failed', e);
+          // Ignore buffer array conversion errors
         }
       }
       
@@ -87,7 +86,7 @@ const extractOrderId = (id: any): string => {
             return hexString;
           }
         } catch (e) {
-          console.warn('extractOrderId: Uint8Array conversion failed', e);
+          // Ignore Uint8Array conversion errors
         }
       }
       
@@ -105,7 +104,7 @@ const extractOrderId = (id: any): string => {
             return hexString;
           }
         } catch (e) {
-          console.warn('extractOrderId: Buffer type conversion failed', e);
+          // Ignore Buffer type conversion errors
         }
       }
     }
@@ -130,7 +129,7 @@ const extractOrderId = (id: any): string => {
           return value;
         }
       } catch (e) {
-        console.warn('extractOrderId: valueOf() failed', e);
+        // Ignore valueOf() errors
       }
     }
   }
@@ -138,7 +137,6 @@ const extractOrderId = (id: any): string => {
   // Last resort: try String() conversion
   const str = String(id);
   if (str === '[object Object]' || str === 'null' || str === 'undefined') {
-    console.error('extractOrderId: Failed to extract valid ID from:', id);
     return '';
   }
   
@@ -246,7 +244,6 @@ const MyOrders = () => {
               // Ensure we have a valid order ID for the key
               const orderId = extractOrderId(order._id);
               if (!orderId) {
-                console.error('MyOrders: Invalid order ID:', order._id);
                 return null;
               }
               
