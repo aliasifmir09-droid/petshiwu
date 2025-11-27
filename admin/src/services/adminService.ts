@@ -104,8 +104,15 @@ export const adminService = {
   },
 
   createProduct: async (data: any) => {
-    const response = await api.post('/products', data);
-    return response.data.data;
+    try {
+      const response = await api.post('/products', data);
+      return response.data.data;
+    } catch (error: any) {
+      // Log the full error for debugging
+      console.error('Create product API error:', error);
+      console.error('Error response:', error.response?.data);
+      throw error;
+    }
   },
 
   updateProduct: async (id: string, data: any) => {

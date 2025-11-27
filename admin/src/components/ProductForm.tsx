@@ -79,6 +79,27 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     },
     onError: (error: any) => {
       console.error('Product creation error:', error);
+      console.error('Error response data:', error.response?.data);
+      
+      // Handle validation errors from express-validator
+      if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+        const validationErrors = error.response.data.errors
+          .map((err: any) => err.message || err.msg)
+          .join(', ');
+        showToast(`Validation errors: ${validationErrors}`, 'error');
+        return;
+      }
+      
+      // Handle Mongoose validation errors
+      if (error.response?.data?.error && typeof error.response.data.error === 'object') {
+        const mongooseErrors = Object.values(error.response.data.error)
+          .map((err: any) => err.message || err)
+          .join(', ');
+        showToast(`Validation errors: ${mongooseErrors}`, 'error');
+        return;
+      }
+      
+      // Handle standard error messages
       const errorMessage = error.response?.data?.message 
         || error.response?.data?.error 
         || error.message 
@@ -333,6 +354,13 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       variants: validatedVariants
     };
 
+    // Log the data being sent for debugging
+    console.log('Submitting product data:', {
+      ...productData,
+      images: productData.images.length,
+      variants: productData.variants.length
+    });
+
     try {
       if (isEditing) {
         updateMutation.mutate(productData);
@@ -340,6 +368,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
         createMutation.mutate(productData);
       }
     } catch (error: any) {
+      console.error('Error submitting product:', error);
       showToast(error.message || 'Failed to submit product', 'error');
     }
   };

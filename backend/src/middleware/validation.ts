@@ -87,13 +87,12 @@ export const createProductValidation = [
     .withMessage('Product name must be between 3 and 200 characters'),
   body('description')
     .trim()
-    .isLength({ min: 10, max: 5000 })
-    .withMessage('Description must be between 10 and 5000 characters'),
+    .isLength({ min: 3, max: 5000 })
+    .withMessage('Description must be between 3 and 5000 characters'),
   body('brand')
     .trim()
     .isLength({ min: 2, max: 100 })
-    .matches(/^[a-zA-Z0-9\s\-]+$/)
-    .withMessage('Invalid brand name'),
+    .withMessage('Brand name must be between 2 and 100 characters'),
   body('category')
     .custom((value) => mongoose.Types.ObjectId.isValid(value))
     .withMessage('Invalid category ID'),

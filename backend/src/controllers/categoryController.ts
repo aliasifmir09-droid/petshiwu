@@ -196,7 +196,16 @@ export const updateCategory = async (req: AuthRequest, res: Response, next: Next
 // Delete category (Admin)
 export const deleteCategory = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const category = await Category.findByIdAndDelete(req.params.id);
+    // Ensure ID is a valid ObjectId format
+    const categoryId = String(req.params.id || '').trim();
+    if (!/^[0-9a-fA-F]{24}$/.test(categoryId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid category ID format'
+      });
+    }
+
+    const category = await Category.findByIdAndDelete(categoryId);
 
     if (!category) {
       return res.status(404).json({
@@ -209,7 +218,8 @@ export const deleteCategory = async (req: AuthRequest, res: Response, next: Next
       success: true,
       message: 'Category deleted successfully'
     });
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Delete category error:', error);
     next(error);
   }
 };

@@ -115,13 +115,25 @@ const CategoriesNew = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`${API_URL}/categories/${id}`, {
+      // Ensure ID is a string and valid ObjectId format
+      const categoryId = String(id || '').trim();
+      if (!/^[0-9a-fA-F]{24}$/.test(categoryId)) {
+        throw new Error('Invalid category ID format');
+      }
+      
+      const response = await fetch(`${API_URL}/categories/${encodeURIComponent(categoryId)}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
       });
-      if (!response.ok) throw new Error('Failed to delete category');
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.message || errorData.error || `Failed to delete category (${response.status})`;
+        throw new Error(errorMessage);
+      }
+      
       return response.json();
     },
     onSuccess: () => {
@@ -130,6 +142,7 @@ const CategoriesNew = () => {
       setDeleteConfirm({ isOpen: false });
     },
     onError: (error: any) => {
+      console.error('Category delete error:', error);
       showToast(error.message || 'Failed to delete category', 'error');
     }
   });
