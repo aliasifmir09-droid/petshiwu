@@ -21,20 +21,7 @@ const extractOrderId = (id: any): string => {
   
   // If it's an object
   if (typeof id === 'object' && id !== null) {
-    // Handle MongoDB ObjectId with buffer property
-    if (id.buffer && Buffer.isBuffer && Buffer.isBuffer(id.buffer)) {
-      // Convert buffer to hex string (ObjectId format)
-      try {
-        const hexString = id.buffer.toString('hex');
-        if (hexString && hexString.length === 24) {
-          return hexString;
-        }
-      } catch (e) {
-        console.warn('extractOrderId: buffer conversion failed', e);
-      }
-    }
-    
-    // Try toString() method first (for ObjectId)
+    // Try toString() method first (for ObjectId) - this should work for most cases
     if (typeof id.toString === 'function') {
       try {
         const str = id.toString();
@@ -44,6 +31,36 @@ const extractOrderId = (id: any): string => {
         }
       } catch (e) {
         console.warn('extractOrderId: toString() failed', e);
+      }
+    }
+    
+    // Handle MongoDB ObjectId with buffer property (browser-safe)
+    if (id.buffer && typeof id.buffer === 'object') {
+      // Try to get hex string from buffer.data array
+      if (id.buffer.data && Array.isArray(id.buffer.data)) {
+        try {
+          const hexString = id.buffer.data.map((b: number) => 
+            b.toString(16).padStart(2, '0')
+          ).join('');
+          if (hexString && hexString.length === 24) {
+            return hexString;
+          }
+        } catch (e) {
+          // Ignore
+        }
+      }
+      // Try buffer as Uint8Array or similar
+      if (id.buffer instanceof Uint8Array || (Array.isArray(id.buffer) && id.buffer.length === 12)) {
+        try {
+          const hexString = Array.from(id.buffer).map((b: number) => 
+            b.toString(16).padStart(2, '0')
+          ).join('');
+          if (hexString && hexString.length === 24) {
+            return hexString;
+          }
+        } catch (e) {
+          // Ignore
+        }
       }
     }
     
@@ -68,23 +85,6 @@ const extractOrderId = (id: any): string => {
         }
       } catch (e) {
         console.warn('extractOrderId: valueOf() failed', e);
-      }
-    }
-    
-    // Try to extract from buffer object if it exists
-    if (id.buffer && typeof id.buffer === 'object') {
-      // Try to get hex string from buffer
-      if (id.buffer.data && Array.isArray(id.buffer.data)) {
-        try {
-          const hexString = id.buffer.data.map((b: number) => 
-            b.toString(16).padStart(2, '0')
-          ).join('');
-          if (hexString && hexString.length === 24) {
-            return hexString;
-          }
-        } catch (e) {
-          // Ignore
-        }
       }
     }
   }
