@@ -51,25 +51,24 @@ const Products = () => {
 
   const deleteMutation = useMutation({
     mutationFn: adminService.deleteProduct,
-    onSuccess: () => {
-      // Invalidate all product-related queries
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      // Force refetch with current filters
-      queryClient.refetchQueries({ 
-        queryKey: ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter] 
-      });
+    onSuccess: async () => {
+      // Aggressively invalidate and remove all product-related queries
+      await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
+      // Remove all product queries from cache to force fresh fetch
+      queryClient.removeQueries({ queryKey: ['products'], exact: false });
+      // Manually refetch the current query
+      await refetch();
       showToast('Product deleted successfully!', 'success');
     },
-    onError: (error: any) => {
+    onError: async (error: any) => {
       console.error('Delete product error:', error);
       
       // If product is already deleted (404), treat it as success and update UI
       if (error?.response?.status === 404) {
         // Product already deleted, just update the UI
-        queryClient.invalidateQueries({ queryKey: ['products'] });
-        queryClient.refetchQueries({ 
-          queryKey: ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter] 
-        });
+        await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
+        queryClient.removeQueries({ queryKey: ['products'], exact: false });
+        await refetch();
         showToast('Product has been deleted', 'success');
         return;
       }
