@@ -155,7 +155,7 @@ const Checkout = () => {
     onSuccess: (order) => {
       clearCart();
       // Ensure order ID is a string
-      const orderId = String(order._id || order.id || '');
+      const orderId = String(order._id || '');
       navigate(`/orders/${orderId}?newOrder=true`);
     },
     onError: (error: any) => {
