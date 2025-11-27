@@ -162,6 +162,11 @@ const OrderDetail = () => {
     );
   }
 
+  // TypeScript guard: if we reach here, order must be defined
+  if (!order) {
+    return null;
+  }
+
   return (
     <div className="container mx-auto px-4 lg:px-8 py-8">
       <div className="max-w-6xl mx-auto">
