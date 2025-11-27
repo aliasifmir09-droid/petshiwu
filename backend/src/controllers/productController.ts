@@ -27,20 +27,9 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     const limit = parseInt(req.query.limit as string) || 20;
     const skip = (page - 1) * limit;
     
-    // Check if this is an admin request (has auth token) and wants to include deleted
-    const includeDeletedParam = req.query.includeDeleted;
-    const includeDeleted = (includeDeletedParam === 'true' || String(includeDeletedParam) === 'true') && req.headers.authorization;
-
-    // Build query - exclude soft-deleted products unless admin requests them
-    const query: any = {};
-    if (!includeDeleted) {
-      // Exclude deleted products: both deletedAt must be null AND isActive should be true
-      query.deletedAt = null;
-      query.isActive = true;
-    } else {
-      // When including deleted, we want all products (both active and deleted)
-      // Don't filter by isActive or deletedAt
-    }
+    // Build query - products are now permanently deleted, so no need to filter by deletedAt
+    // Only filter by isActive for active/inactive products
+    const query: any = { isActive: true };
 
     // Filter by category
     if (req.query.category) {
@@ -147,7 +136,7 @@ export const getProduct = async (req: Request, res: Response, next: NextFunction
     if (!product) {
       // Try finding by ID if it's a valid MongoDB ObjectId
       try {
-        product = await Product.findOne({ _id: identifier, deletedAt: null })
+        product = await Product.findOne({ _id: identifier })
           .populate('category', 'name slug')
           .lean(); // Use lean() for better performance
       } catch (err) {
@@ -200,10 +189,8 @@ export const getRelatedProducts = async (req: Request, res: Response, next: Next
     }
 
     // Find products that match both category AND petType first
-    // Exclude soft-deleted products
     const exactMatches = await Product.find({
       isActive: true,
-      deletedAt: null,
       _id: { $ne: currentProduct._id },
       category: currentProduct.category,
       petType: currentProduct.petType
@@ -218,7 +205,6 @@ export const getRelatedProducts = async (req: Request, res: Response, next: Next
       const remainingLimit = limit - exactMatches.length;
       const partialMatches = await Product.find({
         isActive: true,
-        deletedAt: null,
         _id: { 
           $ne: currentProduct._id,
           $nin: exactMatches.map(p => p._id)

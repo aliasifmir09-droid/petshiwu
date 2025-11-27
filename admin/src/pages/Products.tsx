@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
-import { Plus, Edit, Trash2, Search, Filter, AlertTriangle, X, FolderTree, Layers, Package, RotateCcw } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Filter, AlertTriangle, X, FolderTree, Layers, Package } from 'lucide-react';
 import ProductForm from '@/components/ProductForm';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Toast from '@/components/Toast';
@@ -26,18 +26,15 @@ const Products = () => {
     productName?: string;
   }>({ isOpen: false });
 
-  const [showDeleted, setShowDeleted] = useState(false);
-
   const { data: productsData, isLoading } = useQuery({
-    queryKey: ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter, showDeleted],
+    queryKey: ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter],
     queryFn: () => adminService.getProducts({ 
       page, 
       limit: 20, 
       search: searchQuery || undefined,
       category: categoryFilter || undefined,
       petType: petTypeFilter || undefined,
-      inStock: stockFilter === 'in-stock' ? true : stockFilter === 'out-of-stock' ? false : undefined,
-      includeDeleted: showDeleted ? 'true' : 'false' // Convert boolean to string for backend
+      inStock: stockFilter === 'in-stock' ? true : stockFilter === 'out-of-stock' ? false : undefined
     })
   });
 
@@ -175,16 +172,6 @@ const Products = () => {
             icon={<Package size={18} />}
             size="md"
           />
-          <button
-            onClick={() => setShowDeleted(!showDeleted)}
-            className={`px-4 py-2 rounded-lg border transition-colors ${
-              showDeleted
-                ? 'bg-red-100 border-red-300 text-red-700'
-                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            {showDeleted ? 'Hide Deleted' : 'Show Deleted'}
-          </button>
         </div>
       </div>
 
@@ -322,55 +309,34 @@ const Products = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      {product.deletedAt ? (
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          Deleted
-                        </span>
-                      ) : (
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          product.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {product.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                      )}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        product.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {product.isActive ? 'Active' : 'Inactive'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <div className="flex items-center gap-2">
-                        {product.deletedAt ? (
-                          <button
-                            onClick={() => {
-                              const productId = product._id ? String(product._id) : product._id;
-                              restoreMutation.mutate(productId);
-                            }}
-                            className="p-2 text-green-600 hover:bg-green-50 rounded"
-                            title="Restore product"
-                          >
-                            <RotateCcw size={18} />
-                          </button>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => handleEdit(product)}
-                              className="p-2 text-blue-600 hover:bg-blue-50 rounded"
-                            >
-                              <Edit size={18} />
-                            </button>
-                            <button
-                              onClick={() => {
-                                // Normalize product ID to string
-                                const productId = product._id ? String(product._id) : product._id;
-                                setDeleteConfirm({
-                                  isOpen: true,
-                                  productId: productId,
-                                  productName: product.name
-                                });
-                              }}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          </>
-                        )}
+                        <button
+                          onClick={() => handleEdit(product)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                        >
+                          <Edit size={18} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            // Normalize product ID to string
+                            const productId = product._id ? String(product._id) : product._id;
+                            setDeleteConfirm({
+                              isOpen: true,
+                              productId: productId,
+                              productName: product.name
+                            });
+                          }}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded"
+                        >
+                          <Trash2 size={18} />
+                        </button>
                       </div>
                     </td>
                   </tr>
