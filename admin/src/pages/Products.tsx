@@ -26,7 +26,7 @@ const Products = () => {
     productName?: string;
   }>({ isOpen: false });
 
-  const { data: productsData, isLoading } = useQuery({
+  const { data: productsData, isLoading, refetch } = useQuery({
     queryKey: ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter],
     queryFn: () => adminService.getProducts({ 
       page, 
@@ -35,7 +35,9 @@ const Products = () => {
       category: categoryFilter || undefined,
       petType: petTypeFilter || undefined,
       inStock: stockFilter === 'in-stock' ? true : stockFilter === 'out-of-stock' ? false : undefined
-    })
+    }),
+    staleTime: 0, // Always consider data stale to ensure fresh fetches
+    gcTime: 0 // Don't cache to ensure immediate updates
   });
 
   // Get out-of-stock products for notification bar
