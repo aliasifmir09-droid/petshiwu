@@ -98,6 +98,11 @@ const Products = () => {
     setShowModal(true);
   };
 
+  const handleProductCreated = () => {
+    // Force refetch when product is created from the modal
+    refetch();
+  };
+
   return (
     <div className="space-y-6">
       {/* Header Section with Gradient */}
@@ -377,6 +382,8 @@ const Products = () => {
           onClose={() => {
             setShowModal(false);
             setEditingProduct(null);
+            // Refetch products when modal closes (in case product was created/updated)
+            refetch();
           }}
         />
       )}
