@@ -341,7 +341,25 @@ export const updateProduct = async (req: AuthRequest, res: Response, next: NextF
   }
 };
 
-// Delete product (Admin) - Soft delete
+// Helper function to extract public_id from Cloudinary URL
+const extractCloudinaryPublicId = (url: string): string | null => {
+  try {
+    // Cloudinary URL format: https://res.cloudinary.com/{cloud_name}/{resource_type}/upload/{version}/{public_id}.{format}
+    // or: https://res.cloudinary.com/{cloud_name}/{resource_type}/upload/v{version}/{public_id}.{format}
+    const cloudinaryPattern = /res\.cloudinary\.com\/[^/]+\/(image|video)\/upload\/(?:v\d+\/)?(.+?)(?:\.[^.]+)?$/;
+    const match = url.match(cloudinaryPattern);
+    if (match) {
+      // Extract public_id (which includes the folder path)
+      return match[2];
+    }
+    return null;
+  } catch (error) {
+    console.error('Error extracting Cloudinary public_id:', error);
+    return null;
+  }
+};
+
+// Delete product (Admin) - Permanent delete with Cloudinary cleanup
 export const deleteProduct = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     // Ensure ID is a valid MongoDB ObjectId
@@ -353,25 +371,8 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
       });
     }
     
-    // Check if product exists
-    const existingProduct = await Product.findById(productId);
-    if (!existingProduct) {
-      return res.status(404).json({
-        success: false,
-        message: 'Product not found'
-      });
-    }
-
-    // Soft delete: mark as deleted instead of actually deleting
-    const product = await Product.findByIdAndUpdate(
-      productId,
-      { 
-        deletedAt: new Date(), 
-        isActive: false 
-      },
-      { new: true }
-    );
-
+    // Find product before deleting to get image URLs
+    const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -379,10 +380,37 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
       });
     }
 
+    // Delete images from Cloudinary if configured
+    const { deleteFromCloudinary, isCloudinaryConfigured } = await import('../utils/cloudinary');
+    
+    if (isCloudinaryConfigured() && product.images && product.images.length > 0) {
+      const deletePromises = product.images.map(async (imageUrl: string) => {
+        try {
+          const publicId = extractCloudinaryPublicId(imageUrl);
+          if (publicId) {
+            // Determine resource type from URL
+            const resourceType = imageUrl.includes('/video/upload/') ? 'video' : 'image';
+            await deleteFromCloudinary(publicId, resourceType);
+            console.log(`Deleted from Cloudinary: ${publicId}`);
+          } else {
+            console.log(`Skipping non-Cloudinary URL: ${imageUrl}`);
+          }
+        } catch (error: any) {
+          // Log error but don't fail the entire operation
+          console.error(`Failed to delete image from Cloudinary: ${imageUrl}`, error.message);
+        }
+      });
+
+      // Wait for all deletions to complete (or fail gracefully)
+      await Promise.allSettled(deletePromises);
+    }
+
+    // Permanently delete the product from database
+    await Product.findByIdAndDelete(productId);
+
     res.status(200).json({
       success: true,
-      message: 'Product deleted successfully',
-      data: normalizeProductId(product)
+      message: 'Product and associated images deleted successfully'
     });
   } catch (error: any) {
     console.error('Delete product error:', error);
