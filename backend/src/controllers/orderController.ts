@@ -282,19 +282,25 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
       });
     }
 
-    // Use the same approach as getMyOrders - query with user filter for non-admin users
+    // For frontend customers, always filter by user ID (same as getMyOrders)
+    // Only admins (from dashboard) can view any order
+    // Use the same approach as getMyOrders - query with user filter
     // This ensures Mongoose handles ObjectId comparison correctly
     let order;
     
-    if (req.user.role === 'admin') {
-      // Admin can view any order
+    if (req.user.role === 'admin' || req.user.role === 'staff') {
+      // Admin/Staff from dashboard can view any order
       order = await Order.findById(orderId).populate('user', 'firstName lastName email').lean();
     } else {
-      // Regular users can only view their own orders - use same filter as getMyOrders
+      // Frontend customers can only view their own orders - use same filter as getMyOrders
+      // This is the same query pattern that works in getMyOrders
       order = await Order.findOne({ 
         _id: orderId,
-        user: req.user._id  // Mongoose will handle ObjectId comparison
+        user: req.user._id  // Mongoose will handle ObjectId comparison automatically
       }).populate('user', 'firstName lastName email').lean();
+      
+      console.log('getOrder - Customer query:', { _id: orderId, user: req.user._id });
+      console.log('getOrder - Order found:', !!order);
     }
     
     if (!order) {
