@@ -180,8 +180,18 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
         };
 
         // Parse hierarchical category path (e.g., "Dog > Food > Dry Food")
-        let categoryId: mongoose.Types.ObjectId;
-        const categoryPath = String(row.category).trim();
+        // IMPORTANT: Reset categoryId for each product to avoid using previous product's category
+        let categoryId: mongoose.Types.ObjectId | null = null;
+        const categoryPath = String(row.category || '').trim();
+        
+        if (!categoryPath || categoryPath.length === 0) {
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            error: 'Category is required'
+          });
+          continue;
+        }
         
         if (categoryPath.includes('>')) {
           // Hierarchical path detected
