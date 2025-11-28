@@ -434,6 +434,12 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       .limit(limit)
       .lean(); // Use lean() for better performance (returns plain JS objects)
 
+    // Filter out any products that might have been deleted (extra safety check)
+    const activeProducts = products.filter((product: any) => {
+      // Ensure product exists and is active
+      return product && product.isActive !== false;
+    });
+
     const total = await Product.countDocuments(query);
 
     // Normalize _id to string for all products (use filtered products)
