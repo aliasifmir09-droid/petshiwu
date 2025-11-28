@@ -438,11 +438,14 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     }
 
     // Get products with pagination
+    // Use readPreference 'primary' to ensure we read from primary (not stale secondary)
+    // Add hint to force fresh query and bypass any potential caching
     const products = await Product.find(query)
       .populate('category', 'name slug')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
+      .read('primary') // Read from primary to avoid replication lag
       .lean(); // Use lean() for better performance (returns plain JS objects)
 
     // Filter out any products that might have been deleted (extra safety check)
@@ -464,7 +467,10 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     });
 
     // Count total (also deduplicated to match the filtered results)
-    const allProducts = await Product.find(query).lean();
+    // Use readPreference 'primary' for consistency
+    const allProducts = await Product.find(query)
+      .read('primary')
+      .lean();
     const uniqueProducts = allProducts.filter((p: any, index: number, self: any[]) => {
       const pid = String(p._id);
       return index === self.findIndex((pr: any) => String(pr._id) === pid && pr.isActive !== false);
