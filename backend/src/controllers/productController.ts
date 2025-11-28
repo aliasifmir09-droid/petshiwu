@@ -376,61 +376,65 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     // Build query - products are now permanently deleted, so no need to filter by deletedAt
     // Only filter by isActive for active/inactive products
     // Explicitly exclude any products that might have deletedAt set (backward compatibility)
-    const query: any = { 
+    const baseQuery: any = { 
       isActive: true,
       // Explicitly exclude any products that might have deletedAt set (backward compatibility)
-      $and: [
-        {
-          $or: [
-            { deletedAt: null },
-            { deletedAt: { $exists: false } }
-          ]
-        }
+      $or: [
+        { deletedAt: null },
+        { deletedAt: { $exists: false } }
       ]
     };
 
     // Filter by category
     if (req.query.category) {
-      query.category = req.query.category;
+      baseQuery.category = req.query.category;
     }
 
     // Filter by pet type
     if (req.query.petType) {
-      query.petType = req.query.petType;
+      baseQuery.petType = req.query.petType;
     }
 
     // Filter by brand
     if (req.query.brand) {
-      query.brand = req.query.brand;
+      baseQuery.brand = req.query.brand;
     }
 
     // Filter by price range
     if (req.query.minPrice || req.query.maxPrice) {
-      query.basePrice = {};
+      baseQuery.basePrice = {};
       if (req.query.minPrice) {
-        query.basePrice.$gte = parseFloat(req.query.minPrice as string);
+        baseQuery.basePrice.$gte = parseFloat(req.query.minPrice as string);
       }
       if (req.query.maxPrice) {
-        query.basePrice.$lte = parseFloat(req.query.maxPrice as string);
+        baseQuery.basePrice.$lte = parseFloat(req.query.maxPrice as string);
       }
     }
 
     // Filter by in stock
     if (req.query.inStock !== undefined) {
-      query.inStock = req.query.inStock === 'true';
+      baseQuery.inStock = req.query.inStock === 'true';
     }
 
+    // Build final query - combine base query with search if needed
+    let query: any = baseQuery;
+    
     // Search by name, description, brand, or tags
     if (req.query.search) {
-      // Add search conditions to $and array to avoid conflict with deletedAt $or
-      query.$and.push({
-        $or: [
-          { name: { $regex: req.query.search, $options: 'i' } },
-          { description: { $regex: req.query.search, $options: 'i' } },
-          { brand: { $regex: req.query.search, $options: 'i' } },
-          { tags: { $in: [new RegExp(req.query.search as string, 'i')] } }
+      // Use $and to combine base query with search conditions
+      query = {
+        $and: [
+          baseQuery,
+          {
+            $or: [
+              { name: { $regex: req.query.search, $options: 'i' } },
+              { description: { $regex: req.query.search, $options: 'i' } },
+              { brand: { $regex: req.query.search, $options: 'i' } },
+              { tags: { $in: [new RegExp(req.query.search as string, 'i')] } }
+            ]
+          }
         ]
-      });
+      };
     }
 
     // Get products with pagination
