@@ -194,7 +194,7 @@ const Products = () => {
       await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
       
       // Refetch and filter out deleted products from the response
-      const refetchResult = await queryClient.refetchQueries({
+      await queryClient.refetchQueries({
         queryKey: updatedQueryKey,
         exact: true
       });
