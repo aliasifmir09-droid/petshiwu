@@ -375,7 +375,15 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     
     // Build query - products are now permanently deleted, so no need to filter by deletedAt
     // Only filter by isActive for active/inactive products
-    const query: any = { isActive: true };
+    // Explicitly exclude any products that might have deletedAt set (backward compatibility)
+    const query: any = { 
+      isActive: true,
+      // Explicitly exclude any products that might have deletedAt set (backward compatibility)
+      $or: [
+        { deletedAt: null },
+        { deletedAt: { $exists: false } }
+      ]
+    };
 
     // Filter by category
     if (req.query.category) {
