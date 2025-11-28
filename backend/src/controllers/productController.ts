@@ -105,23 +105,100 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           continue;
         }
 
-        // Find category by name or ID
-        let category;
-        if (mongoose.Types.ObjectId.isValid(row.category)) {
-          category = await Category.findById(row.category);
-        } else {
-          // Try to find by name (case-insensitive)
-          category = await Category.findOne({
-            name: { $regex: new RegExp(`^${row.category}$`, 'i') },
+        // Helper function to find or create category in hierarchy
+        const findOrCreateCategory = async (categoryName: string, petType: string, parentId: mongoose.Types.ObjectId | null = null): Promise<mongoose.Types.ObjectId> => {
+          const trimmedName = categoryName.trim();
+          
+          // Try to find existing category
+          const query: any = {
+            name: { $regex: new RegExp(`^${trimmedName}$`, 'i') },
+            petType: petType.toLowerCase(),
             isActive: true
-          });
-        }
+          };
+          
+          if (parentId) {
+            query.parentCategory = parentId;
+          } else {
+            query.parentCategory = null;
+          }
+          
+          let category = await Category.findOne(query);
+          
+          // If not found, create it
+          if (!category) {
+            category = await Category.create({
+              name: trimmedName,
+              petType: petType.toLowerCase(),
+              parentCategory: parentId,
+              isActive: true,
+              description: `${trimmedName} products`
+            });
+          }
+          
+          return category._id;
+        };
 
+        // Parse hierarchical category path (e.g., "Dog > Food > Dry Food")
+        let categoryId: mongoose.Types.ObjectId;
+        const categoryPath = String(row.category).trim();
+        
+        if (categoryPath.includes('>')) {
+          // Hierarchical path detected
+          const categoryParts = categoryPath.split('>').map(part => part.trim()).filter(part => part.length > 0);
+          
+          if (categoryParts.length === 0) {
+            results.failed++;
+            results.errors.push({
+              row: rowNumber,
+              error: 'Invalid category path format'
+            });
+            continue;
+          }
+          
+          // Validate pet type matches first category (if it's a pet type name)
+          const petType = String(row.petType).toLowerCase().trim();
+          const firstCategoryName = categoryParts[0].toLowerCase();
+          
+          // Check if first part matches pet type (optional validation)
+          // We'll use the petType from CSV row instead
+          
+          // Build category hierarchy
+          let currentParentId: mongoose.Types.ObjectId | null = null;
+          
+          for (let i = 0; i < categoryParts.length; i++) {
+            const categoryName = categoryParts[i];
+            currentParentId = await findOrCreateCategory(categoryName, petType, currentParentId);
+          }
+          
+          categoryId = currentParentId!;
+        } else {
+          // Simple category name or ID
+          if (mongoose.Types.ObjectId.isValid(categoryPath)) {
+            // It's an ObjectId
+            const foundCategory = await Category.findById(categoryPath);
+            if (!foundCategory) {
+              results.failed++;
+              results.errors.push({
+                row: rowNumber,
+                error: `Category not found: ${categoryPath}`
+              });
+              continue;
+            }
+            categoryId = foundCategory._id;
+          } else {
+            // It's a category name - find or create as root category
+            const petType = String(row.petType).toLowerCase().trim();
+            categoryId = await findOrCreateCategory(categoryPath, petType, null);
+          }
+        }
+        
+        // Get the final category for validation
+        const category = await Category.findById(categoryId);
         if (!category) {
           results.failed++;
           results.errors.push({
             row: rowNumber,
-            error: `Category not found: ${row.category}`
+            error: 'Failed to resolve category'
           });
           continue;
         }
@@ -192,7 +269,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           description: String(row.description).trim(),
           shortDescription: row.shortDescription ? String(row.shortDescription).trim() : '',
           brand: String(row.brand).trim(),
-          category: category._id,
+          category: categoryId,
           images: images,
           variants: variants,
           basePrice: parseFloat(String(row.basePrice || '0')),
