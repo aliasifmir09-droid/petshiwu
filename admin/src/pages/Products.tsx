@@ -73,9 +73,14 @@ const Products = () => {
       // If product is already deleted (404), treat it as success and update UI
       if (error?.response?.status === 404) {
         // Product already deleted, just update the UI
-        await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
         queryClient.removeQueries({ queryKey: ['products'], exact: false });
+        await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
         await refetch();
+        await queryClient.refetchQueries({ 
+          queryKey: ['products'], 
+          exact: false,
+          type: 'active'
+        });
         showToast('Product has been deleted', 'success');
         return;
       }
@@ -108,23 +113,29 @@ const Products = () => {
       const failed = results.filter(r => r.status === 'rejected').length;
       const deletedCount = variables.length; // Number of products that were attempted to be deleted
       
-      // Aggressively invalidate and remove all product-related queries
-      queryClient.removeQueries({ queryKey: ['products'], exact: false });
-      await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
+      // Clear selection first
+      setSelectedProducts(new Set());
       
-      // Force refetch with current query parameters
-      await refetch();
-      
-      // Also refetch all product queries to ensure consistency
-      await queryClient.refetchQueries({ queryKey: ['products'], exact: false });
-      
-      // If we're on a page that might now be empty, reset to page 1
+      // If we're on a page that might now be empty, reset to page 1 before refetching
       if (productsData?.data && productsData.data.length <= deletedCount) {
         setPage(1);
       }
       
-      // Clear selection after delete
-      setSelectedProducts(new Set());
+      // Aggressively remove all product-related queries from cache
+      queryClient.removeQueries({ queryKey: ['products'], exact: false });
+      
+      // Invalidate all product queries
+      await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
+      
+      // Force refetch the current query with exact parameters
+      await refetch();
+      
+      // Also refetch all product queries to ensure consistency across the app
+      await queryClient.refetchQueries({ 
+        queryKey: ['products'], 
+        exact: false,
+        type: 'active' // Only refetch active queries
+      });
       
       if (failed > 0) {
         showToast(`${succeeded} products deleted, ${failed} failed`, 'warning');
