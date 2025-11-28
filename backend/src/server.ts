@@ -137,47 +137,23 @@ app.use(helmet({
   frameguard: false // Disable X-Frame-Options (using CSP frame-ancestors instead)
 }));
 
-// Rate limiting - Prevent brute force attacks
-const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+// Rate limiting - Disabled or very lenient to avoid blocking legitimate requests
+// Note: Rate limiting is disabled for now. Re-enable with appropriate limits if needed for security.
 
-// Stricter rate limiting for auth endpoints
+// Very lenient rate limiting for auth endpoints only (to prevent brute force)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // limit each IP to 10 login attempts per windowMs (increased from 5)
+  max: 50, // Very high limit to avoid blocking legitimate users
   message: 'Too many login attempts, please try again after 15 minutes.',
   skipSuccessfulRequests: true, // Don't count successful requests
   standardHeaders: true,
   legacyHeaders: false,
-  // Use a key generator that considers both IP and user agent to avoid false positives
-  keyGenerator: (req) => {
-    return req.ip || req.socket.remoteAddress || 'unknown';
-  },
-  // Skip rate limiting for successful logins
-  skip: (req) => {
-    // This will be handled by skipSuccessfulRequests, but we can add additional logic here
-    return false;
-  }
 });
 
-// Stricter rate limiting for upload endpoints
-const uploadLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 20, // limit each IP to 20 uploads per hour
-  message: 'Too many upload requests, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-app.use('/api/', generalLimiter);
+// Apply rate limiting only to auth endpoints
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
-app.use('/api/upload', uploadLimiter);
+// All other endpoints have no rate limiting
 
 // Body parser with size limits to prevent DoS attacks
 app.use(express.json({ limit: '10mb' }));
