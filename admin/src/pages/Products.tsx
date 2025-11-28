@@ -398,7 +398,12 @@ const Products = () => {
         <CSVImport
           onClose={() => {
             setShowCSVImport(false);
+          }}
+          onImportComplete={() => {
+            // Force refetch with current filters
             refetch();
+            // Also reset to page 1 to see newly imported products
+            setPage(1);
           }}
         />
       )}

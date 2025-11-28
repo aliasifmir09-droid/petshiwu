@@ -6,9 +6,10 @@ import { useToast } from '@/hooks/useToast';
 
 interface CSVImportProps {
   onClose: () => void;
+  onImportComplete?: () => void;
 }
 
-const CSVImport = ({ onClose }: CSVImportProps) => {
+const CSVImport = ({ onClose, onImportComplete }: CSVImportProps) => {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -18,12 +19,17 @@ const CSVImport = ({ onClose }: CSVImportProps) => {
 
   const importMutation = useMutation({
     mutationFn: (file: File) => adminService.importProductsFromCSV(file),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setImportResult(data);
-      queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
+      // Aggressively invalidate and refetch all product queries
+      await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
       queryClient.removeQueries({ queryKey: ['products'], exact: false });
-      queryClient.refetchQueries({ queryKey: ['products'] });
-      showToast('Products imported successfully!', 'success');
+      await queryClient.refetchQueries({ queryKey: ['products'], exact: false });
+      showToast(`Successfully imported ${data.data?.succeeded || 0} products!`, 'success');
+      // Call onImportComplete callback if provided
+      if (onImportComplete) {
+        onImportComplete();
+      }
     },
     onError: (error: any) => {
       showToast(error?.response?.data?.message || 'Failed to import products', 'error');
