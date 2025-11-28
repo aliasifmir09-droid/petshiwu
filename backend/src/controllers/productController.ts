@@ -379,9 +379,13 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     const query: any = { 
       isActive: true,
       // Explicitly exclude any products that might have deletedAt set (backward compatibility)
-      $or: [
-        { deletedAt: null },
-        { deletedAt: { $exists: false } }
+      $and: [
+        {
+          $or: [
+            { deletedAt: null },
+            { deletedAt: { $exists: false } }
+          ]
+        }
       ]
     };
 
@@ -418,12 +422,15 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
 
     // Search by name, description, brand, or tags
     if (req.query.search) {
-      query.$or = [
-        { name: { $regex: req.query.search, $options: 'i' } },
-        { description: { $regex: req.query.search, $options: 'i' } },
-        { brand: { $regex: req.query.search, $options: 'i' } },
-        { tags: { $in: [new RegExp(req.query.search as string, 'i')] } }
-      ];
+      // Add search conditions to $and array to avoid conflict with deletedAt $or
+      query.$and.push({
+        $or: [
+          { name: { $regex: req.query.search, $options: 'i' } },
+          { description: { $regex: req.query.search, $options: 'i' } },
+          { brand: { $regex: req.query.search, $options: 'i' } },
+          { tags: { $in: [new RegExp(req.query.search as string, 'i')] } }
+        ]
+      });
     }
 
     // Get products with pagination
