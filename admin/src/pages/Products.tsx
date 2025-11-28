@@ -418,63 +418,64 @@ const Products = () => {
                         />
                       </td>
                       <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={normalizeImageUrl(product.images?.[0])}
-                          alt={product.name}
-                          onError={(e) => handleImageError(e, product.name)}
-                          className="w-12 h-12 object-cover rounded"
-                        />
-                        <div>
-                          <p className="font-medium">{product.name}</p>
-                          <p className="text-sm text-gray-600">{product.brand}</p>
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={normalizeImageUrl(product.images?.[0])}
+                            alt={product.name}
+                            onError={(e) => handleImageError(e, product.name)}
+                            className="w-12 h-12 object-cover rounded"
+                          />
+                          <div>
+                            <p className="font-medium">{product.name}</p>
+                            <p className="text-sm text-gray-600">{product.brand}</p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      {product.category?.name || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium">
-                      ${product.basePrice.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span className={product.totalStock > 0 ? 'text-green-600' : 'text-red-600'}>
-                        {product.totalStock}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        product.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {product.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleEdit(product)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded"
-                        >
-                          <Edit size={18} />
-                        </button>
-                        <button
-                          onClick={() => {
-                            // Normalize product ID to string
-                            const productId = product._id ? String(product._id) : product._id;
-                            setDeleteConfirm({
-                              isOpen: true,
-                              productId: productId,
-                              productName: product.name
-                            });
-                          }}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        {product.category?.name || 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-medium">
+                        ${product.basePrice.toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={product.totalStock > 0 ? 'text-green-600' : 'text-red-600'}>
+                          {product.totalStock}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          product.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {product.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleEdit(product)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                          >
+                            <Edit size={18} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              // Normalize product ID to string
+                              const productId = product._id ? String(product._id) : product._id;
+                              setDeleteConfirm({
+                                isOpen: true,
+                                productId: productId,
+                                productName: product.name
+                              });
+                            }}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
