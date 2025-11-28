@@ -59,12 +59,18 @@ const Products = () => {
   const deleteMutation = useMutation({
     mutationFn: adminService.deleteProduct,
     onSuccess: async () => {
-      // Aggressively invalidate and remove all product-related queries
-      await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
-      // Remove all product queries from cache to force fresh fetch
+      // Aggressively remove all product-related queries from cache
       queryClient.removeQueries({ queryKey: ['products'], exact: false });
+      // Invalidate all product queries
+      await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
       // Manually refetch the current query
       await refetch();
+      // Also refetch all product queries to ensure consistency
+      await queryClient.refetchQueries({ 
+        queryKey: ['products'], 
+        exact: false,
+        type: 'active'
+      });
       showToast('Product deleted successfully!', 'success');
     },
     onError: async (error: any) => {
