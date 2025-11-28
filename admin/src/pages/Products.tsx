@@ -23,6 +23,7 @@ const Products = () => {
   const [stockFilter, setStockFilter] = useState('');
   const [dismissedNotification, setDismissedNotification] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [forceRefresh, setForceRefresh] = useState(0); // Force re-render counter
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean;
     productId?: string;
@@ -32,7 +33,7 @@ const Products = () => {
   }>({ isOpen: false });
 
   const { data: productsData, isLoading, refetch } = useQuery({
-    queryKey: ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter],
+    queryKey: ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter, forceRefresh],
     queryFn: () => adminService.getProducts({ 
       page, 
       limit: 20, 
@@ -123,6 +124,9 @@ const Products = () => {
       // Show success message immediately
       showToast('Product deleted successfully!', 'success');
       
+      // Force a complete re-render by updating the refresh counter
+      setForceRefresh(prev => prev + 1);
+      
       // Then do background refetch to ensure consistency
       setTimeout(async () => {
         // Remove all product queries from cache
@@ -133,11 +137,15 @@ const Products = () => {
         
         // Refetch the current query
         const updatedPage = willBeEmpty && page > 1 ? page - 1 : page;
-        const updatedQueryKey = ['products', updatedPage, searchQuery, categoryFilter, petTypeFilter, stockFilter];
-        await queryClient.refetchQueries({
-          queryKey: updatedQueryKey,
-          exact: true
-        });
+        if (updatedPage !== page) {
+          setPage(updatedPage);
+        }
+        
+        // Force another refresh
+        setForceRefresh(prev => prev + 1);
+        
+        // Also manually refetch
+        await refetch();
       }, 100);
     },
     onError: async (error: any, productId) => {
