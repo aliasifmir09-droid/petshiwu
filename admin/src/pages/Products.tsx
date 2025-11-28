@@ -103,9 +103,10 @@ const Products = () => {
       );
       return results;
     },
-    onSuccess: async (results) => {
+    onSuccess: async (results, variables) => {
       const succeeded = results.filter(r => r.status === 'fulfilled').length;
       const failed = results.filter(r => r.status === 'rejected').length;
+      const deletedCount = variables.length; // Number of products that were attempted to be deleted
       
       // Aggressively invalidate and remove all product-related queries
       queryClient.removeQueries({ queryKey: ['products'], exact: false });
@@ -118,7 +119,7 @@ const Products = () => {
       await queryClient.refetchQueries({ queryKey: ['products'], exact: false });
       
       // If we're on a page that might now be empty, reset to page 1
-      if (productsData?.data && productsData.data.length <= productIds.length) {
+      if (productsData?.data && productsData.data.length <= deletedCount) {
         setPage(1);
       }
       
