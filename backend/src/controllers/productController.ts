@@ -109,9 +109,13 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
         const findOrCreateCategory = async (categoryName: string, petType: string, parentId: mongoose.Types.ObjectId | null = null): Promise<mongoose.Types.ObjectId> => {
           const trimmedName = categoryName.trim();
           
+          if (!trimmedName || trimmedName.length === 0) {
+            throw new Error('Category name cannot be empty');
+          }
+          
           // Try to find existing category (check both active and inactive)
           const query: any = {
-            name: { $regex: new RegExp(`^${trimmedName}$`, 'i') },
+            name: { $regex: new RegExp(`^${trimmedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
             petType: petType.toLowerCase()
           };
           
@@ -137,14 +141,26 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
               }
             }
             
-            category = await Category.create({
-              name: trimmedName,
-              petType: petType.toLowerCase(),
-              parentCategory: parentId,
-              isActive: true,
-              level: level,
-              description: `${trimmedName} products`
-            });
+            try {
+              category = await Category.create({
+                name: trimmedName,
+                petType: petType.toLowerCase(),
+                parentCategory: parentId,
+                isActive: true,
+                level: level,
+                description: `${trimmedName} products`
+              });
+            } catch (createError: any) {
+              // If creation fails (e.g., duplicate key), try to find it again
+              if (createError.code === 11000 || createError.name === 'MongoServerError') {
+                category = await Category.findOne(query);
+                if (!category) {
+                  throw new Error(`Failed to create category "${trimmedName}": ${createError.message}`);
+                }
+              } else {
+                throw createError;
+              }
+            }
           } else if (!category.isActive) {
             // If category exists but is inactive, reactivate it
             category.isActive = true;
@@ -153,6 +169,10 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           
           // Ensure we return a proper ObjectId
           if (category && category._id) {
+            // Convert to ObjectId if it's not already
+            if (typeof category._id === 'string') {
+              return new mongoose.Types.ObjectId(category._id);
+            }
             return category._id as mongoose.Types.ObjectId;
           }
           
