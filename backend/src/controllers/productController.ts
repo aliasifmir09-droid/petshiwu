@@ -436,8 +436,8 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
 
     const total = await Product.countDocuments(query);
 
-    // Normalize _id to string for all products
-    const normalizedProducts = normalizeProducts(products);
+    // Normalize _id to string for all products (use filtered products)
+    const normalizedProducts = normalizeProducts(activeProducts);
 
     res.status(200).json({
       success: true,
@@ -722,22 +722,30 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
     // Wait for all image deletions to complete (using allSettled to not fail on individual errors)
     await Promise.allSettled(imageDeletionPromises);
 
-    // Permanently delete product from database
-    const deletedProduct = await Product.findByIdAndDelete(productId);
+    // Permanently delete product from database using deleteOne for more control
+    const deleteResult = await Product.deleteOne({ _id: productId });
     
     // Verify deletion was successful
-    if (!deletedProduct) {
-      return res.status(404).json({
-        success: false,
-        message: 'Product not found or already deleted'
+    if (deleteResult.deletedCount === 0) {
+      // Product might not exist, but that's okay (idempotent)
+      return res.status(200).json({
+        success: true,
+        message: 'Product deleted successfully'
       });
     }
 
     // Double-check: Verify product is actually deleted
     const verifyDeleted = await Product.findById(productId);
     if (verifyDeleted) {
-      // If still exists, try deleteOne as fallback
-      await Product.deleteOne({ _id: productId });
+      // If still exists, force delete using findByIdAndDelete
+      await Product.findByIdAndDelete(productId);
+      
+      // One more verification
+      const finalCheck = await Product.findById(productId);
+      if (finalCheck) {
+        // Last resort: use remove
+        await finalCheck.deleteOne();
+      }
     }
 
     res.status(200).json({
