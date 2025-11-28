@@ -224,15 +224,21 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           }
         }
         
-        // Get the final category for validation
-        const category = await Category.findById(categoryId);
+        // Get the final category for validation and ensure it's populated
+        const category = await Category.findById(categoryId).lean();
         if (!category) {
           results.failed++;
           results.errors.push({
             row: rowNumber,
-            error: 'Failed to resolve category'
+            error: `Failed to resolve category with ID: ${categoryId}`
           });
           continue;
+        }
+        
+        // Verify category is active
+        if (!category.isActive) {
+          // Reactivate the category if it was inactive
+          await Category.findByIdAndUpdate(categoryId, { isActive: true });
         }
 
         // Parse images (comma-separated URLs)
