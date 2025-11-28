@@ -57,22 +57,43 @@ const Orders = () => {
     }
   });
 
-  const handleStatusChange = (orderId: string, newStatus: string) => {
-    setPendingStatusChange({ orderId, status: newStatus });
+  const handleStatusChange = (orderId: any, newStatus: string) => {
+    // Ensure orderId is a string
+    const id = String(orderId || '').trim();
+    if (!id || id === 'undefined' || id === 'null' || id === '[object Object]') {
+      showToast('Invalid order ID', 'error');
+      return;
+    }
+    setPendingStatusChange({ orderId: id, status: newStatus });
     setShowStatusConfirm(true);
   };
 
   const confirmStatusChange = () => {
     if (pendingStatusChange) {
+      // Ensure orderId is a string before sending
+      const orderId = String(pendingStatusChange.orderId || '').trim();
+      if (!orderId || orderId === 'undefined' || orderId === 'null' || orderId === '[object Object]') {
+        showToast('Invalid order ID', 'error');
+        setShowStatusConfirm(false);
+        setPendingStatusChange(null);
+        return;
+      }
       updateStatusMutation.mutate({
-        id: pendingStatusChange.orderId,
+        id: orderId,
         data: { orderStatus: pendingStatusChange.status }
       });
     }
   };
 
   const handlePaymentUpdate = () => {
-    adminService.updatePaymentStatus(selectedOrder._id, { paymentStatus: 'paid' })
+    // Ensure order ID is a string
+    const orderId = String(selectedOrder._id || selectedOrder.id || '').trim();
+    if (!orderId || orderId === 'undefined' || orderId === 'null' || orderId === '[object Object]') {
+      showToast('Invalid order ID', 'error');
+      setShowPaymentConfirm(false);
+      return;
+    }
+    adminService.updatePaymentStatus(orderId, { paymentStatus: 'paid' })
       .then(() => {
         // Invalidate and refetch all order-related queries
         queryClient.invalidateQueries({ queryKey: ['orders'] });
@@ -182,7 +203,7 @@ const Orders = () => {
                     <td className="px-6 py-4 text-sm">
                       <select
                         value={order.orderStatus}
-                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                        onChange={(e) => handleStatusChange(String(order._id || order.id || ''), e.target.value)}
                         className={`px-2 py-1 rounded-full text-xs font-medium border-0 ${
                           order.orderStatus === 'delivered' ? 'bg-green-100 text-green-800' :
                           order.orderStatus === 'shipped' ? 'bg-blue-100 text-blue-800' :
