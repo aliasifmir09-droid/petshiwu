@@ -654,11 +654,25 @@ const Products = () => {
           onClose={() => {
             setShowCSVImport(false);
           }}
-          onImportComplete={() => {
-            // Force refetch with current filters
-            refetch();
-            // Also reset to page 1 to see newly imported products
+          onImportComplete={async () => {
+            // Reset to page 1 to see newly imported products
             setPage(1);
+            
+            // Wait a moment for page state to update
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Aggressively clear cache and refetch
+            queryClient.removeQueries({ queryKey: ['products'], exact: false });
+            await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
+            
+            // Refetch with page 1 and current filters
+            await queryClient.refetchQueries({
+              queryKey: ['products', 1, searchQuery, categoryFilter, petTypeFilter, stockFilter],
+              exact: true
+            });
+            
+            // Also force manual refetch
+            await refetch();
           }}
         />
       )}

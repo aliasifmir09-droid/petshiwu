@@ -21,14 +21,22 @@ const CSVImport = ({ onClose, onImportComplete }: CSVImportProps) => {
     mutationFn: (file: File) => adminService.importProductsFromCSV(file),
     onSuccess: async (data) => {
       setImportResult(data);
+      
+      // Wait a moment for backend to fully process the imports
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       // Aggressively invalidate and refetch all product queries
-      await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
       queryClient.removeQueries({ queryKey: ['products'], exact: false });
+      await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
       await queryClient.refetchQueries({ queryKey: ['products'], exact: false });
+      
       showToast(`Successfully imported ${data.data?.succeeded || 0} products!`, 'success');
-      // Call onImportComplete callback if provided
+      
+      // Call onImportComplete callback if provided (after a short delay to ensure queries are ready)
       if (onImportComplete) {
-        onImportComplete();
+        setTimeout(() => {
+          onImportComplete();
+        }, 300);
       }
     },
     onError: (error: any) => {
