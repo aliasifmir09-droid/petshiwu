@@ -84,13 +84,91 @@ const Products = () => {
     }
   });
 
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (productIds: string[]) => {
+      // Delete products one by one (or you could create a bulk delete endpoint)
+      const results = await Promise.allSettled(
+        productIds.map(id => adminService.deleteProduct(id))
+      );
+      return results;
+    },
+    onSuccess: async (results) => {
+      const succeeded = results.filter(r => r.status === 'fulfilled').length;
+      const failed = results.filter(r => r.status === 'rejected').length;
+      
+      // Aggressively invalidate and remove all product-related queries
+      await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
+      queryClient.removeQueries({ queryKey: ['products'], exact: false });
+      await refetch();
+      
+      // Clear selection after delete
+      setSelectedProducts(new Set());
+      
+      if (failed > 0) {
+        showToast(`${succeeded} products deleted, ${failed} failed`, 'warning');
+      } else {
+        showToast(`${succeeded} products deleted successfully!`, 'success');
+      }
+    },
+    onError: (error: any) => {
+      showToast(error?.response?.data?.message || 'Failed to delete products', 'error');
+    }
+  });
+
   const handleConfirmDelete = () => {
-    if (deleteConfirm.productId) {
-      // Ensure product ID is a string
+    if (deleteConfirm.isBulk && deleteConfirm.productIds) {
+      // Bulk delete
+      bulkDeleteMutation.mutate(deleteConfirm.productIds);
+    } else if (deleteConfirm.productId) {
+      // Single delete
       const productId = String(deleteConfirm.productId);
       deleteMutation.mutate(productId);
     }
     setDeleteConfirm({ isOpen: false });
+  };
+
+  const handleSelectProduct = (productId: string) => {
+    setSelectedProducts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(productId)) {
+        newSet.delete(productId);
+      } else {
+        newSet.add(productId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (productsData?.data) {
+      if (selectedProducts.size === productsData.data.length) {
+        // Deselect all
+        setSelectedProducts(new Set());
+      } else {
+        // Select all on current page
+        const allIds = productsData.data.map((p: any) => String(p._id));
+        setSelectedProducts(new Set(allIds));
+      }
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedProducts.size === 0) return;
+    
+    const productIds = Array.from(selectedProducts);
+    const productNames = productsData?.data
+      ?.filter((p: any) => selectedProducts.has(String(p._id)))
+      .map((p: any) => p.name)
+      .slice(0, 3) || [];
+    
+    setDeleteConfirm({
+      isOpen: true,
+      productIds: productIds,
+      isBulk: true,
+      productName: selectedProducts.size === 1 
+        ? productNames[0] 
+        : `${selectedProducts.size} products`
+    });
   };
 
   const handleEdit = (product: any) => {
@@ -267,12 +345,39 @@ const Products = () => {
         </div>
       )}
 
+      {/* Bulk Actions Bar */}
+      {selectedProducts.size > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="font-semibold text-blue-900">
+              {selectedProducts.size} product{selectedProducts.size > 1 ? 's' : ''} selected
+            </span>
+          </div>
+          <button
+            onClick={handleBulkDelete}
+            disabled={bulkDeleteMutation.isPending}
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Trash2 size={18} />
+            {bulkDeleteMutation.isPending ? 'Deleting...' : `Delete Selected (${selectedProducts.size})`}
+          </button>
+        </div>
+      )}
+
       {/* Products Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    checked={productsData?.data && selectedProducts.size === productsData.data.length && productsData.data.length > 0}
+                    onChange={handleSelectAll}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
@@ -431,12 +536,16 @@ const Products = () => {
         isOpen={deleteConfirm.isOpen}
         onClose={() => setDeleteConfirm({ isOpen: false })}
         onConfirm={handleConfirmDelete}
-        title="Delete Product"
-        message={`Are you sure you want to delete "${deleteConfirm.productName}"? This action cannot be undone and will permanently remove this product from the system.`}
-        confirmText="Delete Product"
+        title={deleteConfirm.isBulk ? "Delete Products" : "Delete Product"}
+        message={
+          deleteConfirm.isBulk
+            ? `Are you sure you want to delete ${deleteConfirm.productIds?.length || 0} selected products? This action cannot be undone and will permanently remove these products from the system.`
+            : `Are you sure you want to delete "${deleteConfirm.productName}"? This action cannot be undone and will permanently remove this product from the system.`
+        }
+        confirmText={deleteConfirm.isBulk ? `Delete ${deleteConfirm.productIds?.length || 0} Products` : "Delete Product"}
         cancelText="Cancel"
         confirmButtonClass="bg-red-600 hover:bg-red-700"
-        isLoading={deleteMutation.isPending}
+        isLoading={deleteConfirm.isBulk ? bulkDeleteMutation.isPending : deleteMutation.isPending}
         icon={
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
             <Trash2 className="text-red-600" size={32} />
