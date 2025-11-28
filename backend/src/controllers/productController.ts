@@ -742,20 +742,24 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
     // Permanently delete product from database using deleteOne for more control
     const deleteResult = await Product.deleteOne({ _id: productId });
     
-    // Verify deletion was successful
+    // If deleteOne didn't work, try findByIdAndDelete
     if (deleteResult.deletedCount === 0) {
-      // Check if product actually exists
-      const stillExists = await Product.findById(productId);
-      if (!stillExists) {
-        // Product doesn't exist, deletion already successful (idempotent)
-        return res.status(200).json({
-          success: true,
-          message: 'Product deleted successfully'
-        });
+      const deletedProduct = await Product.findByIdAndDelete(productId);
+      if (!deletedProduct) {
+        // Check if product actually exists
+        const stillExists = await Product.findById(productId);
+        if (!stillExists) {
+          // Product doesn't exist, deletion already successful (idempotent)
+          return res.status(200).json({
+            success: true,
+            message: 'Product deleted successfully'
+          });
+        }
       }
-      // Product exists but deleteOne returned 0, try alternative methods
-      await Product.findByIdAndDelete(productId);
     }
+
+    // Wait for database to commit the deletion
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     // Double-check: Verify product is actually deleted
     const verifyDeleted = await Product.findById(productId);
@@ -764,11 +768,15 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
       await Product.deleteOne({ _id: productId });
       await Product.findByIdAndDelete(productId);
       
+      // Wait again for commit
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
       // One more verification
       const finalCheck = await Product.findById(productId);
       if (finalCheck) {
-        // Last resort: use remove
+        // Last resort: use remove on the document
         await finalCheck.deleteOne();
+        await new Promise(resolve => setTimeout(resolve, 300));
       }
     }
 
