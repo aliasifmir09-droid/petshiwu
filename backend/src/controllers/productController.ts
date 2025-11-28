@@ -331,13 +331,29 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           ? String(row.features).split(',').map((feature: string) => feature.trim()).filter((feature: string) => feature.length > 0)
           : [];
 
-        // Create product data
+        // Ensure categoryId is a proper ObjectId before creating product
+        const categoryObjectId = categoryId instanceof mongoose.Types.ObjectId 
+          ? categoryId 
+          : new mongoose.Types.ObjectId(String(categoryId));
+        
+        // Final validation - ensure category exists
+        const finalCategoryCheck = await Category.findById(categoryObjectId);
+        if (!finalCategoryCheck) {
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            error: `Category with ID ${categoryObjectId} does not exist before product creation`
+          });
+          continue;
+        }
+        
+        // Create product data - use the validated ObjectId
         const productData: any = {
           name: String(row.name).trim(),
           description: String(row.description).trim(),
           shortDescription: row.shortDescription ? String(row.shortDescription).trim() : '',
           brand: String(row.brand).trim(),
-          category: categoryId,
+          category: categoryObjectId, // Use the validated ObjectId
           images: images,
           variants: variants,
           basePrice: parseFloat(String(row.basePrice || '0')),
