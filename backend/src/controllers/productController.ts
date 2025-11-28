@@ -727,17 +727,24 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
     
     // Verify deletion was successful
     if (deleteResult.deletedCount === 0) {
-      // Product might not exist, but that's okay (idempotent)
-      return res.status(200).json({
-        success: true,
-        message: 'Product deleted successfully'
-      });
+      // Check if product actually exists
+      const stillExists = await Product.findById(productId);
+      if (!stillExists) {
+        // Product doesn't exist, deletion already successful (idempotent)
+        return res.status(200).json({
+          success: true,
+          message: 'Product deleted successfully'
+        });
+      }
+      // Product exists but deleteOne returned 0, try alternative methods
+      await Product.findByIdAndDelete(productId);
     }
 
     // Double-check: Verify product is actually deleted
     const verifyDeleted = await Product.findById(productId);
     if (verifyDeleted) {
-      // If still exists, force delete using findByIdAndDelete
+      // If still exists, force delete using multiple methods
+      await Product.deleteOne({ _id: productId });
       await Product.findByIdAndDelete(productId);
       
       // One more verification
@@ -746,6 +753,16 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
         // Last resort: use remove
         await finalCheck.deleteOne();
       }
+    }
+
+    // Final verification - ensure product is gone
+    const finalVerification = await Product.findById(productId);
+    if (finalVerification) {
+      // If still exists after all attempts, return error
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to delete product. Please try again.'
+      });
     }
 
     res.status(200).json({
