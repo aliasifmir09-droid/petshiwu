@@ -419,6 +419,23 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response, next: N
   try {
     const { orderStatus, trackingNumber } = req.body;
 
+    // Validate orderStatus if provided
+    const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+    if (orderStatus && !validStatuses.includes(orderStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid order status. Must be one of: ${validStatuses.join(', ')}`
+      });
+    }
+
+    // Validate order ID
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid order ID'
+      });
+    }
+
     const order = await Order.findById(req.params.id);
 
     if (!order) {
@@ -428,24 +445,44 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response, next: N
       });
     }
 
-    order.orderStatus = orderStatus || order.orderStatus;
+    // Update order status if provided
+    if (orderStatus) {
+      order.orderStatus = orderStatus;
+    }
     
-    if (trackingNumber) {
-      order.trackingNumber = trackingNumber;
+    // Update tracking number if provided
+    if (trackingNumber !== undefined) {
+      order.trackingNumber = trackingNumber || null;
     }
 
+    // Handle delivered status
     if (orderStatus === 'delivered') {
       order.isDelivered = true;
       order.deliveredAt = new Date();
+    } else if (orderStatus && orderStatus !== 'delivered') {
+      // If changing from delivered to another status, reset delivered flags
+      if (order.isDelivered) {
+        order.isDelivered = false;
+        order.deliveredAt = undefined;
+      }
     }
 
     await order.save();
 
     res.status(200).json({
       success: true,
+      message: 'Order status updated successfully',
       data: order
     });
-  } catch (error) {
+  } catch (error: any) {
+    // Handle Mongoose validation errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors: Object.values(error.errors).map((err: any) => err.message)
+      });
+    }
     next(error);
   }
 };

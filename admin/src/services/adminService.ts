@@ -219,7 +219,21 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
   },
 
   updateOrderStatus: async (id: string, data: any) => {
-    const response = await api.put(`/orders/${id}/status`, data);
+    // Ensure ID is a string and valid
+    const orderId = String(id).trim();
+    if (!orderId || orderId === 'undefined' || orderId === 'null') {
+      throw new Error('Invalid order ID');
+    }
+    
+    // Ensure orderStatus is valid if provided
+    if (data.orderStatus) {
+      const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+      if (!validStatuses.includes(data.orderStatus)) {
+        throw new Error(`Invalid order status: ${data.orderStatus}`);
+      }
+    }
+    
+    const response = await api.put(`/orders/${encodeURIComponent(orderId)}/status`, data);
     return response.data.data;
   },
 
