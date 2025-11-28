@@ -88,7 +88,18 @@ const Products = () => {
     mutationFn: async (productIds: string[]) => {
       // Delete products one by one (or you could create a bulk delete endpoint)
       const results = await Promise.allSettled(
-        productIds.map(id => adminService.deleteProduct(id))
+        productIds.map(async (id) => {
+          try {
+            await adminService.deleteProduct(id);
+            return { success: true, id };
+          } catch (error: any) {
+            // If product is already deleted (404), treat it as success
+            if (error?.response?.status === 404) {
+              return { success: true, id, alreadyDeleted: true };
+            }
+            throw error;
+          }
+        })
       );
       return results;
     },
@@ -97,9 +108,19 @@ const Products = () => {
       const failed = results.filter(r => r.status === 'rejected').length;
       
       // Aggressively invalidate and remove all product-related queries
-      await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
       queryClient.removeQueries({ queryKey: ['products'], exact: false });
+      await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
+      
+      // Force refetch with current query parameters
       await refetch();
+      
+      // Also refetch all product queries to ensure consistency
+      await queryClient.refetchQueries({ queryKey: ['products'], exact: false });
+      
+      // If we're on a page that might now be empty, reset to page 1
+      if (productsData?.data && productsData.data.length <= productIds.length) {
+        setPage(1);
+      }
       
       // Clear selection after delete
       setSelectedProducts(new Set());
@@ -107,7 +128,7 @@ const Products = () => {
       if (failed > 0) {
         showToast(`${succeeded} products deleted, ${failed} failed`, 'warning');
       } else {
-        showToast(`${succeeded} products deleted successfully!`, 'success');
+        showToast(`${succeeded} product${succeeded > 1 ? 's' : ''} deleted successfully!`, 'success');
       }
     },
     onError: (error: any) => {
