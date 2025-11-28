@@ -164,14 +164,21 @@ const findAndRemoveDuplicates = async (dryRun: boolean = true) => {
 };
 
 // Run the script
-const args = process.argv.slice(2);
-const dryRun = !args.includes('--delete');
+const runScript = async () => {
+  const args = process.argv.slice(2);
+  const dryRun = !args.includes('--delete');
 
-if (!dryRun) {
-  console.log('⚠️  WARNING: This will permanently delete duplicate products!');
-  console.log('   Press Ctrl+C to cancel, or wait 5 seconds to continue...\n');
-  await new Promise(resolve => setTimeout(resolve, 5000));
-}
+  if (!dryRun) {
+    console.log('⚠️  WARNING: This will permanently delete duplicate products!');
+    console.log('   Press Ctrl+C to cancel, or wait 5 seconds to continue...\n');
+    await new Promise(resolve => setTimeout(resolve, 5000));
+  }
 
-findAndRemoveDuplicates(dryRun);
+  await findAndRemoveDuplicates(dryRun);
+};
+
+runScript().catch((error) => {
+  console.error('❌ Script error:', error);
+  process.exit(1);
+});
 
