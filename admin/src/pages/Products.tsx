@@ -188,19 +188,52 @@ const Products = () => {
       });
       
       // Wait for backend to process deletions
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 800));
       
       // Invalidate all product queries
       await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
       
-      // Force refetch the current query with exact parameters
-      await queryClient.refetchQueries({
+      // Refetch and filter out deleted products from the response
+      const refetchResult = await queryClient.refetchQueries({
         queryKey: updatedQueryKey,
         exact: true
       });
       
+      // After refetch, ensure deleted products are still filtered out
+      queryClient.setQueryData(updatedQueryKey, (oldData: any) => {
+        if (!oldData || !oldData.data) return oldData;
+        
+        // Filter out deleted products (in case they came back from backend)
+        const filteredData = oldData.data.filter((product: any) => {
+          const productId = String(product._id);
+          return !deletedIds.has(productId);
+        });
+        
+        return {
+          ...oldData,
+          data: filteredData,
+          total: Math.max(0, (oldData.total || 0) - succeeded)
+        };
+      });
+      
       // Force a manual refetch as well
       await refetch();
+      
+      // One more time, ensure deleted products are filtered after manual refetch
+      queryClient.setQueryData(updatedQueryKey, (oldData: any) => {
+        if (!oldData || !oldData.data) return oldData;
+        
+        const filteredData = oldData.data.filter((product: any) => {
+          const productId = String(product._id);
+          return !deletedIds.has(productId);
+        });
+        
+        return {
+          ...oldData,
+          data: filteredData,
+          total: Math.max(0, (oldData.total || 0) - succeeded)
+        };
+      });
       
       if (failed > 0) {
         showToast(`${succeeded} products deleted, ${failed} failed`, 'warning');
