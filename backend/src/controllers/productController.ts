@@ -711,9 +711,24 @@ export const updateProduct = async (req: AuthRequest, res: Response, next: NextF
 export const deleteProduct = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const productId = req.params.id;
+    const userId = req.user?._id;
+    const userEmail = req.user?.email;
+    const userRole = req.user?.role;
+
+    // LOG: Track all product deletions
+    console.log(`[DELETE PRODUCT] Request received:`, {
+      productId,
+      userId: userId?.toString(),
+      userEmail,
+      userRole,
+      timestamp: new Date().toISOString(),
+      ip: req.ip,
+      userAgent: req.get('user-agent')
+    });
 
     // Validate product ID
     if (!mongoose.Types.ObjectId.isValid(productId)) {
+      console.log(`[DELETE PRODUCT] Invalid product ID: ${productId}`);
       return res.status(400).json({
         success: false,
         message: 'Invalid product ID'
@@ -731,18 +746,24 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
       const productBySlug = await Product.findOne({ slug: productId });
       if (!productBySlug) {
         // Return success even if product doesn't exist (idempotent)
+        console.log(`[DELETE PRODUCT] Product not found: ${productId} (idempotent success)`);
         return res.status(200).json({
           success: true,
           message: 'Product deleted successfully'
         });
       }
       // Found by slug, delete it
+      console.log(`[DELETE PRODUCT] Found product by slug, deleting: ${productBySlug._id} (${productBySlug.name})`);
       await Product.deleteOne({ _id: productBySlug._id });
+      console.log(`[DELETE PRODUCT] Successfully deleted product by slug: ${productBySlug._id}`);
       return res.status(200).json({
         success: true,
         message: 'Product deleted successfully'
       });
     }
+
+    // LOG: Product found, proceeding with deletion
+    console.log(`[DELETE PRODUCT] Product found: ${product._id} (${product.name}), proceeding with deletion`);
 
     // Extract Cloudinary public_ids from image URLs and delete from Cloudinary
     const { deleteFromCloudinary } = await import('../utils/cloudinary');
@@ -773,23 +794,29 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
 
     // Permanently delete product from database
     // Use deleteOne with explicit ObjectId
+    console.log(`[DELETE PRODUCT] Attempting database deletion: ${objectId}`);
     let deleteResult = await Product.deleteOne({ _id: objectId });
+    console.log(`[DELETE PRODUCT] deleteOne result: ${deleteResult.deletedCount} deleted`);
     
     // If deleteOne didn't work, try findByIdAndDelete
     if (deleteResult.deletedCount === 0) {
+      console.log(`[DELETE PRODUCT] deleteOne returned 0, trying findByIdAndDelete`);
       const deletedProduct = await Product.findByIdAndDelete(objectId);
       if (deletedProduct) {
+        console.log(`[DELETE PRODUCT] findByIdAndDelete succeeded: ${deletedProduct._id}`);
         deleteResult = { deletedCount: 1 } as any;
       } else {
         // Check if product actually exists
         const stillExists = await Product.findById(objectId);
         if (!stillExists) {
           // Product doesn't exist, deletion already successful (idempotent)
+          console.log(`[DELETE PRODUCT] Product already deleted (idempotent success)`);
           return res.status(200).json({
             success: true,
             message: 'Product deleted successfully'
           });
         }
+        console.log(`[DELETE PRODUCT] Product still exists after deletion attempts`);
       }
     }
 
@@ -826,11 +853,24 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
     }
 
     // Final verification
+    console.log(`[DELETE PRODUCT] Performing final verification for: ${objectId}`);
     const finalVerification = await Product.findById(objectId);
     if (finalVerification) {
       // Log warning but still return success (deletion might be in progress)
-      console.warn(`Product ${productId} verification failed, but deletion was attempted`);
+      console.warn(`[DELETE PRODUCT] Product ${productId} verification failed, but deletion was attempted`);
+    } else {
+      console.log(`[DELETE PRODUCT] ✅ Product successfully deleted: ${productId} (${product.name})`);
     }
+
+    // LOG: Final success
+    console.log(`[DELETE PRODUCT] ✅ Deletion completed successfully:`, {
+      productId,
+      productName: product.name,
+      userId: userId?.toString(),
+      userEmail,
+      userRole,
+      timestamp: new Date().toISOString()
+    });
 
     res.status(200).json({
       success: true,
