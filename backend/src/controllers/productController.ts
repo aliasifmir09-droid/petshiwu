@@ -446,12 +446,30 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       .lean(); // Use lean() for better performance (returns plain JS objects)
 
     // Filter out any products that might have been deleted (extra safety check)
+    // Also remove duplicates by _id (in case of database duplicates)
+    const seenIds = new Set<string>();
     const activeProducts = products.filter((product: any) => {
       // Ensure product exists and is active
-      return product && product.isActive !== false;
+      if (!product || product.isActive === false) {
+        return false;
+      }
+      
+      // Remove duplicates by _id (convert to string for comparison)
+      const productId = String(product._id);
+      if (seenIds.has(productId)) {
+        return false; // Duplicate, skip it
+      }
+      seenIds.add(productId);
+      return true;
     });
 
-    const total = await Product.countDocuments(query);
+    // Count total (also deduplicated to match the filtered results)
+    const allProducts = await Product.find(query).lean();
+    const uniqueProducts = allProducts.filter((p: any, index: number, self: any[]) => {
+      const pid = String(p._id);
+      return index === self.findIndex((pr: any) => String(pr._id) === pid && pr.isActive !== false);
+    });
+    const total = uniqueProducts.length;
 
     // Normalize _id to string for all products (use filtered products)
     const normalizedProducts = normalizeProducts(activeProducts);
