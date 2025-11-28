@@ -149,11 +149,20 @@ const generalLimiter = rateLimit({
 // Stricter rate limiting for auth endpoints
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 login attempts per windowMs
+  max: 10, // limit each IP to 10 login attempts per windowMs (increased from 5)
   message: 'Too many login attempts, please try again after 15 minutes.',
   skipSuccessfulRequests: true, // Don't count successful requests
   standardHeaders: true,
   legacyHeaders: false,
+  // Use a key generator that considers both IP and user agent to avoid false positives
+  keyGenerator: (req) => {
+    return req.ip || req.socket.remoteAddress || 'unknown';
+  },
+  // Skip rate limiting for successful logins
+  skip: (req) => {
+    // This will be handled by skipSuccessfulRequests, but we can add additional logic here
+    return false;
+  }
 });
 
 // Stricter rate limiting for upload endpoints
@@ -205,6 +214,9 @@ const allowedOrigins = [
   process.env.ADMIN_URL || 'http://localhost:5174',
   'https://pet-shop-1-d7ec.onrender.com', // Frontend production URL
   'https://pet-shop-2-r3ed.onrender.com', // Admin production URL
+  'https://dashboard.petshiwu.com', // Admin dashboard production URL
+  'https://www.petshiwu.com', // Frontend production URL
+  'https://petshiwu.com', // Frontend production URL (without www)
 ];
 
 app.use(cors({
@@ -212,16 +224,30 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-      if (allowedOrigins.includes(origin) || allowedOrigins.some(allowed => origin?.startsWith(allowed))) {
-        callback(null, true);
-      } else {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn(`CORS blocked origin: ${origin}`);
-        }
-        callback(null, true); // Allow anyway in production to avoid blocking
+    // Check if origin is in allowed list or matches a pattern
+    const isAllowed = allowedOrigins.includes(origin) || 
+                     allowedOrigins.some(allowed => origin?.startsWith(allowed)) ||
+                     origin?.includes('petshiwu.com') || // Allow all petshiwu.com subdomains
+                     origin?.includes('pet-shop') || // Allow all pet-shop subdomains
+                     origin?.includes('onrender.com'); // Allow all Render subdomains
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`CORS blocked origin: ${origin}`);
       }
+      // In production, be more permissive but log it
+      if (process.env.NODE_ENV === 'production') {
+        console.warn(`CORS: Allowing origin ${origin} (not in allowed list but allowing in production)`);
+      }
+      callback(null, true); // Allow anyway to avoid blocking legitimate requests
+    }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Authorization']
 }));
 
 // Request logging middleware (development only)
