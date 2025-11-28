@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { X, Plus, Trash2, Upload, Link2 } from 'lucide-react';
@@ -53,6 +53,47 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     queryKey: ['categories'],
     queryFn: adminService.getCategories
   });
+
+  // Update formData when product changes (for editing)
+  useEffect(() => {
+    if (product && isEditing) {
+      // Extract category ID properly
+      let categoryId = '';
+      if (product.category) {
+        if (typeof product.category === 'object' && product.category._id) {
+          categoryId = String(product.category._id);
+        } else if (typeof product.category === 'string') {
+          categoryId = product.category;
+        }
+      }
+      
+      setFormData(prev => ({
+        ...prev,
+        name: product.name || prev.name,
+        description: product.description || prev.description,
+        shortDescription: product.shortDescription || prev.shortDescription,
+        brand: product.brand || prev.brand,
+        category: categoryId || prev.category,
+        petType: product.petType || prev.petType,
+        basePrice: product.basePrice || prev.basePrice,
+        compareAtPrice: product.compareAtPrice || prev.compareAtPrice,
+        tags: product.tags?.join(', ') || prev.tags,
+        features: product.features?.join('\n') || prev.features,
+        ingredients: product.ingredients || prev.ingredients,
+        isActive: product.isActive ?? prev.isActive,
+        isFeatured: product.isFeatured ?? prev.isFeatured,
+        autoshipEligible: product.autoshipEligible ?? prev.autoshipEligible,
+        autoshipDiscount: product.autoshipDiscount || prev.autoshipDiscount
+      }));
+      
+      if (product.variants) {
+        setVariants(product.variants);
+      }
+      if (product.images) {
+        setImageUrls(product.images);
+      }
+    }
+  }, [product, isEditing]);
 
   const createCategoryMutation = useMutation({
     mutationFn: adminService.createCategory,
@@ -291,7 +332,14 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   };
 
   // Filter categories based on selected pet type
+  // Always include the current product's category even if it doesn't match the filter
+  const currentCategoryId = formData.category ? String(formData.category) : '';
   const filteredCategories = categories?.filter((cat: any) => {
+    const catId = String(cat._id);
+    // Always include the current category if editing
+    if (isEditing && currentCategoryId && catId === currentCategoryId) {
+      return true;
+    }
     if (!formData.petType) return true; // Show all if no pet type selected
     // Show categories that match the pet type or are for 'all' pets
     return cat.petType === formData.petType.toLowerCase() || cat.petType === 'all';
