@@ -120,8 +120,20 @@ const Products = () => {
       const deletedCount = variables.length; // Number of products that were attempted to be deleted
       const deletedIds = new Set(variables.map(id => String(id)));
       
+      // Clear selection first
+      setSelectedProducts(new Set());
+      
+      // If we're on a page that might now be empty, reset to page 1 before refetching
+      const shouldResetPage = productsData?.data && productsData.data.length <= deletedCount;
+      if (shouldResetPage) {
+        setPage(1);
+      }
+      
       // Immediately update the query data to remove deleted products from UI
       const currentQueryKey = ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter];
+      const updatedPage = shouldResetPage ? 1 : page;
+      const updatedQueryKey = ['products', updatedPage, searchQuery, categoryFilter, petTypeFilter, stockFilter];
+      
       queryClient.setQueryData(currentQueryKey, (oldData: any) => {
         if (!oldData || !oldData.data) return oldData;
         
@@ -134,41 +146,57 @@ const Products = () => {
         return {
           ...oldData,
           data: filteredData,
-          total: Math.max(0, (oldData.total || 0) - filteredData.length)
+          total: Math.max(0, (oldData.total || 0) - succeeded)
         };
       });
       
-      // Clear selection first
-      setSelectedProducts(new Set());
-      
-      // If we're on a page that might now be empty, reset to page 1 before refetching
-      const shouldResetPage = productsData?.data && productsData.data.length <= deletedCount;
+      // Also update the query data for the updated page if page changed
       if (shouldResetPage) {
-        setPage(1);
+        queryClient.setQueryData(updatedQueryKey, (oldData: any) => {
+          if (!oldData || !oldData.data) return oldData;
+          
+          // Filter out deleted products
+          const filteredData = oldData.data.filter((product: any) => {
+            const productId = String(product._id);
+            return !deletedIds.has(productId);
+          });
+          
+          return {
+            ...oldData,
+            data: filteredData,
+            total: Math.max(0, (oldData.total || 0) - succeeded)
+          };
+        });
       }
       
-      // Aggressively remove all product-related queries from cache
-      queryClient.removeQueries({ queryKey: ['products'], exact: false });
+      // Aggressively remove all product-related queries from cache (except the one we just updated)
+      queryClient.removeQueries({ 
+        queryKey: ['products'], 
+        exact: false,
+        predicate: (query) => {
+          // Keep the current query data we just updated
+          const queryKey = query.queryKey as any[];
+          return !(
+            queryKey[0] === 'products' &&
+            queryKey[1] === page &&
+            queryKey[2] === searchQuery &&
+            queryKey[3] === categoryFilter &&
+            queryKey[4] === petTypeFilter &&
+            queryKey[5] === stockFilter
+          );
+        }
+      });
       
-      // Wait a tiny bit to ensure cache is cleared
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait for backend to process deletions
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       // Invalidate all product queries
       await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
       
       // Force refetch the current query with exact parameters
-      // Use the current page or page 1 if we reset
-      const currentPage = shouldResetPage ? 1 : page;
       await queryClient.refetchQueries({
-        queryKey: ['products', currentPage, searchQuery, categoryFilter, petTypeFilter, stockFilter],
+        queryKey: updatedQueryKey,
         exact: true
-      });
-      
-      // Also refetch all product queries to ensure consistency across the app
-      await queryClient.refetchQueries({ 
-        queryKey: ['products'], 
-        exact: false,
-        type: 'active'
       });
       
       // Force a manual refetch as well
