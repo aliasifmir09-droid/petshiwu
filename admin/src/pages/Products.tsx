@@ -130,7 +130,6 @@ const Products = () => {
       }
       
       // Immediately update the query data to remove deleted products from UI
-      const currentQueryKey = ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter];
       const updatedPage = shouldResetPage ? 1 : page;
       const updatedQueryKey = ['products', updatedPage, searchQuery, categoryFilter, petTypeFilter, stockFilter];
       
