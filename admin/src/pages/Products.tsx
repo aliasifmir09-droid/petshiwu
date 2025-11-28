@@ -58,7 +58,7 @@ const Products = () => {
 
   const deleteMutation = useMutation({
     mutationFn: adminService.deleteProduct,
-    onSuccess: async (_, productId) => {
+    onSuccess: async (_, productId: string) => {
       const deletedId = String(productId);
       const deletedIds = new Set([deletedId]);
       
