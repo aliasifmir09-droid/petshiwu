@@ -202,7 +202,7 @@ const CSVImport = ({ onClose }: CSVImportProps) => {
                 <div><strong>name</strong> - Product name (required)</div>
                 <div><strong>description</strong> - Full product description (required)</div>
                 <div><strong>brand</strong> - Brand name (required)</div>
-                <div><strong>category</strong> - Category name or path like "Dog > Food > Dry Food" (required)</div>
+                <div><strong>category</strong> - Category name or path like &quot;Dog &gt; Food &gt; Dry Food&quot; (required)</div>
                 <div><strong>basePrice</strong> - Base price in numbers, e.g., 29.99 (required)</div>
                 <div><strong>petType</strong> - Use: dog, cat, bird, fish, small-pet, reptile (required)</div>
                 <div><strong>images</strong> - Comma-separated URLs, e.g., url1.jpg,url2.jpg (required)</div>
@@ -237,7 +237,7 @@ const CSVImport = ({ onClose }: CSVImportProps) => {
               <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
                 <li>Download the template above to see complete examples</li>
                 <li>Remove comment lines (starting with #) from the template before importing</li>
-                <li>Category: Use simple name (e.g., "Dog Food") or hierarchical path (e.g., "Dog > Food > Dry Food")</li>
+                <li>Category: Use simple name (e.g., &quot;Dog Food&quot;) or hierarchical path (e.g., &quot;Dog &gt; Food &gt; Dry Food&quot;)</li>
                 <li>Hierarchical paths automatically create missing parent categories</li>
                 <li>Category names are case-insensitive</li>
                 <li>Use commas to separate multiple images, tags, or features</li>

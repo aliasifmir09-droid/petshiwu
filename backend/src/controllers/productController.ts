@@ -135,7 +135,12 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
             });
           }
           
-          return category._id;
+          // Ensure we return a proper ObjectId
+          if (category && category._id) {
+            return category._id as mongoose.Types.ObjectId;
+          }
+          
+          throw new Error(`Failed to find or create category: ${trimmedName}`);
         };
 
         // Parse hierarchical category path (e.g., "Dog > Food > Dry Food")
@@ -167,10 +172,20 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           
           for (let i = 0; i < categoryParts.length; i++) {
             const categoryName = categoryParts[i];
-            currentParentId = await findOrCreateCategory(categoryName, petType, currentParentId);
+            const createdId = await findOrCreateCategory(categoryName, petType, currentParentId);
+            currentParentId = createdId;
           }
           
-          categoryId = currentParentId!;
+          if (!currentParentId) {
+            results.failed++;
+            results.errors.push({
+              row: rowNumber,
+              error: 'Failed to resolve category hierarchy'
+            });
+            continue;
+          }
+          
+          categoryId = currentParentId;
         } else {
           // Simple category name or ID
           if (mongoose.Types.ObjectId.isValid(categoryPath)) {
