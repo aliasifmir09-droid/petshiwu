@@ -701,11 +701,24 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
       });
     }
 
-    // Fetch product to get image URLs
-    const product = await Product.findById(productId);
+    // Convert to ObjectId for consistent querying
+    const objectId = new mongoose.Types.ObjectId(productId);
+
+    // Check if product exists (check by both _id and slug to catch duplicates)
+    const product = await Product.findById(objectId);
     
     if (!product) {
-      // Return success even if product doesn't exist (idempotent)
+      // Also check by slug in case there's a duplicate
+      const productBySlug = await Product.findOne({ slug: productId });
+      if (!productBySlug) {
+        // Return success even if product doesn't exist (idempotent)
+        return res.status(200).json({
+          success: true,
+          message: 'Product deleted successfully'
+        });
+      }
+      // Found by slug, delete it
+      await Product.deleteOne({ _id: productBySlug._id });
       return res.status(200).json({
         success: true,
         message: 'Product deleted successfully'
@@ -739,49 +752,69 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
     // Wait for all image deletions to complete (using allSettled to not fail on individual errors)
     await Promise.allSettled(imageDeletionPromises);
 
-    // Permanently delete product from database using deleteOne for more control
-    const deleteResult = await Product.deleteOne({ _id: productId });
+    // Delete ALL products with this ID (in case of duplicates)
+    // Use deleteMany to catch any duplicates
+    const deleteResult = await Product.deleteMany({ _id: objectId });
     
-    // If deleteOne didn't work, try findByIdAndDelete
-    if (deleteResult.deletedCount === 0) {
-      const deletedProduct = await Product.findByIdAndDelete(productId);
-      if (!deletedProduct) {
-        // Check if product actually exists
-        const stillExists = await Product.findById(productId);
-        if (!stillExists) {
-          // Product doesn't exist, deletion already successful (idempotent)
-          return res.status(200).json({
-            success: true,
-            message: 'Product deleted successfully'
-          });
-        }
-      }
+    // Also delete by slug if different
+    if (product.slug) {
+      await Product.deleteMany({ slug: product.slug });
     }
+    
+    // Also delete by name and brand combination (in case of true duplicates)
+    await Product.deleteMany({ 
+      name: product.name,
+      brand: product.brand,
+      _id: objectId
+    });
 
     // Wait for database to commit the deletion
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Double-check: Verify product is actually deleted
-    const verifyDeleted = await Product.findById(productId);
-    if (verifyDeleted) {
-      // If still exists, force delete using multiple methods
-      await Product.deleteOne({ _id: productId });
-      await Product.findByIdAndDelete(productId);
+    // Verify deletion - check by ID
+    const verifyDeletedById = await Product.findById(objectId);
+    
+    // Also check by slug
+    const verifyDeletedBySlug = product.slug ? await Product.findOne({ slug: product.slug }) : null;
+    
+    // Also check by name and brand
+    const verifyDeletedByName = await Product.findOne({ 
+      name: product.name,
+      brand: product.brand
+    });
+
+    if (verifyDeletedById || verifyDeletedBySlug || verifyDeletedByName) {
+      // If still exists, try more aggressive deletion
+      if (verifyDeletedById) {
+        await Product.deleteOne({ _id: verifyDeletedById._id });
+      }
+      if (verifyDeletedBySlug) {
+        await Product.deleteMany({ slug: product.slug });
+      }
+      if (verifyDeletedByName && verifyDeletedByName._id.toString() === productId) {
+        await Product.deleteOne({ _id: verifyDeletedByName._id });
+      }
       
       // Wait again for commit
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // One more verification
-      const finalCheck = await Product.findById(productId);
+      // Final check
+      const finalCheck = await Product.findById(objectId);
       if (finalCheck) {
-        // Last resort: use remove on the document
-        await finalCheck.deleteOne();
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Last resort: delete all matching products
+        await Product.deleteMany({ 
+          $or: [
+            { _id: objectId },
+            { slug: product.slug },
+            { name: product.name, brand: product.brand }
+          ]
+        });
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
 
-    // Final verification - ensure product is gone
-    const finalVerification = await Product.findById(productId);
+    // Final verification - ensure product is completely gone
+    const finalVerification = await Product.findById(objectId);
     if (finalVerification) {
       // If still exists after all attempts, return error
       return res.status(500).json({
