@@ -20,7 +20,9 @@
     "force-drop-category-name-index": "ts-node src/utils/forceDropCategoryNameIndex.ts",
     "update-category-levels": "ts-node src/utils/updateCategoryLevels.ts",
     "grant-permissions": "ts-node src/utils/grantPermissions.ts",
-    "create-customer": "ts-node src/utils/createCustomer.ts"
+    "create-customer": "ts-node src/utils/createCustomer.ts",
+    "find-duplicates": "ts-node src/utils/findAndRemoveDuplicates.ts",
+    "remove-duplicates": "ts-node src/utils/findAndRemoveDuplicates.ts --delete"
   },
   "dependencies": {
     "@types/node": "^20.10.6",
