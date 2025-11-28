@@ -22,10 +22,13 @@ const Products = () => {
   const [petTypeFilter, setPetTypeFilter] = useState('');
   const [stockFilter, setStockFilter] = useState('');
   const [dismissedNotification, setDismissedNotification] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean;
     productId?: string;
     productName?: string;
+    productIds?: string[];
+    isBulk?: boolean;
   }>({ isOpen: false });
 
   const { data: productsData, isLoading, refetch } = useQuery({
@@ -281,20 +284,35 @@ const Products = () => {
             <tbody className="divide-y divide-gray-200">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                     Loading products...
                   </td>
                 </tr>
               ) : productsData?.data.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                     No products found
                   </td>
                 </tr>
               ) : (
-                productsData?.data.map((product: any) => (
-                  <tr key={product._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
+                productsData?.data.map((product: any) => {
+                  const productId = String(product._id);
+                  const isSelected = selectedProducts.has(productId);
+                  
+                  return (
+                    <tr 
+                      key={product._id} 
+                      className={`hover:bg-gray-50 ${isSelected ? 'bg-blue-50' : ''}`}
+                    >
+                      <td className="px-6 py-4">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => handleSelectProduct(productId)}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                      </td>
+                      <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <img
                           src={normalizeImageUrl(product.images?.[0])}
