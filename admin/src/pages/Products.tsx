@@ -118,6 +118,25 @@ const Products = () => {
       const succeeded = results.filter(r => r.status === 'fulfilled').length;
       const failed = results.filter(r => r.status === 'rejected').length;
       const deletedCount = variables.length; // Number of products that were attempted to be deleted
+      const deletedIds = new Set(variables.map(id => String(id)));
+      
+      // Immediately update the query data to remove deleted products from UI
+      const currentQueryKey = ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter];
+      queryClient.setQueryData(currentQueryKey, (oldData: any) => {
+        if (!oldData || !oldData.data) return oldData;
+        
+        // Filter out deleted products
+        const filteredData = oldData.data.filter((product: any) => {
+          const productId = String(product._id);
+          return !deletedIds.has(productId);
+        });
+        
+        return {
+          ...oldData,
+          data: filteredData,
+          total: Math.max(0, (oldData.total || 0) - filteredData.length)
+        };
+      });
       
       // Clear selection first
       setSelectedProducts(new Set());
@@ -132,7 +151,7 @@ const Products = () => {
       queryClient.removeQueries({ queryKey: ['products'], exact: false });
       
       // Wait a tiny bit to ensure cache is cleared
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Invalidate all product queries
       await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
