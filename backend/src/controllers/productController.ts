@@ -203,7 +203,8 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           } else {
             // It's a category name - find or create as root category
             const petType = String(row.petType).toLowerCase().trim();
-            categoryId = await findOrCreateCategory(categoryPath, petType, null);
+            const createdId = await findOrCreateCategory(categoryPath, petType, null);
+            categoryId = createdId;
           }
         }
         
