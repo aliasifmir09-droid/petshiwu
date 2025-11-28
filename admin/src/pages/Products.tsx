@@ -69,34 +69,16 @@ const Products = () => {
       const currentProducts = productsData?.data || [];
       const willBeEmpty = currentProducts.length === 1;
       
-      // IMMEDIATELY remove from UI by updating the exact query
-      const currentQueryKey = ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter];
+      // Show success message immediately
+      showToast('Product deleted successfully!', 'success');
       
-      // Update the current query immediately
-      queryClient.setQueryData(currentQueryKey, (oldData: any) => {
-        if (!oldData || !oldData.data) return oldData;
-        
-        const filteredData = oldData.data.filter((product: any) => {
-          return String(product._id) !== deletedId;
-        });
-        
-        return {
-          ...oldData,
-          data: filteredData,
-          pagination: {
-            ...oldData.pagination,
-            total: Math.max(0, (oldData.pagination?.total || 0) - 1)
-          }
-        };
-      });
-      
-      // Also update ALL other product queries
+      // IMMEDIATELY remove from ALL cached queries
       queryClient.setQueriesData(
         { queryKey: ['products'], exact: false },
         (oldData: any) => {
           if (!oldData) return oldData;
           
-          // API response structure: { success: true, data: [...], pagination: {...} }
+          // Handle different response structures
           if (oldData.data && Array.isArray(oldData.data)) {
             const filteredData = oldData.data.filter((product: any) => {
               return String(product._id) !== deletedId;
@@ -121,32 +103,28 @@ const Products = () => {
         setPage(page - 1);
       }
       
-      // Show success message immediately
-      showToast('Product deleted successfully!', 'success');
+      // Force a complete cache clear and refetch
+      // Remove ALL product queries from cache
+      queryClient.removeQueries({ queryKey: ['products'], exact: false });
       
-      // Force a complete re-render by updating the refresh counter
+      // Increment force refresh to trigger new query
       setForceRefresh(prev => prev + 1);
       
-      // Then do background refetch to ensure consistency
+      // Wait a moment for backend to process deletion, then refetch
       setTimeout(async () => {
-        // Remove all product queries from cache
-        queryClient.removeQueries({ queryKey: ['products'], exact: false });
-        
-        // Invalidate and refetch
+        // Invalidate all product queries
         await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
         
-        // Refetch the current query
-        const updatedPage = willBeEmpty && page > 1 ? page - 1 : page;
-        if (updatedPage !== page) {
-          setPage(updatedPage);
-        }
+        // Force refetch of all active product queries
+        await queryClient.refetchQueries({ 
+          queryKey: ['products'], 
+          exact: false,
+          type: 'active'
+        });
         
-        // Force another refresh
-        setForceRefresh(prev => prev + 1);
-        
-        // Also manually refetch
+        // Also manually refetch the current query
         await refetch();
-      }, 100);
+      }, 500);
     },
     onError: async (error: any, productId) => {
       console.error('Delete product error:', error);
