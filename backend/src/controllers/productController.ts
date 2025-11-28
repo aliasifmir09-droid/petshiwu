@@ -322,8 +322,43 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           autoshipEligible: String(row.autoshipEligible || 'false').toLowerCase() === 'true' ? true : false
         };
 
+        // Validate categoryId before creating product
+        if (!categoryId || !mongoose.Types.ObjectId.isValid(categoryId)) {
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            error: `Invalid category ID: ${categoryId}`
+          });
+          continue;
+        }
+        
+        // Double-check category exists before creating product
+        const categoryCheck = await Category.findById(categoryId);
+        if (!categoryCheck) {
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            error: `Category with ID ${categoryId} does not exist`
+          });
+          continue;
+        }
+        
         // Create product
         const product = await Product.create(productData);
+        
+        // Verify product was created with correct category
+        const createdProduct = await Product.findById(product._id).populate('category', 'name');
+        if (!createdProduct || !createdProduct.category) {
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            error: `Product created but category not assigned correctly`
+          });
+          // Delete the product if category wasn't assigned
+          await Product.findByIdAndDelete(product._id);
+          continue;
+        }
+        
         results.success++;
 
       } catch (error: any) {
