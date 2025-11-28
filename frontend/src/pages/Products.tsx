@@ -66,7 +66,10 @@ const Products = () => {
     } else {
       newParams.delete(key);
     }
-    newParams.set('page', '1');
+    // Only reset to page 1 if changing filters (not when changing page number)
+    if (key !== 'page') {
+      newParams.set('page', '1');
+    }
     setSearchParams(newParams);
   };
 
