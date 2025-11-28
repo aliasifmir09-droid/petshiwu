@@ -191,7 +191,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           if (mongoose.Types.ObjectId.isValid(categoryPath)) {
             // It's an ObjectId
             const foundCategory = await Category.findById(categoryPath);
-            if (!foundCategory) {
+            if (!foundCategory || !foundCategory._id) {
               results.failed++;
               results.errors.push({
                 row: rowNumber,
@@ -199,7 +199,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
               });
               continue;
             }
-            categoryId = foundCategory._id;
+            categoryId = foundCategory._id as mongoose.Types.ObjectId;
           } else {
             // It's a category name - find or create as root category
             const petType = String(row.petType).toLowerCase().trim();
