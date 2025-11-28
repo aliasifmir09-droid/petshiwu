@@ -9,7 +9,44 @@ dotenv.config();
 
 const seedProductsFixed = async () => {
   try {
+    // PRODUCTION PROTECTION: Prevent accidental data deletion
+    const isProduction = process.env.NODE_ENV === 'production';
+    const forceSeed = process.env.FORCE_SEED === 'true';
+    
+    if (isProduction && !forceSeed) {
+      console.error('\n❌❌❌ PRODUCTION SEED BLOCKED ❌❌❌\n');
+      console.error('⚠️  WARNING: Seed script is blocked in production to prevent data loss!');
+      console.error('   This script will DELETE ALL existing products and categories.\n');
+      console.error('   To run in production, you MUST set:');
+      console.error('   FORCE_SEED=true\n');
+      console.error('   Example:');
+      console.error('   FORCE_SEED=true npm run seed-products\n');
+      console.error('   ⚠️  This is a DESTRUCTIVE operation. Use with extreme caution!\n');
+      process.exit(1);
+    }
+
+    if (isProduction && forceSeed) {
+      console.warn('\n⚠️⚠️⚠️  PRODUCTION SEED MODE ⚠️⚠️⚠️\n');
+      console.warn('⚠️  WARNING: You are about to DELETE ALL products and categories!');
+      console.warn('   Users and Pet Types will be preserved.\n');
+      console.warn('   Waiting 5 seconds before proceeding...\n');
+      await new Promise(resolve => setTimeout(resolve, 5000));
+    }
+
     await connectDatabase();
+
+    // Count existing data before deletion
+    const productCount = await Product.countDocuments({});
+    const categoryCount = await Category.countDocuments({});
+
+    console.log('\n📊 Current Database State:');
+    console.log(`   Products: ${productCount}`);
+    console.log(`   Categories: ${categoryCount}\n`);
+
+    if (isProduction && forceSeed) {
+      console.warn('⚠️  PROCEEDING WITH DELETION IN 3 SECONDS...\n');
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    }
 
     console.log('🌱 Starting product seeding with fixed images...\n');
 

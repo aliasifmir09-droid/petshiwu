@@ -10,7 +10,48 @@ dotenv.config();
 
 const seedData = async () => {
   try {
+    // PRODUCTION PROTECTION: Prevent accidental data deletion
+    const isProduction = process.env.NODE_ENV === 'production';
+    const forceSeed = process.env.FORCE_SEED === 'true';
+    
+    if (isProduction && !forceSeed) {
+      console.error('\n❌❌❌ PRODUCTION SEED BLOCKED ❌❌❌\n');
+      console.error('⚠️  WARNING: Seed script is blocked in production to prevent data loss!');
+      console.error('   This script will DELETE ALL existing data (users, products, categories, pet types).\n');
+      console.error('   To run in production, you MUST set:');
+      console.error('   FORCE_SEED=true\n');
+      console.error('   Example:');
+      console.error('   FORCE_SEED=true npm run seed\n');
+      console.error('   ⚠️  This is a DESTRUCTIVE operation. Use with extreme caution!\n');
+      process.exit(1);
+    }
+
+    if (isProduction && forceSeed) {
+      console.warn('\n⚠️⚠️⚠️  PRODUCTION SEED MODE ⚠️⚠️⚠️\n');
+      console.warn('⚠️  WARNING: You are about to DELETE ALL existing data!');
+      console.warn('   This includes: Users, Products, Categories, Pet Types\n');
+      console.warn('   Waiting 5 seconds before proceeding...\n');
+      await new Promise(resolve => setTimeout(resolve, 5000));
+    }
+
     await connectDatabase();
+
+    // Count existing data before deletion
+    const userCount = await User.countDocuments({});
+    const productCount = await Product.countDocuments({});
+    const categoryCount = await Category.countDocuments({});
+    const petTypeCount = await PetType.countDocuments({});
+
+    console.log('\n📊 Current Database State:');
+    console.log(`   Users: ${userCount}`);
+    console.log(`   Products: ${productCount}`);
+    console.log(`   Categories: ${categoryCount}`);
+    console.log(`   Pet Types: ${petTypeCount}\n`);
+
+    if (isProduction && forceSeed) {
+      console.warn('⚠️  PROCEEDING WITH DELETION IN 3 SECONDS...\n');
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    }
 
     // Clear existing data
     await User.deleteMany({});
@@ -18,7 +59,7 @@ const seedData = async () => {
     await Product.deleteMany({});
     await PetType.deleteMany({});
 
-    console.log('Existing data cleared');
+    console.log('✅ Existing data cleared');
 
     // ===== CREATE PET TYPES =====
     const dogPetType = await PetType.create({
