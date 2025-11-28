@@ -109,11 +109,10 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
         const findOrCreateCategory = async (categoryName: string, petType: string, parentId: mongoose.Types.ObjectId | null = null): Promise<mongoose.Types.ObjectId> => {
           const trimmedName = categoryName.trim();
           
-          // Try to find existing category
+          // Try to find existing category (check both active and inactive)
           const query: any = {
             name: { $regex: new RegExp(`^${trimmedName}$`, 'i') },
-            petType: petType.toLowerCase(),
-            isActive: true
+            petType: petType.toLowerCase()
           };
           
           if (parentId) {
@@ -126,13 +125,30 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           
           // If not found, create it
           if (!category) {
+            // Calculate level based on parent
+            let level = 1;
+            if (parentId) {
+              const parent = await Category.findById(parentId);
+              if (parent) {
+                level = (parent.level || 1) + 1;
+                if (level > 3) {
+                  throw new Error(`Maximum category depth is 3 levels. Cannot create category "${trimmedName}" at level ${level}.`);
+                }
+              }
+            }
+            
             category = await Category.create({
               name: trimmedName,
               petType: petType.toLowerCase(),
               parentCategory: parentId,
               isActive: true,
+              level: level,
               description: `${trimmedName} products`
             });
+          } else if (!category.isActive) {
+            // If category exists but is inactive, reactivate it
+            category.isActive = true;
+            await category.save();
           }
           
           // Ensure we return a proper ObjectId
