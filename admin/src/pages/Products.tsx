@@ -123,25 +123,37 @@ const Products = () => {
       setSelectedProducts(new Set());
       
       // If we're on a page that might now be empty, reset to page 1 before refetching
-      if (productsData?.data && productsData.data.length <= deletedCount) {
+      const shouldResetPage = productsData?.data && productsData.data.length <= deletedCount;
+      if (shouldResetPage) {
         setPage(1);
       }
       
       // Aggressively remove all product-related queries from cache
       queryClient.removeQueries({ queryKey: ['products'], exact: false });
       
+      // Wait a tiny bit to ensure cache is cleared
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
       // Invalidate all product queries
       await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
       
       // Force refetch the current query with exact parameters
-      await refetch();
+      // Use the current page or page 1 if we reset
+      const currentPage = shouldResetPage ? 1 : page;
+      await queryClient.refetchQueries({
+        queryKey: ['products', currentPage, searchQuery, categoryFilter, petTypeFilter, stockFilter],
+        exact: true
+      });
       
       // Also refetch all product queries to ensure consistency across the app
       await queryClient.refetchQueries({ 
         queryKey: ['products'], 
         exact: false,
-        type: 'active' // Only refetch active queries
+        type: 'active'
       });
+      
+      // Force a manual refetch as well
+      await refetch();
       
       if (failed > 0) {
         showToast(`${succeeded} products deleted, ${failed} failed`, 'warning');
