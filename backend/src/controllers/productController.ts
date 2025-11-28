@@ -668,6 +668,14 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
   try {
     const productId = req.params.id;
 
+    // Validate product ID
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid product ID'
+      });
+    }
+
     // Fetch product to get image URLs
     const product = await Product.findById(productId);
     
@@ -707,7 +715,22 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
     await Promise.allSettled(imageDeletionPromises);
 
     // Permanently delete product from database
-    await Product.findByIdAndDelete(productId);
+    const deletedProduct = await Product.findByIdAndDelete(productId);
+    
+    // Verify deletion was successful
+    if (!deletedProduct) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found or already deleted'
+      });
+    }
+
+    // Double-check: Verify product is actually deleted
+    const verifyDeleted = await Product.findById(productId);
+    if (verifyDeleted) {
+      // If still exists, try deleteOne as fallback
+      await Product.deleteOne({ _id: productId });
+    }
 
     res.status(200).json({
       success: true,

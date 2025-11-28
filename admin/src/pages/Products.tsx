@@ -134,25 +134,10 @@ const Products = () => {
       const updatedPage = shouldResetPage ? 1 : page;
       const updatedQueryKey = ['products', updatedPage, searchQuery, categoryFilter, petTypeFilter, stockFilter];
       
-      queryClient.setQueryData(currentQueryKey, (oldData: any) => {
-        if (!oldData || !oldData.data) return oldData;
-        
-        // Filter out deleted products
-        const filteredData = oldData.data.filter((product: any) => {
-          const productId = String(product._id);
-          return !deletedIds.has(productId);
-        });
-        
-        return {
-          ...oldData,
-          data: filteredData,
-          total: Math.max(0, (oldData.total || 0) - succeeded)
-        };
-      });
-      
-      // Also update the query data for the updated page if page changed
-      if (shouldResetPage) {
-        queryClient.setQueryData(updatedQueryKey, (oldData: any) => {
+      // Update all product queries to remove deleted products
+      queryClient.setQueriesData(
+        { queryKey: ['products'], exact: false },
+        (oldData: any) => {
           if (!oldData || !oldData.data) return oldData;
           
           // Filter out deleted products
@@ -166,74 +151,65 @@ const Products = () => {
             data: filteredData,
             total: Math.max(0, (oldData.total || 0) - succeeded)
           };
-        });
-      }
-      
-      // Aggressively remove all product-related queries from cache (except the one we just updated)
-      queryClient.removeQueries({ 
-        queryKey: ['products'], 
-        exact: false,
-        predicate: (query) => {
-          // Keep the current query data we just updated
-          const queryKey = query.queryKey as any[];
-          return !(
-            queryKey[0] === 'products' &&
-            queryKey[1] === page &&
-            queryKey[2] === searchQuery &&
-            queryKey[3] === categoryFilter &&
-            queryKey[4] === petTypeFilter &&
-            queryKey[5] === stockFilter
-          );
         }
-      });
+      );
       
-      // Wait for backend to process deletions
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Aggressively remove all product-related queries from cache
+      queryClient.removeQueries({ queryKey: ['products'], exact: false });
+      
+      // Wait longer for backend to fully process deletions
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
       // Invalidate all product queries
       await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
       
-      // Refetch and filter out deleted products from the response
+      // Refetch with exact query key
       await queryClient.refetchQueries({
         queryKey: updatedQueryKey,
         exact: true
       });
       
-      // After refetch, ensure deleted products are still filtered out
-      queryClient.setQueryData(updatedQueryKey, (oldData: any) => {
-        if (!oldData || !oldData.data) return oldData;
-        
-        // Filter out deleted products (in case they came back from backend)
-        const filteredData = oldData.data.filter((product: any) => {
-          const productId = String(product._id);
-          return !deletedIds.has(productId);
-        });
-        
-        return {
-          ...oldData,
-          data: filteredData,
-          total: Math.max(0, (oldData.total || 0) - succeeded)
-        };
-      });
+      // After refetch, ensure deleted products are still filtered out from ALL queries
+      queryClient.setQueriesData(
+        { queryKey: ['products'], exact: false },
+        (oldData: any) => {
+          if (!oldData || !oldData.data) return oldData;
+          
+          // Filter out deleted products (in case they came back from backend)
+          const filteredData = oldData.data.filter((product: any) => {
+            const productId = String(product._id);
+            return !deletedIds.has(productId);
+          });
+          
+          return {
+            ...oldData,
+            data: filteredData,
+            total: Math.max(0, (oldData.total || 0) - succeeded)
+          };
+        }
+      );
       
       // Force a manual refetch as well
       await refetch();
       
-      // One more time, ensure deleted products are filtered after manual refetch
-      queryClient.setQueryData(updatedQueryKey, (oldData: any) => {
-        if (!oldData || !oldData.data) return oldData;
-        
-        const filteredData = oldData.data.filter((product: any) => {
-          const productId = String(product._id);
-          return !deletedIds.has(productId);
-        });
-        
-        return {
-          ...oldData,
-          data: filteredData,
-          total: Math.max(0, (oldData.total || 0) - succeeded)
-        };
-      });
+      // Final filter after manual refetch - update ALL product queries
+      queryClient.setQueriesData(
+        { queryKey: ['products'], exact: false },
+        (oldData: any) => {
+          if (!oldData || !oldData.data) return oldData;
+          
+          const filteredData = oldData.data.filter((product: any) => {
+            const productId = String(product._id);
+            return !deletedIds.has(productId);
+          });
+          
+          return {
+            ...oldData,
+            data: filteredData,
+            total: Math.max(0, (oldData.total || 0) - succeeded)
+          };
+        }
+      );
       
       if (failed > 0) {
         showToast(`${succeeded} products deleted, ${failed} failed`, 'warning');
