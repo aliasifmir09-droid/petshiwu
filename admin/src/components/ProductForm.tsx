@@ -267,9 +267,14 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       showToast('Please enter a category name', 'warning');
       return;
     }
+    if (!formData.petType) {
+      showToast('Please select a pet type first', 'warning');
+      return;
+    }
     createCategoryMutation.mutate({
       name: newCategoryName.trim(),
       description: `${newCategoryName} products`,
+      petType: formData.petType.toLowerCase(),
       isActive: true
     });
   };
