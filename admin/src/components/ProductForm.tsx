@@ -277,12 +277,20 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   const handlePetTypeChange = (value: string) => {
     if (value === 'custom') {
       setShowCustomPetType(true);
-      setFormData({ ...formData, petType: customPetType || '' });
+      setFormData({ ...formData, petType: customPetType || '', category: '' }); // Clear category when switching
     } else {
       setShowCustomPetType(false);
-      setFormData({ ...formData, petType: value });
+      // Clear category when pet type changes, as the current category might not be valid for the new pet type
+      setFormData({ ...formData, petType: value, category: '' });
     }
   };
+
+  // Filter categories based on selected pet type
+  const filteredCategories = categories?.filter((cat: any) => {
+    if (!formData.petType) return true; // Show all if no pet type selected
+    // Show categories that match the pet type or are for 'all' pets
+    return cat.petType === formData.petType.toLowerCase() || cat.petType === 'all';
+  }) || [];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -486,14 +494,18 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                       className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                       <option value="">Select a category</option>
-                      {categories && categories.length > 0 ? (
-                        categories.map((cat: any) => (
+                      {filteredCategories.length > 0 ? (
+                        filteredCategories.map((cat: any) => (
                           <option key={cat._id} value={String(cat._id)}>
                             {cat.name}
                           </option>
                         ))
+                      ) : formData.petType ? (
+                        <option value="" disabled>
+                          No categories available for {formData.petType}. Please select a different pet type or create a new category.
+                        </option>
                       ) : (
-                        <option value="" disabled>Loading categories...</option>
+                        <option value="" disabled>Please select a pet type first</option>
                       )}
                       <option value="new">➕ Add New Category</option>
                     </select>
