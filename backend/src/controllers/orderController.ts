@@ -395,13 +395,17 @@ export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFu
       .populate('user', 'firstName lastName email')
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean(); // Use lean() to get plain JavaScript objects
 
     const total = await Order.countDocuments(query);
 
+    // Normalize order IDs to strings
+    const normalizedOrders = orders.map((order: any) => normalizeOrderId(order));
+
     res.status(200).json({
       success: true,
-      data: orders,
+      data: normalizedOrders,
       pagination: {
         page,
         limit,

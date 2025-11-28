@@ -58,12 +58,33 @@ const Orders = () => {
   });
 
   const handleStatusChange = (orderId: any, newStatus: string) => {
-    // Ensure orderId is a string
-    const id = String(orderId || '').trim();
-    if (!id || id === 'undefined' || id === 'null' || id === '[object Object]') {
+    // Extract order ID - handle both object and string formats
+    let id: string = '';
+    
+    if (typeof orderId === 'string') {
+      id = orderId.trim();
+    } else if (orderId && typeof orderId === 'object') {
+      // Handle ObjectId object
+      if (orderId.toString && typeof orderId.toString === 'function') {
+        id = orderId.toString().trim();
+      } else if (orderId._id) {
+        id = String(orderId._id).trim();
+      } else if (orderId.id) {
+        id = String(orderId.id).trim();
+      } else {
+        id = String(orderId).trim();
+      }
+    } else {
+      id = String(orderId || '').trim();
+    }
+    
+    // Validate the ID
+    if (!id || id === 'undefined' || id === 'null' || id === '[object Object]' || id.length < 10) {
+      console.error('Invalid order ID:', orderId, 'Extracted:', id);
       showToast('Invalid order ID', 'error');
       return;
     }
+    
     setPendingStatusChange({ orderId: id, status: newStatus });
     setShowStatusConfirm(true);
   };
