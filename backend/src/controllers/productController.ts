@@ -870,23 +870,29 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
       }
     });
 
-    // Wait for all image deletions to complete (using allSettled to not fail on individual errors)
-    await Promise.allSettled(imageDeletionPromises);
+    // Delete images from Cloudinary in background (non-blocking)
+    // Don't wait for Cloudinary deletions to complete before responding
+    Promise.allSettled(imageDeletionPromises).then((results) => {
+      const failed = results.filter(r => r.status === 'rejected').length;
+      if (failed > 0) {
+        console.warn(`[DELETE PRODUCT] ${failed} image(s) failed to delete from Cloudinary for product ${productId}`);
+      } else {
+        console.log(`[DELETE PRODUCT] All images deleted from Cloudinary for product ${productId}`);
+      }
+    }).catch((error) => {
+      console.error(`[DELETE PRODUCT] Error in background Cloudinary deletion for product ${productId}:`, error);
+    });
 
     // Permanently delete product from database
-    // Use deleteOne with explicit ObjectId
     console.log(`[DELETE PRODUCT] Attempting database deletion: ${objectId}`);
-    let deleteResult = await Product.deleteOne({ _id: objectId });
+    const deleteResult = await Product.deleteOne({ _id: objectId });
     console.log(`[DELETE PRODUCT] deleteOne result: ${deleteResult.deletedCount} deleted`);
     
-    // If deleteOne didn't work, try findByIdAndDelete
+    // If deleteOne didn't work, try findByIdAndDelete as fallback
     if (deleteResult.deletedCount === 0) {
       console.log(`[DELETE PRODUCT] deleteOne returned 0, trying findByIdAndDelete`);
       const deletedProduct = await Product.findByIdAndDelete(objectId);
-      if (deletedProduct) {
-        console.log(`[DELETE PRODUCT] findByIdAndDelete succeeded: ${deletedProduct._id}`);
-        deleteResult = { deletedCount: 1 } as any;
-      } else {
+      if (!deletedProduct) {
         // Check if product actually exists
         const stillExists = await Product.findById(objectId);
         if (!stillExists) {
@@ -897,54 +903,18 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
             message: 'Product deleted successfully'
           });
         }
-        console.log(`[DELETE PRODUCT] Product still exists after deletion attempts`);
+        // Product still exists after both attempts - return error
+        console.error(`[DELETE PRODUCT] Failed to delete product: ${productId}`);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to delete product from database'
+        });
       }
-    }
-
-    // Wait for database to commit the deletion (longer delay for persistence)
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Verify deletion with retry logic
-    let verificationAttempts = 0;
-    const maxAttempts = 5;
-    
-    while (verificationAttempts < maxAttempts) {
-      const verifyDeleted = await Product.findById(objectId);
-      
-      if (!verifyDeleted) {
-        // Product is deleted, we're good
-        break;
-      }
-      
-      // Product still exists, try deleting again
-      verificationAttempts++;
-      
-      if (verificationAttempts < maxAttempts) {
-        // Try deleting again
-        await Product.deleteOne({ _id: objectId });
-        await Product.findByIdAndDelete(objectId);
-        
-        // Wait longer on each attempt
-        await new Promise(resolve => setTimeout(resolve, 1000 * verificationAttempts));
-      } else {
-        // Last attempt failed, but we'll still return success
-        // The deletion might be in progress (eventual consistency)
-        console.warn(`Product ${productId} still exists after ${maxAttempts} deletion attempts`);
-      }
-    }
-
-    // Final verification
-    console.log(`[DELETE PRODUCT] Performing final verification for: ${objectId}`);
-    const finalVerification = await Product.findById(objectId);
-    if (finalVerification) {
-      // Log warning but still return success (deletion might be in progress)
-      console.warn(`[DELETE PRODUCT] Product ${productId} verification failed, but deletion was attempted`);
-    } else {
-      console.log(`[DELETE PRODUCT] ✅ Product successfully deleted: ${productId} (${product.name})`);
+      console.log(`[DELETE PRODUCT] findByIdAndDelete succeeded: ${deletedProduct._id}`);
     }
 
     // LOG: Final success
-    console.log(`[DELETE PRODUCT] ✅ Deletion completed successfully:`, {
+    console.log(`[DELETE PRODUCT] ✅ Product deleted successfully: ${productId} (${product.name})`, {
       productId,
       productName: product.name,
       userId: userId?.toString(),
@@ -953,6 +923,7 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
       timestamp: new Date().toISOString()
     });
 
+    // Return success immediately - no need to wait for verification
     res.status(200).json({
       success: true,
       message: 'Product deleted successfully'
