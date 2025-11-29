@@ -117,12 +117,9 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   const createMutation = useMutation({
     mutationFn: adminService.createProduct,
     onSuccess: async () => {
-      // Aggressively invalidate and remove all product-related queries
+      // Invalidate and refetch all product-related queries
       await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
-      // Remove all product queries from cache to force fresh fetch
-      queryClient.removeQueries({ queryKey: ['products'], exact: false });
-      // Force refetch all product queries
-      await queryClient.refetchQueries({ queryKey: ['products'], exact: false });
+      await queryClient.refetchQueries({ queryKey: ['products'], exact: false, type: 'active' });
       showToast('Product created successfully!', 'success');
       onClose();
     },
@@ -160,12 +157,11 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   const updateMutation = useMutation({
     mutationFn: (data: any) => adminService.updateProduct(product._id, data),
     onSuccess: async () => {
-      // Aggressively invalidate and remove all product-related queries
+      // Invalidate and refetch all product-related queries
       await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
-      // Remove all product queries from cache to force fresh fetch
-      queryClient.removeQueries({ queryKey: ['products'], exact: false });
-      // Force refetch all product queries
-      await queryClient.refetchQueries({ queryKey: ['products'], exact: false });
+      // Also invalidate the specific product query
+      await queryClient.invalidateQueries({ queryKey: ['product', product.slug || product._id] });
+      await queryClient.refetchQueries({ queryKey: ['products'], exact: false, type: 'active' });
       showToast('Product updated successfully!', 'success');
       onClose();
     },

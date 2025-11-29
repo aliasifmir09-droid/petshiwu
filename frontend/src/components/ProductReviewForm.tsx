@@ -22,9 +22,11 @@ const ProductReviewForm = ({ productId, productName, orderId, onSuccess }: Produ
 
   const reviewMutation = useMutation({
     mutationFn: (data: any) => reviewService.createReview(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['order', orderId] });
-      queryClient.invalidateQueries({ queryKey: ['reviews', productId] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+      await queryClient.invalidateQueries({ queryKey: ['reviews', productId] });
+      await queryClient.invalidateQueries({ queryKey: ['product'] }); // Invalidate product queries to refresh ratings
+      await queryClient.refetchQueries({ queryKey: ['reviews', productId] });
       setShowForm(false);
       setRating(0);
       setComment('');

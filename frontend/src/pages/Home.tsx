@@ -24,34 +24,20 @@ const Home = () => {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
 
-  const checkScrollPosition = () => {
-    if (petTypesScrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = petTypesScrollRef.current;
-      
-      // Show left arrow if we can scroll left
-      setShowLeftArrow(scrollLeft > 0);
-      
-      // Show right arrow if we can scroll right
-      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
-    }
-  };
-
-  const scrollPetTypes = (direction: 'left' | 'right') => {
-    if (petTypesScrollRef.current) {
-      const scrollAmount = 300;
-      const newScrollPosition = direction === 'left' 
-        ? petTypesScrollRef.current.scrollLeft - scrollAmount
-        : petTypesScrollRef.current.scrollLeft + scrollAmount;
-      
-      petTypesScrollRef.current.scrollTo({
-        left: newScrollPosition,
-        behavior: 'smooth'
-      });
-    }
-  };
-
   useEffect(() => {
     const scrollContainer = petTypesScrollRef.current;
+    
+    const checkScrollPosition = () => {
+      if (petTypesScrollRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = petTypesScrollRef.current;
+        
+        // Show left arrow if we can scroll left
+        setShowLeftArrow(scrollLeft > 0);
+        
+        // Show right arrow if we can scroll right
+        setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+      }
+    };
     
     // Check initial scroll position
     checkScrollPosition();
@@ -72,7 +58,21 @@ const Home = () => {
         window.removeEventListener('resize', checkScrollPosition);
       }
     };
-  }, []);
+  }, []); // Empty deps are fine since we only want this to run once on mount
+
+  const scrollPetTypes = (direction: 'left' | 'right') => {
+    if (petTypesScrollRef.current) {
+      const scrollAmount = 300;
+      const newScrollPosition = direction === 'left' 
+        ? petTypesScrollRef.current.scrollLeft - scrollAmount
+        : petTypesScrollRef.current.scrollLeft + scrollAmount;
+      
+      petTypesScrollRef.current.scrollTo({
+        left: newScrollPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   return (
     <div className="relative">

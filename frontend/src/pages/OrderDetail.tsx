@@ -67,9 +67,10 @@ const OrderDetail = () => {
 
   const cancelOrderMutation = useMutation({
     mutationFn: orderService.cancelOrder,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['order', id] });
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['order', id] });
+      await queryClient.invalidateQueries({ queryKey: ['orders'] });
+      await queryClient.refetchQueries({ queryKey: ['order', id] });
       showToast('Order cancelled successfully', 'success');
       setShowCancelModal(false);
     },

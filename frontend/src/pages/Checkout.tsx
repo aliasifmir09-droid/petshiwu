@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { orderService } from '@/services/orders';
@@ -12,6 +12,7 @@ import CheckoutDonationModal from '@/components/CheckoutDonationModal';
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { items, getTotalPrice, clearCart } = useCartStore();
   const { isAuthenticated, user } = useAuthStore();
   const { toast, showToast, hideToast } = useToast();
@@ -152,10 +153,15 @@ const Checkout = () => {
 
   const createOrderMutation = useMutation({
     mutationFn: orderService.createOrder,
-    onSuccess: (order) => {
+    onSuccess: async (order) => {
       clearCart();
       // Ensure order ID is a string
       const orderId = String(order._id || '');
+      
+      // Invalidate related queries
+      await queryClient.invalidateQueries({ queryKey: ['orders'] });
+      await queryClient.invalidateQueries({ queryKey: ['order'] });
+      
       navigate(`/orders/${orderId}?newOrder=true`);
     },
     onError: (error: any) => {

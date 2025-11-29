@@ -41,14 +41,17 @@ const Products = () => {
       petType: petTypeFilter || undefined,
       inStock: stockFilter === 'in-stock' ? true : stockFilter === 'out-of-stock' ? false : undefined
     }),
-    staleTime: 0, // Always consider data stale to ensure fresh fetches
-    gcTime: 0 // Don't cache to ensure immediate updates
+    staleTime: 30 * 1000, // Consider data fresh for 30 seconds
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: true // Refetch when window regains focus for better sync
   });
 
   // Get out-of-stock products for notification bar
   const { data: outOfStockData } = useQuery({
     queryKey: ['products', 'out-of-stock-notification'],
-    queryFn: () => adminService.getProducts({ inStock: false, limit: 100 })
+    queryFn: () => adminService.getProducts({ inStock: false, limit: 100 }),
+    staleTime: 60 * 1000, // Consider fresh for 1 minute (less critical data)
+    gcTime: 10 * 60 * 1000 // Keep in cache for 10 minutes
   });
 
   const { data: categories } = useQuery({
