@@ -21,7 +21,7 @@ const Category = () => {
   const petType = searchParams.get('petType') || '';
 
   // Fetch category by slug (with petType filter if provided)
-  const { data: category, isLoading: isLoadingCategory } = useQuery({
+  const { data: category, isLoading: isLoadingCategory, error: categoryError } = useQuery({
     queryKey: ['category', slug, petType],
     queryFn: () => categoryService.getCategory(slug!, petType || undefined),
     enabled: !!slug,
@@ -132,21 +132,34 @@ const Category = () => {
     setSearchParams(newParams);
   };
 
-  // Don't show products if category is not loaded - wait for category to load first
-  if (!category && !isLoadingCategory) {
+  // Handle error or category not found
+  if (categoryError || (!category && !isLoadingCategory)) {
+    const errorMessage = (categoryError as any)?.response?.data?.message || 
+      `The category "${slug?.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}" doesn't exist.`;
+    
     return (
       <div className="container mx-auto px-4 lg:px-8 py-12">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Category Not Found</h1>
           <p className="text-gray-600 mb-6">
-            The category "{slug?.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}" doesn't exist.
+            {errorMessage}
           </p>
-          <Link
-            to="/products"
-            className="inline-block px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-          >
-            Browse All Products
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/products"
+              className="inline-block px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            >
+              Browse All Products
+            </Link>
+            {petType && (
+              <Link
+                to={`/${petType === 'other-animals' ? 'other-animals' : petType}`}
+                className="inline-block px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                View {petType === 'other-animals' ? 'Other Animals' : petType.charAt(0).toUpperCase() + petType.slice(1)} Products
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     );
