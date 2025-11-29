@@ -157,10 +157,43 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
       
       // If still not found, try to find by name (case-insensitive)
       if (!category) {
+        // Try different name formats
+        const nameVariations = [
+          normalizedSlug.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()), // "Dry Food"
+          normalizedSlug.replace(/-/g, ' '), // "dry food"
+          normalizedSlug.replace(/-/g, ' ').toLowerCase(), // "dry food"
+        ];
+        
+        for (const nameMatch of nameVariations) {
+          category = await Category.findOne({
+            name: { $regex: new RegExp(`^${nameMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+            isActive: true
+          })
+            .populate('parentCategory', 'name slug')
+            .lean();
+          
+          if (category) break;
+        }
+      }
+      
+      // If still not found, try without isActive filter (for debugging)
+      if (!category) {
+        category = await Category.findOne({
+          slug: normalizedSlug
+        })
+          .populate('parentCategory', 'name slug')
+          .lean();
+        
+        if (category && !category.isActive) {
+          console.warn(`[GET CATEGORY] Found inactive category: ${category.name} (slug: ${category.slug})`);
+        }
+      }
+      
+      // Final fallback: try name match without isActive filter
+      if (!category) {
         const nameMatch = normalizedSlug.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
         category = await Category.findOne({
-          name: { $regex: new RegExp(`^${nameMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
-          isActive: true
+          name: { $regex: new RegExp(`^${nameMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
         })
           .populate('parentCategory', 'name slug')
           .lean();
