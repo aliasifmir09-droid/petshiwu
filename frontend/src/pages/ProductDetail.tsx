@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/products';
@@ -19,6 +19,8 @@ const ProductDetail = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [zoomPosition, setZoomPosition] = useState<{ x: number; y: number } | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const { data: product, isLoading } = useQuery({
     queryKey: ['product', slug],
@@ -86,6 +88,12 @@ const ProductDetail = () => {
     }
   };
 
+  // Reset zoom when image changes
+  useEffect(() => {
+    setZoomPosition(null);
+    setImageLoaded(false);
+  }, [selectedImage]);
+
   return (
     <div className="container mx-auto px-4 lg:px-8 py-8">
       {/* Breadcrumb */}
@@ -102,13 +110,46 @@ const ProductDetail = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Images */}
         <div>
-          <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
-            <img
-              src={normalizeImageUrl(product.images?.[selectedImage])}
-              alt={product.name}
-              onError={(e) => handleImageError(e, product.name)}
-              className="w-full h-full object-cover"
-            />
+          <div 
+            className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4 relative group cursor-zoom-in"
+            onMouseMove={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = ((e.clientX - rect.left) / rect.width) * 100;
+              const y = ((e.clientY - rect.top) / rect.height) * 100;
+              
+              // Clamp values to prevent zoom from going out of bounds
+              const clampedX = Math.max(0, Math.min(100, x));
+              const clampedY = Math.max(0, Math.min(100, y));
+              
+              setZoomPosition({ x: clampedX, y: clampedY });
+            }}
+            onMouseLeave={() => setZoomPosition(null)}
+          >
+            <div className="relative w-full h-full overflow-hidden">
+              <img
+                src={normalizeImageUrl(product.images?.[selectedImage])}
+                alt={product.name}
+                onError={(e) => handleImageError(e, product.name)}
+                onLoad={() => setImageLoaded(true)}
+                className={`w-full h-full object-cover transition-all duration-200 ease-out ${
+                  zoomPosition ? 'scale-[2.5]' : 'scale-100'
+                }`}
+                style={{
+                  transformOrigin: zoomPosition ? `${zoomPosition.x}% ${zoomPosition.y}%` : 'center center',
+                  willChange: zoomPosition ? 'transform' : 'auto'
+                }}
+              />
+              
+              {/* Subtle overlay to indicate zoom area */}
+              {zoomPosition && imageLoaded && (
+                <div 
+                  className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{
+                    background: `radial-gradient(circle 200px at ${zoomPosition.x}% ${zoomPosition.y}%, transparent 40%, rgba(0,0,0,0.05) 100%)`
+                  }}
+                />
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-4 gap-2">
             {product.images?.map((image, index) => (
