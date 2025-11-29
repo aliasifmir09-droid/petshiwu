@@ -1142,7 +1142,7 @@ export const getUniqueBrands = async (req: Request, res: Response, next: NextFun
     // Build filter query
     const filterQuery: any = {
       isActive: true,
-      brand: { $exists: true, $ne: null, $nin: [null, ''] },
+      brand: { $exists: true, $nin: [null, ''] },
       $or: [
         { deletedAt: null },
         { deletedAt: { $exists: false } }
