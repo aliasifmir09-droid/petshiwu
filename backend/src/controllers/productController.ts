@@ -519,6 +519,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
           
           if (foundCategory && foundCategory._id) {
             categoryId = foundCategory._id as mongoose.Types.ObjectId;
+            console.log(`[GET PRODUCTS] Found category by query: ${foundCategory.name} (ID: ${categoryId}, petType: ${foundCategory.petType}, slug: ${foundCategory.slug})`);
           } else {
             // Try one more time with more flexible matching (remove petType constraint for broader search)
             const flexibleQuery: any = {
@@ -534,11 +535,29 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
               // Verify petType matches if provided
               if (!req.query.petType || flexibleMatch.petType === String(req.query.petType).toLowerCase().trim()) {
                 categoryId = flexibleMatch._id as mongoose.Types.ObjectId;
+                console.log(`[GET PRODUCTS] Found category by flexible query: ${flexibleMatch.name} (ID: ${categoryId}, petType: ${flexibleMatch.petType}, slug: ${flexibleMatch.slug})`);
               } else {
-                console.warn(`Category found but petType mismatch: ${categoryParam} (found: ${flexibleMatch.petType}, requested: ${req.query.petType})`);
+                console.warn(`[GET PRODUCTS] Category found but petType mismatch: ${categoryParam} (found: ${flexibleMatch.petType}, requested: ${req.query.petType})`);
+                // Still use it if petType wasn't specified
+                if (!req.query.petType) {
+                  categoryId = flexibleMatch._id as mongoose.Types.ObjectId;
+                  console.log(`[GET PRODUCTS] Using category anyway since no petType filter: ${flexibleMatch.name} (ID: ${categoryId})`);
+                }
               }
             } else {
-              console.warn(`Category not found: ${categoryParam} (petType: ${req.query.petType || 'any'})`);
+              // Try to find all matching categories for debugging
+              const allMatches = await Category.find({
+                $or: [
+                  { slug: { $regex: new RegExp(normalizedSlug, 'i') } },
+                  { name: { $regex: new RegExp(escapedParam.replace(/\s+/g, '\\s*'), 'i') } }
+                ],
+                isActive: true
+              }).select('_id name slug petType parentCategory').lean();
+              
+              console.warn(`[GET PRODUCTS] Category not found: ${categoryParam} (petType: ${req.query.petType || 'any'})`);
+              if (allMatches.length > 0) {
+                console.warn(`[GET PRODUCTS] But found ${allMatches.length} similar categories:`, allMatches.map(c => ({ name: c.name, slug: c.slug, petType: c.petType, id: c._id })));
+              }
             }
           }
         }
@@ -571,7 +590,14 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
           if (categoryIds.length > 0) {
             // Include products in the selected category and all its subcategories
             baseQuery.category = { $in: categoryIds };
+            
+            // Log category filtering for debugging
+            console.log(`[GET PRODUCTS] Filtering by category: ${categoryId} (found ${categoryIds.length} categories including subcategories)`);
+          } else {
+            console.warn(`[GET PRODUCTS] No valid category IDs found for category filter: ${categoryParam}`);
           }
+        } else {
+          console.warn(`[GET PRODUCTS] Category not resolved from parameter: ${categoryParam}`);
         }
       } catch (error: any) {
         // If category lookup fails, log error but continue without category filter
