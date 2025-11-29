@@ -23,7 +23,6 @@ const Products = () => {
   const [stockFilter, setStockFilter] = useState('');
   const [dismissedNotification, setDismissedNotification] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
-  const [forceRefresh, setForceRefresh] = useState(0); // Force re-render counter
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean;
     productId?: string;
@@ -33,7 +32,7 @@ const Products = () => {
   }>({ isOpen: false });
 
   const { data: productsData, isLoading, refetch } = useQuery({
-    queryKey: ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter, forceRefresh],
+    queryKey: ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter],
     queryFn: () => adminService.getProducts({ 
       page, 
       limit: 20, 
