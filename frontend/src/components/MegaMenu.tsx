@@ -265,7 +265,7 @@ const MegaMenu = ({ petType }: MegaMenuProps) => {
                 {category.items.map((item, itemIndex) => (
                   <li key={itemIndex}>
                     <Link
-                      to={`/products?petType=${petType}&category=${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
+                      to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
                       className="text-sm text-gray-700 hover:text-primary-600 hover:underline block transition-colors whitespace-nowrap overflow-hidden text-ellipsis"
                     >
                       {item}
