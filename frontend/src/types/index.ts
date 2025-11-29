@@ -28,7 +28,7 @@ export interface Category {
   description?: string;
   image?: string;
   parentCategory?: Category;
-  petType: 'dog' | 'cat' | 'all';
+  petType: 'dog' | 'cat' | 'other-animals' | 'all';
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
