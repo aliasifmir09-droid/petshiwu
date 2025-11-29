@@ -519,7 +519,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     }
 
     // Get products with pagination
-    // Use readPreference 'primary' to ensure we read from primary (not stale secondary)
+    // Connection-level readPreference ensures we read from primary (not stale replica)
     const products = await Product.find(query)
       .populate('category', 'name slug')
       .sort({ createdAt: -1 })
@@ -546,6 +546,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     });
 
     // Count total (also deduplicated to match the filtered results)
+    // Connection-level readPreference ensures we read from primary
     const allProducts = await Product.find(query).lean();
     const uniqueProducts = allProducts.filter((p: any, index: number, self: any[]) => {
       const pid = String(p._id);
@@ -888,28 +889,56 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
     const deleteResult = await Product.deleteOne({ _id: objectId });
     console.log(`[DELETE PRODUCT] deleteOne result: ${deleteResult.deletedCount} deleted`);
     
-    // If deleteOne didn't work, try findByIdAndDelete as fallback
-    if (deleteResult.deletedCount === 0) {
-      console.log(`[DELETE PRODUCT] deleteOne returned 0, trying findByIdAndDelete`);
-      const deletedProduct = await Product.findByIdAndDelete(objectId);
-      if (!deletedProduct) {
-        // Check if product actually exists
-        const stillExists = await Product.findById(objectId);
-        if (!stillExists) {
-          // Product doesn't exist, deletion already successful (idempotent)
-          console.log(`[DELETE PRODUCT] Product already deleted (idempotent success)`);
-          return res.status(200).json({
-            success: true,
-            message: 'Product deleted successfully'
+    // Verify deletion immediately by checking if product still exists
+    if (deleteResult.deletedCount > 0) {
+      // Product was deleted - verify it's actually gone
+      // Small delay to ensure database consistency
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const verifyDeleted = await Product.findById(objectId).lean();
+      
+      if (verifyDeleted) {
+        console.error(`[DELETE PRODUCT] WARNING: Product ${productId} still exists after deletion! Retrying...`);
+        // Retry deletion with findByIdAndDelete
+        await Product.findByIdAndDelete(objectId);
+        
+        // Verify again after retry
+        await new Promise(resolve => setTimeout(resolve, 100));
+        const verifyAgain = await Product.findById(objectId).lean();
+        
+        if (verifyAgain) {
+          console.error(`[DELETE PRODUCT] ERROR: Product ${productId} still exists after retry!`);
+          return res.status(500).json({
+            success: false,
+            message: 'Product deletion may not be complete. Please try again or contact support.'
           });
         }
-        // Product still exists after both attempts - return error
+      }
+    } else {
+      // deleteOne returned 0 - product might already be deleted or doesn't exist
+      console.log(`[DELETE PRODUCT] deleteOne returned 0, checking if product exists`);
+      const stillExists = await Product.findById(objectId).lean();
+      
+      if (!stillExists) {
+        // Product doesn't exist, deletion already successful (idempotent)
+        console.log(`[DELETE PRODUCT] Product already deleted (idempotent success)`);
+        return res.status(200).json({
+          success: true,
+          message: 'Product deleted successfully'
+        });
+      }
+      
+      // Product exists but deleteOne failed - try findByIdAndDelete
+      console.log(`[DELETE PRODUCT] Product exists, trying findByIdAndDelete`);
+      const deletedProduct = await Product.findByIdAndDelete(objectId);
+      
+      if (!deletedProduct) {
         console.error(`[DELETE PRODUCT] Failed to delete product: ${productId}`);
         return res.status(500).json({
           success: false,
           message: 'Failed to delete product from database'
         });
       }
+      
       console.log(`[DELETE PRODUCT] findByIdAndDelete succeeded: ${deletedProduct._id}`);
     }
 

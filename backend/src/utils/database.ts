@@ -11,7 +11,9 @@ export const connectDatabase = async () => {
     const conn = await mongoose.connect(mongoUri, {
       serverSelectionTimeoutMS: 10000, // Increased timeout
       socketTimeoutMS: 45000,
-      family: 4 // Force IPv4 instead of IPv6
+      family: 4, // Force IPv4 instead of IPv6
+      readPreference: 'primary', // Always read from primary to avoid stale data
+      readConcern: { level: 'majority' } // Ensure we read committed data
     });
     
     console.log(`✅ MongoDB Connected Successfully: ${conn.connection.host}`);
