@@ -57,7 +57,7 @@ export interface Product {
   compareAtPrice?: number;
   averageRating: number;
   totalReviews: number;
-  petType: 'dog' | 'cat';
+  petType: 'dog' | 'cat' | 'other-animals';
   tags: string[];
   features: string[];
   ingredients?: string;
