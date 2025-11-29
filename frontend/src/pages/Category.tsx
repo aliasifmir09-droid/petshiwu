@@ -68,6 +68,9 @@ const Category = () => {
       { label: 'Home', path: '/' }
     ];
 
+    // Use petType from URL params, or from category if loaded
+    const currentPetType = petType || category?.petType;
+
     if (category) {
       // Add pet type if available
       if (category.petType && category.petType !== 'all') {
@@ -78,24 +81,36 @@ const Category = () => {
         });
       }
       
-      // Add parent category if it exists
+      // Add parent category if it exists - preserve petType parameter
       if (category.parentCategory && typeof category.parentCategory === 'object') {
+        const parentPath = `/category/${category.parentCategory.slug}`;
+        const parentPathWithPetType = currentPetType && category.petType !== 'all' 
+          ? `${parentPath}?petType=${category.petType}` 
+          : parentPath;
         crumbs.push({
           label: category.parentCategory.name,
-          path: `/category/${category.parentCategory.slug}`
+          path: parentPathWithPetType
         });
       }
       
-      // Add current category
+      // Add current category - preserve petType parameter
+      const currentPath = `/category/${category.slug}`;
+      const currentPathWithPetType = currentPetType && category.petType !== 'all'
+        ? `${currentPath}?petType=${category.petType}`
+        : currentPath;
       crumbs.push({
         label: category.name,
-        path: `/category/${category.slug}`
+        path: currentPathWithPetType
       });
     } else if (slug) {
       // Fallback if category not loaded yet
+      const fallbackPath = `/category/${slug}`;
+      const fallbackPathWithPetType = currentPetType
+        ? `${fallbackPath}?petType=${currentPetType}`
+        : fallbackPath;
       crumbs.push({
         label: slug.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
-        path: `/category/${slug}`
+        path: fallbackPathWithPetType
       });
     }
 
