@@ -7,7 +7,7 @@ import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ProductCard from '@/components/ProductCard';
-import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles } from 'lucide-react';
+import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home } from 'lucide-react';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 
 const ProductDetail = () => {
@@ -135,16 +135,89 @@ const ProductDetail = () => {
     }
   };
 
+  // Build breadcrumbs
+  const buildBreadcrumbs = () => {
+    const crumbs = [
+      { label: 'Home', path: '/' }
+    ];
+
+    // Add pet type if available (skip for "all" and handle "other-animals" specially)
+    if (product.petType && product.petType !== 'all') {
+      const petTypeDisplay = product.petType === 'other-animals' 
+        ? 'Other Animals' 
+        : product.petType.charAt(0).toUpperCase() + product.petType.slice(1);
+      
+      // For "other-animals", we don't add it as a separate breadcrumb
+      // For dog and cat, we add it
+      if (product.petType !== 'other-animals') {
+        crumbs.push({
+          label: petTypeDisplay,
+          path: `/${product.petType}`
+        });
+      }
+    }
+
+    // Add category hierarchy if category exists
+    if (product.category && typeof product.category === 'object') {
+      const category = product.category;
+      
+      // Add parent category if it exists
+      if (category.parentCategory && typeof category.parentCategory === 'object') {
+        const parentPath = `/category/${category.parentCategory.slug}`;
+        const parentPathWithPetType = product.petType && product.petType !== 'all' && product.petType !== 'other-animals'
+          ? `${parentPath}?petType=${product.petType}`
+          : parentPath;
+        
+        crumbs.push({
+          label: category.parentCategory.name,
+          path: parentPathWithPetType
+        });
+      }
+      
+      // Add current category
+      const categoryPath = `/category/${category.slug}`;
+      const categoryPathWithPetType = product.petType && product.petType !== 'all' && product.petType !== 'other-animals'
+        ? `${categoryPath}?petType=${product.petType}`
+        : categoryPath;
+      
+      crumbs.push({
+        label: category.name,
+        path: categoryPathWithPetType
+      });
+    }
+
+    // Add product name (not clickable, it's the current page)
+    crumbs.push({
+      label: product.name,
+      path: ''
+    });
+
+    return crumbs;
+  };
+
+  const breadcrumbs = buildBreadcrumbs();
+
   return (
     <div className="container mx-auto px-4 lg:px-8 py-8">
       {/* Breadcrumb */}
-      <nav className="text-sm mb-6">
-        <ol className="flex items-center gap-2">
-          <li><Link to="/" className="text-gray-600 hover:text-primary-600">Home</Link></li>
-          <li>/</li>
-          <li><Link to="/products" className="text-gray-600 hover:text-primary-600">Products</Link></li>
-          <li>/</li>
-          <li className="text-gray-900">{product.name}</li>
+      <nav className="mb-6" aria-label="Breadcrumb">
+        <ol className="flex items-center space-x-2 text-sm text-gray-600">
+          {breadcrumbs.map((crumb, index) => (
+            <li key={crumb.path || index} className="flex items-center">
+              {index > 0 && <ChevronRight size={16} className="mx-2 text-gray-400" />}
+              {index === breadcrumbs.length - 1 ? (
+                <span className="font-medium text-gray-900 line-clamp-1">{crumb.label}</span>
+              ) : (
+                <Link
+                  to={crumb.path}
+                  className="hover:text-primary-600 transition-colors flex items-center gap-1"
+                >
+                  {index === 0 && <Home size={16} />}
+                  {crumb.label}
+                </Link>
+              )}
+            </li>
+          ))}
         </ol>
       </nav>
 
