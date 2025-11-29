@@ -481,26 +481,74 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     };
 
     // Filter by category - include subcategories
+    // Support both category ID (ObjectId) and category slug/name
     if (req.query.category) {
       try {
-        const categoryId = new mongoose.Types.ObjectId(req.query.category as string);
+        let categoryId: mongoose.Types.ObjectId | null = null;
+        const categoryParam = String(req.query.category).trim();
         
-        // Find all subcategories of this category (including the category itself)
-        const subcategories = await Category.find({
-          $or: [
-            { _id: categoryId },
-            { parentCategory: categoryId }
-          ],
-          isActive: true
-        }).select('_id').lean();
+        // Try to parse as ObjectId first
+        if (mongoose.Types.ObjectId.isValid(categoryParam)) {
+          categoryId = new mongoose.Types.ObjectId(categoryParam);
+        } else {
+          // Not a valid ObjectId, try to find by slug or name
+          // Normalize slug format (replace spaces with hyphens, lowercase)
+          const normalizedSlug = categoryParam.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+          
+          // Build query to find category by slug or name (case-insensitive)
+          const categoryQuery: any = {
+            $or: [
+              { slug: normalizedSlug },
+              { slug: categoryParam.toLowerCase() }, // Also try exact lowercase
+              { name: { $regex: new RegExp(`^${categoryParam.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } }
+            ],
+            isActive: true
+          };
+          
+          // Also filter by petType if provided to avoid cross-pet-type matches
+          if (req.query.petType) {
+            categoryQuery.petType = String(req.query.petType).toLowerCase().trim();
+          }
+          
+          // Find category by slug or name (case-insensitive)
+          const foundCategory = await Category.findOne(categoryQuery).lean();
+          
+          if (foundCategory && foundCategory._id) {
+            categoryId = foundCategory._id as mongoose.Types.ObjectId;
+          } else {
+            // Category not found by slug/name, skip category filter
+            console.warn(`Category not found: ${categoryParam} (petType: ${req.query.petType || 'any'})`);
+          }
+        }
         
-        const categoryIds = subcategories.map(cat => cat._id);
-        
-        // Include products in the selected category and all its subcategories
-        baseQuery.category = { $in: categoryIds };
-      } catch (error) {
-        // If category ID is invalid, try direct match
-        baseQuery.category = req.query.category;
+        // If we have a valid categoryId, find subcategories
+        if (categoryId) {
+          // Also filter by petType if provided (to avoid cross-pet-type matches)
+          const subcategoryQuery: any = {
+            $or: [
+              { _id: categoryId },
+              { parentCategory: categoryId }
+            ],
+            isActive: true
+          };
+          
+          if (req.query.petType) {
+            subcategoryQuery.petType = String(req.query.petType).toLowerCase().trim();
+          }
+          
+          // Find all subcategories of this category (including the category itself)
+          const subcategories = await Category.find(subcategoryQuery).select('_id').lean();
+          
+          const categoryIds = subcategories.map(cat => cat._id);
+          
+          if (categoryIds.length > 0) {
+            // Include products in the selected category and all its subcategories
+            baseQuery.category = { $in: categoryIds };
+          }
+        }
+      } catch (error: any) {
+        // If category lookup fails, log error but continue without category filter
+        console.error('Error filtering by category:', error.message);
       }
     }
 
