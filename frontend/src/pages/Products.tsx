@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { productService } from '@/services/products';
@@ -23,6 +23,24 @@ const Products = () => {
   const brand = searchParams.get('brand') || '';
   const inStock = searchParams.get('inStock') || '';
 
+  // Redirect to category page if category query parameter exists
+  useEffect(() => {
+    if (category) {
+      // Fetch category to get slug, then redirect
+      categoryService.getCategory(category).then((cat) => {
+        if (cat && cat.slug) {
+          // Preserve other query params if needed, or just redirect to category page
+          navigate(`/category/${cat.slug}`, { replace: true });
+        }
+      }).catch(() => {
+        // If category not found, remove category param
+        const newParams = new URLSearchParams(searchParams);
+        newParams.delete('category');
+        setSearchParams(newParams, { replace: true });
+      });
+    }
+  }, [category, navigate, searchParams, setSearchParams]);
+
   const { data: products, isLoading } = useQuery({
     queryKey: ['products', page, petType, category, search, sort, featured, minRating, brand, inStock],
     queryFn: () =>
@@ -30,7 +48,7 @@ const Products = () => {
         page,
         limit: 20,
         petType: petType || undefined,
-        category: category || undefined,
+        category: undefined, // Don't filter by category here - redirect instead
         search: search || undefined,
         sort: sort as any,
         featured: featured || undefined,
@@ -39,7 +57,8 @@ const Products = () => {
         brand: brand || undefined,
         minRating: minRating ? parseFloat(minRating) : undefined,
         inStock: inStock ? inStock === 'true' : undefined
-      })
+      }),
+    enabled: !category // Don't fetch if category param exists (will redirect)
   });
 
   const { data: categories } = useQuery({
@@ -199,36 +218,7 @@ const Products = () => {
               />
             </div>
 
-            {/* Category */}
-            {categories && categories.length > 0 && (
-              <div className="mb-6">
-                <h3 className="font-medium mb-3">Category</h3>
-                <Dropdown
-                  options={[
-                    { value: '', label: 'All Categories' },
-                    ...categories.map((cat) => ({
-                      value: cat._id,
-                      label: cat.name
-                    }))
-                  ]}
-                  value={category}
-                  onChange={(value) => {
-                    if (value) {
-                      // Navigate to category page instead of filtering
-                      const selectedCategory = categories.find(cat => cat._id === value);
-                      if (selectedCategory && selectedCategory.slug) {
-                        navigate(`/category/${selectedCategory.slug}`);
-                      }
-                    } else {
-                      // Clear category filter
-                      updateFilters('category', '');
-                    }
-                  }}
-                  icon={<FolderTree size={16} />}
-                  size="sm"
-                />
-              </div>
-            )}
+            {/* Category - Removed to force navigation to category pages */}
 
             {/* Brand Filter */}
             {brands.length > 0 && (
