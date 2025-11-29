@@ -94,11 +94,11 @@ const ProductDetail = () => {
     ? Math.max(0, Math.min(selectedImage, product.images.length - 1))
     : 0;
   
-  const selectedVariantData = hasVariants ? product.variants[safeSelectedVariant] : null;
+  const selectedVariantData = hasVariants ? product.variants[safeSelectedVariant] : undefined;
   const price = selectedVariantData?.price || product?.basePrice || 0;
 
   const handleAddToCart = () => {
-    addToCart(product, selectedVariantData, quantity);
+    addToCart(product, selectedVariantData || undefined, quantity);
     // Show success message or redirect to cart
   };
 
@@ -269,7 +269,7 @@ const ProductDetail = () => {
           </div>
 
           {/* Variants */}
-          {product.variants.length > 0 && (
+          {product.variants.length > 0 && selectedVariantData && (
             <div className="mb-6">
               <label className="block text-sm font-medium mb-2">
                 Size: {selectedVariantData.size || selectedVariantData.weight}
@@ -301,33 +301,40 @@ const ProductDetail = () => {
 
           {/* Stock Availability */}
           <div className="mb-6">
-            {selectedVariantData.stock > 0 ? (
-              <div className="flex items-center gap-2">
-                {selectedVariantData.stock <= 5 ? (
-                  <>
-                    <span className="w-3 h-3 bg-orange-500 rounded-full"></span>
-                    <span className="text-orange-600 font-medium">
-                      Only {selectedVariantData.stock} left in stock!
-                    </span>
-                  </>
-                ) : selectedVariantData.stock <= 10 ? (
-                  <>
-                    <span className="w-3 h-3 bg-yellow-500 rounded-full"></span>
-                    <span className="text-yellow-600 font-medium">
-                      Low stock - {selectedVariantData.stock} available
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-                    <span className="text-green-600 font-medium">In Stock ({selectedVariantData.stock} available)</span>
-                  </>
-                )}
-              </div>
+            {selectedVariantData ? (
+              selectedVariantData.stock > 0 ? (
+                <div className="flex items-center gap-2">
+                  {selectedVariantData.stock <= 5 ? (
+                    <>
+                      <span className="w-3 h-3 bg-orange-500 rounded-full"></span>
+                      <span className="text-orange-600 font-medium">
+                        Only {selectedVariantData.stock} left in stock!
+                      </span>
+                    </>
+                  ) : selectedVariantData.stock <= 10 ? (
+                    <>
+                      <span className="w-3 h-3 bg-yellow-500 rounded-full"></span>
+                      <span className="text-yellow-600 font-medium">
+                        Low stock - {selectedVariantData.stock} available
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                      <span className="text-green-600 font-medium">In Stock ({selectedVariantData.stock} available)</span>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 bg-red-500 rounded-full"></span>
+                  <span className="text-red-600 font-medium">Out of Stock</span>
+                </div>
+              )
             ) : (
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-red-500 rounded-full"></span>
-                <span className="text-red-600 font-medium">Out of Stock</span>
+                <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                <span className="text-green-600 font-medium">In Stock</span>
               </div>
             )}
           </div>
@@ -361,7 +368,7 @@ const ProductDetail = () => {
           <div className="flex gap-4 mb-8">
             <button
               onClick={handleAddToCart}
-              disabled={!selectedVariantData || selectedVariantData.stock === 0}
+              disabled={!selectedVariantData || (selectedVariantData ? selectedVariantData.stock === 0 : true)}
               className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors ${
                 selectedVariantData && selectedVariantData.stock > 0
                   ? 'bg-primary-600 text-white hover:bg-primary-700'
