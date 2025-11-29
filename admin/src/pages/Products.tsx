@@ -100,8 +100,33 @@ const Products = () => {
         setPage(page - 1);
       }
       
-      // Only invalidate - it will automatically refetch if query is active
+      // Aggressively remove deleted product from all caches
+      queryClient.setQueriesData(
+        { queryKey: ['products'], exact: false },
+        (oldData: any) => {
+          if (!oldData) return oldData;
+          if (oldData.data && Array.isArray(oldData.data)) {
+            const filtered = oldData.data.filter((p: any) => String(p._id) !== deletedId);
+            return {
+              ...oldData,
+              data: filtered,
+              pagination: {
+                ...oldData.pagination,
+                total: Math.max(0, (oldData.pagination?.total || 0) - 1)
+              }
+            };
+          }
+          return oldData;
+        }
+      );
+      
+      // Force immediate refetch with fresh data from server (no cache)
       queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
+      queryClient.refetchQueries({ 
+        queryKey: ['products'], 
+        exact: false,
+        type: 'active'
+      });
     },
     onError: (error: any, productId) => {
       console.error('Delete product error:', error);
