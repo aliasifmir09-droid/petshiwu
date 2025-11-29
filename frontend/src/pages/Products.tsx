@@ -25,20 +25,27 @@ const Products = () => {
 
   // Redirect to category page if category query parameter exists
   useEffect(() => {
-    if (category) {
-      // Fetch category to get slug, then redirect
-      categoryService.getCategory(category).then((cat) => {
-        if (cat && cat.slug) {
-          // Preserve other query params if needed, or just redirect to category page
-          navigate(`/category/${cat.slug}`, { replace: true });
-        }
-      }).catch(() => {
-        // If category not found, remove category param
-        const newParams = new URLSearchParams(searchParams);
-        newParams.delete('category');
-        setSearchParams(newParams, { replace: true });
-      });
-    }
+    if (!category) return;
+    
+    let cancelled = false;
+    
+    // Fetch category to get slug, then redirect
+    categoryService.getCategory(category).then((cat) => {
+      if (cancelled) return;
+      if (cat && cat.slug) {
+        navigate(`/category/${cat.slug}`, { replace: true });
+      }
+    }).catch(() => {
+      if (cancelled) return;
+      // If category not found, remove category param
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('category');
+      setSearchParams(newParams, { replace: true });
+    });
+    
+    return () => {
+      cancelled = true;
+    };
   }, [category, navigate, searchParams, setSearchParams]);
 
   const { data: products, isLoading } = useQuery({
@@ -67,17 +74,13 @@ const Products = () => {
   });
 
   // Get all products to extract unique brands (for filter options)
-  const { data: allProductsForBrands } = useQuery({
-    queryKey: ['products-brands'],
-    queryFn: () => productService.getProducts({ limit: 1000 }),
-    staleTime: 5 * 60 * 1000 // Cache for 5 minutes
+  // Get unique brands efficiently using dedicated API endpoint
+  const { data: brands = [] } = useQuery({
+    queryKey: ['brands', petType],
+    queryFn: () => productService.getUniqueBrands(undefined, petType || undefined),
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (brands don't change often)
+    gcTime: 30 * 60 * 1000 // Keep in cache for 30 minutes
   });
-
-  // Extract unique brands from products
-  const brands = allProductsForBrands?.data
-    ? Array.from(new Set(allProductsForBrands.data.map((p) => p.brand).filter(Boolean)))
-        .sort()
-    : [];
 
   const updateFilters = (key: string, value: string) => {
     const newParams = new URLSearchParams(searchParams);

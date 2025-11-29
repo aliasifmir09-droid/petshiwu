@@ -39,6 +39,16 @@ export const productService = {
       params: { limit }
     });
     return response.data;
+  },
+
+  getUniqueBrands: async (categoryId?: string, petType?: string) => {
+    const response = await api.get<ApiResponse<string[]>>('/products/brands', {
+      params: {
+        ...(categoryId && { category: categoryId }),
+        ...(petType && { petType })
+      }
+    });
+    return response.data.data;
   }
 };
 

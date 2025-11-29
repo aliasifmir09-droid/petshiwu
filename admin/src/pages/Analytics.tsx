@@ -48,10 +48,12 @@ const Analytics = () => {
     queryFn: adminService.getProductStats
   });
 
-  // Fetch all orders for detailed analytics
+  // Fetch orders for detailed analytics - use reasonable limit to improve performance
   const { data: ordersData } = useQuery({
-    queryKey: ['orders', 'all'],
-    queryFn: () => adminService.getAllOrders({ page: 1, limit: 1000 })
+    queryKey: ['orders', 'analytics', timeRange],
+    queryFn: () => adminService.getAllOrders({ page: 1, limit: 500 }), // Reduced from 1000 to 500
+    staleTime: 2 * 60 * 1000, // Consider fresh for 2 minutes
+    gcTime: 10 * 60 * 1000 // Cache for 10 minutes
   });
 
   // Get time range in days

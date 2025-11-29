@@ -26,19 +26,25 @@ const ProductDetail = () => {
     queryKey: ['product', slug],
     queryFn: () => productService.getProduct(slug!),
     enabled: !!slug,
-    retry: 1
+    retry: 1,
+    staleTime: 2 * 60 * 1000, // Consider fresh for 2 minutes
+    gcTime: 10 * 60 * 1000 // Cache for 10 minutes
   });
 
   const { data: reviews } = useQuery({
     queryKey: ['reviews', product?._id],
     queryFn: () => reviewService.getProductReviews(product!._id),
-    enabled: !!product && !!product._id
+    enabled: !!product && !!product._id,
+    staleTime: 1 * 60 * 1000, // Consider fresh for 1 minute
+    gcTime: 5 * 60 * 1000 // Cache for 5 minutes
   });
 
   const { data: relatedProducts } = useQuery({
     queryKey: ['related-products', slug],
     queryFn: () => productService.getRelatedProducts(slug!),
-    enabled: !!slug
+    enabled: !!slug,
+    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
+    gcTime: 15 * 60 * 1000 // Cache for 15 minutes
   });
 
   // Reset zoom when image changes

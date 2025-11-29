@@ -42,25 +42,22 @@ const Category = () => {
         minRating: minRating ? parseFloat(minRating) : undefined,
         inStock: inStock ? inStock === 'true' : undefined
       }),
-    enabled: !!category // Only fetch products when category is loaded
+    enabled: !!category, // Only fetch products when category is loaded
+    staleTime: 30 * 1000, // Consider fresh for 30 seconds
+    gcTime: 5 * 60 * 1000 // Cache for 5 minutes
   });
 
-  // Get all products to extract unique brands (for filter options)
-  const { data: allProductsForBrands } = useQuery({
-    queryKey: ['products-brands', category?._id],
-    queryFn: () => productService.getProducts({ 
-      limit: 1000,
-      category: category?._id || undefined // Only use category ID
-    }),
+  // Get unique brands efficiently using dedicated API endpoint
+  const { data: brands = [] } = useQuery({
+    queryKey: ['brands', category?._id, category?.petType],
+    queryFn: () => productService.getUniqueBrands(
+      category?._id ? String(category._id) : undefined,
+      category?.petType
+    ),
     enabled: !!category, // Only fetch when category is loaded
-    staleTime: 5 * 60 * 1000
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (brands don't change often)
+    gcTime: 30 * 60 * 1000 // Keep in cache for 30 minutes
   });
-
-  // Extract unique brands from products
-  const brands = allProductsForBrands?.data
-    ? Array.from(new Set(allProductsForBrands.data.map((p) => p.brand).filter(Boolean)))
-        .sort()
-    : [];
 
   // Build breadcrumbs
   const buildBreadcrumbs = () => {

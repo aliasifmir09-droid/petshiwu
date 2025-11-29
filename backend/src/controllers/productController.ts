@@ -1135,3 +1135,89 @@ export const getProductStats = async (req: Request, res: Response, next: NextFun
     next(error);
   }
 };
+
+// Get unique brands (optimized - no need to fetch all products)
+export const getUniqueBrands = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Build filter query
+    const filterQuery: any = {
+      isActive: true,
+      brand: { $exists: true, $ne: null, $ne: '' },
+      $or: [
+        { deletedAt: null },
+        { deletedAt: { $exists: false } }
+      ]
+    };
+
+    // Filter by category if provided
+    if (req.query.category) {
+      try {
+        let categoryId: mongoose.Types.ObjectId | null = null;
+        const categoryParam = String(req.query.category).trim();
+        
+        if (mongoose.Types.ObjectId.isValid(categoryParam)) {
+          categoryId = new mongoose.Types.ObjectId(categoryParam);
+        } else {
+          // Try to find by slug or name
+          const normalizedSlug = categoryParam.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+          const escapedParam = categoryParam.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          
+          const categoryQuery: any = {
+            $or: [
+              { slug: normalizedSlug },
+              { name: { $regex: new RegExp(`^${escapedParam.replace(/\s+/g, '\\s*')}$`, 'i') } }
+            ],
+            isActive: true
+          };
+          
+          if (req.query.petType) {
+            categoryQuery.petType = String(req.query.petType).toLowerCase().trim();
+          }
+          
+          const foundCategory = await Category.findOne(categoryQuery).lean();
+          if (foundCategory?._id) {
+            categoryId = foundCategory._id as mongoose.Types.ObjectId;
+            
+            // Include subcategories
+            const subcategories = await Category.find({
+              $or: [
+                { _id: categoryId },
+                { parentCategory: categoryId }
+              ],
+              isActive: true
+            }).select('_id').lean();
+            const categoryIds = subcategories.map(cat => cat._id);
+            filterQuery.category = { $in: categoryIds };
+          }
+        }
+        
+        if (!filterQuery.category && categoryId) {
+          filterQuery.category = categoryId;
+        }
+      } catch (error) {
+        console.error('[GET UNIQUE BRANDS] Error processing category filter:', error);
+      }
+    }
+
+    // Filter by petType if provided
+    if (req.query.petType) {
+      filterQuery.petType = String(req.query.petType).toLowerCase().trim();
+    }
+
+    // Use distinct to get unique brands efficiently - much faster than fetching all products
+    const brands = await Product.distinct('brand', filterQuery);
+    
+    // Filter out null/empty and sort
+    const uniqueBrands = brands
+      .filter(brand => brand && typeof brand === 'string' && brand.trim().length > 0)
+      .map(brand => brand.trim())
+      .sort();
+
+    res.status(200).json({
+      success: true,
+      data: uniqueBrands
+    });
+  } catch (error) {
+    next(error);
+  }
+};

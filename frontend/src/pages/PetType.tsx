@@ -32,25 +32,20 @@ const PetType = () => {
         inStock: inStock ? inStock === 'true' : undefined
       }),
     enabled: !!petType,
-    retry: 1
+    retry: 1,
+    staleTime: 30 * 1000, // Consider fresh for 30 seconds
+    gcTime: 5 * 60 * 1000 // Cache for 5 minutes
   });
 
   // Get all products to extract unique brands (for filter options)
-  const { data: allProductsForBrands } = useQuery({
-    queryKey: ['products-brands', 'petType', petType],
-    queryFn: () => productService.getProducts({ 
-      limit: 1000,
-      petType: petType || undefined
-    }),
+  // Get unique brands efficiently using dedicated API endpoint
+  const { data: brands = [] } = useQuery({
+    queryKey: ['brands', 'petType', petType],
+    queryFn: () => productService.getUniqueBrands(undefined, petType),
     enabled: !!petType,
-    staleTime: 5 * 60 * 1000
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (brands don't change often)
+    gcTime: 30 * 60 * 1000 // Keep in cache for 30 minutes
   });
-
-  // Extract unique brands from products
-  const brands = allProductsForBrands?.data
-    ? Array.from(new Set(allProductsForBrands.data.map((p) => p.brand).filter(Boolean)))
-        .sort()
-    : [];
 
   const updateFilters = (key: string, value: string) => {
     const newParams = new URLSearchParams(searchParams);

@@ -8,6 +8,7 @@ import {
   deleteProduct,
   restoreProduct,
   getProductStats,
+  getUniqueBrands,
   importProductsFromCSV
 } from '../controllers/productController';
 import { protect, authorize } from '../middleware/auth';
@@ -22,6 +23,7 @@ import { csvUpload } from '../middleware/csvUpload';
 const router = express.Router();
 
 router.get('/', paginationValidation, getProducts);
+router.get('/brands', getUniqueBrands); // Public endpoint for unique brands
 router.get('/stats', protect, checkPermission('canViewAnalytics'), getProductStats);
 router.get('/:id/related', getRelatedProducts);
 router.get('/:id', getProduct);
