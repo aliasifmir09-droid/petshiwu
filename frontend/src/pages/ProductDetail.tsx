@@ -117,31 +117,23 @@ const ProductDetail = () => {
     }
   };
 
-  // Reset zoom and validate selectedImage when product or selectedImage changes
+  // Reset zoom when image changes
   useEffect(() => {
-    if (!product) return;
-    
     setZoomPosition(null);
     setImageLoaded(false);
-    
-    // Ensure selectedImage is within bounds
-    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
-      if (selectedImage >= product.images.length || selectedImage < 0) {
-        setSelectedImage(0);
-      }
-    } else {
+  }, [selectedImage]);
+
+  // Reset indices when product changes
+  useEffect(() => {
+    if (!product) {
       setSelectedImage(0);
+      setSelectedVariant(0);
+      return;
     }
     
-    // Ensure selectedVariant is within bounds
-    if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
-      if (selectedVariant >= product.variants.length || selectedVariant < 0) {
-        setSelectedVariant(0);
-      }
-    } else {
-      setSelectedVariant(0);
-    }
-  }, [selectedImage, selectedVariant, product]);
+    setSelectedImage(0);
+    setSelectedVariant(0);
+  }, [product?._id]); // Reset to first image/variant when product changes
 
   return (
     <div className="container mx-auto px-4 lg:px-8 py-8">
