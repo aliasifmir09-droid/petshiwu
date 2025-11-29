@@ -496,11 +496,15 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
           const normalizedSlug = categoryParam.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
           
           // Build query to find category by slug or name (case-insensitive)
+          // Also search for partial matches (e.g., "dry food" matches "Dry Food")
+          const escapedParam = categoryParam.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
           const categoryQuery: any = {
             $or: [
               { slug: normalizedSlug },
               { slug: categoryParam.toLowerCase() }, // Also try exact lowercase
-              { name: { $regex: new RegExp(`^${categoryParam.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } }
+              { slug: { $regex: new RegExp(`^${normalizedSlug}`, 'i') } }, // Partial slug match
+              { name: { $regex: new RegExp(`^${escapedParam}$`, 'i') } }, // Exact name match
+              { name: { $regex: new RegExp(escapedParam.replace(/\s+/g, '\\s+'), 'i') } } // Match with any whitespace
             ],
             isActive: true
           };
@@ -510,14 +514,32 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
             categoryQuery.petType = String(req.query.petType).toLowerCase().trim();
           }
           
-          // Find category by slug or name (case-insensitive)
+          // Find category by slug or name (case-insensitive) - search all categories (not just root)
           const foundCategory = await Category.findOne(categoryQuery).lean();
           
           if (foundCategory && foundCategory._id) {
             categoryId = foundCategory._id as mongoose.Types.ObjectId;
           } else {
-            // Category not found by slug/name, skip category filter
-            console.warn(`Category not found: ${categoryParam} (petType: ${req.query.petType || 'any'})`);
+            // Try one more time with more flexible matching (remove petType constraint for broader search)
+            const flexibleQuery: any = {
+              $or: [
+                { slug: normalizedSlug },
+                { name: { $regex: new RegExp(`^${escapedParam.replace(/\s+/g, '\\s*')}$`, 'i') } }
+              ],
+              isActive: true
+            };
+            
+            const flexibleMatch = await Category.findOne(flexibleQuery).lean();
+            if (flexibleMatch && flexibleMatch._id) {
+              // Verify petType matches if provided
+              if (!req.query.petType || flexibleMatch.petType === String(req.query.petType).toLowerCase().trim()) {
+                categoryId = flexibleMatch._id as mongoose.Types.ObjectId;
+              } else {
+                console.warn(`Category found but petType mismatch: ${categoryParam} (found: ${flexibleMatch.petType}, requested: ${req.query.petType})`);
+              }
+            } else {
+              console.warn(`Category not found: ${categoryParam} (petType: ${req.query.petType || 'any'})`);
+            }
           }
         }
         
@@ -540,6 +562,11 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
           const subcategories = await Category.find(subcategoryQuery).select('_id').lean();
           
           const categoryIds = subcategories.map(cat => cat._id);
+          
+          // Always include the selected category itself, even if no subcategories found
+          if (!categoryIds.includes(categoryId)) {
+            categoryIds.push(categoryId);
+          }
           
           if (categoryIds.length > 0) {
             // Include products in the selected category and all its subcategories
