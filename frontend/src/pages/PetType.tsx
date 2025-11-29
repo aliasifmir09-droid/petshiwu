@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { categoryService } from '@/services/categories';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -7,7 +6,6 @@ import { ChevronRight, Home } from 'lucide-react';
 
 const PetType = () => {
   const { petType } = useParams<{ petType: string }>();
-  const [searchParams] = useSearchParams();
   
   // Fetch categories for this pet type (only parent/main categories)
   const { data: categories, isLoading } = useQuery({
