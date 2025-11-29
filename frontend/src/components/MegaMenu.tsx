@@ -258,7 +258,7 @@ const MegaMenu = ({ petType }: MegaMenuProps) => {
           {categories.map((category, index) => (
             <div key={index}>
               <Link
-                to={`/category/${encodeURIComponent(category.title.toLowerCase().replace(/\s+/g, '-'))}`}
+                to={`/category/${encodeURIComponent(category.title.toLowerCase().replace(/\s+/g, '-'))}?petType=${petType}`}
                 className="font-bold text-gray-900 mb-3 text-sm flex items-center gap-1.5 hover:text-primary-600 transition-colors cursor-pointer"
               >
                 {category.title}
@@ -268,7 +268,7 @@ const MegaMenu = ({ petType }: MegaMenuProps) => {
                 {category.items.map((item, itemIndex) => (
                   <li key={itemIndex}>
                     <Link
-                      to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
+                      to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}?petType=${petType}`}
                       className="text-sm text-gray-700 hover:text-primary-600 hover:underline block transition-colors whitespace-nowrap overflow-hidden text-ellipsis"
                     >
                       {item}

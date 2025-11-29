@@ -640,7 +640,7 @@ const Header = () => {
                                   {petCategories.map((category: any) => (
                                     <Link
                                       key={category._id}
-                                      to={`/category/${category.slug}`}
+                                      to={`/category/${category.slug}${category.petType && category.petType !== 'all' ? `?petType=${category.petType}` : ''}`}
                                       className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-blue-50 hover:text-[#1E3A8A] transition-all group/item"
                                     >
                                       {category.image && (
@@ -672,7 +672,7 @@ const Header = () => {
                                   return (
                                     <div key={category._id} className="space-y-1.5 pb-2 border-b border-gray-100 last:border-b-0 last:pb-0">
                                       <Link
-                                        to={`/category/${category.slug}`}
+                                        to={`/category/${category.slug}${category.petType && category.petType !== 'all' ? `?petType=${category.petType}` : ''}`}
                                         className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] block transition-colors"
                                       >
                                         {category.name}
@@ -686,7 +686,7 @@ const Header = () => {
                                             return (
                                               <li key={sub._id} className="space-y-0.5">
                                                 <Link
-                                                  to={`/category/${sub.slug}`}
+                                                  to={`/category/${sub.slug}${sub.petType && sub.petType !== 'all' ? `?petType=${sub.petType}` : ''}`}
                                                   className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors font-medium py-0.5"
                                                 >
                                                   {sub.name}
@@ -698,7 +698,7 @@ const Header = () => {
                                                     {subSubcategories.map((subSub: any) => (
                                                       <li key={subSub._id}>
                                                         <Link
-                                                          to={`/category/${subSub.slug}`}
+                                                          to={`/category/${subSub.slug}${subSub.petType && subSub.petType !== 'all' ? `?petType=${subSub.petType}` : ''}`}
                                                           className="text-[10px] text-gray-500 hover:text-[#1E3A8A] block transition-colors py-0.5"
                                                         >
                                                           • {subSub.name}
@@ -935,7 +935,7 @@ const Header = () => {
                                   return (
                                     <div key={category._id} className="space-y-1">
                                       <Link
-                                        to={`/category/${category.slug}`}
+                                        to={`/category/${category.slug}${category.petType && category.petType !== 'all' ? `?petType=${category.petType}` : ''}`}
                                         onClick={() => setMobileMenuOpen(false)}
                                         className="block py-2 px-3 text-sm font-semibold text-gray-900 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                       >
@@ -950,7 +950,7 @@ const Header = () => {
                                             return (
                                               <div key={sub._id} className="space-y-1">
                                                 <Link
-                                                  to={`/category/${sub.slug}`}
+                                                  to={`/category/${sub.slug}${sub.petType && sub.petType !== 'all' ? `?petType=${sub.petType}` : ''}`}
                                                   onClick={() => setMobileMenuOpen(false)}
                                                   className="block py-1.5 px-3 text-sm text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors font-medium truncate overflow-hidden"
                                                 >
@@ -963,7 +963,7 @@ const Header = () => {
                                                     {subSubcategories.map((subSub: any) => (
                                                       <Link
                                                         key={subSub._id}
-                                                        to={`/category/${subSub.slug}`}
+                                                        to={`/category/${subSub.slug}${subSub.petType && subSub.petType !== 'all' ? `?petType=${subSub.petType}` : ''}`}
                                                         onClick={() => setMobileMenuOpen(false)}
                                                         className="block py-1 px-3 text-xs text-gray-500 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                                       >
@@ -1228,7 +1228,7 @@ const Header = () => {
                                 return (
                                   <div key={category._id} className="space-y-1">
                                     <Link
-                                      to={`/category/${category.slug}`}
+                                      to={`/category/${category.slug}${category.petType && category.petType !== 'all' ? `?petType=${category.petType}` : ''}`}
                                       onClick={() => setIsLeftSidebarOpen(false)}
                                       className="block py-2 px-3 font-semibold text-gray-900 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
                                     >
@@ -1239,7 +1239,7 @@ const Header = () => {
                                         {subcategories.map((sub: any) => (
                                           <Link
                                             key={sub._id}
-                                            to={`/category/${sub.slug}`}
+                                            to={`/category/${sub.slug}${sub.petType && sub.petType !== 'all' ? `?petType=${sub.petType}` : ''}`}
                                             onClick={() => setIsLeftSidebarOpen(false)}
                                             className="block py-1.5 px-3 text-sm text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
                                           >

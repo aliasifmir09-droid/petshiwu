@@ -393,7 +393,7 @@ const ProductDetail = () => {
                   </span>
                 ) : (
                   <Link
-                    to={`/category/${product.category.slug}`}
+                    to={`/category/${product.category.slug}${product.petType && product.category.petType !== 'all' ? `?petType=${product.category.petType}` : ''}`}
                     className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium hover:bg-primary-200 transition-colors cursor-pointer inline-block"
                   >
                     {product.category.name}
