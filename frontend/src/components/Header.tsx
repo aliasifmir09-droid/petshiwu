@@ -517,14 +517,17 @@ const Header = () => {
                             <div className="grid grid-cols-4 gap-6">
                               {dogMegaMenu.map((section, idx) => (
                                 <div key={idx} className="space-y-2">
-                                  <h3 className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors">
+                                  <Link
+                                    to={`/category/${encodeURIComponent(section.title.toLowerCase().replace(/\s+/g, '-'))}`}
+                                    className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors block"
+                                  >
                                     {section.title} →
-                                  </h3>
+                                  </Link>
                                   <ul className="space-y-1">
                                     {section.items.map((item, itemIdx) => (
                                       <li key={itemIdx}>
                                         <Link
-                                          to={`/products?petType=dog&search=${encodeURIComponent(item)}`}
+                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
                                           className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
                                         >
                                           {item}
@@ -557,14 +560,17 @@ const Header = () => {
                             <div className="grid grid-cols-4 gap-6">
                               {catMegaMenu.map((section, idx) => (
                                 <div key={idx} className="space-y-2">
-                                  <h3 className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors">
+                                  <Link
+                                    to={`/category/${encodeURIComponent(section.title.toLowerCase().replace(/\s+/g, '-'))}`}
+                                    className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors block"
+                                  >
                                     {section.title} →
-                                  </h3>
+                                  </Link>
                                   <ul className="space-y-1">
                                     {section.items.map((item, itemIdx) => (
                                       <li key={itemIdx}>
                                         <Link
-                                          to={`/products?petType=cat&search=${encodeURIComponent(item)}`}
+                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
                                           className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
                                         >
                                           {item}
@@ -597,14 +603,17 @@ const Header = () => {
                             <div className="grid grid-cols-4 gap-6">
                               {otherAnimalsMegaMenu.map((section, idx) => (
                                 <div key={idx} className="space-y-2">
-                                  <h3 className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors">
+                                  <Link
+                                    to={`/category/${encodeURIComponent(section.title.toLowerCase().replace(/\s+/g, '-'))}`}
+                                    className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors block"
+                                  >
                                     {section.title} →
-                                  </h3>
+                                  </Link>
                                   <ul className="space-y-1">
                                     {section.items.map((item, itemIdx) => (
                                       <li key={itemIdx}>
                                         <Link
-                                          to={`/products?petType=other-animals&search=${encodeURIComponent(item)}`}
+                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
                                           className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
                                         >
                                           {item}
@@ -832,7 +841,7 @@ const Header = () => {
                                       {section.items.map((item, itemIdx) => (
                                         <Link
                                           key={itemIdx}
-                                          to={`/products?petType=dog&search=${encodeURIComponent(item)}`}
+                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
                                           onClick={() => setMobileMenuOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                         >
@@ -869,7 +878,7 @@ const Header = () => {
                                       {section.items.map((item, itemIdx) => (
                                         <Link
                                           key={itemIdx}
-                                          to={`/products?petType=cat&search=${encodeURIComponent(item)}`}
+                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
                                           onClick={() => setMobileMenuOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                         >
@@ -906,7 +915,7 @@ const Header = () => {
                                       {section.items.map((item, itemIdx) => (
                                         <Link
                                           key={itemIdx}
-                                          to={`/products?petType=other-animals&search=${encodeURIComponent(item)}`}
+                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
                                           onClick={() => setMobileMenuOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                         >
@@ -1158,7 +1167,7 @@ const Header = () => {
                                       {section.items.map((item, itemIdx) => (
                                         <Link
                                           key={itemIdx}
-                                          to={`/products?petType=dog&search=${encodeURIComponent(item)}`}
+                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
                                           onClick={() => setIsLeftSidebarOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
                                         >
@@ -1180,7 +1189,7 @@ const Header = () => {
                                       {section.items.map((item, itemIdx) => (
                                         <Link
                                           key={itemIdx}
-                                          to={`/products?petType=cat&search=${encodeURIComponent(item)}`}
+                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
                                           onClick={() => setIsLeftSidebarOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
                                         >
@@ -1202,7 +1211,7 @@ const Header = () => {
                                       {section.items.map((item, itemIdx) => (
                                         <Link
                                           key={itemIdx}
-                                          to={`/products?petType=other-animals&search=${encodeURIComponent(item)}`}
+                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
                                           onClick={() => setIsLeftSidebarOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
                                         >
