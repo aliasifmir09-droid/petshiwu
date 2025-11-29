@@ -41,6 +41,8 @@ const Products = () => {
       petType: petTypeFilter || undefined,
       inStock: stockFilter === 'in-stock' ? true : stockFilter === 'out-of-stock' ? false : undefined
     }),
+    staleTime: 0, // Always consider data stale for products list to ensure fresh data after mutations
+    gcTime: 1 * 60 * 1000, // Cache for 1 minute (shorter than default to ensure faster updates)
   });
 
   // Get out-of-stock products for notification bar
@@ -120,13 +122,11 @@ const Products = () => {
         }
       );
       
-      // Force immediate refetch with fresh data from server (no cache)
+      // Force immediate refetch - remove cache and fetch fresh data
+      queryClient.removeQueries({ queryKey: ['products'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
-      queryClient.refetchQueries({ 
-        queryKey: ['products'], 
-        exact: false,
-        type: 'active'
-      });
+      // Immediately refetch to get fresh data from server
+      refetch();
     },
     onError: (error: any, productId) => {
       console.error('Delete product error:', error);
