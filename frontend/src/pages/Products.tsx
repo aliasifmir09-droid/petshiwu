@@ -6,7 +6,7 @@ import { categoryService } from '@/services/categories';
 import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Dropdown from '@/components/Dropdown';
-import { SlidersHorizontal, Layers, FolderTree, ArrowUpDown, Star, Package, Tag } from 'lucide-react';
+import { SlidersHorizontal, Layers, ArrowUpDown, Star, Package, Tag } from 'lucide-react';
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
