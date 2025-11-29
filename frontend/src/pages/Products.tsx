@@ -65,7 +65,9 @@ const Products = () => {
         minRating: minRating ? parseFloat(minRating) : undefined,
         inStock: inStock ? inStock === 'true' : undefined
       }),
-    enabled: !category // Don't fetch if category param exists (will redirect)
+    enabled: !category, // Don't fetch if category param exists (will redirect)
+    staleTime: 30 * 1000, // Consider fresh for 30 seconds
+    gcTime: 5 * 60 * 1000 // Cache for 5 minutes
   });
 
   const { data: categories } = useQuery({
