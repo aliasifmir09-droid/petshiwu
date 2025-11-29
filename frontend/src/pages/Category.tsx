@@ -27,21 +27,21 @@ const Category = () => {
     retry: 1
   });
 
-  // Fetch products for this category
+  // Fetch products for this category - only use category ID, not slug
   const { data: products, isLoading: isLoadingProducts } = useQuery({
-    queryKey: ['products', 'category', slug, page, sort, brand, minRating, inStock],
+    queryKey: ['products', 'category', category?._id, page, sort, brand, minRating, inStock],
     queryFn: () =>
       productService.getProducts({
         page,
         limit: 20,
-        category: category?._id || slug || undefined,
+        category: category?._id || undefined, // Only use category ID, not slug
         petType: category?.petType || undefined,
         sort: sort as any,
         brand: brand || undefined,
         minRating: minRating ? parseFloat(minRating) : undefined,
         inStock: inStock ? inStock === 'true' : undefined
       }),
-    enabled: !!category || !!slug
+    enabled: !!category // Only fetch products when category is loaded
   });
 
   // Get all products to extract unique brands (for filter options)
@@ -49,9 +49,9 @@ const Category = () => {
     queryKey: ['products-brands', category?._id],
     queryFn: () => productService.getProducts({ 
       limit: 1000,
-      category: category?._id || slug || undefined 
+      category: category?._id || undefined // Only use category ID
     }),
-    enabled: !!category || !!slug,
+    enabled: !!category, // Only fetch when category is loaded
     staleTime: 5 * 60 * 1000
   });
 
@@ -107,20 +107,15 @@ const Category = () => {
     setSearchParams(newParams);
   };
 
-  if (isLoadingCategory) {
-    return (
-      <div className="container mx-auto px-4 lg:px-8 py-12">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
-
-  if (!category) {
+  // Don't show products if category is not loaded - wait for category to load first
+  if (!category && !isLoadingCategory) {
     return (
       <div className="container mx-auto px-4 lg:px-8 py-12">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Category Not Found</h1>
-          <p className="text-gray-600 mb-6">The category you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-6">
+            The category "{slug?.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}" doesn't exist.
+          </p>
           <Link
             to="/products"
             className="inline-block px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
@@ -128,6 +123,15 @@ const Category = () => {
             Browse All Products
           </Link>
         </div>
+      </div>
+    );
+  }
+
+  // Show loading if category is still loading
+  if (isLoadingCategory || !category) {
+    return (
+      <div className="container mx-auto px-4 lg:px-8 py-12">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
