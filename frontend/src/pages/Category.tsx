@@ -27,39 +27,21 @@ const Category = () => {
     retry: 1
   });
 
-  // Fetch subcategories for this category (if it's a parent category)
-  const { data: allCategories } = useQuery({
-    queryKey: ['categories', category?.petType],
-    queryFn: () => categoryService.getCategories(category?.petType || undefined),
-    enabled: !!category?.petType,
-    staleTime: 5 * 60 * 1000
-  });
-
-  // Filter subcategories (categories that have this category as parent)
-  const subcategories = allCategories?.filter(
-    (cat) => cat.parentCategory && 
-    (typeof cat.parentCategory === 'object' ? cat.parentCategory._id : cat.parentCategory) === category?._id
-  ) || [];
-
-  // Check if this category has subcategories or should show products
-  const hasSubcategories = subcategories.length > 0;
-
-  // Fetch products for this category - only use category ID, not slug
-  // Only fetch if this category has no subcategories (leaf category)
+  // Fetch products for this category - always show products, filtered by category and petType
   const { data: products, isLoading: isLoadingProducts } = useQuery({
-    queryKey: ['products', 'category', category?._id, page, sort, brand, minRating, inStock],
+    queryKey: ['products', 'category', category?._id, category?.petType, page, sort, brand, minRating, inStock],
     queryFn: () =>
       productService.getProducts({
         page,
         limit: 20,
-        category: category?._id || undefined, // Only use category ID, not slug
-        petType: category?.petType || undefined,
+        category: category?._id || undefined, // Use category ID
+        petType: category?.petType || undefined, // Also filter by petType
         sort: sort as any,
         brand: brand || undefined,
         minRating: minRating ? parseFloat(minRating) : undefined,
         inStock: inStock ? inStock === 'true' : undefined
       }),
-    enabled: !!category && !hasSubcategories // Only fetch products when category is loaded and has no subcategories
+    enabled: !!category // Only fetch products when category is loaded
   });
 
   // Get all products to extract unique brands (for filter options)
@@ -193,51 +175,15 @@ const Category = () => {
         {category.description && (
           <p className="text-gray-600 mb-4">{category.description}</p>
         )}
-        {hasSubcategories && (
-          <p className="text-gray-600">
-            Browse {subcategories.length} subcategor{subcategories.length === 1 ? 'y' : 'ies'}
-          </p>
-        )}
-        {!hasSubcategories && products && (
+        {products && (
           <p className="text-gray-600">
             Showing {products.data.length} of {products.pagination.total} products
           </p>
         )}
       </div>
 
-      {/* Show subcategories if this category has children */}
-      {hasSubcategories ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {subcategories.map((subcategory) => (
-            <Link
-              key={subcategory._id}
-              to={`/category/${subcategory.slug}`}
-              className="group bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 p-6 text-center border border-gray-200 hover:border-primary-500"
-            >
-              {subcategory.image && (
-                <div className="mb-4 aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                  <img
-                    src={subcategory.image}
-                    alt={subcategory.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                </div>
-              )}
-              <h3 className="font-bold text-lg text-gray-900 group-hover:text-primary-600 transition-colors">
-                {subcategory.name}
-              </h3>
-              {subcategory.description && (
-                <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                  {subcategory.description}
-                </p>
-              )}
-            </Link>
-          ))}
-        </div>
-      ) : (
-        <>
-          {/* Filters and Sort - only show when displaying products */}
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+      {/* Filters and Sort */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
@@ -392,8 +338,6 @@ const Category = () => {
               )}
             </div>
           </div>
-        </>
-      )}
     </div>
   );
 };
