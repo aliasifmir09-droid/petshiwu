@@ -269,17 +269,45 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       return;
     }
 
-    // Basic URL validation - accept any valid URL (Cloudinary, external, etc.)
+    // Support multiple URLs separated by commas or newlines
     const urlPattern = /^(https?:\/\/|data:image\/)/i;
-    if (!urlPattern.test(imageUrlInput.trim())) {
-      showToast('Please enter a valid URL (must start with http:// or https://)', 'warning');
+    const urls = imageUrlInput
+      .split(/[,\n]/)
+      .map(url => url.trim())
+      .filter(url => url.length > 0);
+
+    if (urls.length === 0) {
+      showToast('Please enter at least one valid image URL', 'warning');
       return;
     }
 
-    setImageUrls([...imageUrls, imageUrlInput.trim()]);
+    // Validate all URLs
+    const invalidUrls: string[] = [];
+    const validUrls: string[] = [];
+
+    urls.forEach(url => {
+      if (urlPattern.test(url)) {
+        validUrls.push(url);
+      } else {
+        invalidUrls.push(url);
+      }
+    });
+
+    if (invalidUrls.length > 0 && validUrls.length === 0) {
+      showToast('All URLs are invalid (must start with http:// or https://)', 'warning');
+      return;
+    }
+
+    if (invalidUrls.length > 0) {
+      showToast(`Added ${validUrls.length} valid URL(s). ${invalidUrls.length} invalid URL(s) skipped.`, 'warning');
+    } else {
+      showToast(`${validUrls.length} image URL(s) added successfully`, 'success');
+    }
+
+    // Add valid URLs to the list
+    setImageUrls([...imageUrls, ...validUrls]);
     setImageUrlInput('');
     setShowUrlInput(false);
-    showToast('Image URL added successfully', 'success');
   };
 
   const addVariant = () => {
@@ -654,29 +682,33 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
             {/* URL Input Field */}
             {showUrlInput && (
               <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
+                <div className="flex flex-col gap-2">
+                  <textarea
                     value={imageUrlInput}
                     onChange={(e) => setImageUrlInput(e.target.value)}
-                    placeholder="Enter image URL (https://example.com/image.jpg or Cloudinary URL)"
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
+                    placeholder="Enter image URL(s) - one per line or separated by commas&#10;Example:&#10;https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 min-h-[100px] resize-y"
+                    rows={3}
+                    onKeyDown={(e) => {
+                      // Allow Ctrl+Enter or Cmd+Enter to submit
+                      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
                         handleAddImageUrl();
                       }
                     }}
                   />
-                  <button
-                    type="button"
-                    onClick={handleAddImageUrl}
-                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
-                  >
-                    Add URL
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleAddImageUrl}
+                      className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                    >
+                      Add URL(s)
+                    </button>
+                  </div>
                 </div>
                 <p className="mt-2 text-xs text-gray-500">
-                  Supports: https:// or http:// URLs (including Cloudinary URLs)
+                  Supports: https:// or http:// URLs (including Cloudinary URLs). You can add multiple URLs - one per line or separated by commas.
                 </p>
               </div>
             )}
