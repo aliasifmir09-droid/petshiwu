@@ -72,8 +72,8 @@ const Category = () => {
     const currentPetType = petType || category?.petType;
 
     if (category) {
-      // Add pet type if available
-      if (category.petType && category.petType !== 'all') {
+      // Add pet type if available, but skip for "other-animals" - they should start from the category itself
+      if (category.petType && category.petType !== 'all' && category.petType !== 'other-animals') {
         const petTypeDisplay = category.petType.charAt(0).toUpperCase() + category.petType.slice(1);
         crumbs.push({
           label: petTypeDisplay,
