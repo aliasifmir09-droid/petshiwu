@@ -72,7 +72,7 @@ const Products = () => {
       // Show success message immediately
       showToast('Product deleted successfully!', 'success');
       
-      // IMMEDIATELY remove from ALL cached queries
+      // Optimistically update ALL cached product queries to remove the deleted product
       queryClient.setQueriesData(
         { queryKey: ['products'], exact: false },
         (oldData: any) => {
@@ -103,59 +103,47 @@ const Products = () => {
         setPage(page - 1);
       }
       
-      // Force a complete cache clear and refetch
-      // Remove ALL product queries from cache
-      queryClient.removeQueries({ queryKey: ['products'], exact: false });
+      // Immediately invalidate and refetch all product queries (no delay needed)
+      // This ensures the UI shows the updated data from the server
+      await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
       
-      // Increment force refresh to trigger new query
-      setForceRefresh(prev => prev + 1);
-      
-      // Wait a moment for backend to process deletion, then refetch
-      setTimeout(async () => {
-        // Invalidate all product queries
-        await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
-        
-        // Force refetch of all active product queries
-        await queryClient.refetchQueries({ 
-          queryKey: ['products'], 
-          exact: false,
-          type: 'active'
-        });
-        
-        // Also manually refetch the current query
-        await refetch();
-      }, 500);
+      // Force refetch all active product queries immediately
+      await queryClient.refetchQueries({ 
+        queryKey: ['products'], 
+        exact: false,
+        type: 'active'
+      });
     },
     onError: async (error: any, productId) => {
       console.error('Delete product error:', error);
       
       const deletedId = String(productId);
-      const deletedIds = new Set([deletedId]);
       
       // If product is already deleted (404), treat it as success and update UI
       if (error?.response?.status === 404) {
-        // Product already deleted, just update the UI
+        // Product already deleted - optimistically remove it and refetch
         queryClient.setQueriesData(
           { queryKey: ['products'], exact: false },
           (oldData: any) => {
             if (!oldData || !oldData.data) return oldData;
             
             const filteredData = oldData.data.filter((product: any) => {
-              const productId = String(product._id);
-              return !deletedIds.has(productId);
+              return String(product._id) !== deletedId;
             });
             
             return {
               ...oldData,
               data: filteredData,
-              total: Math.max(0, (oldData.total || 0) - 1)
+              pagination: {
+                ...oldData.pagination,
+                total: Math.max(0, (oldData.pagination?.total || 0) - 1)
+              }
             };
           }
         );
         
-        queryClient.removeQueries({ queryKey: ['products'], exact: false });
+        // Invalidate and refetch to ensure consistency
         await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
-        await refetch();
         await queryClient.refetchQueries({ 
           queryKey: ['products'], 
           exact: false,
@@ -205,7 +193,7 @@ const Products = () => {
         showToast(`${failed} product(s) failed to delete.`, 'error');
       }
       
-      // IMMEDIATELY remove deleted products from ALL cached queries
+      // Optimistically remove deleted products from ALL cached queries
       queryClient.setQueriesData(
         { queryKey: ['products'], exact: false },
         (oldData: any) => {
@@ -234,51 +222,13 @@ const Products = () => {
         setPage(1);
       }
       
-      // Force a complete cache clear and refetch
-      // Remove ALL product queries from cache
-      queryClient.removeQueries({ queryKey: ['products'], exact: false });
-      
-      // Increment force refresh to trigger new query
-      setForceRefresh(prev => prev + 1);
-      
-      // Wait for backend to process deletions, then refetch
-      setTimeout(async () => {
-        // Invalidate all product queries
-        await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
-        
-        // Force refetch of all active product queries
-        await queryClient.refetchQueries({ 
-          queryKey: ['products'], 
-          exact: false,
-          type: 'active'
-        });
-        
-        // Also manually refetch the current query
-        await refetch();
-        
-        // After refetch, ensure deleted products are still filtered out (safety check)
-        queryClient.setQueriesData(
-          { queryKey: ['products'], exact: false },
-          (oldData: any) => {
-            if (!oldData || !oldData.data) return oldData;
-            
-            // Filter out deleted products (in case they came back from backend)
-            const filteredData = oldData.data.filter((product: any) => {
-              const productId = String(product._id);
-              return !deletedIds.has(productId);
-            });
-            
-            return {
-              ...oldData,
-              data: filteredData,
-              pagination: {
-                ...oldData.pagination,
-                total: Math.max(0, (oldData.pagination?.total || 0) - succeeded)
-              }
-            };
-          }
-        );
-      }, 500);
+      // Immediately invalidate and refetch all product queries (no delay needed)
+      await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
+      await queryClient.refetchQueries({ 
+        queryKey: ['products'], 
+        exact: false,
+        type: 'active'
+      });
     },
     onError: (error: any) => {
       showToast(error?.response?.data?.message || 'Failed to delete products', 'error');
