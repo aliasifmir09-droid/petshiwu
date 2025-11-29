@@ -141,8 +141,8 @@ const ProductDetail = () => {
       { label: 'Home', path: '/' }
     ];
 
-    // Add pet type if available (skip for "all" and handle "other-animals" specially)
-    if (product.petType && product.petType !== 'all') {
+    // Add pet type if available (handle "other-animals" specially)
+    if (product.petType) {
       const petTypeDisplay = product.petType === 'other-animals' 
         ? 'Other Animals' 
         : product.petType.charAt(0).toUpperCase() + product.petType.slice(1);
@@ -164,7 +164,7 @@ const ProductDetail = () => {
       // Add parent category if it exists
       if (category.parentCategory && typeof category.parentCategory === 'object') {
         const parentPath = `/category/${category.parentCategory.slug}`;
-        const parentPathWithPetType = product.petType && product.petType !== 'all' && product.petType !== 'other-animals'
+        const parentPathWithPetType = product.petType && product.petType !== 'other-animals'
           ? `${parentPath}?petType=${product.petType}`
           : parentPath;
         
@@ -176,7 +176,7 @@ const ProductDetail = () => {
       
       // Add current category
       const categoryPath = `/category/${category.slug}`;
-      const categoryPathWithPetType = product.petType && product.petType !== 'all' && product.petType !== 'other-animals'
+      const categoryPathWithPetType = product.petType && product.petType !== 'other-animals'
         ? `${categoryPath}?petType=${product.petType}`
         : categoryPath;
       
