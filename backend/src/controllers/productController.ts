@@ -271,9 +271,9 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           await Category.findByIdAndUpdate(categoryId, { isActive: true });
         }
 
-        // Parse images (comma-separated URLs)
+        // Parse images (comma or pipe-separated URLs)
         const images = row.images 
-          ? String(row.images).split(',').map((img: string) => img.trim()).filter((img: string) => img.length > 0)
+          ? String(row.images).split(/[,|]/).map((img: string) => img.trim()).filter((img: string) => img.length > 0)
           : [];
 
         if (images.length === 0) {

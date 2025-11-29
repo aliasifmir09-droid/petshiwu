@@ -21,7 +21,7 @@ export const adminService = {
 # Instructions:
 # 1. Required fields: name, description, brand, category, basePrice, petType, images
 # 2. Optional fields: shortDescription, compareAtPrice, tags, features, ingredients, isActive, isFeatured, inStock, stock, autoshipEligible
-# 3. Images: Separate multiple URLs with commas (no spaces)
+# 3. Images: Separate multiple URLs with commas or pipe (|) characters
 # 4. Tags & Features: Separate multiple values with commas
 # 5. Pet Types: Use lowercase (dog, cat, bird, fish, small-pet, reptile)
 # 6. Category: Use exact category name OR hierarchical path like "Dog > Food > Dry Food"
