@@ -257,10 +257,13 @@ const MegaMenu = ({ petType }: MegaMenuProps) => {
         <div className="grid grid-cols-4 gap-x-10 gap-y-10">
           {categories.map((category, index) => (
             <div key={index}>
-              <h3 className="font-bold text-gray-900 mb-3 text-sm flex items-center gap-1.5">
+              <Link
+                to={`/category/${encodeURIComponent(category.title.toLowerCase().replace(/\s+/g, '-'))}`}
+                className="font-bold text-gray-900 mb-3 text-sm flex items-center gap-1.5 hover:text-primary-600 transition-colors cursor-pointer"
+              >
                 {category.title}
                 <span className="text-gray-400 text-xs">›</span>
-              </h3>
+              </Link>
               <ul className="space-y-2">
                 {category.items.map((item, itemIndex) => (
                   <li key={itemIndex}>

@@ -387,9 +387,18 @@ const ProductDetail = () => {
             {/* Category & Pet Type */}
             <div className="flex flex-wrap gap-2 mb-4">
               {product.category && (
-                <span className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium">
-                  {typeof product.category === 'string' ? product.category : product.category.name}
-                </span>
+                typeof product.category === 'string' ? (
+                  <span className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium">
+                    {product.category}
+                  </span>
+                ) : (
+                  <Link
+                    to={`/category/${product.category.slug}`}
+                    className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium hover:bg-primary-200 transition-colors cursor-pointer inline-block"
+                  >
+                    {product.category.name}
+                  </Link>
+                )
               )}
               {product.petType && (
                 <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">

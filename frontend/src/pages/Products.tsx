@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { productService } from '@/services/products';
 import { categoryService } from '@/services/categories';
 import ProductCard from '@/components/ProductCard';
@@ -10,6 +10,7 @@ import { SlidersHorizontal, Layers, FolderTree, ArrowUpDown, Star, Package, Tag 
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [showFilters, setShowFilters] = useState(false);
 
   const page = parseInt(searchParams.get('page') || '1');
@@ -211,7 +212,18 @@ const Products = () => {
                     }))
                   ]}
                   value={category}
-                  onChange={(value) => updateFilters('category', value)}
+                  onChange={(value) => {
+                    if (value) {
+                      // Navigate to category page instead of filtering
+                      const selectedCategory = categories.find(cat => cat._id === value);
+                      if (selectedCategory && selectedCategory.slug) {
+                        navigate(`/category/${selectedCategory.slug}`);
+                      }
+                    } else {
+                      // Clear category filter
+                      updateFilters('category', '');
+                    }
+                  }}
                   icon={<FolderTree size={16} />}
                   size="sm"
                 />
