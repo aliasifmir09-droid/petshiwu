@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 import Category from '../models/Category';
 import { AuthRequest } from '../middleware/auth';
 
@@ -121,16 +122,55 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
 // Get single category
 export const getCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const category = await Category.findOne({
-      $or: [{ _id: req.params.id }, { slug: req.params.id }]
-    })
-      .populate('parentCategory', 'name slug')
-      .lean(); // Use lean() for better performance
+    const identifier = req.params.id;
+    
+    // Try to find category by ID first (if it's a valid ObjectId)
+    let category = null;
+    
+    if (mongoose.Types.ObjectId.isValid(identifier)) {
+      category = await Category.findOne({ _id: identifier })
+        .populate('parentCategory', 'name slug')
+        .lean();
+    }
+    
+    // If not found by ID, try to find by slug (case-insensitive)
+    if (!category) {
+      const normalizedSlug = identifier.toLowerCase().trim();
+      
+      // Try exact match first
+      category = await Category.findOne({
+        slug: normalizedSlug,
+        isActive: true
+      })
+        .populate('parentCategory', 'name slug')
+        .lean();
+      
+      // If still not found, try case-insensitive regex match
+      if (!category) {
+        category = await Category.findOne({
+          slug: { $regex: new RegExp(`^${normalizedSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+          isActive: true
+        })
+          .populate('parentCategory', 'name slug')
+          .lean();
+      }
+      
+      // If still not found, try to find by name (case-insensitive)
+      if (!category) {
+        const nameMatch = normalizedSlug.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+        category = await Category.findOne({
+          name: { $regex: new RegExp(`^${nameMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+          isActive: true
+        })
+          .populate('parentCategory', 'name slug')
+          .lean();
+      }
+    }
 
     if (!category) {
       return res.status(404).json({
         success: false,
-        message: 'Category not found'
+        message: `Category not found: ${identifier}`
       });
     }
 
