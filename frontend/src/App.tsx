@@ -7,6 +7,7 @@ import { authService } from './services/auth';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LoadingSpinner from './components/LoadingSpinner';
+import ErrorBoundary from './components/ErrorBoundary';
 import './index.css';
 
 // Lazy load pages for code splitting and better performance
@@ -69,15 +70,16 @@ function App() {
         <div className="flex flex-col min-h-screen">
           <Header />
           <main className="flex-1">
-            <Suspense fallback={
-              <div className="container mx-auto px-4 py-12">
-                <LoadingSpinner size="lg" />
-              </div>
-            }>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/products/:slug" element={<ProductDetail />} />
+            <ErrorBoundary>
+              <Suspense fallback={
+                <div className="container mx-auto px-4 py-12">
+                  <LoadingSpinner size="lg" />
+                </div>
+              }>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route path="/products/:slug" element={<ProductDetail />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/login" element={<Login />} />
@@ -93,6 +95,7 @@ function App() {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
+            </ErrorBoundary>
           </main>
           <Footer />
         </div>

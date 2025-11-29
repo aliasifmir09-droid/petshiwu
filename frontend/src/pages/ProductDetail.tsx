@@ -22,10 +22,11 @@ const ProductDetail = () => {
   const [zoomPosition, setZoomPosition] = useState<{ x: number; y: number } | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  const { data: product, isLoading } = useQuery({
+  const { data: product, isLoading, error: productError } = useQuery({
     queryKey: ['product', slug],
     queryFn: () => productService.getProduct(slug!),
-    enabled: !!slug
+    enabled: !!slug,
+    retry: 1
   });
 
   const { data: reviews } = useQuery({
@@ -48,6 +49,21 @@ const ProductDetail = () => {
     );
   }
 
+  if (productError) {
+    return (
+      <div className="container mx-auto px-4 lg:px-8 py-12 text-center">
+        <h1 className="text-2xl font-bold mb-4">Error loading product</h1>
+        <p className="text-gray-600 mb-4">There was an error loading this product. Please try again.</p>
+        <button
+          onClick={() => navigate('/products')}
+          className="text-primary-600 hover:text-primary-700"
+        >
+          Browse All Products
+        </button>
+      </div>
+    );
+  }
+
   if (!product) {
     return (
       <div className="container mx-auto px-4 lg:px-8 py-12 text-center">
@@ -65,8 +81,21 @@ const ProductDetail = () => {
   // Convert _id to string if it's an object (MongoDB ObjectId)
   const productId = product._id ? String(product._id) : null;
   const inWishlist = productId ? isInWishlist(productId) : false;
-  const selectedVariantData = product.variants[selectedVariant];
-  const price = selectedVariantData?.price || product.basePrice;
+  
+  // Safety checks for variants and images
+  const hasVariants = product?.variants && Array.isArray(product.variants) && product.variants.length > 0;
+  const hasImages = product?.images && Array.isArray(product.images) && product.images.length > 0;
+  
+  // Ensure selectedVariant and selectedImage are within bounds
+  const safeSelectedVariant = hasVariants 
+    ? Math.max(0, Math.min(selectedVariant, product.variants.length - 1))
+    : 0;
+  const safeSelectedImage = hasImages 
+    ? Math.max(0, Math.min(selectedImage, product.images.length - 1))
+    : 0;
+  
+  const selectedVariantData = hasVariants ? product.variants[safeSelectedVariant] : null;
+  const price = selectedVariantData?.price || product?.basePrice || 0;
 
   const handleAddToCart = () => {
     addToCart(product, selectedVariantData, quantity);
@@ -88,11 +117,31 @@ const ProductDetail = () => {
     }
   };
 
-  // Reset zoom when image changes
+  // Reset zoom and validate selectedImage when product or selectedImage changes
   useEffect(() => {
+    if (!product) return;
+    
     setZoomPosition(null);
     setImageLoaded(false);
-  }, [selectedImage]);
+    
+    // Ensure selectedImage is within bounds
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+      if (selectedImage >= product.images.length || selectedImage < 0) {
+        setSelectedImage(0);
+      }
+    } else {
+      setSelectedImage(0);
+    }
+    
+    // Ensure selectedVariant is within bounds
+    if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
+      if (selectedVariant >= product.variants.length || selectedVariant < 0) {
+        setSelectedVariant(0);
+      }
+    } else {
+      setSelectedVariant(0);
+    }
+  }, [selectedImage, selectedVariant, product]);
 
   return (
     <div className="container mx-auto px-4 lg:px-8 py-8">
@@ -126,19 +175,28 @@ const ProductDetail = () => {
             onMouseLeave={() => setZoomPosition(null)}
           >
             <div className="relative w-full h-full overflow-hidden">
-              <img
-                src={normalizeImageUrl(product.images?.[selectedImage])}
-                alt={product.name}
-                onError={(e) => handleImageError(e, product.name)}
-                onLoad={() => setImageLoaded(true)}
-                className={`w-full h-full object-cover transition-all duration-200 ease-out ${
-                  zoomPosition ? 'scale-[2.5]' : 'scale-100'
-                }`}
-                style={{
-                  transformOrigin: zoomPosition ? `${zoomPosition.x}% ${zoomPosition.y}%` : 'center center',
-                  willChange: zoomPosition ? 'transform' : 'auto'
-                }}
-              />
+              {hasImages && product.images[safeSelectedImage] ? (
+                <img
+                  src={normalizeImageUrl(product.images[safeSelectedImage]) || ''}
+                  alt={product?.name || 'Product image'}
+                  onError={(e) => {
+                    handleImageError(e, product?.name || 'Product');
+                    setImageLoaded(false);
+                  }}
+                  onLoad={() => setImageLoaded(true)}
+                  className={`w-full h-full object-cover transition-all duration-200 ease-out ${
+                    zoomPosition ? 'scale-[2.5]' : 'scale-100'
+                  }`}
+                  style={{
+                    transformOrigin: zoomPosition ? `${zoomPosition.x}% ${zoomPosition.y}%` : 'center center',
+                    willChange: zoomPosition ? 'transform' : 'auto'
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  No image available
+                </div>
+              )}
               
               {/* Subtle overlay to indicate zoom area */}
               {zoomPosition && imageLoaded && (
