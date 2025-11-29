@@ -137,7 +137,7 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
     if (!category) {
       const normalizedSlug = identifier.toLowerCase().trim();
       
-      // Try exact match first
+      // Try exact match first (with isActive check)
       category = await Category.findOne({
         slug: normalizedSlug,
         isActive: true
@@ -145,10 +145,29 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
         .populate('parentCategory', 'name slug')
         .lean();
       
+      // If not found, try exact match without isActive filter
+      if (!category) {
+        category = await Category.findOne({
+          slug: normalizedSlug
+        })
+          .populate('parentCategory', 'name slug')
+          .lean();
+      }
+      
       // If still not found, try case-insensitive regex match
       if (!category) {
         category = await Category.findOne({
           slug: { $regex: new RegExp(`^${normalizedSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+          isActive: true
+        })
+          .populate('parentCategory', 'name slug')
+          .lean();
+      }
+      
+      // Try partial slug match (e.g., "dry-food" matches "dog-dry-food")
+      if (!category) {
+        category = await Category.findOne({
+          slug: { $regex: new RegExp(normalizedSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') },
           isActive: true
         })
           .populate('parentCategory', 'name slug')
