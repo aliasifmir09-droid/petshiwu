@@ -841,7 +841,7 @@ const Header = () => {
                                       {section.items.map((item, itemIdx) => (
                                         <Link
                                           key={itemIdx}
-                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
+                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}?petType=dog`}
                                           onClick={() => setMobileMenuOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                         >
@@ -878,7 +878,7 @@ const Header = () => {
                                       {section.items.map((item, itemIdx) => (
                                         <Link
                                           key={itemIdx}
-                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
+                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}?petType=cat`}
                                           onClick={() => setMobileMenuOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                         >
