@@ -41,6 +41,24 @@ const ProductDetail = () => {
     enabled: !!slug
   });
 
+  // Reset zoom when image changes
+  useEffect(() => {
+    setZoomPosition(null);
+    setImageLoaded(false);
+  }, [selectedImage]);
+
+  // Reset indices when product changes
+  useEffect(() => {
+    if (!product?._id) {
+      setSelectedImage(0);
+      setSelectedVariant(0);
+      return;
+    }
+    
+    setSelectedImage(0);
+    setSelectedVariant(0);
+  }, [product?._id]); // Reset to first image/variant when product changes
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 lg:px-8 py-12">
@@ -116,24 +134,6 @@ const ProductDetail = () => {
       // Silent fail
     }
   };
-
-  // Reset zoom when image changes
-  useEffect(() => {
-    setZoomPosition(null);
-    setImageLoaded(false);
-  }, [selectedImage]);
-
-  // Reset indices when product changes
-  useEffect(() => {
-    if (!product) {
-      setSelectedImage(0);
-      setSelectedVariant(0);
-      return;
-    }
-    
-    setSelectedImage(0);
-    setSelectedVariant(0);
-  }, [product?._id]); // Reset to first image/variant when product changes
 
   return (
     <div className="container mx-auto px-4 lg:px-8 py-8">
