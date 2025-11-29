@@ -205,14 +205,77 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
         }
       }
       
+      // Try singular/plural variations if still not found
+      if (!category) {
+        // Try adding/removing 's' at the end for plural/singular matching
+        const singular = normalizedSlug.replace(/s$/, ''); // "horses" -> "horse"
+        const plural = normalizedSlug + 's'; // "horse" -> "horses"
+        
+        // Try singular version
+        if (singular !== normalizedSlug) {
+          category = await Category.findOne(buildQuery({ slug: singular }))
+            .populate('parentCategory', 'name slug')
+            .lean();
+        }
+        
+        // Try plural version if singular didn't work
+        if (!category && plural !== normalizedSlug) {
+          category = await Category.findOne(buildQuery({ slug: plural }))
+            .populate('parentCategory', 'name slug')
+            .lean();
+        }
+        
+        // Try by name with singular/plural
+        if (!category) {
+          const nameBase = normalizedSlug.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+          const nameSingular = nameBase.replace(/s$/, '');
+          const namePlural = nameBase + 's';
+          
+          for (const nameMatch of [nameSingular, namePlural].filter(n => n !== nameBase)) {
+            category = await Category.findOne(buildQuery({
+              name: { $regex: new RegExp(`^${nameMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+            }))
+              .populate('parentCategory', 'name slug')
+              .lean();
+            
+            if (category) break;
+          }
+        }
+      }
+      
       // If still not found and petType was provided, try without petType filter (fallback)
       if (!category && petType) {
+        // Try slug without petType filter
         category = await Category.findOne({
           slug: normalizedSlug,
           isActive: true
         })
           .populate('parentCategory', 'name slug')
           .lean();
+        
+        // Try singular/plural without petType filter
+        if (!category) {
+          const singular = normalizedSlug.replace(/s$/, '');
+          const plural = normalizedSlug + 's';
+          
+          if (singular !== normalizedSlug) {
+            category = await Category.findOne({
+              slug: singular,
+              isActive: true
+            })
+              .populate('parentCategory', 'name slug')
+              .lean();
+          }
+          
+          if (!category && plural !== normalizedSlug) {
+            category = await Category.findOne({
+              slug: plural,
+              isActive: true
+            })
+              .populate('parentCategory', 'name slug')
+              .lean();
+          }
+        }
         
         if (category) {
           console.warn(`[GET CATEGORY] Found category without petType filter: ${category.name} (slug: ${category.slug}, petType: ${category.petType}, requested: ${petType})`);
@@ -236,19 +299,51 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
 
     if (!category) {
       // Log for debugging
-      console.warn(`[GET CATEGORY] Category not found: ${identifier}`);
+      console.warn(`[GET CATEGORY] Category not found: ${identifier} (petType: ${petType || 'any'})`);
       
       // Try to find any similar categories for better error message
+      const searchSlug = identifier.toLowerCase().trim();
+      const singular = searchSlug.replace(/s$/, '');
+      const plural = searchSlug + 's';
+      
       const similarCategories = await Category.find({
         $or: [
-          { slug: { $regex: new RegExp(identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } },
-          { name: { $regex: new RegExp(identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } }
-        ]
-      }).select('name slug petType isActive').limit(5).lean();
+          { slug: { $regex: new RegExp(searchSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } },
+          { name: { $regex: new RegExp(searchSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } },
+          ...(singular !== searchSlug ? [
+            { slug: { $regex: new RegExp(singular.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } },
+            { name: { $regex: new RegExp(singular.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } }
+          ] : []),
+          ...(plural !== searchSlug ? [
+            { slug: { $regex: new RegExp(plural.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } },
+            { name: { $regex: new RegExp(plural.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } }
+          ] : [])
+        ],
+        ...(petType === 'other-animals' ? { petType: 'other-animals' } : {})
+      }).select('name slug petType isActive').limit(10).lean();
       
-      let errorMessage = `Category not found: ${identifier}`;
-      if (similarCategories.length > 0) {
-        errorMessage += `. Similar categories found: ${similarCategories.map(c => `${c.name} (slug: ${c.slug})`).join(', ')}`;
+      // Also check all active categories for other-animals if petType is other-animals
+      let otherAnimalsCategories: any[] = [];
+      if (petType === 'other-animals') {
+        otherAnimalsCategories = await Category.find({
+          petType: 'other-animals',
+          isActive: true
+        }).select('name slug').limit(20).lean();
+      }
+      
+      let errorMessage = `Category not found: "${identifier}"`;
+      if (petType) {
+        errorMessage += ` for pet type "${petType}"`;
+      }
+      
+      if (similarCategories.length > 0 || otherAnimalsCategories.length > 0) {
+        errorMessage += '. ';
+        if (similarCategories.length > 0) {
+          errorMessage += `Similar categories found: ${similarCategories.map(c => `${c.name} (${c.petType}, slug: ${c.slug})`).join(', ')}. `;
+        }
+        if (otherAnimalsCategories.length > 0 && petType === 'other-animals') {
+          errorMessage += `Available "Other Animals" categories: ${otherAnimalsCategories.map(c => `${c.name} (slug: ${c.slug})`).join(', ')}.`;
+        }
       }
       
       return res.status(404).json({
