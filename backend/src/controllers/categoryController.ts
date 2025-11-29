@@ -201,9 +201,25 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
     }
 
     if (!category) {
+      // Log for debugging
+      console.warn(`[GET CATEGORY] Category not found: ${identifier}`);
+      
+      // Try to find any similar categories for better error message
+      const similarCategories = await Category.find({
+        $or: [
+          { slug: { $regex: new RegExp(identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } },
+          { name: { $regex: new RegExp(identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } }
+        ]
+      }).select('name slug petType isActive').limit(5).lean();
+      
+      let errorMessage = `Category not found: ${identifier}`;
+      if (similarCategories.length > 0) {
+        errorMessage += `. Similar categories found: ${similarCategories.map(c => `${c.name} (slug: ${c.slug})`).join(', ')}`;
+      }
+      
       return res.status(404).json({
         success: false,
-        message: `Category not found: ${identifier}`
+        message: errorMessage
       });
     }
 
