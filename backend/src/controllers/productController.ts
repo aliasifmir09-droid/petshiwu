@@ -466,9 +466,28 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       ]
     };
 
-    // Filter by category
+    // Filter by category - include subcategories
     if (req.query.category) {
-      baseQuery.category = req.query.category;
+      try {
+        const categoryId = new mongoose.Types.ObjectId(req.query.category as string);
+        
+        // Find all subcategories of this category (including the category itself)
+        const subcategories = await Category.find({
+          $or: [
+            { _id: categoryId },
+            { parentCategory: categoryId }
+          ],
+          isActive: true
+        }).select('_id').lean();
+        
+        const categoryIds = subcategories.map(cat => cat._id);
+        
+        // Include products in the selected category and all its subcategories
+        baseQuery.category = { $in: categoryIds };
+      } catch (error) {
+        // If category ID is invalid, try direct match
+        baseQuery.category = req.query.category;
+      }
     }
 
     // Filter by pet type
