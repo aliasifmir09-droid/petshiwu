@@ -908,14 +908,18 @@ const Header = () => {
                               <>
                                 {otherAnimalsMegaMenu.map((section, idx) => (
                                   <div key={idx} className="space-y-1 mb-3">
-                                    <p className="text-sm font-bold text-gray-900 px-3">
+                                    <Link
+                                      to={`/category/${encodeURIComponent(section.title.toLowerCase().replace(/\s+/g, '-'))}?petType=other-animals`}
+                                      onClick={() => setMobileMenuOpen(false)}
+                                      className="text-sm font-bold text-gray-900 px-3 block hover:text-[#1E3A8A] transition-colors"
+                                    >
                                       {section.title}
-                                    </p>
+                                    </Link>
                                     <div className="space-y-1">
                                       {section.items.map((item, itemIdx) => (
                                         <Link
                                           key={itemIdx}
-                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
+                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}?petType=other-animals`}
                                           onClick={() => setMobileMenuOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                         >
