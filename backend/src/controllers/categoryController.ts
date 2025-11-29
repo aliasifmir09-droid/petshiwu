@@ -123,12 +123,26 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
 export const getCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const identifier = req.params.id;
+    const petType = req.query.petType ? String(req.query.petType).toLowerCase().trim() : null;
+    
+    // Build base query with petType filter if provided
+    const buildQuery = (slugQuery: any) => {
+      const query: any = { ...slugQuery, isActive: true };
+      if (petType) {
+        query.petType = petType;
+      }
+      return query;
+    };
     
     // Try to find category by ID first (if it's a valid ObjectId)
     let category = null;
     
     if (mongoose.Types.ObjectId.isValid(identifier)) {
-      category = await Category.findOne({ _id: identifier })
+      const idQuery: any = { _id: identifier };
+      if (petType) {
+        idQuery.petType = petType;
+      }
+      category = await Category.findOne(idQuery)
         .populate('parentCategory', 'name slug')
         .lean();
     }
@@ -137,39 +151,36 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
     if (!category) {
       const normalizedSlug = identifier.toLowerCase().trim();
       
-      // Try exact match first (with isActive check)
-      category = await Category.findOne({
-        slug: normalizedSlug,
-        isActive: true
-      })
+      // Try exact match first (with isActive check and petType if provided)
+      category = await Category.findOne(buildQuery({ slug: normalizedSlug }))
         .populate('parentCategory', 'name slug')
         .lean();
       
-      // If not found, try exact match without isActive filter
+      // If not found, try exact match without isActive filter (but still with petType if provided)
       if (!category) {
-        category = await Category.findOne({
-          slug: normalizedSlug
-        })
+        const query: any = { slug: normalizedSlug };
+        if (petType) {
+          query.petType = petType;
+        }
+        category = await Category.findOne(query)
           .populate('parentCategory', 'name slug')
           .lean();
       }
       
       // If still not found, try case-insensitive regex match
       if (!category) {
-        category = await Category.findOne({
-          slug: { $regex: new RegExp(`^${normalizedSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
-          isActive: true
-        })
+        category = await Category.findOne(buildQuery({
+          slug: { $regex: new RegExp(`^${normalizedSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+        }))
           .populate('parentCategory', 'name slug')
           .lean();
       }
       
       // Try partial slug match (e.g., "dry-food" matches "dog-dry-food")
       if (!category) {
-        category = await Category.findOne({
-          slug: { $regex: new RegExp(normalizedSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') },
-          isActive: true
-        })
+        category = await Category.findOne(buildQuery({
+          slug: { $regex: new RegExp(normalizedSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') }
+        }))
           .populate('parentCategory', 'name slug')
           .lean();
       }
@@ -184,10 +195,9 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
         ];
         
         for (const nameMatch of nameVariations) {
-          category = await Category.findOne({
-            name: { $regex: new RegExp(`^${nameMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
-            isActive: true
-          })
+          category = await Category.findOne(buildQuery({
+            name: { $regex: new RegExp(`^${nameMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+          }))
             .populate('parentCategory', 'name slug')
             .lean();
           
@@ -195,25 +205,30 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
         }
       }
       
-      // If still not found, try without isActive filter (for debugging)
-      if (!category) {
+      // If still not found and petType was provided, try without petType filter (fallback)
+      if (!category && petType) {
         category = await Category.findOne({
-          slug: normalizedSlug
+          slug: normalizedSlug,
+          isActive: true
         })
           .populate('parentCategory', 'name slug')
           .lean();
         
-        if (category && !category.isActive) {
-          console.warn(`[GET CATEGORY] Found inactive category: ${category.name} (slug: ${category.slug})`);
+        if (category) {
+          console.warn(`[GET CATEGORY] Found category without petType filter: ${category.name} (slug: ${category.slug}, petType: ${category.petType}, requested: ${petType})`);
         }
       }
       
       // Final fallback: try name match without isActive filter
       if (!category) {
         const nameMatch = normalizedSlug.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-        category = await Category.findOne({
+        const query: any = {
           name: { $regex: new RegExp(`^${nameMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
-        })
+        };
+        if (petType) {
+          query.petType = petType;
+        }
+        category = await Category.findOne(query)
           .populate('parentCategory', 'name slug')
           .lean();
       }

@@ -518,7 +518,7 @@ const Header = () => {
                               {dogMegaMenu.map((section, idx) => (
                                 <div key={idx} className="space-y-2">
                                   <Link
-                                    to={`/category/${encodeURIComponent(section.title.toLowerCase().replace(/\s+/g, '-'))}`}
+                                    to={`/category/${encodeURIComponent(section.title.toLowerCase().replace(/\s+/g, '-'))}?petType=dog`}
                                     className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors block"
                                   >
                                     {section.title} →
@@ -527,7 +527,7 @@ const Header = () => {
                                     {section.items.map((item, itemIdx) => (
                                       <li key={itemIdx}>
                                         <Link
-                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
+                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}?petType=dog`}
                                           className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
                                         >
                                           {item}
@@ -561,7 +561,7 @@ const Header = () => {
                               {catMegaMenu.map((section, idx) => (
                                 <div key={idx} className="space-y-2">
                                   <Link
-                                    to={`/category/${encodeURIComponent(section.title.toLowerCase().replace(/\s+/g, '-'))}`}
+                                    to={`/category/${encodeURIComponent(section.title.toLowerCase().replace(/\s+/g, '-'))}?petType=cat`}
                                     className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors block"
                                   >
                                     {section.title} →
@@ -570,7 +570,7 @@ const Header = () => {
                                     {section.items.map((item, itemIdx) => (
                                       <li key={itemIdx}>
                                         <Link
-                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}`}
+                                          to={`/category/${encodeURIComponent(item.toLowerCase().replace(/\s+/g, '-'))}?petType=cat`}
                                           className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
                                         >
                                           {item}

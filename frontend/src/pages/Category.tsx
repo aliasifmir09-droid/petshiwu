@@ -18,11 +18,12 @@ const Category = () => {
   const brand = searchParams.get('brand') || '';
   const minRating = searchParams.get('minRating') || '';
   const inStock = searchParams.get('inStock') || '';
+  const petType = searchParams.get('petType') || '';
 
-  // Fetch category by slug
+  // Fetch category by slug (with petType filter if provided)
   const { data: category, isLoading: isLoadingCategory } = useQuery({
-    queryKey: ['category', slug],
-    queryFn: () => categoryService.getCategory(slug!),
+    queryKey: ['category', slug, petType],
+    queryFn: () => categoryService.getCategory(slug!, petType || undefined),
     enabled: !!slug,
     retry: 1
   });
