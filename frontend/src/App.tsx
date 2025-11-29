@@ -15,6 +15,7 @@ const Home = lazy(() => import('./pages/Home'));
 const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const Category = lazy(() => import('./pages/Category'));
+const PetType = lazy(() => import('./pages/PetType'));
 const Cart = lazy(() => import('./pages/Cart'));
 const Checkout = lazy(() => import('./pages/Checkout'));
 const Login = lazy(() => import('./pages/Login'));
@@ -77,12 +78,12 @@ function App() {
                   <LoadingSpinner size="lg" />
                 </div>
               }>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/products" element={<Products />} />
-                  <Route path="/products/:slug" element={<ProductDetail />} />
-                  <Route path="/category/:slug" element={<Category />} />
-                <Route path="/cart" element={<Cart />} />
+                        <Routes>
+                          <Route path="/" element={<Home />} />
+                          <Route path="/products" element={<Products />} />
+                          <Route path="/products/:slug" element={<ProductDetail />} />
+                          <Route path="/category/:slug" element={<Category />} />
+                          <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
@@ -93,8 +94,9 @@ function App() {
                 <Route path="/donate" element={<Donate />} />
                 <Route path="/favorites" element={<Favorites />} />
                 <Route path="/403" element={<Forbidden />} />
-                <Route path="/404" element={<NotFound />} />
-                <Route path="*" element={<NotFound />} />
+                  <Route path="/404" element={<NotFound />} />
+                  <Route path="/:petType" element={<PetType />} />
+                  <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
             </ErrorBoundary>

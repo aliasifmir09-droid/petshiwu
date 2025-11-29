@@ -501,7 +501,7 @@ const Header = () => {
                     return (
                       <li key={petType.slug} className="relative group flex-shrink-0">
                         <Link 
-                          to={`/products?petType=${petType.slug}`} 
+                          to={`/${petType.slug}`} 
                           className="flex items-center gap-0.5 lg:gap-1 hover:text-[#1E3A8A] transition-colors py-1.5 lg:py-2 px-1 lg:px-1.5 whitespace-nowrap"
                         >
                           <span className="text-sm lg:text-base flex-shrink-0 leading-none">{petType.icon}</span>
@@ -544,7 +544,7 @@ const Header = () => {
                               {dogSpecialLinks.map((link, idx) => (
                                 <Link
                                   key={idx}
-                                  to={`/products?petType=dog`}
+                                  to={`/dog`}
                                   className="text-xs font-semibold text-[#1E3A8A] hover:underline"
                                 >
                                   {link} →
@@ -587,7 +587,7 @@ const Header = () => {
                               {catSpecialLinks.map((link, idx) => (
                                 <Link
                                   key={idx}
-                                  to={`/products?petType=cat`}
+                                  to={`/cat`}
                                   className="text-xs font-semibold text-[#1E3A8A] hover:underline"
                                 >
                                   {link} →
@@ -657,7 +657,7 @@ const Header = () => {
                                   ))}
                                 </div>
                                 <Link
-                                  to={`/products?petType=${petType.slug}`}
+                                  to={`/${petType.slug}`}
                                   className="text-sm font-semibold text-[#1E3A8A] hover:underline mt-3 block text-center"
                                 >
                                   View All {petType.name} →
@@ -718,7 +718,7 @@ const Header = () => {
                                 
                                 {/* View All Link */}
                                 <Link
-                                  to={`/products?petType=${petType.slug}`}
+                                  to={`/${petType.slug}`}
                                   className="text-xs font-semibold text-[#1E3A8A] hover:underline mt-3 pt-2 border-t border-gray-200 block"
                                 >
                                   View All {petType.name} Products →
@@ -857,7 +857,7 @@ const Header = () => {
                                   {dogSpecialLinks.map((link, idx) => (
                                     <Link
                                       key={idx}
-                                      to={`/products?petType=dog`}
+                                      to={`/dog`}
                                       onClick={() => setMobileMenuOpen(false)}
                                       className="block py-2 px-3 text-sm font-semibold text-[#1E3A8A] hover:underline truncate overflow-hidden"
                                     >
@@ -894,7 +894,7 @@ const Header = () => {
                                   {catSpecialLinks.map((link, idx) => (
                                     <Link
                                       key={idx}
-                                      to={`/products?petType=cat`}
+                                      to={`/cat`}
                                       onClick={() => setMobileMenuOpen(false)}
                                       className="block py-2 px-3 text-sm font-semibold text-[#1E3A8A] hover:underline truncate overflow-hidden"
                                     >
@@ -983,7 +983,7 @@ const Header = () => {
                                 
                                 {/* View All */}
                                 <Link
-                                  to={`/products?petType=${petType.slug}`}
+                                  to={`/${petType.slug}`}
                                   onClick={() => setMobileMenuOpen(false)}
                                   className="block py-2 px-3 text-sm font-semibold text-[#1E3A8A] hover:underline truncate overflow-hidden"
                                 >
@@ -997,7 +997,7 @@ const Header = () => {
                     ) : (
                       // Pet type without categories - direct link
                       <Link
-                        to={`/products?petType=${petType.slug}`}
+                        to={`/${petType.slug}`}
                         className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors overflow-hidden"
                         onClick={() => setMobileMenuOpen(false)}
                       >
@@ -1257,7 +1257,7 @@ const Header = () => {
                       </>
                     ) : (
                       <Link
-                        to={`/products?petType=${petType.slug}`}
+                        to={`/${petType.slug}`}
                         onClick={() => setIsLeftSidebarOpen(false)}
                         className="flex items-center gap-3 py-3 px-4 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
                       >
