@@ -179,7 +179,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           throw new Error(`Failed to find or create category: ${trimmedName}`);
         };
 
-        // Parse hierarchical category path (e.g., "Dog > Food > Dry Food")
+        // Parse hierarchical category path (e.g., "Dog > Food > Dry Food" or "food > dry food")
         // IMPORTANT: Reset categoryId for each product to avoid using previous product's category
         let categoryId: mongoose.Types.ObjectId | null = null;
         const categoryPath = String(row.category || '').trim();
@@ -192,6 +192,9 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           });
           continue;
         }
+        
+        // Get pet type once for the entire category resolution
+        const petType = String(row.petType).toLowerCase().trim();
         
         if (categoryPath.includes('>')) {
           // Hierarchical path detected
@@ -206,20 +209,30 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
             continue;
           }
           
-          // Validate pet type matches first category (if it's a pet type name)
-          const petType = String(row.petType).toLowerCase().trim();
-          const firstCategoryName = categoryParts[0].toLowerCase();
-          
-          // Check if first part matches pet type (optional validation)
-          // We'll use the petType from CSV row instead
-          
-          // Build category hierarchy
+          // Build category hierarchy - ensure each part is processed correctly
           let currentParentId: mongoose.Types.ObjectId | null = null;
           
           for (let i = 0; i < categoryParts.length; i++) {
-            const categoryName = categoryParts[i];
-            const createdId = await findOrCreateCategory(categoryName, petType, currentParentId);
-            currentParentId = createdId;
+            const categoryName = categoryParts[i].trim();
+            if (!categoryName) {
+              continue; // Skip empty parts
+            }
+            
+            try {
+              const createdId = await findOrCreateCategory(categoryName, petType, currentParentId);
+              if (!createdId) {
+                throw new Error(`Failed to create/find category: ${categoryName}`);
+              }
+              currentParentId = createdId;
+            } catch (error: any) {
+              results.failed++;
+              results.errors.push({
+                row: rowNumber,
+                error: `Category hierarchy error at "${categoryName}": ${error.message}`
+              });
+              currentParentId = null;
+              break;
+            }
           }
           
           if (!currentParentId) {
@@ -331,10 +344,30 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           ? String(row.features).split(',').map((feature: string) => feature.trim()).filter((feature: string) => feature.length > 0)
           : [];
 
+        // Ensure categoryId is valid and exists
+        if (!categoryId) {
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            error: 'Category ID is null or undefined'
+          });
+          continue;
+        }
+        
         // Ensure categoryId is a proper ObjectId before creating product
-        const categoryObjectId = categoryId instanceof mongoose.Types.ObjectId 
-          ? categoryId 
-          : new mongoose.Types.ObjectId(String(categoryId));
+        let categoryObjectId: mongoose.Types.ObjectId;
+        try {
+          categoryObjectId = categoryId instanceof mongoose.Types.ObjectId 
+            ? categoryId 
+            : new mongoose.Types.ObjectId(String(categoryId));
+        } catch (error: any) {
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            error: `Invalid category ID format: ${categoryId}`
+          });
+          continue;
+        }
         
         // Final validation - ensure category exists
         const finalCategoryCheck = await Category.findById(categoryObjectId);
@@ -368,26 +401,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           autoshipEligible: String(row.autoshipEligible || 'false').toLowerCase() === 'true' ? true : false
         };
 
-        // Validate categoryId before creating product
-        if (!categoryId || !mongoose.Types.ObjectId.isValid(categoryId)) {
-          results.failed++;
-          results.errors.push({
-            row: rowNumber,
-            error: `Invalid category ID: ${categoryId}`
-          });
-          continue;
-        }
-        
-        // Double-check category exists before creating product
-        const categoryCheck = await Category.findById(categoryId);
-        if (!categoryCheck) {
-          results.failed++;
-          results.errors.push({
-            row: rowNumber,
-            error: `Category with ID ${categoryId} does not exist`
-          });
-          continue;
-        }
+        // categoryObjectId is already validated above, no need to check again
         
         // Create product
         const product = await Product.create(productData);
