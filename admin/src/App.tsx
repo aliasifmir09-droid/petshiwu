@@ -20,10 +20,10 @@ const Login = lazy(() => import('./pages/Login'));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: true, // Refetch when window regains focus for better sync
-      refetchOnMount: 'always', // Always refetch when component mounts (navigating to page)
+      refetchOnWindowFocus: false, // Don't refetch on window focus for better performance
+      refetchOnMount: true, // Refetch if data is stale (default behavior)
       retry: 1,
-      staleTime: 0, // Consider data stale immediately to ensure fresh data on navigation
+      staleTime: 30 * 1000, // Consider data fresh for 30 seconds (prevents unnecessary refetches)
       gcTime: 5 * 60 * 1000, // Cache for 5 minutes (formerly cacheTime)
     }
   }

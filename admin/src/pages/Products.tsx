@@ -41,14 +41,12 @@ const Products = () => {
       petType: petTypeFilter || undefined,
       inStock: stockFilter === 'in-stock' ? true : stockFilter === 'out-of-stock' ? false : undefined
     }),
-    refetchOnMount: 'always' // Always refetch when navigating to this page
   });
 
   // Get out-of-stock products for notification bar
   const { data: outOfStockData } = useQuery({
     queryKey: ['products', 'out-of-stock-notification'],
     queryFn: () => adminService.getProducts({ inStock: false, limit: 100 }),
-    refetchOnMount: 'always' // Always refetch when navigating to this page
   });
 
   const { data: categories } = useQuery({
@@ -58,7 +56,7 @@ const Products = () => {
 
   const deleteMutation = useMutation({
     mutationFn: adminService.deleteProduct,
-    onSuccess: async (_, productId: string) => {
+    onSuccess: (_, productId: string) => {
       const deletedId = String(productId);
       
       // Close delete confirmation modal immediately
@@ -102,18 +100,10 @@ const Products = () => {
         setPage(page - 1);
       }
       
-      // Immediately invalidate and refetch all product queries (no delay needed)
-      // This ensures the UI shows the updated data from the server
-      await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
-      
-      // Force refetch all active product queries immediately
-      await queryClient.refetchQueries({ 
-        queryKey: ['products'], 
-        exact: false,
-        type: 'active'
-      });
+      // Only invalidate - it will automatically refetch if query is active
+      queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
     },
-    onError: async (error: any, productId) => {
+    onError: (error: any, productId) => {
       console.error('Delete product error:', error);
       
       const deletedId = String(productId);
@@ -141,13 +131,8 @@ const Products = () => {
           }
         );
         
-        // Invalidate and refetch to ensure consistency
-        await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
-        await queryClient.refetchQueries({ 
-          queryKey: ['products'], 
-          exact: false,
-          type: 'active'
-        });
+        // Only invalidate - it will automatically refetch if query is active
+        queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
         showToast('Product has been deleted', 'success');
         return;
       }
@@ -222,12 +207,8 @@ const Products = () => {
       }
       
       // Immediately invalidate and refetch all product queries (no delay needed)
-      await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
-      await queryClient.refetchQueries({ 
-        queryKey: ['products'], 
-        exact: false,
-        type: 'active'
-      });
+      // Only invalidate - it will automatically refetch if query is active
+      queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
     },
     onError: (error: any) => {
       showToast(error?.response?.data?.message || 'Failed to delete products', 'error');
@@ -646,21 +627,9 @@ const Products = () => {
             // Reset to page 1 to see newly imported products
             setPage(1);
             
-            // Wait a moment for page state to update
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            // Aggressively clear cache and refetch
-            queryClient.removeQueries({ queryKey: ['products'], exact: false });
-            await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
-            
-            // Refetch with page 1 and current filters
-            await queryClient.refetchQueries({
-              queryKey: ['products', 1, searchQuery, categoryFilter, petTypeFilter, stockFilter],
-              exact: true
-            });
-            
-            // Also force manual refetch
-            await refetch();
+            // Invalidate cache and reset to page 1
+            queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
+            setPage(1);
           }}
         />
       )}
