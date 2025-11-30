@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit, Trash2, X, Save, ChevronRight, ChevronDown, FolderTree, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Save, ChevronRight, ChevronDown, FolderTree, ArrowUp, ArrowDown } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
