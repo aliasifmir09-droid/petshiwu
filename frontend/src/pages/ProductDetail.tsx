@@ -253,10 +253,10 @@ const ProductDetail = () => {
                   onError={(e) => {
                     handleImageError(e, product?.name || 'Product');
                     setImageLoaded(false);
+                    // Suppress console errors for failed image loads (403, 404, etc.)
                     e.stopPropagation();
                   }}
                   onLoad={() => setImageLoaded(true)}
-                  crossOrigin="anonymous"
                   className={`w-full h-full object-cover transition-all duration-200 ease-out ${
                     zoomPosition ? 'scale-[2.5]' : 'scale-100'
                   }`}
@@ -296,9 +296,9 @@ const ProductDetail = () => {
                   alt={`${product.name} ${index + 1}`} 
                   onError={(e) => {
                     handleImageError(e, `${product.name} ${index + 1}`);
+                    // Suppress console errors for failed image loads (403, 404, etc.)
                     e.stopPropagation();
                   }}
-                  crossOrigin="anonymous"
                   className="w-full h-full object-cover" 
                 />
               </button>

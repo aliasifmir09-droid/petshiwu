@@ -83,10 +83,9 @@ const ProductCard = memo(({ product, hideCartButton = false, hideAutoship = fals
           loading="lazy"
           onError={(e) => {
             handleImageError(e, product.name);
-            // Suppress console errors for failed image loads
+            // Suppress console errors for failed image loads (403, 404, etc.)
             e.stopPropagation();
           }}
-          crossOrigin="anonymous"
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
         
