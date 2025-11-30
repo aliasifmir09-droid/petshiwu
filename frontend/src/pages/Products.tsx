@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { productService } from '@/services/products';
 import { categoryService } from '@/services/categories';
 import ProductCard from '@/components/ProductCard';
@@ -11,7 +11,9 @@ import { SlidersHorizontal, Layers, ArrowUpDown, Star, Package, Tag } from 'luci
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showFilters, setShowFilters] = useState(false);
+  const hasScrolledRef = useRef(false);
 
   const page = parseInt(searchParams.get('page') || '1');
   const petType = searchParams.get('petType') || '';
@@ -22,6 +24,29 @@ const Products = () => {
   const minRating = searchParams.get('minRating') || '';
   const brand = searchParams.get('brand') || '';
   const inStock = searchParams.get('inStock') || '';
+
+  // Scroll to top immediately when navigating to this page
+  useEffect(() => {
+    // Reset scroll flag when route changes
+    hasScrolledRef.current = false;
+    // Scroll immediately on route change
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    // Also use setTimeout as a fallback to ensure scroll happens after render
+    const timeoutId = setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }, 0);
+    return () => clearTimeout(timeoutId);
+  }, [location.pathname]); // Trigger on route change
+
+  // Scroll to top smoothly when filters change (within same page)
+  useEffect(() => {
+    // Only smooth scroll if we've already scrolled once (i.e., not initial load)
+    if (hasScrolledRef.current) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      hasScrolledRef.current = true;
+    }
+  }, [page, petType, category, search, sort, featured, minRating, brand, inStock]);
 
   // Redirect to category page if category query parameter exists
   useEffect(() => {
