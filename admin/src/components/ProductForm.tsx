@@ -64,35 +64,34 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
           categoryId = String(product.category._id);
         } else if (typeof product.category === 'string') {
           categoryId = product.category;
+        } else if (product.category.toString && typeof product.category.toString === 'function') {
+          // Handle ObjectId objects
+          categoryId = String(product.category);
         }
       }
       
       // Extract pet type
       const productPetType = product.petType || 'dog';
       
-      setFormData(prev => {
-        // Preserve category if pet type hasn't changed, otherwise use product's category
-        const shouldPreserveCategory = prev.petType === productPetType && prev.category;
-        
-        return {
-          ...prev,
-          name: product.name || prev.name,
-          description: product.description || prev.description,
-          shortDescription: product.shortDescription || prev.shortDescription,
-          brand: product.brand || prev.brand,
-          category: shouldPreserveCategory ? prev.category : (categoryId || prev.category),
-          petType: productPetType,
-          basePrice: product.basePrice || prev.basePrice,
-          compareAtPrice: product.compareAtPrice || prev.compareAtPrice,
-          tags: product.tags?.join(', ') || prev.tags,
-          features: product.features?.join('\n') || prev.features,
-          ingredients: product.ingredients || prev.ingredients,
-          isActive: product.isActive ?? prev.isActive,
-          isFeatured: product.isFeatured ?? prev.isFeatured,
-          autoshipEligible: product.autoshipEligible ?? prev.autoshipEligible,
-          autoshipDiscount: product.autoshipDiscount || prev.autoshipDiscount
-        };
-      });
+      // Always set category from product when editing - no need to preserve previous state
+      setFormData(prev => ({
+        ...prev,
+        name: product.name || prev.name,
+        description: product.description || prev.description,
+        shortDescription: product.shortDescription || prev.shortDescription,
+        brand: product.brand || prev.brand,
+        category: categoryId || '', // Always use product's category
+        petType: productPetType,
+        basePrice: product.basePrice || prev.basePrice,
+        compareAtPrice: product.compareAtPrice || prev.compareAtPrice,
+        tags: product.tags?.join(', ') || prev.tags,
+        features: product.features?.join('\n') || prev.features,
+        ingredients: product.ingredients || prev.ingredients,
+        isActive: product.isActive ?? prev.isActive,
+        isFeatured: product.isFeatured ?? prev.isFeatured,
+        autoshipEligible: product.autoshipEligible ?? prev.autoshipEligible,
+        autoshipDiscount: product.autoshipDiscount || prev.autoshipDiscount
+      }));
       
       if (product.variants) {
         setVariants(product.variants);
