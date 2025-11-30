@@ -459,7 +459,7 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
       });
     }
 
-    const category = await Category.findById(categoryId);
+    const category = await Category.findById(categoryId).lean();
     if (!category) {
       return res.status(404).json({
         success: false,
@@ -468,10 +468,24 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
     }
 
     // Find categories with the same parent and petType
+    // Handle parentCategory comparison correctly (can be ObjectId, string, or null)
+    const parentCategoryId = category.parentCategory 
+      ? (category.parentCategory._id ? category.parentCategory._id : category.parentCategory)
+      : null;
+
     const query: any = {
-      petType: category.petType,
-      parentCategory: category.parentCategory || null
+      petType: category.petType
     };
+
+    // For MongoDB query, use $in to handle both null and ObjectId cases
+    if (parentCategoryId) {
+      query.parentCategory = parentCategoryId;
+    } else {
+      query.$or = [
+        { parentCategory: null },
+        { parentCategory: { $exists: false } }
+      ];
+    }
 
     const siblings = await Category.find(query)
       .sort({ position: 1, createdAt: -1 })
