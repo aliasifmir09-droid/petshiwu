@@ -69,6 +69,39 @@ const Header = () => {
     refetchOnMount: true, // Always refetch when component mounts
   });
 
+  // Listen for localStorage changes (when admin clears cached_categories)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'cached_categories' && !e.newValue) {
+        // localStorage was cleared by admin, refetch categories immediately
+        console.log('[Header] Categories cache cleared, refetching...');
+        refetchCategories();
+      }
+    };
+
+    // Listen for storage events (works across tabs/windows on same origin)
+    window.addEventListener('storage', handleStorageChange);
+
+    // Also poll localStorage to detect changes (for same-tab updates)
+    let lastCacheValue = localStorage.getItem('cached_categories');
+    const pollInterval = setInterval(() => {
+      const currentCacheValue = localStorage.getItem('cached_categories');
+      if (lastCacheValue && !currentCacheValue) {
+        // Cache was cleared
+        console.log('[Header] Categories cache cleared (polled), refetching...');
+        refetchCategories();
+        lastCacheValue = currentCacheValue;
+      } else if (currentCacheValue !== lastCacheValue) {
+        lastCacheValue = currentCacheValue;
+      }
+    }, 1000); // Check every second
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(pollInterval);
+    };
+  }, [refetchCategories]);
+
   // Get cached data from localStorage if database is down
   const getCachedPetTypes = () => {
     try {
