@@ -14,10 +14,23 @@ const normalizeProductId = (product: any): any => {
   // Convert to plain object if it's a Mongoose document
   const plainProduct = product.toObject ? product.toObject() : product;
   
-  return {
+  // Normalize product _id
+  const normalized: any = {
     ...plainProduct,
     _id: plainProduct._id ? String(plainProduct._id) : plainProduct._id
   };
+  
+  // Normalize category._id if category is populated
+  if (normalized.category && typeof normalized.category === 'object' && normalized.category._id) {
+    normalized.category = {
+      ...normalized.category,
+      _id: typeof normalized.category._id === 'object' && normalized.category._id.toString
+        ? normalized.category._id.toString()
+        : String(normalized.category._id)
+    };
+  }
+  
+  return normalized;
 };
 
 // Helper function to normalize array of products
