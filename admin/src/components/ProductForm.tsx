@@ -57,7 +57,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   // Update formData when product changes (for editing)
   useEffect(() => {
     if (product && isEditing) {
-      // Extract category ID properly
+      // Extract category ID properly - handle various formats
       let categoryId = '';
       if (product.category) {
         if (typeof product.category === 'object' && product.category._id) {
@@ -67,24 +67,32 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
         }
       }
       
-      setFormData(prev => ({
-        ...prev,
-        name: product.name || prev.name,
-        description: product.description || prev.description,
-        shortDescription: product.shortDescription || prev.shortDescription,
-        brand: product.brand || prev.brand,
-        category: categoryId || prev.category,
-        petType: product.petType || prev.petType,
-        basePrice: product.basePrice || prev.basePrice,
-        compareAtPrice: product.compareAtPrice || prev.compareAtPrice,
-        tags: product.tags?.join(', ') || prev.tags,
-        features: product.features?.join('\n') || prev.features,
-        ingredients: product.ingredients || prev.ingredients,
-        isActive: product.isActive ?? prev.isActive,
-        isFeatured: product.isFeatured ?? prev.isFeatured,
-        autoshipEligible: product.autoshipEligible ?? prev.autoshipEligible,
-        autoshipDiscount: product.autoshipDiscount || prev.autoshipDiscount
-      }));
+      // Extract pet type
+      const productPetType = product.petType || 'dog';
+      
+      setFormData(prev => {
+        // Preserve category if pet type hasn't changed, otherwise use product's category
+        const shouldPreserveCategory = prev.petType === productPetType && prev.category;
+        
+        return {
+          ...prev,
+          name: product.name || prev.name,
+          description: product.description || prev.description,
+          shortDescription: product.shortDescription || prev.shortDescription,
+          brand: product.brand || prev.brand,
+          category: shouldPreserveCategory ? prev.category : (categoryId || prev.category),
+          petType: productPetType,
+          basePrice: product.basePrice || prev.basePrice,
+          compareAtPrice: product.compareAtPrice || prev.compareAtPrice,
+          tags: product.tags?.join(', ') || prev.tags,
+          features: product.features?.join('\n') || prev.features,
+          ingredients: product.ingredients || prev.ingredients,
+          isActive: product.isActive ?? prev.isActive,
+          isFeatured: product.isFeatured ?? prev.isFeatured,
+          autoshipEligible: product.autoshipEligible ?? prev.autoshipEligible,
+          autoshipDiscount: product.autoshipDiscount || prev.autoshipDiscount
+        };
+      });
       
       if (product.variants) {
         setVariants(product.variants);
@@ -344,11 +352,24 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   const handlePetTypeChange = (value: string) => {
     if (value === 'custom') {
       setShowCustomPetType(true);
-      setFormData({ ...formData, petType: customPetType || '', category: '' }); // Clear category when switching
+      // Only clear category if pet type actually changed
+      const currentPetType = formData.petType;
+      setFormData({ ...formData, petType: customPetType || '', category: currentPetType === (customPetType || '') ? formData.category : '' });
     } else {
       setShowCustomPetType(false);
-      // Clear category when pet type changes, as the current category might not be valid for the new pet type
-      setFormData({ ...formData, petType: value, category: '' });
+      // Only clear category if pet type actually changed to a different value
+      const currentPetType = formData.petType;
+      if (currentPetType !== value) {
+        // Check if current category belongs to the new pet type
+        const currentCategory = categories?.find((cat: any) => cat._id === formData.category);
+        if (currentCategory && (currentCategory.petType === value || currentCategory.petType === 'all')) {
+          // Keep the category if it's compatible with the new pet type
+          setFormData({ ...formData, petType: value });
+        } else {
+          // Clear category only if it's not compatible
+          setFormData({ ...formData, petType: value, category: '' });
+        }
+      }
     }
   };
 
