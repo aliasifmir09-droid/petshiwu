@@ -16,47 +16,76 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   const { toast, showToast, hideToast } = useToast();
   const isEditing = !!product;
 
+  // Helper function to safely extract ObjectId as string
+  const extractObjectIdString = (obj: any): string => {
+    if (!obj) return '';
+    
+    // If it's already a string, return it
+    if (typeof obj === 'string') {
+      return obj.trim();
+    }
+    
+    // If it's an object, try to extract the ID
+    if (typeof obj === 'object' && obj !== null) {
+      // Try toString() method (ObjectId has this)
+      if (typeof obj.toString === 'function') {
+        const idStr = obj.toString().trim();
+        // Validate it's a proper ObjectId format (24 hex chars)
+        if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
+          return idStr;
+        }
+        // If toString() returns something that's not valid ObjectId, try other methods
+        if (idStr !== '[object Object]' && idStr.length > 0) {
+          return idStr;
+        }
+      }
+      
+      // Try valueOf() method
+      if (typeof obj.valueOf === 'function') {
+        const value = obj.valueOf();
+        if (typeof value === 'string') {
+          return value.trim();
+        }
+      }
+      
+      // Try accessing common ObjectId properties
+      if (obj.$oid) {
+        return String(obj.$oid).trim();
+      }
+      if (obj.hexString) {
+        return String(obj.hexString).trim();
+      }
+      if (obj.str) {
+        return String(obj.str).trim();
+      }
+    }
+    
+    return '';
+  };
+
   // Helper function to extract category ID from product
   const extractCategoryId = (product: any): string => {
     if (!product?.category) return '';
     
-    // Handle different formats
-    if (typeof product.category === 'object' && product.category !== null) {
-      // First, try to get _id property (most common case)
-      if (product.category._id) {
-        // Handle case where _id might be an ObjectId object
-        if (typeof product.category._id === 'object' && product.category._id.toString) {
-          const idStr = product.category._id.toString().trim();
-          // Validate it's a proper ObjectId format (24 hex chars)
-          if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
-            return idStr;
-          }
-        }
-        // Handle case where _id is already a string
-        const idStr = String(product.category._id).trim();
-        if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
-          return idStr;
-        }
-        return idStr; // Return even if not valid format (for debugging)
-      }
-      
-      // Try id property as fallback
-      if (product.category.id) {
-        if (typeof product.category.id === 'object' && product.category.id.toString) {
-          return product.category.id.toString().trim();
-        }
-        return String(product.category.id).trim();
-      }
-      
-      // Last resort: if the category itself is an ObjectId (shouldn't happen but handle it)
-      if (product.category.toString && typeof product.category.toString === 'function') {
-        const idStr = product.category.toString().trim();
-        if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
-          return idStr;
-        }
-      }
-    } else if (typeof product.category === 'string') {
+    // Handle string format
+    if (typeof product.category === 'string') {
       return product.category.trim();
+    }
+    
+    // Handle object format
+    if (typeof product.category === 'object' && product.category !== null) {
+      // Most common: populated category object with _id
+      if (product.category._id !== undefined && product.category._id !== null) {
+        return extractObjectIdString(product.category._id);
+      }
+      
+      // Fallback: try id property
+      if (product.category.id !== undefined && product.category.id !== null) {
+        return extractObjectIdString(product.category.id);
+      }
+      
+      // Last resort: if the category itself is an ObjectId
+      return extractObjectIdString(product.category);
     }
     
     return '';
