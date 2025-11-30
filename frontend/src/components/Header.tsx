@@ -130,7 +130,19 @@ const Header = () => {
   };
 
   // Build dynamic mega menu from categories for a specific pet type
-  const buildDynamicMegaMenu = (petTypeSlug: string) => {
+  interface MenuItem {
+    name: string;
+    slug: string;
+  }
+
+  interface MenuSection {
+    _id: string;
+    title: string;
+    slug: string;
+    items: MenuItem[];
+  }
+
+  const buildDynamicMegaMenu = (petTypeSlug: string): MenuSection[] => {
     if (!categories || categories.length === 0) return [];
     
     // Get all active categories for this pet type (including those with parentCategory)
@@ -142,15 +154,15 @@ const Header = () => {
     const mainCategories = petTypeCategories.filter((cat: any) => !cat.parentCategory);
     
     // Build menu structure: each main category with its subcategories as items
-    return mainCategories.map((mainCat: any) => {
+    return mainCategories.map((mainCat: any): MenuSection => {
       const categoryId = mainCat._id || String(mainCat._id);
       const subcategories = getSubcategories(categoryId)
         .filter((sub: any) => sub.isActive !== false)
-        .map((sub: any) => ({
+        .map((sub: any): MenuItem => ({
           name: sub.name,
           slug: sub.slug
         }))
-        .sort((a, b) => a.name.localeCompare(b.name));
+        .sort((a: MenuItem, b: MenuItem) => a.name.localeCompare(b.name));
 
       return {
         _id: categoryId,
@@ -158,7 +170,7 @@ const Header = () => {
         slug: mainCat.slug,
         items: subcategories
       };
-    }).sort((a, b) => a.title.localeCompare(b.title));
+    }).sort((a: MenuSection, b: MenuSection) => a.title.localeCompare(b.title));
   };
 
   // Build dynamic menus for each pet type
@@ -455,7 +467,7 @@ const Header = () => {
                         {isSpecialDogMenu && (
                           <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                             <div className="grid grid-cols-4 gap-6">
-                              {dogMegaMenu.map((section) => (
+                              {dogMegaMenu.map((section: MenuSection) => (
                                 <div key={section._id || section.slug} className="space-y-2">
                                   <Link
                                     to={`/category/${section.slug}?petType=dog`}
@@ -464,13 +476,13 @@ const Header = () => {
                                     {section.title} →
                                   </Link>
                                   <ul className="space-y-1">
-                                    {section.items.map((item) => (
-                                      <li key={item.slug || item.name}>
+                                    {section.items.map((item: MenuItem | string) => (
+                                      <li key={typeof item === 'object' ? item.slug : String(item)}>
                                         <Link
-                                          to={`/category/${item.slug}?petType=dog`}
+                                          to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=dog`}
                                           className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
                                         >
-                                          {item.name || item}
+                                          {typeof item === 'object' ? item.name : item}
                                         </Link>
                                       </li>
                                     ))}
@@ -498,7 +510,7 @@ const Header = () => {
                         {isSpecialCatMenu && (
                           <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                             <div className="grid grid-cols-4 gap-6">
-                              {catMegaMenu.map((section) => (
+                              {catMegaMenu.map((section: MenuSection) => (
                                 <div key={section._id || section.slug} className="space-y-2">
                                   <Link
                                     to={`/category/${section.slug}?petType=cat`}
@@ -507,13 +519,13 @@ const Header = () => {
                                     {section.title} →
                                   </Link>
                                   <ul className="space-y-1">
-                                    {section.items.map((item) => (
-                                      <li key={item.slug || item.name}>
+                                    {section.items.map((item: MenuItem | string) => (
+                                      <li key={typeof item === 'object' ? item.slug : String(item)}>
                                         <Link
-                                          to={`/category/${item.slug}?petType=cat`}
+                                          to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=cat`}
                                           className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
                                         >
-                                          {item.name || item}
+                                          {typeof item === 'object' ? item.name : item}
                                         </Link>
                                       </li>
                                     ))}
@@ -541,7 +553,7 @@ const Header = () => {
                         {isSpecialOtherAnimalsMenu && (
                           <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                             <div className="grid grid-cols-4 gap-6">
-                              {otherAnimalsMegaMenu.map((section) => (
+                              {otherAnimalsMegaMenu.map((section: MenuSection) => (
                                 <div key={section._id || section.slug} className="space-y-2">
                                   <Link
                                     to={`/category/${section.slug}?petType=other-animals`}
@@ -550,13 +562,13 @@ const Header = () => {
                                     {section.title} →
                                   </Link>
                                   <ul className="space-y-1">
-                                    {section.items.map((item) => (
-                                      <li key={item.slug || item.name}>
+                                    {section.items.map((item: MenuItem | string) => (
+                                      <li key={typeof item === 'object' ? item.slug : String(item)}>
                                         <Link
-                                          to={`/category/${item.slug}?petType=other-animals`}
+                                          to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=other-animals`}
                                           className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
                                         >
-                                          {item.name || item}
+                                          {typeof item === 'object' ? item.name : item}
                                         </Link>
                                       </li>
                                     ))}
@@ -772,7 +784,7 @@ const Header = () => {
                             {isSpecialDogMenu ? (
                               // Special hardcoded Dog menu
                               <>
-                                {dogMegaMenu.map((section) => (
+                                {dogMegaMenu.map((section: MenuSection) => (
                                   <div key={section._id || section.slug} className="space-y-1 mb-3">
                                     <Link
                                       to={`/category/${section.slug}?petType=dog`}
@@ -782,9 +794,9 @@ const Header = () => {
                                       {section.title} →
                                     </Link>
                                     <div className="space-y-1">
-                                      {section.items.map((item) => (
+                                      {section.items.map((item: MenuItem | string) => (
                                         <Link
-                                          key={item.slug || item.name || String(item)}
+                                          key={typeof item === 'object' ? item.slug : String(item)}
                                           to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=dog`}
                                           onClick={() => setMobileMenuOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
@@ -813,7 +825,7 @@ const Header = () => {
                             ) : isSpecialCatMenu ? (
                               // Special hardcoded Cat menu
                               <>
-                                {catMegaMenu.map((section) => (
+                                {catMegaMenu.map((section: MenuSection) => (
                                   <div key={section._id || section.slug} className="space-y-1 mb-3">
                                     <Link
                                       to={`/category/${section.slug}?petType=cat`}
@@ -823,9 +835,9 @@ const Header = () => {
                                       {section.title} →
                                     </Link>
                                     <div className="space-y-1">
-                                      {section.items.map((item) => (
+                                      {section.items.map((item: MenuItem | string) => (
                                         <Link
-                                          key={item.slug || item.name || String(item)}
+                                          key={typeof item === 'object' ? item.slug : String(item)}
                                           to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=cat`}
                                           onClick={() => setMobileMenuOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
@@ -854,7 +866,7 @@ const Header = () => {
                             ) : isSpecialOtherAnimalsMenu ? (
                               // Special hardcoded Other Animals menu
                               <>
-                                {otherAnimalsMegaMenu.map((section) => (
+                                {otherAnimalsMegaMenu.map((section: MenuSection) => (
                                   <div key={section._id || section.slug} className="space-y-1 mb-3">
                                     <Link
                                       to={`/category/${section.slug}?petType=other-animals`}
@@ -864,9 +876,9 @@ const Header = () => {
                                       {section.title} →
                                     </Link>
                                     <div className="space-y-1">
-                                      {section.items.map((item) => (
+                                      {section.items.map((item: MenuItem | string) => (
                                         <Link
-                                          key={item.slug || item.name || String(item)}
+                                          key={typeof item === 'object' ? item.slug : String(item)}
                                           to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=other-animals`}
                                           onClick={() => setMobileMenuOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
@@ -1110,7 +1122,7 @@ const Header = () => {
                           <div className="ml-6 mt-2 space-y-2">
                             {isSpecialDogMenu ? (
                               <>
-                                {dogMegaMenu.map((section) => (
+                                {dogMegaMenu.map((section: MenuSection) => (
                                   <div key={section._id || section.slug} className="space-y-1 mb-3">
                                     <Link
                                       to={`/category/${section.slug}?petType=dog`}
@@ -1120,9 +1132,9 @@ const Header = () => {
                                       {section.title} →
                                     </Link>
                                     <div className="space-y-1">
-                                      {section.items.map((item) => (
+                                      {section.items.map((item: MenuItem | string) => (
                                         <Link
-                                          key={item.slug || item.name || String(item)}
+                                          key={typeof item === 'object' ? item.slug : String(item)}
                                           to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=dog`}
                                           onClick={() => setIsLeftSidebarOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
@@ -1136,7 +1148,7 @@ const Header = () => {
                               </>
                             ) : isSpecialCatMenu ? (
                               <>
-                                {catMegaMenu.map((section) => (
+                                {catMegaMenu.map((section: MenuSection) => (
                                   <div key={section._id || section.slug} className="space-y-1 mb-3">
                                     <Link
                                       to={`/category/${section.slug}?petType=cat`}
@@ -1146,9 +1158,9 @@ const Header = () => {
                                       {section.title} →
                                     </Link>
                                     <div className="space-y-1">
-                                      {section.items.map((item) => (
+                                      {section.items.map((item: MenuItem | string) => (
                                         <Link
-                                          key={item.slug || item.name || String(item)}
+                                          key={typeof item === 'object' ? item.slug : String(item)}
                                           to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=cat`}
                                           onClick={() => setIsLeftSidebarOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
@@ -1162,7 +1174,7 @@ const Header = () => {
                               </>
                             ) : isSpecialOtherAnimalsMenu ? (
                               <>
-                                {otherAnimalsMegaMenu.map((section) => (
+                                {otherAnimalsMegaMenu.map((section: MenuSection) => (
                                   <div key={section._id || section.slug} className="space-y-1 mb-3">
                                     <Link
                                       to={`/category/${section.slug}?petType=other-animals`}
@@ -1172,9 +1184,9 @@ const Header = () => {
                                       {section.title} →
                                     </Link>
                                     <div className="space-y-1">
-                                      {section.items.map((item) => (
+                                      {section.items.map((item: MenuItem | string) => (
                                         <Link
-                                          key={item.slug || item.name || String(item)}
+                                          key={typeof item === 'object' ? item.slug : String(item)}
                                           to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=other-animals`}
                                           onClick={() => setIsLeftSidebarOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
