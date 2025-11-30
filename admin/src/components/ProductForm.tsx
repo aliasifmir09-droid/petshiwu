@@ -383,17 +383,27 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
 
   // Filter categories based on selected pet type
   // Always include the current product's category even if it doesn't match the filter
-  const currentCategoryId = formData.category ? String(formData.category) : '';
+  const currentCategoryId = formData.category ? String(formData.category).trim() : '';
   const filteredCategories = categories?.filter((cat: any) => {
-    const catId = String(cat._id);
-    // Always include the current category if editing
-    if (isEditing && currentCategoryId && catId === currentCategoryId) {
+    const catId = String(cat._id || '').trim();
+    // Always include the current category if editing - match exactly or case-insensitive
+    if (isEditing && currentCategoryId && (catId === currentCategoryId || catId.toLowerCase() === currentCategoryId.toLowerCase())) {
       return true;
     }
     if (!formData.petType) return true; // Show all if no pet type selected
     // Show categories that match the pet type or are for 'all' pets
     return cat.petType === formData.petType.toLowerCase() || cat.petType === 'all';
   }) || [];
+  
+  // Ensure current category is in the list if editing (add it if it's missing)
+  const currentCategory = isEditing && currentCategoryId 
+    ? categories?.find((cat: any) => String(cat._id || '').trim() === currentCategoryId)
+    : null;
+  
+  // If current category exists but is not in filtered list, add it
+  if (currentCategory && !filteredCategories.find((cat: any) => String(cat._id || '').trim() === currentCategoryId)) {
+    filteredCategories.unshift(currentCategory);
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
