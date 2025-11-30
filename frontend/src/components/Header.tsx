@@ -107,16 +107,26 @@ const Header = () => {
 
   // Group categories by pet type
   const getCategoriesForPetType = (petTypeSlug: string) => {
-    return categories.filter((cat: any) => 
-      cat.petType === petTypeSlug && !cat.parentCategory
-    );
+    return categories
+      .filter((cat: any) => cat.petType === petTypeSlug && !cat.parentCategory)
+      .sort((a: any, b: any) => {
+        const posA = a.position !== undefined ? a.position : 999999;
+        const posB = b.position !== undefined ? b.position : 999999;
+        if (posA !== posB) return posA - posB;
+        return a.name.localeCompare(b.name);
+      });
   };
 
   // Get subcategories for a category (works for any level)
   const getSubcategories = (categoryId: string) => {
-    return categories.filter((cat: any) => 
-      cat.parentCategory?._id === categoryId || cat.parentCategory === categoryId
-    );
+    return categories
+      .filter((cat: any) => cat.parentCategory?._id === categoryId || cat.parentCategory === categoryId)
+      .sort((a: any, b: any) => {
+        const posA = a.position !== undefined ? a.position : 999999;
+        const posB = b.position !== undefined ? b.position : 999999;
+        if (posA !== posB) return posA - posB;
+        return a.name.localeCompare(b.name);
+      });
   };
 
   // Get the level of a category (1 = main, 2 = sub, 3 = sub-sub, etc.)
@@ -151,18 +161,35 @@ const Header = () => {
     );
 
     // Get main categories (no parent) - these are the top-level categories
-    const mainCategories = petTypeCategories.filter((cat: any) => !cat.parentCategory);
+    // Sort by position first, then by name as fallback
+    const mainCategories = petTypeCategories
+      .filter((cat: any) => !cat.parentCategory)
+      .sort((a: any, b: any) => {
+        const posA = a.position !== undefined ? a.position : 999999;
+        const posB = b.position !== undefined ? b.position : 999999;
+        if (posA !== posB) return posA - posB;
+        return a.name.localeCompare(b.name);
+      });
     
     // Build menu structure: each main category with its subcategories as items
     return mainCategories.map((mainCat: any): MenuSection => {
       const categoryId = mainCat._id || String(mainCat._id);
       const subcategories = getSubcategories(categoryId)
         .filter((sub: any) => sub.isActive !== false)
-        .map((sub: any): MenuItem => ({
+        .map((sub: any) => ({
           name: sub.name,
-          slug: sub.slug
+          slug: sub.slug,
+          position: sub.position !== undefined ? sub.position : 999999
         }))
-        .sort((a: MenuItem, b: MenuItem) => a.name.localeCompare(b.name));
+        .sort((a: any, b: any) => {
+          // Sort by position first, then by name
+          if (a.position !== b.position) return a.position - b.position;
+          return a.name.localeCompare(b.name);
+        })
+        .map((item: any): MenuItem => ({
+          name: item.name,
+          slug: item.slug
+        }));
 
       return {
         _id: categoryId,
@@ -170,7 +197,7 @@ const Header = () => {
         slug: mainCat.slug,
         items: subcategories
       };
-    }).sort((a: MenuSection, b: MenuSection) => a.title.localeCompare(b.title));
+    });
   };
 
   // Build dynamic menus for each pet type

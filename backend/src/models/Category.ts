@@ -8,6 +8,7 @@ export interface ICategory extends Document {
   parentCategory?: mongoose.Types.ObjectId;
   petType: string; // Dynamic pet type (references PetType slug or 'all')
   level: number; // 1 = Main Category, 2 = Subcategory, 3 = Sub-subcategory
+  position: number; // Position/order for sorting in navbar (higher = appears later)
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -48,6 +49,11 @@ const categorySchema = new Schema<ICategory>(
       default: 1,
       min: 1,
       max: 3
+    },
+    position: {
+      type: Number,
+      default: 0,
+      min: 0
     },
     isActive: {
       type: Boolean,
@@ -97,6 +103,7 @@ categorySchema.pre('save', async function (next) {
 categorySchema.index({ petType: 1, isActive: 1 }); // Pet type filtering
 categorySchema.index({ parentCategory: 1 }); // Subcategory queries
 categorySchema.index({ level: 1 }); // Level-based queries
+categorySchema.index({ petType: 1, parentCategory: 1, position: 1 }); // Position sorting
 // Compound unique indexes: Allow same name/slug for different petType or parentCategory combinations
 // This allows "Food" to exist under both Dog and Cat categories
 categorySchema.index({ name: 1, petType: 1, parentCategory: 1 }, { unique: true });

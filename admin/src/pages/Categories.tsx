@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit, Trash2, X, Save, ChevronRight, ChevronDown, FolderTree } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Save, ChevronRight, ChevronDown, FolderTree, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
@@ -14,6 +14,7 @@ interface Category {
   petType: string;
   isActive: boolean;
   level: number;
+  position?: number;
   parentCategory?: any;
   subcategories?: Category[];
 }
@@ -124,6 +125,29 @@ const CategoriesNew = () => {
       showToast(error.message || 'Failed to delete category', 'error');
     }
   });
+
+  const positionMutation = useMutation({
+    mutationFn: ({ id, direction }: { id: string; direction: 'up' | 'down' | 'left' | 'right' }) => 
+      adminService.updateCategoryPosition(id, direction),
+    onSuccess: () => {
+      // Clear localStorage cache to ensure frontend navbar updates
+      localStorage.removeItem('cached_categories');
+      // Invalidate all category-related queries
+      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.refetchQueries({ queryKey: ['admin-categories'] });
+      queryClient.refetchQueries({ queryKey: ['categories'] });
+      showToast('Category position updated successfully!', 'success');
+    },
+    onError: (error: any) => {
+      showToast(error.response?.data?.message || error.message || 'Failed to update category position', 'error');
+    }
+  });
+
+  const handlePositionChange = (category: Category, direction: 'up' | 'down' | 'left' | 'right') => {
+    const categoryId = String(category._id || '');
+    positionMutation.mutate({ id: categoryId, direction });
+  };
 
   const toggleExpand = (categoryId: string) => {
     setExpandedCategories(prev => {
@@ -315,6 +339,25 @@ const CategoriesNew = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
+            {/* Position Controls */}
+            <div className="flex items-center gap-1 border border-gray-300 rounded-lg p-1 bg-gray-50">
+              <button
+                onClick={() => handlePositionChange(category, 'up')}
+                disabled={positionMutation.isPending}
+                className="p-1.5 text-blue-600 hover:bg-blue-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Move Up"
+              >
+                <ArrowUp size={14} />
+              </button>
+              <button
+                onClick={() => handlePositionChange(category, 'down')}
+                disabled={positionMutation.isPending}
+                className="p-1.5 text-blue-600 hover:bg-blue-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Move Down"
+              >
+                <ArrowDown size={14} />
+              </button>
+            </div>
             <button
               onClick={() => handleOpenModal(category)}
               className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"

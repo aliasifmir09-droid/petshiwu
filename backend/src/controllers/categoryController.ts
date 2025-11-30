@@ -47,7 +47,7 @@ export const getCategories = async (req: Request, res: Response, next: NextFunct
 
     const categories = await Category.find(query)
       .populate('parentCategory', 'name slug')
-      .sort({ name: 1 })
+      .sort({ position: 1, name: 1 }) // Sort by position first, then by name
       .lean(); // Use lean() for better performance
 
     // Normalize _id to string for all categories
@@ -78,7 +78,7 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
 
     const categories = await Category.find(query)
       .populate('parentCategory', 'name slug petType')
-      .sort({ createdAt: -1 });
+      .sort({ position: 1, createdAt: -1 }); // Sort by position first, then by creation date
 
     // Build hierarchical structure
     const categoryMap = new Map();
@@ -91,7 +91,7 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
       categoryMap.set(cat._id.toString(), catObj);
     });
 
-    // Second pass: build hierarchy
+    // Second pass: build hierarchy and sort subcategories by position
     categories.forEach(cat => {
       const catObj = categoryMap.get(cat._id.toString());
       if (cat.parentCategory) {
@@ -105,6 +105,21 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
         rootCategories.push(catObj);
       }
     });
+
+    // Sort subcategories by position for each category
+    const sortByPosition = (cats: any[]) => {
+      cats.sort((a, b) => {
+        const posA = a.position !== undefined ? a.position : 999999;
+        const posB = b.position !== undefined ? b.position : 999999;
+        return posA - posB;
+      });
+      cats.forEach(cat => {
+        if (cat.subcategories && cat.subcategories.length > 0) {
+          sortByPosition(cat.subcategories);
+        }
+      });
+    };
+    sortByPosition(rootCategories);
 
     // Normalize all category IDs to strings
     const normalizedRootCategories = normalizeCategories(rootCategories);
@@ -367,6 +382,18 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
 // Create category (Admin)
 export const createCategory = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    // If position is not provided, set it to the next available position
+    if (req.body.position === undefined) {
+      const query: any = {
+        petType: req.body.petType || 'all',
+        parentCategory: req.body.parentCategory || null
+      };
+      const siblings = await Category.find(query).sort({ position: -1 }).limit(1);
+      req.body.position = siblings.length > 0 && siblings[0].position !== undefined 
+        ? siblings[0].position + 1 
+        : 0;
+    }
+    
     const category = await Category.create(req.body);
 
     // Normalize _id to string
@@ -412,6 +439,86 @@ export const updateCategory = async (req: AuthRequest, res: Response, next: Next
 };
 
 // Delete category (Admin)
+// Update category position (Admin)
+export const updateCategoryPosition = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const categoryId = String(req.params.id || '').trim();
+    const { direction } = req.body; // 'up', 'down', 'left', 'right'
+
+    if (!/^[0-9a-fA-F]{24}$/.test(categoryId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid category ID format'
+      });
+    }
+
+    if (!['up', 'down', 'left', 'right'].includes(direction)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid direction. Must be "up", "down", "left", or "right"'
+      });
+    }
+
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: 'Category not found'
+      });
+    }
+
+    // Find categories with the same parent and petType
+    const query: any = {
+      petType: category.petType,
+      parentCategory: category.parentCategory || null
+    };
+
+    const siblings = await Category.find(query)
+      .sort({ position: 1, createdAt: -1 })
+      .lean();
+
+    const currentIndex = siblings.findIndex(c => c._id.toString() === categoryId);
+    
+    if (currentIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Category position not found'
+      });
+    }
+
+    let targetIndex = -1;
+
+    if (direction === 'up' && currentIndex > 0) {
+      targetIndex = currentIndex - 1;
+    } else if (direction === 'down' && currentIndex < siblings.length - 1) {
+      targetIndex = currentIndex + 1;
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot move category ${direction}. Already at the ${direction === 'up' ? 'top' : 'bottom'}.`
+      });
+    }
+
+    // Swap positions
+    const currentCategory = siblings[currentIndex];
+    const targetCategory = siblings[targetIndex];
+
+    const currentPosition = currentCategory.position !== undefined ? currentCategory.position : 0;
+    const targetPosition = targetCategory.position !== undefined ? targetCategory.position : 0;
+
+    // Update both categories
+    await Category.findByIdAndUpdate(categoryId, { position: targetPosition });
+    await Category.findByIdAndUpdate(targetCategory._id, { position: currentPosition });
+
+    res.status(200).json({
+      success: true,
+      message: `Category moved ${direction} successfully`
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const deleteCategory = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     // Ensure ID is a valid ObjectId format

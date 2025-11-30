@@ -268,6 +268,11 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
     return response.data.data;
   },
 
+  updateCategoryPosition: async (id: string, direction: 'up' | 'down' | 'left' | 'right') => {
+    const response = await api.put(`/categories/${id}/position`, { direction });
+    return response.data;
+  },
+
   deleteCategory: async (id: string) => {
     const response = await api.delete(`/categories/${id}`);
     return response.data;
