@@ -116,23 +116,39 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
         categoryIdValue: product.category?._id
       });
       
-      // If category is still an object and extraction failed, try direct access
-      if (!categoryId && product.category && typeof product.category === 'object') {
-        // Try direct _id access
-        if (product.category._id) {
-          // Check if _id is an object (ObjectId) or string
-          if (typeof product.category._id === 'object' && product.category._id.toString) {
-            categoryId = product.category._id.toString().trim();
-          } else {
-            categoryId = String(product.category._id).trim();
+      // If extraction failed or returned '[object Object]', try direct access
+      if (!categoryId || categoryId === '[object Object]') {
+        if (product.category && typeof product.category === 'object' && product.category !== null) {
+          // Try direct _id access
+          if (product.category._id !== undefined && product.category._id !== null) {
+            // Check if _id is an ObjectId object (has toString method)
+            if (typeof product.category._id === 'object' && typeof product.category._id.toString === 'function') {
+              categoryId = product.category._id.toString().trim();
+            } else {
+              // _id is already a string
+              categoryId = String(product.category._id).trim();
+            }
           }
         }
       }
       
-      // Final validation - ensure categoryId is a valid ObjectId format
-      if (categoryId && !/^[0-9a-fA-F]{24}$/.test(categoryId)) {
+      // Final validation - reject '[object Object]' and ensure categoryId is a valid ObjectId format
+      if (categoryId === '[object Object]' || (categoryId && !/^[0-9a-fA-F]{24}$/.test(categoryId))) {
         console.warn('[ProductForm] Invalid category ID format:', categoryId);
-        categoryId = '';
+        // Try one more time with direct extraction
+        if (product.category && typeof product.category === 'object' && product.category._id) {
+          if (typeof product.category._id.toString === 'function') {
+            categoryId = product.category._id.toString().trim();
+          } else {
+            categoryId = String(product.category._id).trim();
+          }
+          // If still invalid, clear it
+          if (categoryId === '[object Object]' || !/^[0-9a-fA-F]{24}$/.test(categoryId)) {
+            categoryId = '';
+          }
+        } else {
+          categoryId = '';
+        }
       }
       
       console.log('[ProductForm] Setting category for editing:', {
