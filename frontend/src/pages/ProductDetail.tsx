@@ -8,6 +8,7 @@ import { useWishlistStore } from '@/stores/wishlistStore';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ProductCard from '@/components/ProductCard';
 import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home } from 'lucide-react';
+import { FormattedDescription } from '@/utils/descriptionFormatter';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 
 const ProductDetail = () => {
@@ -548,7 +549,9 @@ const ProductDetail = () => {
         </div>
 
         <div className="prose max-w-none">
-          <p className="text-gray-700 mb-6">{product.description}</p>
+          <div className="mb-6">
+            <FormattedDescription description={product.description} />
+          </div>
 
           {product.features && product.features.length > 0 && (
             <div className="mb-6">

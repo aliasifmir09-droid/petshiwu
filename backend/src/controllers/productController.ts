@@ -6,6 +6,7 @@ import { parse } from 'csv-parse/sync';
 import fs from 'fs';
 import path from 'path';
 import mongoose from 'mongoose';
+import { formatProductDescription } from '../utils/descriptionFormatter';
 
 // Helper function to normalize product _id to string
 const normalizeProductId = (product: any): any => {
@@ -393,10 +394,14 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           continue;
         }
         
+        // Format description with headings
+        const rawDescription = String(row.description).trim();
+        const formattedDescription = formatProductDescription(rawDescription);
+        
         // Create product data - use the validated ObjectId
         const productData: any = {
           name: String(row.name).trim(),
-          description: String(row.description).trim(),
+          description: formattedDescription || rawDescription,
           shortDescription: row.shortDescription ? String(row.shortDescription).trim() : '',
           brand: String(row.brand).trim(),
           category: categoryObjectId, // Use the validated ObjectId
