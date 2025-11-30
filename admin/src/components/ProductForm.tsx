@@ -86,11 +86,15 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       if (product.category && typeof product.category === 'object') {
         // Try multiple ways to extract the ID
         if (product.category._id) {
-          categoryId = String(product.category._id);
+          categoryId = String(product.category._id).trim();
         } else if (product.category.id) {
-          categoryId = String(product.category.id);
+          categoryId = String(product.category.id).trim();
         } else if (product.category.toString) {
-          categoryId = String(product.category);
+          const idStr = String(product.category).trim();
+          // Validate it's a proper ObjectId format
+          if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
+            categoryId = idStr;
+          }
         }
       }
       
@@ -100,7 +104,9 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       console.log('[ProductForm] Setting category for editing:', {
         productCategory: product.category,
         extractedCategoryId: categoryId,
-        productPetType: productPetType
+        productPetType: productPetType,
+        categoriesLoaded: !!categories,
+        categoriesCount: categories?.length || 0
       });
       
       // Always set category from product when editing - no need to preserve previous state
@@ -130,7 +136,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
         setImageUrls(product.images);
       }
     }
-  }, [product, isEditing]);
+  }, [product, isEditing, categories]); // Add categories to dependencies to re-run when categories load
 
   const createCategoryMutation = useMutation({
     mutationFn: adminService.createCategory,
