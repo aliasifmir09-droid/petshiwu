@@ -21,13 +21,13 @@ export const renderFormattedDescription = (description: string): JSX.Element => 
   return (
     <div className="space-y-4">
       {paragraphs.map((paragraph, index) => {
-        // Check if paragraph starts with a heading (text ending with ":")
-        const headingMatch = paragraph.match(/^([A-Z][^:]{0,49}?):\s*(.+)$/);
+        // Check if paragraph starts with a heading (markdown-style **Heading:**)
+        const headingMatch = paragraph.match(/^\*\*([^*]+):\*\*\s*(.+)$/);
         
         if (headingMatch) {
           const [, heading, content] = headingMatch;
           return (
-            <div key={index} className="mb-4">
+            <div key={index} className="mb-6">
               <p className="text-gray-700">
                 <strong className="font-semibold text-gray-900">{heading}:</strong>{' '}
                 {renderInlineContent(content)}
@@ -36,18 +36,33 @@ export const renderFormattedDescription = (description: string): JSX.Element => 
           );
         }
         
+        // Check if paragraph is just a heading without content
+        const headingOnlyMatch = paragraph.match(/^\*\*([^*]+):\*\*$/);
+        if (headingOnlyMatch) {
+          const [, heading] = headingOnlyMatch;
+          return (
+            <div key={index} className="mb-6">
+              <p className="text-gray-700">
+                <strong className="font-semibold text-gray-900">{heading}:</strong>
+              </p>
+            </div>
+          );
+        }
+        
         // Check for markdown-style bold (**text**)
         if (paragraph.includes('**')) {
           return (
-            <p key={index} className="text-gray-700">
-              {renderInlineContent(paragraph)}
-            </p>
+            <div key={index} className="mb-6">
+              <p className="text-gray-700">
+                {renderInlineContent(paragraph)}
+              </p>
+            </div>
           );
         }
         
         // Regular paragraph
         return (
-          <p key={index} className="text-gray-700">
+          <p key={index} className="text-gray-700 mb-4">
             {paragraph.split('\n').map((line, lineIndex, lines) => (
               <React.Fragment key={lineIndex}>
                 {renderInlineContent(line)}

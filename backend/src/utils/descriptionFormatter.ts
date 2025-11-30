@@ -55,12 +55,14 @@ export const formatProductDescription = (description: string): string => {
   // Process each line to detect and format headings
   const lines = formatted.split('\n');
   const processedLines: string[] = [];
+  let previousWasHeading = false;
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) {
       // Empty line - add as-is (will create paragraph break)
       processedLines.push('');
+      previousWasHeading = false;
       continue;
     }
     
@@ -68,6 +70,7 @@ export const formatProductDescription = (description: string): string => {
     // Pattern 1: Line starts with known heading followed by colon
     let isHeading = false;
     let headingText = '';
+    let headingContent = '';
     
     // Check against known headings
     for (const knownHeading of knownHeadings) {
@@ -76,40 +79,53 @@ export const formatProductDescription = (description: string): string => {
       if (match) {
         isHeading = true;
         headingText = match[1]; // Use original casing from line
-        const content = match[2].trim();
-        // Format as: **Heading:** content
-        processedLines.push(`**${headingText}:** ${content}`);
+        headingContent = match[2].trim();
         break;
       }
     }
     
-    if (isHeading) {
-      continue;
+    // Pattern 2: Line matches "Word: content" pattern (potential heading)
+    if (!isHeading) {
+      const headingPattern = /^([A-Z][^:]{0,49}?):\s*(.+)$/;
+      const headingMatch = line.match(headingPattern);
+      
+      if (headingMatch) {
+        const [, potentialHeading, content] = headingMatch;
+        // Heuristic: if heading is short (< 40 chars), capitalized, and content is substantial, treat as heading
+        if (potentialHeading.length < 40 && potentialHeading.length > 0 && content.trim().length > 0) {
+          isHeading = true;
+          headingText = potentialHeading.trim();
+          headingContent = content.trim();
+        }
+      }
     }
     
-    // Pattern 2: Line matches "Word: content" pattern (potential heading)
-    // Check if line looks like "Heading: Content" format
-    const headingPattern = /^([A-Z][^:]{0,49}?):\s*(.+)$/;
-    const headingMatch = line.match(headingPattern);
-    
-    if (headingMatch) {
-      const [, potentialHeading, content] = headingMatch;
-      // Heuristic: if heading is short (< 40 chars), capitalized, and content is substantial, treat as heading
-      if (potentialHeading.length < 40 && potentialHeading.length > 0 && content.trim().length > 0) {
-        processedLines.push(`**${potentialHeading.trim()}:** ${content.trim()}`);
-        continue;
+    if (isHeading) {
+      // Add blank line before heading if previous line wasn't already blank and wasn't a heading
+      if (previousWasHeading && processedLines.length > 0 && processedLines[processedLines.length - 1] !== '') {
+        processedLines.push(''); // One blank line
       }
+      
+      // Format as: **Heading:** content
+      processedLines.push(`**${headingText}:** ${headingContent}`);
+      previousWasHeading = true;
+      continue;
     }
     
     // Regular line - keep as-is
     processedLines.push(line);
+    previousWasHeading = false;
   }
   
   // Join lines back together
   formatted = processedLines.join('\n');
   
-  // Clean up: remove extra blank lines but preserve paragraph breaks
-  formatted = formatted.replace(/\n{3,}/g, '\n\n');
+  // Ensure double newline (2 blank lines) between heading sections
+  // Replace single newlines between headings with double newlines
+  formatted = formatted.replace(/(\*\*[^*]+\*\*: [^\n]+)\n(\*\*[^*]+\*\*:)/g, '$1\n\n$2');
+  
+  // Clean up: ensure consistent double newlines between sections, but remove more than 2 consecutive newlines
+  formatted = formatted.replace(/\n{4,}/g, '\n\n\n');
   
   return formatted.trim();
 };
