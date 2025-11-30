@@ -502,6 +502,10 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
 
     // For MongoDB query, handle both null and ObjectId cases
     if (parentCategoryId) {
+      // Ensure parentCategoryId is an ObjectId for proper MongoDB comparison
+      if (!(parentCategoryId instanceof mongoose.Types.ObjectId)) {
+        parentCategoryId = new mongoose.Types.ObjectId(String(parentCategoryId));
+      }
       query.parentCategory = parentCategoryId;
     } else {
       // Find categories with no parent (root categories)
@@ -511,7 +515,10 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
       ];
     }
 
-    console.log(`[UPDATE CATEGORY POSITION] Query:`, JSON.stringify(query, null, 2));
+    console.log(`[UPDATE CATEGORY POSITION] Query:`, JSON.stringify({
+      ...query,
+      parentCategory: query.parentCategory ? String(query.parentCategory) : query.parentCategory
+    }, null, 2));
 
     const siblings = await Category.find(query)
       .sort({ position: 1, createdAt: -1 })
