@@ -34,6 +34,39 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Listen for localStorage changes (when admin clears cached_categories)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'cached_categories' && !e.newValue) {
+        // localStorage was cleared by admin, refetch categories immediately
+        console.log('[Header] Categories cache cleared, refetching...');
+        refetchCategories();
+      }
+    };
+
+    // Listen for storage events (works across tabs/windows on same origin)
+    window.addEventListener('storage', handleStorageChange);
+
+    // Also poll localStorage to detect changes (for same-tab updates)
+    let lastCacheValue = localStorage.getItem('cached_categories');
+    const pollInterval = setInterval(() => {
+      const currentCacheValue = localStorage.getItem('cached_categories');
+      if (lastCacheValue && !currentCacheValue) {
+        // Cache was cleared
+        console.log('[Header] Categories cache cleared (polled), refetching...');
+        refetchCategories();
+        lastCacheValue = currentCacheValue;
+      } else if (currentCacheValue !== lastCacheValue) {
+        lastCacheValue = currentCacheValue;
+      }
+    }, 1000); // Check every second
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(pollInterval);
+    };
+  }, [refetchCategories]);
+
   // Fetch pet types with error handling and localStorage caching
   const { data: petTypesResponse, isError: petTypesError } = useQuery({
     queryKey: ['pet-types'],
@@ -51,8 +84,8 @@ const Header = () => {
   });
 
   // Fetch categories with error handling and localStorage caching
-  // Reduced staleTime to 30 seconds so changes appear quickly in navbar
-  const { data: categoriesResponse, isError: categoriesError } = useQuery({
+  // Very short staleTime so position changes appear immediately in navbar
+  const { data: categoriesResponse, isError: categoriesError, refetch: refetchCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
       const response = await api.get('/categories');
@@ -63,9 +96,10 @@ const Header = () => {
       return response.data;
     },
     retry: 2,
-    staleTime: 30 * 1000, // Reduced from 5 minutes to 30 seconds for faster updates
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    staleTime: 0, // Always consider stale - refetch immediately when component mounts
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: true, // Refetch when user comes back to tab
+    refetchOnMount: true, // Always refetch when component mounts
   });
 
   // Get cached data from localStorage if database is down
