@@ -21,17 +21,42 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     if (!product?.category) return '';
     
     // Handle different formats
-    if (typeof product.category === 'object') {
-      // Could be { _id: '...', name: '...' } or populated object
+    if (typeof product.category === 'object' && product.category !== null) {
+      // First, try to get _id property (most common case)
       if (product.category._id) {
-        return String(product.category._id);
+        // Handle case where _id might be an ObjectId object
+        if (typeof product.category._id === 'object' && product.category._id.toString) {
+          const idStr = product.category._id.toString().trim();
+          // Validate it's a proper ObjectId format (24 hex chars)
+          if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
+            return idStr;
+          }
+        }
+        // Handle case where _id is already a string
+        const idStr = String(product.category._id).trim();
+        if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
+          return idStr;
+        }
+        return idStr; // Return even if not valid format (for debugging)
       }
-      // Could be an ObjectId object
+      
+      // Try id property as fallback
+      if (product.category.id) {
+        if (typeof product.category.id === 'object' && product.category.id.toString) {
+          return product.category.id.toString().trim();
+        }
+        return String(product.category.id).trim();
+      }
+      
+      // Last resort: if the category itself is an ObjectId (shouldn't happen but handle it)
       if (product.category.toString && typeof product.category.toString === 'function') {
-        return String(product.category);
+        const idStr = product.category.toString().trim();
+        if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
+          return idStr;
+        }
       }
     } else if (typeof product.category === 'string') {
-      return product.category;
+      return product.category.trim();
     }
     
     return '';
