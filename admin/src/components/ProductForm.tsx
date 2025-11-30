@@ -16,12 +16,33 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   const { toast, showToast, hideToast } = useToast();
   const isEditing = !!product;
 
+  // Helper function to extract category ID from product
+  const extractCategoryId = (product: any): string => {
+    if (!product?.category) return '';
+    
+    // Handle different formats
+    if (typeof product.category === 'object') {
+      // Could be { _id: '...', name: '...' } or populated object
+      if (product.category._id) {
+        return String(product.category._id);
+      }
+      // Could be an ObjectId object
+      if (product.category.toString && typeof product.category.toString === 'function') {
+        return String(product.category);
+      }
+    } else if (typeof product.category === 'string') {
+      return product.category;
+    }
+    
+    return '';
+  };
+
   const [formData, setFormData] = useState({
     name: product?.name || '',
     description: product?.description || '',
     shortDescription: product?.shortDescription || '',
     brand: product?.brand || '',
-    category: product?.category?._id ? String(product.category._id) : (product?.category ? String(product.category) : ''),
+    category: extractCategoryId(product),
     petType: product?.petType || 'dog',
     basePrice: product?.basePrice || '',
     compareAtPrice: product?.compareAtPrice || '',
@@ -57,20 +78,8 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   // Update formData when product changes (for editing)
   useEffect(() => {
     if (product && isEditing) {
-      // Extract category ID properly - handle various formats
-      let categoryId = '';
-      if (product.category) {
-        if (typeof product.category === 'object' && product.category._id) {
-          categoryId = String(product.category._id);
-        } else if (typeof product.category === 'string') {
-          categoryId = product.category;
-        } else if (product.category.toString && typeof product.category.toString === 'function') {
-          // Handle ObjectId objects
-          categoryId = String(product.category);
-        }
-      }
-      
-      // Extract pet type
+      // Extract category ID using the helper function
+      const categoryId = extractCategoryId(product);
       const productPetType = product.petType || 'dog';
       
       // Always set category from product when editing - no need to preserve previous state
@@ -80,7 +89,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
         description: product.description || prev.description,
         shortDescription: product.shortDescription || prev.shortDescription,
         brand: product.brand || prev.brand,
-        category: categoryId || '', // Always use product's category
+        category: categoryId, // Always use product's category
         petType: productPetType,
         basePrice: product.basePrice || prev.basePrice,
         compareAtPrice: product.compareAtPrice || prev.compareAtPrice,
