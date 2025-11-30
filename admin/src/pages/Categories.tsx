@@ -74,10 +74,13 @@ const CategoriesNew = () => {
   const createMutation = useMutation({
     mutationFn: adminService.createCategory,
     onSuccess: () => {
+      // Clear localStorage cache to ensure frontend navbar updates
+      localStorage.removeItem('cached_categories');
       // Invalidate all category-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       queryClient.refetchQueries({ queryKey: ['admin-categories'] });
+      queryClient.refetchQueries({ queryKey: ['categories'] });
       showToast('Category created successfully!', 'success');
       handleCloseModal();
     },
@@ -89,10 +92,13 @@ const CategoriesNew = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => adminService.updateCategory(id, data),
     onSuccess: () => {
+      // Clear localStorage cache to ensure frontend navbar updates
+      localStorage.removeItem('cached_categories');
       // Invalidate all category-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       queryClient.refetchQueries({ queryKey: ['admin-categories'] });
+      queryClient.refetchQueries({ queryKey: ['categories'] });
       showToast('Category updated successfully!', 'success');
       handleCloseModal();
     },
@@ -104,10 +110,13 @@ const CategoriesNew = () => {
   const deleteMutation = useMutation({
     mutationFn: adminService.deleteCategory,
     onSuccess: () => {
+      // Clear localStorage cache to ensure frontend navbar updates
+      localStorage.removeItem('cached_categories');
       // Invalidate all category-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       queryClient.refetchQueries({ queryKey: ['admin-categories'] });
+      queryClient.refetchQueries({ queryKey: ['categories'] });
       showToast('Category deleted successfully!', 'success');
       setDeleteConfirm({ isOpen: false });
     },
