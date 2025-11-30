@@ -136,15 +136,6 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       let categoryId = extractCategoryId(product);
       const productPetType = product.petType || 'dog';
       
-      // Debug: Log the raw category value
-      console.log('[ProductForm] Raw product category:', {
-        category: product.category,
-        categoryType: typeof product.category,
-        isObject: typeof product.category === 'object',
-        hasId: product.category?._id,
-        categoryIdValue: product.category?._id
-      });
-      
       // If extraction failed or returned '[object Object]', try direct access
       if (!categoryId || categoryId === '[object Object]') {
         if (product.category && typeof product.category === 'object' && product.category !== null) {
@@ -163,7 +154,6 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       
       // Final validation - reject '[object Object]' and ensure categoryId is a valid ObjectId format
       if (categoryId === '[object Object]' || (categoryId && !/^[0-9a-fA-F]{24}$/.test(categoryId))) {
-        console.warn('[ProductForm] Invalid category ID format:', categoryId);
         // Try one more time with direct extraction
         if (product.category && typeof product.category === 'object' && product.category._id) {
           if (typeof product.category._id.toString === 'function') {
@@ -179,15 +169,6 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
           categoryId = '';
         }
       }
-      
-      console.log('[ProductForm] Setting category for editing:', {
-        productCategory: product.category,
-        extractedCategoryId: categoryId,
-        productPetType: productPetType,
-        categoriesLoaded: !!categories,
-        categoriesCount: categories?.length || 0,
-        isValidObjectId: categoryId ? /^[0-9a-fA-F]{24}$/.test(categoryId) : false
-      });
       
       // Always set category from product when editing - no need to preserve previous state
       setFormData(prev => ({
@@ -246,8 +227,6 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       onClose();
     },
     onError: (error: any) => {
-      console.error('Product creation error:', error);
-      console.error('Error response data:', error.response?.data);
       
       // Handle validation errors from express-validator
       if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
@@ -298,9 +277,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     try {
       const uploadPromises = Array.from(files).map(async (file) => {
         try {
-          console.log('Uploading file:', file.name, file.type, file.size);
           const result = await adminService.uploadImage(file);
-          console.log('Upload result (full):', JSON.stringify(result, null, 2));
           
           // Extract URL from response - check multiple possible locations
           let imageUrl = null;
@@ -327,7 +304,6 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
           }
           
           if (!imageUrl) {
-            console.error('No URL found in result. Full result:', JSON.stringify(result, null, 2));
             throw new Error(`No image URL returned from server. Response: ${JSON.stringify(result)}`);
           }
           
@@ -338,21 +314,13 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
             throw new Error('Invalid URL returned from server');
           }
           
-          console.log('✅ Uploaded image URL:', imageUrl);
           return imageUrl;
         } catch (error: any) {
-          console.error('❌ Upload error for file:', file.name, error);
-          console.error('Error details:', {
-            message: error.message,
-            response: error.response?.data,
-            status: error.response?.status
-          });
           throw error;
         }
       });
 
       const uploadedUrls = await Promise.all(uploadPromises);
-      console.log('All uploaded URLs:', uploadedUrls);
       
       // Filter out any invalid URLs
       const validUrls = uploadedUrls.filter(url => url && url.trim() && url !== 'undefined' && url !== 'null');
@@ -363,12 +331,10 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       
       // Add URLs to the image list
       const newImageUrls = [...imageUrls, ...validUrls];
-      console.log('Setting image URLs. Old:', imageUrls.length, 'New:', newImageUrls.length);
       setImageUrls(newImageUrls);
       
       showToast(`Successfully uploaded ${validUrls.length} image(s)`, 'success');
     } catch (error: any) {
-      console.error('Image upload error:', error);
       const errorMessage = error.response?.data?.message || 
                           error.message || 
                           'Failed to upload images. Please check your Cloudinary configuration and server logs.';
@@ -492,16 +458,6 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   // Always include the current product's category even if it doesn't match the filter
   const currentCategoryId = formData.category ? String(formData.category).trim() : '';
   
-  // Debug logging
-  if (isEditing && currentCategoryId) {
-    console.log('[ProductForm] Category filtering:', {
-      currentCategoryId,
-      categoriesCount: categories?.length || 0,
-      petType: formData.petType,
-      allCategoryIds: categories?.map((c: any) => String(c._id || '').trim())
-    });
-  }
-  
   const filteredCategories = categories?.filter((cat: any) => {
     const catId = String(cat._id || '').trim();
     // Always include the current category if editing - match exactly
@@ -524,22 +480,8 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   // If current category exists but is not in filtered list, add it at the beginning
   if (currentCategory && !filteredCategories.find((cat: any) => String(cat._id || '').trim() === currentCategoryId)) {
     filteredCategories.unshift(currentCategory);
-    console.log('[ProductForm] Added missing category to filtered list:', currentCategory.name);
   }
   
-  // Debug: Check if current category ID matches any option value
-  if (isEditing && currentCategoryId) {
-    const matchingOption = filteredCategories.find((cat: any) => String(cat._id || '').trim() === currentCategoryId);
-    if (!matchingOption) {
-      console.warn('[ProductForm] Category ID not found in filtered categories:', {
-        currentCategoryId,
-        availableIds: filteredCategories.map((c: any) => String(c._id || '').trim())
-      });
-    } else {
-      console.log('[ProductForm] Category found in dropdown:', matchingOption.name);
-    }
-  }
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -623,13 +565,6 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       variants: validatedVariants
     };
 
-    // Log the data being sent for debugging
-    console.log('Submitting product data:', {
-      ...productData,
-      images: productData.images.length,
-      variants: productData.variants.length
-    });
-
     try {
       if (isEditing) {
         updateMutation.mutate(productData);
@@ -637,7 +572,6 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
         createMutation.mutate(productData);
       }
     } catch (error: any) {
-      console.error('Error submitting product:', error);
       showToast(error.message || 'Failed to submit product', 'error');
     }
   };

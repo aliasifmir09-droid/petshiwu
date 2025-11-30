@@ -74,7 +74,6 @@ const Header = () => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'cached_categories' && !e.newValue) {
         // localStorage was cleared by admin, refetch categories immediately
-        console.log('[Header] Categories cache cleared, refetching...');
         refetchCategories();
       }
     };
@@ -88,7 +87,6 @@ const Header = () => {
       const currentCacheValue = localStorage.getItem('cached_categories');
       if (lastCacheValue && !currentCacheValue) {
         // Cache was cleared
-        console.log('[Header] Categories cache cleared (polled), refetching...');
         refetchCategories();
         lastCacheValue = currentCacheValue;
       } else if (currentCacheValue !== lastCacheValue) {
