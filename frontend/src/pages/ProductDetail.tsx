@@ -253,8 +253,10 @@ const ProductDetail = () => {
                   onError={(e) => {
                     handleImageError(e, product?.name || 'Product');
                     setImageLoaded(false);
+                    e.stopPropagation();
                   }}
                   onLoad={() => setImageLoaded(true)}
+                  crossOrigin="anonymous"
                   className={`w-full h-full object-cover transition-all duration-200 ease-out ${
                     zoomPosition ? 'scale-[2.5]' : 'scale-100'
                   }`}
@@ -292,7 +294,11 @@ const ProductDetail = () => {
                 <img 
                   src={normalizeImageUrl(image)} 
                   alt={`${product.name} ${index + 1}`} 
-                  onError={(e) => handleImageError(e, `${product.name} ${index + 1}`)}
+                  onError={(e) => {
+                    handleImageError(e, `${product.name} ${index + 1}`);
+                    e.stopPropagation();
+                  }}
+                  crossOrigin="anonymous"
                   className="w-full h-full object-cover" 
                 />
               </button>

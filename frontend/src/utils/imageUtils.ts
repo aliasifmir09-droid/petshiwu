@@ -52,10 +52,29 @@ export const getPlaceholderImage = (text: string = 'Product Image'): string => {
 
 /**
  * Creates an image error handler that sets a fallback placeholder
+ * Handles 403 Forbidden, 404 Not Found, and other image loading errors
+ * Silently handles errors without logging to console
  */
 export const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, fallbackText?: string) => {
   const img = e.currentTarget;
-  img.src = getPlaceholderImage(fallbackText || 'Image Not Available');
+  
+  // Prevent infinite loop if placeholder also fails
+  if (img.src && (img.src.startsWith('data:image/svg+xml') || img.src.includes('placeholder'))) {
+    return;
+  }
+  
+  // Set placeholder image silently
+  try {
+    img.src = getPlaceholderImage(fallbackText || 'Image Not Available');
+    // Remove error listener to prevent further errors
+    img.onerror = null;
+  } catch (err) {
+    // Silently fail - don't log errors
+  }
+  
+  // Prevent error from bubbling
+  e.stopPropagation();
+  e.preventDefault();
 };
 
 /**
