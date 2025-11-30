@@ -82,31 +82,41 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       let categoryId = extractCategoryId(product);
       const productPetType = product.petType || 'dog';
       
-      // If category is populated as object, ensure we get the _id correctly
-      if (product.category && typeof product.category === 'object') {
-        // Try multiple ways to extract the ID
+      // Debug: Log the raw category value
+      console.log('[ProductForm] Raw product category:', {
+        category: product.category,
+        categoryType: typeof product.category,
+        isObject: typeof product.category === 'object',
+        hasId: product.category?._id,
+        categoryIdValue: product.category?._id
+      });
+      
+      // If category is still an object and extraction failed, try direct access
+      if (!categoryId && product.category && typeof product.category === 'object') {
+        // Try direct _id access
         if (product.category._id) {
-          categoryId = String(product.category._id).trim();
-        } else if (product.category.id) {
-          categoryId = String(product.category.id).trim();
-        } else if (product.category.toString) {
-          const idStr = String(product.category).trim();
-          // Validate it's a proper ObjectId format
-          if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
-            categoryId = idStr;
+          // Check if _id is an object (ObjectId) or string
+          if (typeof product.category._id === 'object' && product.category._id.toString) {
+            categoryId = product.category._id.toString().trim();
+          } else {
+            categoryId = String(product.category._id).trim();
           }
         }
       }
       
-      // Normalize category ID - ensure it's a clean string
-      categoryId = categoryId ? String(categoryId).trim() : '';
+      // Final validation - ensure categoryId is a valid ObjectId format
+      if (categoryId && !/^[0-9a-fA-F]{24}$/.test(categoryId)) {
+        console.warn('[ProductForm] Invalid category ID format:', categoryId);
+        categoryId = '';
+      }
       
       console.log('[ProductForm] Setting category for editing:', {
         productCategory: product.category,
         extractedCategoryId: categoryId,
         productPetType: productPetType,
         categoriesLoaded: !!categories,
-        categoriesCount: categories?.length || 0
+        categoriesCount: categories?.length || 0,
+        isValidObjectId: categoryId ? /^[0-9a-fA-F]{24}$/.test(categoryId) : false
       });
       
       // Always set category from product when editing - no need to preserve previous state
