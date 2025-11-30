@@ -357,13 +357,40 @@ const Products = () => {
           <Dropdown
             options={[
               { value: '', label: 'All Categories' },
-              ...(categories?.map((cat: any) => ({
-                value: cat._id,
-                label: cat.name
-              })) || [])
+              ...(categories
+                ?.filter((cat: any) => {
+                  // If petTypeFilter is selected, only show categories for that pet type
+                  if (petTypeFilter) {
+                    return cat.petType === petTypeFilter;
+                  }
+                  // If no petTypeFilter, show all categories
+                  return true;
+                })
+                .map((cat: any) => {
+                  // Format label with pet type prefix for clarity
+                  const petTypeLabel = cat.petType 
+                    ? cat.petType === 'dog' ? 'Dog' 
+                      : cat.petType === 'cat' ? 'Cat'
+                      : cat.petType === 'other-animals' ? 'Other'
+                      : cat.petType.charAt(0).toUpperCase() + cat.petType.slice(1)
+                    : '';
+                  return {
+                    value: cat._id,
+                    label: petTypeLabel ? `${petTypeLabel} - ${cat.name}` : cat.name
+                  };
+                }) || [])
             ]}
             value={categoryFilter}
-            onChange={setCategoryFilter}
+            onChange={(value) => {
+              setCategoryFilter(value);
+              // If category is selected, optionally auto-set pet type if not already set
+              if (value && !petTypeFilter) {
+                const selectedCat = categories?.find((cat: any) => cat._id === value);
+                if (selectedCat?.petType) {
+                  setPetTypeFilter(selectedCat.petType);
+                }
+              }
+            }}
             icon={<FolderTree size={18} />}
             size="md"
           />
@@ -371,10 +398,20 @@ const Products = () => {
             options={[
               { value: '', label: 'All Pet Types' },
               { value: 'dog', label: 'Dog' },
-              { value: 'cat', label: 'Cat' }
+              { value: 'cat', label: 'Cat' },
+              { value: 'other-animals', label: 'Other Animals' }
             ]}
             value={petTypeFilter}
-            onChange={setPetTypeFilter}
+            onChange={(value) => {
+              setPetTypeFilter(value);
+              // Clear category filter if selected category doesn't match new pet type
+              if (value && categoryFilter) {
+                const selectedCat = categories?.find((cat: any) => cat._id === categoryFilter);
+                if (selectedCat && selectedCat.petType !== value) {
+                  setCategoryFilter('');
+                }
+              }
+            }}
             icon={<Layers size={18} />}
             size="md"
           />
