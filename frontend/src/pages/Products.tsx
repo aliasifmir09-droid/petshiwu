@@ -27,25 +27,26 @@ const Products = () => {
 
   // Scroll to top immediately when navigating to this page
   useEffect(() => {
-    // Reset scroll flag when route changes
-    hasScrolledRef.current = false;
-    // Scroll immediately on route change
+    // Scroll immediately on component mount and route changes
     window.scrollTo({ top: 0, behavior: 'auto' });
     // Also use setTimeout as a fallback to ensure scroll happens after render
     const timeoutId = setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'auto' });
     }, 0);
     return () => clearTimeout(timeoutId);
-  }, [location.pathname]); // Trigger on route change
+  }, [location.pathname, location.search]); // Trigger on route or query change
 
   // Scroll to top smoothly when filters change (within same page)
   useEffect(() => {
-    // Only smooth scroll if we've already scrolled once (i.e., not initial load)
-    if (hasScrolledRef.current) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      hasScrolledRef.current = true;
-    }
+    // Small delay to ensure smooth scroll works properly
+    const timeoutId = setTimeout(() => {
+      if (hasScrolledRef.current) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        hasScrolledRef.current = true;
+      }
+    }, 100);
+    return () => clearTimeout(timeoutId);
   }, [page, petType, category, search, sort, featured, minRating, brand, inStock]);
 
   // Redirect to category page if category query parameter exists
