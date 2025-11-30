@@ -79,8 +79,29 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   useEffect(() => {
     if (product && isEditing) {
       // Extract category ID using the helper function
-      const categoryId = extractCategoryId(product);
+      let categoryId = extractCategoryId(product);
       const productPetType = product.petType || 'dog';
+      
+      // If category is populated as object, ensure we get the _id correctly
+      if (product.category && typeof product.category === 'object') {
+        // Try multiple ways to extract the ID
+        if (product.category._id) {
+          categoryId = String(product.category._id);
+        } else if (product.category.id) {
+          categoryId = String(product.category.id);
+        } else if (product.category.toString) {
+          categoryId = String(product.category);
+        }
+      }
+      
+      // Normalize category ID - ensure it's a clean string
+      categoryId = categoryId ? String(categoryId).trim() : '';
+      
+      console.log('[ProductForm] Setting category for editing:', {
+        productCategory: product.category,
+        extractedCategoryId: categoryId,
+        productPetType: productPetType
+      });
       
       // Always set category from product when editing - no need to preserve previous state
       setFormData(prev => ({
@@ -384,10 +405,21 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   // Filter categories based on selected pet type
   // Always include the current product's category even if it doesn't match the filter
   const currentCategoryId = formData.category ? String(formData.category).trim() : '';
+  
+  // Debug logging
+  if (isEditing && currentCategoryId) {
+    console.log('[ProductForm] Category filtering:', {
+      currentCategoryId,
+      categoriesCount: categories?.length || 0,
+      petType: formData.petType,
+      allCategoryIds: categories?.map((c: any) => String(c._id || '').trim())
+    });
+  }
+  
   const filteredCategories = categories?.filter((cat: any) => {
     const catId = String(cat._id || '').trim();
-    // Always include the current category if editing - match exactly or case-insensitive
-    if (isEditing && currentCategoryId && (catId === currentCategoryId || catId.toLowerCase() === currentCategoryId.toLowerCase())) {
+    // Always include the current category if editing - match exactly
+    if (isEditing && currentCategoryId && catId === currentCategoryId) {
       return true;
     }
     if (!formData.petType) return true; // Show all if no pet type selected
@@ -397,12 +429,29 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   
   // Ensure current category is in the list if editing (add it if it's missing)
   const currentCategory = isEditing && currentCategoryId 
-    ? categories?.find((cat: any) => String(cat._id || '').trim() === currentCategoryId)
+    ? categories?.find((cat: any) => {
+        const catId = String(cat._id || '').trim();
+        return catId === currentCategoryId;
+      })
     : null;
   
-  // If current category exists but is not in filtered list, add it
+  // If current category exists but is not in filtered list, add it at the beginning
   if (currentCategory && !filteredCategories.find((cat: any) => String(cat._id || '').trim() === currentCategoryId)) {
     filteredCategories.unshift(currentCategory);
+    console.log('[ProductForm] Added missing category to filtered list:', currentCategory.name);
+  }
+  
+  // Debug: Check if current category ID matches any option value
+  if (isEditing && currentCategoryId) {
+    const matchingOption = filteredCategories.find((cat: any) => String(cat._id || '').trim() === currentCategoryId);
+    if (!matchingOption) {
+      console.warn('[ProductForm] Category ID not found in filtered categories:', {
+        currentCategoryId,
+        availableIds: filteredCategories.map((c: any) => String(c._id || '').trim())
+      });
+    } else {
+      console.log('[ProductForm] Category found in dropdown:', matchingOption.name);
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
