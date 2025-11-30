@@ -291,7 +291,6 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
       });
       
       // Log response for debugging
-      console.log('Upload response:', response.data);
       
       // Handle different response structures
       const data = response.data?.data || response.data;

@@ -274,7 +274,6 @@ const Checkout = () => {
         donationAmount: amount > 0 ? amount : undefined,
         totalPrice: subtotal + shipping + tax + amount
       };
-      console.log('Creating order with donation:', updatedOrderData);
       createOrderMutation.mutate(updatedOrderData);
       setPendingOrderData(null);
     }
@@ -284,7 +283,6 @@ const Checkout = () => {
     setShowDonationModal(false);
     // Submit order without donation
     if (pendingOrderData) {
-      console.log('Creating order without donation:', pendingOrderData);
       createOrderMutation.mutate(pendingOrderData);
       setPendingOrderData(null);
     }
