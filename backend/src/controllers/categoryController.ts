@@ -499,16 +499,18 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
       });
     }
 
-    // Swap positions
-    const currentCategory = siblings[currentIndex];
-    const targetCategory = siblings[targetIndex];
+    // Swap items in array to prepare for position recalculation
+    const reorderedSiblings = [...siblings];
+    [reorderedSiblings[currentIndex], reorderedSiblings[targetIndex]] = 
+      [reorderedSiblings[targetIndex], reorderedSiblings[currentIndex]];
 
-    const currentPosition = currentCategory.position !== undefined ? currentCategory.position : 0;
-    const targetPosition = targetCategory.position !== undefined ? targetCategory.position : 0;
+    // Recalculate all positions sequentially (0, 1, 2, 3, ...)
+    // This ensures clean ordering without gaps
+    const updatePromises = reorderedSiblings.map((cat, index) => {
+      return Category.findByIdAndUpdate(cat._id, { position: index }, { new: false });
+    });
 
-    // Update both categories
-    await Category.findByIdAndUpdate(categoryId, { position: targetPosition });
-    await Category.findByIdAndUpdate(targetCategory._id, { position: currentPosition });
+    await Promise.all(updatePromises);
 
     res.status(200).json({
       success: true,
