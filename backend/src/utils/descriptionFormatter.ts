@@ -3,81 +3,115 @@
  * Headings are identified as text ending with ":" followed by content
  * 
  * @param description - Raw description text from CSV or user input
- * @returns Formatted description with HTML bold tags for headings
+ * @returns Formatted description with markdown-style **bold** tags for headings
  */
 export const formatProductDescription = (description: string): string => {
   if (!description || typeof description !== 'string') {
     return '';
   }
 
-  // Common heading patterns that should be bolded
-  const headingPatterns = [
-    /(Features\s*&\s*Benefits?):/gi,
-    /(Item\s*Number):/gi,
-    /(Brand):/gi,
-    /(Food\s*Type):/gi,
-    /(Breed\s*Size):/gi,
-    /(Life\s*Stage):/gi,
-    /(Nutritional\s*Benefits?):/gi,
-    /(Health\s*Consideration):/gi,
-    /(Flavor):/gi,
-    /(Weight):/gi,
-    /(Ingredients?):/gi,
-    /(Guaranteed\s*Analysis):/gi,
-    /(Caloric\s*Content):/gi,
-    /(Transition\s*Instructions?):/gi,
-    /(Species):/gi,
-    /(Warranty):/gi,
-    /(Dimensions?):/gi,
-    /(Color):/gi,
-    /(Size):/gi,
-    /(Material):/gi,
-    /(Care\s*Instructions?):/gi
+  // Common heading patterns that should be bolded (case-insensitive)
+  const knownHeadings = [
+    'Features & Benefits',
+    'Features and Benefits',
+    'Item Number',
+    'Brand',
+    'Food Type',
+    'Breed Size',
+    'Life Stage',
+    'Nutritional Benefits',
+    'Health Consideration',
+    'Health Considerations',
+    'Flavor',
+    'Weight',
+    'Ingredients',
+    'Ingredient',
+    'Guaranteed Analysis',
+    'Caloric Content',
+    'Transition Instructions',
+    'Transition Instruction',
+    'Species',
+    'Warranty',
+    'Dimensions',
+    'Dimension',
+    'Color',
+    'Size',
+    'Material',
+    'Care Instructions',
+    'Care Instruction'
   ];
 
   let formatted = description.trim();
 
-  // First, normalize line breaks and whitespace
+  // Normalize line breaks
   formatted = formatted.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   
-  // Replace multiple spaces with single space
+  // Normalize whitespace - replace multiple spaces with single space (but preserve intentional line breaks)
   formatted = formatted.replace(/[ \t]+/g, ' ');
   
-  // Replace multiple newlines with double newline (paragraph break)
+  // Replace multiple consecutive newlines with double newline (paragraph break)
   formatted = formatted.replace(/\n{3,}/g, '\n\n');
   
-  // Split by double newlines first to handle paragraph breaks
-  const paragraphs = formatted.split(/\n\s*\n/);
+  // Process each line to detect and format headings
+  const lines = formatted.split('\n');
+  const processedLines: string[] = [];
   
-  const formattedParagraphs = paragraphs.map(paragraph => {
-    if (!paragraph.trim()) return '';
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) {
+      // Empty line - add as-is (will create paragraph break)
+      processedLines.push('');
+      continue;
+    }
     
-    // Check for explicit headings (text ending with colon followed by content)
-    // Pattern: Heading: content (heading should be on its own line or at start of line)
-    const headingRegex = /^([A-Z][^:]*?):\s*(.+)$/gm;
-    let processed = paragraph;
+    // Check if line contains a heading pattern
+    // Pattern 1: Line starts with known heading followed by colon
+    let isHeading = false;
+    let headingText = '';
     
-    // Replace headings with bold format
-    processed = processed.replace(headingRegex, (match, heading, content) => {
-      // Check if this looks like a heading (capitalized, short, ends with colon)
-      if (heading.length > 0 && heading.length < 50 && /^[A-Z]/.test(heading.trim())) {
-        return `**${heading.trim()}:** ${content.trim()}`;
+    // Check against known headings
+    for (const knownHeading of knownHeadings) {
+      const regex = new RegExp(`^(${knownHeading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}):\\s*(.*)$`, 'i');
+      const match = line.match(regex);
+      if (match) {
+        isHeading = true;
+        headingText = match[1]; // Use original casing from line
+        const content = match[2].trim();
+        // Format as: **Heading:** content
+        processedLines.push(`**${headingText}:** ${content}`);
+        break;
       }
-      return match;
-    });
+    }
     
-    // Also apply known heading patterns
-    headingPatterns.forEach(pattern => {
-      processed = processed.replace(pattern, (match, heading) => {
-        return `**${heading}:**`;
-      });
-    });
+    if (isHeading) {
+      continue;
+    }
     
-    return processed.trim();
-  }).filter(p => p.length > 0);
+    // Pattern 2: Line matches "Word: content" pattern (potential heading)
+    // Check if line looks like "Heading: Content" format
+    const headingPattern = /^([A-Z][^:]{0,49}?):\s*(.+)$/;
+    const headingMatch = line.match(headingPattern);
+    
+    if (headingMatch) {
+      const [, potentialHeading, content] = headingMatch;
+      // Heuristic: if heading is short (< 40 chars), capitalized, and content is substantial, treat as heading
+      if (potentialHeading.length < 40 && potentialHeading.length > 0 && content.trim().length > 0) {
+        processedLines.push(`**${potentialHeading.trim()}:** ${content.trim()}`);
+        continue;
+      }
+    }
+    
+    // Regular line - keep as-is
+    processedLines.push(line);
+  }
   
-  // Join paragraphs with double newline
-  return formattedParagraphs.join('\n\n');
+  // Join lines back together
+  formatted = processedLines.join('\n');
+  
+  // Clean up: remove extra blank lines but preserve paragraph breaks
+  formatted = formatted.replace(/\n{3,}/g, '\n\n');
+  
+  return formatted.trim();
 };
 
 /**
