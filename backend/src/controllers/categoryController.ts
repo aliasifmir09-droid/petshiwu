@@ -469,18 +469,29 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
 
     // Find categories with the same parent and petType
     // Handle parentCategory comparison correctly (can be ObjectId, string, or null)
-    const parentCategoryId = category.parentCategory 
-      ? (category.parentCategory._id ? category.parentCategory._id : category.parentCategory)
-      : null;
+    let parentCategoryId: any = null;
+    if (category.parentCategory) {
+      // Handle both populated and unpopulated parentCategory
+      if (typeof category.parentCategory === 'object' && category.parentCategory._id) {
+        parentCategoryId = category.parentCategory._id;
+      } else {
+        parentCategoryId = category.parentCategory;
+      }
+      // Convert to ObjectId if it's a string
+      if (typeof parentCategoryId === 'string' && mongoose.Types.ObjectId.isValid(parentCategoryId)) {
+        parentCategoryId = new mongoose.Types.ObjectId(parentCategoryId);
+      }
+    }
 
     const query: any = {
       petType: category.petType
     };
 
-    // For MongoDB query, use $in to handle both null and ObjectId cases
+    // For MongoDB query, handle both null and ObjectId cases
     if (parentCategoryId) {
       query.parentCategory = parentCategoryId;
     } else {
+      // Find categories with no parent (root categories)
       query.$or = [
         { parentCategory: null },
         { parentCategory: { $exists: false } }
@@ -491,12 +502,19 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
       .sort({ position: 1, createdAt: -1 })
       .lean();
 
+    if (siblings.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No sibling categories found'
+      });
+    }
+
     const currentIndex = siblings.findIndex(c => c._id.toString() === categoryId);
     
     if (currentIndex === -1) {
       return res.status(404).json({
         success: false,
-        message: 'Category position not found'
+        message: `Category position not found. Found ${siblings.length} siblings but category not in list.`
       });
     }
 
