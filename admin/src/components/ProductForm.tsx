@@ -643,25 +643,28 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                   <div className="flex gap-2">
                     <select
                       required={!showNewCategory}
-                      value={formData.category || ''}
+                      value={formData.category ? String(formData.category).trim() : ''}
                       onChange={(e) => {
                         const selectedValue = e.target.value;
                         if (selectedValue === 'new') {
                           setShowNewCategory(true);
                           setFormData({ ...formData, category: '' });
                         } else if (selectedValue) {
-                          setFormData({ ...formData, category: selectedValue });
+                          setFormData({ ...formData, category: selectedValue.trim() });
                         }
                       }}
                       className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                       <option value="">Select a category</option>
                       {filteredCategories.length > 0 ? (
-                        filteredCategories.map((cat: any) => (
-                          <option key={cat._id} value={String(cat._id)}>
-                            {cat.name}
-                          </option>
-                        ))
+                        filteredCategories.map((cat: any) => {
+                          const catId = String(cat._id || '').trim();
+                          return (
+                            <option key={cat._id} value={catId}>
+                              {cat.name}
+                            </option>
+                          );
+                        })
                       ) : formData.petType ? (
                         <option value="" disabled>
                           No categories available for {formData.petType}. Please select a different pet type or create a new category.
