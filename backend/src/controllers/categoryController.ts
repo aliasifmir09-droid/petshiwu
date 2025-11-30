@@ -445,6 +445,8 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
     const categoryId = String(req.params.id || '').trim();
     const { direction } = req.body; // 'up', 'down', 'left', 'right'
 
+    console.log(`[UPDATE CATEGORY POSITION] Category ID: ${categoryId}, Direction: ${direction}`);
+
     if (!/^[0-9a-fA-F]{24}$/.test(categoryId)) {
       return res.status(400).json({
         success: false,
@@ -452,10 +454,10 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
       });
     }
 
-    if (!['up', 'down', 'left', 'right'].includes(direction)) {
+    if (!direction || !['up', 'down', 'left', 'right'].includes(direction)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid direction. Must be "up", "down", "left", or "right"'
+        message: `Invalid direction "${direction}". Must be "up", "down", "left", or "right"`
       });
     }
 
@@ -470,21 +472,32 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
     // Find categories with the same parent and petType
     // Handle parentCategory comparison correctly (can be ObjectId, string, or null)
     let parentCategoryId: any = null;
+    
+    // Extract parentCategory ID - handle various formats
     if (category.parentCategory) {
-      // Handle both populated and unpopulated parentCategory
-      if (typeof category.parentCategory === 'object' && category.parentCategory._id) {
-        parentCategoryId = category.parentCategory._id;
+      if (typeof category.parentCategory === 'object') {
+        // If it's an object, it might be populated or have _id
+        parentCategoryId = category.parentCategory._id || category.parentCategory;
       } else {
+        // Direct ObjectId or string
         parentCategoryId = category.parentCategory;
       }
-      // Convert to ObjectId if it's a string
+      
+      // Ensure it's a valid ObjectId for query
       if (typeof parentCategoryId === 'string' && mongoose.Types.ObjectId.isValid(parentCategoryId)) {
         parentCategoryId = new mongoose.Types.ObjectId(parentCategoryId);
+      } else if (parentCategoryId && !(parentCategoryId instanceof mongoose.Types.ObjectId)) {
+        // Convert if it's already an ObjectId-like object
+        try {
+          parentCategoryId = new mongoose.Types.ObjectId(String(parentCategoryId));
+        } catch (e) {
+          console.error('[UPDATE CATEGORY POSITION] Failed to convert parentCategoryId:', e);
+        }
       }
     }
 
     const query: any = {
-      petType: category.petType
+      petType: category.petType || 'all'
     };
 
     // For MongoDB query, handle both null and ObjectId cases
@@ -498,9 +511,13 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
       ];
     }
 
+    console.log(`[UPDATE CATEGORY POSITION] Query:`, JSON.stringify(query, null, 2));
+
     const siblings = await Category.find(query)
       .sort({ position: 1, createdAt: -1 })
       .lean();
+
+    console.log(`[UPDATE CATEGORY POSITION] Found ${siblings.length} siblings`);
 
     if (siblings.length === 0) {
       return res.status(404).json({
@@ -512,11 +529,14 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
     const currentIndex = siblings.findIndex(c => c._id.toString() === categoryId);
     
     if (currentIndex === -1) {
+      console.error(`[UPDATE CATEGORY POSITION] Category ${categoryId} not found in siblings list`);
       return res.status(404).json({
         success: false,
-        message: `Category position not found. Found ${siblings.length} siblings but category not in list.`
+        message: `Category not found in sibling list. Found ${siblings.length} siblings but category not in list.`
       });
     }
+
+    console.log(`[UPDATE CATEGORY POSITION] Current index: ${currentIndex} of ${siblings.length - 1}`);
 
     let targetIndex = -1;
 
