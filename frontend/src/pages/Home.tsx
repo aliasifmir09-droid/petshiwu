@@ -180,7 +180,7 @@ const Home = () => {
                   name: 'Fish', 
                   petType: 'fish', 
                   slug: 'fish',
-                  image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&h=500&fit=crop&q=90&auto=format'
+                  image: 'https://images.unsplash.com/photo-1574781330858-7ce0d5d807e6?w=500&h=500&fit=crop&q=90'
                 },
                 { 
                   name: 'Bird', 
@@ -192,7 +192,7 @@ const Home = () => {
                   name: 'Reptile', 
                   petType: 'reptile', 
                   slug: 'reptile',
-                  image: 'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e?w=500&h=500&fit=crop&q=90&auto=format'
+                  image: 'https://images.unsplash.com/photo-1615789383744-2cae08a83b02?w=500&h=500&fit=crop&q=90'
                 },
                 { 
                   name: 'Small Pet', 
