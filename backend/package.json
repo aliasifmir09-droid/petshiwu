@@ -22,7 +22,8 @@
     "grant-permissions": "ts-node src/utils/grantPermissions.ts",
     "create-customer": "ts-node src/utils/createCustomer.ts",
     "find-duplicates": "ts-node src/utils/findAndRemoveDuplicates.ts",
-    "remove-duplicates": "ts-node src/utils/findAndRemoveDuplicates.ts --delete"
+    "remove-duplicates": "ts-node src/utils/findAndRemoveDuplicates.ts --delete",
+    "format-product-descriptions": "ts-node src/utils/formatAllProductDescriptions.ts"
   },
   "dependencies": {
     "@types/node": "^20.10.6",
