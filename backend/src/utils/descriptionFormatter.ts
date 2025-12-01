@@ -69,6 +69,7 @@ export const formatProductDescription = (description: string): string => {
     
     // Replace "Features & Benefits" or "Features and Benefits" with "Key Benefits" in the line
     // Handle both plain text and markdown formats
+    // Also ensure "Key Benefits" is normalized (in case it appears with different casing)
     line = line.replace(/^(Features?\s*(?:&|and)\s*Benefits?):/i, 'Key Benefits:');
     line = line.replace(/^\*\*(Features?\s*(?:&|and)\s*Benefits?):/i, '**Key Benefits:');
     
@@ -83,7 +84,12 @@ export const formatProductDescription = (description: string): string => {
       const match = line.match(regex);
       if (match) {
         isHeading = true;
-        headingText = match[1]; // Use original casing from line
+        // Normalize heading: if it's "Features & Benefits" or "Key Benefits", use "Key Benefits"
+        let matchedHeading = match[1].trim();
+        if (/^(Features?\s*(?:&|and)\s*Benefits?|Key\s*Benefits?)$/i.test(matchedHeading)) {
+          matchedHeading = 'Key Benefits';
+        }
+        headingText = matchedHeading;
         headingContent = match[2].trim();
         break;
       }
@@ -94,7 +100,12 @@ export const formatProductDescription = (description: string): string => {
       const markdownMatch = line.match(/^\*\*([^*]+):\*\*\s*(.*)$/);
       if (markdownMatch) {
         isHeading = true;
-        headingText = markdownMatch[1].trim();
+        // Normalize heading: if it's "Features & Benefits" or "Key Benefits", use "Key Benefits"
+        let markdownHeading = markdownMatch[1].trim();
+        if (/^(Features?\s*(?:&|and)\s*Benefits?|Key\s*Benefits?)$/i.test(markdownHeading)) {
+          markdownHeading = 'Key Benefits';
+        }
+        headingText = markdownHeading;
         headingContent = markdownMatch[2].trim();
       }
     }
@@ -109,7 +120,12 @@ export const formatProductDescription = (description: string): string => {
         // Heuristic: if heading is short (< 40 chars), capitalized, and content is substantial, treat as heading
         if (potentialHeading.length < 40 && potentialHeading.length > 0 && content.trim().length > 0) {
           isHeading = true;
-          headingText = potentialHeading.trim();
+          // Normalize heading: if it's "Features & Benefits" or "Key Benefits", use "Key Benefits"
+          let normalizedHeading = potentialHeading.trim();
+          if (/^(Features?\s*(?:&|and)\s*Benefits?|Key\s*Benefits?)$/i.test(normalizedHeading)) {
+            normalizedHeading = 'Key Benefits';
+          }
+          headingText = normalizedHeading;
           headingContent = content.trim();
         }
       }

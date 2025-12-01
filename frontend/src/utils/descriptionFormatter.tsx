@@ -45,10 +45,22 @@ const isHeading = (line: string): { isHeading: boolean; headingText?: string; co
   trimmed = trimmed.replace(/^(Features?\s*(?:&|and)\s*Benefits?):/i, 'Key Benefits:');
   trimmed = trimmed.replace(/^\*\*(Features?\s*(?:&|and)\s*Benefits?):/i, '**Key Benefits:');
   
+  // Helper function to normalize heading text
+  const normalizeHeading = (heading: string): string => {
+    if (/^(Features?\s*(?:&|and)\s*Benefits?|Key\s*Benefits?)$/i.test(heading.trim())) {
+      return 'Key Benefits';
+    }
+    return heading.trim();
+  };
+  
   // Check for markdown-style bold (**Heading:**)
   const markdownMatch = trimmed.match(/^\*\*([^*]+):\*\*\s*(.*)$/);
   if (markdownMatch) {
-    return { isHeading: true, headingText: markdownMatch[1].trim(), content: markdownMatch[2].trim() };
+    return { 
+      isHeading: true, 
+      headingText: normalizeHeading(markdownMatch[1]), 
+      content: markdownMatch[2].trim() 
+    };
   }
   
   // Check for known heading patterns
@@ -56,7 +68,11 @@ const isHeading = (line: string): { isHeading: boolean; headingText?: string; co
     const regex = new RegExp(`^(${pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}):\\s*(.*)$`, 'i');
     const match = trimmed.match(regex);
     if (match) {
-      return { isHeading: true, headingText: match[1].trim(), content: match[2].trim() };
+      return { 
+        isHeading: true, 
+        headingText: normalizeHeading(match[1]), 
+        content: match[2].trim() 
+      };
     }
   }
   
@@ -65,7 +81,11 @@ const isHeading = (line: string): { isHeading: boolean; headingText?: string; co
   if (genericMatch) {
     const heading = genericMatch[1].trim();
     if (heading.length > 0 && heading.length < 40) {
-      return { isHeading: true, headingText: heading, content: genericMatch[2].trim() };
+      return { 
+        isHeading: true, 
+        headingText: normalizeHeading(heading), 
+        content: genericMatch[2].trim() 
+      };
     }
   }
   
