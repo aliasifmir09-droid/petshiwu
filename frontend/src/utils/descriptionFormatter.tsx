@@ -80,67 +80,78 @@ export const renderFormattedDescription = (description: string): JSX.Element => 
   // Normalize line breaks
   let normalized = description.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   
-  // Split into sections - preserve double newlines
-  // Split by double newlines, but also check for headings
+  // Process lines to detect headings and create sections
   const sections: Array<{ type: 'heading' | 'paragraph'; heading?: string; content: string }> = [];
   const lines = normalized.split('\n');
   
-  let currentSection: { type: 'heading' | 'paragraph'; heading?: string; content: string } | null = null;
-  
-  for (let i = 0; i < lines.length; i++) {
+  let i = 0;
+  while (i < lines.length) {
     const line = lines[i].trim();
-    const isBlank = line.length === 0;
-    const nextLine = i < lines.length - 1 ? lines[i + 1].trim() : '';
-    const isNextBlank = nextLine.length === 0;
     
-    // Check if this is a heading
+    // Skip empty lines but count consecutive empties
+    if (!line) {
+      i++;
+      continue;
+    }
+    
+    // Check if this line is a heading
     const headingCheck = isHeading(line);
     
     if (headingCheck.isHeading) {
-      // If we have a current section, save it
-      if (currentSection && currentSection.content.trim()) {
-        sections.push(currentSection);
-      }
-      
-      // Start new heading section
-      currentSection = {
+      // Found a heading - save it as a section
+      sections.push({
         type: 'heading',
         heading: headingCheck.headingText,
         content: headingCheck.content || ''
-      };
+      });
+      i++;
+    } else {
+      // Regular paragraph - collect all lines until we hit a heading or double blank
+      let paragraphContent = line;
+      i++;
       
-      // If next line is blank and line after that exists, skip the blank
-      if (isNextBlank && i < lines.length - 2) {
-        i++; // Skip the blank line
-      }
-    } else if (!isBlank) {
-      // Regular content line
-      if (!currentSection) {
-        currentSection = { type: 'paragraph', content: '' };
-      }
-      
-      if (currentSection.content) {
-        currentSection.content += '\n' + line;
-      } else {
-        currentSection.content = line;
-      }
-    } else if (isBlank && currentSection) {
-      // Blank line - if we have 2 consecutive blanks, end current section
-      const lineAfterNext = i < lines.length - 2 ? lines[i + 2].trim() : '';
-      if (isNextBlank && lineAfterNext.length === 0) {
-        // Two consecutive blanks - end section
-        if (currentSection.content.trim()) {
-          sections.push(currentSection);
+      // Collect subsequent lines until we hit a heading or double blank
+      while (i < lines.length) {
+        const nextLine = lines[i].trim();
+        
+        // If blank line, check if next is also blank or if it's a heading
+        if (!nextLine) {
+          const lineAfter = i < lines.length - 1 ? lines[i + 1].trim() : '';
+          const isHeadingAfter = lineAfter ? isHeading(lineAfter).isHeading : false;
+          
+          if (isHeadingAfter) {
+            // Next line is a heading - stop here
+            break;
+          } else if (!lineAfter) {
+            // Double blank - stop here
+            i++; // Skip this blank
+            break;
+          } else {
+            // Single blank - continue collecting
+            paragraphContent += '\n\n';
+            i++;
+            continue;
+          }
         }
-        currentSection = null;
-        i++; // Skip next blank line too
+        
+        // Check if next line is a heading
+        const nextIsHeading = isHeading(nextLine);
+        if (nextIsHeading.isHeading) {
+          break;
+        }
+        
+        // Add to paragraph content
+        paragraphContent += '\n' + nextLine;
+        i++;
+      }
+      
+      if (paragraphContent.trim()) {
+        sections.push({
+          type: 'paragraph',
+          content: paragraphContent.trim()
+        });
       }
     }
-  }
-  
-  // Push last section
-  if (currentSection && currentSection.content.trim()) {
-    sections.push(currentSection);
   }
   
   // If no sections found, render as plain text
