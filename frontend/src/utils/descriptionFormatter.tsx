@@ -160,24 +160,23 @@ export const renderFormattedDescription = (description: string): JSX.Element => 
   }
   
   return (
-    <div>
+    <div className="space-y-6">
       {sections.map((section, index) => {
-        const isLast = index === sections.length - 1;
-        const marginBottom = section.type === 'heading' ? 'mb-6' : 'mb-4';
-        
         if (section.type === 'heading') {
           return (
-            <div key={index} className={marginBottom}>
-              <p className="text-gray-700">
-                <strong className="font-bold text-gray-900">{section.heading}:</strong>
-                {section.content && ` ${renderInlineContent(section.content)}`}
+            <div key={index} className="mb-6">
+              <p className="text-gray-700 leading-relaxed">
+                <strong className="font-bold text-gray-900 text-base">{section.heading}:</strong>
+                {section.content && (
+                  <span className="ml-1">{renderInlineContent(section.content)}</span>
+                )}
               </p>
             </div>
           );
         }
         
         return (
-          <p key={index} className={`text-gray-700 ${marginBottom} whitespace-pre-line`}>
+          <p key={index} className="text-gray-700 mb-4 whitespace-pre-line leading-relaxed">
             {renderInlineContent(section.content)}
           </p>
         );
