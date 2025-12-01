@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { productService } from '@/services/products';
 import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -15,6 +15,7 @@ import { ChevronRight, ChevronLeft, Star, Shield, TrendingUp } from 'lucide-reac
 import { useRef, useState, useEffect } from 'react';
 
 const Home = () => {
+  const navigate = useNavigate();
   const { data: featuredProducts, isLoading } = useQuery({
     queryKey: ['products', 'featured'],
     queryFn: () => productService.getProducts({ featured: true, limit: 8 })
@@ -121,12 +122,20 @@ const Home = () => {
       {/* Trust Badges */}
       <TrustBadges />
 
-      {/* Shop by Pet Type - New Design */}
-      <section className="py-12 md:py-16 bg-gradient-to-b from-white to-gray-50">
-        <div className="container mx-auto px-4 lg:px-8">
+      {/* Shop by Pet Type - Enhanced Modern Design */}
+      <section className="py-12 md:py-16 bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden">
+        {/* Decorative background elements */}
+        <div className="absolute top-0 left-0 w-72 h-72 bg-blue-200 rounded-full opacity-10 blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-200 rounded-full opacity-10 blur-3xl"></div>
+        
+        <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-black mb-3 text-gray-900">Shop by Pet Type</h2>
-            <p className="text-gray-600 text-lg">Find everything your furry, feathered, or scaly friend needs</p>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Shop by Pet Type
+            </h2>
+            <p className="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto">
+              Find everything your furry, feathered, or scaly friend needs
+            </p>
           </div>
           
           {/* Horizontal Scrollable Pet Types */}
@@ -158,96 +167,131 @@ const Home = () => {
                 { 
                   name: 'Dog', 
                   petType: 'dog', 
-                  image: 'https://images.unsplash.com/photo-1534361960057-19889db9621e?w=400&h=400&fit=crop&q=90'
+                  slug: 'dog',
+                  image: 'https://images.unsplash.com/photo-1534361960057-19889db9621e?w=500&h=500&fit=crop&q=90'
                 },
                 { 
                   name: 'Cat', 
                   petType: 'cat', 
-                  image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop&q=90'
-                },
-                { 
-                  name: 'Pet Parent', 
-                  petType: 'dog', 
-                  image: 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=400&h=400&fit=crop&q=90'
-                },
-                { 
-                  name: 'Horse', 
-                  petType: 'other-animals', 
-                  image: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?w=400&h=400&fit=crop&q=90&auto=format'
-                },
-                { 
-                  name: 'Wild bird', 
-                  petType: 'other-animals', 
-                  image: 'https://images.unsplash.com/photo-1444464666168-49d633b86797?w=400&h=400&fit=crop&q=90'
-                },
-                { 
-                  name: 'Chicken', 
-                  petType: 'other-animals', 
-                  image: 'https://images.unsplash.com/photo-1612170153139-6f881ff067e0?w=400&h=400&fit=crop&q=90'
-                },
-                { 
-                  name: 'Wildlife', 
-                  petType: 'other-animals', 
-                  image: 'https://images.unsplash.com/photo-1484406566174-9da000fda645?w=400&h=400&fit=crop&q=90'
-                },
-                { 
-                  name: 'Pet bird', 
-                  petType: 'other-animals', 
-                  image: 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=400&h=400&fit=crop&q=90'
-                },
-                { 
-                  name: 'Small pet', 
-                  petType: 'other-animals', 
-                  image: 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=400&h=400&fit=crop&q=90'
-                },
-                { 
-                  name: 'Livestock', 
-                  petType: 'other-animals', 
-                  image: 'https://images.unsplash.com/photo-1506755855567-92ff770e8d00?w=400&h=400&fit=crop&q=90'
-                },
-                { 
-                  name: 'Reptile', 
-                  petType: 'other-animals', 
-                  image: 'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e?w=400&h=400&fit=crop&q=90&auto=format'
+                  slug: 'cat',
+                  image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&h=500&fit=crop&q=90'
                 },
                 { 
                   name: 'Fish', 
-                  petType: 'other-animals', 
-                  image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=400&fit=crop&q=90&auto=format'
+                  petType: 'fish', 
+                  slug: 'fish',
+                  image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&h=500&fit=crop&q=90&auto=format'
+                },
+                { 
+                  name: 'Bird', 
+                  petType: 'bird', 
+                  slug: 'bird',
+                  image: 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=500&h=500&fit=crop&q=90'
+                },
+                { 
+                  name: 'Reptile', 
+                  petType: 'reptile', 
+                  slug: 'reptile',
+                  image: 'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e?w=500&h=500&fit=crop&q=90&auto=format'
+                },
+                { 
+                  name: 'Small Pet', 
+                  petType: 'small-pet', 
+                  slug: 'small-pet',
+                  image: 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=500&h=500&fit=crop&q=90'
+                },
+                { 
+                  name: 'Chicken & Poultry', 
+                  petType: 'chicken-poultry', 
+                  slug: 'chicken-poultry',
+                  image: 'https://images.unsplash.com/photo-1612170153139-6f881ff067e0?w=500&h=500&fit=crop&q=90'
+                },
+                { 
+                  name: 'Cow', 
+                  petType: 'cow', 
+                  slug: 'cow',
+                  image: 'https://images.unsplash.com/photo-1506755855567-92ff770e8d00?w=500&h=500&fit=crop&q=90'
+                },
+                { 
+                  name: 'Duck', 
+                  petType: 'duck', 
+                  slug: 'duck',
+                  image: 'https://images.unsplash.com/photo-1522926193341-e9ffd686c60f?w=500&h=500&fit=crop&q=90'
+                },
+                { 
+                  name: 'Goat', 
+                  petType: 'goat', 
+                  slug: 'goat',
+                  image: 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=500&h=500&fit=crop&q=90'
+                },
+                { 
+                  name: 'Horse', 
+                  petType: 'horse', 
+                  slug: 'horse',
+                  image: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?w=500&h=500&fit=crop&q=90&auto=format'
+                },
+                { 
+                  name: 'Pig', 
+                  petType: 'pig', 
+                  slug: 'pig',
+                  image: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=500&h=500&fit=crop&q=90'
+                },
+                { 
+                  name: 'Sheep', 
+                  petType: 'sheep', 
+                  slug: 'sheep',
+                  image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=500&h=500&fit=crop&q=90'
+                },
+                { 
+                  name: 'Wild Bird', 
+                  petType: 'wild-bird', 
+                  slug: 'wild-bird',
+                  image: 'https://images.unsplash.com/photo-1444464666168-49d633b86797?w=500&h=500&fit=crop&q=90'
+                },
+                { 
+                  name: 'Pond', 
+                  petType: 'pond', 
+                  slug: 'pond',
+                  image: 'https://images.unsplash.com/photo-1560774358-d8b19d75c5b9?w=500&h=500&fit=crop&q=90'
                 }
               ].map((category, index) => (
-                <Link
-                  key={index}
-                  to={`/products?petType=${category.petType}`}
-                  className="flex-shrink-0 snap-center group"
+                <div
+                  key={`${category.slug}-${index}`}
+                  className="flex-shrink-0 snap-center group cursor-pointer"
+                  onClick={() => {
+                    // Navigate to products page with specific pet type filter
+                    navigate(`/products?petType=${category.slug}`);
+                  }}
                 >
-                  <div className="flex flex-col items-center gap-3">
-                    {/* Circular Image with Uniform Gradient Border */}
-                    <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-1 transform group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-2xl">
+                  <div className="flex flex-col items-center gap-3 w-full">
+                    {/* Circular Image with Enhanced Gradient Border */}
+                    <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-44 lg:h-44 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[3px] transform group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-2xl group-hover:from-blue-600 group-hover:via-purple-600 group-hover:to-pink-600">
                       <div className="w-full h-full rounded-full overflow-hidden bg-white">
                         <img 
                           src={category.image} 
                           alt={category.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
                             // Fallback to placeholder if image fails to load
                             const target = e.currentTarget;
                             // Use SVG data URI - no external requests needed
-                            const svg = `<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="16" fill="#6b7280" text-anchor="middle" dy=".3em">${category.name}</text></svg>`;
+                            const svg = `<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#6b7280" text-anchor="middle" dy=".3em">${category.name}</text></svg>`;
                             target.src = `data:image/svg+xml;base64,${btoa(svg)}`;
                           }}
                           loading="lazy"
                         />
                       </div>
                       {/* Decorative overlay on hover */}
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-t from-blue-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-t from-blue-600/20 via-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      {/* Pulse effect on hover */}
+                      <div className="absolute inset-0 rounded-full border-2 border-blue-400 opacity-0 group-hover:opacity-50 group-hover:animate-ping"></div>
                     </div>
-                    {/* Label */}
-                    <p className="text-base md:text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
+                    {/* Label with enhanced styling */}
+                    <p className="text-sm md:text-base lg:text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300 text-center px-2 max-w-[120px] md:max-w-[140px]">
                       {category.name}
                     </p>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
             
