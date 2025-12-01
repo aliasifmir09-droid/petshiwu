@@ -101,9 +101,16 @@ export const formatProductDescription = (description: string): string => {
     }
     
     if (isHeading) {
-      // Add blank line before heading if previous line wasn't already blank and wasn't a heading
-      if (previousWasHeading && processedLines.length > 0 && processedLines[processedLines.length - 1] !== '') {
-        processedLines.push(''); // One blank line
+      // Add blank line before heading if:
+      // 1. Previous line was a heading (need spacing between headings)
+      // 2. Previous line was not blank (need spacing from regular text)
+      const lastLine = processedLines.length > 0 ? processedLines[processedLines.length - 1] : '';
+      if (lastLine && lastLine.trim() !== '' && !lastLine.startsWith('**')) {
+        // Previous line was regular text - add blank line before heading
+        processedLines.push('');
+      } else if (previousWasHeading && lastLine && lastLine.trim() !== '') {
+        // Previous line was a heading - add blank line between headings
+        processedLines.push('');
       }
       
       // Format as: **Heading:** content

@@ -160,11 +160,19 @@ export const renderFormattedDescription = (description: string): JSX.Element => 
   }
   
   return (
-    <div className="space-y-6">
+    <div>
       {sections.map((section, index) => {
-        if (section.type === 'heading') {
+        const isHeading = section.type === 'heading';
+        const prevSection = index > 0 ? sections[index - 1] : null;
+        const isFirstSection = index === 0;
+        
+        // Add top margin if this is a heading and previous section was not a heading
+        const topMargin = isHeading && prevSection && prevSection.type !== 'heading' && !isFirstSection ? 'mt-6' : '';
+        const bottomMargin = isHeading ? 'mb-6' : 'mb-4';
+        
+        if (isHeading) {
           return (
-            <div key={index} className="mb-6">
+            <div key={index} className={`${topMargin} ${bottomMargin}`}>
               <p className="text-gray-700 leading-relaxed">
                 <strong className="font-bold text-gray-900 text-base">{section.heading}:</strong>
                 {section.content && (
@@ -176,7 +184,7 @@ export const renderFormattedDescription = (description: string): JSX.Element => 
         }
         
         return (
-          <p key={index} className="text-gray-700 mb-4 whitespace-pre-line leading-relaxed">
+          <p key={index} className={`text-gray-700 ${bottomMargin} whitespace-pre-line leading-relaxed`}>
             {renderInlineContent(section.content)}
           </p>
         );
