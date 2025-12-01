@@ -12,6 +12,7 @@ export const formatProductDescription = (description: string): string => {
 
   // Common heading patterns that should be bolded (case-insensitive)
   const knownHeadings = [
+    'Key Benefits',
     'Features & Benefits',
     'Features and Benefits',
     'Item Number',
@@ -58,7 +59,7 @@ export const formatProductDescription = (description: string): string => {
   let previousWasHeading = false;
   
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+    let line = lines[i].trim();
     if (!line) {
       // Empty line - add as-is (will create paragraph break)
       processedLines.push('');
@@ -66,7 +67,11 @@ export const formatProductDescription = (description: string): string => {
       continue;
     }
     
-    // Check if line contains a heading pattern
+    // Replace "Features & Benefits" or "Features and Benefits" with "Key Benefits" in the line
+    // Handle both plain text and markdown formats
+    line = line.replace(/^(Features?\s*(?:&|and)\s*Benefits?):/i, 'Key Benefits:');
+    line = line.replace(/^\*\*(Features?\s*(?:&|and)\s*Benefits?):/i, '**Key Benefits:');
+    
     // Pattern 1: Line starts with known heading followed by colon
     let isHeading = false;
     let headingText = '';
@@ -81,6 +86,16 @@ export const formatProductDescription = (description: string): string => {
         headingText = match[1]; // Use original casing from line
         headingContent = match[2].trim();
         break;
+      }
+    }
+    
+    // Also check for markdown-formatted headings
+    if (!isHeading) {
+      const markdownMatch = line.match(/^\*\*([^*]+):\*\*\s*(.*)$/);
+      if (markdownMatch) {
+        isHeading = true;
+        headingText = markdownMatch[1].trim();
+        headingContent = markdownMatch[2].trim();
       }
     }
     

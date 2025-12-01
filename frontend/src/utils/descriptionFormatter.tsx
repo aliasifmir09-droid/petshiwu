@@ -4,6 +4,7 @@ import React from 'react';
  * Common heading patterns that should be bolded
  */
 const HEADING_PATTERNS = [
+  'Key Benefits',
   'Features & Benefits',
   'Features and Benefits',
   'Item Number',
@@ -37,7 +38,12 @@ const HEADING_PATTERNS = [
  * Checks if a line is a heading
  */
 const isHeading = (line: string): { isHeading: boolean; headingText?: string; content?: string } => {
-  const trimmed = line.trim();
+  let trimmed = line.trim();
+  
+  // Replace "Features & Benefits" or "Features and Benefits" with "Key Benefits"
+  // Handle both plain text and markdown formats
+  trimmed = trimmed.replace(/^(Features?\s*(?:&|and)\s*Benefits?):/i, 'Key Benefits:');
+  trimmed = trimmed.replace(/^\*\*(Features?\s*(?:&|and)\s*Benefits?):/i, '**Key Benefits:');
   
   // Check for markdown-style bold (**Heading:**)
   const markdownMatch = trimmed.match(/^\*\*([^*]+):\*\*\s*(.*)$/);
