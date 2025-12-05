@@ -254,57 +254,6 @@ const HeroSlideshow = () => {
             </div>
           </div>
 
-          {/* Autoship Promo - Enhanced */}
-          <Link
-            to="/products"
-            className="hidden md:block relative bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-blue-200 group hover:scale-105 min-h-[100px]"
-          >
-            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-300 rounded-full -mr-12 -mt-12 opacity-20 group-hover:scale-150 transition-transform duration-500 overflow-hidden"></div>
-            <div className="absolute top-2 right-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md z-20">
-              35% OFF
-            </div>
-            <div className="relative z-10 flex items-center gap-4">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3.5 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-base md:text-lg text-gray-800 group-hover:text-blue-600 transition-colors mb-1">
-                  Save 35% on first order
-                </p>
-                <p className="text-sm text-gray-600">
-                  Set up an Autoship
-                </p>
-              </div>
-            </div>
-          </Link>
-
-          {/* Pharmacy Promo - Enhanced */}
-          <Link
-            to="/products?search=pharmacy"
-            className="hidden md:block relative bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-purple-200 group hover:scale-105 min-h-[100px]"
-          >
-            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-300 rounded-full -mr-12 -mt-12 opacity-20 group-hover:scale-150 transition-transform duration-500 overflow-hidden"></div>
-            <div className="absolute top-2 right-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md z-20">
-              20% OFF
-            </div>
-            <div className="relative z-10 flex items-center gap-4">
-              <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-3.5 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-base md:text-lg text-gray-800 group-hover:text-purple-600 transition-colors mb-1">
-                  Save 20% on pharmacy
-                </p>
-                <p className="text-sm text-gray-600">
-                  Fill a prescription
-                </p>
-              </div>
-            </div>
-          </Link>
         </div>
       </div>
     </div>

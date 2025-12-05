@@ -748,13 +748,6 @@ const Header = () => {
                   </Link>
                 </li>
                 
-                {/* Pharmacy */}
-                <li className="flex-shrink-0">
-                  <Link to="/products" className="hover:text-[#1E3A8A] transition-colors py-1.5 lg:py-2 px-1 lg:px-1.5 whitespace-nowrap text-xs lg:text-sm">
-                    Pharmacy
-                  </Link>
-                </li>
-                
                 {/* About */}
                 <li className="flex-shrink-0">
                   <Link to="/about" className="hover:text-[#1E3A8A] transition-colors py-1.5 lg:py-2 px-1 lg:px-1.5 whitespace-nowrap text-xs lg:text-sm">
@@ -1312,13 +1305,6 @@ const Header = () => {
               >
                 <span>🔥</span>
                 <span>Today's Deals</span>
-              </Link>
-              <Link
-                to="/products"
-                onClick={() => setIsLeftSidebarOpen(false)}
-                className="block py-3 px-4 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-              >
-                Pharmacy
               </Link>
               <Link
                 to="/about"

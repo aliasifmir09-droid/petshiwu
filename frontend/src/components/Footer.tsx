@@ -84,11 +84,6 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/autoship" className="hover:text-white">
-                  Autoship Program
-                </Link>
-              </li>
-              <li>
                 <Link to="/brands" className="hover:text-white">
                   Shop by Brand
                 </Link>

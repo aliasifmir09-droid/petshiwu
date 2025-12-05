@@ -10,7 +10,7 @@ import CountdownTimer from '@/components/CountdownTimer';
 import TrustBadges from '@/components/TrustBadges';
 import FloatingDiscount from '@/components/FloatingDiscount';
 import CategoryIcons from '@/components/CategoryIcons';
-import { ChevronRight, ChevronLeft, Star, Shield, TrendingUp } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Star } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 
 const Home = () => {
@@ -418,18 +418,6 @@ const Home = () => {
               </div>
             </div>
             <div className="group bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-2 border border-white/20">
-              <div className="bg-gradient-to-br from-green-400 to-green-600 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-xl">
-                <div className="text-5xl float" style={{animationDelay: '0.5s'}}>🔄</div>
-              </div>
-              <h3 className="text-2xl font-black mb-3 text-white">Autoship & Save 10%</h3>
-              <p className="text-white/90 leading-relaxed text-lg mb-4">
-                Never run out! Automatic deliveries
-              </p>
-              <div className="bg-white/20 backdrop-blur-md rounded-lg px-4 py-2 inline-block">
-                <p className="text-sm font-bold text-white">💰 Average Savings: $240/year</p>
-              </div>
-            </div>
-            <div className="group bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-2 border border-white/20">
               <div className="bg-gradient-to-br from-yellow-400 to-orange-500 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-xl">
                 <div className="text-5xl float" style={{animationDelay: '1s'}}>⭐</div>
               </div>
@@ -439,84 +427,6 @@ const Home = () => {
               </p>
               <div className="bg-white/20 backdrop-blur-md rounded-lg px-4 py-2 inline-block">
                 <p className="text-sm font-bold text-white">⭐ 4.8/5 Average Rating</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Call to Action - Enhanced with Social Proof */}
-      <section className="py-20 md:py-28 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white relative overflow-hidden">
-        {/* Animated Background Shapes */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute top-10 left-10 w-64 h-64 bg-blue-500 rounded-full opacity-20 blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-pink-500 rounded-full opacity-20 blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-        </div>
-        
-        <div className="container mx-auto px-4 lg:px-8 text-center relative z-10">
-          <div className="max-w-4xl mx-auto relative z-30">
-            {/* Social Proof Badge */}
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-full font-bold text-sm mb-6 shadow-lg animate-fade-in-up relative z-30">
-              <Shield size={18} />
-              <span>Trusted by 50,000+ Pet Parents</span>
-            </div>
-
-            <div className="text-7xl md:text-8xl mb-6 animate-bounce-slow relative z-30">🎁</div>
-            <h2 className="text-4xl md:text-6xl font-black mb-6 leading-tight relative z-30">
-              Never Run Out. Save 10% Every Order.
-            </h2>
-            <p className="text-xl md:text-2xl mb-4 leading-relaxed opacity-95 relative z-30">
-              Join our <span className="font-black text-yellow-300">Autoship Program</span> and get your pet's favorites delivered automatically
-            </p>
-            <p className="text-lg mb-10 opacity-80 relative z-30">
-              ✓ Free shipping ✓ Cancel anytime ✓ Flexible scheduling ✓ Skip or modify orders
-            </p>
-
-            {/* Stats Row */}
-            <div className="grid grid-cols-3 gap-4 md:gap-8 mb-10 max-w-2xl mx-auto">
-              <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-                <p className="text-3xl font-black mb-1">10%</p>
-                <p className="text-sm opacity-90">You Save</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-                <p className="text-3xl font-black mb-1">45K+</p>
-                <p className="text-sm opacity-90">Active Autoship</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-                <p className="text-3xl font-black mb-1">FREE</p>
-                <p className="text-sm opacity-90">Shipping</p>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to="/products"
-                className="inline-flex items-center justify-center gap-2 bg-white text-indigo-900 px-10 py-5 rounded-xl font-black text-lg hover:bg-gray-100 hover:shadow-2xl transition-all transform hover:scale-105 btn-ripple shadow-xl"
-              >
-                <span>Start Shopping Now</span>
-                <ChevronRight size={24} />
-              </Link>
-              <Link
-                to="/autoship"
-                className="inline-flex items-center justify-center gap-2 bg-transparent border-3 border-white text-white px-10 py-5 rounded-xl font-black text-lg hover:bg-white hover:text-indigo-900 transition-all transform hover:scale-105"
-              >
-                <span>How It Works</span>
-              </Link>
-            </div>
-
-            {/* Trust Indicators */}
-            <div className="mt-12 flex items-center justify-center gap-8 flex-wrap opacity-75">
-              <div className="flex items-center gap-2">
-                <Shield size={20} />
-                <span className="text-sm">Secure Checkout</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Star size={20} className="fill-yellow-300 text-yellow-300" />
-                <span className="text-sm">4.8/5 Rating</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <TrendingUp size={20} />
-                <span className="text-sm">#1 Pet Store</span>
               </div>
             </div>
           </div>
