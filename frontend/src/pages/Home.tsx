@@ -105,16 +105,18 @@ const Home = () => {
       </div>
 
       {/* Flash Deal Section with Countdown */}
-      <section className="py-8 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900">
-        <div className="container mx-auto px-4 lg:px-8">
+      <section className="py-8 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 relative">
+        <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-white text-center md:text-left">
-              <h2 className="text-3xl md:text-4xl font-black mb-2 gradient-text-vibrant">
+            <div className="text-white text-center md:text-left relative z-20">
+              <h2 className="text-3xl md:text-4xl font-black mb-2 gradient-text-vibrant relative z-20">
                 ⚡ Flash Sale Today Only!
               </h2>
-              <p className="text-lg opacity-90">Hurry! Limited quantities available</p>
+              <p className="text-lg opacity-90 relative z-20">Hurry! Limited quantities available</p>
             </div>
-            <CountdownTimer title="Ends in" />
+            <div className="relative z-20">
+              <CountdownTimer title="Ends in" />
+            </div>
           </div>
         </div>
       </section>
@@ -129,11 +131,11 @@ const Home = () => {
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-200 rounded-full opacity-10 blur-3xl"></div>
         
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <div className="text-center mb-12 relative z-20">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent relative z-20">
               Shop by Pet Type
             </h2>
-            <p className="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto">
+            <p className="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto relative z-20">
               Find everything your furry, feathered, or scaly friend needs
             </p>
           </div>
@@ -316,16 +318,16 @@ const Home = () => {
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           {/* Section Header with Psychological Trigger */}
-          <div className="text-center mb-12 animate-fade-in-up">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-2 rounded-full font-bold text-sm mb-4 shadow-lg animate-pulse-slow">
+          <div className="text-center mb-12 animate-fade-in-up relative z-20">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-2 rounded-full font-bold text-sm mb-4 shadow-lg animate-pulse-slow relative z-20">
               <Star size={16} className="fill-white" />
               <span>Most Popular This Week</span>
               <Star size={16} className="fill-white" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent relative z-20">
               Trending Products
             </h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto relative z-20">
               Join thousands of happy pet parents who trust these best-selling products
             </p>
           </div>
@@ -387,9 +389,9 @@ const Home = () => {
         </div>
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
-          <div className="text-center mb-12 text-white">
-            <h2 className="text-4xl md:text-5xl font-black mb-4">Why 50,000+ Pet Parents Choose Us</h2>
-            <p className="text-xl opacity-90 max-w-2xl mx-auto">
+          <div className="text-center mb-12 text-white relative z-20">
+            <h2 className="text-4xl md:text-5xl font-black mb-4 relative z-20">Why 50,000+ Pet Parents Choose Us</h2>
+            <p className="text-xl opacity-90 max-w-2xl mx-auto relative z-20">
               Join our growing community of happy customers
             </p>
           </div>
@@ -443,21 +445,21 @@ const Home = () => {
         </div>
         
         <div className="container mx-auto px-4 lg:px-8 text-center relative z-10">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto relative z-20">
             {/* Social Proof Badge */}
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-full font-bold text-sm mb-6 shadow-lg animate-fade-in-up">
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-full font-bold text-sm mb-6 shadow-lg animate-fade-in-up relative z-20">
               <Shield size={18} />
               <span>Trusted by 50,000+ Pet Parents</span>
             </div>
 
-            <div className="text-7xl md:text-8xl mb-6 animate-bounce-slow">🎁</div>
-            <h2 className="text-4xl md:text-6xl font-black mb-6 leading-tight">
+            <div className="text-7xl md:text-8xl mb-6 animate-bounce-slow relative z-20">🎁</div>
+            <h2 className="text-4xl md:text-6xl font-black mb-6 leading-tight relative z-20">
               Never Run Out. Save 10% Every Order.
             </h2>
-            <p className="text-xl md:text-2xl mb-4 leading-relaxed opacity-95">
+            <p className="text-xl md:text-2xl mb-4 leading-relaxed opacity-95 relative z-20">
               Join our <span className="font-black text-yellow-300">Autoship Program</span> and get your pet's favorites delivered automatically
             </p>
-            <p className="text-lg mb-10 opacity-80">
+            <p className="text-lg mb-10 opacity-80 relative z-20">
               ✓ Free shipping ✓ Cancel anytime ✓ Flexible scheduling ✓ Skip or modify orders
             </p>
 

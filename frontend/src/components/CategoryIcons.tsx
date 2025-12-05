@@ -107,10 +107,10 @@ const CategoryIcons = () => {
   ];
 
   return (
-    <section className="py-12 md:py-16 bg-gradient-to-b from-white to-gray-50">
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-black mb-3 text-gray-900">
+    <section className="py-12 md:py-16 bg-gradient-to-b from-white to-gray-50 relative">
+      <div className="container mx-auto px-4 lg:px-8 relative z-10">
+        <div className="text-center mb-8 relative z-20">
+          <h2 className="text-3xl md:text-4xl font-black mb-3 text-gray-900 relative z-20">
             Find all your pet's must-haves
           </h2>
         </div>
