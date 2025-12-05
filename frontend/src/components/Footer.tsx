@@ -15,7 +15,7 @@ const Footer = () => {
                 className="h-14 w-14 object-contain drop-shadow-lg"
               />
               <h3 className="text-xl font-black bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent" style={{ fontFamily: "'Nunito', sans-serif" }}>
-                petshiwu
+                Petshiwu
               </h3>
             </div>
             <p className="text-gray-400 text-sm mb-4">
@@ -105,8 +105,16 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li>📞 1-800-PETSHIWU</li>
-              <li>📧 support@petshiwu.com</li>
+              <li>
+                <a href="tel:1-800-738-7449" className="hover:text-white">
+                  📞 1-800-738-7449
+                </a>
+              </li>
+              <li>
+                <a href="mailto:support@petshiwu.com" className="hover:text-white">
+                  📧 support@petshiwu.com
+                </a>
+              </li>
               <li>🕐 Mon-Fri: 9AM - 8PM EST</li>
               <li>🕐 Sat-Sun: 9AM - 6PM EST</li>
             </ul>

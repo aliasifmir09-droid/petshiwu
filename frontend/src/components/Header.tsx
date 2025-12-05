@@ -306,7 +306,7 @@ const Header = () => {
               <div className="absolute inset-0 bg-white/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             </div>
               <span className="text-xl lg:text-2xl xl:text-3xl font-black text-white tracking-tight transition-all duration-300" style={{ fontFamily: "'Nunito', sans-serif" }}>
-                petshiwu
+                Petshiwu
               </span>
             </Link>
 
@@ -343,11 +343,11 @@ const Header = () => {
                 <ChevronDown size={12} className="opacity-80" />
               </div>
 
-              {/* 24/7 Help - Desktop with Dropdown */}
+              {/* Customer Support - Desktop with Dropdown */}
               <div className="hidden lg:block relative group z-[100]">
                 <div className="flex items-center gap-1.5 lg:gap-2 px-2 lg:px-3 py-1.5 rounded-md hover:bg-white/10 transition-colors cursor-pointer">
                   <Phone size={16} className="lg:w-[18px] lg:h-[18px]" />
-                  <span className="text-xs lg:text-sm font-semibold">24/7 Help</span>
+                  <span className="text-xs lg:text-sm font-semibold">Support</span>
                   <ChevronDown size={12} className="opacity-80" />
                 </div>
                 <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg py-4 px-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all text-gray-900 z-[100]">
@@ -356,19 +356,19 @@ const Header = () => {
                     <div className="flex items-start gap-3 text-[#1E3A8A]">
                       <Phone size={20} className="mt-1 flex-shrink-0" />
                       <div>
-                        <p className="text-sm font-bold mb-1">24/7 Support Available</p>
-                        <p className="text-xs text-gray-600 mb-2">Call us anytime, day or night</p>
+                        <p className="text-sm font-bold mb-1">We're Here to Help</p>
+                        <p className="text-xs text-gray-600 mb-2">Mon-Fri: 9AM - 8PM EST | Sat-Sun: 9AM - 6PM EST</p>
                         <a 
-                          href="tel:1-800-672-4399" 
+                          href="tel:1-800-738-7449" 
                           className="text-xl font-bold hover:underline block"
                         >
                           Call Toll-Free
                         </a>
                         <a 
-                          href="tel:1-800-672-4399" 
+                          href="tel:1-800-738-7449" 
                           className="text-2xl font-black text-[#1E3A8A] hover:text-blue-700 block"
                         >
-                          1-800-672-4399
+                          1-800-738-7449
                         </a>
                       </div>
                     </div>
