@@ -108,13 +108,13 @@ const Home = () => {
       <section className="py-8 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 relative">
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-white text-center md:text-left relative z-20">
-              <h2 className="text-3xl md:text-4xl font-black mb-2 gradient-text-vibrant relative z-20">
+            <div className="text-white text-center md:text-left relative z-30">
+              <h2 className="text-3xl md:text-4xl font-black mb-2 gradient-text-vibrant relative z-30">
                 ⚡ Flash Sale Today Only!
               </h2>
-              <p className="text-lg opacity-90 relative z-20">Hurry! Limited quantities available</p>
+              <p className="text-lg opacity-90 relative z-30">Hurry! Limited quantities available</p>
             </div>
-            <div className="relative z-20">
+            <div className="relative z-30">
               <CountdownTimer title="Ends in" />
             </div>
           </div>
@@ -127,15 +127,15 @@ const Home = () => {
       {/* Shop by Pet Type - Enhanced Modern Design */}
       <section className="py-12 md:py-16 bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden">
         {/* Decorative background elements */}
-        <div className="absolute top-0 left-0 w-72 h-72 bg-blue-200 rounded-full opacity-10 blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-200 rounded-full opacity-10 blur-3xl"></div>
+        <div className="absolute top-0 left-0 w-72 h-72 bg-blue-200 rounded-full opacity-10 blur-3xl z-0"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-200 rounded-full opacity-10 blur-3xl z-0"></div>
         
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
-          <div className="text-center mb-12 relative z-20">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent relative z-20">
+          <div className="text-center mb-12 relative z-30">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent relative z-30">
               Shop by Pet Type
             </h2>
-            <p className="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto relative z-20">
+            <p className="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto relative z-30">
               Find everything your furry, feathered, or scaly friend needs
             </p>
           </div>
@@ -313,21 +313,21 @@ const Home = () => {
       {/* Featured Products with Enhanced Design */}
       <section className="py-16 bg-gradient-to-b from-white via-blue-50 to-white relative overflow-hidden">
         {/* Decorative Background Elements */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-200 rounded-full opacity-10 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-200 rounded-full opacity-10 blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-200 rounded-full opacity-10 blur-3xl z-0"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-200 rounded-full opacity-10 blur-3xl z-0"></div>
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           {/* Section Header with Psychological Trigger */}
-          <div className="text-center mb-12 animate-fade-in-up relative z-20">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-2 rounded-full font-bold text-sm mb-4 shadow-lg animate-pulse-slow relative z-20">
+          <div className="text-center mb-12 animate-fade-in-up relative z-30">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-2 rounded-full font-bold text-sm mb-4 shadow-lg animate-pulse-slow relative z-30">
               <Star size={16} className="fill-white" />
               <span>Most Popular This Week</span>
               <Star size={16} className="fill-white" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent relative z-20">
+            <h2 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent relative z-30">
               Trending Products
             </h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto relative z-20">
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto relative z-30">
               Join thousands of happy pet parents who trust these best-selling products
             </p>
           </div>
@@ -381,7 +381,7 @@ const Home = () => {
       {/* Features - Enhanced with Statistics */}
       <section className="py-16 md:py-20 bg-gradient-to-br from-blue-600 via-purple-700 to-pink-600 relative overflow-hidden">
         {/* Animated Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 opacity-10 z-0">
           <div className="absolute top-0 left-0 w-full h-full" style={{
             backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
             backgroundSize: '50px 50px'
@@ -389,9 +389,9 @@ const Home = () => {
         </div>
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
-          <div className="text-center mb-12 text-white relative z-20">
-            <h2 className="text-4xl md:text-5xl font-black mb-4 relative z-20">Why 50,000+ Pet Parents Choose Us</h2>
-            <p className="text-xl opacity-90 max-w-2xl mx-auto relative z-20">
+          <div className="text-center mb-12 text-white relative z-30">
+            <h2 className="text-4xl md:text-5xl font-black mb-4 relative z-30">Why 50,000+ Pet Parents Choose Us</h2>
+            <p className="text-xl opacity-90 max-w-2xl mx-auto relative z-30">
               Join our growing community of happy customers
             </p>
           </div>
@@ -439,27 +439,27 @@ const Home = () => {
       {/* Call to Action - Enhanced with Social Proof */}
       <section className="py-20 md:py-28 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white relative overflow-hidden">
         {/* Animated Background Shapes */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 z-0">
           <div className="absolute top-10 left-10 w-64 h-64 bg-blue-500 rounded-full opacity-20 blur-3xl animate-pulse"></div>
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-pink-500 rounded-full opacity-20 blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
         </div>
         
         <div className="container mx-auto px-4 lg:px-8 text-center relative z-10">
-          <div className="max-w-4xl mx-auto relative z-20">
+          <div className="max-w-4xl mx-auto relative z-30">
             {/* Social Proof Badge */}
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-full font-bold text-sm mb-6 shadow-lg animate-fade-in-up relative z-20">
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-full font-bold text-sm mb-6 shadow-lg animate-fade-in-up relative z-30">
               <Shield size={18} />
               <span>Trusted by 50,000+ Pet Parents</span>
             </div>
 
-            <div className="text-7xl md:text-8xl mb-6 animate-bounce-slow relative z-20">🎁</div>
-            <h2 className="text-4xl md:text-6xl font-black mb-6 leading-tight relative z-20">
+            <div className="text-7xl md:text-8xl mb-6 animate-bounce-slow relative z-30">🎁</div>
+            <h2 className="text-4xl md:text-6xl font-black mb-6 leading-tight relative z-30">
               Never Run Out. Save 10% Every Order.
             </h2>
-            <p className="text-xl md:text-2xl mb-4 leading-relaxed opacity-95 relative z-20">
+            <p className="text-xl md:text-2xl mb-4 leading-relaxed opacity-95 relative z-30">
               Join our <span className="font-black text-yellow-300">Autoship Program</span> and get your pet's favorites delivered automatically
             </p>
-            <p className="text-lg mb-10 opacity-80 relative z-20">
+            <p className="text-lg mb-10 opacity-80 relative z-30">
               ✓ Free shipping ✓ Cancel anytime ✓ Flexible scheduling ✓ Skip or modify orders
             </p>
 
