@@ -11,6 +11,8 @@ const HEADING_PATTERNS = [
   'Intended For',
   'Includes',
   'Uses',
+  'Use',
+  'Cautions',
   'Total Weight',
   'Item Number',
   'Brand',
