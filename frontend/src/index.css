@@ -218,6 +218,25 @@ body {
   background-clip: text;
 }
 
+/* Animated gradient text */
+@keyframes gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background: linear-gradient(90deg, #ec4899, #fbbf24, #ec4899);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient 3s linear infinite;
+}
+
 /* Animated gradient background */
 .bg-gradient-animated {
   background: linear-gradient(270deg, #667eea, #764ba2, #f093fb, #f5576c);
