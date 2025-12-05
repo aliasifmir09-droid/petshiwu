@@ -132,7 +132,13 @@ const Home = () => {
         
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="text-center mb-12 relative z-30">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent relative z-30">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-3 relative z-30" style={{ 
+              background: 'linear-gradient(to right, #2563eb, #9333ea, #db2777)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              color: '#9333ea'
+            }}>
               Shop by Pet Type
             </h2>
             <p className="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto relative z-30">
@@ -324,7 +330,13 @@ const Home = () => {
               <span>Most Popular This Week</span>
               <Star size={16} className="fill-white" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent relative z-30">
+            <h2 className="text-4xl md:text-5xl font-black mb-3 relative z-30" style={{ 
+              background: 'linear-gradient(to right, #2563eb, #9333ea, #db2777)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              color: '#9333ea'
+            }}>
               Trending Products
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto relative z-30">
