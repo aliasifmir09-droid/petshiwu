@@ -101,18 +101,51 @@ const Home = () => {
         <HeroSlideshow />
       </div>
 
-      {/* Flash Deal Section with Countdown */}
-      <section className="py-8 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 relative">
+      {/* Grand Launching Section with Countdown */}
+      <section className="py-12 md:py-16 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
+        {/* Animated Background Effects */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-pink-500 rounded-full opacity-20 blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500 rounded-full opacity-20 blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-500 rounded-full opacity-10 blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+        </div>
+        
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-white text-center md:text-left relative z-30">
-              <h2 className="text-3xl md:text-4xl font-black mb-2 gradient-text-vibrant relative z-30">
-                ⚡ Flash Sale Today Only!
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            {/* Left Side - Launch Announcement */}
+            <div className="text-white text-center md:text-left relative z-30 flex-1">
+              <div className="inline-block mb-4 px-4 py-2 bg-white/20 backdrop-blur-md rounded-full border border-white/30">
+                <span className="text-sm font-bold uppercase tracking-wider">🎉 Grand Launching</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 relative z-30 leading-tight">
+                <span className="bg-gradient-to-r from-pink-400 via-yellow-300 to-pink-400 bg-clip-text text-transparent animate-gradient">
+                  🚀 We're Launching Soon!
+                </span>
               </h2>
-              <p className="text-lg opacity-90 relative z-30">Hurry! Limited quantities available</p>
+              <p className="text-xl md:text-2xl opacity-95 mb-2 relative z-30 font-semibold">
+                Mark Your Calendar
+              </p>
+              <p className="text-lg md:text-xl opacity-90 relative z-30">
+                <span className="font-bold text-yellow-300">February 15, 2026</span> - The future of pet shopping begins!
+              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-4 justify-center md:justify-start">
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20">
+                  <span className="text-2xl">✨</span>
+                  <span className="text-sm font-semibold">Exclusive Launch Deals</span>
+                </div>
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20">
+                  <span className="text-2xl">🎁</span>
+                  <span className="text-sm font-semibold">Special Offers</span>
+                </div>
+              </div>
             </div>
-            <div className="relative z-30">
-              <CountdownTimer title="Ends in" />
+            
+            {/* Right Side - Countdown Timer */}
+            <div className="relative z-30 flex-shrink-0">
+              <CountdownTimer 
+                endTime={new Date('2026-02-15T00:00:00')} 
+                title="Launching In" 
+              />
             </div>
           </div>
         </div>
