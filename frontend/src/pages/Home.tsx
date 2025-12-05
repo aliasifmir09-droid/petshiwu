@@ -420,7 +420,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Features - Enhanced with Statistics */}
+      {/* Features - What We Offer */}
       <section className="py-16 md:py-20 bg-gradient-to-br from-blue-600 via-purple-700 to-pink-600 relative overflow-hidden">
         {/* Animated Background Pattern */}
         <div className="absolute inset-0 opacity-10 z-0">
@@ -432,12 +432,12 @@ const Home = () => {
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="text-center mb-12 text-white relative z-30">
-            <h2 className="text-4xl md:text-5xl font-black mb-4 relative z-30">Why 50,000+ Pet Parents Choose Us</h2>
+            <h2 className="text-4xl md:text-5xl font-black mb-4 relative z-30">What Makes Us Different</h2>
             <p className="text-xl opacity-90 max-w-2xl mx-auto relative z-30">
-              Join our growing community of happy customers
+              Your trusted partner for all your pet's needs
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 stagger-animation">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 stagger-animation">
             <div className="group bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-2 border border-white/20">
               <div className="bg-gradient-to-br from-blue-400 to-blue-600 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-xl">
                 <div className="text-5xl float">🚚</div>
@@ -446,9 +446,6 @@ const Home = () => {
               <p className="text-white/90 leading-relaxed text-lg mb-4">
                 Get free delivery on orders over $49
               </p>
-              <div className="bg-white/20 backdrop-blur-md rounded-lg px-4 py-2 inline-block">
-                <p className="text-sm font-bold text-white">🎯 98% On-Time Delivery</p>
-              </div>
             </div>
             <div className="group bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-2 border border-white/20">
               <div className="bg-gradient-to-br from-yellow-400 to-orange-500 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-xl">
@@ -458,9 +455,24 @@ const Home = () => {
               <p className="text-white/90 leading-relaxed text-lg mb-4">
                 Only verified & trusted brands
               </p>
-              <div className="bg-white/20 backdrop-blur-md rounded-lg px-4 py-2 inline-block">
-                <p className="text-sm font-bold text-white">⭐ 4.8/5 Average Rating</p>
+            </div>
+            <div className="group bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-2 border border-white/20">
+              <div className="bg-gradient-to-br from-green-400 to-emerald-600 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-xl">
+                <div className="text-5xl float" style={{animationDelay: '0.5s'}}>💳</div>
               </div>
+              <h3 className="text-2xl font-black mb-3 text-white">Secure Payment</h3>
+              <p className="text-white/90 leading-relaxed text-lg mb-4">
+                Safe and encrypted transactions
+              </p>
+            </div>
+            <div className="group bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-2 border border-white/20">
+              <div className="bg-gradient-to-br from-purple-400 to-pink-600 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-xl">
+                <div className="text-5xl float" style={{animationDelay: '1.5s'}}>🔄</div>
+              </div>
+              <h3 className="text-2xl font-black mb-3 text-white">Easy Returns</h3>
+              <p className="text-white/90 leading-relaxed text-lg mb-4">
+                Hassle-free return policy
+              </p>
             </div>
           </div>
         </div>
