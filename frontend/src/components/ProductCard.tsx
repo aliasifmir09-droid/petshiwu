@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { generateProductUrl } from '@/utils/productUrl';
 import { Heart, Star, ShoppingCart, TrendingUp, Clock, Eye, Zap } from 'lucide-react';
 import { Product } from '@/types';
 import { useWishlistStore } from '@/stores/wishlistStore';
@@ -60,7 +61,7 @@ const ProductCard = memo(({ product, hideCartButton = false, hideAutoship = fals
 
   return (
     <Link
-      to={`/products/${product.slug || product._id}`}
+      to={generateProductUrl(product)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-blue-300 hover:-translate-y-2 relative animate-fade-in-up hover-lift flex flex-col h-full w-full"

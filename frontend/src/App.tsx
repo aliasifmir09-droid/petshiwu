@@ -82,6 +82,8 @@ function App() {
                           <Route path="/" element={<Home />} />
                           <Route path="/products" element={<Products />} />
                           <Route path="/products/:slug" element={<ProductDetail />} />
+                          {/* SEO-friendly product URLs with category hierarchy: /petType/categoryPath/productSlug */}
+                          <Route path="/:petType/*" element={<ProductDetail />} />
                           <Route path="/category/:slug" element={<Category />} />
                           <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />

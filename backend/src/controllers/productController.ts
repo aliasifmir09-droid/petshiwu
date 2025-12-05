@@ -727,7 +727,18 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     // Get products with pagination
     // Connection-level readPreference ensures we read from primary (not stale replica)
     const products = await Product.find(query)
-      .populate('category', 'name slug')
+      .populate({
+        path: 'category',
+        select: 'name slug parentCategory petType',
+        populate: {
+          path: 'parentCategory',
+          select: 'name slug parentCategory',
+          populate: {
+            path: 'parentCategory',
+            select: 'name slug'
+          }
+        }
+      })
       .sort(sortOrder)
       .skip(skip)
       .limit(limit)
@@ -787,14 +798,36 @@ export const getProduct = async (req: Request, res: Response, next: NextFunction
     // Try to find by slug first, then by ID if slug doesn't match
     // Exclude soft-deleted products
     product = await Product.findOne({ slug: identifier, deletedAt: null })
-      .populate('category', 'name slug')
+      .populate({
+        path: 'category',
+        select: 'name slug parentCategory petType',
+        populate: {
+          path: 'parentCategory',
+          select: 'name slug parentCategory',
+          populate: {
+            path: 'parentCategory',
+            select: 'name slug'
+          }
+        }
+      })
       .lean(); // Use lean() for better performance
     
     if (!product) {
       // Try finding by ID if it's a valid MongoDB ObjectId
       try {
         product = await Product.findOne({ _id: identifier })
-          .populate('category', 'name slug')
+          .populate({
+        path: 'category',
+        select: 'name slug parentCategory petType',
+        populate: {
+          path: 'parentCategory',
+          select: 'name slug parentCategory',
+          populate: {
+            path: 'parentCategory',
+            select: 'name slug'
+          }
+        }
+      })
           .lean(); // Use lean() for better performance
       } catch (err) {
         // Invalid ObjectId, product not found
@@ -852,7 +885,18 @@ export const getRelatedProducts = async (req: Request, res: Response, next: Next
       category: currentProduct.category,
       petType: currentProduct.petType
     })
-      .populate('category', 'name slug')
+      .populate({
+        path: 'category',
+        select: 'name slug parentCategory petType',
+        populate: {
+          path: 'parentCategory',
+          select: 'name slug parentCategory',
+          populate: {
+            path: 'parentCategory',
+            select: 'name slug'
+          }
+        }
+      })
       .sort({ averageRating: -1, totalReviews: -1 })
       .limit(limit);
 
@@ -871,7 +915,18 @@ export const getRelatedProducts = async (req: Request, res: Response, next: Next
           { petType: currentProduct.petType }
         ]
       })
-        .populate('category', 'name slug')
+        .populate({
+        path: 'category',
+        select: 'name slug parentCategory petType',
+        populate: {
+          path: 'parentCategory',
+          select: 'name slug parentCategory',
+          populate: {
+            path: 'parentCategory',
+            select: 'name slug'
+          }
+        }
+      })
         .sort({ averageRating: -1, totalReviews: -1 })
         .limit(remainingLimit);
       

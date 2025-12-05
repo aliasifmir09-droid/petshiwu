@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/products';
 import { reviewService } from '@/services/reviews';
@@ -10,10 +10,30 @@ import ProductCard from '@/components/ProductCard';
 import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home } from 'lucide-react';
 import { FormattedDescription } from '@/utils/descriptionFormatter';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
+import { extractProductSlugFromUrl } from '@/utils/productUrl';
 
 const ProductDetail = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug } = useParams<{ slug?: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
+  
+  // Extract product slug from URL - supports both old and new formats
+  // Old format: /products/product-slug
+  // New format: /petType/categoryPath/product-slug
+  let actualProductSlug = slug || '';
+  
+  // If no slug param, try to extract from pathname (new SEO-friendly format)
+  if (!actualProductSlug) {
+    const pathname = location.pathname.replace(/^#/, ''); // Remove hash for HashRouter
+    const parts = pathname.split('/').filter(Boolean);
+    
+    // If path doesn't start with "products", it's the new format
+    // Last part is always the product slug
+    if (parts.length > 0 && parts[0] !== 'products') {
+      actualProductSlug = parts[parts.length - 1];
+    }
+  }
+  
   const { addToCart } = useCartStore();
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
 
@@ -24,9 +44,9 @@ const ProductDetail = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const { data: product, isLoading, error: productError } = useQuery({
-    queryKey: ['product', slug],
-    queryFn: () => productService.getProduct(slug!),
-    enabled: !!slug,
+    queryKey: ['product', actualProductSlug],
+    queryFn: () => productService.getProduct(actualProductSlug),
+    enabled: !!actualProductSlug,
     retry: 1,
     staleTime: 2 * 60 * 1000, // Consider fresh for 2 minutes
     gcTime: 10 * 60 * 1000 // Cache for 10 minutes
@@ -41,9 +61,9 @@ const ProductDetail = () => {
   });
 
   const { data: relatedProducts } = useQuery({
-    queryKey: ['related-products', slug],
-    queryFn: () => productService.getRelatedProducts(slug!),
-    enabled: !!slug,
+    queryKey: ['related-products', actualProductSlug],
+    queryFn: () => productService.getRelatedProducts(actualProductSlug),
+    enabled: !!actualProductSlug,
     staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
     gcTime: 15 * 60 * 1000 // Cache for 15 minutes
   });

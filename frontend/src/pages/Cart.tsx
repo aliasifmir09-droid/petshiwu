@@ -4,6 +4,7 @@ import { useCartStore } from '@/stores/cartStore';
 import { Trash2, ShoppingBag, AlertTriangle } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
+import { generateProductUrl } from '@/utils/productUrl';
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -66,7 +67,7 @@ const Cart = () => {
               return (
                 <div key={`${item.product._id}-${item.variant?.sku}`} className="flex gap-4 p-6 border-b last:border-b-0">
                   {/* Image */}
-                  <Link to={`/products/${item.product.slug}`} className="flex-shrink-0">
+                  <Link to={generateProductUrl(item.product)} className="flex-shrink-0">
                     <img
                       src={normalizeImageUrl(item.product.images?.[0])}
                       alt={item.product.name}
@@ -77,7 +78,7 @@ const Cart = () => {
 
                   {/* Info */}
                   <div className="flex-1">
-                    <Link to={`/products/${item.product.slug}`} className="hover:text-primary-600">
+                    <Link to={generateProductUrl(item.product)} className="hover:text-primary-600">
                       <h3 className="font-semibold mb-1">{item.product.name}</h3>
                     </Link>
                     <p className="text-sm text-gray-600 mb-2">{item.product.brand}</p>
