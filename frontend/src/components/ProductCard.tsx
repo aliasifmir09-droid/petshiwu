@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { generateProductUrl } from '@/utils/productUrl';
-import { Heart, Star, ShoppingCart, TrendingUp, Clock, Eye, Zap } from 'lucide-react';
+import { Heart, Star, ShoppingCart, TrendingUp, Clock, Zap } from 'lucide-react';
 import { Product } from '@/types';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useCartStore } from '@/stores/cartStore';
@@ -56,8 +56,6 @@ const ProductCard = memo(({ product, hideCartButton = false, hideAutoship = fals
     return 'low';
   }, [product.inStock, product.totalStock]);
 
-  // Generate random view count for social proof (in real app, this would come from backend)
-  const viewCount = useMemo(() => Math.floor(Math.random() * 200) + 50, [product._id]);
 
   return (
     <Link
@@ -112,13 +110,6 @@ const ProductCard = memo(({ product, hideCartButton = false, hideAutoship = fals
           )}
         </div>
 
-        {/* Social Proof - Viewers Count (appears on hover) */}
-        <div className={`absolute bottom-3 left-3 bg-white/90 backdrop-blur-md text-gray-800 text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 transition-all duration-300 ${
-          isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-        }`}>
-          <Eye size={12} className="text-blue-600" />
-          <span>{viewCount} viewing now</span>
-        </div>
 
         {/* Wishlist Button */}
         <button
