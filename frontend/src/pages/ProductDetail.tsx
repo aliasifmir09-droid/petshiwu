@@ -10,10 +10,13 @@ import ProductCard from '@/components/ProductCard';
 import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home } from 'lucide-react';
 import { FormattedDescription } from '@/utils/descriptionFormatter';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
-import { extractProductSlugFromUrl } from '@/utils/productUrl';
+import { generateProductUrl } from '@/utils/productUrl';
 
 const ProductDetail = () => {
-  const { slug } = useParams<{ slug?: string }>();
+  const { slug, petType } = useParams<{ 
+    slug?: string; 
+    petType?: string;
+  }>();
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -23,14 +26,21 @@ const ProductDetail = () => {
   let actualProductSlug = slug || '';
   
   // If no slug param, try to extract from pathname (new SEO-friendly format)
-  if (!actualProductSlug) {
+  // For route /:petType/*, the splat (*) captures everything after petType
+  if (!actualProductSlug && petType) {
     const pathname = location.pathname.replace(/^#/, ''); // Remove hash for HashRouter
     const parts = pathname.split('/').filter(Boolean);
     
-    // If path doesn't start with "products", it's the new format
-    // Last part is always the product slug
-    if (parts.length > 0 && parts[0] !== 'products') {
-      actualProductSlug = parts[parts.length - 1];
+    // Skip known routes that shouldn't be treated as product URLs
+    const knownRoutes = ['category', 'cart', 'checkout', 'login', 'register', 'profile', 'orders', 'favorites', 'about', 'products', 'track-order', 'donate', '403', '404'];
+    
+    // If path starts with petType and not a known route, extract product slug (last part)
+    if (parts.length > 0 && parts[0] === petType && !knownRoutes.includes(parts[0])) {
+      // Last part is always the product slug
+      actualProductSlug = parts[parts.length - 1] || '';
+    } else if (parts.length > 0 && !knownRoutes.includes(parts[0])) {
+      // Fallback: if it doesn't start with a known route, last part might be product slug
+      actualProductSlug = parts[parts.length - 1] || '';
     }
   }
   
@@ -85,6 +95,20 @@ const ProductDetail = () => {
     setSelectedImage(0);
     setSelectedVariant(0);
   }, [product?._id]); // Reset to first image/variant when product changes
+
+  // Redirect from old URL format (/products/slug) to new SEO-friendly format
+  useEffect(() => {
+    if (product && slug) {
+      // If we're on the old URL format (/products/slug), redirect to new format
+      const newUrl = generateProductUrl(product);
+      const currentPath = location.pathname.replace(/^#/, '');
+      
+      // Only redirect if the new URL is different and we're on the old format
+      if (newUrl !== currentPath && currentPath.startsWith('/products/')) {
+        navigate(newUrl, { replace: true });
+      }
+    }
+  }, [product, slug, location.pathname, navigate]);
 
   if (isLoading) {
     return (

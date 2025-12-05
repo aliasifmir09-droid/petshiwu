@@ -83,6 +83,7 @@ function App() {
                           <Route path="/products" element={<Products />} />
                           <Route path="/products/:slug" element={<ProductDetail />} />
                           {/* SEO-friendly product URLs with category hierarchy: /petType/categoryPath/productSlug */}
+                          {/* This route uses splat (*) to capture all path segments after petType */}
                           <Route path="/:petType/*" element={<ProductDetail />} />
                           <Route path="/category/:slug" element={<Category />} />
                           <Route path="/cart" element={<Cart />} />

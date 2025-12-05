@@ -46,11 +46,14 @@ export const generateProductUrl = (product: Product): string => {
   const categoryPath = buildCategoryPath(category);
   
   // If we have category path, use SEO-friendly URL
+  // Even if we only have one category level, still use the new format
   if (categoryPath.length > 0) {
-    return `/${petType}/${categoryPath.join('/')}/${productSlug}`;
+    // Use petType if available, otherwise fallback to 'products'
+    const validPetType = petType || 'products';
+    return `/${validPetType}/${categoryPath.join('/')}/${productSlug}`;
   }
   
-  // Fallback to simple URL
+  // Fallback to simple URL if category path couldn't be built
   return `/products/${productSlug}`;
 };
 
