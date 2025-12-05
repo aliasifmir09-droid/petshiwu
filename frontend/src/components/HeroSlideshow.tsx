@@ -236,26 +236,6 @@ const HeroSlideshow = () => {
       </div>
 
       {/* Enhanced Promotional Cards Section */}
-      <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-6 mb-8">
-        <div className="grid md:grid-cols-3 gap-5">
-          {/* Hey Friend Card - Enhanced */}
-          <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 group hover:scale-105 min-h-[100px]">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-200 rounded-full -mr-12 -mt-12 opacity-20 group-hover:scale-150 transition-transform duration-500 overflow-hidden"></div>
-            <div className="relative z-10">
-              <h2 className="text-xl md:text-2xl font-black text-gray-800 flex items-center gap-2 mb-3">
-                <span className="text-2xl">👋</span> Hey, friend!
-              </h2>
-              <Link
-                to="/login"
-                className="block w-full bg-gradient-to-r from-blue-600 via-purple-600 to-purple-700 text-white px-4 py-3 rounded-full font-bold text-sm sm:text-base hover:from-blue-700 hover:via-purple-700 hover:to-purple-800 transition-all shadow-sm hover:shadow-md transform hover:-translate-y-0.5 duration-300 text-center"
-              >
-                Sign In or Create Account
-              </Link>
-            </div>
-          </div>
-
-        </div>
-      </div>
     </div>
   );
 };
