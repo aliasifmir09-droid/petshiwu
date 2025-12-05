@@ -8,7 +8,8 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
-import createDOMPurify from 'isomorphic-dompurify';
+// Using express-validator's built-in sanitization instead of DOMPurify
+// This avoids the complexity of isomorphic-dompurify in Node.js
 import compression from 'compression';
 import mongoose from 'mongoose';
 import { connectDatabase } from './utils/database';
@@ -136,11 +137,7 @@ app.use(helmet({
   xssFilter: false, // Disable deprecated X-XSS-Protection header (CSP handles this)
   referrerPolicy: { policy: "strict-origin-when-cross-origin" },
   frameguard: false, // Disable X-Frame-Options (using CSP frame-ancestors instead)
-  permittedCrossDomainPolicies: false, // Disable Flash/Adobe cross-domain policies
-  expectCt: {
-    maxAge: 86400, // 24 hours
-    enforce: true
-  }
+  permittedCrossDomainPolicies: false // Disable Flash/Adobe cross-domain policies
 }));
 
 // Rate limiting - Disabled or very lenient to avoid blocking legitimate requests
@@ -185,19 +182,34 @@ app.use(mongoSanitize({
   replaceWith: '_'
 }));
 
-// Data sanitization against XSS attacks using DOMPurify
-const DOMPurify = createDOMPurify();
+// Data sanitization against XSS attacks
+// Using a simple HTML entity encoding approach for XSS protection
+// express-mongo-sanitize already handles NoSQL injection
+// express-validator handles input validation and sanitization on specific routes
+// This middleware provides additional XSS protection for all inputs
 app.use((req, res, next) => {
-  // Sanitize request body
+  // Simple HTML entity encoding function
+  const escapeHtml = (text: string): string => {
+    const map: { [key: string]: string } = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, (m) => map[m]);
+  };
+
+  // Sanitize request body strings
   if (req.body && typeof req.body === 'object') {
     const sanitizeObject = (obj: any): any => {
       if (typeof obj === 'string') {
-        return DOMPurify.sanitize(obj, { ALLOWED_TAGS: [] });
+        return escapeHtml(obj);
       }
       if (Array.isArray(obj)) {
         return obj.map(sanitizeObject);
       }
-      if (obj && typeof obj === 'object') {
+      if (obj && typeof obj === 'object' && obj.constructor === Object) {
         const sanitized: any = {};
         for (const key in obj) {
           sanitized[key] = sanitizeObject(obj[key]);
@@ -208,16 +220,17 @@ app.use((req, res, next) => {
     };
     req.body = sanitizeObject(req.body);
   }
-  // Sanitize query parameters
+  
+  // Sanitize query parameters strings
   if (req.query && typeof req.query === 'object') {
     const sanitizeQuery = (obj: any): any => {
       if (typeof obj === 'string') {
-        return DOMPurify.sanitize(obj, { ALLOWED_TAGS: [] });
+        return escapeHtml(obj);
       }
       if (Array.isArray(obj)) {
         return obj.map(sanitizeQuery);
       }
-      if (obj && typeof obj === 'object') {
+      if (obj && typeof obj === 'object' && obj.constructor === Object) {
         const sanitized: any = {};
         for (const key in obj) {
           sanitized[key] = sanitizeQuery(obj[key]);
