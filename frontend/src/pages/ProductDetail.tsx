@@ -27,19 +27,15 @@ const ProductDetail = () => {
   
   // If no slug param, try to extract from pathname (new SEO-friendly format)
   // For route /:petType/*, the splat (*) captures everything after petType
+  // Since specific routes are ordered before this catch-all, we can safely extract the slug
   if (!actualProductSlug && petType) {
     const pathname = location.pathname.replace(/^#/, ''); // Remove hash for HashRouter
     const parts = pathname.split('/').filter(Boolean);
     
-    // Skip known routes that shouldn't be treated as product URLs
-    const knownRoutes = ['category', 'cart', 'checkout', 'login', 'register', 'profile', 'orders', 'favorites', 'about', 'products', 'track-order', 'donate', '403', '404'];
-    
-    // If path starts with petType and not a known route, extract product slug (last part)
-    if (parts.length > 0 && parts[0] === petType && !knownRoutes.includes(parts[0])) {
+    // If path starts with petType, extract product slug (last part)
+    // This route only matches if no specific route matched, so we can safely extract
+    if (parts.length > 0 && parts[0] === petType) {
       // Last part is always the product slug
-      actualProductSlug = parts[parts.length - 1] || '';
-    } else if (parts.length > 0 && !knownRoutes.includes(parts[0])) {
-      // Fallback: if it doesn't start with a known route, last part might be product slug
       actualProductSlug = parts[parts.length - 1] || '';
     }
   }

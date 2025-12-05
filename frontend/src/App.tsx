@@ -79,27 +79,30 @@ function App() {
                 </div>
               }>
                         <Routes>
+                          {/* Most specific routes first */}
                           <Route path="/" element={<Home />} />
                           <Route path="/products" element={<Products />} />
                           <Route path="/products/:slug" element={<ProductDetail />} />
-                          {/* SEO-friendly product URLs with category hierarchy: /petType/categoryPath/productSlug */}
-                          {/* This route uses splat (*) to capture all path segments after petType */}
-                          <Route path="/:petType/*" element={<ProductDetail />} />
                           <Route path="/category/:slug" element={<Category />} />
                           <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/orders" element={<MyOrders />} />
-                <Route path="/orders/:id" element={<OrderDetail />} />
-                <Route path="/track-order" element={<TrackOrder />} />
-                <Route path="/donate" element={<Donate />} />
-                <Route path="/favorites" element={<Favorites />} />
-                <Route path="/403" element={<Forbidden />} />
-                  <Route path="/404" element={<NotFound />} />
-                  <Route path="/:petType" element={<PetType />} />
-                  <Route path="*" element={<NotFound />} />
+                          <Route path="/checkout" element={<Checkout />} />
+                          <Route path="/login" element={<Login />} />
+                          <Route path="/register" element={<Register />} />
+                          <Route path="/profile" element={<Profile />} />
+                          <Route path="/orders/:id" element={<OrderDetail />} />
+                          <Route path="/orders" element={<MyOrders />} />
+                          <Route path="/track-order" element={<TrackOrder />} />
+                          <Route path="/donate" element={<Donate />} />
+                          <Route path="/favorites" element={<Favorites />} />
+                          <Route path="/403" element={<Forbidden />} />
+                          <Route path="/404" element={<NotFound />} />
+                          {/* Less specific routes - pet type pages */}
+                          <Route path="/:petType" element={<PetType />} />
+                          {/* SEO-friendly product URLs with category hierarchy: /petType/categoryPath/productSlug */}
+                          {/* This catch-all route must come last to avoid intercepting specific routes */}
+                          <Route path="/:petType/*" element={<ProductDetail />} />
+                          {/* Final catch-all for 404 */}
+                          <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
             </ErrorBoundary>
