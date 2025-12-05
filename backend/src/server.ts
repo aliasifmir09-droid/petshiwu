@@ -8,7 +8,7 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
-import xss from 'xss-clean';
+import createDOMPurify from 'isomorphic-dompurify';
 import compression from 'compression';
 import mongoose from 'mongoose';
 import { connectDatabase } from './utils/database';
@@ -123,7 +123,8 @@ app.use(helmet({
       scriptSrc: ["'self'", "https://embed.tawk.to"],
       connectSrc: ["'self'", "https://embed.tawk.to", "https://api.tawk.to"],
       frameSrc: ["'self'", "https://embed.tawk.to"],
-      frameAncestors: ["'self'"] // Replaces X-Frame-Options
+      frameAncestors: ["'self'"], // Replaces X-Frame-Options
+      upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null // Force HTTPS in production
     }
   },
   hsts: {
@@ -134,26 +135,46 @@ app.use(helmet({
   noSniff: true, // Sets x-content-type-options: nosniff
   xssFilter: false, // Disable deprecated X-XSS-Protection header (CSP handles this)
   referrerPolicy: { policy: "strict-origin-when-cross-origin" },
-  frameguard: false // Disable X-Frame-Options (using CSP frame-ancestors instead)
+  frameguard: false, // Disable X-Frame-Options (using CSP frame-ancestors instead)
+  permittedCrossDomainPolicies: false, // Disable Flash/Adobe cross-domain policies
+  expectCt: {
+    maxAge: 86400, // 24 hours
+    enforce: true
+  }
 }));
 
 // Rate limiting - Disabled or very lenient to avoid blocking legitimate requests
 // Note: Rate limiting is disabled for now. Re-enable with appropriate limits if needed for security.
 
-// Very lenient rate limiting for auth endpoints only (to prevent brute force)
+// Rate limiting for auth endpoints to prevent brute force attacks
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // Very high limit to avoid blocking legitimate users
-  message: 'Too many login attempts, please try again after 15 minutes.',
+  max: 5, // Maximum 5 attempts per 15 minutes
+  message: 'Too many login attempts from this IP, please try again after 15 minutes.',
   skipSuccessfulRequests: true, // Don't count successful requests
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => {
+    // Skip rate limiting for successful logins
+    return false;
+  }
+});
+
+// General API rate limiting to prevent DoS attacks
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Maximum 100 requests per 15 minutes per IP
+  message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// Apply rate limiting only to auth endpoints
+// Apply rate limiting to auth endpoints
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
-// All other endpoints have no rate limiting
+
+// Apply general rate limiting to all API routes
+app.use('/api', apiLimiter);
 
 // Body parser with size limits to prevent DoS attacks
 app.use(express.json({ limit: '10mb' }));
@@ -164,8 +185,51 @@ app.use(mongoSanitize({
   replaceWith: '_'
 }));
 
-// Data sanitization against XSS attacks
-app.use(xss());
+// Data sanitization against XSS attacks using DOMPurify
+const DOMPurify = createDOMPurify();
+app.use((req, res, next) => {
+  // Sanitize request body
+  if (req.body && typeof req.body === 'object') {
+    const sanitizeObject = (obj: any): any => {
+      if (typeof obj === 'string') {
+        return DOMPurify.sanitize(obj, { ALLOWED_TAGS: [] });
+      }
+      if (Array.isArray(obj)) {
+        return obj.map(sanitizeObject);
+      }
+      if (obj && typeof obj === 'object') {
+        const sanitized: any = {};
+        for (const key in obj) {
+          sanitized[key] = sanitizeObject(obj[key]);
+        }
+        return sanitized;
+      }
+      return obj;
+    };
+    req.body = sanitizeObject(req.body);
+  }
+  // Sanitize query parameters
+  if (req.query && typeof req.query === 'object') {
+    const sanitizeQuery = (obj: any): any => {
+      if (typeof obj === 'string') {
+        return DOMPurify.sanitize(obj, { ALLOWED_TAGS: [] });
+      }
+      if (Array.isArray(obj)) {
+        return obj.map(sanitizeQuery);
+      }
+      if (obj && typeof obj === 'object') {
+        const sanitized: any = {};
+        for (const key in obj) {
+          sanitized[key] = sanitizeQuery(obj[key]);
+        }
+        return sanitized;
+      }
+      return obj;
+    };
+    req.query = sanitizeQuery(req.query);
+  }
+  next();
+});
 
 // Response compression - Gzip/Deflate
 app.use(compression({

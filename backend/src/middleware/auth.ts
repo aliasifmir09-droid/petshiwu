@@ -33,7 +33,8 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
           message: 'Server configuration error'
         });
       }
-      const decoded = jwt.verify(token, secret) as { id: string };
+      // Explicitly specify algorithm to prevent algorithm confusion attacks
+      const decoded = jwt.verify(token, secret, { algorithms: ['HS256'] }) as { id: string };
       
       // Don't select password field for security
       const user = await User.findById(decoded.id);

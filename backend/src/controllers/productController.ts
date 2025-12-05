@@ -482,8 +482,27 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
 // Get all products with filters
 export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
+    // Validate and sanitize pagination parameters
+    const pageParam = req.query.page as string;
+    const limitParam = req.query.limit as string;
+    
+    let page = 1;
+    let limit = 20;
+    
+    if (pageParam) {
+      const parsedPage = parseInt(pageParam, 10);
+      if (!isNaN(parsedPage) && parsedPage > 0 && parsedPage <= 1000) {
+        page = parsedPage;
+      }
+    }
+    
+    if (limitParam) {
+      const parsedLimit = parseInt(limitParam, 10);
+      if (!isNaN(parsedLimit) && parsedLimit > 0 && parsedLimit <= 100) {
+        limit = parsedLimit;
+      }
+    }
+    
     const skip = (page - 1) * limit;
     
     // Build query - products are now permanently deleted, so no need to filter by deletedAt
@@ -633,14 +652,20 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       baseQuery.brand = req.query.brand;
     }
 
-    // Filter by price range
+    // Filter by price range with validation
     if (req.query.minPrice || req.query.maxPrice) {
       baseQuery.basePrice = {};
       if (req.query.minPrice) {
-        baseQuery.basePrice.$gte = parseFloat(req.query.minPrice as string);
+        const minPrice = parseFloat(String(req.query.minPrice));
+        if (!isNaN(minPrice) && minPrice >= 0 && minPrice <= 1000000) {
+          baseQuery.basePrice.$gte = minPrice;
+        }
       }
       if (req.query.maxPrice) {
-        baseQuery.basePrice.$lte = parseFloat(req.query.maxPrice as string);
+        const maxPrice = parseFloat(String(req.query.maxPrice));
+        if (!isNaN(maxPrice) && maxPrice >= 0 && maxPrice <= 1000000) {
+          baseQuery.basePrice.$lte = maxPrice;
+        }
       }
     }
 

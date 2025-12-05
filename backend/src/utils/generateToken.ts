@@ -7,7 +7,11 @@ export const generateToken = (id: string) => {
     throw new Error('JWT_SECRET is not configured. Please set JWT_SECRET in your environment variables.');
   }
   const expiresIn = process.env.JWT_EXPIRE || '30d';
-  return jwt.sign({ id }, secret, { expiresIn: expiresIn as any });
+  // Explicitly specify algorithm to prevent algorithm confusion attacks
+  return jwt.sign({ id }, secret, { 
+    expiresIn: expiresIn as any,
+    algorithm: 'HS256' // Explicitly use HS256 to prevent algorithm confusion
+  });
 };
 
 export const sendTokenResponse = (userId: string, statusCode: number, res: Response) => {
