@@ -651,7 +651,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
 
     // Filter by featured - IMPORTANT: Only show products with isFeatured: true
     if (req.query.featured !== undefined) {
-      const featuredValue = req.query.featured === 'true' || req.query.featured === true;
+      const featuredValue = String(req.query.featured).toLowerCase() === 'true';
       if (featuredValue) {
         baseQuery.isFeatured = true;
       }
