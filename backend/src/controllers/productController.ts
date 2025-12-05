@@ -678,11 +678,32 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       };
     }
 
+    // Determine sort order based on query parameter
+    let sortOrder: any = { createdAt: -1 }; // Default to newest first
+    if (req.query.sort) {
+      const sortParam = String(req.query.sort).toLowerCase();
+      switch (sortParam) {
+        case 'price-asc':
+          sortOrder = { basePrice: 1 }; // Low to high
+          break;
+        case 'price-desc':
+          sortOrder = { basePrice: -1 }; // High to low
+          break;
+        case 'rating':
+          sortOrder = { averageRating: -1, totalReviews: -1 }; // Highest rated first
+          break;
+        case 'newest':
+        default:
+          sortOrder = { createdAt: -1 }; // Newest first
+          break;
+      }
+    }
+
     // Get products with pagination
     // Connection-level readPreference ensures we read from primary (not stale replica)
     const products = await Product.find(query)
       .populate('category', 'name slug')
-      .sort({ createdAt: -1 })
+      .sort(sortOrder)
       .skip(skip)
       .limit(limit)
       .lean(); // Use lean() for better performance (returns plain JS objects)
