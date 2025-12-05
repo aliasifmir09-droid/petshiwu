@@ -102,7 +102,7 @@ const Home = () => {
       </div>
 
       {/* Grand Launching Section with Countdown */}
-      <section className="py-12 md:py-16 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
+      <section className="py-12 md:py-16 mt-8 md:mt-12 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
         {/* Animated Background Effects */}
         <div className="absolute inset-0 z-0">
           <div className="absolute top-0 left-0 w-96 h-96 bg-pink-500 rounded-full opacity-20 blur-3xl animate-pulse"></div>
