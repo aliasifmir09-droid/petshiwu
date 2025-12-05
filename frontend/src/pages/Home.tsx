@@ -139,7 +139,7 @@ const Home = () => {
           </div>
           
           {/* Horizontal Scrollable Pet Types */}
-          <div className="relative">
+          <div className="relative overflow-visible">
             {/* Left Arrow - Only show when scrollable */}
             {showLeftArrow && (
               <button
@@ -162,7 +162,7 @@ const Home = () => {
               </button>
             )}
 
-            <div ref={petTypesScrollRef} className="flex gap-6 md:gap-8 overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory">
+            <div ref={petTypesScrollRef} className="flex gap-6 md:gap-8 overflow-x-auto overflow-y-visible pb-6 pt-6 scrollbar-hide snap-x snap-mandatory">
               {[
                 { 
                   name: 'Dog', 
@@ -265,7 +265,7 @@ const Home = () => {
                 >
                   <div className="flex flex-col items-center gap-3 w-full">
                     {/* Circular Image with Enhanced Gradient Border */}
-                    <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-44 lg:h-44 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[3px] transform group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-2xl group-hover:from-blue-600 group-hover:via-purple-600 group-hover:to-pink-600">
+                    <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-44 lg:h-44 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[3px] transform group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-2xl group-hover:from-blue-600 group-hover:via-purple-600 group-hover:to-pink-600 origin-center">
                       <div className="w-full h-full rounded-full overflow-hidden bg-white">
                         <img 
                           src={category.image} 
