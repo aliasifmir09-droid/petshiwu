@@ -6,7 +6,6 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import HeroSlideshow from '@/components/HeroSlideshow';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
-import LiveStats from '@/components/LiveStats';
 import CountdownTimer from '@/components/CountdownTimer';
 import TrustBadges from '@/components/TrustBadges';
 import FloatingDiscount from '@/components/FloatingDiscount';
@@ -96,8 +95,6 @@ const Home = () => {
         }}
       />
 
-      {/* Live Stats Bar - Social Proof */}
-      <LiveStats />
 
       {/* Hero Slideshow */}
       <div className="container mx-auto px-4 lg:px-8 mt-4">
