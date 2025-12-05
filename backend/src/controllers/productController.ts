@@ -649,6 +649,14 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       baseQuery.inStock = req.query.inStock === 'true';
     }
 
+    // Filter by featured - IMPORTANT: Only show products with isFeatured: true
+    if (req.query.featured !== undefined) {
+      const featuredValue = req.query.featured === 'true' || req.query.featured === true;
+      if (featuredValue) {
+        baseQuery.isFeatured = true;
+      }
+    }
+
     // Build final query - combine base query with search if needed
     let query: any = baseQuery;
     
