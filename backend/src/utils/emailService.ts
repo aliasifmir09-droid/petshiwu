@@ -3,7 +3,7 @@ import logger from './logger';
 
 // Create reusable transporter
 const createTransporter = () => {
-  // If SMTP is configured, use it; otherwise use a test account
+  // Option 1: Custom SMTP server
   if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
     return nodemailer.createTransport({
       host: process.env.SMTP_HOST,
@@ -16,15 +16,43 @@ const createTransporter = () => {
     });
   }
 
-  // Fallback: Use test account (for development)
-  // In production, you should configure SMTP settings
+  // Option 2: Gmail (using App Password)
+  // To use Gmail:
+  // 1. Enable 2-factor authentication on your Google account
+  // 2. Generate an App Password: https://myaccount.google.com/apppasswords
+  // 3. Set EMAIL_USER=your-email@gmail.com and EMAIL_PASS=your-app-password
+  if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    const isGmail = process.env.EMAIL_USER.includes('@gmail.com');
     return nodemailer.createTransport({
+      service: isGmail ? 'gmail' : undefined,
+      host: isGmail ? undefined : process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: isGmail ? undefined : parseInt(process.env.SMTP_PORT || '587'),
+      secure: process.env.SMTP_SECURE === 'true' || false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+  }
+
+  // Option 3: Development/Test mode - Use Ethereal Email (creates test account)
+  // Emails won't actually be sent, but you can view them at https://ethereal.email
+  logger.warn('⚠️  No email configuration found. Using test mode (emails won\'t be sent).');
+  logger.warn('⚠️  To enable email sending, configure EMAIL_USER and EMAIL_PASS (for Gmail) or SMTP settings.');
+  
+  // Return a test transporter that won't actually send emails
+  // In development, this prevents errors but emails won't be delivered
+  return nodemailer.createTransport({
     host: 'smtp.ethereal.email',
     port: 587,
     secure: false,
     auth: {
-      user: process.env.ETHEREAL_USER || 'test@ethereal.email',
-      pass: process.env.ETHEREAL_PASS || 'test'
+      user: 'test@ethereal.email',
+      pass: 'test'
+    },
+    // Don't actually send in test mode
+    tls: {
+      rejectUnauthorized: false
     }
   });
 };
@@ -32,6 +60,19 @@ const createTransporter = () => {
 // Send email verification
 export const sendVerificationEmail = async (email: string, token: string, firstName: string) => {
   try {
+    // Check if email is actually configured
+    const isEmailConfigured = !!(process.env.SMTP_HOST || process.env.EMAIL_USER);
+    
+    if (!isEmailConfigured) {
+      logger.warn(`⚠️  Email not configured. Skipping verification email to ${email}.`);
+      logger.warn(`⚠️  In development, you can verify manually or configure email settings.`);
+      // In development/test mode, log the verification link instead
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const verificationUrl = `${frontendUrl}/verify-email?token=${token}`;
+      logger.info(`📧 Verification link for ${email}: ${verificationUrl}`);
+      return { messageId: 'test-mode', accepted: [email] };
+    }
+
     const transporter = createTransporter();
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const verificationUrl = `${frontendUrl}/verify-email?token=${token}`;
@@ -91,10 +132,16 @@ export const sendVerificationEmail = async (email: string, token: string, firstN
     };
 
     const info = await transporter.sendMail(mailOptions);
-    logger.info(`Verification email sent to ${email}: ${info.messageId}`);
+    logger.info(`✅ Verification email sent to ${email}: ${info.messageId}`);
     return info;
   } catch (error: any) {
-    logger.error(`Error sending verification email to ${email}:`, error.message);
+    logger.error(`❌ Error sending verification email to ${email}:`, error.message);
+    // In development, don't fail completely - log the link
+    if (process.env.NODE_ENV !== 'production') {
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const verificationUrl = `${frontendUrl}/verify-email?token=${token}`;
+      logger.warn(`📧 Fallback verification link for ${email}: ${verificationUrl}`);
+    }
     throw error;
   }
 };
@@ -161,10 +208,16 @@ export const sendPasswordResetEmail = async (email: string, token: string, first
     };
 
     const info = await transporter.sendMail(mailOptions);
-    logger.info(`Password reset email sent to ${email}: ${info.messageId}`);
+    logger.info(`✅ Password reset email sent to ${email}: ${info.messageId}`);
     return info;
   } catch (error: any) {
-    logger.error(`Error sending password reset email to ${email}:`, error.message);
+    logger.error(`❌ Error sending password reset email to ${email}:`, error.message);
+    // In development, don't fail completely - log the link
+    if (process.env.NODE_ENV !== 'production') {
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
+      logger.warn(`📧 Fallback password reset link for ${email}: ${resetUrl}`);
+    }
     throw error;
   }
 };
