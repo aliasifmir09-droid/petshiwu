@@ -2,17 +2,11 @@ import request from 'supertest';
 import mongoose from 'mongoose';
 import { connectDatabase } from '../../utils/database';
 import User from '../../models/User';
-
-// Import app after environment is set up
-let app: any;
-beforeAll(async () => {
-  // Set test environment before importing server
-  process.env.NODE_ENV = 'test';
-  app = (await import('../../server')).default;
-});
+import app from '../helpers/testApp';
 
 describe('Auth API', () => {
   beforeAll(async () => {
+    process.env.NODE_ENV = 'test';
     await connectDatabase();
   });
 

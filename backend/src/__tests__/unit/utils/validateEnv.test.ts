@@ -17,7 +17,7 @@ describe('validateEnv', () => {
     delete process.env.JWT_SECRET;
 
     // Mock process.exit to prevent actual exit
-    const exitSpy = jest.spyOn(process, 'exit').mockImplementation((code?: number) => {
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
       throw new Error(`process.exit(${code})`);
     });
 
@@ -30,7 +30,7 @@ describe('validateEnv', () => {
     delete process.env.JWT_SECRET;
 
     // Mock process.exit to prevent actual exit
-    const exitSpy = jest.spyOn(process, 'exit').mockImplementation((code?: number) => {
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation((code?: string | number | null | undefined) => {
       throw new Error(`process.exit(${code})`);
     });
 

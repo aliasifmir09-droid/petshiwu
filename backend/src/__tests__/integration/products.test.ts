@@ -1,10 +1,11 @@
 import request from 'supertest';
-import app from '../../server';
 import mongoose from 'mongoose';
 import { connectDatabase } from '../../utils/database';
+import app from '../helpers/testApp';
 
 describe('Products API', () => {
   beforeAll(async () => {
+    process.env.NODE_ENV = 'test';
     await connectDatabase();
   });
 
