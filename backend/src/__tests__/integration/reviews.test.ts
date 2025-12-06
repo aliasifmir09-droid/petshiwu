@@ -65,38 +65,40 @@ describe('Reviews API', () => {
   describe('GET /api/reviews/product/:productId', () => {
     it('should return reviews for a product (public)', async () => {
       const response = await request(app)
-        .get(`/api/reviews/product/${testProduct._id}`)
-        .expect(200);
+        .get(`/api/reviews/product/${testProduct._id}`);
 
+      expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
     });
 
     it('should support pagination', async () => {
       const response = await request(app)
-        .get(`/api/reviews/product/${testProduct._id}?page=1&limit=10`)
-        .expect(200);
+        .get(`/api/reviews/product/${testProduct._id}?page=1&limit=10`);
 
+      expect(response.status).toBe(200);
       expect(response.body.pagination).toBeDefined();
     });
 
     it('should return 400 for invalid product ID', async () => {
-      await request(app)
-        .get('/api/reviews/product/invalid-id')
-        .expect(400);
+      const response = await request(app)
+        .get('/api/reviews/product/invalid-id');
+
+      expect(response.status).toBe(400);
     });
   });
 
   describe('POST /api/reviews', () => {
     it('should require authentication', async () => {
-      await request(app)
+      const response = await request(app)
         .post('/api/reviews')
         .send({
           product: testProduct._id,
           rating: 5,
           comment: 'Great product!'
-        })
-        .expect(401);
+        });
+
+      expect(response.status).toBe(401);
     });
 
     it('should create review with valid data (requires order)', async () => {
@@ -125,38 +127,41 @@ describe('Reviews API', () => {
     });
 
     it('should return 400 for invalid rating', async () => {
-      await request(app)
+      const response = await request(app)
         .post('/api/reviews')
         .set('Authorization', `Bearer ${customerToken}`)
         .send({
           product: testProduct._id,
           rating: 6, // Invalid: should be 1-5
           comment: 'Test'
-        })
-        .expect(400);
+        });
+
+      expect(response.status).toBe(400);
     });
 
     it('should return 400 for missing required fields', async () => {
-      await request(app)
+      const response = await request(app)
         .post('/api/reviews')
         .set('Authorization', `Bearer ${customerToken}`)
         .send({
           rating: 5
           // Missing product and comment
-        })
-        .expect(400);
+        });
+
+      expect(response.status).toBe(400);
     });
   });
 
   describe('PUT /api/reviews/:id', () => {
     it('should require authentication', async () => {
       const fakeId = new mongoose.Types.ObjectId();
-      await request(app)
+      const response = await request(app)
         .put(`/api/reviews/${fakeId}`)
         .send({
           comment: 'Updated comment'
-        })
-        .expect(401);
+        });
+
+      expect(response.status).toBe(401);
     });
 
     it('should update review (requires review ownership)', async () => {
@@ -180,10 +185,10 @@ describe('Reviews API', () => {
   describe('DELETE /api/reviews/:id', () => {
     it('should require authentication', async () => {
       const fakeId = new mongoose.Types.ObjectId();
-      await request(app)
-        .delete(`/api/reviews/${fakeId}`)
-        .expect(401);
+      const response = await request(app)
+        .delete(`/api/reviews/${fakeId}`);
+
+      expect(response.status).toBe(401);
     });
   });
 });
-

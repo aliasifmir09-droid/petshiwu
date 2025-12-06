@@ -63,17 +63,18 @@ describe('Users API', () => {
 
   describe('GET /api/users/me/permissions', () => {
     it('should require authentication', async () => {
-      await request(app)
-        .get('/api/users/me/permissions')
-        .expect(401);
+      const response = await request(app)
+        .get('/api/users/me/permissions');
+
+      expect(response.status).toBe(401);
     });
 
     it('should return user permissions', async () => {
       const response = await request(app)
         .get('/api/users/me/permissions')
-        .set('Authorization', `Bearer ${customerToken}`)
-        .expect(200);
+        .set('Authorization', `Bearer ${customerToken}`);
 
+      expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.data).toBeDefined();
     });
@@ -81,24 +82,26 @@ describe('Users API', () => {
 
   describe('GET /api/users/staff', () => {
     it('should require authentication', async () => {
-      await request(app)
-        .get('/api/users/staff')
-        .expect(401);
+      const response = await request(app)
+        .get('/api/users/staff');
+
+      expect(response.status).toBe(401);
     });
 
     it('should require admin role', async () => {
-      await request(app)
+      const response = await request(app)
         .get('/api/users/staff')
-        .set('Authorization', `Bearer ${customerToken}`)
-        .expect(403);
+        .set('Authorization', `Bearer ${customerToken}`);
+
+      expect(response.status).toBe(403);
     });
 
     it('should return staff users for admin', async () => {
       const response = await request(app)
         .get('/api/users/staff')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(200);
+        .set('Authorization', `Bearer ${adminToken}`);
 
+      expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
     });
@@ -106,7 +109,7 @@ describe('Users API', () => {
 
   describe('POST /api/users/staff', () => {
     it('should require admin role', async () => {
-      await request(app)
+      const response = await request(app)
         .post('/api/users/staff')
         .set('Authorization', `Bearer ${customerToken}`)
         .send({
@@ -114,8 +117,9 @@ describe('Users API', () => {
           lastName: 'User',
           email: 'staff@test.com',
           password: 'Staff123456'
-        })
-        .expect(403);
+        });
+
+      expect(response.status).toBe(403);
     });
 
     it('should create staff user', async () => {
@@ -134,9 +138,9 @@ describe('Users API', () => {
       const response = await request(app)
         .post('/api/users/staff')
         .set('Authorization', `Bearer ${adminToken}`)
-        .send(staffData)
-        .expect(201);
+        .send(staffData);
 
+      expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
       expect(response.body.data.email).toBe(staffData.email);
 
@@ -150,18 +154,19 @@ describe('Users API', () => {
 
   describe('GET /api/users/customers', () => {
     it('should require admin/staff permissions', async () => {
-      await request(app)
+      const response = await request(app)
         .get('/api/users/customers')
-        .set('Authorization', `Bearer ${customerToken}`)
-        .expect(403);
+        .set('Authorization', `Bearer ${customerToken}`);
+
+      expect(response.status).toBe(403);
     });
 
     it('should return customers for admin', async () => {
       const response = await request(app)
         .get('/api/users/customers')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(200);
+        .set('Authorization', `Bearer ${adminToken}`);
 
+      expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
     });
@@ -169,36 +174,38 @@ describe('Users API', () => {
 
   describe('POST /api/users/wishlist', () => {
     it('should require authentication', async () => {
-      await request(app)
+      const response = await request(app)
         .post('/api/users/wishlist')
-        .send({ productId: testProduct._id })
-        .expect(401);
+        .send({ productId: testProduct._id });
+
+      expect(response.status).toBe(401);
     });
 
     it('should add product to wishlist', async () => {
       const response = await request(app)
         .post('/api/users/wishlist')
         .set('Authorization', `Bearer ${customerToken}`)
-        .send({ productId: testProduct._id.toString() })
-        .expect(200);
+        .send({ productId: testProduct._id.toString() });
 
+      expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
     });
   });
 
   describe('GET /api/users/wishlist', () => {
     it('should require authentication', async () => {
-      await request(app)
-        .get('/api/users/wishlist')
-        .expect(401);
+      const response = await request(app)
+        .get('/api/users/wishlist');
+
+      expect(response.status).toBe(401);
     });
 
     it('should return user wishlist', async () => {
       const response = await request(app)
         .get('/api/users/wishlist')
-        .set('Authorization', `Bearer ${customerToken}`)
-        .expect(200);
+        .set('Authorization', `Bearer ${customerToken}`);
 
+      expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
     });
@@ -206,40 +213,41 @@ describe('Users API', () => {
 
   describe('DELETE /api/users/wishlist', () => {
     it('should require authentication', async () => {
-      await request(app)
+      const response = await request(app)
         .delete('/api/users/wishlist')
-        .send({ productId: testProduct._id })
-        .expect(401);
+        .send({ productId: testProduct._id });
+
+      expect(response.status).toBe(401);
     });
 
     it('should remove product from wishlist', async () => {
       const response = await request(app)
         .delete('/api/users/wishlist')
         .set('Authorization', `Bearer ${customerToken}`)
-        .send({ productId: testProduct._id.toString() })
-        .expect(200);
+        .send({ productId: testProduct._id.toString() });
 
+      expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
     });
   });
 
   describe('GET /api/users/database/stats', () => {
     it('should require admin role', async () => {
-      await request(app)
+      const response = await request(app)
         .get('/api/users/database/stats')
-        .set('Authorization', `Bearer ${customerToken}`)
-        .expect(403);
+        .set('Authorization', `Bearer ${customerToken}`);
+
+      expect(response.status).toBe(403);
     });
 
     it('should return database stats for admin', async () => {
       const response = await request(app)
         .get('/api/users/database/stats')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(200);
+        .set('Authorization', `Bearer ${adminToken}`);
 
+      expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.data).toBeDefined();
     });
   });
 });
-
