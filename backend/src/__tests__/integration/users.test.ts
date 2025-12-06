@@ -20,10 +20,11 @@ describe('Users API', () => {
     const customer = await createTestUser(app, { role: 'customer' });
     customerToken = customer.token;
 
-    // Create test category and product for wishlist tests
+    // Create test category and product for wishlist tests with unique name
+    const timestamp = Date.now();
     testCategory = await Category.create({
-      name: 'Test Category',
-      slug: `test-cat-${Date.now()}`,
+      name: `Test Category ${timestamp}`,
+      slug: `test-cat-${timestamp}`,
       petType: 'dog',
       level: 1,
       isActive: true
@@ -43,8 +44,12 @@ describe('Users API', () => {
   });
 
   afterAll(async () => {
-    await Product.deleteOne({ _id: testProduct._id });
-    await Category.deleteOne({ _id: testCategory._id });
+    if (testProduct?._id) {
+      await Product.deleteOne({ _id: testProduct._id });
+    }
+    if (testCategory?._id) {
+      await Category.deleteOne({ _id: testCategory._id });
+    }
     await mongoose.connection.close();
   });
 

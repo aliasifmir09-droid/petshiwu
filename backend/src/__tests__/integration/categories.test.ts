@@ -68,7 +68,8 @@ describe('Categories API', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data._id).toBe(category._id.toString());
+      const categoryId = (category._id as mongoose.Types.ObjectId).toString();
+      expect(response.body.data._id).toBe(categoryId);
 
       // Cleanup
       await Category.deleteOne({ _id: category._id });
