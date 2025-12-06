@@ -11,6 +11,48 @@ import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import CheckoutDonationModal from '@/components/CheckoutDonationModal';
 import { normalizeId } from '@/utils/idNormalizer';
 
+interface CreateOrderData {
+  items: Array<{
+    product: string;
+    name: string;
+    image: string;
+    price: number;
+    quantity: number;
+    variant?: {
+      size?: string;
+      weight?: string;
+      sku: string;
+    };
+  }>;
+  shippingAddress: {
+    firstName: string;
+    lastName: string;
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+    phone: string;
+  };
+  billingAddress?: {
+    firstName: string;
+    lastName: string;
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+    phone: string;
+  };
+  paymentMethod: 'credit_card' | 'paypal' | 'apple_pay' | 'google_pay' | 'cod';
+  itemsPrice: number;
+  shippingPrice: number;
+  taxPrice: number;
+  donationAmount?: number;
+  totalPrice: number;
+  notes?: string;
+}
+
 const Checkout = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -33,7 +75,7 @@ const Checkout = () => {
   const [paymentMethod] = useState<'cod'>('cod');
   const [donationAmount, setDonationAmount] = useState<number>(0);
   const [showDonationModal, setShowDonationModal] = useState(false);
-  const [pendingOrderData, setPendingOrderData] = useState<unknown>(null);
+  const [pendingOrderData, setPendingOrderData] = useState<CreateOrderData | null>(null);
 
   // Function to refresh product data from API
   const refreshCartProducts = async () => {
@@ -209,7 +251,7 @@ const Checkout = () => {
     
     // Update order data with donation
     if (pendingOrderData) {
-      const updatedOrderData = {
+      const updatedOrderData: CreateOrderData = {
         ...pendingOrderData,
         donationAmount: amount > 0 ? amount : undefined,
         totalPrice: subtotal + shipping + tax + amount

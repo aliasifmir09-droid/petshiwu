@@ -11,6 +11,7 @@ import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronR
 import { FormattedDescription } from '@/utils/descriptionFormatter';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
+import { FREE_SHIPPING_THRESHOLD } from '@/config/constants';
 
 const ProductDetail = () => {
   const { slug, petType } = useParams<{ 
