@@ -1,4 +1,5 @@
 import { Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 import User from '../models/User';
 import { AuthRequest } from '../middleware/auth';
 
@@ -68,11 +69,11 @@ export const createStaffUser = async (req: AuthRequest, res: Response, next: Nex
 
     // Remove password from response
     const staffUserObj = staffUser.toObject();
-    delete staffUserObj.password;
+    const { password: _, ...staffUserWithoutPassword } = staffUserObj;
 
     res.status(201).json({
       success: true,
-      data: staffUserObj,
+      data: staffUserWithoutPassword,
       message: 'Staff user created successfully'
     });
   } catch (error) {
@@ -116,11 +117,11 @@ export const updateStaffUser = async (req: AuthRequest, res: Response, next: Nex
 
     // Remove password from response
     const staffUserObj = staffUser.toObject();
-    delete staffUserObj.password;
+    const { password: __, ...staffUserWithoutPassword } = staffUserObj;
 
     res.status(200).json({
       success: true,
-      data: staffUserObj,
+      data: staffUserWithoutPassword,
       message: 'Staff user updated successfully'
     });
   } catch (error) {
@@ -151,7 +152,9 @@ export const deleteStaffUser = async (req: AuthRequest, res: Response, next: Nex
     }
 
     // Prevent deleting yourself
-    if (staffUser._id.toString() === req.user?._id.toString()) {
+    const staffUserId = (staffUser._id as any) as mongoose.Types.ObjectId;
+    const currentUserId = (req.user?._id as any) as mongoose.Types.ObjectId | undefined;
+    if (currentUserId && staffUserId.toString() === currentUserId.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Cannot delete your own account'

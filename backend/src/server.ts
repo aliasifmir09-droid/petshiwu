@@ -18,6 +18,7 @@ import { validateEnv } from './utils/validateEnv';
 import { isCloudinaryConfigured } from './utils/cloudinary';
 import { sanitizeResponse } from './middleware/sanitizeResponse';
 import User from './models/User';
+import { setupSwagger } from './utils/swagger';
 
 // Load env vars
 dotenv.config();
@@ -246,7 +247,7 @@ app.use((req, res, next) => {
 
 // Response compression - Gzip/Deflate
 app.use(compression({
-  filter: (req, res) => {
+  filter: (req: express.Request, res: express.Response) => {
     if (req.headers['x-no-compression']) {
       return false;
     }
@@ -353,6 +354,12 @@ app.use('/api', (req, res, next) => {
   }
   next();
 });
+
+// Setup Swagger documentation
+if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_SWAGGER === 'true') {
+  setupSwagger(app);
+  console.log('📚 API Documentation available at /api-docs');
+}
 
 // Mount routers
 app.use('/api/auth', authRoutes);

@@ -206,12 +206,15 @@ export const getDonation = async (req: AuthRequest, res: Response, next: NextFun
     }
 
     // Only allow user to see their own donation or admin
-    if (req.user && donation.user && donation.user.toString() !== req.user._id.toString()) {
-      if (!req.user.role || req.user.role !== 'admin') {
-        return res.status(403).json({
-          success: false,
-          message: 'Not authorized to view this donation'
-        });
+    if (req.user && donation.user && req.user._id) {
+      const userId = req.user._id as mongoose.Types.ObjectId;
+      if (donation.user.toString() !== userId.toString()) {
+        if (!req.user.role || req.user.role !== 'admin') {
+          return res.status(403).json({
+            success: false,
+            message: 'Not authorized to view this donation'
+          });
+        }
       }
     }
 

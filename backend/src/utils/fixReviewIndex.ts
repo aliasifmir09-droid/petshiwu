@@ -16,6 +16,9 @@ const fixReviewIndex = async () => {
     console.log('✅ Connected to MongoDB');
 
     const db = mongoose.connection.db;
+    if (!db) {
+      throw new Error('Database connection not available');
+    }
     const reviewsCollection = db.collection('reviews');
 
     console.log('📋 Current indexes on reviews collection:');

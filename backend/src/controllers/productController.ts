@@ -162,16 +162,17 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           }
         }
         
-        try {
-          category = await Category.create({
-            name: trimmedName,
-            petType: petType.toLowerCase(),
-            parentCategory: parentId,
-            isActive: true,
-            level: level,
-            description: `${trimmedName} products`
-          });
-        } catch (createError: any) {
+            try {
+              const newCategory = await Category.create({
+                name: trimmedName,
+                petType: petType.toLowerCase(),
+                parentCategory: parentId,
+                isActive: true,
+                level: level,
+                description: `${trimmedName} products`
+              });
+              category = newCategory as any;
+            } catch (createError: any) {
           if (createError.code === 11000 || createError.name === 'MongoServerError') {
             category = await Category.findOne(query).lean();
             if (!category) {
@@ -584,6 +585,63 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
   }
 };
 
+/**
+ * @swagger
+ * /api/products:
+ *   get:
+ *     summary: Get all products with optional filters
+ *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Items per page
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Category ID or slug
+ *       - in: query
+ *         name: petType
+ *         schema:
+ *           type: string
+ *         description: Filter by pet type
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search query
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [newest, price-asc, price-desc, rating]
+ *         description: Sort order
+ *     responses:
+ *       200:
+ *         description: List of products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
+ *                 pagination:
+ *                   type: object
+ */
 // Get all products with filters
 export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
   try {

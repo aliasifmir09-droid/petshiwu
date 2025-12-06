@@ -34,7 +34,8 @@ const addSlugsToExistingData = async () => {
         } catch (error: any) {
           if (error.code === 11000) {
             // Duplicate slug, add product ID to make it unique
-            product.slug = `${product.slug}-${product._id.toString().slice(-6)}`;
+            const productId = product._id as mongoose.Types.ObjectId;
+            product.slug = `${product.slug}-${productId.toString().slice(-6)}`;
             await product.save();
             console.log(`✅ Updated product (with ID): ${product.name} -> ${product.slug}`);
           } else {
@@ -68,7 +69,8 @@ const addSlugsToExistingData = async () => {
         } catch (error: any) {
           if (error.code === 11000) {
             // Duplicate slug, add category ID to make it unique
-            category.slug = `${category.slug}-${category._id.toString().slice(-6)}`;
+            const categoryId = category._id as mongoose.Types.ObjectId;
+            category.slug = `${category.slug}-${categoryId.toString().slice(-6)}`;
             await category.save();
             console.log(`✅ Updated category (with ID): ${category.name} -> ${category.slug}`);
           } else {
