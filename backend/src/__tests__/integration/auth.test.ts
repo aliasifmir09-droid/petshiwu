@@ -62,9 +62,19 @@ describe('Auth API', () => {
         })
         .expect(201);
 
+      // sendTokenResponse returns { success: true, token }
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toHaveProperty('email', testEmail);
-      expect(response.body.data).not.toHaveProperty('password');
+      expect(response.body.token).toBeDefined();
+      expect(typeof response.body.token).toBe('string');
+
+      // Verify user was actually created in database
+      const createdUser = await User.findOne({ email: testEmail });
+      expect(createdUser).toBeDefined();
+      expect(createdUser?.email).toBe(testEmail);
+      expect(createdUser?.firstName).toBe('Test');
+      expect(createdUser?.lastName).toBe('User');
+      // Password should be hashed, not plain text
+      expect(createdUser?.password).not.toBe('Test123456');
 
       // Cleanup
       await User.deleteOne({ email: testEmail });
