@@ -269,9 +269,57 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    // Client-side validation before upload
+    const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB in bytes
+    const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo'];
+    const ALLOWED_TYPES = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES];
+    
+    // Validate each file
+    const validationErrors: string[] = [];
+    const fileArray = Array.from(files);
+    
+    for (let i = 0; i < fileArray.length; i++) {
+      const file = fileArray[i];
+      
+      // Check file size
+      if (file.size > MAX_FILE_SIZE) {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        validationErrors.push(`${file.name}: File size (${sizeMB}MB) exceeds maximum allowed size of 100MB`);
+        continue;
+      }
+      
+      // Check file type
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        const allowedExtensions = ALLOWED_IMAGE_TYPES.map(t => t.split('/')[1]).join(', ') + 
+                                 ', ' + ALLOWED_VIDEO_TYPES.map(t => t.split('/')[1]).join(', ');
+        validationErrors.push(`${file.name}: File type "${file.type}" is not allowed. Allowed types: ${allowedExtensions}`);
+        continue;
+      }
+      
+      // Additional check: validate by extension for cases where MIME type might be incorrect
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      const allowedExtensions = ['jpeg', 'jpg', 'png', 'gif', 'webp', 'svg', 'mp4', 'webm', 'ogg', 'mov', 'avi'];
+      if (fileExtension && !allowedExtensions.includes(fileExtension)) {
+        validationErrors.push(`${file.name}: File extension ".${fileExtension}" is not allowed. Allowed extensions: ${allowedExtensions.join(', ')}`);
+        continue;
+      }
+    }
+    
+    // If validation errors exist, show them and stop upload
+    if (validationErrors.length > 0) {
+      const errorMessage = `Validation failed:\n${validationErrors.join('\n')}`;
+      showToast(errorMessage, 'error');
+      // Reset file input
+      if (e.target) {
+        e.target.value = '';
+      }
+      return;
+    }
+
     setUploading(true);
     try {
-      const uploadPromises = Array.from(files).map(async (file) => {
+      const uploadPromises = fileArray.map(async (file) => {
         try {
           const result = await adminService.uploadImage(file);
           
@@ -763,7 +811,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                 </span>
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/svg+xml,video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo"
                   multiple
                   onChange={handleImageUpload}
                   className="hidden"

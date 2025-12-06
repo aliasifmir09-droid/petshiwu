@@ -55,11 +55,17 @@
 - **Location:** `backend/src/controllers/orderController.ts`
 - **Impact:** Multiple users can no longer order the same last item simultaneously - stock is now atomically decremented
 
-### 6. **Image Upload - No Size/Format Validation on Frontend**
-- **Severity:** LOW
-- **Issue:** Backend validates (100MB limit) but frontend doesn't warn users before upload
+### 6. **Image Upload - No Size/Format Validation on Frontend - FIXED** ✅
+- **Status:** RESOLVED
+- **Solution Implemented:**
+  - Added client-side file size validation (100MB limit) before upload
+  - Added file type validation (JPEG, PNG, GIF, WebP, SVG, MP4, WebM, OGG, MOV, AVI)
+  - Added file extension validation as additional safety check
+  - Shows user-friendly error messages listing all validation failures
+  - Updated file input accept attribute to restrict file picker
+  - Added helpful text showing file size and format requirements
 - **Location:** `admin/src/components/ProductForm.tsx`
-- **Fix Required:** Add client-side validation before upload
+- **Impact:** Users are now warned immediately if files don't meet requirements, preventing unnecessary upload attempts
 
 ---
 
