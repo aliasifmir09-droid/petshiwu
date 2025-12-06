@@ -46,29 +46,76 @@ export const createTestUser = async (app: Application, userData?: {
  * Helper to get admin token
  */
 export const getAdminToken = async (app: Application) => {
-  // Try to find existing admin
-  let admin = await User.findOne({ role: 'admin' });
+  const testAdminEmail = 'test-admin@test.com';
+  const testAdminPassword = 'Admin123456';
+  
+  // Try to find existing test admin
+  let admin = await User.findOne({ 
+    email: testAdminEmail,
+    role: 'admin' 
+  });
   
   if (!admin) {
-    // Create admin if doesn't exist
-    admin = await User.create({
-      firstName: 'Admin',
-      lastName: 'User',
-      email: `admin${Date.now()}@test.com`,
-      password: 'Admin123456',
-      role: 'admin',
-      phone: '+1234567890'
-    });
+    // Create test admin if doesn't exist
+    try {
+      admin = await User.create({
+        firstName: 'Test',
+        lastName: 'Admin',
+        email: testAdminEmail,
+        password: testAdminPassword,
+        role: 'admin',
+        phone: '+1234567890'
+      });
+      console.log('✅ Created new test admin');
+    } catch (error: any) {
+      console.error('❌ Failed to create admin:', error.message);
+      throw error;
+    }
+  } else {
+    // If admin exists, delete and recreate to ensure correct password
+    try {
+      await User.deleteOne({ _id: admin._id });
+      admin = await User.create({
+        firstName: 'Test',
+        lastName: 'Admin',
+        email: testAdminEmail,
+        password: testAdminPassword,
+        role: 'admin',
+        phone: '+1234567890'
+      });
+      console.log('✅ Recreated test admin with known password');
+    } catch (error: any) {
+      console.error('❌ Failed to recreate admin:', error.message);
+      throw error;
+    }
   }
 
-  const loginResponse = await request(app)
-    .post('/api/auth/login')
-    .send({
-      email: admin.email,
-      password: 'Admin123456'
-    });
+  // Login to get token
+  try {
+    const loginResponse = await request(app)
+      .post('/api/auth/login')
+      .send({
+        email: testAdminEmail,
+        password: testAdminPassword
+      });
 
-  return loginResponse.body.token;
+    if (loginResponse.status !== 200) {
+      console.error('❌ Login failed with status:', loginResponse.status);
+      console.error('Response body:', JSON.stringify(loginResponse.body, null, 2));
+      throw new Error(`Login failed with status ${loginResponse.status}`);
+    }
+
+    if (!loginResponse.body.token) {
+      console.error('❌ No token in response:', JSON.stringify(loginResponse.body, null, 2));
+      throw new Error(`No token in login response: ${JSON.stringify(loginResponse.body)}`);
+    }
+
+    console.log('✅ Successfully obtained admin token');
+    return loginResponse.body.token;
+  } catch (error: any) {
+    console.error('❌ Failed to login as admin:', error.message);
+    throw error;
+  }
 };
 
 /**

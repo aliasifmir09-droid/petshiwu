@@ -28,6 +28,12 @@ module.exports = {
   // Run tests serially to avoid database connection conflicts
   maxWorkers: 1,
   // Show full error details
-  showSeed: false
+  showSeed: false,
+  // Better error reporting
+  errorOnDeprecated: false,
+  // Don't suppress console output
+  silent: false,
+  // Show all console output
+  verbose: true
 };
 
