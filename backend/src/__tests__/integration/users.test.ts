@@ -14,41 +14,68 @@ describe('Users API', () => {
   let testCategory: any;
 
   beforeAll(async () => {
-    process.env.NODE_ENV = 'test';
-    await connectDatabase();
-    
-    // Fix indexes before creating test data
-    const { fixProductIndexes } = await import('../helpers/fixIndexes');
-    await fixProductIndexes();
-    
-    adminToken = await getAdminToken(app);
-    const customer = await createTestUser(app, { role: 'customer' });
-    customerToken = customer.token;
+    try {
+      process.env.NODE_ENV = 'test';
+      await connectDatabase();
+      
+      // Fix indexes before creating test data
+      const { fixProductIndexes } = await import('../helpers/fixIndexes');
+      await fixProductIndexes();
+      
+      try {
+        adminToken = await getAdminToken(app);
+        if (!adminToken) {
+          throw new Error('Failed to get admin token');
+        }
+        console.log('✅ Admin token obtained');
+      } catch (error: any) {
+        console.error('❌ Failed to get admin token:', error.message);
+        throw error;
+      }
 
-    // Create test category and product for wishlist tests with unique name
-    const timestamp = Date.now();
-    testCategory = await Category.create({
-      name: `Test Category ${timestamp}`,
-      slug: `test-cat-${timestamp}`,
-      petType: 'dog',
-      level: 1,
-      isActive: true
-    });
+      try {
+        const customer = await createTestUser(app, { role: 'customer' });
+        customerToken = customer.token;
+        if (!customerToken) {
+          throw new Error('Failed to get customer token');
+        }
+        console.log('✅ Customer token obtained');
+      } catch (error: any) {
+        console.error('❌ Failed to create test user:', error.message);
+        throw error;
+      }
 
-    const productTimestamp = Date.now();
-    testProduct = await Product.create({
-      name: `Test Product ${productTimestamp}`,
-      slug: `test-product-${productTimestamp}`,
-      description: 'Test description',
-      brand: 'Test Brand',
-      basePrice: 29.99,
-      petType: 'dog',
-      category: testCategory._id,
-      isActive: true,
-      inStock: true,
-      variants: [], // Empty variants array to avoid SKU unique index issues
-      images: ['https://example.com/image.jpg']
-    });
+      // Create test category and product for wishlist tests with unique name
+      const timestamp = Date.now();
+      testCategory = await Category.create({
+        name: `Test Category ${timestamp}`,
+        slug: `test-cat-${timestamp}`,
+        petType: 'dog',
+        level: 1,
+        isActive: true
+      });
+
+      const productTimestamp = Date.now();
+      testProduct = await Product.create({
+        name: `Test Product ${productTimestamp}`,
+        slug: `test-product-${productTimestamp}`,
+        description: 'Test description',
+        brand: 'Test Brand',
+        basePrice: 29.99,
+        petType: 'dog',
+        category: testCategory._id,
+        isActive: true,
+        inStock: true,
+        variants: [], // Empty variants array to avoid SKU unique index issues
+        images: ['https://example.com/image.jpg']
+      });
+      
+      console.log('✅ beforeAll completed successfully');
+    } catch (error: any) {
+      console.error('❌ beforeAll failed:', error.message);
+      console.error('Stack:', error.stack);
+      throw error;
+    }
   });
 
   afterAll(async () => {
@@ -63,20 +90,25 @@ describe('Users API', () => {
 
   describe('GET /api/users/me/permissions', () => {
     it('should require authentication', async () => {
-      const response = await request(app)
-        .get('/api/users/me/permissions');
-
-      // Add detailed logging if assertion fails
+      let response: any;
       try {
-        expect(response.status).toBe(401);
-      } catch (e: any) {
-        console.error('STATUS ASSERTION FAILED:');
-        console.error('Expected: 401');
-        console.error('Got:', response.status);
-        console.error('Response:', JSON.stringify(response, null, 2));
-        throw e;
+        response = await request(app)
+          .get('/api/users/me/permissions');
+      } catch (error: any) {
+        console.error('Request error:', error.message);
+        throw error;
       }
 
+      if (!response) {
+        throw new Error('Response is undefined');
+      }
+
+      if (!response.status) {
+        console.error('Response object:', JSON.stringify(response, null, 2));
+        throw new Error('Response.status is undefined');
+      }
+
+      expect(response.status).toBe(401);
       if (response.body) {
         expect(response.body.success).toBe(false);
       }
