@@ -103,6 +103,104 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
       errors: [] as Array<{ row: number; error: string }>
     };
 
+    // OPTIMIZATION: Pre-fetch all existing slugs in one query (much faster than checking one-by-one)
+    const existingSlugs = new Set<string>();
+    const allExistingProducts = await Product.find({}).select('slug').lean();
+    allExistingProducts.forEach((p: any) => {
+      if (p.slug) existingSlugs.add(p.slug);
+    });
+    console.log(`[CSV IMPORT] Pre-loaded ${existingSlugs.size} existing product slugs`);
+
+    // OPTIMIZATION: Cache for categories to avoid redundant lookups
+    const categoryCache = new Map<string, mongoose.Types.ObjectId>();
+    const categoryNameCache = new Map<string, string>(); // categoryId -> name for slug generation
+
+    // OPTIMIZATION: Process products in batches for better performance
+    const BATCH_SIZE = 50;
+    const productsToInsert: any[] = [];
+    const productRowMap = new Map<number, number>(); // Maps product index to row number
+
+    // Helper function to find or create category in hierarchy (with caching)
+    const findOrCreateCategory = async (categoryName: string, petType: string, parentId: mongoose.Types.ObjectId | null = null): Promise<mongoose.Types.ObjectId> => {
+      const cacheKey = `${categoryName.toLowerCase()}_${petType}_${parentId?.toString() || 'null'}`;
+      
+      // Check cache first
+      if (categoryCache.has(cacheKey)) {
+        return categoryCache.get(cacheKey)!;
+      }
+
+      const trimmedName = categoryName.trim();
+      
+      if (!trimmedName || trimmedName.length === 0) {
+        throw new Error('Category name cannot be empty');
+      }
+      
+      // Try to find existing category
+      const query: any = {
+        name: { $regex: new RegExp(`^${trimmedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+        petType: petType.toLowerCase()
+      };
+      
+      if (parentId) {
+        query.parentCategory = parentId;
+      } else {
+        query.parentCategory = null;
+      }
+      
+      let category = await Category.findOne(query).lean();
+      
+      // If not found, create it
+      if (!category) {
+        let level = 1;
+        if (parentId) {
+          const parent = await Category.findById(parentId).select('level').lean();
+          if (parent) {
+            level = (parent.level || 1) + 1;
+            if (level > 3) {
+              throw new Error(`Maximum category depth is 3 levels. Cannot create category "${trimmedName}" at level ${level}.`);
+            }
+          }
+        }
+        
+        try {
+          category = await Category.create({
+            name: trimmedName,
+            petType: petType.toLowerCase(),
+            parentCategory: parentId,
+            isActive: true,
+            level: level,
+            description: `${trimmedName} products`
+          });
+        } catch (createError: any) {
+          if (createError.code === 11000 || createError.name === 'MongoServerError') {
+            category = await Category.findOne(query).lean();
+            if (!category) {
+              throw new Error(`Failed to create category "${trimmedName}": ${createError.message}`);
+            }
+          } else {
+            throw createError;
+          }
+        }
+      } else if (!category.isActive) {
+        await Category.findByIdAndUpdate(category._id, { isActive: true });
+        category.isActive = true;
+      }
+      
+      if (category && category._id) {
+        const categoryId = category._id instanceof mongoose.Types.ObjectId 
+          ? category._id 
+          : new mongoose.Types.ObjectId(String(category._id));
+        
+        // Cache the result
+        categoryCache.set(cacheKey, categoryId);
+        categoryNameCache.set(categoryId.toString(), category.name);
+        
+        return categoryId;
+      }
+      
+      throw new Error(`Failed to find or create category: ${trimmedName}`);
+    };
+
     // Process each row
     for (let i = 0; i < records.length; i++) {
       const row = records[i];
@@ -119,79 +217,6 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           continue;
         }
 
-        // Helper function to find or create category in hierarchy
-        const findOrCreateCategory = async (categoryName: string, petType: string, parentId: mongoose.Types.ObjectId | null = null): Promise<mongoose.Types.ObjectId> => {
-          const trimmedName = categoryName.trim();
-          
-          if (!trimmedName || trimmedName.length === 0) {
-            throw new Error('Category name cannot be empty');
-          }
-          
-          // Try to find existing category (check both active and inactive)
-          const query: any = {
-            name: { $regex: new RegExp(`^${trimmedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
-            petType: petType.toLowerCase()
-          };
-          
-          if (parentId) {
-            query.parentCategory = parentId;
-          } else {
-            query.parentCategory = null;
-          }
-          
-          let category = await Category.findOne(query);
-          
-          // If not found, create it
-          if (!category) {
-            // Calculate level based on parent
-            let level = 1;
-            if (parentId) {
-              const parent = await Category.findById(parentId);
-              if (parent) {
-                level = (parent.level || 1) + 1;
-                if (level > 3) {
-                  throw new Error(`Maximum category depth is 3 levels. Cannot create category "${trimmedName}" at level ${level}.`);
-                }
-              }
-            }
-            
-            try {
-              category = await Category.create({
-                name: trimmedName,
-                petType: petType.toLowerCase(),
-                parentCategory: parentId,
-                isActive: true,
-                level: level,
-                description: `${trimmedName} products`
-              });
-            } catch (createError: any) {
-              // If creation fails (e.g., duplicate key), try to find it again
-              if (createError.code === 11000 || createError.name === 'MongoServerError') {
-                category = await Category.findOne(query);
-                if (!category) {
-                  throw new Error(`Failed to create category "${trimmedName}": ${createError.message}`);
-                }
-              } else {
-                throw createError;
-              }
-            }
-          } else if (!category.isActive) {
-            // If category exists but is inactive, reactivate it
-            category.isActive = true;
-            await category.save();
-          }
-          
-          // Ensure we return a proper ObjectId
-          if (category && category._id) {
-            // Convert to ObjectId if it's not already
-            if (typeof category._id === 'string') {
-              return new mongoose.Types.ObjectId(category._id);
-            }
-            return category._id as mongoose.Types.ObjectId;
-          }
-          
-          throw new Error(`Failed to find or create category: ${trimmedName}`);
-        };
 
         // Parse hierarchical category path (e.g., "Dog > Food > Dry Food" or "food > dry food")
         // IMPORTANT: Reset categoryId for each product to avoid using previous product's category
@@ -226,8 +251,8 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           // Build category hierarchy - ensure each part is processed correctly
           let currentParentId: mongoose.Types.ObjectId | null = null;
           
-          for (let i = 0; i < categoryParts.length; i++) {
-            const categoryName = categoryParts[i].trim();
+          for (let j = 0; j < categoryParts.length; j++) {
+            const categoryName = categoryParts[j].trim();
             if (!categoryName) {
               continue; // Skip empty parts
             }
@@ -281,22 +306,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           }
         }
         
-        // Get the final category for validation and ensure it's populated
-        const category = await Category.findById(categoryId).lean();
-        if (!category) {
-          results.failed++;
-          results.errors.push({
-            row: rowNumber,
-            error: `Failed to resolve category with ID: ${categoryId}`
-          });
-          continue;
-        }
-        
-        // Verify category is active
-        if (!category.isActive) {
-          // Reactivate the category if it was inactive
-          await Category.findByIdAndUpdate(categoryId, { isActive: true });
-        }
+        // Skip redundant category validation - we already validated it exists in findOrCreateCategory
 
         // Parse images (comma or pipe-separated URLs)
         const images = row.images 
@@ -368,48 +378,25 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           continue;
         }
         
-        // Ensure categoryId is a proper ObjectId before creating product
-        let categoryObjectId: mongoose.Types.ObjectId;
-        try {
-          categoryObjectId = categoryId instanceof mongoose.Types.ObjectId 
-            ? categoryId 
-            : new mongoose.Types.ObjectId(String(categoryId));
-        } catch (error: any) {
-          results.failed++;
-          results.errors.push({
-            row: rowNumber,
-            error: `Invalid category ID format: ${categoryId}`
-          });
-          continue;
-        }
-        
-        // Final validation - ensure category exists
-        const finalCategoryCheck = await Category.findById(categoryObjectId);
-        if (!finalCategoryCheck) {
-          results.failed++;
-          results.errors.push({
-            row: rowNumber,
-            error: `Category with ID ${categoryObjectId} does not exist before product creation`
-          });
-          continue;
-        }
+        // categoryId is already a valid ObjectId from findOrCreateCategory
+        const categoryObjectId = categoryId;
         
         // Format description with headings
         const rawDescription = String(row.description).trim();
         const formattedDescription = formatProductDescription(rawDescription);
         
-        // Generate unique slug from product name
-        // If slug already exists, append brand and/or category to make it unique
+        // Generate unique slug from product name (OPTIMIZED: use pre-loaded slug set instead of DB query)
         let baseSlug = String(row.name).trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
         let uniqueSlug = baseSlug;
         let slugAttempts = 0;
         const maxSlugAttempts = 10;
         
-        // Check if slug already exists and make it unique if needed
+        // Check if slug already exists using pre-loaded set (much faster than DB query)
         while (slugAttempts < maxSlugAttempts) {
-          const existingProduct = await Product.findOne({ slug: uniqueSlug }).lean();
-          if (!existingProduct) {
-            break; // Slug is unique, we can use it
+          if (!existingSlugs.has(uniqueSlug)) {
+            // Slug is unique, add it to set and use it
+            existingSlugs.add(uniqueSlug);
+            break;
           }
           
           // Slug exists, make it unique by appending brand, category, or timestamp
@@ -419,22 +406,17 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
             const brandSlug = String(row.brand).trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
             uniqueSlug = `${baseSlug}-${brandSlug}`;
           } else if (slugAttempts === 2) {
-            // Second attempt: append category name
-            try {
-              const categoryDoc = await Category.findById(categoryObjectId).select('name').lean();
-              const categoryName = categoryDoc?.name || '';
-              if (categoryName) {
-                const categorySlug = categoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-                uniqueSlug = `${baseSlug}-${categorySlug}`;
-              } else {
-                uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-6)}`;
-              }
-            } catch {
-              uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-6)}`;
+            // Second attempt: append category name (use cache)
+            const categoryName = categoryNameCache.get(categoryObjectId.toString()) || '';
+            if (categoryName) {
+              const categorySlug = categoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+              uniqueSlug = `${baseSlug}-${categorySlug}`;
+            } else {
+              uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-6)}-${i}`;
             }
           } else {
-            // Subsequent attempts: append timestamp
-            uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-6)}-${slugAttempts}`;
+            // Subsequent attempts: append timestamp and row index
+            uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-6)}-${i}-${slugAttempts}`;
           }
         }
         
@@ -469,25 +451,50 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           autoshipEligible: String(row.autoshipEligible || 'false').toLowerCase() === 'true' ? true : false
         };
 
-        // categoryObjectId is already validated above, no need to check again
+        // Add product to batch for bulk insert
+        productsToInsert.push(productData);
+        productRowMap.set(productsToInsert.length - 1, rowNumber);
         
-        // Create product
-        const product = await Product.create(productData);
-        
-        // Verify product was created with correct category
-        const createdProduct = await Product.findById(product._id).populate('category', 'name');
-        if (!createdProduct || !createdProduct.category) {
-          results.failed++;
-          results.errors.push({
-            row: rowNumber,
-            error: `Product created but category not assigned correctly`
-          });
-          // Delete the product if category wasn't assigned
-          await Product.findByIdAndDelete(product._id);
-          continue;
+        // Insert in batches for better performance
+        if (productsToInsert.length >= BATCH_SIZE) {
+          try {
+            const insertedProducts = await Product.insertMany(productsToInsert, { ordered: false });
+            results.success += insertedProducts.length;
+            productsToInsert.length = 0; // Clear array
+            productRowMap.clear();
+            console.log(`[CSV IMPORT] Batch inserted ${insertedProducts.length} products`);
+          } catch (batchError: any) {
+            // Handle partial batch failures
+            if (batchError.writeErrors) {
+              // Some products failed, try inserting them one by one
+              for (let j = 0; j < productsToInsert.length; j++) {
+                try {
+                  await Product.create(productsToInsert[j]);
+                  results.success++;
+                } catch (singleError: any) {
+                  const originalRowNum = productRowMap.get(j) || rowNumber;
+                  results.failed++;
+                  results.errors.push({
+                    row: originalRowNum,
+                    error: singleError.message || 'Failed to create product'
+                  });
+                }
+              }
+            } else {
+              // All products in batch failed
+              for (let j = 0; j < productsToInsert.length; j++) {
+                const originalRowNum = productRowMap.get(j) || rowNumber;
+                results.failed++;
+                results.errors.push({
+                  row: originalRowNum,
+                  error: batchError.message || 'Batch insert failed'
+                });
+              }
+            }
+            productsToInsert.length = 0;
+            productRowMap.clear();
+          }
         }
-        
-        results.success++;
 
       } catch (error: any) {
         // Handle duplicate slug error specifically (MongoDB duplicate key error code 11000)
@@ -505,6 +512,43 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
             row: rowNumber,
             error: error.message || 'Unknown error'
           });
+        }
+      }
+    }
+
+    // Insert any remaining products in the final batch
+    if (productsToInsert.length > 0) {
+      try {
+        const insertedProducts = await Product.insertMany(productsToInsert, { ordered: false });
+        results.success += insertedProducts.length;
+        console.log(`[CSV IMPORT] Final batch inserted ${insertedProducts.length} products`);
+      } catch (batchError: any) {
+        // Handle partial batch failures
+        if (batchError.writeErrors) {
+          // Some products failed, try inserting them one by one
+          for (let j = 0; j < productsToInsert.length; j++) {
+            try {
+              await Product.create(productsToInsert[j]);
+              results.success++;
+            } catch (singleError: any) {
+              const originalRowNum = productRowMap.get(j) || 0;
+              results.failed++;
+              results.errors.push({
+                row: originalRowNum,
+                error: singleError.message || 'Failed to create product'
+              });
+            }
+          }
+        } else {
+          // All products in batch failed
+          for (let j = 0; j < productsToInsert.length; j++) {
+            const originalRowNum = productRowMap.get(j) || 0;
+            results.failed++;
+            results.errors.push({
+              row: originalRowNum,
+              error: batchError.message || 'Batch insert failed'
+            });
+          }
         }
       }
     }
