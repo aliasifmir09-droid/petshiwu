@@ -21,8 +21,8 @@ const HeroSlideshow = () => {
   const slides: Slide[] = [
     {
       id: 1,
-      title: 'Free $20 eGift Card',
-      subtitle: 'With your $49+ order.',
+      title: 'Welcome to Petshiwu',
+      subtitle: 'Everything Your Pet Needs',
       description: 'Shop the best for your pets!',
       buttonText: 'Shop now',
       buttonLink: '/products',
@@ -99,24 +99,6 @@ const HeroSlideshow = () => {
 
   return (
     <div className="w-full mt-4">
-      {/* Top Promotional Banner - Matching Slideshow Width */}
-      <div className="container mx-auto px-4 md:px-6 lg:px-8">
-        <Link to="/products">
-          <div className="relative overflow-hidden bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 py-1 md:py-1.5 text-center rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group border-2 border-emerald-400/30 w-full">
-            {/* Animated background overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-yellow-300/20 via-transparent to-yellow-300/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            
-            {/* Main text */}
-            <p className="text-[10px] sm:text-xs md:text-sm lg:text-base font-black text-white drop-shadow-lg relative z-10 tracking-tight whitespace-nowrap px-2 overflow-hidden text-ellipsis">
-              🎁 FREE $20 eGift Card with $49+ Order • Limited Time! 🎁
-            </p>
-            
-            {/* Bottom shine effect */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
-          </div>
-        </Link>
-      </div>
-
       {/* Main Slideshow */}
       <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-4">
         <div className="relative w-full overflow-hidden bg-white rounded-xl shadow-lg">
