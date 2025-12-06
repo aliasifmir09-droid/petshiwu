@@ -8,6 +8,7 @@ import path from 'path';
 import mongoose from 'mongoose';
 import { formatProductDescription } from '../utils/descriptionFormatter';
 import logger from '../utils/logger';
+import { cache, cacheKeys } from '../utils/cache';
 
 // Helper function to normalize product _id to string
 const normalizeProductId = (product: any): any => {
