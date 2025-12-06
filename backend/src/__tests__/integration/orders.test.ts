@@ -159,7 +159,7 @@ describe('Orders API', () => {
           }
         } catch (error: any) {
           // If cleanup fails, log but don't fail the test
-          console.warn('Failed to cleanup test order:', error.message);
+          // Cleanup failed, but test passed - this is acceptable
         }
       }
     });

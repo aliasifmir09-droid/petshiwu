@@ -75,28 +75,11 @@ describe('Users API', () => {
 
   describe('GET /api/users/me/permissions', () => {
     it('should require authentication', async () => {
-      let response: any;
-      try {
-        response = await request(app)
-          .get('/api/users/me/permissions');
-      } catch (error: any) {
-        console.error('Request error:', error.message);
-        throw error;
-      }
-
-      if (!response) {
-        throw new Error('Response is undefined');
-      }
-
-      if (!response.status) {
-        console.error('Response object:', JSON.stringify(response, null, 2));
-        throw new Error('Response.status is undefined');
-      }
+      const response = await request(app)
+        .get('/api/users/me/permissions');
 
       expect(response.status).toBe(401);
-      if (response.body) {
-        expect(response.body.success).toBe(false);
-      }
+      expect(response.body.success).toBe(false);
     });
 
     it('should return user permissions', async () => {
