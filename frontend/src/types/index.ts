@@ -138,8 +138,6 @@ export interface Order {
   taxPrice: number;
   donationAmount?: number;
   totalPrice: number;
-  discount?: number;
-  couponCode?: string;
   isPaid: boolean;
   paidAt?: string;
   isDelivered: boolean;

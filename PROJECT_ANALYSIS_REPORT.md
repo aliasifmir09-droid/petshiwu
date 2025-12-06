@@ -28,14 +28,13 @@
 - **Impact:** Cannot accept online payments for orders
 - **Fix Required:** Implement Stripe/PayPal integration for order payments
 
-### 3. **Coupon/Discount System - NOT IMPLEMENTED**
-- **Severity:** MEDIUM
-- **Issue:** 
-  - `couponCode` and `discount` fields exist in Order model but no validation/application logic
-  - No coupon model or API endpoints
-  - No UI for entering coupon codes
-- **Location:** `backend/src/models/Order.ts` (lines 168, 163-166), `frontend/src/pages/Checkout.tsx`
-- **Fix Required:** Create Coupon model, validation logic, and UI
+### 3. **Coupon/Discount System - REMOVED** ✅
+- **Status:** REMOVED per user request
+- **Action Taken:** 
+  - Removed `couponCode` and `discount` fields from Order model
+  - Removed coupon-related UI components (FloatingDiscount)
+  - Removed discount display from OrderDetail page
+- **Note:** Autoship discounts and product sale prices (compareAtPrice) remain intact
 
 ### 4. **Autoship/Subscription Feature - MODEL EXISTS BUT NO IMPLEMENTATION**
 - **Severity:** MEDIUM

@@ -8,7 +8,6 @@ import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import CountdownTimer from '@/components/CountdownTimer';
 import TrustBadges from '@/components/TrustBadges';
-import FloatingDiscount from '@/components/FloatingDiscount';
 import CategoryIcons from '@/components/CategoryIcons';
 import { ChevronRight, ChevronLeft, Star } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
@@ -478,8 +477,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Floating Discount Popup */}
-      <FloatingDiscount />
     </div>
   );
 };

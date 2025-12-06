@@ -340,12 +340,6 @@ const OrderDetail = () => {
                     <span className="font-medium">${order.donationAmount.toFixed(2)}</span>
                   </div>
                 )}
-                {order.discount && order.discount > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Discount</span>
-                    <span className="font-medium">-${order.discount.toFixed(2)}</span>
-                  </div>
-                )}
                 <div className="border-t pt-3 flex justify-between text-lg font-bold">
                   <span>Total</span>
                   <span className="text-primary-600">${order.totalPrice.toFixed(2)}</span>
