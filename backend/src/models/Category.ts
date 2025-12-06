@@ -101,9 +101,10 @@ categorySchema.pre('save', async function (next) {
 
 // Indexes for performance optimization
 categorySchema.index({ petType: 1, isActive: 1 }); // Pet type filtering
-categorySchema.index({ parentCategory: 1 }); // Subcategory queries
+categorySchema.index({ parentCategory: 1, isActive: 1 }); // Subcategory queries with active filter
 categorySchema.index({ level: 1 }); // Level-based queries
 categorySchema.index({ petType: 1, parentCategory: 1, position: 1 }); // Position sorting
+categorySchema.index({ isActive: 1, parentCategory: 1 }); // For fetching all active categories by parent
 // Compound unique indexes: Allow same name/slug for different petType or parentCategory combinations
 // This allows "Food" to exist under both Dog and Cat categories
 categorySchema.index({ name: 1, petType: 1, parentCategory: 1 }, { unique: true });

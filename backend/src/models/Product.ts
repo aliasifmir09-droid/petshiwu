@@ -193,6 +193,9 @@ productSchema.index({ brand: 1, deletedAt: 1 }); // Brand filter
 productSchema.index({ totalStock: 1, isActive: 1, deletedAt: 1 }); // Stock filtering
 productSchema.index({ petType: 1, category: 1, isActive: 1, deletedAt: 1 }); // Compound index for common queries
 productSchema.index({ deletedAt: 1 }); // For soft delete queries
+productSchema.index({ isActive: 1, deletedAt: 1, createdAt: -1 }); // For default sorting with active filter
+productSchema.index({ isActive: 1, deletedAt: 1, basePrice: 1 }); // For price sorting
+productSchema.index({ isActive: 1, deletedAt: 1, averageRating: -1 }); // For rating sorting
 // Note: slug, variants.sku, basePrice, averageRating, createdAt, isFeatured+isActive indexes already exist in schema
 
 export default mongoose.model<IProduct>('Product', productSchema);

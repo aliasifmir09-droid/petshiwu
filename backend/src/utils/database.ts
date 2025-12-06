@@ -13,7 +13,13 @@ export const connectDatabase = async () => {
       socketTimeoutMS: 45000,
       family: 4, // Force IPv4 instead of IPv6
       readPreference: 'primary', // Always read from primary to avoid stale data
-      readConcern: { level: 'majority' } // Ensure we read committed data
+      readConcern: { level: 'majority' }, // Ensure we read committed data
+      // Connection pooling for better performance
+      maxPoolSize: 10, // Maintain up to 10 socket connections
+      minPoolSize: 2, // Maintain at least 2 socket connections
+      maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
+      serverSelectionTimeoutMS: 5000, // How long to try selecting a server
+      heartbeatFrequencyMS: 10000 // How often to check server status
     });
     
     console.log(`✅ MongoDB Connected Successfully: ${conn.connection.host}`);

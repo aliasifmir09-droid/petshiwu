@@ -601,8 +601,38 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
         
         // If we have a valid categoryId, find all descendant subcategories recursively
         if (categoryId) {
-          // Helper function to recursively find all descendant category IDs
-          const findAllDescendantIds = async (parentId: mongoose.Types.ObjectId, visited = new Set<string>()): Promise<mongoose.Types.ObjectId[]> => {
+          // Optimized: Fetch all relevant categories in one query, then build tree in memory
+          const petTypeFilter = req.query.petType ? String(req.query.petType).toLowerCase().trim() : null;
+          
+          // Build query to fetch all categories that might be descendants
+          // Since max depth is 3, we can fetch all categories with same petType or all categories
+          const allCategoriesQuery: any = { isActive: true };
+          if (petTypeFilter) {
+            allCategoriesQuery.petType = petTypeFilter;
+          }
+          
+          // Fetch all categories in one query (much faster than recursive queries)
+          const allCategories = await Category.find(allCategoriesQuery).select('_id parentCategory').lean();
+          
+          // Build a map for quick parent-child lookups
+          const categoryMap = new Map<string, mongoose.Types.ObjectId[]>();
+          const parentMap = new Map<string, mongoose.Types.ObjectId | null>();
+          
+          for (const cat of allCategories) {
+            const catId = cat._id.toString();
+            const parentId = cat.parentCategory ? cat.parentCategory.toString() : null;
+            parentMap.set(catId, cat.parentCategory as mongoose.Types.ObjectId | null);
+            
+            if (parentId) {
+              if (!categoryMap.has(parentId)) {
+                categoryMap.set(parentId, []);
+              }
+              categoryMap.get(parentId)!.push(cat._id as mongoose.Types.ObjectId);
+            }
+          }
+          
+          // Recursively find all descendant IDs in memory (no more DB queries)
+          const findAllDescendantIds = (parentId: mongoose.Types.ObjectId, visited = new Set<string>()): mongoose.Types.ObjectId[] => {
             const parentIdStr = parentId.toString();
             
             // Prevent infinite loops
@@ -613,31 +643,20 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
             
             const result: mongoose.Types.ObjectId[] = [parentId];
             
-            // Build query for direct children
-            const childQuery: any = {
-              parentCategory: parentId,
-              isActive: true
-            };
-            
-            if (req.query.petType) {
-              childQuery.petType = String(req.query.petType).toLowerCase().trim();
-            }
-            
-            // Find direct children
-            const children = await Category.find(childQuery).select('_id').lean();
+            // Get direct children from map
+            const children = categoryMap.get(parentIdStr) || [];
             
             // Recursively find descendants of each child
-            for (const child of children) {
-              const childId = child._id as mongoose.Types.ObjectId;
-              const descendants = await findAllDescendantIds(childId, visited);
+            for (const childId of children) {
+              const descendants = findAllDescendantIds(childId, visited);
               result.push(...descendants);
             }
             
             return result;
           };
           
-          // Find all descendant categories (including the category itself)
-          const categoryIds = await findAllDescendantIds(categoryId);
+          // Find all descendant categories (including the category itself) - all in memory now
+          const categoryIds = findAllDescendantIds(categoryId);
           
           // Remove duplicates (in case of any circular references)
           const uniqueCategoryIds = Array.from(new Set(categoryIds.map(id => id.toString())))
@@ -781,14 +800,9 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       return true;
     });
 
-    // Count total (also deduplicated to match the filtered results)
-    // Connection-level readPreference ensures we read from primary
-    const allProducts = await Product.find(query).lean();
-    const uniqueProducts = allProducts.filter((p: any, index: number, self: any[]) => {
-      const pid = String(p._id);
-      return index === self.findIndex((pr: any) => String(pr._id) === pid && pr.isActive !== false);
-    });
-    const total = uniqueProducts.length;
+    // Count total using countDocuments (much faster than fetching all products)
+    // This uses indexes and doesn't load documents into memory
+    const total = await Product.countDocuments(query);
 
     // Normalize _id to string for all products (use filtered products)
     const normalizedProducts = normalizeProducts(activeProducts);
@@ -1324,8 +1338,33 @@ export const getUniqueBrands = async (req: Request, res: Response, next: NextFun
           if (foundCategory?._id) {
             categoryId = foundCategory._id as mongoose.Types.ObjectId;
             
-            // Helper function to recursively find all descendant category IDs
-            const findAllDescendantIds = async (parentId: mongoose.Types.ObjectId, visited = new Set<string>()): Promise<mongoose.Types.ObjectId[]> => {
+            // Optimized: Fetch all relevant categories in one query, then build tree in memory
+            const petTypeFilter = req.query.petType ? String(req.query.petType).toLowerCase().trim() : null;
+            
+            // Build query to fetch all categories that might be descendants
+            const allCategoriesQuery: any = { isActive: true };
+            if (petTypeFilter) {
+              allCategoriesQuery.petType = petTypeFilter;
+            }
+            
+            // Fetch all categories in one query (much faster than recursive queries)
+            const allCategories = await Category.find(allCategoriesQuery).select('_id parentCategory').lean();
+            
+            // Build a map for quick parent-child lookups
+            const categoryMap = new Map<string, mongoose.Types.ObjectId[]>();
+            
+            for (const cat of allCategories) {
+              const parentId = cat.parentCategory ? cat.parentCategory.toString() : null;
+              if (parentId) {
+                if (!categoryMap.has(parentId)) {
+                  categoryMap.set(parentId, []);
+                }
+                categoryMap.get(parentId)!.push(cat._id as mongoose.Types.ObjectId);
+              }
+            }
+            
+            // Recursively find all descendant IDs in memory (no more DB queries)
+            const findAllDescendantIds = (parentId: mongoose.Types.ObjectId, visited = new Set<string>()): mongoose.Types.ObjectId[] => {
               const parentIdStr = parentId.toString();
               
               // Prevent infinite loops
@@ -1336,31 +1375,20 @@ export const getUniqueBrands = async (req: Request, res: Response, next: NextFun
               
               const result: mongoose.Types.ObjectId[] = [parentId];
               
-              // Build query for direct children
-              const childQuery: any = {
-                parentCategory: parentId,
-                isActive: true
-              };
-              
-              if (req.query.petType) {
-                childQuery.petType = String(req.query.petType).toLowerCase().trim();
-              }
-              
-              // Find direct children
-              const children = await Category.find(childQuery).select('_id').lean();
+              // Get direct children from map
+              const children = categoryMap.get(parentIdStr) || [];
               
               // Recursively find descendants of each child
-              for (const child of children) {
-                const childId = child._id as mongoose.Types.ObjectId;
-                const descendants = await findAllDescendantIds(childId, visited);
+              for (const childId of children) {
+                const descendants = findAllDescendantIds(childId, visited);
                 result.push(...descendants);
               }
               
               return result;
             };
             
-            // Find all descendant categories (including the category itself)
-            const categoryIds = await findAllDescendantIds(categoryId);
+            // Find all descendant categories (including the category itself) - all in memory now
+            const categoryIds = findAllDescendantIds(categoryId);
             
             // Remove duplicates
             const uniqueCategoryIds = Array.from(new Set(categoryIds.map(id => id.toString())))
