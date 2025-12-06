@@ -44,19 +44,14 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       });
     }
 
-    // Verify stock availability
-    for (const item of items) {
+    // Normalize product IDs and validate items
+    const normalizedItems = items.map((item: any) => {
       // Convert product ID to string if it's an object
       let productId: string | null = null;
       const rawProductId = item.product;
       
       if (!rawProductId) {
-        // Product ID validation failed
-        return res.status(400).json({
-          success: false,
-          message: `Product ID is missing for item: ${item.name || 'Unknown'}`,
-          errors: [`Item "${item.name || 'Unknown'}" has no product ID`]
-        });
+        throw new Error(`Product ID is missing for item: ${item.name || 'Unknown'}`);
       }
       
       // Handle different types of product IDs
@@ -77,64 +72,155 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       
       // Validate MongoDB ObjectId format
       if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
-        // Invalid product ID format
+        throw new Error(`Invalid product ID for item: ${item.name || 'Unknown'}`);
+      }
+      
+      return {
+        ...item,
+        product: productId
+      };
+    });
+
+    // Use MongoDB transaction to ensure atomic stock updates
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      // Step 1: Verify stock availability and prepare stock updates
+      const stockUpdates: Array<{
+        productId: string;
+        quantity: number;
+        variantSku?: string;
+      }> = [];
+
+      for (const item of normalizedItems) {
+        const productId = item.product;
+        const quantity = item.quantity || 1;
+        
+        // Find product with lock (within transaction)
+        const product = await Product.findById(productId).session(session);
+        
+        if (!product) {
+          throw new Error(`Product ${item.name || productId} not found`);
+        }
+        
+        if (!product.inStock) {
+          throw new Error(`Product "${item.name}" is currently out of stock`);
+        }
+
+        // Handle variant stock if item has a variant SKU
+        if (item.variant && item.variant.sku) {
+          const variant = product.variants.find((v: any) => v.sku === item.variant.sku);
+          if (!variant) {
+            throw new Error(`Variant with SKU "${item.variant.sku}" not found for product "${item.name}"`);
+          }
+          if (variant.stock < quantity) {
+            throw new Error(`Insufficient stock for variant "${item.variant.sku}" of product "${item.name}". Available: ${variant.stock}, Requested: ${quantity}`);
+          }
+          stockUpdates.push({ productId, quantity, variantSku: item.variant.sku });
+        } else {
+          // Check total stock for products without variants or when variant not specified
+          if (product.totalStock < quantity) {
+            throw new Error(`Insufficient stock for product "${item.name}". Available: ${product.totalStock}, Requested: ${quantity}`);
+          }
+          stockUpdates.push({ productId, quantity });
+        }
+      }
+
+      // Step 2: Atomically update stock using $inc with conditions
+      for (const update of stockUpdates) {
+        if (update.variantSku) {
+          // Update variant stock atomically
+          const variantUpdateResult = await Product.updateOne(
+            {
+              _id: update.productId,
+              'variants.sku': update.variantSku,
+              'variants.stock': { $gte: update.quantity } // Only update if sufficient stock
+            },
+            {
+              $inc: { 
+                'variants.$.stock': -update.quantity,
+                totalStock: -update.quantity
+              }
+            },
+            { session }
+          );
+
+          if (variantUpdateResult.matchedCount === 0) {
+            throw new Error(`Insufficient stock for variant SKU "${update.variantSku}"`);
+          }
+        } else {
+          // Update total stock atomically
+          const productUpdateResult = await Product.updateOne(
+            {
+              _id: update.productId,
+              totalStock: { $gte: update.quantity } // Only update if sufficient stock
+            },
+            {
+              $inc: { totalStock: -update.quantity }
+            },
+            { session }
+          );
+
+          if (productUpdateResult.matchedCount === 0) {
+            const product = await Product.findById(update.productId).session(session);
+            throw new Error(`Insufficient stock for product. Available: ${product?.totalStock || 0}, Requested: ${update.quantity}`);
+          }
+        }
+
+        // Update inStock flag based on new totalStock
+        await Product.updateOne(
+          { _id: update.productId },
+          [
+            {
+              $set: {
+                inStock: { $gt: ['$totalStock', 0] }
+              }
+            }
+          ],
+          { session }
+        );
+      }
+
+      // Step 3: Create order within transaction
+      const order = await Order.create([{
+        user: req.user._id,
+        items: normalizedItems,
+        shippingAddress,
+        billingAddress: billingAddress || shippingAddress,
+        paymentMethod,
+        itemsPrice,
+        shippingPrice,
+        taxPrice,
+        donationAmount: donationAmount || 0,
+        totalPrice
+      }], { session });
+
+      // Step 4: Commit transaction
+      await session.commitTransaction();
+      
+      res.status(201).json({
+        success: true,
+        data: order[0]
+      });
+    } catch (error: any) {
+      // Rollback transaction on error
+      await session.abortTransaction();
+      
+      // Return appropriate error response
+      if (error.message.includes('not found') || error.message.includes('out of stock') || error.message.includes('Insufficient stock')) {
         return res.status(400).json({
           success: false,
-          message: `Invalid product ID for item: ${item.name || 'Unknown'}`,
-          errors: [`Product ID "${productId}" is not a valid MongoDB ObjectId`]
+          message: error.message,
+          errors: [error.message]
         });
       }
       
-      const product = await Product.findById(productId);
-      if (!product) {
-        return res.status(400).json({
-          success: false,
-          message: `Product ${item.name || productId} not found`,
-          errors: [`Product with ID "${productId}" does not exist in database`]
-        });
-      }
-      if (!product.inStock) {
-        return res.status(400).json({
-          success: false,
-          message: `Product ${item.name} is out of stock`,
-          errors: [`Product "${item.name}" is currently out of stock`]
-        });
-      }
+      throw error; // Re-throw to be handled by outer catch
+    } finally {
+      // End session
+      session.endSession();
     }
-
-    // Convert product IDs in items to strings (MongoDB will convert them to ObjectIds)
-    const normalizedItems = items.map((item: any) => ({
-      ...item,
-      product: item.product ? String(item.product) : item.product
-    }));
-
-    const order = await Order.create({
-      user: req.user._id,
-      items: normalizedItems,
-      shippingAddress,
-      billingAddress: billingAddress || shippingAddress,
-      paymentMethod,
-      itemsPrice,
-      shippingPrice,
-      taxPrice,
-      donationAmount: donationAmount || 0,
-      totalPrice
-    });
-
-    // Update product stock
-    for (const item of items) {
-      const product = await Product.findById(item.product);
-      if (product) {
-        product.totalStock -= item.quantity;
-        product.inStock = product.totalStock > 0;
-        await product.save();
-      }
-    }
-
-    res.status(201).json({
-      success: true,
-      data: order
-    });
   } catch (error: any) {
     // Handle validation errors
     if (error.name === 'ValidationError') {

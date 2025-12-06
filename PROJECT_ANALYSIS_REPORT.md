@@ -45,12 +45,15 @@
 - **Location:** Missing routes in `backend/src/routes/`, no subscription controller
 - **Fix Required:** Implement subscription CRUD, scheduling logic, and frontend UI
 
-### 5. **Stock Race Condition**
-- **Severity:** MEDIUM
-- **Issue:** Stock validation happens but no atomic operations or transactions
-- **Location:** `backend/src/controllers/orderController.ts` (lines 100-150)
-- **Impact:** Multiple users could order same last item simultaneously
-- **Fix Required:** Use MongoDB transactions or atomic updates (`$inc` with conditions)
+### 5. **Stock Race Condition - FIXED** ✅
+- **Status:** RESOLVED
+- **Solution Implemented:** 
+  - Implemented MongoDB transactions to ensure atomic order creation and stock updates
+  - Used atomic `$inc` operations with conditions to prevent stock from going negative
+  - Added proper variant stock handling with atomic updates
+  - Transaction rollback on any error ensures data consistency
+- **Location:** `backend/src/controllers/orderController.ts`
+- **Impact:** Multiple users can no longer order the same last item simultaneously - stock is now atomically decremented
 
 ### 6. **Image Upload - No Size/Format Validation on Frontend**
 - **Severity:** LOW
