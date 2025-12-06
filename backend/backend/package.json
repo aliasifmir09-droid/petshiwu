@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "@types/csv-parse": "^1.1.12",
-    "cloudinary": "^1.41.3",
-    "express-mongo-sanitize": "^2.2.0",
-    "multer-storage-cloudinary": "^4.0.0",
-    "xss-clean": "^0.1.4"
-  }
-}
