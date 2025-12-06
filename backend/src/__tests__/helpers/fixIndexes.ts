@@ -26,12 +26,18 @@ export const fixProductIndexes = async () => {
     
     for (const index of skuIndexes) {
       try {
-        console.log(`Dropping index: ${index.name}...`);
-        await productsCollection.dropIndex(index.name);
-        console.log(`✅ Index ${index.name} dropped`);
+        const indexName = index.name || 'variants.sku_1';
+        if (!indexName) {
+          console.log(`  ⚠️  Skipping index with no name`);
+          continue;
+        }
+        console.log(`Dropping index: ${indexName}...`);
+        await productsCollection.dropIndex(indexName);
+        console.log(`✅ Index ${indexName} dropped`);
       } catch (error: any) {
         if (error.code !== 27) { // Index not found
-          console.warn(`Warning dropping index ${index.name}:`, error.message);
+          const indexName = index.name || 'variants.sku_1';
+          console.warn(`Warning dropping index ${indexName}:`, error.message);
         }
       }
     }

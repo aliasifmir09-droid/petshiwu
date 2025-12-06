@@ -192,7 +192,7 @@ describe('Users API', () => {
       // Cleanup
       const userId = response.body.data._id?.toString() || response.body.data._id;
       if (userId) {
-        await User.deleteOne({ _id: userId });
+        await User.deleteOne({ _id: mongoose.Types.ObjectId.createFromHexString(userId.toString()) });
       }
     });
   });
