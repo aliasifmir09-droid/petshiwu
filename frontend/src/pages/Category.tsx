@@ -78,26 +78,45 @@ const Category = () => {
         });
       }
       
-      // Add parent category if it exists - preserve petType parameter
-      if (category.parentCategory && typeof category.parentCategory === 'object') {
-        const parentPath = `/category/${category.parentCategory.slug}`;
-        const parentPathWithPetType = currentPetType && category.petType !== 'all' 
-          ? `${parentPath}?petType=${category.petType}` 
-          : parentPath;
-        crumbs.push({
-          label: category.parentCategory.name,
-          path: parentPathWithPetType
+      // Add category hierarchy - recursively build the full parent chain
+      const categoryChain: Array<{ name: string; slug: string }> = [];
+      
+      // Traverse up the parent category chain and collect all categories
+      const ancestors: Array<{ name: string; slug: string }> = [];
+      let parent = category.parentCategory;
+      
+      while (parent && typeof parent === 'object') {
+        ancestors.push({
+          name: parent.name,
+          slug: parent.slug
         });
+        // Check if parent has a parent (grandparent)
+        parent = parent.parentCategory;
       }
       
-      // Add current category - preserve petType parameter
-      const currentPath = `/category/${category.slug}`;
-      const currentPathWithPetType = currentPetType && category.petType !== 'all'
-        ? `${currentPath}?petType=${category.petType}`
-        : currentPath;
-      crumbs.push({
-        label: category.name,
-        path: currentPathWithPetType
+      // Reverse ancestors to get top-to-bottom order (Supplies -> Toys)
+      ancestors.reverse();
+      
+      // Add ancestors to chain
+      categoryChain.push(...ancestors);
+      
+      // Add current category
+      categoryChain.push({
+        name: category.name,
+        slug: category.slug
+      });
+      
+      // Add all categories in the chain to breadcrumbs (in order: Supplies -> Toys -> Plush Toys)
+      categoryChain.forEach((cat) => {
+        const categoryPath = `/category/${cat.slug}`;
+        const categoryPathWithPetType = currentPetType && category.petType !== 'all'
+          ? `${categoryPath}?petType=${category.petType}`
+          : categoryPath;
+        
+        crumbs.push({
+          label: cat.name,
+          path: categoryPathWithPetType
+        });
       });
     } else if (slug) {
       // Fallback if category not loaded yet

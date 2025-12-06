@@ -158,7 +158,14 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
         idQuery.petType = petType;
       }
       category = await Category.findOne(idQuery)
-        .populate('parentCategory', 'name slug')
+        .populate({
+          path: 'parentCategory',
+          select: 'name slug parentCategory',
+          populate: {
+            path: 'parentCategory',
+            select: 'name slug'
+          }
+        })
         .lean();
     }
     
@@ -166,10 +173,22 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
     if (!category) {
       const normalizedSlug = identifier.toLowerCase().trim();
       
+      // Helper function to populate full parent category hierarchy
+      const populateParentChain = (query: any) => {
+        return query.populate({
+          path: 'parentCategory',
+          select: 'name slug parentCategory',
+          populate: {
+            path: 'parentCategory',
+            select: 'name slug'
+          }
+        });
+      };
+      
       // Try exact match first (with isActive check and petType if provided)
-      category = await Category.findOne(buildQuery({ slug: normalizedSlug }))
-        .populate('parentCategory', 'name slug')
-        .lean();
+      category = await populateParentChain(
+        Category.findOne(buildQuery({ slug: normalizedSlug }))
+      ).lean();
       
       // If not found, try exact match without isActive filter (but still with petType if provided)
       if (!category) {
@@ -177,27 +196,25 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
         if (petType) {
           query.petType = petType;
         }
-        category = await Category.findOne(query)
-          .populate('parentCategory', 'name slug')
-          .lean();
+        category = await populateParentChain(Category.findOne(query)).lean();
       }
       
       // If still not found, try case-insensitive regex match
       if (!category) {
-        category = await Category.findOne(buildQuery({
-          slug: { $regex: new RegExp(`^${normalizedSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
-        }))
-          .populate('parentCategory', 'name slug')
-          .lean();
+        category = await populateParentChain(
+          Category.findOne(buildQuery({
+            slug: { $regex: new RegExp(`^${normalizedSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+          }))
+        ).lean();
       }
       
       // Try partial slug match (e.g., "dry-food" matches "dog-dry-food")
       if (!category) {
-        category = await Category.findOne(buildQuery({
-          slug: { $regex: new RegExp(normalizedSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') }
-        }))
-          .populate('parentCategory', 'name slug')
-          .lean();
+        category = await populateParentChain(
+          Category.findOne(buildQuery({
+            slug: { $regex: new RegExp(normalizedSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') }
+          }))
+        ).lean();
       }
       
       // If still not found, try to find by name (case-insensitive)
@@ -210,11 +227,11 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
         ];
         
         for (const nameMatch of nameVariations) {
-          category = await Category.findOne(buildQuery({
-            name: { $regex: new RegExp(`^${nameMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
-          }))
-            .populate('parentCategory', 'name slug')
-            .lean();
+          category = await populateParentChain(
+            Category.findOne(buildQuery({
+              name: { $regex: new RegExp(`^${nameMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+            }))
+          ).lean();
           
           if (category) break;
         }
@@ -228,16 +245,16 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
         
         // Try singular version
         if (singular !== normalizedSlug) {
-          category = await Category.findOne(buildQuery({ slug: singular }))
-            .populate('parentCategory', 'name slug')
-            .lean();
+          category = await populateParentChain(
+            Category.findOne(buildQuery({ slug: singular }))
+          ).lean();
         }
         
         // Try plural version if singular didn't work
         if (!category && plural !== normalizedSlug) {
-          category = await Category.findOne(buildQuery({ slug: plural }))
-            .populate('parentCategory', 'name slug')
-            .lean();
+          category = await populateParentChain(
+            Category.findOne(buildQuery({ slug: plural }))
+          ).lean();
         }
         
         // Try by name with singular/plural
@@ -247,11 +264,11 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
           const namePlural = nameBase + 's';
           
           for (const nameMatch of [nameSingular, namePlural].filter(n => n !== nameBase)) {
-            category = await Category.findOne(buildQuery({
-              name: { $regex: new RegExp(`^${nameMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
-            }))
-              .populate('parentCategory', 'name slug')
-              .lean();
+            category = await populateParentChain(
+              Category.findOne(buildQuery({
+                name: { $regex: new RegExp(`^${nameMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+              }))
+            ).lean();
             
             if (category) break;
           }
@@ -261,12 +278,12 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
       // If still not found and petType was provided, try without petType filter (fallback)
       if (!category && petType) {
         // Try slug without petType filter
-        category = await Category.findOne({
-          slug: normalizedSlug,
-          isActive: true
-        })
-          .populate('parentCategory', 'name slug')
-          .lean();
+        category = await populateParentChain(
+          Category.findOne({
+            slug: normalizedSlug,
+            isActive: true
+          })
+        ).lean();
         
         // Try singular/plural without petType filter
         if (!category) {
@@ -274,21 +291,21 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
           const plural = normalizedSlug + 's';
           
           if (singular !== normalizedSlug) {
-            category = await Category.findOne({
-              slug: singular,
-              isActive: true
-            })
-              .populate('parentCategory', 'name slug')
-              .lean();
+            category = await populateParentChain(
+              Category.findOne({
+                slug: singular,
+                isActive: true
+              })
+            ).lean();
           }
           
           if (!category && plural !== normalizedSlug) {
-            category = await Category.findOne({
-              slug: plural,
-              isActive: true
-            })
-              .populate('parentCategory', 'name slug')
-              .lean();
+            category = await populateParentChain(
+              Category.findOne({
+                slug: plural,
+                isActive: true
+              })
+            ).lean();
           }
         }
         
@@ -306,9 +323,7 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
         if (petType) {
           query.petType = petType;
         }
-        category = await Category.findOne(query)
-          .populate('parentCategory', 'name slug')
-          .lean();
+        category = await populateParentChain(Category.findOne(query)).lean();
       }
     }
 
