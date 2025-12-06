@@ -205,31 +205,49 @@ const ProductDetail = () => {
     }
 
     // Add category hierarchy if category exists
+    // Recursively build the full category chain (up to 3 levels: Supplies -> Toys -> Plush Toys)
     if (product.category && typeof product.category === 'object') {
-      const category = product.category;
+      const categoryChain: Array<{ name: string; slug: string }> = [];
       
-      // Add parent category if it exists
-      if (category.parentCategory && typeof category.parentCategory === 'object') {
-        const parentPath = `/category/${category.parentCategory.slug}`;
-        const parentPathWithPetType = product.petType && product.petType !== 'other-animals'
-          ? `${parentPath}?petType=${product.petType}`
-          : parentPath;
-        
-        crumbs.push({
-          label: category.parentCategory.name,
-          path: parentPathWithPetType
+      // Traverse up the parent category chain and collect all categories
+      let currentCategory: any = product.category;
+      
+      // First, collect all ancestors by traversing up the parent chain
+      const ancestors: Array<{ name: string; slug: string }> = [];
+      let parent = currentCategory.parentCategory;
+      
+      while (parent && typeof parent === 'object') {
+        ancestors.push({
+          name: parent.name,
+          slug: parent.slug
         });
+        // Check if parent has a parent (grandparent)
+        parent = parent.parentCategory;
       }
       
-      // Add current category
-      const categoryPath = `/category/${category.slug}`;
-      const categoryPathWithPetType = product.petType && product.petType !== 'other-animals'
-        ? `${categoryPath}?petType=${product.petType}`
-        : categoryPath;
+      // Reverse ancestors to get top-to-bottom order (Supplies -> Toys)
+      ancestors.reverse();
       
-      crumbs.push({
-        label: category.name,
-        path: categoryPathWithPetType
+      // Add ancestors to chain
+      categoryChain.push(...ancestors);
+      
+      // Add current category (Plush Toys)
+      categoryChain.push({
+        name: currentCategory.name,
+        slug: currentCategory.slug
+      });
+      
+      // Add all categories in the chain to breadcrumbs (in order: Supplies -> Toys -> Plush Toys)
+      categoryChain.forEach((cat) => {
+        const categoryPath = `/category/${cat.slug}`;
+        const categoryPathWithPetType = product.petType && product.petType !== 'other-animals'
+          ? `${categoryPath}?petType=${product.petType}`
+          : categoryPath;
+        
+        crumbs.push({
+          label: cat.name,
+          path: categoryPathWithPetType
+        });
       });
     }
 
