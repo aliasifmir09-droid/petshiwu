@@ -1,31 +1,49 @@
 # Email Configuration Guide
 
-This guide explains how to configure email sending for the Pet Shop application.
+This guide explains how to configure email sending for the Pet Shop application using SMTP.
 
-## Quick Setup Options
+## GoDaddy Email Setup (Recommended)
 
-### Option 1: Gmail (Easiest - Free)
+If you have email hosting from GoDaddy, use these settings:
 
-1. **Enable 2-Factor Authentication** on your Gmail account:
-   - Go to https://myaccount.google.com/security
-   - Enable 2-Step Verification
+### GoDaddy SMTP Settings
 
-2. **Generate an App Password**:
-   - Go to https://myaccount.google.com/apppasswords
-   - Select "Mail" and "Other (Custom name)"
-   - Enter "Pet Shop" as the name
-   - Copy the 16-character password
+Add these to your `.env` file:
 
-3. **Set Environment Variables**:
-   ```env
-   EMAIL_USER=your-email@gmail.com
-   EMAIL_PASS=your-16-character-app-password
-   FRONTEND_URL=http://localhost:3000
-   ```
+```env
+SMTP_HOST=smtpout.secureserver.net
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@yourdomain.com
+SMTP_PASS=your-email-password
+SMTP_FROM=noreply@yourdomain.com
+FRONTEND_URL=http://localhost:3000
+```
 
-### Option 2: Custom SMTP Server
+**Note:** 
+- Replace `your-email@yourdomain.com` with your actual GoDaddy email address
+- Replace `your-email-password` with your email password
+- Replace `yourdomain.com` with your actual domain
 
-If you have your own SMTP server or use a service like SendGrid, Mailgun, etc.:
+### Alternative GoDaddy Settings (if above doesn't work)
+
+Some GoDaddy email plans use Office 365. Try these settings:
+
+```env
+SMTP_HOST=smtp.office365.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@yourdomain.com
+SMTP_PASS=your-email-password
+SMTP_FROM=noreply@yourdomain.com
+FRONTEND_URL=http://localhost:3000
+```
+
+## Other SMTP Providers
+
+### Custom SMTP Server
+
+If you have your own SMTP server or use another email service:
 
 ```env
 SMTP_HOST=smtp.example.com
@@ -39,12 +57,43 @@ FRONTEND_URL=http://localhost:3000
 
 **Common SMTP Settings:**
 
-- **Gmail**: `smtp.gmail.com`, port `587`, secure `false`
-- **Outlook/Hotmail**: `smtp-mail.outlook.com`, port `587`, secure `false`
-- **SendGrid**: `smtp.sendgrid.net`, port `587`, secure `false`
-- **Mailgun**: `smtp.mailgun.org`, port `587`, secure `false`
+- **Port 587**: Use `SMTP_SECURE=false` (TLS/STARTTLS)
+- **Port 465**: Use `SMTP_SECURE=true` (SSL)
+- **Port 25**: Usually blocked by ISPs, not recommended
 
-### Option 3: Development Mode (No Email Sending)
+### Popular Email Services
+
+**SendGrid:**
+```env
+SMTP_HOST=smtp.sendgrid.net
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=apikey
+SMTP_PASS=your-sendgrid-api-key
+SMTP_FROM=noreply@yourdomain.com
+```
+
+**Mailgun:**
+```env
+SMTP_HOST=smtp.mailgun.org
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-mailgun-username
+SMTP_PASS=your-mailgun-password
+SMTP_FROM=noreply@yourdomain.com
+```
+
+**Amazon SES:**
+```env
+SMTP_HOST=email-smtp.us-east-1.amazonaws.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-ses-smtp-username
+SMTP_PASS=your-ses-smtp-password
+SMTP_FROM=noreply@yourdomain.com
+```
+
+## Development Mode (No Email Configuration)
 
 If you don't configure email settings, the application will:
 - Log verification links to the console
@@ -61,21 +110,15 @@ If you don't configure email settings, the application will:
 Add these to your `.env` file:
 
 ```env
-# Email Configuration (choose one method)
-
-# Method 1: Gmail (recommended for development)
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
-
-# Method 2: Custom SMTP
-SMTP_HOST=smtp.example.com
+# Required SMTP Settings
+SMTP_HOST=smtpout.secureserver.net
 SMTP_PORT=587
 SMTP_SECURE=false
-SMTP_USER=your-email@example.com
-SMTP_PASS=your-password
-SMTP_FROM=noreply@petshiwu.com
+SMTP_USER=your-email@yourdomain.com
+SMTP_PASS=your-email-password
 
-# Frontend URL (for verification links)
+# Optional
+SMTP_FROM=noreply@yourdomain.com
 FRONTEND_URL=http://localhost:3000
 ```
 
@@ -90,35 +133,36 @@ After setting up email, test it by:
 ## Troubleshooting
 
 ### "Email not configured" warning
-- Set `EMAIL_USER` and `EMAIL_PASS` for Gmail, or
-- Set `SMTP_HOST`, `SMTP_USER`, and `SMTP_PASS` for custom SMTP
+- Ensure all three are set: `SMTP_HOST`, `SMTP_USER`, and `SMTP_PASS`
+- Check for typos in variable names
 
-### Gmail "Less secure app" error
-- Use an App Password instead of your regular password
-- Enable 2-Factor Authentication first
+### Connection timeout
+- Verify `SMTP_HOST` is correct
+- Check if port 587 is blocked by firewall
+- Try port 465 with `SMTP_SECURE=true`
+
+### Authentication failed
+- Double-check `SMTP_USER` and `SMTP_PASS`
+- Ensure email password is correct (not account password)
+- Some services require app-specific passwords
 
 ### Emails not being received
 - Check spam/junk folder
-- Verify SMTP settings are correct
+- Verify `SMTP_FROM` address is valid
 - Check server logs for errors
 - Ensure firewall allows SMTP connections
 
-### Development mode
-- In development without email config, check server logs for verification links
-- Links are logged when emails can't be sent
+### GoDaddy-specific issues
+- Make sure your GoDaddy email account is active
+- Verify you're using the correct SMTP host for your plan
+- Some GoDaddy plans use Office 365 - try `smtp.office365.com`
+- Check GoDaddy email settings in your account dashboard
 
 ## Production Recommendations
 
-For production, use a professional email service:
-
-1. **SendGrid** (Free tier: 100 emails/day)
-2. **Mailgun** (Free tier: 5,000 emails/month)
-3. **Amazon SES** (Very affordable, pay per email)
-4. **Resend** (Developer-friendly, good free tier)
-
-These services provide:
-- Better deliverability
-- Email analytics
-- Bounce handling
-- Professional support
-
+For production, ensure:
+- ✅ Use a professional email service (GoDaddy, SendGrid, Mailgun, etc.)
+- ✅ Set `SMTP_FROM` to a valid email address on your domain
+- ✅ Use port 587 with TLS (`SMTP_SECURE=false`) for best compatibility
+- ✅ Test email delivery before going live
+- ✅ Monitor email logs for delivery issues
