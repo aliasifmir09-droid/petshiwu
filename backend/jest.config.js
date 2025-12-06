@@ -24,6 +24,10 @@ module.exports = {
   displayName: {
     name: 'PET-SHOP',
     color: 'blue'
-  }
+  },
+  // Run tests serially to avoid database connection conflicts
+  maxWorkers: 1,
+  // Show full error details
+  showSeed: false
 };
 

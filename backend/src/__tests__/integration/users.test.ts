@@ -66,8 +66,20 @@ describe('Users API', () => {
       const response = await request(app)
         .get('/api/users/me/permissions');
 
-      expect(response.status).toBe(401);
-      expect(response.body.success).toBe(false);
+      // Add detailed logging if assertion fails
+      try {
+        expect(response.status).toBe(401);
+      } catch (e: any) {
+        console.error('STATUS ASSERTION FAILED:');
+        console.error('Expected: 401');
+        console.error('Got:', response.status);
+        console.error('Response:', JSON.stringify(response, null, 2));
+        throw e;
+      }
+
+      if (response.body) {
+        expect(response.body.success).toBe(false);
+      }
     });
 
     it('should return user permissions', async () => {
