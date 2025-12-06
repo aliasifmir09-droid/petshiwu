@@ -16,14 +16,26 @@ describe('validateEnv', () => {
     delete process.env.MONGODB_URI;
     delete process.env.JWT_SECRET;
 
+    // Mock process.exit to prevent actual exit
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation((code?: number) => {
+      throw new Error(`process.exit(${code})`);
+    });
+
     expect(() => validateEnv()).toThrow();
+    exitSpy.mockRestore();
   });
 
   it('should throw error if JWT_SECRET is missing', () => {
     process.env.MONGODB_URI = 'mongodb://localhost:27017/test';
     delete process.env.JWT_SECRET;
 
+    // Mock process.exit to prevent actual exit
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation((code?: number) => {
+      throw new Error(`process.exit(${code})`);
+    });
+
     expect(() => validateEnv()).toThrow();
+    exitSpy.mockRestore();
   });
 
   it('should pass validation with required variables', () => {
