@@ -17,6 +17,10 @@ describe('Orders API', () => {
     process.env.NODE_ENV = 'test';
     await connectDatabase();
     
+    // Fix indexes before creating test data
+    const { fixProductIndexes } = await import('../helpers/fixIndexes');
+    await fixProductIndexes();
+    
     adminToken = await getAdminToken(app);
     const customer = await createTestUser(app, { role: 'customer' });
     customerToken = customer.token;

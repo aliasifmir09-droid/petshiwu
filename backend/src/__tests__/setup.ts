@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import mongoose from 'mongoose';
 
 // Load test environment variables
 dotenv.config({ path: path.join(__dirname, '../../.env.test') });
@@ -8,6 +9,22 @@ dotenv.config({ path: path.join(__dirname, '../../.env.test') });
 process.env.NODE_ENV = process.env.NODE_ENV || 'test';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-jwt-secret-key-minimum-32-characters-long';
 process.env.MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/pet-ecommerce-test';
+
+// Fix database indexes after connection (runs once per test suite)
+let indexesFixed = false;
+export const ensureIndexesFixed = async () => {
+  if (indexesFixed || !mongoose.connection.readyState) {
+    return;
+  }
+  
+  try {
+    const { fixProductIndexes } = await import('./helpers/fixIndexes');
+    await fixProductIndexes();
+    indexesFixed = true;
+  } catch (error) {
+    // Ignore errors in test setup
+  }
+};
 
 // Suppress console logs during tests (optional - remove if you want to see logs)
 // global.console = {
