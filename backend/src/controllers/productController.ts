@@ -398,9 +398,59 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
         const rawDescription = String(row.description).trim();
         const formattedDescription = formatProductDescription(rawDescription);
         
+        // Generate unique slug from product name
+        // If slug already exists, append brand and/or category to make it unique
+        let baseSlug = String(row.name).trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+        let uniqueSlug = baseSlug;
+        let slugAttempts = 0;
+        const maxSlugAttempts = 10;
+        
+        // Check if slug already exists and make it unique if needed
+        while (slugAttempts < maxSlugAttempts) {
+          const existingProduct = await Product.findOne({ slug: uniqueSlug }).lean();
+          if (!existingProduct) {
+            break; // Slug is unique, we can use it
+          }
+          
+          // Slug exists, make it unique by appending brand, category, or timestamp
+          slugAttempts++;
+          if (slugAttempts === 1) {
+            // First attempt: append brand
+            const brandSlug = String(row.brand).trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+            uniqueSlug = `${baseSlug}-${brandSlug}`;
+          } else if (slugAttempts === 2) {
+            // Second attempt: append category name
+            try {
+              const categoryDoc = await Category.findById(categoryObjectId).select('name').lean();
+              const categoryName = categoryDoc?.name || '';
+              if (categoryName) {
+                const categorySlug = categoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+                uniqueSlug = `${baseSlug}-${categorySlug}`;
+              } else {
+                uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-6)}`;
+              }
+            } catch {
+              uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-6)}`;
+            }
+          } else {
+            // Subsequent attempts: append timestamp
+            uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-6)}-${slugAttempts}`;
+          }
+        }
+        
+        if (slugAttempts >= maxSlugAttempts) {
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            error: `Could not generate unique slug for product: ${row.name}`
+          });
+          continue;
+        }
+
         // Create product data - use the validated ObjectId
         const productData: any = {
           name: String(row.name).trim(),
+          slug: uniqueSlug, // Use the unique slug we generated
           description: formattedDescription || rawDescription,
           shortDescription: row.shortDescription ? String(row.shortDescription).trim() : '',
           brand: String(row.brand).trim(),
@@ -440,11 +490,22 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
         results.success++;
 
       } catch (error: any) {
-        results.failed++;
-        results.errors.push({
-          row: rowNumber,
-          error: error.message || 'Unknown error'
-        });
+        // Handle duplicate slug error specifically (MongoDB duplicate key error code 11000)
+        if ((error.code === 11000 || error.name === 'MongoServerError') && error.keyPattern?.slug) {
+          // Duplicate slug error - this shouldn't happen with our pre-check, but handle it anyway
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            error: `Product with same slug already exists. The system tried to generate a unique slug but it still conflicts. Please ensure product names are unique or include brand/category in the name. Original error: ${error.message}`
+          });
+        } else {
+          // Other errors
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            error: error.message || 'Unknown error'
+          });
+        }
       }
     }
 
