@@ -22,27 +22,15 @@ describe('Users API', () => {
       const { fixProductIndexes } = await import('../helpers/fixIndexes');
       await fixProductIndexes();
       
-      try {
-        adminToken = await getAdminToken(app);
-        if (!adminToken) {
-          throw new Error('Failed to get admin token');
-        }
-        console.log('✅ Admin token obtained');
-      } catch (error: any) {
-        console.error('❌ Failed to get admin token:', error.message);
-        throw error;
+      adminToken = await getAdminToken(app);
+      if (!adminToken) {
+        throw new Error('Failed to get admin token');
       }
 
-      try {
-        const customer = await createTestUser(app, { role: 'customer' });
-        customerToken = customer.token;
-        if (!customerToken) {
-          throw new Error('Failed to get customer token');
-        }
-        console.log('✅ Customer token obtained');
-      } catch (error: any) {
-        console.error('❌ Failed to create test user:', error.message);
-        throw error;
+      const customer = await createTestUser(app, { role: 'customer' });
+      customerToken = customer.token;
+      if (!customerToken) {
+        throw new Error('Failed to get customer token');
       }
 
       // Create test category and product for wishlist tests with unique name
@@ -69,11 +57,8 @@ describe('Users API', () => {
         variants: [], // Empty variants array to avoid SKU unique index issues
         images: ['https://example.com/image.jpg']
       });
-      
-      console.log('✅ beforeAll completed successfully');
     } catch (error: any) {
-      console.error('❌ beforeAll failed:', error.message);
-      console.error('Stack:', error.stack);
+      console.error('beforeAll failed:', error.message);
       throw error;
     }
   });

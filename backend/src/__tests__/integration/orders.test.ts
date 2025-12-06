@@ -96,17 +96,8 @@ describe('Orders API', () => {
           totalPrice: testProduct.basePrice + 5.99 + 2.50
         });
       
-      // Log for debugging
-      if (response.status !== 401) {
-        console.log('Unexpected status:', response.status);
-        console.log('Response body:', JSON.stringify(response.body, null, 2));
-      }
-      
-      // Protect middleware should return 401 before validation runs
       expect(response.status).toBe(401);
-      if (response.body) {
-        expect(response.body.success).toBe(false);
-      }
+      expect(response.body.success).toBe(false);
     });
 
     it('should create order with valid data', async () => {
