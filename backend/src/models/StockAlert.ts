@@ -43,6 +43,7 @@ const stockAlertSchema = new Schema<IStockAlert>(
 stockAlertSchema.index({ product: 1, user: 1 }, { unique: true });
 stockAlertSchema.index({ product: 1, isNotified: 1 });
 stockAlertSchema.index({ user: 1 });
+stockAlertSchema.index({ isNotified: 1, createdAt: 1 }); // For batch notification queries
 
 export default mongoose.model<IStockAlert>('StockAlert', stockAlertSchema);
 

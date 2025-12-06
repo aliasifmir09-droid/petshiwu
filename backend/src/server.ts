@@ -19,6 +19,7 @@ import { isCloudinaryConfigured } from './utils/cloudinary';
 import { sanitizeResponse } from './middleware/sanitizeResponse';
 import User from './models/User';
 import { setupSwagger } from './utils/swagger';
+import { initRedis } from './utils/cache';
 
 // Load env vars
 dotenv.config();
@@ -44,6 +45,9 @@ import donationRoutes from './routes/donations';
 
 // Connect to database
 connectDatabase();
+
+// Initialize Redis cache (non-blocking, app works without Redis)
+initRedis();
 
 // Auto-create admin user if it doesn't exist
 let adminUserCheckAttempts = 0;

@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import Category from '../models/Category';
 import { AuthRequest } from '../middleware/auth';
 import logger from '../utils/logger';
+import { cache, cacheKeys } from '../utils/cache';
 
 // Helper function to normalize category _id to string
 const normalizeCategoryId = (category: any): any => {
@@ -40,10 +41,20 @@ const normalizeCategories = (categories: any[]): any[] => {
 // Get all categories (public - only active)
 export const getCategories = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const petType = req.query.petType as string;
+    const cacheKey = cacheKeys.categories(petType);
+
+    // Try to get from cache
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      logger.debug(`Cache HIT: ${cacheKey}`);
+      return res.status(200).json(cached);
+    }
+
     const query: any = { isActive: true };
 
-    if (req.query.petType) {
-      query.petType = req.query.petType;
+    if (petType) {
+      query.petType = petType;
     }
 
     const categories = await Category.find(query)
@@ -54,10 +65,15 @@ export const getCategories = async (req: Request, res: Response, next: NextFunct
     // Normalize _id to string for all categories
     const normalizedCategories = normalizeCategories(categories);
 
-    res.status(200).json({
+    const response = {
       success: true,
       data: normalizedCategories
-    });
+    };
+
+    // Cache the response (30 minutes for categories - they don't change often)
+    await cache.set(cacheKey, response, 1800);
+
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }
@@ -143,6 +159,14 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
   try {
     const identifier = req.params.id;
     const petType = req.query.petType ? String(req.query.petType).toLowerCase().trim() : null;
+    
+    // Try to get from cache
+    const cacheKey = cacheKeys.category(`${identifier}-${petType || 'all'}`);
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      logger.debug(`Cache HIT: ${cacheKey}`);
+      return res.status(200).json(cached);
+    }
     
     // Build base query with petType filter if provided
     const buildQuery = (slugQuery: any) => {

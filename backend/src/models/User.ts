@@ -205,6 +205,8 @@ userSchema.methods.generateEmailVerificationToken = function (): string {
 // Performance indexes
 userSchema.index({ role: 1, isActive: 1 }); // For filtering users by role
 userSchema.index({ createdAt: -1 }); // For sorting by registration date
+userSchema.index({ email: 1, emailVerified: 1 }); // Email verification queries
+userSchema.index({ 'addresses._id': 1 }); // Address lookups
 // Note: email index is created automatically by unique: true
 
 export default mongoose.model<IUser>('User', userSchema);

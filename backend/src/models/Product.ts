@@ -185,6 +185,10 @@ productSchema.index({ deletedAt: 1 }); // For soft delete queries
 productSchema.index({ isActive: 1, deletedAt: 1, createdAt: -1 }); // For default sorting with active filter
 productSchema.index({ isActive: 1, deletedAt: 1, basePrice: 1 }); // For price sorting
 productSchema.index({ isActive: 1, deletedAt: 1, averageRating: -1 }); // For rating sorting
+productSchema.index({ slug: 1, isActive: 1, deletedAt: 1 }); // Slug lookup optimization
+productSchema.index({ inStock: 1, isActive: 1 }); // In-stock filtering
+productSchema.index({ averageRating: 1, totalReviews: 1 }); // Rating-based queries
+productSchema.index({ brand: 1, isActive: 1 }); // Brand filtering with active status
 
 // Create sparse unique index for variants.sku (only indexes non-null values)
 // This allows multiple products with no variants (null SKUs) without duplicate key errors

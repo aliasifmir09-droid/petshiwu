@@ -666,6 +666,25 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     }
     
     const skip = (page - 1) * limit;
+
+    // Generate cache key from query parameters
+    const queryString = JSON.stringify({
+      page,
+      limit,
+      category: req.query.category,
+      petType: req.query.petType,
+      brand: req.query.brand,
+      search: req.query.search,
+      sort: req.query.sort
+    });
+    const cacheKey = cacheKeys.products(queryString);
+
+    // Try to get from cache
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      logger.debug(`Cache HIT: ${cacheKey}`);
+      return res.status(200).json(cached);
+    }
     
     // Build query - products are now permanently deleted, so no need to filter by deletedAt
     // Only filter by isActive for active/inactive products
@@ -969,7 +988,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     // Normalize _id to string for all products (use filtered products)
     const normalizedProducts = normalizeProducts(activeProducts);
 
-    res.status(200).json({
+    const response = {
       success: true,
       data: normalizedProducts,
       pagination: {
@@ -978,7 +997,12 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
         total,
         pages: Math.ceil(total / limit)
       }
-    });
+    };
+
+    // Cache the response (5 minutes for product listings)
+    await cache.set(cacheKey, response, 300);
+
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }
@@ -988,6 +1012,15 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
 export const getProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const identifier = req.params.id;
+    
+    // Try to get from cache
+    const cacheKey = cacheKeys.product(identifier);
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      logger.debug(`Cache HIT: ${cacheKey}`);
+      return res.status(200).json(cached);
+    }
+
     let product;
 
     // Try to find by slug first, then by ID if slug doesn't match
@@ -1039,10 +1072,15 @@ export const getProduct = async (req: Request, res: Response, next: NextFunction
     // Normalize _id to string
     const normalizedProduct = normalizeProductId(product);
 
-    res.status(200).json({
+    const response = {
       success: true,
       data: normalizedProduct
-    });
+    };
+
+    // Cache the response (15 minutes for single product)
+    await cache.set(cacheKey, response, 900);
+
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }

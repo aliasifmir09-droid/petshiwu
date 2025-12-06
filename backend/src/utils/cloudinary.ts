@@ -101,11 +101,63 @@ export const cloudinaryUpload = multer({
   },
 });
 
-// Helper function to get Cloudinary URL
-export const getCloudinaryUrl = (publicId: string, resourceType: 'image' | 'video' = 'image'): string => {
-  return cloudinary.url(publicId, {
+// Helper function to get Cloudinary URL with CDN optimizations
+export const getCloudinaryUrl = (
+  publicId: string, 
+  resourceType: 'image' | 'video' = 'image',
+  options?: {
+    width?: number;
+    height?: number;
+    quality?: string | number;
+    format?: string;
+    transformation?: any[];
+  }
+): string => {
+  const defaultOptions: any = {
     resource_type: resourceType,
     secure: true,
+    // CDN optimizations
+    fetch_format: 'auto', // Auto-optimize format (WebP when supported)
+    quality: 'auto', // Auto quality optimization
+  };
+
+  // Add size transformations if provided
+  if (options?.width || options?.height) {
+    defaultOptions.width = options.width;
+    defaultOptions.height = options.height;
+    defaultOptions.crop = 'limit'; // Maintain aspect ratio
+  }
+
+  // Add quality if specified
+  if (options?.quality) {
+    defaultOptions.quality = options.quality;
+  }
+
+  // Add format if specified
+  if (options?.format) {
+    defaultOptions.fetch_format = options.format;
+  }
+
+  // Add custom transformations if provided
+  if (options?.transformation) {
+    defaultOptions.transformation = options.transformation;
+  }
+
+  return cloudinary.url(publicId, defaultOptions);
+};
+
+// Helper to get optimized image URL for product listings
+export const getOptimizedImageUrl = (publicId: string, size: 'thumbnail' | 'medium' | 'large' = 'medium'): string => {
+  const sizes = {
+    thumbnail: { width: 200, height: 200 },
+    medium: { width: 500, height: 500 },
+    large: { width: 1000, height: 1000 }
+  };
+
+  return getCloudinaryUrl(publicId, 'image', {
+    ...sizes[size],
+    quality: 'auto',
+    format: 'auto'
   });
 };
 

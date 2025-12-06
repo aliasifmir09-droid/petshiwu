@@ -102,8 +102,11 @@ reviewSchema.post('save', async function () {
 
 // Indexes for performance optimization
 reviewSchema.index({ product: 1, isApproved: 1, createdAt: -1 }); // Product reviews sorted by date
+reviewSchema.index({ product: 1, isApproved: 1, rating: 1 }); // Product reviews by rating
+reviewSchema.index({ product: 1, isApproved: 1, helpfulCount: -1 }); // Most helpful reviews
 reviewSchema.index({ user: 1 }); // User's reviews
 reviewSchema.index({ rating: 1 }); // Rating filtering
+reviewSchema.index({ order: 1 }); // Order-based reviews
 
 export default mongoose.model<IReview>('Review', reviewSchema);
 
