@@ -2,6 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 import User from '../models/User';
 import { sendTokenResponse } from '../utils/generateToken';
 import { AuthRequest } from '../middleware/auth';
+import { sendVerificationEmail } from '../utils/emailService';
+import crypto from 'crypto';
+import logger from '../utils/logger';
 
 // Register user
 export const register = async (req: Request, res: Response, next: NextFunction) => {
@@ -22,10 +25,45 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       lastName,
       email,
       password,
-      phone
+      phone,
+      emailVerified: false // New users need to verify email
     });
 
-    sendTokenResponse((user._id as any).toString(), 201, res);
+    // Generate verification token
+    const verificationToken = user.generateEmailVerificationToken();
+    await user.save({ validateBeforeSave: false });
+
+    try {
+      // Send verification email
+      await sendVerificationEmail(user.email, verificationToken, user.firstName);
+      
+      res.status(201).json({
+        success: true,
+        message: 'Registration successful! Please check your email to verify your account.',
+        data: {
+          _id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          emailVerified: user.emailVerified
+        }
+      });
+    } catch (emailError: any) {
+      // If email sending fails, still create user but log error
+      logger.error('Error sending verification email:', emailError);
+      // Don't fail registration if email fails - user can request resend
+      res.status(201).json({
+        success: true,
+        message: 'Registration successful! However, we could not send the verification email. Please use the resend verification email feature.',
+        data: {
+          _id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          emailVerified: user.emailVerified
+        }
+      });
+    }
   } catch (error) {
     next(error);
   }
@@ -60,6 +98,16 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         message: 'Invalid credentials'
       });
     }
+
+    // Check if email is verified (only for customers, admin/staff are auto-verified)
+    if (user.role === 'customer' && !user.emailVerified) {
+      return res.status(403).json({
+        success: false,
+        message: 'Please verify your email address before logging in. Check your email for the verification link.',
+        requiresVerification: true
+      });
+    }
+
     sendTokenResponse((user._id as any).toString(), 200, res);
   } catch (error: any) {
     next(error);
@@ -145,6 +193,103 @@ export const updatePassword = async (req: AuthRequest, res: Response, next: Next
     await user.save();
 
     sendTokenResponse((user._id as any).toString(), 200, res);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Verify email
+export const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { token } = req.query;
+
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification token is required'
+      });
+    }
+
+    // Hash the token to compare with stored hash
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    // Find user with this token and check if it's not expired
+    const user = await User.findOne({
+      emailVerificationToken: hashedToken,
+      emailVerificationExpires: { $gt: new Date() }
+    }).select('+emailVerificationToken +emailVerificationExpires');
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token'
+      });
+    }
+
+    // Verify the email
+    user.emailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      success: true,
+      message: 'Email verified successfully! You can now log in.'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Resend verification email
+export const resendVerificationEmail = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    const user = await User.findOne({ email }).select('+emailVerificationToken +emailVerificationExpires');
+
+    if (!user) {
+      // Don't reveal if user exists or not (security best practice)
+      return res.status(200).json({
+        success: true,
+        message: 'If an account with this email exists and is not verified, a verification email has been sent.'
+      });
+    }
+
+    if (user.emailVerified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is already verified'
+      });
+    }
+
+    // Generate new verification token
+    const verificationToken = user.generateEmailVerificationToken();
+    await user.save({ validateBeforeSave: false });
+
+    try {
+      await sendVerificationEmail(user.email, verificationToken, user.firstName);
+      res.status(200).json({
+        success: true,
+        message: 'Verification email sent successfully. Please check your email.'
+      });
+    } catch (emailError: any) {
+      logger.error('Error sending verification email:', emailError);
+      return res.status(500).json({
+        success: false,
+        message: 'Error sending verification email. Please try again later.'
+      });
+    }
   } catch (error) {
     next(error);
   }

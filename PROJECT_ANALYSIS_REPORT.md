@@ -107,11 +107,38 @@
 - **Risk:** Users cannot recover accounts
 - **Fix:** Implement password reset with secure tokens and email
 
-### 4. **No Account Verification/Email Confirmation**
-- **Issue:** Users can register without email verification
-- **Location:** `backend/src/controllers/authController.ts`
-- **Risk:** Fake accounts, spam registrations
-- **Fix:** Add email verification flow
+### 4. **No Account Verification/Email Confirmation - FIXED** ✅
+- **Status:** RESOLVED
+- **Solution Implemented:**
+  - Installed nodemailer for email sending
+  - Created email service utility with HTML email templates
+  - Added email verification fields to User model:
+    - `emailVerified` (boolean, default: false)
+    - `emailVerificationToken` (hashed token)
+    - `emailVerificationExpires` (24-hour expiration)
+  - Updated registration flow:
+    - Users receive verification email after registration
+    - Account is created but email is not verified
+    - Users cannot login until email is verified (customers only)
+    - Admin/staff users are auto-verified (created by admins)
+  - Added verification endpoints:
+    - `GET /api/auth/verify-email?token=xxx` - Verify email with token
+    - `POST /api/auth/resend-verification` - Resend verification email
+  - Login now checks email verification status (customers only)
+  - Email service supports SMTP configuration or test account fallback
+  - Professional HTML email templates with verification links
+  - Token expiration: 24 hours
+  - Security: Tokens are hashed before storage
+- **Location:** 
+  - `backend/src/utils/emailService.ts` (email service)
+  - `backend/src/models/User.ts` (verification fields)
+  - `backend/src/controllers/authController.ts` (verification logic)
+  - `backend/src/routes/auth.ts` (verification routes)
+- **Impact:** Prevents fake accounts, spam registrations, and ensures valid email addresses
+- **Configuration Required:**
+  - Set `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, `SMTP_PORT`, `SMTP_SECURE` for production
+  - Set `FRONTEND_URL` for verification links
+  - Or use test account (Ethereal) for development
 
 ### 5. **CORS Configuration - Review Needed**
 - **Issue:** CORS settings may be too permissive

@@ -29,6 +29,9 @@ export interface IUser extends Document {
   role: 'customer' | 'admin' | 'staff';
   permissions?: IPermissions;
   isActive: boolean;
+  emailVerified: boolean;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
   addresses: IAddress[];
   wishlist: mongoose.Types.ObjectId[];
   passwordChangedAt?: Date;
@@ -38,6 +41,7 @@ export interface IUser extends Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
   isPasswordExpired(): boolean;
   getDaysUntilPasswordExpires(): number;
+  generateEmailVerificationToken(): string;
 }
 
 const addressSchema = new Schema<IAddress>({
@@ -107,6 +111,18 @@ const userSchema = new Schema<IUser>(
     },
     passwordExpiresAt: {
       type: Date
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false
+    },
+    emailVerificationToken: {
+      type: String,
+      select: false // Don't include in queries by default
+    },
+    emailVerificationExpires: {
+      type: Date,
+      select: false
     }
   },
   {
@@ -128,6 +144,8 @@ userSchema.pre('save', async function (next) {
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + 30);
     this.passwordExpiresAt = expirationDate;
+    // Auto-verify admin and staff emails (they're created by admins)
+    this.emailVerified = true;
   }
   
   next();
@@ -166,6 +184,22 @@ userSchema.methods.getDaysUntilPasswordExpires = function (): number {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   
   return diffDays > 0 ? diffDays : 0;
+};
+
+// Generate email verification token
+userSchema.methods.generateEmailVerificationToken = function (): string {
+  const crypto = require('crypto');
+  const token = crypto.randomBytes(32).toString('hex');
+  
+  this.emailVerificationToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+  
+  // Token expires in 24 hours
+  this.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  
+  return token;
 };
 
 // Performance indexes
