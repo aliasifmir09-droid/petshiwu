@@ -12,6 +12,7 @@ import {
   removeFromWishlist,
   getWishlist
 } from '../controllers/userController';
+import { shareWishlist, getSharedWishlist, emailWishlist } from '../controllers/wishlistController';
 import { protect } from '../middleware/auth';
 import { isAdmin, hasPermission } from '../middleware/permissions';
 import {
@@ -41,6 +42,11 @@ router.get('/database/stats', protect, isAdmin, getDatabaseStats);
 router.post('/wishlist', protect, addToWishlist);
 router.delete('/wishlist', protect, removeFromWishlist);
 router.get('/wishlist', protect, getWishlist);
+router.get('/wishlist/share', protect, shareWishlist);
+router.post('/wishlist/email', protect, emailWishlist);
+
+// Public wishlist sharing route
+router.get('/wishlist/:userId', getSharedWishlist);
 
 export default router;
 
