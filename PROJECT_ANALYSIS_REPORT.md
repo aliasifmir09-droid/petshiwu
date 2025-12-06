@@ -85,11 +85,21 @@
 - **Location:** `backend/src/utils/logger.ts`, `backend/src/controllers/`
 - **Impact:** Reduced information leakage, better performance, structured logging for production
 
-### 2. **No Rate Limiting on Critical Endpoints**
-- **Issue:** Rate limiting exists but may not cover all sensitive endpoints
+### 2. **No Rate Limiting on Critical Endpoints - FIXED** ✅
+- **Status:** RESOLVED
+- **Solution Implemented:**
+  - Enhanced rate limiting configuration with specific limiters for critical endpoints
+  - **Login endpoint:** 5 attempts per 15 minutes (strict)
+  - **Registration endpoint:** 3 attempts per hour (prevents spam accounts)
+  - **Password update endpoint:** 5 attempts per 15 minutes (prevents brute force)
+  - **Order creation endpoint:** 10 orders per 15 minutes (prevents abuse, only applies to POST)
+  - **Donation endpoints:** 10 attempts per 15 minutes (prevents abuse)
+  - **File upload endpoints:** 20 uploads per 15 minutes (prevents DoS)
+  - **General API limiter:** 100 requests per 15 minutes (fallback for all other routes)
+  - All limiters include standard headers and proper error messages
+  - Applied in correct order: specific limiters before general limiter
 - **Location:** `backend/src/server.ts`
-- **Risk:** Brute force attacks, API abuse
-- **Fix:** Ensure rate limiting on login, registration, password reset, order creation
+- **Impact:** Prevents brute force attacks, API abuse, spam registrations, and DoS attacks
 
 ### 3. **Password Reset - NOT IMPLEMENTED**
 - **Issue:** No password reset functionality found

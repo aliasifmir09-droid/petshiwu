@@ -152,10 +152,55 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true, // Don't count successful requests
   standardHeaders: true,
   legacyHeaders: false,
+});
+
+// Rate limiting for registration to prevent spam accounts
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 3, // Maximum 3 registrations per hour per IP
+  message: 'Too many registration attempts from this IP, please try again after 1 hour.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Rate limiting for password update to prevent brute force
+const passwordUpdateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Maximum 5 password update attempts per 15 minutes
+  message: 'Too many password update attempts from this IP, please try again after 15 minutes.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Rate limiting for order creation to prevent abuse
+const orderCreationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Maximum 10 orders per 15 minutes per IP
+  message: 'Too many order creation attempts from this IP, please try again after 15 minutes.',
+  standardHeaders: true,
+  legacyHeaders: false,
   skip: (req) => {
-    // Skip rate limiting for successful logins
-    return false;
+    // Only apply to POST requests (order creation)
+    return req.method !== 'POST';
   }
+});
+
+// Rate limiting for donation endpoints to prevent abuse
+const donationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Maximum 10 donation attempts per 15 minutes per IP
+  message: 'Too many donation attempts from this IP, please try again after 15 minutes.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Rate limiting for file uploads to prevent DoS
+const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Maximum 20 uploads per 15 minutes per IP
+  message: 'Too many file upload attempts from this IP, please try again after 15 minutes.',
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // General API rate limiting to prevent DoS attacks
@@ -167,11 +212,25 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Apply rate limiting to auth endpoints
-app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/register', authLimiter);
+// Apply rate limiting to specific critical endpoints BEFORE general API limiter
+// Order matters: specific limiters should be applied before general limiter
 
-// Apply general rate limiting to all API routes
+// Auth endpoints - strict limits
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', registerLimiter);
+app.use('/api/auth/updatepassword', passwordUpdateLimiter);
+
+// Order creation - prevent abuse (only applies to POST requests)
+app.use('/api/orders', orderCreationLimiter);
+
+// Donation endpoints - prevent abuse
+app.use('/api/donations/create-intent', donationLimiter);
+app.use('/api/donations/confirm', donationLimiter);
+
+// File upload endpoints - prevent DoS
+app.use('/api/upload', uploadLimiter);
+
+// Apply general rate limiting to all other API routes (after specific limiters)
 app.use('/api', apiLimiter);
 
 // Body parser with size limits to prevent DoS attacks
