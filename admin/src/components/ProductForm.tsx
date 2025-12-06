@@ -908,7 +908,9 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
             {imageUrls.length === 0 && (
               <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
                 <p className="text-gray-500 mb-2">No images added yet</p>
-                <p className="text-xs text-gray-400">Upload images or add image URLs above</p>
+                <p className="text-xs text-gray-400">
+                  Upload images or add image URLs above. Max file size: 100MB. Allowed formats: JPEG, PNG, GIF, WebP, SVG, MP4, WebM, OGG, MOV, AVI
+                </p>
               </div>
             )}
           </div>
