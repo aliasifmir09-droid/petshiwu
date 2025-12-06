@@ -158,6 +158,11 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Apply rate limiters to both versioned and legacy routes
+const applyRateLimiters = (path: string) => {
+  app.use(path, authLimiter);
+};
+
 // Rate limiting for registration to prevent spam accounts
 const registerLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
@@ -216,16 +221,17 @@ const apiLimiter = rateLimit({
 // Order matters: specific limiters should be applied before general limiter
 
 // Auth endpoints - strict limits
-app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/register', registerLimiter);
-app.use('/api/auth/updatepassword', passwordUpdateLimiter);
+// Apply rate limiters to both versioned and legacy routes
+app.use(['/api/v1/auth/login', '/api/auth/login'], authLimiter);
+app.use(['/api/v1/auth/register', '/api/auth/register'], registerLimiter);
+app.use(['/api/v1/auth/updatepassword', '/api/auth/updatepassword'], passwordUpdateLimiter);
 
 // Order creation - prevent abuse (only POST requests)
-app.post('/api/orders', orderCreationLimiter);
+app.post(['/api/v1/orders', '/api/orders'], orderCreationLimiter);
 
 // Donation endpoints - prevent abuse
-app.use('/api/donations/create-intent', donationLimiter);
-app.use('/api/donations/confirm', donationLimiter);
+app.use(['/api/v1/donations/create-intent', '/api/donations/create-intent'], donationLimiter);
+app.use(['/api/v1/donations/confirm', '/api/donations/confirm'], donationLimiter);
 
 // File upload endpoints - prevent DoS
 app.use('/api/upload', uploadLimiter);
@@ -401,7 +407,7 @@ app.use((req, res, next) => {
 });
 
 // Set Cache-Control headers for API responses
-app.use('/api', (req, res, next) => {
+app.use(['/api', '/api/v1'], (req, res, next) => {
   // Don't cache API responses by default (except for GET requests to static data)
   if (req.method === 'GET' && (req.path?.includes('/products') || req.path?.includes('/categories'))) {
     // Cache product/category data for 5 minutes
@@ -420,9 +426,23 @@ if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_SWAGGER === 'tru
   console.log('📚 API Documentation available at /api-docs');
 }
 
-// Mount routers
-app.use('/api/auth', authRoutes);
+// API Versioning - Mount routers with version prefix
+const API_VERSION = process.env.API_VERSION || 'v1';
+const API_PREFIX = `/api/${API_VERSION}`;
 
+// Mount routers with version prefix
+app.use(`${API_PREFIX}/auth`, authRoutes);
+app.use(`${API_PREFIX}/products`, productRoutes);
+app.use(`${API_PREFIX}/categories`, categoryRoutes);
+app.use(`${API_PREFIX}/orders`, orderRoutes);
+app.use(`${API_PREFIX}/reviews`, reviewRoutes);
+app.use(`${API_PREFIX}/upload`, uploadRoutes);
+app.use(`${API_PREFIX}/users`, userRoutes);
+app.use(`${API_PREFIX}/pet-types`, petTypeRoutes);
+app.use(`${API_PREFIX}/donations`, donationRoutes);
+
+// Legacy routes (without version) - redirect to v1 for backward compatibility
+app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
@@ -437,16 +457,16 @@ app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Pet Shop API Server',
-    version: '1.0.0',
+    version: API_VERSION,
     endpoints: {
-      health: '/api/health',
-      auth: '/api/auth',
-      products: '/api/products',
-      categories: '/api/categories',
-      orders: '/api/orders',
-      reviews: '/api/reviews',
-      users: '/api/users',
-      upload: '/api/upload',
+        health: '/api/health',
+        auth: [`${API_PREFIX}/auth`, '/api/auth'],
+        products: [`${API_PREFIX}/products`, '/api/products'],
+        categories: [`${API_PREFIX}/categories`, '/api/categories'],
+        orders: [`${API_PREFIX}/orders`, '/api/orders'],
+        reviews: [`${API_PREFIX}/reviews`, '/api/reviews'],
+        users: [`${API_PREFIX}/users`, '/api/users'],
+        upload: [`${API_PREFIX}/upload`, '/api/upload'],
       petTypes: '/api/pet-types',
       donations: '/api/donations'
     },

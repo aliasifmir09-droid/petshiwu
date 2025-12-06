@@ -5,6 +5,7 @@ import { Trash2, ShoppingBag, AlertTriangle } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
+import { TAX_RATE, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST } from '@/config/constants';
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -21,8 +22,8 @@ const Cart = () => {
   });
 
   const subtotal = getTotalPrice();
-  const shipping = subtotal > 49 ? 0 : 5.99;
-  const tax = subtotal * 0.08; // 8% tax
+  const shipping = subtotal > FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
+  const tax = subtotal * TAX_RATE;
   const total = subtotal + shipping + tax;
 
   const handleConfirmAction = () => {
@@ -171,7 +172,7 @@ const Cart = () => {
 
             {subtotal < 49 && (
               <p className="text-sm text-gray-600 mb-6">
-                Add ${(49 - subtotal).toFixed(2)} more for FREE shipping!
+                Add ${(FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2)} more for FREE shipping!
               </p>
             )}
 

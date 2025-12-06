@@ -9,6 +9,7 @@ import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import CheckoutDonationModal from '@/components/CheckoutDonationModal';
+import { normalizeId } from '@/utils/idNormalizer';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -32,68 +33,7 @@ const Checkout = () => {
   const [paymentMethod] = useState<'cod'>('cod');
   const [donationAmount, setDonationAmount] = useState<number>(0);
   const [showDonationModal, setShowDonationModal] = useState(false);
-  const [pendingOrderData, setPendingOrderData] = useState<any>(null);
-
-  // Helper function to normalize product ID (same as in cartStore)
-  const normalizeId = (id: any): string | null => {
-    if (!id) return null;
-    if (typeof id === 'string') {
-      // Validate it's a MongoDB ObjectId format
-      if (/^[0-9a-fA-F]{24}$/.test(id)) {
-        return id;
-      }
-      return id; // Return anyway, backend will validate
-    }
-    if (id && typeof id === 'object') {
-      // Try toString() method
-      if (typeof id.toString === 'function') {
-        const str = id.toString();
-        if (str && str !== '[object Object]' && /^[0-9a-fA-F]{24}$/.test(str)) {
-          return str;
-        }
-      }
-      // Try common ObjectId properties
-      const possibleProps = ['id', '_id', '_str', '$oid', 'oid', 'value', 'hex'];
-      for (const prop of possibleProps) {
-        if (id[prop] && typeof id[prop] === 'string' && /^[0-9a-fA-F]{24}$/.test(id[prop])) {
-          return id[prop];
-        }
-      }
-      // Try valueOf()
-      if (typeof id.valueOf === 'function') {
-        const value = id.valueOf();
-        if (typeof value === 'string' && /^[0-9a-fA-F]{24}$/.test(value)) {
-          return value;
-        }
-      }
-      // Try JSON.stringify
-      try {
-        const jsonStr = JSON.stringify(id);
-        const parsed = JSON.parse(jsonStr);
-        if (parsed.$oid && /^[0-9a-fA-F]{24}$/.test(parsed.$oid)) {
-          return parsed.$oid;
-        }
-        if (parsed.oid && /^[0-9a-fA-F]{24}$/.test(parsed.oid)) {
-          return parsed.oid;
-        }
-        if (typeof parsed === 'string' && /^[0-9a-fA-F]{24}$/.test(parsed)) {
-          return parsed;
-        }
-      } catch (e) {
-        // JSON operations failed
-      }
-      // Check all string properties
-      for (const key in id) {
-        if (Object.prototype.hasOwnProperty.call(id, key)) {
-          const value = id[key];
-          if (typeof value === 'string' && /^[0-9a-fA-F]{24}$/.test(value)) {
-            return value;
-          }
-        }
-      }
-    }
-    return null;
-  };
+  const [pendingOrderData, setPendingOrderData] = useState<unknown>(null);
 
   // Function to refresh product data from API
   const refreshCartProducts = async () => {

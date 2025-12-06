@@ -567,7 +567,7 @@ const ProductDetail = () => {
               <Truck className="text-primary-600" size={24} />
               <div>
                 <p className="font-medium">Free Shipping</p>
-                <p className="text-sm text-gray-600">On orders over $49</p>
+                <p className="text-sm text-gray-600">On orders over ${FREE_SHIPPING_THRESHOLD}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
