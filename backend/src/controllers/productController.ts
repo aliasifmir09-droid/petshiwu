@@ -599,37 +599,56 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
           }
         }
         
-        // If we have a valid categoryId, find subcategories
+        // If we have a valid categoryId, find all descendant subcategories recursively
         if (categoryId) {
-          // Also filter by petType if provided (to avoid cross-pet-type matches)
-          const subcategoryQuery: any = {
-            $or: [
-              { _id: categoryId },
-              { parentCategory: categoryId }
-            ],
-            isActive: true
+          // Helper function to recursively find all descendant category IDs
+          const findAllDescendantIds = async (parentId: mongoose.Types.ObjectId, visited = new Set<string>()): Promise<mongoose.Types.ObjectId[]> => {
+            const parentIdStr = parentId.toString();
+            
+            // Prevent infinite loops
+            if (visited.has(parentIdStr)) {
+              return [];
+            }
+            visited.add(parentIdStr);
+            
+            const result: mongoose.Types.ObjectId[] = [parentId];
+            
+            // Build query for direct children
+            const childQuery: any = {
+              parentCategory: parentId,
+              isActive: true
+            };
+            
+            if (req.query.petType) {
+              childQuery.petType = String(req.query.petType).toLowerCase().trim();
+            }
+            
+            // Find direct children
+            const children = await Category.find(childQuery).select('_id').lean();
+            
+            // Recursively find descendants of each child
+            for (const child of children) {
+              const childId = child._id as mongoose.Types.ObjectId;
+              const descendants = await findAllDescendantIds(childId, visited);
+              result.push(...descendants);
+            }
+            
+            return result;
           };
           
-          if (req.query.petType) {
-            subcategoryQuery.petType = String(req.query.petType).toLowerCase().trim();
-          }
+          // Find all descendant categories (including the category itself)
+          const categoryIds = await findAllDescendantIds(categoryId);
           
-          // Find all subcategories of this category (including the category itself)
-          const subcategories = await Category.find(subcategoryQuery).select('_id').lean();
+          // Remove duplicates (in case of any circular references)
+          const uniqueCategoryIds = Array.from(new Set(categoryIds.map(id => id.toString())))
+            .map(id => new mongoose.Types.ObjectId(id));
           
-          const categoryIds = subcategories.map(cat => cat._id);
-          
-          // Always include the selected category itself, even if no subcategories found
-          if (!categoryIds.includes(categoryId)) {
-            categoryIds.push(categoryId);
-          }
-          
-          if (categoryIds.length > 0) {
-            // Include products in the selected category and all its subcategories
-            baseQuery.category = { $in: categoryIds };
+          if (uniqueCategoryIds.length > 0) {
+            // Include products in the selected category and all its descendant subcategories
+            baseQuery.category = { $in: uniqueCategoryIds };
             
             // Log category filtering for debugging
-            console.log(`[GET PRODUCTS] Filtering by category: ${categoryId} (found ${categoryIds.length} categories including subcategories)`);
+            console.log(`[GET PRODUCTS] Filtering by category: ${categoryId} (found ${uniqueCategoryIds.length} categories including all descendants)`);
           } else {
             console.warn(`[GET PRODUCTS] No valid category IDs found for category filter: ${categoryParam}`);
           }
@@ -1305,16 +1324,49 @@ export const getUniqueBrands = async (req: Request, res: Response, next: NextFun
           if (foundCategory?._id) {
             categoryId = foundCategory._id as mongoose.Types.ObjectId;
             
-            // Include subcategories
-            const subcategories = await Category.find({
-              $or: [
-                { _id: categoryId },
-                { parentCategory: categoryId }
-              ],
-              isActive: true
-            }).select('_id').lean();
-            const categoryIds = subcategories.map(cat => cat._id);
-            filterQuery.category = { $in: categoryIds };
+            // Helper function to recursively find all descendant category IDs
+            const findAllDescendantIds = async (parentId: mongoose.Types.ObjectId, visited = new Set<string>()): Promise<mongoose.Types.ObjectId[]> => {
+              const parentIdStr = parentId.toString();
+              
+              // Prevent infinite loops
+              if (visited.has(parentIdStr)) {
+                return [];
+              }
+              visited.add(parentIdStr);
+              
+              const result: mongoose.Types.ObjectId[] = [parentId];
+              
+              // Build query for direct children
+              const childQuery: any = {
+                parentCategory: parentId,
+                isActive: true
+              };
+              
+              if (req.query.petType) {
+                childQuery.petType = String(req.query.petType).toLowerCase().trim();
+              }
+              
+              // Find direct children
+              const children = await Category.find(childQuery).select('_id').lean();
+              
+              // Recursively find descendants of each child
+              for (const child of children) {
+                const childId = child._id as mongoose.Types.ObjectId;
+                const descendants = await findAllDescendantIds(childId, visited);
+                result.push(...descendants);
+              }
+              
+              return result;
+            };
+            
+            // Find all descendant categories (including the category itself)
+            const categoryIds = await findAllDescendantIds(categoryId);
+            
+            // Remove duplicates
+            const uniqueCategoryIds = Array.from(new Set(categoryIds.map(id => id.toString())))
+              .map(id => new mongoose.Types.ObjectId(id));
+            
+            filterQuery.category = { $in: uniqueCategoryIds };
           }
         }
         
