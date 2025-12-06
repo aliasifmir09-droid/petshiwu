@@ -31,7 +31,7 @@ describe('Orders API', () => {
       isActive: true
     });
 
-    // Create test product with unique slug
+    // Create test product with unique slug (no variants to avoid SKU index issues)
     const productTimestamp = Date.now();
     testProduct = await Product.create({
       name: `Test Product ${productTimestamp}`,
@@ -42,7 +42,9 @@ describe('Orders API', () => {
       petType: 'dog',
       category: testCategory._id,
       isActive: true,
-      inStock: true
+      inStock: true,
+      variants: [], // Empty variants array to avoid SKU unique index issues
+      images: ['https://example.com/image.jpg']
     });
   });
 
@@ -72,18 +74,27 @@ describe('Orders API', () => {
         items: [
           {
             product: testProduct._id.toString(),
+            name: testProduct.name,
+            image: testProduct.images?.[0] || 'https://example.com/image.jpg',
             quantity: 2,
             price: testProduct.basePrice
           }
         ],
         shippingAddress: {
+          firstName: 'John',
+          lastName: 'Doe',
           street: '123 Test St',
           city: 'Test City',
           state: 'TS',
           zipCode: '12345',
-          country: 'USA'
+          country: 'USA',
+          phone: '+1234567890'
         },
-        paymentMethod: 'card'
+        paymentMethod: 'credit_card',
+        itemsPrice: testProduct.basePrice * 2,
+        shippingPrice: 5.99,
+        taxPrice: 2.50,
+        totalPrice: (testProduct.basePrice * 2) + 5.99 + 2.50
       };
 
       const response = await request(app)

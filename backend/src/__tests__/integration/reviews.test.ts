@@ -29,7 +29,7 @@ describe('Reviews API', () => {
       isActive: true
     });
 
-    // Create test product with unique slug
+    // Create test product with unique slug (no variants to avoid SKU index issues)
     const productTimestamp = Date.now();
     testProduct = await Product.create({
       name: `Test Product ${productTimestamp}`,
@@ -40,7 +40,9 @@ describe('Reviews API', () => {
       petType: 'dog',
       category: testCategory._id,
       isActive: true,
-      inStock: true
+      inStock: true,
+      variants: [], // Empty variants array to avoid SKU unique index issues
+      images: ['https://example.com/image.jpg']
     });
   });
 

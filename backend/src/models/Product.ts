@@ -57,8 +57,8 @@ const productVariantSchema = new Schema<IProductVariant>({
   },
   sku: {
     type: String,
-    required: true,
-    unique: true
+    required: true
+    // Note: unique constraint removed - will create sparse unique index manually below
   }
 });
 
@@ -196,7 +196,12 @@ productSchema.index({ deletedAt: 1 }); // For soft delete queries
 productSchema.index({ isActive: 1, deletedAt: 1, createdAt: -1 }); // For default sorting with active filter
 productSchema.index({ isActive: 1, deletedAt: 1, basePrice: 1 }); // For price sorting
 productSchema.index({ isActive: 1, deletedAt: 1, averageRating: -1 }); // For rating sorting
-// Note: slug, variants.sku, basePrice, averageRating, createdAt, isFeatured+isActive indexes already exist in schema
+
+// Create sparse unique index for variants.sku (only indexes non-null values)
+// This allows multiple products with no variants (null SKUs) without duplicate key errors
+productSchema.index({ 'variants.sku': 1 }, { unique: true, sparse: true });
+
+// Note: slug, basePrice, averageRating, createdAt, isFeatured+isActive indexes already exist in schema
 
 export default mongoose.model<IProduct>('Product', productSchema);
 

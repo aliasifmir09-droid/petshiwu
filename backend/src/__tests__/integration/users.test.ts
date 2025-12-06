@@ -40,7 +40,9 @@ describe('Users API', () => {
       petType: 'dog',
       category: testCategory._id,
       isActive: true,
-      inStock: true
+      inStock: true,
+      variants: [], // Empty variants array to avoid SKU unique index issues
+      images: ['https://example.com/image.jpg']
     });
   });
 
