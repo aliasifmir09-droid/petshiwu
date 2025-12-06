@@ -57,7 +57,6 @@ interface CSVRow {
   isFeatured?: string;
   inStock?: string;
   stock?: string | number;
-  autoshipEligible?: string;
   variants?: string;
   variantSize?: string;
   variantPrice?: string | number;
@@ -448,8 +447,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           ingredients: row.ingredients ? String(row.ingredients).trim() : '',
           isActive: String(row.isActive || 'true').toLowerCase() === 'false' ? false : true,
           isFeatured: String(row.isFeatured || 'false').toLowerCase() === 'true' ? true : false,
-          inStock: String(row.inStock || 'true').toLowerCase() === 'false' ? false : true,
-          autoshipEligible: String(row.autoshipEligible || 'false').toLowerCase() === 'true' ? true : false
+          inStock: String(row.inStock || 'true').toLowerCase() === 'false' ? false : true
         };
 
         // Add product to batch for bulk insert

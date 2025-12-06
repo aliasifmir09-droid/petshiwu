@@ -30,8 +30,6 @@ export interface IProduct extends Document {
   isFeatured: boolean;
   inStock: boolean;
   totalStock: number;
-  autoshipEligible: boolean;
-  autoshipDiscount?: number;
   deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -140,15 +138,6 @@ const productSchema = new Schema<IProduct>(
     totalStock: {
       type: Number,
       default: 0
-    },
-    autoshipEligible: {
-      type: Boolean,
-      default: false
-    },
-    autoshipDiscount: {
-      type: Number,
-      min: 0,
-      max: 100
     },
     deletedAt: {
       type: Date,

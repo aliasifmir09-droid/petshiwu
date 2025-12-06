@@ -20,7 +20,7 @@ export const adminService = {
     const csvContent = `# PRODUCT IMPORT TEMPLATE
 # Instructions:
 # 1. Required fields: name, description, brand, category, basePrice, petType, images
-# 2. Optional fields: shortDescription, compareAtPrice, tags, features, ingredients, isActive, isFeatured, inStock, stock, autoshipEligible
+# 2. Optional fields: shortDescription, compareAtPrice, tags, features, ingredients, isActive, isFeatured, inStock, stock
 # 3. Images: Separate multiple URLs with commas or pipe (|) characters
 # 4. Tags & Features: Separate multiple values with commas
 # 5. Pet Types: Use lowercase (dog, cat, bird, fish, small-pet, reptile)
@@ -33,10 +33,10 @@ export const adminService = {
 #
 # Remove this comment section (lines starting with #) before importing
 
-name,description,shortDescription,brand,category,basePrice,compareAtPrice,petType,images,tags,features,ingredients,isActive,isFeatured,inStock,stock,autoshipEligible,variantSize,variantPrice,variantStock,variantSku
-Premium Dog Food,High-quality premium dog food with natural ingredients for all dog breeds. Rich in protein and essential nutrients to keep your dog healthy and active.,Premium nutrition for your furry friend,PetBrand,Dog > Food > Dry Food,49.99,59.99,dog,https://example.com/dog-food-1.jpg,https://example.com/dog-food-2.jpg,premium,healthy,nutrition,Natural chicken, brown rice, vegetables,true,true,true,100,true,5kg,49.99,50,DOG-FOOD-5KG-001
-Organic Cat Litter,100% natural and biodegradable cat litter. Odor-free and clumping formula for easy cleanup.,Eco-friendly cat litter,OrganicPet,Cat Litter,24.99,,cat,https://example.com/cat-litter-1.jpg,organic,eco-friendly,biodegradable,Natural clay,true,false,true,75,false,10lb,24.99,75,CAT-LITTER-10LB-001
-Bird Seed Mix,Delicious seed mix for all types of birds. Contains sunflower seeds, millet, and other nutritious grains.,Nutritious seed blend for birds,BirdCare,Bird Food,12.99,15.99,bird,https://example.com/bird-seed-1.jpg,bird-food,seeds,nutrition,Sunflower seeds, millet, corn,true,false,true,200,false,2lb,12.99,200,BIRD-SEED-2LB-001
+name,description,shortDescription,brand,category,basePrice,compareAtPrice,petType,images,tags,features,ingredients,isActive,isFeatured,inStock,stock,variantSize,variantPrice,variantStock,variantSku
+Premium Dog Food,High-quality premium dog food with natural ingredients for all dog breeds. Rich in protein and essential nutrients to keep your dog healthy and active.,Premium nutrition for your furry friend,PetBrand,Dog > Food > Dry Food,49.99,59.99,dog,https://example.com/dog-food-1.jpg,https://example.com/dog-food-2.jpg,premium,healthy,nutrition,Natural chicken, brown rice, vegetables,true,true,true,100,5kg,49.99,50,DOG-FOOD-5KG-001
+Organic Cat Litter,100% natural and biodegradable cat litter. Odor-free and clumping formula for easy cleanup.,Eco-friendly cat litter,OrganicPet,Cat Litter,24.99,,cat,https://example.com/cat-litter-1.jpg,organic,eco-friendly,biodegradable,Natural clay,true,false,true,75,10lb,24.99,75,CAT-LITTER-10LB-001
+Bird Seed Mix,Delicious seed mix for all types of birds. Contains sunflower seeds, millet, and other nutritious grains.,Nutritious seed blend for birds,BirdCare,Bird Food,12.99,15.99,bird,https://example.com/bird-seed-1.jpg,bird-food,seeds,nutrition,Sunflower seeds, millet, corn,true,false,true,200,2lb,12.99,200,BIRD-SEED-2LB-001
 Fish Tank Filter,High-performance aquarium filter with 3-stage filtration system. Suitable for tanks up to 50 gallons.,Advanced filtration system,AquaTech,Fish Supplies,89.99,109.99,fish,https://example.com/filter-1.jpg,filter,aquarium,equipment,Plastic, carbon filter, true,true,true,30,false,,
 Small Pet Bedding,Soft and comfortable bedding for hamsters, rabbits, and guinea pigs. Absorbent and easy to clean.,Comfortable bedding for small pets,SmallPetCo,Small Pet Supplies,8.99,,small-pet,https://example.com/bedding-1.jpg,bedding,comfort,absorbent,Recycled paper,true,false,true,150,false,,
 Reptile Heat Lamp,Full-spectrum heat lamp for reptiles. Provides UVB and heat for optimal reptile health.,Essential heating for reptiles,ReptilePro,Reptile Supplies,34.99,44.99,reptile,https://example.com/heat-lamp-1.jpg,heating,uvb,reptile-care,Glass, ceramic,true,true,true,25,false,,

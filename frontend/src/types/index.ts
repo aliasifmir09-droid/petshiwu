@@ -66,9 +66,6 @@ export interface Product {
   isFeatured: boolean;
   inStock: boolean;
   totalStock: number;
-  autoshipEligible: boolean;
-  autoshipDiscount?: number;
-  autoshipFrequency?: number;
   createdAt: string;
   updatedAt: string;
 }

@@ -105,8 +105,6 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     ingredients: product?.ingredients || '',
     isActive: product?.isActive ?? true,
     isFeatured: product?.isFeatured ?? false,
-    autoshipEligible: product?.autoshipEligible ?? false,
-    autoshipDiscount: product?.autoshipDiscount || ''
   });
 
   const [variants, setVariants] = useState(
@@ -185,9 +183,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
         features: product.features?.join('\n') || prev.features,
         ingredients: product.ingredients || prev.ingredients,
         isActive: product.isActive ?? prev.isActive,
-        isFeatured: product.isFeatured ?? prev.isFeatured,
-        autoshipEligible: product.autoshipEligible ?? prev.autoshipEligible,
-        autoshipDiscount: product.autoshipDiscount || prev.autoshipDiscount
+      isFeatured: product.isFeatured ?? prev.isFeatured
       }));
       
       if (product.variants) {
@@ -560,8 +556,6 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       ingredients: formData.ingredients?.trim() || undefined,
       isActive: formData.isActive,
       isFeatured: formData.isFeatured,
-      autoshipEligible: formData.autoshipEligible,
-      autoshipDiscount: formData.autoshipDiscount ? parseFloat(String(formData.autoshipDiscount)) : undefined,
       variants: validatedVariants
     };
 
@@ -1004,37 +998,6 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
             </div>
           </div>
 
-          {/* Autoship */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Autoship Settings</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.autoshipEligible}
-                    onChange={(e) => setFormData({ ...formData, autoshipEligible: e.target.checked })}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-sm font-medium">Autoship Eligible</span>
-                </label>
-              </div>
-              {formData.autoshipEligible && (
-                <div>
-                  <label className="block text-sm font-medium mb-2">Autoship Discount (%)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={formData.autoshipDiscount}
-                    onChange={(e) => setFormData({ ...formData, autoshipDiscount: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="10"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
 
           {/* Status */}
           <div>

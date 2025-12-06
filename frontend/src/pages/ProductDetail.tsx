@@ -397,11 +397,6 @@ const ProductDetail = () => {
                 </span>
               )}
             </div>
-            {product.autoshipEligible && product.autoshipDiscount && (
-              <p className="text-green-600 mt-2">
-                Save {product.autoshipDiscount}% with Autoship: ${(price * (1 - product.autoshipDiscount / 100)).toFixed(2)}
-              </p>
-            )}
           </div>
 
           {/* Variants */}
@@ -549,11 +544,6 @@ const ProductDetail = () => {
                   {product.petType.charAt(0).toUpperCase() + product.petType.slice(1)}
                 </span>
               )}
-              {product.autoshipEligible && (
-                <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                  Autoship Available
-                </span>
-              )}
             </div>
 
             {/* Tags */}
@@ -629,31 +619,6 @@ const ProductDetail = () => {
             </div>
           )}
 
-          {/* Autoship Details */}
-          {product.autoshipEligible && product.autoshipDiscount && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-              <h3 className="text-xl font-semibold mb-3 text-green-900">Autoship & Save</h3>
-              <div className="space-y-2">
-                <p className="text-green-800">
-                  <span className="font-bold text-2xl">{product.autoshipDiscount}% OFF</span> with Autoship
-                </p>
-                <p className="text-green-700">
-                  First Autoship Price: <span className="font-bold">${(price * (1 - product.autoshipDiscount / 100)).toFixed(2)}</span>
-                </p>
-                {product.autoshipFrequency && (
-                  <p className="text-sm text-green-600">
-                    Delivered every {product.autoshipFrequency} days (you can adjust frequency)
-                  </p>
-                )}
-                <ul className="list-disc list-inside text-sm text-green-700 mt-3 space-y-1">
-                  <li>Save on every order</li>
-                  <li>Free shipping on all Autoship orders</li>
-                  <li>Skip, pause, or cancel anytime</li>
-                  <li>Manage deliveries from your account</li>
-                </ul>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

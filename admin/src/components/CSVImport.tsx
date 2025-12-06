@@ -238,7 +238,6 @@ const CSVImport = ({ onClose, onImportComplete }: CSVImportProps) => {
                 <div><strong>isFeatured</strong> - true or false (default: false)</div>
                 <div><strong>inStock</strong> - true or false (default: true)</div>
                 <div><strong>stock</strong> - Total stock quantity (number)</div>
-                <div><strong>autoshipEligible</strong> - true or false (default: false)</div>
                 <div><strong>variantSize</strong> - Size for variant (e.g., 5kg, Small)</div>
                 <div><strong>variantPrice</strong> - Price for this variant</div>
                 <div><strong>variantStock</strong> - Stock for this variant</div>

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { generateProductUrl } from '@/utils/productUrl';
-import { Heart, Star, ShoppingCart, TrendingUp, Clock, Zap } from 'lucide-react';
+import { Heart, Star, ShoppingCart, TrendingUp, Clock } from 'lucide-react';
 import { Product } from '@/types';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useCartStore } from '@/stores/cartStore';
@@ -10,10 +10,9 @@ import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 interface ProductCardProps {
   product: Product;
   hideCartButton?: boolean;
-  hideAutoship?: boolean;
 }
 
-const ProductCard = memo(({ product, hideCartButton = false, hideAutoship = false }: ProductCardProps) => {
+const ProductCard = memo(({ product, hideCartButton = false }: ProductCardProps) => {
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
   const { addToCart } = useCartStore();
   // Convert _id to string if it's an object (MongoDB ObjectId)
@@ -98,11 +97,6 @@ const ProductCard = memo(({ product, hideCartButton = false, hideAutoship = fals
               🔥 SAVE {discountPercent}%
             </span>
           )}
-          {product.autoshipEligible && !hideAutoship && (
-            <span className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
-              🔄 Autoship
-            </span>
-          )}
           {product.isFeatured && (
             <span className="bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
               ⭐ Featured
@@ -177,15 +171,6 @@ const ProductCard = memo(({ product, hideCartButton = false, hideAutoship = fals
               )}
             </div>
 
-            {/* Autoship Price with Special Badge */}
-            {product.autoshipEligible && product.autoshipDiscount && !hideAutoship && (
-              <div className="flex items-center gap-1.5 mt-2 p-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-md">
-                <Zap size={14} className="text-white" />
-                <p className="text-xs text-white font-bold">
-                  ${(product.basePrice * (1 - product.autoshipDiscount / 100)).toFixed(2)} with Autoship - Save {product.autoshipDiscount}%!
-                </p>
-              </div>
-            )}
           </div>
 
           {/* Urgency Indicator with Animations */}
