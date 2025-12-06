@@ -172,17 +172,13 @@ const passwordUpdateLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Rate limiting for order creation to prevent abuse
+// Rate limiting for order creation to prevent abuse (POST only)
 const orderCreationLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10, // Maximum 10 orders per 15 minutes per IP
   message: 'Too many order creation attempts from this IP, please try again after 15 minutes.',
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => {
-    // Only apply to POST requests (order creation)
-    return req.method !== 'POST';
-  }
 });
 
 // Rate limiting for donation endpoints to prevent abuse
