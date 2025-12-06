@@ -114,10 +114,19 @@ describe('Pet Types API', () => {
 
       // Cleanup
       if (response.body.data?._id) {
-        const petTypeId = typeof response.body.data._id === 'string' 
-          ? response.body.data._id 
-          : response.body.data._id.toString();
-        await PetType.deleteOne({ _id: petTypeId });
+        let petTypeId: string;
+        if (typeof response.body.data._id === 'string') {
+          petTypeId = response.body.data._id;
+        } else if (response.body.data._id && typeof response.body.data._id.toString === 'function') {
+          petTypeId = response.body.data._id.toString();
+        } else {
+          // Skip cleanup if _id format is unexpected
+          return;
+        }
+        // Validate ObjectId format before using
+        if (mongoose.Types.ObjectId.isValid(petTypeId)) {
+          await PetType.deleteOne({ _id: new mongoose.Types.ObjectId(petTypeId) });
+        }
       }
     });
   });

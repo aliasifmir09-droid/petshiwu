@@ -29,10 +29,11 @@ describe('Reviews API', () => {
       isActive: true
     });
 
-    // Create test product
+    // Create test product with unique slug
+    const productTimestamp = Date.now();
     testProduct = await Product.create({
-      name: 'Test Product',
-      slug: `test-product-${Date.now()}`,
+      name: `Test Product ${productTimestamp}`,
+      slug: `test-product-${productTimestamp}`,
       description: 'Test description',
       brand: 'Test Brand',
       basePrice: 29.99,
