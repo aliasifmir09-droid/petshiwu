@@ -1,5 +1,5 @@
 import swaggerJsdoc from 'swagger-jsdoc';
-import { Express } from 'express';
+import { Application } from 'express';
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -70,7 +70,7 @@ const options: swaggerJsdoc.Options = {
 
 export const swaggerSpec = swaggerJsdoc(options);
 
-export const setupSwagger = (app: Express) => {
+export const setupSwagger = (app: Application) => {
   const swaggerUi = require('swagger-ui-express');
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
     customCss: '.swagger-ui .topbar { display: none }',
