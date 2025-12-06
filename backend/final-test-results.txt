@@ -1,0 +1,850 @@
+﻿node.exe : npm warn config ignoring workspace config at 
+C:\Users\mmurt\Downloads\pet-shop\backend/.npmrc
+At C:\Program Files\nodejs\npm.ps1:29 char:3
++   & $NODE_EXE $NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn config...\backend/.npmrc 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+> pet-ecommerce-backend@1.0.0 test
+> jest
+
+  console.log
+    Attempting to connect to MongoDB...
+
+      at connectDatabase (src/utils/database.ts:8:13)
+
+  console.log
+    MongoDB URI: mongodb://127.0.0.1:27017/pet-ecommerce-test
+
+      at connectDatabase (src/utils/database.ts:9:13)
+
+  console.log
+    Γ£à MongoDB Connected Successfully: 127.0.0.1
+
+      at connectDatabase (src/utils/database.ts:24:13)
+
+  console.log
+    Dropping index: variants.sku_1_sparse...
+
+      at fixProductIndexes (src/__tests__/helpers/fixIndexes.ts:34:17)
+
+  console.log
+    Γ£à Index variants.sku_1_sparse dropped
+
+      at fixProductIndexes (src/__tests__/helpers/fixIndexes.ts:36:17)
+
+  console.log
+    Creating sparse unique index on variants.sku...
+
+      at fixProductIndexes (src/__tests__/helpers/fixIndexes.ts:47:15)
+
+  console.log
+    Γ£à Sparse index created
+
+      at fixProductIndexes (src/__tests__/helpers/fixIndexes.ts:52:15)
+
+  console.log
+    Γ£à Recreated test admin with known password
+
+      at getAdminToken (src/__tests__/helpers/testHelpers.ts:86:15)
+
+  console.log
+    Γ£à Successfully obtained admin token
+
+      at getAdminToken (src/__tests__/helpers/testHelpers.ts:113:13)
+
+  console.log
+    Γ£à Admin token obtained
+
+      at Object.<anonymous> (src/__tests__/integration/users.test.ts:30:17)
+
+  console.log
+    Γ£à Customer token obtained
+
+      at Object.<anonymous> (src/__tests__/integration/users.test.ts:42:17)
+
+  console.log
+    Γ£à beforeAll completed successfully
+
+      at Object.<anonymous> (src/__tests__/integration/users.test.ts:73:15)
+
+  console.warn
+    ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...
+
+    [0m [90m 30 |[39m     
+     [90m 31 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'disconnected'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 32 |[39m       console[33m.[39mwarn([32m'ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...'[39m)[33m;[39m
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 33 |[39m     })[33m;[39m
+     [90m 34 |[39m     
+     [90m 35 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'reconnected'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at NativeConnection.<anonymous> (src/utils/database.ts:32:15)
+      at NativeConnection.set (../node_modules/mongoose/lib/connection.js:149:12)
+      at NativeConnection.onClose (../node_modules/mongoose/lib/connection.js:1319:19)
+      at NativeConnection._close (../node_modules/mongoose/lib/connection.js:1268:12)
+      at Object.<anonymous> (src/__tests__/integration/users.test.ts:88:5)
+
+FAIL PET-SHOP src/__tests__/integration/users.test.ts
+  Users API
+    GET /api/users/me/permissions
+      ΓêÜ should require authentication (5 ms)
+      ΓêÜ should return user permissions (12 ms)
+    GET /api/users/staff
+      ΓêÜ should require authentication (4 ms)
+      ΓêÜ should require admin role (8 ms)
+      ΓêÜ should return staff users for admin (18 ms)
+    POST /api/users/staff
+      ΓêÜ should require admin role (6 ms)
+      ├ù should create staff user (80 ms)
+    GET /api/users/customers
+      ΓêÜ should require admin/staff permissions (10 ms)
+      ΓêÜ should return customers for admin (30 ms)
+    POST /api/users/wishlist
+      ΓêÜ should require authentication (3 ms)
+      ΓêÜ should add product to wishlist (14 ms)
+    GET /api/users/wishlist
+      ΓêÜ should require authentication (3 ms)
+      ΓêÜ should return user wishlist (24 ms)
+    DELETE /api/users/wishlist
+      ΓêÜ should require authentication (3 ms)
+      ΓêÜ should remove product from wishlist (7 ms)
+    GET /api/users/database/stats
+      ΓêÜ should require admin role (9 ms)
+      ΓêÜ should return database stats for admin (46 ms)
+
+  ΓùÅ Users API ΓÇ║ POST /api/users/staff ΓÇ║ should create staff user
+
+    BSONError: hex string must be 24 characters
+
+    [0m [90m 193 |[39m       [36mconst[39m userId [33m=[39m response[33
+m.[39mbody[33m.[39mdata[33m.[39m_id[33m?[39m[33m.[39mtoString() 
+[33m||[39m response[33m.[39mbody[33m.[39mdata[33m.[39m_id[33m;[39m
+     [90m 194 |[39m       [36mif[39m (userId) {
+    [31m[1m>[22m[39m[90m 195 |[39m         [36mawait[39m 
+[33mUser[39m[33m.[39mdeleteOne({ _id[33m:[39m mongoose[33m.[39m[33mTyp
+es[39m[33m.[39m[33mObjectId[39m[33m.[39mcreateFromHexString(userId[33m.
+[39mtoString()) })[33m;[39m
+     [90m     |[39m                                                          
+   [31m[1m^[22m[39m
+     [90m 196 |[39m       }
+     [90m 197 |[39m     })[33m;[39m
+     [90m 198 |[39m   })[33m;[39m[0m
+
+      at Function.createFromHexString 
+(../node_modules/bson/src/objectid.ts:333:13)
+      at Object.<anonymous> (src/__tests__/integration/users.test.ts:195:61)
+
+  console.log
+    Attempting to connect to MongoDB...
+
+      at connectDatabase (src/utils/database.ts:8:13)
+
+  console.log
+    MongoDB URI: mongodb://127.0.0.1:27017/pet-ecommerce-test
+
+      at connectDatabase (src/utils/database.ts:9:13)
+
+  console.log
+    Γ£à MongoDB Connected Successfully: 127.0.0.1
+
+      at connectDatabase (src/utils/database.ts:24:13)
+
+  console.log
+    Dropping index: variants.sku_1_sparse...
+
+      at fixProductIndexes (src/__tests__/helpers/fixIndexes.ts:34:17)
+
+  console.log
+    Γ£à Index variants.sku_1_sparse dropped
+
+      at fixProductIndexes (src/__tests__/helpers/fixIndexes.ts:36:17)
+
+  console.log
+    Creating sparse unique index on variants.sku...
+
+      at fixProductIndexes (src/__tests__/helpers/fixIndexes.ts:47:15)
+
+  console.log
+    Γ£à Sparse index created
+
+      at fixProductIndexes (src/__tests__/helpers/fixIndexes.ts:52:15)
+
+  console.log
+    Γ£à Recreated test admin with known password
+
+      at getAdminToken (src/__tests__/helpers/testHelpers.ts:86:15)
+
+  console.log
+    Γ£à Successfully obtained admin token
+
+      at getAdminToken (src/__tests__/helpers/testHelpers.ts:113:13)
+
+  console.warn
+    ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...
+
+    [0m [90m 30 |[39m     
+     [90m 31 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'disconnected'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 32 |[39m       console[33m.[39mwarn([32m'ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...'[39m)[33m;[39m
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 33 |[39m     })[33m;[39m
+     [90m 34 |[39m     
+     [90m 35 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'reconnected'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at NativeConnection.<anonymous> (src/utils/database.ts:32:15)
+      at NativeConnection.set (../node_modules/mongoose/lib/connection.js:149:12)
+      at NativeConnection.onClose (../node_modules/mongoose/lib/connection.js:1319:19)
+      at NativeConnection._close (../node_modules/mongoose/lib/connection.js:1268:12)
+      at Object.<anonymous> (src/__tests__/integration/orders.test.ts:63:5)
+
+FAIL PET-SHOP src/__tests__/integration/orders.test.ts
+  Orders API
+    POST /api/orders
+      ΓêÜ should require authentication (4 ms)
+      ├ù should create order with valid data (20 ms)
+      ΓêÜ should return 400 for invalid order data (13 ms)
+    GET /api/orders/myorders
+      ΓêÜ should require authentication (6 ms)
+      ΓêÜ should return user orders (12 ms)
+      ΓêÜ should support pagination (9 ms)
+    GET /api/orders/:id
+      ΓêÜ should require authentication (3 ms)
+      ΓêÜ should return 404 for non-existent order (6 ms)
+    GET /api/orders/track/:id
+      ΓêÜ should track order without authentication (2 ms)
+    GET /api/orders/all
+      ΓêÜ should require authentication (2 ms)
+      ΓêÜ should require admin permissions (5 ms)
+      ΓêÜ should return all orders for admin (16 ms)
+    PUT /api/orders/:id/cancel
+      ΓêÜ should require authentication (3 ms)
+    PUT /api/orders/:id/status
+      ΓêÜ should require admin permissions (4 ms)
+    GET /api/orders/stats
+      ΓêÜ should require admin permissions (3 ms)
+      ΓêÜ should return stats for admin (24 ms)
+
+  ΓùÅ Orders API ΓÇ║ POST /api/orders ΓÇ║ should create order with valid data
+
+    CastError: Cast to ObjectId failed for value "{
+      buffer: {
+        '0': 105,
+        '1': 52,
+        '2': 173,
+        '3': 16,
+        '4': 175,
+        '5': 76,
+        '6': 10,
+        '7': 175,
+        '8': 152,
+        '9': 221,
+        '10': 34,
+        '11': 162
+      }
+    }" (type Object) at path "_id" for model "Order"
+
+    [0m [90m 150 |[39m       [90m// Cleanup[39m
+     [90m 151 |[39m       [36mif[39m 
+(response[33m.[39mbody[33m.[39mdata[33m?[39m[33m.[39m_id) {
+    [31m[1m>[22m[39m[90m 152 |[39m         [36mawait[39m 
+[33mOrder[39m[33m.[39mdeleteOne({ _id[33m:[39m 
+response[33m.[39mbody[33m.[39mdata[33m.[39m_id })[33m;[39m
+     [90m     |[39m         [31m[1m^[22m[39m
+     [90m 153 |[39m       }
+     [90m 154 |[39m     })[33m;[39m
+     [90m 155 |[39m[0m
+
+      at SchemaObjectId.Object.<anonymous>.SchemaObjectId.cast 
+(../node_modules/mongoose/lib/schema/objectId.js:251:11)
+      at SchemaObjectId.Object.<anonymous>.SchemaType.applySetters 
+(../node_modules/mongoose/lib/schemaType.js:1262:12)
+      at SchemaObjectId.Object.<anonymous>.SchemaType.castForQuery 
+(../node_modules/mongoose/lib/schemaType.js:1698:17)
+      at cast (../node_modules/mongoose/lib/cast.js:319:34)
+      at model.Query.Object.<anonymous>.Query.cast 
+(../node_modules/mongoose/lib/query.js:5060:12)
+      at model.Query.Object.<anonymous>.Query._castConditions 
+(../node_modules/mongoose/lib/query.js:2374:10)
+      at model.Query._deleteOne (../node_modules/mongoose/lib/query.js:3199:8)
+      at model.Query.exec (../node_modules/mongoose/lib/query.js:4627:80)
+      at Object.<anonymous> (src/__tests__/integration/orders.test.ts:152:9)
+
+  console.log
+    Attempting to connect to MongoDB...
+
+      at connectDatabase (src/utils/database.ts:8:13)
+
+  console.log
+    MongoDB URI: mongodb://127.0.0.1:27017/pet-ecommerce-test
+
+      at connectDatabase (src/utils/database.ts:9:13)
+
+  console.log
+    Γ£à MongoDB Connected Successfully: 127.0.0.1
+
+      at connectDatabase (src/utils/database.ts:24:13)
+
+  console.log
+    Γ£à Recreated test admin with known password
+
+      at getAdminToken (src/__tests__/helpers/testHelpers.ts:86:15)
+
+  console.log
+    Γ£à Successfully obtained admin token
+
+      at getAdminToken (src/__tests__/helpers/testHelpers.ts:113:13)
+
+  console.warn
+    [GET CATEGORY] Category not found: 6934ad106a6d196678ba4700 (petType: any)
+
+    [0m [90m 333 |[39m     [36mif[39m ([33m![39mcategory) {
+     [90m 334 |[39m       [90m// Log for debugging[39m
+    [31m[1m>[22m[39m[90m 335 |[39m       console[33m.[39mwarn([32m`[GET CATEGORY] Category not found: ${identifier} (petType: ${petType || 'any'})`[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 336 |[39m       
+     [90m 337 |[39m       [90m// Try to find any similar categories for better error message[39m
+     [90m 338 |[39m       [36mconst[39m searchSlug [33m=[39m identifier[33m.[39mtoLowerCase()[33m.[39mtrim()[33m;[39m[0m
+
+      at getCategory (src/controllers/categoryController.ts:335:15)
+
+  console.error
+    Error occurred: {
+      message: 'E11000 duplicate key error collection: pet-ecommerce-test.categories index: name_1_petType_1_parentCategory_1 dup key: { name: "Incomplete Category", petType: "all", parentCategory: null }',
+      stack: undefined,
+      errorLabelSet: {},
+      errorResponse: {
+        index: 0,
+        code: 11000,
+        errmsg: 'E11000 duplicate key error collection: pet-ecommerce-test.categories index: name_1_petType_1_parentCategory_1 dup key: { name: "Incomplete Category", petType: "all", parentCategory: null }',
+        keyPattern: { name: 1, petType: 1, parentCategory: 1 },
+        keyValue: {
+          name: 'Incomplete Category',
+          petType: 'all',
+          parentCategory: null
+        }
+      },
+      index: 0,
+      code: 11000,
+      keyPattern: { name: 1, petType: 1, parentCategory: 1 },
+      keyValue: { name: 'Incomplete Category', petType: 'all', parentCategory: null }
+    }
+
+    [0m [90m 81 |[39m       [33m...[39msanitizeForLogging(error)
+     [90m 82 |[39m     }[33m;[39m
+    [31m[1m>[22m[39m[90m 83 |[39m     console[33m.[39merror(message[33m,[39m sanitizedError)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 84 |[39m   } [36melse[39m {
+     [90m 85 |[39m     console[33m.[39merror(message)[33m;[39m
+     [90m 86 |[39m   }[0m
+
+      at safeError (src/middleware/sanitizeLogs.ts:83:13)
+      at errorHandler (src/middleware/errorHandler.ts:10:12)
+      at Layer.handle_error (../node_modules/express/lib/router/layer.js:71:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:326:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle_error (../node_modules/express/lib/router/layer.js:67:12)
+      at trim_prefix (../node_modules/express/lib/router/index.js:326:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at ../node_modules/express/lib/router/index.js:646:15
+      at next (../node_modules/express/lib/router/index.js:265:14)
+      at next (../node_modules/express/lib/router/route.js:141:14)
+      at createCategory (src/controllers/categoryController.ts:425:5)
+
+  console.warn
+    ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...
+
+    [0m [90m 30 |[39m     
+     [90m 31 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'disconnected'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 32 |[39m       console[33m.[39mwarn([32m'ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...'[39m)[33m;[39m
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 33 |[39m     })[33m;[39m
+     [90m 34 |[39m     
+     [90m 35 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'reconnected'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at NativeConnection.<anonymous> (src/utils/database.ts:32:15)
+      at NativeConnection.set (../node_modules/mongoose/lib/connection.js:149:12)
+      at NativeConnection.onClose (../node_modules/mongoose/lib/connection.js:1319:19)
+      at NativeConnection._close (../node_modules/mongoose/lib/connection.js:1268:12)
+      at Object.<anonymous> (src/__tests__/integration/categories.test.ts:21:5)
+
+PASS PET-SHOP src/__tests__/integration/categories.test.ts
+  Categories API
+    GET /api/categories
+      ΓêÜ should return all categories (public) (7 ms)
+      ΓêÜ should filter by petType (6 ms)
+    GET /api/categories/:id
+      ΓêÜ should return 404 for non-existent category (18 ms)
+      ΓêÜ should return category by ID if exists (6 ms)
+    GET /api/categories/admin/all
+      ΓêÜ should require authentication (4 ms)
+      ΓêÜ should require admin permissions (5 ms)
+      ΓêÜ should return all categories for admin (6 ms)
+    POST /api/categories
+      ΓêÜ should require authentication (7 ms)
+      ΓêÜ should require admin permissions (7 ms)
+      ΓêÜ should create category with valid data (13 ms)
+      ΓêÜ should return 400 for missing required fields (14 ms)
+    PUT /api/categories/:id
+      ΓêÜ should update category (13 ms)
+    DELETE /api/categories/:id
+      ΓêÜ should delete category (10 ms)
+
+  console.log
+    Attempting to connect to MongoDB...
+
+      at connectDatabase (src/utils/database.ts:8:13)
+
+  console.log
+    MongoDB URI: mongodb://127.0.0.1:27017/pet-ecommerce-test
+
+      at connectDatabase (src/utils/database.ts:9:13)
+
+  console.log
+    Γ£à MongoDB Connected Successfully: 127.0.0.1
+
+      at connectDatabase (src/utils/database.ts:24:13)
+
+  console.log
+    Γ£à Recreated test admin with known password
+
+      at getAdminToken (src/__tests__/helpers/testHelpers.ts:86:15)
+
+  console.log
+    Γ£à Successfully obtained admin token
+
+      at getAdminToken (src/__tests__/helpers/testHelpers.ts:113:13)
+
+  console.warn
+    ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...
+
+    [0m [90m 30 |[39m     
+     [90m 31 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'disconnected'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 32 |[39m       console[33m.[39mwarn([32m'ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...'[39m)[33m;[39m
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 33 |[39m     })[33m;[39m
+     [90m 34 |[39m     
+     [90m 35 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'reconnected'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at NativeConnection.<anonymous> (src/utils/database.ts:32:15)
+      at NativeConnection.set (../node_modules/mongoose/lib/connection.js:149:12)
+      at NativeConnection.onClose (../node_modules/mongoose/lib/connection.js:1319:19)
+      at NativeConnection._close (../node_modules/mongoose/lib/connection.js:1268:12)
+      at Object.<anonymous> (src/__tests__/integration/donations.test.ts:20:5)
+
+PASS PET-SHOP src/__tests__/integration/donations.test.ts
+  Donations API
+    POST /api/donations/create-intent
+      ΓêÜ should create donation intent (public) (4 ms)
+      ΓêÜ should return 400 for invalid amount (3 ms)
+    POST /api/donations/confirm
+      ΓêÜ should confirm donation (public) (3 ms)
+    GET /api/donations/:id
+      ΓêÜ should require authentication (2 ms)
+      ΓêÜ should return 404 for non-existent donation (10 ms)
+    GET /api/donations/admin/all
+      ΓêÜ should require authentication (4 ms)
+      ΓêÜ should require admin permissions (10 ms)
+      ΓêÜ should return all donations for admin (7 ms)
+    GET /api/donations/admin/stats
+      ΓêÜ should require admin permissions (6 ms)
+      ΓêÜ should return donation stats for admin (9 ms)
+
+  console.log
+    Attempting to connect to MongoDB...
+
+      at connectDatabase (src/utils/database.ts:8:13)
+
+  console.log
+    MongoDB URI: mongodb://127.0.0.1:27017/pet-ecommerce-test
+
+      at connectDatabase (src/utils/database.ts:9:13)
+
+  console.log
+    Γ£à MongoDB Connected Successfully: 127.0.0.1
+
+      at connectDatabase (src/utils/database.ts:24:13)
+
+  console.log
+    Γ£à Recreated test admin with known password
+
+      at getAdminToken (src/__tests__/helpers/testHelpers.ts:86:15)
+
+  console.log
+    Γ£à Successfully obtained admin token
+
+      at getAdminToken (src/__tests__/helpers/testHelpers.ts:113:13)
+
+  console.warn
+    ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...
+
+    [0m [90m 30 |[39m     
+     [90m 31 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'disconnected'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 32 |[39m       console[33m.[39mwarn([32m'ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...'[39m)[33m;[39m
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 33 |[39m     })[33m;[39m
+     [90m 34 |[39m     
+     [90m 35 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'reconnected'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at NativeConnection.<anonymous> (src/utils/database.ts:32:15)
+      at NativeConnection.set (../node_modules/mongoose/lib/connection.js:149:12)
+      at NativeConnection.onClose (../node_modules/mongoose/lib/connection.js:1319:19)
+      at NativeConnection._close (../node_modules/mongoose/lib/connection.js:1268:12)
+      at Object.<anonymous> (src/__tests__/integration/petTypes.test.ts:21:5)
+
+PASS PET-SHOP src/__tests__/integration/petTypes.test.ts
+  Pet Types API
+    GET /api/pet-types
+      ΓêÜ should return all pet types (public) (13 ms)
+    GET /api/pet-types/:slug
+      ΓêÜ should return pet type by slug (3 ms)
+    GET /api/pet-types/admin/all
+      ΓêÜ should require authentication (3 ms)
+      ΓêÜ should require admin/staff role (9 ms)
+      ΓêÜ should return all pet types for admin (9 ms)
+    POST /api/pet-types
+      ΓêÜ should require authentication (4 ms)
+      ΓêÜ should require admin role (4 ms)
+      ΓêÜ should create pet type with valid data (5 ms)
+    PUT /api/pet-types/:id
+      ΓêÜ should require admin role (6 ms)
+    DELETE /api/pet-types/:id
+      ΓêÜ should require admin role (4 ms)
+
+  console.log
+    Attempting to connect to MongoDB...
+
+      at connectDatabase (src/utils/database.ts:8:13)
+
+  console.log
+    MongoDB URI: mongodb://127.0.0.1:27017/pet-ecommerce-test
+
+      at connectDatabase (src/utils/database.ts:9:13)
+
+  console.log
+    Γ£à MongoDB Connected Successfully: 127.0.0.1
+
+      at connectDatabase (src/utils/database.ts:24:13)
+
+  console.log
+    Dropping index: variants.sku_1_sparse...
+
+      at fixProductIndexes (src/__tests__/helpers/fixIndexes.ts:34:17)
+
+  console.log
+    Γ£à Index variants.sku_1_sparse dropped
+
+      at fixProductIndexes (src/__tests__/helpers/fixIndexes.ts:36:17)
+
+  console.log
+    Creating sparse unique index on variants.sku...
+
+      at fixProductIndexes (src/__tests__/helpers/fixIndexes.ts:47:15)
+
+  console.log
+    Γ£à Sparse index created
+
+      at fixProductIndexes (src/__tests__/helpers/fixIndexes.ts:52:15)
+
+  console.warn
+    ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...
+
+    [0m [90m 30 |[39m     
+     [90m 31 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'disconnected'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 32 |[39m       console[33m.[39mwarn([32m'ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...'[39m)[33m;[39m
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 33 |[39m     })[33m;[39m
+     [90m 34 |[39m     
+     [90m 35 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'reconnected'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at NativeConnection.<anonymous> (src/utils/database.ts:32:15)
+      at NativeConnection.set (../node_modules/mongoose/lib/connection.js:149:12)
+      at NativeConnection.onClose (../node_modules/mongoose/lib/connection.js:1319:19)
+      at NativeConnection._close (../node_modules/mongoose/lib/connection.js:1268:12)
+      at Object.<anonymous> (src/__tests__/integration/reviews.test.ts:62:5)
+
+PASS PET-SHOP src/__tests__/integration/reviews.test.ts
+  Reviews API
+    GET /api/reviews/product/:productId
+      ΓêÜ should return reviews for a product (public) (8 ms)
+      ΓêÜ should support pagination (5 ms)
+      ΓêÜ should return 400 for invalid product ID (4 ms)
+    POST /api/reviews
+      ΓêÜ should require authentication (4 ms)
+      ΓêÜ should create review with valid data (requires order) (5 ms)
+      ΓêÜ should return 400 for invalid rating (4 ms)
+      ΓêÜ should return 400 for missing required fields (7 ms)
+    PUT /api/reviews/:id
+      ΓêÜ should require authentication (3 ms)
+      ΓêÜ should update review (requires review ownership) (6 ms)
+    DELETE /api/reviews/:id
+      ΓêÜ should require authentication (4 ms)
+
+  console.log
+    Attempting to connect to MongoDB...
+
+      at connectDatabase (src/utils/database.ts:8:13)
+
+  console.log
+    MongoDB URI: mongodb://127.0.0.1:27017/pet-ecommerce-test
+
+      at connectDatabase (src/utils/database.ts:9:13)
+
+  console.log
+    Γ£à MongoDB Connected Successfully: 127.0.0.1
+
+      at connectDatabase (src/utils/database.ts:24:13)
+
+  console.warn
+    ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...
+
+    [0m [90m 30 |[39m     
+     [90m 31 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'disconnected'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 32 |[39m       console[33m.[39mwarn([32m'ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...'[39m)[33m;[39m
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 33 |[39m     })[33m;[39m
+     [90m 34 |[39m     
+     [90m 35 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'reconnected'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at NativeConnection.<anonymous> (src/utils/database.ts:32:15)
+      at NativeConnection.set (../node_modules/mongoose/lib/connection.js:149:12)
+      at NativeConnection.onClose (../node_modules/mongoose/lib/connection.js:1319:19)
+      at NativeConnection._close (../node_modules/mongoose/lib/connection.js:1268:12)
+      at Object.<anonymous> (src/__tests__/integration/auth.test.ts:14:5)
+
+PASS PET-SHOP src/__tests__/integration/auth.test.ts
+  Auth API
+    POST /api/auth/login
+      ΓêÜ should return 400 for missing credentials (13 ms)
+      ΓêÜ should return 401 for invalid credentials (17 ms)
+    POST /api/auth/register
+      ΓêÜ should return 400 for missing required fields (6 ms)
+      ΓêÜ should create new user with valid data (81 ms)
+
+  console.log
+    Attempting to connect to MongoDB...
+
+      at connectDatabase (src/utils/database.ts:8:13)
+
+  console.log
+    MongoDB URI: mongodb://127.0.0.1:27017/pet-ecommerce-test
+
+      at connectDatabase (src/utils/database.ts:9:13)
+
+  console.log
+    Γ£à MongoDB Connected Successfully: 127.0.0.1
+
+      at connectDatabase (src/utils/database.ts:24:13)
+
+  console.warn
+    ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...
+
+    [0m [90m 30 |[39m     
+     [90m 31 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'disconnected'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 32 |[39m       console[33m.[39mwarn([32m'ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...'[39m)[33m;[39m
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 33 |[39m     })[33m;[39m
+     [90m 34 |[39m     
+     [90m 35 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'reconnected'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at NativeConnection.<anonymous> (src/utils/database.ts:32:15)
+      at NativeConnection.set (../node_modules/mongoose/lib/connection.js:149:12)
+      at NativeConnection.onClose (../node_modules/mongoose/lib/connection.js:1319:19)
+      at NativeConnection._close (../node_modules/mongoose/lib/connection.js:1268:12)
+      at Object.<anonymous> (src/__tests__/integration/products.test.ts:13:5)
+
+PASS PET-SHOP src/__tests__/integration/products.test.ts
+  Products API
+    GET /api/products
+      ΓêÜ should return products list (24 ms)
+      ΓêÜ should support pagination (13 ms)
+      ΓêÜ should filter by petType (9 ms)
+    GET /api/products/:id
+      ΓêÜ should return 404 for non-existent product (6 ms)
+
+  console.log
+    Making request...
+
+      at Object.<anonymous> (src/__tests__/integration/minimal-test.test.ts:6:13)
+
+  console.log
+    Response received
+
+      at Object.<anonymous> (src/__tests__/integration/minimal-test.test.ts:10:13)
+
+  console.log
+    Status: 401
+
+      at Object.<anonymous> (src/__tests__/integration/minimal-test.test.ts:11:13)
+
+  console.log
+    Body: {
+      "success": false,
+      "message": "Not authorized to access this route"
+    }
+
+      at Object.<anonymous> (src/__tests__/integration/minimal-test.test.ts:12:13)
+
+PASS PET-SHOP src/__tests__/integration/minimal-test.test.ts
+  Minimal Test
+    ΓêÜ should make a simple request (5 ms)
+
+  console.error
+    
+    Γ¥î Missing required environment variables:
+
+    [0m [90m 38 |[39m
+     [90m 39 |[39m   [36mif[39m (missing[33m.[39mlength [33m>[39m [35m0[39m) {
+    [31m[1m>[22m[39m[90m 40 |[39m     console[33m.[39merror([32m'\nΓ¥î Missing required environment variables:'[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 41 |[39m     missing[33m.[39mforEach(key [33m=>[39m console[33m.[39merror([32m`   - ${key}`[39m))[33m;[39m
+     [90m 42 |[39m     console[33m.[39merror([32m'\nPlease set these variables in your .env file or environment.\n'[39m)[33m;[39m
+     [90m 43 |[39m     process[33m.[39mexit([35m1[39m)[33m;[39m[0m
+
+      at validateEnv (src/utils/validateEnv.ts:40:13)
+      at src/__tests__/unit/utils/validateEnv.test.ts:24:29
+      at Object.<anonymous> (../node_modules/@jest/expect/node_modules/expect/build/toThrowMatchers.js:74:11)
+      at Object.throwingMatcher [as toThrow] (../node_modules/@jest/expect/node_modules/expect/build/index.js:320:21)
+      at Object.<anonymous> (src/__tests__/unit/utils/validateEnv.test.ts:24:33)
+
+  console.error
+       - MONGODB_URI
+
+    [0m [90m 39 |[39m   [36mif[39m (missing[33m.[39mlength [33m>[39m [35m0[39m) {
+     [90m 40 |[39m     console[33m.[39merror([32m'\nΓ¥î Missing required environment variables:'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 41 |[39m     missing[33m.[39mforEach(key [33m=>[39m console[33m.[39merror([32m`   - ${key}`[39m))[33m;[39m
+     [90m    |[39m                                    [31m[1m^[22m[39m
+     [90m 42 |[39m     console[33m.[39merror([32m'\nPlease set these variables in your .env file or environment.\n'[39m)[33m;[39m
+     [90m 43 |[39m     process[33m.[39mexit([35m1[39m)[33m;[39m
+     [90m 44 |[39m   }[0m
+
+      at src/utils/validateEnv.ts:41:36
+          at Array.forEach (<anonymous>)
+      at validateEnv (src/utils/validateEnv.ts:41:13)
+      at src/__tests__/unit/utils/validateEnv.test.ts:24:29
+      at Object.<anonymous> (../node_modules/@jest/expect/node_modules/expect/build/toThrowMatchers.js:74:11)
+      at Object.throwingMatcher [as toThrow] (../node_modules/@jest/expect/node_modules/expect/build/index.js:320:21)
+      at Object.<anonymous> (src/__tests__/unit/utils/validateEnv.test.ts:24:33)
+
+  console.error
+       - JWT_SECRET
+
+    [0m [90m 39 |[39m   [36mif[39m (missing[33m.[39mlength [33m>[39m [35m0[39m) {
+     [90m 40 |[39m     console[33m.[39merror([32m'\nΓ¥î Missing required environment variables:'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 41 |[39m     missing[33m.[39mforEach(key [33m=>[39m console[33m.[39merror([32m`   - ${key}`[39m))[33m;[39m
+     [90m    |[39m                                    [31m[1m^[22m[39m
+     [90m 42 |[39m     console[33m.[39merror([32m'\nPlease set these variables in your .env file or environment.\n'[39m)[33m;[39m
+     [90m 43 |[39m     process[33m.[39mexit([35m1[39m)[33m;[39m
+     [90m 44 |[39m   }[0m
+
+      at src/utils/validateEnv.ts:41:36
+          at Array.forEach (<anonymous>)
+      at validateEnv (src/utils/validateEnv.ts:41:13)
+      at src/__tests__/unit/utils/validateEnv.test.ts:24:29
+      at Object.<anonymous> (../node_modules/@jest/expect/node_modules/expect/build/toThrowMatchers.js:74:11)
+      at Object.throwingMatcher [as toThrow] (../node_modules/@jest/expect/node_modules/expect/build/index.js:320:21)
+      at Object.<anonymous> (src/__tests__/unit/utils/validateEnv.test.ts:24:33)
+
+  console.error
+    
+    Please set these variables in your .env file or environment.
+
+    [0m [90m 40 |[39m     console[33m.[39merror([32m'\nΓ¥î Missing required environment variables:'[39m)[33m;[39m
+     [90m 41 |[39m     missing[33m.[39mforEach(key [33m=>[39m console[33m.[39merror([32m`   - ${key}`[39m))[33m;[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m'\nPlease set these variables in your .env file or environment.\n'[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m     process[33m.[39mexit([35m1[39m)[33m;[39m
+     [90m 44 |[39m   }
+     [90m 45 |[39m[0m
+
+      at validateEnv (src/utils/validateEnv.ts:42:13)
+      at src/__tests__/unit/utils/validateEnv.test.ts:24:29
+      at Object.<anonymous> (../node_modules/@jest/expect/node_modules/expect/build/toThrowMatchers.js:74:11)
+      at Object.throwingMatcher [as toThrow] (../node_modules/@jest/expect/node_modules/expect/build/index.js:320:21)
+      at Object.<anonymous> (src/__tests__/unit/utils/validateEnv.test.ts:24:33)
+
+  console.error
+    
+    Γ¥î Missing required environment variables:
+
+    [0m [90m 38 |[39m
+     [90m 39 |[39m   [36mif[39m (missing[33m.[39mlength [33m>[39m [35m0[39m) {
+    [31m[1m>[22m[39m[90m 40 |[39m     console[33m.[39merror([32m'\nΓ¥î Missing required environment variables:'[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 41 |[39m     missing[33m.[39mforEach(key [33m=>[39m console[33m.[39merror([32m`   - ${key}`[39m))[33m;[39m
+     [90m 42 |[39m     console[33m.[39merror([32m'\nPlease set these variables in your .env file or environment.\n'[39m)[33m;[39m
+     [90m 43 |[39m     process[33m.[39mexit([35m1[39m)[33m;[39m[0m
+
+      at validateEnv (src/utils/validateEnv.ts:40:13)
+      at src/__tests__/unit/utils/validateEnv.test.ts:37:29
+      at Object.<anonymous> (../node_modules/@jest/expect/node_modules/expect/build/toThrowMatchers.js:74:11)
+      at Object.throwingMatcher [as toThrow] (../node_modules/@jest/expect/node_modules/expect/build/index.js:320:21)
+      at Object.<anonymous> (src/__tests__/unit/utils/validateEnv.test.ts:37:33)
+
+  console.error
+       - JWT_SECRET
+
+    [0m [90m 39 |[39m   [36mif[39m (missing[33m.[39mlength [33m>[39m [35m0[39m) {
+     [90m 40 |[39m     console[33m.[39merror([32m'\nΓ¥î Missing required environment variables:'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 41 |[39m     missing[33m.[39mforEach(key [33m=>[39m console[33m.[39merror([32m`   - ${key}`[39m))[33m;[39m
+     [90m    |[39m                                    [31m[1m^[22m[39m
+     [90m 42 |[39m     console[33m.[39merror([32m'\nPlease set these variables in your .env file or environment.\n'[39m)[33m;[39m
+     [90m 43 |[39m     process[33m.[39mexit([35m1[39m)[33m;[39m
+     [90m 44 |[39m   }[0m
+
+      at src/utils/validateEnv.ts:41:36
+          at Array.forEach (<anonymous>)
+      at validateEnv (src/utils/validateEnv.ts:41:13)
+      at src/__tests__/unit/utils/validateEnv.test.ts:37:29
+      at Object.<anonymous> (../node_modules/@jest/expect/node_modules/expect/build/toThrowMatchers.js:74:11)
+      at Object.throwingMatcher [as toThrow] (../node_modules/@jest/expect/node_modules/expect/build/index.js:320:21)
+      at Object.<anonymous> (src/__tests__/unit/utils/validateEnv.test.ts:37:33)
+
+  console.error
+    
+    Please set these variables in your .env file or environment.
+
+    [0m [90m 40 |[39m     console[33m.[39merror([32m'\nΓ¥î Missing required environment variables:'[39m)[33m;[39m
+     [90m 41 |[39m     missing[33m.[39mforEach(key [33m=>[39m console[33m.[39merror([32m`   - ${key}`[39m))[33m;[39m
+    [31m[1m>[22m[39m[90m 42 |[39m     console[33m.[39merror([32m'\nPlease set these variables in your .env file or environment.\n'[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 43 |[39m     process[33m.[39mexit([35m1[39m)[33m;[39m
+     [90m 44 |[39m   }
+     [90m 45 |[39m[0m
+
+      at validateEnv (src/utils/validateEnv.ts:42:13)
+      at src/__tests__/unit/utils/validateEnv.test.ts:37:29
+      at Object.<anonymous> (../node_modules/@jest/expect/node_modules/expect/build/toThrowMatchers.js:74:11)
+      at Object.throwingMatcher [as toThrow] (../node_modules/@jest/expect/node_modules/expect/build/index.js:320:21)
+      at Object.<anonymous> (src/__tests__/unit/utils/validateEnv.test.ts:37:33)
+
+  console.log
+    Γ£à All environment variables validated successfully
+
+      at validateEnv (src/utils/validateEnv.ts:53:13)
+
+PASS PET-SHOP src/__tests__/unit/utils/validateEnv.test.ts
+  validateEnv
+    ΓêÜ should throw error if MONGODB_URI is missing (12 ms)
+    ΓêÜ should throw error if JWT_SECRET is missing (6 ms)
+    ΓêÜ should pass validation with required variables (1 ms)
+    ΓêÜ should warn if JWT_SECRET is too short (1 ms)
+
+Test Suites: 2 failed, 8 passed, 10 total
+Tests:       2 failed, 87 passed, 89 total
+Snapshots:   0 total
+Time:        8.361 s, estimated 10 s
+Ran all test suites.
+npm error Lifecycle script `test` failed with error:
+npm error code 1
+npm error path C:\Users\mmurt\Downloads\pet-shop\backend
+npm error workspace pet-ecommerce-backend@1.0.0
+npm error location C:\Users\mmurt\Downloads\pet-shop\backend
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c jest

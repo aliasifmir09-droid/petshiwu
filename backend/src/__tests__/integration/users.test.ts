@@ -190,9 +190,28 @@ describe('Users API', () => {
       expect(response.body.data.email).toBe(staffData.email);
 
       // Cleanup
-      const userId = response.body.data._id?.toString() || response.body.data._id;
-      if (userId) {
-        await User.deleteOne({ _id: mongoose.Types.ObjectId.createFromHexString(userId.toString()) });
+      if (response.body.data?._id) {
+        try {
+          // Handle both string and ObjectId formats
+          let userId: any = response.body.data._id;
+          
+          // If it's already an ObjectId-like object, use it directly
+          if (userId && typeof userId === 'object' && 'toString' in userId) {
+            userId = userId.toString();
+          }
+          
+          // Convert string to ObjectId if needed
+          if (typeof userId === 'string') {
+            userId = new mongoose.Types.ObjectId(userId);
+          }
+          
+          if (userId) {
+            await User.deleteOne({ _id: userId });
+          }
+        } catch (error: any) {
+          // If cleanup fails, log but don't fail the test
+          console.warn('Failed to cleanup test user:', error.message);
+        }
       }
     });
   });

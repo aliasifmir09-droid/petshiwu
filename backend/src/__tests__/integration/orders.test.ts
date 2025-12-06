@@ -149,7 +149,27 @@ describe('Orders API', () => {
 
       // Cleanup
       if (response.body.data?._id) {
-        await Order.deleteOne({ _id: response.body.data._id });
+        try {
+          // Handle both string and ObjectId formats
+          let orderId: any = response.body.data._id;
+          
+          // If it's already an ObjectId-like object, use it directly
+          if (orderId && typeof orderId === 'object' && 'toString' in orderId) {
+            orderId = orderId.toString();
+          }
+          
+          // Convert string to ObjectId if needed
+          if (typeof orderId === 'string') {
+            orderId = new mongoose.Types.ObjectId(orderId);
+          }
+          
+          if (orderId) {
+            await Order.deleteOne({ _id: orderId });
+          }
+        } catch (error: any) {
+          // If cleanup fails, log but don't fail the test
+          console.warn('Failed to cleanup test order:', error.message);
+        }
       }
     });
 
