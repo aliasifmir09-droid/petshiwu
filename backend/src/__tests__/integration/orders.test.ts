@@ -65,12 +65,20 @@ describe('Orders API', () => {
 
   describe('POST /api/orders', () => {
     it('should require authentication', async () => {
-      await request(app)
+      if (!testProduct?._id) {
+        throw new Error('Test product not created');
+      }
+      const response = await request(app)
         .post('/api/orders')
         .send({
-          items: [{ product: testProduct._id, quantity: 1 }]
-        })
-        .expect(401);
+          items: [{ product: testProduct._id.toString(), quantity: 1 }]
+        });
+      
+      if (response.status !== 401) {
+        console.error('Expected 401, got:', response.status);
+        console.error('Response body:', JSON.stringify(response.body, null, 2));
+      }
+      expect(response.status).toBe(401);
     });
 
     it('should create order with valid data', async () => {
