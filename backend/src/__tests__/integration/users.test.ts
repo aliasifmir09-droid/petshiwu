@@ -67,6 +67,7 @@ describe('Users API', () => {
         .get('/api/users/me/permissions');
 
       expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
     });
 
     it('should return user permissions', async () => {

@@ -18,6 +18,12 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   testTimeout: 30000,
   verbose: true,
-  bail: false
+  bail: false,
+  errorOnDeprecated: false,
+  // Show more detailed error messages
+  displayName: {
+    name: 'PET-SHOP',
+    color: 'blue'
+  }
 };
 

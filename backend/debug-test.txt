@@ -1,0 +1,196 @@
+﻿node.exe : npm warn config ignoring workspace config at 
+C:\Users\mmurt\Downloads\pet-shop\backend/.npmrc
+At C:\Program Files\nodejs\npm.ps1:29 char:3
++   & $NODE_EXE $NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn config...\backend/.npmrc 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+> pet-ecommerce-backend@1.0.0 test
+> jest users.test.ts should require authentication
+
+  console.log
+    Attempting to connect to MongoDB...
+
+      at connectDatabase (src/utils/database.ts:8:13)
+
+  console.log
+    MongoDB URI: mongodb://127.0.0.1:27017/pet-ecommerce-test
+
+      at connectDatabase (src/utils/database.ts:9:13)
+
+  console.log
+    Γ£à MongoDB Connected Successfully: 127.0.0.1
+
+      at connectDatabase (src/utils/database.ts:24:13)
+
+  console.warn
+    ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...
+
+    [0m [90m 30 |[39m     
+     [90m 31 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'disconnected'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 32 |[39m       console[33m.[39mwarn([32m'ΓÜá∩╕Å  MongoDB disconnected. Attempting to reconnect...'[39m)[33m;[39m
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 33 |[39m     })[33m;[39m
+     [90m 34 |[39m     
+     [90m 35 |[39m     mongoose[33m.[39mconnection[33m.[39mon([32m'reconnected'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at NativeConnection.<anonymous> (src/utils/database.ts:32:15)
+      at NativeConnection.set (../node_modules/mongoose/lib/connection.js:149:12)
+      at NativeConnection.onClose (../node_modules/mongoose/lib/connection.js:1319:19)
+      at NativeConnection._close (../node_modules/mongoose/lib/connection.js:1268:12)
+      at Object.<anonymous> (src/__tests__/integration/users.test.ts:61:5)
+
+FAIL PET-SHOP src/__tests__/integration/users.test.ts
+  Users API
+    GET /api/users/me/permissions
+      ├ù should require authentication
+      ├ù should return user permissions
+    GET /api/users/staff
+      ├ù should require authentication
+      ├ù should require admin role
+      ├ù should return staff users for admin (1 ms)
+    POST /api/users/staff
+      ├ù should require admin role
+      ├ù should create staff user
+    GET /api/users/customers
+      ├ù should require admin/staff permissions
+      ├ù should return customers for admin
+    POST /api/users/wishlist
+      ├ù should require authentication
+      ├ù should add product to wishlist
+    GET /api/users/wishlist
+      ├ù should require authentication
+      ├ù should return user wishlist
+    DELETE /api/users/wishlist
+      ├ù should require authentication
+      ├ù should remove product from wishlist
+    GET /api/users/database/stats
+      ├ù should require admin role
+      ├ù should return database stats for admin
+
+  ΓùÅ Users API ΓÇ║ GET /api/users/me/permissions ΓÇ║ should require 
+authentication
+
+
+
+
+
+  ΓùÅ Users API ΓÇ║ GET /api/users/me/permissions ΓÇ║ should return user 
+permissions
+
+
+
+
+
+  ΓùÅ Users API ΓÇ║ GET /api/users/staff ΓÇ║ should require authentication
+
+
+
+
+
+  ΓùÅ Users API ΓÇ║ GET /api/users/staff ΓÇ║ should require admin role
+
+
+
+
+
+  ΓùÅ Users API ΓÇ║ GET /api/users/staff ΓÇ║ should return staff users for 
+admin
+
+
+
+
+
+  ΓùÅ Users API ΓÇ║ POST /api/users/staff ΓÇ║ should require admin role
+
+
+
+
+
+  ΓùÅ Users API ΓÇ║ POST /api/users/staff ΓÇ║ should create staff user
+
+
+
+
+
+  ΓùÅ Users API ΓÇ║ GET /api/users/customers ΓÇ║ should require admin/staff 
+permissions
+
+
+
+
+
+  ΓùÅ Users API ΓÇ║ GET /api/users/customers ΓÇ║ should return customers for 
+admin
+
+
+
+
+
+  ΓùÅ Users API ΓÇ║ POST /api/users/wishlist ΓÇ║ should require authentication
+
+
+
+
+
+  ΓùÅ Users API ΓÇ║ POST /api/users/wishlist ΓÇ║ should add product to wishlist
+
+
+
+
+
+  ΓùÅ Users API ΓÇ║ GET /api/users/wishlist ΓÇ║ should require authentication
+
+
+
+
+
+  ΓùÅ Users API ΓÇ║ GET /api/users/wishlist ΓÇ║ should return user wishlist
+
+
+
+
+
+  ΓùÅ Users API ΓÇ║ DELETE /api/users/wishlist ΓÇ║ should require 
+authentication
+
+
+
+
+
+  ΓùÅ Users API ΓÇ║ DELETE /api/users/wishlist ΓÇ║ should remove product from 
+wishlist
+
+
+
+
+
+  ΓùÅ Users API ΓÇ║ GET /api/users/database/stats ΓÇ║ should require admin role
+
+
+
+
+
+  ΓùÅ Users API ΓÇ║ GET /api/users/database/stats ΓÇ║ should return database 
+stats for admin
+
+
+
+
+
+Test Suites: 1 failed, 1 total
+Tests:       17 failed, 17 total
+Snapshots:   0 total
+Time:        5.053 s
+Ran all test suites matching /users.test.ts|should require authentication/i.
+npm error Lifecycle script `test` failed with error:
+npm error code 1
+npm error path C:\Users\mmurt\Downloads\pet-shop\backend
+npm error workspace pet-ecommerce-backend@1.0.0
+npm error location C:\Users\mmurt\Downloads\pet-shop\backend
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c jest users.test.ts 
+^^^"should^^^ require^^^ authentication^^^"
