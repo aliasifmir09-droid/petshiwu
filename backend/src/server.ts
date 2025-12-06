@@ -216,8 +216,8 @@ app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', registerLimiter);
 app.use('/api/auth/updatepassword', passwordUpdateLimiter);
 
-// Order creation - prevent abuse (only applies to POST requests)
-app.use('/api/orders', orderCreationLimiter);
+// Order creation - prevent abuse (only POST requests)
+app.post('/api/orders', orderCreationLimiter);
 
 // Donation endpoints - prevent abuse
 app.use('/api/donations/create-intent', donationLimiter);
