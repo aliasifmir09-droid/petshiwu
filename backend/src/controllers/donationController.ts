@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import Donation from '../models/Donation';
 import { AuthRequest } from '../middleware/auth';
+import logger from '../utils/logger';
 
 // Initialize Stripe (optional - only if STRIPE_SECRET_KEY is set)
 let stripe: any = null;
@@ -94,14 +95,14 @@ export const createDonationIntent = async (req: AuthRequest, res: Response, next
         }
       });
     } catch (stripeError: any) {
-      console.error('Stripe error:', stripeError);
+      logger.error('Stripe error:', stripeError);
       return res.status(500).json({
         success: false,
         message: 'Payment processing error: ' + (stripeError.message || 'Unknown error')
       });
     }
   } catch (error: any) {
-    console.error('Donation intent error:', error);
+    logger.error('Donation intent error:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to create donation intent'
@@ -170,7 +171,7 @@ export const confirmDonation = async (req: Request, res: Response, next: NextFun
           });
         }
       } catch (stripeError: any) {
-        console.error('Stripe verification error:', stripeError);
+        logger.error('Stripe verification error:', stripeError);
         return res.status(500).json({
           success: false,
           message: 'Failed to verify payment'
@@ -183,7 +184,7 @@ export const confirmDonation = async (req: Request, res: Response, next: NextFun
       data: donation
     });
   } catch (error: any) {
-    console.error('Confirm donation error:', error);
+    logger.error('Confirm donation error:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to confirm donation'
@@ -328,7 +329,7 @@ export const stripeWebhook = async (req: Request, res: Response, next: NextFunct
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
   } catch (err: any) {
-    console.error('Webhook signature verification failed:', err.message);
+    logger.error('Webhook signature verification failed:', err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 

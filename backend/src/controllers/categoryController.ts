@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import Category from '../models/Category';
 import { AuthRequest } from '../middleware/auth';
+import logger from '../utils/logger';
 
 // Helper function to normalize category _id to string
 const normalizeCategoryId = (category: any): any => {
@@ -313,7 +314,7 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
         }
         
         if (category) {
-          console.warn(`[GET CATEGORY] Found category without petType filter: ${category.name} (slug: ${category.slug}, petType: ${category.petType}, requested: ${petType})`);
+          logger.warn(`[GET CATEGORY] Found category without petType filter: ${category.name} (slug: ${category.slug}, petType: ${category.petType}, requested: ${petType})`);
         }
       }
       
@@ -332,7 +333,7 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
 
     if (!category) {
       // Log for debugging
-      console.warn(`[GET CATEGORY] Category not found: ${identifier} (petType: ${petType || 'any'})`);
+      logger.warn(`[GET CATEGORY] Category not found: ${identifier} (petType: ${petType || 'any'})`);
       
       // Try to find any similar categories for better error message
       const searchSlug = identifier.toLowerCase().trim();
@@ -463,7 +464,7 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
     const categoryId = String(req.params.id || '').trim();
     const { direction } = req.body; // 'up', 'down', 'left', 'right'
 
-    console.log(`[UPDATE CATEGORY POSITION] Category ID: ${categoryId}, Direction: ${direction}`);
+    logger.debug(`[UPDATE CATEGORY POSITION] Category ID: ${categoryId}, Direction: ${direction}`);
 
     if (!/^[0-9a-fA-F]{24}$/.test(categoryId)) {
       return res.status(400).json({
@@ -509,7 +510,7 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
         try {
           parentCategoryId = new mongoose.Types.ObjectId(String(parentCategoryId));
         } catch (e) {
-          console.error('[UPDATE CATEGORY POSITION] Failed to convert parentCategoryId:', e);
+          logger.error('[UPDATE CATEGORY POSITION] Failed to convert parentCategoryId:', e);
         }
       }
     }
@@ -533,7 +534,7 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
       ];
     }
 
-    console.log(`[UPDATE CATEGORY POSITION] Query:`, JSON.stringify({
+    logger.debug(`[UPDATE CATEGORY POSITION] Query:`, JSON.stringify({
       ...query,
       parentCategory: query.parentCategory ? String(query.parentCategory) : query.parentCategory
     }, null, 2));
@@ -542,7 +543,7 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
       .sort({ position: 1, createdAt: -1 })
       .lean();
 
-    console.log(`[UPDATE CATEGORY POSITION] Found ${siblings.length} siblings`);
+    logger.debug(`[UPDATE CATEGORY POSITION] Found ${siblings.length} siblings`);
 
     if (siblings.length === 0) {
       return res.status(404).json({
@@ -554,14 +555,14 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
     const currentIndex = siblings.findIndex(c => c._id.toString() === categoryId);
     
     if (currentIndex === -1) {
-      console.error(`[UPDATE CATEGORY POSITION] Category ${categoryId} not found in siblings list`);
+      logger.error(`[UPDATE CATEGORY POSITION] Category ${categoryId} not found in siblings list`);
       return res.status(404).json({
         success: false,
         message: `Category not found in sibling list. Found ${siblings.length} siblings but category not in list.`
       });
     }
 
-    console.log(`[UPDATE CATEGORY POSITION] Current index: ${currentIndex} of ${siblings.length - 1}`);
+    logger.debug(`[UPDATE CATEGORY POSITION] Current index: ${currentIndex} of ${siblings.length - 1}`);
 
     let targetIndex = -1;
 
@@ -623,7 +624,7 @@ export const deleteCategory = async (req: AuthRequest, res: Response, next: Next
       message: 'Category deleted successfully'
     });
   } catch (error: any) {
-    console.error('Delete category error:', error);
+    logger.error('Delete category error:', error);
     next(error);
   }
 };

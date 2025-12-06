@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import mongoose from 'mongoose';
 import { formatProductDescription } from '../utils/descriptionFormatter';
+import logger from '../utils/logger';
 
 // Helper function to normalize product _id to string
 const normalizeProductId = (product: any): any => {
@@ -108,7 +109,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
     allExistingProducts.forEach((p: any) => {
       if (p.slug) existingSlugs.add(p.slug);
     });
-    console.log(`[CSV IMPORT] Pre-loaded ${existingSlugs.size} existing product slugs`);
+    logger.debug(`[CSV IMPORT] Pre-loaded ${existingSlugs.size} existing product slugs`);
 
     // OPTIMIZATION: Cache for categories to avoid redundant lookups
     const categoryCache = new Map<string, mongoose.Types.ObjectId>();
@@ -461,7 +462,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
             results.success += insertedProducts.length;
             productsToInsert.length = 0; // Clear array
             productRowMap.clear();
-            console.log(`[CSV IMPORT] Batch inserted ${insertedProducts.length} products`);
+            logger.info(`[CSV IMPORT] Batch inserted ${insertedProducts.length} products`);
           } catch (batchError: any) {
             // Handle partial batch failures
             if (batchError.writeErrors) {
@@ -520,7 +521,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
       try {
         const insertedProducts = await Product.insertMany(productsToInsert, { ordered: false });
         results.success += insertedProducts.length;
-        console.log(`[CSV IMPORT] Final batch inserted ${insertedProducts.length} products`);
+        logger.info(`[CSV IMPORT] Final batch inserted ${insertedProducts.length} products`);
       } catch (batchError: any) {
         // Handle partial batch failures
         if (batchError.writeErrors) {
@@ -717,7 +718,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
           
           if (foundCategory && foundCategory._id) {
             categoryId = foundCategory._id as mongoose.Types.ObjectId;
-            console.log(`[GET PRODUCTS] Found category by query: ${foundCategory.name} (ID: ${categoryId}, petType: ${foundCategory.petType}, slug: ${foundCategory.slug})`);
+            logger.debug(`[GET PRODUCTS] Found category by query: ${foundCategory.name} (ID: ${categoryId}, petType: ${foundCategory.petType}, slug: ${foundCategory.slug})`);
           } else {
             // Try one more time with more flexible matching (remove petType constraint for broader search)
             const flexibleQuery: any = {
@@ -733,13 +734,13 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
               // Verify petType matches if provided
               if (!req.query.petType || flexibleMatch.petType === String(req.query.petType).toLowerCase().trim()) {
                 categoryId = flexibleMatch._id as mongoose.Types.ObjectId;
-                console.log(`[GET PRODUCTS] Found category by flexible query: ${flexibleMatch.name} (ID: ${categoryId}, petType: ${flexibleMatch.petType}, slug: ${flexibleMatch.slug})`);
+                logger.debug(`[GET PRODUCTS] Found category by flexible query: ${flexibleMatch.name} (ID: ${categoryId}, petType: ${flexibleMatch.petType}, slug: ${flexibleMatch.slug})`);
               } else {
-                console.warn(`[GET PRODUCTS] Category found but petType mismatch: ${categoryParam} (found: ${flexibleMatch.petType}, requested: ${req.query.petType})`);
+                logger.warn(`[GET PRODUCTS] Category found but petType mismatch: ${categoryParam} (found: ${flexibleMatch.petType}, requested: ${req.query.petType})`);
                 // Still use it if petType wasn't specified
                 if (!req.query.petType) {
                   categoryId = flexibleMatch._id as mongoose.Types.ObjectId;
-                  console.log(`[GET PRODUCTS] Using category anyway since no petType filter: ${flexibleMatch.name} (ID: ${categoryId})`);
+                  logger.debug(`[GET PRODUCTS] Using category anyway since no petType filter: ${flexibleMatch.name} (ID: ${categoryId})`);
                 }
               }
             } else {
@@ -752,9 +753,9 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
                 isActive: true
               }).select('_id name slug petType parentCategory').lean();
               
-              console.warn(`[GET PRODUCTS] Category not found: ${categoryParam} (petType: ${req.query.petType || 'any'})`);
+              logger.warn(`[GET PRODUCTS] Category not found: ${categoryParam} (petType: ${req.query.petType || 'any'})`);
               if (allMatches.length > 0) {
-                console.warn(`[GET PRODUCTS] But found ${allMatches.length} similar categories:`, allMatches.map(c => ({ name: c.name, slug: c.slug, petType: c.petType, id: c._id })));
+                logger.warn(`[GET PRODUCTS] But found ${allMatches.length} similar categories:`, allMatches.map(c => ({ name: c.name, slug: c.slug, petType: c.petType, id: c._id })));
               }
             }
           }
@@ -828,16 +829,16 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
             baseQuery.category = { $in: uniqueCategoryIds };
             
             // Log category filtering for debugging
-            console.log(`[GET PRODUCTS] Filtering by category: ${categoryId} (found ${uniqueCategoryIds.length} categories including all descendants)`);
+            logger.debug(`[GET PRODUCTS] Filtering by category: ${categoryId} (found ${uniqueCategoryIds.length} categories including all descendants)`);
           } else {
-            console.warn(`[GET PRODUCTS] No valid category IDs found for category filter: ${categoryParam}`);
+            logger.warn(`[GET PRODUCTS] No valid category IDs found for category filter: ${categoryParam}`);
           }
         } else {
-          console.warn(`[GET PRODUCTS] Category not resolved from parameter: ${categoryParam}`);
+          logger.warn(`[GET PRODUCTS] Category not resolved from parameter: ${categoryParam}`);
         }
       } catch (error: any) {
         // If category lookup fails, log error but continue without category filter
-        console.error('Error filtering by category:', error.message);
+        logger.error('Error filtering by category:', error.message);
       }
     }
 
@@ -1253,7 +1254,7 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
     const userRole = req.user?.role;
 
     // LOG: Track all product deletions
-    console.log(`[DELETE PRODUCT] Request received:`, {
+    logger.info(`[DELETE PRODUCT] Request received:`, {
       productId,
       userId: userId?.toString(),
       userEmail,
@@ -1265,7 +1266,7 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
 
     // Validate product ID
     if (!mongoose.Types.ObjectId.isValid(productId)) {
-      console.log(`[DELETE PRODUCT] Invalid product ID: ${productId}`);
+      logger.warn(`[DELETE PRODUCT] Invalid product ID: ${productId}`);
       return res.status(400).json({
         success: false,
         message: 'Invalid product ID'
@@ -1283,16 +1284,16 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
       const productBySlug = await Product.findOne({ slug: productId });
       if (!productBySlug) {
         // Return success even if product doesn't exist (idempotent)
-        console.log(`[DELETE PRODUCT] Product not found: ${productId} (idempotent success)`);
+        logger.info(`[DELETE PRODUCT] Product not found: ${productId} (idempotent success)`);
         return res.status(200).json({
           success: true,
           message: 'Product deleted successfully'
         });
       }
       // Found by slug, delete it
-      console.log(`[DELETE PRODUCT] Found product by slug, deleting: ${productBySlug._id} (${productBySlug.name})`);
+      logger.info(`[DELETE PRODUCT] Found product by slug, deleting: ${productBySlug._id} (${productBySlug.name})`);
       await Product.deleteOne({ _id: productBySlug._id });
-      console.log(`[DELETE PRODUCT] Successfully deleted product by slug: ${productBySlug._id}`);
+      logger.info(`[DELETE PRODUCT] Successfully deleted product by slug: ${productBySlug._id}`);
       return res.status(200).json({
         success: true,
         message: 'Product deleted successfully'
@@ -1300,7 +1301,7 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
     }
 
     // LOG: Product found, proceeding with deletion
-    console.log(`[DELETE PRODUCT] Product found: ${product._id} (${product.name}), proceeding with deletion`);
+    logger.info(`[DELETE PRODUCT] Product found: ${product._id} (${product.name}), proceeding with deletion`);
 
     // Extract Cloudinary public_ids from image URLs and delete from Cloudinary
     const { deleteFromCloudinary } = await import('../utils/cloudinary');
@@ -1331,18 +1332,18 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
     Promise.allSettled(imageDeletionPromises).then((results) => {
       const failed = results.filter(r => r.status === 'rejected').length;
       if (failed > 0) {
-        console.warn(`[DELETE PRODUCT] ${failed} image(s) failed to delete from Cloudinary for product ${productId}`);
+        logger.warn(`[DELETE PRODUCT] ${failed} image(s) failed to delete from Cloudinary for product ${productId}`);
       } else {
-        console.log(`[DELETE PRODUCT] All images deleted from Cloudinary for product ${productId}`);
+        logger.info(`[DELETE PRODUCT] All images deleted from Cloudinary for product ${productId}`);
       }
     }).catch((error) => {
-      console.error(`[DELETE PRODUCT] Error in background Cloudinary deletion for product ${productId}:`, error);
+      logger.error(`[DELETE PRODUCT] Error in background Cloudinary deletion for product ${productId}:`, error);
     });
 
     // Permanently delete product from database
-    console.log(`[DELETE PRODUCT] Attempting database deletion: ${objectId}`);
+    logger.debug(`[DELETE PRODUCT] Attempting database deletion: ${objectId}`);
     const deleteResult = await Product.deleteOne({ _id: objectId });
-    console.log(`[DELETE PRODUCT] deleteOne result: ${deleteResult.deletedCount} deleted`);
+    logger.debug(`[DELETE PRODUCT] deleteOne result: ${deleteResult.deletedCount} deleted`);
     
     // Verify deletion immediately by checking if product still exists
     if (deleteResult.deletedCount > 0) {
@@ -1352,7 +1353,7 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
       const verifyDeleted = await Product.findById(objectId).lean();
       
       if (verifyDeleted) {
-        console.error(`[DELETE PRODUCT] WARNING: Product ${productId} still exists after deletion! Retrying...`);
+        logger.error(`[DELETE PRODUCT] WARNING: Product ${productId} still exists after deletion! Retrying...`);
         // Retry deletion with findByIdAndDelete
         await Product.findByIdAndDelete(objectId);
         
@@ -1361,7 +1362,7 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
         const verifyAgain = await Product.findById(objectId).lean();
         
         if (verifyAgain) {
-          console.error(`[DELETE PRODUCT] ERROR: Product ${productId} still exists after retry!`);
+          logger.error(`[DELETE PRODUCT] ERROR: Product ${productId} still exists after retry!`);
           return res.status(500).json({
             success: false,
             message: 'Product deletion may not be complete. Please try again or contact support.'
@@ -1370,12 +1371,12 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
       }
     } else {
       // deleteOne returned 0 - product might already be deleted or doesn't exist
-      console.log(`[DELETE PRODUCT] deleteOne returned 0, checking if product exists`);
+      logger.debug(`[DELETE PRODUCT] deleteOne returned 0, checking if product exists`);
       const stillExists = await Product.findById(objectId).lean();
       
       if (!stillExists) {
         // Product doesn't exist, deletion already successful (idempotent)
-        console.log(`[DELETE PRODUCT] Product already deleted (idempotent success)`);
+        logger.info(`[DELETE PRODUCT] Product already deleted (idempotent success)`);
         return res.status(200).json({
           success: true,
           message: 'Product deleted successfully'
@@ -1383,22 +1384,22 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
       }
       
       // Product exists but deleteOne failed - try findByIdAndDelete
-      console.log(`[DELETE PRODUCT] Product exists, trying findByIdAndDelete`);
+      logger.debug(`[DELETE PRODUCT] Product exists, trying findByIdAndDelete`);
       const deletedProduct = await Product.findByIdAndDelete(objectId);
       
       if (!deletedProduct) {
-        console.error(`[DELETE PRODUCT] Failed to delete product: ${productId}`);
+        logger.error(`[DELETE PRODUCT] Failed to delete product: ${productId}`);
         return res.status(500).json({
           success: false,
           message: 'Failed to delete product from database'
         });
       }
       
-      console.log(`[DELETE PRODUCT] findByIdAndDelete succeeded: ${deletedProduct._id}`);
+      logger.info(`[DELETE PRODUCT] findByIdAndDelete succeeded: ${deletedProduct._id}`);
     }
 
     // LOG: Final success
-    console.log(`[DELETE PRODUCT] ✅ Product deleted successfully: ${productId} (${product.name})`, {
+    logger.info(`[DELETE PRODUCT] ✅ Product deleted successfully: ${productId} (${product.name})`, {
       productId,
       productName: product.name,
       userId: userId?.toString(),
@@ -1563,7 +1564,7 @@ export const getUniqueBrands = async (req: Request, res: Response, next: NextFun
           filterQuery.category = categoryId;
         }
       } catch (error) {
-        console.error('[GET UNIQUE BRANDS] Error processing category filter:', error);
+        logger.error('[GET UNIQUE BRANDS] Error processing category filter:', error);
       }
     }
 
