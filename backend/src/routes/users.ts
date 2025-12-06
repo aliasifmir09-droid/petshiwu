@@ -13,6 +13,17 @@ import {
   getWishlist
 } from '../controllers/userController';
 import { shareWishlist, getSharedWishlist, emailWishlist } from '../controllers/wishlistController';
+import {
+  getAddresses,
+  addAddress,
+  updateAddress,
+  deleteAddress
+} from '../controllers/addressController';
+import {
+  createStockAlert,
+  getMyStockAlerts,
+  removeStockAlert
+} from '../controllers/stockAlertController';
 import { protect } from '../middleware/auth';
 import { isAdmin, hasPermission } from '../middleware/permissions';
 import {
@@ -47,6 +58,17 @@ router.post('/wishlist/email', protect, emailWishlist);
 
 // Public wishlist sharing route
 router.get('/wishlist/:userId', getSharedWishlist);
+
+// Address management routes
+router.get('/addresses', protect, getAddresses);
+router.post('/addresses', protect, addAddress);
+router.put('/addresses/:addressId', protect, updateAddress);
+router.delete('/addresses/:addressId', protect, deleteAddress);
+
+// Stock alert routes
+router.post('/stock-alerts', protect, createStockAlert);
+router.get('/stock-alerts', protect, getMyStockAlerts);
+router.delete('/stock-alerts/:productId', protect, removeStockAlert);
 
 export default router;
 

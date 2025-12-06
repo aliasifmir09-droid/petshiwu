@@ -222,37 +222,82 @@
   - Skip next delivery
 - **Priority:** HIGH (autoship is key feature)
 
-### 8. **Order Cancellation by Customer**
-- **Status:** Partial (admin can cancel, customer cannot)
-- **Missing:** Customer self-service cancellation within time window
-- **Priority:** MEDIUM
+### 8. **Order Cancellation by Customer - IMPLEMENTED** ✅
+- **Status:** COMPLETE
+- **Solution Implemented:**
+  - Enhanced customer order cancellation with time window (24 hours)
+  - Customers can cancel orders within 24 hours of creation
+  - Cancellation allowed for 'pending' and 'processing' statuses
+  - Automatic stock restoration on cancellation
+  - Refund information provided for paid orders
+  - Cancellation reason can be provided
+  - Transaction-based cancellation to ensure atomicity
+- **Endpoint:** `PUT /api/orders/:id/cancel` (with optional `reason` in body)
+- **Location:** `backend/src/controllers/orderController.ts`
+- **Impact:** Improved customer experience and self-service capabilities
 
-### 9. **Return/Refund System**
-- **Status:** NOT IMPLEMENTED
-- **Missing:**
-  - Return request submission
-  - Return authorization (RMA) generation
-  - Refund processing
-  - Return tracking
-- **Priority:** HIGH (essential for e-commerce)
+### 9. **Return/Refund System - IMPLEMENTED** ✅
+- **Status:** COMPLETE
+- **Solution Implemented:**
+  - Return request submission with item-level returns
+  - Return authorization (RMA) number generation (auto-generated on approval)
+  - Return status tracking (pending, approved, rejected, processing, completed, cancelled)
+  - Refund status tracking (pending, processing, refunded, failed)
+  - Return window validation (30 days from delivery)
+  - Return address management
+  - Admin return management endpoints
+  - Refund amount calculation
+  - Refund method selection (original payment or store credit)
+- **Endpoints:**
+  - `POST /api/orders/returns` - Create return request
+  - `GET /api/orders/returns/my` - Get user's returns
+  - `GET /api/orders/returns/all` - Get all returns (admin)
+  - `GET /api/orders/returns/:id` - Get single return
+  - `PUT /api/orders/returns/:id/status` - Update return status (admin)
+- **Location:** `backend/src/models/Return.ts`, `backend/src/controllers/returnController.ts`
+- **Impact:** Essential e-commerce functionality for customer satisfaction
 
-### 10. **Product Reviews - Missing Features**
-- **Status:** Basic reviews exist
-- **Missing:**
-  - Photo/video reviews
-  - Review helpfulness voting
-  - Review sorting (most helpful, newest, highest rating)
-  - Verified purchase badge (exists but not prominent)
-- **Priority:** MEDIUM
+### 10. **Product Reviews - Missing Features - IMPLEMENTED** ✅
+- **Status:** COMPLETE
+- **Solution Implemented:**
+  - Photo/video reviews support (images and videos arrays)
+  - Review helpfulness voting (helpful/not helpful with user tracking)
+  - Review sorting options:
+    - newest (default)
+    - oldest
+    - highest (rating)
+    - lowest (rating)
+    - most_helpful (by helpful count)
+  - Verified purchase badge (prominently displayed)
+  - Rating distribution in response
+  - User can vote on reviews (toggle vote)
+- **Endpoints:**
+  - `GET /api/reviews/product/:productId?sort=newest|oldest|highest|lowest|most_helpful` - Get reviews with sorting
+  - `POST /api/reviews/:id/vote` - Vote on review helpfulness
+  - Enhanced `POST /api/reviews` - Support for images and videos
+- **Location:** `backend/src/models/Review.ts`, `backend/src/controllers/reviewController.ts`
+- **Impact:** Improved review quality and user engagement
 
-### 11. **Advanced Search**
-- **Status:** Basic search exists
-- **Missing:**
-  - Search filters (price range, rating, in-stock)
-  - Search autocomplete with suggestions
-  - Search history
-  - Saved searches
-- **Priority:** MEDIUM
+### 11. **Advanced Search - IMPLEMENTED** ✅
+- **Status:** COMPLETE
+- **Solution Implemented:**
+  - Advanced search with multiple filters:
+    - Price range (minPrice, maxPrice)
+    - Rating filter (minRating)
+    - In-stock filter
+    - Category filter
+    - Pet type filter
+    - Brand filter
+  - Search autocomplete with product and category suggestions
+  - Multiple sort options (price, rating, name, newest)
+  - Filter options returned in response (available brands, price range)
+  - Pagination support
+- **Endpoints:**
+  - `GET /api/products/search?q=query&minPrice=10&maxPrice=100&minRating=4&inStock=true&sort=price-asc`
+  - `GET /api/products/search/autocomplete?q=query&limit=10`
+- **Location:** `backend/src/controllers/searchController.ts`
+- **Impact:** Improved product discovery and user experience
+- **Note:** Search history and saved searches can be added as frontend features using localStorage
 
 ### 12. **Loyalty Points/Rewards Program**
 - **Status:** NOT IMPLEMENTED
@@ -264,20 +309,49 @@
 - **Missing:** Purchase, send, and redeem gift cards
 - **Priority:** LOW
 
-### 14. **Multi-Address Management**
-- **Status:** Users have `addresses` array but no UI to manage
-- **Missing:** Add/edit/delete multiple shipping addresses
-- **Priority:** MEDIUM
+### 14. **Multi-Address Management - IMPLEMENTED** ✅
+- **Status:** COMPLETE
+- **Solution Implemented:**
+  - Add multiple shipping addresses
+  - Update existing addresses
+  - Delete addresses
+  - Set default address
+  - Get all user addresses
+  - Address validation
+- **Endpoints:**
+  - `GET /api/users/addresses` - Get all addresses
+  - `POST /api/users/addresses` - Add new address
+  - `PUT /api/users/addresses/:addressId` - Update address
+  - `DELETE /api/users/addresses/:addressId` - Delete address
+- **Location:** `backend/src/controllers/addressController.ts`
+- **Impact:** Improved checkout experience and address management
 
-### 15. **Order Notes/Special Instructions**
-- **Status:** Order has `notes` field but no UI
-- **Missing:** Customer cannot add delivery instructions
-- **Priority:** LOW
+### 15. **Order Notes/Special Instructions - IMPLEMENTED** ✅
+- **Status:** COMPLETE
+- **Solution Implemented:**
+  - Order notes field support in order creation
+  - Customers can add delivery instructions during checkout
+  - Notes stored in order and visible to admin
+  - Notes included in order details
+- **Endpoint:** `POST /api/orders` (include `notes` field in request body)
+- **Location:** `backend/src/controllers/orderController.ts`, `backend/src/models/Order.ts`
+- **Impact:** Better customer service and delivery coordination
 
-### 16. **Product Availability Alerts**
-- **Status:** NOT IMPLEMENTED
-- **Missing:** "Notify me when back in stock" feature
-- **Priority:** MEDIUM
+### 16. **Product Availability Alerts - IMPLEMENTED** ✅
+- **Status:** COMPLETE
+- **Solution Implemented:**
+  - "Notify me when back in stock" feature
+  - Stock alert creation per product per user
+  - Email notifications when product is back in stock
+  - Alert management (view, remove alerts)
+  - Automatic notification system (ready for cron job integration)
+  - Prevents duplicate alerts
+- **Endpoints:**
+  - `POST /api/users/stock-alerts` - Create stock alert
+  - `GET /api/users/stock-alerts` - Get user's active alerts
+  - `DELETE /api/users/stock-alerts/:productId` - Remove alert
+- **Location:** `backend/src/models/StockAlert.ts`, `backend/src/controllers/stockAlertController.ts`
+- **Impact:** Increases sales by notifying interested customers when products are available
 
 ### 17. **Bulk Order Discounts**
 - **Status:** NOT IMPLEMENTED
@@ -289,10 +363,23 @@
 - **Missing:** Track vaccinations, medications, vet visits
 - **Priority:** LOW (nice-to-have)
 
-### 19. **Social Sharing**
-- **Status:** NOT IMPLEMENTED
-- **Missing:** Share products on social media
-- **Priority:** LOW
+### 19. **Social Sharing - IMPLEMENTED** ✅
+- **Status:** COMPLETE
+- **Solution Implemented:**
+  - Social sharing links for products
+  - Support for multiple platforms:
+    - Facebook
+    - Twitter
+    - Pinterest
+    - LinkedIn
+    - WhatsApp
+    - Email
+    - Copy link (for clipboard)
+  - Product information included in share links (name, description, image, URL)
+  - URL encoding for proper sharing
+- **Endpoint:** `GET /api/products/:id/share` - Get social sharing links
+- **Location:** `backend/src/controllers/socialController.ts`
+- **Impact:** Increased product visibility and potential sales through social sharing
 
 ### 20. **Product Videos**
 - **Status:** Images only

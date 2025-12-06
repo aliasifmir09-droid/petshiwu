@@ -16,7 +16,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       shippingPrice,
       taxPrice,
       donationAmount,
-      totalPrice
+      totalPrice,
+      notes
     } = req.body;
 
     // Validate user is authenticated
@@ -193,7 +194,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         shippingPrice,
         taxPrice,
         donationAmount: donationAmount || 0,
-        totalPrice
+        totalPrice,
+        notes: notes || undefined
       }], { session });
 
       // Step 4: Commit transaction
@@ -609,9 +611,10 @@ export const updatePaymentStatus = async (req: AuthRequest, res: Response, next:
   }
 };
 
-// Cancel order (Customer)
+// Cancel order (Customer) - Enhanced with time window
 export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    const { reason } = req.body;
     const order = await Order.findById(req.params.id);
 
     if (!order) {
@@ -629,33 +632,79 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
       });
     }
 
-    // Only allow cancellation if order is still pending
-    if (order.orderStatus !== 'pending') {
+    // Check if order can be cancelled
+    const cancellationWindowHours = 24; // Allow cancellation within 24 hours
+    const hoursSinceOrder = (Date.now() - order.createdAt.getTime()) / (1000 * 60 * 60);
+    const canCancelByTime = hoursSinceOrder <= cancellationWindowHours;
+    const canCancelByStatus = ['pending', 'processing'].includes(order.orderStatus);
+    const cannotCancelStatuses = ['shipped', 'delivered', 'cancelled'];
+
+    if (cannotCancelStatuses.includes(order.orderStatus)) {
       return res.status(400).json({
         success: false,
-        message: `Cannot cancel order. Order is already ${order.orderStatus}. Only pending orders can be cancelled.`
+        message: `Cannot cancel order. Order is already ${order.orderStatus}.`,
+        canCancel: false
       });
     }
 
-    // Update order status to cancelled
-    order.orderStatus = 'cancelled';
-    await order.save();
-
-    // Restore product stock
-    for (const item of order.items) {
-      const product = await Product.findById(item.product);
-      if (product) {
-        product.totalStock += item.quantity;
-        product.inStock = product.totalStock > 0;
-        await product.save();
-      }
+    if (!canCancelByTime && order.orderStatus === 'processing') {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot cancel order. Cancellation window (${cancellationWindowHours} hours) has expired. Please contact customer service for assistance.`,
+        canCancel: false,
+        hoursSinceOrder: Math.round(hoursSinceOrder * 10) / 10
+      });
     }
 
-    res.status(200).json({
-      success: true,
-      message: 'Order cancelled successfully',
-      data: order
-    });
+    if (!canCancelByStatus) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot cancel order. Order status is ${order.orderStatus}.`,
+        canCancel: false
+      });
+    }
+
+    // Use transaction to ensure atomicity
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      // Update order status to cancelled
+      order.orderStatus = 'cancelled';
+      if (reason) {
+        order.notes = order.notes ? `${order.notes}\nCancellation reason: ${reason}` : `Cancellation reason: ${reason}`;
+      }
+      await order.save({ session });
+
+      // Restore product stock
+      for (const item of order.items) {
+        const product = await Product.findById(item.product).session(session);
+        if (product) {
+          product.totalStock += item.quantity;
+          product.inStock = product.totalStock > 0;
+          await product.save({ session });
+        }
+      }
+
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(200).json({
+        success: true,
+        message: 'Order cancelled successfully',
+        data: order,
+        refundInfo: order.isPaid ? {
+          willRefund: true,
+          refundAmount: order.totalPrice,
+          refundMethod: 'original',
+          estimatedTime: '5-7 business days'
+        } : null
+      });
+    } catch (error: any) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
+    }
   } catch (error) {
     next(error);
   }

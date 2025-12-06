@@ -3,7 +3,8 @@ import {
   getProductReviews,
   createReview,
   updateReview,
-  deleteReview
+  deleteReview,
+  voteReview
 } from '../controllers/reviewController';
 import { protect } from '../middleware/auth';
 import {
@@ -17,6 +18,7 @@ const router = express.Router();
 router.get('/product/:productId', validateObjectId('productId'), paginationValidation, getProductReviews);
 router.post('/', protect, createReviewValidation, createReview);
 router.put('/:id', protect, validateObjectId(), updateReview);
+router.post('/:id/vote', protect, validateObjectId(), voteReview); // Vote on review helpfulness
 router.delete('/:id', protect, validateObjectId(), deleteReview);
 
 export default router;

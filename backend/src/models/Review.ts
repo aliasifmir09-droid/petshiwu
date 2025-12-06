@@ -8,8 +8,12 @@ export interface IReview extends Document {
   title?: string;
   comment?: string;
   images?: string[];
+  videos?: string[];
   verifiedPurchase: boolean;
   helpfulCount: number;
+  helpfulUsers: mongoose.Types.ObjectId[]; // Users who marked as helpful
+  notHelpfulCount: number;
+  notHelpfulUsers: mongoose.Types.ObjectId[]; // Users who marked as not helpful
   isApproved: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -48,6 +52,7 @@ const reviewSchema = new Schema<IReview>(
       maxlength: 1000
     },
     images: [String],
+    videos: [String],
     verifiedPurchase: {
       type: Boolean,
       default: false
@@ -56,6 +61,18 @@ const reviewSchema = new Schema<IReview>(
       type: Number,
       default: 0
     },
+    helpfulUsers: [{
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+    notHelpfulCount: {
+      type: Number,
+      default: 0
+    },
+    notHelpfulUsers: [{
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    }],
     isApproved: {
       type: Boolean,
       default: true
