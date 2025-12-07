@@ -647,19 +647,19 @@ export const sendPasswordResetEmail = async (email: string, token: string, first
       `
     };
 
-    // Verify connection before sending
+    // Try to verify connection (optional - don't fail if verify fails, just log)
     try {
       await transporter.verify();
       logger.info('✅ SMTP connection verified');
     } catch (verifyError: any) {
-      logger.error('❌ SMTP connection verification failed:', {
+      // Log warning but continue - sometimes verify fails but sendMail works
+      logger.warn('⚠️  SMTP connection verification failed (will attempt to send anyway):', {
         error: verifyError.message,
-        code: verifyError.code,
-        command: verifyError.command
+        code: verifyError.code
       });
-      throw new Error(`SMTP connection failed: ${verifyError.message}`);
     }
 
+    // Send the email
     const info = await transporter.sendMail(mailOptions);
     logger.info(`✅ Password reset email sent to ${email}: ${info.messageId}`);
     return info;
