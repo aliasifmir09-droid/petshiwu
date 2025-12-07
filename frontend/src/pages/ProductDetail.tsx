@@ -513,6 +513,18 @@ const ProductDetail = () => {
               <ShoppingCart size={20} />
               {selectedVariantData && selectedVariantData.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowShareMenu(!showShareMenu)}
+                className="px-6 py-3 border-2 rounded-lg font-semibold transition-colors hover:bg-gray-50"
+              >
+                <Share2 size={20} className="inline mr-2" />
+                Share
+              </button>
+              {showShareMenu && product && (
+                <ProductShareMenu product={product} onClose={() => setShowShareMenu(false)} />
+              )}
+            </div>
             <button
               onClick={handleWishlistToggle}
               className={`px-6 py-3 border-2 rounded-lg font-semibold transition-colors ${
