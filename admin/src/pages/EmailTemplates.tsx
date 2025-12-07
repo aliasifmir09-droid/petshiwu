@@ -113,13 +113,30 @@ const EmailTemplates = () => {
             <h1 className="text-4xl font-black text-white mb-2">Email Templates</h1>
             <p className="text-blue-100 text-lg">Manage email templates for order confirmations and notifications</p>
           </div>
-          <button
-            onClick={handleCreate}
-            className="flex items-center gap-2 bg-white text-[#1E3A8A] px-6 py-3 rounded-xl hover:bg-blue-50 font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-          >
-            <Plus size={20} />
-            Create Template
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={async () => {
+                try {
+                  await adminService.seedEmailTemplates();
+                  showToast('Default email templates seeded successfully!', 'success');
+                  refetch();
+                } catch (error: any) {
+                  showToast(error.response?.data?.message || 'Failed to seed templates', 'error');
+                }
+              }}
+              className="flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+            >
+              <Mail size={20} />
+              Seed Default Templates
+            </button>
+            <button
+              onClick={handleCreate}
+              className="flex items-center gap-2 bg-white text-[#1E3A8A] px-6 py-3 rounded-xl hover:bg-blue-50 font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+            >
+              <Plus size={20} />
+              Create Template
+            </button>
+          </div>
         </div>
       </div>
 
