@@ -99,8 +99,8 @@ export const createReturn = async (req: AuthRequest, res: Response, next: NextFu
         });
       }
 
-      // Use orderItem _id if available, otherwise use index
-      const orderItemId = orderItem._id || orderItemIndex;
+      // Use index as order items don't have _id in schema
+      const orderItemId = orderItemIndex;
 
       returnItems.push({
         orderItem: orderItemId,
