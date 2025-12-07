@@ -1,5 +1,6 @@
 import Redis from 'ioredis';
 import logger from './logger';
+import { memoryCacheService } from './memoryCache';
 
 // Redis client instance
 let redisClient: Redis | null = null;
@@ -57,21 +58,27 @@ export const getRedisClient = (): Redis | null => {
 };
 
 // Cache helper functions
+// Automatically falls back to in-memory cache if Redis is not available
 export const cache = {
   // Get cached value
   get: async <T>(key: string): Promise<T | null> => {
     try {
       const client = getRedisClient();
-      if (!client) return null;
-
-      const value = await client.get(key);
-      if (value) {
-        return JSON.parse(value) as T;
+      if (client) {
+        // Use Redis if available
+        const value = await client.get(key);
+        if (value) {
+          return JSON.parse(value) as T;
+        }
+        return null;
+      } else {
+        // Fallback to in-memory cache
+        return await memoryCacheService.get<T>(key);
       }
-      return null;
     } catch (error: any) {
       logger.error(`Error getting cache key ${key}:`, error.message);
-      return null;
+      // Fallback to memory cache on error
+      return await memoryCacheService.get<T>(key);
     }
   },
 
@@ -79,13 +86,18 @@ export const cache = {
   set: async (key: string, value: any, ttlSeconds: number = 3600): Promise<boolean> => {
     try {
       const client = getRedisClient();
-      if (!client) return false;
-
-      await client.setex(key, ttlSeconds, JSON.stringify(value));
-      return true;
+      if (client) {
+        // Use Redis if available
+        await client.setex(key, ttlSeconds, JSON.stringify(value));
+        return true;
+      } else {
+        // Fallback to in-memory cache
+        return await memoryCacheService.set(key, value, ttlSeconds);
+      }
     } catch (error: any) {
       logger.error(`Error setting cache key ${key}:`, error.message);
-      return false;
+      // Fallback to memory cache on error
+      return await memoryCacheService.set(key, value, ttlSeconds);
     }
   },
 
@@ -93,13 +105,18 @@ export const cache = {
   del: async (key: string): Promise<boolean> => {
     try {
       const client = getRedisClient();
-      if (!client) return false;
-
-      await client.del(key);
-      return true;
+      if (client) {
+        // Use Redis if available
+        await client.del(key);
+        return true;
+      } else {
+        // Fallback to in-memory cache
+        return await memoryCacheService.del(key);
+      }
     } catch (error: any) {
       logger.error(`Error deleting cache key ${key}:`, error.message);
-      return false;
+      // Fallback to memory cache on error
+      return await memoryCacheService.del(key);
     }
   },
 
@@ -107,27 +124,32 @@ export const cache = {
   delPattern: async (pattern: string): Promise<number> => {
     try {
       const client = getRedisClient();
-      if (!client) return 0;
+      if (client) {
+        // Use Redis if available
+        const stream = client.scanStream({
+          match: pattern,
+          count: 100
+        });
 
-      const stream = client.scanStream({
-        match: pattern,
-        count: 100
-      });
+        let deleted = 0;
+        stream.on('data', async (keys: string[]) => {
+          if (keys.length > 0) {
+            const count = await client.del(...keys);
+            deleted += count;
+          }
+        });
 
-      let deleted = 0;
-      stream.on('data', async (keys: string[]) => {
-        if (keys.length > 0) {
-          const count = await client.del(...keys);
-          deleted += count;
-        }
-      });
-
-      return new Promise((resolve) => {
-        stream.on('end', () => resolve(deleted));
-      });
+        return new Promise((resolve) => {
+          stream.on('end', () => resolve(deleted));
+        });
+      } else {
+        // Fallback to in-memory cache
+        return await memoryCacheService.delPattern(pattern);
+      }
     } catch (error: any) {
       logger.error(`Error deleting cache pattern ${pattern}:`, error.message);
-      return 0;
+      // Fallback to memory cache on error
+      return await memoryCacheService.delPattern(pattern);
     }
   },
 
@@ -135,13 +157,18 @@ export const cache = {
   exists: async (key: string): Promise<boolean> => {
     try {
       const client = getRedisClient();
-      if (!client) return false;
-
-      const result = await client.exists(key);
-      return result === 1;
+      if (client) {
+        // Use Redis if available
+        const result = await client.exists(key);
+        return result === 1;
+      } else {
+        // Fallback to in-memory cache
+        return await memoryCacheService.exists(key);
+      }
     } catch (error: any) {
       logger.error(`Error checking cache key ${key}:`, error.message);
-      return false;
+      // Fallback to memory cache on error
+      return await memoryCacheService.exists(key);
     }
   }
 };
