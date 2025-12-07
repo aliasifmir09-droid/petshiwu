@@ -139,8 +139,23 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
     });
 
     // Use MongoDB transaction to ensure atomic stock updates
-    const session = await mongoose.startSession();
-    session.startTransaction();
+    // Skip transactions in test mode (standalone MongoDB doesn't support transactions)
+    const useTransactions = process.env.NODE_ENV !== 'test';
+    
+    let session: mongoose.ClientSession | null = null;
+    if (useTransactions) {
+      try {
+        session = await mongoose.startSession();
+        session.startTransaction();
+      } catch (error: any) {
+        // If transaction fails (e.g., no replica set), continue without it
+        if (error.message && error.message.includes('replica set')) {
+          session = null;
+        } else {
+          throw error;
+        }
+      }
+    }
 
     try {
       // Step 1: Verify stock availability and prepare stock updates
@@ -154,8 +169,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         const productId = item.product;
         const quantity = item.quantity || 1;
         
-        // Find product with lock (within transaction)
-        const product = await Product.findById(productId).session(session);
+        // Find product with lock (within transaction if available)
+        const product = session ? await Product.findById(productId).session(session) : await Product.findById(productId);
         
         if (!product) {
           throw new Error(`Product ${item.name || productId} not found`);
@@ -200,7 +215,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
                 totalStock: -update.quantity
               }
             },
-            { session }
+            session ? { session } : {}
           );
 
           if (variantUpdateResult.matchedCount === 0) {
@@ -216,11 +231,11 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
             {
               $inc: { totalStock: -update.quantity }
             },
-            { session }
+            session ? { session } : {}
           );
 
           if (productUpdateResult.matchedCount === 0) {
-            const product = await Product.findById(update.productId).session(session);
+            const product = session ? await Product.findById(update.productId).session(session) : await Product.findById(update.productId);
             throw new Error(`Insufficient stock for product. Available: ${product?.totalStock || 0}, Requested: ${update.quantity}`);
           }
         }
@@ -235,7 +250,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
               }
             }
           ],
-          { session }
+          session ? { session } : {}
         );
       }
 
@@ -252,18 +267,22 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         donationAmount: donationAmount || 0,
         totalPrice,
         notes: notes || undefined
-      }], { session });
+      }], session ? { session } : {});
 
-      // Step 4: Commit transaction
-      await session.commitTransaction();
+      // Step 4: Commit transaction if using one
+      if (session) {
+        await session.commitTransaction();
+      }
       
       res.status(201).json({
         success: true,
         data: order[0]
       });
     } catch (error: any) {
-      // Rollback transaction on error
-      await session.abortTransaction();
+      // Rollback transaction on error if using one
+      if (session) {
+        await session.abortTransaction();
+      }
       
       // Return appropriate error response
       if (error.message.includes('not found') || error.message.includes('out of stock') || error.message.includes('Insufficient stock')) {
@@ -276,8 +295,10 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       
       throw error; // Re-throw to be handled by outer catch
     } finally {
-      // End session
-      session.endSession();
+      // End session if using one
+      if (session) {
+        session.endSession();
+      }
     }
   } catch (error: any) {
     // Handle validation errors
@@ -918,15 +939,15 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
       if (reason) {
         order.notes = order.notes ? `${order.notes}\nCancellation reason: ${reason}` : `Cancellation reason: ${reason}`;
       }
-      await order.save({ session });
+      await order.save(session ? { session } : {});
 
       // Restore product stock
       for (const item of order.items) {
-        const product = await Product.findById(item.product).session(session);
+        const product = session ? await Product.findById(item.product).session(session) : await Product.findById(item.product);
         if (product) {
           product.totalStock += item.quantity;
           product.inStock = product.totalStock > 0;
-          await product.save({ session });
+          await product.save(session ? { session } : {});
         }
       }
 
@@ -945,8 +966,10 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
         } : null
       });
     } catch (error: any) {
-      await session.abortTransaction();
-      session.endSession();
+      if (session) {
+        await session.abortTransaction();
+        session.endSession();
+      }
       throw error;
     }
   } catch (error) {

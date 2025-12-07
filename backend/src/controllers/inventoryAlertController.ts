@@ -49,11 +49,9 @@ export const getLowStockProducts = async (req: AuthRequest, res: Response, next:
 
     res.status(200).json({
       success: true,
-      data: {
-        products: lowStockProducts,
-        count: lowStockProducts.length,
-        defaultThreshold
-      }
+      products: lowStockProducts,
+      count: lowStockProducts.length,
+      defaultThreshold
     });
   } catch (error: any) {
     logger.error('Error fetching low stock products:', error);
