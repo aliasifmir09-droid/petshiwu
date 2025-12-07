@@ -96,7 +96,8 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
 
     const categories = await Category.find(query)
       .populate('parentCategory', 'name slug petType')
-      .sort({ position: 1, createdAt: -1 }); // Sort by position first, then by creation date
+      .sort({ position: 1, createdAt: -1 }) // Sort by position first, then by creation date
+      .lean();
 
     // Build hierarchical structure
     const categoryMap = new Map();

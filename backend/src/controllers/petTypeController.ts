@@ -6,7 +6,8 @@ import { AuthRequest } from '../middleware/auth';
 export const getPetTypes = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const petTypes = await PetType.find({ isActive: true })
-      .sort({ order: 1, name: 1 });
+      .sort({ order: 1, name: 1 })
+      .lean();
 
     res.status(200).json({
       success: true,
@@ -22,7 +23,8 @@ export const getPetTypes = async (req: Request, res: Response, next: NextFunctio
 export const getAllPetTypesAdmin = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const petTypes = await PetType.find()
-      .sort({ order: 1, createdAt: -1 });
+      .sort({ order: 1, createdAt: -1 })
+      .lean();
 
     res.status(200).json({
       success: true,
@@ -37,7 +39,7 @@ export const getAllPetTypesAdmin = async (req: AuthRequest, res: Response, next:
 // Get single pet type by slug
 export const getPetType = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const petType = await PetType.findOne({ slug: req.params.slug });
+    const petType = await PetType.findOne({ slug: req.params.slug }).lean();
 
     if (!petType) {
       return res.status(404).json({

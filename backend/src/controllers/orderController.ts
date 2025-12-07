@@ -1151,8 +1151,10 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
     const deliveredOrders = await Order.countDocuments({ orderStatus: 'delivered' });
 
     // Calculate total revenue
-    const paidOrders = await Order.find({ paymentStatus: 'paid' });
-    const totalRevenue = paidOrders.reduce((sum, order) => sum + order.totalPrice, 0);
+    const paidOrders = await Order.find({ paymentStatus: 'paid' })
+      .select('totalPrice donationAmount')
+      .lean();
+    const totalRevenue = paidOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
 
     // Calculate donation statistics
     const ordersWithDonations = await Order.find({ donationAmount: { $gt: 0 } })
