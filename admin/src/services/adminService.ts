@@ -162,9 +162,9 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
       const response = await api.post('/products', data);
       return response.data.data;
     } catch (error: any) {
-      // Log the full error for debugging
-      console.error('Create product API error:', error);
-      console.error('Error response:', error.response?.data);
+      // Log error without sensitive data
+      console.error('Create product API error:', error?.message || 'Unknown error');
+      // Don't log full error response - may contain sensitive data
       throw error;
     }
   },
@@ -303,8 +303,8 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
       // url is Cloudinary URL, path is fallback for local storage
       return data;
     } catch (error: any) {
-      console.error('Upload API error:', error);
-      console.error('Error response:', error.response?.data);
+      console.error('Upload API error:', error?.message || 'Unknown error');
+      // Don't log full error response - may contain sensitive data
       throw error;
     }
   },

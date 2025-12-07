@@ -88,7 +88,10 @@ const Favorites = () => {
           }));
           return normalizedProducts;
         } catch (error: any) {
-          console.error('Failed to fetch wishlist from backend:', error);
+          // Don't log wishlist errors - privacy concern
+          if (import.meta.env.DEV) {
+            console.error('Failed to fetch wishlist from backend');
+          }
           // If 404 or other error, fallback to local storage
           if (items.length === 0) return [];
           try {
@@ -145,7 +148,10 @@ const Favorites = () => {
       await removeFromWishlist(productId);
       refetch();
     } catch (error) {
-      console.error('Failed to remove from wishlist:', error);
+      // Don't log wishlist errors - privacy concern
+      if (import.meta.env.DEV) {
+        console.error('Failed to remove from wishlist');
+      }
     }
   };
 

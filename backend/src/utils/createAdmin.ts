@@ -33,10 +33,7 @@ const createAdminUser = async () => {
     console.log('\n✅ Admin user created successfully!');
     console.log('═══════════════════════════════════');
     console.log('Email:', admin.email);
-    // Password is logged only in development for initial setup
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Password:', adminPassword);
-    }
+    // NEVER log passwords - security risk
     if (!process.env.ADMIN_PASSWORD) {
       console.log('⚠️  WARNING: Using default password. Set ADMIN_PASSWORD env var for production!');
     }

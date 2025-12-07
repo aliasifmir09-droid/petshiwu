@@ -62,10 +62,11 @@ const storage = new CloudinaryStorage({
         params.quality = 'auto';
       }
       
-      console.log('Cloudinary upload params:', params);
+      // Don't log params - may contain sensitive data
       return params;
     } catch (error) {
-      console.error('Error in Cloudinary storage params:', error);
+      // Log error without sensitive details
+      console.error('Error in Cloudinary storage params:', error instanceof Error ? error.message : 'Unknown error');
       throw error;
     }
   },

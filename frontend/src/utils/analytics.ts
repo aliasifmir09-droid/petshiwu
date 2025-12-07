@@ -54,10 +54,7 @@ export const trackPageView = (path: string, title?: string) => {
     });
   }
   
-  // Also log to console in development
-  if (import.meta.env.DEV) {
-    console.log('[Analytics] Page view:', path);
-  }
+  // Don't log analytics data - privacy concern
 };
 
 /**
@@ -77,10 +74,7 @@ export const trackEvent = (
     window.gtag('event', eventName, eventParams);
   }
   
-  // Also log to console in development
-  if (import.meta.env.DEV) {
-    console.log('[Analytics] Event:', eventName, eventParams);
-  }
+  // Don't log analytics data - privacy concern
 };
 
 /**

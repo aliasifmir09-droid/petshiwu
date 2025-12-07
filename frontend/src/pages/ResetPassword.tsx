@@ -107,7 +107,10 @@ const ResetPassword = () => {
           setUser(user);
         } catch (err) {
           // User fetch failed, but password reset succeeded
-          console.error('Failed to fetch user data:', err);
+          // Don't log user data errors - privacy concern
+          if (import.meta.env.DEV) {
+            console.error('Failed to fetch user data');
+          }
         }
 
         // Redirect to home after 2 seconds

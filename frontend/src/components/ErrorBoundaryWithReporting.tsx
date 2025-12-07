@@ -28,8 +28,10 @@ class ErrorBoundaryWithReporting extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    // Log error details
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // Log error without sensitive data - only in development
+    if (import.meta.env.DEV) {
+      console.error('ErrorBoundary caught an error:', error.message);
+    }
     
     // Store error info for display
     this.setState({ errorInfo });

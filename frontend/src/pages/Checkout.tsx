@@ -113,7 +113,10 @@ const Checkout = () => {
               product: freshProduct
             };
           } catch (error) {
-            console.error('Failed to refresh product:', productId, error);
+            // Don't log errors with product data - privacy concern
+            if (import.meta.env.DEV) {
+              console.error('Failed to refresh product:', productId);
+            }
             return item; // Return original item if fetch fails
           }
         })
@@ -125,7 +128,10 @@ const Checkout = () => {
       
       // Products refreshed silently
     } catch (error) {
-      console.error('Error refreshing cart products:', error);
+      // Don't log errors with cart data - privacy concern
+      if (import.meta.env.DEV) {
+        console.error('Error refreshing cart products');
+      }
       showToast('Failed to refresh cart products', 'error');
     }
   };

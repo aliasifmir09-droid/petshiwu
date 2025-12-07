@@ -534,6 +534,7 @@ if (!PORT || isNaN(PORT) || PORT < 1 || PORT > 65535) {
 
 console.log(`🚀 Starting server on ${HOST}:${PORT}...`);
 console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+// Don't log sensitive environment variables
 console.log(`🔑 MongoDB URI: ${process.env.MONGODB_URI ? 'Set' : 'NOT SET'}`);
 console.log(`🔐 JWT Secret: ${process.env.JWT_SECRET ? 'Set' : 'NOT SET'}`);
 

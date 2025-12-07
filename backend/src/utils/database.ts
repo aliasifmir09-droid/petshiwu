@@ -6,7 +6,9 @@ export const connectDatabase = async () => {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/pet-ecommerce';
     
     console.log('Attempting to connect to MongoDB...');
-    console.log('MongoDB URI:', mongoUri.replace(/\/\/.*@/, '//<credentials>@')); // Hide credentials in logs
+    // Sanitize URI - remove all credentials
+    const sanitizedUri = mongoUri.replace(/\/\/[^:]+:[^@]+@/, '//<credentials>@').replace(/\/\/[^@]+@/, '//<credentials>@');
+    console.log('MongoDB URI:', sanitizedUri);
     
     const conn = await mongoose.connect(mongoUri, {
       serverSelectionTimeoutMS: 10000, // How long to try selecting a server
