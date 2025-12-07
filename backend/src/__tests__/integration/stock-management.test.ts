@@ -1,24 +1,27 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
+import { connectDatabase } from '../../utils/database';
+import app from '../helpers/testApp';
+import { getAdminToken, createTestUser } from '../helpers/testHelpers';
 import Product from '../../models/Product';
 import Order from '../../models/Order';
 import User from '../../models/User';
 import Category from '../../models/Category';
-import { testApp } from '../helpers/testApp';
-import { getAdminToken, createTestUser, cleanupTestData } from '../helpers/testHelpers';
 
 describe('Stock Management', () => {
   let adminToken: string;
   let userToken: string;
   let testUserId: string;
-  let testProductId: string;
   let testCategoryId: string;
 
   beforeAll(async () => {
-    adminToken = await getAdminToken();
-    const user = await createTestUser();
+    process.env.NODE_ENV = 'test';
+    await connectDatabase();
+    
+    adminToken = await getAdminToken(app);
+    const user = await createTestUser(app);
     userToken = user.token;
-    testUserId = user.userId;
+    testUserId = user.user._id.toString();
 
     // Create test category
     const category = await Category.create({
@@ -29,14 +32,12 @@ describe('Stock Management', () => {
       position: 1,
       isActive: true
     });
-    testCategoryId = category._id.toString();
+    testCategoryId = (category._id as mongoose.Types.ObjectId).toString();
   });
 
   afterAll(async () => {
-    await cleanupTestData([
-      { model: Category, _id: testCategoryId },
-      { model: User, _id: testUserId }
-    ]);
+    if (testCategoryId) await Category.findByIdAndDelete(testCategoryId);
+    if (testUserId) await User.findByIdAndDelete(testUserId);
     await mongoose.connection.close();
   });
 
@@ -57,7 +58,7 @@ describe('Stock Management', () => {
         variants: []
       });
 
-      const productId = product._id.toString();
+      const productId = (product._id as mongoose.Types.ObjectId).toString();
       const initialStock = product.totalStock;
 
       // Create order
@@ -127,7 +128,7 @@ describe('Stock Management', () => {
         variants: []
       });
 
-      const productId = product._id.toString();
+      const productId = (product._id as mongoose.Types.ObjectId).toString();
 
       // Create order
       const orderResponse = await request(testApp)
@@ -199,7 +200,7 @@ describe('Stock Management', () => {
         variants: []
       });
 
-      const productId = product._id.toString();
+      const productId = (product._id as mongoose.Types.ObjectId).toString();
 
       // Create multiple orders simultaneously
       const orders = Array(3).fill(null).map(() =>
@@ -269,7 +270,7 @@ describe('Stock Management', () => {
         variants: []
       });
 
-      const productId = lowStockProduct._id.toString();
+      const productId = (lowStockProduct._id as mongoose.Types.ObjectId).toString();
 
       // Get low stock products (admin endpoint)
       const response = await request(testApp)

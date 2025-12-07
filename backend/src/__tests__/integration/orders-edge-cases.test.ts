@@ -1,11 +1,12 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
+import { connectDatabase } from '../../utils/database';
+import app from '../helpers/testApp';
+import { getAdminToken, createTestUser } from '../helpers/testHelpers';
 import Product from '../../models/Product';
 import Order from '../../models/Order';
 import User from '../../models/User';
 import Category from '../../models/Category';
-import { testApp } from '../helpers/testApp';
-import { getAdminToken, createTestUser, cleanupTestData } from '../helpers/testHelpers';
 
 describe('Order Creation Edge Cases', () => {
   let adminToken: string;
@@ -15,10 +16,13 @@ describe('Order Creation Edge Cases', () => {
   let testCategoryId: string;
 
   beforeAll(async () => {
-    adminToken = await getAdminToken();
-    const user = await createTestUser();
+    process.env.NODE_ENV = 'test';
+    await connectDatabase();
+    
+    adminToken = await getAdminToken(app);
+    const user = await createTestUser(app);
     userToken = user.token;
-    testUserId = user.userId;
+    testUserId = (user.user._id as mongoose.Types.ObjectId).toString();
 
     // Create test category
     const category = await Category.create({
@@ -29,7 +33,7 @@ describe('Order Creation Edge Cases', () => {
       position: 1,
       isActive: true
     });
-    testCategoryId = category._id.toString();
+    testCategoryId = (category._id as mongoose.Types.ObjectId).toString();
 
     // Create test product with stock
     const product = await Product.create({
@@ -45,15 +49,13 @@ describe('Order Creation Edge Cases', () => {
       totalStock: 5,
       variants: []
     });
-    testProductId = product._id.toString();
+    testProductId = (product._id as mongoose.Types.ObjectId).toString();
   });
 
   afterAll(async () => {
-    await cleanupTestData([
-      { model: Product, _id: testProductId },
-      { model: Category, _id: testCategoryId },
-      { model: User, _id: testUserId }
-    ]);
+    if (testProductId) await Product.findByIdAndDelete(testProductId);
+    if (testCategoryId) await Category.findByIdAndDelete(testCategoryId);
+    if (testUserId) await User.findByIdAndDelete(testUserId);
     await mongoose.connection.close();
   });
 
@@ -74,10 +76,10 @@ describe('Order Creation Edge Cases', () => {
         variants: []
       });
 
-      const productId = limitedProduct._id.toString();
+      const productId = (limitedProduct._id as mongoose.Types.ObjectId).toString();
 
       // Create two orders simultaneously requesting 2 items each
-      const order1 = request(testApp)
+      const order1 = request(app)
         .post('/api/orders')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
@@ -103,7 +105,7 @@ describe('Order Creation Edge Cases', () => {
           totalPrice: 27
         });
 
-      const order2 = request(testApp)
+      const order2 = request(app)
         .post('/api/orders')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
