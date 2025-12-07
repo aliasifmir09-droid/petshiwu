@@ -77,7 +77,7 @@ function App() {
       navigator.serviceWorker
         .register('/sw.js')
         .then((registration) => {
-          console.log('Service Worker registered:', registration);
+          // Service Worker registered successfully - no need to log
         })
         .catch((error) => {
           console.log('Service Worker registration failed:', error);
