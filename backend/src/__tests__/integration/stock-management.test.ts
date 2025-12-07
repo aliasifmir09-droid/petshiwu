@@ -287,10 +287,12 @@ describe('Stock Management', () => {
       }
 
       // Manually set order creation time to 25 hours ago
-      // Use $set to override timestamps
+      // Use updateOne with timestamps disabled to override Mongoose's automatic timestamp handling
+      const oldCreatedAt = new Date(Date.now() - 25 * 60 * 60 * 1000);
       await Order.updateOne(
         { _id: orderId },
-        { $set: { createdAt: new Date(Date.now() - 25 * 60 * 60 * 1000) } }
+        { $set: { createdAt: oldCreatedAt } },
+        { timestamps: false } // Disable automatic timestamp updates
       );
 
       // Verify the update was applied by refetching
@@ -298,7 +300,18 @@ describe('Stock Management', () => {
       if (!updatedOrder) {
         throw new Error('Order not found after update');
       }
-      const hoursSinceOrder = (Date.now() - new Date(updatedOrder.createdAt).getTime()) / (1000 * 60 * 60);
+      const updatedCreatedAt = new Date(updatedOrder.createdAt);
+      const hoursSinceOrder = (Date.now() - updatedCreatedAt.getTime()) / (1000 * 60 * 60);
+      
+      // Debug: log the values if test fails
+      if (hoursSinceOrder <= 24) {
+        console.error('Timestamp update failed:', {
+          oldCreatedAt: oldCreatedAt.toISOString(),
+          updatedCreatedAt: updatedCreatedAt.toISOString(),
+          hoursSinceOrder,
+          now: new Date().toISOString()
+        });
+      }
       expect(hoursSinceOrder).toBeGreaterThan(24);
 
       // Try to cancel (should fail)
