@@ -27,7 +27,7 @@ router.post('/confirm', confirmDonation);
 router.get('/:id', protect, validateObjectId(), getDonation);
 
 // Admin routes
-router.get('/admin/all', protect, checkPermission('canViewAnalytics'), paginationValidation, getAllDonations);
+router.get('/admin/all', protect, checkPermission('canViewAnalytics'), adminPaginationValidation, getAllDonations);
 router.get('/admin/stats', protect, checkPermission('canViewAnalytics'), getDonationStats);
 
 export default router;
