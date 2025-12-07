@@ -77,6 +77,25 @@ export const orderService = {
       withCredentials: true
     });
     return response.data.data;
+  },
+
+  createReturn: async (orderId: string, items: Array<{ orderItemIndex: number; quantity: number; reason: string }>, returnAddress?: any) => {
+    const response = await api.post<ApiResponse<any>>('/orders/returns', {
+      orderId,
+      items,
+      returnAddress
+    });
+    return response.data.data;
+  },
+
+  getMyReturns: async () => {
+    const response = await api.get<ApiResponse<any[]>>('/orders/returns/my');
+    return response.data.data;
+  },
+
+  getReturn: async (returnId: string) => {
+    const response = await api.get<ApiResponse<any>>(`/orders/returns/${returnId}`);
+    return response.data.data;
   }
 };
 

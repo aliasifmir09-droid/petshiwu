@@ -49,6 +49,60 @@ export const productService = {
       }
     });
     return response.data.data;
+  },
+
+  getRecommendations: async (productId: string) => {
+    const response = await api.get<ApiResponse<any>>(`/products/${productId}/recommendations`);
+    return response.data.data;
+  },
+
+  getFrequentlyBoughtTogether: async (productId: string) => {
+    const response = await api.get<ApiResponse<any>>(`/products/${productId}/frequently-bought-together`);
+    return response.data.data;
+  },
+
+  compareProducts: async (productIds: string[]) => {
+    const response = await api.get<ApiResponse<any>>('/products/compare', {
+      params: { productIds: productIds.join(',') }
+    });
+    return response.data.data;
+  },
+
+  getComparisonSuggestions: async (productIds: string[]) => {
+    const response = await api.get<ApiResponse<any>>('/products/compare/suggestions', {
+      params: { productIds: productIds.join(',') }
+    });
+    return response.data.data;
+  },
+
+  advancedSearch: async (query: string, filters?: {
+    minPrice?: number;
+    maxPrice?: number;
+    minRating?: number;
+    inStock?: boolean;
+    category?: string;
+    petType?: string;
+    brand?: string;
+    sort?: string;
+    page?: number;
+    limit?: number;
+  }) => {
+    const response = await api.get<PaginatedResponse<Product>>('/products/search', {
+      params: { q: query, ...filters }
+    });
+    return response.data;
+  },
+
+  searchAutocomplete: async (query: string, limit = 10) => {
+    const response = await api.get<ApiResponse<any>>('/products/search/autocomplete', {
+      params: { q: query, limit }
+    });
+    return response.data.data;
+  },
+
+  getProductShareLinks: async (productId: string) => {
+    const response = await api.get<ApiResponse<any>>(`/products/${productId}/share`);
+    return response.data.data;
   }
 };
 
