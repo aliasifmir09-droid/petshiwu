@@ -28,7 +28,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "fix-sku-index": "ts-node src/utils/fixSkuIndex.ts"
+    "fix-sku-index": "ts-node src/utils/fixSkuIndex.ts",
+    "seed-email-templates": "ts-node src/utils/seedEmailTemplates.ts"
   },
   "dependencies": {
     "@types/node": "^20.10.6",

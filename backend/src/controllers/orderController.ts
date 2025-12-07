@@ -6,7 +6,7 @@ import User from '../models/User';
 import { AuthRequest } from '../middleware/auth';
 import { safeToString, extractObjectId } from '../utils/types';
 import { asyncHandler, NotFoundError, UnauthorizedError, ValidationError } from '../utils/errors';
-import { sendOrderConfirmationEmail } from '../utils/emailService';
+import { sendOrderConfirmationEmail, sendOrderCancellationEmail, sendOrderDeliveredEmail } from '../utils/emailService';
 import logger from '../utils/logger';
 
 /**
@@ -787,6 +787,7 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response, next: N
     }
 
     // Handle delivered status
+    const wasDelivered = order.isDelivered;
     if (orderStatus === 'delivered') {
       order.isDelivered = true;
       order.deliveredAt = new Date();
@@ -800,10 +801,45 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response, next: N
 
     await order.save();
 
+    // Send delivery email if order was just marked as delivered
+    if (orderStatus === 'delivered' && !wasDelivered) {
+      try {
+        const user = await User.findById(order.user).select('email firstName lastName').lean();
+        if (user && user.email) {
+          const fullOrder = await Order.findById(order._id).lean();
+          if (fullOrder && fullOrder.orderNumber) {
+            sendOrderDeliveredEmail(
+              user.email,
+              user.firstName || 'Customer',
+              fullOrder.orderNumber,
+              {
+                items: fullOrder.items.map((item: any) => ({
+                  name: item.name,
+                  quantity: item.quantity,
+                  price: item.price,
+                  image: item.image
+                })),
+                totalPrice: fullOrder.totalPrice,
+                trackingNumber: fullOrder.trackingNumber,
+                deliveredAt: fullOrder.deliveredAt || new Date(),
+                shippingAddress: fullOrder.shippingAddress
+              }
+            ).catch((error) => {
+              logger.error('Failed to send order delivered email:', error);
+            });
+          }
+        }
+      } catch (emailError) {
+        logger.error('Error preparing order delivered email:', emailError);
+      }
+    }
+
+    const normalizedOrder = normalizeOrderId(order);
+    
     res.status(200).json({
       success: true,
       message: 'Order status updated successfully',
-      data: order
+      data: normalizedOrder
     });
   } catch (error: any) {
     // Handle Mongoose validation errors
@@ -1025,10 +1061,43 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
         session.endSession();
       }
 
+      const normalizedOrder = normalizeOrderId(order);
+      
+      // Send cancellation email (non-blocking)
+      try {
+        const user = await User.findById(order.user).select('email firstName lastName').lean();
+        if (user && user.email) {
+          const fullOrder = await Order.findById(order._id).lean();
+          if (fullOrder && fullOrder.orderNumber) {
+            sendOrderCancellationEmail(
+              user.email,
+              user.firstName || 'Customer',
+              fullOrder.orderNumber,
+              {
+                items: fullOrder.items.map((item: any) => ({
+                  name: item.name,
+                  quantity: item.quantity,
+                  price: item.price,
+                  image: item.image
+                })),
+                totalPrice: fullOrder.totalPrice,
+                cancellationReason: reason || 'Customer request',
+                refundAmount: fullOrder.totalPrice, // Full refund for cancelled orders
+                createdAt: fullOrder.createdAt
+              }
+            ).catch((error) => {
+              logger.error('Failed to send order cancellation email:', error);
+            });
+          }
+        }
+      } catch (emailError) {
+        logger.error('Error preparing order cancellation email:', emailError);
+      }
+
       res.status(200).json({
         success: true,
         message: 'Order cancelled successfully',
-        data: order,
+        data: normalizedOrder,
         refundInfo: order.isPaid ? {
           willRefund: true,
           refundAmount: order.totalPrice,
