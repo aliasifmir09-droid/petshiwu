@@ -62,10 +62,13 @@ describe('Auth API', () => {
         })
         .expect(201);
 
-      // sendTokenResponse returns { success: true, token }
+      // Registration now requires email verification, so no token is returned
       expect(response.body.success).toBe(true);
-      expect(response.body.token).toBeDefined();
-      expect(typeof response.body.token).toBe('string');
+      expect(response.body.message).toBeDefined();
+      expect(response.body.message).toContain('email');
+      expect(response.body.data).toBeDefined();
+      expect(response.body.data.email).toBe(userData.email);
+      expect(response.body.data.emailVerified).toBe(false);
 
       // Verify user was actually created in database
       const createdUser = await User.findOne({ email: testEmail });
