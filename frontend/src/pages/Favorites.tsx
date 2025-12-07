@@ -13,6 +13,7 @@ import { productService } from '@/services/products';
 import { wishlistShareService } from '@/services/wishlistShare';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
+import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 
 const Favorites = () => {
   const { isAuthenticated } = useAuthStore();
@@ -210,12 +211,17 @@ const Favorites = () => {
         <>
           {/* Products Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product: any) => {
-              const productId = product._id ? String(product._id) : (product.id ? String(product.id) : null);
-              if (!productId) return null;
-              return (
-              <div key={productId} className="relative group">
-                <ProductCard product={product} />
+            {products
+              .filter((product: any) => {
+                const productId = product._id ? String(product._id) : (product.id ? String(product.id) : null);
+                return productId && !hasImageFailed(productId);
+              })
+              .map((product: any) => {
+                const productId = product._id ? String(product._id) : (product.id ? String(product.id) : null);
+                if (!productId) return null;
+                return (
+                <div key={productId} className="relative group">
+                  <ProductCard product={product} />
                 {/* Remove Button Overlay */}
                 <button
                   onClick={() => handleRemoveFromWishlist(productId)}

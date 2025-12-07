@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { Product } from '@/types';
 import { trackStockAlert } from '@/utils/analytics';
+import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 
 const StockAlerts = () => {
   const { toast, showToast, hideToast } = useToast();

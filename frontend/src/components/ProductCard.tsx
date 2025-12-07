@@ -6,6 +6,7 @@ import { useWishlistStore } from '@/stores/wishlistStore';
 import { useCartStore } from '@/stores/cartStore';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
+import { useImageLoadTracker } from '@/hooks/useImageLoadTracker';
 
 interface ProductCardProps {
   product: Product;
@@ -15,10 +16,17 @@ interface ProductCardProps {
 const ProductCard = memo(({ product, hideCartButton = false }: ProductCardProps) => {
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
   const { addToCart } = useCartStore();
+  const { markImageFailed } = useImageLoadTracker();
   // Convert _id to string if it's an object (MongoDB ObjectId)
   const productId = product._id ? String(product._id) : null;
   const inWishlist = productId ? isInWishlist(productId) : false;
   const [isHovered, setIsHovered] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+  
+  // Hide product if image has failed to load
+  if (imageFailed) {
+    return null;
+  }
 
   const handleWishlistToggle = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -81,6 +89,11 @@ const ProductCard = memo(({ product, hideCartButton = false }: ProductCardProps)
           loading="lazy"
           onError={(e) => {
             handleImageError(e, product.name);
+            // Mark this product's image as failed - will hide the product
+            if (productId) {
+              markImageFailed(productId);
+              setImageFailed(true);
+            }
             // Suppress console errors for failed image loads (403, 404, etc.)
             e.stopPropagation();
           }}

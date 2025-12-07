@@ -7,6 +7,7 @@ import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Dropdown from '@/components/Dropdown';
 import { SlidersHorizontal, ArrowUpDown, ChevronRight, Home } from 'lucide-react';
+import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 
 const Category = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -319,11 +320,16 @@ const Category = () => {
               ) : products && products.data.length > 0 ? (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
-                    {products.data.map((product) => (
-                      <div key={product._id} className="flex">
-                        <ProductCard product={product} />
-                      </div>
-                    ))}
+                    {products.data
+                      .filter((product) => {
+                        const productId = product._id ? String(product._id) : null;
+                        return productId && !hasImageFailed(productId);
+                      })
+                      .map((product) => (
+                        <div key={product._id} className="flex">
+                          <ProductCard product={product} />
+                        </div>
+                      ))}
                   </div>
 
                   {/* Pagination */}

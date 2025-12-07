@@ -9,6 +9,7 @@ import EmptyState from '@/components/EmptyState';
 import ErrorMessage from '@/components/ErrorMessage';
 import Dropdown from '@/components/Dropdown';
 import { SlidersHorizontal, Layers, ArrowUpDown, Star, Package, Tag, Search } from 'lucide-react';
+import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -356,11 +357,16 @@ const Products = () => {
           ) : products && products.data.length > 0 ? (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
-                {products.data.map((product) => (
-                  <div key={product._id} className="flex">
-                    <ProductCard product={product} />
-                  </div>
-                ))}
+                {products.data
+                  .filter((product) => {
+                    const productId = product._id ? String(product._id) : null;
+                    return productId && !hasImageFailed(productId);
+                  })
+                  .map((product) => (
+                    <div key={product._id} className="flex">
+                      <ProductCard product={product} />
+                    </div>
+                  ))}
               </div>
 
               {/* Pagination */}
