@@ -647,11 +647,33 @@ export const sendPasswordResetEmail = async (email: string, token: string, first
       `
     };
 
+    // Verify connection before sending
+    try {
+      await transporter.verify();
+      logger.info('✅ SMTP connection verified');
+    } catch (verifyError: any) {
+      logger.error('❌ SMTP connection verification failed:', {
+        error: verifyError.message,
+        code: verifyError.code,
+        command: verifyError.command
+      });
+      throw new Error(`SMTP connection failed: ${verifyError.message}`);
+    }
+
     const info = await transporter.sendMail(mailOptions);
     logger.info(`✅ Password reset email sent to ${email}: ${info.messageId}`);
     return info;
   } catch (error: any) {
-    logger.error(`❌ Error sending password reset email to ${email}:`, error.message);
+    // Log detailed error information
+    logger.error(`❌ Error sending password reset email to ${email}:`, {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode,
+      stack: error.stack
+    });
+    
     // In development, don't fail completely - log the link
     if (process.env.NODE_ENV !== 'production') {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';

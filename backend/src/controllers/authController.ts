@@ -483,10 +483,25 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
       user.passwordResetExpires = undefined;
       await user.save({ validateBeforeSave: false });
 
-      logger.error('Error sending password reset email:', emailError);
+      // Log detailed error for debugging
+      logger.error('Error sending password reset email:', {
+        email: user.email,
+        error: emailError.message,
+        stack: emailError.stack,
+        code: emailError.code,
+        command: emailError.command,
+        response: emailError.response,
+        responseCode: emailError.responseCode
+      });
+      
+      // Return more detailed error in development, generic in production
+      const errorMessage = process.env.NODE_ENV === 'production'
+        ? 'Error sending password reset email. Please try again later.'
+        : `Error sending password reset email: ${emailError.message}`;
+      
       return res.status(500).json({
         success: false,
-        message: 'Error sending password reset email. Please try again later.'
+        message: errorMessage
       });
     }
   } catch (error) {
