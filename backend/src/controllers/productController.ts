@@ -150,7 +150,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
       }
       
       // Type for lean category document - matches what Category.findOne().lean() returns
-      type CategoryLean = {
+      interface CategoryLean {
         _id: mongoose.Types.ObjectId;
         name: string;
         slug: string;
@@ -164,8 +164,8 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
         createdAt: Date;
         updatedAt: Date;
         __v?: number;
-      } | null;
-      let category: CategoryLean = await Category.findOne(query).lean() as CategoryLean;
+      }
+      let category: CategoryLean | null = await Category.findOne(query).lean() as unknown as CategoryLean | null;
       
       // If not found, create it
       if (!category) {
@@ -200,7 +200,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
             if (!foundCategory) {
               throw new Error(`Failed to create category "${trimmedName}": ${error.message || 'Unknown error'}`);
             }
-            category = foundCategory;
+            category = foundCategory as unknown as CategoryLean;
           } else {
             throw createError;
           }
