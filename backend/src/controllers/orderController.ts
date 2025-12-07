@@ -274,9 +274,12 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         await session.commitTransaction();
       }
       
+      // Normalize order ID before sending response
+      const normalizedOrder = normalizeOrderId(order[0]);
+      
       res.status(201).json({
         success: true,
-        data: order[0]
+        data: normalizedOrder
       });
     } catch (error: any) {
       // Rollback transaction on error if using one

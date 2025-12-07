@@ -90,7 +90,7 @@ describe('Stock Management', () => {
         });
 
       expect(orderResponse.status).toBe(201);
-      const orderId = orderResponse.body.data._id;
+      const orderId = orderResponse.body.data._id?.toString() || orderResponse.body.data._id;
 
       // Verify stock was reduced
       const afterOrderProduct = await Product.findById(productId);
@@ -158,10 +158,10 @@ describe('Stock Management', () => {
           totalPrice: 26
         });
 
-      const orderId = orderResponse.body.data._id;
+      const orderId = orderResponse.body.data._id?.toString() || orderResponse.body.data._id;
 
       // Manually set order creation time to 25 hours ago
-      await Order.findByIdAndUpdate(orderId, {
+      await Order.findByIdAndUpdate(new mongoose.Types.ObjectId(orderId), {
         createdAt: new Date(Date.now() - 25 * 60 * 60 * 1000)
       });
 
@@ -247,8 +247,14 @@ describe('Stock Management', () => {
 
       // Cleanup
       await Product.findByIdAndDelete(productId);
-      const orderIds = successfulOrders.map(r => r.body.data._id);
-      await Order.deleteMany({ _id: { $in: orderIds } });
+      const orderIds = successfulOrders.map(r => {
+        const id = r.body.data?._id;
+        if (!id) return null;
+        return typeof id === 'string' ? new mongoose.Types.ObjectId(id) : (id.toString ? new mongoose.Types.ObjectId(id.toString()) : id);
+      }).filter((id): id is mongoose.Types.ObjectId => id !== null);
+      if (orderIds.length > 0) {
+        await Order.deleteMany({ _id: { $in: orderIds } });
+      }
     });
   });
 
@@ -279,7 +285,10 @@ describe('Stock Management', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.products).toBeDefined();
-      const productIds = response.body.products.map((p: any) => p._id.toString());
+      const productIds = response.body.products.map((p: any) => {
+        const id = p._id;
+        return id?.toString ? id.toString() : String(id);
+      });
       expect(productIds).toContain(productId);
 
       // Cleanup

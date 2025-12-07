@@ -67,7 +67,7 @@ describe('Auth API', () => {
       expect(response.body.message).toBeDefined();
       expect(response.body.message).toContain('email');
       expect(response.body.data).toBeDefined();
-      expect(response.body.data.email).toBe(userData.email);
+      expect(response.body.data.email).toBe(testEmail);
       expect(response.body.data.emailVerified).toBe(false);
 
       // Verify user was actually created in database
