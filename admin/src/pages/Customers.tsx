@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
@@ -64,6 +64,7 @@ const Customers = () => {
   const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
   const [deleteOptions, setDeleteOptions] = useState({ deleteOrders: false, anonymizeReviews: true });
   const { toast, showToast, hideToast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch customers
   const { data: customersData, isLoading } = useQuery({
@@ -113,7 +114,7 @@ const Customers = () => {
   const deleteCustomerMutation = useMutation({
     mutationFn: ({ id, options }: { id: string; options?: { deleteOrders?: boolean; anonymizeReviews?: boolean } }) =>
       adminService.deleteCustomer(id, options),
-    onSuccess: async (data) => {
+    onSuccess: async () => {
       showToast(`Customer ${customerToDelete?.email} deleted successfully`, 'success');
       setCustomerToDelete(null);
       // Refetch customers
