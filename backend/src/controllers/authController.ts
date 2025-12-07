@@ -551,13 +551,29 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
     const user = await User.findOne({
       passwordResetToken: hashedToken,
       passwordResetExpires: { $gt: new Date() }
-    }).select('+passwordResetToken +passwordResetExpires +password');
+    }).select('+passwordResetToken +passwordResetExpires +password +email');
 
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid or expired password reset token'
+        message: 'Invalid or expired password reset token. Please request a new password reset link.'
       });
+    }
+
+    // SECURITY: Check if a different user is logged in
+    // If someone is logged in, verify they're the same user requesting the reset
+    const authReq = req as AuthRequest;
+    if (authReq.user && authReq.user._id) {
+      const loggedInUserId = safeToString(authReq.user._id);
+      const resetUserId = safeToString(user._id);
+      
+      if (loggedInUserId !== resetUserId) {
+        logger.warn(`Security: User ${loggedInUserId} (${authReq.user.email}) attempted to reset password for user ${resetUserId} (${user.email})`);
+        return res.status(403).json({
+          success: false,
+          message: `You cannot reset another user's password. You are logged in as ${authReq.user.email}, but this reset link is for ${user.email}. Please log out first or use the correct reset link for your account.`
+        });
+      }
     }
 
     // Validate password length
@@ -572,7 +588,10 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
     user.password = password;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
+    user.passwordChangedAt = new Date();
     await user.save();
+
+    logger.info(`Password reset successful for user: ${user.email} (ID: ${user._id})`);
 
     // Send token response (auto-login after reset)
     sendTokenResponse(safeToString(user._id), 200, res);
@@ -581,5 +600,62 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
   }
 };
 
+/**
+ * @swagger
+ * /api/auth/verify-reset-token:
+ *   get:
+ *     summary: Verify password reset token and get user email
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Token is valid, returns user email
+ *       400:
+ *         description: Invalid or expired token
+ */
+export const verifyResetToken = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { token } = req.query;
 
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'Token is required'
+      });
+    }
+
+    // Hash the token to compare with stored hash
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    // Find user with this token and check if it's not expired
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: new Date() }
+    }).select('email firstName');
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired password reset token'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      email: user.email,
+      firstName: user.firstName
+    });
+  } catch (error: any) {
+    logger.error('Error verifying reset token:', error);
+    next(error);
+  }
+};
 
