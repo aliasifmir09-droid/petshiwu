@@ -175,14 +175,15 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           });
           // Convert to plain object to match lean() return type
           const categoryObj = newCategory.toObject();
-          category = categoryObj as Awaited<ReturnType<typeof Category.findOne>>;
+          category = categoryObj as typeof category;
         } catch (createError: unknown) {
           const error = createError as { code?: number; name?: string; message?: string };
           if (error.code === 11000 || error.name === 'MongoServerError') {
-            category = await Category.findOne(query).lean();
-            if (!category) {
+            const foundCategory = await Category.findOne(query).lean();
+            if (!foundCategory) {
               throw new Error(`Failed to create category "${trimmedName}": ${error.message || 'Unknown error'}`);
             }
+            category = foundCategory;
           } else {
             throw createError;
           }
