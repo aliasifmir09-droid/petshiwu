@@ -143,8 +143,7 @@ export const exportCustomers = async (req: AuthRequest, res: Response, next: Nex
           'Total Orders': orderCount,
           'Total Spent': totalSpent.toFixed(2),
           'Average Order Value': orderCount > 0 ? (totalSpent / orderCount).toFixed(2) : '0.00',
-          'Created At': new Date(user.createdAt).toISOString(),
-          'Last Login': user.lastLogin ? new Date(user.lastLogin).toISOString() : 'Never'
+          'Created At': new Date(user.createdAt).toISOString()
         };
       })
     );
