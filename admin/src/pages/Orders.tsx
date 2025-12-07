@@ -134,13 +134,41 @@ const Orders = () => {
     setShowDetailsModal(true);
   };
 
+  const exportOrdersMutation = useMutation({
+    mutationFn: () => adminService.exportOrders({ status: statusFilter || undefined }),
+    onSuccess: (blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `orders-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      showToast('Orders exported successfully', 'success');
+    },
+    onError: () => {
+      showToast('Failed to export orders', 'error');
+    }
+  });
+
   return (
     <div className="space-y-6">
       {/* Header Section with Gradient */}
       <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 lg:p-8 shadow-xl animate-fade-in-up">
-        <div className="relative z-10">
-          <h1 className="text-4xl font-black text-white mb-2">Orders</h1>
-          <p className="text-blue-100 text-lg">Manage customer orders</p>
+        <div className="relative z-10 flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-4xl font-black text-white mb-2">Orders</h1>
+            <p className="text-blue-100 text-lg">Manage customer orders</p>
+          </div>
+          <button
+            onClick={() => exportOrdersMutation.mutate()}
+            disabled={exportOrdersMutation.isPending}
+            className="flex items-center gap-2 bg-white text-[#1E3A8A] px-6 py-3 rounded-xl hover:bg-blue-50 font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 disabled:opacity-50"
+          >
+            <Download size={20} />
+            Export CSV
+          </button>
         </div>
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>

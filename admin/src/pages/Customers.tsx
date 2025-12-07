@@ -57,6 +57,7 @@ const Customers = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const { toast, showToast, hideToast } = useToast();
 
   // Fetch customers
   const { data: customersData, isLoading } = useQuery({
@@ -138,9 +139,19 @@ const Customers = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Customers</h1>
-        <p className="text-gray-600 mt-1">Manage and view customer information</p>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Customers</h1>
+          <p className="text-gray-600 mt-1">Manage and view customer information</p>
+        </div>
+        <button
+          onClick={() => exportCustomersMutation.mutate()}
+          disabled={exportCustomersMutation.isPending}
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+        >
+          <Download size={18} />
+          Export CSV
+        </button>
       </div>
 
       {/* Stats Cards */}
