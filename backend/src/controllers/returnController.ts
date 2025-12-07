@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
-import Return from '../models/Return';
+import Return, { IReturn } from '../models/Return';
 import Order from '../models/Order';
 import Product from '../models/Product';
 import { AuthRequest } from '../middleware/auth';
 import logger from '../utils/logger';
+import { extractObjectId, safeToString } from '../utils/types';
 
 // Create return request
 export const createReturn = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -76,7 +77,8 @@ export const createReturn = async (req: AuthRequest, res: Response, next: NextFu
         const oi = order.items[i];
         // Order items don't have _id in the schema, use index
         const oiId = i.toString();
-        if (safeToString(oi.product) === item.productId && oiId === item.orderItemId) {
+        const oiProductId = safeToString(oi.product);
+        if (oiProductId === item.productId && oiId === item.orderItemId) {
           orderItem = oi;
           orderItemIndex = i;
           break;

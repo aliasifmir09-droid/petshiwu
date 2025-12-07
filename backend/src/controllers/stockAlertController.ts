@@ -157,8 +157,9 @@ export const checkAndNotifyStockAlerts = async () => {
 
     for (const alert of alerts) {
       try {
-        const product = alert.product as IProduct;
-        const user = alert.user as IUser;
+        // Populated product and user are already the full documents
+        const product = alert.product as unknown as IProduct;
+        const user = alert.user as unknown as IUser;
 
         if (!product || !user) continue;
 

@@ -111,25 +111,27 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
     });
 
     // Second pass: build hierarchy and sort subcategories by position
-    categories.forEach(cat => {
+    for (const cat of categories) {
       const catId = cat._id as mongoose.Types.ObjectId;
       const catObj = categoryMap.get(catId.toString());
+      if (!catObj) continue;
+      
       if (cat.parentCategory) {
         const parentId = extractObjectId(cat.parentCategory);
         if (!parentId) {
           rootCategories.push(catObj);
-          continue;
-        }
-        const parent = categoryMap.get(parentId.toString());
-        if (parent) {
-          parent.subcategories.push(catObj);
         } else {
-          rootCategories.push(catObj);
+          const parent = categoryMap.get(parentId.toString());
+          if (parent) {
+            parent.subcategories.push(catObj);
+          } else {
+            rootCategories.push(catObj);
+          }
         }
       } else {
         rootCategories.push(catObj);
       }
-    });
+    }
 
     // Sort subcategories by position for each category
     const sortByPosition = (cats: any[]) => {

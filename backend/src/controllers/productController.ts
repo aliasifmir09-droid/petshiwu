@@ -173,17 +173,18 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
                 level: level,
                 description: `${trimmedName} products`
               });
-              category = newCategory;
+              category = newCategory.toObject();
             } catch (createError: unknown) {
-          if (createError.code === 11000 || createError.name === 'MongoServerError') {
-            category = await Category.findOne(query).lean();
-            if (!category) {
-              throw new Error(`Failed to create category "${trimmedName}": ${createError.message}`);
+              const error = createError as { code?: number; name?: string; message?: string };
+              if (error.code === 11000 || error.name === 'MongoServerError') {
+                category = await Category.findOne(query).lean();
+                if (!category) {
+                  throw new Error(`Failed to create category "${trimmedName}": ${error.message || 'Unknown error'}`);
+                }
+              } else {
+                throw createError;
+              }
             }
-          } else {
-            throw createError;
-          }
-        }
       } else if (!category.isActive) {
         await Category.findByIdAndUpdate(category._id, { isActive: true });
         category.isActive = true;
