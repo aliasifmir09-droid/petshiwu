@@ -83,7 +83,48 @@ FRONTEND_URL=http://localhost:3000
 
 ## 🎯 **Provider-Specific Configurations**
 
-### **GoDaddy Email (Recommended for your setup)**
+### **Resend** ⭐ **RECOMMENDED** (Free Tier: 3,000 emails/month)
+
+```env
+SMTP_HOST=smtp.resend.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=resend
+SMTP_PASS=re_your_api_key_here
+SMTP_FROM=noreply@petshiwu.com
+FRONTEND_URL=https://petshiwu.com
+```
+
+**Setup Steps:**
+1. Sign up at [https://resend.com/](https://resend.com/)
+2. Go to **API Keys** section
+3. Create a new API key
+4. Copy the API key (starts with `re_`)
+5. Add your domain in **Domains** section
+6. Add DNS records (DKIM, SPF) provided by Resend
+7. Verify domain
+8. Use API key as `SMTP_PASS`
+
+**Alternative Port (SSL):**
+```env
+SMTP_HOST=smtp.resend.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=resend
+SMTP_PASS=re_your_api_key_here
+SMTP_FROM=noreply@petshiwu.com
+```
+
+**Notes:**
+- ✅ Free tier: 3,000 emails/month, 100 emails/day
+- ✅ Modern API, fast delivery
+- ✅ Great developer experience
+- ✅ Requires domain verification for best deliverability
+- ✅ Use `resend` as username (not your email)
+
+---
+
+### **GoDaddy Email**
 
 ```env
 SMTP_HOST=smtpout.secureserver.net
@@ -369,20 +410,25 @@ When email is NOT configured:
 
 ## 🎯 **Recommended Setup for Production**
 
-### **For petshiwu.com:**
+### **For petshiwu.com (Using Resend):**
 
 ```env
-# GoDaddy Email Configuration
-SMTP_HOST=smtpout.secureserver.net
+# Resend Email Configuration
+SMTP_HOST=smtp.resend.com
 SMTP_PORT=587
 SMTP_SECURE=false
-SMTP_USER=noreply@petshiwu.com
-SMTP_PASS=your-secure-password
+SMTP_USER=resend
+SMTP_PASS=re_your_resend_api_key_here
 SMTP_FROM=noreply@petshiwu.com
 
 # Frontend URL
 FRONTEND_URL=https://petshiwu.com
 ```
+
+**Important:**
+1. Replace `re_your_resend_api_key_here` with your actual Resend API key
+2. Make sure `petshiwu.com` domain is verified in Resend dashboard
+3. Add DNS records (DKIM, SPF) to your domain for best deliverability
 
 ### **Best Practices:**
 
