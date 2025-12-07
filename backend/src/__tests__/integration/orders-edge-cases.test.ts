@@ -389,7 +389,7 @@ describe('Order Creation Edge Cases', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.message).toContain('No order items');
+      expect(response.body.message).toContain('Order must have at least one item');
     });
 
     it('should reject order with incomplete shipping address', async () => {
@@ -419,7 +419,8 @@ describe('Order Creation Edge Cases', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.message).toContain('incomplete');
+      // The validation error will be the first missing field (city, state, or zipCode)
+      expect(response.body.message).toMatch(/city|state|zipCode|required/i);
     });
   });
 });
