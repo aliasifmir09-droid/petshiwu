@@ -3,6 +3,7 @@ import EmailTemplate from '../models/EmailTemplate';
 import { AuthRequest } from '../middleware/auth';
 import { extractObjectId } from '../utils/types';
 import logger from '../utils/logger';
+import { seedEmailTemplates } from '../utils/seedEmailTemplates';
 
 /**
  * Get all email templates
@@ -183,6 +184,23 @@ export const deleteEmailTemplate = async (req: AuthRequest, res: Response, next:
     });
   } catch (error: any) {
     logger.error('Error deleting email template:', error);
+    next(error);
+  }
+};
+
+/**
+ * Seed default email templates
+ */
+export const seedTemplates = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    await seedEmailTemplates();
+    
+    res.status(200).json({
+      success: true,
+      message: 'Default email templates seeded successfully'
+    });
+  } catch (error: any) {
+    logger.error('Error seeding email templates:', error);
     next(error);
   }
 };

@@ -4,7 +4,8 @@ import {
   getEmailTemplate,
   createEmailTemplate,
   updateEmailTemplate,
-  deleteEmailTemplate
+  deleteEmailTemplate,
+  seedTemplates
 } from '../controllers/emailTemplateController';
 import { protect } from '../middleware/auth';
 import { isAdmin } from '../middleware/permissions';
@@ -18,6 +19,7 @@ router.get('/:id', protect, isAdmin, validateObjectId(), getEmailTemplate);
 router.post('/', protect, isAdmin, createEmailTemplate);
 router.put('/:id', protect, isAdmin, validateObjectId(), updateEmailTemplate);
 router.delete('/:id', protect, isAdmin, validateObjectId(), deleteEmailTemplate);
+router.post('/seed', protect, isAdmin, seedTemplates);
 
 export default router;
 

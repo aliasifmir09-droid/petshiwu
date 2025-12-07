@@ -21,10 +21,12 @@ const EmailTemplates = () => {
     isActive: true
   });
 
-  const { data: templates, isLoading } = useQuery({
+  const { data: templatesData, isLoading, refetch } = useQuery({
     queryKey: ['emailTemplates'],
     queryFn: adminService.getEmailTemplates
   });
+
+  const templates = templatesData?.data || templatesData || [];
 
   const createMutation = useMutation({
     mutationFn: adminService.createEmailTemplate,
