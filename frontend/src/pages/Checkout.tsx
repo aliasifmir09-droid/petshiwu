@@ -76,6 +76,7 @@ const Checkout = () => {
   const [donationAmount, setDonationAmount] = useState<number>(0);
   const [showDonationModal, setShowDonationModal] = useState(false);
   const [pendingOrderData, setPendingOrderData] = useState<CreateOrderData | null>(null);
+  const [orderNotes, setOrderNotes] = useState('');
 
   // Function to refresh product data from API
   const refreshCartProducts = async () => {
@@ -237,7 +238,8 @@ const Checkout = () => {
       shippingPrice: shipping,
       taxPrice: tax,
       donationAmount: donationAmount > 0 ? donationAmount : undefined,
-      totalPrice: subtotal + shipping + tax + donationAmount
+      totalPrice: subtotal + shipping + tax + donationAmount,
+      notes: orderNotes.trim() || undefined
     };
 
     // Show donation modal before submitting
