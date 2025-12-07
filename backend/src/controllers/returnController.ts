@@ -69,13 +69,14 @@ export const createReturn = async (req: AuthRequest, res: Response, next: NextFu
 
     for (const item of items) {
       // Find order item - handle both _id matching and index-based matching
-      let orderItem: any = null;
+      let orderItem: typeof order.items[0] | null = null;
       let orderItemIndex = -1;
       
       for (let i = 0; i < order.items.length; i++) {
-        const oi = order.items[i] as any;
-        const oiId = oi._id ? oi._id.toString() : i.toString();
-        if (oi.product.toString() === item.productId && oiId === item.orderItemId) {
+        const oi = order.items[i];
+        // Order items don't have _id in the schema, use index
+        const oiId = i.toString();
+        if (safeToString(oi.product) === item.productId && oiId === item.orderItemId) {
           orderItem = oi;
           orderItemIndex = i;
           break;
@@ -215,24 +216,25 @@ export const updateReturnStatus = async (req: AuthRequest, res: Response, next: 
       });
     }
 
-    const validStatuses = ['pending', 'approved', 'rejected', 'processing', 'completed', 'cancelled'];
-    if (status && !validStatuses.includes(status)) {
+    const validStatuses: Array<IReturn['status']> = ['pending', 'approved', 'rejected', 'processing', 'completed', 'cancelled'];
+    if (status && !validStatuses.includes(status as IReturn['status'])) {
       return res.status(400).json({
         success: false,
         message: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
       });
     }
 
-    if (status) {
-      returnRequest.status = status as any;
+    if (status && validStatuses.includes(status as IReturn['status'])) {
+      returnRequest.status = status as IReturn['status'];
     }
 
     if (adminNotes) {
       returnRequest.adminNotes = adminNotes;
     }
 
-    if (refundMethod) {
-      returnRequest.refundMethod = refundMethod as any;
+    const validRefundMethods: Array<IReturn['refundMethod']> = ['original', 'store_credit'];
+    if (refundMethod && validRefundMethods.includes(refundMethod as IReturn['refundMethod'])) {
+      returnRequest.refundMethod = refundMethod as IReturn['refundMethod'];
     }
 
     // When approved, RMA number is generated automatically via pre-save hook

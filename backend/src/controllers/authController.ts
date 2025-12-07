@@ -5,6 +5,7 @@ import { AuthRequest } from '../middleware/auth';
 import { sendVerificationEmail } from '../utils/emailService';
 import crypto from 'crypto';
 import logger from '../utils/logger';
+import { safeToString } from '../utils/types';
 
 // Register user
 export const register = async (req: Request, res: Response, next: NextFunction) => {
@@ -108,7 +109,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       });
     }
 
-    sendTokenResponse((user._id as any).toString(), 200, res);
+    sendTokenResponse(safeToString(user._id), 200, res);
   } catch (error: any) {
     next(error);
   }
@@ -192,7 +193,7 @@ export const updatePassword = async (req: AuthRequest, res: Response, next: Next
     user.password = newPassword;
     await user.save();
 
-    sendTokenResponse((user._id as any).toString(), 200, res);
+    sendTokenResponse(safeToString(user._id), 200, res);
   } catch (error) {
     next(error);
   }

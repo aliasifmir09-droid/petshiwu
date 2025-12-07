@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import Order from '../models/Order';
 import Product from '../models/Product';
 import { AuthRequest } from '../middleware/auth';
+import { safeToString, extractObjectId } from '../utils/types';
+import { asyncHandler, NotFoundError, UnauthorizedError, ValidationError } from '../utils/errors';
 
 // Create new order
 export const createOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -56,20 +58,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       }
       
       // Handle different types of product IDs
-      if (typeof rawProductId === 'string') {
-        productId = rawProductId;
-      } else if (typeof rawProductId === 'object' && rawProductId !== null) {
-        // Handle ObjectId objects
-        if ('toString' in rawProductId && typeof (rawProductId as any).toString === 'function') {
-          productId = (rawProductId as any).toString();
-        } else if ('_id' in rawProductId) {
-          productId = String((rawProductId as any)._id);
-        } else {
-          productId = String(rawProductId);
-        }
-      } else {
-        productId = String(rawProductId);
-      }
+      productId = safeToString(rawProductId);
       
       // Validate MongoDB ObjectId format
       if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
@@ -625,7 +614,10 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
     }
 
     // Make sure user can only cancel their own orders
-    if (order.user.toString() !== (req.user?._id as any)?.toString()) {
+    const userId = extractObjectId(req.user?._id);
+    const orderUserId = extractObjectId(order.user);
+    
+    if (!userId || !orderUserId || !userId.equals(orderUserId)) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to cancel this order'

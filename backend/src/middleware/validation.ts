@@ -50,8 +50,8 @@ export const registerValidation = [
   body('phone')
     .optional()
     .trim()
-    .matches(/^[\d\s\-\+\(\)]+$/)
-    .withMessage('Invalid phone number format'),
+    .matches(/^\+?[1-9]\d{1,14}$/)
+    .withMessage('Please provide a valid phone number'),
   validate
 ];
 
@@ -75,7 +75,7 @@ export const updatePasswordValidation = [
     .isLength({ min: 6 })
     .withMessage('New password must be at least 6 characters')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage('Password must contain at least one uppercase letter, one lowercase letter, and one number'),
+    .withMessage('New password must contain at least one uppercase letter, one lowercase letter, and one number'),
   validate
 ];
 
@@ -83,27 +83,38 @@ export const updatePasswordValidation = [
 export const createProductValidation = [
   body('name')
     .trim()
-    .isLength({ min: 3, max: 200 })
-    .withMessage('Product name must be between 3 and 200 characters'),
+    .isLength({ min: 2, max: 200 })
+    .withMessage('Product name must be between 2 and 200 characters'),
   body('description')
+    .optional()
     .trim()
-    .isLength({ min: 3, max: 5000 })
-    .withMessage('Description must be between 3 and 5000 characters'),
-  body('brand')
-    .trim()
-    .isLength({ min: 2, max: 100 })
-    .withMessage('Brand name must be between 2 and 100 characters'),
+    .isLength({ max: 5000 })
+    .withMessage('Description must be less than 5000 characters'),
+  body('basePrice')
+    .isFloat({ min: 0 })
+    .withMessage('Base price must be a positive number'),
   body('category')
     .custom((value) => mongoose.Types.ObjectId.isValid(value))
     .withMessage('Invalid category ID'),
-  body('basePrice')
-    .isFloat({ min: 0, max: 1000000 })
-    .withMessage('Base price must be a positive number'),
-    body('petType')
-      .notEmpty()
-      .withMessage('Pet type is required')
-      .isString()
-      .withMessage('Pet type must be a valid string'),
+  body('petType')
+    .optional()
+    .trim()
+    .isIn(['dog', 'cat', 'bird', 'fish', 'reptile', 'small_animal', 'all'])
+    .withMessage('Invalid pet type'),
+  body('brand')
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Brand must be less than 100 characters'),
+  body('tags')
+    .optional()
+    .isArray()
+    .withMessage('Tags must be an array'),
+  body('tags.*')
+    .optional()
+    .trim()
+    .isLength({ max: 50 })
+    .withMessage('Each tag must be less than 50 characters'),
   validate
 ];
 
@@ -112,17 +123,20 @@ export const createCategoryValidation = [
   body('name')
     .trim()
     .isLength({ min: 2, max: 100 })
-    .matches(/^[a-zA-Z0-9\s\-&]+$/)
     .withMessage('Category name must be between 2 and 100 characters'),
+  body('petType')
+    .trim()
+    .isIn(['dog', 'cat', 'bird', 'fish', 'reptile', 'small_animal', 'all'])
+    .withMessage('Invalid pet type'),
+  body('parentCategory')
+    .optional()
+    .custom((value) => !value || mongoose.Types.ObjectId.isValid(value))
+    .withMessage('Invalid parent category ID'),
   body('description')
     .optional()
     .trim()
     .isLength({ max: 500 })
     .withMessage('Description must be less than 500 characters'),
-  body('petType')
-    .optional()
-    .isString()
-    .withMessage('Pet type must be a valid string'),
   validate
 ];
 
@@ -130,59 +144,53 @@ export const createCategoryValidation = [
 export const createOrderValidation = [
   body('items')
     .isArray({ min: 1 })
-    .withMessage('Order must contain at least one item'),
+    .withMessage('Order must have at least one item'),
   body('items.*.product')
     .custom((value) => mongoose.Types.ObjectId.isValid(value))
     .withMessage('Invalid product ID'),
   body('items.*.name')
     .trim()
     .notEmpty()
-    .withMessage('Product name is required'),
-  body('items.*.image')
-    .trim()
-    .notEmpty()
-    .withMessage('Product image is required'),
+    .withMessage('Item name is required'),
   body('items.*.price')
     .isFloat({ min: 0 })
-    .withMessage('Product price must be a positive number'),
+    .withMessage('Item price must be a positive number'),
   body('items.*.quantity')
-    .isInt({ min: 1, max: 100 })
-    .withMessage('Quantity must be between 1 and 100'),
+    .isInt({ min: 1 })
+    .withMessage('Item quantity must be at least 1'),
   body('shippingAddress.firstName')
     .trim()
-    .isLength({ min: 2, max: 100 })
-    .matches(/^[a-zA-Z\s]+$/)
-    .withMessage('Invalid first name'),
+    .notEmpty()
+    .withMessage('Shipping address first name is required'),
   body('shippingAddress.lastName')
     .trim()
-    .isLength({ min: 2, max: 100 })
-    .matches(/^[a-zA-Z\s]+$/)
-    .withMessage('Invalid last name'),
+    .notEmpty()
+    .withMessage('Shipping address last name is required'),
   body('shippingAddress.street')
     .trim()
-    .isLength({ min: 5, max: 200 })
-    .withMessage('Street address must be between 5 and 200 characters'),
+    .notEmpty()
+    .withMessage('Shipping address street is required'),
   body('shippingAddress.city')
     .trim()
-    .isLength({ min: 2, max: 100 })
-    .matches(/^[a-zA-Z\s\-\.\']+$/)
-    .withMessage('Invalid city name'),
+    .notEmpty()
+    .withMessage('Shipping address city is required'),
   body('shippingAddress.state')
     .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('Invalid state'),
+    .notEmpty()
+    .withMessage('Shipping address state is required'),
   body('shippingAddress.zipCode')
     .trim()
     .matches(/^\d{5}(-\d{4})?$/)
-    .withMessage('Invalid ZIP code'),
+    .withMessage('Invalid zip code format'),
   body('shippingAddress.country')
+    .optional()
     .trim()
-    .notEmpty()
-    .withMessage('Country is required'),
+    .isLength({ max: 100 })
+    .withMessage('Country must be less than 100 characters'),
   body('shippingAddress.phone')
     .trim()
-    .notEmpty()
-    .withMessage('Phone number is required'),
+    .matches(/^\+?[1-9]\d{1,14}$/)
+    .withMessage('Invalid phone number format'),
   body('paymentMethod')
     .isIn(['credit_card', 'paypal', 'apple_pay', 'google_pay', 'cod'])
     .withMessage('Invalid payment method'),
@@ -198,6 +206,11 @@ export const createOrderValidation = [
   body('totalPrice')
     .isFloat({ min: 0 })
     .withMessage('Invalid total price'),
+  body('notes')
+    .optional()
+    .trim()
+    .isLength({ max: 1000 })
+    .withMessage('Notes must be less than 1000 characters'),
   validate
 ];
 
@@ -212,11 +225,131 @@ export const createReviewValidation = [
   body('rating')
     .isInt({ min: 1, max: 5 })
     .withMessage('Rating must be between 1 and 5'),
+  body('title')
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Title must be less than 100 characters'),
   body('comment')
     .optional()
     .trim()
     .isLength({ max: 1000 })
     .withMessage('Comment must be less than 1000 characters'),
+  body('images')
+    .optional()
+    .isArray()
+    .withMessage('Images must be an array'),
+  body('images.*')
+    .optional()
+    .isURL()
+    .withMessage('Each image must be a valid URL'),
+  body('videos')
+    .optional()
+    .isArray()
+    .withMessage('Videos must be an array'),
+  body('videos.*')
+    .optional()
+    .isURL()
+    .withMessage('Each video must be a valid URL'),
+  validate
+];
+
+// Return validations
+export const createReturnValidation = [
+  body('orderId')
+    .custom((value) => mongoose.Types.ObjectId.isValid(value))
+    .withMessage('Invalid order ID'),
+  body('items')
+    .isArray({ min: 1 })
+    .withMessage('Return must have at least one item'),
+  body('items.*.productId')
+    .custom((value) => mongoose.Types.ObjectId.isValid(value))
+    .withMessage('Invalid product ID'),
+  body('items.*.orderItemId')
+    .notEmpty()
+    .withMessage('Order item ID is required'),
+  body('items.*.quantity')
+    .isInt({ min: 1 })
+    .withMessage('Return quantity must be at least 1'),
+  body('items.*.reason')
+    .isIn(['defective', 'wrong_item', 'not_as_described', 'changed_mind', 'damaged', 'other'])
+    .withMessage('Invalid return reason'),
+  body('items.*.condition')
+    .isIn(['unopened', 'opened', 'damaged', 'defective'])
+    .withMessage('Invalid item condition'),
+  body('reason')
+    .trim()
+    .isLength({ min: 10, max: 500 })
+    .withMessage('Return reason must be between 10 and 500 characters'),
+  body('notes')
+    .optional()
+    .trim()
+    .isLength({ max: 1000 })
+    .withMessage('Notes must be less than 1000 characters'),
+  validate
+];
+
+// Address validations
+export const createAddressValidation = [
+  body('street')
+    .trim()
+    .notEmpty()
+    .withMessage('Street address is required'),
+  body('city')
+    .trim()
+    .notEmpty()
+    .withMessage('City is required'),
+  body('state')
+    .trim()
+    .notEmpty()
+    .withMessage('State is required'),
+  body('zipCode')
+    .trim()
+    .matches(/^\d{5}(-\d{4})?$/)
+    .withMessage('Invalid zip code format'),
+  body('country')
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Country must be less than 100 characters'),
+  validate
+];
+
+// Stock alert validations
+export const createStockAlertValidation = [
+  body('productId')
+    .custom((value) => mongoose.Types.ObjectId.isValid(value))
+    .withMessage('Invalid product ID'),
+  validate
+];
+
+// Search validations
+export const searchValidation = [
+  query('q')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Search query must be between 2 and 100 characters'),
+  query('minPrice')
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage('Minimum price must be a positive number'),
+  query('maxPrice')
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage('Maximum price must be a positive number'),
+  query('minRating')
+    .optional()
+    .isFloat({ min: 0, max: 5 })
+    .withMessage('Minimum rating must be between 0 and 5'),
+  query('inStock')
+    .optional()
+    .isBoolean()
+    .withMessage('inStock must be a boolean'),
+  query('sort')
+    .optional()
+    .isIn(['newest', 'price-asc', 'price-desc', 'rating', 'name-asc', 'name-desc'])
+    .withMessage('Invalid sort option'),
   validate
 ];
 
@@ -236,8 +369,8 @@ export const paginationValidation = [
     .withMessage('Page must be a positive integer'),
   query('limit')
     .optional()
-    .isInt({ min: 1, max: 1000 })
-    .withMessage('Limit must be between 1 and 1000'),
+    .isInt({ min: 1, max: 100 })
+    .withMessage('Limit must be between 1 and 100'),
   validate
 ];
 
@@ -269,5 +402,3 @@ export const createStaffValidation = [
     .withMessage('Permissions must be an object'),
   validate
 ];
-
-

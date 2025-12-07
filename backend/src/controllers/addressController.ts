@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import User from '../models/User';
 import { AuthRequest } from '../middleware/auth';
 import mongoose from 'mongoose';
+import type { IAddress } from '../models/User';
 
 // Get user addresses
 export const getAddresses = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -63,7 +64,7 @@ export const addAddress = async (req: AuthRequest, res: Response, next: NextFunc
       isDefault: isDefault || user.addresses.length === 0
     };
 
-    user.addresses.push(newAddress as any);
+    user.addresses.push(newAddress as IAddress);
     await user.save();
 
     res.status(201).json({

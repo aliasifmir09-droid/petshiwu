@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import Review from '../models/Review';
 import Order from '../models/Order';
 import { AuthRequest } from '../middleware/auth';
+import { extractObjectId } from '../utils/types';
 
 // Get reviews for a product with sorting
 export const getProductReviews = async (req: Request, res: Response, next: NextFunction) => {
@@ -114,11 +115,18 @@ export const voteReview = async (req: AuthRequest, res: Response, next: NextFunc
       } else {
         // Add helpful vote, remove not helpful if exists
         if (hasVotedNotHelpful) {
-          review.notHelpfulUsers = review.notHelpfulUsers?.filter((id: any) => id.toString() !== userId.toString()) || [];
+          const userIdObj = extractObjectId(userId);
+          review.notHelpfulUsers = review.notHelpfulUsers?.filter((id) => {
+            const idObj = extractObjectId(id);
+            return !userIdObj || !idObj || !userIdObj.equals(idObj);
+          }) || [];
           review.notHelpfulCount = Math.max(0, (review.notHelpfulCount || 0) - 1);
         }
         if (!review.helpfulUsers) review.helpfulUsers = [];
-        review.helpfulUsers.push(userId as any);
+        const userIdObj = extractObjectId(userId);
+        if (userIdObj) {
+          review.helpfulUsers.push(userIdObj);
+        }
         review.helpfulCount = (review.helpfulCount || 0) + 1;
       }
     } else if (helpful === false) {
@@ -129,11 +137,18 @@ export const voteReview = async (req: AuthRequest, res: Response, next: NextFunc
       } else {
         // Add not helpful vote, remove helpful if exists
         if (hasVotedHelpful) {
-          review.helpfulUsers = review.helpfulUsers?.filter((id: any) => id.toString() !== userId.toString()) || [];
+          const userIdObj = extractObjectId(userId);
+          review.helpfulUsers = review.helpfulUsers?.filter((id) => {
+            const idObj = extractObjectId(id);
+            return !userIdObj || !idObj || !userIdObj.equals(idObj);
+          }) || [];
           review.helpfulCount = Math.max(0, (review.helpfulCount || 0) - 1);
         }
         if (!review.notHelpfulUsers) review.notHelpfulUsers = [];
-        review.notHelpfulUsers.push(userId as any);
+        const userIdObj = extractObjectId(userId);
+        if (userIdObj) {
+          review.notHelpfulUsers.push(userIdObj);
+        }
         review.notHelpfulCount = (review.notHelpfulCount || 0) + 1;
       }
     }
@@ -277,7 +292,11 @@ export const deleteReview = async (req: AuthRequest, res: Response, next: NextFu
     }
 
     // Make sure user owns the review or is admin
-    if (review.user.toString() !== (req.user?._id as any)?.toString() && req.user?.role !== 'admin') {
+    const userId = extractObjectId(req.user?._id);
+    const reviewUserId = extractObjectId(review.user);
+    const isOwner = userId && reviewUserId && userId.equals(reviewUserId);
+    
+    if (!isOwner && req.user?.role !== 'admin') {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to delete this review'

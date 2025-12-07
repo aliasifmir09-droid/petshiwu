@@ -28,7 +28,9 @@ import { protect } from '../middleware/auth';
 import { isAdmin, hasPermission } from '../middleware/permissions';
 import {
   createStaffValidation,
-  validateObjectId
+  validateObjectId,
+  createAddressValidation,
+  createStockAlertValidation
 } from '../middleware/validation';
 
 const router = express.Router();
@@ -61,14 +63,14 @@ router.get('/wishlist/:userId', getSharedWishlist);
 
 // Address management routes
 router.get('/addresses', protect, getAddresses);
-router.post('/addresses', protect, addAddress);
-router.put('/addresses/:addressId', protect, updateAddress);
+router.post('/addresses', protect, createAddressValidation, addAddress);
+router.put('/addresses/:addressId', protect, createAddressValidation, updateAddress);
 router.delete('/addresses/:addressId', protect, deleteAddress);
 
 // Stock alert routes
-router.post('/stock-alerts', protect, createStockAlert);
+router.post('/stock-alerts', protect, createStockAlertValidation, createStockAlert);
 router.get('/stock-alerts', protect, getMyStockAlerts);
-router.delete('/stock-alerts/:productId', protect, removeStockAlert);
+router.delete('/stock-alerts/:productId', protect, validateObjectId('productId'), removeStockAlert);
 
 export default router;
 

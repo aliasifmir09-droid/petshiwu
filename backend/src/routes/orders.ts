@@ -22,7 +22,8 @@ import { checkPermission } from '../middleware/permissions';
 import {
   createOrderValidation,
   validateObjectId,
-  paginationValidation
+  paginationValidation,
+  createReturnValidation
 } from '../middleware/validation';
 
 const router = express.Router();
@@ -41,7 +42,7 @@ router.put('/:id/status', protect, checkPermission('canManageOrders'), validateO
 router.put('/:id/payment', protect, checkPermission('canManageOrders'), validateObjectId(), updatePaymentStatus);
 
 // Return/Refund routes
-router.post('/returns', protect, createReturn);
+router.post('/returns', protect, createReturnValidation, createReturn);
 router.get('/returns/my', protect, paginationValidation, getMyReturns);
 router.get('/returns/all', protect, checkPermission('canManageOrders'), paginationValidation, getAllReturns);
 router.get('/returns/:id', protect, validateObjectId(), getReturn);

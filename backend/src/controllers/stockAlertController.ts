@@ -4,6 +4,8 @@ import Product from '../models/Product';
 import { AuthRequest } from '../middleware/auth';
 import logger from '../utils/logger';
 import { sendVerificationEmail } from '../utils/emailService';
+import type { IProduct } from '../models/Product';
+import type { IUser } from '../models/User';
 
 // Create stock alert
 export const createStockAlert = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -155,8 +157,8 @@ export const checkAndNotifyStockAlerts = async () => {
 
     for (const alert of alerts) {
       try {
-        const product = alert.product as any;
-        const user = alert.user as any;
+        const product = alert.product as IProduct;
+        const user = alert.user as IUser;
 
         if (!product || !user) continue;
 

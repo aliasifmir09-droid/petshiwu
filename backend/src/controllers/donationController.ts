@@ -94,18 +94,20 @@ export const createDonationIntent = async (req: AuthRequest, res: Response, next
           donationNumber: donation.donationNumber
         }
       });
-    } catch (stripeError: any) {
+    } catch (stripeError: unknown) {
       logger.error('Stripe error:', stripeError);
+      const errorMessage = stripeError instanceof Error ? stripeError.message : 'Unknown error';
       return res.status(500).json({
         success: false,
-        message: 'Payment processing error: ' + (stripeError.message || 'Unknown error')
+        message: 'Payment processing error: ' + errorMessage
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Donation intent error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create donation intent';
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to create donation intent'
+      message: errorMessage
     });
   }
 };

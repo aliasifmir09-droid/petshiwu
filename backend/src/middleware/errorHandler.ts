@@ -1,13 +1,21 @@
 /// <reference types="node" />
 import { Request, Response, NextFunction } from 'express';
 import { safeError } from './sanitizeLogs';
+import { AppError, createErrorResponse } from '../utils/errors';
+import logger from '../utils/logger';
 
-export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
-  let error = { ...err };
-  error.message = err.message;
+export const errorHandler = (err: Error | AppError, req: Request, res: Response, next: NextFunction) => {
+  let error: { message: string; statusCode: number; name?: string } = {
+    message: err.message || 'An error occurred',
+    statusCode: err instanceof AppError ? err.statusCode : 500
+  };
 
   // Log error safely (sanitizes sensitive data)
-  safeError('Error occurred:', err);
+  if (err instanceof AppError && err.isOperational) {
+    logger.warn(`Operational error: ${err.message}`);
+  } else {
+    safeError('Error occurred:', err);
+  }
 
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {
@@ -16,16 +24,19 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
   }
 
   // Mongoose duplicate key
-  if (err.code === 11000) {
+  if ('code' in err && err.code === 11000) {
     const message = 'Duplicate field value entered';
     error = { message, statusCode: 400 };
   }
 
   // Mongoose validation error
   if (err.name === 'ValidationError') {
-    const message = Object.values(err.errors)
-      .map((val: any) => val.message)
-      .join(', ');
+    const mongooseError = err as { errors?: Record<string, { message: string }> };
+    const message = mongooseError.errors 
+      ? Object.values(mongooseError.errors)
+          .map((val) => val.message)
+          .join(', ')
+      : 'Validation error';
     error = { message, statusCode: 400 };
   }
 
@@ -45,16 +56,13 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
     };
   }
 
-  // Response - never expose stack traces or sensitive info in production
-  const response: any = {
-    success: false,
-    message: error.message || 'An error occurred'
-  };
+  // Use standardized error response
+  const response = createErrorResponse(err, error.message);
 
   // Only include stack trace in development
   if (process.env.NODE_ENV === 'development') {
-    response.stack = err.stack;
-    response.error = err.name;
+    (response as { stack?: string; error?: string }).stack = err.stack;
+    (response as { stack?: string; error?: string }).error = err.name;
   }
 
   res.status(error.statusCode || 500).json(response);

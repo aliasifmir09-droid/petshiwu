@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import User from '../models/User';
 import { AuthRequest } from '../middleware/auth';
+import { extractObjectId, safeToObjectId } from '../utils/types';
 
 // Get all staff users (admin only)
 export const getStaffUsers = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -152,9 +153,9 @@ export const deleteStaffUser = async (req: AuthRequest, res: Response, next: Nex
     }
 
     // Prevent deleting yourself
-    const staffUserId = (staffUser._id as any) as mongoose.Types.ObjectId;
-    const currentUserId = (req.user?._id as any) as mongoose.Types.ObjectId | undefined;
-    if (currentUserId && staffUserId.toString() === currentUserId.toString()) {
+    const staffUserId = extractObjectId(staffUser._id);
+    const currentUserId = extractObjectId(req.user?._id);
+    if (currentUserId && staffUserId && currentUserId.equals(staffUserId)) {
       return res.status(403).json({
         success: false,
         message: 'Cannot delete your own account'
@@ -293,8 +294,9 @@ export const addToWishlist = async (req: AuthRequest, res: Response, next: NextF
       });
     }
 
-    if (!user.wishlist.includes(productId as any)) {
-      user.wishlist.push(productId as any);
+    const productObjectId = safeToObjectId(productId);
+    if (productObjectId && !user.wishlist.some(id => id.equals(productObjectId))) {
+      user.wishlist.push(productObjectId);
       await user.save();
     }
 

@@ -4,6 +4,7 @@ import Category from '../models/Category';
 import { AuthRequest } from '../middleware/auth';
 import logger from '../utils/logger';
 import { cache, cacheKeys } from '../utils/cache';
+import { extractObjectId } from '../utils/types';
 
 // Helper function to normalize category _id to string
 const normalizeCategoryId = (category: any): any => {
@@ -114,7 +115,7 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
       const catId = cat._id as mongoose.Types.ObjectId;
       const catObj = categoryMap.get(catId.toString());
       if (cat.parentCategory) {
-        const parentId = (cat.parentCategory as any)._id as mongoose.Types.ObjectId;
+        const parentId = extractObjectId(cat.parentCategory);
         const parent = categoryMap.get(parentId.toString());
         if (parent) {
           parent.subcategories.push(catObj);

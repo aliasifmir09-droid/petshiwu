@@ -20,15 +20,16 @@ import { checkPermission } from '../middleware/permissions';
 import {
   createProductValidation,
   validateObjectId,
-  paginationValidation
+  paginationValidation,
+  searchValidation
 } from '../middleware/validation';
 import { csvUpload } from '../middleware/csvUpload';
 
 const router = express.Router();
 
 router.get('/', paginationValidation, getProducts);
-router.get('/search', advancedSearch); // Advanced search with filters
-router.get('/search/autocomplete', searchAutocomplete); // Search autocomplete
+router.get('/search', searchValidation, advancedSearch); // Advanced search with filters
+router.get('/search/autocomplete', searchValidation, searchAutocomplete); // Search autocomplete
 router.get('/brands', getUniqueBrands); // Public endpoint for unique brands
 router.get('/stats', protect, checkPermission('canViewAnalytics'), getProductStats);
 router.get('/compare', compareProducts); // GET /api/products/compare?productIds=id1,id2,id3

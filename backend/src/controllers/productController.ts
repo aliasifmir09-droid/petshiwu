@@ -9,6 +9,7 @@ import mongoose from 'mongoose';
 import { formatProductDescription } from '../utils/descriptionFormatter';
 import logger from '../utils/logger';
 import { cache, cacheKeys } from '../utils/cache';
+import { safeToString } from '../utils/types';
 
 // Helper function to normalize product _id to string
 const normalizeProductId = (product: any): any => {
@@ -107,7 +108,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
     // OPTIMIZATION: Pre-fetch all existing slugs in one query (much faster than checking one-by-one)
     const existingSlugs = new Set<string>();
     const allExistingProducts = await Product.find({}).select('slug').lean();
-    allExistingProducts.forEach((p: any) => {
+    allExistingProducts.forEach((p: { slug?: string }) => {
       if (p.slug) existingSlugs.add(p.slug);
     });
     logger.debug(`[CSV IMPORT] Pre-loaded ${existingSlugs.size} existing product slugs`);
@@ -172,8 +173,8 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
                 level: level,
                 description: `${trimmedName} products`
               });
-              category = newCategory as any;
-            } catch (createError: any) {
+              category = newCategory;
+            } catch (createError: unknown) {
           if (createError.code === 11000 || createError.name === 'MongoServerError') {
             category = await Category.findOne(query).lean();
             if (!category) {
