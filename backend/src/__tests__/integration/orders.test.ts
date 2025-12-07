@@ -47,6 +47,7 @@ describe('Orders API', () => {
       category: testCategory._id,
       isActive: true,
       inStock: true,
+      totalStock: 100, // Set stock for order creation tests
       variants: [], // Empty variants array to avoid SKU unique index issues
       images: ['https://example.com/image.jpg']
     });
@@ -133,6 +134,9 @@ describe('Orders API', () => {
         .set('Authorization', `Bearer ${customerToken}`)
         .send(orderData);
 
+      if (response.status !== 201) {
+        console.error('Order creation failed:', response.status, response.body);
+      }
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
       expect(response.body.data).toBeDefined();

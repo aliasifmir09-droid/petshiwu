@@ -90,7 +90,11 @@ describe('Stock Management', () => {
         });
 
       expect(orderResponse.status).toBe(201);
-      const orderId = orderResponse.body.data._id?.toString() || orderResponse.body.data._id;
+      const orderIdRaw = orderResponse.body.data?._id;
+      if (!orderIdRaw) {
+        throw new Error('Order ID not found in response');
+      }
+      const orderId = typeof orderIdRaw === 'string' ? orderIdRaw : (orderIdRaw.toString ? orderIdRaw.toString() : String(orderIdRaw));
 
       // Verify stock was reduced
       const afterOrderProduct = await Product.findById(productId);
@@ -102,6 +106,9 @@ describe('Stock Management', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .send({ reason: 'Changed mind' });
 
+      if (cancelResponse.status !== 200) {
+        console.error('Cancel failed:', cancelResponse.status, cancelResponse.body);
+      }
       expect(cancelResponse.status).toBe(200);
 
       // Verify stock was restored
@@ -285,10 +292,15 @@ describe('Stock Management', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.products).toBeDefined();
+      expect(Array.isArray(response.body.products)).toBe(true);
       const productIds = response.body.products.map((p: any) => {
         const id = p._id;
-        return id?.toString ? id.toString() : String(id);
-      });
+        if (!id) return null;
+        if (typeof id === 'string') return id;
+        if (id.toString && typeof id.toString === 'function') return id.toString();
+        return String(id);
+      }).filter((id: string | null): id is string => id !== null);
+      expect(productIds.length).toBeGreaterThan(0);
       expect(productIds).toContain(productId);
 
       // Cleanup
