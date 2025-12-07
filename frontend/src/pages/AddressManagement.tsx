@@ -6,6 +6,7 @@ import EmptyState from '@/components/EmptyState';
 import { MapPin, Plus, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
+import { trackAddressAction } from '@/utils/analytics';
 
 const AddressManagement = () => {
   const { toast, showToast, hideToast } = useToast();
@@ -59,6 +60,7 @@ const AddressManagement = () => {
   const deleteMutation = useMutation({
     mutationFn: addressService.deleteAddress,
     onSuccess: () => {
+      trackAddressAction('delete');
       queryClient.invalidateQueries({ queryKey: ['addresses'] });
       showToast('Address deleted successfully', 'success');
     },
@@ -105,7 +107,7 @@ const AddressManagement = () => {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <LoadingSpinner size="lg" />
+        <LoadingSpinner size="lg" ariaLabel="Loading addresses" />
       </div>
     );
   }
@@ -275,12 +277,14 @@ const AddressManagement = () => {
                   <button
                     onClick={() => handleEdit(address)}
                     className="text-primary-600 hover:text-primary-700"
+                    aria-label={`Edit address for ${address.firstName} ${address.lastName}`}
                   >
                     <Edit size={18} />
                   </button>
                   <button
                     onClick={() => handleDelete(address._id)}
                     className="text-red-600 hover:text-red-700"
+                    aria-label={`Delete address for ${address.firstName} ${address.lastName}`}
                   >
                     <Trash2 size={18} />
                   </button>

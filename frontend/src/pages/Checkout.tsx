@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/useToast';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import CheckoutDonationModal from '@/components/CheckoutDonationModal';
 import { normalizeId } from '@/utils/idNormalizer';
-import { trackPurchase } from '@/utils/analytics';
+import { trackPurchase, trackBeginCheckout } from '@/utils/analytics';
 
 interface CreateOrderData {
   items: Array<{

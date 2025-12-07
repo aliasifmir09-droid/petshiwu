@@ -9,6 +9,7 @@ import EmptyState from '@/components/EmptyState';
 import ErrorMessage from '@/components/ErrorMessage';
 import Dropdown from '@/components/Dropdown';
 import { SlidersHorizontal, Layers, ArrowUpDown, Star, Package, Tag, Search } from 'lucide-react';
+import { trackFilterProducts } from '@/utils/analytics';
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();

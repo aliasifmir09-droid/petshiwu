@@ -4,6 +4,7 @@ import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
 import { authService } from '@/services/auth';
 import { useToast } from '@/hooks/useToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { trackPasswordReset } from '@/utils/analytics';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -19,6 +20,7 @@ const ForgotPassword = () => {
       const response = await authService.forgotPassword(email);
       if (response.success) {
         setSuccess(true);
+        trackPasswordReset('request');
         showToast('Password reset email sent! Please check your inbox.', 'success');
       } else {
         showToast(response.message || 'Failed to send password reset email', 'error');

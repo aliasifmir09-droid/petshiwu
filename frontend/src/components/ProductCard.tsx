@@ -227,6 +227,7 @@ const ProductCard = memo(({ product, hideCartButton = false }: ProductCardProps)
             <button
               onClick={handleAddToCart}
               disabled={!product.inStock}
+              aria-label={product.inStock ? `Add ${product.name} to cart` : `${product.name} is out of stock`}
               className={`w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm transition-all transform active:scale-95 btn-ripple relative overflow-hidden ${
                 product.inStock
                   ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-2xl hover:scale-105'

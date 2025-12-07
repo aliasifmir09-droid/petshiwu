@@ -4,6 +4,7 @@ import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import api from '@/services/api';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
+import { trackEmailVerification } from '@/utils/analytics';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
@@ -30,6 +31,7 @@ const VerifyEmail = () => {
         if (response.data.success) {
           setStatus('success');
           setMessage(response.data.message || 'Email verified successfully! You can now log in.');
+          trackEmailVerification('verify');
           // Redirect to login after 3 seconds
           setTimeout(() => {
             navigate('/login');

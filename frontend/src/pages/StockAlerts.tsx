@@ -19,7 +19,11 @@ const StockAlerts = () => {
 
   const deleteMutation = useMutation({
     mutationFn: stockAlertService.deleteStockAlert,
-    onSuccess: () => {
+    onSuccess: (_, productId) => {
+      const alert = alerts?.find(a => String(a.product._id) === productId);
+      if (alert) {
+        trackStockAlert('delete', String(alert.product._id), alert.product.name);
+      }
       queryClient.invalidateQueries({ queryKey: ['stock-alerts'] });
       showToast('Stock alert removed', 'success');
     },
@@ -35,7 +39,7 @@ const StockAlerts = () => {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <LoadingSpinner size="lg" />
+        <LoadingSpinner size="lg" ariaLabel="Loading stock alerts" />
       </div>
     );
   }

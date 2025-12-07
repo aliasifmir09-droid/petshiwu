@@ -182,7 +182,7 @@ const ProductDetail = () => {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 lg:px-8 py-12">
-        <LoadingSpinner size="lg" />
+        <LoadingSpinner size="lg" ariaLabel="Loading product details" />
       </div>
     );
   }

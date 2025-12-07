@@ -61,7 +61,7 @@ const Returns = () => {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <LoadingSpinner size="lg" />
+        <LoadingSpinner size="lg" ariaLabel="Loading returns" />
       </div>
     );
   }

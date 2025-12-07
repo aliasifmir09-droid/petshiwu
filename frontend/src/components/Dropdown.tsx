@@ -94,6 +94,9 @@ const Dropdown = ({
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
+        aria-label={label || placeholder}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
         className={`
           w-full flex items-center justify-between gap-3
           ${sizeClasses[size]}
@@ -124,13 +127,19 @@ const Dropdown = ({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-auto">
+        <div 
+          role="listbox"
+          aria-label={label || placeholder}
+          className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-auto"
+        >
           <div className="py-1">
             {options.map((option) => (
               <button
                 key={option.value}
                 type="button"
                 onClick={() => handleSelect(option.value)}
+                role="option"
+                aria-selected={value === option.value}
                 className={`
                   w-full flex items-center gap-3 px-4 py-2.5
                   hover:bg-primary-50 transition-colors

@@ -4,6 +4,7 @@ import { Mail, ArrowLeft } from 'lucide-react';
 import api from '@/services/api';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
+import { trackEmailVerification } from '@/utils/analytics';
 
 const ResendVerification = () => {
   const { toast, showToast, hideToast } = useToast();
@@ -21,6 +22,7 @@ const ResendVerification = () => {
 
       if (response.data.success) {
         setIsSuccess(true);
+        trackEmailVerification('resend');
         showToast(response.data.message || 'Verification email sent successfully!', 'success');
       } else {
         showToast(response.data.message || 'Failed to send verification email', 'error');

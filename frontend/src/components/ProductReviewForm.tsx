@@ -52,6 +52,9 @@ const ProductReviewForm = ({ productId, productName, orderId, onSuccess }: Produ
       rating,
       comment: comment.trim() || undefined
     });
+
+    // Track review submission
+    trackReviewSubmit(productId, productName, rating);
   };
 
   if (!showForm) {

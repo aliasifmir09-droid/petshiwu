@@ -8,6 +8,7 @@ import ConfirmationModal from '@/components/ConfirmationModal';
 import DonationModal from '@/components/DonationModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
+import { trackOrderCancel } from '@/utils/analytics';
 
 const OrderDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -68,6 +69,10 @@ const OrderDetail = () => {
   const cancelOrderMutation = useMutation({
     mutationFn: orderService.cancelOrder,
     onSuccess: async () => {
+      // Track order cancellation
+      if (order) {
+        trackOrderCancel(String(order._id), order.totalPrice);
+      }
       await queryClient.invalidateQueries({ queryKey: ['order', id] });
       await queryClient.invalidateQueries({ queryKey: ['orders'] });
       await queryClient.refetchQueries({ queryKey: ['order', id] });
@@ -123,8 +128,9 @@ const OrderDetail = () => {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 lg:px-8 py-8">
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="flex justify-center items-center py-20" role="status" aria-label="Loading order details">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" aria-hidden="true"></div>
+          <span className="sr-only">Loading order details...</span>
         </div>
       </div>
     );
@@ -197,6 +203,7 @@ const OrderDetail = () => {
                 <button
                   onClick={() => setShowCancelModal(true)}
                   className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                  aria-label="Cancel this order"
                 >
                   <XCircle size={20} />
                   Cancel Order

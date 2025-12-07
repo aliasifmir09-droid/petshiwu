@@ -214,3 +214,139 @@ export const trackShare = (method: 'facebook' | 'twitter' | 'email' | 'copy', co
   });
 };
 
+/**
+ * Track remove from wishlist
+ */
+export const trackRemoveFromWishlist = (productId: string, productName: string) => {
+  trackEvent('remove_from_wishlist', {
+    category: 'ecommerce',
+    action: 'remove_from_wishlist',
+    item_id: productId,
+    item_name: productName,
+  });
+};
+
+/**
+ * Track category view
+ */
+export const trackViewCategory = (categoryId: string, categoryName: string, petType?: string) => {
+  trackEvent('view_item_list', {
+    category: 'ecommerce',
+    action: 'view_item_list',
+    item_list_id: categoryId,
+    item_list_name: categoryName,
+    pet_type: petType,
+  });
+};
+
+/**
+ * Track filter usage
+ */
+export const trackFilterProducts = (filters: {
+  petType?: string;
+  category?: string;
+  brand?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
+  inStock?: boolean;
+}) => {
+  trackEvent('filter_products', {
+    category: 'ecommerce',
+    action: 'filter',
+    ...filters,
+  });
+};
+
+/**
+ * Track checkout start
+ */
+export const trackBeginCheckout = (value: number, itemsCount: number) => {
+  trackEvent('begin_checkout', {
+    category: 'ecommerce',
+    action: 'begin_checkout',
+    value: value,
+    items_count: itemsCount,
+  });
+};
+
+/**
+ * Track order cancellation
+ */
+export const trackOrderCancel = (orderId: string, value: number) => {
+  trackEvent('cancel_order', {
+    category: 'ecommerce',
+    action: 'cancel_order',
+    transaction_id: orderId,
+    value: value,
+  });
+};
+
+/**
+ * Track return request
+ */
+export const trackReturnRequest = (orderId: string, returnId: string, itemsCount: number) => {
+  trackEvent('return_request', {
+    category: 'ecommerce',
+    action: 'return_request',
+    transaction_id: orderId,
+    return_id: returnId,
+    items_count: itemsCount,
+  });
+};
+
+/**
+ * Track review submission
+ */
+export const trackReviewSubmit = (productId: string, productName: string, rating: number) => {
+  trackEvent('review_submit', {
+    category: 'ecommerce',
+    action: 'review_submit',
+    item_id: productId,
+    item_name: productName,
+    rating: rating,
+  });
+};
+
+/**
+ * Track email verification
+ */
+export const trackEmailVerification = (method: 'verify' | 'resend') => {
+  trackEvent('email_verification', {
+    category: 'user',
+    action: method === 'verify' ? 'verify_email' : 'resend_verification',
+  });
+};
+
+/**
+ * Track password reset
+ */
+export const trackPasswordReset = (action: 'request' | 'complete') => {
+  trackEvent('password_reset', {
+    category: 'user',
+    action: action === 'request' ? 'request_password_reset' : 'complete_password_reset',
+  });
+};
+
+/**
+ * Track address management
+ */
+export const trackAddressAction = (action: 'add' | 'edit' | 'delete' | 'set_default') => {
+  trackEvent('address_management', {
+    category: 'user',
+    action: action,
+  });
+};
+
+/**
+ * Track stock alert
+ */
+export const trackStockAlert = (action: 'create' | 'delete', productId: string, productName: string) => {
+  trackEvent('stock_alert', {
+    category: 'ecommerce',
+    action: action,
+    item_id: productId,
+    item_name: productName,
+  });
+};
+

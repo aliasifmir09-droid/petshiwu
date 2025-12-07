@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/useToast';
 import { useAuthStore } from '@/stores/authStore';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import PasswordStrength from '@/components/PasswordStrength';
+import { trackPasswordReset } from '@/utils/analytics';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -91,6 +92,7 @@ const ResetPassword = () => {
       const response = await authService.resetPassword(token, password);
       if (response.success) {
         setSuccess(true);
+        trackPasswordReset('complete');
         const email = resetUserEmail || 'your account';
         showToast(`Password reset successfully for ${email}! You are now logged in.`, 'success');
         

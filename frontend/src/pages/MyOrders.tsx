@@ -223,8 +223,9 @@ const MyOrders = () => {
         <h1 className="text-3xl font-bold mb-8">My Orders</h1>
 
         {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+          <div className="flex justify-center items-center py-20" role="status" aria-label="Loading orders">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" aria-hidden="true"></div>
+            <span className="sr-only">Loading orders...</span>
           </div>
         ) : ordersData?.data.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-12 text-center">
