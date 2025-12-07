@@ -375,10 +375,12 @@ app.use(cors({
   exposedHeaders: ['Authorization']
 }));
 
-// Request logging middleware (development only)
+// Request logging middleware (development only) - sanitize URLs
 if (process.env.NODE_ENV === 'development') {
   app.use((req, res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl || req.url}`);
+    // Sanitize URL - remove query params and sensitive data
+    const sanitizedUrl = (req.originalUrl || req.url || '').split('?')[0];
+    console.log(`[${new Date().toISOString()}] ${req.method} ${sanitizedUrl}`);
     next();
   });
 }
