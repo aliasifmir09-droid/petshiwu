@@ -663,9 +663,16 @@ const Products = () => {
                         ${product.basePrice.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        <span className={product.totalStock > 0 ? 'text-green-600' : 'text-red-600'}>
-                          {product.totalStock}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className={product.totalStock > 0 ? 'text-green-600' : 'text-red-600'}>
+                            {product.totalStock}
+                          </span>
+                          {product.lowStockThreshold !== null && product.lowStockThreshold !== undefined && (
+                            <span className="text-xs text-gray-500">
+                              Alert: {product.lowStockThreshold}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-sm">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
