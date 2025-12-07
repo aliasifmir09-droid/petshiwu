@@ -605,6 +605,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       ingredients: formData.ingredients?.trim() || undefined,
       isActive: formData.isActive,
       isFeatured: formData.isFeatured,
+      lowStockThreshold: formData.lowStockThreshold ? parseInt(String(formData.lowStockThreshold), 10) : undefined,
       variants: validatedVariants
     };
 
