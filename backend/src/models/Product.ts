@@ -30,6 +30,7 @@ export interface IProduct extends Document {
   isFeatured: boolean;
   inStock: boolean;
   totalStock: number;
+  lowStockThreshold?: number; // Alert when stock falls below this number
   deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -138,6 +139,11 @@ const productSchema = new Schema<IProduct>(
     totalStock: {
       type: Number,
       default: 0
+    },
+    lowStockThreshold: {
+      type: Number,
+      min: 0,
+      default: null // null means use category default or global default
     },
     deletedAt: {
       type: Date,
