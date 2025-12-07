@@ -149,7 +149,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
         query.parentCategory = null;
       }
       
-      let category: Awaited<ReturnType<typeof Category.findOne>> & { _id: mongoose.Types.ObjectId } | null = await Category.findOne(query).lean();
+      let category = await Category.findOne(query).lean();
       
       // If not found, create it
       if (!category) {
