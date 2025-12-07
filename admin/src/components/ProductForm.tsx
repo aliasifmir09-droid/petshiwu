@@ -184,7 +184,8 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
         features: product.features?.join('\n') || prev.features,
         ingredients: product.ingredients || prev.ingredients,
         isActive: product.isActive ?? prev.isActive,
-      isFeatured: product.isFeatured ?? prev.isFeatured
+      isFeatured: product.isFeatured ?? prev.isFeatured,
+      lowStockThreshold: product.lowStockThreshold ?? prev.lowStockThreshold
       }));
       
       if (product.variants) {
