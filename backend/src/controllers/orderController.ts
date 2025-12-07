@@ -6,6 +6,73 @@ import { AuthRequest } from '../middleware/auth';
 import { safeToString, extractObjectId } from '../utils/types';
 import { asyncHandler, NotFoundError, UnauthorizedError, ValidationError } from '../utils/errors';
 
+/**
+ * @swagger
+ * /api/orders:
+ *   post:
+ *     summary: Create a new order
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - items
+ *               - shippingAddress
+ *               - paymentMethod
+ *               - itemsPrice
+ *               - shippingPrice
+ *               - taxPrice
+ *               - totalPrice
+ *             properties:
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - product
+ *                     - quantity
+ *                     - price
+ *                     - name
+ *               shippingAddress:
+ *                 type: object
+ *                 required:
+ *                   - street
+ *                   - city
+ *                   - state
+ *                   - zipCode
+ *                   - firstName
+ *                   - lastName
+ *                   - phone
+ *               billingAddress:
+ *                 type: object
+ *               paymentMethod:
+ *                 type: string
+ *                 enum: [credit_card, paypal, stripe]
+ *               itemsPrice:
+ *                 type: number
+ *               shippingPrice:
+ *                 type: number
+ *               taxPrice:
+ *                 type: number
+ *               donationAmount:
+ *                 type: number
+ *               totalPrice:
+ *                 type: number
+ *               notes:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Order created successfully
+ *       400:
+ *         description: Validation error or insufficient stock
+ *       401:
+ *         description: Not authenticated
+ */
 // Create new order
 export const createOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -303,6 +370,31 @@ const normalizeOrders = (orders: any[]): any[] => {
   }).filter((order: any) => order !== null && order !== undefined);
 };
 
+/**
+ * @swagger
+ * /api/orders/myorders:
+ *   get:
+ *     summary: Get current user's orders
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         description: List of user orders
+ *       401:
+ *         description: Not authenticated
+ */
 // Get user orders
 export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -367,6 +459,30 @@ export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFun
   }
 };
 
+/**
+ * @swagger
+ * /api/orders/{id}:
+ *   get:
+ *     summary: Get order by ID
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Order details
+ *       401:
+ *         description: Not authenticated
+ *       403:
+ *         description: Not authorized to view this order
+ *       404:
+ *         description: Order not found
+ */
 // Get single order
 export const getOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -449,6 +565,36 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
   }
 };
 
+/**
+ * @swagger
+ * /api/orders/all:
+ *   get:
+ *     summary: Get all orders (Admin)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [pending, processing, shipped, delivered, cancelled]
+ *     responses:
+ *       200:
+ *         description: List of all orders
+ *       401:
+ *         description: Not authenticated
+ *       403:
+ *         description: Not authorized (admin only)
+ */
 // Get all orders (Admin)
 export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -495,6 +641,43 @@ export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFu
   }
 };
 
+/**
+ * @swagger
+ * /api/orders/{id}/status:
+ *   put:
+ *     summary: Update order status (Admin)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               orderStatus:
+ *                 type: string
+ *                 enum: [pending, processing, shipped, delivered, cancelled]
+ *               trackingNumber:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Order status updated
+ *       400:
+ *         description: Invalid status
+ *       401:
+ *         description: Not authenticated
+ *       403:
+ *         description: Not authorized (admin only)
+ *       404:
+ *         description: Order not found
+ */
 // Update order status (Admin)
 export const updateOrderStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -568,6 +751,41 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response, next: N
   }
 };
 
+/**
+ * @swagger
+ * /api/orders/{id}/payment:
+ *   put:
+ *     summary: Update payment status (Admin)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               paymentStatus:
+ *                 type: string
+ *                 enum: [pending, paid, failed, refunded]
+ *     responses:
+ *       200:
+ *         description: Payment status updated
+ *       400:
+ *         description: Invalid payment status
+ *       401:
+ *         description: Not authenticated
+ *       403:
+ *         description: Not authorized (admin only)
+ *       404:
+ *         description: Order not found
+ */
 // Update payment status (Admin)
 export const updatePaymentStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -600,6 +818,40 @@ export const updatePaymentStatus = async (req: AuthRequest, res: Response, next:
   }
 };
 
+/**
+ * @swagger
+ * /api/orders/{id}/cancel:
+ *   put:
+ *     summary: Cancel order (Customer)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               reason:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Order cancelled successfully
+ *       400:
+ *         description: Cannot cancel order (time window expired or invalid status)
+ *       401:
+ *         description: Not authenticated
+ *       403:
+ *         description: Not authorized to cancel this order
+ *       404:
+ *         description: Order not found
+ */
 // Cancel order (Customer) - Enhanced with time window
 export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -702,6 +954,22 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
   }
 };
 
+/**
+ * @swagger
+ * /api/orders/stats:
+ *   get:
+ *     summary: Get order statistics (Admin)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Order statistics
+ *       401:
+ *         description: Not authenticated
+ *       403:
+ *         description: Not authorized (admin only)
+ */
 // Get order stats (Admin)
 export const getOrderStats = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -775,6 +1043,24 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
 };
 
 // Track order by ID (Public - no authentication required)
+/**
+ * @swagger
+ * /api/orders/track/{id}:
+ *   get:
+ *     summary: Track order by ID (Public)
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Order tracking information
+ *       404:
+ *         description: Order not found
+ */
 export const trackOrder = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;

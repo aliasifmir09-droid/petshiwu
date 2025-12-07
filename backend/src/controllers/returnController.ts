@@ -7,6 +7,41 @@ import { AuthRequest } from '../middleware/auth';
 import logger from '../utils/logger';
 import { extractObjectId, safeToString } from '../utils/types';
 
+/**
+ * @swagger
+ * /api/orders/returns:
+ *   post:
+ *     summary: Create a return request
+ *     tags: [Returns]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - orderId
+ *               - items
+ *               - reason
+ *             properties:
+ *               orderId:
+ *                 type: string
+ *               items:
+ *                 type: array
+ *               reason:
+ *                 type: string
+ *               notes:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Return request created
+ *       400:
+ *         description: Invalid request
+ *       401:
+ *         description: Not authenticated
+ */
 // Create return request
 export const createReturn = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -136,6 +171,29 @@ export const createReturn = async (req: AuthRequest, res: Response, next: NextFu
 };
 
 // Get user's return requests
+/**
+ * @swagger
+ * /api/orders/returns/my:
+ *   get:
+ *     summary: Get current user's return requests
+ *     tags: [Returns]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of return requests
+ *       401:
+ *         description: Not authenticated
+ */
 export const getMyReturns = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user?._id;
@@ -204,6 +262,37 @@ export const getReturn = async (req: AuthRequest, res: Response, next: NextFunct
   }
 };
 
+/**
+ * @swagger
+ * /api/orders/returns/{id}/status:
+ *   put:
+ *     summary: Update return status (Admin)
+ *     tags: [Returns]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [pending, approved, rejected, processing, completed]
+ *     responses:
+ *       200:
+ *         description: Return status updated
+ *       401:
+ *         description: Not authenticated
+ *       403:
+ *         description: Not authorized (admin only)
+ */
 // Update return status (Admin)
 export const updateReturnStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -264,6 +353,31 @@ export const updateReturnStatus = async (req: AuthRequest, res: Response, next: 
   }
 };
 
+/**
+ * @swagger
+ * /api/orders/returns/all:
+ *   get:
+ *     summary: Get all return requests (Admin)
+ *     tags: [Returns]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of all return requests
+ *       401:
+ *         description: Not authenticated
+ *       403:
+ *         description: Not authorized (admin only)
+ */
 // Get all returns (Admin)
 export const getAllReturns = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
