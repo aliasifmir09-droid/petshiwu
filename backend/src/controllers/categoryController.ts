@@ -116,6 +116,10 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
       const catObj = categoryMap.get(catId.toString());
       if (cat.parentCategory) {
         const parentId = extractObjectId(cat.parentCategory);
+        if (!parentId) {
+          rootCategories.push(catObj);
+          continue;
+        }
         const parent = categoryMap.get(parentId.toString());
         if (parent) {
           parent.subcategories.push(catObj);
