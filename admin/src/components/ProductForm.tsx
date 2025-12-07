@@ -1050,6 +1050,26 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
             </div>
           </div>
 
+          {/* Inventory Alerts */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Inventory Alerts</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Low Stock Threshold</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.lowStockThreshold}
+                  onChange={(e) => setFormData({ ...formData, lowStockThreshold: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="Leave empty for default (10)"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Alert when stock falls below this number. Leave empty to use category/default threshold.
+                </p>
+              </div>
+            </div>
+          </div>
 
           {/* Status */}
           <div>
