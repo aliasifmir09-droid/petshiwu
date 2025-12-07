@@ -32,7 +32,6 @@ export const registerValidation = [
   body('email')
     .trim()
     .isEmail()
-    .normalizeEmail()
     .withMessage('Please provide a valid email'),
   body('password')
     .isLength({ min: 8 })
@@ -61,7 +60,6 @@ export const loginValidation = [
   body('email')
     .trim()
     .isEmail()
-    .normalizeEmail()
     .withMessage('Please provide a valid email'),
   body('password')
     .notEmpty()
@@ -85,7 +83,6 @@ export const forgotPasswordValidation = [
   body('email')
     .trim()
     .isEmail()
-    .normalizeEmail()
     .withMessage('Please provide a valid email'),
   validate
 ];
@@ -402,7 +399,6 @@ export const createStaffValidation = [
   body('email')
     .trim()
     .isEmail()
-    .normalizeEmail()
     .withMessage('Please provide a valid email'),
   body('password')
     .isLength({ min: 8 })

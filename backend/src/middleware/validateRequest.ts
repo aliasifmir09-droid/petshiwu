@@ -34,7 +34,7 @@ export const validators = {
   ],
   
   // Email validation
-  email: body('email').isEmail().normalizeEmail().withMessage('Invalid email address'),
+  email: body('email').isEmail().withMessage('Invalid email address'),
   
   // Password validation
   password: body('password')
