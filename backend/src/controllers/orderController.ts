@@ -926,7 +926,8 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
       });
     }
 
-    if (!canCancelByTime && order.orderStatus === 'processing') {
+    // Check time window for both pending and processing orders
+    if (!canCancelByTime && canCancelByStatus) {
       return res.status(400).json({
         success: false,
         message: `Cannot cancel order. Cancellation window (${cancellationWindowHours} hours) has expired. Please contact customer service for assistance.`,
