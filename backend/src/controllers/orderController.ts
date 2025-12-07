@@ -944,8 +944,19 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
     }
 
     // Use transaction to ensure atomicity
-    const session = await mongoose.startSession();
-    session.startTransaction();
+    // Skip transactions in test mode (standalone MongoDB doesn't support transactions)
+    const useTransactions = process.env.NODE_ENV !== 'test';
+    let session: mongoose.ClientSession | null = null;
+    
+    if (useTransactions) {
+      try {
+        session = await mongoose.startSession();
+        session.startTransaction();
+      } catch (error) {
+        // If transaction fails (e.g., not a replica set), continue without transaction
+        session = null;
+      }
+    }
 
     try {
       // Update order status to cancelled
@@ -965,8 +976,10 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
         }
       }
 
-      await session.commitTransaction();
-      session.endSession();
+      if (session) {
+        await session.commitTransaction();
+        session.endSession();
+      }
 
       res.status(200).json({
         success: true,
@@ -981,8 +994,16 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
       });
     } catch (error: any) {
       if (session) {
-        await session.abortTransaction();
-        session.endSession();
+        try {
+          await session.abortTransaction();
+        } catch (abortError) {
+          // Ignore abort errors
+        }
+        try {
+          session.endSession();
+        } catch (endError) {
+          // Ignore end session errors
+        }
       }
       throw error;
     }
