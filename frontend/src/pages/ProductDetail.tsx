@@ -16,6 +16,7 @@ import { generateProductUrl } from '@/utils/productUrl';
 import { FREE_SHIPPING_THRESHOLD } from '@/config/constants';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
+import { trackProductView, trackAddToWishlist, trackProductComparison, trackShare } from '@/utils/analytics';
 
 const ProductDetail = () => {
   const { slug, petType } = useParams<{ 
@@ -101,6 +102,8 @@ const ProductDetail = () => {
     if (!socialLinks) return;
     
     const url = (socialLinks as any)[platform];
+    const shareMethod = platform === 'copyLink' ? 'copy' : platform as 'facebook' | 'twitter' | 'email';
+    
     if (platform === 'copyLink') {
       await navigator.clipboard.writeText(url);
       setLinkCopied(true);
@@ -110,6 +113,11 @@ const ProductDetail = () => {
       window.open(url, '_blank', 'width=600,height=400');
     }
     setShowShareMenu(false);
+    
+    // Track share
+    if (product?._id) {
+      trackShare(shareMethod, 'product', String(product._id));
+    }
   };
 
   const handleCompare = () => {
@@ -125,6 +133,10 @@ const ProductDetail = () => {
     }
     const newIds = [...currentIds, String(product._id)];
     localStorage.setItem('compareIds', newIds.join(','));
+    
+    // Track product comparison
+    trackProductComparison(newIds);
+    
     navigate(`/compare?ids=${newIds.join(',')}`);
     showToast('Product added to comparison', 'success');
   };
@@ -145,6 +157,12 @@ const ProductDetail = () => {
     
     setSelectedImage(0);
     setSelectedVariant(0);
+    
+    // Track product view
+    const categoryName = typeof product.category === 'object' && product.category?.name 
+      ? product.category.name 
+      : undefined;
+    trackProductView(String(product._id), product.name, categoryName);
   }, [product?._id]); // Reset to first image/variant when product changes
 
   // Redirect from old URL format (/products/slug) to new SEO-friendly format
@@ -231,6 +249,8 @@ const ProductDetail = () => {
         await removeFromWishlist(productId);
       } else {
         await addToWishlist(productId);
+        // Track add to wishlist
+        trackAddToWishlist(productId, product.name);
       }
     } catch (error) {
       // Silent fail

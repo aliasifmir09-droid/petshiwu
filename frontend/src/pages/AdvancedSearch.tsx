@@ -8,6 +8,7 @@ import ProductCard from '@/components/ProductCard';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
+import { trackSearch } from '@/utils/analytics';
 
 const AdvancedSearch = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -61,6 +62,10 @@ const AdvancedSearch = () => {
       showToast('Please enter a search query', 'warning');
       return;
     }
+    
+    // Track search
+    trackSearch(query, searchResults?.pagination?.total);
+    
     const params = new URLSearchParams();
     params.set('q', query);
     Object.entries(filters).forEach(([key, value]) => {

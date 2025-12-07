@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/useToast';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import CheckoutDonationModal from '@/components/CheckoutDonationModal';
 import { normalizeId } from '@/utils/idNormalizer';
+import { trackPurchase } from '@/utils/analytics';
 
 interface CreateOrderData {
   items: Array<{
@@ -140,6 +141,15 @@ const Checkout = () => {
       clearCart();
       // Ensure order ID is a string
       const orderId = String(order._id || '');
+      
+      // Track purchase
+      const purchaseItems = items.map((item: any) => ({
+        item_id: normalizeId(item.product._id) || String(item.product._id),
+        item_name: item.product.name,
+        price: item.variant?.price || item.product.basePrice,
+        quantity: item.quantity,
+      }));
+      trackPurchase(orderId, total, purchaseItems);
       
       // Invalidate related queries
       await queryClient.invalidateQueries({ queryKey: ['orders'] });

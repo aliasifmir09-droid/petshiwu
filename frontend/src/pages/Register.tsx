@@ -5,6 +5,7 @@ import { authService } from '@/services/auth';
 import Toast from '@/components/Toast';
 import PasswordStrength from '@/components/PasswordStrength';
 import { useToast } from '@/hooks/useToast';
+import { trackSignUp } from '@/utils/analytics';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -22,6 +23,9 @@ const Register = () => {
   const registerMutation = useMutation({
     mutationFn: authService.register,
     onSuccess: (response) => {
+      // Track sign up
+      trackSignUp('email');
+      
       // Show success message about email verification
       showToast(
         response.message || 'Registration successful! Please check your email to verify your account.',

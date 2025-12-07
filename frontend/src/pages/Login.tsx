@@ -5,6 +5,7 @@ import { authService } from '@/services/auth';
 import { useAuthStore } from '@/stores/authStore';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
+import { trackLogin } from '@/utils/analytics';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -22,6 +23,10 @@ const Login = () => {
     onSuccess: async () => {
       const user = await authService.getMe();
       setUser(user);
+      
+      // Track login
+      trackLogin('email');
+      
       const redirect = searchParams.get('redirect') || '/';
       navigate(redirect);
     },

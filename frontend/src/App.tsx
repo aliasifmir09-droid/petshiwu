@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
 import { useWishlistStore } from './stores/wishlistStore';
@@ -7,7 +7,8 @@ import { authService } from './services/auth';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LoadingSpinner from './components/LoadingSpinner';
-import ErrorBoundary from './components/ErrorBoundary';
+import ErrorBoundaryWithReporting from './components/ErrorBoundaryWithReporting';
+import { initAnalytics, trackPageView } from './utils/analytics';
 import './index.css';
 
 // Lazy load pages for code splitting and better performance
@@ -50,9 +51,39 @@ const queryClient = new QueryClient({
   }
 });
 
+// Component to track page views
+const PageViewTracker = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Track page view on route change
+    const path = location.pathname + location.search;
+    trackPageView(path, document.title);
+  }, [location]);
+
+  return null;
+};
+
 function App() {
   const { setUser, setLoading } = useAuthStore();
   const { syncWithBackend } = useWishlistStore();
+
+  // Initialize analytics on mount
+  useEffect(() => {
+    initAnalytics();
+    
+    // Register service worker for offline support
+    if ('serviceWorker' in navigator && import.meta.env.PROD) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((registration) => {
+          console.log('Service Worker registered:', registration);
+        })
+        .catch((error) => {
+          console.log('Service Worker registration failed:', error);
+        });
+    }
+  }, []);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -78,10 +109,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <HashRouter>
+        <PageViewTracker />
         <div className="flex flex-col min-h-screen">
           <Header />
           <main className="flex-1">
-            <ErrorBoundary>
+            <ErrorBoundaryWithReporting>
               <Suspense fallback={
                 <div className="container mx-auto px-4 py-12">
                   <LoadingSpinner size="lg" />
@@ -123,7 +155,7 @@ function App() {
                           <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
-            </ErrorBoundary>
+            </ErrorBoundaryWithReporting>
           </main>
           <Footer />
         </div>

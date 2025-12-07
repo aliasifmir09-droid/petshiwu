@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { CartItem, Product, ProductVariant } from '@/types';
 import { normalizeId } from '@/utils/idNormalizer';
+import { trackAddToCart, trackRemoveFromCart } from '@/utils/analytics';
 
 interface CartState {
   items: CartItem[];
@@ -91,11 +92,22 @@ export const useCartStore = create<CartState>()(
           const newItems = [...items, { product: normalizedProduct, variant, quantity }];
           set({ items: newItems });
           broadcastCartUpdate(newItems);
+          
+          // Track add to cart
+          const price = variant?.price || product.basePrice || 0;
+          trackAddToCart(normalizedId, product.name, price, quantity);
         }
       },
 
       removeFromCart: (productId, variantSku) => {
         const normalizedProductId = normalizeId(productId) || String(productId);
+        
+        // Find item before removing for analytics
+        const itemToRemove = get().items.find(
+          (item) =>
+            (normalizeId(item.product._id) || String(item.product._id)) === normalizedProductId &&
+            item.variant?.sku === variantSku
+        );
         
         const newItems = get().items.filter(
           (item) =>
