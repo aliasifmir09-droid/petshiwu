@@ -94,7 +94,24 @@ describe('Stock Management', () => {
       if (!orderIdRaw) {
         throw new Error('Order ID not found in response');
       }
-      const orderId = typeof orderIdRaw === 'string' ? orderIdRaw : (orderIdRaw.toString ? orderIdRaw.toString() : String(orderIdRaw));
+      // Properly extract orderId as string
+      let orderId: string;
+      if (typeof orderIdRaw === 'string') {
+        orderId = orderIdRaw;
+      } else if (orderIdRaw instanceof mongoose.Types.ObjectId) {
+        orderId = orderIdRaw.toString();
+      } else if (orderIdRaw && typeof orderIdRaw === 'object' && '_id' in orderIdRaw) {
+        orderId = String(orderIdRaw._id);
+      } else {
+        // Try to get string representation
+        const str = String(orderIdRaw);
+        // Check if it's a valid ObjectId string (24 hex chars)
+        if (mongoose.Types.ObjectId.isValid(str) && str.length === 24) {
+          orderId = str;
+        } else {
+          throw new Error(`Invalid order ID format: ${JSON.stringify(orderIdRaw)}`);
+        }
+      }
 
       // Verify stock was reduced
       const afterOrderProduct = await Product.findById(productId);
@@ -165,10 +182,27 @@ describe('Stock Management', () => {
           totalPrice: 26
         });
 
-      const orderId = orderResponse.body.data._id?.toString() || orderResponse.body.data._id;
+      const orderIdRaw = orderResponse.body.data?._id;
+      if (!orderIdRaw) {
+        throw new Error('Order ID not found in response');
+      }
+      // Properly extract orderId as string
+      let orderId: string;
+      if (typeof orderIdRaw === 'string') {
+        orderId = orderIdRaw;
+      } else if (orderIdRaw instanceof mongoose.Types.ObjectId) {
+        orderId = orderIdRaw.toString();
+      } else {
+        const str = String(orderIdRaw);
+        if (mongoose.Types.ObjectId.isValid(str) && str.length === 24) {
+          orderId = str;
+        } else {
+          throw new Error(`Invalid order ID format: ${JSON.stringify(orderIdRaw)}`);
+        }
+      }
 
       // Manually set order creation time to 25 hours ago
-      await Order.findByIdAndUpdate(new mongoose.Types.ObjectId(orderId), {
+      await Order.findByIdAndUpdate(orderId, {
         createdAt: new Date(Date.now() - 25 * 60 * 60 * 1000)
       });
 
@@ -257,7 +291,23 @@ describe('Stock Management', () => {
       const orderIds = successfulOrders.map(r => {
         const id = r.body.data?._id;
         if (!id) return null;
-        return typeof id === 'string' ? new mongoose.Types.ObjectId(id) : (id.toString ? new mongoose.Types.ObjectId(id.toString()) : id);
+        
+        // Properly extract ID as string
+        let idStr: string;
+        if (typeof id === 'string') {
+          idStr = id;
+        } else if (id instanceof mongoose.Types.ObjectId) {
+          idStr = id.toString();
+        } else {
+          const str = String(id);
+          if (mongoose.Types.ObjectId.isValid(str) && str.length === 24) {
+            idStr = str;
+          } else {
+            return null; // Skip invalid IDs
+          }
+        }
+        
+        return mongoose.Types.ObjectId.isValid(idStr) ? new mongoose.Types.ObjectId(idStr) : null;
       }).filter((id): id is mongoose.Types.ObjectId => id !== null);
       if (orderIds.length > 0) {
         await Order.deleteMany({ _id: { $in: orderIds } });
@@ -296,10 +346,29 @@ describe('Stock Management', () => {
       const productIds = response.body.products.map((p: any) => {
         const id = p._id;
         if (!id) return null;
-        if (typeof id === 'string') return id;
-        if (id.toString && typeof id.toString === 'function') return id.toString();
-        return String(id);
-      }).filter((id: string | null): id is string => id !== null);
+        
+        // Properly extract ID as string
+        if (typeof id === 'string') {
+          return id;
+        } else if (id instanceof mongoose.Types.ObjectId) {
+          return id.toString();
+        } else if (id && typeof id === 'object') {
+          // Try to get string representation
+          const str = String(id);
+          // Check if it's a valid ObjectId string
+          if (mongoose.Types.ObjectId.isValid(str) && str.length === 24) {
+            return str;
+          }
+          // Try toString method
+          if (id.toString && typeof id.toString === 'function') {
+            const toStringResult = id.toString();
+            if (mongoose.Types.ObjectId.isValid(toStringResult) && toStringResult.length === 24) {
+              return toStringResult;
+            }
+          }
+        }
+        return null;
+      }).filter((id: string | null): id is string => id !== null && id.length === 24);
       expect(productIds.length).toBeGreaterThan(0);
       expect(productIds).toContain(productId);
 
