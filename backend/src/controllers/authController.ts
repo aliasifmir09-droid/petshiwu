@@ -142,7 +142,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       });
     }
 
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select('+password +emailVerificationToken +emailVerificationExpires');
 
     if (!user) {
       return res.status(401).json({
