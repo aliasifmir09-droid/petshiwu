@@ -7,7 +7,9 @@ import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ProductCard from '@/components/ProductCard';
-import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home } from 'lucide-react';
+import ProductRecommendationsSection from '@/components/ProductRecommendationsSection';
+import ProductShareMenu from '@/components/ProductShareMenu';
+import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home, Share2 } from 'lucide-react';
 import { FormattedDescription } from '@/utils/descriptionFormatter';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
@@ -48,6 +50,7 @@ const ProductDetail = () => {
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [zoomPosition, setZoomPosition] = useState<{ x: number; y: number } | null>(null);
+  const [showShareMenu, setShowShareMenu] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const { data: product, isLoading, error: productError } = useQuery({

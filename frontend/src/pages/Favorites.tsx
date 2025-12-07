@@ -1,7 +1,10 @@
-import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingCart, Trash2 } from 'lucide-react';
+import { Heart, ShoppingCart, Trash2, Share2, Mail, Copy, Check } from 'lucide-react';
+import { userService } from '@/services/users';
+import { useToast } from '@/hooks/useToast';
+import Toast from '@/components/Toast';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useAuthStore } from '@/stores/authStore';
 import ProductCard from '@/components/ProductCard';

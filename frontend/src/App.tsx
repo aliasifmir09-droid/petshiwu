@@ -23,6 +23,12 @@ const Register = lazy(() => import('./pages/Register'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const ResendVerification = lazy(() => import('./pages/ResendVerification'));
 const Profile = lazy(() => import('./pages/Profile'));
+const ProductComparison = lazy(() => import('./pages/ProductComparison'));
+const Returns = lazy(() => import('./pages/Returns'));
+const CreateReturn = lazy(() => import('./pages/CreateReturn'));
+const AdvancedSearch = lazy(() => import('./pages/AdvancedSearch'));
+const AddressManagement = lazy(() => import('./pages/AddressManagement'));
+const StockAlerts = lazy(() => import('./pages/StockAlerts'));
 const MyOrders = lazy(() => import('./pages/MyOrders'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail'));
 const TrackOrder = lazy(() => import('./pages/TrackOrder'));
@@ -93,6 +99,12 @@ function App() {
                           <Route path="/verify-email" element={<VerifyEmail />} />
                           <Route path="/resend-verification" element={<ResendVerification />} />
                           <Route path="/profile" element={<Profile />} />
+                          <Route path="/products/compare" element={<ProductComparison />} />
+                          <Route path="/returns" element={<Returns />} />
+                          <Route path="/returns/new/:orderId" element={<CreateReturn />} />
+                          <Route path="/search" element={<AdvancedSearch />} />
+                          <Route path="/addresses" element={<AddressManagement />} />
+                          <Route path="/stock-alerts" element={<StockAlerts />} />
                           <Route path="/orders/:id" element={<OrderDetail />} />
                           <Route path="/orders" element={<MyOrders />} />
                           <Route path="/track-order" element={<TrackOrder />} />
