@@ -483,6 +483,8 @@ const Customers = () => {
           </div>
         </div>
       )}
+
+      <Toast toast={toast} onClose={hideToast} />
     </div>
   );
 };
