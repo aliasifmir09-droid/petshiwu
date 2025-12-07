@@ -289,6 +289,9 @@ describe('Stock Management', () => {
       // Manually set order creation time to 25 hours ago
       // Use direct MongoDB update to bypass Mongoose timestamp handling
       const oldCreatedAt = new Date(Date.now() - 25 * 60 * 60 * 1000);
+      if (!mongoose.connection.db) {
+        throw new Error('MongoDB connection not established');
+      }
       await mongoose.connection.db.collection('orders').updateOne(
         { _id: new mongoose.Types.ObjectId(orderId) },
         { $set: { createdAt: oldCreatedAt } }
