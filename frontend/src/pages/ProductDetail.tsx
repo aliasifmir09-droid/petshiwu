@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { productService } from '@/services/products';
 import { reviewService } from '@/services/reviews';
 import { recommendationService } from '@/services/recommendations';
@@ -64,7 +64,7 @@ const ProductDetail = () => {
     gcTime: 10 * 60 * 1000 // Cache for 10 minutes
   });
 
-  const [reviewSort, setReviewSort] = useState('newest');
+  const [reviewSort] = useState('newest');
   const { data: reviews } = useQuery({
     queryKey: ['reviews', product?._id, reviewSort],
     queryFn: () => reviewService.getProductReviews(product!._id, 1, 10, undefined, reviewSort),
@@ -100,7 +100,7 @@ const ProductDetail = () => {
   const handleShare = async (platform: string) => {
     if (!socialLinks) return;
     
-    const url = socialLinks[platform];
+    const url = (socialLinks as any)[platform];
     if (platform === 'copyLink') {
       await navigator.clipboard.writeText(url);
       setLinkCopied(true);

@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { addressService, Address } from '@/services/addresses';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import EmptyState from '@/components/EmptyState';
-import { MapPin, Plus, Edit, Trash2, CheckCircle } from 'lucide-react';
+import { MapPin, Plus, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 
@@ -251,7 +251,7 @@ const AddressManagement = () => {
 
       {!addresses || addresses.length === 0 ? (
         <EmptyState
-          icon={<MapPin className="w-16 h-16" />}
+          icon={MapPin}
           title="No Addresses Saved"
           description="Add your first address to get started with faster checkout."
         />

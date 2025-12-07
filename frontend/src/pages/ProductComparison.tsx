@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { comparisonService } from '@/services/comparison';
-import { productService } from '@/services/products';
-import { Product } from '@/types';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ProductCard from '@/components/ProductCard';
 import { X, Plus, CheckCircle, Star, DollarSign, Package, Award } from 'lucide-react';
@@ -13,7 +11,6 @@ import EmptyState from '@/components/EmptyState';
 
 const ProductComparison = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const { toast, showToast, hideToast } = useToast();
   const [productIds, setProductIds] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<Product[]>([]);
@@ -71,17 +68,13 @@ const ProductComparison = () => {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">Compare Products</h1>
           <EmptyState
-            icon={<Package className="w-16 h-16" />}
+            icon={Package}
             title="No Products to Compare"
             description="Add products to compare by clicking the 'Compare' button on product pages."
-            action={
-              <Link
-                to="/products"
-                className="bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700"
-              >
-                Browse Products
-              </Link>
-            }
+            action={{
+              label: "Browse Products",
+              to: "/products"
+            }}
           />
         </div>
         {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
@@ -101,7 +94,7 @@ const ProductComparison = () => {
     return (
       <div className="container mx-auto px-4 py-12">
         <EmptyState
-          icon={<X className="w-16 h-16" />}
+          icon={X}
           title="Error Loading Comparison"
           description="Unable to load product comparison. Please try again."
         />
@@ -213,7 +206,7 @@ const ProductComparison = () => {
                     <Star className="w-5 h-5 text-yellow-400 fill-current" />
                     <span>{product.averageRating?.toFixed(1) || 'N/A'}</span>
                     <span className="text-gray-500 text-sm">
-                      ({product.reviewCount || 0} reviews)
+                      ({product.totalReviews || 0} reviews)
                     </span>
                   </div>
                 </td>

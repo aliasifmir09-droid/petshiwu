@@ -58,6 +58,7 @@ export interface Product {
   compareAtPrice?: number;
   averageRating: number;
   totalReviews: number;
+  reviewCount?: number;
   petType: 'dog' | 'cat' | 'other-animals';
   tags: string[];
   features: string[];

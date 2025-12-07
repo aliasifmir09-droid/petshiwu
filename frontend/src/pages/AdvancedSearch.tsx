@@ -2,11 +2,10 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/products';
-import { Product } from '@/types';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import EmptyState from '@/components/EmptyState';
 import ProductCard from '@/components/ProductCard';
-import { Search, SlidersHorizontal, X, Star, DollarSign } from 'lucide-react';
+import { Search, SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 
@@ -242,7 +241,7 @@ const AdvancedSearch = () => {
         </>
       ) : query ? (
         <EmptyState
-          icon={<Search className="w-16 h-16" />}
+          icon={Search}
           title="No Results Found"
           description="Try adjusting your search terms or filters."
         />

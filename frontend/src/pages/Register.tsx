@@ -9,7 +9,6 @@ import { useToast } from '@/hooks/useToast';
 
 const Register = () => {
   const navigate = useNavigate();
-  const setUser = useAuthStore((state) => state.setUser);
   const { toast, showToast, hideToast } = useToast();
 
   const [formData, setFormData] = useState({

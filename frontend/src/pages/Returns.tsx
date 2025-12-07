@@ -1,17 +1,14 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { returnService, Return } from '@/services/returns';
-import { orderService } from '@/services/orders';
+import { useQuery } from '@tanstack/react-query';
+import { returnService } from '@/services/returns';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import EmptyState from '@/components/EmptyState';
-import { Package, RotateCcw, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
+import { Package, RotateCcw, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { Link } from 'react-router-dom';
 
 const Returns = () => {
-  const { toast, showToast, hideToast } = useToast();
-  const queryClient = useQueryClient();
+  const { toast, hideToast } = useToast();
 
   const { data: returns, isLoading } = useQuery({
     queryKey: ['returns'],
@@ -74,7 +71,7 @@ const Returns = () => {
       <div className="container mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold mb-6">My Returns</h1>
         <EmptyState
-          icon={<Package className="w-16 h-16" />}
+          icon={Package}
           title="No Returns Yet"
           description="You haven't requested any returns. Return requests will appear here once created."
         />

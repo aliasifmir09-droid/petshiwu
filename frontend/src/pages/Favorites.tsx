@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingCart, Trash2, Share2, Mail, Copy, Check } from 'lucide-react';
+import { Heart, ShoppingCart, Trash2, Share2, Copy, Check } from 'lucide-react';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useAuthStore } from '@/stores/authStore';
 import ProductCard from '@/components/ProductCard';
@@ -17,6 +17,56 @@ import Toast from '@/components/Toast';
 const Favorites = () => {
   const { isAuthenticated } = useAuthStore();
   const { items, removeFromWishlist, cleanup } = useWishlistStore();
+  const { toast, showToast, hideToast } = useToast();
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareLink, setShareLink] = useState('');
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [email, setEmail] = useState('');
+  const [emailMessage, setEmailMessage] = useState('');
+
+  const { data: shareData } = useQuery({
+    queryKey: ['wishlist-share'],
+    queryFn: () => wishlistShareService.getShareLink(),
+    enabled: isAuthenticated && showShareModal
+  });
+
+  useEffect(() => {
+    if (shareData) {
+      setShareLink(shareData.shareUrl);
+    }
+  }, [shareData]);
+
+  const emailMutation = useMutation({
+    mutationFn: (data: { recipientEmail: string; message?: string }) =>
+      wishlistShareService.emailWishlist(data),
+    onSuccess: () => {
+      showToast('Wishlist sent successfully!', 'success');
+      setShowShareModal(false);
+      setEmail('');
+      setEmailMessage('');
+    },
+    onError: (error: any) => {
+      showToast(error.response?.data?.message || 'Failed to send wishlist', 'error');
+    }
+  });
+
+  const handleCopyLink = async () => {
+    if (shareLink) {
+      await navigator.clipboard.writeText(shareLink);
+      setLinkCopied(true);
+      showToast('Link copied to clipboard!', 'success');
+      setTimeout(() => setLinkCopied(false), 2000);
+    }
+  };
+
+  const handleEmailWishlist = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      showToast('Please enter recipient email', 'warning');
+      return;
+    }
+    emailMutation.mutate({ recipientEmail: email, message: emailMessage });
+  };
   
   // Clean up invalid items on mount
   useEffect(() => {

@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft } from 'lucide-react';
 import api from '@/services/api';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 
 const ResendVerification = () => {
-  const navigate = useNavigate();
   const { toast, showToast, hideToast } = useToast();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);

@@ -1,13 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { stockAlertService, StockAlert } from '@/services/stockAlerts';
+import { stockAlertService } from '@/services/stockAlerts';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import EmptyState from '@/components/EmptyState';
 import ProductCard from '@/components/ProductCard';
-import { Bell, BellOff, Package } from 'lucide-react';
+import { Bell, BellOff } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { Product } from '@/types';
-import { Link } from 'react-router-dom';
 
 const StockAlerts = () => {
   const { toast, showToast, hideToast } = useToast();
@@ -46,7 +45,7 @@ const StockAlerts = () => {
       <div className="container mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold mb-6">Stock Alerts</h1>
         <EmptyState
-          icon={<Bell className="w-16 h-16" />}
+          icon={Bell}
           title="No Stock Alerts"
           description="You haven't set up any stock alerts yet. Click 'Notify Me' on out-of-stock products to get notified when they're back in stock."
         />
