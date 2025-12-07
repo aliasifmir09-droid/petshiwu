@@ -80,6 +80,7 @@ export const useCartStore = create<CartState>()(
           const newItems = [...items];
           newItems[existingItemIndex].quantity = newQuantity;
           set({ items: newItems });
+          broadcastCartUpdate(newItems);
         } else {
           // Check if requested quantity exceeds available stock
           if (quantity > availableStock) {
@@ -87,19 +88,21 @@ export const useCartStore = create<CartState>()(
             return;
           }
           
-          set({ items: [...items, { product: normalizedProduct, variant, quantity }] });
+          const newItems = [...items, { product: normalizedProduct, variant, quantity }];
+          set({ items: newItems });
+          broadcastCartUpdate(newItems);
         }
       },
 
       removeFromCart: (productId, variantSku) => {
         const normalizedProductId = normalizeId(productId) || String(productId);
         
-        set({
-          items: get().items.filter(
-            (item) =>
-              !((normalizeId(item.product._id) || String(item.product._id)) === normalizedProductId && item.variant?.sku === variantSku)
-          )
-        });
+        const newItems = get().items.filter(
+          (item) =>
+            !((normalizeId(item.product._id) || String(item.product._id)) === normalizedProductId && item.variant?.sku === variantSku)
+        );
+        set({ items: newItems });
+        broadcastCartUpdate(newItems);
       },
 
       updateQuantity: (productId, quantity, variantSku) => {
@@ -129,12 +132,19 @@ export const useCartStore = create<CartState>()(
           const newItems = [...items];
           newItems[itemIndex].quantity = quantity;
           set({ items: newItems });
+          broadcastCartUpdate(newItems);
         }
       },
 
-      clearCart: () => set({ items: [] }),
+      clearCart: () => {
+        set({ items: [] });
+        broadcastCartUpdate([]);
+      },
 
-      setItems: (newItems: CartItem[]) => set({ items: newItems }),
+      setItems: (newItems: CartItem[]) => {
+        set({ items: newItems });
+        broadcastCartUpdate(newItems);
+      },
 
       getTotalItems: () => {
         return get().items.reduce((total, item) => total + item.quantity, 0);
