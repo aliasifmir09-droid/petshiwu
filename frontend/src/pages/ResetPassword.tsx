@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Lock, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
+import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, LogOut } from 'lucide-react';
 import { authService } from '@/services/auth';
 import { useToast } from '@/hooks/useToast';
 import { useAuthStore } from '@/stores/authStore';
@@ -10,7 +10,7 @@ import PasswordStrength from '@/components/PasswordStrength';
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { setUser } = useAuthStore();
+  const { user: loggedInUser, setUser, logout } = useAuthStore();
   const { showToast } = useToast();
 
   const token = searchParams.get('token');
@@ -19,14 +19,43 @@ const ResetPassword = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(true);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [resetUserEmail, setResetUserEmail] = useState<string | null>(null);
+  const [differentUser, setDifferentUser] = useState(false);
 
+  // Verify token and get user email on mount
   useEffect(() => {
-    if (!token) {
-      setError('Invalid or missing reset token. Please request a new password reset link.');
-    }
-  }, [token]);
+    const verifyToken = async () => {
+      if (!token) {
+        setError('Invalid or missing reset token. Please request a new password reset link.');
+        setVerifying(false);
+        return;
+      }
+
+      try {
+        const response = await authService.verifyResetToken(token);
+        if (response.success) {
+          setResetUserEmail(response.email);
+          
+          // Check if a different user is logged in
+          if (loggedInUser && loggedInUser.email !== response.email) {
+            setDifferentUser(true);
+            setError(`⚠️ You are currently logged in as ${loggedInUser.email}, but this reset link is for ${response.email}. Please log out first to reset the password for ${response.email}.`);
+          }
+        } else {
+          setError(response.message || 'Invalid or expired reset token');
+        }
+      } catch (err: any) {
+        setError(err.response?.data?.message || 'Invalid or expired reset token. Please request a new password reset link.');
+      } finally {
+        setVerifying(false);
+      }
+    };
+
+    verifyToken();
+  }, [token, loggedInUser]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,11 +78,26 @@ const ResetPassword = () => {
 
     setLoading(true);
 
+    // If different user is logged in, prevent reset
+    if (differentUser && loggedInUser) {
+      setError('Please log out first before resetting another user\'s password.');
+      showToast('Please log out first before resetting another user\'s password.', 'error');
+      return;
+    }
+
+    setLoading(true);
+
     try {
       const response = await authService.resetPassword(token, password);
       if (response.success) {
         setSuccess(true);
-        showToast('Password reset successfully! You are now logged in.', 'success');
+        const email = resetUserEmail || 'your account';
+        showToast(`Password reset successfully for ${email}! You are now logged in.`, 'success');
+        
+        // If a different user was logged in, log them out first
+        if (loggedInUser && loggedInUser.email !== resetUserEmail) {
+          logout();
+        }
         
         // Fetch user data and update auth store
         try {
@@ -82,6 +126,20 @@ const ResetPassword = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      logout();
+      showToast('Logged out successfully. You can now reset the password.', 'success');
+      // Reload page to clear state
+      window.location.reload();
+    } catch (err) {
+      // Force logout even if API call fails
+      logout();
+      window.location.reload();
+    }
+  };
+
   if (success) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -107,7 +165,20 @@ const ResetPassword = () => {
     );
   }
 
-  if (!token) {
+  if (verifying) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="bg-white p-8 rounded-lg shadow-md text-center">
+            <LoadingSpinner size="lg" />
+            <p className="mt-4 text-gray-600">Verifying reset token...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!token || error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
@@ -117,7 +188,7 @@ const ResetPassword = () => {
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Invalid Reset Link</h2>
             <p className="text-gray-600 mb-6">
-              The password reset link is invalid or has expired. Please request a new one.
+              {error || 'The password reset link is invalid or has expired. Please request a new one.'}
             </p>
             <div className="space-y-3">
               <Link
@@ -146,6 +217,27 @@ const ResetPassword = () => {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Reset Your Password
           </h2>
+          {resetUserEmail && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-sm text-blue-800 text-center">
+                <strong>Resetting password for:</strong> {resetUserEmail}
+              </p>
+            </div>
+          )}
+          {differentUser && loggedInUser && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-800 mb-3">
+                ⚠️ <strong>Security Notice:</strong> You are currently logged in as <strong>{loggedInUser.email}</strong>, but this reset link is for <strong>{resetUserEmail}</strong>.
+              </p>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors text-sm font-semibold"
+              >
+                <LogOut size={16} />
+                Log Out and Continue
+              </button>
+            </div>
+          )}
           <p className="mt-2 text-center text-sm text-gray-600">
             Enter your new password below
           </p>

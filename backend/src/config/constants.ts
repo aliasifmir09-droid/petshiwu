@@ -30,7 +30,7 @@ export const STOCK_ALERT_CHECK_INTERVAL = 60 * 60 * 1000; // 1 hour
 
 // Email configuration
 export const EMAIL_VERIFICATION_EXPIRY_HOURS = 24; // 24 hours
-export const PASSWORD_RESET_EXPIRY_HOURS = 1; // 1 hour
+export const PASSWORD_RESET_EXPIRY_HOURS = 0.25; // 15 minutes
 
 // Review configuration
 export const MIN_REVIEW_LENGTH = 10;

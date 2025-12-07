@@ -9,7 +9,8 @@ import {
   verifyEmail,
   resendVerificationEmail,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  verifyResetToken
 } from '../controllers/authController';
 import { protect } from '../middleware/auth';
 import {
@@ -28,6 +29,7 @@ router.post('/logout', logout);
 router.get('/verify-email', verifyEmail);
 router.post('/resend-verification', resendVerificationEmail);
 router.post('/forgot-password', forgotPasswordValidation, forgotPassword);
+router.get('/verify-reset-token', verifyResetToken);
 router.post('/reset-password', resetPasswordValidation, resetPassword);
 router.get('/me', protect, getMe);
 router.put('/updateprofile', protect, updateProfile);

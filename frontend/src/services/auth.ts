@@ -74,6 +74,13 @@ export const authService = {
     return response.data;
   },
 
+  verifyResetToken: async (token: string) => {
+    const response = await api.get<any>('/auth/verify-reset-token', {
+      params: { token }
+    });
+    return response.data;
+  },
+
   resetPassword: async (token: string, password: string) => {
     const response = await api.post<any>('/auth/reset-password', { token, password });
     if (response.data.success && response.data.token) {
