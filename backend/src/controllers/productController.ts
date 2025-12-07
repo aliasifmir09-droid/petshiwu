@@ -149,7 +149,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
         query.parentCategory = null;
       }
       
-      let category = await Category.findOne(query).lean();
+      let category: Awaited<ReturnType<typeof Category.findOne>> & { _id: mongoose.Types.ObjectId } | null = await Category.findOne(query).lean();
       
       // If not found, create it
       if (!category) {
@@ -164,27 +164,27 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           }
         }
         
-            try {
-              const newCategory = await Category.create({
-                name: trimmedName,
-                petType: petType.toLowerCase(),
-                parentCategory: parentId,
-                isActive: true,
-                level: level,
-                description: `${trimmedName} products`
-              });
-              category = newCategory.toObject();
-            } catch (createError: unknown) {
-              const error = createError as { code?: number; name?: string; message?: string };
-              if (error.code === 11000 || error.name === 'MongoServerError') {
-                category = await Category.findOne(query).lean();
-                if (!category) {
-                  throw new Error(`Failed to create category "${trimmedName}": ${error.message || 'Unknown error'}`);
-                }
-              } else {
-                throw createError;
-              }
+        try {
+          const newCategory = await Category.create({
+            name: trimmedName,
+            petType: petType.toLowerCase(),
+            parentCategory: parentId,
+            isActive: true,
+            level: level,
+            description: `${trimmedName} products`
+          });
+          category = newCategory.toObject() as Awaited<ReturnType<typeof Category.findOne>> & { _id: mongoose.Types.ObjectId };
+        } catch (createError: unknown) {
+          const error = createError as { code?: number; name?: string; message?: string };
+          if (error.code === 11000 || error.name === 'MongoServerError') {
+            category = await Category.findOne(query).lean();
+            if (!category) {
+              throw new Error(`Failed to create category "${trimmedName}": ${error.message || 'Unknown error'}`);
             }
+          } else {
+            throw createError;
+          }
+        }
       } else if (!category.isActive) {
         await Category.findByIdAndUpdate(category._id, { isActive: true });
         category.isActive = true;
