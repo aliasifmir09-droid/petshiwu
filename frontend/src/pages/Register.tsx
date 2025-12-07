@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { authService } from '@/services/auth';
-import { useAuthStore } from '@/stores/authStore';
 import Toast from '@/components/Toast';
 import PasswordStrength from '@/components/PasswordStrength';
 import { useToast } from '@/hooks/useToast';

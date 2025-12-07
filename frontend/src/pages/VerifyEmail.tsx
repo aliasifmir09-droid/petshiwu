@@ -8,7 +8,7 @@ import Toast from '@/components/Toast';
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { toast, showToast, hideToast } = useToast();
+  const { toast, hideToast } = useToast();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
 

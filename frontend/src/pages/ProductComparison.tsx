@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { comparisonService } from '@/services/comparison';
+import { Product } from '@/types';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ProductCard from '@/components/ProductCard';
 import { X, Plus, CheckCircle, Star, DollarSign, Package, Award } from 'lucide-react';
