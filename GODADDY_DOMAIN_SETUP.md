@@ -102,7 +102,14 @@ Cloudflare provides:
 
 4. **Configure DNS in Cloudflare:**
    - Go to Cloudflare Dashboard → DNS → Records
-   - Add these records:
+   
+   **⚠️ IMPORTANT: Check for Existing Records First!**
+   - Look for any existing A, AAAA, or CNAME records with the same name
+   - **Delete conflicting records** before adding new ones
+   - You cannot have both A and CNAME records with the same name
+   - See `CLOUDFLARE_DNS_TROUBLESHOOTING.md` for detailed help
+   
+   **Then add these records:**
 
    **Main Domain (Frontend):**
    ```
@@ -112,6 +119,8 @@ Cloudflare provides:
    Proxy: ✅ (Orange cloud - enabled)
    TTL: Auto
    ```
+   
+   **Note:** If you get error "record already exists", delete the old A/AAAA/CNAME record for `@` first!
 
    **API Subdomain:**
    ```
