@@ -64,7 +64,7 @@ const Profile = () => {
       return;
     }
 
-    if (passwordData.newPassword.length < 6) {
+    if (passwordData.newPassword.length < 8) {
       showToast('Password must be at least 8 characters long', 'error');
       return;
     }
