@@ -27,9 +27,13 @@
   - `getDatabaseStats` - Statistics queries
   - `getAllDonations` - Donation queries
   - `getProductReviews` - Review queries
-  - `getOrderStats` - Order statistics
+  - `getOrderStats` - Order statistics (paidOrders, ordersWithDonations, recentOrders)
   - `getOrders` - Admin order list
+  - `getMyOrders` - User order list
+  - `getPetTypes` - Pet type queries (all endpoints)
+  - `getAllCategoriesAdmin` - Admin category list
 - **Impact:** 30-50% faster query execution by returning plain JavaScript objects instead of Mongoose documents
+- **Total Queries Optimized:** 12+ endpoints
 
 ### 3. **Frontend Performance** ✅
 - **Already Optimized:**
