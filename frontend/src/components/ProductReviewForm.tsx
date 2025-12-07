@@ -4,6 +4,7 @@ import { reviewService } from '@/services/reviews';
 import { Star } from 'lucide-react';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
+import { trackReviewSubmit } from '@/utils/analytics';
 
 interface ProductReviewFormProps {
   productId: string;

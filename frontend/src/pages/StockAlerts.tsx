@@ -7,6 +7,7 @@ import { Bell, BellOff } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { Product } from '@/types';
+import { trackStockAlert } from '@/utils/analytics';
 
 const StockAlerts = () => {
   const { toast, showToast, hideToast } = useToast();
@@ -20,9 +21,12 @@ const StockAlerts = () => {
   const deleteMutation = useMutation({
     mutationFn: stockAlertService.deleteStockAlert,
     onSuccess: (_, productId) => {
-      const alert = alerts?.find(a => String(a.product._id) === productId);
-      if (alert) {
-        trackStockAlert('delete', String(alert.product._id), alert.product.name);
+      const alert = alerts?.find(a => {
+        const product = typeof a.productId === 'object' ? a.productId : null;
+        return product && String(product._id) === productId;
+      });
+      if (alert && typeof alert.productId === 'object') {
+        trackStockAlert('delete', String(alert.productId._id), alert.productId.name);
       }
       queryClient.invalidateQueries({ queryKey: ['stock-alerts'] });
       showToast('Stock alert removed', 'success');
