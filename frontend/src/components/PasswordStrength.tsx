@@ -12,8 +12,8 @@ interface PasswordStrengthProps {
 const PasswordStrength = ({ password }: PasswordStrengthProps) => {
   const requirements: PasswordRequirement[] = [
     {
-      label: 'At least 6 characters',
-      test: (pwd) => pwd.length >= 6
+      label: 'At least 8 characters',
+      test: (pwd) => pwd.length >= 8
     },
     {
       label: 'At least one uppercase letter',

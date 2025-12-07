@@ -106,7 +106,7 @@ const Register = () => {
               <input
                 type="password"
                 required
-                minLength={6}
+                minLength={8}
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -120,7 +120,7 @@ const Register = () => {
               <input
                 type="password"
                 required
-                minLength={6}
+                minLength={8}
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"

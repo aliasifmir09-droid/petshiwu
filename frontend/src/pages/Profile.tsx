@@ -65,7 +65,7 @@ const Profile = () => {
     }
 
     if (passwordData.newPassword.length < 6) {
-      showToast('Password must be at least 6 characters long', 'error');
+      showToast('Password must be at least 8 characters long', 'error');
       return;
     }
 
@@ -272,9 +272,9 @@ const Profile = () => {
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                       className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      minLength={6}
+                      minLength={8}
                     />
-                    <p className="text-sm text-gray-500 mt-1">Must be at least 6 characters</p>
+                    <p className="text-sm text-gray-500 mt-1">Must be at least 8 characters</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Confirm New Password *</label>
@@ -284,7 +284,7 @@ const Profile = () => {
                       value={passwordData.confirmPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
                       className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      minLength={6}
+                      minLength={8}
                     />
                   </div>
                   <div className="flex gap-3">
