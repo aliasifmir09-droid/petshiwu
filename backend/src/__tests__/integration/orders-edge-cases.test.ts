@@ -266,7 +266,7 @@ describe('Order Creation Edge Cases', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           items: [{
-            product: outOfStockProduct._id.toString(),
+            product: (outOfStockProduct._id as mongoose.Types.ObjectId).toString(),
             quantity: 1,
             price: 10,
             name: 'Out of Stock',

@@ -62,7 +62,7 @@ describe('Stock Management', () => {
       const initialStock = product.totalStock;
 
       // Create order
-      const orderResponse = await request(testApp)
+      const orderResponse = await request(app)
         .post('/api/orders')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
@@ -97,7 +97,7 @@ describe('Stock Management', () => {
       expect(afterOrderProduct?.totalStock).toBe(initialStock - 3);
 
       // Cancel order
-      const cancelResponse = await request(testApp)
+      const cancelResponse = await request(app)
         .put(`/api/orders/${orderId}/cancel`)
         .set('Authorization', `Bearer ${userToken}`)
         .send({ reason: 'Changed mind' });
@@ -131,7 +131,7 @@ describe('Stock Management', () => {
       const productId = (product._id as mongoose.Types.ObjectId).toString();
 
       // Create order
-      const orderResponse = await request(testApp)
+      const orderResponse = await request(app)
         .post('/api/orders')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
@@ -166,7 +166,7 @@ describe('Stock Management', () => {
       });
 
       // Try to cancel (should fail)
-      const cancelResponse = await request(testApp)
+      const cancelResponse = await request(app)
         .put(`/api/orders/${orderId}/cancel`)
         .set('Authorization', `Bearer ${userToken}`)
         .send({ reason: 'Too late' });
@@ -204,7 +204,7 @@ describe('Stock Management', () => {
 
       // Create multiple orders simultaneously
       const orders = Array(3).fill(null).map(() =>
-        request(testApp)
+        request(app)
           .post('/api/orders')
           .set('Authorization', `Bearer ${userToken}`)
           .send({
@@ -273,7 +273,7 @@ describe('Stock Management', () => {
       const productId = (lowStockProduct._id as mongoose.Types.ObjectId).toString();
 
       // Get low stock products (admin endpoint)
-      const response = await request(testApp)
+      const response = await request(app)
         .get('/api/inventory-alerts/low-stock')
         .set('Authorization', `Bearer ${adminToken}`)
         .query({ globalThreshold: 5 });
