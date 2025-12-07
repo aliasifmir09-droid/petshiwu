@@ -4,6 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { authService } from '@/services/auth';
 import { useAuthStore } from '@/stores/authStore';
 import Toast from '@/components/Toast';
+import PasswordStrength from '@/components/PasswordStrength';
 import { useToast } from '@/hooks/useToast';
 
 const Register = () => {
@@ -111,6 +112,7 @@ const Register = () => {
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="••••••••"
               />
+              <PasswordStrength password={formData.password} />
             </div>
 
             <div>
