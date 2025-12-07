@@ -287,12 +287,11 @@ describe('Stock Management', () => {
       }
 
       // Manually set order creation time to 25 hours ago
-      // Use updateOne with timestamps disabled to override Mongoose's automatic timestamp handling
+      // Use direct MongoDB update to bypass Mongoose timestamp handling
       const oldCreatedAt = new Date(Date.now() - 25 * 60 * 60 * 1000);
-      await Order.updateOne(
-        { _id: orderId },
-        { $set: { createdAt: oldCreatedAt } },
-        { timestamps: false } // Disable automatic timestamp updates
+      await mongoose.connection.db.collection('orders').updateOne(
+        { _id: new mongoose.Types.ObjectId(orderId) },
+        { $set: { createdAt: oldCreatedAt } }
       );
 
       // Verify the update was applied by refetching
