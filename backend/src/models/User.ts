@@ -32,6 +32,8 @@ export interface IUser extends Document {
   emailVerified: boolean;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
   addresses: IAddress[];
   wishlist: mongoose.Types.ObjectId[];
   passwordChangedAt?: Date;
@@ -42,6 +44,7 @@ export interface IUser extends Document {
   isPasswordExpired(): boolean;
   getDaysUntilPasswordExpires(): number;
   generateEmailVerificationToken(): string;
+  generatePasswordResetToken(): string;
 }
 
 const addressSchema = new Schema<IAddress>({
@@ -123,6 +126,14 @@ const userSchema = new Schema<IUser>(
     emailVerificationExpires: {
       type: Date,
       select: false
+    },
+    passwordResetToken: {
+      type: String,
+      select: false // Don't include in queries by default
+    },
+    passwordResetExpires: {
+      type: Date,
+      select: false
     }
   },
   {
@@ -198,6 +209,23 @@ userSchema.methods.generateEmailVerificationToken = function (): string {
   
   // Token expires in 24 hours
   this.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  
+  return token;
+};
+
+// Generate password reset token
+userSchema.methods.generatePasswordResetToken = function (): string {
+  const crypto = require('crypto');
+  const token = crypto.randomBytes(32).toString('hex');
+  
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+  
+  // Token expires in 1 hour
+  const { PASSWORD_RESET_EXPIRY_HOURS } = require('../config/constants');
+  this.passwordResetExpires = new Date(Date.now() + PASSWORD_RESET_EXPIRY_HOURS * 60 * 60 * 1000);
   
   return token;
 };

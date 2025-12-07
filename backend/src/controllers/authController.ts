@@ -2,10 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import User from '../models/User';
 import { sendTokenResponse } from '../utils/generateToken';
 import { AuthRequest } from '../middleware/auth';
-import { sendVerificationEmail } from '../utils/emailService';
+import { sendVerificationEmail, sendPasswordResetEmail } from '../utils/emailService';
 import crypto from 'crypto';
 import logger from '../utils/logger';
 import { safeToString } from '../utils/types';
+import { PASSWORD_RESET_EXPIRY_HOURS } from '../config/constants';
 
 /**
  * @swagger
@@ -411,6 +412,162 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
       success: true,
       message: 'Logged out successfully'
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Request password reset
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Password reset email sent (if user exists)
+ *       400:
+ *         description: Email is required
+ */
+// Forgot password - send reset email
+export const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    // Find user by email
+    const user = await User.findOne({ email }).select('+passwordResetToken +passwordResetExpires');
+
+    // Don't reveal if user exists or not (security best practice)
+    // Always return success message
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: 'If an account with this email exists, a password reset link has been sent.'
+      });
+    }
+
+    // Generate reset token
+    const resetToken = user.generatePasswordResetToken();
+    await user.save({ validateBeforeSave: false });
+
+    try {
+      // Send password reset email
+      await sendPasswordResetEmail(user.email, resetToken, user.firstName);
+      
+      res.status(200).json({
+        success: true,
+        message: 'If an account with this email exists, a password reset link has been sent.'
+      });
+    } catch (emailError: any) {
+      // Reset token fields if email fails
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+
+      logger.error('Error sending password reset email:', emailError);
+      return res.status(500).json({
+        success: false,
+        message: 'Error sending password reset email. Please try again later.'
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Reset password with token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - password
+ *             properties:
+ *               token:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *                 minLength: 8
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       400:
+ *         description: Invalid or expired token, or validation error
+ */
+// Reset password with token
+export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token and password are required'
+      });
+    }
+
+    // Hash the token to compare with stored hash
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    // Find user with this token and check if it's not expired
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: new Date() }
+    }).select('+passwordResetToken +passwordResetExpires +password');
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired password reset token'
+      });
+    }
+
+    // Validate password length
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters long'
+      });
+    }
+
+    // Set new password
+    user.password = password;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+
+    // Send token response (auto-login after reset)
+    sendTokenResponse(safeToString(user._id), 200, res);
   } catch (error) {
     next(error);
   }

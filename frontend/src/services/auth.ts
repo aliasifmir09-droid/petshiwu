@@ -67,6 +67,19 @@ export const authService = {
   resendVerification: async (email: string) => {
     const response = await api.post<any>('/auth/resend-verification', { email });
     return response.data;
+  },
+
+  forgotPassword: async (email: string) => {
+    const response = await api.post<any>('/auth/forgot-password', { email });
+    return response.data;
+  },
+
+  resetPassword: async (token: string, password: string) => {
+    const response = await api.post<any>('/auth/reset-password', { token, password });
+    if (response.data.success && response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    return response.data;
   }
 };
 
