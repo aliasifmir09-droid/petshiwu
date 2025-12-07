@@ -46,6 +46,7 @@ export const getProductReviews = async (req: Request, res: Response, next: NextF
       .sort(sortOption)
       .skip(skip)
       .limit(limit)
+      .lean()
       .lean();
 
     const total = await Review.countDocuments(query);

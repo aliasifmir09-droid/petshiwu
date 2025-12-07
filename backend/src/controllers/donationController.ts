@@ -244,7 +244,8 @@ export const getAllDonations = async (req: AuthRequest, res: Response, next: Nex
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate('user', 'firstName lastName email');
+      .populate('user', 'firstName lastName email')
+      .lean();
 
     const total = await Donation.countDocuments();
 

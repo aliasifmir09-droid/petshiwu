@@ -12,7 +12,8 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Mail
+  Mail,
+  AlertTriangle
 } from 'lucide-react';
 import ConfirmationModal from './ConfirmationModal';
 
@@ -49,6 +50,7 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
     { path: '/pet-types', icon: Layers, label: 'Pet Types', adminOnly: true },
     { path: '/customers', icon: Users, label: 'Customers', permission: 'canManageCustomers' },
     { path: '/email-templates', icon: Mail, label: 'Email Templates', adminOnly: true },
+    { path: '/inventory-alerts', icon: AlertTriangle, label: 'Inventory Alerts', permission: 'canManageProducts' },
     { path: '/settings', icon: Settings, label: 'Settings', alwaysShow: true }
   ];
 

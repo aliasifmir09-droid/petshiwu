@@ -16,7 +16,8 @@ export const getStaffUsers = async (req: AuthRequest, res: Response, next: NextF
       .select('-password')
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     const total = await User.countDocuments({ role: { $in: ['admin', 'staff'] } });
 
@@ -221,7 +222,8 @@ export const getCustomers = async (req: AuthRequest, res: Response, next: NextFu
       .select('-password')
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     const total = await User.countDocuments({ role: 'customer' });
 
@@ -250,7 +252,8 @@ export const getCustomerOrders = async (req: AuthRequest, res: Response, next: N
 
     const orders = await Order.find({ user: customerId })
       .populate('items.product', 'name imageUrl')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.status(200).json({
       success: true,
@@ -550,7 +553,9 @@ export const getDatabaseStats = async (req: AuthRequest, res: Response, next: Ne
     };
 
     // Calculate total revenue from paid orders
-    const paidOrders = await Order.find({ paymentStatus: 'paid' }).select('totalPrice donationAmount');
+    const paidOrders = await Order.find({ paymentStatus: 'paid' })
+      .select('totalPrice donationAmount')
+      .lean();
     const totalRevenue = paidOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
     const totalDonations = paidOrders.reduce((sum, order) => sum + (order.donationAmount || 0), 0);
 

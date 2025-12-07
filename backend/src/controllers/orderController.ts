@@ -1155,7 +1155,8 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
     const totalRevenue = paidOrders.reduce((sum, order) => sum + order.totalPrice, 0);
 
     // Calculate donation statistics
-    const ordersWithDonations = await Order.find({ donationAmount: { $gt: 0 } });
+    const ordersWithDonations = await Order.find({ donationAmount: { $gt: 0 } })
+      .lean();
     const totalDonations = ordersWithDonations.reduce((sum, order) => sum + (order.donationAmount || 0), 0);
     const donationCount = ordersWithDonations.length;
     const averageDonation = donationCount > 0 ? totalDonations / donationCount : 0;
@@ -1190,7 +1191,8 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
     const recentOrders = await Order.find()
       .populate('user', 'firstName lastName email')
       .sort({ createdAt: -1 })
-      .limit(5);
+      .limit(5)
+      .lean();
 
     res.status(200).json({
       success: true,

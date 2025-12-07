@@ -16,6 +16,7 @@ const Settings = lazy(() => import('./pages/Settings'));
 const Analytics = lazy(() => import('./pages/Analytics'));
 const Customers = lazy(() => import('./pages/Customers'));
 const EmailTemplates = lazy(() => import('./pages/EmailTemplates'));
+const InventoryAlerts = lazy(() => import('./pages/InventoryAlerts'));
 const Login = lazy(() => import('./pages/Login'));
 
 const queryClient = new QueryClient({
@@ -189,6 +190,14 @@ function App() {
                     element={
                       user?.role === 'admin' 
                         ? <EmailTemplates /> 
+                        : <Navigate to={getDefaultPage()} replace />
+                    } 
+                  />
+                  <Route 
+                    path="/inventory-alerts" 
+                    element={
+                      user?.role === 'admin' || user?.permissions?.canManageProducts 
+                        ? <InventoryAlerts /> 
                         : <Navigate to={getDefaultPage()} replace />
                     } 
                   />
