@@ -105,7 +105,8 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
 
     // First pass: create a map of all categories
     categories.forEach(cat => {
-      const catObj: any = cat.toObject();
+      // Since we're using .lean(), cat is already a plain object, not a Mongoose document
+      const catObj: any = { ...cat };
       catObj.subcategories = [];
       const catId = cat._id as mongoose.Types.ObjectId;
       categoryMap.set(catId.toString(), catObj);
