@@ -175,7 +175,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           });
           // Convert to plain object to match lean() return type
           const categoryObj = newCategory.toObject();
-          category = categoryObj as typeof category;
+          category = categoryObj as Awaited<ReturnType<typeof Category.findOne>>;
         } catch (createError: unknown) {
           const error = createError as { code?: number; name?: string; message?: string };
           if (error.code === 11000 || error.name === 'MongoServerError') {
