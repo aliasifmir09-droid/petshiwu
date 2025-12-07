@@ -6,13 +6,26 @@ import EmailTemplate from '../models/EmailTemplate';
 const createTransporter = () => {
   // If SMTP is configured, use it (works with GoDaddy, custom SMTP servers, etc.)
   if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    const port = parseInt(process.env.SMTP_PORT || '587');
+    const secure = process.env.SMTP_SECURE === 'true';
+    
+    logger.info(`Creating SMTP transporter: ${process.env.SMTP_HOST}:${port}, secure: ${secure}`);
+    
     return nodemailer.createTransport({
       host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+      port: port,
+      secure: secure, // true for 465, false for other ports
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
+      },
+      // Add timeout and connection options for cloud environments
+      connectionTimeout: 10000, // 10 seconds
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
+      // For Render/cloud environments - allow self-signed certificates if needed
+      tls: {
+        rejectUnauthorized: false
       }
     });
   }

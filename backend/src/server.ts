@@ -47,6 +47,7 @@ import bulkOperationsRoutes from './routes/bulkOperations';
 import exportRoutes from './routes/exports';
 import emailTemplateRoutes from './routes/emailTemplates';
 import inventoryAlertRoutes from './routes/inventoryAlerts';
+import testEmailRoutes from './routes/testEmail';
 
 // Connect to database
 connectDatabase();
@@ -461,6 +462,7 @@ app.use('/api/bulk', bulkOperationsRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/email-templates', emailTemplateRoutes);
 app.use('/api/inventory-alerts', inventoryAlertRoutes);
+app.use('/api/test', testEmailRoutes);
 
 // Root route - API information
 app.get('/', (req, res) => {
