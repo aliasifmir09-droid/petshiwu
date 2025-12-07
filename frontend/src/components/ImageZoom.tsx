@@ -80,9 +80,7 @@ const ImageZoom = ({
           ref={imageRef}
           src={src}
           alt={alt}
-          className={`w-full h-full object-cover transition-transform duration-200 ease-out ${
-            zoomPosition ? `scale-[${currentZoom}]` : 'scale-100'
-          }`}
+          className="w-full h-full object-cover transition-transform duration-200 ease-out"
           style={{
             transform: zoomPosition 
               ? `scale(${currentZoom})` 
