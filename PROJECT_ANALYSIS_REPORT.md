@@ -565,24 +565,59 @@
 ### 2. **No Subscription Management**
 - **Missing:** View/manage customer subscriptions, pause/resume
 
-### 3. **Limited Analytics**
-- **Missing:** 
-  - Customer lifetime value
-  - Product performance metrics
-  - Sales forecasting
-  - Inventory turnover
+### 3. **Limited Analytics** ✅ **FIXED**
+- **Status:** Implemented advanced analytics endpoint
+- **Features Added:**
+  - Customer lifetime value (CLV) calculation with top customers
+  - Product performance metrics (sales, revenue, conversion rates)
+  - Sales forecasting based on historical trends
+  - Inventory turnover analysis with days-to-sell-out calculations
+- **Endpoint:** `GET /api/analytics/advanced`
 
-### 4. **No Bulk Operations**
-- **Missing:** Bulk product updates, bulk category assignment
+### 4. **No Bulk Operations** ✅ **FIXED**
+- **Status:** Implemented bulk operations endpoints
+- **Features Added:**
+  - Bulk product updates (price, stock, category, activation status)
+  - Bulk category assignment to multiple products
+- **Endpoints:** 
+  - `POST /api/bulk/products/update`
+  - `POST /api/bulk/products/assign-category`
 
-### 5. **No Export Functionality**
-- **Missing:** Export orders, products, customers to CSV/Excel
+### 5. **No Export Functionality** ✅ **FIXED**
+- **Status:** Implemented CSV export functionality
+- **Features Added:**
+  - Export orders to CSV with filtering (date range, status)
+  - Export products to CSV (with option to include inactive)
+  - Export customers to CSV with order statistics
+- **Endpoints:**
+  - `GET /api/export/orders`
+  - `GET /api/export/products`
+  - `GET /api/export/customers`
 
-### 6. **No Email Template Management**
-- **Missing:** Customize email templates for order confirmations, etc.
+### 6. **No Email Template Management** ✅ **FIXED**
+- **Status:** Implemented email template management system
+- **Features Added:**
+  - Create, read, update, delete email templates
+  - Template variables support
+  - Active/inactive template status
+- **Endpoints:**
+  - `GET /api/email-templates`
+  - `GET /api/email-templates/:id`
+  - `POST /api/email-templates`
+  - `PUT /api/email-templates/:id`
+  - `DELETE /api/email-templates/:id`
 
-### 7. **No Inventory Alerts Configuration**
-- **Missing:** Configure low-stock thresholds per product/category
+### 7. **No Inventory Alerts Configuration** ✅ **FIXED**
+- **Status:** Implemented inventory alert configuration
+- **Features Added:**
+  - Low stock threshold per product (`lowStockThreshold` field)
+  - Get products with low stock based on thresholds
+  - Update threshold for individual products
+  - Bulk update thresholds by product IDs or category
+- **Endpoints:**
+  - `GET /api/inventory-alerts/low-stock`
+  - `PUT /api/inventory-alerts/product/:id/threshold`
+  - `POST /api/inventory-alerts/bulk-update-thresholds`
 
 ---
 
