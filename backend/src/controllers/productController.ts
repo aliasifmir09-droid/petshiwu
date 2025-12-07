@@ -149,7 +149,8 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
         query.parentCategory = null;
       }
       
-      let category: Awaited<ReturnType<typeof Category.findOne>> | null = await Category.findOne(query).lean();
+      type CategoryLean = Awaited<ReturnType<typeof Category.findOne>>;
+      let category: CategoryLean = await Category.findOne(query).lean();
       
       // If not found, create it
       if (!category) {
@@ -175,7 +176,8 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           });
           // Convert to plain object to match lean() return type
           const categoryObj = newCategory.toObject();
-          category = categoryObj as Awaited<ReturnType<typeof Category.findOne>>;
+          // Type assertion: toObject() returns a plain object similar to lean()
+          category = categoryObj as unknown as CategoryLean;
         } catch (createError: unknown) {
           const error = createError as { code?: number; name?: string; message?: string };
           if (error.code === 11000 || error.name === 'MongoServerError') {
