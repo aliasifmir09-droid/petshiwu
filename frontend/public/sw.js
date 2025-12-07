@@ -15,7 +15,7 @@ const STATIC_ASSETS = [
 ];
 
 // Install event - cache static assets
-self.addEventListener('install', (event: any) => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS).catch((error) => {
@@ -29,7 +29,7 @@ self.addEventListener('install', (event: any) => {
 });
 
 // Activate event - clean up old caches
-self.addEventListener('activate', (event: any) => {
+self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -44,7 +44,7 @@ self.addEventListener('activate', (event: any) => {
 });
 
 // Fetch event - serve from cache, fallback to network
-self.addEventListener('fetch', (event: any) => {
+self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
@@ -97,7 +97,7 @@ self.addEventListener('fetch', (event: any) => {
 });
 
 // Message handler for cache updates
-self.addEventListener('message', (event: any) => {
+self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
