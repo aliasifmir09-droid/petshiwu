@@ -33,8 +33,13 @@ class ErrorBoundaryWithReporting extends Component<Props, State> {
       console.error('ErrorBoundary caught an error:', error.message);
     }
     
-    // Store error info for display
-    this.setState({ errorInfo });
+    // Store error info for display (only in development)
+    if (import.meta.env.DEV) {
+      this.setState({ errorInfo });
+    } else {
+      // In production, don't store errorInfo to avoid data leakage
+      this.setState({ errorInfo: null });
+    }
     
     // Report error to analytics (if available)
     if (typeof window !== 'undefined' && window.gtag) {
