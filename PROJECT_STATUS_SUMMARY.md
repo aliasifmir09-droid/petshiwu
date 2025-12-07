@@ -72,15 +72,27 @@
 ## ⚠️ **INTENTIONALLY NOT IMPLEMENTED** (By Design)
 
 ### 1. **Email Notifications for Orders** ✅
-- **Status:** IMPLEMENTED
-- **Current State:** Order confirmation emails are automatically sent after order creation
+- **Status:** FULLY IMPLEMENTED
+- **Current State:** Complete email notification system for all order events
 - **Features:**
-  - Professional HTML email template with order details
-  - Order items table with images
-  - Shipping address display
-  - Payment method information
-  - Order tracking link
-  - Non-blocking (order creation succeeds even if email fails)
+  - **Order Confirmation Email**: Automatically sent after order creation
+  - **Order Cancellation Email**: Sent when order is cancelled (with refund info)
+  - **Order Delivered Email**: Sent when order status changes to "delivered" (with review prompt)
+  - **Email Template System**: All emails use database templates (customizable via admin dashboard)
+  - **Template Variables**: Support for dynamic content ({{firstName}}, {{orderNumber}}, etc.)
+  - **Professional HTML Templates**: Responsive, branded email designs
+  - **Non-blocking**: Order operations succeed even if email fails
+  - **Graceful Fallback**: In development/test mode, emails are logged to console
+- **Admin Dashboard:**
+  - Manage email templates via "Email Templates" page
+  - Edit subject lines and body content
+  - View available template variables
+  - Enable/disable templates
+- **Default Templates:**
+  - `order_confirmation` - Order confirmation email
+  - `order_cancellation` - Order cancellation notification
+  - `order_delivered` - Delivery confirmation with review prompt
+- **Seed Script:** Run `npm run seed-email-templates` to create default templates
 - **Note:** Requires SMTP configuration to actually send emails. In development/test mode, emails are logged to console.
 
 ### 2. **Payment Gateway for Orders**
