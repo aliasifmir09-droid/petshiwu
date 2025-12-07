@@ -1,6 +1,14 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import logger from './logger';
 import EmailTemplate from '../models/EmailTemplate';
+
+// Initialize Resend client if API key is provided
+let resendClient: Resend | null = null;
+if (process.env.RESEND_API_KEY) {
+  resendClient = new Resend(process.env.RESEND_API_KEY);
+  logger.info('✅ Resend API client initialized');
+}
 
 // Create reusable transporter
 const createTransporter = () => {
@@ -589,6 +597,68 @@ export const sendOrderDeliveredEmail = async (
 // Send password reset email
 export const sendPasswordResetEmail = async (email: string, token: string, firstName: string) => {
   try {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
+    const fromEmail = process.env.SMTP_FROM || process.env.RESEND_FROM || 'noreply@petshiwu.com';
+
+    // Try Resend API first (more reliable, no port blocking)
+    if (resendClient && process.env.RESEND_API_KEY) {
+      try {
+        logger.info(`Sending password reset email via Resend API to ${email}`);
+        
+        const { data, error } = await resendClient.emails.send({
+          from: fromEmail,
+          to: email,
+          subject: 'Reset Your Password - Petshiwu',
+          html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Reset Your Password</title>
+            </head>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <div style="background-color: #f44336; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
+                <h1 style="margin: 0;">Password Reset Request</h1>
+              </div>
+              <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px;">
+                <p>Hi ${firstName},</p>
+                <p>We received a request to reset your password. Click the button below to reset it:</p>
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${resetUrl}" 
+                     style="background-color: #f44336; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                    Reset Password
+                  </a>
+                </div>
+                <p>Or copy and paste this link into your browser:</p>
+                <p style="word-break: break-all; color: #666; font-size: 12px;">${resetUrl}</p>
+                <p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px;">
+                  This reset link will expire in 1 hour. If you didn't request a password reset, you can safely ignore this email.
+                </p>
+                <p style="color: #666; font-size: 12px; margin-top: 20px;">
+                  Best regards,<br>
+                  The Petshiwu Team
+                </p>
+              </div>
+            </body>
+            </html>
+          `,
+        });
+
+        if (error) {
+          throw new Error(`Resend API error: ${error.message}`);
+        }
+
+        logger.info(`✅ Password reset email sent via Resend API to ${email}: ${data?.id}`);
+        return { messageId: data?.id || 'resend-api', accepted: [email] };
+      } catch (resendError: any) {
+        logger.warn(`Resend API failed, falling back to SMTP: ${resendError.message}`);
+        // Fall through to SMTP
+      }
+    }
+
+    // Fallback to SMTP if Resend API is not configured or failed
     // Check if email is actually configured
     const isEmailConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
     
@@ -596,15 +666,11 @@ export const sendPasswordResetEmail = async (email: string, token: string, first
       logger.warn(`⚠️  Email not configured. Skipping password reset email to ${email}.`);
       logger.warn(`⚠️  In development, you can use the reset link below.`);
       // In development/test mode, log the reset link instead
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
       logger.info(`📧 Password reset link for ${email}: ${resetUrl}`);
       return { messageId: 'test-mode', accepted: [email] };
     }
 
     const transporter = createTransporter();
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
 
     const mailOptions = {
       from: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@petshiwu.com',
