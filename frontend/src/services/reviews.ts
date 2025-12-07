@@ -11,11 +11,16 @@ interface CreateReviewData {
 }
 
 export const reviewService = {
-  getProductReviews: async (productId: string, page = 1, limit = 10, rating?: number) => {
+  getProductReviews: async (productId: string, page = 1, limit = 10, rating?: number, sort?: string) => {
     const response = await api.get<PaginatedResponse<Review>>(`/reviews/product/${productId}`, {
-      params: { page, limit, rating }
+      params: { page, limit, rating, sort }
     });
     return response.data;
+  },
+
+  voteReviewHelpful: async (reviewId: string) => {
+    const response = await api.post<ApiResponse<Review>>(`/reviews/${reviewId}/vote`);
+    return response.data.data;
   },
 
   createReview: async (data: CreateReviewData) => {

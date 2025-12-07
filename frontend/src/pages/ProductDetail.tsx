@@ -24,6 +24,7 @@ const ProductDetail = () => {
   }>();
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   
   // Extract product slug from URL - supports both old and new formats
   // Old format: /products/product-slug
@@ -63,9 +64,10 @@ const ProductDetail = () => {
     gcTime: 10 * 60 * 1000 // Cache for 10 minutes
   });
 
+  const [reviewSort, setReviewSort] = useState('newest');
   const { data: reviews } = useQuery({
-    queryKey: ['reviews', product?._id],
-    queryFn: () => reviewService.getProductReviews(product!._id),
+    queryKey: ['reviews', product?._id, reviewSort],
+    queryFn: () => reviewService.getProductReviews(product!._id, 1, 10, undefined, reviewSort),
     enabled: !!product && !!product._id,
     staleTime: 1 * 60 * 1000, // Consider fresh for 1 minute
     gcTime: 5 * 60 * 1000 // Cache for 5 minutes
@@ -794,6 +796,44 @@ const ProductDetail = () => {
                 {review.comment && (
                   <p className="text-gray-700 leading-relaxed">{review.comment}</p>
                 )}
+
+                {/* Review Images */}
+                {review.images && review.images.length > 0 && (
+                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {review.images.map((image, idx) => (
+                      <img
+                        key={idx}
+                        src={image}
+                        alt={`Review image ${idx + 1}`}
+                        className="w-full h-24 object-cover rounded-lg"
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Helpful Button */}
+                <div className="mt-4 flex items-center gap-4">
+                  <button
+                    onClick={async () => {
+                      try {
+                        await reviewService.voteReviewHelpful(review._id);
+                        showToast('Thank you for your feedback!', 'success');
+                        // Refetch reviews to update helpful count
+                        queryClient.invalidateQueries({ queryKey: ['reviews', product?._id] });
+                      } catch (error: any) {
+                        showToast(error.response?.data?.message || 'Failed to vote', 'error');
+                      }
+                    }}
+                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary-600"
+                  >
+                    <span>Helpful</span>
+                    {review.helpfulCount > 0 && (
+                      <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                        {review.helpfulCount}
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
             ))}
 
