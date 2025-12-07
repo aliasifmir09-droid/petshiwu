@@ -149,9 +149,23 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
         query.parentCategory = null;
       }
       
-      // Type for lean category document
-      type CategoryLean = mongoose.LeanDocument<ICategory> & { _id: mongoose.Types.ObjectId };
-      let category: CategoryLean | null = await Category.findOne(query).lean() as CategoryLean | null;
+      // Type for lean category document - matches what Category.findOne().lean() returns
+      type CategoryLean = {
+        _id: mongoose.Types.ObjectId;
+        name: string;
+        slug: string;
+        description?: string;
+        image?: string;
+        parentCategory?: mongoose.Types.ObjectId;
+        petType: string;
+        level: number;
+        position: number;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        __v?: number;
+      } | null;
+      let category: CategoryLean = await Category.findOne(query).lean() as CategoryLean;
       
       // If not found, create it
       if (!category) {
