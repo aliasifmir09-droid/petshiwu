@@ -476,54 +476,22 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
 
     logger.info(`Reset token generated, attempting to send email to: ${email}`);
 
-    try {
-      // Send password reset email
-      await sendPasswordResetEmail(user.email, resetToken, user.firstName);
-      
-      logger.info(`Password reset email sent successfully to: ${email}`);
-      
-      res.status(200).json({
-        success: true,
-        message: 'If an account with this email exists, a password reset link has been sent.'
+    // Send email asynchronously (don't wait for it to complete)
+    // This improves response time - email will be sent in background
+    sendPasswordResetEmail(user.email, resetToken, user.firstName)
+      .then(() => {
+        logger.info(`✅ Password reset email sent successfully to ${email}`);
+      })
+      .catch((emailError: any) => {
+        logger.error(`❌ Error sending password reset email to ${email}:`, emailError.message);
+        // Don't fail the request if email fails - user can request again
       });
-    } catch (emailError: any) {
-      // Reset token fields if email fails
-      user.passwordResetToken = undefined;
-      user.passwordResetExpires = undefined;
-      await user.save({ validateBeforeSave: false });
 
-      // Log detailed error for debugging
-      logger.error('Error sending password reset email:', {
-        email: user.email,
-        error: emailError.message,
-        stack: emailError.stack,
-        code: emailError.code,
-        command: emailError.command,
-        response: emailError.response,
-        responseCode: emailError.responseCode,
-        errno: emailError.errno,
-        syscall: emailError.syscall,
-        address: emailError.address,
-        port: emailError.port
-      });
-      
-      // Return more detailed error in development, generic in production
-      const errorMessage = process.env.NODE_ENV === 'production'
-        ? 'Error sending password reset email. Please try again later.'
-        : `Error sending password reset email: ${emailError.message || 'Unknown error'}`;
-      
-      return res.status(500).json({
-        success: false,
-        message: errorMessage,
-        ...(process.env.NODE_ENV !== 'production' && {
-          details: {
-            code: emailError.code,
-            command: emailError.command,
-            responseCode: emailError.responseCode
-          }
-        })
-      });
-    }
+    // Return success immediately (email is being sent in background)
+    return res.status(200).json({
+      success: true,
+      message: 'If an account with this email exists, a password reset link has been sent.'
+    });
   } catch (error: any) {
     logger.error('Unexpected error in forgotPassword:', {
       message: error.message,

@@ -598,7 +598,8 @@ export const sendOrderDeliveredEmail = async (
 export const sendPasswordResetEmail = async (email: string, token: string, firstName: string) => {
   try {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
+    // Use HashRouter format (#/) for frontend routing
+    const resetUrl = `${frontendUrl}/#/reset-password?token=${token}`;
     const fromEmail = process.env.SMTP_FROM || process.env.RESEND_FROM || 'noreply@petshiwu.com';
 
     // Try Resend API first (more reliable, no port blocking)
