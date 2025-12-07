@@ -161,12 +161,20 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     }
 
     // Check if email is verified (only for customers, admin/staff are auto-verified)
-    if (user.role === 'customer' && !user.emailVerified) {
-      return res.status(403).json({
-        success: false,
-        message: 'Please verify your email address before logging in. Check your email for the verification link.',
-        requiresVerification: true
-      });
+    // For backward compatibility: auto-verify existing users who don't have emailVerified set
+    if (user.role === 'customer') {
+      // If emailVerified is undefined/null (existing users before email verification was added), auto-verify them
+      if (user.emailVerified === undefined || user.emailVerified === null) {
+        user.emailVerified = true;
+        await user.save({ validateBeforeSave: false });
+      } else if (user.emailVerified === false) {
+        // Only block login if emailVerified is explicitly false
+        return res.status(403).json({
+          success: false,
+          message: 'Please verify your email address before logging in. Check your email for the verification link.',
+          requiresVerification: true
+        });
+      }
     }
 
     sendTokenResponse(safeToString(user._id), 200, res);
