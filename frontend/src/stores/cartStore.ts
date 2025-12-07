@@ -14,6 +14,29 @@ interface CartState {
   getTotalPrice: () => number;
 }
 
+// BroadcastChannel for cross-tab synchronization
+let cartChannel: BroadcastChannel | null = null;
+
+if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+  cartChannel = new BroadcastChannel('cart-sync');
+}
+
+const broadcastCartUpdate = (items: CartItem[]) => {
+  if (cartChannel) {
+    cartChannel.postMessage({ type: 'cart-update', items });
+  }
+};
+
+// Listen for cart updates from other tabs
+if (cartChannel) {
+  cartChannel.onmessage = (event) => {
+    if (event.data.type === 'cart-update') {
+      // Update cart from other tab
+      useCartStore.getState().setItems(event.data.items);
+    }
+  };
+}
+
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({

@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCartStore } from '@/stores/cartStore';
-import { Trash2, ShoppingBag, AlertTriangle } from 'lucide-react';
+import { Trash2, ShoppingBag } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
+import EmptyState from '@/components/EmptyState';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
 import { TAX_RATE, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST } from '@/config/constants';
@@ -38,19 +39,15 @@ const Cart = () => {
   if (items.length === 0) {
     return (
       <div className="container mx-auto px-4 lg:px-8 py-12">
-        <div className="max-w-2xl mx-auto text-center">
-          <ShoppingBag size={64} className="mx-auto text-gray-300 mb-4" />
-          <h1 className="text-3xl font-bold mb-4">Your Cart is Empty</h1>
-          <p className="text-gray-600 mb-8">
-            Looks like you haven't added any items to your cart yet.
-          </p>
-          <Link
-            to="/products"
-            className="inline-block bg-primary-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-700"
-          >
-            Start Shopping
-          </Link>
-        </div>
+        <EmptyState
+          icon={ShoppingBag}
+          title="Your Cart is Empty"
+          description="Looks like you haven't added any items to your cart yet. Start shopping to fill it up!"
+          action={{
+            label: "Start Shopping",
+            to: "/products"
+          }}
+        />
       </div>
     );
   }

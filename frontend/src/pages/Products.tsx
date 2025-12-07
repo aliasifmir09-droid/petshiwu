@@ -5,8 +5,10 @@ import { productService } from '@/services/products';
 import { categoryService } from '@/services/categories';
 import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import EmptyState from '@/components/EmptyState';
+import ErrorMessage from '@/components/ErrorMessage';
 import Dropdown from '@/components/Dropdown';
-import { SlidersHorizontal, Layers, ArrowUpDown, Star, Package, Tag } from 'lucide-react';
+import { SlidersHorizontal, Layers, ArrowUpDown, Star, Package, Tag, Search } from 'lucide-react';
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -74,7 +76,7 @@ const Products = () => {
     };
   }, [category, navigate, searchParams, setSearchParams]);
 
-  const { data: products, isLoading } = useQuery({
+  const { data: products, isLoading, error, refetch } = useQuery({
     queryKey: ['products', page, petType, category, search, sort, featured, minRating, brand, inStock],
     queryFn: () =>
       productService.getProducts({
@@ -405,16 +407,28 @@ const Products = () => {
                 </div>
               )}
             </>
+          ) : error ? (
+            <ErrorMessage
+              title="Failed to load products"
+              message="We couldn't load the products. Please try again."
+              onRetry={() => refetch()}
+              details={error instanceof Error ? error.message : undefined}
+            />
           ) : (
-            <div className="text-center py-12">
-              <p className="text-xl text-gray-600">No products found</p>
-              <button
-                onClick={() => setSearchParams({})}
-                className="mt-4 text-primary-600 hover:text-primary-700 font-medium"
-              >
-                Clear filters and try again
-              </button>
-            </div>
+            <EmptyState
+              icon={Search}
+              title="No Products Found"
+              description={
+                search || petType || category || brand || minRating || inStock
+                  ? "We couldn't find any products matching your filters. Try adjusting your search criteria."
+                  : "No products are available at the moment. Check back soon!"
+              }
+              action={{
+                label: search || petType || category || brand || minRating || inStock ? "Clear Filters" : "Browse All Products",
+                to: "/products",
+                onClick: () => setSearchParams({})
+              }}
+            />
           )}
         </div>
       </div>
