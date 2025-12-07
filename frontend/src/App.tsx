@@ -76,11 +76,14 @@ function App() {
     if ('serviceWorker' in navigator && import.meta.env.PROD) {
       navigator.serviceWorker
         .register('/sw.js')
-        .then((registration) => {
+        .then(() => {
           // Service Worker registered successfully - no need to log
         })
         .catch((error) => {
-          console.log('Service Worker registration failed:', error);
+          // Only log errors in development
+          if (import.meta.env.DEV) {
+            console.error('Service Worker registration failed:', error);
+          }
         });
     }
   }, []);
