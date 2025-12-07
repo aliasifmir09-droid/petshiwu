@@ -71,22 +71,29 @@ const StockAlerts = () => {
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {alerts.map((alert) => {
-          const product = typeof alert.productId === 'object' ? alert.productId : null;
-          if (!product) return null;
+        {alerts
+          .filter((alert) => {
+            const product = typeof alert.productId === 'object' ? alert.productId : null;
+            if (!product) return false;
+            const productId = product._id ? String(product._id) : null;
+            return productId && !hasImageFailed(productId);
+          })
+          .map((alert) => {
+            const product = typeof alert.productId === 'object' ? alert.productId : null;
+            if (!product) return null;
 
-          return (
-            <div key={alert._id} className="bg-white rounded-lg shadow-lg overflow-hidden relative">
-              <ProductCard product={product as Product} />
-              <div className="p-4 border-t">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">
-                    Alert created: {new Date(alert.createdAt).toLocaleDateString()}
-                  </span>
-                  <button
-                    onClick={() => handleRemoveAlert(product._id)}
-                    className="flex items-center gap-2 text-red-600 hover:text-red-700 text-sm font-semibold"
-                  >
+            return (
+              <div key={alert._id} className="bg-white rounded-lg shadow-lg overflow-hidden relative">
+                <ProductCard product={product as Product} />
+                <div className="p-4 border-t">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">
+                      Alert created: {new Date(alert.createdAt).toLocaleDateString()}
+                    </span>
+                    <button
+                      onClick={() => handleRemoveAlert(product._id)}
+                      className="flex items-center gap-2 text-red-600 hover:text-red-700 text-sm font-semibold"
+                    >
                     <BellOff size={16} />
                     Remove Alert
                   </button>
