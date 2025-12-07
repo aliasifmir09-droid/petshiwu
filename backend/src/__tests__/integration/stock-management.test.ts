@@ -237,28 +237,49 @@ describe('Stock Management', () => {
       } else if (orderIdRaw instanceof mongoose.Types.ObjectId) {
         orderId = orderIdRaw.toString();
       } else if (orderIdRaw && typeof orderIdRaw === 'object') {
-        // Handle ObjectId-like objects with buffer property
-        if ('buffer' in orderIdRaw && Buffer.isBuffer(orderIdRaw.buffer)) {
-          // Convert buffer to ObjectId then to string
-          const objId = new mongoose.Types.ObjectId(orderIdRaw.buffer);
-          orderId = objId.toString();
+        // Handle ObjectId-like objects with buffer property (from JSON serialization)
+        if ('buffer' in orderIdRaw && orderIdRaw.buffer) {
+          try {
+            const bufferData = orderIdRaw.buffer;
+            let buffer: Buffer;
+            
+            if (Buffer.isBuffer(bufferData)) {
+              buffer = bufferData;
+            } else if (typeof bufferData === 'object') {
+              // Convert object with numeric keys to array, then to Buffer
+              const bufferValues = Object.keys(bufferData)
+                .filter(k => /^\d+$/.test(k))
+                .sort((a, b) => parseInt(a) - parseInt(b))
+                .map(k => bufferData[k])
+                .filter(v => typeof v === 'number' && v >= 0 && v <= 255);
+              
+              if (bufferValues.length === 12) {
+                buffer = Buffer.from(bufferValues);
+              } else {
+                throw new Error('Invalid buffer length');
+              }
+            } else {
+              throw new Error('Invalid buffer format');
+            }
+            
+            const objId = new mongoose.Types.ObjectId(buffer);
+            orderId = objId.toString();
+          } catch (e) {
+            // Try to create ObjectId from the object
+            try {
+              const objId = new mongoose.Types.ObjectId(orderIdRaw);
+              orderId = objId.toString();
+            } catch {
+              throw new Error(`Invalid order ID format: ${JSON.stringify(orderIdRaw)}`);
+            }
+          }
         } else {
           // Try to create ObjectId from the object
           try {
             const objId = new mongoose.Types.ObjectId(orderIdRaw);
             orderId = objId.toString();
           } catch {
-            // Try toString method
-            if (orderIdRaw.toString && typeof orderIdRaw.toString === 'function') {
-              const str = orderIdRaw.toString();
-              if (mongoose.Types.ObjectId.isValid(str) && str.length === 24) {
-                orderId = str;
-              } else {
-                throw new Error(`Invalid order ID format: ${JSON.stringify(orderIdRaw)}`);
-              }
-            } else {
-              throw new Error(`Invalid order ID format: ${JSON.stringify(orderIdRaw)}`);
-            }
+            throw new Error(`Invalid order ID format: ${JSON.stringify(orderIdRaw)}`);
           }
         }
       } else {
