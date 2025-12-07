@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCartStore } from '@/stores/cartStore';
-import { Trash2, ShoppingBag } from 'lucide-react';
+import { Trash2, ShoppingBag, AlertTriangle } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import EmptyState from '@/components/EmptyState';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
