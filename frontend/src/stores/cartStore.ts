@@ -115,6 +115,11 @@ export const useCartStore = create<CartState>()(
         );
         set({ items: newItems });
         broadcastCartUpdate(newItems);
+        
+        // Track remove from cart
+        if (itemToRemove) {
+          trackRemoveFromCart(normalizedProductId, itemToRemove.product.name);
+        }
       },
 
       updateQuantity: (productId, quantity, variantSku) => {
