@@ -152,7 +152,7 @@ describe('Order Creation Edge Cases', () => {
 
   describe('Invalid Quantities', () => {
     it('should reject order with zero quantity', async () => {
-      const response = await request(testApp)
+      const response = await request(app)
         .post('/api/orders')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
@@ -182,7 +182,7 @@ describe('Order Creation Edge Cases', () => {
     });
 
     it('should reject order with negative quantity', async () => {
-      const response = await request(testApp)
+      const response = await request(app)
         .post('/api/orders')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
@@ -215,7 +215,7 @@ describe('Order Creation Edge Cases', () => {
   describe('Insufficient Stock', () => {
     it('should reject order when quantity exceeds available stock', async () => {
       // Product has 5 items, request 10
-      const response = await request(testApp)
+      const response = await request(app)
         .post('/api/orders')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
@@ -261,7 +261,7 @@ describe('Order Creation Edge Cases', () => {
         variants: []
       });
 
-      const response = await request(testApp)
+      const response = await request(app)
         .post('/api/orders')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
@@ -298,7 +298,7 @@ describe('Order Creation Edge Cases', () => {
   describe('Invalid Product IDs', () => {
     it('should reject order with non-existent product', async () => {
       const fakeId = new mongoose.Types.ObjectId().toString();
-      const response = await request(testApp)
+      const response = await request(app)
         .post('/api/orders')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
@@ -330,7 +330,7 @@ describe('Order Creation Edge Cases', () => {
     });
 
     it('should reject order with invalid product ID format', async () => {
-      const response = await request(testApp)
+      const response = await request(app)
         .post('/api/orders')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
@@ -363,7 +363,7 @@ describe('Order Creation Edge Cases', () => {
 
   describe('Missing Required Fields', () => {
     it('should reject order without items', async () => {
-      const response = await request(testApp)
+      const response = await request(app)
         .post('/api/orders')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
@@ -388,7 +388,7 @@ describe('Order Creation Edge Cases', () => {
     });
 
     it('should reject order with incomplete shipping address', async () => {
-      const response = await request(testApp)
+      const response = await request(app)
         .post('/api/orders')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
