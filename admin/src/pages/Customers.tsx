@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
+import { useToast } from '@/hooks/useToast';
+import Toast from '@/components/Toast';
 import { 
   Search, 
   Mail, 
@@ -85,6 +87,24 @@ const Customers = () => {
   });
 
   const customers = customersData?.data || [];
+
+  const exportCustomersMutation = useMutation({
+    mutationFn: () => adminService.exportCustomers('customer'),
+    onSuccess: (blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `customers-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      showToast('Customers exported successfully', 'success');
+    },
+    onError: () => {
+      showToast('Failed to export customers', 'error');
+    }
+  });
 
   // Filter customers
   const filteredCustomers = customers.filter((customer: Customer) => {

@@ -15,6 +15,7 @@ const PetTypes = lazy(() => import('./pages/PetTypes'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Analytics = lazy(() => import('./pages/Analytics'));
 const Customers = lazy(() => import('./pages/Customers'));
+const EmailTemplates = lazy(() => import('./pages/EmailTemplates'));
 const Login = lazy(() => import('./pages/Login'));
 
 const queryClient = new QueryClient({
