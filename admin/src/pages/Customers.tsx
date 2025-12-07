@@ -14,7 +14,9 @@ import {
   X,
   CheckCircle,
   XCircle,
-  Download
+  Download,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 
 interface Customer {
@@ -59,6 +61,8 @@ const Customers = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
+  const [deleteOptions, setDeleteOptions] = useState({ deleteOrders: false, anonymizeReviews: true });
   const { toast, showToast, hideToast } = useToast();
 
   // Fetch customers
@@ -106,6 +110,20 @@ const Customers = () => {
     }
   });
 
+  const deleteCustomerMutation = useMutation({
+    mutationFn: ({ id, options }: { id: string; options?: { deleteOrders?: boolean; anonymizeReviews?: boolean } }) =>
+      adminService.deleteCustomer(id, options),
+    onSuccess: async (data) => {
+      showToast(`Customer ${customerToDelete?.email} deleted successfully`, 'success');
+      setCustomerToDelete(null);
+      // Refetch customers
+      await queryClient.invalidateQueries({ queryKey: ['customers'] });
+    },
+    onError: (error: any) => {
+      showToast(error.response?.data?.message || 'Failed to delete customer', 'error');
+    }
+  });
+
   // Filter customers
   const filteredCustomers = customers.filter((customer: Customer) => {
     const matchesSearch = 
@@ -129,6 +147,24 @@ const Customers = () => {
   const handleCloseModal = () => {
     setShowDetailsModal(false);
     setSelectedCustomer(null);
+  };
+
+  const handleDeleteClick = (customer: Customer) => {
+    setCustomerToDelete(customer);
+  };
+
+  const handleConfirmDelete = () => {
+    if (customerToDelete) {
+      deleteCustomerMutation.mutate({
+        id: customerToDelete._id,
+        options: deleteOptions
+      });
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setCustomerToDelete(null);
+    setDeleteOptions({ deleteOrders: false, anonymizeReviews: true });
   };
 
   const getStatusColor = (status: string) => {
@@ -311,12 +347,21 @@ const Customers = () => {
                       {new Date(customer.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => handleViewDetails(customer)}
-                        className="text-primary-600 hover:text-primary-900"
-                      >
-                        View Details
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleViewDetails(customer)}
+                          className="text-primary-600 hover:text-primary-900"
+                        >
+                          View Details
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(customer)}
+                          className="text-red-600 hover:text-red-900 flex items-center gap-1"
+                        >
+                          <Trash2 size={16} />
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -485,6 +530,90 @@ const Customers = () => {
       )}
 
       <Toast toast={toast} onClose={hideToast} />
+
+      {/* Delete Confirmation Modal */}
+      {customerToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-red-100 p-2 rounded-full">
+                <AlertTriangle className="text-red-600" size={24} />
+              </div>
+              <h2 className="text-xl font-bold">Delete Customer</h2>
+            </div>
+
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to delete <strong>{customerToDelete.email}</strong>? This action cannot be undone.
+            </p>
+
+            <div className="space-y-4 mb-6">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-sm font-semibold text-yellow-800 mb-2">What will be deleted:</p>
+                <ul className="text-sm text-yellow-700 space-y-1 list-disc list-inside">
+                  <li>Customer account and profile</li>
+                  <li>Wishlist and saved addresses</li>
+                  <li>Stock alerts</li>
+                  <li>Returns</li>
+                  <li>Donations</li>
+                </ul>
+              </div>
+
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={deleteOptions.deleteOrders}
+                    onChange={(e) => setDeleteOptions({ ...deleteOptions, deleteOrders: e.target.checked })}
+                    className="rounded border-gray-300"
+                  />
+                  <span className="text-sm text-gray-700">
+                    Also delete all orders (otherwise orders will be kept for records)
+                  </span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={deleteOptions.anonymizeReviews}
+                    onChange={(e) => setDeleteOptions({ ...deleteOptions, anonymizeReviews: e.target.checked })}
+                    className="rounded border-gray-300"
+                  />
+                  <span className="text-sm text-gray-700">
+                    Anonymize reviews (otherwise reviews will be deleted)
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancelDelete}
+                disabled={deleteCustomerMutation.isPending}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                disabled={deleteCustomerMutation.isPending}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {deleteCustomerMutation.isPending ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={16} />
+                    Delete Customer
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import User from '../models/User';
 import { AuthRequest } from '../middleware/auth';
 import { extractObjectId, safeToObjectId } from '../utils/types';
+import logger from '../utils/logger';
 
 // Get all staff users (admin only)
 export const getStaffUsers = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -370,6 +371,127 @@ export const getWishlist = async (req: AuthRequest, res: Response, next: NextFun
     res.status(200).json({
       success: true,
       data: wishlistProducts
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Delete customer and all associated data (admin only)
+export const deleteCustomer = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { deleteOrders = false, anonymizeReviews = true } = req.body; // Options for data handling
+
+    // Find the customer
+    const customer = await User.findById(id);
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Customer not found'
+      });
+    }
+
+    // Prevent deleting admin/staff users (use deleteStaffUser for those)
+    if (customer.role !== 'customer') {
+      return res.status(403).json({
+        success: false,
+        message: 'This endpoint is for deleting customers only. Use staff deletion endpoint for admin/staff users.'
+      });
+    }
+
+    const customerId = extractObjectId(customer._id);
+    if (!customerId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid customer ID'
+      });
+    }
+
+    // Dynamically import models to avoid circular dependencies
+    const Order = (await import('../models/Order')).default;
+    const Review = (await import('../models/Review')).default;
+    const Return = (await import('../models/Return')).default;
+    const StockAlert = (await import('../models/StockAlert')).default;
+    const Donation = (await import('../models/Donation')).default;
+
+    // Get counts before deletion for response
+    const orderCount = await Order.countDocuments({ user: customerId });
+    const reviewCount = await Review.countDocuments({ user: customerId });
+    const returnCount = await Return.countDocuments({ user: customerId });
+    const stockAlertCount = await StockAlert.countDocuments({ user: customerId });
+    const donationCount = await Donation.countDocuments({ user: customerId });
+
+    // Delete or handle associated data
+    const deletionSummary: any = {
+      user: customer.email,
+      orders: { count: orderCount, deleted: 0, kept: 0 },
+      reviews: { count: reviewCount, deleted: 0, anonymized: 0 },
+      returns: { count: returnCount, deleted: 0 },
+      stockAlerts: { count: stockAlertCount, deleted: 0 },
+      donations: { count: donationCount, deleted: 0 },
+      wishlist: { count: customer.wishlist.length, cleared: true },
+      addresses: { count: customer.addresses.length, cleared: true }
+    };
+
+    // 1. Handle Orders
+    if (deleteOrders) {
+      // Delete all orders
+      const orderResult = await Order.deleteMany({ user: customerId });
+      deletionSummary.orders.deleted = orderResult.deletedCount || 0;
+    } else {
+      // Keep orders but remove user reference (anonymize)
+      // Note: Orders might need to be kept for legal/compliance reasons
+      deletionSummary.orders.kept = orderCount;
+      logger.info(`Keeping ${orderCount} orders for customer ${customer.email} (for records)`);
+    }
+
+    // 2. Handle Reviews
+    if (anonymizeReviews) {
+      // Anonymize reviews (keep them but remove user reference)
+      const reviewResult = await Review.updateMany(
+        { user: customerId },
+        { $unset: { user: '' } }
+      );
+      deletionSummary.reviews.anonymized = reviewResult.modifiedCount || 0;
+    } else {
+      // Delete reviews completely
+      const reviewResult = await Review.deleteMany({ user: customerId });
+      deletionSummary.reviews.deleted = reviewResult.deletedCount || 0;
+    }
+
+    // Remove user from helpfulUsers and notHelpfulUsers arrays in reviews
+    await Review.updateMany(
+      { helpfulUsers: customerId },
+      { $pull: { helpfulUsers: customerId }, $inc: { helpfulCount: -1 } }
+    );
+    await Review.updateMany(
+      { notHelpfulUsers: customerId },
+      { $pull: { notHelpfulUsers: customerId }, $inc: { notHelpfulCount: -1 } }
+    );
+
+    // 3. Delete Returns
+    const returnResult = await Return.deleteMany({ user: customerId });
+    deletionSummary.returns.deleted = returnResult.deletedCount || 0;
+
+    // 4. Delete Stock Alerts
+    const stockAlertResult = await StockAlert.deleteMany({ user: customerId });
+    deletionSummary.stockAlerts.deleted = stockAlertResult.deletedCount || 0;
+
+    // 5. Delete Donations (optional - might want to keep for records)
+    const donationResult = await Donation.deleteMany({ user: customerId });
+    deletionSummary.donations.deleted = donationResult.deletedCount || 0;
+
+    // 6. Delete the user
+    await customer.deleteOne();
+
+    logger.info(`Customer ${customer.email} and associated data deleted:`, deletionSummary);
+
+    res.status(200).json({
+      success: true,
+      message: 'Customer and associated data deleted successfully',
+      data: deletionSummary
     });
   } catch (error) {
     next(error);
