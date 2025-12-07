@@ -6,8 +6,10 @@ import mongoose from 'mongoose';
 export const validate = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    const errorMessages = errors.array().map(err => err.msg);
     return res.status(400).json({
       success: false,
+      message: errorMessages[0] || 'Validation failed', // Include first error as message
       errors: errors.array().map(err => ({
         field: err.type === 'field' ? err.path : undefined,
         message: err.msg
