@@ -287,9 +287,19 @@ describe('Stock Management', () => {
       }
 
       // Manually set order creation time to 25 hours ago
-      await Order.findByIdAndUpdate(orderId, {
-        createdAt: new Date(Date.now() - 25 * 60 * 60 * 1000)
-      });
+      // Use $set to override timestamps
+      await Order.updateOne(
+        { _id: orderId },
+        { $set: { createdAt: new Date(Date.now() - 25 * 60 * 60 * 1000) } }
+      );
+
+      // Verify the update was applied by refetching
+      const updatedOrder = await Order.findById(orderId).lean();
+      if (!updatedOrder) {
+        throw new Error('Order not found after update');
+      }
+      const hoursSinceOrder = (Date.now() - new Date(updatedOrder.createdAt).getTime()) / (1000 * 60 * 60);
+      expect(hoursSinceOrder).toBeGreaterThan(24);
 
       // Try to cancel (should fail)
       const cancelResponse = await request(app)
