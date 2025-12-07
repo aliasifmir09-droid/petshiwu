@@ -35,6 +35,8 @@ const Login = () => {
     loginMutation.mutate(formData);
   };
 
+  const isRegistered = searchParams.get('registered') === 'true';
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
@@ -42,6 +44,20 @@ const Login = () => {
           <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
           <p className="text-gray-600">Sign in to your account</p>
         </div>
+
+        {isRegistered && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <p className="text-blue-800 text-sm">
+              <strong>Registration successful!</strong> Please check your email to verify your account before logging in.
+            </p>
+            <Link
+              to="/resend-verification"
+              className="text-blue-600 hover:text-blue-700 text-sm font-semibold underline mt-2 inline-block"
+            >
+              Didn't receive the email? Resend verification
+            </Link>
+          </div>
+        )}
 
         <div className="bg-white rounded-lg shadow-lg p-8">
           <form onSubmit={handleSubmit} className="space-y-6">

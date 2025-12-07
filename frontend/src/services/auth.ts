@@ -55,6 +55,18 @@ export const authService = {
       localStorage.setItem('token', response.data.token);
     }
     return response.data;
+  },
+
+  verifyEmail: async (token: string) => {
+    const response = await api.get<any>('/auth/verify-email', {
+      params: { token }
+    });
+    return response.data;
+  },
+
+  resendVerification: async (email: string) => {
+    const response = await api.post<any>('/auth/resend-verification', { email });
+    return response.data;
   }
 };
 

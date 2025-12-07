@@ -88,6 +88,8 @@ function App() {
                           <Route path="/checkout" element={<Checkout />} />
                           <Route path="/login" element={<Login />} />
                           <Route path="/register" element={<Register />} />
+                          <Route path="/verify-email" element={<VerifyEmail />} />
+                          <Route path="/resend-verification" element={<ResendVerification />} />
                           <Route path="/profile" element={<Profile />} />
                           <Route path="/orders/:id" element={<OrderDetail />} />
                           <Route path="/orders" element={<MyOrders />} />

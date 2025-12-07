@@ -23,10 +23,17 @@ const Register = () => {
 
   const registerMutation = useMutation({
     mutationFn: authService.register,
-    onSuccess: async () => {
-      const user = await authService.getMe();
-      setUser(user);
-      navigate('/');
+    onSuccess: (response) => {
+      // Show success message about email verification
+      showToast(
+        response.message || 'Registration successful! Please check your email to verify your account.',
+        'success'
+      );
+      // Don't auto-login - user needs to verify email first
+      // Redirect to a page showing verification instructions
+      setTimeout(() => {
+        navigate('/login?registered=true');
+      }, 2000);
     },
     onError: (error: any) => {
       showToast(error.response?.data?.message || 'Registration failed', 'error');
