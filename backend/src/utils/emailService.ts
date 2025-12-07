@@ -126,6 +126,201 @@ export const sendVerificationEmail = async (email: string, token: string, firstN
   }
 };
 
+// Send order confirmation email
+export const sendOrderConfirmationEmail = async (
+  email: string,
+  firstName: string,
+  orderNumber: string,
+  orderData: {
+    items: Array<{ name: string; quantity: number; price: number; image?: string }>;
+    totalPrice: number;
+    itemsPrice: number;
+    shippingPrice: number;
+    taxPrice: number;
+    donationAmount?: number;
+    shippingAddress: {
+      firstName: string;
+      lastName: string;
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+      country: string;
+    };
+    paymentMethod: string;
+    orderStatus: string;
+    createdAt: Date;
+  }
+) => {
+  try {
+    // Check if email is actually configured
+    const isEmailConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+    
+    if (!isEmailConfigured) {
+      logger.warn(`⚠️  Email not configured. Skipping order confirmation email to ${email}.`);
+      logger.warn(`⚠️  Order #${orderNumber} created successfully, but confirmation email not sent.`);
+      return { messageId: 'test-mode', accepted: [email] };
+    }
+
+    const transporter = createTransporter();
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const orderUrl = `${frontendUrl}/orders/${orderData.createdAt}`;
+
+    const itemsHtml = orderData.items.map(item => `
+      <tr>
+        <td style="padding: 10px; border-bottom: 1px solid #ddd;">
+          ${item.image ? `<img src="${item.image}" alt="${item.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 10px; vertical-align: middle;">` : ''}
+          <span style="vertical-align: middle;">${item.name}</span>
+        </td>
+        <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">$${item.price.toFixed(2)}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">$${(item.price * item.quantity).toFixed(2)}</td>
+      </tr>
+    `).join('');
+
+    const mailOptions = {
+      from: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@petshiwu.com',
+      to: email,
+      subject: `Order Confirmation #${orderNumber} - Petshiwu`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Order Confirmation</title>
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background-color: #4CAF50; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
+            <h1 style="margin: 0;">Order Confirmed!</h1>
+            <p style="margin: 10px 0 0 0; font-size: 18px;">Order #${orderNumber}</p>
+          </div>
+          <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px;">
+            <p>Hi ${firstName},</p>
+            <p>Thank you for your order! We've received your order and will begin processing it shortly.</p>
+            
+            <div style="background-color: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
+              <h2 style="margin-top: 0; color: #333;">Order Details</h2>
+              <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="background-color: #f5f5f5;">
+                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Item</th>
+                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #ddd;">Qty</th>
+                    <th style="padding: 10px; text-align: right; border-bottom: 2px solid #ddd;">Price</th>
+                    <th style="padding: 10px; text-align: right; border-bottom: 2px solid #ddd;">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${itemsHtml}
+                </tbody>
+              </table>
+              
+              <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #ddd;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                  <span>Subtotal:</span>
+                  <span>$${orderData.itemsPrice.toFixed(2)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                  <span>Shipping:</span>
+                  <span>$${orderData.shippingPrice.toFixed(2)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                  <span>Tax:</span>
+                  <span>$${orderData.taxPrice.toFixed(2)}</span>
+                </div>
+                ${orderData.donationAmount && orderData.donationAmount > 0 ? `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #4CAF50;">
+                  <span>Donation:</span>
+                  <span>$${orderData.donationAmount.toFixed(2)}</span>
+                </div>
+                ` : ''}
+                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; padding-top: 10px; border-top: 2px solid #ddd; margin-top: 10px;">
+                  <span>Total:</span>
+                  <span>$${orderData.totalPrice.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="background-color: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
+              <h3 style="margin-top: 0; color: #333;">Shipping Address</h3>
+              <p style="margin: 5px 0;">
+                ${orderData.shippingAddress.firstName} ${orderData.shippingAddress.lastName}<br>
+                ${orderData.shippingAddress.street}<br>
+                ${orderData.shippingAddress.city}, ${orderData.shippingAddress.state} ${orderData.shippingAddress.zipCode}<br>
+                ${orderData.shippingAddress.country}
+              </p>
+            </div>
+
+            <div style="background-color: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
+              <h3 style="margin-top: 0; color: #333;">Payment Method</h3>
+              <p style="margin: 5px 0; text-transform: capitalize;">
+                ${orderData.paymentMethod === 'cod' ? 'Cash on Delivery (COD)' : orderData.paymentMethod.replace('_', ' ')}
+              </p>
+              <p style="margin: 5px 0; color: #666; font-size: 14px;">
+                ${orderData.paymentMethod === 'cod' ? 'Payment will be collected upon delivery.' : 'Payment processed successfully.'}
+              </p>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${orderUrl}" 
+                 style="background-color: #4CAF50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                View Order Details
+              </a>
+            </div>
+
+            <p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px;">
+              We'll send you another email when your order ships. If you have any questions, please contact our customer service.
+            </p>
+            <p style="color: #666; font-size: 12px; margin-top: 20px;">
+              Best regards,<br>
+              The Petshiwu Team
+            </p>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+        Order Confirmation #${orderNumber}
+        
+        Hi ${firstName},
+        
+        Thank you for your order! We've received your order and will begin processing it shortly.
+        
+        Order Details:
+        ${orderData.items.map(item => `- ${item.name} (Qty: ${item.quantity}) - $${(item.price * item.quantity).toFixed(2)}`).join('\n')}
+        
+        Subtotal: $${orderData.itemsPrice.toFixed(2)}
+        Shipping: $${orderData.shippingPrice.toFixed(2)}
+        Tax: $${orderData.taxPrice.toFixed(2)}
+        ${orderData.donationAmount && orderData.donationAmount > 0 ? `Donation: $${orderData.donationAmount.toFixed(2)}\n` : ''}Total: $${orderData.totalPrice.toFixed(2)}
+        
+        Shipping Address:
+        ${orderData.shippingAddress.firstName} ${orderData.shippingAddress.lastName}
+        ${orderData.shippingAddress.street}
+        ${orderData.shippingAddress.city}, ${orderData.shippingAddress.state} ${orderData.shippingAddress.zipCode}
+        ${orderData.shippingAddress.country}
+        
+        Payment Method: ${orderData.paymentMethod === 'cod' ? 'Cash on Delivery (COD)' : orderData.paymentMethod}
+        
+        View your order: ${orderUrl}
+        
+        We'll send you another email when your order ships. If you have any questions, please contact our customer service.
+        
+        Best regards,
+        The Petshiwu Team
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    logger.info(`✅ Order confirmation email sent to ${email} for order #${orderNumber}: ${info.messageId}`);
+    return info;
+  } catch (error: any) {
+    logger.error(`❌ Error sending order confirmation email to ${email}:`, error.message);
+    // Don't throw error - order was created successfully, email failure shouldn't break the flow
+    return null;
+  }
+};
+
 // Send password reset email (for future use)
 export const sendPasswordResetEmail = async (email: string, token: string, firstName: string) => {
   try {

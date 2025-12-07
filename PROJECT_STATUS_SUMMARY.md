@@ -71,11 +71,17 @@
 
 ## ⚠️ **INTENTIONALLY NOT IMPLEMENTED** (By Design)
 
-### 1. **Email Notifications for Orders**
-- **Status:** NOT IMPLEMENTED
-- **Reason:** Email service requires SMTP configuration
-- **Current State:** Email verification works, but order confirmations need SMTP setup
-- **Note:** Backend supports it, just needs SMTP configuration
+### 1. **Email Notifications for Orders** ✅
+- **Status:** IMPLEMENTED
+- **Current State:** Order confirmation emails are automatically sent after order creation
+- **Features:**
+  - Professional HTML email template with order details
+  - Order items table with images
+  - Shipping address display
+  - Payment method information
+  - Order tracking link
+  - Non-blocking (order creation succeeds even if email fails)
+- **Note:** Requires SMTP configuration to actually send emails. In development/test mode, emails are logged to console.
 
 ### 2. **Payment Gateway for Orders**
 - **Status:** INCOMPLETE (COD only)

@@ -2,9 +2,12 @@ import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import Order from '../models/Order';
 import Product from '../models/Product';
+import User from '../models/User';
 import { AuthRequest } from '../middleware/auth';
 import { safeToString, extractObjectId } from '../utils/types';
 import { asyncHandler, NotFoundError, UnauthorizedError, ValidationError } from '../utils/errors';
+import { sendOrderConfirmationEmail } from '../utils/emailService';
+import logger from '../utils/logger';
 
 /**
  * @swagger
@@ -276,6 +279,46 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       
       // Normalize order ID before sending response
       const normalizedOrder = normalizeOrderId(order[0]);
+      
+      // Send order confirmation email (non-blocking - don't fail order if email fails)
+      try {
+        const user = await User.findById(req.user._id).select('email firstName lastName').lean();
+        if (user && user.email) {
+          // Fetch the full order with all details for email
+          const fullOrder = await Order.findById(normalizedOrder._id).lean();
+          
+          if (fullOrder && fullOrder.orderNumber) {
+            sendOrderConfirmationEmail(
+              user.email,
+              user.firstName || 'Customer',
+              fullOrder.orderNumber,
+              {
+                items: fullOrder.items.map((item: any) => ({
+                  name: item.name,
+                  quantity: item.quantity,
+                  price: item.price,
+                  image: item.image
+                })),
+                totalPrice: fullOrder.totalPrice,
+                itemsPrice: fullOrder.itemsPrice,
+                shippingPrice: fullOrder.shippingPrice,
+                taxPrice: fullOrder.taxPrice,
+                donationAmount: fullOrder.donationAmount,
+                shippingAddress: fullOrder.shippingAddress,
+                paymentMethod: fullOrder.paymentMethod,
+                orderStatus: fullOrder.orderStatus,
+                createdAt: fullOrder.createdAt
+              }
+            ).catch((error) => {
+              // Log error but don't fail the order creation
+              logger.error('Failed to send order confirmation email:', error);
+            });
+          }
+        }
+      } catch (emailError) {
+        // Log error but don't fail the order creation
+        logger.error('Error preparing order confirmation email:', emailError);
+      }
       
       res.status(201).json({
         success: true,
