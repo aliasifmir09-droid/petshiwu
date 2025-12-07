@@ -26,7 +26,8 @@ const EmailTemplates = () => {
     queryFn: adminService.getEmailTemplates
   });
 
-  const templates = templatesData?.data || templatesData || [];
+  // Handle both response formats: { data: [...] } or [...]
+  const templates = Array.isArray(templatesData) ? templatesData : (templatesData?.data || []);
 
   const createMutation = useMutation({
     mutationFn: adminService.createEmailTemplate,
