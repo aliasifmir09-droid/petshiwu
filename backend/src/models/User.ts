@@ -223,7 +223,7 @@ userSchema.methods.generatePasswordResetToken = function (): string {
     .update(token)
     .digest('hex');
   
-  // Token expires in 1 hour
+  // Token expires in 15 minutes (0.25 hours)
   const { PASSWORD_RESET_EXPIRY_HOURS } = require('../config/constants');
   this.passwordResetExpires = new Date(Date.now() + PASSWORD_RESET_EXPIRY_HOURS * 60 * 60 * 1000);
   
