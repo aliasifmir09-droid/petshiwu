@@ -392,6 +392,90 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
   getDatabaseStats: async () => {
     const response = await api.get('/users/database/stats');
     return response.data.data;
+  },
+
+  // Advanced Analytics
+  getAdvancedAnalytics: async (period: string = '30d') => {
+    const response = await api.get('/analytics/advanced', { params: { period } });
+    return response.data.data;
+  },
+
+  // Bulk Operations
+  bulkUpdateProducts: async (productIds: string[], updates: any) => {
+    const response = await api.post('/bulk/products/update', { productIds, updates });
+    return response.data.data;
+  },
+
+  bulkAssignCategory: async (productIds: string[], categoryId: string) => {
+    const response = await api.post('/bulk/products/assign-category', { productIds, categoryId });
+    return response.data.data;
+  },
+
+  // Export
+  exportOrders: async (params?: { startDate?: string; endDate?: string; status?: string }) => {
+    const response = await api.get('/export/orders', { 
+      params,
+      responseType: 'blob' 
+    });
+    return response.data;
+  },
+
+  exportProducts: async (includeInactive: boolean = false) => {
+    const response = await api.get('/export/products', { 
+      params: { includeInactive },
+      responseType: 'blob' 
+    });
+    return response.data;
+  },
+
+  exportCustomers: async (role: string = 'customer') => {
+    const response = await api.get('/export/customers', { 
+      params: { role },
+      responseType: 'blob' 
+    });
+    return response.data;
+  },
+
+  // Email Templates
+  getEmailTemplates: async () => {
+    const response = await api.get('/email-templates');
+    return response.data.data;
+  },
+
+  getEmailTemplate: async (id: string) => {
+    const response = await api.get(`/email-templates/${id}`);
+    return response.data.data;
+  },
+
+  createEmailTemplate: async (data: any) => {
+    const response = await api.post('/email-templates', data);
+    return response.data.data;
+  },
+
+  updateEmailTemplate: async (id: string, data: any) => {
+    const response = await api.put(`/email-templates/${id}`, data);
+    return response.data.data;
+  },
+
+  deleteEmailTemplate: async (id: string) => {
+    const response = await api.delete(`/email-templates/${id}`);
+    return response.data;
+  },
+
+  // Inventory Alerts
+  getLowStockProducts: async (params?: { categoryId?: string; globalThreshold?: number }) => {
+    const response = await api.get('/inventory-alerts/low-stock', { params });
+    return response.data.data;
+  },
+
+  updateProductThreshold: async (id: string, lowStockThreshold: number | null) => {
+    const response = await api.put(`/inventory-alerts/product/${id}/threshold`, { lowStockThreshold });
+    return response.data.data;
+  },
+
+  bulkUpdateThresholds: async (data: { productIds?: string[]; categoryId?: string; lowStockThreshold: number | null }) => {
+    const response = await api.post('/inventory-alerts/bulk-update-thresholds', data);
+    return response.data.data;
   }
 };
 

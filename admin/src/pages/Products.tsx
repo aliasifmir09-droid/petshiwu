@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
-import { Plus, Edit, Trash2, Search, Filter, AlertTriangle, X, FolderTree, Layers, Package, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Filter, AlertTriangle, X, FolderTree, Layers, Package, Upload, Download, Settings } from 'lucide-react';
 import ProductForm from '@/components/ProductForm';
 import CSVImport from '@/components/CSVImport';
 import ConfirmationModal from '@/components/ConfirmationModal';
+import BulkOperationsModal from '@/components/BulkOperationsModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import Dropdown from '@/components/Dropdown';
@@ -23,6 +24,7 @@ const Products = () => {
   const [stockFilter, setStockFilter] = useState('');
   const [dismissedNotification, setDismissedNotification] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [showBulkModal, setShowBulkModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean;
     productId?: string;
@@ -315,7 +317,15 @@ const Products = () => {
             <h1 className="text-4xl font-black text-white mb-2">Products</h1>
             <p className="text-blue-100 text-lg">Manage your product catalog</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <button
+              onClick={() => exportProductsMutation.mutate(false)}
+              disabled={exportProductsMutation.isPending}
+              className="flex items-center gap-2 bg-white/90 text-[#1E3A8A] px-6 py-3 rounded-xl hover:bg-white font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 disabled:opacity-50"
+            >
+              <Download size={20} />
+              Export CSV
+            </button>
             <button
               onClick={() => setShowCSVImport(true)}
               className="flex items-center gap-2 bg-white/90 text-[#1E3A8A] px-6 py-3 rounded-xl hover:bg-white font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
@@ -509,20 +519,29 @@ const Products = () => {
 
       {/* Bulk Actions Bar */}
       {selectedProducts.size > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
             <span className="font-semibold text-blue-900">
               {selectedProducts.size} product{selectedProducts.size > 1 ? 's' : ''} selected
             </span>
           </div>
-          <button
-            onClick={handleBulkDelete}
-            disabled={bulkDeleteMutation.isPending}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Trash2 size={18} />
-            {bulkDeleteMutation.isPending ? 'Deleting...' : `Delete Selected (${selectedProducts.size})`}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowBulkModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Settings size={18} />
+              Bulk Operations
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              disabled={bulkDeleteMutation.isPending}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Trash2 size={18} />
+              {bulkDeleteMutation.isPending ? 'Deleting...' : `Delete Selected`}
+            </button>
+          </div>
         </div>
       )}
 
@@ -717,6 +736,18 @@ const Products = () => {
           </div>
         }
       />
+
+      {showBulkModal && (
+        <BulkOperationsModal
+          isOpen={showBulkModal}
+          onClose={() => setShowBulkModal(false)}
+          selectedCount={selectedProducts.size}
+          onBulkUpdate={(updates) => bulkUpdateMutation.mutate(updates)}
+          onBulkAssignCategory={(categoryId) => bulkAssignCategoryMutation.mutate(categoryId)}
+          categories={categories?.data || []}
+          isLoading={bulkUpdateMutation.isPending || bulkAssignCategoryMutation.isPending}
+        />
+      )}
 
       {/* Toast Notification */}
       <Toast toast={toast} onClose={hideToast} />

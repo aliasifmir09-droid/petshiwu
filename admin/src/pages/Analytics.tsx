@@ -48,6 +48,13 @@ const Analytics = () => {
     queryFn: adminService.getProductStats
   });
 
+  // Fetch advanced analytics
+  const { data: advancedAnalytics, isLoading: loadingAdvanced } = useQuery({
+    queryKey: ['advancedAnalytics', timeRange],
+    queryFn: () => adminService.getAdvancedAnalytics(timeRange),
+    enabled: true
+  });
+
   // Fetch orders for detailed analytics - use reasonable limit to improve performance
   const { data: ordersData } = useQuery({
     queryKey: ['orders', 'analytics', timeRange],
@@ -854,6 +861,163 @@ const Analytics = () => {
           <Package className="mx-auto mb-4 text-gray-400" size={48} />
           <h3 className="text-xl font-bold text-gray-900 mb-2">No Product Data Available</h3>
           <p className="text-gray-600">Top products will appear here once you have product sales data.</p>
+        </div>
+      )}
+
+      {/* Advanced Analytics Section */}
+      {loadingAdvanced ? (
+        <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100 text-center">
+          <p className="text-gray-600">Loading advanced analytics...</p>
+        </div>
+      ) : advancedAnalytics && (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-gray-900">Advanced Analytics</h2>
+          
+          {/* Customer Lifetime Value */}
+          {advancedAnalytics.customerLifetimeValue && (
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Customer Lifetime Value</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Average CLV</p>
+                  <p className="text-2xl font-bold text-blue-600">${advancedAnalytics.customerLifetimeValue.averageCLV.toFixed(2)}</p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Total Customers</p>
+                  <p className="text-2xl font-bold text-green-600">{advancedAnalytics.customerLifetimeValue.totalCustomers}</p>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Top Customers</p>
+                  <p className="text-2xl font-bold text-purple-600">{Math.min(10, advancedAnalytics.customerLifetimeValue.topCustomers.length)}</p>
+                </div>
+              </div>
+              {advancedAnalytics.customerLifetimeValue.topCustomers.length > 0 && (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total Spent</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Orders</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Avg Order Value</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {advancedAnalytics.customerLifetimeValue.topCustomers.slice(0, 10).map((customer: any) => (
+                        <tr key={customer.userId} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm">
+                            {customer.email || `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || 'Unknown'}
+                          </td>
+                          <td className="px-4 py-3 text-right text-sm font-medium">${customer.totalSpent.toFixed(2)}</td>
+                          <td className="px-4 py-3 text-right text-sm">{customer.orderCount}</td>
+                          <td className="px-4 py-3 text-right text-sm">${customer.averageOrderValue.toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Product Performance */}
+          {advancedAnalytics.productPerformance && (
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Product Performance Metrics</h3>
+              {advancedAnalytics.productPerformance.topProducts.length > 0 && (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total Sold</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Revenue</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Orders</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Conversion Rate</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {advancedAnalytics.productPerformance.topProducts.slice(0, 10).map((product: any) => (
+                        <tr key={product.productId} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm font-medium">{product.productName || 'Unknown'}</td>
+                          <td className="px-4 py-3 text-right text-sm">{product.totalSold}</td>
+                          <td className="px-4 py-3 text-right text-sm font-medium">${product.totalRevenue.toFixed(2)}</td>
+                          <td className="px-4 py-3 text-right text-sm">{product.orderCount}</td>
+                          <td className="px-4 py-3 text-right text-sm">{(product.conversionRate * 100).toFixed(1)}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Sales Forecast */}
+          {advancedAnalytics.salesForecast && (
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Sales Forecasting</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Forecasted Revenue (30 Days)</p>
+                  <p className="text-2xl font-bold text-blue-600">${advancedAnalytics.salesForecast.forecastedRevenue30Days.toFixed(2)}</p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Forecasted Orders (30 Days)</p>
+                  <p className="text-2xl font-bold text-green-600">{advancedAnalytics.salesForecast.forecastedOrders30Days}</p>
+                </div>
+                <div className={`p-4 rounded-lg ${advancedAnalytics.salesForecast.trend >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
+                  <p className="text-sm text-gray-600 mb-1">Trend</p>
+                  <p className={`text-2xl font-bold ${advancedAnalytics.salesForecast.trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {advancedAnalytics.salesForecast.trend >= 0 ? '+' : ''}{advancedAnalytics.salesForecast.trend.toFixed(1)}%
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Inventory Turnover */}
+          {advancedAnalytics.inventoryTurnover && (
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Inventory Turnover Analysis</h3>
+              <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Average Turnover Rate</p>
+                  <p className="text-2xl font-bold text-blue-600">{(advancedAnalytics.inventoryTurnover.averageTurnoverRate * 100).toFixed(1)}%</p>
+                </div>
+                <div className="bg-orange-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Slow Moving Products</p>
+                  <p className="text-2xl font-bold text-orange-600">{advancedAnalytics.inventoryTurnover.slowMovingProducts}</p>
+                </div>
+              </div>
+              {advancedAnalytics.inventoryTurnover.products.length > 0 && (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Current Stock</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total Sold</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Turnover Rate</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Days to Sell Out</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {advancedAnalytics.inventoryTurnover.products.slice(0, 10).map((product: any) => (
+                        <tr key={product.productId} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm font-medium">{product.productName || 'Unknown'}</td>
+                          <td className="px-4 py-3 text-right text-sm">{product.currentStock}</td>
+                          <td className="px-4 py-3 text-right text-sm">{product.totalSold}</td>
+                          <td className="px-4 py-3 text-right text-sm">{(product.turnoverRate * 100).toFixed(1)}%</td>
+                          <td className="px-4 py-3 text-right text-sm">{product.daysToSellOut === 999 ? 'N/A' : product.daysToSellOut.toFixed(0)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
