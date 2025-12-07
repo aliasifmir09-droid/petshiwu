@@ -40,7 +40,8 @@ export const initRedis = (): Redis | null => {
 
       return redisClient;
     } else {
-      logger.warn('⚠️  REDIS_URL not set. Caching disabled. Set REDIS_URL to enable caching.');
+      logger.warn('⚠️  REDIS_URL not set. Using in-memory cache (data lost on restart).');
+      logger.info('💡 For production, use free Redis: Upstash (upstash.com) or Redis Cloud (redis.com/try-free)');
       return null;
     }
   } catch (error: any) {
