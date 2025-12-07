@@ -1,5 +1,4 @@
 import { AlertTriangle, X, RefreshCw } from 'lucide-react';
-import { ReactNode } from 'react';
 
 interface ErrorMessageProps {
   title?: string;
