@@ -167,7 +167,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       // If user doesn't have a verification token, they're an existing user - auto-verify them
       if (!user.emailVerificationToken && !user.emailVerificationExpires) {
         // Existing user created before email verification - auto-verify
-        if (!user.emailVerified) {
+        if (user.emailVerified === undefined || user.emailVerified === null || !user.emailVerified) {
           user.emailVerified = true;
           await user.save({ validateBeforeSave: false });
         }
