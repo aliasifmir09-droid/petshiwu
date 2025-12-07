@@ -16,14 +16,15 @@ export const createTestUser = async (app: Application, userData?: {
   const testEmail = userData?.email || `test${Date.now()}@test.com`;
   const password = userData?.password || 'Test123456';
   
-  // Create user
+  // Create user with email verified for tests
   const user = await User.create({
     firstName: userData?.firstName || 'Test',
     lastName: userData?.lastName || 'User',
     email: testEmail,
     password: password,
     phone: '+1234567890',
-    role: userData?.role || 'customer'
+    role: userData?.role || 'customer',
+    emailVerified: true // Mark as verified for tests
   });
 
   // Login to get token
@@ -64,7 +65,8 @@ export const getAdminToken = async (app: Application) => {
         email: testAdminEmail,
         password: testAdminPassword,
         role: 'admin',
-        phone: '+1234567890'
+        phone: '+1234567890',
+        emailVerified: true // Mark as verified for tests
       });
     } catch (error: any) {
       throw new Error(`Failed to create admin: ${error.message}`);
@@ -78,7 +80,8 @@ export const getAdminToken = async (app: Application) => {
       email: testAdminEmail,
       password: testAdminPassword,
       role: 'admin',
-      phone: '+1234567890'
+      phone: '+1234567890',
+      emailVerified: true // Mark as verified for tests
     });
   }
 

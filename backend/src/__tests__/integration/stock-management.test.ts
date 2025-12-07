@@ -274,9 +274,8 @@ describe('Stock Management', () => {
 
       // Get low stock products (admin endpoint)
       const response = await request(app)
-        .get('/api/inventory-alerts/low-stock')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .query({ globalThreshold: 5 });
+        .get('/api/inventory-alerts/low-stock?globalThreshold=5')
+        .set('Authorization', `Bearer ${adminToken}`);
 
       expect(response.status).toBe(200);
       expect(response.body.products).toBeDefined();

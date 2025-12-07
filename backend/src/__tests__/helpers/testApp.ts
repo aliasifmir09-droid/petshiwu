@@ -31,6 +31,11 @@ import uploadRoutes from '../../routes/upload';
 import userRoutes from '../../routes/users';
 import petTypeRoutes from '../../routes/petTypes';
 import donationRoutes from '../../routes/donations';
+import analyticsRoutes from '../../routes/analytics';
+import bulkOperationsRoutes from '../../routes/bulkOperations';
+import exportRoutes from '../../routes/exports';
+import emailTemplateRoutes from '../../routes/emailTemplates';
+import inventoryAlertRoutes from '../../routes/inventoryAlerts';
 
 // Create Express app
 const app: Application = express();
@@ -99,6 +104,11 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/pet-types', petTypeRoutes);
 app.use('/api/donations', donationRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/bulk-operations', bulkOperationsRoutes);
+app.use('/api/exports', exportRoutes);
+app.use('/api/email-templates', emailTemplateRoutes);
+app.use('/api/inventory-alerts', inventoryAlertRoutes);
 
 // Error handling
 app.use(notFound);
