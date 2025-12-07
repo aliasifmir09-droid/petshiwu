@@ -3,17 +3,19 @@ import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/products';
 import { reviewService } from '@/services/reviews';
+import { recommendationService } from '@/services/recommendations';
+import { socialService } from '@/services/social';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ProductCard from '@/components/ProductCard';
-import ProductRecommendationsSection from '@/components/ProductRecommendationsSection';
-import ProductShareMenu from '@/components/ProductShareMenu';
-import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home, Share2 } from 'lucide-react';
+import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home, Share2, Facebook, Twitter, Mail, Copy, Check } from 'lucide-react';
 import { FormattedDescription } from '@/utils/descriptionFormatter';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
 import { FREE_SHIPPING_THRESHOLD } from '@/config/constants';
+import { useToast } from '@/hooks/useToast';
+import Toast from '@/components/Toast';
 
 const ProductDetail = () => {
   const { slug, petType } = useParams<{ 
@@ -50,7 +52,6 @@ const ProductDetail = () => {
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [zoomPosition, setZoomPosition] = useState<{ x: number; y: number } | null>(null);
-  const [showShareMenu, setShowShareMenu] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const { data: product, isLoading, error: productError } = useQuery({
@@ -77,6 +78,54 @@ const ProductDetail = () => {
     staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
     gcTime: 15 * 60 * 1000 // Cache for 15 minutes
   });
+
+  const { data: recommendations } = useQuery({
+    queryKey: ['recommendations', product?._id],
+    queryFn: () => recommendationService.getRecommendations(String(product?._id)),
+    enabled: !!product?._id
+  });
+
+  const { data: socialLinks } = useQuery({
+    queryKey: ['social-links', product?._id],
+    queryFn: () => socialService.getProductShareLinks(String(product?._id)),
+    enabled: !!product?._id
+  });
+
+  const { toast, showToast, hideToast } = useToast();
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  const handleShare = async (platform: string) => {
+    if (!socialLinks) return;
+    
+    const url = socialLinks[platform];
+    if (platform === 'copyLink') {
+      await navigator.clipboard.writeText(url);
+      setLinkCopied(true);
+      showToast('Link copied to clipboard!', 'success');
+      setTimeout(() => setLinkCopied(false), 2000);
+    } else {
+      window.open(url, '_blank', 'width=600,height=400');
+    }
+    setShowShareMenu(false);
+  };
+
+  const handleCompare = () => {
+    if (!product?._id) return;
+    const currentIds = localStorage.getItem('compareIds')?.split(',').filter(Boolean) || [];
+    if (currentIds.length >= 5) {
+      showToast('You can compare up to 5 products', 'warning');
+      return;
+    }
+    if (currentIds.includes(String(product._id))) {
+      showToast('Product already in comparison', 'warning');
+      return;
+    }
+    const newIds = [...currentIds, String(product._id)];
+    localStorage.setItem('compareIds', newIds.join(','));
+    navigate(`/compare?ids=${newIds.join(',')}`);
+    showToast('Product added to comparison', 'success');
+  };
 
   // Reset zoom when image changes
   useEffect(() => {
@@ -513,18 +562,6 @@ const ProductDetail = () => {
               <ShoppingCart size={20} />
               {selectedVariantData && selectedVariantData.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
-            <div className="relative">
-              <button
-                onClick={() => setShowShareMenu(!showShareMenu)}
-                className="px-6 py-3 border-2 rounded-lg font-semibold transition-colors hover:bg-gray-50"
-              >
-                <Share2 size={20} className="inline mr-2" />
-                Share
-              </button>
-              {showShareMenu && product && (
-                <ProductShareMenu product={product} onClose={() => setShowShareMenu(false)} />
-              )}
-            </div>
             <button
               onClick={handleWishlistToggle}
               className={`px-6 py-3 border-2 rounded-lg font-semibold transition-colors ${
@@ -534,6 +571,52 @@ const ProductDetail = () => {
               }`}
             >
               <Heart size={20} fill={inWishlist ? 'currentColor' : 'none'} />
+            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowShareMenu(!showShareMenu)}
+                className="px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold text-gray-700 hover:border-primary-600 hover:text-primary-600 transition-colors"
+              >
+                <Share2 size={20} />
+              </button>
+              {showShareMenu && socialLinks && (
+                <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 p-2 z-10 min-w-[200px]">
+                  <button
+                    onClick={() => handleShare('facebook')}
+                    className="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 rounded text-left"
+                  >
+                    <Facebook size={18} className="text-blue-600" />
+                    Facebook
+                  </button>
+                  <button
+                    onClick={() => handleShare('twitter')}
+                    className="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 rounded text-left"
+                  >
+                    <Twitter size={18} className="text-blue-400" />
+                    Twitter
+                  </button>
+                  <button
+                    onClick={() => handleShare('email')}
+                    className="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 rounded text-left"
+                  >
+                    <Mail size={18} />
+                    Email
+                  </button>
+                  <button
+                    onClick={() => handleShare('copyLink')}
+                    className="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 rounded text-left"
+                  >
+                    {linkCopied ? <Check size={18} className="text-green-600" /> : <Copy size={18} />}
+                    {linkCopied ? 'Copied!' : 'Copy Link'}
+                  </button>
+                </div>
+              )}
+            </div>
+            <button
+              onClick={handleCompare}
+              className="px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold text-gray-700 hover:border-primary-600 hover:text-primary-600 transition-colors"
+            >
+              Compare
             </button>
           </div>
 
@@ -734,6 +817,26 @@ const ProductDetail = () => {
         )}
       </div>
 
+      {/* Recommendations Section */}
+      {recommendations && recommendations.recommendations && recommendations.recommendations.length > 0 && (
+        <div className="mt-16 border-t pt-12">
+          <div className="flex items-center gap-3 mb-8">
+            <Sparkles size={28} className="text-primary-600" />
+            <h2 className="text-3xl font-bold">Recommended for You</h2>
+          </div>
+          <p className="text-gray-600 mb-6">
+            Intelligent recommendations based on customer behavior
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+            {recommendations.recommendations.slice(0, 8).map((rec) => (
+              <div key={rec.product._id} className="flex">
+                <ProductCard product={rec.product} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Suggested Products Section */}
       {relatedProducts && relatedProducts.data && relatedProducts.data.length > 0 && (
         <div className="mt-16 border-t pt-12">
@@ -753,6 +856,8 @@ const ProductDetail = () => {
           </div>
         </div>
       )}
+
+      {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
     </div>
   );
 };

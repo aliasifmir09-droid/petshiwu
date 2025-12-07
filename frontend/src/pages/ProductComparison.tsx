@@ -1,302 +1,275 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { comparisonService } from '@/services/comparison';
 import { productService } from '@/services/products';
+import { Product } from '@/types';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import ErrorMessage from '@/components/ErrorMessage';
 import ProductCard from '@/components/ProductCard';
-import { X, Plus, ShoppingCart, Star, Package, TrendingUp, Award } from 'lucide-react';
-import { useCartStore } from '@/stores/cartStore';
+import { X, Plus, CheckCircle, Star, DollarSign, Package, Award } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
+import EmptyState from '@/components/EmptyState';
 
 const ProductComparison = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { addToCart } = useCartStore();
   const { toast, showToast, hideToast } = useToast();
+  const [productIds, setProductIds] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
 
-  const productIds = searchParams.get('ids')?.split(',').filter(Boolean) || [];
-  const [comparisonIds, setComparisonIds] = useState<string[]>(productIds);
+  useEffect(() => {
+    const ids = searchParams.get('ids')?.split(',').filter(Boolean) || [];
+    setProductIds(ids);
+  }, [searchParams]);
 
-  const { data: comparison, isLoading, error } = useQuery({
-    queryKey: ['productComparison', comparisonIds.join(',')],
-    queryFn: () => productService.compareProducts(comparisonIds),
-    enabled: comparisonIds.length > 0 && comparisonIds.length <= 5
+  const { data: comparisonData, isLoading } = useQuery({
+    queryKey: ['compare', productIds.join(',')],
+    queryFn: () => comparisonService.compareProducts(productIds),
+    enabled: productIds.length > 0 && productIds.length <= 5
   });
 
-  const { data: suggestions } = useQuery({
-    queryKey: ['comparisonSuggestions', comparisonIds.join(',')],
-    queryFn: () => productService.getComparisonSuggestions(comparisonIds),
-    enabled: comparisonIds.length > 0 && comparisonIds.length < 5
+  const { data: suggestionData } = useQuery({
+    queryKey: ['compare-suggestions', productIds.join(',')],
+    queryFn: () => comparisonService.getSuggestions(productIds),
+    enabled: productIds.length > 0 && productIds.length < 5
   });
 
   useEffect(() => {
-    if (comparisonIds.length > 0) {
-      setSearchParams({ ids: comparisonIds.join(',') });
+    if (suggestionData?.suggestions) {
+      setSuggestions(suggestionData.suggestions);
     }
-  }, [comparisonIds, setSearchParams]);
-
-  const removeProduct = (productId: string) => {
-    setComparisonIds(prev => prev.filter(id => id !== productId));
-  };
+  }, [suggestionData]);
 
   const addProduct = (productId: string) => {
-    if (comparisonIds.length >= 5) {
-      showToast('You can compare up to 5 products at once', 'error');
+    if (productIds.length >= 5) {
+      showToast('You can compare up to 5 products', 'warning');
       return;
     }
-    if (!comparisonIds.includes(productId)) {
-      setComparisonIds(prev => [...prev, productId]);
+    if (productIds.includes(productId)) {
+      showToast('Product already in comparison', 'warning');
+      return;
+    }
+    const newIds = [...productIds, productId];
+    setProductIds(newIds);
+    setSearchParams({ ids: newIds.join(',') });
+  };
+
+  const removeProduct = (productId: string) => {
+    const newIds = productIds.filter(id => id !== productId);
+    setProductIds(newIds);
+    if (newIds.length > 0) {
+      setSearchParams({ ids: newIds.join(',') });
+    } else {
+      setSearchParams({});
     }
   };
 
-  const handleAddToCart = (product: any) => {
-    addToCart(product, product.variants?.[0]);
-    showToast(`${product.name} added to cart`, 'success');
-  };
-
-  if (comparisonIds.length === 0) {
+  if (productIds.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow p-8 text-center">
-          <Package className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-          <h2 className="text-2xl font-bold mb-2">No Products to Compare</h2>
-          <p className="text-gray-600 mb-6">
-            Add products to compare by clicking "Compare" on product pages
-          </p>
-          <Link
-            to="/products"
-            className="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700"
-          >
-            Browse Products
-          </Link>
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-6">Compare Products</h1>
+          <EmptyState
+            icon={<Package className="w-16 h-16" />}
+            title="No Products to Compare"
+            description="Add products to compare by clicking the 'Compare' button on product pages."
+            action={
+              <Link
+                to="/products"
+                className="bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700"
+              >
+                Browse Products
+              </Link>
+            }
+          />
         </div>
+        {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-12">
         <LoadingSpinner size="lg" />
       </div>
     );
   }
 
-  if (error) {
+  if (!comparisonData) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <ErrorMessage
-          message="Failed to load product comparison"
-          retry={() => window.location.reload()}
+      <div className="container mx-auto px-4 py-12">
+        <EmptyState
+          icon={<X className="w-16 h-16" />}
+          title="Error Loading Comparison"
+          description="Unable to load product comparison. Please try again."
         />
       </div>
     );
   }
 
-  if (!comparison || !comparison.products || comparison.products.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow p-8 text-center">
-          <X className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-          <h2 className="text-2xl font-bold mb-2">Invalid Products</h2>
-          <p className="text-gray-600 mb-6">Some products could not be found</p>
-          <button
-            onClick={() => navigate('/products')}
-            className="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700"
-          >
-            Browse Products
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const { products, summary } = comparison;
+  const { products, summary } = comparisonData;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Compare Products</h1>
-        {comparisonIds.length < 5 && suggestions && suggestions.length > 0 && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Add more:</span>
-            {suggestions.slice(0, 3).map((product: any) => (
-              <button
-                key={product._id}
-                onClick={() => addProduct(product._id)}
-                className="text-sm text-primary-600 hover:text-primary-700 font-semibold"
-              >
-                + {product.name}
-              </button>
-            ))}
-          </div>
-        )}
+    <div className="container mx-auto px-4 py-12">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-2">Compare Products</h1>
+        <p className="text-gray-600">Side-by-side comparison of selected products</p>
       </div>
 
-      {/* Comparison Summary */}
+      {/* Summary Cards */}
       {summary && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <h3 className="font-semibold mb-2">Quick Summary</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            {summary.cheapest && (
-              <div>
-                <span className="text-gray-600">Cheapest:</span>
-                <p className="font-semibold">{summary.cheapest.name}</p>
-              </div>
-            )}
-            {summary.highestRated && (
-              <div>
-                <span className="text-gray-600">Highest Rated:</span>
-                <p className="font-semibold">{summary.highestRated.name}</p>
-              </div>
-            )}
-            {summary.mostReviewed && (
-              <div>
-                <span className="text-gray-600">Most Reviewed:</span>
-                <p className="font-semibold">{summary.mostReviewed.name}</p>
-              </div>
-            )}
-            {summary.bestValue && (
-              <div>
-                <span className="text-gray-600">Best Value:</span>
-                <p className="font-semibold">{summary.bestValue.name}</p>
-              </div>
-            )}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <DollarSign className="w-5 h-5 text-green-600" />
+              <span className="font-semibold text-green-800">Cheapest</span>
+            </div>
+            <p className="text-sm text-green-700">
+              {products.find(p => p._id === summary.cheapest)?.name || 'N/A'}
+            </p>
+          </div>
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Star className="w-5 h-5 text-yellow-600" />
+              <span className="font-semibold text-yellow-800">Highest Rated</span>
+            </div>
+            <p className="text-sm text-yellow-700">
+              {products.find(p => p._id === summary.highestRated)?.name || 'N/A'}
+            </p>
+          </div>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle className="w-5 h-5 text-blue-600" />
+              <span className="font-semibold text-blue-800">Most Reviewed</span>
+            </div>
+            <p className="text-sm text-blue-700">
+              {products.find(p => p._id === summary.mostReviewed)?.name || 'N/A'}
+            </p>
+          </div>
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Award className="w-5 h-5 text-purple-600" />
+              <span className="font-semibold text-purple-800">Best Value</span>
+            </div>
+            <p className="text-sm text-purple-700">
+              {products.find(p => p._id === summary.bestValue)?.name || 'N/A'}
+            </p>
           </div>
         </div>
       )}
 
       {/* Comparison Table */}
-      <div className="bg-white rounded-lg shadow overflow-x-auto">
-        <div className="min-w-[800px]">
-          {/* Header */}
-          <div className="grid grid-cols-6 gap-4 p-4 border-b bg-gray-50">
-            <div className="font-semibold">Feature</div>
-            {products.map((product: any) => (
-              <div key={product._id} className="relative">
-                <button
-                  onClick={() => removeProduct(product._id)}
-                  className="absolute top-0 right-0 p-1 hover:bg-gray-200 rounded"
-                  aria-label="Remove from comparison"
-                >
-                  <X size={16} />
-                </button>
-                <img
-                  src={product.images?.[0] || '/placeholder.png'}
-                  alt={product.name}
-                  className="w-24 h-24 object-cover rounded mb-2"
-                />
-                <h3 className="font-semibold text-sm">{product.name}</h3>
-              </div>
-            ))}
-            {comparisonIds.length < 5 && (
-              <div className="flex items-center justify-center">
-                <button
-                  onClick={() => navigate('/products')}
-                  className="flex flex-col items-center gap-2 p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 text-gray-600 hover:text-primary-600"
-                >
-                  <Plus size={24} />
-                  <span className="text-sm">Add Product</span>
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Comparison Rows */}
-          <div className="divide-y">
-            {/* Price */}
-            <div className="grid grid-cols-6 gap-4 p-4">
-              <div className="font-semibold">Price</div>
-              {products.map((product: any) => (
-                <div key={product._id}>
-                  <span className="text-lg font-bold">${product.basePrice?.toFixed(2)}</span>
+      <div className="bg-white rounded-lg shadow-lg overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b">
+              <th className="p-4 text-left">Feature</th>
+              {products.map((product) => (
+                <th key={product._id} className="p-4 text-center min-w-[200px]">
+                  <div className="flex flex-col items-center">
+                    <button
+                      onClick={() => removeProduct(product._id)}
+                      className="ml-auto mb-2 text-gray-400 hover:text-red-500"
+                    >
+                      <X size={20} />
+                    </button>
+                    <img
+                      src={product.images?.[0] || '/placeholder.png'}
+                      alt={product.name}
+                      className="w-24 h-24 object-cover rounded mb-2"
+                    />
+                    <Link
+                      to={`/products/${product.slug}`}
+                      className="font-semibold text-primary-600 hover:text-primary-700"
+                    >
+                      {product.name}
+                    </Link>
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-b">
+              <td className="p-4 font-semibold">Price</td>
+              {products.map((product) => (
+                <td key={product._id} className="p-4 text-center">
+                  <span className="text-lg font-bold">${product.basePrice.toFixed(2)}</span>
                   {product.compareAtPrice && (
                     <span className="text-sm text-gray-500 line-through ml-2">
                       ${product.compareAtPrice.toFixed(2)}
                     </span>
                   )}
-                </div>
+                </td>
               ))}
-            </div>
-
-            {/* Rating */}
-            <div className="grid grid-cols-6 gap-4 p-4">
-              <div className="font-semibold">Rating</div>
-              {products.map((product: any) => (
-                <div key={product._id} className="flex items-center gap-1">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span>{product.averageRating?.toFixed(1) || 'N/A'}</span>
-                  <span className="text-sm text-gray-500">
-                    ({product.reviewCount || 0} reviews)
+            </tr>
+            <tr className="border-b">
+              <td className="p-4 font-semibold">Rating</td>
+              {products.map((product) => (
+                <td key={product._id} className="p-4 text-center">
+                  <div className="flex items-center justify-center gap-1">
+                    <Star className="w-5 h-5 text-yellow-400 fill-current" />
+                    <span>{product.averageRating?.toFixed(1) || 'N/A'}</span>
+                    <span className="text-gray-500 text-sm">
+                      ({product.reviewCount || 0} reviews)
+                    </span>
+                  </div>
+                </td>
+              ))}
+            </tr>
+            <tr className="border-b">
+              <td className="p-4 font-semibold">Stock</td>
+              {products.map((product) => (
+                <td key={product._id} className="p-4 text-center">
+                  <span className={product.inStock ? 'text-green-600' : 'text-red-600'}>
+                    {product.inStock ? 'In Stock' : 'Out of Stock'}
                   </span>
-                </div>
+                </td>
               ))}
-            </div>
-
-            {/* Stock */}
-            <div className="grid grid-cols-6 gap-4 p-4">
-              <div className="font-semibold">Stock</div>
-              {products.map((product: any) => (
-                <div key={product._id}>
-                  {product.inStock ? (
-                    <span className="text-green-600 font-semibold">In Stock</span>
-                  ) : (
-                    <span className="text-red-600 font-semibold">Out of Stock</span>
-                  )}
-                </div>
+            </tr>
+            <tr className="border-b">
+              <td className="p-4 font-semibold">Brand</td>
+              {products.map((product) => (
+                <td key={product._id} className="p-4 text-center">
+                  {product.brand || 'N/A'}
+                </td>
               ))}
-            </div>
-
-            {/* Brand */}
-            <div className="grid grid-cols-6 gap-4 p-4">
-              <div className="font-semibold">Brand</div>
-              {products.map((product: any) => (
-                <div key={product._id}>{product.brand || 'N/A'}</div>
+            </tr>
+            <tr className="border-b">
+              <td className="p-4 font-semibold">Category</td>
+              {products.map((product) => (
+                <td key={product._id} className="p-4 text-center">
+                  {typeof product.category === 'object' ? product.category.name : 'N/A'}
+                </td>
               ))}
-            </div>
-
-            {/* Category */}
-            <div className="grid grid-cols-6 gap-4 p-4">
-              <div className="font-semibold">Category</div>
-              {products.map((product: any) => (
-                <div key={product._id} className="text-sm">
-                  {product.category?.name || 'N/A'}
-                </div>
-              ))}
-            </div>
-
-            {/* Actions */}
-            <div className="grid grid-cols-6 gap-4 p-4 bg-gray-50">
-              <div className="font-semibold">Actions</div>
-              {products.map((product: any) => (
-                <div key={product._id} className="space-y-2">
-                  <button
-                    onClick={() => handleAddToCart(product)}
-                    disabled={!product.inStock}
-                    className="w-full bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                  >
-                    <ShoppingCart size={16} className="inline mr-1" />
-                    Add to Cart
-                  </button>
-                  <Link
-                    to={`/products/${product.slug}`}
-                    className="block text-center text-primary-600 hover:text-primary-700 text-sm font-semibold"
-                  >
-                    View Details
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      {/* Toast */}
-      {toast.isVisible && (
-        <Toast message={toast.message} type={toast.type} onClose={hideToast} />
+      {/* Suggestions */}
+      {suggestions.length > 0 && productIds.length < 5 && (
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4">Add More Products to Compare</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {suggestions.slice(0, 5 - productIds.length).map((product) => (
+              <div key={product._id} className="relative">
+                <ProductCard product={product} />
+                <button
+                  onClick={() => addProduct(product._id)}
+                  className="absolute top-2 right-2 bg-primary-600 text-white p-2 rounded-full hover:bg-primary-700"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
+
+      {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
     </div>
   );
 };

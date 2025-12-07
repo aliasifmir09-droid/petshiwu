@@ -1,45 +1,47 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/products';
-import ProductCard from '@/components/ProductCard';
+import { Product } from '@/types';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import EmptyState from '@/components/EmptyState';
-import ErrorMessage from '@/components/ErrorMessage';
-import { Search, X, SlidersHorizontal, Star, DollarSign } from 'lucide-react';
+import ProductCard from '@/components/ProductCard';
+import { Search, SlidersHorizontal, X, Star, DollarSign } from 'lucide-react';
+import { useToast } from '@/hooks/useToast';
+import Toast from '@/components/Toast';
 
 const AdvancedSearch = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  const query = searchParams.get('q') || '';
-  const [searchQuery, setSearchQuery] = useState(query);
+  const { toast, showToast, hideToast } = useToast();
+  const [query, setQuery] = useState(searchParams.get('q') || '');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
-    minPrice: searchParams.get('minPrice') ? parseFloat(searchParams.get('minPrice')!) : undefined,
-    maxPrice: searchParams.get('maxPrice') ? parseFloat(searchParams.get('maxPrice')!) : undefined,
-    minRating: searchParams.get('minRating') ? parseFloat(searchParams.get('minRating')!) : undefined,
+    minPrice: searchParams.get('minPrice') || '',
+    maxPrice: searchParams.get('maxPrice') || '',
+    minRating: searchParams.get('minRating') || '',
     inStock: searchParams.get('inStock') === 'true',
     category: searchParams.get('category') || '',
     petType: searchParams.get('petType') || '',
     brand: searchParams.get('brand') || '',
-    sort: searchParams.get('sort') || 'relevance'
+    sort: searchParams.get('sort') || 'newest'
   });
 
   const [autocompleteQuery, setAutocompleteQuery] = useState('');
+  const [autocompleteResults, setAutocompleteResults] = useState<Array<{ type: string; name: string; slug: string; image?: string }>>([]);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
 
-  const { data: autocompleteResults } = useQuery({
-    queryKey: ['searchAutocomplete', autocompleteQuery],
-    queryFn: () => productService.searchAutocomplete(autocompleteQuery),
-    enabled: autocompleteQuery.length > 2 && showAutocomplete
-  });
-
-  const { data: searchResults, isLoading, error } = useQuery({
-    queryKey: ['advancedSearch', query, filters],
-    queryFn: () => productService.advancedSearch(query, {
-      ...filters,
+  const { data: searchResults, isLoading } = useQuery({
+    queryKey: ['search', query, filters],
+    queryFn: () => productService.search(query, {
+      ...(filters.minPrice && { minPrice: parseFloat(filters.minPrice) }),
+      ...(filters.maxPrice && { maxPrice: parseFloat(filters.maxPrice) }),
+      ...(filters.minRating && { minRating: parseFloat(filters.minRating) }),
+      ...(filters.inStock && { inStock: true }),
+      ...(filters.category && { category: filters.category }),
+      ...(filters.petType && { petType: filters.petType }),
+      ...(filters.brand && { brand: filters.brand }),
+      sort: filters.sort,
       page: 1,
       limit: 20
     }),
@@ -47,140 +49,113 @@ const AdvancedSearch = () => {
   });
 
   useEffect(() => {
-    if (query) {
-      setSearchQuery(query);
+    if (autocompleteQuery.length > 2) {
+      productService.searchAutocomplete(autocompleteQuery, 10).then(setAutocompleteResults);
+    } else {
+      setAutocompleteResults([]);
     }
-  }, [query]);
+  }, [autocompleteQuery]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
-    
+    if (!query.trim()) {
+      showToast('Please enter a search query', 'warning');
+      return;
+    }
     const params = new URLSearchParams();
-    params.set('q', searchQuery);
-    if (filters.minPrice) params.set('minPrice', filters.minPrice.toString());
-    if (filters.maxPrice) params.set('maxPrice', filters.maxPrice.toString());
-    if (filters.minRating) params.set('minRating', filters.minRating.toString());
-    if (filters.inStock) params.set('inStock', 'true');
-    if (filters.category) params.set('category', filters.category);
-    if (filters.petType) params.set('petType', filters.petType);
-    if (filters.brand) params.set('brand', filters.brand);
-    if (filters.sort) params.set('sort', filters.sort);
-    
+    params.set('q', query);
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) params.set(key, String(value));
+    });
     setSearchParams(params);
-    setShowAutocomplete(false);
-  };
-
-  const handleFilterChange = (key: string, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
   };
 
   const clearFilters = () => {
     setFilters({
-      minPrice: undefined,
-      maxPrice: undefined,
-      minRating: undefined,
+      minPrice: '',
+      maxPrice: '',
+      minRating: '',
       inStock: false,
       category: '',
       petType: '',
       brand: '',
-      sort: 'relevance'
+      sort: 'newest'
     });
+    setSearchParams({ q: query });
+  };
+
+  const handleAutocompleteSelect = (item: { type: string; slug: string }) => {
+    if (item.type === 'product') {
+      navigate(`/products/${item.slug}`);
+    } else if (item.type === 'category') {
+      navigate(`/category/${item.slug}`);
+    }
+    setShowAutocomplete(false);
+    setAutocompleteQuery('');
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <form onSubmit={handleSearch} className="relative">
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setAutocompleteQuery(e.target.value);
-              setShowAutocomplete(e.target.value.length > 2);
-            }}
-            onFocus={() => setShowAutocomplete(searchQuery.length > 2)}
-            placeholder="Search for products..."
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-primary-500"
-          />
+    <div className="container mx-auto px-4 py-12">
+      <h1 className="text-3xl font-bold mb-6">Advanced Search</h1>
+
+      {/* Search Bar */}
+      <div className="relative mb-6">
+        <form onSubmit={handleSearch} className="flex gap-2">
+          <div className="flex-1 relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setAutocompleteQuery(e.target.value);
+                setShowAutocomplete(e.target.value.length > 2);
+              }}
+              onFocus={() => setShowAutocomplete(autocompleteQuery.length > 2)}
+              placeholder="Search for products..."
+              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+            {showAutocomplete && autocompleteResults.length > 0 && (
+              <div className="absolute z-10 w-full mt-2 bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto">
+                {autocompleteResults.map((item, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleAutocompleteSelect(item)}
+                    className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 text-left"
+                  >
+                    {item.image && (
+                      <img src={item.image} alt={item.name} className="w-12 h-12 object-cover rounded" />
+                    )}
+                    <div>
+                      <p className="font-semibold">{item.name}</p>
+                      <p className="text-sm text-gray-500 capitalize">{item.type}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <button
             type="submit"
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-600 hover:text-primary-600"
+            className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700"
           >
-            <Search size={20} />
+            Search
           </button>
-
-          {/* Autocomplete Dropdown */}
-          {showAutocomplete && autocompleteResults && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
-              {autocompleteResults.products?.length > 0 && (
-                <div className="p-2">
-                  <p className="text-xs font-semibold text-gray-500 px-2 py-1">Products</p>
-                  {autocompleteResults.products.map((product: any) => (
-                    <button
-                      key={product._id}
-                      onClick={() => {
-                        setSearchQuery(product.name);
-                        setShowAutocomplete(false);
-                        navigate(`/products/${product.slug}`);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded flex items-center gap-3"
-                    >
-                      <img
-                        src={product.images?.[0] || '/placeholder.png'}
-                        alt={product.name}
-                        className="w-10 h-10 object-cover rounded"
-                      />
-                      <span className="text-sm">{product.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-              {autocompleteResults.categories?.length > 0 && (
-                <div className="p-2 border-t">
-                  <p className="text-xs font-semibold text-gray-500 px-2 py-1">Categories</p>
-                  {autocompleteResults.categories.map((category: any) => (
-                    <button
-                      key={category._id}
-                      onClick={() => {
-                        setSearchQuery(category.name);
-                        setShowAutocomplete(false);
-                        navigate(`/category/${category.slug}`);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded text-sm"
-                    >
-                      {category.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </form>
-
-        <div className="flex items-center justify-between mt-4">
           <button
+            type="button"
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="bg-gray-200 text-gray-800 px-4 py-3 rounded-lg hover:bg-gray-300"
           >
             <SlidersHorizontal size={20} />
-            Filters
           </button>
-          {query && (
-            <p className="text-sm text-gray-600">
-              {searchResults?.total || 0} results found
-            </p>
-          )}
-        </div>
+        </form>
       </div>
 
-      {/* Filters Panel */}
+      {/* Filters */}
       {showFilters && (
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Filters</h3>
+            <h2 className="text-xl font-semibold">Filters</h2>
             <button
               onClick={clearFilters}
               className="text-sm text-primary-600 hover:text-primary-700"
@@ -188,64 +163,60 @@ const AdvancedSearch = () => {
               Clear All
             </button>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Price Range</label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  placeholder="Min"
-                  value={filters.minPrice || ''}
-                  onChange={(e) => handleFilterChange('minPrice', e.target.value ? parseFloat(e.target.value) : undefined)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                />
-                <input
-                  type="number"
-                  placeholder="Max"
-                  value={filters.maxPrice || ''}
-                  onChange={(e) => handleFilterChange('maxPrice', e.target.value ? parseFloat(e.target.value) : undefined)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                />
-              </div>
+              <label className="block text-sm font-medium mb-2">Min Price</label>
+              <input
+                type="number"
+                value={filters.minPrice}
+                onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                placeholder="0"
+              />
             </div>
-
             <div>
-              <label className="block text-sm font-medium mb-2">Minimum Rating</label>
+              <label className="block text-sm font-medium mb-2">Max Price</label>
+              <input
+                type="number"
+                value={filters.maxPrice}
+                onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                placeholder="1000"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Min Rating</label>
               <select
-                value={filters.minRating || ''}
-                onChange={(e) => handleFilterChange('minRating', e.target.value ? parseFloat(e.target.value) : undefined)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                value={filters.minRating}
+                onChange={(e) => setFilters({ ...filters, minRating: e.target.value })}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2"
               >
-                <option value="">Any Rating</option>
+                <option value="">Any</option>
                 <option value="4">4+ Stars</option>
                 <option value="3">3+ Stars</option>
                 <option value="2">2+ Stars</option>
                 <option value="1">1+ Star</option>
               </select>
             </div>
-
             <div>
               <label className="block text-sm font-medium mb-2">Sort By</label>
               <select
                 value={filters.sort}
-                onChange={(e) => handleFilterChange('sort', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                onChange={(e) => setFilters({ ...filters, sort: e.target.value })}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2"
               >
-                <option value="relevance">Relevance</option>
+                <option value="newest">Newest</option>
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
                 <option value="rating">Highest Rated</option>
-                <option value="newest">Newest First</option>
               </select>
             </div>
-
             <div>
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex items-center gap-2 mt-6">
                 <input
                   type="checkbox"
                   checked={filters.inStock}
-                  onChange={(e) => handleFilterChange('inStock', e.target.checked)}
+                  onChange={(e) => setFilters({ ...filters, inStock: e.target.checked })}
                   className="w-4 h-4"
                 />
                 <span className="text-sm">In Stock Only</span>
@@ -255,45 +226,29 @@ const AdvancedSearch = () => {
         </div>
       )}
 
-      {/* Search Results */}
-      {!query && (
-        <div className="text-center py-12">
-          <Search className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-          <h2 className="text-2xl font-bold mb-2">Start Your Search</h2>
-          <p className="text-gray-600">Enter a search term to find products</p>
-        </div>
-      )}
-
-      {query && isLoading && (
-        <div className="py-12">
-          <LoadingSpinner size="lg" />
-        </div>
-      )}
-
-      {query && error && (
-        <ErrorMessage
-          message="Failed to load search results"
-          retry={() => window.location.reload()}
-        />
-      )}
-
-      {query && searchResults && searchResults.data && (
+      {/* Results */}
+      {isLoading ? (
+        <LoadingSpinner size="lg" />
+      ) : searchResults && searchResults.data && searchResults.data.length > 0 ? (
         <>
-          {searchResults.data.length === 0 ? (
-            <EmptyState
-              icon={<Search className="w-16 h-16" />}
-              title="No Results Found"
-              description={`We couldn't find any products matching "${query}"`}
-            />
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {searchResults.data.map((product: any) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
-            </div>
-          )}
+          <div className="mb-4 text-gray-600">
+            Found {searchResults.pagination?.total || searchResults.data.length} results
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {searchResults.data.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))}
+          </div>
         </>
-      )}
+      ) : query ? (
+        <EmptyState
+          icon={<Search className="w-16 h-16" />}
+          title="No Results Found"
+          description="Try adjusting your search terms or filters."
+        />
+      ) : null}
+
+      {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
     </div>
   );
 };

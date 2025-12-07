@@ -76,7 +76,6 @@ const Checkout = () => {
   const [donationAmount, setDonationAmount] = useState<number>(0);
   const [showDonationModal, setShowDonationModal] = useState(false);
   const [pendingOrderData, setPendingOrderData] = useState<CreateOrderData | null>(null);
-  const [orderNotes, setOrderNotes] = useState('');
 
   // Function to refresh product data from API
   const refreshCartProducts = async () => {
@@ -238,8 +237,7 @@ const Checkout = () => {
       shippingPrice: shipping,
       taxPrice: tax,
       donationAmount: donationAmount > 0 ? donationAmount : undefined,
-      totalPrice: subtotal + shipping + tax + donationAmount,
-      notes: orderNotes.trim() || undefined
+      totalPrice: subtotal + shipping + tax + donationAmount
     };
 
     // Show donation modal before submitting
@@ -381,21 +379,6 @@ const Checkout = () => {
                   />
                 </div>
               </div>
-            </div>
-
-            {/* Order Notes */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold mb-6">Special Instructions (Optional)</h2>
-              <textarea
-                value={orderNotes}
-                onChange={(e) => setOrderNotes(e.target.value)}
-                placeholder="Add any special delivery instructions or notes for your order..."
-                rows={4}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-              <p className="text-sm text-gray-500 mt-2">
-                These notes will be included with your order and visible to our team.
-              </p>
             </div>
 
             {/* Payment Method */}

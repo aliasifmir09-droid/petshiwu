@@ -1,10 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Trash2, Share2, Mail, Copy, Check } from 'lucide-react';
-import { userService } from '@/services/users';
-import { useToast } from '@/hooks/useToast';
-import Toast from '@/components/Toast';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useAuthStore } from '@/stores/authStore';
 import ProductCard from '@/components/ProductCard';
@@ -13,6 +10,9 @@ import EmptyState from '@/components/EmptyState';
 import ErrorMessage from '@/components/ErrorMessage';
 import { wishlistService } from '@/services/wishlist';
 import { productService } from '@/services/products';
+import { wishlistShareService } from '@/services/wishlistShare';
+import { useToast } from '@/hooks/useToast';
+import Toast from '@/components/Toast';
 
 const Favorites = () => {
   const { isAuthenticated } = useAuthStore();
@@ -175,6 +175,15 @@ const Favorites = () => {
 
           {/* Action Buttons */}
           <div className="mt-8 flex flex-wrap gap-4 justify-center">
+            {isAuthenticated && (
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
+              >
+                <Share2 size={20} />
+                Share Wishlist
+              </button>
+            )}
             <Link
               to="/products"
               className="inline-flex items-center gap-2 bg-gray-100 text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
@@ -185,6 +194,79 @@ const Favorites = () => {
           </div>
         </>
       )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h2 className="text-2xl font-bold mb-4">Share Your Wishlist</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Share Link</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={shareLink}
+                    readOnly
+                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2"
+                  />
+                  <button
+                    onClick={handleCopyLink}
+                    className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
+                  >
+                    {linkCopied ? <Check size={20} /> : <Copy size={20} />}
+                  </button>
+                </div>
+              </div>
+              <form onSubmit={handleEmailWishlist} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Email to Friend</label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="friend@example.com"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Message (Optional)</label>
+                  <textarea
+                    value={emailMessage}
+                    onChange={(e) => setEmailMessage(e.target.value)}
+                    placeholder="Check out my wishlist!"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                    rows={3}
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    type="submit"
+                    disabled={emailMutation.isPending}
+                    className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                  >
+                    {emailMutation.isPending ? 'Sending...' : 'Send Email'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowShareModal(false);
+                      setEmail('');
+                      setEmailMessage('');
+                    }}
+                    className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
     </div>
   );
 };
