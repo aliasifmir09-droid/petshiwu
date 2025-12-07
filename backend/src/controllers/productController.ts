@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import Product from '../models/Product';
-import Category from '../models/Category';
+import Category, { ICategory } from '../models/Category';
 import { AuthRequest } from '../middleware/auth';
 import { parse } from 'csv-parse/sync';
 import fs from 'fs';
@@ -149,8 +149,9 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
         query.parentCategory = null;
       }
       
-      type CategoryLean = Awaited<ReturnType<typeof Category.findOne>>;
-      let category: CategoryLean = await Category.findOne(query).lean();
+      // Type for lean category document
+      type CategoryLean = mongoose.LeanDocument<ICategory> & { _id: mongoose.Types.ObjectId };
+      let category: CategoryLean | null = await Category.findOne(query).lean() as CategoryLean | null;
       
       // If not found, create it
       if (!category) {
@@ -190,7 +191,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
             throw createError;
           }
         }
-      } else if (!category.isActive) {
+      } else if (category && !category.isActive) {
         await Category.findByIdAndUpdate(category._id, { isActive: true });
         category.isActive = true;
       }
@@ -202,7 +203,9 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
         
         // Cache the result
         categoryCache.set(cacheKey, categoryId);
-        categoryNameCache.set(categoryId.toString(), category.name);
+        if (category.name) {
+          categoryNameCache.set(categoryId.toString(), category.name);
+        }
         
         return categoryId;
       }
