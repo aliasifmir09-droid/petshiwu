@@ -573,9 +573,22 @@ export const sendOrderDeliveredEmail = async (
   }
 };
 
-// Send password reset email (for future use)
+// Send password reset email
 export const sendPasswordResetEmail = async (email: string, token: string, firstName: string) => {
   try {
+    // Check if email is actually configured
+    const isEmailConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+    
+    if (!isEmailConfigured) {
+      logger.warn(`⚠️  Email not configured. Skipping password reset email to ${email}.`);
+      logger.warn(`⚠️  In development, you can use the reset link below.`);
+      // In development/test mode, log the reset link instead
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
+      logger.info(`📧 Password reset link for ${email}: ${resetUrl}`);
+      return { messageId: 'test-mode', accepted: [email] };
+    }
+
     const transporter = createTransporter();
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
