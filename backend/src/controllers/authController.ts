@@ -453,25 +453,34 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
       });
     }
 
+    logger.info(`Password reset requested for email: ${email}`);
+
     // Find user by email
     const user = await User.findOne({ email }).select('+passwordResetToken +passwordResetExpires');
 
     // Don't reveal if user exists or not (security best practice)
     // Always return success message
     if (!user) {
+      logger.info(`User not found for email: ${email}`);
       return res.status(200).json({
         success: true,
         message: 'If an account with this email exists, a password reset link has been sent.'
       });
     }
 
+    logger.info(`User found, generating reset token for: ${email}`);
+
     // Generate reset token
     const resetToken = user.generatePasswordResetToken();
     await user.save({ validateBeforeSave: false });
 
+    logger.info(`Reset token generated, attempting to send email to: ${email}`);
+
     try {
       // Send password reset email
       await sendPasswordResetEmail(user.email, resetToken, user.firstName);
+      
+      logger.info(`Password reset email sent successfully to: ${email}`);
       
       res.status(200).json({
         success: true,
@@ -491,20 +500,36 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
         code: emailError.code,
         command: emailError.command,
         response: emailError.response,
-        responseCode: emailError.responseCode
+        responseCode: emailError.responseCode,
+        errno: emailError.errno,
+        syscall: emailError.syscall,
+        address: emailError.address,
+        port: emailError.port
       });
       
       // Return more detailed error in development, generic in production
       const errorMessage = process.env.NODE_ENV === 'production'
         ? 'Error sending password reset email. Please try again later.'
-        : `Error sending password reset email: ${emailError.message}`;
+        : `Error sending password reset email: ${emailError.message || 'Unknown error'}`;
       
       return res.status(500).json({
         success: false,
-        message: errorMessage
+        message: errorMessage,
+        ...(process.env.NODE_ENV !== 'production' && {
+          details: {
+            code: emailError.code,
+            command: emailError.command,
+            responseCode: emailError.responseCode
+          }
+        })
       });
     }
-  } catch (error) {
+  } catch (error: any) {
+    logger.error('Unexpected error in forgotPassword:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     next(error);
   }
 };
