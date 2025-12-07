@@ -9,7 +9,7 @@ import {
 } from '../controllers/donationController';
 import { protect, authorize } from '../middleware/auth';
 import { checkPermission } from '../middleware/permissions';
-import { validateObjectId, paginationValidation } from '../middleware/validation';
+import { validateObjectId, paginationValidation, adminPaginationValidation } from '../middleware/validation';
 
 const router = express.Router();
 

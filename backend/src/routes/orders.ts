@@ -23,6 +23,7 @@ import {
   createOrderValidation,
   validateObjectId,
   paginationValidation,
+  adminPaginationValidation,
   createReturnValidation
 } from '../middleware/validation';
 
@@ -35,7 +36,7 @@ router.get('/track/:id', validateObjectId(), trackOrder);
 router.post('/', protect, createOrderValidation, createOrder);
 router.get('/myorders', protect, paginationValidation, getMyOrders);
 router.get('/stats', protect, checkPermission('canViewAnalytics'), getOrderStats);
-router.get('/all', protect, checkPermission('canManageOrders'), paginationValidation, getAllOrders);
+router.get('/all', protect, checkPermission('canManageOrders'), adminPaginationValidation, getAllOrders);
 router.get('/:id', protect, validateObjectId(), getOrder);
 router.put('/:id/cancel', protect, validateObjectId(), cancelOrder);
 router.put('/:id/status', protect, checkPermission('canManageOrders'), validateObjectId(), updateOrderStatus);
@@ -44,7 +45,7 @@ router.put('/:id/payment', protect, checkPermission('canManageOrders'), validate
 // Return/Refund routes
 router.post('/returns', protect, createReturnValidation, createReturn);
 router.get('/returns/my', protect, paginationValidation, getMyReturns);
-router.get('/returns/all', protect, checkPermission('canManageOrders'), paginationValidation, getAllReturns);
+router.get('/returns/all', protect, checkPermission('canManageOrders'), adminPaginationValidation, getAllReturns);
 router.get('/returns/:id', protect, validateObjectId(), getReturn);
 router.put('/returns/:id/status', protect, checkPermission('canManageOrders'), validateObjectId(), updateReturnStatus);
 

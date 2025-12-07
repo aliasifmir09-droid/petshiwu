@@ -394,6 +394,19 @@ export const paginationValidation = [
   validate
 ];
 
+// Admin pagination validation - allows higher limits for admin endpoints
+export const adminPaginationValidation = [
+  query('page')
+    .optional()
+    .isInt({ min: 1, max: 1000 })
+    .withMessage('Page must be a positive integer'),
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 1000 })
+    .withMessage('Limit must be between 1 and 1000'),
+  validate
+];
+
 // Staff user validation
 export const createStaffValidation = [
   body('email')
