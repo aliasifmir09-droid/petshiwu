@@ -72,9 +72,14 @@ export const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event
     // Silently fail - don't log errors
   }
   
-  // Prevent error from bubbling
+  // Prevent error from bubbling and suppress console errors
   e.stopPropagation();
   e.preventDefault();
+  
+  // Suppress the error in console by overriding the error event
+  if (e.nativeEvent) {
+    e.nativeEvent.stopImmediatePropagation();
+  }
 };
 
 /**

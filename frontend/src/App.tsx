@@ -72,6 +72,37 @@ function App() {
   useEffect(() => {
     initAnalytics();
     
+    // Suppress image loading errors in console (403, 404, etc.)
+    // This prevents console spam from external CDN images that fail to load
+    const handleGlobalError = (event: ErrorEvent) => {
+      // Check if this is an image loading error
+      const target = event.target as HTMLElement;
+      if (target && target.tagName === 'IMG') {
+        // Suppress image loading errors (403, 404, CORS, etc.)
+        const errorMessage = event.message || '';
+        const errorSource = (event.filename || '').toLowerCase();
+        
+        if (
+          errorMessage.includes('403') ||
+          errorMessage.includes('404') ||
+          errorMessage.includes('Failed to load') ||
+          errorSource.includes('scene7') ||
+          errorSource.includes('petsmart') ||
+          (target as HTMLImageElement).src?.includes('scene7') ||
+          (target as HTMLImageElement).src?.includes('petsmart')
+        ) {
+          // Prevent the error from appearing in console
+          event.preventDefault();
+          event.stopPropagation();
+          return false;
+        }
+      }
+      return true;
+    };
+    
+    // Add global error listener for image errors
+    window.addEventListener('error', handleGlobalError, true);
+    
     // Register service worker for offline support
     if ('serviceWorker' in navigator && import.meta.env.PROD) {
       navigator.serviceWorker
@@ -86,6 +117,11 @@ function App() {
           }
         });
     }
+    
+    // Cleanup: remove error listener on unmount
+    return () => {
+      window.removeEventListener('error', handleGlobalError, true);
+    };
   }, []);
 
   useEffect(() => {
