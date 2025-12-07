@@ -105,6 +105,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     ingredients: product?.ingredients || '',
     isActive: product?.isActive ?? true,
     isFeatured: product?.isFeatured ?? false,
+    lowStockThreshold: product?.lowStockThreshold ?? '',
   });
 
   const [variants, setVariants] = useState(
