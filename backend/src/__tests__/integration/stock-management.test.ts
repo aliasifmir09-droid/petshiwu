@@ -21,7 +21,7 @@ describe('Stock Management', () => {
     adminToken = await getAdminToken(app);
     const user = await createTestUser(app);
     userToken = user.token;
-    testUserId = user.user._id.toString();
+    testUserId = (user.user._id as mongoose.Types.ObjectId).toString();
 
     // Create test category
     const category = await Category.create({
