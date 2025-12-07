@@ -11,7 +11,8 @@ import {
   User,
   X,
   CheckCircle,
-  XCircle
+  XCircle,
+  Download
 } from 'lucide-react';
 
 interface Customer {

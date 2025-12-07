@@ -183,6 +183,14 @@ function App() {
                     path="/settings" 
                     element={<Settings />} 
                   />
+                  <Route 
+                    path="/email-templates" 
+                    element={
+                      user?.role === 'admin' 
+                        ? <EmailTemplates /> 
+                        : <Navigate to={getDefaultPage()} replace />
+                    } 
+                  />
                   <Route path="*" element={<Navigate to={getDefaultPage()} replace />} />
                 </Routes>
               </Suspense>

@@ -242,6 +242,50 @@ const Products = () => {
     }
   });
 
+  const bulkUpdateMutation = useMutation({
+    mutationFn: (updates: any) => adminService.bulkUpdateProducts(Array.from(selectedProducts), updates),
+    onSuccess: () => {
+      setSelectedProducts(new Set());
+      setShowBulkModal(false);
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      showToast('Products updated successfully', 'success');
+    },
+    onError: (error: any) => {
+      showToast(error.response?.data?.message || 'Failed to update products', 'error');
+    }
+  });
+
+  const bulkAssignCategoryMutation = useMutation({
+    mutationFn: (categoryId: string) => adminService.bulkAssignCategory(Array.from(selectedProducts), categoryId),
+    onSuccess: () => {
+      setSelectedProducts(new Set());
+      setShowBulkModal(false);
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      showToast('Category assigned successfully', 'success');
+    },
+    onError: (error: any) => {
+      showToast(error.response?.data?.message || 'Failed to assign category', 'error');
+    }
+  });
+
+  const exportProductsMutation = useMutation({
+    mutationFn: (includeInactive: boolean) => adminService.exportProducts(includeInactive),
+    onSuccess: (blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `products-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      showToast('Products exported successfully', 'success');
+    },
+    onError: () => {
+      showToast('Failed to export products', 'error');
+    }
+  });
+
   const handleConfirmDelete = () => {
     if (deleteConfirm.isBulk && deleteConfirm.productIds) {
       // Bulk delete

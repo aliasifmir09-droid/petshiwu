@@ -11,7 +11,8 @@ import {
   Layers,
   BarChart3,
   Settings,
-  LogOut
+  LogOut,
+  Mail
 } from 'lucide-react';
 import ConfirmationModal from './ConfirmationModal';
 
@@ -47,6 +48,7 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
     { path: '/categories', icon: FolderTree, label: 'Categories', permission: 'canManageCategories' },
     { path: '/pet-types', icon: Layers, label: 'Pet Types', adminOnly: true },
     { path: '/customers', icon: Users, label: 'Customers', permission: 'canManageCustomers' },
+    { path: '/email-templates', icon: Mail, label: 'Email Templates', adminOnly: true },
     { path: '/settings', icon: Settings, label: 'Settings', alwaysShow: true }
   ];
 
