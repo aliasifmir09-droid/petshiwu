@@ -173,7 +173,9 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
             level: level,
             description: `${trimmedName} products`
           });
-          category = newCategory.toObject() as Awaited<ReturnType<typeof Category.findOne>> & { _id: mongoose.Types.ObjectId };
+          // Convert to plain object to match lean() return type
+          const categoryObj = newCategory.toObject();
+          category = categoryObj as typeof category;
         } catch (createError: unknown) {
           const error = createError as { code?: number; name?: string; message?: string };
           if (error.code === 11000 || error.name === 'MongoServerError') {
