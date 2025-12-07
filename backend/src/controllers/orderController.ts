@@ -880,7 +880,18 @@ export const updatePaymentStatus = async (req: AuthRequest, res: Response, next:
 export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { reason } = req.body;
-    const order = await Order.findById(req.params.id);
+    
+    // Validate and extract order ID
+    const orderId = extractObjectId(req.params.id);
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid order ID format',
+        errors: [{ field: 'id', message: 'Invalid ID format' }]
+      });
+    }
+    
+    const order = await Order.findById(orderId);
 
     if (!order) {
       return res.status(404).json({
