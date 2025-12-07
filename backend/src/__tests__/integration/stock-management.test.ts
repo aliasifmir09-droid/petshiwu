@@ -100,17 +100,35 @@ describe('Stock Management', () => {
         orderId = orderIdRaw;
       } else if (orderIdRaw instanceof mongoose.Types.ObjectId) {
         orderId = orderIdRaw.toString();
-      } else if (orderIdRaw && typeof orderIdRaw === 'object' && '_id' in orderIdRaw) {
-        orderId = String(orderIdRaw._id);
-      } else {
-        // Try to get string representation
-        const str = String(orderIdRaw);
-        // Check if it's a valid ObjectId string (24 hex chars)
-        if (mongoose.Types.ObjectId.isValid(str) && str.length === 24) {
-          orderId = str;
+      } else if (orderIdRaw && typeof orderIdRaw === 'object') {
+        // Handle ObjectId-like objects with buffer property
+        if ('buffer' in orderIdRaw && Buffer.isBuffer(orderIdRaw.buffer)) {
+          // Convert buffer to ObjectId then to string
+          const objId = new mongoose.Types.ObjectId(orderIdRaw.buffer);
+          orderId = objId.toString();
+        } else if ('_id' in orderIdRaw) {
+          orderId = String(orderIdRaw._id);
         } else {
-          throw new Error(`Invalid order ID format: ${JSON.stringify(orderIdRaw)}`);
+          // Try to create ObjectId from the object
+          try {
+            const objId = new mongoose.Types.ObjectId(orderIdRaw);
+            orderId = objId.toString();
+          } catch {
+            // Try toString method
+            if (orderIdRaw.toString && typeof orderIdRaw.toString === 'function') {
+              const str = orderIdRaw.toString();
+              if (mongoose.Types.ObjectId.isValid(str) && str.length === 24) {
+                orderId = str;
+              } else {
+                throw new Error(`Invalid order ID format: ${JSON.stringify(orderIdRaw)}`);
+              }
+            } else {
+              throw new Error(`Invalid order ID format: ${JSON.stringify(orderIdRaw)}`);
+            }
+          }
         }
+      } else {
+        throw new Error(`Invalid order ID format: ${JSON.stringify(orderIdRaw)}`);
       }
 
       // Verify stock was reduced
@@ -192,13 +210,33 @@ describe('Stock Management', () => {
         orderId = orderIdRaw;
       } else if (orderIdRaw instanceof mongoose.Types.ObjectId) {
         orderId = orderIdRaw.toString();
-      } else {
-        const str = String(orderIdRaw);
-        if (mongoose.Types.ObjectId.isValid(str) && str.length === 24) {
-          orderId = str;
+      } else if (orderIdRaw && typeof orderIdRaw === 'object') {
+        // Handle ObjectId-like objects with buffer property
+        if ('buffer' in orderIdRaw && Buffer.isBuffer(orderIdRaw.buffer)) {
+          // Convert buffer to ObjectId then to string
+          const objId = new mongoose.Types.ObjectId(orderIdRaw.buffer);
+          orderId = objId.toString();
         } else {
-          throw new Error(`Invalid order ID format: ${JSON.stringify(orderIdRaw)}`);
+          // Try to create ObjectId from the object
+          try {
+            const objId = new mongoose.Types.ObjectId(orderIdRaw);
+            orderId = objId.toString();
+          } catch {
+            // Try toString method
+            if (orderIdRaw.toString && typeof orderIdRaw.toString === 'function') {
+              const str = orderIdRaw.toString();
+              if (mongoose.Types.ObjectId.isValid(str) && str.length === 24) {
+                orderId = str;
+              } else {
+                throw new Error(`Invalid order ID format: ${JSON.stringify(orderIdRaw)}`);
+              }
+            } else {
+              throw new Error(`Invalid order ID format: ${JSON.stringify(orderIdRaw)}`);
+            }
+          }
         }
+      } else {
+        throw new Error(`Invalid order ID format: ${JSON.stringify(orderIdRaw)}`);
       }
 
       // Manually set order creation time to 25 hours ago
@@ -353,17 +391,40 @@ describe('Stock Management', () => {
         } else if (id instanceof mongoose.Types.ObjectId) {
           return id.toString();
         } else if (id && typeof id === 'object') {
-          // Try to get string representation
-          const str = String(id);
-          // Check if it's a valid ObjectId string
-          if (mongoose.Types.ObjectId.isValid(str) && str.length === 24) {
-            return str;
+          // Handle ObjectId-like objects with buffer property (from JSON serialization)
+          if ('buffer' in id && id.buffer) {
+            try {
+              // Convert buffer array to Buffer, then to ObjectId
+              const bufferArray = id.buffer;
+              if (Array.isArray(bufferArray) || (typeof bufferArray === 'object' && '0' in bufferArray)) {
+                // Convert object with numeric keys to array
+                const bufferValues = Object.keys(bufferArray)
+                  .filter(k => /^\d+$/.test(k))
+                  .map(k => bufferArray[k])
+                  .filter(v => typeof v === 'number' && v >= 0 && v <= 255);
+                
+                if (bufferValues.length === 12) {
+                  const buffer = Buffer.from(bufferValues);
+                  const objId = new mongoose.Types.ObjectId(buffer);
+                  return objId.toString();
+                }
+              }
+            } catch (e) {
+              // Fall through to other methods
+            }
           }
-          // Try toString method
-          if (id.toString && typeof id.toString === 'function') {
-            const toStringResult = id.toString();
-            if (mongoose.Types.ObjectId.isValid(toStringResult) && toStringResult.length === 24) {
-              return toStringResult;
+          
+          // Try to create ObjectId directly
+          try {
+            const objId = new mongoose.Types.ObjectId(id);
+            return objId.toString();
+          } catch {
+            // Try toString method
+            if (id.toString && typeof id.toString === 'function') {
+              const toStringResult = id.toString();
+              if (mongoose.Types.ObjectId.isValid(toStringResult) && toStringResult.length === 24) {
+                return toStringResult;
+              }
             }
           }
         }
