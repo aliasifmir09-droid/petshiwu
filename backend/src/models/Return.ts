@@ -160,12 +160,11 @@ returnSchema.pre('save', async function (next) {
 });
 
 // Indexes
+// Note: returnNumber and rmaNumber indexes are created automatically by unique: true
 returnSchema.index({ user: 1, createdAt: -1 });
 returnSchema.index({ order: 1 });
 returnSchema.index({ status: 1, createdAt: -1 });
 returnSchema.index({ status: 1, refundStatus: 1 }); // Status filtering with refund status
-returnSchema.index({ rmaNumber: 1 });
-returnSchema.index({ returnNumber: 1 });
 returnSchema.index({ user: 1, status: 1 }); // User returns by status
 returnSchema.index({ 'items.product': 1 }); // Product-based return queries
 
