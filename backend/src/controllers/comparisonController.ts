@@ -212,9 +212,15 @@ export const getComparisonSuggestions = async (req: Request, res: Response, next
       .limit(limit)
       .lean();
 
+    // Normalize product IDs to strings
+    const normalizedSuggestions = suggestions.map((product: any) => ({
+      ...product,
+      _id: String(product._id)
+    }));
+
     res.status(200).json({
       success: true,
-      data: suggestions
+      data: normalizedSuggestions
     });
   } catch (error) {
     next(error);

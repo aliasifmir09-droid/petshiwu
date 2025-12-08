@@ -46,8 +46,11 @@ const ProductComparison = () => {
   });
 
   useEffect(() => {
-    if (suggestionData?.suggestions) {
-      setSuggestions(suggestionData.suggestions);
+    if (suggestionData) {
+      // Backend returns data directly as array, not wrapped in suggestions
+      setSuggestions(Array.isArray(suggestionData) ? suggestionData : suggestionData.suggestions || []);
+    } else {
+      setSuggestions([]);
     }
   }, [suggestionData]);
 
@@ -284,6 +287,11 @@ const ProductComparison = () => {
                   </div>
                 ))}
               </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>Loading similar products...</p>
+                </div>
+              )}
             </div>
           )}
         </div>
