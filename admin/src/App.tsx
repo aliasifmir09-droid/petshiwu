@@ -37,26 +37,23 @@ function App() {
 
   useEffect(() => {
     const loadUser = async () => {
-      const token = localStorage.getItem('adminToken');
-      if (token) {
-        try {
-          const userData = await adminService.getMe();
-          
-          if (userData && (userData.role === 'admin' || userData.role === 'staff')) {
-            setUser(userData);
-          } else {
-            localStorage.removeItem('adminToken');
-            setUser(null);
-          }
-        } catch (error: any) {
-          console.error('Error loading user:', error);
-          localStorage.removeItem('adminToken');
+      // Phase 2: Cookie-Only - Try to get user from backend using httpOnly cookie
+      // If cookie exists, request will succeed. If not, it will fail and we set user to null
+      try {
+        const userData = await adminService.getMe();
+        
+        if (userData && (userData.role === 'admin' || userData.role === 'staff')) {
+          setUser(userData);
+        } else {
           setUser(null);
         }
-      } else {
+      } catch (error: any) {
+        // No cookie or invalid cookie - user is not authenticated
+        console.error('Error loading user:', error);
         setUser(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     loadUser();

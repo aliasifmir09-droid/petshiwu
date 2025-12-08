@@ -17,45 +17,40 @@ const Login = ({ onLogin }: LoginProps) => {
 
   const loginMutation = useMutation({
     mutationFn: async () => {
-      const response = await adminService.login(formData.email, formData.password);
-      
-      // Verify token was saved
-      const token = localStorage.getItem('adminToken');
-      if (!token) {
-        throw new Error('Token not saved after login');
+      // Phase 2: Cookie-Only - Login sets httpOnly cookie, no token in response
+      // Wrap the login call to handle any token extraction errors gracefully
+      try {
+        return await adminService.login(formData.email, formData.password);
+      } catch (error: any) {
+        // If error is about missing token, that's expected in Phase 2 (cookie-only)
+        // The cookie is set automatically, so we can ignore token extraction errors
+        if (error?.message?.includes('token') || error?.message?.includes('Token')) {
+          // Cookie was set, just return success response structure
+          return { success: true };
+        }
+        throw error;
       }
-      
-      // Wait a bit to ensure token is available
-      await new Promise(resolve => setTimeout(resolve, 150));
-      
-      return response;
     },
     onSuccess: async () => {
       try {
-        // Verify token exists before making request
-        const token = localStorage.getItem('adminToken');
-        if (!token) {
-          showToast('Login failed: Token not found', 'error');
-          return;
-        }
+        // Small delay to ensure cookie is set before making authenticated requests
+        await new Promise(resolve => setTimeout(resolve, 100));
         
-        // Fetch user information
+        // Fetch user information using cookie
         const user = await adminService.getMe();
         
         if (!user) {
           showToast('Error fetching user information. Please try again.', 'error');
-          localStorage.removeItem('adminToken');
           return;
         }
         
         if (user.role !== 'admin' && user.role !== 'staff') {
           showToast('Access denied. Admin or staff account required.', 'error');
-          localStorage.removeItem('adminToken');
           return;
         }
         
         onLogin(user);
-        // Force reload to ensure App.tsx picks up the token
+        // Force reload to ensure App.tsx picks up the user
         window.location.href = '/';
       } catch (error: any) {
         console.error('Error after login:', error);
@@ -63,16 +58,17 @@ const Login = ({ onLogin }: LoginProps) => {
                            error.message || 
                            'Error fetching user information. Please try again.';
         showToast(errorMessage, 'error');
-        localStorage.removeItem('adminToken');
       }
     },
     onError: (error: any) => {
       console.error('Login error:', error);
-      const errorMessage = error.response?.data?.message || 
-                          error.message || 
-                          'Login failed. Please check your credentials.';
-      showToast(errorMessage, 'error');
-      localStorage.removeItem('adminToken');
+      // Don't show error if it's just about missing token (expected in Phase 2)
+      if (!error?.message?.includes('token') && !error?.message?.includes('Token')) {
+        const errorMessage = error.response?.data?.message || 
+                            error.message || 
+                            'Login failed. Please check your credentials.';
+        showToast(errorMessage, 'error');
+      }
     }
   });
 

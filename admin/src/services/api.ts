@@ -19,12 +19,14 @@ const api = axios.create({
   withCredentials: true
 });
 
+// Phase 2: Cookie-Only - Rely solely on httpOnly cookies
+// Cookies are sent automatically via withCredentials: true
+// No Authorization header needed - backend only accepts cookies
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('adminToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // Phase 2: No Authorization header - httpOnly cookies sent automatically
+    // Backend only accepts tokens from httpOnly cookies (more secure)
+    // withCredentials: true ensures cookies are sent with all requests
     return config;
   },
   (error) => {
@@ -35,11 +37,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Only logout on 401 (Unauthorized - invalid/expired token)
-    // Do NOT logout on 403 (Forbidden - valid token but insufficient permissions)
+    // Only logout on 401 (Unauthorized - invalid/expired cookie)
+    // Do NOT logout on 403 (Forbidden - valid cookie but insufficient permissions)
     if (error.response?.status === 401) {
-      localStorage.removeItem('adminToken');
-      window.location.href = '/login';
+      // Phase 2: No localStorage token to remove - cookies are cleared by backend on logout
+      // Redirect to login
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

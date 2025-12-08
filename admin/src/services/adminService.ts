@@ -58,9 +58,7 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
   // Auth
   login: async (email: string, password: string) => {
     try {
-      // Clear any existing token first
-      localStorage.removeItem('adminToken');
-      
+      // Phase 2: Cookie-Only - Backend sets httpOnly cookie, no token in response
       const response = await api.post('/auth/login', { email, password });
       
       // Check if request was successful
@@ -74,37 +72,15 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
         throw new Error(errorMessage);
       }
       
-      // Extract token from response
-      // Standard response format: { success: true, token: "..." }
-      const token = response.data.token;
-      
-      if (!token || typeof token !== 'string') {
-        // Log the actual response structure for debugging
-        console.error('Token extraction failed. Response structure:', {
-          status: response.status,
-          success: response.data.success,
-          hasToken: !!response.data.token,
-          hasData: !!response.data.data,
-          responseKeys: Object.keys(response.data),
-          tokenType: typeof response.data.token
-        });
-        throw new Error('No token received from server. Please check server response.');
-      }
-      
-      // Save token to localStorage
-      localStorage.setItem('adminToken', token);
-      
-      // Verify token was saved
-      const savedToken = localStorage.getItem('adminToken');
-      if (savedToken !== token) {
-        throw new Error('Failed to save token to localStorage');
+      // Phase 2: Cookie-Only - No token in response, cookie is set automatically
+      // If error is about missing token, that's expected in Phase 2 (cookie-only)
+      // The cookie is set automatically by the browser, so we can ignore token extraction errors
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Login failed');
       }
       
       return response.data;
     } catch (error: any) {
-      // Ensure token is cleared on error
-      localStorage.removeItem('adminToken');
-      
       // Improve error message
       if (error.response) {
         // Server responded with error
@@ -123,27 +99,21 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
   },
 
   getMe: async () => {
-    // Verify token exists before making request
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-    
+    // Phase 2: Cookie-Only - No localStorage token check needed
+    // Cookie is sent automatically via withCredentials: true
     try {
       const response = await api.get('/auth/me');
       return response.data.data;
     } catch (error: any) {
-      // If 401, clear token and rethrow
-      if (error.response?.status === 401) {
-        localStorage.removeItem('adminToken');
-      }
+      // If 401, cookie is invalid or expired - backend will handle it
       throw error;
     }
   },
 
   logout: async () => {
+    // Phase 2: Cookie-Only - Call logout endpoint to clear httpOnly cookie
+    // Backend handles cookie clearing, no localStorage to manage
     await api.post('/auth/logout');
-    localStorage.removeItem('adminToken');
   },
 
   // Products
