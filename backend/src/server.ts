@@ -308,11 +308,11 @@ app.use((req, res, next) => {
         return obj.map(sanitizeObject);
       }
       if (obj && typeof obj === 'object' && obj.constructor === Object) {
-        const sanitized: Record<string, unknown> = {};
+        const sanitized: { [key: string]: SanitizedObject } = {};
         for (const key in obj) {
           sanitized[key] = sanitizeObject((obj as Record<string, unknown>)[key]);
         }
-        return sanitized as SanitizedObject;
+        return sanitized;
       }
       return obj as SanitizedObject;
     };
