@@ -18,7 +18,11 @@ import {
   loginValidation,
   updatePasswordValidation,
   forgotPasswordValidation,
-  resetPasswordValidation
+  resetPasswordValidation,
+  verifyEmailValidation,
+  resendVerificationValidation,
+  verifyResetTokenValidation,
+  updateProfileValidation
 } from '../middleware/validation';
 
 const router = express.Router();
@@ -26,13 +30,13 @@ const router = express.Router();
 router.post('/register', registerValidation, register);
 router.post('/login', loginValidation, login);
 router.post('/logout', logout);
-router.get('/verify-email', verifyEmail);
-router.post('/resend-verification', resendVerificationEmail);
+router.get('/verify-email', verifyEmailValidation, verifyEmail);
+router.post('/resend-verification', resendVerificationValidation, resendVerificationEmail);
 router.post('/forgot-password', forgotPasswordValidation, forgotPassword);
-router.get('/verify-reset-token', verifyResetToken);
+router.get('/verify-reset-token', verifyResetTokenValidation, verifyResetToken);
 router.post('/reset-password', resetPasswordValidation, resetPassword);
 router.get('/me', protect, getMe);
-router.put('/updateprofile', protect, updateProfile);
+router.put('/updateprofile', protect, updateProfileValidation, updateProfile);
 router.put('/updatepassword', protect, updatePasswordValidation, updatePassword);
 
 export default router;

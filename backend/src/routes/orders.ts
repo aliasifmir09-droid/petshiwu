@@ -26,7 +26,9 @@ import {
   validateObjectId,
   paginationValidation,
   adminPaginationValidation,
-  createReturnValidation
+  createReturnValidation,
+  createPaymentIntentValidation,
+  confirmPaymentValidation
 } from '../middleware/validation';
 
 const router = express.Router();
@@ -35,8 +37,8 @@ const router = express.Router();
 router.get('/track/:id', validateObjectId(), trackOrder);
 
 // Order routes
-router.post('/payment-intent', protect, createOrderPaymentIntent);
-router.post('/confirm-payment', protect, confirmOrderPayment);
+router.post('/payment-intent', protect, createPaymentIntentValidation, createOrderPaymentIntent);
+router.post('/confirm-payment', protect, confirmPaymentValidation, confirmOrderPayment);
 router.post('/', protect, createOrderValidation, createOrder);
 router.get('/myorders', protect, paginationValidation, getMyOrders);
 router.get('/stats', protect, checkPermission('canViewAnalytics'), getOrderStats);

@@ -434,3 +434,181 @@ export const createStaffValidation = [
     .withMessage('Permissions must be an object'),
   validate
 ];
+
+// Auth endpoint validations (missing validations)
+export const verifyEmailValidation = [
+  query('token')
+    .notEmpty()
+    .withMessage('Verification token is required')
+    .isLength({ min: 20, max: 200 })
+    .withMessage('Invalid token format'),
+  validate
+];
+
+export const resendVerificationValidation = [
+  body('email')
+    .trim()
+    .isEmail()
+    .withMessage('Please provide a valid email'),
+  validate
+];
+
+export const verifyResetTokenValidation = [
+  query('token')
+    .notEmpty()
+    .withMessage('Reset token is required')
+    .isLength({ min: 20, max: 200 })
+    .withMessage('Invalid token format'),
+  validate
+];
+
+export const updateProfileValidation = [
+  body('firstName')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .matches(/^[a-zA-Z\s]+$/)
+    .withMessage('First name must contain only letters and be between 2-50 characters'),
+  body('lastName')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .matches(/^[a-zA-Z\s]+$/)
+    .withMessage('Last name must contain only letters and be between 2-50 characters'),
+  body('phone')
+    .optional()
+    .trim()
+    .matches(/^\+?[1-9]\d{1,14}$/)
+    .withMessage('Please provide a valid phone number'),
+  body('dateOfBirth')
+    .optional()
+    .isISO8601()
+    .withMessage('Invalid date format'),
+  validate
+];
+
+// Product comparison validations
+export const productIdsValidation = [
+  query('productIds')
+    .notEmpty()
+    .withMessage('Product IDs are required')
+    .custom((value) => {
+      const ids = typeof value === 'string' ? value.split(',') : Array.isArray(value) ? value : [value];
+      if (ids.length < 2 || ids.length > 10) {
+        throw new Error('Must provide between 2 and 10 product IDs');
+      }
+      return ids.every((id: string) => mongoose.Types.ObjectId.isValid(id.trim()));
+    })
+    .withMessage('All product IDs must be valid'),
+  validate
+];
+
+// Wishlist validations
+export const wishlistAddValidation = [
+  body('productId')
+    .custom((value) => mongoose.Types.ObjectId.isValid(value))
+    .withMessage('Invalid product ID'),
+  validate
+];
+
+export const wishlistRemoveValidation = [
+  body('productId')
+    .custom((value) => mongoose.Types.ObjectId.isValid(value))
+    .withMessage('Invalid product ID'),
+  validate
+];
+
+export const wishlistEmailValidation = [
+  body('recipients')
+    .isArray({ min: 1 })
+    .withMessage('At least one recipient email is required'),
+  body('recipients.*')
+    .trim()
+    .isEmail()
+    .withMessage('Each recipient must be a valid email address'),
+  body('message')
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Message must be less than 500 characters'),
+  validate
+];
+
+// Order payment validations
+export const createPaymentIntentValidation = [
+  body('orderId')
+    .custom((value) => mongoose.Types.ObjectId.isValid(value))
+    .withMessage('Invalid order ID'),
+  body('amount')
+    .isFloat({ min: 0.01 })
+    .withMessage('Amount must be greater than 0'),
+  validate
+];
+
+export const confirmPaymentValidation = [
+  body('orderId')
+    .custom((value) => mongoose.Types.ObjectId.isValid(value))
+    .withMessage('Invalid order ID'),
+  body('paymentIntentId')
+    .optional()
+    .trim()
+    .isLength({ min: 20, max: 200 })
+    .withMessage('Invalid payment intent ID'),
+  body('paypalOrderId')
+    .optional()
+    .trim()
+    .isLength({ min: 10, max: 200 })
+    .withMessage('Invalid PayPal order ID'),
+  body('paymentMethod')
+    .isIn(['stripe', 'paypal'])
+    .withMessage('Invalid payment method'),
+  validate
+];
+
+// Donation validations
+export const createDonationIntentValidation = [
+  body('amount')
+    .isFloat({ min: 1 })
+    .withMessage('Donation amount must be at least $1'),
+  body('currency')
+    .optional()
+    .trim()
+    .isIn(['usd', 'eur', 'gbp'])
+    .withMessage('Invalid currency'),
+  body('name')
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Name must be less than 100 characters'),
+  body('email')
+    .optional()
+    .trim()
+    .isEmail()
+    .withMessage('Please provide a valid email'),
+  body('message')
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Message must be less than 500 characters'),
+  validate
+];
+
+export const confirmDonationValidation = [
+  body('donationId')
+    .custom((value) => mongoose.Types.ObjectId.isValid(value))
+    .withMessage('Invalid donation ID'),
+  body('paymentIntentId')
+    .optional()
+    .trim()
+    .isLength({ min: 20, max: 200 })
+    .withMessage('Invalid payment intent ID'),
+  body('paypalOrderId')
+    .optional()
+    .trim()
+    .isLength({ min: 10, max: 200 })
+    .withMessage('Invalid PayPal order ID'),
+  body('paymentMethod')
+    .isIn(['stripe', 'paypal'])
+    .withMessage('Invalid payment method'),
+  validate
+];

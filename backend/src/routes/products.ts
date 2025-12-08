@@ -21,7 +21,8 @@ import {
   createProductValidation,
   validateObjectId,
   paginationValidation,
-  searchValidation
+  searchValidation,
+  productIdsValidation
 } from '../middleware/validation';
 import { csvUpload } from '../middleware/csvUpload';
 
@@ -32,13 +33,13 @@ router.get('/search', searchValidation, advancedSearch); // Advanced search with
 router.get('/search/autocomplete', searchValidation, searchAutocomplete); // Search autocomplete
 router.get('/brands', getUniqueBrands); // Public endpoint for unique brands
 router.get('/stats', protect, checkPermission('canViewAnalytics'), getProductStats);
-router.get('/compare', compareProducts); // GET /api/products/compare?productIds=id1,id2,id3
-router.get('/compare/suggestions', getComparisonSuggestions); // GET /api/products/compare/suggestions?productIds=id1,id2
-router.get('/:id/share', getProductShareLinks); // Social sharing links
-router.get('/:id/recommendations', getProductRecommendations); // Intelligent recommendations
-router.get('/:id/frequently-bought-together', getFrequentlyBoughtTogether); // Frequently bought together
-router.get('/:id/related', getRelatedProducts); // Basic related products (backward compatible)
-router.get('/:id', getProduct);
+router.get('/compare', productIdsValidation, compareProducts); // GET /api/products/compare?productIds=id1,id2,id3
+router.get('/compare/suggestions', productIdsValidation, getComparisonSuggestions); // GET /api/products/compare/suggestions?productIds=id1,id2
+router.get('/:id/share', validateObjectId(), getProductShareLinks); // Social sharing links
+router.get('/:id/recommendations', validateObjectId(), getProductRecommendations); // Intelligent recommendations
+router.get('/:id/frequently-bought-together', validateObjectId(), getFrequentlyBoughtTogether); // Frequently bought together
+router.get('/:id/related', validateObjectId(), getRelatedProducts); // Basic related products (backward compatible)
+router.get('/:id', validateObjectId(), getProduct);
 router.post('/', protect, checkPermission('canManageProducts'), createProductValidation, createProduct);
 router.post('/import', protect, checkPermission('canManageProducts'), csvUpload.single('csv'), importProductsFromCSV);
 router.put('/:id', protect, checkPermission('canManageProducts'), validateObjectId(), updateProduct);

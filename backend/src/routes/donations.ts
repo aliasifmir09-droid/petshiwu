@@ -9,7 +9,13 @@ import {
 } from '../controllers/donationController';
 import { protect, authorize } from '../middleware/auth';
 import { checkPermission } from '../middleware/permissions';
-import { validateObjectId, paginationValidation, adminPaginationValidation } from '../middleware/validation';
+import { 
+  validateObjectId, 
+  paginationValidation, 
+  adminPaginationValidation,
+  createDonationIntentValidation,
+  confirmDonationValidation
+} from '../middleware/validation';
 
 const router = express.Router();
 
@@ -18,10 +24,10 @@ const router = express.Router();
 router.post('/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
 
 // Public route - anyone can create a donation
-router.post('/create-intent', createDonationIntent);
+router.post('/create-intent', createDonationIntentValidation, createDonationIntent);
 
 // Confirm donation (public, but should be called after payment)
-router.post('/confirm', confirmDonation);
+router.post('/confirm', confirmDonationValidation, confirmDonation);
 
 // Get single donation (user can see their own, admin can see all)
 router.get('/:id', protect, validateObjectId(), getDonation);

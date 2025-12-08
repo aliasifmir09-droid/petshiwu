@@ -31,7 +31,10 @@ import {
   createStaffValidation,
   validateObjectId,
   createAddressValidation,
-  createStockAlertValidation
+  createStockAlertValidation,
+  wishlistAddValidation,
+  wishlistRemoveValidation,
+  wishlistEmailValidation
 } from '../middleware/validation';
 
 const router = express.Router();
@@ -54,20 +57,20 @@ router.delete('/customers/:id', protect, hasPermission('canManageCustomers'), va
 router.get('/database/stats', protect, isAdmin, getDatabaseStats);
 
 // Wishlist routes (authenticated users)
-router.post('/wishlist', protect, addToWishlist);
-router.delete('/wishlist', protect, removeFromWishlist);
+router.post('/wishlist', protect, wishlistAddValidation, addToWishlist);
+router.delete('/wishlist', protect, wishlistRemoveValidation, removeFromWishlist);
 router.get('/wishlist', protect, getWishlist);
 router.get('/wishlist/share', protect, shareWishlist);
-router.post('/wishlist/email', protect, emailWishlist);
+router.post('/wishlist/email', protect, wishlistEmailValidation, emailWishlist);
 
 // Public wishlist sharing route
-router.get('/wishlist/:userId', getSharedWishlist);
+router.get('/wishlist/:userId', validateObjectId('userId'), getSharedWishlist);
 
 // Address management routes
 router.get('/addresses', protect, getAddresses);
 router.post('/addresses', protect, createAddressValidation, addAddress);
-router.put('/addresses/:addressId', protect, createAddressValidation, updateAddress);
-router.delete('/addresses/:addressId', protect, deleteAddress);
+router.put('/addresses/:addressId', protect, validateObjectId('addressId'), createAddressValidation, updateAddress);
+router.delete('/addresses/:addressId', protect, validateObjectId('addressId'), deleteAddress);
 
 // Stock alert routes
 router.post('/stock-alerts', protect, createStockAlertValidation, createStockAlert);
