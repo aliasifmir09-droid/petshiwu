@@ -104,8 +104,9 @@ const ensureAdminUser = async () => {
         console.log('   ⚠️  Please change the default password after first login!\n');
       }
     }
-  } catch (error: any) {
-    console.error('Error ensuring admin user:', error.message);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Error ensuring admin user:', errorMessage);
     // Retry after a delay if error occurred (but limit attempts)
     if (adminUserCheckAttempts < MAX_ADMIN_CHECK_ATTEMPTS) {
       setTimeout(ensureAdminUser, 3000);
@@ -298,7 +299,7 @@ app.use((req, res, next) => {
 
   // Sanitize request body strings
   if (req.body && typeof req.body === 'object') {
-    const sanitizeObject = (obj: any): any => {
+    const sanitizeObject = (obj: unknown): SanitizedObject => {
       if (typeof obj === 'string') {
         return escapeHtml(obj);
       }
@@ -319,7 +320,7 @@ app.use((req, res, next) => {
   
   // Sanitize query parameters strings
   if (req.query && typeof req.query === 'object') {
-    const sanitizeQuery = (obj: any): any => {
+    const sanitizeQuery = (obj: unknown): SanitizedObject => {
       if (typeof obj === 'string') {
         return escapeHtml(obj);
       }
@@ -600,10 +601,13 @@ try {
     console.log(`✅ Server is listening on ${typeof addr === 'string' ? addr : `${addr?.address}:${addr?.port}`}`);
   });
 
-} catch (error: any) {
+} catch (error: unknown) {
+  const errorObj = error instanceof Error ? error : { message: String(error), stack: undefined };
   console.error('❌ CRITICAL: Failed to start server:', error);
-  console.error('Error details:', error.message);
-  console.error('Stack:', error.stack);
+  console.error('Error details:', errorObj.message);
+  if (errorObj.stack) {
+    console.error('Stack:', errorObj.stack);
+  }
   // Exit after a delay to allow logging
   setTimeout(() => process.exit(1), 2000);
 }

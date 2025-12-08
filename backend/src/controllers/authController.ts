@@ -84,7 +84,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
           emailVerified: user.emailVerified
         }
       });
-    } catch (emailError: any) {
+    } catch (emailError: unknown) {
       // If email sending fails, still create user but log error
       logger.error('Error sending verification email:', emailError);
       // Don't fail registration if email fails - user can request resend
@@ -191,7 +191,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     }
 
     sendTokenResponse(safeToString(user._id), 200, res);
-  } catch (error: any) {
+  } catch (error: unknown) {
     next(error);
   }
 };
@@ -516,11 +516,12 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
       success: true,
       message: 'If an account with this email exists, a password reset link has been sent.'
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorObj = error instanceof Error ? error : { message: String(error), stack: undefined, name: 'Error' };
     logger.error('Unexpected error in forgotPassword:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
+      message: errorObj.message,
+      stack: errorObj.stack,
+      name: errorObj.name
     });
     next(error);
   }

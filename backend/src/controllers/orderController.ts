@@ -204,7 +204,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
 
         // Handle variant stock if item has a variant SKU
         if (item.variant && item.variant.sku) {
-          const variant = product.variants.find((v: any) => v.sku === item.variant.sku);
+          const variant = product.variants.find((v) => v.sku === item.variant?.sku);
           if (!variant) {
             throw new Error(`Variant with SKU "${item.variant.sku}" not found for product "${item.name}"`);
           }
@@ -319,9 +319,10 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
               
               paymentIntentId = intentId;
               isPaymentVerified = true;
-            } catch (stripeError: any) {
+            } catch (stripeError: unknown) {
               logger.error('Payment verification error:', stripeError);
-              throw new Error(`Payment verification failed: ${stripeError.message || 'Unknown error'}`);
+              const errorMessage = stripeError instanceof Error ? stripeError.message : 'Unknown error';
+              throw new Error(`Payment verification failed: ${errorMessage}`);
             }
           } else {
             // Stripe not configured but payment method requires it
@@ -374,7 +375,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
               user.firstName || 'Customer',
               fullOrder.orderNumber,
               {
-                items: fullOrder.items.map((item: any) => ({
+                items: fullOrder.items.map((item) => ({
                   name: item.name,
                   quantity: item.quantity,
                   price: item.price,
@@ -516,7 +517,7 @@ const normalizeOrders = (orders: unknown[]): NormalizedOrder[] => {
       // Error normalizing order in array
       return order;
     }
-  }).filter((order: any) => order !== null && order !== undefined);
+  }).filter((order): order is NormalizedOrder => order !== null && order !== undefined);
 };
 
 /**
@@ -568,7 +569,7 @@ export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFun
     const total = await Order.countDocuments({ user: req.user._id });
 
     // Normalize order IDs to strings - ensure _id is always a string
-    const normalizedOrders = orders.map((order: any) => {
+    const normalizedOrders = orders.map((order) => {
       // Force _id to be a string
       if (order._id) {
         // Handle ObjectId with buffer or other formats
@@ -590,7 +591,7 @@ export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFun
         }
       }
       return normalizeOrderId(order);
-    }).filter((order: any) => order !== null && order !== undefined);
+    }).filter((order): order is NormalizedOrder => order !== null && order !== undefined);
 
     res.status(200).json({
       success: true,
@@ -602,7 +603,7 @@ export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFun
         pages: Math.ceil(total / limit)
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Error in getMyOrders
     next(error);
   }
@@ -709,7 +710,7 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
       success: true,
       data: normalizedOrder
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     next(error);
   }
 };
@@ -751,7 +752,7 @@ export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFu
     const limit = parseInt(req.query.limit as string) || 20;
     const skip = (page - 1) * limit;
 
-    const query: any = {};
+    const query: Record<string, unknown> = {};
 
     // Filter by status
     if (req.query.status) {
@@ -895,7 +896,7 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response, next: N
               user.firstName || 'Customer',
               fullOrder.orderNumber,
               {
-                items: fullOrder.items.map((item: any) => ({
+                items: fullOrder.items.map((item) => ({
                   name: item.name,
                   quantity: item.quantity,
                   price: item.price,
@@ -1156,7 +1157,7 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
               user.firstName || 'Customer',
               fullOrder.orderNumber,
               {
-                items: fullOrder.items.map((item: any) => ({
+                items: fullOrder.items.map((item) => ({
                   name: item.name,
                   quantity: item.quantity,
                   price: item.price,
