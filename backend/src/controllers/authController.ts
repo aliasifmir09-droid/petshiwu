@@ -209,7 +209,7 @@ export const getMe = async (req: AuthRequest, res: Response, next: NextFunction)
     }
 
     // Include password expiry info for admin and staff
-    const responseData: any = user.toObject();
+    const responseData: Record<string, unknown> = user.toObject();
     if (user.role === 'admin' || user.role === 'staff') {
       responseData.passwordExpired = user.isPasswordExpired();
       responseData.daysUntilPasswordExpires = user.getDaysUntilPasswordExpires();
@@ -506,7 +506,7 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
       .then(() => {
         logger.info(`✅ Password reset email sent successfully to ${email}`);
       })
-      .catch((emailError: any) => {
+      .catch((emailError: unknown) => {
         logger.error(`❌ Error sending password reset email to ${email}:`, emailError.message);
         // Don't fail the request if email fails - user can request again
       });

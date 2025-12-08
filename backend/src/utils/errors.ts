@@ -50,13 +50,16 @@ export class ConflictError extends AppError {
   }
 }
 
+import { Request, Response, NextFunction } from 'express';
+import { AuthRequest } from '../middleware/auth';
+import { AsyncRequestHandler } from '../types/common';
+
 /**
  * Standardized error handler wrapper for async controller functions
+ * Provides proper TypeScript types instead of 'any'
  */
-export const asyncHandler = (
-  fn: (req: any, res: any, next: any) => Promise<any>
-) => {
-  return (req: any, res: any, next: any) => {
+export const asyncHandler = (fn: AsyncRequestHandler) => {
+  return (req: Request | AuthRequest, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };

@@ -9,8 +9,10 @@ import { asyncHandler, NotFoundError, UnauthorizedError, ValidationError } from 
 import { sendOrderConfirmationEmail, sendOrderCancellationEmail, sendOrderDeliveredEmail } from '../utils/emailService';
 import logger from '../utils/logger';
 
+import { StripeInstance } from '../types/common';
+
 // Initialize Stripe (optional - only if STRIPE_SECRET_KEY is set)
-let stripe: any = null;
+let stripe: StripeInstance | null = null;
 try {
   if (process.env.STRIPE_SECRET_KEY) {
     // Dynamic import to avoid errors if stripe package isn't installed
@@ -134,7 +136,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
     }
 
     // Normalize product IDs and validate items
-    const normalizedItems = items.map((item: any) => {
+    const normalizedItems = items.map((item: OrderItemInput): NormalizedOrderItem => {
       // Convert product ID to string if it's an object
       let productId: string | null = null;
       const rawProductId = item.product;
@@ -769,7 +771,7 @@ export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFu
     const total = await Order.countDocuments(query);
 
     // Normalize order IDs to strings
-    const normalizedOrders = orders.map((order: any) => normalizeOrderId(order));
+    const normalizedOrders = orders.map((order) => normalizeOrderId(order));
 
     res.status(200).json({
       success: true,

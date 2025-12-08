@@ -350,7 +350,7 @@ app.use(compression({
   level: 6 // Balance between compression and CPU usage
 }));
 
-// Cookie parser
+// Cookie parser - Must be before CORS to parse cookies correctly
 app.use(cookieParser());
 
 // Response sanitization - Remove sensitive data from responses
@@ -570,7 +570,9 @@ console.log(`🔑 MongoDB URI: ${process.env.MONGODB_URI ? 'Set' : 'NOT SET'}`);
 console.log(`🔐 JWT Secret: ${process.env.JWT_SECRET ? 'Set' : 'NOT SET'}`);
 
 // Start server - MUST start even if there are errors
-let server: any;
+import { Server } from 'http';
+
+let server: Server | null = null;
 try {
   server = app.listen(PORT, HOST, () => {
     console.log(`\n✅✅✅ SERVER SUCCESSFULLY STARTED ✅✅✅`);
@@ -580,7 +582,7 @@ try {
   });
 
   // Handle server errors
-  server.on('error', (error: any) => {
+  server.on('error', (error: NodeJS.ErrnoException) => {
     console.error('❌ Server error event:', error);
     if (error.code === 'EADDRINUSE') {
       console.error(`❌ Port ${PORT} is already in use`);
