@@ -17,10 +17,6 @@ interface ComparisonResponse {
   };
 }
 
-interface ComparisonSuggestionsResponse {
-  suggestions: Product[];
-}
-
 export const comparisonService = {
   compareProducts: async (productIds: string[]): Promise<ComparisonResponse> => {
     const response = await api.get<ApiResponse<ComparisonResponse>>(
@@ -34,8 +30,8 @@ export const comparisonService = {
     return response.data.data;
   },
 
-  getSuggestions: async (productIds: string[]): Promise<ComparisonSuggestionsResponse> => {
-    const response = await api.get<ApiResponse<ComparisonSuggestionsResponse>>(
+  getSuggestions: async (productIds: string[]): Promise<Product[]> => {
+    const response = await api.get<ApiResponse<Product[]>>(
       `/products/compare/suggestions`,
       {
         params: {
@@ -43,6 +39,7 @@ export const comparisonService = {
         }
       }
     );
+    // Backend returns data as array directly
     return response.data.data;
   }
 };

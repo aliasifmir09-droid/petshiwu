@@ -46,9 +46,8 @@ const ProductComparison = () => {
   });
 
   useEffect(() => {
-    if (suggestionData) {
-      // Backend returns data directly as array, not wrapped in suggestions
-      setSuggestions(Array.isArray(suggestionData) ? suggestionData : suggestionData.suggestions || []);
+    if (suggestionData && Array.isArray(suggestionData)) {
+      setSuggestions(suggestionData);
     } else {
       setSuggestions([]);
     }
