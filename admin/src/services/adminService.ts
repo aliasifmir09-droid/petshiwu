@@ -277,8 +277,9 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
       // url is Cloudinary URL, path is fallback for local storage
       return data;
     } catch (error: any) {
-      console.error('Upload API error:', error?.message || 'Unknown error');
-      // Don't log full error response - may contain sensitive data
+      // Use safe error logging
+      const { safeError } = await import('../utils/safeLogger');
+      safeError('Upload API error', error);
       throw error;
     }
   },
