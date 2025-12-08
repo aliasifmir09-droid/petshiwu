@@ -1,5 +1,12 @@
 import axios from 'axios';
 
+// Extend AxiosRequestConfig to include our custom skipAuth property
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    skipAuth?: boolean;
+  }
+}
+
 // Use relative URL to leverage Vite proxy in development
 // Normalize the URL: remove trailing slashes and ensure /api is included
 let API_URL = import.meta.env.VITE_API_URL || '/api';
