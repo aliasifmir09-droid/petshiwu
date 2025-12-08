@@ -81,6 +81,61 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
   }
 };
 
+/**
+ * Optional authentication middleware
+ * Does NOT return 401 if no token - instead sets req.user to null
+ * Useful for endpoints that need to check auth status without requiring authentication
+ */
+export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    let token;
+
+    // Check for token in httpOnly cookie
+    if (req.cookies?.token) {
+      token = req.cookies.token;
+    }
+
+    if (!token) {
+      // No token - set user to null and continue (don't return 401)
+      req.user = undefined;
+      return next();
+    }
+
+    try {
+      const secret = process.env.JWT_SECRET;
+      if (!secret) {
+        // Server error - set user to null and continue
+        req.user = undefined;
+        return next();
+      }
+      
+      // Verify token
+      const decoded = jwt.verify(token, secret, { algorithms: ['HS256'] }) as { id: string };
+      
+      // Find user
+      const user = await User.findById(decoded.id);
+
+      if (!user) {
+        // User not found - set user to null and continue (don't return 401)
+        req.user = undefined;
+        return next();
+      }
+
+      // User found - set req.user and continue
+      req.user = user;
+      next();
+    } catch (error: unknown) {
+      // Invalid/expired token - set user to null and continue (don't return 401)
+      req.user = undefined;
+      next();
+    }
+  } catch (error) {
+    // Any other error - set user to null and continue
+    req.user = undefined;
+    next();
+  }
+};
+
 export const authorize = (...roles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {

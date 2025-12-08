@@ -12,7 +12,7 @@ import {
   resetPassword,
   verifyResetToken
 } from '../controllers/authController';
-import { protect } from '../middleware/auth';
+import { protect, optionalAuth } from '../middleware/auth';
 import {
   registerValidation,
   loginValidation,
@@ -35,7 +35,7 @@ router.post('/resend-verification', resendVerificationValidation, resendVerifica
 router.post('/forgot-password', forgotPasswordValidation, forgotPassword);
 router.get('/verify-reset-token', verifyResetTokenValidation, verifyResetToken);
 router.post('/reset-password', resetPasswordValidation, resetPassword);
-router.get('/me', protect, getMe);
+router.get('/me', optionalAuth, getMe);
 router.put('/updateprofile', protect, updateProfileValidation, updateProfile);
 router.put('/updatepassword', protect, updatePasswordValidation, updatePassword);
 

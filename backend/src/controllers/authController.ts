@@ -197,13 +197,27 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 };
 
 // Get current user
+// Uses optionalAuth middleware - returns user if authenticated, null if not
+// Never returns 401 - always returns 200 with data or null
 export const getMe = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const user = await User.findById(req.user?._id);
+    // If no user (not authenticated), return success with null data
+    if (!req.user) {
+      return res.status(200).json({
+        success: true,
+        data: null,
+        message: 'User not authenticated'
+      });
+    }
+
+    // User is authenticated - fetch fresh user data
+    const user = await User.findById(req.user._id);
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
+      // User was in token but not found in DB - return null
+      return res.status(200).json({
+        success: true,
+        data: null,
         message: 'User not found'
       });
     }
