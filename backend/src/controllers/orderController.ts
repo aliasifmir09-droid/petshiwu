@@ -522,7 +522,12 @@ const normalizeOrders = (orders: unknown[]): NormalizedOrder[] => {
       const normalized = normalizeOrderId(order);
       // Double-check _id is a string
       if (normalized && normalized._id && typeof normalized._id !== 'string') {
-        normalized._id = normalized._id.toString ? normalized._id.toString() : String(normalized._id);
+        const idValue = normalized._id as { toString?: () => string } | string | number;
+        if (typeof idValue === 'object' && idValue !== null && 'toString' in idValue && typeof idValue.toString === 'function') {
+          normalized._id = idValue.toString();
+        } else {
+          normalized._id = String(normalized._id);
+        }
       }
       return normalized;
     } catch (error) {
