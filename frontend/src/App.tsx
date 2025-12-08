@@ -133,8 +133,9 @@ function App() {
     const loadUser = async () => {
       // Phase 2: Cookie-Only - Try to get user from backend using httpOnly cookie
       // If cookie exists, request will succeed. If not, it will fail and we set user to null
+      // Use skipAuth=true to prevent 401 errors from being logged in browser console
       try {
-        const user = await authService.getMe();
+        const user = await authService.getMe(true); // skipAuth=true prevents console spam
         // Only set user if we got a valid response
         if (user) {
           setUser(user);
@@ -146,6 +147,7 @@ function App() {
       } catch (error) {
         // No cookie or invalid cookie - user is not authenticated
         // This is expected after logout, so don't log as error
+        // skipAuth flag ensures this 401 error is silently handled
         setUser(null);
       } finally {
         setLoading(false);
