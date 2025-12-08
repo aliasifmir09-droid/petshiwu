@@ -36,7 +36,7 @@ const ProductDetail = () => {
   // For route /:petType/*, the splat (*) captures everything after petType
   // Since specific routes are ordered before this catch-all, we can safely extract the slug
   if (!actualProductSlug && petType) {
-    const pathname = location.pathname.replace(/^#/, ''); // Remove hash for HashRouter
+    const pathname = location.pathname; // BrowserRouter - no hash to remove
     const parts = pathname.split('/').filter(Boolean);
     
     // If path starts with petType, extract product slug (last part)
