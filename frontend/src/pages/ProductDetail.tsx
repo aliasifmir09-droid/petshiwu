@@ -99,18 +99,39 @@ const ProductDetail = () => {
   const [linkCopied, setLinkCopied] = useState(false);
 
   const handleShare = async (platform: string) => {
-    if (!socialLinks) return;
+    if (!socialLinks) {
+      showToast('Share links not available. Please try again.', 'error');
+      return;
+    }
     
-    const url = (socialLinks as any)[platform];
+    const url = socialLinks[platform as keyof typeof socialLinks];
+    
+    if (!url) {
+      console.error('Share URL not found for platform:', platform, 'Available links:', socialLinks);
+      showToast('Share link not available for this platform.', 'error');
+      return;
+    }
+    
     const shareMethod = platform === 'copyLink' ? 'copy' : platform as 'facebook' | 'twitter' | 'email';
     
     if (platform === 'copyLink') {
-      await navigator.clipboard.writeText(url);
-      setLinkCopied(true);
-      showToast('Link copied to clipboard!', 'success');
-      setTimeout(() => setLinkCopied(false), 2000);
+      try {
+        await navigator.clipboard.writeText(url);
+        setLinkCopied(true);
+        showToast('Link copied to clipboard!', 'success');
+        setTimeout(() => setLinkCopied(false), 2000);
+      } catch (error) {
+        console.error('Failed to copy to clipboard:', error);
+        showToast('Failed to copy link. Please try again.', 'error');
+      }
     } else {
-      window.open(url, '_blank', 'width=600,height=400');
+      // Open share window for social platforms
+      try {
+        window.open(url, '_blank', 'width=600,height=400,menubar=no,toolbar=no,resizable=yes,scrollbars=yes');
+      } catch (error) {
+        console.error('Failed to open share window:', error);
+        showToast('Failed to open share window. Please try again.', 'error');
+      }
     }
     setShowShareMenu(false);
     

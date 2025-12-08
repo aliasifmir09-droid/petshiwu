@@ -151,7 +151,7 @@ export const getProductShareLinks = async (req: Request, res: Response, next: Ne
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
       whatsapp: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
       email: `mailto:?subject=${encodeURIComponent(productName)}&body=${encodedText}%20${encodedUrl}`,
-      copy: productUrl // For copy to clipboard
+      copyLink: productUrl // For copy to clipboard - must match frontend interface
     };
 
     res.status(200).json({
