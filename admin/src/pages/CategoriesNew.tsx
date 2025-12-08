@@ -4,7 +4,7 @@ import { Plus, Edit, Trash2, X, Save, ChevronRight, ChevronDown, FolderTree } fr
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
-import { API_URL } from '@/services/api';
+import api, { API_URL } from '@/services/api';
 
 interface Category {
   _id: string;
@@ -40,13 +40,9 @@ const CategoriesNew = () => {
   const { data: categoriesResponse, isLoading } = useQuery({
     queryKey: ['admin-categories'],
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/categories/admin/all`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        }
-      });
-      if (!response.ok) throw new Error('Failed to fetch categories');
-      return response.json();
+      // Phase 2: Cookie-Only - Use api service which handles cookies automatically
+      const response = await api.get('/categories/admin/all');
+      return response.data;
     }
   });
 
@@ -69,16 +65,9 @@ const CategoriesNew = () => {
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch(`${API_URL}/categories`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) throw new Error('Failed to create category');
-      return response.json();
+      // Phase 2: Cookie-Only - Use api service which handles cookies automatically
+      const response = await api.post('/categories', data);
+      return response.data;
     },
     onSuccess: () => {
       // Invalidate all category-related queries
@@ -95,16 +84,9 @@ const CategoriesNew = () => {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const response = await fetch(`${API_URL}/categories/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) throw new Error('Failed to update category');
-      return response.json();
+      // Phase 2: Cookie-Only - Use api service which handles cookies automatically
+      const response = await api.put(`/categories/${id}`, data);
+      return response.data;
     },
     onSuccess: () => {
       // Invalidate all category-related queries
@@ -127,12 +109,8 @@ const CategoriesNew = () => {
         throw new Error('Invalid category ID format');
       }
       
-      const response = await fetch(`${API_URL}/categories/${encodeURIComponent(categoryId)}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        }
-      });
+      // Phase 2: Cookie-Only - Use api service which handles cookies automatically
+      const response = await api.delete(`/categories/${encodeURIComponent(categoryId)}`);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
