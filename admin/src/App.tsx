@@ -39,8 +39,12 @@ function App() {
     const loadUser = async () => {
       // Phase 2: Cookie-Only - Try to get user from backend using httpOnly cookie
       // If cookie exists, request will succeed. If not, it will fail and we set user to null
+      // Use skipAuth to prevent redirect loops when on login page
+      const isLoginPage = window.location.pathname === '/login' || window.location.pathname === '/login/';
+      
       try {
-        const userData = await adminService.getMe();
+        // Use skipAuth when on login page to prevent redirect loops
+        const userData = await adminService.getMe(isLoginPage);
         
         if (userData && (userData.role === 'admin' || userData.role === 'staff')) {
           setUser(userData);
@@ -49,8 +53,8 @@ function App() {
         }
       } catch (error: any) {
         // No cookie or invalid cookie - user is not authenticated
-        // This is expected after logout, so only log in development
-        if (process.env.NODE_ENV === 'development') {
+        // This is expected after logout or on login page, so only log in development
+        if (process.env.NODE_ENV === 'development' && !isLoginPage) {
           console.log('User not authenticated (expected after logout):', error.response?.status || error.message);
         }
         setUser(null);

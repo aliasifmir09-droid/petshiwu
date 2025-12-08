@@ -51,16 +51,26 @@ api.interceptors.response.use(
       // Only redirect if not already on login page and not during logout
       const url = error.config?.url || '';
       const isLogoutEndpoint = url.includes('/auth/logout');
-      const isLoginPage = window.location.pathname === '/login';
+      const isLoginEndpoint = url.includes('/auth/login');
+      const pathname = window.location.pathname;
+      const isLoginPage = pathname === '/login' || pathname === '/login/' || pathname.startsWith('/login');
       
       // Don't redirect if:
       // 1. Already on login page
       // 2. This is a logout request
-      // 3. Request has skipAuth flag (e.g., during logout)
+      // 3. This is a login request (login can fail with 401 for invalid credentials)
+      // 4. Request has skipAuth flag (e.g., during logout or auth check on login page)
       const skipAuth = (error.config as any)?.skipAuth;
       
-      if (!skipAuth && !isLogoutEndpoint && !isLoginPage) {
-        window.location.href = '/login';
+      if (!skipAuth && !isLogoutEndpoint && !isLoginEndpoint && !isLoginPage) {
+        // Prevent multiple redirects by checking if we're already navigating
+        const isNavigating = sessionStorage.getItem('adminNavigating') === 'true';
+        if (!isNavigating) {
+          sessionStorage.setItem('adminNavigating', 'true');
+          window.location.href = '/login';
+          // Clear flag after a short delay
+          setTimeout(() => sessionStorage.removeItem('adminNavigating'), 1000);
+        }
       }
     }
     return Promise.reject(error);
