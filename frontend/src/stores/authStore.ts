@@ -33,11 +33,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       // Silently continue - user is already logged out locally
     }
     
-    // Use pathname navigation (BrowserRouter handles it)
+    // Use hash navigation to home page - no full page reload to prevent loops
     // Small delay to ensure cookie is cleared
     setTimeout(() => {
-      if (window.location.pathname !== '/') {
-        window.location.href = '/';
+      if (window.location.hash !== '#/') {
+        window.location.hash = '/';
       }
     }, 50);
   }
