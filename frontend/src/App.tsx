@@ -130,11 +130,17 @@ function App() {
       // If cookie exists, request will succeed. If not, it will fail and we set user to null
       try {
         const user = await authService.getMe();
-        setUser(user);
-        // Sync wishlist with backend after user loads
-        await syncWithBackend();
+        // Only set user if we got a valid response
+        if (user) {
+          setUser(user);
+          // Sync wishlist with backend after user loads
+          await syncWithBackend();
+        } else {
+          setUser(null);
+        }
       } catch (error) {
         // No cookie or invalid cookie - user is not authenticated
+        // This is expected after logout, so don't log as error
         setUser(null);
       } finally {
         setLoading(false);

@@ -404,11 +404,15 @@ export const resendVerificationEmail = async (req: Request, res: Response, next:
 export const logout = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Clear httpOnly cookie with same settings as when it was set
-    res.cookie('token', 'none', {
-      expires: new Date(Date.now() + 10 * 1000), // Expire immediately (10 seconds)
+    // Must match the cookie settings from generateToken.ts exactly
+    const isProduction = process.env.NODE_ENV === 'production';
+    
+    // Clear the cookie by setting it to expire in the past
+    res.cookie('token', '', {
+      expires: new Date(0), // Expire immediately (past date)
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict' as const,
+      secure: isProduction, // Must match login cookie settings
+      sameSite: (isProduction ? 'none' : 'lax') as 'strict' | 'lax' | 'none', // Must match login cookie settings
       path: '/',
     });
 
