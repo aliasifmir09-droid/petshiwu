@@ -80,7 +80,10 @@ const Orders = () => {
     
     // Validate the ID
     if (!id || id === 'undefined' || id === 'null' || id === '[object Object]' || id.length < 10) {
-      console.error('Invalid order ID:', orderId, 'Extracted:', id);
+      // Use safe error logging
+      import('@/utils/safeLogger').then(({ safeWarn }) => {
+        safeWarn('Invalid order ID format', { orderId: orderId?.substring(0, 20) });
+      });
       showToast('Invalid order ID', 'error');
       return;
     }

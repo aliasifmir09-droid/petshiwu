@@ -135,7 +135,9 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
       return response.data.data;
     } catch (error: any) {
       // Log error without sensitive data
-      console.error('Create product API error:', error?.message || 'Unknown error');
+      // Use safe error logging
+      const { safeError } = await import('../utils/safeLogger');
+      safeError('Create product API error', error);
       // Don't log full error response - may contain sensitive data
       throw error;
     }

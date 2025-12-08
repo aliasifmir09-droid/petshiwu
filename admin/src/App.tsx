@@ -54,8 +54,10 @@ function App() {
       } catch (error: any) {
         // No cookie or invalid cookie - user is not authenticated
         // This is expected after logout or on login page, so only log in development
-        if (process.env.NODE_ENV === 'development' && !isLoginPage) {
-          console.log('User not authenticated (expected after logout):', error.response?.status || error.message);
+        if (!isLoginPage) {
+          import('./utils/safeLogger').then(({ safeLog }) => {
+            safeLog('User not authenticated (expected after logout)', { status: error.response?.status });
+          });
         }
         setUser(null);
       } finally {

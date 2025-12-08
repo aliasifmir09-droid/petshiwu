@@ -53,7 +53,9 @@ const Login = ({ onLogin }: LoginProps) => {
         // Force reload to ensure App.tsx picks up the user
         window.location.href = '/';
       } catch (error: any) {
-        console.error('Error after login:', error);
+        // Use safe error logging to prevent data leakage
+        const { safeError } = await import('@/utils/safeLogger');
+        safeError('Error after login', error);
         const errorMessage = error.response?.data?.message || 
                            error.message || 
                            'Error fetching user information. Please try again.';
@@ -61,7 +63,10 @@ const Login = ({ onLogin }: LoginProps) => {
       }
     },
     onError: (error: any) => {
-      console.error('Login error:', error);
+      // Use safe error logging to prevent data leakage
+      import('@/utils/safeLogger').then(({ safeError }) => {
+        safeError('Login error', error);
+      });
       // Don't show error if it's just about missing token (expected in Phase 2)
       if (!error?.message?.includes('token') && !error?.message?.includes('Token')) {
         const errorMessage = error.response?.data?.message || 

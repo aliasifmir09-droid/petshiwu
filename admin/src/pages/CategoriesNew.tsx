@@ -122,7 +122,10 @@ const CategoriesNew = () => {
       setDeleteConfirm({ isOpen: false });
     },
     onError: (error: any) => {
-      console.error('Category delete error:', error);
+      // Use safe error logging
+      import('@/utils/safeLogger').then(({ safeError }) => {
+        safeError('Category delete error', error);
+      });
       showToast(error.message || 'Failed to delete category', 'error');
     }
   });

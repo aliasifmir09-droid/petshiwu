@@ -161,7 +161,10 @@ const Checkout = () => {
         });
         refetchAddresses();
       } catch (error: any) {
-        console.error('Failed to save address:', error);
+        // Use safe error logging
+        import('@/utils/safeLogger').then(({ safeError }) => {
+          safeError('Failed to save address', error);
+        });
         // Don't block order submission if address save fails
       }
     }
@@ -189,7 +192,10 @@ const Checkout = () => {
           }
           
           if (!productId) {
-            console.error('Cannot extract product ID for:', item.product);
+            // Use safe error logging
+            import('@/utils/safeLogger').then(({ safeWarn }) => {
+              safeWarn('Cannot extract product ID for cart item');
+            });
             return item; // Return original item if we can't get ID
           }
           
@@ -201,10 +207,10 @@ const Checkout = () => {
               product: freshProduct
             };
           } catch (error) {
-            // Don't log errors with product data - privacy concern
-            if (import.meta.env.DEV) {
-              console.error('Failed to refresh product:', productId);
-            }
+            // Use safe error logging (only in development)
+            import('@/utils/safeLogger').then(({ safeError }) => {
+              safeError('Failed to refresh product', error);
+            });
             return item; // Return original item if fetch fails
           }
         })
@@ -216,10 +222,10 @@ const Checkout = () => {
       
       // Products refreshed silently
     } catch (error) {
-      // Don't log errors with cart data - privacy concern
-      if (import.meta.env.DEV) {
-        console.error('Error refreshing cart products');
-      }
+      // Use safe error logging
+      import('@/utils/safeLogger').then(({ safeError }) => {
+        safeError('Error refreshing cart products', error);
+      });
       showToast('Failed to refresh cart products', 'error');
     }
   };
@@ -294,7 +300,10 @@ const Checkout = () => {
             setPaymentMethod('cod'); // Fallback to COD
           }
         } catch (error: any) {
-          console.error('Payment intent error:', error);
+          // Use safe error logging
+          import('@/utils/safeLogger').then(({ safeError }) => {
+            safeError('Payment intent error', error);
+          });
           showToast(
             error.response?.data?.message || 'Payment initialization failed. Please use Cash on Delivery.',
             'error'

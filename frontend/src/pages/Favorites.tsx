@@ -91,7 +91,10 @@ const Favorites = () => {
         } catch (error: any) {
           // Don't log wishlist errors - privacy concern
           if (import.meta.env.DEV) {
-            console.error('Failed to fetch wishlist from backend');
+            // Use safe error logging
+            import('@/utils/safeLogger').then(({ safeError }) => {
+              safeError('Failed to fetch wishlist from backend', error);
+            });
           }
           // If 404 or other error, fallback to local storage
           if (items.length === 0) return [];
@@ -151,7 +154,10 @@ const Favorites = () => {
     } catch (error) {
       // Don't log wishlist errors - privacy concern
       if (import.meta.env.DEV) {
-        console.error('Failed to remove from wishlist');
+        // Use safe error logging
+        import('@/utils/safeLogger').then(({ safeError }) => {
+          safeError('Failed to remove from wishlist', error);
+        });
       }
     }
   };

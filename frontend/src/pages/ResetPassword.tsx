@@ -109,7 +109,10 @@ const ResetPassword = () => {
           // User fetch failed, but password reset succeeded
           // Don't log user data errors - privacy concern
           if (import.meta.env.DEV) {
-            console.error('Failed to fetch user data');
+            // Use safe error logging
+            import('@/utils/safeLogger').then(({ safeError }) => {
+              safeError('Failed to fetch user data', error);
+            });
           }
         }
 

@@ -161,7 +161,10 @@ const Donate = () => {
         setIsProcessing(false);
       }
     } catch (error: any) {
-      console.error('Donation error:', error);
+      // Use safe error logging
+      import('@/utils/safeLogger').then(({ safeError }) => {
+        safeError('Donation error', error);
+      });
       showToast(
         error.response?.data?.message || 'An error occurred. Please try again.',
         'error'

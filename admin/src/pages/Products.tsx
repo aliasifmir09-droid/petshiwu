@@ -131,7 +131,10 @@ const Products = () => {
       refetch();
     },
     onError: (error: any, productId) => {
-      console.error('Delete product error:', error);
+      // Use safe error logging
+      import('@/utils/safeLogger').then(({ safeError }) => {
+        safeError('Delete product error', error);
+      });
       
       const deletedId = String(productId);
       

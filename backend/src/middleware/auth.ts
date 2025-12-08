@@ -30,15 +30,12 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
     }
 
     if (!token) {
-      // Debug: Log cookie information in development
+      // Debug: Log minimal information in development only
+      // Never log cookie values, headers, or sensitive request data
       if (process.env.NODE_ENV === 'development') {
         console.log('Auth Debug - No token found:', {
           hasCookies: !!req.cookies,
-          cookies: req.cookies,
-          cookieNames: req.cookies ? Object.keys(req.cookies) : [],
-          rawCookieHeader: req.headers.cookie,
-          origin: req.headers.origin,
-          referer: req.headers.referer,
+          cookieCount: req.cookies ? Object.keys(req.cookies).length : 0,
           url: req.url,
           method: req.method
         });
