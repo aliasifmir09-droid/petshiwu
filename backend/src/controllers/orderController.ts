@@ -459,20 +459,21 @@ const normalizeOrderId = (order: unknown): NormalizedOrder | null => {
   try {
     // Convert Mongoose document to plain object
     const orderObj = order as Record<string, unknown>;
-    let normalized: Partial<NormalizedOrder>;
+    let normalized: Record<string, unknown>;
     if ('toObject' in orderObj && typeof orderObj.toObject === 'function') {
-      normalized = orderObj.toObject() as Partial<NormalizedOrder>;
+      normalized = orderObj.toObject() as Record<string, unknown>;
     } else if ('toJSON' in orderObj && typeof orderObj.toJSON === 'function') {
-      normalized = orderObj.toJSON() as Partial<NormalizedOrder>;
+      normalized = orderObj.toJSON() as Record<string, unknown>;
     } else {
-      normalized = { ...orderObj } as Partial<NormalizedOrder>;
+      normalized = { ...orderObj };
     }
     
     // Normalize _id - ensure it's a string
     if (normalized._id) {
       // Handle ObjectId objects properly
-      if (normalized._id.toString && typeof normalized._id.toString === 'function') {
-        normalized._id = normalized._id.toString();
+      const idValue = normalized._id as { toString?: () => string } | string | number;
+      if (typeof idValue === 'object' && idValue !== null && 'toString' in idValue && typeof idValue.toString === 'function') {
+        normalized._id = idValue.toString();
       } else {
         normalized._id = String(normalized._id);
       }
@@ -480,19 +481,21 @@ const normalizeOrderId = (order: unknown): NormalizedOrder | null => {
     
     // Normalize user._id if user is populated
     if (normalized.user && typeof normalized.user === 'object' && normalized.user !== null) {
-      if (normalized.user._id) {
-        normalized.user._id = String(normalized.user._id);
+      const userObj = normalized.user as Record<string, unknown>;
+      if (userObj._id) {
+        userObj._id = String(userObj._id);
       }
     }
     
     // Normalize product IDs in items
     if (normalized.items && Array.isArray(normalized.items)) {
-      normalized.items = normalized.items.map((item) => {
+      normalized.items = (normalized.items || []).map((item: unknown) => {
         if (item && typeof item === 'object') {
-          const normalizedItem = { ...item };
+          const normalizedItem = { ...(item as Record<string, unknown>) };
           if (normalizedItem.product && typeof normalizedItem.product === 'object' && normalizedItem.product !== null) {
-            if (normalizedItem.product._id) {
-              normalizedItem.product = String(normalizedItem.product._id);
+            const productObj = normalizedItem.product as Record<string, unknown>;
+            if (productObj._id) {
+              normalizedItem.product = String(productObj._id);
             }
           }
           return normalizedItem;
