@@ -131,8 +131,9 @@ export const getProductShareLinks = async (req: Request, res: Response, next: Ne
     }
 
     // Build SEO-friendly product URL (matches frontend format)
-    // Frontend uses BrowserRouter, so clean URLs without hash
-    const productUrl = buildProductUrl(product, frontendUrl);
+    // Frontend uses HashRouter, so we need to add # before the path
+    const productPath = buildProductUrl(product, '').replace(/^\//, ''); // Remove leading slash, we'll add it with #
+    const productUrl = `${frontendUrl}/#/${productPath}`;
     const productName = product.name;
     const productDescription = product.shortDescription || product.name;
     

@@ -92,9 +92,9 @@ api.interceptors.response.use(
       if (!skipAuth && 
           !isPublicEndpoint && 
           !isNavigating &&
-          window.location.pathname !== '/login' && 
-          window.location.pathname !== '/register' &&
-          window.location.pathname !== '/') {
+          window.location.hash !== '#/login' && 
+          window.location.hash !== '#/register' &&
+          window.location.hash !== '#/') {
         // Mark that we're navigating to prevent loops
         sessionStorage.setItem('_isNavigating', 'true');
         
@@ -103,9 +103,9 @@ api.interceptors.response.use(
           useAuthStore.getState().setUser(null);
         });
         
-        // Use pathname navigation (BrowserRouter handles it)
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
+        // Use hash navigation to prevent full page reload loops
+        if (window.location.hash !== '#/login') {
+          window.location.hash = '/login';
         }
         
         // Clear navigation flag after a short delay
@@ -118,12 +118,12 @@ api.interceptors.response.use(
       const isOrderEndpoint = url.includes('/orders/');
       if (!isOrderEndpoint) {
         // Redirect to 403 page for other endpoints
-        window.location.href = '/403';
+        window.location.href = '/#/403';
       }
     } else if (error.response?.status === 404 && !isWishlistEndpoint && !isProductEndpoint) {
       // Only redirect to 404 page for non-resource endpoints
       // Wishlist and product endpoints might legitimately return 404
-      window.location.href = '/404';
+      window.location.href = '/#/404';
     }
     return Promise.reject(error);
   }
