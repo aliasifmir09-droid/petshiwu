@@ -307,15 +307,15 @@ app.use((req, res, next) => {
         return obj.map(sanitizeObject);
       }
       if (obj && typeof obj === 'object' && obj.constructor === Object) {
-        const sanitized: any = {};
+        const sanitized: Record<string, unknown> = {};
         for (const key in obj) {
-          sanitized[key] = sanitizeObject(obj[key]);
+          sanitized[key] = sanitizeObject((obj as Record<string, unknown>)[key]);
         }
-        return sanitized;
+        return sanitized as SanitizedObject;
       }
-      return obj;
+      return obj as SanitizedObject;
     };
-    req.body = sanitizeObject(req.body);
+    req.body = sanitizeObject(req.body) as typeof req.body;
   }
   
   // Sanitize query parameters strings
@@ -325,18 +325,18 @@ app.use((req, res, next) => {
         return escapeHtml(obj);
       }
       if (Array.isArray(obj)) {
-        return obj.map(sanitizeQuery);
+        return obj.map(sanitizeQuery) as SanitizedObject;
       }
       if (obj && typeof obj === 'object' && obj.constructor === Object) {
-        const sanitized: any = {};
+        const sanitized: Record<string, unknown> = {};
         for (const key in obj) {
-          sanitized[key] = sanitizeQuery(obj[key]);
+          sanitized[key] = sanitizeQuery((obj as Record<string, unknown>)[key]);
         }
-        return sanitized;
+        return sanitized as SanitizedObject;
       }
-      return obj;
+      return obj as SanitizedObject;
     };
-    req.query = sanitizeQuery(req.query);
+    req.query = sanitizeQuery(req.query) as typeof req.query;
   }
   next();
 });
