@@ -27,8 +27,9 @@ dotenv.config();
 // Validate required environment variables (but don't exit - let server start)
 try {
   validateEnv();
-} catch (error: any) {
-  console.error('⚠️  Environment validation error:', error.message);
+} catch (error: unknown) {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  console.error('⚠️  Environment validation error:', errorMessage);
   console.warn('⚠️  Server will start but may not function correctly');
 }
 

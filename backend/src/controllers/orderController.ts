@@ -168,9 +168,10 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       try {
         session = await mongoose.startSession();
         session.startTransaction();
-      } catch (error: any) {
+      } catch (error: unknown) {
         // If transaction fails (e.g., no replica set), continue without it
-        if (error.message && error.message.includes('replica set')) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (errorMessage.includes('replica set')) {
           session = null;
         } else {
           throw error;
@@ -414,8 +415,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       if (error.message.includes('not found') || error.message.includes('out of stock') || error.message.includes('Insufficient stock')) {
         return res.status(400).json({
           success: false,
-          message: error.message,
-          errors: [error.message]
+          message: errorMessage,
+          errors: [errorMessage]
         });
       }
       
@@ -426,10 +427,11 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         session.endSession();
       }
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Handle validation errors
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map((err: any) => err.message);
+    if (error instanceof Error && error.name === 'ValidationError') {
+      const validationError = error as { errors?: Record<string, { message: string }> };
+      const messages = Object.values(validationError.errors || {}).map((err) => err.message);
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
@@ -448,12 +450,12 @@ const normalizeOrderId = (order: any): any => {
   try {
     // Convert Mongoose document to plain object
     let normalized: any;
-    if (order.toObject && typeof order.toObject === 'function') {
-      normalized = order.toObject();
-    } else if (order.toJSON && typeof order.toJSON === 'function') {
-      normalized = order.toJSON();
+    if ('toObject' in orderObj && typeof orderObj.toObject === 'function') {
+      normalized = orderObj.toObject() as Partial<NormalizedOrder>;
+    } else if ('toJSON' in orderObj && typeof orderObj.toJSON === 'function') {
+      normalized = orderObj.toJSON() as Partial<NormalizedOrder>;
     } else {
-      normalized = { ...order };
+      normalized = { ...orderObj } as Partial<NormalizedOrder>;
     }
     
     // Normalize _id - ensure it's a string
@@ -475,7 +477,7 @@ const normalizeOrderId = (order: any): any => {
     
     // Normalize product IDs in items
     if (normalized.items && Array.isArray(normalized.items)) {
-      normalized.items = normalized.items.map((item: any) => {
+      normalized.items = normalized.items.map((item) => {
         if (item && typeof item === 'object') {
           const normalizedItem = { ...item };
           if (normalizedItem.product && typeof normalizedItem.product === 'object' && normalizedItem.product !== null) {
@@ -489,20 +491,20 @@ const normalizeOrderId = (order: any): any => {
       });
     }
     
-    return normalized;
+    return normalized as NormalizedOrder;
   } catch (error) {
     // Error normalizing order
-    // Return original order if normalization fails
-    return order;
+    // Return null if normalization fails
+    return null;
   }
 };
 
 // Helper function to normalize array of orders
-const normalizeOrders = (orders: any[]): any[] => {
+const normalizeOrders = (orders: unknown[]): NormalizedOrder[] => {
   if (!Array.isArray(orders)) {
     return [];
   }
-  return orders.map((order: any) => {
+  return orders.map((order) => {
     try {
       const normalized = normalizeOrderId(order);
       // Double-check _id is a string
