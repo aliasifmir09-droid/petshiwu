@@ -42,6 +42,7 @@ export interface IOrder extends Document {
   isPaid: boolean;
   paidAt?: Date;
   paymentIntentId?: string; // Stripe payment intent ID for online payments
+  paypalOrderId?: string; // PayPal order ID for PayPal payments
   isDelivered: boolean;
   deliveredAt?: Date;
   trackingNumber?: string;
@@ -165,6 +166,7 @@ const orderSchema = new Schema<IOrder>(
     },
     paidAt: Date,
     paymentIntentId: String, // Stripe payment intent ID
+    paypalOrderId: String, // PayPal order ID
     isDelivered: {
       type: Boolean,
       default: false

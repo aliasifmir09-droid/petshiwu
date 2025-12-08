@@ -6,6 +6,8 @@ interface CreateOrderData {
   shippingAddress: ShippingAddress;
   billingAddress?: ShippingAddress;
   paymentMethod: 'credit_card' | 'paypal' | 'apple_pay' | 'google_pay' | 'cod';
+  paymentIntentId?: string;
+  paypalOrderId?: string;
   itemsPrice: number;
   shippingPrice: number;
   taxPrice: number;

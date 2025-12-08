@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/useToast';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import CheckoutDonationModal from '@/components/CheckoutDonationModal';
 import PaymentForm from '@/components/PaymentForm';
+import PayPalButton from '@/components/PayPalButton';
 import { getStripe } from '@/utils/stripe';
 import { normalizeId } from '@/utils/idNormalizer';
 import { trackPurchase } from '@/utils/analytics';
@@ -50,6 +51,7 @@ interface CreateOrderData {
   };
   paymentMethod: 'credit_card' | 'paypal' | 'apple_pay' | 'google_pay' | 'cod';
   paymentIntentId?: string;
+  paypalOrderId?: string;
   itemsPrice: number;
   shippingPrice: number;
   taxPrice: number;
@@ -79,9 +81,11 @@ const Checkout = () => {
 
   const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'paypal' | 'apple_pay' | 'google_pay' | 'cod'>('cod');
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
+  const [paypalOrderId, setPaypalOrderId] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [showPayPalButton, setShowPayPalButton] = useState(false);
   const [donationAmount, setDonationAmount] = useState<number>(0);
   const [showDonationModal, setShowDonationModal] = useState(false);
   const [pendingOrderData, setPendingOrderData] = useState<CreateOrderData | null>(null);
@@ -184,9 +188,18 @@ const Checkout = () => {
     }
   });
 
-  // Create payment intent when payment method changes to non-COD
+  // Create payment intent when payment method changes to non-COD (but not PayPal)
   useEffect(() => {
     const createPaymentIntent = async () => {
+      // PayPal doesn't use Stripe payment intents - it has its own flow
+      if (paymentMethod === 'paypal') {
+        setShowPayPalButton(true);
+        setShowPaymentForm(false);
+        setClientSecret(null);
+        setPaymentIntentId(null);
+        return;
+      }
+
       if (paymentMethod !== 'cod' && !clientSecret && !isProcessingPayment) {
         setIsProcessingPayment(true);
         try {
@@ -199,6 +212,7 @@ const Checkout = () => {
             setClientSecret(paymentIntentResponse.data.clientSecret);
             setPaymentIntentId(paymentIntentResponse.data.paymentIntentId);
             setShowPaymentForm(true);
+            setShowPayPalButton(false);
           } else {
             showToast('Failed to initialize payment. Please try again or use Cash on Delivery.', 'error');
             setPaymentMethod('cod'); // Fallback to COD
@@ -216,8 +230,10 @@ const Checkout = () => {
       } else if (paymentMethod === 'cod') {
         // Reset payment form when switching to COD
         setShowPaymentForm(false);
+        setShowPayPalButton(false);
         setClientSecret(null);
         setPaymentIntentId(null);
+        setPaypalOrderId(null);
       }
     };
 
@@ -234,16 +250,27 @@ const Checkout = () => {
     }
 
     // For online payments, payment must be completed first
-    if (paymentMethod !== 'cod' && !paymentIntentId) {
+    if (paymentMethod !== 'cod' && paymentMethod !== 'paypal' && !paymentIntentId) {
       showToast('Please complete the payment first.', 'error');
+      return;
+    }
+
+    // For PayPal, order ID must be present
+    if (paymentMethod === 'paypal' && !paypalOrderId) {
+      showToast('Please complete the PayPal payment first.', 'error');
       return;
     }
 
     // For COD, proceed directly. For online payments, payment should already be completed
     if (paymentMethod === 'cod') {
       await prepareAndSubmitOrder();
+    } else if (paymentMethod === 'paypal') {
+      // PayPal payment already completed
+      if (paypalOrderId) {
+        await prepareAndSubmitOrder(undefined, paypalOrderId);
+      }
     } else {
-      // For online payments, if payment is already completed, proceed
+      // For Stripe payments, if payment is already completed, proceed
       if (paymentIntentId) {
         await prepareAndSubmitOrder(paymentIntentId);
       } else {
@@ -287,7 +314,26 @@ const Checkout = () => {
     setPaymentMethod('cod');
   };
 
-  const prepareAndSubmitOrder = async (confirmedPaymentIntentId?: string) => {
+  const handlePayPalSuccess = async (orderId: string, payerId?: string) => {
+    setPaypalOrderId(orderId);
+    setShowPayPalButton(false);
+    
+    // Proceed with order creation
+    await prepareAndSubmitOrder(undefined, orderId);
+  };
+
+  const handlePayPalError = (error: string) => {
+    showToast(error, 'error');
+    setIsProcessingPayment(false);
+  };
+
+  const handlePayPalCancel = () => {
+    setShowPayPalButton(false);
+    setPaypalOrderId(null);
+    setPaymentMethod('cod');
+  };
+
+  const prepareAndSubmitOrder = async (confirmedPaymentIntentId?: string, paypalOrderIdParam?: string) => {
     // Get current items (may be refreshed)
     let currentItems = items;
     
@@ -351,6 +397,7 @@ const Checkout = () => {
       },
       paymentMethod,
       paymentIntentId: confirmedPaymentIntentId || paymentIntentId || undefined,
+      paypalOrderId: paypalOrderIdParam || paypalOrderId || undefined,
       itemsPrice: subtotal,
       shippingPrice: shipping,
       taxPrice: tax,
@@ -593,7 +640,7 @@ const Checkout = () => {
             </div>
 
             {/* Payment Form - Show when payment method is selected and client secret is ready */}
-            {showPaymentForm && clientSecret && paymentMethod !== 'cod' && (
+            {showPaymentForm && clientSecret && paymentMethod !== 'cod' && paymentMethod !== 'paypal' && (
               <Elements stripe={getStripe()} options={{ clientSecret }}>
                 <PaymentForm
                   clientSecret={clientSecret}
@@ -603,6 +650,29 @@ const Checkout = () => {
                   onCancel={handlePaymentCancel}
                 />
               </Elements>
+            )}
+
+            {/* PayPal Button - Show when PayPal is selected */}
+            {showPayPalButton && paymentMethod === 'paypal' && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.202 1.13-.49 2.36-1.02 3.922-.826 2.448-2.71 4.482-5.644 6.087-.178.096-.36.188-.548.275-2.24 1.08-4.51 1.657-6.74 1.657-.91 0-1.787-.09-2.6-.27-.18-.04-.36-.08-.54-.13l-.14-.03c-.76-.17-1.5-.38-2.2-.63-.2-.07-.4-.15-.6-.23l-.3-.12c-.6-.24-1.12-.48-1.55-.72-.4-.23-.73-.45-1-.66-.26-.2-.45-.38-.58-.54-.12-.15-.2-.28-.24-.4-.04-.1-.06-.18-.06-.24 0-.06.02-.11.05-.15.03-.04.08-.07.15-.09.14-.04.33-.06.57-.06h4.6c.24 0 .45.04.63.1.18.07.33.16.45.27.12.11.22.24.3.4.08.16.14.34.18.54.04.2.06.41.06.63 0 .22-.02.43-.06.63-.04.2-.1.38-.18.54-.08.16-.18.29-.3.4-.12.11-.27.2-.45.27-.18.06-.39.1-.63.1H9.23c-.07 0-.13.01-.18.03-.05.02-.09.05-.12.09-.03.04-.05.08-.05.13 0 .05.02.09.05.13.03.04.07.07.12.09.05.02.11.03.18.03h2.6c.24 0 .45.04.63.1.18.07.33.16.45.27.12.11.22.24.3.4.08.16.14.34.18.54.04.2.06.41.06.63 0 .22-.02.43-.06.63-.04.2-.1.38-.18.54-.08.16-.18.29-.3.4-.12.11-.27.2-.45.27-.18.06-.39.1-.63.1h-2.6c-.07 0-.13.01-.18.03-.05.02-.09.05-.12.09-.03.04-.05.08-.05.13 0 .05.02.09.05.13.03.04.07.07.12.09.05.02.11.03.18.03h4.6c.24 0 .45.04.63.1.18.07.33.16.45.27.12.11.22.24.3.4.08.16.14.34.18.54.04.2.06.41.06.63 0 .22-.02.43-.06.63-.04.2-.1.38-.18.54-.08.16-.18.29-.3.4-.12.11-.27.2-.45.27-.18.06-.39.1-.63.1H7.076c-.07 0-.13.01-.18.03-.05.02-.09.05-.12.09-.03.04-.05.08-.05.13 0 .05.02.09.05.13.03.04.07.07.12.09.05.02.11.03.18.03z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">PayPal Payment</h3>
+                    <p className="text-sm text-gray-600">Pay securely with your PayPal account</p>
+                  </div>
+                </div>
+                <PayPalButton
+                  amount={total}
+                  onSuccess={handlePayPalSuccess}
+                  onError={handlePayPalError}
+                  onCancel={handlePayPalCancel}
+                />
+              </div>
             )}
 
             {/* Order Notes */}

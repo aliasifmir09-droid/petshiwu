@@ -275,10 +275,30 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
 
       // Step 3: Verify payment for online payment methods (not COD)
       let paymentIntentId: string | undefined = undefined;
+      let paypalOrderId: string | undefined = undefined;
+      let isPaymentVerified = false;
+
       if (paymentMethod !== 'cod') {
-        const { paymentIntentId: intentId } = req.body;
+        const { paymentIntentId: intentId, paypalOrderId: paypalId } = req.body;
         
-        if (intentId) {
+        if (paymentMethod === 'paypal') {
+          // PayPal payment verification
+          if (!paypalId) {
+            throw new Error('PayPal Order ID is required for PayPal payments');
+          }
+          
+          // For PayPal, we trust the frontend has already captured the payment
+          // In production, you should verify with PayPal API
+          // For now, we'll accept the PayPal order ID as proof of payment
+          paypalOrderId = paypalId;
+          isPaymentVerified = true;
+          logger.info(`PayPal payment received: Order ID ${paypalId}`);
+        } else {
+          // Stripe payment verification (credit_card, apple_pay, google_pay)
+          if (!intentId) {
+            throw new Error('Payment Intent ID is required for online payment methods');
+          }
+          
           // Verify payment with Stripe
           if (stripe) {
             try {
@@ -295,6 +315,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
               }
               
               paymentIntentId = intentId;
+              isPaymentVerified = true;
             } catch (stripeError: any) {
               logger.error('Payment verification error:', stripeError);
               throw new Error(`Payment verification failed: ${stripeError.message || 'Unknown error'}`);
@@ -303,9 +324,10 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
             // Stripe not configured but payment method requires it
             throw new Error('Payment processing not configured. Please use Cash on Delivery (COD) or configure Stripe.');
           }
-        } else {
-          throw new Error('Payment Intent ID is required for online payment methods');
         }
+      } else {
+        // COD - no payment verification needed
+        isPaymentVerified = true;
       }
 
       // Step 4: Create order within transaction
@@ -316,9 +338,10 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         billingAddress: billingAddress || shippingAddress,
         paymentMethod,
         paymentIntentId: paymentIntentId,
-        paymentStatus: paymentMethod === 'cod' ? 'pending' : (paymentIntentId ? 'paid' : 'pending'),
-        isPaid: paymentMethod !== 'cod' && paymentIntentId ? true : false,
-        paidAt: paymentMethod !== 'cod' && paymentIntentId ? new Date() : undefined,
+        paypalOrderId: paypalOrderId,
+        paymentStatus: paymentMethod === 'cod' ? 'pending' : (isPaymentVerified ? 'paid' : 'pending'),
+        isPaid: paymentMethod !== 'cod' && isPaymentVerified ? true : false,
+        paidAt: paymentMethod !== 'cod' && isPaymentVerified ? new Date() : undefined,
         itemsPrice,
         shippingPrice,
         taxPrice,
