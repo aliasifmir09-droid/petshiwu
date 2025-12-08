@@ -30,7 +30,7 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
     queryKey: ['user-info'],
     queryFn: () => adminService.getMe(),
     retry: false, // Don't retry on 401 - it's expected if not authenticated
-    enabled: false // Disable by default - only fetch when needed
+    staleTime: 5 * 60 * 1000 // Cache for 5 minutes
   });
 
   // Get out-of-stock product count
