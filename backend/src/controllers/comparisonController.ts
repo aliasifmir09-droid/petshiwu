@@ -67,7 +67,7 @@ export const compareProducts = async (req: Request, res: Response, next: NextFun
     // Structure comparison data
     const comparison = {
       products: products.map((product: any) => ({
-        _id: product._id,
+        _id: String(product._id), // Ensure _id is always a string
         name: product.name,
         slug: product.slug,
         brand: product.brand,

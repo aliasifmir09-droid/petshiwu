@@ -323,15 +323,22 @@ const ProductComparison = () => {
       </div>
 
       {/* Summary Cards */}
-      {summary && (
+      {summary && products.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <DollarSign className="w-5 h-5 text-green-600" />
               <span className="font-semibold text-green-800">Cheapest</span>
             </div>
-            <p className="text-sm text-green-700">
-              {products.find(p => String(p._id) === summary.cheapest)?.name || 'N/A'}
+            <p className="text-sm text-green-700 line-clamp-2">
+              {(() => {
+                const cheapestProduct = products.find(p => {
+                  const productId = String(p._id);
+                  const summaryId = String(summary.cheapest);
+                  return productId === summaryId;
+                });
+                return cheapestProduct?.name || 'N/A';
+              })()}
             </p>
           </div>
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -339,8 +346,15 @@ const ProductComparison = () => {
               <Star className="w-5 h-5 text-yellow-600" />
               <span className="font-semibold text-yellow-800">Highest Rated</span>
             </div>
-            <p className="text-sm text-yellow-700">
-              {products.find(p => String(p._id) === summary.highestRated)?.name || 'N/A'}
+            <p className="text-sm text-yellow-700 line-clamp-2">
+              {(() => {
+                const highestRatedProduct = products.find(p => {
+                  const productId = String(p._id);
+                  const summaryId = String(summary.highestRated);
+                  return productId === summaryId;
+                });
+                return highestRatedProduct?.name || 'N/A';
+              })()}
             </p>
           </div>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -348,8 +362,15 @@ const ProductComparison = () => {
               <CheckCircle className="w-5 h-5 text-blue-600" />
               <span className="font-semibold text-blue-800">Most Reviewed</span>
             </div>
-            <p className="text-sm text-blue-700">
-              {products.find(p => String(p._id) === summary.mostReviewed)?.name || 'N/A'}
+            <p className="text-sm text-blue-700 line-clamp-2">
+              {(() => {
+                const mostReviewedProduct = products.find(p => {
+                  const productId = String(p._id);
+                  const summaryId = String(summary.mostReviewed);
+                  return productId === summaryId;
+                });
+                return mostReviewedProduct?.name || 'N/A';
+              })()}
             </p>
           </div>
           <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
@@ -357,8 +378,15 @@ const ProductComparison = () => {
               <Award className="w-5 h-5 text-purple-600" />
               <span className="font-semibold text-purple-800">Best Value</span>
             </div>
-            <p className="text-sm text-purple-700">
-              {products.find(p => String(p._id) === summary.bestValue)?.name || 'N/A'}
+            <p className="text-sm text-purple-700 line-clamp-2">
+              {(() => {
+                const bestValueProduct = products.find(p => {
+                  const productId = String(p._id);
+                  const summaryId = String(summary.bestValue);
+                  return productId === summaryId;
+                });
+                return bestValueProduct?.name || 'N/A';
+              })()}
             </p>
           </div>
         </div>
