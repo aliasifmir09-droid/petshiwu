@@ -143,23 +143,14 @@ const ProductDetail = () => {
 
   const handleCompare = () => {
     if (!product?._id) return;
-    const currentIds = localStorage.getItem('compareIds')?.split(',').filter(Boolean) || [];
-    if (currentIds.length >= 5) {
-      showToast('You can compare up to 5 products', 'warning');
-      return;
-    }
-    if (currentIds.includes(String(product._id))) {
-      showToast('Product already in comparison', 'warning');
-      return;
-    }
-    const newIds = [...currentIds, String(product._id)];
-    localStorage.setItem('compareIds', newIds.join(','));
+    const productId = String(product._id);
+    
+    // Navigate to compare page with this product
+    // The compare page will show search/suggestions for the second product
+    navigate(`/compare?ids=${productId}`);
     
     // Track product comparison
-    trackProductComparison(newIds);
-    
-    navigate(`/compare?ids=${newIds.join(',')}`);
-    showToast('Product added to comparison', 'success');
+    trackProductComparison([productId]);
   };
 
   // Reset zoom when image changes

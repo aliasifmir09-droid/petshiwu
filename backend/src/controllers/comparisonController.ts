@@ -117,18 +117,22 @@ export const compareProducts = async (req: Request, res: Response, next: NextFun
       summary: {
         cheapest: products.reduce((min: any, p: any) => 
           p.basePrice < min.basePrice ? p : min, products[0]
-        ),
+        )._id.toString(),
         highestRated: products.reduce((max: any, p: any) => 
-          p.averageRating > max.averageRating ? p : max, products[0]
-        ),
+          (p.averageRating || 0) > (max.averageRating || 0) ? p : max, products[0]
+        )._id.toString(),
         mostReviewed: products.reduce((max: any, p: any) => 
-          p.totalReviews > max.totalReviews ? p : max, products[0]
-        ),
+          (p.totalReviews || 0) > (max.totalReviews || 0) ? p : max, products[0]
+        )._id.toString(),
         bestValue: products.reduce((best: any, p: any) => {
-          const value = p.averageRating * (p.totalReviews || 1) / p.basePrice;
-          const bestValue = best.averageRating * (best.totalReviews || 1) / best.basePrice;
-          return value > bestValue ? p : best;
-        }, products[0])
+          const pRating = p.averageRating || 0;
+          const pReviews = p.totalReviews || 0;
+          const pValue = pRating * (pReviews + 1) / (p.basePrice || 1);
+          const bestRating = best.averageRating || 0;
+          const bestReviews = best.totalReviews || 0;
+          const bestValue = bestRating * (bestReviews + 1) / (best.basePrice || 1);
+          return pValue > bestValue ? p : best;
+        }, products[0])._id.toString()
       }
     };
 
