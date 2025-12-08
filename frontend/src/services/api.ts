@@ -50,8 +50,21 @@ api.interceptors.response.use(
     
     if (error.response?.status === 401) {
       // Phase 2: No localStorage token to remove - cookies are cleared by backend on logout
-      // Redirect to login or reload if already on login page
-      if (window.location.hash !== '#/login' && window.location.hash !== '#/register') {
+      // Only redirect if not already on login/register pages and not a public endpoint
+      const url = error.config?.url || '';
+      const isPublicEndpoint = url.includes('/auth/login') || 
+                               url.includes('/auth/register') || 
+                               url.includes('/auth/forgot-password') ||
+                               url.includes('/auth/reset-password') ||
+                               url.includes('/products') ||
+                               url.includes('/categories');
+      
+      if (!isPublicEndpoint && 
+          window.location.hash !== '#/login' && 
+          window.location.hash !== '#/register') {
+        // Clear any stale auth state
+        const { useAuthStore } = await import('@/stores/authStore');
+        useAuthStore.getState().setUser(null);
         window.location.href = '/#/login';
       }
     } else if (error.response?.status === 403) {

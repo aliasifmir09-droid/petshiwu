@@ -30,7 +30,7 @@ export const sendTokenResponse = (userId: string, statusCode: number, res: Respo
     expires: new Date(Date.now() + expiresDays * 24 * 60 * 60 * 1000),
     httpOnly: true, // Cookie not accessible via JavaScript (XSS protection)
     secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    sameSite: 'strict' as const, // CSRF protection - strict prevents cross-site requests
+    sameSite: (process.env.NODE_ENV === 'production' ? 'strict' : 'lax') as 'strict' | 'lax', // CSRF protection - strict in production, lax in dev for better compatibility
     path: '/',
   };
 
