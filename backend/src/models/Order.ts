@@ -41,6 +41,7 @@ export interface IOrder extends Document {
   totalPrice: number;
   isPaid: boolean;
   paidAt?: Date;
+  paymentIntentId?: string; // Stripe payment intent ID for online payments
   isDelivered: boolean;
   deliveredAt?: Date;
   trackingNumber?: string;
@@ -163,6 +164,7 @@ const orderSchema = new Schema<IOrder>(
       default: false
     },
     paidAt: Date,
+    paymentIntentId: String, // Stripe payment intent ID
     isDelivered: {
       type: Boolean,
       default: false
@@ -190,7 +192,7 @@ orderSchema.pre('save', async function (next) {
 orderSchema.index({ user: 1, createdAt: -1 }); // User's orders sorted by date
 orderSchema.index({ orderStatus: 1, createdAt: -1 }); // For filtering orders by status
 orderSchema.index({ paymentStatus: 1 }); // Payment status filtering
-orderSchema.index({ 'paymentIntent.paymentIntentId': 1 }); // For payment lookups
+orderSchema.index({ paymentIntentId: 1 }); // For payment lookups
 orderSchema.index({ user: 1, orderStatus: 1 }); // User orders by status
 // Note: orderNumber index is created automatically by unique: true
 // Note: createdAt index already exists above

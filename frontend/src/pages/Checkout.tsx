@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Elements } from '@stripe/react-stripe-js';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { orderService } from '@/services/orders';
@@ -9,6 +10,8 @@ import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import CheckoutDonationModal from '@/components/CheckoutDonationModal';
+import PaymentForm from '@/components/PaymentForm';
+import { getStripe } from '@/utils/stripe';
 import { normalizeId } from '@/utils/idNormalizer';
 import { trackPurchase } from '@/utils/analytics';
 
@@ -46,6 +49,7 @@ interface CreateOrderData {
     phone: string;
   };
   paymentMethod: 'credit_card' | 'paypal' | 'apple_pay' | 'google_pay' | 'cod';
+  paymentIntentId?: string;
   itemsPrice: number;
   shippingPrice: number;
   taxPrice: number;
@@ -73,7 +77,11 @@ const Checkout = () => {
     country: 'USA'
   });
 
-  const [paymentMethod] = useState<'cod'>('cod');
+  const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'paypal' | 'apple_pay' | 'google_pay' | 'cod'>('cod');
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [donationAmount, setDonationAmount] = useState<number>(0);
   const [showDonationModal, setShowDonationModal] = useState(false);
   const [pendingOrderData, setPendingOrderData] = useState<CreateOrderData | null>(null);
@@ -176,6 +184,47 @@ const Checkout = () => {
     }
   });
 
+  // Create payment intent when payment method changes to non-COD
+  useEffect(() => {
+    const createPaymentIntent = async () => {
+      if (paymentMethod !== 'cod' && !clientSecret && !isProcessingPayment) {
+        setIsProcessingPayment(true);
+        try {
+          const paymentIntentResponse = await orderService.createPaymentIntent({
+            totalPrice: total,
+            paymentMethod: paymentMethod
+          });
+
+          if (paymentIntentResponse.success && paymentIntentResponse.data?.clientSecret) {
+            setClientSecret(paymentIntentResponse.data.clientSecret);
+            setPaymentIntentId(paymentIntentResponse.data.paymentIntentId);
+            setShowPaymentForm(true);
+          } else {
+            showToast('Failed to initialize payment. Please try again or use Cash on Delivery.', 'error');
+            setPaymentMethod('cod'); // Fallback to COD
+          }
+        } catch (error: any) {
+          console.error('Payment intent error:', error);
+          showToast(
+            error.response?.data?.message || 'Payment initialization failed. Please use Cash on Delivery.',
+            'error'
+          );
+          setPaymentMethod('cod'); // Fallback to COD
+        } finally {
+          setIsProcessingPayment(false);
+        }
+      } else if (paymentMethod === 'cod') {
+        // Reset payment form when switching to COD
+        setShowPaymentForm(false);
+        setClientSecret(null);
+        setPaymentIntentId(null);
+      }
+    };
+
+    createPaymentIntent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentMethod]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -184,6 +233,61 @@ const Checkout = () => {
       return;
     }
 
+    // For online payments, payment must be completed first
+    if (paymentMethod !== 'cod' && !paymentIntentId) {
+      showToast('Please complete the payment first.', 'error');
+      return;
+    }
+
+    // For COD, proceed directly. For online payments, payment should already be completed
+    if (paymentMethod === 'cod') {
+      await prepareAndSubmitOrder();
+    } else {
+      // For online payments, if payment is already completed, proceed
+      if (paymentIntentId) {
+        await prepareAndSubmitOrder(paymentIntentId);
+      } else {
+        // If payment not completed, show payment form
+        if (!showPaymentForm && clientSecret) {
+          setShowPaymentForm(true);
+        } else if (!clientSecret) {
+          showToast('Please wait for payment initialization...', 'info');
+        }
+      }
+    }
+  };
+
+  const handlePaymentSuccess = async (confirmedPaymentIntentId: string) => {
+    setPaymentIntentId(confirmedPaymentIntentId);
+    setShowPaymentForm(false);
+    
+    // Proceed with order creation
+    if (pendingOrderData) {
+      const updatedOrderData: CreateOrderData = {
+        ...pendingOrderData,
+        paymentIntentId: confirmedPaymentIntentId
+      };
+      createOrderMutation.mutate(updatedOrderData);
+      setPendingOrderData(null);
+    } else {
+      // If no pending order data, prepare it now
+      await prepareAndSubmitOrder(confirmedPaymentIntentId);
+    }
+  };
+
+  const handlePaymentError = (error: string) => {
+    showToast(error, 'error');
+    setIsProcessingPayment(false);
+  };
+
+  const handlePaymentCancel = () => {
+    setShowPaymentForm(false);
+    setClientSecret(null);
+    setPaymentIntentId(null);
+    setPaymentMethod('cod');
+  };
+
+  const prepareAndSubmitOrder = async (confirmedPaymentIntentId?: string) => {
     // Get current items (may be refreshed)
     let currentItems = items;
     
@@ -211,15 +315,11 @@ const Checkout = () => {
         showToast('Some products still have invalid IDs. Please remove them from cart and add again.', 'error');
         return;
       }
-      
-      // If refresh worked, continue with refreshed items
-      // The items will be re-validated in the map function below
     }
 
     // Prepare order data
-    const orderData = {
+    const orderData: CreateOrderData = {
       items: currentItems.map((item: any) => {
-        // Use the normalizeId function which is more reliable
         const productId = normalizeId(item.product._id);
         
         if (!productId || !/^[0-9a-fA-F]{24}$/.test(productId)) {
@@ -250,6 +350,7 @@ const Checkout = () => {
         phone: shippingInfo.phone
       },
       paymentMethod,
+      paymentIntentId: confirmedPaymentIntentId || paymentIntentId || undefined,
       itemsPrice: subtotal,
       shippingPrice: shipping,
       taxPrice: tax,
@@ -404,27 +505,105 @@ const Checkout = () => {
               <h2 className="text-xl font-bold mb-6">Payment Method</h2>
 
               <div className="space-y-3">
-                <div className="flex items-center gap-3 p-4 border-2 border-primary-600 bg-primary-50 rounded-lg">
-                  <div className="w-4 h-4 bg-primary-600 rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                {/* Cash on Delivery */}
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('cod')}
+                  className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${
+                    paymentMethod === 'cod'
+                      ? 'border-primary-600 bg-primary-50'
+                      : 'border-gray-300 bg-white hover:border-gray-400'
+                  }`}
+                >
+                  <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                    paymentMethod === 'cod' ? 'bg-primary-600' : 'border-2 border-gray-400'
+                  }`}>
+                    {paymentMethod === 'cod' && (
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    )}
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 text-left">
                     <span className="font-semibold text-gray-900">Cash on Delivery (COD)</span>
                     <p className="text-sm text-gray-600 mt-1">Pay with cash when your order is delivered</p>
                   </div>
+                </button>
+
+                {/* Credit Card */}
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('credit_card')}
+                  className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${
+                    paymentMethod === 'credit_card'
+                      ? 'border-primary-600 bg-primary-50'
+                      : 'border-gray-300 bg-white hover:border-gray-400'
+                  }`}
+                >
+                  <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                    paymentMethod === 'credit_card' ? 'bg-primary-600' : 'border-2 border-gray-400'
+                  }`}>
+                    {paymentMethod === 'credit_card' && (
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    )}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <span className="font-semibold text-gray-900">Credit/Debit Card</span>
+                    <p className="text-sm text-gray-600 mt-1">Pay securely with your card</p>
+                  </div>
+                </button>
+
+                {/* PayPal */}
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('paypal')}
+                  className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${
+                    paymentMethod === 'paypal'
+                      ? 'border-primary-600 bg-primary-50'
+                      : 'border-gray-300 bg-white hover:border-gray-400'
+                  }`}
+                >
+                  <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                    paymentMethod === 'paypal' ? 'bg-primary-600' : 'border-2 border-gray-400'
+                  }`}>
+                    {paymentMethod === 'paypal' && (
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    )}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <span className="font-semibold text-gray-900">PayPal</span>
+                    <p className="text-sm text-gray-600 mt-1">Pay with your PayPal account</p>
+                  </div>
+                </button>
+              </div>
+
+              {paymentMethod === 'cod' && (
+                <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <span className="font-semibold">💵 Cash on Delivery:</span> Please keep exact change ready. Our delivery partner will collect the payment when your order arrives.
+                  </p>
                 </div>
-              </div>
+              )}
 
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800">
-                  <span className="font-semibold">💵 Cash on Delivery:</span> Please keep exact change ready. Our delivery partner will collect the payment when your order arrives.
-                </p>
-              </div>
-
-              <p className="mt-4 text-xs text-gray-500">
-                Online payment methods coming soon!
-              </p>
+              {paymentMethod !== 'cod' && isProcessingPayment && !clientSecret && (
+                <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-sm text-yellow-800">
+                    <span className="font-semibold">⏳ Initializing payment...</span> Please wait while we set up your secure payment.
+                  </p>
+                </div>
+              )}
             </div>
+
+            {/* Payment Form - Show when payment method is selected and client secret is ready */}
+            {showPaymentForm && clientSecret && paymentMethod !== 'cod' && (
+              <Elements stripe={getStripe()} options={{ clientSecret }}>
+                <PaymentForm
+                  clientSecret={clientSecret}
+                  amount={total}
+                  onSuccess={handlePaymentSuccess}
+                  onError={handlePaymentError}
+                  onCancel={handlePaymentCancel}
+                />
+              </Elements>
+            )}
 
             {/* Order Notes */}
             <div className="bg-white rounded-lg shadow p-6">
@@ -507,10 +686,10 @@ const Checkout = () => {
 
               <button
                 type="submit"
-                disabled={createOrderMutation.isPending}
+                disabled={createOrderMutation.isPending || isProcessingPayment}
                 className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50"
               >
-                {createOrderMutation.isPending ? 'Processing...' : 'Place Order'}
+                {isProcessingPayment ? 'Initializing Payment...' : createOrderMutation.isPending ? 'Processing...' : 'Place Order'}
               </button>
             </div>
           </div>

@@ -8,7 +8,9 @@ import {
   updatePaymentStatus,
   getOrderStats,
   cancelOrder,
-  trackOrder
+  trackOrder,
+  createOrderPaymentIntent,
+  confirmOrderPayment
 } from '../controllers/orderController';
 import {
   createReturn,
@@ -33,6 +35,8 @@ const router = express.Router();
 router.get('/track/:id', validateObjectId(), trackOrder);
 
 // Order routes
+router.post('/payment-intent', protect, createOrderPaymentIntent);
+router.post('/confirm-payment', protect, confirmOrderPayment);
 router.post('/', protect, createOrderValidation, createOrder);
 router.get('/myorders', protect, paginationValidation, getMyOrders);
 router.get('/stats', protect, checkPermission('canViewAnalytics'), getOrderStats);

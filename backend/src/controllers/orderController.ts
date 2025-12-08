@@ -9,6 +9,22 @@ import { asyncHandler, NotFoundError, UnauthorizedError, ValidationError } from 
 import { sendOrderConfirmationEmail, sendOrderCancellationEmail, sendOrderDeliveredEmail } from '../utils/emailService';
 import logger from '../utils/logger';
 
+// Initialize Stripe (optional - only if STRIPE_SECRET_KEY is set)
+let stripe: any = null;
+try {
+  if (process.env.STRIPE_SECRET_KEY) {
+    // Dynamic import to avoid errors if stripe package isn't installed
+    // @ts-ignore - Stripe may not be installed, handled in try-catch
+    const Stripe = require('stripe');
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2024-11-20.acacia',
+    });
+  }
+} catch (error) {
+  // Stripe package not installed - payments will not work
+  // This is okay if payments are not being used
+}
+
 /**
  * @swagger
  * /api/orders:
@@ -257,13 +273,52 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         );
       }
 
-      // Step 3: Create order within transaction
+      // Step 3: Verify payment for online payment methods (not COD)
+      let paymentIntentId: string | undefined = undefined;
+      if (paymentMethod !== 'cod') {
+        const { paymentIntentId: intentId } = req.body;
+        
+        if (intentId) {
+          // Verify payment with Stripe
+          if (stripe) {
+            try {
+              const paymentIntent = await stripe.paymentIntents.retrieve(intentId);
+              
+              if (paymentIntent.status !== 'succeeded') {
+                throw new Error(`Payment not completed. Status: ${paymentIntent.status}`);
+              }
+              
+              // Verify amount matches
+              const expectedAmount = Math.round(totalPrice * 100);
+              if (paymentIntent.amount !== expectedAmount) {
+                throw new Error(`Payment amount mismatch. Expected: $${totalPrice}, Got: $${paymentIntent.amount / 100}`);
+              }
+              
+              paymentIntentId = intentId;
+            } catch (stripeError: any) {
+              logger.error('Payment verification error:', stripeError);
+              throw new Error(`Payment verification failed: ${stripeError.message || 'Unknown error'}`);
+            }
+          } else {
+            // Stripe not configured but payment method requires it
+            throw new Error('Payment processing not configured. Please use Cash on Delivery (COD) or configure Stripe.');
+          }
+        } else {
+          throw new Error('Payment Intent ID is required for online payment methods');
+        }
+      }
+
+      // Step 4: Create order within transaction
       const order = await Order.create([{
         user: req.user._id,
         items: normalizedItems,
         shippingAddress,
         billingAddress: billingAddress || shippingAddress,
         paymentMethod,
+        paymentIntentId: paymentIntentId,
+        paymentStatus: paymentMethod === 'cod' ? 'pending' : (paymentIntentId ? 'paid' : 'pending'),
+        isPaid: paymentMethod !== 'cod' && paymentIntentId ? true : false,
+        paidAt: paymentMethod !== 'cod' && paymentIntentId ? new Date() : undefined,
         itemsPrice,
         shippingPrice,
         taxPrice,
@@ -272,7 +327,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         notes: notes || undefined
       }], session ? { session } : {});
 
-      // Step 4: Commit transaction if using one
+      // Step 5: Commit transaction if using one
       if (session) {
         await session.commitTransaction();
       }
@@ -1293,6 +1348,142 @@ export const trackOrder = async (req: Request, res: Response, next: NextFunction
     });
   } catch (error) {
     next(error);
+  }
+};
+
+// Create payment intent for order
+export const createOrderPaymentIntent = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { totalPrice, paymentMethod, shippingAddress } = req.body;
+
+    // Validate total price
+    if (!totalPrice || totalPrice < 0.5) {
+      return res.status(400).json({
+        success: false,
+        message: 'Order total must be at least $0.50'
+      });
+    }
+
+    // Validate payment method
+    const validMethods = ['credit_card', 'paypal', 'apple_pay', 'google_pay'];
+    if (!validMethods.includes(paymentMethod)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid payment method. Use credit_card, paypal, apple_pay, or google_pay'
+      });
+    }
+
+    // Check if Stripe is configured
+    if (!stripe) {
+      return res.status(500).json({
+        success: false,
+        message: 'Payment processing not configured. Please set STRIPE_SECRET_KEY in environment variables.'
+      });
+    }
+
+    // Create Stripe Payment Intent
+    const amountInCents = Math.round(totalPrice * 100);
+
+    try {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amountInCents,
+        currency: 'usd',
+        payment_method_types: paymentMethod === 'credit_card' 
+          ? ['card'] 
+          : paymentMethod === 'apple_pay' 
+          ? ['card', 'apple_pay'] 
+          : paymentMethod === 'google_pay'
+          ? ['card', 'google_pay']
+          : ['card'],
+        metadata: {
+          order: 'true',
+          userId: String(req.user?._id || ''),
+          userEmail: req.user?.email || '',
+          userName: `${req.user?.firstName || ''} ${req.user?.lastName || ''}`.trim()
+        }
+      });
+
+      res.status(200).json({
+        success: true,
+        data: {
+          clientSecret: paymentIntent.client_secret,
+          paymentIntentId: paymentIntent.id
+        }
+      });
+    } catch (stripeError: unknown) {
+      logger.error('Stripe error:', stripeError);
+      const errorMessage = stripeError instanceof Error ? stripeError.message : 'Unknown error';
+      return res.status(500).json({
+        success: false,
+        message: 'Payment processing error: ' + errorMessage
+      });
+    }
+  } catch (error: unknown) {
+    logger.error('Payment intent error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create payment intent';
+    res.status(500).json({
+      success: false,
+      message: errorMessage
+    });
+  }
+};
+
+// Confirm order payment (verify payment before creating order)
+export const confirmOrderPayment = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { paymentIntentId } = req.body;
+
+    if (!paymentIntentId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Payment Intent ID is required'
+      });
+    }
+
+    // Verify payment with Stripe
+    if (!stripe) {
+      return res.status(500).json({
+        success: false,
+        message: 'Payment processing not configured.'
+      });
+    }
+    
+    try {
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+      if (paymentIntent.status === 'succeeded') {
+        return res.status(200).json({
+          success: true,
+          message: 'Payment confirmed successfully',
+          data: {
+            paymentStatus: 'paid',
+            paymentIntentId: paymentIntent.id,
+            amount: paymentIntent.amount / 100 // Convert from cents
+          }
+        });
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Payment not completed',
+          data: {
+            paymentStatus: paymentIntent.status
+          }
+        });
+      }
+    } catch (stripeError: any) {
+      logger.error('Stripe verification error:', stripeError);
+      return res.status(500).json({
+        success: false,
+        message: 'Payment verification failed: ' + (stripeError.message || 'Unknown error')
+      });
+    }
+  } catch (error: unknown) {
+    logger.error('Payment confirmation error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to confirm payment';
+    res.status(500).json({
+      success: false,
+      message: errorMessage
+    });
   }
 };
 

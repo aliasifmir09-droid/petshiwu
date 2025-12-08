@@ -77,6 +77,16 @@ export const orderService = {
       withCredentials: true
     });
     return response.data.data;
+  },
+
+  createPaymentIntent: async (data: { totalPrice: number; paymentMethod: string }) => {
+    const response = await api.post<ApiResponse<{ clientSecret: string; paymentIntentId: string }>>('/orders/payment-intent', data);
+    return response.data;
+  },
+
+  confirmPayment: async (paymentIntentId: string) => {
+    const response = await api.post<ApiResponse<{ paymentStatus: string; paymentIntentId: string; amount: number }>>('/orders/confirm-payment', { paymentIntentId });
+    return response.data;
   }
 };
 
