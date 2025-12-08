@@ -240,52 +240,53 @@ const ProductComparison = () => {
             )}
           </div>
 
-          {/* Suggestions */}
-          {suggestions.length > 0 && (
+          {/* Suggestions - Show automatically when we have 1 product */}
+          {productIds.length === 1 && (
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-semibold mb-4">Similar Products</h2>
               <p className="text-sm text-gray-600 mb-4">Click on any product below to add it to comparison</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {suggestions.slice(0, 8).map((product) => (
-                  <div
-                    key={product._id}
-                    className="relative bg-white rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer border border-gray-100 hover:border-primary-300"
-                    onClick={() => addProduct(product._id)}
-                  >
-                    <div className="p-4">
-                      <div className="relative aspect-square mb-3">
-                        <img
-                          src={product.images?.[0] || '/placeholder.png'}
-                          alt={product.name}
-                          className="w-full h-full object-cover rounded-lg"
-                        />
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            addProduct(product._id);
-                          }}
-                          className="absolute top-2 right-2 bg-primary-600 text-white p-2 rounded-full hover:bg-primary-700 shadow-lg z-10"
-                          title="Add to comparison"
-                        >
-                          <Plus size={16} />
-                        </button>
-                      </div>
-                      <h3 className="font-semibold text-sm mb-1 line-clamp-2 text-gray-800">
-                        {product.name}
-                      </h3>
-                      <p className="text-lg font-bold text-primary-600">
-                        ${product.basePrice.toFixed(2)}
-                      </p>
-                      <div className="flex items-center gap-1 mt-1">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="text-xs text-gray-600">
-                          {product.averageRating?.toFixed(1) || '0.0'} ({product.totalReviews || 0})
-                        </span>
+              {suggestions.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {suggestions.slice(0, 8).map((product) => (
+                    <div
+                      key={product._id}
+                      className="relative bg-white rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer border border-gray-100 hover:border-primary-300"
+                      onClick={() => addProduct(product._id)}
+                    >
+                      <div className="p-4">
+                        <div className="relative aspect-square mb-3">
+                          <img
+                            src={product.images?.[0] || '/placeholder.png'}
+                            alt={product.name}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addProduct(product._id);
+                            }}
+                            className="absolute top-2 right-2 bg-primary-600 text-white p-2 rounded-full hover:bg-primary-700 shadow-lg z-10"
+                            title="Add to comparison"
+                          >
+                            <Plus size={16} />
+                          </button>
+                        </div>
+                        <h3 className="font-semibold text-sm mb-1 line-clamp-2 text-gray-800">
+                          {product.name}
+                        </h3>
+                        <p className="text-lg font-bold text-primary-600">
+                          ${product.basePrice.toFixed(2)}
+                        </p>
+                        <div className="flex items-center gap-1 mt-1">
+                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                          <span className="text-xs text-gray-600">
+                            {product.averageRating?.toFixed(1) || '0.0'} ({product.totalReviews || 0})
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <p>Loading similar products...</p>
