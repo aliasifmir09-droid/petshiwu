@@ -380,30 +380,34 @@
 
 ## 🔒 SECURITY WEAKNESSES
 
-### 1. **CORS Too Permissive** ⚠️ HIGH
-- **Issue:** Allows all origins in production
-- **Fix:** Restrict to specific domains only
-- **Priority:** **HIGH**
+### 1. **CORS Too Permissive** ✅ FIXED
+- **Status:** ✅ **RESOLVED** - Unauthorized origins now blocked in production
+- **Fix Applied:** Removed fallback `callback(null, true)` in production
+- **Priority:** ✅ **RESOLVED**
 
-### 2. **JWT in localStorage** ⚠️ MEDIUM
-- **Issue:** XSS vulnerability - tokens can be stolen
-- **Fix:** Use httpOnly cookies or implement proper XSS protection
-- **Priority:** **MEDIUM**
+### 2. **JWT in localStorage** ✅ FIXED
+- **Status:** ✅ **RESOLVED** - Migrated to httpOnly cookies (Phase 2 complete)
+- **Fix Applied:** Tokens now stored in httpOnly cookies, not accessible via JavaScript
+- **Priority:** ✅ **RESOLVED**
 
 ### 3. **No CSRF Protection** ⚠️ MEDIUM
 - **Issue:** No CSRF tokens for state-changing operations
-- **Fix:** Implement CSRF protection middleware
-- **Priority:** **MEDIUM**
+- **Current Protection:** SameSite='strict' cookies provide partial CSRF protection
+- **Fix:** Consider implementing CSRF tokens for additional protection
+- **Priority:** **MEDIUM** (partially addressed)
 
-### 4. **Password Reset Security** ⚠️ MEDIUM
-- **Issue:** May need additional rate limiting and token invalidation
-- **Fix:** Verify single-use tokens, add rate limiting
-- **Priority:** **MEDIUM**
+### 4. **Password Reset Security** ✅ FIXED
+- **Status:** ✅ **RESOLVED** - Rate limiting implemented
+- **Fix Applied:** 
+  - `/forgot-password`: 3 requests/hour per IP
+  - `/reset-password`: 5 attempts/15min per IP
+  - Token single-use and expiration already implemented
+- **Priority:** ✅ **RESOLVED**
 
 ### 5. **Environment Variable Validation** ⚠️ LOW
 - **Issue:** Some optional but important env vars not validated
 - **Fix:** Add warnings for missing optional but recommended vars
-- **Priority:** **LOW**
+- **Priority:** **LOW** (optional enhancement)
 
 ---
 
