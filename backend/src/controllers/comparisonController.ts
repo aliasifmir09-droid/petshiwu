@@ -175,42 +175,117 @@ export const getComparisonSuggestions = async (req: Request, res: Response, next
       });
     }
 
-    // Get the products being compared
-    const comparedProducts = await Product.find({
-      _id: { $in: ids },
+    // Get the first product (primary product for comparison)
+    const firstProduct = await Product.findOne({
+      _id: ids[0],
       isActive: true
     })
-      .select('category petType brand tags')
+      .populate({
+        path: 'category',
+        select: 'name slug parentCategory petType',
+        populate: {
+          path: 'parentCategory',
+          select: 'name slug parentCategory',
+          populate: {
+            path: 'parentCategory',
+            select: 'name slug'
+          }
+        }
+      })
       .lean();
 
-    if (comparedProducts.length === 0) {
+    if (!firstProduct) {
       return res.status(404).json({
         success: false,
-        message: 'No products found'
+        message: 'Product not found'
       });
     }
 
-    // Collect common attributes
-    const categories = new Set(comparedProducts.map((p: any) => p.category?.toString()).filter(Boolean));
-    const petTypes = new Set(comparedProducts.map((p: any) => p.petType).filter(Boolean));
-    const brands = new Set(comparedProducts.map((p: any) => p.brand).filter(Boolean));
-    const allTags = new Set(comparedProducts.flatMap((p: any) => p.tags || []));
+    const firstProductCategory = firstProduct.category as any;
+    const firstProductPetType = firstProduct.petType;
+    const firstProductCategoryId = firstProductCategory?._id ? String(firstProductCategory._id) : null;
+    const firstProductParentCategoryId = firstProductCategory?.parentCategory?._id ? String(firstProductCategory.parentCategory._id) : null;
+    const firstProductGrandParentCategoryId = firstProductCategory?.parentCategory?.parentCategory?._id ? String(firstProductCategory.parentCategory.parentCategory._id) : null;
 
-    // Find similar products
-    const suggestions = await Product.find({
+    // Build prioritized query: Same petType + category/subcategory matches
+    const query: any = {
       _id: { $nin: ids },
       isActive: true,
-      $or: [
-        { category: { $in: Array.from(categories).map(id => new mongoose.Types.ObjectId(id)) } },
-        { petType: { $in: Array.from(petTypes) } },
-        { brand: { $in: Array.from(brands) } },
-        { tags: { $in: Array.from(allTags) } }
-      ]
-    })
-      .populate('category')
+      petType: firstProductPetType // Must match pet type
+    };
+
+    // Collect category IDs to search (category, parent, grandparent)
+    const categoryIdsToSearch: mongoose.Types.ObjectId[] = [];
+    if (firstProductCategoryId) {
+      categoryIdsToSearch.push(new mongoose.Types.ObjectId(firstProductCategoryId));
+    }
+    if (firstProductParentCategoryId) {
+      categoryIdsToSearch.push(new mongoose.Types.ObjectId(firstProductParentCategoryId));
+    }
+    if (firstProductGrandParentCategoryId) {
+      categoryIdsToSearch.push(new mongoose.Types.ObjectId(firstProductGrandParentCategoryId));
+    }
+
+    // If we have category IDs, filter by them (prioritize same category/subcategory)
+    if (categoryIdsToSearch.length > 0) {
+      query.category = { $in: categoryIdsToSearch };
+    }
+
+    // Find similar products with same petType and category/subcategory
+    let suggestions = await Product.find(query)
+      .populate({
+        path: 'category',
+        select: 'name slug parentCategory petType'
+      })
       .sort({ averageRating: -1, totalReviews: -1 })
-      .limit(limit)
+      .limit(limit * 2) // Get more to allow for sorting
       .lean();
+
+    // If we don't have enough suggestions, fall back to same petType only
+    if (suggestions.length < limit) {
+      const fallbackQuery: any = {
+        _id: { $nin: [...ids, ...suggestions.map((p: any) => p._id)] },
+        isActive: true,
+        petType: firstProductPetType
+      };
+      
+      const fallbackSuggestions = await Product.find(fallbackQuery)
+        .populate({
+          path: 'category',
+          select: 'name slug parentCategory petType'
+        })
+        .sort({ averageRating: -1, totalReviews: -1 })
+        .limit(limit - suggestions.length)
+        .lean();
+      
+      suggestions = [...suggestions, ...fallbackSuggestions];
+    }
+
+    // Sort by relevance: exact category match > parent category match > grandparent match > other
+    suggestions.sort((a: any, b: any) => {
+      const aCategoryId = String(a.category?._id || '');
+      const bCategoryId = String(b.category?._id || '');
+      
+      // Exact category match gets highest priority
+      if (aCategoryId === firstProductCategoryId && bCategoryId !== firstProductCategoryId) return -1;
+      if (bCategoryId === firstProductCategoryId && aCategoryId !== firstProductCategoryId) return 1;
+      
+      // Parent category match
+      if (aCategoryId === firstProductParentCategoryId && bCategoryId !== firstProductParentCategoryId) return -1;
+      if (bCategoryId === firstProductParentCategoryId && aCategoryId !== firstProductParentCategoryId) return 1;
+      
+      // Grandparent category match
+      if (aCategoryId === firstProductGrandParentCategoryId && bCategoryId !== firstProductGrandParentCategoryId) return -1;
+      if (bCategoryId === firstProductGrandParentCategoryId && aCategoryId !== firstProductGrandParentCategoryId) return 1;
+      
+      // Then by rating and reviews
+      const aScore = (a.averageRating || 0) * (a.totalReviews || 0);
+      const bScore = (b.averageRating || 0) * (b.totalReviews || 0);
+      return bScore - aScore;
+    });
+
+    // Limit to requested number
+    suggestions = suggestions.slice(0, limit);
 
     // Normalize product IDs to strings
     const normalizedSuggestions = suggestions.map((product: any) => ({
