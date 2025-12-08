@@ -17,6 +17,9 @@ interface RegisterData {
 export const authService = {
   register: async (data: RegisterData) => {
     const response = await api.post<any>('/auth/register', data);
+    // Phase 1: Dual Support - Backend sets httpOnly cookie AND returns token
+    // Save token to localStorage for backward compatibility (Authorization header)
+    // httpOnly cookie is set automatically by backend and sent with requests via withCredentials
     if (response.data.success && response.data.token) {
       localStorage.setItem('token', response.data.token);
     }
@@ -25,6 +28,9 @@ export const authService = {
 
   login: async (data: LoginData) => {
     const response = await api.post<any>('/auth/login', data);
+    // Phase 1: Dual Support - Backend sets httpOnly cookie AND returns token
+    // Save token to localStorage for backward compatibility (Authorization header)
+    // httpOnly cookie is set automatically by backend and sent with requests via withCredentials
     if (response.data.success && response.data.token) {
       localStorage.setItem('token', response.data.token);
     }
@@ -32,6 +38,8 @@ export const authService = {
   },
 
   logout: async () => {
+    // Phase 1: Dual Support - Call logout endpoint to clear httpOnly cookie
+    // Also clear localStorage for backward compatibility
     await api.post('/auth/logout');
     localStorage.removeItem('token');
   },
@@ -83,6 +91,8 @@ export const authService = {
 
   resetPassword: async (token: string, password: string) => {
     const response = await api.post<any>('/auth/reset-password', { token, password });
+    // Phase 1: Dual Support - Backend sets httpOnly cookie AND returns token
+    // Save token to localStorage for backward compatibility
     if (response.data.success && response.data.token) {
       localStorage.setItem('token', response.data.token);
     }

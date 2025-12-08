@@ -403,9 +403,13 @@ export const resendVerificationEmail = async (req: Request, res: Response, next:
 // Logout user
 export const logout = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    // Clear httpOnly cookie with same settings as when it was set
     res.cookie('token', 'none', {
-      expires: new Date(Date.now() + 10 * 1000),
-      httpOnly: true
+      expires: new Date(Date.now() + 10 * 1000), // Expire immediately (10 seconds)
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict' as const,
+      path: '/',
     });
 
     res.status(200).json({

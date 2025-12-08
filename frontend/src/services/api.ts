@@ -21,14 +21,20 @@ const api = axios.create({
 });
 
 // Add token to requests
+// Phase 1: Dual Support - Use Authorization header (backward compatibility)
+// Cookies are sent automatically via withCredentials: true
 api.interceptors.request.use(
   (config: any) => {
     // Skip auth if skipAuth flag is set
     if (!config.skipAuth) {
+      // Phase 1: Still use localStorage token in Authorization header for backward compatibility
+      // In Phase 2, we'll remove this and rely solely on httpOnly cookies
       const token = localStorage.getItem('token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+      // Note: httpOnly cookies are sent automatically via withCredentials: true
+      // Backend will prefer cookie over Authorization header (more secure)
     }
     return config;
   },
