@@ -62,9 +62,10 @@ api.interceptors.response.use(
       if (!isPublicEndpoint && 
           window.location.hash !== '#/login' && 
           window.location.hash !== '#/register') {
-        // Clear any stale auth state
-        const { useAuthStore } = await import('@/stores/authStore');
-        useAuthStore.getState().setUser(null);
+        // Clear any stale auth state (use dynamic import without await since we're in a non-async function)
+        import('@/stores/authStore').then(({ useAuthStore }) => {
+          useAuthStore.getState().setUser(null);
+        });
         window.location.href = '/#/login';
       }
     } else if (error.response?.status === 403) {
