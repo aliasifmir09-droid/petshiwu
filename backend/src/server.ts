@@ -586,21 +586,22 @@ try {
   // Handle server errors
   if (server) {
     server.on('error', (error: NodeJS.ErrnoException) => {
-    console.error('❌ Server error event:', error);
-    if (error.code === 'EADDRINUSE') {
-      console.error(`❌ Port ${PORT} is already in use`);
-    } else {
-      console.error('❌ Server error details:', error.message);
-    }
-    // Don't exit immediately - let Render see the error
-    setTimeout(() => process.exit(1), 1000);
-  });
+      console.error('❌ Server error event:', error);
+      if (error.code === 'EADDRINUSE') {
+        console.error(`❌ Port ${PORT} is already in use`);
+      } else {
+        console.error('❌ Server error details:', error.message);
+      }
+      // Don't exit immediately - let Render see the error
+      setTimeout(() => process.exit(1), 1000);
+    });
 
-  // Log when server is actually listening
-  server.on('listening', () => {
-    const addr = server.address();
-    console.log(`✅ Server is listening on ${typeof addr === 'string' ? addr : `${addr?.address}:${addr?.port}`}`);
-  });
+    // Log when server is actually listening
+    server.on('listening', () => {
+      const addr = server.address();
+      console.log(`✅ Server is listening on ${typeof addr === 'string' ? addr : `${addr?.address}:${addr?.port}`}`);
+    });
+  }
 
 } catch (error: unknown) {
   const errorObj = error instanceof Error ? error : { message: String(error), stack: undefined };
