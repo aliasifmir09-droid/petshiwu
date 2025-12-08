@@ -14,7 +14,7 @@ const PayPalButtonContent = ({ amount, onSuccess, onError, onCancel, currency = 
   const [{ isPending }] = usePayPalScriptReducer();
   const [error, setError] = useState<string | null>(null);
 
-  const createOrder = (data: any, actions: any) => {
+  const createOrder = (_data: any, actions: any) => {
     return actions.order.create({
       purchase_units: [
         {
@@ -27,7 +27,7 @@ const PayPalButtonContent = ({ amount, onSuccess, onError, onCancel, currency = 
     });
   };
 
-  const onApprove = async (data: any, actions: any) => {
+  const onApprove = async (_data: any, actions: any) => {
     try {
       // Capture the payment
       const details = await actions.order.capture();

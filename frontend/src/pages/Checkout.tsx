@@ -314,7 +314,7 @@ const Checkout = () => {
     setPaymentMethod('cod');
   };
 
-  const handlePayPalSuccess = async (orderId: string, payerId?: string) => {
+  const handlePayPalSuccess = async (orderId: string, _payerId?: string) => {
     setPaypalOrderId(orderId);
     setShowPayPalButton(false);
     
