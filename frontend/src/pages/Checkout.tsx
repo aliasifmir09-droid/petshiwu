@@ -410,6 +410,9 @@ const Checkout = () => {
   };
 
   const prepareAndSubmitOrder = async (confirmedPaymentIntentId?: string, paypalOrderIdParam?: string) => {
+    // Save address if user requested it
+    await saveAddressIfNeeded();
+    
     // Get current items (may be refreshed)
     let currentItems = items;
     
