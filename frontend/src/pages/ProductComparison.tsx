@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { comparisonService } from '@/services/comparison';
 import { productService } from '@/services/products';
@@ -13,7 +13,6 @@ import EmptyState from '@/components/EmptyState';
 
 const ProductComparison = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const { toast, showToast, hideToast } = useToast();
   const [productIds, setProductIds] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<Product[]>([]);
@@ -58,8 +57,8 @@ const ProductComparison = () => {
         limit: 10
       });
       // Filter out the current product if we have one
-      const filtered = response.products.filter(
-        p => !productIds.includes(String(p._id))
+      const filtered = response.data.filter(
+        (p: Product) => !productIds.includes(String(p._id))
       );
       setSearchResults(filtered);
     } catch (error) {
