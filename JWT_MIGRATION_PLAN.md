@@ -30,107 +30,195 @@ logout: () => {
 
 ### Migration Steps
 
-#### 1. Backend Changes
+#### 1. Backend Changes ✅ **IMPLEMENTED (Phase 2)**
 
-**Update `backend/src/utils/generateToken.ts`:**
+**✅ `backend/src/utils/generateToken.ts` - COMPLETE:**
 
 ```typescript
-// Instead of returning token in response body, set httpOnly cookie
+// Phase 2: Cookie-Only - Set httpOnly cookie, token NOT returned in response body
 export const sendTokenResponse = (userId: string, statusCode: number, res: Response) => {
   const token = generateToken(userId);
-  
+
+  // Calculate expiration from JWT_EXPIRE or default to 30 days
+  const expiresIn = process.env.JWT_EXPIRE || '30d';
+  let expiresDays = 30;
+  if (expiresIn.endsWith('d')) {
+    expiresDays = parseInt(expiresIn.replace('d', ''));
+  } else if (expiresIn.endsWith('h')) {
+    expiresDays = parseInt(expiresIn.replace('h', '')) / 24;
+  }
+
+  // For cross-subdomain cookies (e.g., different Render subdomains), use sameSite: 'none'
+  // sameSite: 'strict' blocks cookies across different subdomains
+  const isProduction = process.env.NODE_ENV === 'production';
   const options = {
-    expires: new Date(Date.now() + process.env.JWT_EXPIRE ? parseInt(process.env.JWT_EXPIRE) * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000),
-    httpOnly: true, // Cookie not accessible via JavaScript
-    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    sameSite: 'strict' as const, // CSRF protection
+    expires: new Date(Date.now() + expiresDays * 24 * 60 * 60 * 1000),
+    httpOnly: true, // Cookie not accessible via JavaScript (XSS protection)
+    secure: isProduction, // HTTPS only in production (required for sameSite: 'none')
+    sameSite: (isProduction ? 'none' : 'lax') as 'strict' | 'lax' | 'none', // 'none' for cross-subdomain cookies
     path: '/',
   };
 
+  // Phase 2: Cookie-Only - Token NOT returned in response body (more secure)
   res.status(statusCode)
     .cookie('token', token, options)
     .json({
-      success: true,
-      token, // Still return for backward compatibility during migration
-      data: { userId }
+      success: true
+      // Token not returned - frontend uses httpOnly cookie only
     });
 };
 ```
 
-**Update `backend/src/middleware/auth.ts`:**
+**✅ `backend/src/middleware/auth.ts` - COMPLETE:**
 
 ```typescript
-// Extract token from cookie instead of header
-const token = req.cookies.token || req.headers.authorization?.replace('Bearer ', '');
+// Phase 2: Cookie-Only - Only accept token from httpOnly cookie (more secure)
+// Removed Authorization header support for better security
+export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    let token;
+
+    // Phase 2: Cookie-Only - Only accept token from httpOnly cookie
+    if (req.cookies?.token) {
+      token = req.cookies.token;
+    }
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Not authorized to access this route. Please log in again.',
+        code: 'AUTH_REQUIRED'
+      });
+    }
+    // ... rest of authentication logic
+  }
+};
 ```
 
-**Update CORS configuration:**
+**✅ CORS configuration - COMPLETE:**
 
 ```typescript
 app.use(cors({
   origin: (origin, callback) => { /* ... */ },
-  credentials: true, // Already set - required for cookies
-  // ...
+  credentials: true, // Required for cookies - already set
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Authorization']
 }));
 ```
 
-#### 2. Frontend Changes
+#### 2. Frontend Changes ✅ **IMPLEMENTED (Phase 2)**
 
-**Update `frontend/src/stores/authStore.ts`:**
+**✅ `frontend/src/stores/authStore.ts` - COMPLETE:**
 
 ```typescript
-// Remove localStorage usage
-// Tokens will be automatically sent with requests via cookies
+// Phase 2: Cookie-Only - No localStorage usage
+// Tokens are automatically sent with requests via httpOnly cookies
 
 logout: async () => {
   try {
-    // Call logout endpoint to clear cookie
+    // Phase 2: Cookie-Only - Call logout endpoint to clear httpOnly cookie
+    // Backend handles cookie clearing, no localStorage to manage
+    const { default: api } = await import('@/services/api');
     await api.post('/auth/logout');
   } catch (error) {
+    // If logout endpoint fails, still clear local state
     console.error('Logout error:', error);
+  } finally {
+    // Clear local state (no localStorage token to remove)
+    set({ user: null, isAuthenticated: false });
+    // Reload the page after logout to clear all state
+    window.location.href = '/';
   }
-  set({ user: null, isAuthenticated: false });
-  window.location.href = '/';
 }
 ```
 
-**Update API service (`frontend/src/services/api.ts`):**
+**✅ API service (`frontend/src/services/api.ts`) - COMPLETE:**
 
 ```typescript
-// Ensure credentials are sent with requests
+// Phase 2: Cookie-Only - Rely solely on httpOnly cookies
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
-  withCredentials: true, // Send cookies with requests
+  baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json'
   },
+  withCredentials: true // Send cookies with requests - REQUIRED
 });
+
+// Phase 2: No Authorization header - httpOnly cookies sent automatically
+// Backend only accepts tokens from httpOnly cookies (more secure)
+api.interceptors.request.use(
+  (config: any) => {
+    if (!config.skipAuth) {
+      // No Authorization header needed - cookies sent automatically via withCredentials
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 ```
 
-**Remove token from request headers:**
+**✅ Auth service (`frontend/src/services/auth.ts`) - COMPLETE:**
 
 ```typescript
-// Remove manual token setting - cookies are sent automatically
-// api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+// Phase 2: Cookie-Only - No token in response, no localStorage
+export const authService = {
+  login: async (data: LoginData) => {
+    const response = await api.post<any>('/auth/login', data);
+    // Phase 2: Cookie-Only - Backend sets httpOnly cookie only
+    // No token returned in response, no localStorage needed
+    // httpOnly cookie is set automatically by backend and sent with requests via withCredentials
+    return response.data;
+  },
+  // ... other methods similarly updated
+};
 ```
 
-#### 3. Backend Logout Endpoint
+**✅ App.tsx user loading - COMPLETE:**
 
-**Update `backend/src/controllers/authController.ts`:**
+```typescript
+// Phase 2: Cookie-Only - Try to get user from backend using httpOnly cookie
+// If cookie exists, request will succeed. If not, it will fail and we set user to null
+useEffect(() => {
+  const loadUser = async () => {
+    try {
+      const user = await authService.getMe();
+      setUser(user);
+      await syncWithBackend();
+    } catch (error) {
+      // No cookie or invalid cookie - user is not authenticated
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+  loadUser();
+}, [setUser, setLoading, syncWithBackend]);
+```
+
+#### 3. Backend Logout Endpoint ✅ **IMPLEMENTED (Phase 2)**
+
+**✅ `backend/src/controllers/authController.ts` - COMPLETE:**
 
 ```typescript
 export const logout = async (req: Request, res: Response, next: NextFunction) => {
-  res.cookie('token', 'none', {
-    expires: new Date(Date.now() + 10 * 1000), // Expire immediately
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-  });
+  try {
+    res.cookie('token', 'none', {
+      expires: new Date(Date.now() + 10 * 1000), // Expire in 10 seconds
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Only secure in production
+      sameSite: 'strict' as const // CSRF protection
+    });
 
-  res.status(200).json({
-    success: true,
-    message: 'Logged out successfully'
-  });
+    res.status(200).json({
+      success: true,
+      message: 'Logged out successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 ```
 
