@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { Elements } from '@stripe/react-stripe-js';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { orderService } from '@/services/orders';
 import { productService } from '@/services/products';
+import { addressService } from '@/services/addresses';
+import { Address } from '@/types';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
@@ -15,6 +17,7 @@ import PayPalButton from '@/components/PayPalButton';
 import { getStripe } from '@/utils/stripe';
 import { normalizeId } from '@/utils/idNormalizer';
 import { trackPurchase } from '@/utils/analytics';
+import { MapPin, Plus, Check } from 'lucide-react';
 
 interface CreateOrderData {
   items: Array<{
@@ -67,6 +70,10 @@ const Checkout = () => {
   const { isAuthenticated, user } = useAuthStore();
   const { toast, showToast, hideToast } = useToast();
 
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+  const [saveNewAddress, setSaveNewAddress] = useState(false);
+  
   const [shippingInfo, setShippingInfo] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
@@ -77,6 +84,14 @@ const Checkout = () => {
     state: '',
     zipCode: '',
     country: 'USA'
+  });
+
+  // Fetch saved addresses if user is logged in
+  const { data: savedAddresses = [], refetch: refetchAddresses } = useQuery({
+    queryKey: ['addresses'],
+    queryFn: addressService.getAddresses,
+    enabled: isAuthenticated,
+    retry: 1
   });
 
   const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'paypal' | 'apple_pay' | 'google_pay' | 'cod'>('cod');
@@ -90,6 +105,67 @@ const Checkout = () => {
   const [showDonationModal, setShowDonationModal] = useState(false);
   const [pendingOrderData, setPendingOrderData] = useState<CreateOrderData | null>(null);
   const [orderNotes, setOrderNotes] = useState('');
+
+  // Set default address when addresses are loaded
+  useEffect(() => {
+    if (savedAddresses.length > 0 && !selectedAddressId) {
+      const defaultAddress = savedAddresses.find(addr => addr.isDefault) || savedAddresses[0];
+      if (defaultAddress) {
+        handleSelectAddress(defaultAddress);
+      }
+    }
+  }, [savedAddresses]);
+
+  // Update shipping info when user changes
+  useEffect(() => {
+    if (user && isAuthenticated) {
+      setShippingInfo(prev => ({
+        ...prev,
+        firstName: user.firstName || prev.firstName,
+        lastName: user.lastName || prev.lastName,
+        email: user.email || prev.email,
+        phone: user.phone || prev.phone
+      }));
+    }
+  }, [user, isAuthenticated]);
+
+  // Handle address selection
+  const handleSelectAddress = (address: Address) => {
+    setSelectedAddressId(address._id || null);
+    setShowNewAddressForm(false);
+    setShippingInfo(prev => ({
+      ...prev,
+      street: address.street,
+      city: address.city,
+      state: address.state,
+      zipCode: address.zipCode,
+      country: address.country || 'USA'
+    }));
+  };
+
+  // Save address if requested (called before order submission)
+  const saveAddressIfNeeded = async () => {
+    if (saveNewAddress && isAuthenticated && showNewAddressForm) {
+      if (!shippingInfo.street || !shippingInfo.city || !shippingInfo.state || !shippingInfo.zipCode) {
+        return; // Address validation will happen in form submission
+      }
+
+      try {
+        await addressService.createAddress({
+          street: shippingInfo.street,
+          city: shippingInfo.city,
+          state: shippingInfo.state,
+          zipCode: shippingInfo.zipCode,
+          country: shippingInfo.country,
+          isDefault: savedAddresses.length === 0
+        });
+        refetchAddresses();
+      } catch (error: any) {
+        console.error('Failed to save address:', error);
+        // Don't block order submission if address save fails
+      }
+    }
+  };
 
   // Function to refresh product data from API
   const refreshCartProducts = async () => {
@@ -453,38 +529,65 @@ const Checkout = () => {
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-bold mb-6">Shipping Information</h2>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">First Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={shippingInfo.firstName}
-                    onChange={(e) => setShippingInfo({ ...shippingInfo, firstName: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
+              {/* User Info - Only show if logged in */}
+              {isAuthenticated && user && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-2">Shipping to:</p>
+                  <p className="font-semibold text-gray-900">{user.firstName} {user.lastName}</p>
+                  <p className="text-sm text-gray-600">{user.email}</p>
+                  {user.phone && <p className="text-sm text-gray-600">{user.phone}</p>}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Last Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={shippingInfo.lastName}
-                    onChange={(e) => setShippingInfo({ ...shippingInfo, lastName: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
+              )}
+
+              {/* Name and Email - Only show if NOT logged in */}
+              {!isAuthenticated && (
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">First Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={shippingInfo.firstName}
+                      onChange={(e) => setShippingInfo({ ...shippingInfo, firstName: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Last Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={shippingInfo.lastName}
+                      onChange={(e) => setShippingInfo({ ...shippingInfo, lastName: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Email *</label>
+                    <input
+                      type="email"
+                      required
+                      value={shippingInfo.email}
+                      onChange={(e) => setShippingInfo({ ...shippingInfo, email: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Phone *</label>
+                    <input
+                      type="tel"
+                      required
+                      value={shippingInfo.phone}
+                      onChange={(e) => setShippingInfo({ ...shippingInfo, phone: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Email *</label>
-                  <input
-                    type="email"
-                    required
-                    value={shippingInfo.email}
-                    onChange={(e) => setShippingInfo({ ...shippingInfo, email: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
-                <div>
+              )}
+
+              {/* Phone - Always show (even if logged in) */}
+              {isAuthenticated && (
+                <div className="mb-4">
                   <label className="block text-sm font-medium mb-2">Phone *</label>
                   <input
                     type="tel"
@@ -494,57 +597,157 @@ const Checkout = () => {
                     className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-2">Street Address *</label>
-                  <input
-                    type="text"
-                    required
-                    value={shippingInfo.street}
-                    onChange={(e) => setShippingInfo({ ...shippingInfo, street: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
+              )}
+
+              {/* Saved Addresses - Only show if logged in and has addresses */}
+              {isAuthenticated && savedAddresses.length > 0 && !showNewAddressForm && (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium mb-3">Select Address</label>
+                  <div className="space-y-3">
+                    {savedAddresses.map((address) => (
+                      <button
+                        key={address._id}
+                        type="button"
+                        onClick={() => handleSelectAddress(address)}
+                        className={`w-full text-left p-4 border-2 rounded-lg transition-all ${
+                          selectedAddressId === address._id
+                            ? 'border-primary-600 bg-primary-50'
+                            : 'border-gray-300 bg-white hover:border-gray-400'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`mt-1 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
+                            selectedAddressId === address._id
+                              ? 'bg-primary-600'
+                              : 'border-2 border-gray-400'
+                          }`}>
+                            {selectedAddressId === address._id && (
+                              <Check className="w-3 h-3 text-white" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <MapPin className="w-4 h-4 text-gray-500" />
+                              {address.isDefault && (
+                                <span className="text-xs bg-primary-100 text-primary-700 px-2 py-0.5 rounded">Default</span>
+                              )}
+                            </div>
+                            <p className="font-medium text-gray-900">{address.street}</p>
+                            <p className="text-sm text-gray-600">
+                              {address.city}, {address.state} {address.zipCode}
+                            </p>
+                            <p className="text-sm text-gray-600">{address.country}</p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNewAddressForm(true);
+                      setSelectedAddressId(null);
+                    }}
+                    className="mt-3 w-full flex items-center justify-center gap-2 p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-primary-500 hover:text-primary-600 transition-colors"
+                  >
+                    <Plus className="w-5 h-5" />
+                    <span>Add New Address</span>
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">City *</label>
-                  <input
-                    type="text"
-                    required
-                    value={shippingInfo.city}
-                    onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
+              )}
+
+              {/* Address Form - Show if no saved addresses, or if "Add New" clicked, or if not logged in */}
+              {(showNewAddressForm || savedAddresses.length === 0 || !isAuthenticated) && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Street Address *</label>
+                    <input
+                      type="text"
+                      required
+                      value={shippingInfo.street}
+                      onChange={(e) => setShippingInfo({ ...shippingInfo, street: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">City *</label>
+                      <input
+                        type="text"
+                        required
+                        value={shippingInfo.city}
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">State *</label>
+                      <input
+                        type="text"
+                        required
+                        value={shippingInfo.state}
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, state: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">ZIP Code *</label>
+                      <input
+                        type="text"
+                        required
+                        value={shippingInfo.zipCode}
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, zipCode: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Country *</label>
+                      <input
+                        type="text"
+                        required
+                        value={shippingInfo.country}
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, country: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Save address checkbox - Only show if logged in and adding new address */}
+                  {isAuthenticated && showNewAddressForm && (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="saveAddress"
+                        checked={saveNewAddress}
+                        onChange={(e) => setSaveNewAddress(e.target.checked)}
+                        className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                      />
+                      <label htmlFor="saveAddress" className="text-sm text-gray-700">
+                        Save this address to my account
+                      </label>
+                    </div>
+                  )}
+
+                  {/* Cancel button - Only show if logged in and has saved addresses */}
+                  {isAuthenticated && savedAddresses.length > 0 && showNewAddressForm && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNewAddressForm(false);
+                        if (savedAddresses.length > 0) {
+                          const defaultAddress = savedAddresses.find(addr => addr.isDefault) || savedAddresses[0];
+                          if (defaultAddress) {
+                            handleSelectAddress(defaultAddress);
+                          }
+                        }
+                      }}
+                      className="text-sm text-gray-600 hover:text-gray-900"
+                    >
+                      Cancel
+                    </button>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">State *</label>
-                  <input
-                    type="text"
-                    required
-                    value={shippingInfo.state}
-                    onChange={(e) => setShippingInfo({ ...shippingInfo, state: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">ZIP Code *</label>
-                  <input
-                    type="text"
-                    required
-                    value={shippingInfo.zipCode}
-                    onChange={(e) => setShippingInfo({ ...shippingInfo, zipCode: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Country *</label>
-                  <input
-                    type="text"
-                    required
-                    value={shippingInfo.country}
-                    onChange={(e) => setShippingInfo({ ...shippingInfo, country: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Payment Method */}

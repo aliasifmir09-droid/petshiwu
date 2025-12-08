@@ -1,22 +1,10 @@
 import api from './api';
+import { Address } from '@/types';
 
 interface ApiResponse<T> {
   success: boolean;
   data: T;
   message?: string;
-}
-
-export interface Address {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country: string;
-  phone?: string;
-  isDefault?: boolean;
 }
 
 export const addressService = {
