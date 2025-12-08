@@ -39,6 +39,13 @@ const ProductComparison = () => {
     enabled: productIds.length === 1
   });
 
+  // Fetch current product when we have 1 product
+  const { data: currentProduct } = useQuery({
+    queryKey: ['product', productIds[0]],
+    queryFn: () => productService.getProduct(productIds[0]),
+    enabled: productIds.length === 1 && !!productIds[0]
+  });
+
   useEffect(() => {
     if (suggestionData?.suggestions) {
       setSuggestions(suggestionData.suggestions);
@@ -114,13 +121,6 @@ const ProductComparison = () => {
       </div>
     );
   }
-
-  // Fetch current product when we have 1 product
-  const { data: currentProduct } = useQuery({
-    queryKey: ['product', productIds[0]],
-    queryFn: () => productService.getProduct(productIds[0]),
-    enabled: productIds.length === 1
-  });
 
   // Show search/suggestions when we have 1 product
   if (productIds.length === 1) {
