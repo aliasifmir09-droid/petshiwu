@@ -30,7 +30,7 @@ export const getProductShareLinks = async (req: Request, res: Response, next: Ne
       });
     }
 
-    const productUrl = `${frontendUrl}/product/${product.slug || id}`;
+    const productUrl = `${frontendUrl}/product/${product.slug || identifier}`;
     const productName = product.name;
     const productDescription = product.shortDescription || product.name;
     const productImage = product.images && product.images.length > 0 ? product.images[0] : '';
