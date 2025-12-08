@@ -26,11 +26,16 @@ export const sendTokenResponse = (userId: string, statusCode: number, res: Respo
     expiresDays = parseInt(expiresIn.replace('h', '')) / 24;
   }
 
+  // For cross-subdomain cookies (e.g., different Render subdomains), we need sameSite: 'none' with secure: true
+  // sameSite: 'strict' blocks cookies across different subdomains (e.g., frontend.onrender.com -> backend.onrender.com)
+  // sameSite: 'lax' works for same domain but not for cross-site
+  // sameSite: 'none' with secure: true is required for cross-site cookies (different subdomains on Render)
+  const isProduction = process.env.NODE_ENV === 'production';
   const options = {
     expires: new Date(Date.now() + expiresDays * 24 * 60 * 60 * 1000),
     httpOnly: true, // Cookie not accessible via JavaScript (XSS protection)
-    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    sameSite: (process.env.NODE_ENV === 'production' ? 'strict' : 'lax') as 'strict' | 'lax', // CSRF protection - strict in production, lax in dev for better compatibility
+    secure: isProduction, // HTTPS only in production (required for sameSite: 'none')
+    sameSite: (isProduction ? 'none' : 'lax') as 'strict' | 'lax' | 'none', // 'none' for cross-subdomain cookies on Render
     path: '/',
   };
 
