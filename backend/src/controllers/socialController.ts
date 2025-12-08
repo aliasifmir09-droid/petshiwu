@@ -4,12 +4,24 @@ import Product from '../models/Product';
 // Generate social sharing links for a product
 export const getProductShareLinks = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
+    const identifier = req.params.id;
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
 
-    const product = await Product.findById(id)
+    // Get current product - try slug first, then ID
+    let product = await Product.findOne({ slug: identifier, deletedAt: null })
       .select('name slug images shortDescription')
       .lean();
+    
+    if (!product) {
+      // Try finding by ID if it's a valid MongoDB ObjectId
+      try {
+        product = await Product.findById(identifier)
+          .select('name slug images shortDescription')
+          .lean();
+      } catch (err) {
+        // Invalid ObjectId, product not found
+      }
+    }
 
     if (!product) {
       return res.status(404).json({

@@ -20,6 +20,7 @@ import { checkPermission } from '../middleware/permissions';
 import {
   createProductValidation,
   validateObjectId,
+  validateProductIdentifier,
   paginationValidation,
   searchValidation,
   productIdsValidation
@@ -35,11 +36,11 @@ router.get('/brands', getUniqueBrands); // Public endpoint for unique brands
 router.get('/stats', protect, checkPermission('canViewAnalytics'), getProductStats);
 router.get('/compare', productIdsValidation, compareProducts); // GET /api/products/compare?productIds=id1,id2,id3
 router.get('/compare/suggestions', productIdsValidation, getComparisonSuggestions); // GET /api/products/compare/suggestions?productIds=id1,id2
-router.get('/:id/share', validateObjectId(), getProductShareLinks); // Social sharing links
-router.get('/:id/recommendations', validateObjectId(), getProductRecommendations); // Intelligent recommendations
-router.get('/:id/frequently-bought-together', validateObjectId(), getFrequentlyBoughtTogether); // Frequently bought together
-router.get('/:id/related', validateObjectId(), getRelatedProducts); // Basic related products (backward compatible)
-router.get('/:id', validateObjectId(), getProduct);
+router.get('/:id/share', validateProductIdentifier(), getProductShareLinks); // Social sharing links - supports slug or ID
+router.get('/:id/recommendations', validateProductIdentifier(), getProductRecommendations); // Intelligent recommendations - supports slug or ID
+router.get('/:id/frequently-bought-together', validateProductIdentifier(), getFrequentlyBoughtTogether); // Frequently bought together - supports slug or ID
+router.get('/:id/related', validateProductIdentifier(), getRelatedProducts); // Basic related products - supports slug or ID
+router.get('/:id', validateProductIdentifier(), getProduct); // Get product by slug or ID
 router.post('/', protect, checkPermission('canManageProducts'), createProductValidation, createProduct);
 router.post('/import', protect, checkPermission('canManageProducts'), csvUpload.single('csv'), importProductsFromCSV);
 router.put('/:id', protect, checkPermission('canManageProducts'), validateObjectId(), updateProduct);

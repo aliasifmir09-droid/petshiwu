@@ -381,6 +381,27 @@ export const validateObjectId = (paramName: string = 'id') => [
   validate
 ];
 
+// Validate product identifier (accepts both ObjectId and slug)
+// Slugs can contain letters, numbers, hyphens, and underscores
+export const validateProductIdentifier = (paramName: string = 'id') => [
+  param(paramName)
+    .custom((value) => {
+      // Accept valid MongoDB ObjectId
+      if (mongoose.Types.ObjectId.isValid(value)) {
+        return true;
+      }
+      // Accept slug format: letters, numbers, hyphens, underscores, dots
+      // Must be at least 1 character and max 200 characters
+      const slugPattern = /^[a-zA-Z0-9\-_.]+$/;
+      if (slugPattern.test(value) && value.length >= 1 && value.length <= 200) {
+        return true;
+      }
+      return false;
+    })
+    .withMessage('Invalid product identifier (must be a valid ID or slug)'),
+  validate
+];
+
 // Query parameter validation
 export const paginationValidation = [
   query('page')

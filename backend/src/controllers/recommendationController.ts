@@ -8,14 +8,25 @@ import logger from '../utils/logger';
 // Get intelligent product recommendations
 export const getProductRecommendations = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const productId = req.params.id;
+    const identifier = req.params.id;
     const userId = req.user?._id;
     const limit = parseInt(req.query.limit as string) || 8;
 
-    // Get current product
-    const currentProduct = await Product.findById(productId)
+    // Get current product - try slug first, then ID
+    let currentProduct = await Product.findOne({ slug: identifier, deletedAt: null })
       .populate('category')
       .lean();
+    
+    if (!currentProduct) {
+      // Try finding by ID if it's a valid MongoDB ObjectId
+      try {
+        currentProduct = await Product.findById(identifier)
+          .populate('category')
+          .lean();
+      } catch (err) {
+        // Invalid ObjectId, product not found
+      }
+    }
 
     if (!currentProduct) {
       return res.status(404).json({
@@ -23,6 +34,8 @@ export const getProductRecommendations = async (req: AuthRequest, res: Response,
         message: 'Product not found'
       });
     }
+
+    const productId = currentProduct._id.toString();
 
     const recommendations: any[] = [];
     const productIds = new Set<string>();
@@ -295,8 +308,29 @@ export const getProductRecommendations = async (req: AuthRequest, res: Response,
 // Get "Frequently Bought Together" for a product
 export const getFrequentlyBoughtTogether = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const productId = req.params.id;
+    const identifier = req.params.id;
     const limit = parseInt(req.query.limit as string) || 4;
+
+    // Get current product - try slug first, then ID
+    let currentProduct = await Product.findOne({ slug: identifier, deletedAt: null }).lean();
+    
+    if (!currentProduct) {
+      // Try finding by ID if it's a valid MongoDB ObjectId
+      try {
+        currentProduct = await Product.findById(identifier).lean();
+      } catch (err) {
+        // Invalid ObjectId, product not found
+      }
+    }
+
+    if (!currentProduct) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+
+    const productId = currentProduct._id.toString();
 
     const frequentlyBought = await Order.aggregate([
       {
