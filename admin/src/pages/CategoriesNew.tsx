@@ -4,7 +4,7 @@ import { Plus, Edit, Trash2, X, Save, ChevronRight, ChevronDown, FolderTree } fr
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
-import api, { API_URL } from '@/services/api';
+import api from '@/services/api';
 
 interface Category {
   _id: string;
