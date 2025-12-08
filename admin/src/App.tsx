@@ -35,6 +35,13 @@ function App() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  // Suppress expected 401/403 network errors in console
+  useEffect(() => {
+    import('./utils/suppressNetworkErrors').then(({ suppressNetworkErrors }) => {
+      suppressNetworkErrors();
+    });
+  }, []);
+
   useEffect(() => {
     const loadUser = async () => {
       // Phase 2: Cookie-Only - Try to get user from backend using httpOnly cookie

@@ -19,9 +19,12 @@ import {
 
 const Dashboard = () => {
   // Get user data first
+  // Only fetch if we're likely authenticated (skip if we know we're not)
   const { data: userData } = useQuery({
     queryKey: ['user-info'],
-    queryFn: () => adminService.getMe()
+    queryFn: () => adminService.getMe(),
+    retry: false, // Don't retry on 401 - it's expected if not authenticated
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   const hasAnalyticsPermission = userData?.role === 'admin' || userData?.permissions?.canViewAnalytics;

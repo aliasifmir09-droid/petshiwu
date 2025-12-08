@@ -72,6 +72,11 @@ function App() {
   useEffect(() => {
     initAnalytics();
     
+    // Suppress expected 401/403 network errors in console
+    import('./utils/suppressNetworkErrors').then(({ suppressNetworkErrors }) => {
+      suppressNetworkErrors();
+    });
+    
     // Suppress image loading errors in console (403, 404, etc.)
     // This prevents console spam from external CDN images that fail to load
     const handleGlobalError = (event: ErrorEvent) => {

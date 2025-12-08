@@ -28,7 +28,9 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
   // Get user info and permissions
   const { data: userData } = useQuery({
     queryKey: ['user-info'],
-    queryFn: () => adminService.getMe()
+    queryFn: () => adminService.getMe(),
+    retry: false, // Don't retry on 401 - it's expected if not authenticated
+    enabled: false // Disable by default - only fetch when needed
   });
 
   // Get out-of-stock product count

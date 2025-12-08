@@ -10,7 +10,9 @@ const PasswordExpiryWarning = () => {
 
   const { data: currentUser } = useQuery({
     queryKey: ['user-info'],
-    queryFn: () => adminService.getMe()
+    queryFn: () => adminService.getMe(),
+    retry: false, // Don't retry on 401 - it's expected if not authenticated
+    staleTime: 5 * 60 * 1000 // Cache for 5 minutes
   });
 
   // Reset dismissed state when user data changes
