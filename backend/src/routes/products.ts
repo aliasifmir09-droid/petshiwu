@@ -23,7 +23,8 @@ import {
   validateProductIdentifier,
   paginationValidation,
   searchValidation,
-  productIdsValidation
+  productIdsValidation,
+  productIdsValidationForSuggestions
 } from '../middleware/validation';
 import { csvUpload } from '../middleware/csvUpload';
 
@@ -34,8 +35,8 @@ router.get('/search', searchValidation, advancedSearch); // Advanced search with
 router.get('/search/autocomplete', searchValidation, searchAutocomplete); // Search autocomplete
 router.get('/brands', getUniqueBrands); // Public endpoint for unique brands
 router.get('/stats', protect, checkPermission('canViewAnalytics'), getProductStats);
-router.get('/compare', productIdsValidation, compareProducts); // GET /api/products/compare?productIds=id1,id2,id3
-router.get('/compare/suggestions', productIdsValidation, getComparisonSuggestions); // GET /api/products/compare/suggestions?productIds=id1,id2
+router.get('/compare', productIdsValidation, compareProducts); // GET /api/products/compare?productIds=id1,id2,id3 (requires 2+ IDs)
+router.get('/compare/suggestions', productIdsValidationForSuggestions, getComparisonSuggestions); // GET /api/products/compare/suggestions?productIds=id1 (allows 1+ IDs)
 router.get('/:id/share', validateProductIdentifier(), getProductShareLinks); // Social sharing links - supports slug or ID
 router.get('/:id/recommendations', validateProductIdentifier(), getProductRecommendations); // Intelligent recommendations - supports slug or ID
 router.get('/:id/frequently-bought-together', validateProductIdentifier(), getFrequentlyBoughtTogether); // Frequently bought together - supports slug or ID

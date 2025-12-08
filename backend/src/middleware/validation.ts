@@ -543,6 +543,22 @@ export const productIdsValidation = [
   validate
 ];
 
+// Product comparison suggestions validation (allows 1 product ID for getting suggestions)
+export const productIdsValidationForSuggestions = [
+  query('productIds')
+    .notEmpty()
+    .withMessage('Product IDs are required')
+    .custom((value) => {
+      const ids = typeof value === 'string' ? value.split(',') : Array.isArray(value) ? value : [value];
+      if (ids.length < 1 || ids.length > 10) {
+        throw new Error('Must provide between 1 and 10 product IDs');
+      }
+      return ids.every((id: string) => mongoose.Types.ObjectId.isValid(id.trim()));
+    })
+    .withMessage('All product IDs must be valid'),
+  validate
+];
+
 // Wishlist validations
 export const wishlistAddValidation = [
   body('productId')
