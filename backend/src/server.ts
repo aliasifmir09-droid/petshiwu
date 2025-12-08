@@ -326,14 +326,14 @@ app.use((req, res, next) => {
         return escapeHtml(obj);
       }
       if (Array.isArray(obj)) {
-        return obj.map(sanitizeQuery) as SanitizedObject;
+        return obj.map(sanitizeQuery);
       }
       if (obj && typeof obj === 'object' && obj.constructor === Object) {
-        const sanitized: Record<string, unknown> = {};
+        const sanitized: { [key: string]: SanitizedObject } = {};
         for (const key in obj) {
           sanitized[key] = sanitizeQuery((obj as Record<string, unknown>)[key]);
         }
-        return sanitized as SanitizedObject;
+        return sanitized;
       }
       return obj as SanitizedObject;
     };
