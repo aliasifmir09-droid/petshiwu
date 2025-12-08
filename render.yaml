@@ -24,6 +24,8 @@ services:
     plan: free
     buildCommand: npm install && npm run build
     staticPublishPath: dist
+    # Render automatically handles SPA routing for static sites
+    # All routes will serve index.html, allowing React Router to handle routing
     envVars:
       - key: VITE_API_URL
         # Update with actual API URL after backend deploy if different

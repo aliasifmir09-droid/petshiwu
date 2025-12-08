@@ -70,17 +70,27 @@ echo ""
 # Create .htaccess files
 echo "[6/6] Creating .htaccess files..."
 
-# Frontend .htaccess
-cat > ~/Desktop/deployment/public_html/.htaccess << 'EOF'
+# Frontend .htaccess (copy from public folder - already configured)
+# The .htaccess file is now in frontend/public/.htaccess and will be copied during build
+# If it doesn't exist in dist, create it here as fallback
+if [ ! -f ~/Desktop/deployment/public_html/.htaccess ]; then
+  cat > ~/Desktop/deployment/public_html/.htaccess << 'EOF'
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
-  RewriteRule ^index\.html$ - [L]
+  
+  # Don't rewrite files or directories that exist
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
+  
+  # Don't rewrite API calls
+  RewriteCond %{REQUEST_URI} !^/api/
+  
+  # Rewrite everything else to index.html for SPA routing
   RewriteRule . /index.html [L]
 </IfModule>
 EOF
+fi
 
 # Admin .htaccess
 cat > ~/Desktop/deployment/admin/.htaccess << 'EOF'
