@@ -111,14 +111,7 @@ const CategoriesNew = () => {
       
       // Phase 2: Cookie-Only - Use api service which handles cookies automatically
       const response = await api.delete(`/categories/${encodeURIComponent(categoryId)}`);
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.message || errorData.error || `Failed to delete category (${response.status})`;
-        throw new Error(errorMessage);
-      }
-      
-      return response.json();
+      return response.data;
     },
     onSuccess: () => {
       // Invalidate all category-related queries
