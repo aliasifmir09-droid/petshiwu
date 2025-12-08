@@ -116,13 +116,15 @@ const ProductComparison = () => {
     );
   }
 
+  // Fetch current product when we have 1 product
+  const { data: currentProduct } = useQuery({
+    queryKey: ['product', productIds[0]],
+    queryFn: () => productService.getProduct(productIds[0]),
+    enabled: productIds.length === 1
+  });
+
   // Show search/suggestions when we have 1 product
   if (productIds.length === 1) {
-    const { data: currentProduct } = useQuery({
-      queryKey: ['product', productIds[0]],
-      queryFn: () => productService.getProduct(productIds[0]),
-      enabled: productIds.length === 1
-    });
 
     return (
       <div className="container mx-auto px-4 py-12">
