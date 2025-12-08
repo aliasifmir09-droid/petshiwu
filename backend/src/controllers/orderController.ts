@@ -406,14 +406,15 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         success: true,
         data: normalizedOrder
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Rollback transaction on error if using one
       if (session) {
         await session.abortTransaction();
       }
       
       // Return appropriate error response
-      if (error.message.includes('not found') || error.message.includes('out of stock') || error.message.includes('Insufficient stock')) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('not found') || errorMessage.includes('out of stock') || errorMessage.includes('Insufficient stock')) {
         return res.status(400).json({
           success: false,
           message: errorMessage,
@@ -445,12 +446,13 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
 };
 
 // Helper function to normalize order IDs to strings
-const normalizeOrderId = (order: any): any => {
-  if (!order) return order;
+const normalizeOrderId = (order: unknown): NormalizedOrder | null => {
+  if (!order || typeof order !== 'object') return null;
   
   try {
     // Convert Mongoose document to plain object
-    let normalized: any;
+    const orderObj = order as Record<string, unknown>;
+    let normalized: Partial<NormalizedOrder>;
     if ('toObject' in orderObj && typeof orderObj.toObject === 'function') {
       normalized = orderObj.toObject() as Partial<NormalizedOrder>;
     } else if ('toJSON' in orderObj && typeof orderObj.toJSON === 'function') {
@@ -924,13 +926,14 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response, next: N
       message: 'Order status updated successfully',
       data: normalizedOrder
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Handle Mongoose validation errors
-    if (error.name === 'ValidationError') {
+    if (error instanceof Error && error.name === 'ValidationError') {
+      const validationError = error as { errors?: Record<string, { message: string }> };
       return res.status(400).json({
         success: false,
         message: 'Validation error',
-        errors: Object.values(error.errors).map((err: any) => err.message)
+        errors: Object.values(validationError.errors || {}).map((err) => err.message)
       });
     }
     next(error);
@@ -1498,7 +1501,7 @@ export const confirmOrderPayment = async (req: AuthRequest, res: Response, next:
           }
         });
       }
-    } catch (stripeError: any) {
+    } catch (stripeError: unknown) {
       logger.error('Stripe verification error:', stripeError);
       return res.status(500).json({
         success: false,
