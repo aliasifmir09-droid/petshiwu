@@ -133,15 +133,12 @@ const ResetPassword = () => {
 
   const handleLogout = async () => {
     try {
-      await authService.logout();
+      // Use the store's logout function which handles everything properly
       logout();
       showToast('Logged out successfully. You can now reset the password.', 'success');
-      // Reload page to clear state
-      window.location.reload();
     } catch (err) {
-      // Force logout even if API call fails
+      // Force logout even if there's an error
       logout();
-      window.location.reload();
     }
   };
 

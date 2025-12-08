@@ -70,19 +70,23 @@ function App() {
   };
 
   const handleLogout = async () => {
+    // Clear user state immediately to prevent redirect loops
+    setUser(null);
+    
     try {
       // Phase 2: Cookie-Only - Call logout endpoint to clear httpOnly cookie
       // Backend handles cookie clearing, no localStorage to manage
-      adminService.logout().catch(() => {
-        // Silently handle logout errors
+      await adminService.logout().catch(() => {
+        // Silently handle logout errors - state already cleared
       });
     } catch (error) {
-      // Silently handle logout errors
-    } finally {
-      // Always clear user state and redirect
-      setUser(null);
-      window.location.href = '/login';
+      // Silently handle logout errors - state already cleared
     }
+    
+    // Small delay to ensure cookie is cleared, then redirect
+    setTimeout(() => {
+      window.location.href = '/login';
+    }, 50);
   };
 
   // Loading component for Suspense fallback

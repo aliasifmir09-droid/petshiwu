@@ -76,19 +76,36 @@ api.interceptors.response.use(
       // Don't redirect if skipAuth flag is set (e.g., during logout)
       const skipAuth = error.config?.skipAuth;
       
+      // Only redirect if:
+      // 1. Not a skipAuth request (e.g., logout)
+      // 2. Not a public endpoint
+      // 3. Not already on login/register/home pages
+      // 4. Not during a navigation (check if we're in the middle of a redirect)
+      const isNavigating = sessionStorage.getItem('_isNavigating') === 'true';
+      
       if (!skipAuth && 
           !isPublicEndpoint && 
+          !isNavigating &&
           window.location.hash !== '#/login' && 
           window.location.hash !== '#/register' &&
           window.location.hash !== '#/') {
+        // Mark that we're navigating to prevent loops
+        sessionStorage.setItem('_isNavigating', 'true');
+        
         // Clear any stale auth state (use dynamic import without await since we're in a non-async function)
         import('@/stores/authStore').then(({ useAuthStore }) => {
           useAuthStore.getState().setUser(null);
         });
+        
         // Use hash navigation to prevent full page reload loops
         if (window.location.hash !== '#/login') {
           window.location.hash = '/login';
         }
+        
+        // Clear navigation flag after a short delay
+        setTimeout(() => {
+          sessionStorage.removeItem('_isNavigating');
+        }, 1000);
       }
     } else if (error.response?.status === 403) {
       // Don't redirect for order endpoints - let the component handle the error

@@ -31,13 +31,31 @@ export const sendTokenResponse = (userId: string, statusCode: number, res: Respo
   // sameSite: 'lax' works for same domain but not for cross-site
   // sameSite: 'none' with secure: true is required for cross-site cookies (different subdomains on Render)
   const isProduction = process.env.NODE_ENV === 'production';
-  const options = {
+  
+  // Get cookie domain from environment or leave undefined (browser will use current domain)
+  // For cross-subdomain cookies on Render, we don't set domain (browser handles it)
+  // Setting domain explicitly can cause issues, so we let the browser handle it
+  const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
+  
+  const options: {
+    expires: Date;
+    httpOnly: boolean;
+    secure: boolean;
+    sameSite: 'strict' | 'lax' | 'none';
+    path: string;
+    domain?: string;
+  } = {
     expires: new Date(Date.now() + expiresDays * 24 * 60 * 60 * 1000),
     httpOnly: true, // Cookie not accessible via JavaScript (XSS protection)
     secure: isProduction, // HTTPS only in production (required for sameSite: 'none')
     sameSite: (isProduction ? 'none' : 'lax') as 'strict' | 'lax' | 'none', // 'none' for cross-subdomain cookies on Render
     path: '/',
   };
+  
+  // Only set domain if explicitly configured (usually not needed for cross-subdomain)
+  if (cookieDomain) {
+    options.domain = cookieDomain;
+  }
 
   // Phase 2: Cookie-Only - Set httpOnly cookie, token not returned in response body
   // Frontend relies solely on httpOnly cookies (more secure, XSS protection)

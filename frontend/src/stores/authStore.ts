@@ -17,30 +17,29 @@ export const useAuthStore = create<AuthState>((set) => ({
   setUser: (user) => set({ user, isAuthenticated: !!user, isLoading: false }),
   setLoading: (loading) => set({ isLoading: loading }),
   logout: async () => {
+    // Clear local state immediately to prevent any redirect loops
+    set({ user: null, isAuthenticated: false });
+    
     try {
       // Phase 2: Cookie-Only - Call logout endpoint to clear httpOnly cookie
       // Backend handles cookie clearing, no localStorage to manage
       const { default: api } = await import('@/services/api');
-      // Clear local state first to prevent any redirect loops
-      set({ user: null, isAuthenticated: false });
-      // Call logout endpoint
+      // Call logout endpoint with skipAuth to prevent 401 redirects
       await api.post('/auth/logout', {}, { skipAuth: true }).catch(() => {
-        // Ignore errors - cookie clearing is best effort
+        // Ignore errors - cookie clearing is best effort, state already cleared
       });
     } catch (error) {
-      // If logout endpoint fails, still clear local state
-      console.error('Logout error:', error);
-      set({ user: null, isAuthenticated: false });
-    } finally {
-      // Use hash-based navigation for React Router instead of window.location
-      // This prevents infinite redirect loops
+      // If logout endpoint fails, state is already cleared above
+      // Silently continue - user is already logged out locally
+    }
+    
+    // Use hash navigation to home page - no full page reload to prevent loops
+    // Small delay to ensure cookie is cleared
+    setTimeout(() => {
       if (window.location.hash !== '#/') {
         window.location.hash = '/';
-      } else {
-        // If already on home, force a reload to clear state
-        window.location.reload();
       }
-    }
+    }, 50);
   }
 }));
 

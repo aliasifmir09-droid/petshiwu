@@ -406,15 +406,31 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
     // Clear httpOnly cookie with same settings as when it was set
     // Must match the cookie settings from generateToken.ts exactly
     const isProduction = process.env.NODE_ENV === 'production';
+    const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
     
     // Clear the cookie by setting it to expire in the past
-    res.cookie('token', '', {
+    // Use same options as login to ensure proper clearing
+    const clearOptions: {
+      expires: Date;
+      httpOnly: boolean;
+      secure: boolean;
+      sameSite: 'strict' | 'lax' | 'none';
+      path: string;
+      domain?: string;
+    } = {
       expires: new Date(0), // Expire immediately (past date)
       httpOnly: true,
       secure: isProduction, // Must match login cookie settings
       sameSite: (isProduction ? 'none' : 'lax') as 'strict' | 'lax' | 'none', // Must match login cookie settings
       path: '/',
-    });
+    };
+    
+    // Only set domain if it was set during login
+    if (cookieDomain) {
+      clearOptions.domain = cookieDomain;
+    }
+    
+    res.cookie('token', '', clearOptions);
 
     res.status(200).json({
       success: true,
