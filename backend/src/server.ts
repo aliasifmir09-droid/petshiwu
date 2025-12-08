@@ -584,7 +584,8 @@ try {
   });
 
   // Handle server errors
-  server.on('error', (error: NodeJS.ErrnoException) => {
+  if (server) {
+    server.on('error', (error: NodeJS.ErrnoException) => {
     console.error('❌ Server error event:', error);
     if (error.code === 'EADDRINUSE') {
       console.error(`❌ Port ${PORT} is already in use`);

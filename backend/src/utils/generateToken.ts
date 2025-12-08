@@ -9,7 +9,7 @@ export const generateToken = (id: string) => {
   const expiresIn = process.env.JWT_EXPIRE || '30d';
   // Explicitly specify algorithm to prevent algorithm confusion attacks
   return jwt.sign({ id }, secret, { 
-    expiresIn: expiresIn,
+    expiresIn: expiresIn as string | number,
     algorithm: 'HS256' // Explicitly use HS256 to prevent algorithm confusion
   });
 };

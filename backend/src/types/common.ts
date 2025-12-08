@@ -2,6 +2,8 @@
  * Common TypeScript types to replace 'as any' usages
  */
 
+import type mongoose from 'mongoose';
+
 import { Request, Response, NextFunction } from 'express';
 import { AuthRequest } from '../middleware/auth';
 

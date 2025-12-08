@@ -1503,9 +1503,10 @@ export const confirmOrderPayment = async (req: AuthRequest, res: Response, next:
       }
     } catch (stripeError: unknown) {
       logger.error('Stripe verification error:', stripeError);
+      const errorMessage = stripeError instanceof Error ? stripeError.message : 'Unknown error';
       return res.status(500).json({
         success: false,
-        message: 'Payment verification failed: ' + (stripeError.message || 'Unknown error')
+        message: 'Payment verification failed: ' + errorMessage
       });
     }
   } catch (error: unknown) {

@@ -209,7 +209,7 @@ export const getMe = async (req: AuthRequest, res: Response, next: NextFunction)
     }
 
     // Include password expiry info for admin and staff
-    const responseData: Record<string, unknown> = user.toObject();
+    const responseData = user.toObject() as Record<string, unknown>;
     if (user.role === 'admin' || user.role === 'staff') {
       responseData.passwordExpired = user.isPasswordExpired();
       responseData.daysUntilPasswordExpires = user.getDaysUntilPasswordExpires();
