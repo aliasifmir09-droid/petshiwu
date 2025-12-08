@@ -190,16 +190,17 @@
   await user.save();
   ```
 - **Impact:** 
-  - ⚠️ Brute force attacks possible on forgot-password endpoint
-  - ⚠️ Email spam/abuse possible (no rate limiting)
+  - ✅ Brute force attacks prevented with rate limiting
+  - ✅ Email spam/abuse prevented with rate limiting
   - ✅ Token cannot be reused (single-use enforced)
   - ✅ Short expiration window (15 minutes) reduces attack window
-- **Fix Applied:** ✅
+- **Fix Applied:** ✅ **RESOLVED**
   - ✅ Token single-use: **ALREADY IMPLEMENTED**
   - ✅ Short expiration: **ALREADY IMPLEMENTED** (15 minutes)
   - ✅ **ADDED:** Rate limiting to `/forgot-password` endpoint (3 requests/hour per IP)
   - ✅ **ADDED:** Rate limiting to `/reset-password` endpoint (5 attempts/15min per IP)
   - ✅ IP-based rate limiting implemented
+- **Status:** ✅ **FIXED** - Rate limiting prevents brute force and email spam
 - **Implementation:**
   ```typescript
   // Rate limiting for password reset (forgot password) to prevent abuse and email spam
@@ -229,7 +230,7 @@
 - **Location:** `backend/src/server.ts` (rate limiters defined and applied)
 - **Priority:** ✅ **RESOLVED** (rate limiting implemented)
 
-### 6. **Missing Input Validation on Some Endpoints** ⚠️ MEDIUM
+### 6. **Missing Input Validation on Some Endpoints** ✅ FIXED
 - **Severity:** MEDIUM
 - **Issue:** 
   - Not all endpoints use validation middleware
@@ -239,11 +240,32 @@
 - **Impact:** 
   - Potential injection attacks
   - Invalid data in database
-- **Fix Required:** 
-  - Audit all endpoints for missing validation
-  - Add validation middleware to all POST/PUT endpoints
-  - Validate query parameters
-- **Priority:** **MEDIUM**
+- **Fix Applied:** ✅ **RESOLVED**
+  - ✅ **ADDED:** Validation for auth endpoints (verify-email, resend-verification, verify-reset-token, updateProfile)
+  - ✅ **ADDED:** Validation for product endpoints (compare, suggestions, all id params)
+  - ✅ **ADDED:** Validation for user endpoints (wishlist add/remove/email, addresses)
+  - ✅ **ADDED:** Validation for order endpoints (payment-intent, confirm-payment)
+  - ✅ **ADDED:** Validation for donation endpoints (create-intent, confirm)
+  - ✅ All query parameters now validated
+  - ✅ All POST/PUT request bodies now validated
+  - ✅ All route parameters validated with ObjectId validation
+- **Implementation:**
+  ```typescript
+  // Example: Product comparison validation
+  export const productIdsValidation = [
+    query('productIds')
+      .notEmpty()
+      .custom((value) => {
+        const ids = typeof value === 'string' ? value.split(',') : Array.isArray(value) ? value : [value];
+        if (ids.length < 2 || ids.length > 10) {
+          throw new Error('Must provide between 2 and 10 product IDs');
+        }
+        return ids.every((id: string) => mongoose.Types.ObjectId.isValid(id.trim()));
+      }),
+    validate
+  ];
+  ```
+- **Status:** ✅ **FIXED** - All endpoints now have comprehensive input validation
 
 ---
 
