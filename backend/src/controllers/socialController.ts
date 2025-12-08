@@ -1,22 +1,122 @@
 import { Request, Response, NextFunction } from 'express';
 import Product from '../models/Product';
+import Category from '../models/Category';
+
+// Helper function to build SEO-friendly product URL (matches frontend format)
+const buildProductUrl = (product: any, frontendUrl: string): string => {
+  const productSlug = product.slug || product._id?.toString() || '';
+  
+  // If no category or category is just a string ID, use simple URL
+  if (!product.category || typeof product.category === 'string') {
+    return `${frontendUrl}/products/${productSlug}`;
+  }
+
+  const category = product.category;
+  const petType = product.petType || 'products';
+  
+  // Build category path from hierarchy (from root to current category)
+  const buildCategoryPath = (cat: any, visited = new Set<string>()): string[] => {
+    const path: string[] = [];
+    
+    const buildPathRecursive = (current: any): void => {
+      if (!current || path.length >= 3) return;
+      
+      const catId = current._id?.toString() || '';
+      if (visited.has(catId)) return; // Prevent circular references
+      visited.add(catId);
+      
+      // If has parent, build parent path first
+      if (current.parentCategory && typeof current.parentCategory === 'object') {
+        buildPathRecursive(current.parentCategory);
+      }
+      
+      // Then add current category slug
+      if (current.slug) {
+        path.push(current.slug);
+      }
+    };
+    
+    buildPathRecursive(cat);
+    return path;
+  };
+
+  const categoryPath = buildCategoryPath(category);
+  
+  // If we have category path, use SEO-friendly URL
+  if (categoryPath.length > 0) {
+    const validPetType = petType || 'products';
+    return `${frontendUrl}/${validPetType}/${categoryPath.join('/')}/${productSlug}`;
+  }
+  
+  // Fallback to simple URL
+  return `${frontendUrl}/products/${productSlug}`;
+};
+
+// Helper function to normalize image URL to absolute URL
+const normalizeImageUrl = (imageUrl: string | undefined | null, backendUrl: string): string => {
+  if (!imageUrl) {
+    return '';
+  }
+
+  // Already a full URL (http:// or https://) - includes Cloudinary URLs
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl;
+  }
+
+  // Relative path starting with /uploads
+  if (imageUrl.startsWith('/uploads/')) {
+    return `${backendUrl}${imageUrl}`;
+  }
+
+  // Relative path without leading slash
+  if (imageUrl.startsWith('uploads/')) {
+    return `${backendUrl}/${imageUrl}`;
+  }
+
+  return imageUrl;
+};
 
 // Generate social sharing links for a product
 export const getProductShareLinks = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const identifier = req.params.id;
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/+$/, ''); // Remove trailing slashes
+    const backendUrl = (process.env.API_URL || process.env.BACKEND_URL || 'http://localhost:5000').replace(/\/+$/, '').replace(/\/api$/, ''); // Remove /api suffix if present
 
-    // Get current product - try slug first, then ID
+    // Get current product with category populated - try slug first, then ID
     let product = await Product.findOne({ slug: identifier, deletedAt: null })
-      .select('name slug images shortDescription')
+      .populate({
+        path: 'category',
+        select: 'name slug parentCategory',
+        populate: {
+          path: 'parentCategory',
+          select: 'name slug parentCategory',
+          populate: {
+            path: 'parentCategory',
+            select: 'name slug'
+          }
+        }
+      })
+      .select('name slug images shortDescription category petType')
       .lean();
     
     if (!product) {
       // Try finding by ID if it's a valid MongoDB ObjectId
       try {
         product = await Product.findById(identifier)
-          .select('name slug images shortDescription')
+          .populate({
+            path: 'category',
+            select: 'name slug parentCategory',
+            populate: {
+              path: 'parentCategory',
+              select: 'name slug parentCategory',
+              populate: {
+                path: 'parentCategory',
+                select: 'name slug'
+              }
+            }
+          })
+          .select('name slug images shortDescription category petType')
           .lean();
       } catch (err) {
         // Invalid ObjectId, product not found
@@ -30,10 +130,14 @@ export const getProductShareLinks = async (req: Request, res: Response, next: Ne
       });
     }
 
-    const productUrl = `${frontendUrl}/product/${product.slug || identifier}`;
+    // Build SEO-friendly product URL (matches frontend format)
+    const productUrl = buildProductUrl(product, frontendUrl);
     const productName = product.name;
     const productDescription = product.shortDescription || product.name;
-    const productImage = product.images && product.images.length > 0 ? product.images[0] : '';
+    
+    // Get first image and normalize to absolute URL for social media previews
+    const rawImageUrl = product.images && product.images.length > 0 ? product.images[0] : '';
+    const productImage = normalizeImageUrl(rawImageUrl, backendUrl);
 
     // Encode for URL
     const encodedUrl = encodeURIComponent(productUrl);
