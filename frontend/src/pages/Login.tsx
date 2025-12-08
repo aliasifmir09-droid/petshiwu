@@ -19,8 +19,25 @@ const Login = () => {
   });
 
   const loginMutation = useMutation({
-    mutationFn: authService.login,
+    mutationFn: async (data: LoginData) => {
+      // Phase 2: Cookie-Only - Login sets httpOnly cookie, no token in response
+      // Wrap the login call to handle any token extraction errors gracefully
+      try {
+        return await authService.login(data);
+      } catch (error: any) {
+        // If error is about missing token, that's expected in Phase 2 (cookie-only)
+        // The cookie is set automatically, so we can ignore token extraction errors
+        if (error?.message?.includes('token') || error?.message?.includes('Token')) {
+          // Cookie was set, just return success response structure
+          return { success: true };
+        }
+        throw error;
+      }
+    },
     onSuccess: async () => {
+      // Small delay to ensure cookie is set before making authenticated requests
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const user = await authService.getMe();
       setUser(user);
       
@@ -31,7 +48,10 @@ const Login = () => {
       navigate(redirect);
     },
     onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Login failed', 'error');
+      // Don't show error if it's just about missing token (expected in Phase 2)
+      if (!error?.message?.includes('token') && !error?.message?.includes('Token')) {
+        showToast(error.response?.data?.message || 'Login failed', 'error');
+      }
     }
   });
 

@@ -41,7 +41,12 @@ api.interceptors.request.use(
 
 // Handle response errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Phase 2: Cookie-Only - Ensure response structure is consistent
+    // Some analytics/wrapper code might expect a token field, but we don't return it anymore
+    // The cookie is set automatically by the browser, so we just return the response as-is
+    return response;
+  },
   (error) => {
     // Don't redirect for certain endpoints that might legitimately return 404
     const url = error.config?.url || '';
