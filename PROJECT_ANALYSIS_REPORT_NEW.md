@@ -66,9 +66,9 @@
   - Add subscription creation during checkout
 - **Priority:** **HIGH** (feature gap, affects business model)
 
-### 3. **CORS Configuration - TOO PERMISSIVE** ⚠️ SECURITY RISK
+### 3. **CORS Configuration - TOO PERMISSIVE** ✅ FIXED
 - **Severity:** MEDIUM-HIGH (Security Risk)
-- **Status:** ⚠️ **STILL EXISTS** - Needs immediate attention
+- **Status:** ✅ **FIXED** - Unauthorized origins now blocked in production
 - **Issue:** 
   - CORS allows ALL origins in production (line 369 in `server.ts`)
   - `callback(null, true)` allows any origin if not in allowed list
@@ -91,25 +91,34 @@
   - Potential for CSRF attacks
   - Data leakage risk
   - Unauthorized API access
-- **Fix Required:** 
-  - Remove the fallback `callback(null, true)` in production
-  - Only allow specific origins from environment variable
-  - Reject requests from unknown origins
-  - Consider using a CORS whitelist from environment variables
-- **Recommended Fix:**
+- **Fix Applied:** ✅
+  - ✅ Removed fallback `callback(null, true)` in production
+  - ✅ Now blocks unauthorized origins in production
+  - ✅ Only allows specific origins from allowed list
+  - ✅ Development mode still allows unknown origins (for local testing)
+- **Implementation:**
   ```typescript
   if (isAllowed) {
     callback(null, true);
   } else {
+    // SECURITY FIX: Block unauthorized origins in production
     if (process.env.NODE_ENV === 'production') {
-      logger.warn(`CORS: Blocking origin ${origin} (not in allowed list)`);
+      console.warn(`CORS: Blocking unauthorized origin: ${origin}`);
       return callback(new Error('Not allowed by CORS'), false);
     }
-    // Only allow in development
-    callback(null, true);
+    // In development, allow but log warning
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`CORS: Allowing origin ${origin} in development mode`);
+      callback(null, true);
+    } else {
+      // Default: block unknown origins
+      console.warn(`CORS: Blocking origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'), false);
+    }
   }
   ```
-- **Priority:** **HIGH** (security vulnerability - allows unauthorized API access)
+- **Location:** `backend/src/server.ts` (lines 347-376)
+- **Priority:** ✅ **RESOLVED** (security vulnerability fixed)
 
 ### 4. **JWT Token Storage - XSS VULNERABILITY** ⚠️ SECURITY RISK
 - **Severity:** MEDIUM (Security Risk)
@@ -144,9 +153,9 @@
   - Implement CSP headers (check if already configured)
 - **Priority:** **MEDIUM** (requires frontend and backend refactoring, but XSS protection is already in place)
 
-### 5. **Password Reset Token Security** ⚠️ PARTIALLY SECURE
+### 5. **Password Reset Token Security** ✅ FIXED
 - **Severity:** MEDIUM (Rate Limiting Missing)
-- **Status:** ✅ **Token Invalidation: IMPLEMENTED** | ⚠️ **Rate Limiting: MISSING**
+- **Status:** ✅ **Token Invalidation: IMPLEMENTED** | ✅ **Rate Limiting: IMPLEMENTED**
 - **Current Implementation:** 
   - ✅ Token expiration is **15 minutes** (0.25 hours) - Good security practice
   - ✅ Token **IS invalidated after use** (lines 589-590 in `authController.ts`)
@@ -170,27 +179,40 @@
   - ⚠️ Email spam/abuse possible (no rate limiting)
   - ✅ Token cannot be reused (single-use enforced)
   - ✅ Short expiration window (15 minutes) reduces attack window
-- **Fix Required:** 
+- **Fix Applied:** ✅
   - ✅ Token single-use: **ALREADY IMPLEMENTED**
   - ✅ Short expiration: **ALREADY IMPLEMENTED** (15 minutes)
-  - ⚠️ **ADD:** Rate limiting to `/forgot-password` endpoint
-  - ⚠️ **ADD:** Rate limiting to `/reset-password` endpoint
-  - Consider IP-based rate limiting
-  - Consider email-based rate limiting (max 3 requests per email per hour)
-- **Recommended Fix:**
+  - ✅ **ADDED:** Rate limiting to `/forgot-password` endpoint (3 requests/hour per IP)
+  - ✅ **ADDED:** Rate limiting to `/reset-password` endpoint (5 attempts/15min per IP)
+  - ✅ IP-based rate limiting implemented
+- **Implementation:**
   ```typescript
-  // Add rate limiting middleware
-  import rateLimit from 'express-rate-limit';
-  
+  // Rate limiting for password reset (forgot password) to prevent abuse and email spam
   const forgotPasswordLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
-    max: 3, // 3 requests per hour per IP
-    message: 'Too many password reset requests, please try again later.'
+    max: 3, // Maximum 3 password reset requests per hour per IP
+    message: 'Too many password reset requests from this IP, please try again after 1 hour.',
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: false, // Count all requests to prevent email spam
   });
-  
-  router.post('/forgot-password', forgotPasswordLimiter, forgotPasswordValidation, forgotPassword);
+
+  // Rate limiting for password reset (reset password) to prevent brute force
+  const resetPasswordLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // Maximum 5 password reset attempts per 15 minutes per IP
+    message: 'Too many password reset attempts from this IP, please try again after 15 minutes.',
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: true, // Don't count successful resets
+  });
+
+  // Applied to routes
+  app.post(['/api/v1/auth/forgot-password', '/api/auth/forgot-password'], forgotPasswordLimiter);
+  app.post(['/api/v1/auth/reset-password', '/api/auth/reset-password'], resetPasswordLimiter);
   ```
-- **Priority:** **MEDIUM** (good security practices in place, but rate limiting needed)
+- **Location:** `backend/src/server.ts` (rate limiters defined and applied)
+- **Priority:** ✅ **RESOLVED** (rate limiting implemented)
 
 ### 6. **Missing Input Validation on Some Endpoints** ⚠️ MEDIUM
 - **Severity:** MEDIUM
@@ -415,7 +437,7 @@
 ## 🎯 PRIORITY RECOMMENDATIONS
 
 ### **IMMEDIATE (Week 1)** 🔴
-1. **Fix CORS Security Issue** - Restrict origins in production
+1. ~~**Fix CORS Security Issue**~~ - ✅ **COMPLETE** (Unauthorized origins blocked in production)
 2. ~~**Implement Payment Gateway for Orders**~~ - ✅ **COMPLETE** (Stripe.js + PayPal SDK implemented)
 3. **Remove or Implement Subscription Feature** - Either remove from README or implement fully
 
@@ -440,13 +462,13 @@
 
 ## 📝 SUMMARY
 
-### **Critical Issues Found:** 4 (Reduced from 6)
+### **Critical Issues Found:** 2 (Reduced from 6)
 1. ~~Payment gateway incomplete~~ ✅ **RESOLVED** (Stripe.js + PayPal SDK implemented)
 2. ~~Checkout address management~~ ✅ **RESOLVED** (Saved addresses implemented)
 3. Subscription feature missing (despite being advertised)
-4. CORS too permissive (security risk)
-5. JWT in localStorage (XSS risk)
-6. Password reset security review needed
+4. ~~CORS too permissive~~ ✅ **RESOLVED** (Unauthorized origins blocked in production)
+5. JWT in localStorage (XSS risk) - Migration plan documented
+6. ~~Password reset security~~ ✅ **RESOLVED** (Rate limiting implemented)
 7. Missing input validation on some endpoints
 
 ### **Missing Features:** 6 (Reduced from 8)
@@ -491,10 +513,10 @@
 ## 🎯 **ACTION ITEMS**
 
 ### **Before Production:**
-1. ⚠️ **MUST FIX:** CORS security issue
-2. ~~⚠️ **MUST FIX:** Payment gateway for orders~~ ✅ **COMPLETE** (Stripe.js implemented)
+1. ~~⚠️ **MUST FIX:** CORS security issue~~ ✅ **COMPLETE** (Unauthorized origins blocked)
+2. ~~⚠️ **MUST FIX:** Payment gateway for orders~~ ✅ **COMPLETE** (Stripe.js + PayPal SDK implemented)
 3. ⚠️ **MUST FIX:** Remove subscription from README or implement it
-4. ⚠️ **SHOULD FIX:** JWT storage security
+4. ⚠️ **SHOULD FIX:** JWT storage security (Migration plan documented in JWT_MIGRATION_PLAN.md)
 5. ⚠️ **SHOULD FIX:** CSRF protection
 
 ### **Feature Completion:**
@@ -509,7 +531,7 @@
 ## 📊 **RISK ASSESSMENT**
 
 ### **High Risk:**
-- CORS vulnerability (allows unauthorized access)
+- ~~CORS vulnerability~~ ✅ **RESOLVED** (Unauthorized origins blocked)
 - ~~Missing payment gateway~~ ✅ **RESOLVED** (Stripe.js + PayPal SDK implemented)
 - Advertised but missing subscription feature (user expectation gap)
 
