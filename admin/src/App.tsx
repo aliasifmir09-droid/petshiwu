@@ -71,10 +71,8 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      // Clear token first to prevent any subsequent requests
-      localStorage.removeItem('adminToken');
-      
-      // Then call logout endpoint (don't wait for it)
+      // Phase 2: Cookie-Only - Call logout endpoint to clear httpOnly cookie
+      // Backend handles cookie clearing, no localStorage to manage
       adminService.logout().catch(() => {
         // Silently handle logout errors
       });
