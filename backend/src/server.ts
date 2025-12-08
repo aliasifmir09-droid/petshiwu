@@ -598,10 +598,12 @@ try {
     });
 
     // Log when server is actually listening
-    server.on('listening', () => {
-      const addr = server.address();
-      console.log(`✅ Server is listening on ${typeof addr === 'string' ? addr : `${addr?.address}:${addr?.port}`}`);
-    });
+    if (server) {
+      server.on('listening', () => {
+        const addr = server.address();
+        console.log(`✅ Server is listening on ${typeof addr === 'string' ? addr : `${addr?.address}:${addr?.port}`}`);
+      });
+    }
   }
 
 } catch (error: unknown) {
