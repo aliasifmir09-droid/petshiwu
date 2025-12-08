@@ -16,10 +16,20 @@ export interface SocialShareLinks {
   copyLink: string;
 }
 
+export interface SocialShareData {
+  product: {
+    name: string;
+    url: string;
+    image: string;
+  };
+  shareLinks: SocialShareLinks;
+}
+
 export const socialService = {
   getProductShareLinks: async (productId: string): Promise<SocialShareLinks> => {
-    const response = await api.get<ApiResponse<SocialShareLinks>>(`/products/${productId}/share`);
-    return response.data.data;
+    const response = await api.get<ApiResponse<SocialShareData>>(`/products/${productId}/share`);
+    // Return only the shareLinks part, not the whole data object
+    return response.data.data.shareLinks;
   }
 };
 
