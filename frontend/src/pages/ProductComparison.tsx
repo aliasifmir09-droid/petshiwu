@@ -5,7 +5,6 @@ import { comparisonService } from '@/services/comparison';
 import { productService } from '@/services/products';
 import { Product } from '@/types';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import ProductCard from '@/components/ProductCard';
 import { X, Plus, CheckCircle, Star, DollarSign, Package, Award, Search } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
