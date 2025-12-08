@@ -20,6 +20,7 @@ import { sanitizeResponse } from './middleware/sanitizeResponse';
 import User from './models/User';
 import { setupSwagger } from './utils/swagger';
 import { initRedis } from './utils/cache';
+import type { SanitizedObject } from './types/common';
 
 // Load env vars
 dotenv.config();

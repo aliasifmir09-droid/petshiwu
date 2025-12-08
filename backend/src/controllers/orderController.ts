@@ -402,6 +402,13 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         logger.error('Error preparing order confirmation email:', emailError);
       }
       
+      if (!normalizedOrder) {
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to create order'
+        });
+      }
+      
       res.status(201).json({
         success: true,
         data: normalizedOrder
