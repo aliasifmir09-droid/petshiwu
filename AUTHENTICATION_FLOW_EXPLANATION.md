@@ -1,8 +1,22 @@
-# Why 401 Errors Occur - Authentication Flow Explanation
+# Authentication Flow Explanation
 
-## 🔍 Understanding the 401 Error
+## ✅ **UPDATE: 401 Errors Fixed!**
 
-The `GET /api/auth/me 401 (Unauthorized)` error you're seeing is **expected behavior** and part of the normal authentication flow. Here's why it happens:
+**Status:** The backend has been updated to **never return 401 errors** on `/api/auth/me` when checking authentication status.
+
+**What Changed:**
+- Created `optionalAuth` middleware that doesn't return 401 when no token exists
+- `/api/auth/me` now uses `optionalAuth` instead of `protect` middleware
+- Returns `200 OK` with `{ success: true, data: null }` when user is not authenticated
+- Returns `200 OK` with `{ success: true, data: {...user} }` when user is authenticated
+
+**Result:** No more 401 errors in browser console! ✅
+
+---
+
+## 🔍 Previous Behavior (Before Fix)
+
+The `GET /api/auth/me 401 (Unauthorized)` error was occurring because:
 
 ## 📋 The Authentication Check Flow
 
