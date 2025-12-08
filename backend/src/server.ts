@@ -187,6 +187,26 @@ const passwordUpdateLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Rate limiting for password reset (forgot password) to prevent abuse and email spam
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 3, // Maximum 3 password reset requests per hour per IP
+  message: 'Too many password reset requests from this IP, please try again after 1 hour.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: false, // Count all requests (even successful ones) to prevent email spam
+});
+
+// Rate limiting for password reset (reset password) to prevent brute force
+const resetPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Maximum 5 password reset attempts per 15 minutes per IP
+  message: 'Too many password reset attempts from this IP, please try again after 15 minutes.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true, // Don't count successful resets
+});
+
 // Rate limiting for order creation to prevent abuse (POST only)
 const orderCreationLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -231,6 +251,9 @@ const apiLimiter = rateLimit({
 app.use(['/api/v1/auth/login', '/api/auth/login'], authLimiter);
 app.use(['/api/v1/auth/register', '/api/auth/register'], registerLimiter);
 app.use(['/api/v1/auth/updatepassword', '/api/auth/updatepassword'], passwordUpdateLimiter);
+// Password reset endpoints - prevent abuse and email spam
+app.post(['/api/v1/auth/forgot-password', '/api/auth/forgot-password'], forgotPasswordLimiter);
+app.post(['/api/v1/auth/reset-password', '/api/auth/reset-password'], resetPasswordLimiter);
 
 // Order creation - prevent abuse (only POST requests)
 app.post(['/api/v1/orders', '/api/orders'], orderCreationLimiter);
@@ -359,14 +382,20 @@ app.use(cors({
     if (isAllowed) {
       callback(null, true);
     } else {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`CORS blocked origin: ${origin}`);
-      }
-      // In production, be more permissive but log it
+      // SECURITY FIX: Block unauthorized origins in production
       if (process.env.NODE_ENV === 'production') {
-        console.warn(`CORS: Allowing origin ${origin} (not in allowed list but allowing in production)`);
+        console.warn(`CORS: Blocking unauthorized origin: ${origin}`);
+        return callback(new Error('Not allowed by CORS'), false);
       }
-      callback(null, true); // Allow anyway to avoid blocking legitimate requests
+      // In development, allow but log warning
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`CORS: Allowing origin ${origin} in development mode`);
+        callback(null, true);
+      } else {
+        // Default: block unknown origins
+        console.warn(`CORS: Blocking origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'), false);
+      }
     }
   },
   credentials: true,
