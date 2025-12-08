@@ -9,7 +9,7 @@ import { asyncHandler, NotFoundError, UnauthorizedError, ValidationError } from 
 import { sendOrderConfirmationEmail, sendOrderCancellationEmail, sendOrderDeliveredEmail } from '../utils/emailService';
 import logger from '../utils/logger';
 
-import { StripeInstance } from '../types/common';
+import type { StripeInstance, OrderItemInput, NormalizedOrderItem, NormalizedOrder } from '../types/common';
 
 // Initialize Stripe (optional - only if STRIPE_SECRET_KEY is set)
 let stripe: StripeInstance | null = null;

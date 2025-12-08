@@ -507,7 +507,8 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
         logger.info(`✅ Password reset email sent successfully to ${email}`);
       })
       .catch((emailError: unknown) => {
-        logger.error(`❌ Error sending password reset email to ${email}:`, emailError.message);
+        const errorMessage = emailError instanceof Error ? emailError.message : String(emailError);
+        logger.error(`❌ Error sending password reset email to ${email}:`, errorMessage);
         // Don't fail the request if email fails - user can request again
       });
 
