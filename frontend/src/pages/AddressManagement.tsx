@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { addressService, Address } from '@/services/addresses';
+import { addressService } from '@/services/addresses';
+import { Address } from '@/types';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import EmptyState from '@/components/EmptyState';
 import { MapPin, Plus, Edit, Trash2 } from 'lucide-react';
@@ -14,14 +15,11 @@ const AddressManagement = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<Partial<Address>>({
-    firstName: '',
-    lastName: '',
-    address: '',
+    street: '',
     city: '',
     state: '',
     zipCode: '',
-    country: 'US',
-    phone: '',
+    country: 'USA',
     isDefault: false
   });
 
@@ -71,22 +69,21 @@ const AddressManagement = () => {
 
   const resetForm = () => {
     setFormData({
-      firstName: '',
-      lastName: '',
-      address: '',
+      street: '',
       city: '',
       state: '',
       zipCode: '',
-      country: 'US',
-      phone: '',
+      country: 'USA',
       isDefault: false
     });
   };
 
   const handleEdit = (address: Address) => {
-    setEditingId(address._id);
-    setFormData(address);
-    setShowForm(true);
+    if (address._id) {
+      setEditingId(address._id);
+      setFormData(address);
+      setShowForm(true);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -137,33 +134,13 @@ const AddressManagement = () => {
             {editingId ? 'Edit Address' : 'Add New Address'}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">First Name *</label>
-              <input
-                type="text"
-                required
-                value={formData.firstName}
-                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Last Name *</label>
-              <input
-                type="text"
-                required
-                value={formData.lastName}
-                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-            </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-2">Address *</label>
+              <label className="block text-sm font-medium mb-2">Street Address *</label>
               <input
                 type="text"
                 required
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                value={formData.street || ''}
+                onChange={(e) => setFormData({ ...formData, street: e.target.value })}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
@@ -202,17 +179,8 @@ const AddressManagement = () => {
               <input
                 type="text"
                 required
-                value={formData.country}
+                value={formData.country || 'USA'}
                 onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Phone</label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
@@ -277,25 +245,23 @@ const AddressManagement = () => {
                   <button
                     onClick={() => handleEdit(address)}
                     className="text-primary-600 hover:text-primary-700"
-                    aria-label={`Edit address for ${address.firstName} ${address.lastName}`}
+                    aria-label="Edit address"
                   >
                     <Edit size={18} />
                   </button>
                   <button
-                    onClick={() => handleDelete(address._id)}
+                    onClick={() => address._id && handleDelete(address._id)}
                     className="text-red-600 hover:text-red-700"
-                    aria-label={`Delete address for ${address.firstName} ${address.lastName}`}
+                    aria-label="Delete address"
                   >
                     <Trash2 size={18} />
                   </button>
                 </div>
               </div>
               <div className="text-gray-700">
-                <p className="font-semibold">{address.firstName} {address.lastName}</p>
-                <p className="mt-1">{address.address}</p>
+                <p className="font-semibold mt-1">{address.street}</p>
                 <p>{address.city}, {address.state} {address.zipCode}</p>
                 <p>{address.country}</p>
-                {address.phone && <p className="mt-2 text-sm text-gray-600">Phone: {address.phone}</p>}
               </div>
             </div>
           ))}
