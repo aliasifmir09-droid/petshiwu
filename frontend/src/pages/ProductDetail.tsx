@@ -191,7 +191,7 @@ const ProductDetail = () => {
     if (product && slug) {
       // If we're on the old URL format (/products/slug), redirect to new format
       const newUrl = generateProductUrl(product);
-      const currentPath = location.pathname.replace(/^#/, '');
+      const currentPath = location.pathname; // BrowserRouter - no hash to remove
       
       // Only redirect if the new URL is different and we're on the old format
       if (newUrl !== currentPath && currentPath.startsWith('/products/')) {
