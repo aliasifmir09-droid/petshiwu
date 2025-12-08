@@ -68,17 +68,18 @@
 
 ### 3. **CORS Configuration - TOO PERMISSIVE** ⚠️ SECURITY RISK
 - **Severity:** MEDIUM-HIGH (Security Risk)
+- **Status:** ⚠️ **STILL EXISTS** - Needs immediate attention
 - **Issue:** 
   - CORS allows ALL origins in production (line 369 in `server.ts`)
   - `callback(null, true)` allows any origin if not in allowed list
   - Only logs warning but still allows the request
-- **Location:** `backend/src/server.ts` (lines 348-370)
-- **Code:**
+  - Current implementation has pattern matching but fallback allows all
+- **Location:** `backend/src/server.ts` (lines 347-376)
+- **Current Code:**
   ```typescript
   if (isAllowed) {
     callback(null, true);
   } else {
-    // In production, be more permissive but log it
     if (process.env.NODE_ENV === 'production') {
       console.warn(`CORS: Allowing origin ${origin} (not in allowed list but allowing in production)`);
     }
@@ -89,43 +90,107 @@
   - Any website can make requests to your API
   - Potential for CSRF attacks
   - Data leakage risk
+  - Unauthorized API access
 - **Fix Required:** 
   - Remove the fallback `callback(null, true)` in production
-  - Only allow specific origins
-  - Use environment variable for allowed origins list
-- **Priority:** **HIGH** (security vulnerability)
+  - Only allow specific origins from environment variable
+  - Reject requests from unknown origins
+  - Consider using a CORS whitelist from environment variables
+- **Recommended Fix:**
+  ```typescript
+  if (isAllowed) {
+    callback(null, true);
+  } else {
+    if (process.env.NODE_ENV === 'production') {
+      logger.warn(`CORS: Blocking origin ${origin} (not in allowed list)`);
+      return callback(new Error('Not allowed by CORS'), false);
+    }
+    // Only allow in development
+    callback(null, true);
+  }
+  ```
+- **Priority:** **HIGH** (security vulnerability - allows unauthorized API access)
 
 ### 4. **JWT Token Storage - XSS VULNERABILITY** ⚠️ SECURITY RISK
 - **Severity:** MEDIUM (Security Risk)
+- **Status:** ⚠️ **STILL EXISTS** - Confirmed in codebase
 - **Issue:** 
   - JWT tokens stored in `localStorage` (XSS vulnerability)
   - If malicious script runs, it can access localStorage and steal tokens
   - No httpOnly cookies for token storage
-- **Location:** Frontend auth store (likely `stores/authStore.ts`)
+  - Tokens accessible via JavaScript (XSS attack vector)
+- **Location:** `frontend/src/stores/authStore.ts` (line 20 shows localStorage usage)
+- **Current Implementation:**
+  ```typescript
+  logout: () => {
+    localStorage.removeItem('token'); // Token stored in localStorage
+    set({ user: null, isAuthenticated: false });
+  }
+  ```
 - **Impact:** 
   - Stolen tokens can be used to impersonate users
   - XSS attacks can extract authentication tokens
+  - Session hijacking possible if XSS vulnerability exists
+  - No protection against client-side script access
 - **Fix Required:** 
-  - Consider using httpOnly cookies for token storage
+  - Migrate to httpOnly cookies for token storage (requires backend changes)
   - Implement token refresh mechanism
-  - Add CSRF protection
-- **Priority:** **MEDIUM** (requires frontend refactoring)
+  - Add CSRF protection tokens
+  - Consider SameSite cookie attributes
+  - Add Content Security Policy (CSP) headers to reduce XSS risk
+- **Mitigation (Short-term):**
+  - Ensure all user inputs are sanitized (already implemented)
+  - Use React's built-in XSS protection (already in place)
+  - Implement CSP headers (check if already configured)
+- **Priority:** **MEDIUM** (requires frontend and backend refactoring, but XSS protection is already in place)
 
-### 5. **Password Reset Token Security** ⚠️ REVIEW NEEDED
-- **Severity:** MEDIUM
-- **Issue:** 
-  - Password reset tokens may not have proper rate limiting
-  - Token expiration is 1 hour (may be too long)
-  - No mention of token invalidation after use
-- **Location:** `backend/src/controllers/authController.ts`
+### 5. **Password Reset Token Security** ⚠️ PARTIALLY SECURE
+- **Severity:** MEDIUM (Rate Limiting Missing)
+- **Status:** ✅ **Token Invalidation: IMPLEMENTED** | ⚠️ **Rate Limiting: MISSING**
+- **Current Implementation:** 
+  - ✅ Token expiration is **15 minutes** (0.25 hours) - Good security practice
+  - ✅ Token **IS invalidated after use** (lines 589-590 in `authController.ts`)
+  - ✅ Token is hashed before storage (SHA-256)
+  - ✅ Expiration check implemented (`passwordResetExpires: { $gt: new Date() }`)
+  - ⚠️ **No rate limiting** on `/forgot-password` endpoint
+- **Location:** 
+  - `backend/src/controllers/authController.ts` (resetPassword function)
+  - `backend/src/config/constants.ts` (PASSWORD_RESET_EXPIRY_HOURS = 0.25)
+  - `backend/src/routes/auth.ts` (no rate limiting middleware)
+- **Current Code (Token Invalidation):**
+  ```typescript
+  // Token is invalidated after successful reset
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  user.passwordChangedAt = new Date();
+  await user.save();
+  ```
 - **Impact:** 
-  - Brute force attacks on reset tokens
-  - Tokens valid for extended period
+  - ⚠️ Brute force attacks possible on forgot-password endpoint
+  - ⚠️ Email spam/abuse possible (no rate limiting)
+  - ✅ Token cannot be reused (single-use enforced)
+  - ✅ Short expiration window (15 minutes) reduces attack window
 - **Fix Required:** 
-  - Verify token is single-use (invalidated after reset)
-  - Add rate limiting to reset endpoint
-  - Consider shorter expiration (15-30 minutes)
-- **Priority:** **MEDIUM**
+  - ✅ Token single-use: **ALREADY IMPLEMENTED**
+  - ✅ Short expiration: **ALREADY IMPLEMENTED** (15 minutes)
+  - ⚠️ **ADD:** Rate limiting to `/forgot-password` endpoint
+  - ⚠️ **ADD:** Rate limiting to `/reset-password` endpoint
+  - Consider IP-based rate limiting
+  - Consider email-based rate limiting (max 3 requests per email per hour)
+- **Recommended Fix:**
+  ```typescript
+  // Add rate limiting middleware
+  import rateLimit from 'express-rate-limit';
+  
+  const forgotPasswordLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 3, // 3 requests per hour per IP
+    message: 'Too many password reset requests, please try again later.'
+  });
+  
+  router.post('/forgot-password', forgotPasswordLimiter, forgotPasswordValidation, forgotPassword);
+  ```
+- **Priority:** **MEDIUM** (good security practices in place, but rate limiting needed)
 
 ### 6. **Missing Input Validation on Some Endpoints** ⚠️ MEDIUM
 - **Severity:** MEDIUM
