@@ -24,7 +24,8 @@ export const suppressNetworkErrors = () => {
     const is401Error = message.includes('401') && (
       message.includes('Unauthorized') ||
       message.includes('/api/auth/me') ||
-      message.includes('/auth/me')
+      message.includes('/auth/me') ||
+      message.includes('pet-shop-backend') && message.includes('/auth/me')
     );
     
     const is403Error = message.includes('403') && (
@@ -40,7 +41,7 @@ export const suppressNetworkErrors = () => {
         return;
       } else {
         // In development, show but mark as expected
-        originalWarn('[Expected]', ...args);
+        originalWarn('[Expected Network Error - User Not Authenticated]', ...args);
         return;
       }
     }

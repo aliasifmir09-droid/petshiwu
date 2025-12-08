@@ -59,12 +59,13 @@ api.interceptors.response.use(
     const url = error.config?.url || '';
     const isWishlistEndpoint = url.includes('/wishlist');
     const isProductEndpoint = url.includes('/products/');
+    const skipAuth = error.config?.skipAuth;
+    const isAuthMeEndpoint = url.includes('/auth/me');
     
     if (error.response?.status === 401) {
       // Phase 2: No localStorage token to remove - cookies are cleared by backend on logout
       // Only redirect if not already on login/register pages and not a public endpoint
       // Also skip redirect if this is a logout request (skipAuth flag)
-      const url = error.config?.url || '';
       const isPublicEndpoint = url.includes('/auth/login') || 
                                url.includes('/auth/register') || 
                                url.includes('/auth/forgot-password') ||
@@ -73,9 +74,14 @@ api.interceptors.response.use(
                                url.includes('/products') ||
                                url.includes('/categories');
       
-      // Don't redirect if skipAuth flag is set (e.g., during logout)
-      const skipAuth = error.config?.skipAuth;
+      // For /auth/me endpoint with skipAuth, silently handle 401 (expected when not logged in)
+      // This prevents browser network logs from showing 401 errors
+      if (isAuthMeEndpoint && skipAuth) {
+        // Silently handle - this is expected when user is not authenticated
+        return Promise.reject(error);
+      }
       
+      // Don't redirect if skipAuth flag is set (e.g., during logout or initial load)
       // Only redirect if:
       // 1. Not a skipAuth request (e.g., logout)
       // 2. Not a public endpoint

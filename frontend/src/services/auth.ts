@@ -37,8 +37,8 @@ export const authService = {
     await api.post('/auth/logout');
   },
 
-  getMe: async () => {
-    const response = await api.get<ApiResponse<User>>('/auth/me');
+  getMe: async (skipAuth = false) => {
+    const response = await api.get<ApiResponse<User>>('/auth/me', { skipAuth } as any);
     return response.data.data;
   },
 
