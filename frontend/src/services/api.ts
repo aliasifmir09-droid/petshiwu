@@ -1,4 +1,11 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
+
+// Extend AxiosRequestConfig to include our custom skipAuth property
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    skipAuth?: boolean;
+  }
+}
 
 // Use environment variable for API URL, fallback to relative path for local dev
 // Normalize the URL: remove trailing slashes and ensure /api is included
