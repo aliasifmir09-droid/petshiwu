@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 
 // Extend AxiosRequestConfig to include our custom skipAuth property
 declare module 'axios' {
