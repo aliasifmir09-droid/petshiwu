@@ -126,18 +126,17 @@ function App() {
 
   useEffect(() => {
     const loadUser = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const user = await authService.getMe();
-          setUser(user);
-          // Sync wishlist with backend after user loads
-          await syncWithBackend();
-        } catch (error) {
-          localStorage.removeItem('token');
-          setUser(null);
-        }
-      } else {
+      // Phase 2: Cookie-Only - Try to get user from backend using httpOnly cookie
+      // If cookie exists, request will succeed. If not, it will fail and we set user to null
+      try {
+        const user = await authService.getMe();
+        setUser(user);
+        // Sync wishlist with backend after user loads
+        await syncWithBackend();
+      } catch (error) {
+        // No cookie or invalid cookie - user is not authenticated
+        setUser(null);
+      } finally {
         setLoading(false);
       }
     };

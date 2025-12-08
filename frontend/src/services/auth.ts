@@ -17,31 +17,24 @@ interface RegisterData {
 export const authService = {
   register: async (data: RegisterData) => {
     const response = await api.post<any>('/auth/register', data);
-    // Phase 1: Dual Support - Backend sets httpOnly cookie AND returns token
-    // Save token to localStorage for backward compatibility (Authorization header)
+    // Phase 2: Cookie-Only - Backend sets httpOnly cookie only
+    // No token returned in response, no localStorage needed
     // httpOnly cookie is set automatically by backend and sent with requests via withCredentials
-    if (response.data.success && response.data.token) {
-      localStorage.setItem('token', response.data.token);
-    }
     return response.data;
   },
 
   login: async (data: LoginData) => {
     const response = await api.post<any>('/auth/login', data);
-    // Phase 1: Dual Support - Backend sets httpOnly cookie AND returns token
-    // Save token to localStorage for backward compatibility (Authorization header)
+    // Phase 2: Cookie-Only - Backend sets httpOnly cookie only
+    // No token returned in response, no localStorage needed
     // httpOnly cookie is set automatically by backend and sent with requests via withCredentials
-    if (response.data.success && response.data.token) {
-      localStorage.setItem('token', response.data.token);
-    }
     return response.data;
   },
 
   logout: async () => {
-    // Phase 1: Dual Support - Call logout endpoint to clear httpOnly cookie
-    // Also clear localStorage for backward compatibility
+    // Phase 2: Cookie-Only - Call logout endpoint to clear httpOnly cookie
+    // No localStorage to clear - backend handles cookie clearing
     await api.post('/auth/logout');
-    localStorage.removeItem('token');
   },
 
   getMe: async () => {
@@ -59,9 +52,8 @@ export const authService = {
       currentPassword,
       newPassword
     });
-    if (response.data.success && response.data.token) {
-      localStorage.setItem('token', response.data.token);
-    }
+    // Phase 2: Cookie-Only - Backend sets httpOnly cookie only
+    // No token returned, no localStorage needed
     return response.data;
   },
 
@@ -91,11 +83,8 @@ export const authService = {
 
   resetPassword: async (token: string, password: string) => {
     const response = await api.post<any>('/auth/reset-password', { token, password });
-    // Phase 1: Dual Support - Backend sets httpOnly cookie AND returns token
-    // Save token to localStorage for backward compatibility
-    if (response.data.success && response.data.token) {
-      localStorage.setItem('token', response.data.token);
-    }
+    // Phase 2: Cookie-Only - Backend sets httpOnly cookie only
+    // No token returned, no localStorage needed
     return response.data;
   }
 };

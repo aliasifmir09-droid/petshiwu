@@ -34,13 +34,13 @@ export const sendTokenResponse = (userId: string, statusCode: number, res: Respo
     path: '/',
   };
 
-  // Phase 1: Dual Support - Set httpOnly cookie AND return token in response body
-  // This allows gradual migration: frontend can use cookie (preferred) or localStorage (backward compatibility)
+  // Phase 2: Cookie-Only - Set httpOnly cookie, token not returned in response body
+  // Frontend relies solely on httpOnly cookies (more secure, XSS protection)
   res.status(statusCode)
     .cookie('token', token, options)
     .json({
-      success: true,
-      token // Still return for backward compatibility during migration
+      success: true
+      // Token not returned - frontend uses httpOnly cookie only
     });
 };
 

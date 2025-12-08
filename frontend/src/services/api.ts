@@ -21,20 +21,16 @@ const api = axios.create({
 });
 
 // Add token to requests
-// Phase 1: Dual Support - Use Authorization header (backward compatibility)
+// Phase 2: Cookie-Only - Rely solely on httpOnly cookies
 // Cookies are sent automatically via withCredentials: true
+// No Authorization header needed - backend only accepts cookies
 api.interceptors.request.use(
   (config: any) => {
     // Skip auth if skipAuth flag is set
     if (!config.skipAuth) {
-      // Phase 1: Still use localStorage token in Authorization header for backward compatibility
-      // In Phase 2, we'll remove this and rely solely on httpOnly cookies
-      const token = localStorage.getItem('token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      // Note: httpOnly cookies are sent automatically via withCredentials: true
-      // Backend will prefer cookie over Authorization header (more secure)
+      // Phase 2: No Authorization header - httpOnly cookies sent automatically
+      // Backend only accepts tokens from httpOnly cookies (more secure)
+      // withCredentials: true ensures cookies are sent with all requests
     }
     return config;
   },
@@ -53,7 +49,7 @@ api.interceptors.response.use(
     const isProductEndpoint = url.includes('/products/');
     
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
+      // Phase 2: No localStorage token to remove - cookies are cleared by backend on logout
       // Redirect to login or reload if already on login page
       if (window.location.hash !== '#/login' && window.location.hash !== '#/register') {
         window.location.href = '/#/login';

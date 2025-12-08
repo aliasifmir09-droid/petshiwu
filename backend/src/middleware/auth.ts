@@ -12,12 +12,10 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
   try {
     let token;
 
-    // Phase 1: Dual Support - Accept token from either cookie (preferred) or Authorization header (backward compatibility)
-    // Priority: Cookie first (more secure), then Authorization header
+    // Phase 2: Cookie-Only - Only accept token from httpOnly cookie (more secure)
+    // Removed Authorization header support for better security
     if ((req as any).cookies?.token) {
       token = (req as any).cookies.token;
-    } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      token = req.headers.authorization.split(' ')[1];
     }
 
     if (!token) {
