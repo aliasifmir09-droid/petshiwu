@@ -113,7 +113,8 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
   logout: async () => {
     // Phase 2: Cookie-Only - Call logout endpoint to clear httpOnly cookie
     // Backend handles cookie clearing, no localStorage to manage
-    await api.post('/auth/logout');
+    // Use skipAuth to prevent 401 redirect during logout
+    await api.post('/auth/logout', {}, { skipAuth: true } as any);
   },
 
   // Products

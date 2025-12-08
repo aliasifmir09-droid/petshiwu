@@ -49,7 +49,10 @@ function App() {
         }
       } catch (error: any) {
         // No cookie or invalid cookie - user is not authenticated
-        console.error('Error loading user:', error);
+        // This is expected after logout, so only log in development
+        if (process.env.NODE_ENV === 'development') {
+          console.log('User not authenticated (expected after logout):', error.response?.status || error.message);
+        }
         setUser(null);
       } finally {
         setLoading(false);

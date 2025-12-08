@@ -41,8 +41,18 @@ api.interceptors.response.use(
     // Do NOT logout on 403 (Forbidden - valid cookie but insufficient permissions)
     if (error.response?.status === 401) {
       // Phase 2: No localStorage token to remove - cookies are cleared by backend on logout
-      // Redirect to login
-      if (window.location.pathname !== '/login') {
+      // Only redirect if not already on login page and not during logout
+      const url = error.config?.url || '';
+      const isLogoutEndpoint = url.includes('/auth/logout');
+      const isLoginPage = window.location.pathname === '/login';
+      
+      // Don't redirect if:
+      // 1. Already on login page
+      // 2. This is a logout request
+      // 3. Request has skipAuth flag (e.g., during logout)
+      const skipAuth = (error.config as any)?.skipAuth;
+      
+      if (!skipAuth && !isLogoutEndpoint && !isLoginPage) {
         window.location.href = '/login';
       }
     }
