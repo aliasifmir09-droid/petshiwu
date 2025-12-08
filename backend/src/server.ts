@@ -598,9 +598,10 @@ try {
     });
 
     // Log when server is actually listening
-    if (server) {
-      server.on('listening', () => {
-        const addr = server.address();
+    const currentServer = server;
+    if (currentServer) {
+      currentServer.on('listening', () => {
+        const addr = currentServer.address();
         console.log(`✅ Server is listening on ${typeof addr === 'string' ? addr : `${addr?.address}:${addr?.port}`}`);
       });
     }

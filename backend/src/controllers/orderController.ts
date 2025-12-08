@@ -365,7 +365,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       // Send order confirmation email (non-blocking - don't fail order if email fails)
       try {
         const user = await User.findById(req.user._id).select('email firstName lastName').lean();
-        if (user && user.email) {
+        if (user && user.email && normalizedOrder) {
           // Fetch the full order with all details for email
           const fullOrder = await Order.findById(normalizedOrder._id).lean();
           

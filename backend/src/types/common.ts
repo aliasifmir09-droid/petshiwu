@@ -133,9 +133,7 @@ export interface NormalizedOrder {
 }
 
 // Sanitization types
-export interface SanitizedObject {
-  [key: string]: string | number | boolean | null | SanitizedObject | SanitizedObject[];
-}
+export type SanitizedObject = string | number | boolean | null | SanitizedObject[] | { [key: string]: SanitizedObject };
 
 // Product types for CSV import
 export interface ProductInput {
