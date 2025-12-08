@@ -98,11 +98,12 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
     }
   },
 
-  getMe: async () => {
+  getMe: async (skipAuth = false) => {
     // Phase 2: Cookie-Only - No localStorage token check needed
     // Cookie is sent automatically via withCredentials: true
+    // skipAuth prevents redirect loops when checking auth status on login page
     try {
-      const response = await api.get('/auth/me');
+      const response = await api.get('/auth/me', { skipAuth } as any);
       return response.data.data;
     } catch (error: any) {
       // If 401, cookie is invalid or expired - backend will handle it
