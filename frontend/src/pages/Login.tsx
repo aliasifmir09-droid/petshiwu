@@ -7,6 +7,11 @@ import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { trackLogin } from '@/utils/analytics';
 
+interface LoginData {
+  email: string;
+  password: string;
+}
+
 const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
