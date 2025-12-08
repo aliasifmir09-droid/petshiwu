@@ -56,22 +56,32 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Phase 2: No localStorage token to remove - cookies are cleared by backend on logout
       // Only redirect if not already on login/register pages and not a public endpoint
+      // Also skip redirect if this is a logout request (skipAuth flag)
       const url = error.config?.url || '';
       const isPublicEndpoint = url.includes('/auth/login') || 
                                url.includes('/auth/register') || 
                                url.includes('/auth/forgot-password') ||
                                url.includes('/auth/reset-password') ||
+                               url.includes('/auth/logout') ||
                                url.includes('/products') ||
                                url.includes('/categories');
       
-      if (!isPublicEndpoint && 
+      // Don't redirect if skipAuth flag is set (e.g., during logout)
+      const skipAuth = error.config?.skipAuth;
+      
+      if (!skipAuth && 
+          !isPublicEndpoint && 
           window.location.hash !== '#/login' && 
-          window.location.hash !== '#/register') {
+          window.location.hash !== '#/register' &&
+          window.location.hash !== '#/') {
         // Clear any stale auth state (use dynamic import without await since we're in a non-async function)
         import('@/stores/authStore').then(({ useAuthStore }) => {
           useAuthStore.getState().setUser(null);
         });
-        window.location.href = '/#/login';
+        // Use hash navigation to prevent full page reload loops
+        if (window.location.hash !== '#/login') {
+          window.location.hash = '/login';
+        }
       }
     } else if (error.response?.status === 403) {
       // Don't redirect for order endpoints - let the component handle the error
