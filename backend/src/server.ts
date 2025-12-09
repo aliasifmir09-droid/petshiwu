@@ -137,7 +137,11 @@ app.use(helmet({
       imgSrc: process.env.NODE_ENV === 'production' 
         ? ["'self'", "data:", "https:", "https://res.cloudinary.com"]
         : ["'self'", "data:", "https:", "http:", "https://res.cloudinary.com"], // Allow HTTP in development only
-      scriptSrc: ["'self'", "https://embed.tawk.to"],
+      // Allow scripts from self, Tawk.to, and inline scripts (needed for Tawk.to and font loading)
+      // 'unsafe-inline' is needed for: 1) Tawk.to inline script, 2) onload event handler on font link
+      scriptSrc: ["'self'", "https://embed.tawk.to", "'unsafe-inline'"],
+      // Allow service workers (needed for PWA functionality)
+      workerSrc: ["'self'"],
       connectSrc: ["'self'", "https://embed.tawk.to", "https://api.tawk.to"],
       frameSrc: ["'self'", "https://embed.tawk.to"],
       frameAncestors: ["'self'"], // Replaces X-Frame-Options
