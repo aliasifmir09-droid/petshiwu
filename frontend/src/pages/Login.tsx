@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/authStore';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { trackLogin } from '@/utils/analytics';
+import { validateEmail, sanitizeFormData } from '@/utils/inputValidation';
 
 interface LoginData {
   email: string;
@@ -62,7 +63,21 @@ const Login = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    loginMutation.mutate(formData);
+    
+    // Validate inputs
+    if (!validateEmail(formData.email)) {
+      showToast('Please enter a valid email address', 'error');
+      return;
+    }
+    
+    if (!formData.password || formData.password.length < 1) {
+      showToast('Password is required', 'error');
+      return;
+    }
+    
+    // Sanitize inputs before sending
+    const sanitizedData = sanitizeFormData(formData);
+    loginMutation.mutate(sanitizedData);
   };
 
   const isRegistered = searchParams.get('registered') === 'true';

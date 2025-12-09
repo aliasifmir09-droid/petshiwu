@@ -87,16 +87,21 @@ api.interceptors.response.use(
       // 2. Not a public endpoint
       // 3. Not already on login/register/home pages
       // 4. Not during a navigation (check if we're in the middle of a redirect)
+      // Use a more secure key name and add timestamp to prevent stale flags
+      const navKey = '_nav_' + Date.now();
       const isNavigating = sessionStorage.getItem('_isNavigating') === 'true';
+      const navTimestamp = sessionStorage.getItem('_navTimestamp');
+      const isStale = navTimestamp && (Date.now() - parseInt(navTimestamp)) > 5000; // 5 second timeout
       
       if (!skipAuth && 
           !isPublicEndpoint && 
-          !isNavigating &&
+          !(isNavigating && !isStale) &&
           window.location.pathname !== '/login' && 
           window.location.pathname !== '/register' &&
           window.location.pathname !== '/') {
-        // Mark that we're navigating to prevent loops
+        // Mark that we're navigating to prevent loops (with timestamp)
         sessionStorage.setItem('_isNavigating', 'true');
+        sessionStorage.setItem('_navTimestamp', Date.now().toString());
         
         // Clear any stale auth state (use dynamic import without await since we're in a non-async function)
         import('@/stores/authStore').then(({ useAuthStore }) => {
@@ -111,6 +116,7 @@ api.interceptors.response.use(
         // Clear navigation flag after a short delay
         setTimeout(() => {
           sessionStorage.removeItem('_isNavigating');
+          sessionStorage.removeItem('_navTimestamp');
         }, 1000);
       }
     } else if (error.response?.status === 403) {

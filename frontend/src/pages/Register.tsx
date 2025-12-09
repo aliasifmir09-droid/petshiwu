@@ -6,6 +6,7 @@ import Toast from '@/components/Toast';
 import PasswordStrength from '@/components/PasswordStrength';
 import { useToast } from '@/hooks/useToast';
 import { trackSignUp } from '@/utils/analytics';
+import { validateEmail, validateName, validatePassword, sanitizeInput, sanitizeFormData } from '@/utils/inputValidation';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -45,13 +46,46 @@ const Register = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate and sanitize inputs
+    const firstNameValidation = validateName(formData.firstName);
+    if (!firstNameValidation.valid) {
+      showToast(firstNameValidation.message || 'Invalid first name', 'error');
+      return;
+    }
+
+    const lastNameValidation = validateName(formData.lastName);
+    if (!lastNameValidation.valid) {
+      showToast(lastNameValidation.message || 'Invalid last name', 'error');
+      return;
+    }
+
+    if (!validateEmail(formData.email)) {
+      showToast('Please enter a valid email address', 'error');
+      return;
+    }
+
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.valid) {
+      showToast(passwordValidation.message || 'Invalid password', 'error');
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       showToast('Passwords do not match', 'error');
       return;
     }
 
-    const { confirmPassword, ...registerData } = formData;
-    registerMutation.mutate(registerData);
+    // Sanitize all inputs before sending
+    const sanitizedData = sanitizeFormData({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      password: formData.password,
+      phone: formData.phone || undefined
+    });
+
+    const { confirmPassword, ...registerData } = sanitizedData;
+    registerMutation.mutate(registerData as any);
   };
 
   return (
