@@ -6,7 +6,6 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import HeroSlideshow from '@/components/HeroSlideshow';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
-import CountdownTimer from '@/components/CountdownTimer';
 import TrustBadges from '@/components/TrustBadges';
 import CategoryIcons from '@/components/CategoryIcons';
 import { ChevronRight, ChevronLeft, Star } from 'lucide-react';
@@ -89,7 +88,7 @@ const Home = () => {
           logo: 'https://petshiwu.com/logo.png',
           description: 'Everything Your Pet Needs - Quality Pet Supplies Online',
           contactPoint: {
-            telephone: '+1-555-PETSHOP',
+            telephone: '+1-800-738-7449',
             contactType: 'customer service'
           }
         }}
@@ -101,7 +100,7 @@ const Home = () => {
         <HeroSlideshow />
       </div>
 
-      {/* Grand Launching Section with Countdown */}
+      {/* Special Offers Section */}
       <section className="py-12 md:py-16 mt-8 md:mt-12 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
         {/* Animated Background Effects */}
         <div className="absolute inset-0 z-0">
@@ -112,40 +111,43 @@ const Home = () => {
         
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            {/* Left Side - Launch Announcement */}
+            {/* Left Side - Special Offers */}
             <div className="text-white text-center md:text-left relative z-30 flex-1">
               <div className="inline-block mb-4 px-4 py-2 bg-white/20 backdrop-blur-md rounded-full border border-white/30">
-                <span className="text-sm font-bold uppercase tracking-wider">🎉 Grand Launching</span>
+                <span className="text-sm font-bold uppercase tracking-wider">Special Offers</span>
               </div>
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 relative z-30 leading-tight">
                 <span className="bg-gradient-to-r from-pink-400 via-yellow-300 to-pink-400 bg-clip-text text-transparent animate-gradient">
-                  🚀 We're Launching Soon!
+                  Premium Pet Products
                 </span>
               </h2>
               <p className="text-xl md:text-2xl opacity-95 mb-2 relative z-30 font-semibold">
-                Mark Your Calendar
+                Quality You Can Trust
               </p>
               <p className="text-lg md:text-xl opacity-90 relative z-30">
-                <span className="font-bold text-yellow-300">February 15, 2026</span> - The future of pet shopping begins!
+                Discover our curated selection of <span className="font-bold text-yellow-300">verified premium products</span> for your beloved pets
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-4 justify-center md:justify-start">
                 <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20">
-                  <span className="text-2xl">✨</span>
-                  <span className="text-sm font-semibold">Exclusive Launch Deals</span>
+                  <span className="text-sm font-semibold">Exclusive Deals</span>
                 </div>
                 <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20">
-                  <span className="text-2xl">🎁</span>
-                  <span className="text-sm font-semibold">Special Offers</span>
+                  <span className="text-sm font-semibold">Free Shipping Over $49</span>
                 </div>
               </div>
             </div>
             
-            {/* Right Side - Countdown Timer */}
+            {/* Right Side - Call to Action */}
             <div className="relative z-30 flex-shrink-0">
-              <CountdownTimer 
-                endTime={new Date('2026-02-15T00:00:00')} 
-                title="Launching In" 
-              />
+              <Link
+                to="/products?featured=true"
+                className="inline-block bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 text-white px-8 py-6 rounded-3xl shadow-2xl border-2 border-white/30 backdrop-blur-sm transform hover:scale-105 transition-all duration-300 text-center"
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <p className="text-base font-bold uppercase tracking-wider">Shop Now</p>
+                  <p className="text-2xl font-black">Featured Products</p>
+                </div>
+              </Link>
             </div>
           </div>
         </div>
@@ -355,9 +357,9 @@ const Home = () => {
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           {/* Section Header with Psychological Trigger */}
           <div className="text-center mb-12 animate-fade-in-up relative z-30">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-2 rounded-full font-bold text-sm mb-4 shadow-lg animate-pulse-slow relative z-30">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-2 rounded-full font-bold text-sm mb-4 shadow-lg relative z-30">
               <Star size={16} className="fill-white" />
-              <span>Most Popular This Week</span>
+              <span>Featured Products</span>
               <Star size={16} className="fill-white" />
             </div>
             <h2 className="text-4xl md:text-5xl font-black mb-3 relative z-30" style={{ 
@@ -370,7 +372,7 @@ const Home = () => {
               Trending Products
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto relative z-30">
-              Join thousands of happy pet parents who trust these best-selling products
+              Trusted by pet parents nationwide - premium quality products for your furry friends
             </p>
           </div>
 

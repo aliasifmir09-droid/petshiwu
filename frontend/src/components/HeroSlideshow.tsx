@@ -34,7 +34,7 @@ const HeroSlideshow = () => {
       id: 2,
       title: 'Up to 40% Off',
       subtitle: 'Premium Pet Food & Treats',
-      description: 'Limited time offer!',
+      description: 'Premium quality at great prices',
       buttonText: 'Shop Deals',
       buttonLink: '/products?featured=true',
       leftImage: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&h=600&fit=crop&q=80', // Happy dog

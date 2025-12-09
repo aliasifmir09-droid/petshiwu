@@ -19,8 +19,8 @@ const TrustBadges = () => {
     },
     {
       icon: HeadphonesIcon,
-      title: '24/7 Support',
-      description: 'Always here to help'
+      title: 'Expert Support',
+      description: 'Mon-Fri 9AM-8PM EST'
     },
     {
       icon: Award,
@@ -29,8 +29,8 @@ const TrustBadges = () => {
     },
     {
       icon: Lock,
-      title: '100% Secure',
-      description: 'Your data is protected'
+      title: '30-Day Returns',
+      description: 'Hassle-free return policy'
     }
   ];
 
