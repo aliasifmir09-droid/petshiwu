@@ -11,7 +11,7 @@ import logger from '../utils/logger';
 import { cache, cacheKeys } from '../utils/cache';
 import { safeToString } from '../utils/types';
 
-// Helper function to normalize product _id to string
+// Helper function to normalize product _id to string and convert Maps to objects
 const normalizeProductId = (product: any): any => {
   if (!product) return product;
   
@@ -32,6 +32,22 @@ const normalizeProductId = (product: any): any => {
         ? normalized.category._id.toString()
         : String(normalized.category._id)
     };
+  }
+  
+  // Convert variant attributes Maps to plain objects for JSON serialization
+  if (normalized.variants && Array.isArray(normalized.variants)) {
+    normalized.variants = normalized.variants.map((variant: any) => {
+      const variantCopy = { ...variant };
+      // Convert Map to plain object if it's a Map
+      if (variantCopy.attributes instanceof Map) {
+        const attributesObj: { [key: string]: string } = {};
+        variantCopy.attributes.forEach((value: string, key: string) => {
+          attributesObj[key] = value;
+        });
+        variantCopy.attributes = attributesObj;
+      }
+      return variantCopy;
+    });
   }
   
   return normalized;
@@ -1234,7 +1250,26 @@ export const createProduct = async (req: AuthRequest, res: Response, next: NextF
       });
     }
 
-    const product = await Product.create(req.body);
+    // Convert attributes objects to Maps for variants if present
+    const productData = { ...req.body };
+    if (productData.variants && Array.isArray(productData.variants)) {
+      productData.variants = productData.variants.map((variant: any) => {
+        const variantData = { ...variant };
+        // Convert attributes object to Map if it exists
+        if (variantData.attributes && typeof variantData.attributes === 'object' && !(variantData.attributes instanceof Map)) {
+          const attributesMap = new Map<string, string>();
+          Object.entries(variantData.attributes).forEach(([key, value]) => {
+            if (key && value && typeof value === 'string') {
+              attributesMap.set(key, value);
+            }
+          });
+          variantData.attributes = attributesMap.size > 0 ? attributesMap : undefined;
+        }
+        return variantData;
+      });
+    }
+
+    const product = await Product.create(productData);
 
     res.status(201).json({
       success: true,
@@ -1268,9 +1303,28 @@ export const createProduct = async (req: AuthRequest, res: Response, next: NextF
 // Update product (Admin)
 export const updateProduct = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    // Convert attributes objects to Maps for variants if present
+    const updateData = { ...req.body };
+    if (updateData.variants && Array.isArray(updateData.variants)) {
+      updateData.variants = updateData.variants.map((variant: any) => {
+        const variantData = { ...variant };
+        // Convert attributes object to Map if it exists
+        if (variantData.attributes && typeof variantData.attributes === 'object' && !(variantData.attributes instanceof Map)) {
+          const attributesMap = new Map<string, string>();
+          Object.entries(variantData.attributes).forEach(([key, value]) => {
+            if (key && value && typeof value === 'string') {
+              attributesMap.set(key, value);
+            }
+          });
+          variantData.attributes = attributesMap.size > 0 ? attributesMap : undefined;
+        }
+        return variantData;
+      });
+    }
+
     const product = await Product.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     ).populate('category', 'name slug');
 

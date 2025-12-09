@@ -49,6 +49,7 @@ const productVariantSchema = new Schema<IProductVariant>({
   weight: String,
   
   // Flexible attributes - can store any key-value pairs
+  // Using Schema.Types.Mixed instead of Map for better JSON serialization
   attributes: {
     type: Map,
     of: String,
