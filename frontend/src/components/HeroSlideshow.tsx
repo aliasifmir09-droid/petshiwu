@@ -21,10 +21,10 @@ const HeroSlideshow = () => {
   const slides: Slide[] = [
     {
       id: 1,
-      title: 'Welcome to Petshiwu',
-      subtitle: 'Everything Your Pet Needs',
-      description: 'Shop the best for your pets!',
-      buttonText: 'Shop now',
+      title: 'Everything Your Pet Needs',
+      subtitle: 'Premium Pet Food, Toys & Supplies',
+      description: 'Trusted by pet parents nationwide. Quality products, fast shipping.',
+      buttonText: 'Shop Now',
       buttonLink: '/products',
       leftImage: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=800&h=600&fit=crop&q=80', // White cat with Christmas theme
       backgroundColor: 'bg-gradient-to-br from-blue-50 via-white to-purple-50',
@@ -114,68 +114,49 @@ const HeroSlideshow = () => {
                 <div className={`w-full h-full ${slide.backgroundColor}`}>
                   <div className="grid md:grid-cols-2 h-full gap-0">
                     
-                    {/* Left Side - Content with Enhanced Striped Background */}
-                    <div className="relative flex items-center justify-center p-4 md:p-6 overflow-hidden">
-                      {/* Modern Diagonal Striped Pattern */}
-                      <div className="absolute inset-0 opacity-80" style={{
-                        backgroundImage: `repeating-linear-gradient(
-                          45deg,
-                          #1E3A8A 0px,
-                          #1E3A8A 30px,
-                          #3B82F6 30px,
-                          #3B82F6 50px,
-                          #ffffff 50px,
-                          #ffffff 60px,
-                          #EF4444 60px,
-                          #EF4444 90px,
-                          #ffffff 90px,
-                          #ffffff 100px,
-                          #1E3A8A 100px,
-                          #1E3A8A 130px
-                        )`
-                      }}></div>
-
-                      {/* Animated Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 animate-pulse"></div>
-
-                      {/* Content Card with Glass Effect */}
-                      <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-xl max-w-sm border border-white/50 transform hover:scale-105 transition-transform duration-300">
-                        <div className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
-                          SALE
-                        </div>
-                        <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2 leading-tight">
+                    {/* Left Side - Content (Clean, Focused Design) */}
+                    <div className="relative flex items-center justify-center p-6 md:p-8">
+                      {/* ✅ REMOVED: Busy striped pattern - too distracting */}
+                      {/* ✅ REMOVED: Animated gradient overlay - unnecessary noise */}
+                      
+                      {/* Content Card - Simplified Design */}
+                      <div className="relative bg-white rounded-2xl p-6 md:p-8 shadow-xl max-w-lg">
+                        {/* ✅ REMOVED: SALE badge - not needed on hero, feels "salesy" */}
+                        
+                        {/* ✅ PRIMARY: Large, bold value proposition */}
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4 leading-tight">
                           {slide.title}
                         </h1>
-                        <p className="text-base md:text-lg font-semibold text-gray-700 mb-1">
+                        
+                        {/* ✅ SECONDARY: Supporting text with clear hierarchy */}
+                        <p className="text-xl md:text-2xl font-semibold text-gray-700 mb-3">
                           {slide.subtitle}
                         </p>
-                        <p className="text-xs md:text-sm text-gray-600 mb-3">
+                        
+                        {/* ✅ TRUST: Social proof and benefits */}
+                        <p className="text-base md:text-lg text-gray-600 mb-6">
                           {slide.description}
                         </p>
+                        
+                        {/* ✅ PROMINENT: Large, clear CTA button */}
                         <Link
                           to={slide.buttonLink}
-                          className="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-full font-bold text-sm hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 duration-300"
+                          className="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 border-2 border-white/50"
                         >
                           {slide.buttonText} →
                         </Link>
-                        <p className="text-xs text-gray-500 mt-2 italic">
-                          *Exclusions apply.
-                        </p>
                       </div>
                     </div>
 
-                    {/* Right Side - Pet Image with Overlay */}
+                    {/* Right Side - Pet Image (Clean Design) */}
                     <div className="relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                       <img
                         src={slide.leftImage}
                         alt={slide.title}
-                        className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700"
+                        className="w-full h-full object-cover"
                       />
-                      {/* Decorative Corner Badge */}
-                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
-                        <p className="text-xs font-bold text-blue-600">🐾 Trusted Quality</p>
-                      </div>
+                      {/* ✅ REMOVED: Trust badge - trust should be in copy, not badges */}
                     </div>
                   </div>
                 </div>
