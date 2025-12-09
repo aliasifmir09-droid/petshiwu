@@ -1056,14 +1056,9 @@ export const processRefund = async (req: AuthRequest, res: Response, next: NextF
     if (order.paymentStatus !== 'paid') {
       return res.status(400).json({
         success: false,
-        message: 'Only paid orders can be refunded'
-      });
-    }
-
-    if (order.paymentStatus === 'refunded') {
-      return res.status(400).json({
-        success: false,
-        message: 'Order has already been refunded'
+        message: order.paymentStatus === 'refunded' 
+          ? 'Order has already been refunded'
+          : 'Only paid orders can be refunded'
       });
     }
 
@@ -1084,16 +1079,23 @@ export const processRefund = async (req: AuthRequest, res: Response, next: NextF
         // Convert amount to cents for Stripe
         const refundAmountCents = Math.round(amount * 100);
         
-        const refund = await stripe.refunds.create({
+        // Create refund params
+        const refundParams: any = {
           payment_intent: order.paymentIntentId,
           amount: refundAmountCents,
-          reason: reason ? 'requested_by_customer' : undefined,
-          metadata: {
-            orderId: order._id.toString(),
-            orderNumber: order.orderNumber,
+          reason: reason ? 'requested_by_customer' : undefined
+        };
+        
+        // Add metadata if Stripe supports it (may not be in type definition)
+        if (order._id && typeof order._id === 'object' && 'toString' in order._id) {
+          refundParams.metadata = {
+            orderId: String(order._id),
+            orderNumber: order.orderNumber || '',
             reason: reason || 'No reason provided'
-          }
-        });
+          };
+        }
+        
+        const refund = await stripe.refunds.create(refundParams);
 
         refundId = refund.id;
         refundStatus = refund.status === 'succeeded' ? 'refunded' : 'pending';
@@ -1148,14 +1150,22 @@ export const processRefund = async (req: AuthRequest, res: Response, next: NextF
     try {
       const user = await User.findById(order.user);
       if (user) {
-        await sendOrderCancellationEmail({
-          to: user.email,
-          firstName: user.firstName,
-          orderNumber: order.orderNumber,
-          orderDate: order.createdAt.toISOString(),
-          totalPrice: order.totalPrice,
-          refundAmount: amount
-        });
+        await sendOrderCancellationEmail(
+          user.email,
+          user.firstName,
+          order.orderNumber || '',
+          {
+            items: order.items.map(item => ({
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price,
+              image: item.image
+            })),
+            totalPrice: order.totalPrice,
+            refundAmount: amount,
+            createdAt: order.createdAt
+          }
+        );
       }
     } catch (emailError) {
       logger.error('Failed to send refund email:', emailError);
