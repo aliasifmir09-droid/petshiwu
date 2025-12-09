@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Fixes - XSS Protection Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.3.0/dist/purify.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .test-case {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #2196F3;
+        }
+        .input-label {
+            font-weight: bold;
+            color: #666;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-box {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-bottom: 10px;
+        }
+        .output-box {
+            padding: 15px;
+            background: #fff;
+            border: 2px solid #4CAF50;
+            border-radius: 4px;
+            margin-top: 10px;
+            min-height: 50px;
+        }
+        .output-label {
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .status.safe {
+            background: #4CAF50;
+            color: white;
+        }
+        .status.unsafe {
+            background: #f44336;
+            color: white;
+        }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        .info {
+            background: #E3F2FD;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔒 Security Fixes - XSS Protection Test Page</h1>
+    <p>This page demonstrates that XSS attacks are prevented by DOMPurify sanitization.</p>
+
+    <!-- Test 1: Review Comment Sanitization -->
+    <div class="test-section">
+        <h2>Test 1: Review Comment Sanitization</h2>
+        <div class="info">
+            <strong>Expected:</strong> Script tags and malicious HTML should be removed, safe HTML preserved.
+        </div>
+        
+        <div class="test-case">
+            <label class="input-label">Test Input (Try XSS attacks):</label>
+            <input type="text" id="reviewComment" class="input-box" 
+                   placeholder='<script>alert("XSS")</script>This is a test'>
+            <button onclick="testReviewComment()">Test Sanitization</button>
+            <div class="output-label">Sanitized Output:</div>
+            <div id="reviewOutput" class="output-box"></div>
+        </div>
+
+        <div class="test-case">
+            <label class="input-label">Predefined Test Cases:</label>
+            <button onclick="testCase1()">Test: Script Tag</button>
+            <button onclick="testCase2()">Test: Image onerror</button>
+            <button onclick="testCase3()">Test: SVG onload</button>
+            <button onclick="testCase4()">Test: Safe HTML</button>
+        </div>
+    </div>
+
+    <!-- Test 2: Review Title Sanitization -->
+    <div class="test-section">
+        <h2>Test 2: Review Title Sanitization</h2>
+        <div class="info">
+            <strong>Expected:</strong> All HTML tags removed, only plain text remains.
+        </div>
+        
+        <div class="test-case">
+            <label class="input-label">Test Input:</label>
+            <input type="text" id="reviewTitle" class="input-box" 
+                   placeholder='<script>alert("XSS")</script>Great Product'>
+            <button onclick="testReviewTitle()">Test Sanitization</button>
+            <div class="output-label">Sanitized Output:</div>
+            <div id="titleOutput" class="output-box"></div>
+        </div>
+    </div>
+
+    <!-- Test 3: Product Description Sanitization -->
+    <div class="test-section">
+        <h2>Test 3: Product Description Sanitization</h2>
+        <div class="info">
+            <strong>Expected:</strong> All HTML removed, only text content preserved.
+        </div>
+        
+        <div class="test-case">
+            <label class="input-label">Test Input:</label>
+            <textarea id="productDescription" class="input-box" rows="4" 
+                      placeholder='<p>Description</p><script>alert("XSS")</script>Buy now!'></textarea>
+            <button onclick="testProductDescription()">Test Sanitization</button>
+            <div class="output-label">Sanitized Output:</div>
+            <div id="descriptionOutput" class="output-box"></div>
+        </div>
+    </div>
+
+    <!-- Test 4: Image URL Validation -->
+    <div class="test-section">
+        <h2>Test 4: HTTPS-Only Image URLs (Production Mode)</h2>
+        <div class="info">
+            <strong>Expected:</strong> HTTP URLs rejected in production, HTTPS URLs accepted.
+        </div>
+        
+        <div class="test-case">
+            <label class="input-label">Test Image URL:</label>
+            <input type="text" id="imageUrl" class="input-box" 
+                   placeholder="http://example.com/image.jpg">
+            <label>
+                <input type="checkbox" id="productionMode"> Production Mode
+            </label>
+            <button onclick="testImageUrl()">Test URL</button>
+            <div class="output-label">Result:</div>
+            <div id="imageOutput" class="output-box"></div>
+        </div>
+    </div>
+
+    <script>
+        // Test Review Comment (allows safe HTML)
+        function testReviewComment() {
+            const input = document.getElementById('reviewComment').value;
+            const sanitized = DOMPurify.sanitize(input, {
+                ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'ul', 'ol', 'li'],
+                ALLOWED_ATTR: []
+            });
+            
+            const output = document.getElementById('reviewOutput');
+            output.innerHTML = sanitized;
+            
+            // Check if script tags were removed
+            const isSafe = !sanitized.includes('<script>') && !sanitized.includes('onerror') && !sanitized.includes('onload');
+            output.innerHTML += `<span class="status ${isSafe ? 'safe' : 'unsafe'}">${isSafe ? '✅ SAFE' : '❌ UNSAFE'}</span>`;
+        }
+
+        // Test Review Title (no HTML allowed)
+        function testReviewTitle() {
+            const input = document.getElementById('reviewTitle').value;
+            const sanitized = DOMPurify.sanitize(input, { ALLOWED_TAGS: [] });
+            
+            const output = document.getElementById('titleOutput');
+            output.textContent = sanitized;
+            
+            const isSafe = !sanitized.includes('<') && !sanitized.includes('>');
+            output.innerHTML += `<span class="status ${isSafe ? 'safe' : 'unsafe'}">${isSafe ? '✅ SAFE' : '❌ UNSAFE'}</span>`;
+        }
+
+        // Test Product Description (no HTML allowed)
+        function testProductDescription() {
+            const input = document.getElementById('productDescription').value;
+            const sanitized = DOMPurify.sanitize(input, { 
+                ALLOWED_TAGS: [], 
+                ALLOWED_ATTR: [] 
+            });
+            
+            const output = document.getElementById('descriptionOutput');
+            output.textContent = sanitized;
+            
+            const isSafe = !sanitized.includes('<script>') && !sanitized.includes('<img');
+            output.innerHTML += `<span class="status ${isSafe ? 'safe' : 'unsafe'}">${isSafe ? '✅ SAFE' : '❌ UNSAFE'}</span>`;
+        }
+
+        // Test Image URL
+        function testImageUrl() {
+            const url = document.getElementById('imageUrl').value;
+            const isProduction = document.getElementById('productionMode').checked;
+            const output = document.getElementById('imageOutput');
+            
+            if (!url) {
+                output.textContent = 'Please enter an image URL';
+                return;
+            }
+            
+            if (url.startsWith('https://')) {
+                output.innerHTML = `<span style="color: green;">✅ HTTPS URL accepted: ${url}</span>`;
+            } else if (url.startsWith('http://')) {
+                if (isProduction) {
+                    output.innerHTML = `<span style="color: red;">❌ HTTP URL rejected in production mode. Use HTTPS only.</span>`;
+                } else {
+                    output.innerHTML = `<span style="color: orange;">⚠️ HTTP URL allowed in development mode: ${url}</span>`;
+                }
+            } else {
+                output.innerHTML = `<span style="color: blue;">ℹ️ Relative or invalid URL: ${url}</span>`;
+            }
+        }
+
+        // Predefined test cases
+        function testCase1() {
+            document.getElementById('reviewComment').value = '<script>alert("XSS Attack!")</script>This is a test review';
+            testReviewComment();
+        }
+
+        function testCase2() {
+            document.getElementById('reviewComment').value = '<img src=x onerror="alert(\'XSS\')">Nice product!';
+            testReviewComment();
+        }
+
+        function testCase3() {
+            document.getElementById('reviewComment').value = '<svg onload="alert(\'XSS\')">Great quality';
+            testReviewComment();
+        }
+
+        function testCase4() {
+            document.getElementById('reviewComment').value = '<p>This is <strong>bold</strong> text</p>';
+            testReviewComment();
+        }
+
+        // Auto-test on page load
+        window.onload = function() {
+            console.log('🔒 Security Test Page Loaded');
+            console.log('DOMPurify version:', DOMPurify.version);
+        };
+    </script>
+</body>
+</html>
+

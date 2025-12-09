@@ -23,6 +23,15 @@ const Home = () => {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
 
+  // Memoize filtered products - must be at top level, not in JSX
+  const filteredFeaturedProducts = useMemo(() => {
+    if (!featuredProducts?.data) return [];
+    return featuredProducts.data.filter((product) => {
+      const productId = product._id ? String(product._id) : null;
+      return productId && !hasImageFailed(productId);
+    });
+  }, [featuredProducts?.data]);
+
   useEffect(() => {
     const scrollContainer = petTypesScrollRef.current;
     
@@ -400,13 +409,7 @@ const Home = () => {
                     }
                   `}</style>
                   <div className="flex gap-4 md:gap-5 items-stretch">
-                    {useMemo(() => {
-                      if (!featuredProducts?.data) return [];
-                      return featuredProducts.data.filter((product) => {
-                        const productId = product._id ? String(product._id) : null;
-                        return productId && !hasImageFailed(productId);
-                      });
-                    }, [featuredProducts?.data]).map((product, index) => (
+                    {filteredFeaturedProducts.map((product, index) => (
                       <div key={product._id} className="flex-shrink-0 w-56 md:w-60 lg:w-64 animate-fade-in-up">
                         <ProductCard 
                           product={product} 
