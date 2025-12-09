@@ -158,28 +158,32 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
             {product.name}
           </h3>
 
-          {/* Rating with Progress Bar */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <div className="flex items-center">
-                  {starIndices.map((i) => (
-                    <Star 
-                      key={i} 
-                      size={14} 
-                      className={`${
-                        i < Math.floor(product.averageRating) 
-                          ? 'text-amber-400 fill-amber-400' 
-                          : 'text-gray-300'
-                      }`} 
-                    />
-                  ))}
+          {/* Rating - Only render if there are reviews */}
+          {product.totalReviews > 0 ? (
+            <div className="space-y-1.5 min-h-[24px]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <div className="flex items-center">
+                    {starIndices.map((i) => (
+                      <Star 
+                        key={i} 
+                        size={14} 
+                        className={`${
+                          i < Math.floor(product.averageRating) 
+                            ? 'text-amber-400 fill-amber-400' 
+                            : 'text-gray-300'
+                        }`} 
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm font-bold text-gray-800">{product.averageRating.toFixed(1)}</span>
                 </div>
-                <span className="text-sm font-bold text-gray-800">{product.averageRating.toFixed(1)}</span>
+                <span className="text-xs text-gray-500">({product.totalReviews} reviews)</span>
               </div>
-              <span className="text-xs text-gray-500">({product.totalReviews} reviews)</span>
             </div>
-          </div>
+          ) : (
+            <div className="min-h-[24px]"></div>
+          )}
 
           {/* Price Section with Enhanced Design */}
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-lg border border-blue-100">
