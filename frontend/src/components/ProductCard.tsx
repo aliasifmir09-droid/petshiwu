@@ -154,7 +154,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
           </p>
 
           {/* Name */}
-          <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 min-h-[3rem] text-base group-hover:text-blue-700 transition-colors leading-tight">
+          <h3 className="font-bold text-gray-900 mb-2 line-clamp-3 min-h-[4rem] text-sm group-hover:text-blue-700 transition-colors leading-snug">
             {product.name}
           </h3>
 
