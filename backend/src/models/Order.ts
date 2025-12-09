@@ -7,8 +7,9 @@ export interface IOrderItem {
   price: number;
   quantity: number;
   variant?: {
-    size?: string;
-    weight?: string;
+    size?: string; // Legacy field
+    weight?: string; // Legacy field
+    attributes?: { [key: string]: string }; // Flexible attributes
     sku: string;
   };
   isReviewed?: boolean;
@@ -76,8 +77,13 @@ const orderItemSchema = new Schema<IOrderItem>({
     min: 1
   },
   variant: {
-    size: String,
-    weight: String,
+    size: String, // Legacy field
+    weight: String, // Legacy field
+    attributes: {
+      type: Map,
+      of: String,
+      default: undefined
+    },
     sku: String
   },
   isReviewed: {

@@ -109,7 +109,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   });
 
   const [variants, setVariants] = useState(
-    product?.variants || [{ size: '', weight: '', price: '', compareAtPrice: '', stock: '', sku: '', image: '', images: [] }]
+    product?.variants || [{ attributes: {}, price: '', compareAtPrice: '', stock: '', sku: '', image: '', images: [] }]
   );
 
   const [imageUrls, setImageUrls] = useState<string[]>(product?.images || []);
@@ -446,16 +446,52 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   };
 
   const addVariant = () => {
-    setVariants([...variants, { size: '', weight: '', price: '', compareAtPrice: '', stock: '', sku: '', image: '', images: [] }]);
+    setVariants([...variants, { attributes: {}, price: '', compareAtPrice: '', stock: '', sku: '', image: '', images: [] }]);
   };
 
   const removeVariant = (index: number) => {
     setVariants(variants.filter((_: any, i: number) => i !== index));
   };
 
-  const updateVariant = (index: number, field: string, value: string | string[]) => {
+  const updateVariant = (index: number, field: string, value: string | string[] | { [key: string]: string }) => {
     const newVariants = [...variants];
     newVariants[index] = { ...newVariants[index], [field]: value };
+    setVariants(newVariants);
+  };
+
+  // Helper functions for managing variant attributes
+  const updateVariantAttribute = (variantIndex: number, attributeKey: string, attributeValue: string) => {
+    const newVariants = [...variants];
+    const currentAttributes = newVariants[variantIndex].attributes || {};
+    const updatedAttributes = { ...currentAttributes };
+    
+    if (attributeValue.trim()) {
+      updatedAttributes[attributeKey] = attributeValue.trim();
+    } else {
+      delete updatedAttributes[attributeKey];
+    }
+    
+    newVariants[variantIndex] = { ...newVariants[variantIndex], attributes: updatedAttributes };
+    setVariants(newVariants);
+  };
+
+  const removeVariantAttribute = (variantIndex: number, attributeKey: string) => {
+    const newVariants = [...variants];
+    const currentAttributes = newVariants[variantIndex].attributes || {};
+    const updatedAttributes = { ...currentAttributes };
+    delete updatedAttributes[attributeKey];
+    
+    newVariants[variantIndex] = { ...newVariants[variantIndex], attributes: updatedAttributes };
+    setVariants(newVariants);
+  };
+
+  const addVariantAttribute = (variantIndex: number) => {
+    const newVariants = [...variants];
+    const currentAttributes = newVariants[variantIndex].attributes || {};
+    const newKey = `attribute_${Date.now()}`;
+    const updatedAttributes = { ...currentAttributes, [newKey]: '' };
+    
+    newVariants[variantIndex] = { ...newVariants[variantIndex], attributes: updatedAttributes };
     setVariants(newVariants);
   };
 
@@ -651,9 +687,31 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
         ? v.sku.trim() 
         : `SKU-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${index}`;
 
+      // Process attributes - clean up empty values and convert to proper format
+      const attributes: { [key: string]: string } = {};
+      if (v.attributes && typeof v.attributes === 'object') {
+        Object.entries(v.attributes).forEach(([key, value]) => {
+          // Skip temporary keys that start with 'attribute_'
+          if (!key.startsWith('attribute_') && value && String(value).trim()) {
+            attributes[key.trim()] = String(value).trim();
+          }
+        });
+      }
+      
+      // Legacy support: migrate size/weight to attributes if they exist
+      if (v.size && v.size.trim() && !attributes.size) {
+        attributes.size = v.size.trim();
+      }
+      if (v.weight && v.weight.trim() && !attributes.weight) {
+        attributes.weight = v.weight.trim();
+      }
+
       return {
+        // Legacy fields (for backward compatibility)
         size: v.size && v.size.trim() ? v.size.trim() : undefined,
         weight: v.weight && v.weight.trim() ? v.weight.trim() : undefined,
+        // Flexible attributes
+        attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
         price: price,
         compareAtPrice: v.compareAtPrice ? parseFloat(String(v.compareAtPrice)) : undefined,
         stock: stock,
@@ -1124,53 +1182,111 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                     )}
                   </div>
 
-                  {/* Variant Fields Grid */}
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                    <input
-                      type="text"
-                      value={variant.size || ''}
-                      onChange={(e) => updateVariant(index, 'size', e.target.value)}
-                      className="border border-gray-300 rounded px-3 py-2 text-sm"
-                      placeholder="Size (e.g., 5 lbs)"
-                    />
-                    <input
-                      type="text"
-                      value={variant.weight || ''}
-                      onChange={(e) => updateVariant(index, 'weight', e.target.value)}
-                      className="border border-gray-300 rounded px-3 py-2 text-sm"
-                      placeholder="Weight (e.g., 2.3 kg)"
-                    />
-                    <input
-                      type="number"
-                      required
-                      step="0.01"
-                      min="0"
-                      value={variant.price || ''}
-                      onChange={(e) => updateVariant(index, 'price', e.target.value)}
-                      className="border border-gray-300 rounded px-3 py-2 text-sm"
-                      placeholder="Price *"
-                    />
-                    <input
-                      type="number"
-                      required
-                      min="0"
-                      value={variant.stock || ''}
-                      onChange={(e) => updateVariant(index, 'stock', e.target.value)}
-                      className="border border-gray-300 rounded px-3 py-2 text-sm"
-                      placeholder="Stock *"
-                    />
-                    <input
-                      type="text"
-                      required
-                      value={variant.sku || ''}
-                      onChange={(e) => updateVariant(index, 'sku', e.target.value)}
-                      className="border border-gray-300 rounded px-3 py-2 text-sm"
-                      placeholder="SKU *"
-                    />
+                  {/* Flexible Attributes */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-medium text-gray-600">Attributes (Size, Flavor, Color, etc.)</label>
+                      <button
+                        type="button"
+                        onClick={() => addVariantAttribute(index)}
+                        className="text-xs text-primary-600 hover:text-primary-700 flex items-center gap-1"
+                      >
+                        <Plus size={12} />
+                        Add Attribute
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {Object.entries(variant.attributes || {}).map(([key, value]) => (
+                        <div key={key} className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Attribute name (e.g., Size, Flavor)"
+                            value={key.startsWith('attribute_') ? '' : key}
+                            onChange={(e) => {
+                              const newKey = e.target.value.trim();
+                              if (newKey && newKey !== key) {
+                                const currentAttributes = variant.attributes || {};
+                                const updatedAttributes: { [key: string]: string } = {};
+                                Object.keys(currentAttributes).forEach(k => {
+                                  if (k === key) {
+                                    updatedAttributes[newKey] = currentAttributes[k];
+                                  } else {
+                                    updatedAttributes[k] = currentAttributes[k];
+                                  }
+                                });
+                                updateVariant(index, 'attributes', updatedAttributes);
+                              }
+                            }}
+                            className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Value (e.g., 5 lb, Chicken)"
+                            value={value || ''}
+                            onChange={(e) => updateVariantAttribute(index, key, e.target.value)}
+                            className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeVariantAttribute(index, key)}
+                            className="px-2 text-red-500 hover:text-red-700"
+                            title="Remove attribute"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      ))}
+                      {(!variant.attributes || Object.keys(variant.attributes).length === 0) && (
+                        <p className="text-xs text-gray-500 italic">
+                          No attributes added. Click "Add Attribute" to add size, flavor, color, etc.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Price, Stock, SKU */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Price *</label>
+                      <input
+                        type="number"
+                        required
+                        step="0.01"
+                        min="0"
+                        value={variant.price || ''}
+                        onChange={(e) => updateVariant(index, 'price', e.target.value)}
+                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                        placeholder="29.99"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Stock *</label>
+                      <input
+                        type="number"
+                        required
+                        min="0"
+                        value={variant.stock || ''}
+                        onChange={(e) => updateVariant(index, 'stock', e.target.value)}
+                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                        placeholder="100"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">SKU *</label>
+                      <input
+                        type="text"
+                        required
+                        value={variant.sku || ''}
+                        onChange={(e) => updateVariant(index, 'sku', e.target.value)}
+                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                        placeholder="SKU-001"
+                      />
+                    </div>
                   </div>
                   
                   {/* Compare At Price (Optional) */}
                   <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Compare At Price (optional)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -1178,7 +1294,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                       value={variant.compareAtPrice || ''}
                       onChange={(e) => updateVariant(index, 'compareAtPrice', e.target.value)}
                       className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                      placeholder="Compare At Price (optional)"
+                      placeholder="39.99"
                     />
                   </div>
                 </div>

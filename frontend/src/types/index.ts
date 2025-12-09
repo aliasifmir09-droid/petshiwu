@@ -36,8 +36,13 @@ export interface Category {
 }
 
 export interface ProductVariant {
+  // Legacy fields (kept for backward compatibility, deprecated)
   size?: string;
   weight?: string;
+  
+  // Flexible attributes system - can store any attribute (size, weight, flavor, color, material, etc.)
+  attributes?: { [key: string]: string }; // e.g., { size: "5 lb", flavor: "Chicken", color: "Red" }
+  
   price: number;
   compareAtPrice?: number;
   stock: number;
@@ -105,8 +110,9 @@ export interface OrderItem {
   price: number;
   quantity: number;
   variant?: {
-    size?: string;
-    weight?: string;
+    size?: string; // Legacy field
+    weight?: string; // Legacy field
+    attributes?: { [key: string]: string }; // Flexible attributes
     sku: string;
   };
   isReviewed?: boolean;

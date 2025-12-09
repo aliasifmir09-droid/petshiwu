@@ -556,16 +556,59 @@ const ProductDetail = () => {
           {/* Variants */}
           {product.variants.length > 0 && selectedVariantData && (
             <div className="mb-6">
-              {/* Only show label if variant has size or weight */}
-              {(selectedVariantData.size || selectedVariantData.weight) && (
-                <label className="block text-sm font-medium mb-2 text-gray-900">
-                  Size: {selectedVariantData.size || selectedVariantData.weight}
-                </label>
-              )}
+              {/* Display selected variant attributes */}
+              {(() => {
+                // Get attributes from flexible system or legacy fields
+                const attributes = selectedVariantData.attributes || {};
+                const legacySize = selectedVariantData.size;
+                const legacyWeight = selectedVariantData.weight;
+                
+                // Build display text from attributes
+                const attributeEntries = Object.entries(attributes);
+                const hasAttributes = attributeEntries.length > 0 || legacySize || legacyWeight;
+                
+                if (!hasAttributes) return null;
+                
+                // Format attributes for display
+                const displayParts: string[] = [];
+                if (legacySize) displayParts.push(legacySize);
+                if (legacyWeight) displayParts.push(legacyWeight);
+                attributeEntries.forEach(([key, value]) => {
+                  // Don't duplicate if already in legacy fields
+                  if (key !== 'size' && key !== 'weight' && value) {
+                    displayParts.push(value);
+                  }
+                });
+                
+                return (
+                  <label className="block text-sm font-medium mb-2 text-gray-900">
+                    {displayParts.join(' • ')}
+                  </label>
+                );
+              })()}
+              
               <div className="flex flex-wrap gap-2">
                 {product.variants.map((variant, index) => {
-                  // Determine what to display in the button
-                  const displayText = variant.size || variant.weight || `Variant ${index + 1}`;
+                  // Determine what to display in the button from attributes or legacy fields
+                  const getDisplayText = () => {
+                    // Try attributes first
+                    if (variant.attributes && Object.keys(variant.attributes).length > 0) {
+                      const parts: string[] = [];
+                      Object.entries(variant.attributes).forEach(([, value]) => {
+                        if (value) parts.push(value);
+                      });
+                      if (parts.length > 0) return parts.join(' • ');
+                    }
+                    
+                    // Fallback to legacy fields
+                    if (variant.size) return variant.size;
+                    if (variant.weight) return variant.weight;
+                    
+                    // Final fallback
+                    return `Variant ${index + 1}`;
+                  };
+                  
+                  const displayText = getDisplayText();
                   
                   return (
                     <button

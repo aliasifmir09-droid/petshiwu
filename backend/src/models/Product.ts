@@ -1,8 +1,13 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IProductVariant {
+  // Legacy fields (kept for backward compatibility, deprecated)
   size?: string;
   weight?: string;
+  
+  // Flexible attributes system - can store any attribute (size, weight, flavor, color, material, etc.)
+  attributes?: { [key: string]: string }; // e.g., { size: "5 lb", flavor: "Chicken", color: "Red" }
+  
   price: number;
   compareAtPrice?: number;
   stock: number;
@@ -39,8 +44,17 @@ export interface IProduct extends Document {
 }
 
 const productVariantSchema = new Schema<IProductVariant>({
+  // Legacy fields (kept for backward compatibility)
   size: String,
   weight: String,
+  
+  // Flexible attributes - can store any key-value pairs
+  attributes: {
+    type: Map,
+    of: String,
+    default: undefined
+  },
+  
   price: {
     type: Number,
     required: true,
