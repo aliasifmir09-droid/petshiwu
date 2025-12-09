@@ -17,6 +17,7 @@ import PayPalButton from '@/components/PayPalButton';
 import { getStripe } from '@/utils/stripe';
 import { normalizeId } from '@/utils/idNormalizer';
 import { trackPurchase } from '@/utils/analytics';
+import SEO from '@/components/SEO';
 import { MapPin, Plus, Check } from 'lucide-react';
 
 interface CreateOrderData {
@@ -530,8 +531,10 @@ const Checkout = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+    <>
+      <SEO title="Checkout | petshiwu" description="Complete your purchase at petshiwu" noindex={true} />
+      <div className="container mx-auto px-4 lg:px-8 py-8">
+        <h1 className="text-3xl font-bold mb-8">Checkout</h1>
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -995,6 +998,7 @@ const Checkout = () => {
         />
       )}
     </div>
+    </>
   );
 };
 

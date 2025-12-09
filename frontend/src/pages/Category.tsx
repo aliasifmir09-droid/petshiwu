@@ -8,6 +8,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import Dropdown from '@/components/Dropdown';
 import { SlidersHorizontal, ArrowUpDown, ChevronRight, Home } from 'lucide-react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
+import SEO from '@/components/SEO';
 
 const Category = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -136,6 +137,30 @@ const Category = () => {
 
   const breadcrumbs = buildBreadcrumbs();
 
+  // Build SEO data
+  const petTypeDisplay = category.petType && category.petType !== 'all' && category.petType !== 'other-animals'
+    ? category.petType.charAt(0).toUpperCase() + category.petType.slice(1)
+    : '';
+  
+  const categoryTitle = petTypeDisplay
+    ? `${category.name} for ${petTypeDisplay} | petshiwu`
+    : `${category.name} | petshiwu`;
+  
+  const categoryDescription = petTypeDisplay
+    ? `Shop ${category.name} for ${petTypeDisplay} at petshiwu. Quality products, great prices, fast shipping.`
+    : `Shop ${category.name} at petshiwu. Quality pet supplies, great prices, fast shipping.`;
+  
+  const categoryKeywords = [
+    category.name,
+    petTypeDisplay,
+    petTypeDisplay === 'Dog' ? 'dog food' : '',
+    petTypeDisplay === 'Cat' ? 'cat food' : '',
+    'pet supplies',
+    'online pet store'
+  ].filter(Boolean).join(', ');
+
+  const categoryUrl = `https://petshiwu.com/category/${category.slug}${petType ? `?petType=${petType}` : ''}`;
+
   const updateFilters = (key: string, value: string) => {
     const newParams = new URLSearchParams(searchParams);
     if (value) {
@@ -192,8 +217,15 @@ const Category = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 lg:px-8 py-8">
-      {/* Breadcrumbs */}
+    <>
+      <SEO
+        title={categoryTitle}
+        description={categoryDescription}
+        keywords={categoryKeywords}
+        url={categoryUrl}
+      />
+      <div className="container mx-auto px-4 lg:px-8 py-8">
+        {/* Breadcrumbs */}
       <nav className="mb-6" aria-label="Breadcrumb">
         <ol className="flex items-center space-x-2 text-sm text-gray-600">
           {breadcrumbs.map((crumb, index) => (
@@ -387,9 +419,10 @@ const Category = () => {
                   <p className="text-gray-600 text-lg">No products found in this category.</p>
                 </div>
               )}
-            </div>
-          </div>
+        </div>
+      </div>
     </div>
+    </>
   );
 };
 

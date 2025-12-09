@@ -75,7 +75,9 @@ const Home = () => {
 
   return (
     <div className="relative">
-      <SEO />
+      <SEO
+        description="Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, birds, and more. Quality products, fast shipping, great prices."
+      />
       <StructuredData
         type="website"
         data={{}}

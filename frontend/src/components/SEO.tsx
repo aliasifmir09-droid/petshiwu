@@ -10,18 +10,20 @@ interface SEOProps {
   price?: number;
   currency?: string;
   availability?: 'instock' | 'outofstock';
+  noindex?: boolean;
 }
 
 const SEO = ({
   title = 'petshiwu - Everything Your Pet Needs',
-  description = 'Shop the best pet supplies for dogs, cats, birds, fish, and more. Quality products, great prices, and fast shipping. Your one-stop shop for all pet needs.',
+  description = 'Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, birds, and more. Quality products, fast shipping, great prices.',
   keywords = 'pet supplies, dog food, cat food, pet toys, pet accessories, pet care, online pet store',
   image = '/og-image.jpg',
   url = 'https://petshiwu.com',
   type = 'website',
   price,
   currency = 'USD',
-  availability = 'instock'
+  availability = 'instock',
+  noindex = false
 }: SEOProps) => {
   const fullTitle = title === 'petshiwu - Everything Your Pet Needs' ? title : `${title} | petshiwu`;
 
@@ -59,6 +61,11 @@ const SEO = ({
 
       {/* Canonical URL */}
       <link rel="canonical" href={url} />
+
+      {/* Robots meta tag */}
+      {noindex && (
+        <meta name="robots" content="noindex, nofollow" />
+      )}
     </Helmet>
   );
 };

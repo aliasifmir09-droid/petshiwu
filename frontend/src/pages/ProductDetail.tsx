@@ -18,6 +18,7 @@ import { FREE_SHIPPING_THRESHOLD } from '@/config/constants';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { trackProductView, trackAddToWishlist, trackProductComparison, trackShare } from '@/utils/analytics';
+import SEO from '@/components/SEO';
 
 const ProductDetail = () => {
   const { slug, petType } = useParams<{ 
@@ -350,8 +351,50 @@ const ProductDetail = () => {
 
   const breadcrumbs = buildBreadcrumbs();
 
+  // Build SEO data
+  const productTitle = product.name.length > 50 
+    ? `${product.name.substring(0, 47)}... | petshiwu`
+    : `${product.name} | petshiwu`;
+  
+  // Create description from product description or fallback
+  const productDescription = product.description 
+    ? DOMPurify.sanitize(product.description, { ALLOWED_TAGS: [] }).substring(0, 150).trim() + (product.description.length > 150 ? '...' : '')
+    : `Buy ${product.name} for ${product.petType || 'pets'} at petshiwu. Quality products, fast shipping, great prices.`;
+  
+  // Build keywords
+  const keywords = [
+    product.name,
+    product.brand || '',
+    product.category?.name || '',
+    product.petType || '',
+    'pet supplies',
+    product.petType === 'dog' ? 'dog food' : '',
+    product.petType === 'cat' ? 'cat food' : '',
+    'online pet store'
+  ].filter(Boolean).join(', ');
+
+  // Build product URL
+  const productUrl = `https://petshiwu.com${generateProductUrl(product)}`;
+  
+  // Get product image for OG
+  const productImage = product.images && product.images.length > 0
+    ? normalizeImageUrl(product.images[0])
+    : '/og-image.jpg';
+
   return (
-    <div className="container mx-auto px-4 lg:px-8 py-8">
+    <>
+      <SEO
+        title={productTitle}
+        description={productDescription}
+        keywords={keywords}
+        image={productImage}
+        url={productUrl}
+        type="product"
+        price={price}
+        currency="USD"
+        availability={selectedVariantData?.stock && selectedVariantData.stock > 0 ? 'instock' : 'outofstock'}
+      />
+      <div className="container mx-auto px-4 lg:px-8 py-8">
       {/* Breadcrumb */}
       <nav className="mb-6" aria-label="Breadcrumb">
         <ol className="flex items-center space-x-2 text-sm text-gray-600">

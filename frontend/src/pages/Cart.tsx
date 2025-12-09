@@ -6,6 +6,7 @@ import ConfirmationModal from '@/components/ConfirmationModal';
 import EmptyState from '@/components/EmptyState';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
+import SEO from '@/components/SEO';
 import { TAX_RATE, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST } from '@/config/constants';
 
 const Cart = () => {
@@ -38,7 +39,9 @@ const Cart = () => {
 
   if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 lg:px-8 py-12">
+      <>
+        <SEO title="Shopping Cart | petshiwu" description="Your shopping cart at petshiwu" noindex={true} />
+        <div className="container mx-auto px-4 lg:px-8 py-12">
         <EmptyState
           icon={ShoppingBag}
           title="Your Cart is Empty"
@@ -53,8 +56,10 @@ const Cart = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
+    <>
+      <SEO title="Shopping Cart | petshiwu" description="Your shopping cart at petshiwu" noindex={true} />
+      <div className="container mx-auto px-4 lg:px-8 py-8">
+        <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items */}
@@ -211,6 +216,7 @@ const Cart = () => {
         }
       />
     </div>
+    </>
   );
 };
 

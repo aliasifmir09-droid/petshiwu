@@ -10,6 +10,7 @@ import ErrorMessage from '@/components/ErrorMessage';
 import Dropdown from '@/components/Dropdown';
 import { SlidersHorizontal, Layers, ArrowUpDown, Star, Package, Tag, Search } from 'lucide-react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
+import SEO from '@/components/SEO';
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -127,8 +128,61 @@ const Products = () => {
     setSearchParams(newParams);
   };
 
+  // Build dynamic SEO based on filters
+  const getProductsTitle = () => {
+    if (featured) return 'Featured Pet Products | petshiwu';
+    if (search) return `Search Results for "${search}" | petshiwu`;
+    if (petType) {
+      const petTypeDisplay = petType.charAt(0).toUpperCase() + petType.slice(1);
+      return `${petTypeDisplay} Products | petshiwu`;
+    }
+    return 'Pet Supplies & Products | petshiwu';
+  };
+
+  const getProductsDescription = () => {
+    if (featured) {
+      return 'Shop featured pet products at petshiwu. Premium dog food, cat food, toys, and supplies. Quality products, fast shipping, great prices.';
+    }
+    if (search) {
+      return `Find ${search} at petshiwu. Quality pet supplies, fast shipping, great prices.`;
+    }
+    if (petType) {
+      const petTypeDisplay = petType.charAt(0).toUpperCase() + petType.slice(1);
+      const foodKeyword = petType === 'dog' ? 'dog food' : petType === 'cat' ? 'cat food' : '';
+      return `Shop ${petTypeDisplay} products at petshiwu. Premium ${foodKeyword ? foodKeyword + ', ' : ''}toys, and supplies. Quality products, fast shipping, great prices.`;
+    }
+    return 'Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, birds, and more. Quality products, fast shipping, great prices.';
+  };
+
+  const getProductsKeywords = () => {
+    const baseKeywords = ['pet supplies', 'online pet store'];
+    if (featured) {
+      return [...baseKeywords, 'featured products', 'dog food', 'cat food', 'pet toys'].join(', ');
+    }
+    if (search) {
+      return [...baseKeywords, search].join(', ');
+    }
+    if (petType) {
+      const petTypeDisplay = petType.charAt(0).toUpperCase() + petType.slice(1);
+      const keywords = [...baseKeywords, petTypeDisplay.toLowerCase()];
+      if (petType === 'dog') keywords.push('dog food', 'dog supplies');
+      if (petType === 'cat') keywords.push('cat food', 'cat supplies');
+      return keywords.join(', ');
+    }
+    return [...baseKeywords, 'dog food', 'cat food', 'pet toys', 'pet accessories'].join(', ');
+  };
+
+  const productsUrl = `https://petshiwu.com/products${location.search ? location.search : ''}`;
+
   return (
-    <div className="container mx-auto px-4 lg:px-8 py-8">
+    <>
+      <SEO
+        title={getProductsTitle()}
+        description={getProductsDescription()}
+        keywords={getProductsKeywords()}
+        url={productsUrl}
+      />
+      <div className="container mx-auto px-4 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">
@@ -439,6 +493,7 @@ const Products = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
