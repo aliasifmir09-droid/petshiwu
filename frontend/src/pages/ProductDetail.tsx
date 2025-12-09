@@ -556,33 +556,37 @@ const ProductDetail = () => {
           {/* Variants */}
           {product.variants.length > 0 && selectedVariantData && (
             <div className="mb-6">
-              <label className="block text-sm font-medium mb-2">
-                Size: {selectedVariantData.size || selectedVariantData.weight}
-              </label>
+              {/* Only show label if variant has size or weight */}
+              {(selectedVariantData.size || selectedVariantData.weight) && (
+                <label className="block text-sm font-medium mb-2 text-gray-900">
+                  Size: {selectedVariantData.size || selectedVariantData.weight}
+                </label>
+              )}
               <div className="flex flex-wrap gap-2">
-                {product.variants.map((variant, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setSelectedVariant(index);
-                      setSelectedImage(0); // Reset to first image when variant changes
-                    }}
-                    disabled={variant.stock === 0}
-                    className={`px-4 py-2 border-2 rounded-lg font-medium transition-colors ${
-                      selectedVariant === index
-                        ? 'border-primary-600 bg-primary-50'
-                        : variant.stock === 0
-                        ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                  >
-                    {variant.size || variant.weight}
-                    <div className="text-sm">${variant.price.toFixed(2)}</div>
-                    {variant.stock === 0 && (
-                      <div className="text-xs text-red-500">Out of Stock</div>
-                    )}
-                  </button>
-                ))}
+                {product.variants.map((variant, index) => {
+                  // Determine what to display in the button
+                  const displayText = variant.size || variant.weight || `Variant ${index + 1}`;
+                  
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setSelectedVariant(index);
+                        setSelectedImage(0); // Reset to first image when variant changes
+                      }}
+                      disabled={variant.stock === 0}
+                      className={`px-4 py-2 border-2 rounded-lg font-medium transition-all ${
+                        selectedVariant === index
+                          ? 'border-primary-600 text-primary-600 bg-white'
+                          : variant.stock === 0
+                          ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'border-gray-300 text-gray-900 bg-white hover:border-gray-400'
+                      }`}
+                    >
+                      {displayText}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
