@@ -362,10 +362,13 @@ const ProductDetail = () => {
     : `Buy ${product.name} for ${product.petType || 'pets'} at petshiwu. Quality products, fast shipping, great prices.`;
   
   // Build keywords
+  const categoryName = typeof product.category === 'object' && product.category?.name 
+    ? product.category.name 
+    : '';
   const keywords = [
     product.name,
     product.brand || '',
-    product.category?.name || '',
+    categoryName,
     product.petType || '',
     'pet supplies',
     product.petType === 'dog' ? 'dog food' : '',
@@ -712,7 +715,7 @@ const ProductDetail = () => {
                     to={`/category/${product.category.slug}${product.petType && product.category.petType !== 'all' ? `?petType=${product.category.petType}` : ''}`}
                     className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium hover:bg-primary-200 transition-colors cursor-pointer inline-block"
                   >
-                    {product.category.name}
+                    {typeof product.category === 'object' && product.category?.name ? product.category.name : ''}
                   </Link>
                 )
               )}
@@ -984,6 +987,7 @@ const ProductDetail = () => {
 
       {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
     </div>
+    </>
   );
 };
 

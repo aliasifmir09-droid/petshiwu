@@ -137,29 +137,37 @@ const Category = () => {
 
   const breadcrumbs = buildBreadcrumbs();
 
-  // Build SEO data
-  const petTypeDisplay = category.petType && category.petType !== 'all' && category.petType !== 'other-animals'
+  // Build SEO data (only if category is loaded)
+  const petTypeDisplay = category && category.petType && category.petType !== 'all' && category.petType !== 'other-animals'
     ? category.petType.charAt(0).toUpperCase() + category.petType.slice(1)
     : '';
   
-  const categoryTitle = petTypeDisplay
-    ? `${category.name} for ${petTypeDisplay} | petshiwu`
-    : `${category.name} | petshiwu`;
+  const categoryTitle = category
+    ? (petTypeDisplay
+      ? `${category.name} for ${petTypeDisplay} | petshiwu`
+      : `${category.name} | petshiwu`)
+    : 'Category | petshiwu';
   
-  const categoryDescription = petTypeDisplay
-    ? `Shop ${category.name} for ${petTypeDisplay} at petshiwu. Quality products, great prices, fast shipping.`
-    : `Shop ${category.name} at petshiwu. Quality pet supplies, great prices, fast shipping.`;
+  const categoryDescription = category
+    ? (petTypeDisplay
+      ? `Shop ${category.name} for ${petTypeDisplay} at petshiwu. Quality products, great prices, fast shipping.`
+      : `Shop ${category.name} at petshiwu. Quality pet supplies, great prices, fast shipping.`)
+    : 'Shop pet supplies at petshiwu. Quality products, great prices, fast shipping.';
   
-  const categoryKeywords = [
-    category.name,
-    petTypeDisplay,
-    petTypeDisplay === 'Dog' ? 'dog food' : '',
-    petTypeDisplay === 'Cat' ? 'cat food' : '',
-    'pet supplies',
-    'online pet store'
-  ].filter(Boolean).join(', ');
+  const categoryKeywords = category
+    ? [
+        category.name,
+        petTypeDisplay,
+        petTypeDisplay === 'Dog' ? 'dog food' : '',
+        petTypeDisplay === 'Cat' ? 'cat food' : '',
+        'pet supplies',
+        'online pet store'
+      ].filter(Boolean).join(', ')
+    : 'pet supplies, online pet store';
 
-  const categoryUrl = `https://petshiwu.com/category/${category.slug}${petType ? `?petType=${petType}` : ''}`;
+  const categoryUrl = category
+    ? `https://petshiwu.com/category/${category.slug}${petType ? `?petType=${petType}` : ''}`
+    : 'https://petshiwu.com/category';
 
   const updateFilters = (key: string, value: string) => {
     const newParams = new URLSearchParams(searchParams);
