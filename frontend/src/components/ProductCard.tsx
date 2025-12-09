@@ -136,12 +136,12 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
         {/* Wishlist Button */}
         <button
           onClick={handleWishlistToggle}
-          className={`absolute top-3 right-3 p-3 rounded-full bg-white/95 backdrop-blur-md shadow-xl hover:scale-125 transition-all duration-300 transform ${
+          className={`absolute top-3 right-3 p-3.5 rounded-full bg-white/95 backdrop-blur-md shadow-xl hover:scale-125 transition-all duration-300 transform min-w-[44px] min-h-[44px] flex items-center justify-center ${
             inWishlist ? 'text-red-500 ring-2 ring-red-300 animate-wiggle' : 'text-gray-400 hover:text-red-500'
           }`}
           aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
         >
-          <Heart size={18} fill={inWishlist ? 'currentColor' : 'none'} strokeWidth={2.5} />
+          <Heart size={20} fill={inWishlist ? 'currentColor' : 'none'} strokeWidth={2.5} />
         </button>
       </div>
 

@@ -610,7 +610,8 @@ const ProductDetail = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-10 h-10 border border-gray-300 rounded-lg hover:bg-gray-100"
+                className="w-11 h-11 border border-gray-300 rounded-lg hover:bg-gray-100 flex items-center justify-center text-lg font-semibold active:scale-95 transition-transform min-w-[44px] min-h-[44px]"
+                aria-label="Decrease quantity"
               >
                 -
               </button>
@@ -618,11 +619,13 @@ const ProductDetail = () => {
                 type="number"
                 value={quantity}
                 onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-20 text-center border border-gray-300 rounded-lg px-3 py-2"
+                className="w-20 text-center border border-gray-300 rounded-lg px-3 py-2 min-h-[44px]"
+                aria-label="Quantity"
               />
               <button
                 onClick={() => setQuantity(quantity + 1)}
-                className="w-10 h-10 border border-gray-300 rounded-lg hover:bg-gray-100"
+                className="w-11 h-11 border border-gray-300 rounded-lg hover:bg-gray-100 flex items-center justify-center text-lg font-semibold active:scale-95 transition-transform min-w-[44px] min-h-[44px]"
+                aria-label="Increase quantity"
               >
                 +
               </button>

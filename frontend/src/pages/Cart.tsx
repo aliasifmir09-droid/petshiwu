@@ -98,14 +98,16 @@ const Cart = () => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => updateQuantity(item.product._id, item.quantity - 1, item.variant?.sku)}
-                        className="w-8 h-8 border border-gray-300 rounded hover:bg-gray-100"
+                        className="w-11 h-11 border border-gray-300 rounded hover:bg-gray-100 flex items-center justify-center text-lg font-semibold active:scale-95 transition-transform min-w-[44px] min-h-[44px]"
+                        aria-label="Decrease quantity"
                       >
                         -
                       </button>
-                      <span className="w-12 text-center">{item.quantity}</span>
+                      <span className="w-12 text-center font-medium">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.product._id, item.quantity + 1, item.variant?.sku)}
-                        className="w-8 h-8 border border-gray-300 rounded hover:bg-gray-100"
+                        className="w-11 h-11 border border-gray-300 rounded hover:bg-gray-100 flex items-center justify-center text-lg font-semibold active:scale-95 transition-transform min-w-[44px] min-h-[44px]"
+                        aria-label="Increase quantity"
                       >
                         +
                       </button>
@@ -121,10 +123,11 @@ const Cart = () => {
                         variantSku: item.variant?.sku,
                         productName: item.product.name
                       })}
-                      className="text-red-500 hover:text-red-700 flex items-center gap-1 text-sm"
+                      className="text-red-500 hover:text-red-700 flex items-center gap-2 text-sm px-4 py-3 rounded-lg min-h-[44px] active:scale-95 transition-transform"
+                      aria-label="Remove item from cart"
                     >
-                      <Trash2 size={16} />
-                      Remove
+                      <Trash2 size={18} />
+                      <span>Remove</span>
                     </button>
                   </div>
                 </div>
@@ -137,14 +140,15 @@ const Cart = () => {
               isOpen: true,
               action: 'clear'
             })}
-            className="mt-4 text-red-500 hover:text-red-700 text-sm font-medium"
+            className="mt-6 text-red-500 hover:text-red-700 text-sm font-medium px-4 py-3 rounded-lg min-h-[44px] active:scale-95 transition-transform inline-flex items-center"
+            aria-label="Clear entire cart"
           >
             Clear Cart
           </button>
         </div>
 
-        {/* Order Summary */}
-        <div>
+        {/* Order Summary - Desktop */}
+        <div className="hidden lg:block">
           <div className="bg-white rounded-lg shadow p-6 sticky top-24">
             <h2 className="text-xl font-bold mb-6">Order Summary</h2>
 
@@ -195,6 +199,33 @@ const Cart = () => {
           </div>
         </div>
       </div>
+
+      {/* Mobile: Sticky Checkout Button at Bottom (Thumb Zone) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-2xl p-4 z-50 safe-area-inset-bottom">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <span className="text-sm text-gray-600 block">Total</span>
+              <span className="text-2xl font-bold text-gray-900">${total.toFixed(2)}</span>
+            </div>
+            {subtotal < FREE_SHIPPING_THRESHOLD && (
+              <span className="text-xs text-blue-600 font-semibold text-right max-w-[120px]">
+                Add ${(FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2)} for FREE shipping
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => navigate('/checkout')}
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform min-h-[56px]"
+            aria-label="Proceed to checkout"
+          >
+            Proceed to Checkout
+          </button>
+        </div>
+      </div>
+
+      {/* Add padding to bottom of cart items on mobile to prevent overlap with sticky button */}
+      <div className="lg:hidden h-32"></div>
 
       {/* Confirmation Modal */}
       <ConfirmationModal
