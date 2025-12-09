@@ -7,6 +7,8 @@ export interface IProductVariant {
   compareAtPrice?: number;
   stock: number;
   sku: string;
+  image?: string; // Primary variant image (optional)
+  images?: string[]; // Variant image gallery (optional)
 }
 
 export interface IProduct extends Document {
@@ -58,7 +60,9 @@ const productVariantSchema = new Schema<IProductVariant>({
     type: String,
     required: true
     // Note: unique constraint removed - will create sparse unique index manually below
-  }
+  },
+  image: String, // Primary variant image URL (optional)
+  images: [String] // Variant image gallery (optional)
 });
 
 const productSchema = new Schema<IProduct>(

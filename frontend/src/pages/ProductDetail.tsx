@@ -161,6 +161,11 @@ const ProductDetail = () => {
     setImageLoaded(false);
   }, [selectedImage]);
 
+  // Reset selected image when variant changes
+  useEffect(() => {
+    setSelectedImage(0);
+  }, [selectedVariant]);
+
   // Reset indices when product changes
   useEffect(() => {
     if (!product?._id) {
@@ -238,16 +243,32 @@ const ProductDetail = () => {
   const hasVariants = product?.variants && Array.isArray(product.variants) && product.variants.length > 0;
   const hasImages = product?.images && Array.isArray(product.images) && product.images.length > 0;
   
-  // Ensure selectedVariant and selectedImage are within bounds
+  // Ensure selectedVariant is within bounds
   const safeSelectedVariant = hasVariants 
     ? Math.max(0, Math.min(selectedVariant, product.variants.length - 1))
-    : 0;
-  const safeSelectedImage = hasImages 
-    ? Math.max(0, Math.min(selectedImage, product.images.length - 1))
     : 0;
   
   const selectedVariantData = hasVariants ? product.variants[safeSelectedVariant] : undefined;
   const price = selectedVariantData?.price || product?.basePrice || 0;
+
+  // Determine which images to display: variant image if available, otherwise product images
+  const displayImages = (() => {
+    if (selectedVariantData?.image) {
+      // Variant has a primary image - use it as the main image
+      return [selectedVariantData.image];
+    } else if (selectedVariantData?.images && selectedVariantData.images.length > 0) {
+      // Variant has image gallery - use it
+      return selectedVariantData.images;
+    } else {
+      // No variant images - fallback to product images
+      return product.images || [];
+    }
+  })();
+
+  const hasDisplayImages = displayImages.length > 0;
+  const safeSelectedImage = hasDisplayImages 
+    ? Math.max(0, Math.min(selectedImage, displayImages.length - 1))
+    : 0;
 
   const handleAddToCart = () => {
     addToCart(product, selectedVariantData || undefined, quantity);
@@ -439,9 +460,9 @@ const ProductDetail = () => {
             onMouseLeave={() => setZoomPosition(null)}
           >
             <div className="relative w-full h-full overflow-hidden">
-              {hasImages && product.images[safeSelectedImage] ? (
+              {hasDisplayImages && displayImages[safeSelectedImage] ? (
                 <img
-                  src={normalizeImageUrl(product.images[safeSelectedImage]) || ''}
+                  src={normalizeImageUrl(displayImages[safeSelectedImage]) || ''}
                   alt={product?.name || 'Product image'}
                   onError={(e) => {
                     handleImageError(e, product?.name || 'Product');
@@ -476,7 +497,7 @@ const ProductDetail = () => {
             </div>
           </div>
           <div className="grid grid-cols-4 gap-2">
-            {product.images?.map((image, index) => (
+            {displayImages?.map((image, index) => (
               <button
                 key={index}
                 onClick={() => setSelectedImage(index)}
@@ -543,7 +564,10 @@ const ProductDetail = () => {
                 {product.variants.map((variant, index) => (
                   <button
                     key={index}
-                    onClick={() => setSelectedVariant(index)}
+                    onClick={() => {
+                      setSelectedVariant(index);
+                      setSelectedImage(0); // Reset to first image when variant changes
+                    }}
                     disabled={variant.stock === 0}
                     className={`px-4 py-2 border-2 rounded-lg font-medium transition-colors ${
                       selectedVariant === index

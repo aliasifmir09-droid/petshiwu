@@ -109,7 +109,7 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   });
 
   const [variants, setVariants] = useState(
-    product?.variants || [{ size: '', weight: '', price: '', compareAtPrice: '', stock: '', sku: '' }]
+    product?.variants || [{ size: '', weight: '', price: '', compareAtPrice: '', stock: '', sku: '', image: '', images: [] }]
   );
 
   const [imageUrls, setImageUrls] = useState<string[]>(product?.images || []);
@@ -446,17 +446,93 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   };
 
   const addVariant = () => {
-    setVariants([...variants, { size: '', weight: '', price: '', compareAtPrice: '', stock: '', sku: '' }]);
+    setVariants([...variants, { size: '', weight: '', price: '', compareAtPrice: '', stock: '', sku: '', image: '', images: [] }]);
   };
 
   const removeVariant = (index: number) => {
     setVariants(variants.filter((_: any, i: number) => i !== index));
   };
 
-  const updateVariant = (index: number, field: string, value: string) => {
+  const updateVariant = (index: number, field: string, value: string | string[]) => {
     const newVariants = [...variants];
     newVariants[index] = { ...newVariants[index], [field]: value };
     setVariants(newVariants);
+  };
+
+  const handleVariantImageUpload = async (variantIndex: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0]; // Only take first file for variant primary image
+    const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+    const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    
+    if (file.size > MAX_FILE_SIZE) {
+      showToast(`File size exceeds maximum allowed size of 100MB`, 'error');
+      e.target.value = '';
+      return;
+    }
+    
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      showToast(`File type "${file.type}" is not allowed`, 'error');
+      e.target.value = '';
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const result = await adminService.uploadImage(file);
+      
+      let imageUrl = null;
+      if (typeof result === 'string') {
+        imageUrl = result;
+      } else if (result?.url) {
+        imageUrl = result.url;
+      } else if (result?.path) {
+        imageUrl = result.path;
+      } else if (result?.secure_url) {
+        imageUrl = result.secure_url;
+      } else if (result?.data?.url) {
+        imageUrl = result.data.url;
+      } else if (result?.data?.path) {
+        imageUrl = result.data.path;
+      }
+      
+      if (!imageUrl) {
+        throw new Error('No image URL returned from server');
+      }
+      
+      imageUrl = String(imageUrl).trim();
+      updateVariant(variantIndex, 'image', imageUrl);
+      showToast('Variant image uploaded successfully', 'success');
+    } catch (error: any) {
+      showToast(error.response?.data?.message || 'Failed to upload variant image', 'error');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleVariantImageUrl = (variantIndex: number, url: string) => {
+    const trimmedUrl = url.trim();
+    if (!trimmedUrl) {
+      showToast('Please enter a valid image URL', 'warning');
+      return;
+    }
+    
+    // Basic URL validation
+    if (!trimmedUrl.startsWith('http://') && !trimmedUrl.startsWith('https://')) {
+      showToast('Image URL must start with http:// or https://', 'error');
+      return;
+    }
+    
+    updateVariant(variantIndex, 'image', trimmedUrl);
+    showToast('Variant image URL added', 'success');
+  };
+
+  const removeVariantImage = (variantIndex: number) => {
+    updateVariant(variantIndex, 'image', '');
+    showToast('Variant image removed', 'success');
   };
 
   const handleCreateCategory = () => {
@@ -581,7 +657,11 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
         price: price,
         compareAtPrice: v.compareAtPrice ? parseFloat(String(v.compareAtPrice)) : undefined,
         stock: stock,
-        sku: sku
+        sku: sku,
+        image: v.image && v.image.trim() ? v.image.trim() : undefined,
+        images: v.images && Array.isArray(v.images) && v.images.length > 0 
+          ? v.images.map((img: string) => img.trim()).filter((img: string) => img)
+          : undefined
       };
     });
 
@@ -962,53 +1042,145 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                 </button>
               </div>
               {variants.map((variant: any, index: number) => (
-                <div key={index} className="grid grid-cols-6 gap-2 p-3 border rounded-lg">
-                  <input
-                    type="text"
-                    value={variant.size}
-                    onChange={(e) => updateVariant(index, 'size', e.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2 text-sm"
-                    placeholder="5 lbs"
-                  />
-                  <input
-                    type="text"
-                    value={variant.weight}
-                    onChange={(e) => updateVariant(index, 'weight', e.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2 text-sm"
-                    placeholder="2.3 kg"
-                  />
-                  <input
-                    type="number"
-                    required
-                    step="0.01"
-                    value={variant.price}
-                    onChange={(e) => updateVariant(index, 'price', e.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2 text-sm"
-                    placeholder="Price"
-                  />
-                  <input
-                    type="number"
-                    required
-                    value={variant.stock}
-                    onChange={(e) => updateVariant(index, 'stock', e.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2 text-sm"
-                    placeholder="Stock"
-                  />
-                  <input
-                    type="text"
-                    value={variant.sku}
-                    onChange={(e) => updateVariant(index, 'sku', e.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2 text-sm"
-                    placeholder="SKU"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeVariant(index)}
-                    className="text-red-500 hover:text-red-700"
-                    disabled={variants.length === 1}
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                <div key={index} className="border rounded-lg p-4 space-y-3 bg-gray-50">
+                  {/* Variant Header */}
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold text-gray-700">Variant {index + 1}</h4>
+                    <button
+                      type="button"
+                      onClick={() => removeVariant(index)}
+                      className="text-red-500 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={variants.length === 1}
+                      title="Remove variant"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+
+                  {/* Variant Image Section */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-medium text-gray-600">Variant Image (Optional)</label>
+                    <div className="flex items-start gap-3">
+                      {/* Image Preview */}
+                      {variant.image ? (
+                        <div className="relative w-20 h-20 border-2 border-gray-300 rounded-lg overflow-hidden flex-shrink-0 group">
+                          <img
+                            src={normalizeImageUrl(variant.image)}
+                            alt={`Variant ${index + 1} image`}
+                            onError={(e) => handleImageError(e, `Variant ${index + 1} image`)}
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeVariantImage(index)}
+                            className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Remove image"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-white flex-shrink-0">
+                          <span className="text-xs text-gray-400 text-center px-2">No image</span>
+                        </div>
+                      )}
+
+                      {/* Upload Options */}
+                      <div className="flex-1 space-y-2">
+                        <label className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg p-2 cursor-pointer hover:border-primary-500 hover:bg-white transition-colors text-xs">
+                          <Upload size={14} className="text-gray-600" />
+                          <span className="text-xs font-medium text-gray-700">
+                            {uploading ? 'Uploading...' : 'Upload Image'}
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/svg+xml"
+                            onChange={(e) => handleVariantImageUpload(index, e)}
+                            className="hidden"
+                            disabled={uploading}
+                          />
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Or paste image URL here"
+                          onBlur={(e) => {
+                            if (e.target.value.trim()) {
+                              handleVariantImageUrl(index, e.target.value);
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        />
+                      </div>
+                    </div>
+                    {!variant.image && (
+                      <p className="text-xs text-gray-500 italic">
+                        If no variant image is set, the product's main image will be used
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Variant Fields Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                    <input
+                      type="text"
+                      value={variant.size || ''}
+                      onChange={(e) => updateVariant(index, 'size', e.target.value)}
+                      className="border border-gray-300 rounded px-3 py-2 text-sm"
+                      placeholder="Size (e.g., 5 lbs)"
+                    />
+                    <input
+                      type="text"
+                      value={variant.weight || ''}
+                      onChange={(e) => updateVariant(index, 'weight', e.target.value)}
+                      className="border border-gray-300 rounded px-3 py-2 text-sm"
+                      placeholder="Weight (e.g., 2.3 kg)"
+                    />
+                    <input
+                      type="number"
+                      required
+                      step="0.01"
+                      min="0"
+                      value={variant.price || ''}
+                      onChange={(e) => updateVariant(index, 'price', e.target.value)}
+                      className="border border-gray-300 rounded px-3 py-2 text-sm"
+                      placeholder="Price *"
+                    />
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      value={variant.stock || ''}
+                      onChange={(e) => updateVariant(index, 'stock', e.target.value)}
+                      className="border border-gray-300 rounded px-3 py-2 text-sm"
+                      placeholder="Stock *"
+                    />
+                    <input
+                      type="text"
+                      required
+                      value={variant.sku || ''}
+                      onChange={(e) => updateVariant(index, 'sku', e.target.value)}
+                      className="border border-gray-300 rounded px-3 py-2 text-sm"
+                      placeholder="SKU *"
+                    />
+                  </div>
+                  
+                  {/* Compare At Price (Optional) */}
+                  <div>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={variant.compareAtPrice || ''}
+                      onChange={(e) => updateVariant(index, 'compareAtPrice', e.target.value)}
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                      placeholder="Compare At Price (optional)"
+                    />
+                  </div>
                 </div>
               ))}
             </div>
