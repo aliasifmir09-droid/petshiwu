@@ -1196,46 +1196,52 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                       </button>
                     </div>
                     <div className="space-y-2">
-                      {Object.entries(variant.attributes || {}).map(([key, value]) => (
-                        <div key={key} className="flex gap-2">
-                          <input
-                            type="text"
-                            placeholder="Attribute name (e.g., Size, Flavor)"
-                            value={key.startsWith('attribute_') ? '' : key}
-                            onChange={(e) => {
-                              const newKey = e.target.value.trim();
-                              if (newKey && newKey !== key) {
-                                const currentAttributes = variant.attributes || {};
-                                const updatedAttributes: { [key: string]: string } = {};
-                                Object.keys(currentAttributes).forEach(k => {
-                                  if (k === key) {
-                                    updatedAttributes[newKey] = currentAttributes[k];
-                                  } else {
-                                    updatedAttributes[k] = currentAttributes[k];
-                                  }
-                                });
-                                updateVariant(index, 'attributes', updatedAttributes);
-                              }
-                            }}
-                            className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
-                          />
-                          <input
-                            type="text"
-                            placeholder="Value (e.g., 5 lb, Chicken)"
-                            value={value || ''}
-                            onChange={(e) => updateVariantAttribute(index, key, e.target.value)}
-                            className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeVariantAttribute(index, key)}
-                            className="px-2 text-red-500 hover:text-red-700"
-                            title="Remove attribute"
-                          >
-                            <X size={16} />
-                          </button>
-                        </div>
-                      ))}
+                      {Object.entries(variant.attributes || {}).map(([key, value]) => {
+                        // Ensure value is always a string
+                        const stringValue = typeof value === 'string' ? value : '';
+                        return (
+                          <div key={key} className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="Attribute name (e.g., Size, Flavor)"
+                              value={key.startsWith('attribute_') ? '' : key}
+                              onChange={(e) => {
+                                const newKey = e.target.value.trim();
+                                if (newKey && newKey !== key) {
+                                  const currentAttributes = variant.attributes || {};
+                                  const updatedAttributes: { [key: string]: string } = {};
+                                  Object.keys(currentAttributes).forEach(k => {
+                                    if (k === key) {
+                                      const oldValue = currentAttributes[k];
+                                      updatedAttributes[newKey] = typeof oldValue === 'string' ? oldValue : '';
+                                    } else {
+                                      const oldValue = currentAttributes[k];
+                                      updatedAttributes[k] = typeof oldValue === 'string' ? oldValue : '';
+                                    }
+                                  });
+                                  updateVariant(index, 'attributes', updatedAttributes);
+                                }
+                              }}
+                              className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                            <input
+                              type="text"
+                              placeholder="Value (e.g., 5 lb, Chicken)"
+                              value={stringValue}
+                              onChange={(e) => updateVariantAttribute(index, key, e.target.value)}
+                              className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeVariantAttribute(index, key)}
+                              className="px-2 text-red-500 hover:text-red-700"
+                              title="Remove attribute"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                        );
+                      })}
                       {(!variant.attributes || Object.keys(variant.attributes).length === 0) && (
                         <p className="text-xs text-gray-500 italic">
                           No attributes added. Click "Add Attribute" to add size, flavor, color, etc.
