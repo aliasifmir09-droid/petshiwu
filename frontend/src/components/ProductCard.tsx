@@ -22,12 +22,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
   // Convert _id to string if it's an object (MongoDB ObjectId)
   const productId = product._id ? String(product._id) : null;
   const inWishlist = productId ? isInWishlist(productId) : false;
-  const [isHovered, setIsHovered] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
-  
-  // Memoize mouse handlers
-  const handleMouseEnter = useCallback(() => setIsHovered(true), []);
-  const handleMouseLeave = useCallback(() => setIsHovered(false), []);
   
   // Memoize star indices
   const starIndices = useMemo(() => Array.from({ length: 5 }, (_, i) => i), []);
@@ -79,8 +74,6 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
   return (
     <Link
       to={generateProductUrl(product)}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-blue-300 hover:-translate-y-2 relative animate-fade-in-up hover-lift flex flex-col h-full w-full"
     >
       {/* Trending Badge - Top Right Corner */}
@@ -147,7 +140,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
 
       {/* Content */}
       <div className="p-5 flex flex-col flex-grow">
-        <div className="space-y-3 flex-grow">
+        <div className="space-y-2.5 flex-grow">
           {/* Brand */}
           <p className="text-xs text-blue-600 font-extrabold uppercase tracking-widest mb-1 group-hover:text-blue-700 transition-colors">
             {product.brand}
@@ -182,102 +175,83 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
           </div>
 
           {/* Price Section with Enhanced Design */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-lg border border-blue-100">
-            <div className="flex items-baseline gap-2 mb-1">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-2.5 rounded-lg border border-blue-100">
+            {product.compareAtPrice ? (
+              <div className="space-y-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-black text-gray-900 tracking-tight">
+                    ${product.basePrice.toFixed(2)}
+                  </span>
+                  <span className="text-sm text-gray-700 line-through font-semibold">
+                    ${product.compareAtPrice.toFixed(2)}
+                  </span>
+                </div>
+                <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 px-2 py-0.5 rounded-md">
+                  <span className="text-xs font-bold">
+                    Save ${(product.compareAtPrice - product.basePrice).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            ) : (
               <span className="text-2xl font-black text-gray-900 tracking-tight">
                 ${product.basePrice.toFixed(2)}
               </span>
-              {product.compareAtPrice && (
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 line-through">
-                    ${product.compareAtPrice.toFixed(2)}
-                  </span>
-                  <span className="text-[10px] text-green-600 font-bold">
-                    YOU SAVE ${(product.compareAtPrice - product.basePrice).toFixed(2)}
-                  </span>
+            )}
+          </div>
+
+          {/* Urgency Indicator - Only show critical and out of stock */}
+          {(urgencyLevel === 'critical' || urgencyLevel === 'out') && (
+            <div className="mb-2">
+              {urgencyLevel === 'critical' && (
+                <div className="bg-red-50 border-2 border-red-500 rounded-lg p-2.5 animate-pulse-slow">
+                  <div className="flex items-center gap-2">
+                    <Clock size={16} className="text-red-600 animate-wiggle" />
+                    <div className="flex-1">
+                      <p className="text-xs font-black text-red-700 uppercase">
+                        ⚡ ALMOST GONE!
+                      </p>
+                      <p className="text-xs text-red-600 font-bold">
+                        Only {product.totalStock} left in stock
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {urgencyLevel === 'out' && (
+                <div className="bg-gray-100 border border-gray-300 rounded-lg p-2 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                  <span className="text-xs text-red-600 font-bold">Currently Unavailable</span>
                 </div>
               )}
             </div>
-
-          </div>
-
-          {/* Urgency Indicator with Animations */}
-          <div className="mb-2 min-h-[2rem]">
-            {urgencyLevel === 'critical' && (
-              <div className="bg-red-50 border-2 border-red-500 rounded-lg p-2.5 animate-pulse-slow">
-                <div className="flex items-center gap-2">
-                  <Clock size={16} className="text-red-600 animate-wiggle" />
-                  <div className="flex-1">
-                    <p className="text-xs font-black text-red-700 uppercase">
-                      ⚡ ALMOST GONE!
-                    </p>
-                    <p className="text-xs text-red-600 font-bold">
-                      Only {product.totalStock} left in stock
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-            {urgencyLevel === 'high' && (
-              <div className="bg-orange-50 border border-orange-300 rounded-lg p-2 flex items-center gap-2">
-                <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
-                <span className="text-xs text-orange-700 font-bold">
-                  Hurry! Only {product.totalStock} left
-                </span>
-              </div>
-            )}
-            {urgencyLevel === 'medium' && (
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                <span className="text-xs text-yellow-700 font-semibold">
-                  Low stock - {product.totalStock} remaining
-                </span>
-              </div>
-            )}
-            {urgencyLevel === 'low' && product.inStock && (
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <span className="text-xs text-green-700 font-semibold">In Stock & Ready to Ship</span>
-              </div>
-            )}
-            {urgencyLevel === 'out' && (
-              <div className="bg-gray-100 border border-gray-300 rounded-lg p-2 flex items-center gap-2">
-                <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                <span className="text-xs text-red-600 font-bold">Currently Unavailable</span>
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Add to Cart Button with Enhanced Design - Always at bottom */}
         {!hideCartButton && (
-          <div className="mt-auto pt-3">
+          <div className="mt-auto pt-4">
             <button
               onClick={handleAddToCart}
               disabled={!product.inStock}
               aria-label={product.inStock ? `Add ${product.name} to cart` : `${product.name} is out of stock`}
-              className={`w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm transition-all transform active:scale-95 btn-ripple relative overflow-hidden ${
+              className={`w-full flex items-center justify-center gap-2.5 px-4 py-4 rounded-xl font-bold text-base transition-all transform active:scale-95 btn-ripple relative overflow-hidden border-2 ${
                 product.inStock
-                  ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-2xl hover:scale-105'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white border-green-700 hover:from-green-700 hover:to-emerald-700 hover:border-green-800 shadow-xl hover:shadow-2xl hover:scale-105'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed border-gray-300'
               }`}
             >
-              <ShoppingCart size={20} strokeWidth={2.5} />
+              <ShoppingCart size={22} strokeWidth={2.5} />
               <span className="relative z-10">
                 {product.inStock ? 'Add to Cart' : 'Out of Stock'}
               </span>
               {product.inStock && (
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/25 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                  <div className="absolute inset-0 bg-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </>
               )}
             </button>
           </div>
-        )}
-
-        {/* Quick View Hint (appears on hover) */}
-        {isHovered && product.inStock && (
-          <p className="text-center text-xs text-gray-500 animate-fade-in-up font-medium">
-            Click to view details
-          </p>
         )}
       </div>
     </Link>
