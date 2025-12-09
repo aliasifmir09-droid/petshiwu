@@ -345,9 +345,18 @@ const Products = () => {
     });
   };
 
-  const handleEdit = (product: any) => {
-    setEditingProduct(product);
-    setShowModal(true);
+  const handleEdit = async (product: any) => {
+    // Fetch fresh product data to ensure we have the latest version
+    try {
+      const freshProduct = await adminService.getProduct(product._id);
+      setEditingProduct(freshProduct);
+      setShowModal(true);
+    } catch (error) {
+      // If fetch fails, use the product from list as fallback
+      console.error('Failed to fetch fresh product data:', error);
+      setEditingProduct(product);
+      setShowModal(true);
+    }
   };
 
   const handleCreate = () => {
@@ -773,11 +782,13 @@ const Products = () => {
       {showModal && (
         <ProductForm
           product={editingProduct}
-          onClose={() => {
+          onClose={async () => {
             setShowModal(false);
             setEditingProduct(null);
-            // Refetch products when modal closes (in case product was created/updated)
-            refetch();
+            // Refetch products when modal closes to ensure fresh data
+            await refetch();
+            // Also invalidate to clear any stale cache
+            queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
           }}
         />
       )}
