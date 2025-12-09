@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
-import { Eye, Search, MapPin, X, AlertCircle, CheckCircle, Filter as FilterIcon, Download } from 'lucide-react';
+import { Eye, Search, MapPin, X, AlertCircle, CheckCircle, Filter as FilterIcon, Download, RotateCcw } from 'lucide-react';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import ConfirmationModal from '@/components/ConfirmationModal';
@@ -17,6 +17,9 @@ const Orders = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showStatusConfirm, setShowStatusConfirm] = useState(false);
   const [showPaymentConfirm, setShowPaymentConfirm] = useState(false);
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [refundAmount, setRefundAmount] = useState<string>('');
+  const [refundReason, setRefundReason] = useState<string>('');
   const [pendingStatusChange, setPendingStatusChange] = useState<{ orderId: string; status: string } | null>(null);
 
   const { data: ordersData, isLoading } = useQuery({
@@ -130,6 +133,58 @@ const Orders = () => {
         setShowPaymentConfirm(false);
         showToast('Failed to update payment status', 'error');
       });
+  };
+
+  const refundMutation = useMutation({
+    mutationFn: ({ orderId, amount, reason }: { orderId: string; amount: number; reason?: string }) =>
+      adminService.processRefund(orderId, { amount, reason }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.refetchQueries({ queryKey: ['orders'] });
+      setShowRefundModal(false);
+      setShowDetailsModal(false);
+      setRefundAmount('');
+      setRefundReason('');
+      showToast('Refund processed successfully', 'success');
+    },
+    onError: (error: any) => {
+      showToast(error.response?.data?.message || 'Failed to process refund', 'error');
+    }
+  });
+
+  const handleRefund = () => {
+    if (!selectedOrder) return;
+    
+    const orderId = String(selectedOrder._id || selectedOrder.id || '').trim();
+    if (!orderId || orderId === 'undefined' || orderId === 'null') {
+      showToast('Invalid order ID', 'error');
+      return;
+    }
+
+    const amount = parseFloat(refundAmount);
+    if (isNaN(amount) || amount <= 0) {
+      showToast('Please enter a valid refund amount', 'error');
+      return;
+    }
+
+    if (amount > selectedOrder.totalPrice) {
+      showToast('Refund amount cannot exceed order total', 'error');
+      return;
+    }
+
+    refundMutation.mutate({
+      orderId,
+      amount,
+      reason: refundReason.trim() || undefined
+    });
+  };
+
+  const handleOpenRefundModal = () => {
+    if (selectedOrder) {
+      setRefundAmount(selectedOrder.totalPrice.toFixed(2));
+      setRefundReason('');
+      setShowRefundModal(true);
+    }
   };
 
   const handleViewDetails = (order: any) => {
@@ -439,49 +494,103 @@ const Orders = () => {
               </div>
 
               {/* Payment & Status */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="border rounded-lg p-4">
-                  <p className="text-sm text-gray-600 mb-1">Payment Method</p>
-                  <p className="font-semibold">{getPaymentMethodLabel(selectedOrder.paymentMethod)}</p>
-                  <span className={`inline-block mt-2 px-2 py-1 rounded-full text-xs font-medium ${
-                    selectedOrder.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
-                    selectedOrder.paymentStatus === 'failed' ? 'bg-red-100 text-red-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {selectedOrder.paymentStatus}
-                  </span>
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Payment Information</h4>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-xs text-gray-600">Payment Method</p>
+                      <p className="font-semibold text-sm">{getPaymentMethodLabel(selectedOrder.paymentMethod)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600">Payment Status</p>
+                      <span className={`inline-block mt-1 px-2 py-1 rounded-full text-xs font-medium ${
+                        selectedOrder.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
+                        selectedOrder.paymentStatus === 'refunded' ? 'bg-purple-100 text-purple-800' :
+                        selectedOrder.paymentStatus === 'failed' ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {selectedOrder.paymentStatus.charAt(0).toUpperCase() + selectedOrder.paymentStatus.slice(1)}
+                      </span>
+                    </div>
+                    {selectedOrder.paymentIntentId && (
+                      <div>
+                        <p className="text-xs text-gray-600">Stripe Payment Intent</p>
+                        <p className="text-xs font-mono text-gray-800 break-all">{selectedOrder.paymentIntentId}</p>
+                      </div>
+                    )}
+                    {selectedOrder.paypalOrderId && (
+                      <div>
+                        <p className="text-xs text-gray-600">PayPal Order ID</p>
+                        <p className="text-xs font-mono text-gray-800 break-all">{selectedOrder.paypalOrderId}</p>
+                      </div>
+                    )}
+                    {selectedOrder.paidAt && (
+                      <div>
+                        <p className="text-xs text-gray-600">Paid At</p>
+                        <p className="text-xs text-gray-800">
+                          {new Date(selectedOrder.paidAt).toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="border rounded-lg p-4">
-                  <p className="text-sm text-gray-600 mb-1">Order Status</p>
-                  <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                    selectedOrder.orderStatus === 'delivered' ? 'bg-green-100 text-green-800' :
-                    selectedOrder.orderStatus === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                    selectedOrder.orderStatus === 'processing' ? 'bg-yellow-100 text-yellow-800' :
-                    selectedOrder.orderStatus === 'cancelled' ? 'bg-red-100 text-red-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {selectedOrder.orderStatus.charAt(0).toUpperCase() + selectedOrder.orderStatus.slice(1)}
-                  </span>
-                  <p className="text-sm text-gray-600 mt-2">
-                    Placed: {new Date(selectedOrder.createdAt).toLocaleDateString()}
-                  </p>
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Order Status</h4>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-xs text-gray-600">Status</p>
+                      <span className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-medium ${
+                        selectedOrder.orderStatus === 'delivered' ? 'bg-green-100 text-green-800' :
+                        selectedOrder.orderStatus === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                        selectedOrder.orderStatus === 'processing' ? 'bg-yellow-100 text-yellow-800' :
+                        selectedOrder.orderStatus === 'cancelled' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {selectedOrder.orderStatus.charAt(0).toUpperCase() + selectedOrder.orderStatus.slice(1)}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600">Order Placed</p>
+                      <p className="text-xs text-gray-800">
+                        {new Date(selectedOrder.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                    {selectedOrder.trackingNumber && (
+                      <div>
+                        <p className="text-xs text-gray-600">Tracking Number</p>
+                        <p className="text-xs font-mono text-gray-800">{selectedOrder.trackingNumber}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Update Payment Status */}
+              {/* Update Payment Status & Refund */}
               <div className="border-t pt-4">
                 <h3 className="text-lg font-bold mb-4">Admin Actions</h3>
-                <div className="flex gap-4">
-                  <button
-                    onClick={() => setShowPaymentConfirm(true)}
-                    disabled={selectedOrder.paymentStatus === 'paid'}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Mark as Paid
-                  </button>
+                <div className="flex flex-wrap gap-3">
+                  {selectedOrder.paymentStatus !== 'paid' && (
+                    <button
+                      onClick={() => setShowPaymentConfirm(true)}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      Mark as Paid
+                    </button>
+                  )}
+                  {selectedOrder.paymentStatus === 'paid' && selectedOrder.paymentMethod !== 'cod' && (
+                    <button
+                      onClick={handleOpenRefundModal}
+                      disabled={refundMutation.isPending}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                    >
+                      <RotateCcw size={16} />
+                      Process Refund
+                    </button>
+                  )}
                   <button
                     onClick={() => setShowDetailsModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     Close
                   </button>
@@ -529,6 +638,95 @@ const Orders = () => {
           </div>
         }
       />
+
+      {/* Refund Modal */}
+      {showRefundModal && selectedOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <RotateCcw className="text-red-600" size={24} />
+              </div>
+              <h2 className="text-xl font-bold">Process Refund</h2>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Refund Amount <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  <input
+                    type="number"
+                    min="0.01"
+                    max={selectedOrder.totalPrice}
+                    step="0.01"
+                    value={refundAmount}
+                    onChange={(e) => setRefundAmount(e.target.value)}
+                    className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                    placeholder="0.00"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Maximum: ${selectedOrder.totalPrice.toFixed(2)}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Reason (Optional)
+                </label>
+                <textarea
+                  value={refundReason}
+                  onChange={(e) => setRefundReason(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  placeholder="Enter refund reason..."
+                />
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-sm text-yellow-800">
+                  <strong>Note:</strong> Refunds will be processed through the original payment method. 
+                  Processing may take 5-7 business days.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowRefundModal(false);
+                  setRefundAmount('');
+                  setRefundReason('');
+                }}
+                disabled={refundMutation.isPending}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRefund}
+                disabled={refundMutation.isPending || !refundAmount || parseFloat(refundAmount) <= 0}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {refundMutation.isPending ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <RotateCcw size={16} />
+                    Process Refund
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast Notification */}
       <Toast toast={toast} onClose={hideToast} />

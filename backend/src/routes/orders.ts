@@ -6,6 +6,7 @@ import {
   getAllOrders,
   updateOrderStatus,
   updatePaymentStatus,
+  processRefund,
   getOrderStats,
   cancelOrder,
   trackOrder,
@@ -47,6 +48,7 @@ router.get('/:id', protect, validateObjectId(), getOrder);
 router.put('/:id/cancel', protect, validateObjectId(), cancelOrder);
 router.put('/:id/status', protect, checkPermission('canManageOrders'), validateObjectId(), updateOrderStatus);
 router.put('/:id/payment', protect, checkPermission('canManageOrders'), validateObjectId(), updatePaymentStatus);
+router.post('/:id/refund', protect, checkPermission('canManageOrders'), validateObjectId(), processRefund);
 
 // Return/Refund routes
 router.post('/returns', protect, createReturnValidation, createReturn);

@@ -1023,6 +1023,162 @@ export const updatePaymentStatus = async (req: AuthRequest, res: Response, next:
 };
 
 /**
+ * Process refund for an order
+ */
+export const processRefund = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { amount, reason } = req.body;
+    const orderId = extractObjectId(req.params.id);
+
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid order ID'
+      });
+    }
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Refund amount must be greater than 0'
+      });
+    }
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    if (order.paymentStatus !== 'paid') {
+      return res.status(400).json({
+        success: false,
+        message: 'Only paid orders can be refunded'
+      });
+    }
+
+    if (order.paymentStatus === 'refunded') {
+      return res.status(400).json({
+        success: false,
+        message: 'Order has already been refunded'
+      });
+    }
+
+    if (amount > order.totalPrice) {
+      return res.status(400).json({
+        success: false,
+        message: 'Refund amount cannot exceed order total'
+      });
+    }
+
+    // Process refund through payment gateway
+    let refundId: string | null = null;
+    let refundStatus = 'pending';
+
+    // Stripe refund
+    if (order.paymentIntentId && stripe) {
+      try {
+        // Convert amount to cents for Stripe
+        const refundAmountCents = Math.round(amount * 100);
+        
+        const refund = await stripe.refunds.create({
+          payment_intent: order.paymentIntentId,
+          amount: refundAmountCents,
+          reason: reason ? 'requested_by_customer' : undefined,
+          metadata: {
+            orderId: order._id.toString(),
+            orderNumber: order.orderNumber,
+            reason: reason || 'No reason provided'
+          }
+        });
+
+        refundId = refund.id;
+        refundStatus = refund.status === 'succeeded' ? 'refunded' : 'pending';
+        
+        logger.info(`Stripe refund processed: ${refund.id} for order ${order.orderNumber}`);
+      } catch (stripeError: any) {
+        logger.error('Stripe refund error:', stripeError);
+        return res.status(500).json({
+          success: false,
+          message: `Failed to process refund: ${stripeError.message || 'Payment gateway error'}`
+        });
+      }
+    }
+    // PayPal refund (would need PayPal SDK integration)
+    else if (order.paypalOrderId) {
+      // TODO: Implement PayPal refund when PayPal SDK is integrated
+      logger.warn('PayPal refund not yet implemented');
+      return res.status(501).json({
+        success: false,
+        message: 'PayPal refunds are not yet supported. Please process manually through PayPal dashboard.'
+      });
+    }
+    // Cash on Delivery - manual refund
+    else if (order.paymentMethod === 'cod') {
+      refundStatus = 'refunded';
+      logger.info(`Manual refund processed for COD order ${order.orderNumber}`);
+    }
+    else {
+      return res.status(400).json({
+        success: false,
+        message: 'Unable to process refund: No payment method information available'
+      });
+    }
+
+    // Update order status
+    if (amount === order.totalPrice) {
+      // Full refund
+      order.paymentStatus = 'refunded';
+    } else {
+      // Partial refund - keep status as paid but note the refund
+      // You might want to add a refunds array to track partial refunds
+    }
+
+    // Store refund information (you may want to add a refunds array to the Order model)
+    order.notes = order.notes 
+      ? `${order.notes}\n\nRefund: $${amount.toFixed(2)} on ${new Date().toLocaleString()}${reason ? ` - ${reason}` : ''}${refundId ? ` (Refund ID: ${refundId})` : ''}`
+      : `Refund: $${amount.toFixed(2)} on ${new Date().toLocaleString()}${reason ? ` - ${reason}` : ''}${refundId ? ` (Refund ID: ${refundId})` : ''}`;
+
+    await order.save();
+
+    // Send refund confirmation email
+    try {
+      const user = await User.findById(order.user);
+      if (user) {
+        await sendOrderCancellationEmail({
+          to: user.email,
+          firstName: user.firstName,
+          orderNumber: order.orderNumber,
+          orderDate: order.createdAt.toISOString(),
+          totalPrice: order.totalPrice,
+          refundAmount: amount
+        });
+      }
+    } catch (emailError) {
+      logger.error('Failed to send refund email:', emailError);
+      // Don't fail the refund if email fails
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Refund processed successfully',
+      data: {
+        order: order,
+        refundId,
+        refundAmount: amount,
+        refundStatus
+      }
+    });
+  } catch (error: any) {
+    logger.error('Refund processing error:', error);
+    next(error);
+  }
+};
+
+/**
  * @swagger
  * /api/orders/{id}/cancel:
  *   put:

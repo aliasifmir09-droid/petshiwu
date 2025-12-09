@@ -211,6 +211,15 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
     return response.data.data;
   },
 
+  processRefund: async (id: string, data: { amount: number; reason?: string }) => {
+    const orderId = String(id).trim();
+    if (!orderId || orderId === 'undefined' || orderId === 'null') {
+      throw new Error('Invalid order ID');
+    }
+    const response = await api.post(`/orders/${encodeURIComponent(orderId)}/refund`, data);
+    return response.data.data;
+  },
+
   updatePaymentStatus: async (id: string, data: any) => {
     const response = await api.put(`/orders/${id}/payment`, data);
     return response.data.data;
