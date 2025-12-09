@@ -7,7 +7,6 @@ import HeroSlideshow from '@/components/HeroSlideshow';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import TrustBadges from '@/components/TrustBadges';
-import CategoryIcons from '@/components/CategoryIcons';
 import { ChevronRight, ChevronLeft, Star } from 'lucide-react';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
@@ -355,9 +354,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      {/* Category Icons - Find all your pet's must-haves */}
-      <CategoryIcons />
 
       {/* Featured Products with Enhanced Design */}
       <section className="py-16 bg-gradient-to-b from-white via-blue-50 to-white relative overflow-hidden">
