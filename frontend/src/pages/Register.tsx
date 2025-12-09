@@ -6,7 +6,7 @@ import Toast from '@/components/Toast';
 import PasswordStrength from '@/components/PasswordStrength';
 import { useToast } from '@/hooks/useToast';
 import { trackSignUp } from '@/utils/analytics';
-import { validateEmail, validateName, validatePassword, sanitizeInput, sanitizeFormData } from '@/utils/inputValidation';
+import { validateEmail, validateName, validatePassword, sanitizeFormData } from '@/utils/inputValidation';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -75,7 +75,7 @@ const Register = () => {
       return;
     }
 
-    // Sanitize all inputs before sending
+    // Sanitize all inputs before sending (exclude confirmPassword as it's not sent to API)
     const sanitizedData = sanitizeFormData({
       firstName: formData.firstName,
       lastName: formData.lastName,
@@ -84,8 +84,7 @@ const Register = () => {
       phone: formData.phone || undefined
     });
 
-    const { confirmPassword, ...registerData } = sanitizedData;
-    registerMutation.mutate(registerData as any);
+    registerMutation.mutate(sanitizedData as any);
   };
 
   return (

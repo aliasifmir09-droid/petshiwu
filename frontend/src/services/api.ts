@@ -87,8 +87,7 @@ api.interceptors.response.use(
       // 2. Not a public endpoint
       // 3. Not already on login/register/home pages
       // 4. Not during a navigation (check if we're in the middle of a redirect)
-      // Use a more secure key name and add timestamp to prevent stale flags
-      const navKey = '_nav_' + Date.now();
+      // Use timestamp to prevent stale flags
       const isNavigating = sessionStorage.getItem('_isNavigating') === 'true';
       const navTimestamp = sessionStorage.getItem('_navTimestamp');
       const isStale = navTimestamp && (Date.now() - parseInt(navTimestamp)) > 5000; // 5 second timeout
