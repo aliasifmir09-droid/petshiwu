@@ -9,7 +9,7 @@ import StructuredData from '@/components/StructuredData';
 import TrustBadges from '@/components/TrustBadges';
 import CategoryIcons from '@/components/CategoryIcons';
 import { ChevronRight, ChevronLeft, Star } from 'lucide-react';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 
 const Home = () => {
@@ -400,16 +400,22 @@ const Home = () => {
                     }
                   `}</style>
                   <div className="flex gap-4 md:gap-5 items-stretch">
-                    {featuredProducts?.data
-                      .filter((product) => {
+                    {useMemo(() => {
+                      if (!featuredProducts?.data) return [];
+                      return featuredProducts.data.filter((product) => {
                         const productId = product._id ? String(product._id) : null;
                         return productId && !hasImageFailed(productId);
-                      })
-                      .map((product) => (
-                        <div key={product._id} className="flex-shrink-0 w-56 md:w-60 lg:w-64 animate-fade-in-up">
-                          <ProductCard product={product} hideCartButton={true} />
-                        </div>
-                      ))}
+                      });
+                    }, [featuredProducts?.data]).map((product, index) => (
+                      <div key={product._id} className="flex-shrink-0 w-56 md:w-60 lg:w-64 animate-fade-in-up">
+                        <ProductCard 
+                          product={product} 
+                          hideCartButton={true}
+                          index={index}
+                          priority={index < 4}
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>

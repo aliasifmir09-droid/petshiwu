@@ -11,9 +11,11 @@ import { useImageLoadTracker } from '@/hooks/useImageLoadTracker';
 interface ProductCardProps {
   product: Product;
   hideCartButton?: boolean;
+  index?: number;
+  priority?: boolean;
 }
 
-const ProductCard = memo(({ product, hideCartButton = false }: ProductCardProps) => {
+const ProductCard = memo(({ product, hideCartButton = false, index, priority = false }: ProductCardProps) => {
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
   const { addToCart } = useCartStore();
   const { markImageFailed } = useImageLoadTracker();
@@ -22,6 +24,16 @@ const ProductCard = memo(({ product, hideCartButton = false }: ProductCardProps)
   const inWishlist = productId ? isInWishlist(productId) : false;
   const [isHovered, setIsHovered] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
+  
+  // Memoize mouse handlers
+  const handleMouseEnter = useCallback(() => setIsHovered(true), []);
+  const handleMouseLeave = useCallback(() => setIsHovered(false), []);
+  
+  // Memoize star indices
+  const starIndices = useMemo(() => Array.from({ length: 5 }, (_, i) => i), []);
+  
+  // Determine loading priority (first 4 products or explicit priority)
+  const shouldLoadEager = priority || (index !== undefined && index < 4);
   
   // Hide product if image has failed to load
   if (imageFailed) {
@@ -67,8 +79,8 @@ const ProductCard = memo(({ product, hideCartButton = false }: ProductCardProps)
   return (
     <Link
       to={generateProductUrl(product)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-blue-300 hover:-translate-y-2 relative animate-fade-in-up hover-lift flex flex-col h-full w-full"
     >
       {/* Trending Badge - Top Right Corner */}
@@ -86,7 +98,10 @@ const ProductCard = memo(({ product, hideCartButton = false }: ProductCardProps)
         <img
           src={normalizeImageUrl(product.images?.[0])}
           alt={product.name}
-          loading="lazy"
+          width={400}
+          height={400}
+          loading={shouldLoadEager ? "eager" : "lazy"}
+          fetchPriority={shouldLoadEager ? "high" : "auto"}
           onError={(e) => {
             handleImageError(e, product.name);
             // Mark this product's image as failed - will hide the product
@@ -97,7 +112,7 @@ const ProductCard = memo(({ product, hideCartButton = false }: ProductCardProps)
             // Suppress console errors for failed image loads (403, 404, etc.)
             e.stopPropagation();
           }}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          className="w-full h-full object-cover aspect-square group-hover:scale-110 transition-transform duration-700"
         />
         
         {/* Gradient overlay on hover */}
@@ -148,7 +163,7 @@ const ProductCard = memo(({ product, hideCartButton = false }: ProductCardProps)
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
+                  {starIndices.map((i) => (
                     <Star 
                       key={i} 
                       size={14} 

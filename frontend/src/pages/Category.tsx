@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/products';
@@ -136,6 +136,15 @@ const Category = () => {
   };
 
   const breadcrumbs = buildBreadcrumbs();
+
+  // Memoize filtered products to prevent unnecessary re-renders
+  const filteredProducts = useMemo(() => {
+    if (!products?.data) return [];
+    return products.data.filter((product) => {
+      const productId = product._id ? String(product._id) : null;
+      return productId && !hasImageFailed(productId);
+    });
+  }, [products?.data]);
 
   // Build SEO data (only if category is loaded)
   const petTypeDisplay = category && category.petType && category.petType !== 'all' && category.petType !== 'other-animals'
@@ -357,23 +366,22 @@ const Category = () => {
                 <div className="py-12" role="status" aria-label="Loading products">
                   <LoadingSpinner size="lg" ariaLabel="Loading products" />
                 </div>
-              ) : products && products.data.length > 0 ? (
+              ) : filteredProducts.length > 0 ? (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
-                    {products.data
-                      .filter((product) => {
-                        const productId = product._id ? String(product._id) : null;
-                        return productId && !hasImageFailed(productId);
-                      })
-                      .map((product) => (
-                        <div key={product._id} className="flex">
-                          <ProductCard product={product} />
-                        </div>
-                      ))}
+                    {filteredProducts.map((product, index) => (
+                      <div key={product._id} className="flex">
+                        <ProductCard 
+                          product={product}
+                          index={index}
+                          priority={index < 4}
+                        />
+                      </div>
+                    ))}
                   </div>
 
                   {/* Pagination */}
-                  {products.pagination.pages > 1 && (
+                  {products && products.pagination.pages > 1 && (
                     <div className="flex justify-center gap-2 mt-8">
                       {page > 1 && (
                         <button
@@ -384,9 +392,9 @@ const Category = () => {
                         </button>
                       )}
 
-                      {Array.from({ length: products.pagination.pages }, (_, i) => i + 1)
+                      {products && Array.from({ length: products.pagination.pages }, (_, i) => i + 1)
                         .filter((p) => {
-                          if (products.pagination.pages <= 7) return true;
+                          if (!products || products.pagination.pages <= 7) return true;
                           return (
                             p === 1 ||
                             p === products.pagination.pages ||
@@ -411,7 +419,7 @@ const Category = () => {
                           </div>
                         ))}
 
-                      {page < products.pagination.pages && (
+                      {products && page < products.pagination.pages && (
                         <button
                           onClick={() => updateFilters('page', (page + 1).toString())}
                           className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
