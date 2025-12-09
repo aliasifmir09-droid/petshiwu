@@ -553,86 +553,158 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Variants */}
-          {product.variants.length > 0 && selectedVariantData && (
-            <div className="mb-6">
-              {/* Display selected variant attributes */}
-              {(() => {
-                // Get attributes from flexible system or legacy fields
-                const attributes = selectedVariantData.attributes || {};
-                const legacySize = selectedVariantData.size;
-                const legacyWeight = selectedVariantData.weight;
-                
-                // Build display text from attributes
-                const attributeEntries = Object.entries(attributes);
-                const hasAttributes = attributeEntries.length > 0 || legacySize || legacyWeight;
-                
-                if (!hasAttributes) return null;
-                
-                // Format attributes for display
-                const displayParts: string[] = [];
-                if (legacySize) displayParts.push(legacySize);
-                if (legacyWeight) displayParts.push(legacyWeight);
-                attributeEntries.forEach(([key, value]) => {
-                  // Don't duplicate if already in legacy fields
-                  if (key !== 'size' && key !== 'weight' && value) {
-                    displayParts.push(value);
-                  }
-                });
-                
-                return (
-                  <label className="block text-sm font-medium mb-2 text-gray-900">
-                    {displayParts.join(' • ')}
-                  </label>
-                );
-              })()}
-              
-              <div className="flex flex-wrap gap-2">
-                {product.variants.map((variant, index) => {
-                  // Determine what to display in the button from attributes or legacy fields
-                  const getDisplayText = () => {
-                    // Try attributes first
-                    if (variant.attributes && Object.keys(variant.attributes).length > 0) {
-                      const parts: string[] = [];
-                      Object.entries(variant.attributes).forEach(([, value]) => {
-                        if (value) parts.push(value);
-                      });
-                      if (parts.length > 0) return parts.join(' • ');
-                    }
-                    
-                    // Fallback to legacy fields
-                    if (variant.size) return variant.size;
-                    if (variant.weight) return variant.weight;
-                    
-                    // Final fallback
-                    return `Variant ${index + 1}`;
-                  };
-                  
-                  const displayText = getDisplayText();
+          {/* Variants - Grouped by Attribute Type */}
+          {product.variants.length > 0 && selectedVariantData && (() => {
+            // Collect all unique attribute keys from all variants
+            const attributeKeys = new Set<string>();
+            product.variants.forEach((variant) => {
+              if (variant.attributes) {
+                Object.keys(variant.attributes).forEach(key => attributeKeys.add(key));
+              }
+              // Include legacy fields
+              if (variant.size) attributeKeys.add('size');
+              if (variant.weight) attributeKeys.add('weight');
+            });
+
+            // If no attributes, show simple variant selector
+            if (attributeKeys.size === 0) {
+              return (
+                <div className="mb-6">
+                  <div className="flex flex-wrap gap-2">
+                    {product.variants.map((variant, index) => (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          setSelectedVariant(index);
+                          setSelectedImage(0);
+                        }}
+                        disabled={variant.stock === 0}
+                        className={`px-4 py-2 border-2 rounded-lg font-medium transition-all ${
+                          selectedVariant === index
+                            ? 'border-blue-600 text-blue-600 bg-white'
+                            : variant.stock === 0
+                            ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'border-gray-300 text-gray-900 bg-white hover:border-gray-400'
+                        }`}
+                      >
+                        Variant {index + 1}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+
+            // Get selected attributes from current variant
+            const selectedAttributes: { [key: string]: string } = {};
+            if (selectedVariantData.attributes) {
+              Object.entries(selectedVariantData.attributes).forEach(([key, value]) => {
+                selectedAttributes[key] = value as string;
+              });
+            }
+            if (selectedVariantData.size) selectedAttributes.size = selectedVariantData.size;
+            if (selectedVariantData.weight) selectedAttributes.weight = selectedVariantData.weight;
+
+            // Function to find variant index by attribute values
+            const findVariantByAttributes = (attributes: { [key: string]: string }): number => {
+              return product.variants.findIndex((variant) => {
+                const variantAttrs: { [key: string]: string } = {};
+                if (variant.attributes) {
+                  Object.entries(variant.attributes).forEach(([key, value]) => {
+                    variantAttrs[key] = value as string;
+                  });
+                }
+                if (variant.size) variantAttrs.size = variant.size;
+                if (variant.weight) variantAttrs.weight = variant.weight;
+
+                // Check if all attributes match
+                return Object.keys(attributes).every(key => variantAttrs[key] === attributes[key]);
+              });
+            };
+
+            // Function to handle attribute selection
+            const handleAttributeSelect = (attributeKey: string, value: string) => {
+              const newSelectedAttributes = { ...selectedAttributes, [attributeKey]: value };
+              const variantIndex = findVariantByAttributes(newSelectedAttributes);
+              if (variantIndex >= 0) {
+                setSelectedVariant(variantIndex);
+                setSelectedImage(0);
+              }
+            };
+
+            // Get unique values for each attribute key
+            const getUniqueValues = (key: string): string[] => {
+              const values = new Set<string>();
+              product.variants.forEach((variant) => {
+                if (variant.attributes && variant.attributes[key]) {
+                  values.add(variant.attributes[key] as string);
+                } else if (key === 'size' && variant.size) {
+                  values.add(variant.size);
+                } else if (key === 'weight' && variant.weight) {
+                  values.add(variant.weight);
+                }
+              });
+              return Array.from(values).sort();
+            };
+
+            // Capitalize first letter of attribute key for display
+            const formatAttributeKey = (key: string): string => {
+              return key.charAt(0).toUpperCase() + key.slice(1);
+            };
+
+            return (
+              <div className="mb-6 space-y-4">
+                {Array.from(attributeKeys).map((attributeKey) => {
+                  const uniqueValues = getUniqueValues(attributeKey);
+                  const selectedValue = selectedAttributes[attributeKey] || '';
                   
                   return (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        setSelectedVariant(index);
-                        setSelectedImage(0); // Reset to first image when variant changes
-                      }}
-                      disabled={variant.stock === 0}
-                      className={`px-4 py-2 border-2 rounded-lg font-medium transition-all ${
-                        selectedVariant === index
-                          ? 'border-primary-600 text-primary-600 bg-white'
-                          : variant.stock === 0
-                          ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
-                          : 'border-gray-300 text-gray-900 bg-white hover:border-gray-400'
-                      }`}
-                    >
-                      {displayText}
-                    </button>
+                    <div key={attributeKey}>
+                      <label className="block text-sm font-medium mb-2 text-gray-900">
+                        {formatAttributeKey(attributeKey)}: {selectedValue}
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {uniqueValues.map((value) => {
+                          const isSelected = selectedValue === value;
+                          // Check if this value is available (has at least one variant with stock)
+                          const hasStock = product.variants.some((variant) => {
+                            const variantAttrs: { [key: string]: string } = {};
+                            if (variant.attributes) {
+                              Object.entries(variant.attributes).forEach(([k, v]) => {
+                                variantAttrs[k] = v as string;
+                              });
+                            }
+                            if (variant.size) variantAttrs.size = variant.size;
+                            if (variant.weight) variantAttrs.weight = variant.weight;
+                            
+                            const matches = variantAttrs[attributeKey] === value;
+                            return matches && variant.stock > 0;
+                          });
+
+                          return (
+                            <button
+                              key={value}
+                              onClick={() => handleAttributeSelect(attributeKey, value)}
+                              disabled={!hasStock}
+                              className={`px-4 py-2 border-2 rounded-lg font-medium transition-all ${
+                                isSelected
+                                  ? 'border-blue-600 text-blue-600 bg-white'
+                                  : !hasStock
+                                  ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+                                  : 'border-gray-300 text-gray-900 bg-white hover:border-gray-400'
+                              }`}
+                            >
+                              {value}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   );
                 })}
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Stock Availability */}
           <div className="mb-6">
