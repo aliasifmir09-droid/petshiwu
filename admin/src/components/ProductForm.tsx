@@ -112,6 +112,9 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     product?.variants || [{ attributes: {}, price: '', compareAtPrice: '', stock: '', sku: '', image: '', images: [] }]
   );
 
+  // Track attribute name edits separately to allow free typing
+  const [attributeNameEdits, setAttributeNameEdits] = useState<{ [variantIndex: number]: { [key: string]: string } }>({});
+
   const [imageUrls, setImageUrls] = useState<string[]>(product?.images || []);
   const [uploading, setUploading] = useState(false);
   const [imageUrlInput, setImageUrlInput] = useState('');
@@ -194,6 +197,8 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
       if (product.images) {
         setImageUrls(product.images);
       }
+      // Reset attribute name edits when product changes
+      setAttributeNameEdits({});
     }
   }, [product, isEditing, categories]); // Add categories to dependencies to re-run when categories load
 
@@ -1204,22 +1209,64 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                             <input
                               type="text"
                               placeholder="Attribute name (e.g., Size, Flavor)"
-                              value={key.startsWith('attribute_') ? '' : key}
+                              value={attributeNameEdits[index]?.[key] !== undefined 
+                                ? attributeNameEdits[index][key] 
+                                : (key.startsWith('attribute_') ? '' : key)}
                               onChange={(e) => {
+                                const newValue = e.target.value;
+                                
+                                // Store the edit value separately (allows free typing)
+                                setAttributeNameEdits(prev => ({
+                                  ...prev,
+                                  [index]: {
+                                    ...prev[index],
+                                    [key]: newValue
+                                  }
+                                }));
+                              }}
+                              onBlur={(e) => {
                                 const newKey = e.target.value.trim();
+                                const currentAttributes = variant.attributes || {};
+                                const oldValue = currentAttributes[key];
+                                const valueToKeep = typeof oldValue === 'string' ? oldValue : '';
+                                
+                                // Clean up edit state
+                                setAttributeNameEdits(prev => {
+                                  const newEdits = { ...prev };
+                                  if (newEdits[index]) {
+                                    delete newEdits[index][key];
+                                    if (Object.keys(newEdits[index]).length === 0) {
+                                      delete newEdits[index];
+                                    }
+                                  }
+                                  return newEdits;
+                                });
+                                
+                                // If empty and it's a temporary attribute, remove it
+                                if (!newKey && key.startsWith('attribute_')) {
+                                  removeVariantAttribute(index, key);
+                                  return;
+                                }
+                                
+                                // If the key changed, rename it
                                 if (newKey && newKey !== key) {
-                                  const currentAttributes = variant.attributes || {};
                                   const updatedAttributes: { [key: string]: string } = {};
                                   Object.keys(currentAttributes).forEach(k => {
                                     if (k === key) {
-                                      const oldValue = currentAttributes[k];
-                                      updatedAttributes[newKey] = typeof oldValue === 'string' ? oldValue : '';
+                                      updatedAttributes[newKey] = valueToKeep;
                                     } else {
-                                      const oldValue = currentAttributes[k];
-                                      updatedAttributes[k] = typeof oldValue === 'string' ? oldValue : '';
+                                      const oldVal = currentAttributes[k];
+                                      updatedAttributes[k] = typeof oldVal === 'string' ? oldVal : '';
                                     }
                                   });
                                   updateVariant(index, 'attributes', updatedAttributes);
+                                }
+                              }}
+                              onKeyDown={(e) => {
+                                // Prevent Enter from submitting the form
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  e.currentTarget.blur();
                                 }
                               }}
                               className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
