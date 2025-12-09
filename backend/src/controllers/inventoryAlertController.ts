@@ -16,8 +16,8 @@ export const getLowStockProducts = async (req: AuthRequest, res: Response, next:
     const defaultThreshold = globalThreshold ? parseInt(globalThreshold as string) : 10;
 
     let query: any = {
-      isActive: true,
-      totalStock: { $gt: 0 } // Only products with some stock
+      isActive: true
+      // Include all products (including out-of-stock) for inventory alerts
     };
 
     if (categoryId) {
@@ -31,7 +31,7 @@ export const getLowStockProducts = async (req: AuthRequest, res: Response, next:
       .populate('category', 'name')
       .lean();
 
-    // Filter products that are below their threshold
+    // Filter products that are below their threshold or out of stock
     const lowStockProducts = products
       .map(product => {
         const threshold = product.lowStockThreshold !== null && product.lowStockThreshold !== undefined
@@ -41,7 +41,7 @@ export const getLowStockProducts = async (req: AuthRequest, res: Response, next:
         return {
           ...product,
           threshold,
-          isLowStock: product.totalStock <= threshold
+          isLowStock: product.totalStock <= threshold || product.totalStock === 0
         };
       })
       .filter(p => p.isLowStock)

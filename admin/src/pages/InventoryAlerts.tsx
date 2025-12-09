@@ -46,7 +46,8 @@ const InventoryAlerts = () => {
         params.globalThreshold = globalThreshold;
       }
       const response = await adminService.getLowStockProducts(params);
-      return response.data || response;
+      // Backend returns: { success: true, products: [...], count: ..., defaultThreshold: ... }
+      return response;
     },
     staleTime: 30 * 1000, // 30 seconds
   });

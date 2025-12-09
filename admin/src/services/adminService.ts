@@ -305,10 +305,6 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
     return response.data;
   },
 
-  deleteCustomer: async (id: string, options?: { deleteOrders?: boolean; anonymizeReviews?: boolean }) => {
-    const response = await api.delete(`/users/customers/${id}`, { data: options });
-    return response.data;
-  },
 
   getMyPermissions: async () => {
     const response = await api.get('/users/me/permissions');
@@ -449,7 +445,7 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
   // Inventory Alerts
   getLowStockProducts: async (params?: { categoryId?: string; globalThreshold?: number }) => {
     const response = await api.get('/inventory-alerts/low-stock', { params });
-    return response.data.data;
+    return response.data;
   },
 
   updateProductThreshold: async (id: string, lowStockThreshold: number | null) => {
