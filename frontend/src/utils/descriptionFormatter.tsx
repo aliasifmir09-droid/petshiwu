@@ -1,4 +1,5 @@
 import React from 'react';
+import DOMPurify from 'dompurify';
 
 /**
  * Common heading patterns that should be bolded
@@ -110,8 +111,15 @@ export const renderFormattedDescription = (description: string): JSX.Element => 
     return <p className="text-gray-700">No description available.</p>;
   }
 
+  // Sanitize HTML to prevent XSS attacks
+  // Remove all HTML tags and attributes, keeping only text content
+  const sanitized = DOMPurify.sanitize(description, { 
+    ALLOWED_TAGS: [], // No HTML tags allowed
+    ALLOWED_ATTR: []  // No attributes allowed
+  });
+
   // Normalize line breaks
-  let normalized = description.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  let normalized = sanitized.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   
   // Process lines to detect headings and create sections
   const sections: Array<{ type: 'heading' | 'paragraph'; heading?: string; content: string }> = [];
@@ -189,7 +197,7 @@ export const renderFormattedDescription = (description: string): JSX.Element => 
   
   // If no sections found, render as plain text
   if (sections.length === 0) {
-    return <p className="text-gray-700 whitespace-pre-line">{description}</p>;
+    return <p className="text-gray-700 whitespace-pre-line">{sanitized}</p>;
   }
   
   return (
@@ -228,18 +236,28 @@ export const renderFormattedDescription = (description: string): JSX.Element => 
 
 /**
  * Renders inline content with markdown-style formatting
+ * Sanitizes content to prevent XSS attacks
  */
 const renderInlineContent = (content: string): React.ReactNode => {
+  // Sanitize content first to remove any HTML
+  const sanitized = DOMPurify.sanitize(content, { 
+    ALLOWED_TAGS: [], 
+    ALLOWED_ATTR: [] 
+  });
+  
   // Split by ** for bold markers
-  const parts = content.split(/(\*\*[^*]+\*\*)/g);
+  const parts = sanitized.split(/(\*\*[^*]+\*\*)/g);
   
   return parts.map((part, index) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      // Bold text
+      // Bold text - sanitize the extracted text
       const text = part.slice(2, -2);
-      return <strong key={index} className="font-semibold text-gray-900">{text}</strong>;
+      const sanitizedText = DOMPurify.sanitize(text, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+      return <strong key={index} className="font-semibold text-gray-900">{sanitizedText}</strong>;
     }
-    return <React.Fragment key={index}>{part}</React.Fragment>;
+    // Sanitize regular text parts
+    const sanitizedPart = DOMPurify.sanitize(part, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+    return <React.Fragment key={index}>{sanitizedPart}</React.Fragment>;
   });
 };
 

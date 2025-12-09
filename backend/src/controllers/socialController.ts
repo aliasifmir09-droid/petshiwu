@@ -59,7 +59,18 @@ const normalizeImageUrl = (imageUrl: string | undefined | null, backendUrl: stri
   }
 
   // Already a full URL (http:// or https://) - includes Cloudinary URLs
-  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+  // In production, only allow HTTPS for security
+  const isProduction = process.env.NODE_ENV === 'production';
+  if (imageUrl.startsWith('https://')) {
+    return imageUrl;
+  }
+  if (imageUrl.startsWith('http://')) {
+    if (isProduction) {
+      // In production, reject HTTP URLs for security (mixed content)
+      console.warn('HTTP image URL rejected in production:', imageUrl);
+      return ''; // Return empty string to indicate invalid URL
+    }
+    // In development, allow HTTP for local testing
     return imageUrl;
   }
 

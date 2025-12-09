@@ -134,7 +134,9 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:", "http:", "https://res.cloudinary.com"],
+      imgSrc: process.env.NODE_ENV === 'production' 
+        ? ["'self'", "data:", "https:", "https://res.cloudinary.com"]
+        : ["'self'", "data:", "https:", "http:", "https://res.cloudinary.com"], // Allow HTTP in development only
       scriptSrc: ["'self'", "https://embed.tawk.to"],
       connectSrc: ["'self'", "https://embed.tawk.to", "https://api.tawk.to"],
       frameSrc: ["'self'", "https://embed.tawk.to"],

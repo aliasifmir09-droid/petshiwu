@@ -12,7 +12,18 @@ export const normalizeImageUrl = (imageUrl: string | undefined | null): string =
   }
 
   // Already a full URL (http:// or https://) - includes Cloudinary URLs
-  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+  // In production, only allow HTTPS for security
+  const isProduction = import.meta.env.PROD || import.meta.env.MODE === 'production';
+  if (imageUrl.startsWith('https://')) {
+    return imageUrl;
+  }
+  if (imageUrl.startsWith('http://')) {
+    if (isProduction) {
+      // In production, reject HTTP URLs for security (mixed content)
+      console.warn('HTTP image URL rejected in production:', imageUrl);
+      return getPlaceholderImage();
+    }
+    // In development, allow HTTP for local testing
     return imageUrl;
   }
 
@@ -84,9 +95,22 @@ export const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event
 
 /**
  * Checks if an image URL is valid/exists
+ * In production, only HTTPS URLs are allowed
  */
 export const isValidImageUrl = (url: string): boolean => {
   if (!url) return false;
-  return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/uploads/');
+  const isProduction = import.meta.env.PROD || import.meta.env.MODE === 'production';
+  
+  if (url.startsWith('https://') || url.startsWith('/uploads/')) {
+    return true;
+  }
+  
+  // In production, reject HTTP URLs
+  if (isProduction && url.startsWith('http://')) {
+    return false;
+  }
+  
+  // In development, allow HTTP for local testing
+  return url.startsWith('http://');
 };
 

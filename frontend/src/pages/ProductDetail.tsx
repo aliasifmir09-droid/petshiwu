@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import DOMPurify from 'dompurify';
 import { productService } from '@/services/products';
 import { reviewService } from '@/services/reviews';
 import { recommendationService } from '@/services/recommendations';
@@ -802,7 +803,9 @@ const ProductDetail = () => {
                       )}
                     </div>
                     {review.title && (
-                      <h4 className="font-bold text-lg text-gray-900 mb-1">{review.title}</h4>
+                      <h4 className="font-bold text-lg text-gray-900 mb-1">
+                        {DOMPurify.sanitize(review.title, { ALLOWED_TAGS: [] })}
+                      </h4>
                     )}
                   </div>
                 </div>
@@ -813,7 +816,9 @@ const ProductDetail = () => {
                     {review.user.firstName.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">{review.user.firstName}</p>
+                    <p className="font-semibold text-gray-900">
+                      {DOMPurify.sanitize(review.user.firstName, { ALLOWED_TAGS: [] })}
+                    </p>
                     <p className="text-sm text-gray-500">
                       {new Date(review.createdAt).toLocaleDateString('en-US', { 
                         year: 'numeric', 
@@ -826,7 +831,12 @@ const ProductDetail = () => {
 
                 {/* Review Comment */}
                 {review.comment && (
-                  <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                  <p className="text-gray-700 leading-relaxed">
+                    {DOMPurify.sanitize(review.comment, { 
+                      ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'ul', 'ol', 'li'],
+                      ALLOWED_ATTR: []
+                    })}
+                  </p>
                 )}
 
                 {/* Review Images */}
