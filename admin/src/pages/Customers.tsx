@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
@@ -60,7 +60,6 @@ const Customers = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const { toast, showToast, hideToast } = useToast();
-  const queryClient = useQueryClient();
 
   // Fetch customers
   const { data: customersData, isLoading } = useQuery({
