@@ -41,6 +41,12 @@ export default defineConfig({
           'query-vendor': ['@tanstack/react-query'],
           'ui-vendor': ['lucide-react'], // Icon library
           'state-vendor': ['zustand'], // State management
+          // Payment vendor chunk - lazy loaded, separate for better caching
+          'payment-vendor': [
+            '@stripe/react-stripe-js',
+            '@stripe/stripe-js',
+            '@paypal/react-paypal-js'
+          ],
           // Feature chunks - split by feature/page
           'checkout': ['./src/pages/Checkout', './src/pages/Cart'],
           'product': ['./src/pages/ProductDetail', './src/pages/Products'],

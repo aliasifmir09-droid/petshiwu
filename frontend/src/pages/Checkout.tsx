@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { Elements } from '@stripe/react-stripe-js';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { orderService } from '@/services/orders';
@@ -12,13 +11,19 @@ import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import CheckoutDonationModal from '@/components/CheckoutDonationModal';
-import PaymentForm from '@/components/PaymentForm';
-import PayPalButton from '@/components/PayPalButton';
 import { getStripe } from '@/utils/stripe';
 import { normalizeId } from '@/utils/idNormalizer';
 import { trackPurchase } from '@/utils/analytics';
 import SEO from '@/components/SEO';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { MapPin, Plus, Check } from 'lucide-react';
+
+// Lazy load payment components for better performance
+const PaymentForm = lazy(() => import('@/components/PaymentForm'));
+const PayPalButton = lazy(() => import('@/components/PayPalButton'));
+
+// Lazy load Stripe Elements - need to import Elements separately
+// We'll use dynamic import in the component when needed
 
 interface CreateOrderData {
   items: Array<{
@@ -63,6 +68,62 @@ interface CreateOrderData {
   totalPrice: number;
   notes?: string;
 }
+
+// Wrapper component for lazy-loaded Stripe Elements
+const StripePaymentWrapper = ({ 
+  clientSecret, 
+  total, 
+  onSuccess, 
+  onError, 
+  onCancel 
+}: {
+  clientSecret: string;
+  total: number;
+  onSuccess: (paymentIntentId: string) => void;
+  onError: (error: string) => void;
+  onCancel: () => void;
+}) => {
+  const [ElementsComponent, setElementsComponent] = useState<React.ComponentType<any> | null>(null);
+
+  useEffect(() => {
+    // Lazy load Stripe Elements only when this component mounts
+    import('@stripe/react-stripe-js').then(module => {
+      setElementsComponent(() => module.Elements);
+    });
+  }, []);
+
+  if (!ElementsComponent) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center justify-center py-8">
+          <LoadingSpinner size="md" />
+          <span className="ml-3 text-gray-600">Loading payment form...</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Suspense fallback={
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center justify-center py-8">
+          <LoadingSpinner size="md" />
+          <span className="ml-3 text-gray-600">Loading payment form...</span>
+        </div>
+      </div>
+    }>
+      <ElementsComponent stripe={getStripe()} options={{ clientSecret }}>
+        <PaymentForm
+          clientSecret={clientSecret}
+          amount={total}
+          onSuccess={onSuccess}
+          onError={onError}
+          onCancel={onCancel}
+        />
+      </ElementsComponent>
+    </Suspense>
+  );
+};
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -859,15 +920,13 @@ const Checkout = () => {
 
             {/* Payment Form - Show when payment method is selected and client secret is ready */}
             {showPaymentForm && clientSecret && paymentMethod !== 'cod' && paymentMethod !== 'paypal' && (
-              <Elements stripe={getStripe()} options={{ clientSecret }}>
-                <PaymentForm
-                  clientSecret={clientSecret}
-                  amount={total}
-                  onSuccess={handlePaymentSuccess}
-                  onError={handlePaymentError}
-                  onCancel={handlePaymentCancel}
-                />
-              </Elements>
+              <StripePaymentWrapper
+                clientSecret={clientSecret}
+                total={total}
+                onSuccess={handlePaymentSuccess}
+                onError={handlePaymentError}
+                onCancel={handlePaymentCancel}
+              />
             )}
 
             {/* PayPal Button - Show when PayPal is selected */}
@@ -882,12 +941,19 @@ const Checkout = () => {
                     <p className="text-sm text-gray-600">Pay securely with your PayPal account</p>
                   </div>
                 </div>
-                <PayPalButton
-                  amount={total}
-                  onSuccess={handlePayPalSuccess}
-                  onError={handlePayPalError}
-                  onCancel={handlePayPalCancel}
-                />
+                <Suspense fallback={
+                  <div className="flex items-center justify-center py-8">
+                    <LoadingSpinner size="md" />
+                    <span className="ml-3 text-gray-600">Loading PayPal...</span>
+                  </div>
+                }>
+                  <PayPalButton
+                    amount={total}
+                    onSuccess={handlePayPalSuccess}
+                    onError={handlePayPalError}
+                    onCancel={handlePayPalCancel}
+                  />
+                </Suspense>
               </div>
             )}
 
