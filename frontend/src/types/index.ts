@@ -42,6 +42,8 @@ export interface ProductVariant {
   compareAtPrice?: number;
   stock: number;
   sku: string;
+  image?: string; // Primary variant image (optional)
+  images?: string[]; // Variant image gallery (optional)
 }
 
 export interface Product {

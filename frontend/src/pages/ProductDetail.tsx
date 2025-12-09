@@ -239,9 +239,8 @@ const ProductDetail = () => {
   const productId = product._id ? String(product._id) : null;
   const inWishlist = productId ? isInWishlist(productId) : false;
   
-  // Safety checks for variants and images
+  // Safety checks for variants
   const hasVariants = product?.variants && Array.isArray(product.variants) && product.variants.length > 0;
-  const hasImages = product?.images && Array.isArray(product.images) && product.images.length > 0;
   
   // Ensure selectedVariant is within bounds
   const safeSelectedVariant = hasVariants 
@@ -497,7 +496,7 @@ const ProductDetail = () => {
             </div>
           </div>
           <div className="grid grid-cols-4 gap-2">
-            {displayImages?.map((image, index) => (
+            {displayImages?.map((image: string, index: number) => (
               <button
                 key={index}
                 onClick={() => setSelectedImage(index)}
