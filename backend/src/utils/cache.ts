@@ -190,7 +190,10 @@ export const cacheKeys = {
   careGuides: (petType?: string, category?: string, page?: number, limit?: number, search?: string) => 
     `careGuides:${petType || 'all'}:${category || 'all'}:${page || 1}:${limit || 10}:${search || ''}`,
   careGuide: (slug: string) => `careGuide:${slug}`,
-  careGuideCategories: (petType?: string) => `careGuideCategories:${petType || 'all'}`
+  careGuideCategories: (petType?: string) => `careGuideCategories:${petType || 'all'}`,
+  faqs: (category?: string, petType?: string, search?: string) => 
+    `faqs:${category || 'all'}:${petType || 'all'}:${search || ''}`,
+  faqCategories: () => `faqCategories:all`
 };
 
 // Cache middleware for Express routes

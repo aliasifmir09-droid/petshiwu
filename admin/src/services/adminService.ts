@@ -1,4 +1,5 @@
 import api from './api';
+import type { FAQ, FAQFormData, FAQCategory, FAQQueryParams, FAQsResponse } from '@/types/faq';
 
 export const adminService = {
   // CSV Import
@@ -497,6 +498,40 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
     const queryParams = petType ? `?petType=${petType}` : '';
     const response = await api.get(`/care-guides/categories${queryParams}`);
     return response.data;
+  },
+
+  // FAQ Management
+  getFAQs: async (params?: FAQQueryParams) => {
+    const queryParams = new URLSearchParams();
+    if (params?.category) queryParams.append('category', params.category);
+    if (params?.petType) queryParams.append('petType', params.petType);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.isPublished !== undefined) queryParams.append('isPublished', params.isPublished.toString());
+    
+    const response = await api.get(`/faqs/admin/all?${queryParams.toString()}`);
+    return response.data;
+  },
+  getFAQById: async (id: string) => {
+    const response = await api.get<{ success: boolean; data: FAQ }>(`/faqs/admin/${id}`);
+    return response.data;
+  },
+  createFAQ: async (faqData: FAQFormData) => {
+    const response = await api.post<{ success: boolean; data: FAQ }>('/faqs/admin', faqData);
+    return response.data;
+  },
+  updateFAQ: async (id: string, faqData: FAQFormData) => {
+    const response = await api.put<{ success: boolean; data: FAQ }>(`/faqs/admin/${id}`, faqData);
+    return response.data;
+  },
+  deleteFAQ: async (id: string) => {
+    const response = await api.delete<{ success: boolean; message: string }>(`/faqs/admin/${id}`);
+    return response.data;
+  },
+  getFAQCategories: async () => {
+    const response = await api.get<{ success: boolean; data: FAQCategory[] }>('/faqs/categories');
+    return response.data.data;
   },
 
   getPetTypes: async () => {

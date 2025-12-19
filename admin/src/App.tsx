@@ -19,6 +19,7 @@ const EmailTemplates = lazy(() => import('./pages/EmailTemplates'));
 const InventoryAlerts = lazy(() => import('./pages/InventoryAlerts'));
 const Blogs = lazy(() => import('./pages/Blogs'));
 const CareGuides = lazy(() => import('./pages/CareGuides'));
+const FAQs = lazy(() => import('./pages/FAQs'));
 const Login = lazy(() => import('./pages/Login'));
 
 const queryClient = new QueryClient({
@@ -250,6 +251,14 @@ function App() {
                     element={
                       user?.role === 'admin' 
                         ? <CareGuides /> 
+                        : <Navigate to={getDefaultPage()} replace />
+                    } 
+                  />
+                  <Route 
+                    path="/faqs" 
+                    element={
+                      user?.role === 'admin' 
+                        ? <FAQs /> 
                         : <Navigate to={getDefaultPage()} replace />
                     } 
                   />

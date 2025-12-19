@@ -40,6 +40,7 @@ const Learning = lazy(() => import('./pages/Learning'));
 const BlogDetail = lazy(() => import('./pages/BlogDetail'));
 const CareGuides = lazy(() => import('./pages/CareGuides'));
 const CareGuideDetail = lazy(() => import('./pages/CareGuideDetail'));
+const FAQ = lazy(() => import('./pages/FAQ'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const Forbidden = lazy(() => import('./pages/Forbidden'));
 
@@ -184,6 +185,7 @@ function App() {
                           <Route path="/learning/:slug" element={<BlogDetail />} />
                           <Route path="/care-guides" element={<CareGuides />} />
                           <Route path="/care-guides/:slug" element={<CareGuideDetail />} />
+                          <Route path="/faq" element={<FAQ />} />
                           <Route path="/cart" element={<Cart />} />
                           <Route path="/checkout" element={<Checkout />} />
                           <Route path="/login" element={<Login />} />
