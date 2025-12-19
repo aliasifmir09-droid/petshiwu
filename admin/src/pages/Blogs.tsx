@@ -447,7 +447,7 @@ const Blogs = () => {
 interface BlogFormModalProps {
   blog: Blog | null;
   onClose: () => void;
-  onSubmit: (data: BlogFormData) => void;
+  onSubmit: (data: BlogFormData & { tags: string[] }) => void;
   isLoading: boolean;
 }
 
