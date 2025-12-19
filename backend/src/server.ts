@@ -55,6 +55,7 @@ import testEmailRoutes from './routes/testEmail';
 import blogRoutes from './routes/blogs';
 import careGuideRoutes from './routes/careGuides';
 import faqRoutes from './routes/faqs';
+import healthRoutes from './routes/health';
 
 // Connect to database
 connectDatabase();
@@ -582,6 +583,7 @@ app.use('/api/test', testEmailRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/care-guides', careGuideRoutes); // Legacy route
 app.use('/api/faqs', faqRoutes); // Legacy route
+app.use('/api/health', healthRoutes);
 
 // Root route - API information
 app.get('/', (req, res) => {
@@ -606,7 +608,8 @@ app.get('/', (req, res) => {
 });
 
 // Health check endpoint (used by Render to verify server is running)
-app.get('/api/health', (req, res) => {
+// Note: More detailed health check is available at /api/health (via healthRoutes)
+app.get('/health', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Server is running',

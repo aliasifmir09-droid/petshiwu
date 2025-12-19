@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { optimizeMongooseSettings, enableQueryLogging, logConnectionPoolStatus } from './databaseOptimization';
 
 export const connectDatabase = async () => {
   try {
@@ -16,21 +17,48 @@ export const connectDatabase = async () => {
     const isProduction = process.env.NODE_ENV === 'production';
     mongoose.set('bufferCommands', isProduction); // Buffer in production, fail fast in development
     
+    // Optimized connection pool settings for 10,000+ concurrent users
+    // Formula: maxPoolSize = (expected concurrent requests / requests per connection) + buffer
+    // For 10k users with ~100 req/sec per connection: 100 + 50 buffer = 150
+    // Using 100 as a safe starting point, can scale up based on monitoring
+    const maxPoolSize = parseInt(process.env.MONGODB_MAX_POOL_SIZE || '100', 10);
+    const minPoolSize = parseInt(process.env.MONGODB_MIN_POOL_SIZE || '10', 10);
+    
     const conn = await mongoose.connect(mongoUri, {
       serverSelectionTimeoutMS: 10000, // How long to try selecting a server
       socketTimeoutMS: 45000,
       connectTimeoutMS: 10000, // Connection timeout
       family: 4, // Force IPv4 instead of IPv6
-      readPreference: 'primary', // Always read from primary to avoid stale data
+      readPreference: (process.env.MONGODB_READ_PREFERENCE || 'primary') as any, // Can use 'secondaryPreferred' for read scaling
       readConcern: { level: 'majority' }, // Ensure we read committed data
-      // Connection pooling for better performance
-      maxPoolSize: 10, // Maintain up to 10 socket connections
-      minPoolSize: 2, // Maintain at least 2 socket connections
-      maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
-      heartbeatFrequencyMS: 10000 // How often to check server status
+      writeConcern: { w: 'majority', j: true }, // Ensure writes are acknowledged and journaled
+      // Optimized connection pooling for high concurrency (10k+ users)
+      maxPoolSize: maxPoolSize, // Increased from 10 to 100 for high concurrency
+      minPoolSize: minPoolSize, // Increased from 2 to 10 to maintain warm connections
+      maxIdleTimeMS: 60000, // Increased from 30s to 60s to reduce connection churn
+      heartbeatFrequencyMS: 10000, // How often to check server status
+      // Additional performance optimizations
+      retryWrites: true, // Retry write operations on transient errors
+      retryReads: true, // Retry read operations on transient errors
+      // Compression for network efficiency (MongoDB 3.4+)
+      compressors: ['zlib'] as any, // Enable compression to reduce network traffic
     });
     
     console.log(`✅ MongoDB Connected Successfully: ${conn.connection.host}`);
+    console.log(`📊 Connection Pool: max=${maxPoolSize}, min=${minPoolSize}`);
+    
+    // Optimize Mongoose settings for high concurrency
+    optimizeMongooseSettings();
+    
+    // Enable query logging in development if requested
+    enableQueryLogging();
+    
+    // Log connection pool status periodically (every 5 minutes in production)
+    if (isProduction) {
+      setInterval(() => {
+        logConnectionPoolStatus();
+      }, 5 * 60 * 1000); // Every 5 minutes
+    }
     
     // Handle connection errors after initial connection
     mongoose.connection.on('error', (err) => {
