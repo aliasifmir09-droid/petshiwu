@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 interface ConfirmationModalProps {
@@ -26,14 +27,14 @@ const ConfirmationModal = ({
   icon,
   isLoading = false
 }: ConfirmationModalProps) => {
-  if (!isOpen) return null;
-
   const handleConfirm = () => {
     onConfirm();
     onClose();
   };
 
-  return (
+  if (!isOpen || typeof document === 'undefined') return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-[9999] overflow-y-auto">
       {/* Backdrop */}
       <div 
@@ -88,7 +89,8 @@ const ConfirmationModal = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
