@@ -153,16 +153,12 @@ const Blogs = () => {
     });
   };
 
-  const handleSubmit = (formData: BlogFormData) => {
-    // Convert tags string to array for API
-    const submitData = {
-      ...formData,
-      tags: formData.tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0)
-    };
+  const handleSubmit = (formData: BlogFormData & { tags: string[] }) => {
+    // Tags are already converted to array by BlogFormModal
     if (editingBlog) {
-      updateMutation.mutate({ id: editingBlog._id, data: submitData });
+      updateMutation.mutate({ id: editingBlog._id, data: formData });
     } else {
-      createMutation.mutate(submitData);
+      createMutation.mutate(formData);
     }
   };
 
