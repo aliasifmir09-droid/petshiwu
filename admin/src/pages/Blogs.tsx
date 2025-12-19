@@ -477,10 +477,10 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isLoading }: BlogFormModalProp
   useEffect(() => {
     if (blog?.featuredImage) {
       setImagePreview(blog.featuredImage);
-      setFormData(prev => ({ ...prev, featuredImage: blog.featuredImage }));
+      setFormData((prev: BlogFormData) => ({ ...prev, featuredImage: blog.featuredImage || '' }));
     } else {
       setImagePreview(null);
-      setFormData(prev => ({ ...prev, featuredImage: '' }));
+      setFormData((prev: BlogFormData) => ({ ...prev, featuredImage: '' }));
     }
   }, [blog]);
 
