@@ -437,12 +437,12 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
     return response.data;
   },
 
-  createBlog: async (blogData: any) => {
+  createBlog: async (blogData: { title: string; content: string; category: string; [key: string]: unknown }) => {
     const response = await api.post('/blogs/admin', blogData);
     return response.data;
   },
 
-  updateBlog: async (id: string, blogData: any) => {
+  updateBlog: async (id: string, blogData: { title?: string; content?: string; category?: string; [key: string]: unknown }) => {
     const response = await api.put(`/blogs/admin/${id}`, blogData);
     return response.data;
   },

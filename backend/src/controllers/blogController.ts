@@ -1,30 +1,86 @@
 import { Request, Response, NextFunction } from 'express';
-import Blog from '../models/Blog';
+import Blog, { IBlog } from '../models/Blog';
 import { AuthRequest } from '../middleware/auth';
 import logger from '../utils/logger';
 import { cache, cacheKeys } from '../utils/cache';
 import mongoose from 'mongoose';
+import { IBlogResponse, IBlogQuery, IBlogCreateData, IBlogUpdateData, IBlogDocument } from '../types/blog';
 
 // Helper function to normalize blog _id to string
-const normalizeBlogId = (blog: any): any => {
-  if (!blog) return blog;
+const normalizeBlogId = (blog: IBlogDocument | IBlog | IBlogResponse | mongoose.LeanDocument<IBlog>): IBlogResponse => {
+  if (!blog) {
+    throw new Error('Blog is required');
+  }
   
-  const plainBlog = blog.toObject ? blog.toObject() : blog;
+  // Handle Mongoose documents with toObject method
+  const plainBlog = (blog as IBlogDocument).toObject 
+    ? (blog as IBlogDocument).toObject() 
+    : blog as IBlogResponse & { _id?: unknown; author?: unknown; publishedAt?: unknown; createdAt?: unknown; updatedAt?: unknown };
+  
+  // Safely convert _id to string
+  const blogId = plainBlog._id ? String(plainBlog._id) : '';
+  
+  // Handle author field - can be ObjectId, populated object, or already normalized
+  let author: { _id: string; name?: string; email: string };
+  if (plainBlog.author && typeof plainBlog.author === 'object' && 'email' in plainBlog.author) {
+    // Already populated
+    const authorObj = plainBlog.author as { _id: string | mongoose.Types.ObjectId; name?: string; email: string };
+    author = {
+      _id: String(authorObj._id),
+      name: authorObj.name,
+      email: authorObj.email
+    };
+  } else {
+    // Just an ObjectId
+    author = {
+      _id: String(plainBlog.author || ''),
+      name: undefined,
+      email: ''
+    };
+  }
+  
+  // Safely convert dates
+  const publishedAt = plainBlog.publishedAt 
+    ? (plainBlog.publishedAt instanceof Date 
+        ? plainBlog.publishedAt.toISOString() 
+        : new Date(plainBlog.publishedAt as string).toISOString())
+    : undefined;
+  
+  const createdAt = plainBlog.createdAt 
+    ? (plainBlog.createdAt instanceof Date 
+        ? plainBlog.createdAt.toISOString() 
+        : new Date(plainBlog.createdAt as string).toISOString())
+    : new Date().toISOString();
+  
+  const updatedAt = plainBlog.updatedAt 
+    ? (plainBlog.updatedAt instanceof Date 
+        ? plainBlog.updatedAt.toISOString() 
+        : new Date(plainBlog.updatedAt as string).toISOString())
+    : new Date().toISOString();
   
   return {
-    ...plainBlog,
-    _id: plainBlog._id ? String(plainBlog._id) : plainBlog._id,
-    author: plainBlog.author && typeof plainBlog.author === 'object' && plainBlog.author._id
-      ? {
-          ...plainBlog.author,
-          _id: String(plainBlog.author._id)
-        }
-      : plainBlog.author
+    _id: blogId,
+    title: plainBlog.title || '',
+    slug: plainBlog.slug || '',
+    content: plainBlog.content || '',
+    excerpt: plainBlog.excerpt,
+    featuredImage: plainBlog.featuredImage,
+    petType: plainBlog.petType || 'all',
+    category: plainBlog.category || '',
+    author,
+    tags: Array.isArray(plainBlog.tags) ? plainBlog.tags : [],
+    isPublished: plainBlog.isPublished || false,
+    publishedAt,
+    views: typeof plainBlog.views === 'number' ? plainBlog.views : 0,
+    metaTitle: plainBlog.metaTitle,
+    metaDescription: plainBlog.metaDescription,
+    createdAt,
+    updatedAt
   };
 };
 
 // Helper function to normalize array of blogs
-const normalizeBlogs = (blogs: any[]): any[] => {
+const normalizeBlogs = (blogs: (IBlogDocument | IBlog | mongoose.LeanDocument<IBlog>)[]): IBlogResponse[] => {
   return blogs.map(normalizeBlogId);
 };
 
@@ -38,7 +94,7 @@ export const getPublishedBlogs = async (req: Request, res: Response, next: NextF
     const skip = (pageNum - 1) * limitNum;
 
     // Build query
-    const query: any = { isPublished: true };
+    const query: IBlogQuery = { isPublished: true };
     
     if (petType && petType !== 'all') {
       query.petType = petType;
@@ -55,7 +111,16 @@ export const getPublishedBlogs = async (req: Request, res: Response, next: NextF
     // Cache key
     const cacheKey = cacheKeys.blogs(petType as string, category as string, pageNum, limitNum, search as string) || 
       `blogs:${petType || 'all'}:${category || 'all'}:${pageNum}:${limitNum}:${search || ''}`;
-    const cached = await cache.get<{ data: any[]; pagination: any }>(cacheKey);
+    interface CachedBlogs {
+      data: IBlogResponse[];
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        pages: number;
+      };
+    }
+    const cached = await cache.get<CachedBlogs>(cacheKey);
     
     if (cached) {
       return res.json({
@@ -94,7 +159,7 @@ export const getPublishedBlogs = async (req: Request, res: Response, next: NextF
       success: true,
       ...result
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching published blogs:', error);
     next(error);
   }
@@ -106,7 +171,7 @@ export const getBlogBySlug = async (req: Request, res: Response, next: NextFunct
     const { slug } = req.params;
 
     const cacheKey = `blog:${slug}`;
-    const cached = await cache.get<any>(cacheKey);
+    const cached = await cache.get<IBlogResponse>(cacheKey);
     
     if (cached && cached._id) {
       // Increment views (async, don't wait)
@@ -141,7 +206,7 @@ export const getBlogBySlug = async (req: Request, res: Response, next: NextFunct
       success: true,
       data: normalizedBlog
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching blog:', error);
     next(error);
   }
@@ -157,14 +222,14 @@ export const getAllBlogsAdmin = async (req: AuthRequest, res: Response, next: Ne
     const skip = (pageNum - 1) * limitNum;
 
     // Build query
-    const query: any = {};
+    const query: IBlogQuery = {};
     
     if (petType && petType !== 'all') {
-      query.petType = petType;
+      query.petType = typeof petType === 'string' ? petType : String(petType);
     }
     
     if (category) {
-      query.category = category;
+      query.category = typeof category === 'string' ? category : String(category);
     }
     
     if (isPublished !== undefined) {
@@ -200,7 +265,7 @@ export const getAllBlogsAdmin = async (req: AuthRequest, res: Response, next: Ne
         pages: Math.ceil(total / limitNum)
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching blogs (admin):', error);
     next(error);
   }
@@ -235,7 +300,7 @@ export const getBlogById = async (req: AuthRequest, res: Response, next: NextFun
       success: true,
       data: normalizedBlog
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching blog:', error);
     next(error);
   }
@@ -244,7 +309,8 @@ export const getBlogById = async (req: AuthRequest, res: Response, next: NextFun
 // Create new blog (admin)
 export const createBlog = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { title, content, excerpt, featuredImage, petType, category, tags, isPublished, metaTitle, metaDescription } = req.body;
+    const blogData: IBlogCreateData = req.body;
+    const { title, content, excerpt, featuredImage, petType, category, tags, isPublished, metaTitle, metaDescription } = blogData;
 
     if (!title || !content || !category) {
       return res.status(400).json({
@@ -280,8 +346,8 @@ export const createBlog = async (req: AuthRequest, res: Response, next: NextFunc
       data: normalizedBlog,
       message: 'Blog created successfully'
     });
-  } catch (error: any) {
-    if (error.code === 11000) {
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
       return res.status(400).json({
         success: false,
         message: 'A blog with this title already exists'
@@ -345,8 +411,8 @@ export const updateBlog = async (req: AuthRequest, res: Response, next: NextFunc
       data: normalizedBlog,
       message: 'Blog updated successfully'
     });
-  } catch (error: any) {
-    if (error.code === 11000) {
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
       return res.status(400).json({
         success: false,
         message: 'A blog with this title already exists'
@@ -389,7 +455,7 @@ export const deleteBlog = async (req: AuthRequest, res: Response, next: NextFunc
       success: true,
       message: 'Blog deleted successfully'
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error deleting blog:', error);
     next(error);
   }
@@ -430,7 +496,7 @@ export const getBlogCategories = async (req: Request, res: Response, next: NextF
       success: true,
       data: categoriesWithCounts
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Error fetching blog categories:', error);
     next(error);
   }
@@ -442,8 +508,9 @@ const clearBlogCaches = async () => {
     await cache.delPattern('blogs:*');
     await cache.delPattern('blog-categories:*');
     logger.debug('Blog caches cleared');
-  } catch (error: any) {
-    logger.error('Error clearing blog caches:', error.message);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Error clearing blog caches:', errorMessage);
   }
 };
 

@@ -7,8 +7,10 @@ import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import Dropdown from '@/components/Dropdown';
 import { normalizeImageUrl } from '@/utils/imageUtils';
+import { Blog, BlogFormData, BlogCategory } from '@/types/blog';
+
 // Helper function to safely convert any ID to a unique string key
-const getUniqueKey = (id: any, index: number, prefix: string = 'item'): string => {
+const getUniqueKey = (id: unknown, index: number, prefix: string = 'item'): string => {
   if (!id && id !== 0) {
     return `${prefix}-${index}`;
   }
@@ -215,7 +217,7 @@ const Blogs = () => {
           <Dropdown
             options={[
               { value: '', label: 'All Pet Types' },
-              ...(petTypesData?.data || []).map((pt: any) => ({
+              ...(petTypesData?.data || []).map((pt: { _id: string; slug: string; name: string }) => ({
                 value: pt.slug,
                 label: pt.name
               }))
@@ -231,7 +233,7 @@ const Blogs = () => {
           <Dropdown
             options={[
               { value: '', label: 'All Categories' },
-              ...(categoriesData?.data || []).map((cat: any) => ({
+              ...(categoriesData?.data || []).map((cat: BlogCategory) => ({
                 value: cat.name,
                 label: `${cat.name} (${cat.count})`
               }))
@@ -294,7 +296,7 @@ const Blogs = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {blogsData.data.map((blog: any, index: number) => (
+                  {blogsData.data.map((blog: Blog, index: number) => (
                     <tr key={getUniqueKey(blog._id, index, 'blog')} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
@@ -442,9 +444,9 @@ const Blogs = () => {
 
 // Blog Form Modal Component
 interface BlogFormModalProps {
-  blog: any;
+  blog: Blog | null;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: BlogFormData) => void;
   isLoading: boolean;
 }
 
@@ -610,7 +612,7 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isLoading }: BlogFormModalProp
                 list="category-suggestions"
               />
               <datalist id="category-suggestions">
-                {(categoriesData?.data || []).map((cat: any) => (
+                {(categoriesData?.data || []).map((cat: BlogCategory) => (
                   <option key={cat.name} value={cat.name} />
                 ))}
               </datalist>
@@ -626,7 +628,7 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isLoading }: BlogFormModalProp
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All Pets</option>
-                {(petTypesData?.data || []).map((pt: any) => (
+                {(petTypesData?.data || []).map((pt: { _id: string; slug: string; name: string }) => (
                   <option key={pt._id} value={pt.slug}>{pt.name}</option>
                 ))}
               </select>

@@ -97,7 +97,7 @@ const Learning = () => {
             <Dropdown
               options={[
                 { value: '', label: 'All Categories' },
-                ...(categories || []).map((cat: any) => ({
+                ...(categories || []).map((cat: { name: string; count: number }) => ({
                   value: cat.name,
                   label: `${cat.name} (${cat.count})`
                 }))
