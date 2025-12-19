@@ -18,6 +18,7 @@ const Customers = lazy(() => import('./pages/Customers'));
 const EmailTemplates = lazy(() => import('./pages/EmailTemplates'));
 const InventoryAlerts = lazy(() => import('./pages/InventoryAlerts'));
 const Blogs = lazy(() => import('./pages/Blogs'));
+const CareGuides = lazy(() => import('./pages/CareGuides'));
 const Login = lazy(() => import('./pages/Login'));
 
 const queryClient = new QueryClient({
@@ -241,6 +242,14 @@ function App() {
                     element={
                       user?.role === 'admin' 
                         ? <Blogs /> 
+                        : <Navigate to={getDefaultPage()} replace />
+                    } 
+                  />
+                  <Route 
+                    path="/care-guides" 
+                    element={
+                      user?.role === 'admin' 
+                        ? <CareGuides /> 
                         : <Navigate to={getDefaultPage()} replace />
                     } 
                   />

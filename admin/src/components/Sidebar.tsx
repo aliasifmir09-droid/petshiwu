@@ -55,6 +55,7 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
     { path: '/email-templates', icon: Mail, label: 'Email Templates', adminOnly: true },
     { path: '/inventory-alerts', icon: AlertTriangle, label: 'Inventory Alerts', permission: 'canManageProducts' },
     { path: '/blogs', icon: BookOpen, label: 'Blogs', adminOnly: true },
+    { path: '/care-guides', icon: BookOpen, label: 'Care Guides', adminOnly: true },
     { path: '/settings', icon: Settings, label: 'Settings', alwaysShow: true }
   ];
 

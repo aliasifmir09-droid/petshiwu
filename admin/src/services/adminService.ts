@@ -458,6 +458,47 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
     return response.data;
   },
 
+  // Care Guide Management
+  getCareGuides: async (params?: { petType?: string; category?: string; page?: number; limit?: number; search?: string; difficulty?: string; isPublished?: boolean }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.petType) queryParams.append('petType', params.petType);
+    if (params?.category) queryParams.append('category', params.category);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.difficulty) queryParams.append('difficulty', params.difficulty);
+    if (params?.isPublished !== undefined) queryParams.append('isPublished', params.isPublished.toString());
+    
+    const response = await api.get(`/care-guides/admin/all?${queryParams.toString()}`);
+    return response.data;
+  },
+
+  getCareGuideById: async (id: string) => {
+    const response = await api.get(`/care-guides/admin/${id}`);
+    return response.data;
+  },
+
+  createCareGuide: async (careGuideData: { title: string; content: string; category: string; [key: string]: unknown }) => {
+    const response = await api.post('/care-guides/admin', careGuideData);
+    return response.data;
+  },
+
+  updateCareGuide: async (id: string, careGuideData: { title?: string; content?: string; category?: string; [key: string]: unknown }) => {
+    const response = await api.put(`/care-guides/admin/${id}`, careGuideData);
+    return response.data;
+  },
+
+  deleteCareGuide: async (id: string) => {
+    const response = await api.delete(`/care-guides/admin/${id}`);
+    return response.data;
+  },
+
+  getCareGuideCategories: async (petType?: string) => {
+    const queryParams = petType ? `?petType=${petType}` : '';
+    const response = await api.get(`/care-guides/categories${queryParams}`);
+    return response.data;
+  },
+
   getPetTypes: async () => {
     const response = await api.get('/pet-types');
     return response.data;
