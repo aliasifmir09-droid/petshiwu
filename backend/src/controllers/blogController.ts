@@ -41,7 +41,12 @@ const normalizeBlogId = (blog: IBlogDocument | IBlog | IBlogResponse | Record<st
   
   // Safely convert dates - use type guard instead of instanceof
   const isDate = (value: unknown): value is Date => {
-    return value instanceof Date || (value && typeof value === 'object' && 'getTime' in value && typeof (value as Date).getTime === 'function');
+    if (value instanceof Date) return true;
+    if (value && typeof value === 'object' && 'getTime' in value) {
+      const dateLike = value as { getTime?: unknown };
+      return typeof dateLike.getTime === 'function';
+    }
+    return false;
   };
   
   const publishedAt = plainBlog.publishedAt 
