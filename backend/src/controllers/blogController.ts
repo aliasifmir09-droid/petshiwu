@@ -106,11 +106,11 @@ export const getPublishedBlogs = async (req: Request, res: Response, next: NextF
     const query: IBlogQuery = { isPublished: true };
     
     if (petType && petType !== 'all') {
-      query.petType = petType;
+      query.petType = typeof petType === 'string' ? petType : String(petType);
     }
     
     if (category) {
-      query.category = category;
+      query.category = typeof category === 'string' ? category : String(category);
     }
     
     if (search) {
