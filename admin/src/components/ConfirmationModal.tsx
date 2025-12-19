@@ -1,3 +1,4 @@
+import React from 'react';
 import { X } from 'lucide-react';
 
 interface ConfirmationModalProps {
@@ -5,7 +6,7 @@ interface ConfirmationModalProps {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  message: string;
+  message: string | React.ReactNode;
   confirmText?: string;
   cancelText?: string;
   confirmButtonClass?: string;
@@ -64,9 +65,9 @@ const ConfirmationModal = ({
           </h3>
 
           {/* Message */}
-          <p className="text-gray-600 mb-6">
+          <div className="text-gray-600 mb-6">
             {message}
-          </p>
+          </div>
 
           {/* Actions */}
           <div className="flex gap-3 justify-end">

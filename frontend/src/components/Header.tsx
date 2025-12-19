@@ -6,6 +6,7 @@ import { useWishlistStore } from '@/stores/wishlistStore';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/services/api';
+import { blogService } from '@/services/blogs';
 import ConfirmationModal from './ConfirmationModal';
 import { useToast } from '@/hooks/useToast';
 import Toast from './Toast';

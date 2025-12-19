@@ -62,7 +62,7 @@ const Blogs = () => {
   }>({ isOpen: false });
 
   // Fetch blogs
-  const { data: blogsData, isLoading, refetch } = useQuery({
+  const { data: blogsData, isLoading } = useQuery({
     queryKey: ['blogs', 'admin', page, searchQuery, petTypeFilter, categoryFilter, isPublishedFilter],
     queryFn: () => adminService.getBlogs({
       page,
@@ -565,7 +565,7 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isLoading }: BlogFormModalProp
     e.preventDefault();
     onSubmit({
       ...formData,
-      tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+      tags: formData.tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0)
     });
   };
 

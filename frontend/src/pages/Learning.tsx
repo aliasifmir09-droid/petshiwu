@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { blogService, Blog } from '@/services/blogs';
-import { Search, Calendar, User, Eye, ChevronRight, BookOpen } from 'lucide-react';
+import { Search, Calendar, Eye, ChevronRight, BookOpen } from 'lucide-react';
 import Dropdown from '@/components/Dropdown';
 
 const Learning = () => {

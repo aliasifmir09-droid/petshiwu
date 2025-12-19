@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { blogService, Blog } from '@/services/blogs';
+import { blogService } from '@/services/blogs';
 import { Calendar, User, Eye, ArrowLeft, Tag } from 'lucide-react';
 
 const BlogDetail = () => {
