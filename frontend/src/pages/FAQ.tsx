@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { faqService, FAQ, FAQCategory } from '@/services/faqs';
+import { faqService } from '@/services/faqs';
+import type { FAQ } from '@/services/faqs';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { HelpCircle, Search, ThumbsUp, ThumbsDown, ChevronDown, ChevronUp } from 'lucide-react';
 import SEO from '@/components/SEO';
