@@ -34,16 +34,16 @@ const ConfirmationModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-[9999] overflow-y-auto">
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity z-[9998]"
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-fadeIn">
+      <div className="flex min-h-full items-center justify-center p-4 relative z-[9999]">
+        <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-fadeIn z-[9999]">
           {/* Close Button */}
           <button
             onClick={onClose}
