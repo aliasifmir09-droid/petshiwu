@@ -55,7 +55,7 @@ export const getPublishedBlogs = async (req: Request, res: Response, next: NextF
     // Cache key
     const cacheKey = cacheKeys.blogs(petType as string, category as string, pageNum, limitNum, search as string) || 
       `blogs:${petType || 'all'}:${category || 'all'}:${pageNum}:${limitNum}:${search || ''}`;
-    const cached = await cache.get(cacheKey);
+    const cached = await cache.get<{ data: any[]; pagination: any }>(cacheKey);
     
     if (cached) {
       return res.json({
@@ -106,9 +106,9 @@ export const getBlogBySlug = async (req: Request, res: Response, next: NextFunct
     const { slug } = req.params;
 
     const cacheKey = `blog:${slug}`;
-    const cached = await cache.get(cacheKey);
+    const cached = await cache.get<any>(cacheKey);
     
-    if (cached) {
+    if (cached && cached._id) {
       // Increment views (async, don't wait)
       Blog.findByIdAndUpdate(cached._id, { $inc: { views: 1 } }).catch(() => {});
       return res.json({
