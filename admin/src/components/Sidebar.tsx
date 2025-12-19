@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
@@ -15,7 +15,10 @@ import {
   Mail,
   AlertTriangle,
   BookOpen,
-  HelpCircle
+  HelpCircle,
+  ChevronDown,
+  ChevronRight,
+  FileText
 } from 'lucide-react';
 import ConfirmationModal from './ConfirmationModal';
 
@@ -26,6 +29,7 @@ interface SidebarProps {
 const Sidebar = ({ onLogout }: SidebarProps) => {
   const location = useLocation();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isContentMenuOpen, setIsContentMenuOpen] = useState(false);
 
   // Get user info and permissions
   const { data: userData } = useQuery({
@@ -53,12 +57,6 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
     { path: '/categories', icon: FolderTree, label: 'Categories', permission: 'canManageCategories' },
     { path: '/pet-types', icon: Layers, label: 'Pet Types', adminOnly: true },
     { path: '/customers', icon: Users, label: 'Customers', permission: 'canManageCustomers' },
-    { path: '/email-templates', icon: Mail, label: 'Email Templates', adminOnly: true },
-    { path: '/inventory-alerts', icon: AlertTriangle, label: 'Inventory Alerts', permission: 'canManageProducts' },
-    { path: '/blogs', icon: BookOpen, label: 'Blogs', adminOnly: true },
-    { path: '/care-guides', icon: BookOpen, label: 'Care Guides', adminOnly: true },
-    { path: '/faqs', icon: HelpCircle, label: 'FAQs', adminOnly: true },
-    { path: '/faqs', icon: HelpCircle, label: 'FAQs', adminOnly: true },
     { path: '/settings', icon: Settings, label: 'Settings', alwaysShow: true }
   ];
 
@@ -74,6 +72,28 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
     // Check staff permissions
     return userData?.permissions?.[item.permission] === true;
   };
+
+  // Content Management submenu items
+  const contentMenuItems = [
+    { path: '/email-templates', icon: Mail, label: 'Email Templates', adminOnly: true },
+    { path: '/inventory-alerts', icon: AlertTriangle, label: 'Inventory Alerts', permission: 'canManageProducts' },
+    { path: '/blogs', icon: BookOpen, label: 'Blogs', adminOnly: true },
+    { path: '/care-guides', icon: BookOpen, label: 'Care Guides', adminOnly: true },
+    { path: '/faqs', icon: HelpCircle, label: 'FAQs', adminOnly: true }
+  ];
+
+  // Check if any content menu item is active
+  const isContentMenuActive = contentMenuItems.some(item => {
+    if (!hasPermission(item)) return false;
+    return location.pathname === item.path;
+  });
+
+  // Auto-open content menu if one of its items is active
+  useEffect(() => {
+    if (isContentMenuActive) {
+      setIsContentMenuOpen(true);
+    }
+  }, [isContentMenuActive]);
 
   return (
     <aside className="w-64 bg-gradient-to-b from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] text-white h-screen flex flex-col shadow-2xl relative overflow-hidden sticky top-0">
@@ -151,6 +171,60 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
               </li>
             );
           })}
+
+          {/* Content Management Dropdown */}
+          {contentMenuItems.some(item => hasPermission(item)) && (
+            <li className="animate-fade-in-up">
+              <button
+                onClick={() => setIsContentMenuOpen(!isContentMenuOpen)}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 ${
+                  isContentMenuActive
+                    ? 'bg-white text-[#1E3A8A] shadow-xl font-bold'
+                    : 'text-white/90 hover:bg-white/10 hover:text-white hover:shadow-lg'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <FileText size={20} className={isContentMenuActive ? 'text-[#1E3A8A]' : ''} />
+                  <span>Content Management</span>
+                </div>
+                {isContentMenuOpen ? (
+                  <ChevronDown size={18} className={isContentMenuActive ? 'text-[#1E3A8A]' : ''} />
+                ) : (
+                  <ChevronRight size={18} />
+                )}
+              </button>
+              
+              {/* Submenu */}
+              {isContentMenuOpen && (
+                <ul className="mt-2 ml-4 space-y-1 border-l-2 border-white/20 pl-4">
+                  {contentMenuItems.map((item: any) => {
+                    if (!hasPermission(item)) {
+                      return null;
+                    }
+
+                    const Icon = item.icon;
+                    const isActive = location.pathname === item.path;
+                    
+                    return (
+                      <li key={item.path}>
+                        <Link
+                          to={item.path}
+                          className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-300 ${
+                            isActive
+                              ? 'bg-white text-[#1E3A8A] shadow-lg font-semibold'
+                              : 'text-white/80 hover:bg-white/10 hover:text-white'
+                          }`}
+                        >
+                          <Icon size={18} className={isActive ? 'text-[#1E3A8A]' : ''} />
+                          <span className="text-sm">{item.label}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </li>
+          )}
           
           {/* Logout - After Settings */}
           <li className="animate-fade-in-up mt-2">
