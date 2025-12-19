@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 import { IBlogResponse, IBlogQuery, IBlogCreateData, IBlogUpdateData, IBlogDocument } from '../types/blog';
 
 // Helper function to normalize blog _id to string
-const normalizeBlogId = (blog: IBlogDocument | IBlog | IBlogResponse | mongoose.LeanDocument<IBlog>): IBlogResponse => {
+const normalizeBlogId = (blog: IBlogDocument | IBlog | IBlogResponse | Record<string, unknown>): IBlogResponse => {
   if (!blog) {
     throw new Error('Blog is required');
   }
@@ -39,23 +39,27 @@ const normalizeBlogId = (blog: IBlogDocument | IBlog | IBlogResponse | mongoose.
     };
   }
   
-  // Safely convert dates
+  // Safely convert dates - use type guard instead of instanceof
+  const isDate = (value: unknown): value is Date => {
+    return value instanceof Date || (value && typeof value === 'object' && 'getTime' in value && typeof (value as Date).getTime === 'function');
+  };
+  
   const publishedAt = plainBlog.publishedAt 
-    ? (plainBlog.publishedAt instanceof Date 
+    ? (isDate(plainBlog.publishedAt)
         ? plainBlog.publishedAt.toISOString() 
-        : new Date(plainBlog.publishedAt as string).toISOString())
+        : new Date(String(plainBlog.publishedAt)).toISOString())
     : undefined;
   
   const createdAt = plainBlog.createdAt 
-    ? (plainBlog.createdAt instanceof Date 
+    ? (isDate(plainBlog.createdAt)
         ? plainBlog.createdAt.toISOString() 
-        : new Date(plainBlog.createdAt as string).toISOString())
+        : new Date(String(plainBlog.createdAt)).toISOString())
     : new Date().toISOString();
   
   const updatedAt = plainBlog.updatedAt 
-    ? (plainBlog.updatedAt instanceof Date 
+    ? (isDate(plainBlog.updatedAt)
         ? plainBlog.updatedAt.toISOString() 
-        : new Date(plainBlog.updatedAt as string).toISOString())
+        : new Date(String(plainBlog.updatedAt)).toISOString())
     : new Date().toISOString();
   
   return {
@@ -80,7 +84,7 @@ const normalizeBlogId = (blog: IBlogDocument | IBlog | IBlogResponse | mongoose.
 };
 
 // Helper function to normalize array of blogs
-const normalizeBlogs = (blogs: (IBlogDocument | IBlog | mongoose.LeanDocument<IBlog>)[]): IBlogResponse[] => {
+const normalizeBlogs = (blogs: (IBlogDocument | IBlog | Record<string, unknown>)[]): IBlogResponse[] => {
   return blogs.map(normalizeBlogId);
 };
 

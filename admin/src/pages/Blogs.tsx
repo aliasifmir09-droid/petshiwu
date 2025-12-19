@@ -153,11 +153,16 @@ const Blogs = () => {
     });
   };
 
-  const handleSubmit = (formData: any) => {
+  const handleSubmit = (formData: BlogFormData) => {
+    // Convert tags string to array for API
+    const submitData = {
+      ...formData,
+      tags: formData.tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0)
+    };
     if (editingBlog) {
-      updateMutation.mutate({ id: editingBlog._id, data: formData });
+      updateMutation.mutate({ id: editingBlog._id, data: submitData });
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate(submitData);
     }
   };
 
