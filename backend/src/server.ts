@@ -52,6 +52,7 @@ import emailTemplateRoutes from './routes/emailTemplates';
 import inventoryAlertRoutes from './routes/inventoryAlerts';
 import testEmailRoutes from './routes/testEmail';
 import blogRoutes from './routes/blogs';
+import careGuideRoutes from './routes/careGuides';
 
 // Connect to database
 connectDatabase();
@@ -557,6 +558,7 @@ app.use(`${API_PREFIX}/users`, userRoutes);
 app.use(`${API_PREFIX}/pet-types`, petTypeRoutes);
 app.use(`${API_PREFIX}/donations`, donationRoutes);
 app.use(`${API_PREFIX}/blogs`, blogRoutes);
+app.use(`${API_PREFIX}/care-guides`, careGuideRoutes);
 
 // Legacy routes (without version) - redirect to v1 for backward compatibility
 app.use('/api/auth', authRoutes);
@@ -575,6 +577,7 @@ app.use('/api/email-templates', emailTemplateRoutes);
 app.use('/api/inventory-alerts', inventoryAlertRoutes);
 app.use('/api/test', testEmailRoutes);
 app.use('/api/blogs', blogRoutes);
+app.use('/api/care-guides', careGuideRoutes); // Legacy route
 
 // Root route - API information
 app.get('/', (req, res) => {

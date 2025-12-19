@@ -7,33 +7,58 @@ interface ApiResponse<T> {
   message?: string;
 }
 
-interface RecommendationResponse {
-  recommendations: Array<{
-    product: Product;
-    type: string;
-    score: number;
-    reason?: string;
-  }>;
+interface RecommendationProduct extends Product {
+  recommendationType?: 'customers_also_bought' | 'frequently_bought_together' | 'personalized' | 'you_may_also_like';
+  score?: number;
+  orderCount?: number;
 }
 
-interface FrequentlyBoughtTogetherResponse {
-  products: Product[];
-  frequency: number;
+interface RecommendationsResponse {
+  data: RecommendationProduct[];
+  meta?: {
+    total: number;
+    types: {
+      customers_also_bought: number;
+      frequently_bought_together: number;
+      personalized: number;
+      you_may_also_like: number;
+    };
+  };
 }
 
 export const recommendationService = {
-  getRecommendations: async (productId: string): Promise<RecommendationResponse> => {
-    const response = await api.get<ApiResponse<RecommendationResponse>>(
-      `/products/${productId}/recommendations`
+  /**
+   * Get intelligent product recommendations
+   * Returns: "Customers also bought", "Frequently bought together", personalized, and "You may also like"
+   */
+  getRecommendations: async (productId: string, limit: number = 8): Promise<RecommendationProduct[]> => {
+    const response = await api.get<ApiResponse<RecommendationProduct[]>>(
+      `/products/${productId}/recommendations`,
+      { params: { limit } }
     );
-    return response.data.data;
+    return response.data.data || [];
   },
 
-  getFrequentlyBoughtTogether: async (productId: string): Promise<FrequentlyBoughtTogetherResponse> => {
-    const response = await api.get<ApiResponse<FrequentlyBoughtTogetherResponse>>(
-      `/products/${productId}/frequently-bought-together`
+  /**
+   * Get "Frequently Bought Together" products
+   */
+  getFrequentlyBoughtTogether: async (productId: string, limit: number = 4): Promise<RecommendationProduct[]> => {
+    const response = await api.get<ApiResponse<RecommendationProduct[]>>(
+      `/products/${productId}/frequently-bought-together`,
+      { params: { limit } }
     );
-    return response.data.data;
+    return response.data.data || [];
+  },
+
+  /**
+   * Get "Customers Also Bought" products
+   * This is extracted from the main recommendations endpoint
+   */
+  getCustomersAlsoBought: async (productId: string, limit: number = 8): Promise<RecommendationProduct[]> => {
+    const allRecommendations = await recommendationService.getRecommendations(productId, limit * 2);
+    return allRecommendations
+      .filter((rec) => rec.recommendationType === 'customers_also_bought')
+      .slice(0, limit);
   }
 };
 

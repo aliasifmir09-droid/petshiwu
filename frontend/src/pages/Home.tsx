@@ -10,6 +10,7 @@ import TrustBadges from '@/components/TrustBadges';
 import { ChevronRight, ChevronLeft, Star } from 'lucide-react';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
+import RecentlyViewed from '@/components/RecentlyViewed';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -503,6 +504,13 @@ const Home = () => {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Recently Viewed Products */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4 lg:px-8">
+          <RecentlyViewed limit={8} showTitle={true} showClearButton={false} />
         </div>
       </section>
 

@@ -124,6 +124,14 @@ const Header = () => {
 
     return (
       <ul className="space-y-1">
+        <li>
+          <Link
+            to="/care-guides"
+            className="text-xs font-semibold text-[#1E3A8A] hover:text-[#1E40AF] block transition-colors py-1 mb-1"
+          >
+            Care Guides →
+          </Link>
+        </li>
         {displayCategories.map((cat: any, index: number) => {
           const name = typeof cat === 'string' ? cat : cat.name;
           return (

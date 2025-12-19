@@ -186,7 +186,11 @@ export const cacheKeys = {
   recommendations: (productId: string) => `recommendations:${productId}`,
   search: (query: string) => `search:${query}`,
   blogs: (petType?: string, category?: string, page?: number, limit?: number, search?: string) => 
-    `blogs:${petType || 'all'}:${category || 'all'}:${page || 1}:${limit || 10}:${search || ''}`
+    `blogs:${petType || 'all'}:${category || 'all'}:${page || 1}:${limit || 10}:${search || ''}`,
+  careGuides: (petType?: string, category?: string, page?: number, limit?: number, search?: string) => 
+    `careGuides:${petType || 'all'}:${category || 'all'}:${page || 1}:${limit || 10}:${search || ''}`,
+  careGuide: (slug: string) => `careGuide:${slug}`,
+  careGuideCategories: (petType?: string) => `careGuideCategories:${petType || 'all'}`
 };
 
 // Cache middleware for Express routes

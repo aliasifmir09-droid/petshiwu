@@ -18,6 +18,7 @@ import { FREE_SHIPPING_THRESHOLD } from '@/config/constants';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { trackProductView, trackAddToWishlist, trackProductComparison, trackShare } from '@/utils/analytics';
+import { addToRecentlyViewed } from '@/utils/recentlyViewed';
 import SEO from '@/components/SEO';
 
 const ProductDetail = () => {
@@ -182,6 +183,14 @@ const ProductDetail = () => {
       ? product.category.name 
       : undefined;
     trackProductView(String(product._id), product.name, categoryName);
+    
+    // Add to recently viewed
+    addToRecentlyViewed({
+      _id: String(product._id),
+      slug: product.slug,
+      name: product.name,
+      images: product.images
+    });
   }, [product?._id]); // Reset to first image/variant when product changes
 
   // Redirect from old URL format (/products/slug) to new SEO-friendly format
@@ -1090,22 +1099,65 @@ const ProductDetail = () => {
         )}
       </div>
 
-      {/* Recommendations Section */}
-      {recommendations && recommendations.recommendations && recommendations.recommendations.length > 0 && (
+      {/* Frequently Bought Together Section */}
+      {frequentlyBoughtTogether && frequentlyBoughtTogether.length > 0 && (
         <div className="mt-16 border-t pt-12">
           <div className="flex items-center gap-3 mb-8">
             <Sparkles size={28} className="text-primary-600" />
-            <h2 className="text-3xl font-bold">Recommended for You</h2>
+            <h2 className="text-3xl font-bold">Frequently Bought Together</h2>
           </div>
           <p className="text-gray-600 mb-6">
-            Intelligent recommendations based on customer behavior
+            Customers who bought this item also bought these products
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-            {recommendations.recommendations.slice(0, 8).map((rec) => (
-              <div key={rec.product._id} className="flex">
-                <ProductCard product={rec.product} />
+            {frequentlyBoughtTogether.map((product) => (
+              <div key={product._id} className="flex">
+                <ProductCard product={product} />
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Customers Also Bought Section */}
+      {customersAlsoBought && customersAlsoBought.length > 0 && (
+        <div className="mt-16 border-t pt-12">
+          <div className="flex items-center gap-3 mb-8">
+            <Sparkles size={28} className="text-primary-600" />
+            <h2 className="text-3xl font-bold">Customers Also Bought</h2>
+          </div>
+          <p className="text-gray-600 mb-6">
+            Popular products purchased together with this item
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+            {customersAlsoBought.map((product) => (
+              <div key={product._id} className="flex">
+                <ProductCard product={product} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* General Recommendations Section */}
+      {recommendations && recommendations.length > 0 && (
+        <div className="mt-16 border-t pt-12">
+          <div className="flex items-center gap-3 mb-8">
+            <Sparkles size={28} className="text-primary-600" />
+            <h2 className="text-3xl font-bold">You May Also Like</h2>
+          </div>
+          <p className="text-gray-600 mb-6">
+            Recommended products based on your interests
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+            {recommendations
+              .filter((rec) => rec.recommendationType !== 'customers_also_bought' && rec.recommendationType !== 'frequently_bought_together')
+              .slice(0, 8)
+              .map((product) => (
+                <div key={product._id} className="flex">
+                  <ProductCard product={product} />
+                </div>
+              ))}
           </div>
         </div>
       )}
@@ -1129,6 +1181,11 @@ const ProductDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Recently Viewed Section */}
+      <div className="mt-16 border-t pt-12">
+        <RecentlyViewed limit={8} showTitle={true} showClearButton={false} />
+      </div>
 
       {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
     </div>
