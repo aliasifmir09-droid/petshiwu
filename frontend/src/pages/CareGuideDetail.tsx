@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { careGuideService, CareGuide } from '@/services/careGuides';
+import { careGuideService } from '@/services/careGuides';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { Clock, Eye, BookOpen, Calendar, User, Tag, TrendingUp, TrendingDown, Minus, ArrowLeft } from 'lucide-react';
 import { normalizeImageUrl } from '@/utils/imageUtils';

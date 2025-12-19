@@ -13,19 +13,6 @@ interface RecommendationProduct extends Product {
   orderCount?: number;
 }
 
-interface RecommendationsResponse {
-  data: RecommendationProduct[];
-  meta?: {
-    total: number;
-    types: {
-      customers_also_bought: number;
-      frequently_bought_together: number;
-      personalized: number;
-      you_may_also_like: number;
-    };
-  };
-}
-
 export const recommendationService = {
   /**
    * Get intelligent product recommendations

@@ -10,6 +10,7 @@ import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ProductCard from '@/components/ProductCard';
+import RecentlyViewed from '@/components/RecentlyViewed';
 import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home, Share2, Facebook, Twitter, Mail, Copy, Check } from 'lucide-react';
 import { FormattedDescription } from '@/utils/descriptionFormatter';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
@@ -85,10 +86,31 @@ const ProductDetail = () => {
     gcTime: 15 * 60 * 1000 // Cache for 15 minutes
   });
 
+  // Get all recommendations
   const { data: recommendations } = useQuery({
     queryKey: ['recommendations', product?._id],
-    queryFn: () => recommendationService.getRecommendations(String(product?._id)),
-    enabled: !!product?._id
+    queryFn: () => recommendationService.getRecommendations(String(product?._id), 8),
+    enabled: !!product?._id,
+    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
+    gcTime: 15 * 60 * 1000 // Cache for 15 minutes
+  });
+
+  // Get "Frequently Bought Together" separately
+  const { data: frequentlyBoughtTogether } = useQuery({
+    queryKey: ['frequently-bought-together', product?._id],
+    queryFn: () => recommendationService.getFrequentlyBoughtTogether(String(product?._id), 4),
+    enabled: !!product?._id,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 15 * 60 * 1000
+  });
+
+  // Get "Customers Also Bought" separately
+  const { data: customersAlsoBought } = useQuery({
+    queryKey: ['customers-also-bought', product?._id],
+    queryFn: () => recommendationService.getCustomersAlsoBought(String(product?._id), 8),
+    enabled: !!product?._id,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 15 * 60 * 1000
   });
 
   const { data: socialLinks } = useQuery({
@@ -1110,7 +1132,7 @@ const ProductDetail = () => {
             Customers who bought this item also bought these products
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-            {frequentlyBoughtTogether.map((product) => (
+            {frequentlyBoughtTogether.map((product: any) => (
               <div key={product._id} className="flex">
                 <ProductCard product={product} />
               </div>
@@ -1130,7 +1152,7 @@ const ProductDetail = () => {
             Popular products purchased together with this item
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-            {customersAlsoBought.map((product) => (
+            {customersAlsoBought.map((product: any) => (
               <div key={product._id} className="flex">
                 <ProductCard product={product} />
               </div>

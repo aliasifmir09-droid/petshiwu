@@ -1,5 +1,5 @@
 import api from './api';
-import { ApiResponse, PaginatedResponse } from '@/types';
+import { ApiResponse } from '@/types';
 
 export interface CareGuide {
   _id: string;

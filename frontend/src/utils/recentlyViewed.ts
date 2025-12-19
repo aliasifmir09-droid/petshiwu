@@ -1,5 +1,3 @@
-import { Product } from '@/types';
-
 const RECENTLY_VIEWED_KEY = 'recently_viewed_products';
 const MAX_RECENTLY_VIEWED = 20; // Maximum number of recently viewed products to store
 

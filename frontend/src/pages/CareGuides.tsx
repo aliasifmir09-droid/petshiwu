@@ -69,13 +69,6 @@ const CareGuides = () => {
     setPage(1);
   };
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
 
   const getDifficultyIcon = (difficulty?: string) => {
     switch (difficulty) {
