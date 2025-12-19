@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
-import { Plus, Edit, Trash2, Search, Eye, EyeOff, HelpCircle, Calendar, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Eye, EyeOff, HelpCircle, ThumbsUp, ThumbsDown } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import Dropdown from '@/components/Dropdown';
-import { FAQ, FAQFormData, FAQCategory } from '@/types/faq';
+import { FAQ, FAQFormData } from '@/types/faq';
 
 // Helper function to safely convert any ID to a unique string key
 const getUniqueKey = (id: unknown, index: number, prefix: string = 'item'): string => {
@@ -74,12 +74,6 @@ const FAQs = () => {
     retry: false
   });
 
-  // Fetch FAQ categories
-  const { data: categoriesData } = useQuery({
-    queryKey: ['faq-categories'],
-    queryFn: adminService.getFAQCategories,
-    retry: false
-  });
 
   // Create FAQ mutation
   const createMutation = useMutation({

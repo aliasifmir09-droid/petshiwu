@@ -1,5 +1,5 @@
 import api from './api';
-import type { FAQ, FAQFormData, FAQCategory, FAQQueryParams, FAQsResponse } from '@/types/faq';
+import type { FAQ, FAQFormData, FAQCategory, FAQQueryParams } from '@/types/faq';
 
 export const adminService = {
   // CSV Import
