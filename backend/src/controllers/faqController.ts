@@ -245,7 +245,7 @@ export const markFAQHelpful = async (req: Request, res: Response, next: NextFunc
   res.status(200).json({
     success: true,
     data: normalizeFAQId(faq)
-  };
+  });
 };
 
 /**
@@ -286,7 +286,7 @@ export const markFAQNotHelpful = async (req: Request, res: Response, next: NextF
   res.status(200).json({
     success: true,
     data: normalizeFAQId(faq)
-  };
+  });
 };
 
 // Admin endpoints
@@ -382,7 +382,7 @@ export const getAllFAQsAdmin = async (req: AuthRequest, res: Response, next: Nex
       total,
       pages: Math.ceil(total / Number(limit))
     }
-  };
+  });
 };
 
 /**
@@ -431,7 +431,7 @@ export const createFAQ = async (req: AuthRequest, res: Response, next: NextFunct
     return res.status(400).json({
       success: false,
       message: 'Question, answer, and category are required'
-    };
+    });
   }
 
   const faq = await FAQ.create({
@@ -442,7 +442,7 @@ export const createFAQ = async (req: AuthRequest, res: Response, next: NextFunct
     order: order || 0,
     isPublished: isPublished || false,
     tags: tags || []
-  };
+  });
 
   // Clear cache
   await clearFAQCaches();
@@ -450,7 +450,7 @@ export const createFAQ = async (req: AuthRequest, res: Response, next: NextFunct
   res.status(201).json({
     success: true,
     data: normalizeFAQId(faq)
-  };
+  });
 };
 
 /**
@@ -500,7 +500,7 @@ export const updateFAQ = async (req: AuthRequest, res: Response, next: NextFunct
   res.status(200).json({
     success: true,
     data: normalizeFAQId(faq)
-  };
+  });
 };
 
 /**
@@ -539,6 +539,6 @@ export const deleteFAQ = async (req: AuthRequest, res: Response, next: NextFunct
   res.status(200).json({
     success: true,
     message: 'FAQ deleted successfully'
-  };
+  });
 };
 
