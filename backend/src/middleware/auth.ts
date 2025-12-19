@@ -19,13 +19,34 @@ export type AuthRequest = Request & {
   user?: IUser;
 };
 
+// Helper function to detect if request is from admin dashboard
+const isAdminRequest = (req: Request): boolean => {
+  const origin = req.headers?.origin || req.headers?.referer || '';
+  const adminUrls = [
+    process.env.ADMIN_URL || 'http://localhost:5174',
+    'https://pet-shop-2-r3ed.onrender.com',
+    'https://dashboard.petshiwu.com',
+  ];
+  
+  // Check if origin matches admin URLs
+  return adminUrls.some(url => origin.includes(url) || origin.includes('5174') || origin.includes('dashboard'));
+};
+
 export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     let token;
 
-    // Phase 2: Cookie-Only - Only accept token from httpOnly cookie (more secure)
-    // Removed Authorization header support for better security
-    if (req.cookies?.token) {
+    // Check for token in appropriate cookie based on request origin
+    // Use separate cookies for frontend and admin to prevent cross-contamination
+    const isAdmin = isAdminRequest(req);
+    if (isAdmin) {
+      token = req.cookies?.admin_token;
+    } else {
+      token = req.cookies?.frontend_token;
+    }
+    
+    // Fallback to old cookie name for backward compatibility (migration period)
+    if (!token && req.cookies?.token) {
       token = req.cookies.token;
     }
 
@@ -90,8 +111,17 @@ export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFu
   try {
     let token;
 
-    // Check for token in httpOnly cookie
-    if (req.cookies?.token) {
+    // Check for token in appropriate cookie based on request origin
+    // Use separate cookies for frontend and admin to prevent cross-contamination
+    const isAdmin = isAdminRequest(req);
+    if (isAdmin) {
+      token = req.cookies?.admin_token;
+    } else {
+      token = req.cookies?.frontend_token;
+    }
+    
+    // Fallback to old cookie name for backward compatibility (migration period)
+    if (!token && req.cookies?.token) {
       token = req.cookies.token;
     }
 

@@ -190,7 +190,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       }
     }
 
-    sendTokenResponse(safeToString(user._id), 200, res);
+    sendTokenResponse(safeToString(user._id), 200, res, req);
   } catch (error: unknown) {
     logger.error('Login error:', error);
     next(error);
@@ -297,7 +297,7 @@ export const updatePassword = async (req: AuthRequest, res: Response, next: Next
     user.password = newPassword;
     await user.save();
 
-    sendTokenResponse(safeToString(user._id), 200, res);
+    sendTokenResponse(safeToString(user._id), 200, res, req);
   } catch (error) {
     next(error);
   }
@@ -453,6 +453,10 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
       clearOptions.domain = cookieDomain;
     }
     
+    // Clear both frontend and admin cookies to ensure complete logout
+    // Also clear old cookie name for backward compatibility
+    res.cookie('frontend_token', '', clearOptions);
+    res.cookie('admin_token', '', clearOptions);
     res.cookie('token', '', clearOptions);
 
     res.status(200).json({
@@ -643,7 +647,7 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
     logger.info(`Password reset successful for user: ${user.email} (ID: ${user._id})`);
 
     // Send token response (auto-login after reset)
-    sendTokenResponse(safeToString(user._id), 200, res);
+    sendTokenResponse(safeToString(user._id), 200, res, req);
   } catch (error) {
     next(error);
   }

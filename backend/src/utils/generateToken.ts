@@ -14,7 +14,20 @@ export const generateToken = (id: string) => {
   } as jwt.SignOptions);
 };
 
-export const sendTokenResponse = (userId: string, statusCode: number, res: Response) => {
+// Helper function to detect if request is from admin dashboard
+const isAdminRequest = (req: any): boolean => {
+  const origin = req.headers?.origin || req.headers?.referer || '';
+  const adminUrls = [
+    process.env.ADMIN_URL || 'http://localhost:5174',
+    'https://pet-shop-2-r3ed.onrender.com',
+    'https://dashboard.petshiwu.com',
+  ];
+  
+  // Check if origin matches admin URLs
+  return adminUrls.some(url => origin.includes(url) || origin.includes('5174') || origin.includes('dashboard'));
+};
+
+export const sendTokenResponse = (userId: string, statusCode: number, res: Response, req?: any) => {
   try {
     const token = generateToken(userId);
 
@@ -58,10 +71,16 @@ export const sendTokenResponse = (userId: string, statusCode: number, res: Respo
     options.domain = cookieDomain;
   }
 
+  // Determine cookie name based on request origin
+  // Use separate cookies for frontend and admin to prevent cross-contamination
+  const isAdmin = req ? isAdminRequest(req) : false;
+  const cookieName = isAdmin ? 'admin_token' : 'frontend_token';
+
     // Phase 2: Cookie-Only - Set httpOnly cookie, token not returned in response body
     // Frontend relies solely on httpOnly cookies (more secure, XSS protection)
+    // Use separate cookie names for frontend and admin to prevent cross-contamination
     res.status(statusCode)
-      .cookie('token', token, options)
+      .cookie(cookieName, token, options)
       .json({
         success: true
         // Token not returned - frontend uses httpOnly cookie only
