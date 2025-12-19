@@ -625,6 +625,594 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
   }
 };
 
+// JSON Import function
+interface JSONProduct {
+  name: string;
+  description: string;
+  shortDescription?: string;
+  brand: string;
+  category: string; // Category name or path like "Dog > Food > Dry Food"
+  basePrice: number;
+  compareAtPrice?: number;
+  petType: string;
+  images: string | string[]; // Array or comma-separated string
+  tags?: string | string[];
+  features?: string | string[];
+  ingredients?: string;
+  isActive?: boolean | string;
+  isFeatured?: boolean | string;
+  inStock?: boolean | string;
+  stock?: number;
+  lowStockThreshold?: number;
+  variants?: Array<{
+    attributes?: { [key: string]: string };
+    size?: string; // Legacy
+    weight?: string; // Legacy
+    price: number;
+    compareAtPrice?: number;
+    stock: number;
+    sku: string;
+    image?: string;
+    images?: string[];
+  }>;
+  // Legacy variant fields (for single variant)
+  variantSize?: string;
+  variantPrice?: number;
+  variantCompareAtPrice?: number;
+  variantStock?: number;
+  variantSku?: string;
+  sku?: string;
+}
+
+export const importProductsFromJSON = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  let jsonFilePath: string | null = null;
+  
+  try {
+    // Check if file was uploaded
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'JSON file is required'
+      });
+    }
+
+    jsonFilePath = req.file.path;
+
+    // Read and parse JSON file
+    const jsonContent = fs.readFileSync(jsonFilePath, 'utf-8');
+    let products: JSONProduct[];
+    
+    try {
+      const parsed = JSON.parse(jsonContent);
+      // Handle both array format and object with products array
+      if (Array.isArray(parsed)) {
+        products = parsed;
+      } else if (parsed.products && Array.isArray(parsed.products)) {
+        products = parsed.products;
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'JSON must be an array of products or an object with a "products" array'
+        });
+      }
+    } catch (parseError: any) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid JSON format: ${parseError.message}`
+      });
+    }
+
+    if (!products || products.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'JSON file is empty or contains no products'
+      });
+    }
+
+    const results = {
+      success: 0,
+      failed: 0,
+      errors: [] as Array<{ index: number; error: string }>
+    };
+
+    // OPTIMIZATION: Pre-fetch all existing slugs in one query
+    const existingSlugs = new Set<string>();
+    const allExistingProducts = await Product.find({}).select('slug').lean();
+    allExistingProducts.forEach((p: { slug?: string }) => {
+      if (p.slug) existingSlugs.add(p.slug);
+    });
+    logger.debug(`[JSON IMPORT] Pre-loaded ${existingSlugs.size} existing product slugs`);
+
+    // OPTIMIZATION: Cache for categories
+    const categoryCache = new Map<string, mongoose.Types.ObjectId>();
+    const categoryNameCache = new Map<string, string>();
+
+    // Helper function to find or create category (same as CSV import)
+    const findOrCreateCategory = async (categoryName: string, petType: string, parentId: mongoose.Types.ObjectId | null = null): Promise<mongoose.Types.ObjectId> => {
+      const cacheKey = `${categoryName.toLowerCase()}_${petType}_${parentId?.toString() || 'null'}`;
+      
+      if (categoryCache.has(cacheKey)) {
+        return categoryCache.get(cacheKey)!;
+      }
+
+      const trimmedName = categoryName.trim();
+      
+      if (!trimmedName || trimmedName.length === 0) {
+        throw new Error('Category name cannot be empty');
+      }
+      
+      const query: any = {
+        name: { $regex: new RegExp(`^${trimmedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+        petType: petType.toLowerCase()
+      };
+      
+      if (parentId) {
+        query.parentCategory = parentId;
+      } else {
+        query.parentCategory = null;
+      }
+      
+      interface CategoryLean {
+        _id: mongoose.Types.ObjectId;
+        name: string;
+        slug: string;
+        petType: string;
+        level: number;
+        isActive: boolean;
+      }
+      
+      let category: CategoryLean | null = await Category.findOne(query).lean() as unknown as CategoryLean | null;
+      
+      if (!category) {
+        let level = 1;
+        if (parentId) {
+          const parent = await Category.findById(parentId).select('level').lean();
+          if (parent) {
+            level = (parent.level || 1) + 1;
+            if (level > 3) {
+              throw new Error(`Maximum category depth is 3 levels. Cannot create category "${trimmedName}" at level ${level}.`);
+            }
+          }
+        }
+        
+        try {
+          const newCategory = await Category.create({
+            name: trimmedName,
+            petType: petType.toLowerCase(),
+            parentCategory: parentId,
+            isActive: true,
+            level: level,
+            description: `${trimmedName} products`
+          });
+          category = newCategory.toObject() as unknown as CategoryLean;
+        } catch (createError: any) {
+          if (createError.code === 11000 || createError.name === 'MongoServerError') {
+            const foundCategory = await Category.findOne(query).lean();
+            if (!foundCategory) {
+              throw new Error(`Failed to create category "${trimmedName}": ${createError.message || 'Unknown error'}`);
+            }
+            category = foundCategory as unknown as CategoryLean;
+          } else {
+            throw createError;
+          }
+        }
+      } else if (category && !category.isActive) {
+        await Category.findByIdAndUpdate(category._id, { isActive: true });
+        category.isActive = true;
+      }
+      
+      if (category && category._id) {
+        const categoryId = category._id instanceof mongoose.Types.ObjectId 
+          ? category._id 
+          : new mongoose.Types.ObjectId(String(category._id));
+        
+        categoryCache.set(cacheKey, categoryId);
+        if (category.name) {
+          categoryNameCache.set(categoryId.toString(), category.name);
+        }
+        
+        return categoryId;
+      }
+      
+      throw new Error(`Failed to find or create category: ${trimmedName}`);
+    };
+
+    // OPTIMIZATION: Process products in batches
+    const BATCH_SIZE = 50;
+    const productsToInsert: any[] = [];
+    const productIndexMap = new Map<number, number>();
+
+    // Process each product
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
+      const index = i + 1; // 1-based index for error reporting
+
+      try {
+        // Validate required fields
+        if (!product.name || !product.description || !product.brand || !product.category || !product.basePrice || !product.petType) {
+          results.failed++;
+          results.errors.push({
+            index,
+            error: 'Missing required fields: name, description, brand, category, basePrice, or petType'
+          });
+          continue;
+        }
+
+        // Parse category (same logic as CSV)
+        let categoryId: mongoose.Types.ObjectId | null = null;
+        const categoryPath = String(product.category || '').trim();
+        const petType = String(product.petType).toLowerCase().trim();
+        
+        if (categoryPath.includes('>')) {
+          const categoryParts = categoryPath.split('>').map(part => part.trim()).filter(part => part.length > 0);
+          
+          if (categoryParts.length === 0) {
+            results.failed++;
+            results.errors.push({
+              index,
+              error: 'Invalid category path format'
+            });
+            continue;
+          }
+          
+          let currentParentId: mongoose.Types.ObjectId | null = null;
+          
+          for (let j = 0; j < categoryParts.length; j++) {
+            const categoryName = categoryParts[j].trim();
+            if (!categoryName) continue;
+            
+            try {
+              const createdId = await findOrCreateCategory(categoryName, petType, currentParentId);
+              if (!createdId) {
+                throw new Error(`Failed to create/find category: ${categoryName}`);
+              }
+              currentParentId = createdId;
+            } catch (error: any) {
+              results.failed++;
+              results.errors.push({
+                index,
+                error: `Category hierarchy error at "${categoryName}": ${error.message}`
+              });
+              currentParentId = null;
+              break;
+            }
+          }
+          
+          if (!currentParentId) {
+            results.failed++;
+            results.errors.push({
+              index,
+              error: 'Failed to resolve category hierarchy'
+            });
+            continue;
+          }
+          
+          categoryId = currentParentId;
+        } else {
+          if (mongoose.Types.ObjectId.isValid(categoryPath)) {
+            const foundCategory = await Category.findById(categoryPath);
+            if (!foundCategory || !foundCategory._id) {
+              results.failed++;
+              results.errors.push({
+                index,
+                error: `Category not found: ${categoryPath}`
+              });
+              continue;
+            }
+            categoryId = foundCategory._id as mongoose.Types.ObjectId;
+          } else {
+            categoryId = await findOrCreateCategory(categoryPath, petType, null);
+          }
+        }
+
+        // Parse images
+        let images: string[] = [];
+        if (product.images) {
+          if (Array.isArray(product.images)) {
+            images = product.images.filter(img => img && img.trim().length > 0);
+          } else {
+            images = String(product.images).split(/[,|]/).map((img: string) => img.trim()).filter((img: string) => img.length > 0);
+          }
+        }
+
+        if (images.length === 0) {
+          results.failed++;
+          results.errors.push({
+            index,
+            error: 'At least one image URL is required'
+          });
+          continue;
+        }
+
+        // Parse variants
+        let variants: any[] = [];
+        if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
+          variants = product.variants.map(v => ({
+            attributes: v.attributes || (v.size ? { size: v.size } : {}),
+            price: v.price,
+            compareAtPrice: v.compareAtPrice,
+            stock: v.stock || 0,
+            sku: v.sku || `${String(product.name).toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`,
+            image: v.image,
+            images: v.images
+          }));
+        } else if (product.variantPrice || product.variantSku) {
+          // Legacy single variant format
+          variants = [{
+            size: product.variantSize || '',
+            price: product.variantPrice || product.basePrice,
+            compareAtPrice: product.variantCompareAtPrice,
+            stock: product.variantStock || product.stock || 0,
+            sku: product.variantSku || product.sku || `${String(product.name).toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
+          }];
+        } else {
+          // Default variant
+          variants = [{
+            size: '',
+            price: product.basePrice,
+            stock: product.stock || 0,
+            sku: product.sku || `${String(product.name).toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
+          }];
+        }
+
+        // Parse tags and features
+        const tags = product.tags 
+          ? (Array.isArray(product.tags) ? product.tags : String(product.tags).split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0))
+          : [];
+        
+        const features = product.features
+          ? (Array.isArray(product.features) ? product.features : String(product.features).split(',').map((feature: string) => feature.trim()).filter((feature: string) => feature.length > 0))
+          : [];
+
+        // Generate unique slug
+        let baseSlug = String(product.name).trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+        let uniqueSlug = baseSlug;
+        let slugAttempts = 0;
+        const maxSlugAttempts = 10;
+        
+        while (slugAttempts < maxSlugAttempts) {
+          if (!existingSlugs.has(uniqueSlug)) {
+            existingSlugs.add(uniqueSlug);
+            break;
+          }
+          
+          slugAttempts++;
+          if (slugAttempts === 1) {
+            const brandSlug = String(product.brand).trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+            uniqueSlug = `${baseSlug}-${brandSlug}`;
+          } else if (slugAttempts === 2) {
+            const categoryName = categoryNameCache.get(categoryId.toString()) || '';
+            if (categoryName) {
+              const categorySlug = categoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+              uniqueSlug = `${baseSlug}-${categorySlug}`;
+            } else {
+              uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-6)}-${i}`;
+            }
+          } else {
+            uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-6)}-${i}-${slugAttempts}`;
+          }
+        }
+        
+        if (slugAttempts >= maxSlugAttempts) {
+          results.failed++;
+          results.errors.push({
+            index,
+            error: `Could not generate unique slug for product: ${product.name}`
+          });
+          continue;
+        }
+
+        // Format description
+        const rawDescription = String(product.description).trim();
+        const formattedDescription = formatProductDescription(rawDescription);
+
+        // Create product data
+        const productData: any = {
+          name: String(product.name).trim(),
+          slug: uniqueSlug,
+          description: formattedDescription || rawDescription,
+          shortDescription: product.shortDescription ? String(product.shortDescription).trim() : '',
+          brand: String(product.brand).trim(),
+          category: categoryId,
+          images: images,
+          variants: variants,
+          basePrice: parseFloat(String(product.basePrice || '0')),
+          compareAtPrice: product.compareAtPrice ? parseFloat(String(product.compareAtPrice)) : undefined,
+          petType: petType,
+          tags: tags,
+          features: features,
+          ingredients: product.ingredients ? String(product.ingredients).trim() : '',
+          isActive: typeof product.isActive === 'boolean' ? product.isActive : String(product.isActive || 'true').toLowerCase() !== 'false',
+          isFeatured: typeof product.isFeatured === 'boolean' ? product.isFeatured : String(product.isFeatured || 'false').toLowerCase() === 'true',
+          inStock: typeof product.inStock === 'boolean' ? product.inStock : String(product.inStock || 'true').toLowerCase() !== 'false',
+          lowStockThreshold: product.lowStockThreshold !== undefined ? Number(product.lowStockThreshold) : undefined
+        };
+
+        productsToInsert.push(productData);
+        productIndexMap.set(productsToInsert.length - 1, index);
+        
+        // Insert in batches
+        if (productsToInsert.length >= BATCH_SIZE) {
+          try {
+            const insertedProducts = await Product.insertMany(productsToInsert, { ordered: false });
+            results.success += insertedProducts.length;
+            productsToInsert.length = 0;
+            productIndexMap.clear();
+            logger.info(`[JSON IMPORT] Batch inserted ${insertedProducts.length} products`);
+          } catch (batchError: any) {
+            if (batchError.writeErrors) {
+              for (let j = 0; j < productsToInsert.length; j++) {
+                try {
+                  await Product.create(productsToInsert[j]);
+                  results.success++;
+                } catch (singleError: any) {
+                  const originalIndex = productIndexMap.get(j) || index;
+                  results.failed++;
+                  results.errors.push({
+                    index: originalIndex,
+                    error: singleError.message || 'Failed to create product'
+                  });
+                }
+              }
+            } else {
+              for (let j = 0; j < productsToInsert.length; j++) {
+                const originalIndex = productIndexMap.get(j) || index;
+                results.failed++;
+                results.errors.push({
+                  index: originalIndex,
+                  error: batchError.message || 'Batch insert failed'
+                });
+              }
+            }
+            productsToInsert.length = 0;
+            productIndexMap.clear();
+          }
+        }
+
+      } catch (error: any) {
+        if ((error.code === 11000 || error.name === 'MongoServerError') && error.keyPattern?.slug) {
+          results.failed++;
+          results.errors.push({
+            index,
+            error: `Product with same slug already exists: ${error.message}`
+          });
+        } else {
+          results.failed++;
+          results.errors.push({
+            index,
+            error: error.message || 'Unknown error'
+          });
+        }
+      }
+    }
+
+    // Insert any remaining products
+    if (productsToInsert.length > 0) {
+      try {
+        const insertedProducts = await Product.insertMany(productsToInsert, { ordered: false });
+        results.success += insertedProducts.length;
+        logger.info(`[JSON IMPORT] Final batch inserted ${insertedProducts.length} products`);
+      } catch (batchError: any) {
+        if (batchError.writeErrors) {
+          for (let j = 0; j < productsToInsert.length; j++) {
+            try {
+              await Product.create(productsToInsert[j]);
+              results.success++;
+            } catch (singleError: any) {
+              const originalIndex = productIndexMap.get(j) || 0;
+              results.failed++;
+              results.errors.push({
+                index: originalIndex,
+                error: singleError.message || 'Failed to create product'
+              });
+            }
+          }
+        } else {
+          for (let j = 0; j < productsToInsert.length; j++) {
+            const originalIndex = productIndexMap.get(j) || 0;
+            results.failed++;
+            results.errors.push({
+              index: originalIndex,
+              error: batchError.message || 'Batch insert failed'
+            });
+          }
+        }
+      }
+    }
+
+    // Clean up uploaded file
+    if (jsonFilePath && fs.existsSync(jsonFilePath)) {
+      fs.unlinkSync(jsonFilePath);
+    }
+
+    // Return results
+    res.status(200).json({
+      success: true,
+      message: `Import completed: ${results.success} succeeded, ${results.failed} failed`,
+      data: {
+        total: products.length,
+        succeeded: results.success,
+        failed: results.failed,
+        errors: results.errors
+      }
+    });
+
+  } catch (error: any) {
+    // Clean up uploaded file on error
+    if (jsonFilePath && fs.existsSync(jsonFilePath)) {
+      try {
+        fs.unlinkSync(jsonFilePath);
+      } catch (e) {
+        // Ignore cleanup errors
+      }
+    }
+
+    next(error);
+  }
+};
+
+// Download JSON template
+export const downloadJSONTemplate = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const templatePath = path.join(__dirname, '../../uploads/json/product-import-template.json');
+    
+    // Check if template file exists
+    if (!fs.existsSync(templatePath)) {
+      // If file doesn't exist, create a default template
+      const defaultTemplate = [
+        {
+          "name": "Example Product",
+          "description": "Product description here. This is a detailed description of the product.",
+          "shortDescription": "Short description",
+          "brand": "Brand Name",
+          "category": "Dog > Food > Dry Food",
+          "basePrice": 29.99,
+          "compareAtPrice": 39.99,
+          "petType": "dog",
+          "images": ["https://example.com/image.jpg"],
+          "tags": ["tag1", "tag2"],
+          "features": ["feature1", "feature2"],
+          "ingredients": "Ingredients list",
+          "isActive": true,
+          "isFeatured": false,
+          "inStock": true,
+          "stock": 100,
+          "lowStockThreshold": 10,
+          "variants": [
+            {
+              "attributes": {
+                "size": "5 lb",
+                "flavor": "Chicken"
+              },
+              "price": 29.99,
+              "compareAtPrice": 39.99,
+              "stock": 50,
+              "sku": "PRODUCT-SKU-001"
+            }
+          ]
+        }
+      ];
+      
+      // Ensure directory exists
+      const templateDir = path.dirname(templatePath);
+      if (!fs.existsSync(templateDir)) {
+        fs.mkdirSync(templateDir, { recursive: true });
+      }
+      
+      // Write default template
+      fs.writeFileSync(templatePath, JSON.stringify(defaultTemplate, null, 2), 'utf-8');
+    }
+    
+    // Send the template file
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename="product-import-template.json"');
+    res.sendFile(templatePath);
+  } catch (error: any) {
+    logger.error('Error serving JSON template:', error);
+    next(error);
+  }
+};
+
 /**
  * @swagger
  * /api/products:

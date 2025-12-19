@@ -17,6 +17,63 @@ import {
   Legend
 } from 'recharts';
 
+// Helper function to safely convert any ID to a unique string key
+const getUniqueKey = (id: any, index: number, prefix: string = 'item'): string => {
+  if (!id && id !== 0) {
+    return `${prefix}-${index}`;
+  }
+  
+  // Handle string IDs
+  if (typeof id === 'string') {
+    return `${id}-${index}`; // Add index to ensure uniqueness
+  }
+  
+  // Handle number IDs
+  if (typeof id === 'number') {
+    return `${id}-${index}`;
+  }
+  
+  // Handle object IDs (Mongoose ObjectId, etc.)
+  if (typeof id === 'object') {
+    // Try toString() method first (Mongoose ObjectId has this)
+    if (id.toString && typeof id.toString === 'function') {
+      try {
+        const str = id.toString();
+        if (str && str !== '[object Object]') {
+          return `${str}-${index}`;
+        }
+      } catch (e) {
+        // Fall through to other methods
+      }
+    }
+    
+    // Try valueOf() method
+    if (id.valueOf && typeof id.valueOf === 'function') {
+      try {
+        const val = id.valueOf();
+        if (val && val !== id) {
+          return getUniqueKey(val, index, prefix);
+        }
+      } catch (e) {
+        // Fall through
+      }
+    }
+    
+    // Last resort: JSON.stringify (but this might not work for circular refs)
+    try {
+      const json = JSON.stringify(id);
+      if (json && json !== '{}' && json !== 'null') {
+        return `${json}-${index}`;
+      }
+    } catch (e) {
+      // Fall through to index-based key
+    }
+  }
+  
+  // Fallback: use index only
+  return `${prefix}-${index}`;
+};
+
 const Dashboard = () => {
   // Get user data first
   // Only fetch if we're likely authenticated (skip if we know we're not)
@@ -268,8 +325,8 @@ const Dashboard = () => {
                 The following products are out of stock and cannot be purchased by customers. Please restock as soon as possible to avoid lost sales.
               </p>
               <div className="space-y-2 mb-4">
-                {outOfStockData.data.slice(0, 5).map((product: any) => (
-                  <div key={product._id} className="flex items-center justify-between bg-white p-4 rounded-lg border-2 border-red-200 hover:border-red-400 transition-all hover-lift shadow-sm">
+                {outOfStockData.data.slice(0, 5).map((product: any, prodIndex: number) => (
+                  <div key={getUniqueKey(product?._id, prodIndex, 'product')} className="flex items-center justify-between bg-white p-4 rounded-lg border-2 border-red-200 hover:border-red-400 transition-all hover-lift shadow-sm">
                     <div className="flex items-center gap-3">
                       <img
                         src={normalizeImageUrl(product.images?.[0])}
@@ -473,9 +530,9 @@ const Dashboard = () => {
                     {data.mainCategories.length === 0 ? (
                       <p className="text-sm text-gray-500 italic">No main categories yet</p>
                     ) : (
-                      data.mainCategories.map((category: any) => (
+                      data.mainCategories.map((category: any, catIndex: number) => (
                         <Link
-                          key={category._id}
+                          key={getUniqueKey(category?._id, catIndex, 'category')}
                           to="/categories"
                           className="flex items-center justify-between p-2 rounded-lg hover:bg-indigo-50 transition-colors group"
                         >
@@ -529,8 +586,8 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {orderStats?.recentOrders?.map((order: any) => (
-                <tr key={order._id} className="hover:bg-gray-50">
+              {orderStats?.recentOrders?.map((order: any, index: number) => (
+                <tr key={getUniqueKey(order?._id, index, 'order')} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm font-medium">{order.orderNumber}</td>
                   <td className="px-6 py-4 text-sm">
                     {order.user?.firstName} {order.user?.lastName}

@@ -11,6 +11,7 @@ interface WishlistState {
   clearWishlist: () => void;
   syncWithBackend: () => Promise<void>;
   cleanup: () => void;
+  removeInvalidItems: (invalidIds: string[]) => void;
 }
 
 export const useWishlistStore = create<WishlistState>()(
@@ -97,6 +98,18 @@ export const useWishlistStore = create<WishlistState>()(
       cleanup: () => {
         const currentItems = get().items;
         const validItems = currentItems.filter((id) => id && typeof id === 'string' && id.trim() !== '');
+        if (validItems.length !== currentItems.length) {
+          set({ items: validItems });
+        }
+      },
+
+      // Remove invalid product IDs from wishlist (called when products fail to load)
+      removeInvalidItems: (invalidIds: string[]) => {
+        const currentItems = get().items;
+        const invalidIdsStr = invalidIds.map(id => String(id));
+        const validItems = currentItems
+          .map(item => String(item))
+          .filter((id) => !invalidIdsStr.includes(id));
         if (validItems.length !== currentItems.length) {
           set({ items: validItems });
         }

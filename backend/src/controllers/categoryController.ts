@@ -39,6 +39,32 @@ const normalizeCategories = (categories: any[]): any[] => {
   return categories.map(normalizeCategoryId);
 };
 
+// Helper function to clear all category-related caches
+const clearCategoryCaches = async (petType?: string) => {
+  try {
+    // Clear all category list caches (for all petTypes)
+    await cache.delPattern('categories:*');
+    
+    // Clear category tree caches
+    await cache.delPattern('categoryTree:*');
+    
+    // If a specific petType is provided, also clear that specific cache
+    if (petType) {
+      await cache.del(cacheKeys.categories(petType));
+      await cache.del(cacheKeys.categoryTree(petType));
+    }
+    
+    // Clear the default 'all' cache
+    await cache.del(cacheKeys.categories());
+    await cache.del(cacheKeys.categoryTree());
+    
+    logger.debug('Category caches cleared');
+  } catch (error: any) {
+    logger.error('Error clearing category caches:', error.message);
+    // Don't throw - cache clearing failure shouldn't break the operation
+  }
+};
+
 // Get all categories (public - only active)
 export const getCategories = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -448,6 +474,9 @@ export const createCategory = async (req: AuthRequest, res: Response, next: Next
     
     const category = await Category.create(req.body);
 
+    // Clear category caches to ensure frontend sees the new category
+    await clearCategoryCaches(req.body.petType);
+
     // Normalize _id to string
     const normalizedCategory = normalizeCategoryId(category);
 
@@ -472,11 +501,28 @@ export const updateCategory = async (req: AuthRequest, res: Response, next: Next
       });
     }
 
+    // Store old petType before update (for cache clearing)
+    const oldPetType = category.petType;
+    
     // Update fields
     Object.assign(category, req.body);
     
     // Save to trigger pre-save middleware
     await category.save();
+
+    // Clear category caches for both old and new petType (if changed)
+    await clearCategoryCaches(oldPetType);
+    if (req.body.petType && req.body.petType !== oldPetType) {
+      await clearCategoryCaches(req.body.petType);
+    }
+    
+    // Also clear individual category cache
+    const categoryCacheKey = cacheKeys.category(`${category._id}-${oldPetType || 'all'}`);
+    await cache.del(categoryCacheKey);
+    if (req.body.petType && req.body.petType !== oldPetType) {
+      const newCategoryCacheKey = cacheKeys.category(`${category._id}-${req.body.petType}`);
+      await cache.del(newCategoryCacheKey);
+    }
 
     // Normalize _id to string
     const normalizedCategory = normalizeCategoryId(category);
@@ -623,6 +669,9 @@ export const updateCategoryPosition = async (req: AuthRequest, res: Response, ne
 
     await Promise.all(updatePromises);
 
+    // Clear category caches to ensure frontend sees the position change
+    await clearCategoryCaches(category.petType);
+
     res.status(200).json({
       success: true,
       message: `Category moved ${direction} successfully`
@@ -651,6 +700,13 @@ export const deleteCategory = async (req: AuthRequest, res: Response, next: Next
         message: 'Category not found'
       });
     }
+
+    // Clear category caches to ensure frontend sees the deletion
+    await clearCategoryCaches(category.petType);
+    
+    // Also clear individual category cache
+    const categoryCacheKey = cacheKeys.category(`${categoryId}-${category.petType || 'all'}`);
+    await cache.del(categoryCacheKey);
 
     res.status(200).json({
       success: true,

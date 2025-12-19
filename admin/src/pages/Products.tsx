@@ -415,7 +415,7 @@ const Products = () => {
             <input
               type="text"
               placeholder="Search products..."
-              value={searchQuery}
+              value={searchQuery || ''}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
@@ -639,7 +639,7 @@ const Products = () => {
                 <th className="px-6 py-3 text-left">
                   <input
                     type="checkbox"
-                    checked={productsData?.data && selectedProducts.size === productsData.data.length && productsData.data.length > 0}
+                    checked={!!(productsData?.data && selectedProducts.size === productsData.data.length && productsData.data.length > 0)}
                     onChange={handleSelectAll}
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />

@@ -75,8 +75,11 @@ const CategoriesNew = () => {
   const createMutation = useMutation({
     mutationFn: adminService.createCategory,
     onSuccess: () => {
-      // Clear localStorage cache to ensure frontend navbar updates
-      localStorage.removeItem('cached_categories');
+      // Backend cache is now cleared automatically, notify frontend via BroadcastChannel
+      const channel = new BroadcastChannel('category-updates');
+      channel.postMessage('categories-updated');
+      channel.close();
+      
       // Invalidate all category-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
       queryClient.invalidateQueries({ queryKey: ['categories'] });
@@ -93,8 +96,11 @@ const CategoriesNew = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => adminService.updateCategory(id, data),
     onSuccess: () => {
-      // Clear localStorage cache to ensure frontend navbar updates
-      localStorage.removeItem('cached_categories');
+      // Backend cache is now cleared automatically, notify frontend via BroadcastChannel
+      const channel = new BroadcastChannel('category-updates');
+      channel.postMessage('categories-updated');
+      channel.close();
+      
       // Invalidate all category-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
       queryClient.invalidateQueries({ queryKey: ['categories'] });
@@ -111,8 +117,11 @@ const CategoriesNew = () => {
   const deleteMutation = useMutation({
     mutationFn: adminService.deleteCategory,
     onSuccess: () => {
-      // Clear localStorage cache to ensure frontend navbar updates
-      localStorage.removeItem('cached_categories');
+      // Backend cache is now cleared automatically, notify frontend via BroadcastChannel
+      const channel = new BroadcastChannel('category-updates');
+      channel.postMessage('categories-updated');
+      channel.close();
+      
       // Invalidate all category-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
       queryClient.invalidateQueries({ queryKey: ['categories'] });
@@ -130,8 +139,11 @@ const CategoriesNew = () => {
     mutationFn: ({ id, direction }: { id: string; direction: 'up' | 'down' | 'left' | 'right' }) => 
       adminService.updateCategoryPosition(id, direction),
     onSuccess: () => {
-      // Clear localStorage cache to ensure frontend navbar updates
-      localStorage.removeItem('cached_categories');
+      // Backend cache is now cleared automatically, notify frontend via BroadcastChannel
+      const channel = new BroadcastChannel('category-updates');
+      channel.postMessage('categories-updated');
+      channel.close();
+      
       // Invalidate all category-related queries
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
       queryClient.invalidateQueries({ queryKey: ['categories'] });

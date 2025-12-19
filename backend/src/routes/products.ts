@@ -9,7 +9,9 @@ import {
   restoreProduct,
   getProductStats,
   getUniqueBrands,
-  importProductsFromCSV
+  importProductsFromCSV,
+  importProductsFromJSON,
+  downloadJSONTemplate
 } from '../controllers/productController';
 import { getProductRecommendations, getFrequentlyBoughtTogether } from '../controllers/recommendationController';
 import { compareProducts, getComparisonSuggestions } from '../controllers/comparisonController';
@@ -27,6 +29,7 @@ import {
   productIdsValidationForSuggestions
 } from '../middleware/validation';
 import { csvUpload } from '../middleware/csvUpload';
+import { jsonUpload } from '../middleware/jsonUpload';
 
 const router = express.Router();
 
@@ -43,7 +46,9 @@ router.get('/:id/frequently-bought-together', validateProductIdentifier(), getFr
 router.get('/:id/related', validateProductIdentifier(), getRelatedProducts); // Basic related products - supports slug or ID
 router.get('/:id', validateProductIdentifier(), getProduct); // Get product by slug or ID
 router.post('/', protect, checkPermission('canManageProducts'), createProductValidation, createProduct);
+router.get('/import/json/template', protect, checkPermission('canManageProducts'), downloadJSONTemplate);
 router.post('/import', protect, checkPermission('canManageProducts'), csvUpload.single('csv'), importProductsFromCSV);
+router.post('/import/json', protect, checkPermission('canManageProducts'), jsonUpload.single('json'), importProductsFromJSON);
 router.put('/:id', protect, checkPermission('canManageProducts'), validateObjectId(), updateProduct);
 router.delete('/:id', protect, checkPermission('canManageProducts'), validateObjectId(), deleteProduct);
 router.post('/:id/restore', protect, checkPermission('canManageProducts'), validateObjectId(), restoreProduct);

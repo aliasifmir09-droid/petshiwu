@@ -14,6 +14,7 @@ import compression from 'compression';
 import mongoose from 'mongoose';
 import { connectDatabase } from './utils/database';
 import { errorHandler, notFound } from './middleware/errorHandler';
+import { checkDatabase } from './middleware/checkDatabase';
 import { validateEnv } from './utils/validateEnv';
 import { isCloudinaryConfigured } from './utils/cloudinary';
 import { sanitizeResponse } from './middleware/sanitizeResponse';
@@ -50,6 +51,7 @@ import exportRoutes from './routes/exports';
 import emailTemplateRoutes from './routes/emailTemplates';
 import inventoryAlertRoutes from './routes/inventoryAlerts';
 import testEmailRoutes from './routes/testEmail';
+import blogRoutes from './routes/blogs';
 
 // Connect to database
 connectDatabase();
@@ -243,13 +245,41 @@ const uploadLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Rate limiting for auth status check (/me) - more lenient since it's called frequently
+const authStatusLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 30, // Maximum 30 requests per minute per IP (allows frequent checks during development)
+  message: 'Too many auth status checks from this IP, please try again in a moment.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true, // Don't count successful requests
+});
+
 // General API rate limiting to prevent DoS attacks
+// Much more lenient in development to allow hot reloading and frequent requests
+const isDevelopment = process.env.NODE_ENV !== 'production';
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Maximum 100 requests per 15 minutes per IP
+  max: isDevelopment ? 1000 : 100, // Much higher limit in development (1000 vs 100)
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  skipSuccessfulRequests: isDevelopment, // In development, don't count successful GET requests
+});
+
+if (isDevelopment) {
+  console.log('🔓 Development mode: Rate limiting is more lenient (1000 req/15min for general API, 200 req/min for public data)');
+}
+
+// Lenient limiter for frequently-called GET endpoints (pet-types, categories, products)
+// These are safe to call frequently and are needed for navigation/menus
+const publicDataLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: isDevelopment ? 200 : 100, // Very high limit in development
+  message: 'Too many requests from this IP, please try again in a moment.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true, // Don't count successful requests
 });
 
 // Apply rate limiting to specific critical endpoints BEFORE general API limiter
@@ -260,9 +290,39 @@ const apiLimiter = rateLimit({
 app.use(['/api/v1/auth/login', '/api/auth/login'], authLimiter);
 app.use(['/api/v1/auth/register', '/api/auth/register'], registerLimiter);
 app.use(['/api/v1/auth/updatepassword', '/api/auth/updatepassword'], passwordUpdateLimiter);
+
+// Auth status check (/me) - more lenient limiter (called frequently for auth checks)
+// Use middleware that only applies to GET requests
+app.use(['/api/v1/auth/me', '/api/auth/me'], (req, res, next) => {
+  if (req.method === 'GET') {
+    return authStatusLimiter(req, res, next);
+  }
+  next();
+});
 // Password reset endpoints - prevent abuse and email spam
 app.post(['/api/v1/auth/forgot-password', '/api/auth/forgot-password'], forgotPasswordLimiter);
 app.post(['/api/v1/auth/reset-password', '/api/auth/reset-password'], resetPasswordLimiter);
+
+// Frequently-called GET endpoints - very lenient limits (safe, read-only)
+// Apply only to GET requests to avoid interfering with POST/PUT/DELETE
+app.use(['/api/v1/pet-types', '/api/pet-types'], (req, res, next) => {
+  if (req.method === 'GET') {
+    return publicDataLimiter(req, res, next);
+  }
+  next();
+});
+app.use(['/api/v1/categories', '/api/categories'], (req, res, next) => {
+  if (req.method === 'GET') {
+    return publicDataLimiter(req, res, next);
+  }
+  next();
+});
+app.use(['/api/v1/products', '/api/products'], (req, res, next) => {
+  if (req.method === 'GET') {
+    return publicDataLimiter(req, res, next);
+  }
+  next();
+});
 
 // Order creation - prevent abuse (only POST requests)
 app.post(['/api/v1/orders', '/api/orders'], orderCreationLimiter);
@@ -275,7 +335,17 @@ app.use(['/api/v1/donations/confirm', '/api/donations/confirm'], donationLimiter
 app.use('/api/upload', uploadLimiter);
 
 // Apply general rate limiting to all other API routes (after specific limiters)
+// Note: GET endpoints for pet-types, categories, and products are handled above
 app.use('/api', apiLimiter);
+
+// Check database connection before processing API requests (except health check)
+app.use('/api', (req, res, next) => {
+  // Skip database check for health check endpoints
+  if (req.path === '/health' || req.path === '/status') {
+    return next();
+  }
+  return checkDatabase(req, res, next);
+});
 
 // Body parser with size limits to prevent DoS attacks
 app.use(express.json({ limit: '10mb' }));
@@ -486,6 +556,7 @@ app.use(`${API_PREFIX}/upload`, uploadRoutes);
 app.use(`${API_PREFIX}/users`, userRoutes);
 app.use(`${API_PREFIX}/pet-types`, petTypeRoutes);
 app.use(`${API_PREFIX}/donations`, donationRoutes);
+app.use(`${API_PREFIX}/blogs`, blogRoutes);
 
 // Legacy routes (without version) - redirect to v1 for backward compatibility
 app.use('/api/auth', authRoutes);
@@ -503,6 +574,7 @@ app.use('/api/export', exportRoutes);
 app.use('/api/email-templates', emailTemplateRoutes);
 app.use('/api/inventory-alerts', inventoryAlertRoutes);
 app.use('/api/test', testEmailRoutes);
+app.use('/api/blogs', blogRoutes);
 
 // Root route - API information
 app.get('/', (req, res) => {
@@ -596,11 +668,14 @@ try {
       console.error('❌ Server error event:', error);
       if (error.code === 'EADDRINUSE') {
         console.error(`❌ Port ${PORT} is already in use`);
+        console.error(`💡 This usually happens during nodemon restarts. Wait a moment and nodemon will retry.`);
+        // In development, wait longer before exiting to allow nodemon to retry
+        const waitTime = process.env.NODE_ENV === 'production' ? 1000 : 2000;
+        setTimeout(() => process.exit(1), waitTime);
       } else {
         console.error('❌ Server error details:', error.message);
+        setTimeout(() => process.exit(1), 1000);
       }
-      // Don't exit immediately - let Render see the error
-      setTimeout(() => process.exit(1), 1000);
     });
 
     // Log when server is actually listening

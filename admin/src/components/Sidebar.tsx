@@ -13,7 +13,8 @@ import {
   Settings,
   LogOut,
   Mail,
-  AlertTriangle
+  AlertTriangle,
+  BookOpen
 } from 'lucide-react';
 import ConfirmationModal from './ConfirmationModal';
 
@@ -53,6 +54,7 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
     { path: '/customers', icon: Users, label: 'Customers', permission: 'canManageCustomers' },
     { path: '/email-templates', icon: Mail, label: 'Email Templates', adminOnly: true },
     { path: '/inventory-alerts', icon: AlertTriangle, label: 'Inventory Alerts', permission: 'canManageProducts' },
+    { path: '/blogs', icon: BookOpen, label: 'Blogs', adminOnly: true },
     { path: '/settings', icon: Settings, label: 'Settings', alwaysShow: true }
   ];
 

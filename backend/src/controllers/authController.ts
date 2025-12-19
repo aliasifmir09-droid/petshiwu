@@ -192,6 +192,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
     sendTokenResponse(safeToString(user._id), 200, res);
   } catch (error: unknown) {
+    logger.error('Login error:', error);
     next(error);
   }
 };
@@ -225,15 +226,23 @@ export const getMe = async (req: AuthRequest, res: Response, next: NextFunction)
     // Include password expiry info for admin and staff
     const responseData = user.toObject() as unknown as Record<string, unknown>;
     if (user.role === 'admin' || user.role === 'staff') {
-      responseData.passwordExpired = user.isPasswordExpired();
-      responseData.daysUntilPasswordExpires = user.getDaysUntilPasswordExpires();
+      try {
+        responseData.passwordExpired = user.isPasswordExpired();
+        responseData.daysUntilPasswordExpires = user.getDaysUntilPasswordExpires();
+      } catch (methodError: any) {
+        // If password expiry methods fail, set defaults
+        logger.warn('Error calling password expiry methods:', methodError);
+        responseData.passwordExpired = false;
+        responseData.daysUntilPasswordExpires = 30;
+      }
     }
 
     res.status(200).json({
       success: true,
       data: responseData
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    logger.error('getMe error:', error);
     next(error);
   }
 };

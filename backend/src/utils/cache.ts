@@ -184,7 +184,9 @@ export const cacheKeys = {
   user: (id: string) => `user:${id}`,
   brands: (query: string) => `brands:${query}`,
   recommendations: (productId: string) => `recommendations:${productId}`,
-  search: (query: string) => `search:${query}`
+  search: (query: string) => `search:${query}`,
+  blogs: (petType?: string, category?: string, page?: number, limit?: number, search?: string) => 
+    `blogs:${petType || 'all'}:${category || 'all'}:${page || 1}:${limit || 10}:${search || ''}`
 };
 
 // Cache middleware for Express routes

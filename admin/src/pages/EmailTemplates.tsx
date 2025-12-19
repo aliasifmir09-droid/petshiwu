@@ -6,6 +6,53 @@ import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import ConfirmationModal from '@/components/ConfirmationModal';
 
+// Helper function to safely convert any ID to a unique string key
+const getUniqueKey = (id: any, index: number, prefix: string = 'item'): string => {
+  const indexSuffix = `-idx${index}`;
+  
+  if (id === null || id === undefined) {
+    return `${prefix}${indexSuffix}`;
+  }
+  
+  if (typeof id === 'string') {
+    return `${id}${indexSuffix}`;
+  }
+  
+  if (typeof id === 'number') {
+    return `${id}${indexSuffix}`;
+  }
+  
+  if (typeof id === 'object') {
+    if (id && typeof id.toString === 'function') {
+      try {
+        const str = id.toString();
+        if (str && typeof str === 'string' && str !== '[object Object]' && str.length > 0) {
+          return `${str}${indexSuffix}`;
+        }
+      } catch (e) {
+        // Fall through
+      }
+    }
+    
+    if (id && typeof id.valueOf === 'function') {
+      try {
+        const val = id.valueOf();
+        if (val !== id && val !== null && val !== undefined) {
+          return getUniqueKey(val, index, prefix);
+        }
+      } catch (e) {
+        // Fall through
+      }
+    }
+    
+    if (id._id) {
+      return getUniqueKey(id._id, index, prefix);
+    }
+  }
+  
+  return `${prefix}${indexSuffix}`;
+};
+
 const EmailTemplates = () => {
   const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
@@ -148,8 +195,8 @@ const EmailTemplates = () => {
         </div>
       ) : templates && templates.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {templates.map((template: any) => (
-            <div key={template._id} className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all">
+          {templates.map((template: any, index: number) => (
+            <div key={getUniqueKey(template._id, index, 'template')} className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">

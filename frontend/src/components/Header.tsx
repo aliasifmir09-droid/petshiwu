@@ -45,58 +45,40 @@ const Header = () => {
       }
       return response.data;
     },
-    retry: 2,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    retry: 1, // Reduce retries to prevent rate limiting
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (pet types don't change often)
     gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus to reduce requests
   });
 
-  // Fetch categories with error handling and localStorage caching
-  // Very short staleTime so position changes appear immediately in navbar
+  // Fetch categories - backend cache is now properly cleared on updates
   const { data: categoriesResponse, isError: categoriesError, refetch: refetchCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
       const response = await api.get('/categories');
-      // Save to localStorage when successfully fetched
-      if (response.data?.data) {
-        localStorage.setItem('cached_categories', JSON.stringify(response.data.data));
-      }
       return response.data;
     },
     retry: 2,
-    staleTime: 0, // Always consider stale - refetch immediately when component mounts
+    staleTime: 30 * 1000, // Consider fresh for 30 seconds to reduce refetch frequency
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: true, // Refetch when user comes back to tab
     refetchOnMount: true, // Always refetch when component mounts
   });
 
-  // Listen for localStorage changes (when admin clears cached_categories)
+  // Listen for category updates from admin dashboard using BroadcastChannel
   useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'cached_categories' && !e.newValue) {
-        // localStorage was cleared by admin, refetch categories immediately
+    // Use BroadcastChannel for efficient cross-tab communication
+    const channel = new BroadcastChannel('category-updates');
+    
+    channel.onmessage = (event) => {
+      if (event.data === 'categories-updated') {
+        // Admin made changes, refetch categories immediately
         refetchCategories();
       }
     };
 
-    // Listen for storage events (works across tabs/windows on same origin)
-    window.addEventListener('storage', handleStorageChange);
-
-    // Also poll localStorage to detect changes (for same-tab updates)
-    let lastCacheValue = localStorage.getItem('cached_categories');
-    const pollInterval = setInterval(() => {
-      const currentCacheValue = localStorage.getItem('cached_categories');
-      if (lastCacheValue && !currentCacheValue) {
-        // Cache was cleared
-        refetchCategories();
-        lastCacheValue = currentCacheValue;
-      } else if (currentCacheValue !== lastCacheValue) {
-        lastCacheValue = currentCacheValue;
-      }
-    }, 1000); // Check every second
-
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(pollInterval);
+      channel.close();
     };
   }, [refetchCategories]);
 
@@ -117,6 +99,82 @@ const Header = () => {
     } catch {
       return [];
     }
+  };
+
+  // Learning Center Categories Component
+  const LearningCategories = () => {
+    const { data: categories } = useQuery({
+      queryKey: ['blog-categories', 'learning'],
+      queryFn: () => blogService.getBlogCategories(),
+      retry: false,
+      staleTime: 10 * 60 * 1000
+    });
+
+    const learningCategories = [
+      'Dog Care',
+      'Cat Care',
+      'Fish Care',
+      'Fish Compatibility Guide'
+    ];
+
+    const displayCategories = categories && categories.length > 0 
+      ? categories.filter((cat: any) => learningCategories.includes(cat.name))
+      : learningCategories.map((name) => ({ name, count: 0 }));
+
+    return (
+      <ul className="space-y-1">
+        {displayCategories.map((cat: any, index: number) => {
+          const name = typeof cat === 'string' ? cat : cat.name;
+          return (
+            <li key={index}>
+              <Link
+                to={`/learning?category=${encodeURIComponent(name)}`}
+                className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
+              >
+                {name}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    );
+  };
+
+  // New Pet Categories Component
+  const NewPetCategories = () => {
+    const { data: petTypes } = useQuery({
+      queryKey: ['pet-types'],
+      queryFn: async () => {
+        const response = await api.get('/pet-types');
+        return response.data;
+      },
+      retry: false,
+      staleTime: 10 * 60 * 1000
+    });
+
+    const newPetTypes = ['Dog', 'Cat', 'Small Pet', 'Fish'];
+    const displayTypes = petTypes?.data 
+      ? petTypes.data.filter((pt: any) => newPetTypes.includes(pt.name))
+      : newPetTypes.map((name) => ({ name, slug: name.toLowerCase().replace(/\s+/g, '-') }));
+
+    return (
+      <ul className="space-y-1">
+        {displayTypes.map((pt: any, index: number) => {
+          const name = typeof pt === 'string' ? pt : pt.name;
+          const slug = typeof pt === 'string' ? pt.toLowerCase().replace(/\s+/g, '-') : pt.slug;
+          return (
+            <li key={index}>
+              <Link
+                to={`/learning?petType=${slug}&category=New Pet`}
+                className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
+              >
+                {name}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    );
   };
 
   // Use actual database data, or cached data if database is down
@@ -746,6 +804,39 @@ const Header = () => {
                     <span className="text-[10px] lg:text-xs">🔥</span>
                     <span>Today's Deals</span>
                   </Link>
+                </li>
+                
+                {/* Learning Center Dropdown */}
+                <li className="relative group flex-shrink-0">
+                  <Link 
+                    to="/learning" 
+                    className="flex items-center gap-0.5 lg:gap-1 hover:text-[#1E3A8A] transition-colors py-1.5 lg:py-2 px-1 lg:px-1.5 whitespace-nowrap"
+                  >
+                    <span className="text-xs lg:text-sm">Learning</span>
+                    <ChevronDown size={14} className="opacity-60 group-hover:opacity-100 transition-opacity" />
+                  </Link>
+                  
+                  {/* Learning Center Dropdown Menu */}
+                  <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[600px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <div className="grid grid-cols-2 gap-6">
+                      {/* Learning Center Column */}
+                      <div className="space-y-2">
+                        <Link
+                          to="/learning"
+                          className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors block mb-3"
+                        >
+                          Learning Center →
+                        </Link>
+                        <LearningCategories />
+                      </div>
+                      
+                      {/* New Pet Column */}
+                      <div className="space-y-2">
+                        <h3 className="font-bold text-sm text-gray-900 mb-3">New Pet</h3>
+                        <NewPetCategories />
+                      </div>
+                    </div>
+                  </div>
                 </li>
                 
                 {/* About */}

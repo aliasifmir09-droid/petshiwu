@@ -17,6 +17,7 @@ const Analytics = lazy(() => import('./pages/Analytics'));
 const Customers = lazy(() => import('./pages/Customers'));
 const EmailTemplates = lazy(() => import('./pages/EmailTemplates'));
 const InventoryAlerts = lazy(() => import('./pages/InventoryAlerts'));
+const Blogs = lazy(() => import('./pages/Blogs'));
 const Login = lazy(() => import('./pages/Login'));
 
 const queryClient = new QueryClient({
@@ -43,6 +44,9 @@ function App() {
   }, []);
 
   useEffect(() => {
+    let mounted = true;
+    let timeoutId: NodeJS.Timeout;
+
     const loadUser = async () => {
       // Phase 2: Cookie-Only - Try to get user from backend using httpOnly cookie
       // If cookie exists, request will succeed. If not, it will fail and we set user to null
@@ -53,26 +57,42 @@ function App() {
         // Use skipAuth when on login page to prevent redirect loops
         const userData = await adminService.getMe(isLoginPage);
         
-        if (userData && (userData.role === 'admin' || userData.role === 'staff')) {
-          setUser(userData);
-        } else {
-          setUser(null);
+        // Only update state if component is still mounted
+        if (mounted) {
+          if (userData && (userData.role === 'admin' || userData.role === 'staff')) {
+            setUser(userData);
+          } else {
+            setUser(null);
+          }
         }
       } catch (error: any) {
         // No cookie or invalid cookie - user is not authenticated
         // This is expected after logout or on login page, so only log in development
-        if (!isLoginPage) {
-          import('./utils/safeLogger').then(({ safeLog }) => {
-            safeLog('User not authenticated (expected after logout)', { status: error.response?.status });
-          });
+        if (mounted) {
+          if (!isLoginPage && error.response?.status !== 429) {
+            // Don't log 429 errors (rate limiting) - they're expected during development
+            import('./utils/safeLogger').then(({ safeLog }) => {
+              safeLog('User not authenticated (expected after logout)', { status: error.response?.status });
+            });
+          }
+          setUser(null);
         }
-        setUser(null);
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
-    loadUser();
+    // Small delay to prevent rapid-fire requests on hot reload
+    timeoutId = setTimeout(() => {
+      loadUser();
+    }, 100);
+
+    return () => {
+      mounted = false;
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   // Get default redirect page based on user permissions
@@ -213,6 +233,14 @@ function App() {
                     element={
                       user?.role === 'admin' || user?.permissions?.canManageProducts 
                         ? <InventoryAlerts /> 
+                        : <Navigate to={getDefaultPage()} replace />
+                    } 
+                  />
+                  <Route 
+                    path="/blogs" 
+                    element={
+                      user?.role === 'admin' 
+                        ? <Blogs /> 
                         : <Navigate to={getDefaultPage()} replace />
                     } 
                   />

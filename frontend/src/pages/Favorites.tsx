@@ -17,7 +17,7 @@ import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 
 const Favorites = () => {
   const { isAuthenticated } = useAuthStore();
-  const { items, removeFromWishlist, cleanup } = useWishlistStore();
+  const { items, removeFromWishlist, cleanup, removeInvalidItems } = useWishlistStore();
   const { toast, showToast, hideToast } = useToast();
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareLink, setShareLink] = useState('');
@@ -87,6 +87,15 @@ const Favorites = () => {
             ...product,
             _id: product._id ? String(product._id) : product._id
           }));
+          
+          // Sync store with backend - remove any IDs that aren't in backend response
+          const backendProductIds = normalizedProducts.map((p: any) => String(p._id || p.id)).filter(Boolean);
+          const currentItems = items.map(id => String(id));
+          const invalidIds = currentItems.filter((id) => !backendProductIds.includes(id));
+          if (invalidIds.length > 0) {
+            removeInvalidItems(invalidIds);
+          }
+          
           return normalizedProducts;
         } catch (error: any) {
           // Don't log wishlist errors - privacy concern
@@ -105,15 +114,23 @@ const Favorites = () => {
               .filter((id) => id && id.trim() !== '');
             if (validItems.length === 0) return [];
             
-            const products = await Promise.all(
-              validItems.map((id) => productService.getProduct(id).catch(() => null))
-            );
-            const validProducts = products.filter((p) => p !== null);
-            // Normalize _id to strings
-            return validProducts.map((product: any) => ({
-              ...product,
-              _id: product._id ? String(product._id) : product._id
-            }));
+          const products = await Promise.all(
+            validItems.map((id) => productService.getProduct(id).catch(() => null))
+          );
+          const validProducts = products.filter((p) => p !== null);
+          
+          // Remove invalid product IDs from wishlist store
+          const validProductIds = validProducts.map((p: any) => String(p._id || p.id)).filter(Boolean);
+          const invalidIds = validItems.filter((id) => !validProductIds.includes(id));
+          if (invalidIds.length > 0) {
+            removeInvalidItems(invalidIds);
+          }
+          
+          // Normalize _id to strings
+          return validProducts.map((product: any) => ({
+            ...product,
+            _id: product._id ? String(product._id) : product._id
+          }));
           } catch {
             return [];
           }
@@ -132,6 +149,14 @@ const Favorites = () => {
             validItems.map((id) => productService.getProduct(id).catch(() => null))
           );
           const validProducts = products.filter((p) => p !== null);
+          
+          // Remove invalid product IDs from wishlist store
+          const validProductIds = validProducts.map((p: any) => String(p._id || p.id)).filter(Boolean);
+          const invalidIds = validItems.filter((id) => !validProductIds.includes(id));
+          if (invalidIds.length > 0) {
+            removeInvalidItems(invalidIds);
+          }
+          
           // Normalize _id to strings
           return validProducts.map((product: any) => ({
             ...product,

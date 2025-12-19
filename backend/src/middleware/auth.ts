@@ -126,11 +126,17 @@ export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFu
       next();
     } catch (error: unknown) {
       // Invalid/expired token - set user to null and continue (don't return 401)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('OptionalAuth: Token verification failed (expected if not logged in)');
+      }
       req.user = undefined;
       next();
     }
-  } catch (error) {
-    // Any other error - set user to null and continue
+  } catch (error: unknown) {
+    // Any other error - log in development, set user to null and continue
+    if (process.env.NODE_ENV === 'development') {
+      console.error('OptionalAuth error:', error);
+    }
     req.user = undefined;
     next();
   }

@@ -5,6 +5,24 @@ import { extractObjectId } from '../utils/types';
 import logger from '../utils/logger';
 import { seedEmailTemplates } from '../utils/seedEmailTemplates';
 
+// Helper function to normalize email template _id to string
+const normalizeTemplateId = (template: any): any => {
+  if (!template) return template;
+  
+  // Convert to plain object if it's a Mongoose document
+  const plainTemplate = template.toObject ? template.toObject() : template;
+  
+  return {
+    ...plainTemplate,
+    _id: plainTemplate._id ? String(plainTemplate._id) : plainTemplate._id
+  };
+};
+
+// Helper function to normalize array of email templates
+const normalizeTemplates = (templates: any[]): any[] => {
+  return templates.map(normalizeTemplateId);
+};
+
 /**
  * Get all email templates
  */
@@ -12,9 +30,12 @@ export const getEmailTemplates = async (req: AuthRequest, res: Response, next: N
   try {
     const templates = await EmailTemplate.find().sort({ name: 1 }).lean();
 
+    // Normalize _id to string for all templates
+    const normalizedTemplates = normalizeTemplates(templates);
+
     res.status(200).json({
       success: true,
-      data: templates
+      data: normalizedTemplates
     });
   } catch (error: any) {
     logger.error('Error fetching email templates:', error);
@@ -46,9 +67,12 @@ export const getEmailTemplate = async (req: AuthRequest, res: Response, next: Ne
       });
     }
 
+    // Normalize _id to string
+    const normalizedTemplate = normalizeTemplateId(template);
+
     res.status(200).json({
       success: true,
-      data: template
+      data: normalizedTemplate
     });
   } catch (error: any) {
     logger.error('Error fetching email template:', error);
@@ -87,9 +111,12 @@ export const createEmailTemplate = async (req: AuthRequest, res: Response, next:
       isActive: isActive !== undefined ? isActive : true
     });
 
+    // Normalize _id to string
+    const normalizedTemplate = normalizeTemplateId(template);
+
     res.status(201).json({
       success: true,
-      data: template
+      data: normalizedTemplate
     });
   } catch (error: any) {
     logger.error('Error creating email template:', error);
@@ -144,9 +171,12 @@ export const updateEmailTemplate = async (req: AuthRequest, res: Response, next:
       });
     }
 
+    // Normalize _id to string
+    const normalizedTemplate = normalizeTemplateId(template);
+
     res.status(200).json({
       success: true,
-      data: template
+      data: normalizedTemplate
     });
   } catch (error: any) {
     logger.error('Error updating email template:', error);

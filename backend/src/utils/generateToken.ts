@@ -15,7 +15,8 @@ export const generateToken = (id: string) => {
 };
 
 export const sendTokenResponse = (userId: string, statusCode: number, res: Response) => {
-  const token = generateToken(userId);
+  try {
+    const token = generateToken(userId);
 
   // Calculate expiration from JWT_EXPIRE or default to 30 days
   const expiresIn = process.env.JWT_EXPIRE || '30d';
@@ -57,14 +58,18 @@ export const sendTokenResponse = (userId: string, statusCode: number, res: Respo
     options.domain = cookieDomain;
   }
 
-  // Phase 2: Cookie-Only - Set httpOnly cookie, token not returned in response body
-  // Frontend relies solely on httpOnly cookies (more secure, XSS protection)
-  res.status(statusCode)
-    .cookie('token', token, options)
-    .json({
-      success: true
-      // Token not returned - frontend uses httpOnly cookie only
-    });
+    // Phase 2: Cookie-Only - Set httpOnly cookie, token not returned in response body
+    // Frontend relies solely on httpOnly cookies (more secure, XSS protection)
+    res.status(statusCode)
+      .cookie('token', token, options)
+      .json({
+        success: true
+        // Token not returned - frontend uses httpOnly cookie only
+      });
+  } catch (error: any) {
+    // Re-throw with more context for better error handling
+    throw new Error(`Failed to generate token: ${error.message}`);
+  }
 };
 
 

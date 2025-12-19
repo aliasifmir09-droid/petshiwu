@@ -1,13 +1,15 @@
 import { useState, useRef } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
-import { Upload, X, FileText, Download, AlertCircle, CheckCircle } from 'lucide-react';
+import { Upload, X, FileText, Download, AlertCircle, CheckCircle, FileJson } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 
 interface CSVImportProps {
   onClose: () => void;
   onImportComplete?: () => void;
 }
+
+type ImportFormat = 'csv' | 'json';
 
 const CSVImport = ({ onClose, onImportComplete }: CSVImportProps) => {
   const queryClient = useQueryClient();
@@ -16,9 +18,15 @@ const CSVImport = ({ onClose, onImportComplete }: CSVImportProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [importResult, setImportResult] = useState<any>(null);
+  const [importFormat, setImportFormat] = useState<ImportFormat>('csv');
 
   const importMutation = useMutation({
-    mutationFn: (file: File) => adminService.importProductsFromCSV(file),
+    mutationFn: (file: File) => {
+      if (importFormat === 'json') {
+        return adminService.importProductsFromJSON(file);
+      }
+      return adminService.importProductsFromCSV(file);
+    },
     onSuccess: async (data) => {
       setImportResult(data);
       
@@ -45,7 +53,12 @@ const CSVImport = ({ onClose, onImportComplete }: CSVImportProps) => {
   });
 
   const downloadTemplateMutation = useMutation({
-    mutationFn: () => adminService.downloadCSVTemplate(),
+    mutationFn: () => {
+      if (importFormat === 'json') {
+        return adminService.downloadJSONTemplate();
+      }
+      return adminService.downloadCSVTemplate();
+    },
     onSuccess: () => {
       showToast('Template downloaded successfully!', 'success');
     },
@@ -55,11 +68,26 @@ const CSVImport = ({ onClose, onImportComplete }: CSVImportProps) => {
   });
 
   const handleFileSelect = (file: File) => {
-    if (file && file.type === 'text/csv' || file.name.endsWith('.csv')) {
+    const isCSV = file.type === 'text/csv' || file.name.endsWith('.csv');
+    const isJSON = file.type === 'application/json' || file.name.endsWith('.json');
+    
+    if (importFormat === 'csv' && isCSV) {
+      setSelectedFile(file);
+      setImportResult(null);
+    } else if (importFormat === 'json' && isJSON) {
       setSelectedFile(file);
       setImportResult(null);
     } else {
-      showToast('Please select a valid CSV file', 'error');
+      showToast(`Please select a valid ${importFormat.toUpperCase()} file`, 'error');
+    }
+  };
+
+  const handleFormatChange = (format: ImportFormat) => {
+    setImportFormat(format);
+    setSelectedFile(null);
+    setImportResult(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -90,7 +118,7 @@ const CSVImport = ({ onClose, onImportComplete }: CSVImportProps) => {
 
   const handleImport = () => {
     if (!selectedFile) {
-      showToast('Please select a CSV file', 'error');
+      showToast(`Please select a ${importFormat.toUpperCase()} file`, 'error');
       return;
     }
     importMutation.mutate(selectedFile);
@@ -105,12 +133,38 @@ const CSVImport = ({ onClose, onImportComplete }: CSVImportProps) => {
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Import Products from CSV</h2>
+            <h2 className="text-2xl font-bold text-gray-800">Import Products</h2>
             <button
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700 transition-colors"
             >
               <X size={24} />
+            </button>
+          </div>
+
+          {/* Format Selector */}
+          <div className="mb-6 flex gap-2">
+            <button
+              onClick={() => handleFormatChange('csv')}
+              className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-all ${
+                importFormat === 'csv'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              <FileText className="inline mr-2" size={18} />
+              CSV Format
+            </button>
+            <button
+              onClick={() => handleFormatChange('json')}
+              className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-all ${
+                importFormat === 'json'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              <FileJson className="inline mr-2" size={18} />
+              JSON Format
             </button>
           </div>
 
@@ -122,15 +176,16 @@ const CSVImport = ({ onClose, onImportComplete }: CSVImportProps) => {
                   <FileText className="text-blue-600" size={28} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg text-gray-900 mb-1">📥 Download CSV Template</h3>
+                  <h3 className="font-bold text-lg text-gray-900 mb-1">📥 Download {importFormat.toUpperCase()} Template</h3>
                   <p className="text-sm text-gray-700 mb-2">
                     Get a ready-to-use template with example data and detailed instructions. 
-                    This will help you format your CSV file correctly for bulk product import.
+                    This will help you format your {importFormat.toUpperCase()} file correctly for bulk product import.
                   </p>
                   <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
-                    <li>Includes all required and optional columns</li>
-                    <li>Multiple example rows for different pet types</li>
-                    <li>Detailed instructions in the CSV file</li>
+                    <li>Includes all required and optional fields</li>
+                    <li>Multiple example products for different pet types</li>
+                    {importFormat === 'json' && <li>Structured JSON format with nested variants</li>}
+                    {importFormat === 'csv' && <li>Detailed instructions in the CSV file</li>}
                     <li>Ready to fill in with your product data</li>
                   </ul>
                 </div>
@@ -160,7 +215,7 @@ const CSVImport = ({ onClose, onImportComplete }: CSVImportProps) => {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".csv,text/csv"
+              accept={importFormat === 'csv' ? '.csv,text/csv' : '.json,application/json'}
               onChange={handleFileInputChange}
               className="hidden"
             />
@@ -178,7 +233,7 @@ const CSVImport = ({ onClose, onImportComplete }: CSVImportProps) => {
                   </button>
                 </p>
                 <p className="text-sm text-gray-500">
-                  Supported format: CSV (Comma Separated Values)
+                  Supported format: {importFormat.toUpperCase()} ({importFormat === 'csv' ? 'Comma Separated Values' : 'JavaScript Object Notation'})
                 </p>
               </>
             ) : (
@@ -210,7 +265,7 @@ const CSVImport = ({ onClose, onImportComplete }: CSVImportProps) => {
             <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
               <p className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
                 <AlertCircle className="text-yellow-600" size={18} />
-                Required CSV Columns:
+                Required {importFormat.toUpperCase()} {importFormat === 'csv' ? 'Columns' : 'Fields'}:
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
                 <div><strong>name</strong> - Product name (required)</div>
@@ -218,30 +273,40 @@ const CSVImport = ({ onClose, onImportComplete }: CSVImportProps) => {
                 <div><strong>brand</strong> - Brand name (required)</div>
                 <div><strong>category</strong> - Category name or path like &quot;Dog &gt; Food &gt; Dry Food&quot; (required)</div>
                 <div><strong>basePrice</strong> - Base price in numbers, e.g., 29.99 (required)</div>
-                <div><strong>petType</strong> - Use: dog, cat, bird, fish, small-pet, reptile (required)</div>
-                <div><strong>images</strong> - Comma-separated URLs, e.g., url1.jpg,url2.jpg (required)</div>
+                <div><strong>petType</strong> - Use: dog, cat, other (required)</div>
+                <div><strong>images</strong> - {importFormat === 'json' ? 'Array of URLs' : 'Comma-separated URLs'}, e.g., {importFormat === 'json' ? '["url1.jpg", "url2.jpg"]' : 'url1.jpg,url2.jpg'} (required)</div>
               </div>
             </div>
 
             <div className="p-4 bg-green-50 rounded-lg border border-green-200">
               <p className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
                 <CheckCircle className="text-green-600" size={18} />
-                Optional Columns:
+                Optional {importFormat === 'csv' ? 'Columns' : 'Fields'}:
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
                 <div><strong>shortDescription</strong> - Brief product summary</div>
                 <div><strong>compareAtPrice</strong> - Original/compare price</div>
-                <div><strong>tags</strong> - Comma-separated, e.g., premium,organic</div>
-                <div><strong>features</strong> - Comma-separated, e.g., durable,waterproof</div>
+                <div><strong>tags</strong> - {importFormat === 'json' ? 'Array of strings' : 'Comma-separated'}, e.g., {importFormat === 'json' ? '["premium", "organic"]' : 'premium,organic'}</div>
+                <div><strong>features</strong> - {importFormat === 'json' ? 'Array of strings' : 'Comma-separated'}, e.g., {importFormat === 'json' ? '["durable", "waterproof"]' : 'durable,waterproof'}</div>
                 <div><strong>ingredients</strong> - Product ingredients list</div>
-                <div><strong>isActive</strong> - true or false (default: true)</div>
-                <div><strong>isFeatured</strong> - true or false (default: false)</div>
-                <div><strong>inStock</strong> - true or false (default: true)</div>
+                <div><strong>isActive</strong> - {importFormat === 'json' ? 'boolean' : 'true or false'} (default: true)</div>
+                <div><strong>isFeatured</strong> - {importFormat === 'json' ? 'boolean' : 'true or false'} (default: false)</div>
+                <div><strong>inStock</strong> - {importFormat === 'json' ? 'boolean' : 'true or false'} (default: true)</div>
                 <div><strong>stock</strong> - Total stock quantity (number)</div>
-                <div><strong>variantSize</strong> - Size for variant (e.g., 5kg, Small)</div>
-                <div><strong>variantPrice</strong> - Price for this variant</div>
-                <div><strong>variantStock</strong> - Stock for this variant</div>
-                <div><strong>variantSku</strong> - SKU for this variant</div>
+                <div><strong>lowStockThreshold</strong> - Low stock alert threshold (number)</div>
+                {importFormat === 'json' ? (
+                  <>
+                    <div><strong>variants</strong> - Array of variant objects with attributes, price, stock, sku</div>
+                    <div><strong>variants[].attributes</strong> - Object with any key-value pairs (size, color, flavor, etc.)</div>
+                  </>
+                ) : (
+                  <>
+                    <div><strong>variantSize</strong> - Size for variant (e.g., 5kg, Small)</div>
+                    <div><strong>variantPrice</strong> - Price for this variant</div>
+                    <div><strong>variantStock</strong> - Stock for this variant</div>
+                    <div><strong>variantSku</strong> - SKU for this variant</div>
+                  </>
+                )}
               </div>
             </div>
 
@@ -249,13 +314,24 @@ const CSVImport = ({ onClose, onImportComplete }: CSVImportProps) => {
               <p className="font-semibold text-gray-800 mb-2">💡 Tips:</p>
               <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
                 <li>Download the template above to see complete examples</li>
-                <li>Remove comment lines (starting with #) from the template before importing</li>
+                {importFormat === 'csv' && <li>Remove comment lines (starting with #) from the template before importing</li>}
                 <li>Category: Use simple name (e.g., &quot;Dog Food&quot;) or hierarchical path (e.g., &quot;Dog &gt; Food &gt; Dry Food&quot;)</li>
                 <li>Hierarchical paths automatically create missing parent categories</li>
                 <li>Category names are case-insensitive</li>
-                <li>Use commas to separate multiple images, tags, or features</li>
-                <li>For products without variants, leave variant columns empty</li>
-                <li>Boolean values (isActive, isFeatured, etc.) should be "true" or "false"</li>
+                {importFormat === 'json' ? (
+                  <>
+                    <li>Use arrays for images, tags, and features: <code>["item1", "item2"]</code></li>
+                    <li>Variants should be an array of objects with attributes, price, stock, and sku</li>
+                    <li>Use boolean values (true/false) for isActive, isFeatured, inStock</li>
+                    <li>Ensure your JSON is valid - use a JSON validator if needed</li>
+                  </>
+                ) : (
+                  <>
+                    <li>Use commas to separate multiple images, tags, or features</li>
+                    <li>For products without variants, leave variant columns empty</li>
+                    <li>Boolean values (isActive, isFeatured, etc.) should be "true" or "false"</li>
+                  </>
+                )}
               </ul>
             </div>
           </div>

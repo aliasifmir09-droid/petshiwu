@@ -42,7 +42,7 @@ const emailTemplateSchema = new Schema<IEmailTemplate>(
 );
 
 // Indexes
-emailTemplateSchema.index({ name: 1 });
+// Note: name field already has unique: true which creates an index automatically
 emailTemplateSchema.index({ isActive: 1 });
 
 export default mongoose.model<IEmailTemplate>('EmailTemplate', emailTemplateSchema);

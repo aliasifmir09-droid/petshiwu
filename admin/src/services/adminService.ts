@@ -15,6 +15,86 @@ export const adminService = {
     return response.data;
   },
 
+  // JSON Import
+  importProductsFromJSON: async (file: File) => {
+    const formData = new FormData();
+    formData.append('json', file);
+    
+    const response = await api.post('/products/import/json', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    
+    return response.data;
+  },
+
+  downloadJSONTemplate: async () => {
+    try {
+      const response = await api.get('/products/import/json/template', {
+        responseType: 'blob'
+      });
+      
+      const blob = new Blob([response.data], { type: 'application/json' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'product-import-template.json');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error: any) {
+      // Fallback: create template client-side if endpoint fails
+      console.warn('Failed to download template from server, using fallback:', error);
+      const template = [
+        {
+          "name": "Example Product",
+          "description": "Product description here. This is a detailed description of the product.",
+          "shortDescription": "Short description",
+          "brand": "Brand Name",
+          "category": "Dog > Food > Dry Food",
+          "basePrice": 29.99,
+          "compareAtPrice": 39.99,
+          "petType": "dog",
+          "images": ["https://example.com/image.jpg"],
+          "tags": ["tag1", "tag2"],
+          "features": ["feature1", "feature2"],
+          "ingredients": "Ingredients list",
+          "isActive": true,
+          "isFeatured": false,
+          "inStock": true,
+          "stock": 100,
+          "lowStockThreshold": 10,
+          "variants": [
+            {
+              "attributes": {
+                "size": "5 lb",
+                "flavor": "Chicken"
+              },
+              "price": 29.99,
+              "compareAtPrice": 39.99,
+              "stock": 50,
+              "sku": "PRODUCT-SKU-001"
+            }
+          ]
+        }
+      ];
+      
+      const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'product-import-template.json');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  },
+
   downloadCSVTemplate: async () => {
     // Create comprehensive CSV template with detailed examples and instructions
     const csvContent = `# PRODUCT IMPORT TEMPLATE
@@ -338,6 +418,46 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
   },
 
   // Pet Types
+  // Blog Management
+  getBlogs: async (params?: { petType?: string; category?: string; page?: number; limit?: number; search?: string; isPublished?: boolean }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.petType) queryParams.append('petType', params.petType);
+    if (params?.category) queryParams.append('category', params.category);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.isPublished !== undefined) queryParams.append('isPublished', params.isPublished.toString());
+    
+    const response = await api.get(`/blogs/admin/all?${queryParams.toString()}`);
+    return response.data;
+  },
+
+  getBlogById: async (id: string) => {
+    const response = await api.get(`/blogs/admin/${id}`);
+    return response.data;
+  },
+
+  createBlog: async (blogData: any) => {
+    const response = await api.post('/blogs/admin', blogData);
+    return response.data;
+  },
+
+  updateBlog: async (id: string, blogData: any) => {
+    const response = await api.put(`/blogs/admin/${id}`, blogData);
+    return response.data;
+  },
+
+  deleteBlog: async (id: string) => {
+    const response = await api.delete(`/blogs/admin/${id}`);
+    return response.data;
+  },
+
+  getBlogCategories: async (petType?: string) => {
+    const queryParams = petType ? `?petType=${petType}` : '';
+    const response = await api.get(`/blogs/categories${queryParams}`);
+    return response.data;
+  },
+
   getPetTypes: async () => {
     const response = await api.get('/pet-types');
     return response.data;

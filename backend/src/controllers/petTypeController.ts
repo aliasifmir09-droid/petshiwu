@@ -2,6 +2,24 @@ import { Request, Response, NextFunction } from 'express';
 import PetType from '../models/PetType';
 import { AuthRequest } from '../middleware/auth';
 
+// Helper function to normalize pet type _id to string
+const normalizePetTypeId = (petType: any): any => {
+  if (!petType) return petType;
+  
+  // Convert to plain object if it's a Mongoose document
+  const plainPetType = petType.toObject ? petType.toObject() : petType;
+  
+  return {
+    ...plainPetType,
+    _id: plainPetType._id ? String(plainPetType._id) : plainPetType._id
+  };
+};
+
+// Helper function to normalize array of pet types
+const normalizePetTypes = (petTypes: any[]): any[] => {
+  return petTypes.map(normalizePetTypeId);
+};
+
 // Get all pet types (public - only active)
 export const getPetTypes = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -9,10 +27,13 @@ export const getPetTypes = async (req: Request, res: Response, next: NextFunctio
       .sort({ order: 1, name: 1 })
       .lean();
 
+    // Normalize _id to string for all pet types
+    const normalizedPetTypes = normalizePetTypes(petTypes);
+
     res.status(200).json({
       success: true,
-      count: petTypes.length,
-      data: petTypes
+      count: normalizedPetTypes.length,
+      data: normalizedPetTypes
     });
   } catch (error) {
     next(error);
@@ -26,10 +47,13 @@ export const getAllPetTypesAdmin = async (req: AuthRequest, res: Response, next:
       .sort({ order: 1, createdAt: -1 })
       .lean();
 
+    // Normalize _id to string for all pet types
+    const normalizedPetTypes = normalizePetTypes(petTypes);
+
     res.status(200).json({
       success: true,
-      total: petTypes.length,
-      data: petTypes
+      total: normalizedPetTypes.length,
+      data: normalizedPetTypes
     });
   } catch (error) {
     next(error);
@@ -48,9 +72,12 @@ export const getPetType = async (req: Request, res: Response, next: NextFunction
       });
     }
 
+    // Normalize _id to string
+    const normalizedPetType = normalizePetTypeId(petType);
+
     res.status(200).json({
       success: true,
-      data: petType
+      data: normalizedPetType
     });
   } catch (error) {
     next(error);
@@ -62,9 +89,12 @@ export const createPetType = async (req: AuthRequest, res: Response, next: NextF
   try {
     const petType = await PetType.create(req.body);
 
+    // Normalize _id to string
+    const normalizedPetType = normalizePetTypeId(petType);
+
     res.status(201).json({
       success: true,
-      data: petType
+      data: normalizedPetType
     });
   } catch (error) {
     next(error);
@@ -89,9 +119,12 @@ export const updatePetType = async (req: AuthRequest, res: Response, next: NextF
     // Save to trigger pre-save middleware
     await petType.save();
 
+    // Normalize _id to string
+    const normalizedPetType = normalizePetTypeId(petType);
+
     res.status(200).json({
       success: true,
-      data: petType
+      data: normalizedPetType
     });
   } catch (error) {
     next(error);

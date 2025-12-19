@@ -5,6 +5,72 @@ import { adminService } from '@/services/adminService';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 
+// Helper function to safely convert any ID to a unique string key
+// This ensures React keys are always strings, never objects
+const getUniqueKey = (id: any, index: number, prefix: string = 'item'): string => {
+  // Always include index to guarantee uniqueness even if IDs are duplicated
+  const indexSuffix = `-idx${index}`;
+  
+  if (id === null || id === undefined) {
+    return `${prefix}${indexSuffix}`;
+  }
+  
+  // Handle string IDs - most common case
+  if (typeof id === 'string') {
+    return `${id}${indexSuffix}`;
+  }
+  
+  // Handle number IDs
+  if (typeof id === 'number') {
+    return `${id}${indexSuffix}`;
+  }
+  
+  // Handle boolean IDs (unlikely but safe)
+  if (typeof id === 'boolean') {
+    return `${id}${indexSuffix}`;
+  }
+  
+  // Handle object IDs (Mongoose ObjectId, etc.)
+  if (typeof id === 'object') {
+    // Try toString() method first (Mongoose ObjectId has this)
+    if (id && typeof id.toString === 'function') {
+      try {
+        const str = id.toString();
+        // Check if toString() actually returned a useful string
+        if (str && typeof str === 'string' && str !== '[object Object]' && str.length > 0) {
+          return `${str}${indexSuffix}`;
+        }
+      } catch (e) {
+        // toString() failed, try other methods
+      }
+    }
+    
+    // Try valueOf() method
+    if (id && typeof id.valueOf === 'function') {
+      try {
+        const val = id.valueOf();
+        // If valueOf returns something different, recurse
+        if (val !== id && val !== null && val !== undefined) {
+          return getUniqueKey(val, index, prefix);
+        }
+      } catch (e) {
+        // valueOf() failed, try other methods
+      }
+    }
+    
+    // Try accessing _id property if it exists (nested object)
+    if (id._id) {
+      return getUniqueKey(id._id, index, prefix);
+    }
+    
+    // Last resort: use index only (safest fallback)
+    // Don't try JSON.stringify as it might fail or create very long keys
+  }
+  
+  // Final fallback: use index only (guaranteed to be unique)
+  return `${prefix}${indexSuffix}`;
+};
+
 interface PetType {
   _id: string;
   name: string;
@@ -231,8 +297,8 @@ const PetTypes = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {petTypes.map((petType) => (
-                  <tr key={petType._id} className="hover:bg-gray-50">
+                {petTypes.map((petType, index) => (
+                  <tr key={getUniqueKey(petType?._id, index, 'pettype')} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button className="text-gray-400 hover:text-gray-600 cursor-move">
                         <GripVertical size={20} />
