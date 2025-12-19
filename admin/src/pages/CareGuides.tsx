@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
-import { Plus, Edit, Trash2, Search, Eye, EyeOff, BookOpen, Calendar, User, Upload, Link2, X, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Eye, EyeOff, BookOpen, Calendar, Upload, Link2, X, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
@@ -459,7 +459,7 @@ const CareGuides = () => {
         confirmButtonClass="bg-red-600 hover:bg-red-700"
       />
 
-      {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
+      {toast.isVisible && <Toast toast={toast} onClose={hideToast} />}
     </div>
   );
 };
