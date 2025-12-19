@@ -21,6 +21,7 @@ import Toast from '@/components/Toast';
 import { trackProductView, trackAddToWishlist, trackProductComparison, trackShare } from '@/utils/analytics';
 import { addToRecentlyViewed } from '@/utils/recentlyViewed';
 import SEO from '@/components/SEO';
+import { safeError } from '@/utils/safeLogger';
 
 const ProductDetail = () => {
   const { slug, petType } = useParams<{ 
@@ -132,7 +133,7 @@ const ProductDetail = () => {
     const url = socialLinks[platform as keyof typeof socialLinks];
     
     if (!url) {
-      console.error('Share URL not found for platform:', platform, 'Available links:', socialLinks);
+      safeError('Share URL not found for platform', { platform, availableLinks: Object.keys(socialLinks) });
       showToast('Share link not available for this platform.', 'error');
       return;
     }
@@ -146,7 +147,7 @@ const ProductDetail = () => {
         showToast('Link copied to clipboard!', 'success');
         setTimeout(() => setLinkCopied(false), 2000);
       } catch (error) {
-        console.error('Failed to copy to clipboard:', error);
+        safeError('Failed to copy to clipboard', error);
         showToast('Failed to copy link. Please try again.', 'error');
       }
     } else {
@@ -154,7 +155,7 @@ const ProductDetail = () => {
       try {
         window.open(url, '_blank', 'width=600,height=400,menubar=no,toolbar=no,resizable=yes,scrollbars=yes');
       } catch (error) {
-        console.error('Failed to open share window:', error);
+        safeError('Failed to open share window', error);
         showToast('Failed to open share window. Please try again.', 'error');
       }
     }

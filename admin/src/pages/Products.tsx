@@ -10,6 +10,7 @@ import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import Dropdown from '@/components/Dropdown';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
+import { safeError } from '@/utils/safeLogger';
 
 const Products = () => {
   const queryClient = useQueryClient();
@@ -353,7 +354,7 @@ const Products = () => {
       setShowModal(true);
     } catch (error) {
       // If fetch fails, use the product from list as fallback
-      console.error('Failed to fetch fresh product data:', error);
+      safeError('Failed to fetch fresh product data', error);
       setEditingProduct(product);
       setShowModal(true);
     }

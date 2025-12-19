@@ -22,6 +22,7 @@ import User from './models/User';
 import { setupSwagger } from './utils/swagger';
 import { initRedis } from './utils/cache';
 import type { SanitizedObject } from './types/common';
+import logger from './utils/logger';
 
 // Load env vars
 dotenv.config();
@@ -31,8 +32,8 @@ try {
   validateEnv();
 } catch (error: unknown) {
   const errorMessage = error instanceof Error ? error.message : String(error);
-  console.error('⚠️  Environment validation error:', errorMessage);
-  console.warn('⚠️  Server will start but may not function correctly');
+  logger.error('⚠️  Environment validation error:', errorMessage);
+  logger.warn('⚠️  Server will start but may not function correctly');
 }
 
 // Import routes
