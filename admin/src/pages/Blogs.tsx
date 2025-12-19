@@ -566,10 +566,12 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isLoading }: BlogFormModalProp
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Convert tags string to array for API submission
+    const tagsArray = formData.tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0);
     onSubmit({
       ...formData,
-      tags: formData.tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0)
-    });
+      tags: tagsArray
+    } as BlogFormData & { tags: string[] });
   };
 
   return (
