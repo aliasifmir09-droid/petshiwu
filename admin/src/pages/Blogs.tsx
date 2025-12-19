@@ -434,7 +434,7 @@ const Blogs = () => {
         }
         confirmText="Delete"
         cancelText="Cancel"
-        variant="danger"
+        confirmButtonClass="bg-red-600 hover:bg-red-700"
       />
     </div>
   );
