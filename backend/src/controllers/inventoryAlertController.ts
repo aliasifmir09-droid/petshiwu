@@ -112,6 +112,7 @@ export const bulkUpdateThresholds = async (req: AuthRequest, res: Response, next
   try {
     const { productIds, lowStockThreshold, categoryId } = req.body;
 
+    // Validate lowStockThreshold - it can be null or a number >= 0
     if (lowStockThreshold === undefined) {
       return res.status(400).json({
         success: false,
@@ -119,19 +120,28 @@ export const bulkUpdateThresholds = async (req: AuthRequest, res: Response, next
       });
     }
 
-    if (lowStockThreshold < 0) {
+    // Allow null, but if it's a number, it must be >= 0
+    if (lowStockThreshold !== null && (typeof lowStockThreshold !== 'number' || isNaN(lowStockThreshold) || lowStockThreshold < 0)) {
       return res.status(400).json({
         success: false,
-        message: 'Low stock threshold must be a positive number or null'
+        message: 'Low stock threshold must be a positive number (>= 0) or null'
       });
     }
 
     let query: any = {};
 
+    // If neither productIds nor categoryId is provided, update all products
+    // This allows bulk updates for all products
     if (productIds && Array.isArray(productIds) && productIds.length > 0) {
       const validIds = productIds
         .map(id => extractObjectId(id))
         .filter(id => id !== null) as any[];
+      if (validIds.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'No valid product IDs provided'
+        });
+      }
       query._id = { $in: validIds };
     } else if (categoryId) {
       const categoryIdObj = extractObjectId(categoryId);
@@ -144,10 +154,8 @@ export const bulkUpdateThresholds = async (req: AuthRequest, res: Response, next
         });
       }
     } else {
-      return res.status(400).json({
-        success: false,
-        message: 'Either productIds or categoryId is required'
-      });
+      // If neither productIds nor categoryId is provided, update all active products
+      query.isActive = true;
     }
 
     const result = await Product.updateMany(
