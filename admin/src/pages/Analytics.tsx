@@ -36,23 +36,29 @@ import Dropdown from '@/components/Dropdown';
 const Analytics = () => {
   const [timeRange, setTimeRange] = useState('30d'); // 1d, 7d, 30d, 90d, 1y, all
 
-  // Fetch order stats
+  // Fetch order stats - OPTIMIZED with caching
   const { data: orderStats, isLoading: loadingOrders } = useQuery({
     queryKey: ['orderStats'],
-    queryFn: adminService.getOrderStats
+    queryFn: adminService.getOrderStats,
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
-  // Fetch product stats
+  // Fetch product stats - OPTIMIZED with caching
   const { data: productStats, isLoading: loadingProducts } = useQuery({
     queryKey: ['productStats'],
-    queryFn: adminService.getProductStats
+    queryFn: adminService.getProductStats,
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
-  // Fetch advanced analytics
+  // Fetch advanced analytics - OPTIMIZED with caching
   const { data: advancedAnalytics, isLoading: loadingAdvanced } = useQuery({
     queryKey: ['advancedAnalytics', timeRange],
     queryFn: () => adminService.getAdvancedAnalytics(timeRange),
-    enabled: true
+    enabled: true,
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
   // Fetch orders for detailed analytics - use reasonable limit to improve performance

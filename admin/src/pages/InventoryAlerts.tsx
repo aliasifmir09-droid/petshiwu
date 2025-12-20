@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { useToast } from '@/hooks/useToast';
@@ -37,7 +37,7 @@ const InventoryAlerts = () => {
   const { toast, showToast, hideToast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch low stock products
+  // Fetch low stock products - OPTIMIZED with better caching
   const { data: lowStockData, isLoading, refetch } = useQuery({
     queryKey: ['low-stock-products', thresholdFilter, globalThreshold],
     queryFn: async () => {
@@ -49,7 +49,8 @@ const InventoryAlerts = () => {
       // Backend returns: { success: true, products: [...], count: ..., defaultThreshold: ... }
       return response;
     },
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes (increased from 30 seconds)
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
   const lowStockProducts = lowStockData?.products || [];
@@ -117,20 +118,29 @@ const InventoryAlerts = () => {
     });
   };
 
-  // Filter products
-  const filteredProducts = lowStockProducts.filter((product: LowStockProduct) => {
-    const matchesSearch = 
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.category?.name.toLowerCase().includes(searchTerm.toLowerCase());
+  // Filter products - MEMOIZED for performance
+  const filteredProducts = useMemo(() => {
+    if (!searchTerm && thresholdFilter === 'all') {
+      // No filtering needed, return all products
+      return lowStockProducts;
+    }
 
-    const matchesThreshold = 
-      thresholdFilter === 'all' ||
-      (thresholdFilter === 'custom' && product.lowStockThreshold !== null) ||
-      (thresholdFilter === 'global' && product.lowStockThreshold === null);
+    const searchLower = searchTerm.toLowerCase();
+    return lowStockProducts.filter((product: LowStockProduct) => {
+      const matchesSearch = 
+        !searchTerm ||
+        product.name.toLowerCase().includes(searchLower) ||
+        product.brand?.toLowerCase().includes(searchLower) ||
+        product.category?.name.toLowerCase().includes(searchLower);
 
-    return matchesSearch && matchesThreshold;
-  });
+      const matchesThreshold = 
+        thresholdFilter === 'all' ||
+        (thresholdFilter === 'custom' && product.lowStockThreshold !== null) ||
+        (thresholdFilter === 'global' && product.lowStockThreshold === null);
+
+      return matchesSearch && matchesThreshold;
+    });
+  }, [lowStockProducts, searchTerm, thresholdFilter]);
 
   if (isLoading) {
     return (

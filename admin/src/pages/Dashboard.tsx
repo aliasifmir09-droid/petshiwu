@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { adminService } from '@/services/adminService';
 import StatCard from '@/components/StatCard';
@@ -90,38 +91,48 @@ const Dashboard = () => {
     queryKey: ['orderStats'],
     queryFn: adminService.getOrderStats,
     enabled: hasAnalyticsPermission, // Only fetch if user has permission
-    retry: false
+    retry: false,
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
   const { data: productStats } = useQuery({
     queryKey: ['productStats'],
     queryFn: adminService.getProductStats,
     enabled: hasAnalyticsPermission, // Only fetch if user has permission
-    retry: false
+    retry: false,
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
-  // Get out-of-stock products
+  // Get out-of-stock products - limited to 10 for performance
   const { data: outOfStockData } = useQuery({
     queryKey: ['products', 'out-of-stock'],
     queryFn: () => adminService.getProducts({ inStock: false, limit: 10 }),
-    retry: false
+    retry: false,
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
   // Get categories and pet types for navigation menu
   const { data: categoriesData } = useQuery({
     queryKey: ['admin-categories'],
     queryFn: adminService.getAllCategoriesAdmin,
-    retry: false
+    retry: false,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   const { data: petTypesData } = useQuery({
     queryKey: ['pet-types'],
     queryFn: adminService.getPetTypes,
-    retry: false
+    retry: false,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
-  // Group categories by pet type
-  const categoriesByPetType = () => {
+  // Group categories by pet type - MEMOIZED for performance
+  const categoriesByPet = useMemo(() => {
     if (!categoriesData?.data || !petTypesData?.data) return {};
     
     const grouped: any = {};
@@ -153,9 +164,7 @@ const Dashboard = () => {
     });
 
     return grouped;
-  };
-
-  const categoriesByPet = categoriesByPetType();
+  }, [categoriesData?.data, petTypesData?.data]);
 
   // Check if user has permission issues
   const hasPermissionError = !hasAnalyticsPermission;
@@ -170,8 +179,8 @@ const Dashboard = () => {
     { month: 'Jun', sales: 5500 }
   ];
 
-  // Generate category data from actual navigation menu categories
-  const categoryData = (() => {
+  // Generate category data from actual navigation menu categories - MEMOIZED for performance
+  const categoryData = useMemo(() => {
     if (!categoriesData?.data || !Array.isArray(categoriesData.data)) {
       // Fallback mock data if categories not loaded yet
       return [
@@ -233,7 +242,7 @@ const Dashboard = () => {
     return chartData.length > 0 ? chartData : [
       { name: 'No categories found', value: 0 }
     ];
-  })();
+  }, [categoriesData?.data]);
 
   return (
     <div className="space-y-8">

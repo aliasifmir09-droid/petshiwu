@@ -28,7 +28,9 @@ const Orders = () => {
       page, 
       limit: 20, 
       status: statusFilter || undefined 
-    })
+    }),
+    staleTime: 30 * 1000, // Cache for 30 seconds
+    gcTime: 2 * 60 * 1000, // Keep in cache for 2 minutes
   });
 
   const getPaymentMethodLabel = (method: string) => {

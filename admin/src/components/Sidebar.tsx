@@ -39,11 +39,13 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
     staleTime: 5 * 60 * 1000 // Cache for 5 minutes
   });
 
-  // Get out-of-stock product count
+  // Get out-of-stock product count - OPTIMIZED with better caching
   const { data: outOfStockData } = useQuery({
     queryKey: ['products', 'out-of-stock-count'],
     queryFn: () => adminService.getProducts({ inStock: false, limit: 1 }),
-    refetchInterval: 60000 // Refetch every minute
+    refetchInterval: 2 * 60 * 1000, // Refetch every 2 minutes (reduced from 1 minute)
+    staleTime: 1 * 60 * 1000, // Cache for 1 minute
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
   const outOfStockCount = outOfStockData?.pagination?.total || 0;

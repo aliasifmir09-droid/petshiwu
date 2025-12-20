@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { Plus, Edit, Trash2, Search, Filter, AlertTriangle, X, FolderTree, Layers, Package, Upload, Download, Settings } from 'lucide-react';
@@ -44,19 +44,23 @@ const Products = () => {
       petType: petTypeFilter || undefined,
       inStock: stockFilter === 'in-stock' ? true : stockFilter === 'out-of-stock' ? false : undefined
     }),
-    staleTime: 0, // Always consider data stale for products list to ensure fresh data after mutations
-    gcTime: 1 * 60 * 1000, // Cache for 1 minute (shorter than default to ensure faster updates)
+    staleTime: 30 * 1000, // Cache for 30 seconds (reduced from 0 to improve performance)
+    gcTime: 2 * 60 * 1000, // Cache for 2 minutes
   });
 
-  // Get out-of-stock products for notification bar
+  // Get out-of-stock products for notification bar - REDUCED LIMIT for performance
   const { data: outOfStockData } = useQuery({
     queryKey: ['products', 'out-of-stock-notification'],
-    queryFn: () => adminService.getProducts({ inStock: false, limit: 100 }),
+    queryFn: () => adminService.getProducts({ inStock: false, limit: 10 }), // Reduced from 100 to 10
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
-    queryFn: adminService.getCategories
+    queryFn: adminService.getCategories,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   const deleteMutation = useMutation({
