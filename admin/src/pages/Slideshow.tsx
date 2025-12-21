@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
-import { Plus, Edit, Trash2, Eye, EyeOff, GripVertical, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, ArrowUp, ArrowDown } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
@@ -288,14 +288,13 @@ const Slideshow = () => {
         message={`Are you sure you want to delete "${deleteConfirm.slideTitle}"? This action cannot be undone.`}
         confirmText="Delete"
         cancelText="Cancel"
-        variant="danger"
+        confirmButtonClass="bg-red-600 hover:bg-red-700"
       />
 
       {/* Toast */}
-      {toast.show && (
+      {toast.isVisible && (
         <Toast
-          message={toast.message}
-          type={toast.type}
+          toast={toast}
           onClose={hideToast}
         />
       )}
