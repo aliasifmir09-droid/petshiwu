@@ -19,16 +19,18 @@ export const analyzeIndexUsage = async () => {
       return;
     }
 
-    // Get index statistics
+    // Get index statistics using db.command
     const collection = db.collection('products');
-    const stats = await collection.stats();
+    const stats = await db.command({ collStats: 'products' });
     const indexes = await collection.indexes();
 
     logger.info('=== Product Collection Index Analysis ===');
     logger.info(`Total Indexes: ${indexes.length}`);
-    logger.info(`Index Size: ${(stats.totalIndexSize / 1024 / 1024).toFixed(2)} MB`);
-    logger.info(`Collection Size: ${(stats.size / 1024 / 1024).toFixed(2)} MB`);
-    logger.info(`Index to Collection Ratio: ${((stats.totalIndexSize / stats.size) * 100).toFixed(2)}%`);
+    const totalIndexSize = (stats as any).totalIndexSize || 0;
+    const collectionSize = (stats as any).size || 0;
+    logger.info(`Index Size: ${(totalIndexSize / 1024 / 1024).toFixed(2)} MB`);
+    logger.info(`Collection Size: ${(collectionSize / 1024 / 1024).toFixed(2)} MB`);
+    logger.info(`Index to Collection Ratio: ${collectionSize > 0 ? ((totalIndexSize / collectionSize) * 100).toFixed(2) : '0.00'}%`);
 
     // Analyze each index
     logger.info('\n=== Index Details ===');
@@ -112,14 +114,16 @@ export const getIndexStats = async () => {
     }
 
     const collection = db.collection('products');
-    const stats = await collection.stats();
+    const stats = await db.command({ collStats: 'products' });
     const indexes = await collection.indexes();
 
+    const totalIndexSize = (stats as any).totalIndexSize || 0;
+    const collectionSize = (stats as any).size || 0;
     return {
       totalIndexes: indexes.length,
-      indexSizeMB: (stats.totalIndexSize / 1024 / 1024).toFixed(2),
-      collectionSizeMB: (stats.size / 1024 / 1024).toFixed(2),
-      indexRatio: ((stats.totalIndexSize / stats.size) * 100).toFixed(2),
+      indexSizeMB: (totalIndexSize / 1024 / 1024).toFixed(2),
+      collectionSizeMB: (collectionSize / 1024 / 1024).toFixed(2),
+      indexRatio: collectionSize > 0 ? ((totalIndexSize / collectionSize) * 100).toFixed(2) : '0.00',
       indexes: indexes.map(idx => ({
         name: idx.name,
         keys: idx.key,

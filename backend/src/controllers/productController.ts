@@ -1633,8 +1633,12 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       });
     }
 
+    // Conditionally apply select() only if selectFields is defined
+    if (selectFields) {
+      productsQuery.select(selectFields);
+    }
+
     const products = await productsQuery
-      .select(selectFields)
       .sort(sortOrder)
       .skip(skip)
       .limit(limit)
