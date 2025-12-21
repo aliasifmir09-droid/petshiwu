@@ -79,15 +79,7 @@ const ProductDetail = () => {
     gcTime: 5 * 60 * 1000 // Cache for 5 minutes
   });
 
-  const { data: relatedProducts } = useQuery({
-    queryKey: ['related-products', actualProductSlug],
-    queryFn: () => productService.getRelatedProducts(actualProductSlug),
-    enabled: !!actualProductSlug,
-    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
-    gcTime: 15 * 60 * 1000 // Cache for 15 minutes
-  });
-
-  // Get all recommendations
+  // Get all recommendations (optimized - uses recommendation service with better caching)
   const { data: recommendations } = useQuery({
     queryKey: ['recommendations', product?._id],
     queryFn: () => recommendationService.getRecommendations(String(product?._id), 8),
@@ -1181,26 +1173,6 @@ const ProductDetail = () => {
                   <ProductCard product={product} />
                 </div>
               ))}
-          </div>
-        </div>
-      )}
-
-      {/* Suggested Products Section */}
-      {relatedProducts && relatedProducts.data && relatedProducts.data.length > 0 && (
-        <div className="mt-16 border-t pt-12">
-          <div className="flex items-center gap-3 mb-8">
-            <Sparkles size={28} className="text-primary-600" />
-            <h2 className="text-3xl font-bold">You May Also Like</h2>
-          </div>
-          <p className="text-gray-600 mb-6">
-            Similar products based on category and pet type
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-            {relatedProducts.data.map((relatedProduct) => (
-              <div key={relatedProduct._id} className="flex">
-                <ProductCard product={relatedProduct} />
-              </div>
-            ))}
           </div>
         </div>
       )}
