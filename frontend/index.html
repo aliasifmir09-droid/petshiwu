@@ -12,6 +12,9 @@
     <!-- Preconnect for faster DNS lookup -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Preconnect for Tawk.to (lazy loaded but preconnect helps when it loads) -->
+    <link rel="preconnect" href="https://embed.tawk.to">
+    <link rel="dns-prefetch" href="https://embed.tawk.to">
     <!-- Non-blocking font loading - reduced weights for better performance -->
     <link 
       href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" 
@@ -31,17 +34,50 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!--Start of Tawk.to Script-->
+    <!--Start of Tawk.to Script - Lazy Loaded for Performance-->
     <script type="text/javascript">
-    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-    (function(){
-    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-    s1.async=true;
-    s1.src='https://embed.tawk.to/6921e5eced8113195e016894/1jam6k9ak';
-    s1.charset='UTF-8';
-    s1.setAttribute('crossorigin','*');
-    s0.parentNode.insertBefore(s1,s0);
-    })();
+    // Lazy load Tawk.to after page load to improve initial page performance
+    function loadTawk() {
+      if (window.Tawk_API && window.Tawk_API.isLoaded) {
+        return; // Already loaded
+      }
+      var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+      (function(){
+        var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+        s1.async=true;
+        s1.src='https://embed.tawk.to/6921e5eced8113195e016894/1jam6k9ak';
+        s1.charset='UTF-8';
+        s1.setAttribute('crossorigin','*');
+        s0.parentNode.insertBefore(s1,s0);
+      })();
+    }
+    
+    // Load Tawk.to after page is fully loaded (not blocking initial render)
+    if (document.readyState === 'complete') {
+      // Page already loaded, load immediately
+      setTimeout(loadTawk, 2000); // Wait 2 seconds after page load
+    } else {
+      // Wait for page to load
+      window.addEventListener('load', function() {
+        setTimeout(loadTawk, 2000); // Wait 2 seconds after page load
+      });
+    }
+    
+    // Also load on user interaction (scroll, click, etc.) for faster activation
+    var tawkLoaded = false;
+    function loadTawkOnInteraction() {
+      if (!tawkLoaded) {
+        tawkLoaded = true;
+        loadTawk();
+        // Remove listeners after first interaction
+        window.removeEventListener('scroll', loadTawkOnInteraction, { passive: true });
+        window.removeEventListener('click', loadTawkOnInteraction);
+        window.removeEventListener('touchstart', loadTawkOnInteraction, { passive: true });
+      }
+    }
+    window.addEventListener('scroll', loadTawkOnInteraction, { passive: true });
+    window.addEventListener('click', loadTawkOnInteraction);
+    window.addEventListener('touchstart', loadTawkOnInteraction, { passive: true });
     </script>
     <!--End of Tawk.to Script-->
   </body>

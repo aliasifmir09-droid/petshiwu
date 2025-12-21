@@ -10,14 +10,15 @@ const RUNTIME_CACHE = 'petshiwu-runtime-v1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/logo.png',
   '/manifest.json',
+  // Don't cache logo.png on install - cache it on first fetch instead
 ];
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
+      // Only cache essential assets, skip logo.png to prevent multiple fetches
       return cache.addAll(STATIC_ASSETS).catch((error) => {
         console.log('Cache install error:', error);
         // Don't fail installation if some assets fail to cache
@@ -58,42 +59,66 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Strategy: Network first, fallback to cache
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        // Clone the response
-        const responseToCache = response.clone();
-
-        // Cache successful responses (except API calls)
-        if (response.status === 200 && !url.pathname.startsWith('/api/')) {
-          caches.open(RUNTIME_CACHE).then((cache) => {
-            cache.put(request, responseToCache);
-          });
+  // Strategy: Cache first for static assets, Network first for others
+  // This prevents multiple fetches of the same asset (like logo.png)
+  if (url.pathname.match(/\.(png|jpg|jpeg|gif|webp|svg|ico|woff|woff2|ttf|eot)$/i)) {
+    // Static assets: Cache first strategy
+    event.respondWith(
+      caches.match(request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse; // Return from cache immediately
         }
-
-        return response;
-      })
-      .catch(() => {
-        // Network failed, try cache
-        return caches.match(request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
+        // Not in cache, fetch and cache it
+        return fetch(request).then((response) => {
+          // Only cache successful responses
+          if (response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(RUNTIME_CACHE).then((cache) => {
+              cache.put(request, responseToCache);
+            });
           }
-
-          // If it's a navigation request and we have index.html cached, return that
-          if (request.mode === 'navigate') {
-            return caches.match('/index.html');
-          }
-
-          // Return a basic offline page
-          return new Response('Offline - Please check your connection', {
-            status: 503,
-            headers: { 'Content-Type': 'text/plain' },
-          });
+          return response;
         });
       })
-  );
+    );
+  } else {
+    // Other requests: Network first, fallback to cache
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Clone the response
+          const responseToCache = response.clone();
+
+          // Cache successful responses (except API calls)
+          if (response.status === 200 && !url.pathname.startsWith('/api/')) {
+            caches.open(RUNTIME_CACHE).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+
+          return response;
+        })
+        .catch(() => {
+          // Network failed, try cache
+          return caches.match(request).then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+
+            // If it's a navigation request and we have index.html cached, return that
+            if (request.mode === 'navigate') {
+              return caches.match('/index.html');
+            }
+
+            // Return a basic offline page
+            return new Response('Offline - Please check your connection', {
+              status: 503,
+              headers: { 'Content-Type': 'text/plain' },
+            });
+          });
+        })
+    );
+  }
 });
 
 // Message handler for cache updates
