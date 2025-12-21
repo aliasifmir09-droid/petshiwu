@@ -13,7 +13,6 @@ import {
   Settings,
   LogOut,
   Mail,
-  AlertTriangle,
   BookOpen,
   HelpCircle,
   ChevronDown,
