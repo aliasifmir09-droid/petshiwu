@@ -273,6 +273,23 @@ const ProductDetail = () => {
   
   const selectedVariantData = hasVariants ? product.variants[safeSelectedVariant] : undefined;
   const price = selectedVariantData?.price || product?.basePrice || 0;
+  
+  // Calculate available stock: use variant stock if available, otherwise product total stock
+  const availableStock = selectedVariantData?.stock ?? product?.totalStock ?? 0;
+
+  // Reset quantity to 1 when variant changes
+  useEffect(() => {
+    setQuantity(1);
+  }, [selectedVariant]);
+
+  // Adjust quantity if it exceeds available stock
+  useEffect(() => {
+    if (quantity > availableStock && availableStock > 0) {
+      setQuantity(availableStock);
+    } else if (availableStock === 0 && quantity > 0) {
+      setQuantity(1); // Reset to 1 if out of stock (will be disabled anyway)
+    }
+  }, [availableStock]);
 
   // Determine which images to display: variant image if available, otherwise product images
   const displayImages = (() => {
@@ -776,26 +793,47 @@ const ProductDetail = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-11 h-11 border border-gray-300 rounded-lg hover:bg-gray-100 flex items-center justify-center text-lg font-semibold active:scale-95 transition-transform min-w-[44px] min-h-[44px]"
+                disabled={quantity <= 1}
+                className={`w-11 h-11 border border-gray-300 rounded-lg flex items-center justify-center text-lg font-semibold active:scale-95 transition-transform min-w-[44px] min-h-[44px] ${
+                  quantity <= 1
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'hover:bg-gray-100'
+                }`}
                 aria-label="Decrease quantity"
               >
                 -
               </button>
               <input
                 type="number"
+                min="1"
+                max={availableStock}
                 value={quantity}
-                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value) || 1;
+                  const clampedValue = Math.max(1, Math.min(value, availableStock));
+                  setQuantity(clampedValue);
+                }}
                 className="w-20 text-center border border-gray-300 rounded-lg px-3 py-2 min-h-[44px]"
                 aria-label="Quantity"
               />
               <button
-                onClick={() => setQuantity(quantity + 1)}
-                className="w-11 h-11 border border-gray-300 rounded-lg hover:bg-gray-100 flex items-center justify-center text-lg font-semibold active:scale-95 transition-transform min-w-[44px] min-h-[44px]"
+                onClick={() => setQuantity(Math.min(availableStock, quantity + 1))}
+                disabled={quantity >= availableStock || availableStock === 0}
+                className={`w-11 h-11 border border-gray-300 rounded-lg flex items-center justify-center text-lg font-semibold active:scale-95 transition-transform min-w-[44px] min-h-[44px] ${
+                  quantity >= availableStock || availableStock === 0
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'hover:bg-gray-100'
+                }`}
                 aria-label="Increase quantity"
               >
                 +
               </button>
             </div>
+            {availableStock > 0 && (
+              <p className="text-xs text-gray-500 mt-1">
+                Maximum {availableStock} {availableStock === 1 ? 'item' : 'items'} available
+              </p>
+            )}
           </div>
 
           {/* Actions */}
