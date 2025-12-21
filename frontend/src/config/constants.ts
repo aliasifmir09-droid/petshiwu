@@ -54,3 +54,16 @@ export const API_RETRY_ATTEMPTS = 3;
 export const TOAST_DURATION = 3000; // 3 seconds
 export const DEBOUNCE_DELAY = 300; // 300ms
 
+// Contact information
+export const CONTACT_PHONE = '+1 (626) 342-0419';
+export const CONTACT_PHONE_TEL = '+16263420419'; // For tel: links
+export const CONTACT_EMAIL = 'support@petshiwu.com';
+export const CONTACT_ADDRESS = {
+  street: '37-68 74th St',
+  city: 'Jackson Heights',
+  state: 'NY',
+  zipCode: '11372',
+  country: 'USA',
+  full: '37-68 74th St, Jackson Heights, NY 11372'
+};
+

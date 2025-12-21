@@ -103,8 +103,15 @@ const Home = () => {
           logo: 'https://petshiwu.com/logo.png',
           description: 'Everything Your Pet Needs - Quality Pet Supplies Online',
           contactPoint: {
-            telephone: '+1-800-738-7449',
+            telephone: '+1-626-342-0419',
             contactType: 'customer service'
+          },
+          address: {
+            streetAddress: '37-68 74th St',
+            addressLocality: 'Jackson Heights',
+            addressRegion: 'NY',
+            postalCode: '11372',
+            addressCountry: 'US'
           }
         }}
       />

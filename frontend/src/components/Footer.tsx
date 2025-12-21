@@ -101,8 +101,8 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-2 text-sm text-gray-400">
               <li>
-                <a href="tel:1-800-738-7449" className="hover:text-white">
-                  📞 1-800-738-7449
+                <a href="tel:+16263420419" className="hover:text-white">
+                  📞 +1 (626) 342-0419
                 </a>
               </li>
               <li>
@@ -110,6 +110,7 @@ const Footer = () => {
                   📧 support@petshiwu.com
                 </a>
               </li>
+              <li className="mt-3">📍 37-68 74th St<br />Jackson Heights, NY 11372</li>
               <li>🕐 Mon-Fri: 9AM - 8PM EST</li>
               <li>🕐 Sat-Sun: 9AM - 6PM EST</li>
             </ul>
