@@ -1910,11 +1910,9 @@ export const updateProduct = async (req: AuthRequest, res: Response, next: NextF
       });
     }
 
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true, runValidators: true }
-    ).populate('category', 'name slug');
+    // Use findById + save instead of findByIdAndUpdate to trigger pre-save hooks
+    // This ensures totalStock and inStock are recalculated from variants
+    const product = await Product.findById(req.params.id);
 
     if (!product) {
       return res.status(404).json({
@@ -1922,6 +1920,19 @@ export const updateProduct = async (req: AuthRequest, res: Response, next: NextF
         message: 'Product not found'
       });
     }
+
+    // Update product fields
+    Object.keys(updateData).forEach(key => {
+      if (key !== '_id' && key !== '__v' && updateData[key] !== undefined) {
+        (product as any)[key] = updateData[key];
+      }
+    });
+
+    // Save to trigger pre-save hooks (which will recalculate totalStock and inStock)
+    await product.save();
+
+    // Populate category after save
+    await product.populate('category', 'name slug');
 
     res.status(200).json({
       success: true,

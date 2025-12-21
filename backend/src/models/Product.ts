@@ -190,10 +190,25 @@ productSchema.pre('save', function (next) {
     this.slug = this.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
   }
   
-  // Calculate total stock from variants
+  // Always calculate total stock from variants (if variants exist)
+  // This ensures totalStock and inStock are always in sync
   if (this.variants && this.variants.length > 0) {
-    this.totalStock = this.variants.reduce((total, variant) => total + variant.stock, 0);
-    this.inStock = this.totalStock > 0;
+    const calculatedTotalStock = this.variants.reduce((total, variant) => {
+      const variantStock = variant.stock || 0;
+      return total + variantStock;
+    }, 0);
+    this.totalStock = calculatedTotalStock;
+    this.inStock = calculatedTotalStock > 0;
+  } else {
+    // If no variants, ensure inStock matches totalStock
+    // If totalStock is set directly (e.g., during import), use it
+    if (this.totalStock !== undefined && this.totalStock !== null) {
+      this.inStock = this.totalStock > 0;
+    } else {
+      // If totalStock is not set and no variants, default to 0
+      this.totalStock = 0;
+      this.inStock = false;
+    }
   }
   
   next();
