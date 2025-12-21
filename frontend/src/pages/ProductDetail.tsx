@@ -1125,8 +1125,8 @@ const ProductDetail = () => {
             Customers who bought this item also bought these products
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-            {frequentlyBoughtTogether.map((product: any) => (
-              <div key={product._id} className="flex">
+            {frequentlyBoughtTogether.map((product: any, index: number) => (
+              <div key={product._id ? String(product._id) : `fbt-${index}`} className="flex">
                 <ProductCard product={product} />
               </div>
             ))}
@@ -1145,8 +1145,8 @@ const ProductDetail = () => {
             Popular products purchased together with this item
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-            {customersAlsoBought.map((product: any) => (
-              <div key={product._id} className="flex">
+            {customersAlsoBought.map((product: any, index: number) => (
+              <div key={product._id ? String(product._id) : `cab-${index}`} className="flex">
                 <ProductCard product={product} />
               </div>
             ))}
@@ -1168,8 +1168,8 @@ const ProductDetail = () => {
             {recommendations
               .filter((rec) => rec.recommendationType !== 'customers_also_bought' && rec.recommendationType !== 'frequently_bought_together')
               .slice(0, 8)
-              .map((product) => (
-                <div key={product._id} className="flex">
+              .map((product, index) => (
+                <div key={product._id ? String(product._id) : `rec-${index}`} className="flex">
                   <ProductCard product={product} />
                 </div>
               ))}
