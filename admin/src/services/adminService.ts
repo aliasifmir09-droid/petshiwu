@@ -676,6 +676,11 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
   reorderSlides: async (slides: Array<{ id: string; order: number }>) => {
     const response = await api.post('/slideshow/reorder', { slides });
     return response.data;
+  },
+
+  seedSlideshow: async () => {
+    const response = await api.post('/slideshow/seed');
+    return response.data;
   }
 };
 

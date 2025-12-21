@@ -295,3 +295,93 @@ export const reorderSlides = async (req: AuthRequest, res: Response, next: NextF
   }
 };
 
+// Seed dummy slideshow data (admin)
+export const seedSlideshow = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    // Check if slides already exist
+    const existingSlides = await Slideshow.countDocuments();
+    if (existingSlides > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Slides already exist. Delete existing slides first to seed new data.'
+      });
+    }
+
+    const dummySlides = [
+      {
+        title: 'Welcome to Petshiwu',
+        subtitle: 'Everything Your Pet Needs',
+        description: 'Shop the best for your pets!',
+        buttonText: 'Shop now',
+        buttonLink: '/products',
+        imageUrl: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=800&h=600&fit=crop&q=80',
+        backgroundColor: 'bg-gradient-to-br from-blue-50 via-white to-purple-50',
+        theme: 'holiday',
+        isActive: true,
+        order: 0
+      },
+      {
+        title: 'Up to 40% Off',
+        subtitle: 'Premium Pet Food & Treats',
+        description: 'Premium quality at great prices',
+        buttonText: 'Shop Deals',
+        buttonLink: '/products?featured=true',
+        imageUrl: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&h=600&fit=crop&q=80',
+        backgroundColor: 'bg-gradient-to-br from-orange-50 via-white to-amber-50',
+        theme: 'product',
+        isActive: true,
+        order: 1
+      },
+      {
+        title: 'Health & Wellness',
+        subtitle: 'Keep Your Pets Happy & Healthy',
+        description: 'Vitamins, Supplements & More',
+        buttonText: 'Explore Now',
+        buttonLink: '/products?search=vitamins',
+        imageUrl: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800&h=600&fit=crop&q=80',
+        backgroundColor: 'bg-gradient-to-br from-green-50 via-white to-emerald-50',
+        theme: 'wellness',
+        isActive: true,
+        order: 2
+      },
+      {
+        title: 'Premium Nutrition',
+        subtitle: 'Science-Backed Formulas',
+        description: 'For Every Life Stage',
+        buttonText: 'Shop Food',
+        buttonLink: '/products?search=food',
+        imageUrl: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800&h=600&fit=crop&q=80',
+        backgroundColor: 'bg-gradient-to-br from-purple-50 via-white to-pink-50',
+        theme: 'product',
+        isActive: true,
+        order: 3
+      },
+      {
+        title: 'Delicious Treats',
+        subtitle: 'Premium Rewards They Love',
+        description: 'Make every moment special',
+        buttonText: 'Shop Treats',
+        buttonLink: '/products?search=treats',
+        imageUrl: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=800&h=600&fit=crop&q=80',
+        backgroundColor: 'bg-gradient-to-br from-red-50 via-white to-rose-50',
+        theme: 'treats',
+        isActive: true,
+        order: 4
+      }
+    ];
+
+    const createdSlides = await Slideshow.insertMany(dummySlides);
+
+    // Clear cache
+    await cache.del(cacheKeys.slideshow('active'));
+
+    res.status(201).json({
+      success: true,
+      message: `Successfully seeded ${createdSlides.length} slides`,
+      data: createdSlides.map(slide => normalizeSlideshowId(slide))
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
+

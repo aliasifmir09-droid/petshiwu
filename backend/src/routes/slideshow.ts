@@ -6,7 +6,8 @@ import {
   createSlide,
   updateSlide,
   deleteSlide,
-  reorderSlides
+  reorderSlides,
+  seedSlideshow
 } from '../controllers/slideshowController';
 import { protect, authorize } from '../middleware/auth';
 
@@ -22,6 +23,7 @@ router.post('/', protect, authorize('admin'), createSlide);
 router.put('/:id', protect, authorize('admin'), updateSlide);
 router.delete('/:id', protect, authorize('admin'), deleteSlide);
 router.post('/reorder', protect, authorize('admin'), reorderSlides);
+router.post('/seed', protect, authorize('admin'), seedSlideshow);
 
 export default router;
 

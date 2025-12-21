@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
-import { Plus, Edit, Trash2, Eye, EyeOff, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, ArrowUp, ArrowDown, Upload, Link2 } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
@@ -153,19 +153,42 @@ const Slideshow = () => {
     reorderMutation.mutate(reordered);
   };
 
+  // Seed slides mutation
+  const seedMutation = useMutation({
+    mutationFn: () => adminService.seedSlideshow(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['slideshow'] });
+      showToast('Dummy slides created successfully', 'success');
+    },
+    onError: (error: any) => {
+      showToast(error.response?.data?.message || 'Failed to seed slides', 'error');
+    }
+  });
+
   const sortedSlides = slides ? [...slides].sort((a, b) => a.order - b.order) : [];
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Slideshow Management</h1>
-        <button
-          onClick={handleCreate}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-        >
-          <Plus size={20} />
-          Add New Slide
-        </button>
+        <div className="flex gap-2">
+          {(!slides || slides.length === 0) && (
+            <button
+              onClick={() => seedMutation.mutate()}
+              disabled={seedMutation.isPending}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 disabled:opacity-50"
+            >
+              {seedMutation.isPending ? 'Seeding...' : 'Add Dummy Data'}
+            </button>
+          )}
+          <button
+            onClick={handleCreate}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          >
+            <Plus size={20} />
+            Add New Slide
+          </button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -311,6 +334,11 @@ interface SlideModalProps {
 }
 
 const SlideModal = ({ slide, onClose, onSubmit, isLoading }: SlideModalProps) => {
+  const { showToast } = useToast();
+  const [imageInputMode, setImageInputMode] = useState<'url' | 'upload'>(slide?.imageUrl ? 'url' : 'url');
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(slide?.imageUrl || null);
+
   const [formData, setFormData] = useState({
     title: slide?.title || '',
     subtitle: slide?.subtitle || '',
@@ -324,12 +352,81 @@ const SlideModal = ({ slide, onClose, onSubmit, isLoading }: SlideModalProps) =>
     order: slide?.order ?? 0
   });
 
+  // Update preview when formData.imageUrl changes
+  useEffect(() => {
+    if (formData.imageUrl) {
+      setImagePreview(formData.imageUrl);
+    }
+  }, [formData.imageUrl]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     }));
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      showToast('Please upload a valid image file (JPEG, PNG, GIF, or WebP)', 'error');
+      if (e.target) {
+        e.target.value = '';
+      }
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      showToast('Image size must be less than 5MB', 'error');
+      if (e.target) {
+        e.target.value = '';
+      }
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const result = await adminService.uploadImage(file);
+      
+      // Extract URL from response
+      let imageUrl = null;
+      if (typeof result === 'string') {
+        imageUrl = result;
+      } else if (result?.url) {
+        imageUrl = result.url;
+      } else if (result?.path) {
+        imageUrl = result.path;
+      } else if (result?.secure_url) {
+        imageUrl = result.secure_url;
+      } else if (result?.data?.url) {
+        imageUrl = result.data.url;
+      } else if (result?.data?.path) {
+        imageUrl = result.data.path;
+      }
+      
+      if (!imageUrl) {
+        throw new Error('No image URL returned from server');
+      }
+      
+      imageUrl = String(imageUrl).trim();
+      setFormData({ ...formData, imageUrl });
+      setImagePreview(imageUrl);
+      showToast('Image uploaded successfully!', 'success');
+    } catch (error: any) {
+      showToast(error.response?.data?.message || 'Failed to upload image', 'error');
+    } finally {
+      setUploading(false);
+      if (e.target) {
+        e.target.value = '';
+      }
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -409,20 +506,67 @@ const SlideModal = ({ slide, onClose, onSubmit, isLoading }: SlideModalProps) =>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Image URL *</label>
-            <input
-              type="url"
-              name="imageUrl"
-              value={formData.imageUrl}
-              onChange={handleChange}
-              required
-              placeholder="https://example.com/image.jpg"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            {formData.imageUrl && (
+            <label className="block text-sm font-medium text-gray-700 mb-1">Image *</label>
+            
+            {/* Toggle between URL and Upload */}
+            <div className="flex gap-2 mb-2">
+              <button
+                type="button"
+                onClick={() => setImageInputMode('url')}
+                className={`px-3 py-1.5 text-sm rounded-lg flex items-center gap-2 ${
+                  imageInputMode === 'url'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <Link2 size={16} />
+                URL
+              </button>
+              <button
+                type="button"
+                onClick={() => setImageInputMode('upload')}
+                className={`px-3 py-1.5 text-sm rounded-lg flex items-center gap-2 ${
+                  imageInputMode === 'upload'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <Upload size={16} />
+                Upload
+              </button>
+            </div>
+
+            {imageInputMode === 'url' ? (
+              <>
+                <input
+                  type="url"
+                  name="imageUrl"
+                  value={formData.imageUrl}
+                  onChange={handleChange}
+                  required
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </>
+            ) : (
+              <div>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+                {uploading && (
+                  <p className="mt-1 text-sm text-gray-500">Uploading image...</p>
+                )}
+              </div>
+            )}
+
+            {imagePreview && (
               <div className="mt-2 w-32 h-20 rounded-lg overflow-hidden bg-gray-100">
                 <img
-                  src={normalizeImageUrl(formData.imageUrl)}
+                  src={normalizeImageUrl(imagePreview)}
                   alt="Preview"
                   className="w-full h-full object-cover"
                   onError={(e) => {
