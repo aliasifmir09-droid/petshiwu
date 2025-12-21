@@ -222,6 +222,29 @@ const ProductDetail = () => {
     }
   }, [product, slug, location.pathname, navigate]);
 
+  // Calculate available stock: use variant stock if available, otherwise product total stock
+  // This must be calculated before conditional returns to maintain hook order
+  const hasVariants = product?.variants && Array.isArray(product.variants) && product.variants.length > 0;
+  const safeSelectedVariant = hasVariants 
+    ? Math.max(0, Math.min(selectedVariant, product.variants.length - 1))
+    : 0;
+  const selectedVariantData = hasVariants ? product.variants[safeSelectedVariant] : undefined;
+  const availableStock = selectedVariantData?.stock ?? product?.totalStock ?? 0;
+
+  // Reset quantity to 1 when variant changes
+  useEffect(() => {
+    setQuantity(1);
+  }, [selectedVariant]);
+
+  // Adjust quantity if it exceeds available stock
+  useEffect(() => {
+    if (quantity > availableStock && availableStock > 0) {
+      setQuantity(availableStock);
+    } else if (availableStock === 0 && quantity > 0) {
+      setQuantity(1); // Reset to 1 if out of stock (will be disabled anyway)
+    }
+  }, [availableStock, quantity]);
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 lg:px-8 py-12">
@@ -263,33 +286,7 @@ const ProductDetail = () => {
   const productId = product._id ? String(product._id) : null;
   const inWishlist = productId ? isInWishlist(productId) : false;
   
-  // Safety checks for variants
-  const hasVariants = product?.variants && Array.isArray(product.variants) && product.variants.length > 0;
-  
-  // Ensure selectedVariant is within bounds
-  const safeSelectedVariant = hasVariants 
-    ? Math.max(0, Math.min(selectedVariant, product.variants.length - 1))
-    : 0;
-  
-  const selectedVariantData = hasVariants ? product.variants[safeSelectedVariant] : undefined;
   const price = selectedVariantData?.price || product?.basePrice || 0;
-  
-  // Calculate available stock: use variant stock if available, otherwise product total stock
-  const availableStock = selectedVariantData?.stock ?? product?.totalStock ?? 0;
-
-  // Reset quantity to 1 when variant changes
-  useEffect(() => {
-    setQuantity(1);
-  }, [selectedVariant]);
-
-  // Adjust quantity if it exceeds available stock
-  useEffect(() => {
-    if (quantity > availableStock && availableStock > 0) {
-      setQuantity(availableStock);
-    } else if (availableStock === 0 && quantity > 0) {
-      setQuantity(1); // Reset to 1 if out of stock (will be disabled anyway)
-    }
-  }, [availableStock]);
 
   // Determine which images to display: variant image if available, otherwise product images
   const displayImages = (() => {
