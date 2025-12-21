@@ -78,7 +78,6 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
   // Content Management submenu items
   const contentMenuItems = [
     { path: '/email-templates', icon: Mail, label: 'Email Templates', adminOnly: true },
-    { path: '/inventory-alerts', icon: AlertTriangle, label: 'Inventory Alerts', permission: 'canManageProducts' },
     { path: '/blogs', icon: BookOpen, label: 'Blogs', adminOnly: true },
     { path: '/care-guides', icon: BookOpen, label: 'Care Guides', adminOnly: true },
     { path: '/faqs', icon: HelpCircle, label: 'FAQs', adminOnly: true }

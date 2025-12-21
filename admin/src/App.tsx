@@ -16,7 +16,6 @@ const Settings = lazy(() => import('./pages/Settings'));
 const Analytics = lazy(() => import('./pages/Analytics'));
 const Customers = lazy(() => import('./pages/Customers'));
 const EmailTemplates = lazy(() => import('./pages/EmailTemplates'));
-const InventoryAlerts = lazy(() => import('./pages/InventoryAlerts'));
 const Blogs = lazy(() => import('./pages/Blogs'));
 const CareGuides = lazy(() => import('./pages/CareGuides'));
 const FAQs = lazy(() => import('./pages/FAQs'));
@@ -227,14 +226,6 @@ function App() {
                     element={
                       user?.role === 'admin' 
                         ? <EmailTemplates /> 
-                        : <Navigate to={getDefaultPage()} replace />
-                    } 
-                  />
-                  <Route 
-                    path="/inventory-alerts" 
-                    element={
-                      user?.role === 'admin' || user?.permissions?.canManageProducts 
-                        ? <InventoryAlerts /> 
                         : <Navigate to={getDefaultPage()} replace />
                     } 
                   />

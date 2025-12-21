@@ -50,7 +50,6 @@ import analyticsRoutes from './routes/analytics';
 import bulkOperationsRoutes from './routes/bulkOperations';
 import exportRoutes from './routes/exports';
 import emailTemplateRoutes from './routes/emailTemplates';
-import inventoryAlertRoutes from './routes/inventoryAlerts';
 import testEmailRoutes from './routes/testEmail';
 import blogRoutes from './routes/blogs';
 import careGuideRoutes from './routes/careGuides';
@@ -578,7 +577,6 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/bulk', bulkOperationsRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/email-templates', emailTemplateRoutes);
-app.use('/api/inventory-alerts', inventoryAlertRoutes);
 app.use('/api/test', testEmailRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/care-guides', careGuideRoutes); // Legacy route
