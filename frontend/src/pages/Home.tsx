@@ -436,7 +436,7 @@ const Home = () => {
               {/* View All Button */}
               <div className="text-center">
                 <Link
-                  to="/products?featured=true"
+                  to="/products"
                   className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:shadow-2xl transition-all transform hover:scale-105 btn-ripple"
                 >
                   <span>View All Products</span>
