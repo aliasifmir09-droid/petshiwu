@@ -11,6 +11,29 @@ import logger from '../utils/logger';
 import { cache, cacheKeys } from '../utils/cache';
 import { safeToString } from '../utils/types';
 
+// Helper function to recalculate stock from variants
+const recalculateStock = (product: any): { totalStock: number; inStock: boolean } => {
+  let calculatedTotalStock = 0;
+  
+  // Calculate total stock from variants
+  if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
+    calculatedTotalStock = product.variants.reduce((total: number, variant: any) => {
+      const variantStock = variant.stock || 0;
+      return total + variantStock;
+    }, 0);
+  } else {
+    // If no variants, use existing totalStock or default to 0
+    calculatedTotalStock = product.totalStock || 0;
+  }
+  
+  const calculatedInStock = calculatedTotalStock > 0;
+  
+  return {
+    totalStock: calculatedTotalStock,
+    inStock: calculatedInStock
+  };
+};
+
 // Helper function to normalize product _id to string and convert Maps to objects
 const normalizeProductId = (product: any): any => {
   if (!product) return product;
@@ -18,10 +41,15 @@ const normalizeProductId = (product: any): any => {
   // Convert to plain object if it's a Mongoose document
   const plainProduct = product.toObject ? product.toObject() : product;
   
+  // Recalculate stock from variants to ensure accuracy
+  const stockData = recalculateStock(plainProduct);
+  
   // Normalize product _id
   const normalized: any = {
     ...plainProduct,
-    _id: plainProduct._id ? String(plainProduct._id) : plainProduct._id
+    _id: plainProduct._id ? String(plainProduct._id) : plainProduct._id,
+    totalStock: stockData.totalStock,
+    inStock: stockData.inStock
   };
   
   // Normalize category._id if category is populated
