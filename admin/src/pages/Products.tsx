@@ -502,35 +502,6 @@ const Products = () => {
         </div>
       </div>
 
-      {/* Low Stock & Inventory Alerts Section */}
-      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Inventory Alerts</h2>
-          <button
-            onClick={() => {
-              adminService.getLowStockProducts({ globalThreshold: 10 })
-                .then((data) => {
-                  if (data.products && data.products.length > 0) {
-                    showToast(`${data.count} products are low on stock`, 'warning');
-                  } else {
-                    showToast('No low stock products found', 'success');
-                  }
-                })
-                .catch(() => {
-                  showToast('Failed to fetch low stock products', 'error');
-                });
-            }}
-            className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-          >
-            <AlertTriangle size={18} />
-            Check Low Stock
-          </button>
-        </div>
-        <p className="text-sm text-gray-600">
-          Configure low stock thresholds for products. Products below their threshold will trigger alerts.
-        </p>
-      </div>
-
       {/* Out of Stock Notification Bar */}
       {!dismissedNotification && outOfStockData && outOfStockData.data.length > 0 && (
         <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 border-l-4 border-red-600 rounded-xl p-6 shadow-xl animate-fade-in-up relative overflow-hidden">
