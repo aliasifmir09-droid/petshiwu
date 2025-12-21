@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { slideshowService, Slide } from '@/services/slideshow';
+import { slideshowService } from '@/services/slideshow';
 import LoadingSpinner from './LoadingSpinner';
 
 const HeroSlideshow = () => {
