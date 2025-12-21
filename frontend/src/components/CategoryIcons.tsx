@@ -122,7 +122,7 @@ const CategoryIcons = () => {
       link: '/category/food?petType=dog',
       color: 'from-blue-500 to-blue-600',
       // Image: Blue bag with paw print + blue bowl with kibble
-      image: '/category-dog-food1.png'
+      image: '/category-dog-food.avif'
     },
     {
       icon: HeartPulse,
@@ -138,7 +138,7 @@ const CategoryIcons = () => {
       link: '/products?petType=dog&search=treats',
       color: 'from-pink-500 to-rose-600',
       // Image: Blue jar with white flower-shaped treats + white bone
-      image: '/category-dog-treats1.png'
+      image: '/category-dog-treats.avif'
     },
     {
       icon: Fish,
@@ -146,7 +146,7 @@ const CategoryIcons = () => {
       link: '/category/food?petType=cat',
       color: 'from-purple-500 to-purple-600',
       // Image: Stack of three blue cat food cans
-      image: '/category-cat-food1.png'
+      image: '/category-cat-food.avif'
     },
     {
       icon: Box,
@@ -154,7 +154,7 @@ const CategoryIcons = () => {
       link: '/products?petType=cat&search=litter',
       color: 'from-teal-500 to-cyan-600',
       // Image: Blue litter box with white hood
-      image: '/category-cat-litter1.png'
+      image: '/category-cat-litter.avif'
     },
     {
       icon: Tag,
@@ -162,7 +162,7 @@ const CategoryIcons = () => {
       link: '/products?featured=true',
       color: 'from-orange-500 to-red-600',
       // Image: Blue gift box + blue price tag with $ sign
-      image: '/category-deals1.png'
+      image: '/category-deals.avif'
     }
   ];
 
