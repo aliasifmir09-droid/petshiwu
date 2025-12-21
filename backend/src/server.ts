@@ -55,6 +55,7 @@ import testEmailRoutes from './routes/testEmail';
 import blogRoutes from './routes/blogs';
 import careGuideRoutes from './routes/careGuides';
 import faqRoutes from './routes/faqs';
+import slideshowRoutes from './routes/slideshow';
 import healthRoutes from './routes/health';
 
 // Connect to database
@@ -554,6 +555,7 @@ app.use(`${API_PREFIX}/donations`, donationRoutes);
 app.use(`${API_PREFIX}/blogs`, blogRoutes);
 app.use(`${API_PREFIX}/care-guides`, careGuideRoutes);
 app.use(`${API_PREFIX}/faqs`, faqRoutes);
+app.use(`${API_PREFIX}/slideshow`, slideshowRoutes);
 
 // Legacy routes (without version) - redirect to v1 for backward compatibility
 app.use('/api/auth', authRoutes);
@@ -573,6 +575,7 @@ app.use('/api/test', testEmailRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/care-guides', careGuideRoutes); // Legacy route
 app.use('/api/faqs', faqRoutes); // Legacy route
+app.use('/api/slideshow', slideshowRoutes); // Legacy route
 app.use('/api/health', healthRoutes);
 
 // Root route - API information

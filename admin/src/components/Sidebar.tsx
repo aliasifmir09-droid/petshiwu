@@ -17,7 +17,8 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronRight,
-  FileText
+  FileText,
+  Image
 } from 'lucide-react';
 import ConfirmationModal from './ConfirmationModal';
 
@@ -76,6 +77,7 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
 
   // Content Management submenu items
   const contentMenuItems = [
+    { path: '/slideshow', icon: Image, label: 'Slideshow', adminOnly: true },
     { path: '/email-templates', icon: Mail, label: 'Email Templates', adminOnly: true },
     { path: '/blogs', icon: BookOpen, label: 'Blogs', adminOnly: true },
     { path: '/care-guides', icon: BookOpen, label: 'Care Guides', adminOnly: true },

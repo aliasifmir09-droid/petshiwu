@@ -645,6 +645,37 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
   seedEmailTemplates: async () => {
     const response = await api.post('/email-templates/seed');
     return response.data;
+  },
+
+  // Slideshow Management
+  getSlides: async () => {
+    const response = await api.get('/slideshow');
+    return response.data.data;
+  },
+
+  getSlide: async (id: string) => {
+    const response = await api.get(`/slideshow/${id}`);
+    return response.data.data;
+  },
+
+  createSlide: async (slideData: any) => {
+    const response = await api.post('/slideshow', slideData);
+    return response.data.data;
+  },
+
+  updateSlide: async (id: string, slideData: any) => {
+    const response = await api.put(`/slideshow/${id}`, slideData);
+    return response.data.data;
+  },
+
+  deleteSlide: async (id: string) => {
+    const response = await api.delete(`/slideshow/${id}`);
+    return response.data;
+  },
+
+  reorderSlides: async (slides: Array<{ id: string; order: number }>) => {
+    const response = await api.post('/slideshow/reorder', { slides });
+    return response.data;
   }
 };
 

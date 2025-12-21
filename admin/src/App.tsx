@@ -16,6 +16,7 @@ const Settings = lazy(() => import('./pages/Settings'));
 const Analytics = lazy(() => import('./pages/Analytics'));
 const Customers = lazy(() => import('./pages/Customers'));
 const EmailTemplates = lazy(() => import('./pages/EmailTemplates'));
+const Slideshow = lazy(() => import('./pages/Slideshow'));
 const Blogs = lazy(() => import('./pages/Blogs'));
 const CareGuides = lazy(() => import('./pages/CareGuides'));
 const FAQs = lazy(() => import('./pages/FAQs'));
@@ -226,6 +227,14 @@ function App() {
                     element={
                       user?.role === 'admin' 
                         ? <EmailTemplates /> 
+                        : <Navigate to={getDefaultPage()} replace />
+                    } 
+                  />
+                  <Route 
+                    path="/slideshow" 
+                    element={
+                      user?.role === 'admin' 
+                        ? <Slideshow /> 
                         : <Navigate to={getDefaultPage()} replace />
                     } 
                   />

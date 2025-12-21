@@ -1,83 +1,26 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-interface Slide {
-  id: number;
-  title: string;
-  subtitle: string;
-  description: string;
-  buttonText: string;
-  buttonLink: string;
-  leftImage: string;
-  rightImage?: string;
-  backgroundColor: string;
-  theme: 'holiday' | 'product' | 'wellness' | 'treats';
-}
+import { useQuery } from '@tanstack/react-query';
+import { slideshowService, Slide } from '@/services/slideshow';
+import LoadingSpinner from './LoadingSpinner';
 
 const HeroSlideshow = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const slides: Slide[] = [
-    {
-      id: 1,
-      title: 'Welcome to Petshiwu',
-      subtitle: 'Everything Your Pet Needs',
-      description: 'Shop the best for your pets!',
-      buttonText: 'Shop now',
-      buttonLink: '/products',
-      leftImage: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=800&h=600&fit=crop&q=80', // White cat with Christmas theme
-      backgroundColor: 'bg-gradient-to-br from-blue-50 via-white to-purple-50',
-      theme: 'holiday'
-    },
-    {
-      id: 2,
-      title: 'Up to 40% Off',
-      subtitle: 'Premium Pet Food & Treats',
-      description: 'Premium quality at great prices',
-      buttonText: 'Shop Deals',
-      buttonLink: '/products?featured=true',
-      leftImage: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&h=600&fit=crop&q=80', // Happy dog
-      backgroundColor: 'bg-gradient-to-br from-orange-50 via-white to-amber-50',
-      theme: 'product'
-    },
-    {
-      id: 3,
-      title: 'Health & Wellness',
-      subtitle: 'Keep Your Pets Happy & Healthy',
-      description: 'Vitamins, Supplements & More',
-      buttonText: 'Explore Now',
-      buttonLink: '/products?search=vitamins',
-      leftImage: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800&h=600&fit=crop&q=80', // Healthy pet
-      backgroundColor: 'bg-gradient-to-br from-green-50 via-white to-emerald-50',
-      theme: 'wellness'
-    },
-    {
-      id: 4,
-      title: 'Premium Nutrition',
-      subtitle: 'Science-Backed Formulas',
-      description: 'For Every Life Stage',
-      buttonText: 'Shop Food',
-      buttonLink: '/products?search=food',
-      leftImage: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800&h=600&fit=crop&q=80', // Pet eating
-      backgroundColor: 'bg-gradient-to-br from-purple-50 via-white to-pink-50',
-      theme: 'product'
-    },
-    {
-      id: 5,
-      title: 'Delicious Treats',
-      subtitle: 'Premium Rewards They Love',
-      description: 'Make every moment special',
-      buttonText: 'Shop Treats',
-      buttonLink: '/products?search=treats',
-      leftImage: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=800&h=600&fit=crop&q=80', // Dog with treat
-      backgroundColor: 'bg-gradient-to-br from-red-50 via-white to-rose-50',
-      theme: 'treats'
-    }
-  ];
+  // Fetch slides from API
+  const { data: slides = [], isLoading } = useQuery({
+    queryKey: ['slideshow', 'active'],
+    queryFn: slideshowService.getActiveSlides,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    refetchOnWindowFocus: false
+  });
 
-  // Auto-advance slides every 5 seconds
+  // Auto-advance slides every 5 seconds (only if slides exist)
   useEffect(() => {
+    if (slides.length === 0) return;
+    
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
@@ -97,6 +40,24 @@ const HeroSlideshow = () => {
     setCurrentSlide(index);
   };
 
+  // Show loading spinner while fetching
+  if (isLoading) {
+    return (
+      <div className="w-full mt-4">
+        <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-4">
+          <div className="relative w-full overflow-hidden bg-white rounded-xl shadow-lg h-[260px] md:h-[280px] lg:h-[300px] flex items-center justify-center">
+            <LoadingSpinner />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if no slides
+  if (slides.length === 0) {
+    return null;
+  }
+
   return (
     <div className="w-full mt-4">
       {/* Main Slideshow */}
@@ -106,12 +67,12 @@ const HeroSlideshow = () => {
           <div className="relative w-full h-[260px] md:h-[280px] lg:h-[300px]">
             {slides.map((slide, index) => (
               <div
-                key={slide.id}
+                key={slide._id || slide.id}
                 className={`absolute inset-0 transition-all duration-1000 ${
                   index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
                 }`}
               >
-                <div className={`w-full h-full ${slide.backgroundColor}`}>
+                <div className={`w-full h-full ${slide.backgroundColor || 'bg-gradient-to-br from-blue-50 via-white to-purple-50'}`}>
                   <div className="grid md:grid-cols-2 h-full gap-0">
                     
                     {/* Left Side - Content with Enhanced Striped Background */}
@@ -168,9 +129,15 @@ const HeroSlideshow = () => {
                     <div className="relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                       <img
-                        src={slide.leftImage}
+                        src={slide.leftImage || slide.imageUrl}
                         alt={slide.title}
                         className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700"
+                        onError={(e) => {
+                          // Fallback to imageUrl if leftImage fails
+                          if (slide.leftImage && slide.imageUrl && (e.target as HTMLImageElement).src !== slide.imageUrl) {
+                            (e.target as HTMLImageElement).src = slide.imageUrl;
+                          }
+                        }}
                       />
                       {/* Decorative Corner Badge */}
                       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
