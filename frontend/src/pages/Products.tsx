@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { productService } from '@/services/products';
@@ -421,7 +421,7 @@ const Products = () => {
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
                 {filteredProducts.map((product, index) => (
-                  <div key={product._id} className="flex">
+                  <div key={product._id ? String(product._id) : `product-${index}`} className="flex">
                     <ProductCard 
                       product={product}
                       index={index}
@@ -445,13 +445,16 @@ const Products = () => {
                   
                   {products && Array.from({ length: products.pagination.pages }, (_, i) => i + 1)
                     .filter(p => p === 1 || p === products.pagination.pages || Math.abs(p - page) <= 2)
-                    .map((p, index, array) => (
-                      <>
-                        {index > 0 && array[index - 1] !== p - 1 && (
-                          <span className="px-2 py-2">...</span>
-                        )}
+                    .flatMap((p, index, array) => {
+                      const elements: React.ReactNode[] = [];
+                      if (index > 0 && array[index - 1] !== p - 1) {
+                        elements.push(
+                          <span key={`ellipsis-before-${p}`} className="px-2 py-2">...</span>
+                        );
+                      }
+                      elements.push(
                         <button
-                          key={p}
+                          key={`page-${p}`}
                           onClick={() => updateFilters('page', p.toString())}
                           className={`px-4 py-2 rounded-lg ${
                             p === page
@@ -461,8 +464,9 @@ const Products = () => {
                         >
                           {p}
                         </button>
-                      </>
-                    ))}
+                      );
+                      return elements;
+                    })}
 
                   {products && page < products.pagination.pages && (
                     <button
