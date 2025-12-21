@@ -11,11 +11,13 @@ import { useToast } from '@/hooks/useToast';
 import Dropdown from '@/components/Dropdown';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import { safeError } from '@/utils/safeLogger';
+import { useDebounce } from '@/hooks/useDebounce';
 
 const Products = () => {
   const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 300); // Debounce search input by 300ms
   const [page, setPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [showCSVImport, setShowCSVImport] = useState(false);
@@ -35,11 +37,11 @@ const Products = () => {
   }>({ isOpen: false });
 
   const { data: productsData, isLoading, refetch } = useQuery({
-    queryKey: ['products', page, searchQuery, categoryFilter, petTypeFilter, stockFilter],
+    queryKey: ['products', page, debouncedSearch, categoryFilter, petTypeFilter, stockFilter],
     queryFn: () => adminService.getProducts({ 
       page, 
       limit: 20, 
-      search: searchQuery || undefined,
+      search: debouncedSearch || undefined,
       category: categoryFilter || undefined,
       petType: petTypeFilter || undefined,
       inStock: stockFilter === 'in-stock' ? true : stockFilter === 'out-of-stock' ? false : undefined

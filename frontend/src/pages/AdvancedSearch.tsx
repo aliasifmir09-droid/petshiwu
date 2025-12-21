@@ -9,6 +9,7 @@ import { Search, SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { trackSearch } from '@/utils/analytics';
+import { useDebounce } from '@/hooks/useDebounce';
 
 const AdvancedSearch = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,6 +29,7 @@ const AdvancedSearch = () => {
   });
 
   const [autocompleteQuery, setAutocompleteQuery] = useState('');
+  const debouncedAutocompleteQuery = useDebounce(autocompleteQuery, 300); // Debounce autocomplete by 300ms
   const [autocompleteResults, setAutocompleteResults] = useState<Array<{ type: string; name: string; slug: string; image?: string }>>([]);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
 
@@ -49,12 +51,12 @@ const AdvancedSearch = () => {
   });
 
   useEffect(() => {
-    if (autocompleteQuery.length > 2) {
-      productService.searchAutocomplete(autocompleteQuery, 10).then(setAutocompleteResults);
+    if (debouncedAutocompleteQuery.length > 2) {
+      productService.searchAutocomplete(debouncedAutocompleteQuery, 10).then(setAutocompleteResults);
     } else {
       setAutocompleteResults([]);
     }
-  }, [autocompleteQuery]);
+  }, [debouncedAutocompleteQuery]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

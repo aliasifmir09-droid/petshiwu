@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/useToast';
 import Dropdown from '@/components/Dropdown';
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import { Blog, BlogFormData, BlogCategory } from '@/types/blog';
+import { useDebounce } from '@/hooks/useDebounce';
 
 // Helper function to safely convert any ID to a unique string key
 const getUniqueKey = (id: unknown, index: number, prefix: string = 'item'): string => {
@@ -51,6 +52,7 @@ const Blogs = () => {
   const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 300); // Debounce search input by 300ms
   const [page, setPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [editingBlog, setEditingBlog] = useState<any>(null);
@@ -65,11 +67,11 @@ const Blogs = () => {
 
   // Fetch blogs
   const { data: blogsData, isLoading } = useQuery({
-    queryKey: ['blogs', 'admin', page, searchQuery, petTypeFilter, categoryFilter, isPublishedFilter],
+    queryKey: ['blogs', 'admin', page, debouncedSearch, petTypeFilter, categoryFilter, isPublishedFilter],
     queryFn: () => adminService.getBlogs({
       page,
       limit: 20,
-      search: searchQuery || undefined,
+      search: debouncedSearch || undefined,
       petType: petTypeFilter || undefined,
       category: categoryFilter || undefined,
       isPublished: isPublishedFilter ? isPublishedFilter === 'true' : undefined
