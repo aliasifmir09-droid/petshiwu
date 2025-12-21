@@ -20,7 +20,7 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
       className="flex flex-col items-center text-center group cursor-pointer"
     >
       {/* Circular Icon/Image with Gradient Border - Enhanced with Home page styling */}
-      <div className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-full mb-3 group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-2xl">
+      <div className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-full mb-3 overflow-hidden group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-2xl">
         {/* Gradient Border - Blue to Purple to Pink (matching screenshot) */}
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-[3px] transform group-hover:from-blue-600 group-hover:via-purple-600 group-hover:to-pink-600 transition-all duration-300">
           <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
@@ -35,7 +35,7 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
                 <img 
                   src={category.image} 
                   alt={category.title}
-                  className={`w-full h-full object-contain object-center p-2 sm:p-3 ${imageError ? 'opacity-0 absolute' : 'opacity-100 relative'} group-hover:scale-105 transition-transform duration-300`}
+                  className={`w-full h-full object-contain object-center p-2 sm:p-3 ${imageError ? 'opacity-0 absolute' : 'opacity-100 relative'} transition-transform duration-300`}
                   onError={() => {
                     setImageError(true);
                   }}
@@ -220,7 +220,9 @@ const CategoryIcons = () => {
             style={{ 
               scrollbarWidth: 'none', 
               msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch'
+              WebkitOverflowScrolling: 'touch',
+              paddingTop: '1rem',
+              paddingBottom: '1rem'
             }}
           >
             <style>{`
@@ -231,7 +233,7 @@ const CategoryIcons = () => {
             {/* Spacer for centering */}
             <div className="flex-shrink-0" style={{ width: '0px' }}></div>
             {categories.map((category, index) => (
-              <div key={index} className="flex-shrink-0 snap-center">
+              <div key={index} className="flex-shrink-0 snap-center py-2">
                 <CategoryItemComponent category={category} />
               </div>
             ))}
