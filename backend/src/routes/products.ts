@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   getProducts,
+  getProductsCursor,
   getProduct,
   getRelatedProducts,
   createProduct,
@@ -34,6 +35,7 @@ import { jsonUpload } from '../middleware/jsonUpload';
 const router = express.Router();
 
 router.get('/', paginationValidation, getProducts);
+router.get('/cursor', getProductsCursor); // Cursor-based pagination (optimized for large datasets)
 router.get('/search', searchValidation, advancedSearch); // Advanced search with filters
 router.get('/search/autocomplete', searchValidation, searchAutocomplete); // Search autocomplete
 router.get('/brands', getUniqueBrands); // Public endpoint for unique brands

@@ -1600,10 +1600,26 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       }
     }
 
+    // Optimize field selection for featured products (home page)
+    // Only select fields needed for product cards to reduce data transfer
+    const isFeaturedQuery = req.query.featured === 'true' && limit <= 12;
+    const selectFields = isFeaturedQuery
+      ? 'name slug images basePrice compareAtPrice averageRating totalReviews brand category petType isFeatured inStock totalStock variants'
+      : undefined; // Select all fields for other queries
+
     // Get products with pagination
     // Connection-level readPreference ensures we read from primary (not stale replica)
-    const products = await Product.find(query)
-      .populate({
+    const productsQuery = Product.find(query)
+      .maxTimeMS(5000); // 5 second timeout to prevent slow queries
+
+    // Only populate category if needed (simplified for featured products)
+    if (isFeaturedQuery) {
+      productsQuery.populate({
+        path: 'category',
+        select: 'name slug petType' // Simplified - don't need deep nesting for home page
+      });
+    } else {
+      productsQuery.populate({
         path: 'category',
         select: 'name slug parentCategory petType',
         populate: {
@@ -1614,7 +1630,11 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
             select: 'name slug'
           }
         }
-      })
+      });
+    }
+
+    const products = await productsQuery
+      .select(selectFields)
       .sort(sortOrder)
       .skip(skip)
       .limit(limit)
@@ -1640,7 +1660,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
 
     // Count total using countDocuments (much faster than fetching all products)
     // This uses indexes and doesn't load documents into memory
-    const total = await Product.countDocuments(query);
+    const total = await Product.countDocuments(query).maxTimeMS(5000);
 
     // Normalize _id to string for all products (use filtered products)
     const normalizedProducts = normalizeProducts(activeProducts);
@@ -1665,6 +1685,145 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+/**
+ * Cursor-based pagination for products (optimized for large datasets)
+ * Better performance than offset-based pagination for 10,000+ products
+ * @swagger
+ * /api/products/cursor:
+ *   get:
+ *     summary: Get products using cursor-based pagination
+ *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: cursor
+ *         schema:
+ *           type: string
+ *         description: Product ID cursor (from previous response)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Items per page
+ */
+export const getProductsCursor = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { cursor, limit = '20', petType, category, brand, search, sort } = req.query;
+    
+    const limitNum = Math.min(parseInt(limit as string, 10) || 20, 100);
+    
+    // Build base query (same as getProducts)
+    const baseQuery: any = { 
+      isActive: true,
+      $or: [
+        { deletedAt: null },
+        { deletedAt: { $exists: false } }
+      ]
+    };
+
+    // Add cursor to query if provided
+    if (cursor) {
+      try {
+        baseQuery._id = { $gt: cursor };
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid cursor format'
+        });
+      }
+    }
+
+    // Apply filters (same logic as getProducts)
+    if (petType) {
+      baseQuery.petType = (petType as string).toLowerCase();
+    }
+
+    // Category filtering - simplified for cursor-based pagination
+    if (category) {
+      try {
+        const categoryParam = String(category).trim();
+        if (mongoose.Types.ObjectId.isValid(categoryParam)) {
+          const categoryId = new mongoose.Types.ObjectId(categoryParam);
+          // For cursor-based, use direct category match (can be enhanced later)
+          baseQuery.category = categoryId;
+        } else {
+          // Try to find by slug
+          const foundCategory = await Category.findOne({
+            $or: [
+              { slug: categoryParam.toLowerCase() },
+              { name: { $regex: new RegExp(`^${categoryParam}$`, 'i') } }
+            ],
+            isActive: true
+          }).lean();
+          if (foundCategory && foundCategory._id) {
+            baseQuery.category = foundCategory._id;
+          }
+        }
+      } catch (error) {
+        // Invalid category, skip filter
+        logger.debug('Invalid category in cursor pagination:', error);
+      }
+    }
+
+    if (brand) {
+      baseQuery.brand = { $regex: new RegExp(`^${brand}$`, 'i') };
+    }
+
+    if (search) {
+      baseQuery.$text = { $search: search as string };
+    }
+
+    // Build sort
+    let sortOption: any = { _id: 1 }; // Cursor-based requires _id sort
+    if (sort) {
+      switch (sort) {
+        case 'price-asc':
+          sortOption = { basePrice: 1, _id: 1 };
+          break;
+        case 'price-desc':
+          sortOption = { basePrice: -1, _id: 1 };
+          break;
+        case 'rating':
+          sortOption = { averageRating: -1, totalReviews: -1, _id: 1 };
+          break;
+        case 'newest':
+          sortOption = { createdAt: -1, _id: 1 };
+          break;
+        default:
+          sortOption = { _id: 1 };
+      }
+    }
+
+    // Fetch one extra to check if more exists
+    const products = await Product.find(baseQuery)
+      .maxTimeMS(5000) // 5 second timeout
+      .select('name slug images basePrice averageRating totalReviews brand category petType inStock totalStock')
+      .populate('category', 'name slug')
+      .sort(sortOption)
+      .limit(limitNum + 1)
+      .lean();
+
+    const hasMore = products.length > limitNum;
+    const nextCursor = hasMore ? String(products[products.length - 1]._id) : null;
+    
+    // Return only the requested number of products
+    const resultProducts = products.slice(0, limitNum);
+    const normalizedProducts = normalizeProducts(resultProducts);
+
+    res.status(200).json({
+      success: true,
+      data: normalizedProducts,
+      pagination: {
+        hasMore,
+        nextCursor,
+        limit: limitNum
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Get single product (by slug or ID)
 export const getProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -1683,6 +1842,7 @@ export const getProduct = async (req: Request, res: Response, next: NextFunction
     // Try to find by slug first, then by ID if slug doesn't match
     // Exclude soft-deleted products
     product = await Product.findOne({ slug: identifier, deletedAt: null })
+      .maxTimeMS(5000) // 5 second timeout
       .populate({
         path: 'category',
         select: 'name slug parentCategory petType',
@@ -1701,6 +1861,7 @@ export const getProduct = async (req: Request, res: Response, next: NextFunction
       // Try finding by ID if it's a valid MongoDB ObjectId
       try {
         product = await Product.findOne({ _id: identifier })
+          .maxTimeMS(5000) // 5 second timeout
           .populate({
         path: 'category',
         select: 'name slug parentCategory petType',
@@ -1751,11 +1912,17 @@ export const getRelatedProducts = async (req: Request, res: Response, next: Next
 
     // First, get the current product to know its category and petType
     let currentProduct;
-    currentProduct = await Product.findOne({ slug: identifier });
+    currentProduct = await Product.findOne({ slug: identifier })
+      .maxTimeMS(3000)
+      .select('category petType')
+      .lean();
     
     if (!currentProduct) {
       try {
-        currentProduct = await Product.findById(identifier);
+        currentProduct = await Product.findById(identifier)
+          .maxTimeMS(3000)
+          .select('category petType')
+          .lean();
       } catch (err) {
         // Invalid ObjectId
       }
@@ -1775,20 +1942,15 @@ export const getRelatedProducts = async (req: Request, res: Response, next: Next
       category: currentProduct.category,
       petType: currentProduct.petType
     })
+      .maxTimeMS(5000) // 5 second timeout
+      .select('name slug images basePrice compareAtPrice averageRating totalReviews brand category petType isFeatured inStock totalStock variants')
       .populate({
         path: 'category',
-        select: 'name slug parentCategory petType',
-        populate: {
-          path: 'parentCategory',
-          select: 'name slug parentCategory',
-          populate: {
-            path: 'parentCategory',
-            select: 'name slug'
-          }
-        }
+        select: 'name slug petType' // Simplified for related products
       })
       .sort({ averageRating: -1, totalReviews: -1 })
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     // If we need more products, find ones that match either category OR petType
     let relatedProducts = exactMatches;
@@ -1798,27 +1960,22 @@ export const getRelatedProducts = async (req: Request, res: Response, next: Next
         isActive: true,
         _id: { 
           $ne: currentProduct._id,
-          $nin: exactMatches.map(p => p._id)
+          $nin: exactMatches.map((p: any) => p._id)
         },
         $or: [
           { category: currentProduct.category },
           { petType: currentProduct.petType }
         ]
       })
+        .maxTimeMS(5000) // 5 second timeout
+        .select('name slug images basePrice compareAtPrice averageRating totalReviews brand category petType isFeatured inStock totalStock variants')
         .populate({
         path: 'category',
-        select: 'name slug parentCategory petType',
-        populate: {
-          path: 'parentCategory',
-          select: 'name slug parentCategory',
-          populate: {
-            path: 'parentCategory',
-            select: 'name slug'
-          }
-        }
-      })
+        select: 'name slug petType' // Simplified for related products
+        })
         .sort({ averageRating: -1, totalReviews: -1 })
-        .limit(remainingLimit);
+        .limit(remainingLimit)
+        .lean();
       
       relatedProducts = [...exactMatches, ...partialMatches];
     }

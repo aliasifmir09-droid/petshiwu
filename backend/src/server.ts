@@ -18,6 +18,7 @@ import { checkDatabase } from './middleware/checkDatabase';
 import { validateEnv } from './utils/validateEnv';
 import { isCloudinaryConfigured } from './utils/cloudinary';
 import { sanitizeResponse } from './middleware/sanitizeResponse';
+import { setCacheHeaders } from './middleware/cacheHeaders';
 import User from './models/User';
 import { setupSwagger } from './utils/swagger';
 import { initRedis } from './utils/cache';
@@ -421,15 +422,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// Response compression - Gzip/Deflate
+// Response compression - Gzip/Deflate (Optimized)
 app.use(compression({
+  level: 6, // Optimal balance (1-9, default is 6)
+  threshold: 1024, // Only compress responses > 1KB
   filter: (req: express.Request, res: express.Response) => {
+    // Don't compress if client doesn't support it
     if (req.headers['x-no-compression']) {
       return false;
     }
     return compression.filter(req, res);
-  },
-  level: 6 // Balance between compression and CPU usage
+  }
 }));
 
 // Cookie parser - Must be before CORS to parse cookies correctly
@@ -525,19 +528,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Set Cache-Control headers for API responses
-app.use(['/api', '/api/v1'], (req, res, next) => {
-  // Don't cache API responses by default (except for GET requests to static data)
-  if (req.method === 'GET' && (req.path?.includes('/products') || req.path?.includes('/categories'))) {
-    // Cache product/category data for 5 minutes
-    res.setHeader('Cache-Control', 'public, max-age=300');
-  } else {
-    // No cache for other API endpoints
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-    res.setHeader('Pragma', 'no-cache');
-  }
-  next();
-});
+// Enhanced Cache-Control headers with ETag support
+app.use(['/api', '/api/v1'], setCacheHeaders);
 
 // Setup Swagger documentation
 if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_SWAGGER === 'true') {

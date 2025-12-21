@@ -230,6 +230,45 @@ productSchema.index({ inStock: 1, isActive: 1 }); // In-stock filtering
 productSchema.index({ averageRating: 1, totalReviews: 1 }); // Rating-based queries
 productSchema.index({ brand: 1, isActive: 1 }); // Brand filtering with active status
 
+// Additional compound indexes for optimized query patterns
+productSchema.index({ 
+  petType: 1, 
+  category: 1, 
+  isActive: 1, 
+  inStock: 1 
+}); // For filtered product listings with stock filter
+
+productSchema.index({ 
+  brand: 1, 
+  petType: 1, 
+  isActive: 1 
+}); // For brand + pet type filtering
+
+productSchema.index({ 
+  averageRating: -1, 
+  totalReviews: -1, 
+  isActive: 1 
+}); // For rating-based sorting (enhanced)
+
+productSchema.index({ 
+  basePrice: 1, 
+  isActive: 1, 
+  inStock: 1 
+}); // For price-based sorting with stock filter
+
+productSchema.index({ 
+  createdAt: -1, 
+  isActive: 1, 
+  isFeatured: 1 
+}); // For newest/featured products
+
+// Optimized index for home page featured products query
+productSchema.index({ 
+  isFeatured: 1, 
+  isActive: 1, 
+  createdAt: -1 
+}); // For featured products on home page (isFeatured=true, isActive=true)
+
 // Create sparse unique index for variants.sku (only indexes non-null values)
 // This allows multiple products with no variants (null SKUs) without duplicate key errors
 productSchema.index({ 'variants.sku': 1 }, { unique: true, sparse: true });

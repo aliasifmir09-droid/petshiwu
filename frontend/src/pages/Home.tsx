@@ -7,6 +7,7 @@ import HeroSlideshow from '@/components/HeroSlideshow';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import TrustBadges from '@/components/TrustBadges';
+import CategoryIcons from '@/components/CategoryIcons';
 import { ChevronRight, ChevronLeft, Star } from 'lucide-react';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
@@ -15,7 +16,11 @@ const Home = () => {
   const navigate = useNavigate();
   const { data: featuredProducts, isLoading } = useQuery({
     queryKey: ['products', 'featured'],
-    queryFn: () => productService.getProducts({ featured: true, limit: 8 })
+    queryFn: () => productService.getProducts({ featured: true, limit: 8 }),
+    staleTime: 5 * 60 * 1000, // 5 minutes - featured products don't change often
+    gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache longer
+    refetchOnWindowFocus: false, // Don't refetch on window focus for home page
+    refetchOnMount: false // Don't refetch on mount if data exists
   });
 
   const petTypesScrollRef = useRef<HTMLDivElement>(null);
@@ -166,6 +171,9 @@ const Home = () => {
       {/* Trust Badges */}
       <TrustBadges />
 
+      {/* Category Icons Section - Find all your pet's must-haves */}
+      <CategoryIcons />
+
       {/* Shop by Pet Type - Enhanced Modern Design */}
       <section className="py-8 sm:py-12 md:py-16 bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden">
         {/* Decorative background elements */}
@@ -264,7 +272,7 @@ const Home = () => {
                   >
                     <div className="flex flex-col items-center gap-3 w-full">
                       {/* Circular Image with Enhanced Gradient Border */}
-                      <div className="relative w-40 h-40 lg:w-44 lg:h-44 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[3px] transform group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-2xl group-hover:from-blue-600 group-hover:via-purple-600 group-hover:to-pink-600 origin-center">
+                      <div className="relative w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[3px] transform group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-2xl group-hover:from-blue-600 group-hover:via-purple-600 group-hover:to-pink-600 origin-center">
                         <div className="w-full h-full rounded-full overflow-hidden bg-white">
                           <img 
                             src={category.image} 
@@ -343,7 +351,7 @@ const Home = () => {
                   }}
                 >
                   {/* Circular Image with Enhanced Gradient Border - Smaller on Mobile */}
-                  <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[2px] sm:p-[3px] transform group-active:scale-105 transition-all duration-200 shadow-md group-active:shadow-lg">
+                  <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[2px] sm:p-[3px] transform group-active:scale-105 transition-all duration-200 shadow-md group-active:shadow-lg">
                     <div className="w-full h-full rounded-full overflow-hidden bg-white">
                       <img 
                         src={category.image} 
