@@ -25,6 +25,7 @@
     "remove-duplicates": "ts-node src/utils/findAndRemoveDuplicates.ts --delete",
     "format-product-descriptions": "ts-node src/utils/formatAllProductDescriptions.ts",
     "delete-all-products": "ts-node src/utils/deleteAllProducts.ts",
+    "fix-product-stock": "ts-node src/utils/fixProductStock.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
