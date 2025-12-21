@@ -184,6 +184,9 @@ productSchema.pre('validate', function (next) {
 });
 
 // Create slug from name before saving
+// Import Elasticsearch utilities (at top of file, but adding here for context)
+// import { indexProduct, removeProductFromIndex } from '../utils/elasticsearch';
+
 productSchema.pre('save', function (next) {
   // Always generate slug if name is modified or slug is missing/empty
   if (this.isModified('name') || !this.slug || this.slug.trim() === '') {
@@ -274,6 +277,64 @@ productSchema.index({
 productSchema.index({ 'variants.sku': 1 }, { unique: true, sparse: true });
 
 // Note: slug, basePrice, averageRating, createdAt, isFeatured+isActive indexes already exist in schema
+
+// Elasticsearch sync hooks (only if Elasticsearch is available)
+// Using dynamic imports to avoid circular dependencies and ensure graceful degradation
+productSchema.post('save', async function (doc) {
+  try {
+    const { indexProduct, isElasticsearchAvailable } = await import('../utils/elasticsearch');
+    
+    if (isElasticsearchAvailable() && doc.isActive && !doc.deletedAt) {
+      // Populate category if not already populated
+      if (!doc.populated('category')) {
+        await doc.populate('category', 'name slug petType');
+      }
+      
+      const productDoc = doc.toObject();
+      await indexProduct(productDoc);
+    }
+  } catch (error) {
+    // Silently fail - don't block product save if Elasticsearch fails
+  }
+});
+
+productSchema.post('findOneAndUpdate', async function (doc) {
+  try {
+    if (!doc) return;
+    
+    const { indexProduct, removeProductFromIndex, isElasticsearchAvailable } = await import('../utils/elasticsearch');
+    
+    if (!isElasticsearchAvailable()) return;
+    
+    // Check if product was deleted or deactivated
+    if (doc.deletedAt || !doc.isActive) {
+      await removeProductFromIndex(String(doc._id));
+    } else {
+      // Re-index the product
+      if (!doc.populated('category')) {
+        await doc.populate('category', 'name slug petType');
+      }
+      const productDoc = doc.toObject();
+      await indexProduct(productDoc);
+    }
+  } catch (error) {
+    // Silently fail
+  }
+});
+
+productSchema.post('findOneAndDelete', async function (doc) {
+  try {
+    if (!doc) return;
+    
+    const { removeProductFromIndex, isElasticsearchAvailable } = await import('../utils/elasticsearch');
+    
+    if (isElasticsearchAvailable()) {
+      await removeProductFromIndex(String(doc._id));
+    }
+  } catch (error) {
+    // Silently fail
+  }
+});
 
 export default mongoose.model<IProduct>('Product', productSchema);
 

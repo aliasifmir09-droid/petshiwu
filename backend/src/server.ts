@@ -57,12 +57,35 @@ import careGuideRoutes from './routes/careGuides';
 import faqRoutes from './routes/faqs';
 import slideshowRoutes from './routes/slideshow';
 import healthRoutes from './routes/health';
+import elasticsearchRoutes from './routes/elasticsearch';
+import { initElasticsearch, createProductsIndex } from './utils/elasticsearch';
 
 // Connect to database
 connectDatabase();
 
 // Initialize Redis cache (non-blocking, app works without Redis)
 initRedis();
+
+// Initialize Elasticsearch (non-blocking, app works without Elasticsearch)
+const initElasticsearchAsync = async () => {
+  try {
+    const client = initElasticsearch();
+    if (client) {
+      // Create index if it doesn't exist
+      await createProductsIndex();
+      logger.info('Elasticsearch initialized and index ready');
+    } else {
+      logger.warn('Elasticsearch not configured. Search will use MongoDB.');
+    }
+  } catch (error: any) {
+    logger.warn(`Elasticsearch initialization failed: ${error.message}. Search will use MongoDB.`);
+  }
+};
+
+// Initialize Elasticsearch after a delay to ensure DB is connected
+setTimeout(() => {
+  initElasticsearchAsync();
+}, 5000);
 
 // Auto-create admin user if it doesn't exist
 let adminUserCheckAttempts = 0;
@@ -577,6 +600,8 @@ app.use('/api/care-guides', careGuideRoutes); // Legacy route
 app.use('/api/faqs', faqRoutes); // Legacy route
 app.use('/api/slideshow', slideshowRoutes); // Legacy route
 app.use('/api/health', healthRoutes);
+app.use(`${API_PREFIX}/elasticsearch`, elasticsearchRoutes);
+app.use('/api/elasticsearch', elasticsearchRoutes); // Legacy route
 
 // Root route - API information
 app.get('/', (req, res) => {
