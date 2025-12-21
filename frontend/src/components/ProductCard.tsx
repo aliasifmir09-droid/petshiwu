@@ -101,7 +101,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
           width={400}
           height={400}
           loading={shouldLoadEager ? "eager" : "lazy"}
-          fetchPriority={shouldLoadEager ? "high" : "auto"}
+          fetchpriority={shouldLoadEager ? "high" : "auto"}
           onError={(e) => {
             handleImageError(e, product.name);
             // Mark this product's image as failed - will hide the product
