@@ -8,7 +8,7 @@ import {
   deleteSlide,
   reorderSlides
 } from '../controllers/slideshowController';
-import { protect, admin } from '../middleware/auth';
+import { protect, authorize } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -16,12 +16,12 @@ const router = express.Router();
 router.get('/active', getActiveSlides);
 
 // Admin routes - require authentication and admin role
-router.get('/', protect, admin, getAllSlides);
-router.get('/:id', protect, admin, getSlideById);
-router.post('/', protect, admin, createSlide);
-router.put('/:id', protect, admin, updateSlide);
-router.delete('/:id', protect, admin, deleteSlide);
-router.post('/reorder', protect, admin, reorderSlides);
+router.get('/', protect, authorize('admin'), getAllSlides);
+router.get('/:id', protect, authorize('admin'), getSlideById);
+router.post('/', protect, authorize('admin'), createSlide);
+router.put('/:id', protect, authorize('admin'), updateSlide);
+router.delete('/:id', protect, authorize('admin'), deleteSlide);
+router.post('/reorder', protect, authorize('admin'), reorderSlides);
 
 export default router;
 

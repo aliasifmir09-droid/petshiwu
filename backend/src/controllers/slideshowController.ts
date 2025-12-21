@@ -5,7 +5,7 @@ import logger from '../utils/logger';
 import { cache, cacheKeys } from '../utils/cache';
 
 // Helper function to normalize slideshow _id to string
-const normalizeSlideshowId = (slide: ISlideshow | Record<string, unknown>): any => {
+const normalizeSlideshowId = (slide: ISlideshow | Record<string, unknown> | any): any => {
   if (!slide) {
     throw new Error('Slide is required');
   }
@@ -34,7 +34,7 @@ const normalizeSlideshowId = (slide: ISlideshow | Record<string, unknown>): any 
 };
 
 // Helper function to normalize array of slideshows
-const normalizeSlideshows = (slides: ISlideshow[]): any[] => {
+const normalizeSlideshows = (slides: ISlideshow[] | any[]): any[] => {
   return slides.map(normalizeSlideshowId);
 };
 
