@@ -6,6 +6,18 @@ import { getRedisStatus } from '../utils/cache';
 const router = express.Router();
 
 /**
+ * Simple health check endpoint (doesn't require database)
+ * GET /api/health/ping
+ */
+router.get('/ping', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'Server is running',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+/**
  * Health check endpoint for monitoring
  * GET /api/health
  */

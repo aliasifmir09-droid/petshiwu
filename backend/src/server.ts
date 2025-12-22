@@ -449,37 +449,49 @@ const allowedOrigins = [
   'https://pet-shop-1-d7ec.onrender.com', // Frontend production URL
   'https://pet-shop-2-r3ed.onrender.com', // Admin production URL
   'https://dashboard.petshiwu.com', // Admin dashboard production URL
-  'https://www.petshiwu.com', // Frontend production URL
+  'https://www.petshiwu.com', // Frontend production URL (with www)
   'https://petshiwu.com', // Frontend production URL (without www)
 ];
 
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    if (!origin) {
+      logger.debug('CORS: Allowing request with no origin');
+      return callback(null, true);
+    }
     
-    // Check if origin is in allowed list or matches a pattern
-    const isAllowed = allowedOrigins.includes(origin) || 
-                     allowedOrigins.some(allowed => origin?.startsWith(allowed)) ||
-                     origin?.includes('petshiwu.com') || // Allow all petshiwu.com subdomains
-                     origin?.includes('pet-shop') || // Allow all pet-shop subdomains
-                     origin?.includes('onrender.com'); // Allow all Render subdomains
+    // Normalize origin (remove trailing slash)
+    const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+    
+    // Check if origin is in allowed list
+    const isExactMatch = allowedOrigins.includes(normalizedOrigin) || allowedOrigins.includes(origin);
+    
+    // Check if origin matches patterns
+    const matchesPattern = 
+      normalizedOrigin.includes('petshiwu.com') || // Allow all petshiwu.com subdomains
+      normalizedOrigin.includes('pet-shop') || // Allow all pet-shop subdomains
+      normalizedOrigin.includes('onrender.com'); // Allow all Render subdomains
+    
+    const isAllowed = isExactMatch || matchesPattern;
     
     if (isAllowed) {
+      logger.debug(`CORS: Allowing origin: ${normalizedOrigin}`);
       callback(null, true);
     } else {
       // SECURITY FIX: Block unauthorized origins in production
       if (process.env.NODE_ENV === 'production') {
-        console.warn(`CORS: Blocking unauthorized origin: ${origin}`);
+        logger.warn(`CORS: Blocking unauthorized origin: ${normalizedOrigin}`);
+        logger.warn(`CORS: Allowed origins: ${allowedOrigins.join(', ')}`);
         return callback(new Error('Not allowed by CORS'), false);
       }
       // In development, allow but log warning
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`CORS: Allowing origin ${origin} in development mode`);
+        logger.warn(`CORS: Allowing origin ${normalizedOrigin} in development mode`);
         callback(null, true);
       } else {
         // Default: block unknown origins
-        console.warn(`CORS: Blocking origin: ${origin}`);
+        logger.warn(`CORS: Blocking origin: ${normalizedOrigin}`);
         callback(new Error('Not allowed by CORS'), false);
       }
     }
@@ -487,7 +499,8 @@ app.use(cors({
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['Authorization']
+  exposedHeaders: ['Authorization'],
+  maxAge: 86400 // Cache preflight requests for 24 hours
 }));
 
 // Request logging middleware (development only) - sanitize URLs
