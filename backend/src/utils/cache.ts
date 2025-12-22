@@ -58,6 +58,100 @@ export const getRedisClient = (): Redis | null => {
   return redisClient;
 };
 
+// Check Redis connection status
+export const getRedisStatus = async (): Promise<{
+  available: boolean;
+  connected: boolean;
+  configured: boolean;
+  error?: string;
+  info?: {
+    version?: string;
+    usedMemory?: string;
+    connectedClients?: number;
+  };
+}> => {
+  const configured = !!process.env.REDIS_URL;
+  
+  if (!configured) {
+    return {
+      available: false,
+      connected: false,
+      configured: false,
+      error: 'REDIS_URL not configured'
+    };
+  }
+
+  const client = getRedisClient();
+  
+  if (!client) {
+    return {
+      available: false,
+      connected: false,
+      configured: true,
+      error: 'Redis client not initialized'
+    };
+  }
+
+  try {
+    // Test connection with PING command
+    const pingResult = await client.ping();
+    
+    if (pingResult === 'PONG') {
+      // Get Redis info
+      try {
+        const info = await client.info('server');
+        const memoryInfo = await client.info('memory');
+        const clientsInfo = await client.info('clients');
+        
+        // Parse version
+        const versionMatch = info.match(/redis_version:([^\r\n]+)/);
+        const version = versionMatch ? versionMatch[1] : undefined;
+        
+        // Parse used memory
+        const memoryMatch = memoryInfo.match(/used_memory_human:([^\r\n]+)/);
+        const usedMemory = memoryMatch ? memoryMatch[1].trim() : undefined;
+        
+        // Parse connected clients
+        const clientsMatch = clientsInfo.match(/connected_clients:(\d+)/);
+        const connectedClients = clientsMatch ? parseInt(clientsMatch[1], 10) : undefined;
+        
+        return {
+          available: true,
+          connected: true,
+          configured: true,
+          info: {
+            version,
+            usedMemory,
+            connectedClients
+          }
+        };
+      } catch (infoError: any) {
+        // If info fails, but ping works, Redis is still connected
+        return {
+          available: true,
+          connected: true,
+          configured: true,
+          error: `Connected but info failed: ${infoError.message}`
+        };
+      }
+    } else {
+      return {
+        available: false,
+        connected: false,
+        configured: true,
+        error: 'PING command returned unexpected result'
+      };
+    }
+  } catch (error: any) {
+    return {
+      available: false,
+      connected: false,
+      configured: true,
+      error: error.message || 'Connection test failed'
+    };
+  }
+};
+
 // Cache helper functions
 // Automatically falls back to in-memory cache if Redis is not available
 export const cache = {
