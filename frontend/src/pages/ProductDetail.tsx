@@ -21,6 +21,7 @@ import Toast from '@/components/Toast';
 import { trackProductView, trackAddToWishlist, trackProductComparison, trackShare } from '@/utils/analytics';
 import { addToRecentlyViewed } from '@/utils/recentlyViewed';
 import SEO from '@/components/SEO';
+import StructuredData from '@/components/StructuredData';
 import { safeError } from '@/utils/safeLogger';
 
 const ProductDetail = () => {
@@ -454,6 +455,25 @@ const ProductDetail = () => {
         price={price}
         currency="USD"
         availability={selectedVariantData?.stock && selectedVariantData.stock > 0 ? 'instock' : 'outofstock'}
+        brand={product.brand}
+        category={categoryName}
+        rating={product.averageRating}
+        ratingCount={product.totalReviews}
+      />
+      <StructuredData
+        type="product"
+        data={{
+          name: product.name,
+          description: productDescription,
+          image: product.images?.map(img => normalizeImageUrl(img)) || [productImage],
+          brand: product.brand || 'petshiwu',
+          price: price,
+          currency: 'USD',
+          availability: selectedVariantData?.stock && selectedVariantData.stock > 0 ? 'InStock' : 'OutOfStock',
+          rating: product.averageRating,
+          ratingCount: product.totalReviews,
+          url: productUrl
+        }}
       />
       <div className="container mx-auto px-4 lg:px-8 py-8">
       {/* Breadcrumb */}
