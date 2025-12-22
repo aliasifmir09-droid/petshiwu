@@ -10,7 +10,7 @@ const TrustBadges = () => {
     {
       icon: Truck,
       title: 'Free Shipping',
-      description: 'On orders over $49'
+      description: 'On orders over $75'
     },
     {
       icon: CreditCard,
