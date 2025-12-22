@@ -17,6 +17,7 @@ import { trackPurchase } from '@/utils/analytics';
 import SEO from '@/components/SEO';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { MapPin, Plus, Check } from 'lucide-react';
+import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
 
 // Lazy load payment components for better performance
 const PaymentForm = lazy(() => import('@/components/PaymentForm'));
@@ -293,8 +294,8 @@ const Checkout = () => {
   };
 
   const subtotal = getTotalPrice();
-  const shipping = subtotal > 49 ? 0 : 5.99;
-  const tax = subtotal * 0.08;
+  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
+  const tax = subtotal * TAX_RATE;
   const total = subtotal + shipping + tax + donationAmount;
 
   const createOrderMutation = useMutation({

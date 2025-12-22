@@ -7,8 +7,8 @@
 export const TAX_RATE = 0.08; // 8% tax rate
 
 // Shipping configuration
-export const FREE_SHIPPING_THRESHOLD = 49; // Free shipping for orders over $49
-export const STANDARD_SHIPPING_COST = 5.99; // Standard shipping cost
+export const FREE_SHIPPING_THRESHOLD = 75; // Free shipping for orders over $75
+export const STANDARD_SHIPPING_COST = 7.00; // Standard shipping cost ($7 for orders less than $75)
 
 // Pagination defaults
 export const DEFAULT_PAGE_SIZE = 20;

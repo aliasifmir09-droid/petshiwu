@@ -154,7 +154,7 @@ const Home = () => {
                   <span className="text-sm font-semibold">Exclusive Deals</span>
                 </div>
                 <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20">
-                  <span className="text-sm font-semibold">Free Shipping Over $49</span>
+                  <span className="text-sm font-semibold">Free Shipping Over $75</span>
                 </div>
               </div>
             </div>
@@ -487,7 +487,7 @@ const Home = () => {
               </div>
               <h3 className="text-2xl font-black mb-3 text-white">Free Shipping</h3>
               <p className="text-white/90 leading-relaxed text-lg mb-4">
-                Get free delivery on orders over $49
+                Get free delivery on orders over $75
               </p>
             </div>
             <div className="group bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-2 border border-white/20">

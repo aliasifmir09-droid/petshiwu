@@ -177,7 +177,7 @@ const Cart = () => {
               </div>
             </div>
 
-            {subtotal < 49 && (
+            {subtotal < FREE_SHIPPING_THRESHOLD && (
               <p className="text-sm text-gray-600 mb-6">
                 Add ${(FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2)} more for FREE shipping!
               </p>
