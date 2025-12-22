@@ -1,10 +1,27 @@
 # Robots.txt for petshiwu.com
-# Allow all crawlers
+# Optimized for search engine crawling
 
 User-agent: *
 Allow: /
 
-# Disallow admin and checkout pages
+# Disallow private/user pages
 Disallow: /checkout
 Disallow: /profile
-Distml:parameter name="parameter_name">$PARAMETER_VALUE
+Disallow: /orders
+Disallow: /wishlist
+Disallow: /cart
+Disallow: /admin
+Disallow: /dashboard
+
+# Allow important pages
+Allow: /products
+Allow: /category
+Allow: /blog
+Allow: /faq
+
+# Sitemap location
+Sitemap: https://www.petshiwu.com/sitemap.xml
+Sitemap: https://petshiwu.com/sitemap.xml
+
+# Crawl delay (optional, helps prevent server overload)
+Crawl-delay: 1

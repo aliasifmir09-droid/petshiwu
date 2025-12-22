@@ -57,6 +57,7 @@ import careGuideRoutes from './routes/careGuides';
 import faqRoutes from './routes/faqs';
 import slideshowRoutes from './routes/slideshow';
 import healthRoutes from './routes/health';
+import { generateSitemap } from './controllers/sitemapController';
 
 // Connect to database
 connectDatabase();
@@ -590,6 +591,9 @@ app.use('/api/care-guides', careGuideRoutes); // Legacy route
 app.use('/api/faqs', faqRoutes); // Legacy route
 app.use('/api/slideshow', slideshowRoutes); // Legacy route
 app.use('/api/health', healthRoutes);
+
+// Sitemap route (no API prefix for SEO)
+app.get('/sitemap.xml', generateSitemap);
 
 // Root route - API information
 app.get('/', (req, res) => {

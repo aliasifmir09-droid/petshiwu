@@ -22,6 +22,13 @@ interface OrganizationSchema {
     telephone: string;
     contactType: string;
   };
+  address?: {
+    streetAddress: string;
+    addressLocality: string;
+    addressRegion: string;
+    postalCode: string;
+    addressCountry: string;
+  };
 }
 
 interface StructuredDataProps {
@@ -74,7 +81,26 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
         url: org.url,
         logo: org.logo,
         description: org.description,
-        contactPoint: org.contactPoint
+        contactPoint: org.contactPoint ? {
+          '@type': 'ContactPoint',
+          telephone: org.contactPoint.telephone,
+          contactType: org.contactPoint.contactType,
+          areaServed: 'US',
+          availableLanguage: 'English'
+        } : undefined,
+        address: org.address ? {
+          '@type': 'PostalAddress',
+          streetAddress: org.address.streetAddress,
+          addressLocality: org.address.addressLocality,
+          addressRegion: org.address.addressRegion,
+          postalCode: org.address.postalCode,
+          addressCountry: org.address.addressCountry
+        } : undefined,
+        sameAs: [
+          'https://www.facebook.com/petshiwu',
+          'https://www.instagram.com/petshiwu',
+          'https://twitter.com/petshiwu'
+        ]
       };
       break;
 
