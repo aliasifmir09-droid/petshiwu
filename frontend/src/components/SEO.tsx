@@ -106,6 +106,8 @@ const SEO = ({
           {brand && <meta property="product:brand" content={brand} />}
           {category && <meta property="product:category" content={category} />}
           {sku && <meta property="product:retailer_item_id" content={sku} />}
+          {rating && <meta property="product:rating" content={rating.toString()} />}
+          {ratingCount && <meta property="product:rating_count" content={ratingCount.toString()} />}
         </>
       )}
 
