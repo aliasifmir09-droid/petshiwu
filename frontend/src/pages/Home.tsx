@@ -122,65 +122,6 @@ const Home = () => {
         <HeroSlideshow />
       </div>
 
-      {/* Special Offers Section */}
-      <section className="py-12 md:py-16 mt-8 md:mt-12 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
-        {/* Animated Background Effects */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-pink-500 rounded-full opacity-20 blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500 rounded-full opacity-20 blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-500 rounded-full opacity-10 blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
-        </div>
-        
-        <div className="container mx-auto px-4 lg:px-8 relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            {/* Left Side - Special Offers */}
-            <div className="text-white text-center md:text-left relative z-30 flex-1">
-              <div className="inline-block mb-4 px-4 py-2 bg-white/20 backdrop-blur-md rounded-full border border-white/30">
-                <span className="text-sm font-bold uppercase tracking-wider">Special Offers</span>
-              </div>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 relative z-30 leading-tight">
-                <span className="bg-gradient-to-r from-pink-400 via-yellow-300 to-pink-400 bg-clip-text text-transparent animate-gradient">
-                  Premium Pet Products
-                </span>
-              </h2>
-              <p className="text-xl md:text-2xl opacity-95 mb-2 relative z-30 font-semibold">
-                Quality You Can Trust
-              </p>
-              <p className="text-lg md:text-xl opacity-90 relative z-30">
-                Discover our curated selection of <span className="font-bold text-yellow-300">verified premium products</span> for your beloved pets
-              </p>
-              <div className="mt-6 flex flex-wrap items-center gap-4 justify-center md:justify-start">
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20">
-                  <span className="text-sm font-semibold">Exclusive Deals</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20">
-                  <span className="text-sm font-semibold">Free Shipping Over $75</span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Right Side - Call to Action */}
-            <div className="relative z-30 flex-shrink-0">
-              <Link
-                to="/products?featured=true"
-                className="inline-block bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 text-white px-8 py-6 rounded-3xl shadow-2xl border-2 border-white/30 backdrop-blur-sm transform hover:scale-105 transition-all duration-300 text-center"
-              >
-                <div className="flex flex-col items-center gap-3">
-                  <p className="text-base font-bold uppercase tracking-wider">Shop Now</p>
-                  <p className="text-2xl font-black">Featured Products</p>
-                </div>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Badges */}
-      <TrustBadges />
-
-      {/* Category Icons Section - Find all your pet's must-haves */}
-      <CategoryIcons />
-
       {/* Shop by Pet Type - Enhanced Modern Design */}
       <section className="py-8 sm:py-12 md:py-16 bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden">
         {/* Decorative background elements */}
@@ -462,6 +403,65 @@ const Home = () => {
           )}
         </div>
       </section>
+
+      {/* Special Offers Section */}
+      <section className="py-12 md:py-16 mt-8 md:mt-12 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
+        {/* Animated Background Effects */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-pink-500 rounded-full opacity-20 blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500 rounded-full opacity-20 blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-500 rounded-full opacity-10 blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+        </div>
+        
+        <div className="container mx-auto px-4 lg:px-8 relative z-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            {/* Left Side - Special Offers */}
+            <div className="text-white text-center md:text-left relative z-30 flex-1">
+              <div className="inline-block mb-4 px-4 py-2 bg-white/20 backdrop-blur-md rounded-full border border-white/30">
+                <span className="text-sm font-bold uppercase tracking-wider">Special Offers</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 relative z-30 leading-tight">
+                <span className="bg-gradient-to-r from-pink-400 via-yellow-300 to-pink-400 bg-clip-text text-transparent animate-gradient">
+                  Premium Pet Products
+                </span>
+              </h2>
+              <p className="text-xl md:text-2xl opacity-95 mb-2 relative z-30 font-semibold">
+                Quality You Can Trust
+              </p>
+              <p className="text-lg md:text-xl opacity-90 relative z-30">
+                Discover our curated selection of <span className="font-bold text-yellow-300">verified premium products</span> for your beloved pets
+              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-4 justify-center md:justify-start">
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20">
+                  <span className="text-sm font-semibold">Exclusive Deals</span>
+                </div>
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20">
+                  <span className="text-sm font-semibold">Free Shipping Over $75</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Right Side - Call to Action */}
+            <div className="relative z-30 flex-shrink-0">
+              <Link
+                to="/products?featured=true"
+                className="inline-block bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 text-white px-8 py-6 rounded-3xl shadow-2xl border-2 border-white/30 backdrop-blur-sm transform hover:scale-105 transition-all duration-300 text-center"
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <p className="text-base font-bold uppercase tracking-wider">Shop Now</p>
+                  <p className="text-2xl font-black">Featured Products</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Badges */}
+      <TrustBadges />
+
+      {/* Category Icons Section - Find all your pet's must-haves */}
+      <CategoryIcons />
 
       {/* Features - What We Offer */}
       <section className="py-16 md:py-20 bg-gradient-to-br from-blue-600 via-purple-700 to-pink-600 relative overflow-hidden">
