@@ -37,6 +37,10 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 1000, // Increase warning limit to 1MB
+    // Enable minification with esbuild (faster) or terser (more aggressive)
+    minify: 'esbuild', // Use esbuild for faster builds, or 'terser' for better compression
+    // Additional minification options
+    terserOptions: undefined, // Will use esbuild minify options instead
     rollupOptions: {
       output: {
         manualChunks: {
@@ -71,6 +75,14 @@ export default defineConfig({
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js'
       }
+    },
+    // Optimize esbuild minification
+    esbuild: {
+      minifyIdentifiers: true,
+      minifySyntax: true,
+      minifyWhitespace: true,
+      legalComments: 'none', // Remove all comments
+      treeShaking: true
     }
   }
 });
