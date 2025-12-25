@@ -76,6 +76,7 @@ const optimizeCloudinaryUrl = (url: string, width?: number, height?: number, for
 
 /**
  * Optimizes Adobe Scene7 image URL with size parameters
+ * Scene7 URLs typically have wid=2000&hei=2000, we need to reduce this
  */
 const optimizeScene7Url = (url: string, width?: number, height?: number): string => {
   if (!url.includes('scene7.com')) {
@@ -85,17 +86,17 @@ const optimizeScene7Url = (url: string, width?: number, height?: number): string
   try {
     const urlObj = new URL(url);
     
-    // Update width and height parameters
-    if (width) {
-      urlObj.searchParams.set('wid', width.toString());
-    }
-    if (height) {
-      urlObj.searchParams.set('hei', height.toString());
-    }
+    // Always override width and height - Scene7 defaults to 2000x2000 which is too large
+    // Default to 400x400 if not specified (good for product cards)
+    const targetWidth = width || 400;
+    const targetHeight = height || 400;
+    
+    urlObj.searchParams.set('wid', targetWidth.toString());
+    urlObj.searchParams.set('hei', targetHeight.toString());
     
     // Add format optimization (WebP if supported)
     urlObj.searchParams.set('fmt', 'webp');
-    urlObj.searchParams.set('qlt', '85'); // Quality 85%
+    urlObj.searchParams.set('qlt', '85'); // Quality 85% (good balance)
     
     return urlObj.toString();
   } catch {
