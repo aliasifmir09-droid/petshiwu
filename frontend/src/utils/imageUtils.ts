@@ -106,8 +106,9 @@ const optimizeScene7Url = (url: string, width?: number, height?: number): string
 
 /**
  * Optimizes Unsplash image URL with size parameters
+ * For mobile, uses smaller sizes to reduce download time
  */
-const optimizeUnsplashUrl = (url: string, width?: number, height?: number): string => {
+const optimizeUnsplashUrl = (url: string, width?: number, height?: number, isMobile = false): string => {
   if (!url.includes('unsplash.com')) {
     return url;
   }
@@ -115,17 +116,18 @@ const optimizeUnsplashUrl = (url: string, width?: number, height?: number): stri
   try {
     const urlObj = new URL(url);
     
-    // Update width and height parameters
-    if (width) {
-      urlObj.searchParams.set('w', width.toString());
-    }
-    if (height) {
-      urlObj.searchParams.set('h', height.toString());
-    }
+    // For mobile, use smaller sizes to reduce download
+    // Mobile displays at ~189x189, so request 200x200 instead of 500x500
+    const targetWidth = isMobile && (!width || width > 200) ? 200 : (width || 400);
+    const targetHeight = isMobile && (!height || height > 200) ? 200 : (height || 400);
     
-    // Add quality optimization
-    urlObj.searchParams.set('q', '80');
+    urlObj.searchParams.set('w', targetWidth.toString());
+    urlObj.searchParams.set('h', targetHeight.toString());
+    
+    // Add quality optimization and format
+    urlObj.searchParams.set('q', '85'); // Slightly higher quality
     urlObj.searchParams.set('fit', 'crop');
+    urlObj.searchParams.set('fm', 'webp'); // Request WebP format for better compression
     
     return urlObj.toString();
   } catch {
@@ -146,13 +148,14 @@ export const normalizeImageUrl = (
     height?: number;
     size?: ImageSize;
     format?: 'webp' | 'avif' | 'auto';
+    isMobile?: boolean;
   }
 ): string => {
   if (!imageUrl) {
     return getPlaceholderImage();
   }
 
-  const { width, height, size, format = 'auto' } = options || {};
+  const { width, height, size, format = 'auto', isMobile = false } = options || {};
   const finalWidth = width || (size ? IMAGE_SIZES[size] : undefined);
   const finalHeight = height;
 
@@ -167,7 +170,7 @@ export const normalizeImageUrl = (
       return optimizeScene7Url(imageUrl, finalWidth, finalHeight);
     }
     if (imageUrl.includes('unsplash.com')) {
-      return optimizeUnsplashUrl(imageUrl, finalWidth, finalHeight);
+      return optimizeUnsplashUrl(imageUrl, finalWidth, finalHeight, isMobile);
     }
     return imageUrl;
   }
@@ -207,12 +210,14 @@ export const getOptimizedImageUrl = (
     height?: number;
     format?: 'webp' | 'avif' | 'auto';
     quality?: 'auto' | number;
+    isMobile?: boolean;
   } = {}
 ): string => {
   return normalizeImageUrl(imageUrl, {
     width: options.width,
     height: options.height,
-    format: options.format || 'auto'
+    format: options.format || 'auto',
+    isMobile: options.isMobile
   });
 };
 

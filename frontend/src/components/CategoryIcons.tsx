@@ -35,6 +35,8 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
                 <img 
                   src={category.image} 
                   alt=""
+                  width={170}
+                  height={170}
                   className={`w-full h-full object-contain object-center p-2 sm:p-3 ${imageError ? 'opacity-0 absolute' : 'opacity-100 relative'} transition-transform duration-300`}
                   onError={() => {
                     setImageError(true);

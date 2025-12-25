@@ -11,7 +11,7 @@ import CategoryIcons from '@/components/CategoryIcons';
 import { ChevronRight, ChevronLeft, Star } from 'lucide-react';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
-import { normalizeImageUrl, generateSrcSet } from '@/utils/imageUtils';
+import { normalizeImageUrl, generateSrcSet, getOptimizedImageUrl } from '@/utils/imageUtils';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -307,8 +307,12 @@ const Home = () => {
                   <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[2px] sm:p-[3px] transform group-active:scale-105 transition-all duration-200 shadow-md group-active:shadow-lg">
                     <div className="w-full h-full rounded-full overflow-hidden bg-white">
                       <img 
-                        src={category.image} 
+                        src={getOptimizedImageUrl(category.image, { width: 200, height: 200, format: 'webp', isMobile: true })} 
+                        srcSet={generateSrcSet(category.image, [112, 200, 300], { format: 'webp', isMobile: true })}
+                        sizes="(max-width: 640px) 112px, (max-width: 1024px) 200px, 300px"
                         alt={category.name}
+                        width={200}
+                        height={200}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           const target = e.currentTarget;
