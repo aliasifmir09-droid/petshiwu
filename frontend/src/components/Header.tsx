@@ -10,6 +10,7 @@ import { blogService } from '@/services/blogs';
 import ConfirmationModal from './ConfirmationModal';
 import { useToast } from '@/hooks/useToast';
 import Toast from './Toast';
+import SearchSuggestions from './SearchSuggestions';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const Header = () => {
   const { items: wishlistItems } = useWishlistStore();
   const { toast, hideToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [expandedMobilePetTypes, setExpandedMobilePetTypes] = useState<Set<string>>(new Set());
@@ -321,6 +323,7 @@ const Header = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      setShowSuggestions(false);
       navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
       setSearchQuery('');
     }
@@ -384,7 +387,15 @@ const Header = () => {
                 type="text"
                 placeholder="Search for products, brands, or pet types..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => {
+                  if (searchQuery.length >= 2) {
+                    setShowSuggestions(true);
+                  }
+                }}
                 className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-white/20 bg-white/95 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:border-yellow-300 shadow-lg hover:shadow-xl transition-all placeholder:text-gray-500 font-medium"
               />
               <button
@@ -394,6 +405,16 @@ const Header = () => {
               >
                 <Search size={18} />
               </button>
+              <SearchSuggestions
+                query={searchQuery}
+                isOpen={showSuggestions}
+                onClose={() => setShowSuggestions(false)}
+                onSelect={(query) => {
+                  setSearchQuery(query);
+                  setShowSuggestions(false);
+                  navigate(`/products?search=${encodeURIComponent(query)}`);
+                }}
+              />
             </div>
           </form>
 
@@ -887,6 +908,16 @@ const Header = () => {
                 <input
                   type="text"
                   placeholder="Search for products..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => {
+                    if (searchQuery.length >= 2) {
+                      setShowSuggestions(true);
+                    }
+                  }}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full px-4 py-2.5 pr-12 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"

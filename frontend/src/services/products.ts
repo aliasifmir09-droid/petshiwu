@@ -72,11 +72,11 @@ export const productService = {
     return response.data;
   },
 
-  searchAutocomplete: async (query: string, limit: number = 10) => {
-    const response = await api.get<ApiResponse<Array<{ type: string; name: string; slug: string; image?: string }>>>('/products/search/autocomplete', {
+  getSearchSuggestions: async (query: string, limit: number = 10) => {
+    const response = await api.get<ApiResponse<{ products: Product[]; categories: any[] }>>('/products/search/autocomplete', {
       params: { q: query, limit }
     });
-    return response.data.data;
+    return response.data;
   }
 };
 

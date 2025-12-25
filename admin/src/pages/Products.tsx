@@ -12,11 +12,13 @@ import Dropdown from '@/components/Dropdown';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import { safeError } from '@/utils/safeLogger';
 import { useDebounce } from '@/hooks/useDebounce';
+import SearchSuggestions from '@/components/SearchSuggestions';
 
 const Products = () => {
   const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const debouncedSearch = useDebounce(searchQuery, 300); // Debounce search input by 300ms
   const [page, setPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
@@ -423,8 +425,25 @@ const Products = () => {
               type="text"
               placeholder="Search products..."
               value={searchQuery || ''}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => {
+                if (searchQuery.length >= 2) {
+                  setShowSuggestions(true);
+                }
+              }}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+            <SearchSuggestions
+              query={searchQuery}
+              isOpen={showSuggestions}
+              onClose={() => setShowSuggestions(false)}
+              onSelect={(query) => {
+                setSearchQuery(query);
+                setShowSuggestions(false);
+              }}
             />
           </div>
           <Dropdown
