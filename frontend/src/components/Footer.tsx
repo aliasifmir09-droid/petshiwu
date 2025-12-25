@@ -3,7 +3,7 @@ import { Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-gray-900 text-white" style={{ minHeight: '400px' }}>
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* About */}
@@ -12,7 +12,10 @@ const Footer = () => {
               <img 
                 src="/logo.png" 
                 alt="petshiwu Logo" 
+                width={56}
+                height={56}
                 className="h-14 w-14 object-contain drop-shadow-lg"
+                loading="lazy"
               />
               <h3 className="text-xl font-black bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent" style={{ fontFamily: "'Nunito', sans-serif" }}>
                 Petshiwu

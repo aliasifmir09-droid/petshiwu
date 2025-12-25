@@ -19,6 +19,33 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: linear-gradient(to bottom, #ffffff 0%, #f9fafb 100%);
+  /* Prevent layout shifts from font loading */
+  font-display: optional;
+}
+
+/* Fallback font metrics to prevent layout shift when custom fonts load */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: optional;
+  src: local('Arial');
+  size-adjust: 100%;
+  ascent-override: 100%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: optional;
+  src: local('Arial');
+  size-adjust: 100%;
+  ascent-override: 100%;
+  descent-override: 25%;
+  line-gap-override: 0%;
 }
 
 .line-clamp-2 {
