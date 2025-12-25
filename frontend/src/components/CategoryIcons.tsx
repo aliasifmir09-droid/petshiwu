@@ -34,7 +34,7 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
                 {/* Image that should be visible */}
                 <img 
                   src={category.image} 
-                  alt={category.title}
+                  alt=""
                   className={`w-full h-full object-contain object-center p-2 sm:p-3 ${imageError ? 'opacity-0 absolute' : 'opacity-100 relative'} transition-transform duration-300`}
                   onError={() => {
                     setImageError(true);
@@ -44,6 +44,7 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
                   }}
                   loading="eager"
                   style={{ display: imageError ? 'none' : 'block' }}
+                  aria-hidden="true"
                 />
                 {/* Decorative overlay on hover - matching Home page style */}
                 <div className="absolute inset-0 rounded-full bg-gradient-to-t from-blue-600/20 via-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
