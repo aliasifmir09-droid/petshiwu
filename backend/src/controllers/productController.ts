@@ -1343,17 +1343,29 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       return res.status(200).json(cached);
     }
     
+    // Check if this is an admin request (user is authenticated and has admin role)
+    // Note: GET /products doesn't require auth, but we check if user is authenticated
+    const isAdminRequest = (req as any).user && 
+      ((req as any).user.role === 'admin' || (req as any).user.permissions?.canManageProducts);
+    
     // Build query - products are now permanently deleted, so no need to filter by deletedAt
-    // Only filter by isActive for active/inactive products
+    // Admin can see inactive products, public can only see active products
     // Explicitly exclude any products that might have deletedAt set (backward compatibility)
     const baseQuery: any = { 
-      isActive: true,
       // Explicitly exclude any products that might have deletedAt set (backward compatibility)
       $or: [
         { deletedAt: null },
         { deletedAt: { $exists: false } }
       ]
     };
+    
+    // Only filter by isActive for non-admin requests
+    if (!isAdminRequest) {
+      baseQuery.isActive = true;
+    } else if (req.query.isActive !== undefined) {
+      // Admin can filter by isActive if specified
+      baseQuery.isActive = req.query.isActive === 'true';
+    }
 
     // Filter by category - include subcategories
     // Support both category ID (ObjectId) and category slug/name
@@ -1389,50 +1401,30 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
             categoryQuery.petType = String(req.query.petType).toLowerCase().trim();
           }
           
-          // Find category by slug or name (case-insensitive) - search all categories (not just root)
-          const foundCategory = await Category.findOne(categoryQuery).lean();
+          // Optimized: Try exact match first (fastest), then regex if needed
+          // Use index-friendly queries when possible
+          let foundCategory = await Category.findOne({
+            slug: normalizedSlug,
+            isActive: true,
+            ...(req.query.petType && { petType: String(req.query.petType).toLowerCase().trim() })
+          }).select('_id name slug petType').lean();
+          
+          // If not found, try case-insensitive name match (slower, but needed for flexibility)
+          if (!foundCategory) {
+            foundCategory = await Category.findOne({
+              name: { $regex: new RegExp(`^${escapedParam}$`, 'i') },
+              isActive: true,
+              ...(req.query.petType && { petType: String(req.query.petType).toLowerCase().trim() })
+            }).select('_id name slug petType').lean();
+          }
           
           if (foundCategory && foundCategory._id) {
             categoryId = foundCategory._id as mongoose.Types.ObjectId;
-            logger.debug(`[GET PRODUCTS] Found category by query: ${foundCategory.name} (ID: ${categoryId}, petType: ${foundCategory.petType}, slug: ${foundCategory.slug})`);
+            logger.debug(`[GET PRODUCTS] Found category: ${foundCategory.name} (ID: ${categoryId})`);
           } else {
-            // Try one more time with more flexible matching (remove petType constraint for broader search)
-            const flexibleQuery: any = {
-              $or: [
-                { slug: normalizedSlug },
-                { name: { $regex: new RegExp(`^${escapedParam.replace(/\s+/g, '\\s*')}$`, 'i') } }
-              ],
-              isActive: true
-            };
-            
-            const flexibleMatch = await Category.findOne(flexibleQuery).lean();
-            if (flexibleMatch && flexibleMatch._id) {
-              // Verify petType matches if provided
-              if (!req.query.petType || flexibleMatch.petType === String(req.query.petType).toLowerCase().trim()) {
-                categoryId = flexibleMatch._id as mongoose.Types.ObjectId;
-                logger.debug(`[GET PRODUCTS] Found category by flexible query: ${flexibleMatch.name} (ID: ${categoryId}, petType: ${flexibleMatch.petType}, slug: ${flexibleMatch.slug})`);
-              } else {
-                logger.warn(`[GET PRODUCTS] Category found but petType mismatch: ${categoryParam} (found: ${flexibleMatch.petType}, requested: ${req.query.petType})`);
-                // Still use it if petType wasn't specified
-                if (!req.query.petType) {
-                  categoryId = flexibleMatch._id as mongoose.Types.ObjectId;
-                  logger.debug(`[GET PRODUCTS] Using category anyway since no petType filter: ${flexibleMatch.name} (ID: ${categoryId})`);
-                }
-              }
-            } else {
-              // Try to find all matching categories for debugging
-              const allMatches = await Category.find({
-                $or: [
-                  { slug: { $regex: new RegExp(normalizedSlug, 'i') } },
-                  { name: { $regex: new RegExp(escapedParam.replace(/\s+/g, '\\s*'), 'i') } }
-                ],
-                isActive: true
-              }).select('_id name slug petType parentCategory').lean();
-              
-              logger.warn(`[GET PRODUCTS] Category not found: ${categoryParam} (petType: ${req.query.petType || 'any'})`);
-              if (allMatches.length > 0) {
-                logger.warn(`[GET PRODUCTS] But found ${allMatches.length} similar categories:`, allMatches.map(c => ({ name: c.name, slug: c.slug, petType: c.petType, id: c._id })));
-              }
+            // Only log warning in development to avoid performance impact
+            if (process.env.NODE_ENV === 'development') {
+              logger.warn(`[GET PRODUCTS] Category not found: ${categoryParam}`);
             }
           }
         }
@@ -1600,25 +1592,45 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       }
     }
 
-    // Optimize field selection for featured products (home page)
-    // Only select fields needed for product cards to reduce data transfer
+    // Optimize field selection and category population based on request type
     const isFeaturedQuery = req.query.featured === 'true' && limit <= 12;
-    const selectFields = isFeaturedQuery
-      ? 'name slug images basePrice compareAtPrice averageRating totalReviews brand category petType isFeatured inStock totalStock variants'
-      : undefined; // Select all fields for other queries
+    
+    // Admin queries: simplified category (1 level), select essential fields (exclude heavy fields)
+    // Featured queries: minimal fields for product cards
+    // Regular queries: optimized fields for frontend (exclude unnecessary heavy fields)
+    let selectFields: string | undefined;
+    if (isAdminRequest) {
+      // Admin needs essential fields for management, exclude description and other heavy fields
+      selectFields = 'name slug images basePrice compareAtPrice averageRating totalReviews brand category petType isActive isFeatured inStock totalStock variants createdAt updatedAt tags';
+    } else if (isFeaturedQuery) {
+      // Featured products for home page - minimal fields
+      selectFields = 'name slug images basePrice compareAtPrice averageRating totalReviews brand category petType isFeatured inStock totalStock variants';
+    } else {
+      // Frontend regular queries: exclude heavy fields like full description, ingredients, features
+      // These are only needed on product detail page
+      selectFields = 'name slug shortDescription images basePrice compareAtPrice averageRating totalReviews brand category petType isFeatured inStock totalStock variants tags createdAt';
+    }
 
     // Get products with pagination
     // Connection-level readPreference ensures we read from primary (not stale replica)
     const productsQuery = Product.find(query)
       .maxTimeMS(5000); // 5 second timeout to prevent slow queries
 
-    // Only populate category if needed (simplified for featured products)
-    if (isFeaturedQuery) {
+    // Optimize category population based on request type
+    if (isAdminRequest) {
+      // Admin: simplified 1-level category population (faster)
+      productsQuery.populate({
+        path: 'category',
+        select: 'name slug petType' // Admin doesn't need full hierarchy
+      });
+    } else if (isFeaturedQuery) {
+      // Featured: minimal category info
       productsQuery.populate({
         path: 'category',
         select: 'name slug petType' // Simplified - don't need deep nesting for home page
       });
     } else {
+      // Frontend: full category hierarchy for SEO breadcrumbs
       productsQuery.populate({
         path: 'category',
         select: 'name slug parentCategory petType',
@@ -1648,8 +1660,14 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     // Also remove duplicates by _id (in case of database duplicates)
     const seenIds = new Set<string>();
     const activeProducts = products.filter((product: any) => {
-      // Ensure product exists and is active
-      if (!product || product.isActive === false) {
+      // Ensure product exists
+      if (!product) {
+        return false;
+      }
+      
+      // For non-admin requests, filter out inactive products
+      // Admin should see all products (active and inactive)
+      if (!isAdminRequest && product.isActive === false) {
         return false;
       }
       
