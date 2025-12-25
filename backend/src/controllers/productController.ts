@@ -1601,6 +1601,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     let selectFields: string | undefined;
     if (isAdminRequest) {
       // Admin needs essential fields for management, exclude description and other heavy fields
+      // IMPORTANT: Always include isActive for admin to see product status
       selectFields = 'name slug images basePrice compareAtPrice averageRating totalReviews brand category petType isActive isFeatured inStock totalStock variants createdAt updatedAt tags';
     } else if (isFeaturedQuery) {
       // Featured products for home page - minimal fields
