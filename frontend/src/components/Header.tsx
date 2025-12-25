@@ -381,7 +381,7 @@ const Header = () => {
             </Link>
 
             {/* Search Bar - Desktop with Enhanced Design */}
-            <form onSubmit={handleSearch} className="hidden lg:flex flex-1 max-w-xl xl:max-w-2xl mx-2 lg:mx-4 min-w-0">
+            <form onSubmit={handleSearch} className="hidden lg:flex flex-1 max-w-xl xl:max-w-2xl mx-2 lg:mx-4 min-w-0" style={{ minHeight: '48px' }}>
             <div className="relative w-full group">
               <input
                 type="text"
@@ -396,6 +396,7 @@ const Header = () => {
                     setShowSuggestions(true);
                   }
                 }}
+                style={{ minHeight: '48px' }}
                 className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-white/20 bg-white/95 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:border-yellow-300 shadow-lg hover:shadow-xl transition-all placeholder:text-gray-500 font-medium"
               />
               <button
