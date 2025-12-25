@@ -330,6 +330,9 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Category Icons Section - Find all your pet's must-haves */}
+      <CategoryIcons />
+
       {/* Featured Products with Enhanced Design */}
       <section className="py-16 bg-gradient-to-b from-white via-blue-50 to-white relative overflow-hidden">
         {/* Decorative Background Elements */}
@@ -464,9 +467,6 @@ const Home = () => {
 
       {/* Trust Badges */}
       <TrustBadges />
-
-      {/* Category Icons Section - Find all your pet's must-haves */}
-      <CategoryIcons />
 
       {/* Features - What We Offer */}
       <section className="py-16 md:py-20 bg-gradient-to-br from-blue-600 via-purple-700 to-pink-600 relative overflow-hidden">
