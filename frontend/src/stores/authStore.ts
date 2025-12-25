@@ -23,6 +23,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       // Phase 2: Cookie-Only - Call logout endpoint to clear httpOnly cookie
       // Backend handles cookie clearing, no localStorage to manage
+      // Use dynamic import to avoid circular dependency (authStore -> api -> authStore)
+      // Note: This won't create a separate chunk since api is statically imported elsewhere,
+      // but it prevents circular dependency issues. The Vite warning is expected and harmless.
       const { default: api } = await import('@/services/api');
       // Call logout endpoint with skipAuth to prevent 401 redirects
       await api.post('/auth/logout', {}, { skipAuth: true }).catch(() => {

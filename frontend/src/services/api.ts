@@ -102,7 +102,10 @@ api.interceptors.response.use(
         sessionStorage.setItem('_isNavigating', 'true');
         sessionStorage.setItem('_navTimestamp', Date.now().toString());
         
-        // Clear any stale auth state (use dynamic import without await since we're in a non-async function)
+        // Clear any stale auth state
+        // Use dynamic import to avoid circular dependency (api -> authStore -> api)
+        // Note: This won't create a separate chunk since authStore is statically imported elsewhere,
+        // but it prevents circular dependency issues. The Vite warning is expected and harmless.
         import('@/stores/authStore').then(({ useAuthStore }) => {
           useAuthStore.getState().setUser(null);
         });

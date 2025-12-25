@@ -64,6 +64,9 @@ export const orderService = {
   trackOrder: async (id: string) => {
     // Public endpoint - no auth required
     // Create a new axios instance without interceptors for public requests
+    // Use dynamic import to create a fresh axios instance without api interceptors
+    // Note: This won't create a separate chunk since axios is statically imported in api.ts,
+    // but it allows us to create a clean instance. The Vite warning is expected and harmless.
     const axios = (await import('axios')).default;
     let apiUrl = import.meta.env.VITE_API_URL || '/api';
     apiUrl = apiUrl.replace(/\/+$/, '');
