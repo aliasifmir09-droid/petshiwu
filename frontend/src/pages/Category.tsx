@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/products';
@@ -23,6 +23,11 @@ const Category = () => {
   const minRating = searchParams.get('minRating') || '';
   const inStock = searchParams.get('inStock') || '';
   const petType = searchParams.get('petType') || '';
+
+  // Scroll to top when page changes (pagination)
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [page]);
 
   // Fetch category by slug (with petType filter if provided)
   const { data: category, isLoading: isLoadingCategory, error: categoryError } = useQuery({
