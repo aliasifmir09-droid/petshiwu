@@ -137,7 +137,7 @@ const HeroSlideshow = () => {
                     </div>
 
                     {/* Right Side - Pet Image with Overlay */}
-                    <div className="relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                    <div className="relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200" style={{ contain: 'layout' }}>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                       <img
                         src={slide.leftImage || slide.imageUrl}
@@ -146,7 +146,12 @@ const HeroSlideshow = () => {
                         height={432}
                         loading={index === 0 ? "eager" : "lazy"}
                         fetchPriority={index === 0 ? "high" : "auto"}
+                        decoding={index === 0 ? "sync" : "async"}
                         className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700"
+                        style={{ 
+                          contentVisibility: index === 0 ? 'auto' : 'auto',
+                          containIntrinsicSize: index === 0 ? '576px 432px' : undefined
+                        }}
                         onError={(e) => {
                           // Fallback to imageUrl if leftImage fails
                           if (slide.leftImage && slide.imageUrl && (e.target as HTMLImageElement).src !== slide.imageUrl) {

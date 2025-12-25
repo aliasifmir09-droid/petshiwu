@@ -39,33 +39,36 @@ const Home = () => {
 
   useEffect(() => {
     const scrollContainer = petTypesScrollRef.current;
+    let rafId: number | null = null;
     
     const checkScrollPosition = () => {
-      if (petTypesScrollRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = petTypesScrollRef.current;
-        
-        // Show left arrow if we can scroll left
-        setShowLeftArrow(scrollLeft > 0);
-        
-        // Show right arrow if we can scroll right
-        setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
-      }
+      // Use requestAnimationFrame to avoid forced reflows
+      rafId = requestAnimationFrame(() => {
+        if (petTypesScrollRef.current) {
+          const { scrollLeft, scrollWidth, clientWidth } = petTypesScrollRef.current;
+          
+          // Show left arrow if we can scroll left
+          setShowLeftArrow(scrollLeft > 0);
+          
+          // Show right arrow if we can scroll right
+          setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+        }
+      });
     };
     
-    // Check initial scroll position
-    checkScrollPosition();
+    // Check initial scroll position after a frame
+    rafId = requestAnimationFrame(checkScrollPosition);
     
-    // Check again after a short delay to ensure content is loaded
-    const timer = setTimeout(checkScrollPosition, 100);
-    
-    // Add scroll event listener
+    // Add scroll event listener with passive flag to improve performance
     if (scrollContainer) {
-      scrollContainer.addEventListener('scroll', checkScrollPosition);
-      window.addEventListener('resize', checkScrollPosition);
+      scrollContainer.addEventListener('scroll', checkScrollPosition, { passive: true });
+      window.addEventListener('resize', checkScrollPosition, { passive: true });
     }
     
     return () => {
-      clearTimeout(timer);
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
       if (scrollContainer) {
         scrollContainer.removeEventListener('scroll', checkScrollPosition);
         window.removeEventListener('resize', checkScrollPosition);
