@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port 5173",
+    "generate-sitemap": "node scripts/generate-sitemap.js",
+    "prebuild": "npm run generate-sitemap || echo 'Warning: Could not generate sitemap. Continuing build...'",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest",

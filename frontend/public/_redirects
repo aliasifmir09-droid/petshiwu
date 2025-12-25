@@ -1,1 +1,5 @@
+# Sitemap - serve static file if exists, otherwise redirect to backend
+/sitemap.xml    /sitemap.xml   200
+
+# All other routes - SPA fallback
 /*    /index.html   200
