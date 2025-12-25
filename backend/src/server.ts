@@ -602,10 +602,10 @@ app.use('/api/health', healthRoutes);
 
 // Sitemap route (no API prefix for SEO) - must be before content-type middleware
 // This ensures it returns XML, not HTML
-app.get('/sitemap.xml', (req, res, next) => {
+app.get('/sitemap.xml', (req, res) => {
   // Set XML content type before calling generateSitemap
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
-  generateSitemap(req, res, next);
+  generateSitemap(req, res);
 });
 
 // Root route - API information
