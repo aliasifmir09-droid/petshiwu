@@ -104,7 +104,7 @@ export const useOrderNotifications = (options: UseOrderNotificationsOptions = {}
           }
         };
 
-        eventSource.onerror = (error) => {
+        eventSource.onerror = () => {
           setIsConnected(false);
           eventSource?.close();
 

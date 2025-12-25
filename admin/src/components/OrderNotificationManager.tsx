@@ -15,9 +15,9 @@ const OrderNotificationManager = () => {
     onNewOrder: (notification) => {
       setCurrentNotification(notification);
     },
-    onOrderUpdate: (notification) => {
+    onOrderUpdate: (_notification) => {
       // Optionally show update notifications too
-      // setCurrentNotification(notification);
+      // setCurrentNotification(_notification);
     }
   });
 
