@@ -164,7 +164,9 @@ router.get('/orders', protect, authorize('admin'), (req: Request, res: Response)
 
   // Handle request errors
   req.on('error', (error: any) => {
-    if (isExpectedDisconnect(error)) {
+    // Double-check: if error string contains "aborted", treat as expected disconnect
+    const errorStr = String(error || '').toLowerCase();
+    if (isExpectedDisconnect(error) || errorStr.includes('aborted')) {
       // Expected disconnect, don't log as error
       cleanup();
       return;
@@ -176,7 +178,9 @@ router.get('/orders', protect, authorize('admin'), (req: Request, res: Response)
 
   // Handle response errors
   res.on('error', (error: any) => {
-    if (isExpectedDisconnect(error)) {
+    // Double-check: if error string contains "aborted", treat as expected disconnect
+    const errorStr = String(error || '').toLowerCase();
+    if (isExpectedDisconnect(error) || errorStr.includes('aborted')) {
       // Expected disconnect, don't log as error
       cleanup();
       return;
