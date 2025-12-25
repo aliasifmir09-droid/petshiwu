@@ -187,12 +187,19 @@ const HeroSlideshow = () => {
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${
+                className={`rounded-full transition-all duration-300 flex items-center justify-center ${
                   index === currentSlide
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 w-8'
-                    : 'bg-gray-400 w-2 hover:bg-gray-600 hover:w-4'
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600'
+                    : 'bg-gray-400 hover:bg-gray-600'
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
+                style={{ 
+                  minWidth: '44px', 
+                  minHeight: '44px',
+                  width: index === currentSlide ? '32px' : '12px',
+                  height: '12px',
+                  padding: index === currentSlide ? '0' : '16px'
+                }}
               />
             ))}
           </div>
