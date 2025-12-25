@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/products';
@@ -21,6 +21,11 @@ const PetType = () => {
   const brand = searchParams.get('brand') || '';
   const minRating = searchParams.get('minRating') || '';
   const inStock = searchParams.get('inStock') || '';
+
+  // Scroll to top when page changes (pagination)
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [page]);
 
   // Fetch all products for this pet type
   const { data: products, isLoading } = useQuery({
@@ -137,7 +142,7 @@ const PetType = () => {
         <h1 className="text-3xl font-bold mb-2">{petTypeDisplay} Products</h1>
         {products && (
           <p className="text-gray-600">
-            Showing {products.data.length} of {products.pagination.total} products
+            Showing {((page - 1) * (products.pagination.limit || 20)) + 1} - {Math.min(page * (products.pagination.limit || 20), products.pagination.total)} of {products.pagination.total} products
           </p>
         )}
       </div>

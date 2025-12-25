@@ -41,9 +41,15 @@ const Products = () => {
     return () => clearTimeout(timeoutId);
   }, [location.pathname]); // Only trigger on route change, not query params
 
+  // Scroll to top when page changes (pagination)
+  useEffect(() => {
+    // Scroll to top when page number changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [page]);
+
   // Scroll to top smoothly when filters change (but NOT when only page changes)
   useEffect(() => {
-    // Don't scroll when only page number changes - maintain scroll position for pagination
+    // Small delay to ensure smooth scroll works properly
     const timeoutId = setTimeout(() => {
       if (hasScrolledRef.current) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -231,7 +237,7 @@ const Products = () => {
         </h1>
         {products && (
           <p className="text-gray-600">
-            Showing {products.data.length} of {products.pagination.total} products
+            Showing {((page - 1) * (products.pagination.limit || 20)) + 1} - {Math.min(page * (products.pagination.limit || 20), products.pagination.total)} of {products.pagination.total} products
           </p>
         )}
       </div>

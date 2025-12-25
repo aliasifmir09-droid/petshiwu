@@ -288,7 +288,7 @@ const Category = () => {
         )}
         {products && (
           <p className="text-gray-600">
-            Showing {products.data.length} of {products.pagination.total} products
+            Showing {((page - 1) * (products.pagination.limit || 20)) + 1} - {Math.min(page * (products.pagination.limit || 20), products.pagination.total)} of {products.pagination.total} products
           </p>
         )}
       </div>
