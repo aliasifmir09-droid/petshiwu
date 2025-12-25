@@ -52,7 +52,14 @@
         s1.async=true;
         s1.src='https://embed.tawk.to/6921e5eced8113195e016894/1jam6k9ak';
         s1.charset='UTF-8';
-        s1.setAttribute('crossorigin','*');
+        // Add error handling for CORS or network failures
+        s1.onerror = function() {
+          console.warn('Tawk.to chat widget failed to load. This is non-critical and the site will continue to function normally.');
+          // Clean up the failed script element
+          if (s1.parentNode) {
+            s1.parentNode.removeChild(s1);
+          }
+        };
         s0.parentNode.insertBefore(s1,s0);
       })();
     }
