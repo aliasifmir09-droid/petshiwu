@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/products';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -18,6 +18,16 @@ const AdvancedSearch = () => {
   const navigate = useNavigate();
   const { toast, showToast, hideToast } = useToast();
   const [query, setQuery] = useState(searchParams.get('q') || '');
+  
+  // SEO
+  const seoData = useSEO({
+    title: query ? `Search Results for "${query}"` : 'Advanced Product Search',
+    description: query 
+      ? `Find the best pet products matching "${query}". Filter by price, rating, brand, and more.`
+      : 'Search for pet products with advanced filters. Find dog food, cat food, toys, and supplies by price, rating, brand, and more.',
+    keywords: query ? [query, 'pet products', 'search'] : ['pet product search', 'find pet supplies', 'pet product filters'],
+    type: 'website'
+  });
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     minPrice: searchParams.get('minPrice') || '',
