@@ -52,7 +52,35 @@ const AdvancedSearch = () => {
 
   useEffect(() => {
     if (debouncedAutocompleteQuery.length > 2) {
-      productService.searchAutocomplete(debouncedAutocompleteQuery, 10).then(setAutocompleteResults);
+      productService.getSearchSuggestions(debouncedAutocompleteQuery, 10).then((response) => {
+        // Transform the response to match the expected format
+        const results: Array<{ type: string; name: string; slug: string; image?: string }> = [];
+        
+        // Add products
+        if (response.data?.products) {
+          response.data.products.forEach((product: any) => {
+            results.push({
+              type: 'product',
+              name: product.name,
+              slug: product.slug,
+              image: product.images?.[0]
+            });
+          });
+        }
+        
+        // Add categories
+        if (response.data?.categories) {
+          response.data.categories.forEach((category: any) => {
+            results.push({
+              type: 'category',
+              name: category.name,
+              slug: category.slug
+            });
+          });
+        }
+        
+        setAutocompleteResults(results);
+      });
     } else {
       setAutocompleteResults([]);
     }
