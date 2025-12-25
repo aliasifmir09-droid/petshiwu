@@ -48,13 +48,24 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
+  // Get pending orders count for badge
+  const { data: pendingOrdersData } = useQuery({
+    queryKey: ['orders', 'pending-count'],
+    queryFn: () => adminService.getAllOrders({ status: 'pending', limit: 1 }),
+    enabled: !!userData && (userData.role === 'admin' || userData.permissions?.canManageOrders),
+    refetchInterval: 15 * 1000, // Refetch every 15 seconds for real-time updates
+    staleTime: 10 * 1000, // Cache for 10 seconds
+    gcTime: 2 * 60 * 1000, // Keep in cache for 2 minutes
+  });
+
   const outOfStockCount = outOfStockData?.pagination?.total || 0;
+  const pendingOrdersCount = pendingOrdersData?.pagination?.total || 0;
   const isAdmin = userData?.role === 'admin';
 
   const menuItems = [
     { path: '/', icon: LayoutDashboard, label: 'Dashboard', permission: 'canViewAnalytics' },
     { path: '/analytics', icon: BarChart3, label: 'Analytics', permission: 'canViewAnalytics' },
-    { path: '/orders', icon: ShoppingCart, label: 'Orders', permission: 'canManageOrders' },
+    { path: '/orders', icon: ShoppingCart, label: 'Orders', badge: pendingOrdersCount, permission: 'canManageOrders' },
     { path: '/products', icon: Package, label: 'Products', badge: outOfStockCount, permission: 'canManageProducts' },
     { path: '/categories', icon: FolderTree, label: 'Categories', permission: 'canManageCategories' },
     { path: '/pet-types', icon: Layers, label: 'Pet Types', adminOnly: true },

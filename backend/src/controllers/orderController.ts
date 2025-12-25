@@ -362,6 +362,21 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       // Normalize order ID before sending response
       const normalizedOrder = normalizeOrderId(order[0]);
       
+      // Emit real-time notification for new order (non-blocking)
+      try {
+        const { notifyNewOrder } = await import('../utils/orderNotifications');
+        // Fetch full order with populated user for notification
+        const fullOrder = await Order.findById(normalizedOrder._id)
+          .populate('user', 'firstName lastName email')
+          .lean();
+        if (fullOrder) {
+          notifyNewOrder(fullOrder);
+        }
+      } catch (notificationError) {
+        // Log error but don't fail the order creation
+        logger.error('Error sending order notification:', notificationError);
+      }
+      
       // Send order confirmation email (non-blocking - don't fail order if email fails)
       try {
         const user = await User.findById(req.user._id).select('email firstName lastName').lean();
@@ -936,6 +951,15 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response, next: N
 
     const normalizedOrder = normalizeOrderId(order);
     
+    // Emit order update notification (non-blocking)
+    try {
+      const { notifyOrderUpdate } = await import('../utils/orderNotifications');
+      notifyOrderUpdate(order, 'status');
+    } catch (notificationError) {
+      // Log error but don't fail the update
+      logger.error('Error sending order update notification:', notificationError);
+    }
+    
     res.status(200).json({
       success: true,
       message: 'Order status updated successfully',
@@ -1012,6 +1036,15 @@ export const updatePaymentStatus = async (req: AuthRequest, res: Response, next:
     }
 
     await order.save();
+
+    // Emit order update notification (non-blocking)
+    try {
+      const { notifyOrderUpdate } = await import('../utils/orderNotifications');
+      notifyOrderUpdate(order, 'payment');
+    } catch (notificationError) {
+      // Log error but don't fail the update
+      logger.error('Error sending order update notification:', notificationError);
+    }
 
     res.status(200).json({
       success: true,

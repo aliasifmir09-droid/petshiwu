@@ -29,8 +29,10 @@ const Orders = () => {
       limit: 20, 
       status: statusFilter || undefined 
     }),
-    staleTime: 30 * 1000, // Cache for 30 seconds
+    staleTime: 10 * 1000, // Cache for 10 seconds (reduced for faster updates)
     gcTime: 2 * 60 * 1000, // Keep in cache for 2 minutes
+    refetchInterval: 15000, // Poll every 15 seconds for new orders (fallback if SSE fails)
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
   });
 
   const getPaymentMethodLabel = (method: string) => {

@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { adminService } from './services/adminService';
 import Sidebar from './components/Sidebar';
 import PasswordExpiryWarning from './components/PasswordExpiryWarning';
+import OrderNotificationManager from './components/OrderNotificationManager';
 import './index.css';
 
 // Lazy load pages for code splitting and better performance
@@ -155,6 +156,7 @@ function App() {
           <div className="flex min-h-screen">
             <Sidebar onLogout={handleLogout} />
             <main className="flex-1 bg-gradient-to-br from-gray-50 via-white to-gray-50 p-6 lg:p-8 overflow-auto min-h-screen">
+              <OrderNotificationManager />
               <PasswordExpiryWarning />
               <Suspense fallback={
                 <div className="flex items-center justify-center h-64">
