@@ -146,7 +146,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
       xml += `    <lastmod>${lastmod}</lastmod>\n`;
       xml += '    <changefreq>weekly</changefreq>\n';
       xml += '    <priority>0.8</priority>\n';
-      xml += '  </url>\n`;
+      xml += '  </url>\n';
       
       // Also include legacy /products/slug URL for backward compatibility
       if (productUrl !== `${baseUrl}/products/${product.slug}`) {
