@@ -345,6 +345,10 @@ const Header = () => {
     });
   };
 
+  const toggleLearningMenu = () => {
+    setIsLearningExpanded(prev => !prev);
+  };
+
   return (
     <>
       <header className="bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] sticky top-0 z-40 shadow-xl w-full">
