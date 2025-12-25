@@ -13,7 +13,7 @@ import ProductCard from '@/components/ProductCard';
 import RecentlyViewed from '@/components/RecentlyViewed';
 import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home, Share2, Facebook, Twitter, Mail, Copy, Check } from 'lucide-react';
 import { FormattedDescription } from '@/utils/descriptionFormatter';
-import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
+import { normalizeImageUrl, handleImageError, getOptimizedImageUrl, generateSrcSet } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
 import { FREE_SHIPPING_THRESHOLD } from '@/config/constants';
 import { useToast } from '@/hooks/useToast';
@@ -519,8 +519,12 @@ const ProductDetail = () => {
             <div className="relative w-full h-full overflow-hidden">
               {hasDisplayImages && displayImages[safeSelectedImage] ? (
                 <img
-                  src={normalizeImageUrl(displayImages[safeSelectedImage]) || ''}
+                  src={getOptimizedImageUrl(displayImages[safeSelectedImage], { width: 800, height: 800, format: 'webp', quality: 'auto' }) || ''}
+                  srcSet={generateSrcSet(displayImages[safeSelectedImage], [400, 600, 800, 1200], { format: 'webp', quality: 'auto' })}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 800px"
                   alt={product?.name || 'Product image'}
+                  width={800}
+                  height={800}
                   onError={(e) => {
                     handleImageError(e, product?.name || 'Product');
                     setImageLoaded(false);

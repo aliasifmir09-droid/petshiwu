@@ -197,11 +197,32 @@ export const normalizeImageUrl = (
 };
 
 /**
+ * Gets optimized image URL with explicit options
+ * This is a convenience wrapper around normalizeImageUrl with better defaults
+ */
+export const getOptimizedImageUrl = (
+  imageUrl: string | undefined | null,
+  options: {
+    width?: number;
+    height?: number;
+    format?: 'webp' | 'avif' | 'auto';
+    quality?: 'auto' | number;
+  } = {}
+): string => {
+  return normalizeImageUrl(imageUrl, {
+    width: options.width,
+    height: options.height,
+    format: options.format || 'auto'
+  });
+};
+
+/**
  * Generates responsive image srcset for different screen sizes
  */
 export const generateSrcSet = (
   imageUrl: string | undefined | null,
-  sizes: number[] = [300, 500, 800, 1200]
+  sizes: number[] = [300, 500, 800, 1200],
+  options: Omit<Parameters<typeof getOptimizedImageUrl>[1], 'width' | 'height'> = {}
 ): string => {
   if (!imageUrl) {
     return '';
@@ -209,7 +230,7 @@ export const generateSrcSet = (
 
   return sizes
     .map(size => {
-      const optimizedUrl = normalizeImageUrl(imageUrl, { width: size, format: 'auto' });
+      const optimizedUrl = getOptimizedImageUrl(imageUrl, { ...options, width: size, height: size });
       return `${optimizedUrl} ${size}w`;
     })
     .join(', ');
