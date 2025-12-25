@@ -1,5 +1,6 @@
 # Robots.txt for petshiwu.com
 # Optimized for search engine crawling
+# Only standard robots.txt directives are used (User-agent, Allow, Disallow, Sitemap, Crawl-delay)
 
 User-agent: *
 Allow: /
@@ -28,6 +29,8 @@ Allow: /learning
 Allow: /care-guides
 Allow: /faq
 Allow: /search
+Allow: /returns
+Allow: /donate
 
 # Sitemap location
 Sitemap: https://www.petshiwu.com/sitemap.xml
