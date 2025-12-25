@@ -918,8 +918,6 @@ const Header = () => {
                       setShowSuggestions(true);
                     }
                   }}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full px-4 py-2.5 pr-12 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
                 />
                 <button
@@ -929,6 +927,16 @@ const Header = () => {
                 >
                   <Search size={20} />
                 </button>
+                <SearchSuggestions
+                  query={searchQuery}
+                  isOpen={showSuggestions}
+                  onClose={() => setShowSuggestions(false)}
+                  onSelect={(query) => {
+                    setSearchQuery(query);
+                    setShowSuggestions(false);
+                    navigate(`/products?search=${encodeURIComponent(query)}`);
+                  }}
+                />
               </div>
             </form>
             <ul className="space-y-1 text-gray-700 overflow-x-hidden">
