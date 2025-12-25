@@ -1,9 +1,18 @@
-import { loadStripe, Stripe } from '@stripe/stripe-js';
+// Lazy load Stripe to avoid loading it on pages that don't need it
+let stripePromise: Promise<any> | null = null;
+let stripeModule: any = null;
 
-// Initialize Stripe with publishable key
-let stripePromise: Promise<Stripe | null> | null = null;
+export const getStripe = async (): Promise<any> => {
+  // Lazy load the Stripe module only when needed
+  if (!stripeModule) {
+    try {
+      stripeModule = await import('@stripe/stripe-js');
+    } catch (error) {
+      console.error('Failed to load Stripe:', error);
+      return Promise.resolve(null);
+    }
+  }
 
-export const getStripe = (): Promise<Stripe | null> => {
   if (!stripePromise) {
     const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
     
@@ -12,7 +21,8 @@ export const getStripe = (): Promise<Stripe | null> => {
       return Promise.resolve(null);
     }
 
-    stripePromise = loadStripe(publishableKey);
+    // Only load Stripe.js script when getStripe is actually called
+    stripePromise = stripeModule.loadStripe(publishableKey);
   }
 
   return stripePromise;

@@ -11,7 +11,8 @@ import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import CheckoutDonationModal from '@/components/CheckoutDonationModal';
-import { getStripe } from '@/utils/stripe';
+// Lazy load Stripe utility - only import when needed
+const getStripe = () => import('@/utils/stripe').then(m => m.getStripe());
 import { normalizeId } from '@/utils/idNormalizer';
 import { trackPurchase } from '@/utils/analytics';
 import SEO from '@/components/SEO';
