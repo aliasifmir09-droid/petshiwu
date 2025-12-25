@@ -9,7 +9,6 @@ import {
   generateCanonicalUrl,
   generateTitle,
   generateDescription,
-  generateKeywords,
   generateMetaKeywords,
   generateOGImage,
   generateBreadcrumbSchema,

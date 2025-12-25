@@ -139,6 +139,20 @@ const Category = () => {
 
   const breadcrumbs = buildBreadcrumbs();
 
+  // Build SEO data (only if category is loaded) - must be defined before useSEO
+  const petTypeDisplay = category && category.petType && category.petType !== 'all' && category.petType !== 'other-animals'
+    ? category.petType.charAt(0).toUpperCase() + category.petType.slice(1)
+    : '';
+
+  // Memoize filtered products to prevent unnecessary re-renders - must be defined before useSEO
+  const filteredProducts = useMemo(() => {
+    if (!products?.data) return [];
+    return products.data.filter((product) => {
+      const productId = product._id ? String(product._id) : null;
+      return productId && !hasImageFailed(productId);
+    });
+  }, [products?.data]);
+
   // Generate SEO metadata
   const seoData = useSEO({
     title: category
@@ -172,20 +186,6 @@ const Category = () => {
       image: product.images[0]
     }))
   });
-
-  // Memoize filtered products to prevent unnecessary re-renders
-  const filteredProducts = useMemo(() => {
-    if (!products?.data) return [];
-    return products.data.filter((product) => {
-      const productId = product._id ? String(product._id) : null;
-      return productId && !hasImageFailed(productId);
-    });
-  }, [products?.data]);
-
-  // Build SEO data (only if category is loaded)
-  const petTypeDisplay = category && category.petType && category.petType !== 'all' && category.petType !== 'other-animals'
-    ? category.petType.charAt(0).toUpperCase() + category.petType.slice(1)
-    : '';
 
   const updateFilters = (key: string, value: string) => {
     const newParams = new URLSearchParams(searchParams);

@@ -5,7 +5,7 @@
 
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
-import { generateInternalLinks, type InternalLink } from '@/utils/seoUtils';
+import { generateInternalLinks } from '@/utils/seoUtils';
 
 interface InternalLinksProps {
   category?: string;
