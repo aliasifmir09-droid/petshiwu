@@ -532,6 +532,11 @@ if (!isCloudinaryConfigured()) {
 
 // Set proper content-type with charset for all responses
 app.use((req, res, next) => {
+  // Skip content-type setting for sitemap.xml (handled by its own route)
+  if (req.path === '/sitemap.xml') {
+    return next();
+  }
+  
   // Set charset=utf-8 for text/html and application/json
   const contentType = res.getHeader('content-type');
   if (!contentType || typeof contentType === 'string') {
@@ -595,8 +600,13 @@ app.use('/api/slideshow', slideshowRoutes); // Legacy route
 app.use('/api/notifications', notificationRoutes); // Legacy route
 app.use('/api/health', healthRoutes);
 
-// Sitemap route (no API prefix for SEO)
-app.get('/sitemap.xml', generateSitemap);
+// Sitemap route (no API prefix for SEO) - must be before content-type middleware
+// This ensures it returns XML, not HTML
+app.get('/sitemap.xml', (req, res, next) => {
+  // Set XML content type before calling generateSitemap
+  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+  generateSitemap(req, res, next);
+});
 
 // Root route - API information
 app.get('/', (req, res) => {

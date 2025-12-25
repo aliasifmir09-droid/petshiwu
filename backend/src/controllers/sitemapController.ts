@@ -247,8 +247,9 @@ export const generateSitemap = async (req: Request, res: Response) => {
 
     xml += '</urlset>';
 
-    // Set proper content type
-    res.set('Content-Type', 'application/xml');
+    // Set proper content type with charset for XML
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
     res.send(xml);
   } catch (error: any) {
     logger.error('Error generating sitemap:', error);
