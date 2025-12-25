@@ -23,6 +23,7 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [expandedMobilePetTypes, setExpandedMobilePetTypes] = useState<Set<string>>(new Set());
+  const [isLearningExpanded, setIsLearningExpanded] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
 
@@ -152,7 +153,7 @@ const Header = () => {
   };
 
   // New Pet Categories Component
-  const NewPetCategories = () => {
+  const NewPetCategories = ({ onLinkClick }: { onLinkClick?: () => void }) => {
     const { data: petTypes } = useQuery({
       queryKey: ['pet-types'],
       queryFn: async () => {
@@ -177,7 +178,8 @@ const Header = () => {
             <li key={index}>
               <Link
                 to={`/learning?petType=${slug}&category=New Pet`}
-                className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
+                onClick={onLinkClick}
+                className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
               >
                 {name}
               </Link>
