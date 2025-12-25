@@ -11,6 +11,7 @@ import CategoryIcons from '@/components/CategoryIcons';
 import { ChevronRight, ChevronLeft, Star } from 'lucide-react';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
+import { normalizeImageUrl, generateSrcSet } from '@/utils/imageUtils';
 
 const Home = () => {
   const navigate = useNavigate();
