@@ -5,7 +5,7 @@ import { Product } from '@/types';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useCartStore } from '@/stores/cartStore';
 import { memo, useCallback, useMemo, useState } from 'react';
-import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
+import { normalizeImageUrl, handleImageError, generateSrcSet, getOptimalImageSize } from '@/utils/imageUtils';
 import { useImageLoadTracker } from '@/hooks/useImageLoadTracker';
 
 interface ProductCardProps {
@@ -96,10 +96,15 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
         <img
-          src={normalizeImageUrl(product.images?.[0])}
+          src={normalizeImageUrl(product.images?.[0], { 
+            size: getOptimalImageSize(254, 254),
+            format: 'auto'
+          })}
+          srcSet={generateSrcSet(product.images?.[0], [254, 400, 600])}
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 254px"
           alt={product.name}
-          width={400}
-          height={400}
+          width={254}
+          height={254}
           loading={shouldLoadEager ? "eager" : "lazy"}
           {...(shouldLoadEager ? { fetchpriority: "high" as any } : { fetchpriority: "auto" as any })}
           onError={(e) => {

@@ -223,8 +223,12 @@ const Home = () => {
                       <div className="relative w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[3px] transform group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-2xl group-hover:from-blue-600 group-hover:via-purple-600 group-hover:to-pink-600 origin-center">
                         <div className="w-full h-full rounded-full overflow-hidden bg-white">
                           <img 
-                            src={category.image} 
+                            src={normalizeImageUrl(category.image, { width: 170, height: 170, format: 'auto' })} 
+                            srcSet={generateSrcSet(category.image, [128, 170, 256])}
+                            sizes="(max-width: 640px) 128px, 170px"
                             alt={category.name}
+                            width={170}
+                            height={170}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => {
                               const target = e.currentTarget;

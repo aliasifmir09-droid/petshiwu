@@ -1,35 +1,186 @@
 import { API_URL } from '@/services/api';
 
 /**
- * Normalizes image URLs to full URLs
- * - If already a full URL (http/https), returns as-is (including Cloudinary URLs)
+ * Image size presets for different use cases
+ */
+export type ImageSize = 'thumbnail' | 'small' | 'medium' | 'large' | 'xlarge';
+
+const IMAGE_SIZES: Record<ImageSize, number> = {
+  thumbnail: 150,
+  small: 300,
+  medium: 500,
+  large: 800,
+  xlarge: 1200
+};
+
+/**
+ * Optimizes Cloudinary image URL with size and format transformations
+ */
+const optimizeCloudinaryUrl = (url: string, width?: number, height?: number, format?: 'webp' | 'avif' | 'auto'): string => {
+  // Check if it's a Cloudinary URL
+  if (!url.includes('res.cloudinary.com')) {
+    return url;
+  }
+
+  // Parse existing URL to preserve path
+  try {
+    const urlObj = new URL(url);
+    const pathParts = urlObj.pathname.split('/');
+    
+    // Find the upload index (usually after /upload/)
+    const uploadIndex = pathParts.findIndex(part => part === 'upload');
+    if (uploadIndex === -1) {
+      return url; // Not a standard Cloudinary URL
+    }
+
+    // Build transformation parameters
+    const transformations: string[] = [];
+    
+    // Add size transformations
+    if (width) {
+      transformations.push(`w_${width}`);
+    }
+    if (height) {
+      transformations.push(`h_${height}`);
+    }
+    
+    // Add format (WebP/AVIF)
+    if (format === 'webp') {
+      transformations.push('f_webp');
+    } else if (format === 'avif') {
+      transformations.push('f_avif');
+    } else if (format === 'auto' || !format) {
+      transformations.push('f_auto'); // Auto-optimize format
+    }
+    
+    // Add quality optimization
+    transformations.push('q_auto');
+    
+    // Add crop mode
+    if (width || height) {
+      transformations.push('c_limit'); // Maintain aspect ratio
+    }
+
+    // Insert transformations after /upload/
+    if (transformations.length > 0) {
+      const transformString = transformations.join(',');
+      pathParts.splice(uploadIndex + 1, 0, transformString);
+    }
+
+    urlObj.pathname = pathParts.join('/');
+    return urlObj.toString();
+  } catch {
+    return url; // If URL parsing fails, return original
+  }
+};
+
+/**
+ * Optimizes Adobe Scene7 image URL with size parameters
+ */
+const optimizeScene7Url = (url: string, width?: number, height?: number): string => {
+  if (!url.includes('scene7.com')) {
+    return url;
+  }
+
+  try {
+    const urlObj = new URL(url);
+    
+    // Update width and height parameters
+    if (width) {
+      urlObj.searchParams.set('wid', width.toString());
+    }
+    if (height) {
+      urlObj.searchParams.set('hei', height.toString());
+    }
+    
+    // Add format optimization (WebP if supported)
+    urlObj.searchParams.set('fmt', 'webp');
+    urlObj.searchParams.set('qlt', '85'); // Quality 85%
+    
+    return urlObj.toString();
+  } catch {
+    return url;
+  }
+};
+
+/**
+ * Optimizes Unsplash image URL with size parameters
+ */
+const optimizeUnsplashUrl = (url: string, width?: number, height?: number): string => {
+  if (!url.includes('unsplash.com')) {
+    return url;
+  }
+
+  try {
+    const urlObj = new URL(url);
+    
+    // Update width and height parameters
+    if (width) {
+      urlObj.searchParams.set('w', width.toString());
+    }
+    if (height) {
+      urlObj.searchParams.set('h', height.toString());
+    }
+    
+    // Add quality optimization
+    urlObj.searchParams.set('q', '80');
+    urlObj.searchParams.set('fit', 'crop');
+    
+    return urlObj.toString();
+  } catch {
+    return url;
+  }
+};
+
+/**
+ * Normalizes and optimizes image URLs with size transformations
+ * - If already a full URL (http/https), optimizes it based on provider
  * - If relative path starting with /uploads, prepends backend API URL
  * - Otherwise returns a placeholder or fallback
  */
-export const normalizeImageUrl = (imageUrl: string | undefined | null): string => {
+export const normalizeImageUrl = (
+  imageUrl: string | undefined | null,
+  options?: {
+    width?: number;
+    height?: number;
+    size?: ImageSize;
+    format?: 'webp' | 'avif' | 'auto';
+  }
+): string => {
   if (!imageUrl) {
     return getPlaceholderImage();
   }
 
-  // Already a full URL (http:// or https://) - includes Cloudinary URLs
-  // In production, only allow HTTPS for security
+  const { width, height, size, format = 'auto' } = options || {};
+  const finalWidth = width || (size ? IMAGE_SIZES[size] : undefined);
+  const finalHeight = height;
+
+  // Already a full URL (http:// or https://) - optimize based on provider
   const isProduction = import.meta.env.PROD || import.meta.env.MODE === 'production';
   if (imageUrl.startsWith('https://')) {
+    // Optimize based on image provider
+    if (imageUrl.includes('res.cloudinary.com')) {
+      return optimizeCloudinaryUrl(imageUrl, finalWidth, finalHeight, format);
+    }
+    if (imageUrl.includes('scene7.com')) {
+      return optimizeScene7Url(imageUrl, finalWidth, finalHeight);
+    }
+    if (imageUrl.includes('unsplash.com')) {
+      return optimizeUnsplashUrl(imageUrl, finalWidth, finalHeight);
+    }
     return imageUrl;
   }
+  
   if (imageUrl.startsWith('http://')) {
     if (isProduction) {
-      // In production, reject HTTP URLs for security (mixed content)
       console.warn('HTTP image URL rejected in production:', imageUrl);
       return getPlaceholderImage();
     }
-    // In development, allow HTTP for local testing
     return imageUrl;
   }
 
   // Relative path starting with /uploads
   if (imageUrl.startsWith('/uploads/')) {
-    // Get backend URL without /api suffix
     const backendUrl = API_URL.replace(/\/api$/, '');
     return `${backendUrl}${imageUrl}`;
   }
@@ -42,6 +193,38 @@ export const normalizeImageUrl = (imageUrl: string | undefined | null): string =
 
   // Fallback to placeholder
   return getPlaceholderImage();
+};
+
+/**
+ * Generates responsive image srcset for different screen sizes
+ */
+export const generateSrcSet = (
+  imageUrl: string | undefined | null,
+  sizes: number[] = [300, 500, 800, 1200]
+): string => {
+  if (!imageUrl) {
+    return '';
+  }
+
+  return sizes
+    .map(size => {
+      const optimizedUrl = normalizeImageUrl(imageUrl, { width: size, format: 'auto' });
+      return `${optimizedUrl} ${size}w`;
+    })
+    .join(', ');
+};
+
+/**
+ * Gets the appropriate image size based on display dimensions
+ */
+export const getOptimalImageSize = (displayWidth: number, displayHeight?: number): ImageSize => {
+  const maxDimension = displayHeight ? Math.max(displayWidth, displayHeight) : displayWidth;
+  
+  if (maxDimension <= 200) return 'thumbnail';
+  if (maxDimension <= 400) return 'small';
+  if (maxDimension <= 600) return 'medium';
+  if (maxDimension <= 1000) return 'large';
+  return 'xlarge';
 };
 
 /**
