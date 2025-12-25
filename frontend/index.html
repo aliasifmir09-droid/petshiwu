@@ -9,16 +9,18 @@
     <link rel="icon" href="/logo.png" type="image/png" />
     <meta name="theme-color" content="#1E3A8A" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Preconnect for faster DNS lookup - Critical origins -->
+    <!-- Critical: Preconnect to backend API FIRST (most important for LCP) -->
+    <link rel="dns-prefetch" href="https://pet-shop-backend-totp.onrender.com">
+    <link rel="preconnect" href="https://pet-shop-backend-totp.onrender.com" crossorigin>
+    <!-- Preconnect to image CDNs for faster image loading (critical for LCP) -->
+    <link rel="dns-prefetch" href="https://res.cloudinary.com">
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+    <link rel="dns-prefetch" href="https://s7d2.scene7.com">
+    <link rel="preconnect" href="https://s7d2.scene7.com" crossorigin>
+    <!-- Preconnect for fonts (less critical, can be deferred) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Preconnect to backend API for faster initial requests -->
-    <link rel="preconnect" href="https://pet-shop-backend-totp.onrender.com" crossorigin>
-    <!-- Preconnect to image CDNs for faster image loading -->
-    <link rel="preconnect" href="https://s7d2.scene7.com" crossorigin>
-    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-    <!-- Preconnect for Tawk.to (lazy loaded but preconnect helps when it loads) -->
-    <link rel="preconnect" href="https://embed.tawk.to">
+    <!-- Preconnect for Tawk.to (lazy loaded, low priority) -->
     <link rel="dns-prefetch" href="https://embed.tawk.to">
     <!-- Non-blocking font loading with optional display to prevent layout shifts -->
     <link 
