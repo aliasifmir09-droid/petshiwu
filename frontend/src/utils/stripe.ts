@@ -22,20 +22,21 @@ export const getStripe = async (): Promise<any> => {
       return Promise.resolve(null);
     }
 
-    // Load Stripe.js script with defer to avoid blocking main thread
-    // The loadStripe function loads the script asynchronously, but we can further defer it
+    // Load Stripe.js script - loadStripe already loads asynchronously
+    // We defer it slightly to yield to browser for other critical tasks
     stripePromise = new Promise((resolve, reject) => {
-      // Use requestIdleCallback if available to load during idle time
       const loadStripeScript = () => {
         stripeModule.loadStripe(publishableKey)
           .then(resolve)
           .catch(reject);
       };
 
+      // Defer loading to next event loop tick to avoid blocking
+      // This allows browser to complete other critical tasks first
       if ('requestIdleCallback' in window) {
-        requestIdleCallback(loadStripeScript, { timeout: 1000 });
+        requestIdleCallback(loadStripeScript, { timeout: 500 });
       } else {
-        // Fallback: small delay to yield to browser
+        // Fallback: use setTimeout to yield to browser
         setTimeout(loadStripeScript, 0);
       }
     });
