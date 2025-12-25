@@ -84,10 +84,11 @@ const HeroSlideshow = () => {
                 }`}
               >
                 <div className={`w-full h-full ${slide.backgroundColor || 'bg-gradient-to-br from-blue-50 via-white to-purple-50'}`}>
-                  <div className="grid md:grid-cols-2 h-full gap-0">
+                  {/* Mobile: Stack vertically, Desktop: Side by side */}
+                  <div className="flex flex-col md:grid md:grid-cols-2 h-full">
                     
-                    {/* Left Side - Content with Enhanced Striped Background */}
-                    <div className="relative flex items-center justify-center p-4 md:p-6 overflow-hidden">
+                    {/* Content Section - Top on mobile, Left on desktop */}
+                    <div className="relative flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-hidden flex-shrink-0 md:flex-shrink">
                       {/* Modern Diagonal Striped Pattern */}
                       <div className="absolute inset-0 opacity-80" style={{
                         backgroundImage: `repeating-linear-gradient(
@@ -110,34 +111,34 @@ const HeroSlideshow = () => {
                       {/* Animated Gradient Overlay */}
                       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 animate-pulse"></div>
 
-                      {/* Content Card with Glass Effect */}
-                      <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-xl max-w-sm border border-white/50 transform hover:scale-105 transition-transform duration-300">
-                        <div className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                      {/* Content Card with Glass Effect - Optimized for mobile */}
+                      <div className="relative bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 shadow-xl max-w-sm w-full border border-white/50 transform hover:scale-105 transition-transform duration-300">
+                        <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-md">
                           SALE
                         </div>
-                        <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2 leading-tight">
+                        <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1 sm:mb-2 leading-tight">
                           {slide.title}
                         </h1>
-                        <p className="text-base md:text-lg font-semibold text-gray-700 mb-1">
+                        <p className="text-sm sm:text-base md:text-lg font-semibold text-gray-700 mb-0.5 sm:mb-1">
                           {slide.subtitle}
                         </p>
-                        <p className="text-xs md:text-sm text-gray-600 mb-3">
+                        <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-2 sm:mb-3 line-clamp-2">
                           {slide.description}
                         </p>
                         <Link
                           to={slide.buttonLink}
-                          className="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-full font-bold text-sm hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 duration-300"
+                          className="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 duration-300"
                         >
                           {slide.buttonText} →
                         </Link>
-                        <p className="text-xs text-gray-500 mt-2 italic">
+                        <p className="text-[10px] sm:text-xs text-gray-500 mt-1 sm:mt-2 italic">
                           *Exclusions apply.
                         </p>
                       </div>
                     </div>
 
-                    {/* Right Side - Pet Image with Overlay */}
-                    <div className="relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200" style={{ contain: 'layout' }}>
+                    {/* Image Section - Bottom on mobile, Right on desktop */}
+                    <div className="relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex-1 min-h-[120px] sm:min-h-[160px] md:min-h-0" style={{ contain: 'layout' }}>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                       <img
                         src={slide.leftImage || slide.imageUrl}
@@ -159,9 +160,9 @@ const HeroSlideshow = () => {
                           }
                         }}
                       />
-                      {/* Decorative Corner Badge */}
-                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
-                        <p className="text-xs font-bold text-blue-600">🐾 Trusted Quality</p>
+                      {/* Decorative Corner Badge - Hidden on very small screens */}
+                      <div className="hidden sm:block absolute top-2 right-2 sm:top-4 sm:right-4 bg-white/90 backdrop-blur-sm px-2 sm:px-4 py-1 sm:py-2 rounded-full shadow-lg">
+                        <p className="text-[10px] sm:text-xs font-bold text-blue-600">🐾 Trusted Quality</p>
                       </div>
                     </div>
                   </div>
@@ -170,20 +171,22 @@ const HeroSlideshow = () => {
             ))}
           </div>
 
-          {/* Enhanced Navigation Arrows */}
+          {/* Enhanced Navigation Arrows - Larger touch targets for mobile */}
           <button
             onClick={prevSlide}
-            className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white hover:bg-blue-600 text-gray-800 hover:text-white p-2 md:p-3 rounded-full transition-all shadow-lg hover:shadow-xl z-10 transform hover:scale-110 duration-300"
+            className="absolute left-1 sm:left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white hover:bg-blue-600 text-gray-800 hover:text-white p-2.5 sm:p-3 md:p-3 rounded-full transition-all shadow-lg hover:shadow-xl z-10 transform hover:scale-110 duration-300 touch-manipulation"
             aria-label="Previous slide"
+            style={{ minWidth: '44px', minHeight: '44px' }}
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={20} className="sm:w-5 sm:h-5" />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white hover:bg-blue-600 text-gray-800 hover:text-white p-2 md:p-3 rounded-full transition-all shadow-lg hover:shadow-xl z-10 transform hover:scale-110 duration-300"
+            className="absolute right-1 sm:right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white hover:bg-blue-600 text-gray-800 hover:text-white p-2.5 sm:p-3 md:p-3 rounded-full transition-all shadow-lg hover:shadow-xl z-10 transform hover:scale-110 duration-300 touch-manipulation"
             aria-label="Next slide"
+            style={{ minWidth: '44px', minHeight: '44px' }}
           >
-            <ChevronRight size={20} />
+            <ChevronRight size={20} className="sm:w-5 sm:h-5" />
           </button>
 
           {/* Modern Slide Indicators */}
