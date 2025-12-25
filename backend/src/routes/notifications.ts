@@ -15,6 +15,36 @@ const router = Router();
  * GET /api/notifications/orders
  */
 router.get('/orders', protect, authorize('admin'), (req: Request, res: Response) => {
+  let isCleanedUp = false;
+  let heartbeatInterval: NodeJS.Timeout | null = null;
+
+  // Helper function to check if response is still writable
+  const isWritable = (): boolean => {
+    return !isCleanedUp && !res.writableEnded && !res.destroyed && res.writable;
+  };
+
+  // Helper function to safely write to response
+  const safeWrite = (data: string): boolean => {
+    if (!isWritable()) {
+      return false;
+    }
+    try {
+      res.write(data);
+      return true;
+    } catch (error: any) {
+      // "aborted" errors are expected when client disconnects
+      if (error?.code === 'ECONNRESET' || error?.message?.includes('aborted')) {
+        // Expected disconnect, don't log as error
+        return false;
+      }
+      // Only log unexpected errors
+      if (error?.code !== 'EPIPE') {
+        logger.debug('SSE write error (expected on disconnect):', error?.message || error);
+      }
+      return false;
+    }
+  };
+
   // Set headers for SSE
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
@@ -22,34 +52,30 @@ router.get('/orders', protect, authorize('admin'), (req: Request, res: Response)
   res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
 
   // Send initial connection message
-  res.write(`data: ${JSON.stringify({ type: 'connected', message: 'Connected to order notifications' })}\n\n`);
+  if (!safeWrite(`data: ${JSON.stringify({ type: 'connected', message: 'Connected to order notifications' })}\n\n`)) {
+    return;
+  }
 
   // Keep connection alive with heartbeat
-  const heartbeatInterval = setInterval(() => {
-    try {
-      res.write(`: heartbeat\n\n`);
-    } catch (error) {
-      // Client disconnected
-      clearInterval(heartbeatInterval);
+  heartbeatInterval = setInterval(() => {
+    if (!safeWrite(`: heartbeat\n\n`)) {
+      if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+        heartbeatInterval = null;
+      }
     }
   }, 30000); // Send heartbeat every 30 seconds
 
   // Listen for new order notifications
   const onNewOrder = (notification: any) => {
-    try {
-      res.write(`data: ${JSON.stringify(notification)}\n\n`);
-    } catch (error) {
-      logger.error('Error sending SSE notification:', error);
+    if (!safeWrite(`data: ${JSON.stringify(notification)}\n\n`)) {
       cleanup();
     }
   };
 
   // Listen for order update notifications
   const onOrderUpdate = (notification: any) => {
-    try {
-      res.write(`data: ${JSON.stringify(notification)}\n\n`);
-    } catch (error) {
-      logger.error('Error sending SSE notification:', error);
+    if (!safeWrite(`data: ${JSON.stringify(notification)}\n\n`)) {
       cleanup();
     }
   };
@@ -60,21 +86,61 @@ router.get('/orders', protect, authorize('admin'), (req: Request, res: Response)
 
   // Cleanup function
   const cleanup = () => {
-    clearInterval(heartbeatInterval);
+    if (isCleanedUp) {
+      return; // Prevent multiple cleanups
+    }
+    isCleanedUp = true;
+
+    if (heartbeatInterval) {
+      clearInterval(heartbeatInterval);
+      heartbeatInterval = null;
+    }
+
     orderNotificationEmitter.removeListener('new_order', onNewOrder);
     orderNotificationEmitter.removeListener('order_update', onOrderUpdate);
-    res.end();
+
+    if (!res.writableEnded && !res.destroyed) {
+      try {
+        res.end();
+      } catch (error) {
+        // Ignore errors during cleanup
+      }
+    }
   };
 
-  // Handle client disconnect
+  // Handle client disconnect (expected)
   req.on('close', () => {
-    logger.debug('SSE client disconnected');
     cleanup();
   });
 
-  // Handle errors
-  req.on('error', (error) => {
+  // Handle request errors
+  req.on('error', (error: any) => {
+    // "aborted" and "ECONNRESET" are expected when clients disconnect
+    if (error?.code === 'ECONNRESET' || error?.message?.includes('aborted')) {
+      // Expected disconnect, don't log as error
+      cleanup();
+      return;
+    }
+    // Only log unexpected errors
     logger.error('SSE connection error:', error);
+    cleanup();
+  });
+
+  // Handle response errors
+  res.on('error', (error: any) => {
+    // "aborted" and "ECONNRESET" are expected when clients disconnect
+    if (error?.code === 'ECONNRESET' || error?.message?.includes('aborted')) {
+      // Expected disconnect, don't log as error
+      cleanup();
+      return;
+    }
+    // Only log unexpected errors
+    logger.error('SSE response error:', error);
+    cleanup();
+  });
+
+  // Handle response finish
+  res.on('finish', () => {
     cleanup();
   });
 });
