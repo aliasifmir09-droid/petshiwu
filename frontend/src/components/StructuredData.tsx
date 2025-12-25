@@ -11,6 +11,8 @@ interface ProductSchema {
   rating?: number;
   ratingCount?: number;
   url: string;
+  sku?: string;
+  category?: string;
 }
 
 interface OrganizationSchema {
@@ -32,7 +34,7 @@ interface OrganizationSchema {
 }
 
 interface StructuredDataProps {
-  type: 'product' | 'organization' | 'website' | 'breadcrumb';
+  type: 'product' | 'organization' | 'website' | 'breadcrumb' | 'itemList' | 'collectionPage' | 'faq' | 'review';
   data: ProductSchema | OrganizationSchema | any;
 }
 
@@ -67,8 +69,18 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
         schema.aggregateRating = {
           '@type': 'AggregateRating',
           ratingValue: product.rating,
-          reviewCount: product.ratingCount
+          reviewCount: product.ratingCount,
+          bestRating: 5,
+          worstRating: 1
         };
+      }
+
+      if (product.sku) {
+        schema.sku = product.sku;
+      }
+
+      if (product.category) {
+        schema.category = product.category;
       }
       break;
 
@@ -121,6 +133,38 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
 
     case 'breadcrumb':
       schema = data;
+      break;
+
+    case 'itemList':
+      schema = {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        ...data
+      };
+      break;
+
+    case 'collectionPage':
+      schema = {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        ...data
+      };
+      break;
+
+    case 'faq':
+      schema = {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: Array.isArray(data) ? data : data.mainEntity || []
+      };
+      break;
+
+    case 'review':
+      schema = {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        ...data
+      };
       break;
 
     default:

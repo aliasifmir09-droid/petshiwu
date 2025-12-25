@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import Product from '../models/Product';
 import Category from '../models/Category';
 import Blog from '../models/Blog';
+import CareGuide from '../models/CareGuide';
+import FAQ from '../models/FAQ';
+import PetType from '../models/PetType';
 import logger from '../utils/logger';
 
 /**
@@ -13,18 +16,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
     const baseUrl = 'https://www.petshiwu.com';
     const currentDate = new Date().toISOString().split('T')[0];
 
-    // Fetch all active products (only slugs for sitemap)
-    const products = await Product.find({ 
-      isActive: true,
-      $or: [
-        { deletedAt: null },
-        { deletedAt: { $exists: false } }
-      ]
-    })
-      .select('slug updatedAt')
-      .sort({ updatedAt: -1 })
-      .limit(10000) // Limit to 10,000 products (sitemap limit)
-      .lean();
+    // Note: Products are fetched later with category info for SEO-friendly URLs
 
     // Fetch all active categories
     const categories = await Category.find({ 
@@ -38,6 +30,20 @@ export const generateSitemap = async (req: Request, res: Response) => {
       isPublished: true 
     })
       .select('slug updatedAt')
+      .lean();
+
+    // Fetch all published care guides
+    const careGuides = await CareGuide.find({ 
+      isPublished: true 
+    })
+      .select('slug updatedAt')
+      .lean();
+
+    // Fetch all active FAQs
+    const faqs = await FAQ.find({ 
+      isActive: true 
+    })
+      .select('_id updatedAt')
       .lean();
 
     // Start building XML
@@ -69,29 +75,88 @@ export const generateSitemap = async (req: Request, res: Response) => {
     xml += '    <priority>0.9</priority>\n';
     xml += '  </url>\n';
 
-    // Pet type pages
-    const petTypes = ['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet'];
+    // Pet type pages - fetch from database for dynamic pet types
+    const petTypes = await PetType.find({ isActive: true })
+      .select('slug updatedAt')
+      .lean();
+    
     petTypes.forEach(petType => {
+      // SEO-friendly URL: /petType instead of /products?petType=...
       xml += '  <url>\n';
-      xml += `    <loc>${baseUrl}/products?petType=${petType}</loc>\n`;
-      xml += `    <lastmod>${currentDate}</lastmod>\n`;
-      xml += '    <changefreq>weekly</changefreq>\n';
-      xml += '    <priority>0.8</priority>\n';
-      xml += '  </url>\n';
-    });
-
-    // Individual product pages
-    products.forEach(product => {
-      const lastmod = product.updatedAt 
-        ? new Date(product.updatedAt).toISOString().split('T')[0]
+      xml += `    <loc>${baseUrl}/${petType.slug}</loc>\n`;
+      const lastmod = petType.updatedAt 
+        ? new Date(petType.updatedAt).toISOString().split('T')[0]
         : currentDate;
-      
-      xml += '  <url>\n';
-      xml += `    <loc>${baseUrl}/products/${product.slug}</loc>\n`;
       xml += `    <lastmod>${lastmod}</lastmod>\n`;
       xml += '    <changefreq>weekly</changefreq>\n';
       xml += '    <priority>0.8</priority>\n';
       xml += '  </url>\n';
+      
+      // Also include legacy query param URL for backward compatibility
+      xml += '  <url>\n';
+      xml += `    <loc>${baseUrl}/products?petType=${petType.slug}</loc>\n`;
+      xml += `    <lastmod>${lastmod}</lastmod>\n`;
+      xml += '    <changefreq>weekly</changefreq>\n';
+      xml += '    <priority>0.7</priority>\n';
+      xml += '  </url>\n';
+    });
+
+    // Individual product pages - need category info for SEO-friendly URLs
+    const productsWithCategory = await Product.find({ 
+      isActive: true,
+      $or: [
+        { deletedAt: null },
+        { deletedAt: { $exists: false } }
+      ]
+    })
+      .select('slug updatedAt petType category')
+      .populate('category', 'slug parentCategory')
+      .sort({ updatedAt: -1 })
+      .limit(10000)
+      .lean();
+
+    productsWithCategory.forEach(product => {
+      const lastmod = product.updatedAt 
+        ? new Date(product.updatedAt).toISOString().split('T')[0]
+        : currentDate;
+      
+      // Generate SEO-friendly URL: /petType/categoryPath/product-slug
+      // Fallback to /products/slug if category info not available
+      let productUrl = `${baseUrl}/products/${product.slug}`;
+      
+      if (product.petType && product.category && typeof product.category === 'object') {
+        const category = product.category as any;
+        const categorySlug = category.slug || '';
+        const petTypeSlug = product.petType;
+        
+        // Build category path if parent exists
+        let categoryPath = categorySlug;
+        if (category.parentCategory && typeof category.parentCategory === 'object') {
+          const parent = category.parentCategory as any;
+          categoryPath = `${parent.slug}/${categorySlug}`;
+        }
+        
+        if (categoryPath && petTypeSlug) {
+          productUrl = `${baseUrl}/${petTypeSlug}/${categoryPath}/${product.slug}`;
+        }
+      }
+      
+      xml += '  <url>\n';
+      xml += `    <loc>${productUrl}</loc>\n`;
+      xml += `    <lastmod>${lastmod}</lastmod>\n`;
+      xml += '    <changefreq>weekly</changefreq>\n';
+      xml += '    <priority>0.8</priority>\n';
+      xml += '  </url>\n`;
+      
+      // Also include legacy /products/slug URL for backward compatibility
+      if (productUrl !== `${baseUrl}/products/${product.slug}`) {
+        xml += '  <url>\n';
+        xml += `    <loc>${baseUrl}/products/${product.slug}</loc>\n`;
+        xml += `    <lastmod>${lastmod}</lastmod>\n`;
+        xml += '    <changefreq>weekly</changefreq>\n';
+        xml += '    <priority>0.7</priority>\n';
+        xml += '  </url>\n';
+      }
     });
 
     // Category pages
@@ -112,26 +177,54 @@ export const generateSitemap = async (req: Request, res: Response) => {
       xml += '  </url>\n';
     });
 
-    // Blog pages
+    // Blog/Learning pages
     blogs.forEach(blog => {
       const lastmod = blog.updatedAt 
         ? new Date(blog.updatedAt).toISOString().split('T')[0]
         : currentDate;
       
+      // SEO-friendly URL: /learning/slug
       xml += '  <url>\n';
-      xml += `    <loc>${baseUrl}/blog/${blog.slug}</loc>\n`;
+      xml += `    <loc>${baseUrl}/learning/${blog.slug}</loc>\n`;
       xml += `    <lastmod>${lastmod}</lastmod>\n`;
       xml += '    <changefreq>monthly</changefreq>\n';
       xml += '    <priority>0.6</priority>\n';
       xml += '  </url>\n';
     });
 
+    // Care guide pages
+    careGuides.forEach(guide => {
+      const lastmod = guide.updatedAt 
+        ? new Date(guide.updatedAt).toISOString().split('T')[0]
+        : currentDate;
+      
+      xml += '  <url>\n';
+      xml += `    <loc>${baseUrl}/care-guides/${guide.slug}</loc>\n`;
+      xml += `    <lastmod>${lastmod}</lastmod>\n`;
+      xml += '    <changefreq>monthly</changefreq>\n';
+      xml += '    <priority>0.6</priority>\n';
+      xml += '  </url>\n';
+    });
+
+    // Learning/Care Guides index pages
+    xml += '  <url>\n';
+    xml += `    <loc>${baseUrl}/learning</loc>\n`;
+    xml += `    <lastmod>${currentDate}</lastmod>\n`;
+    xml += '    <changefreq>weekly</changefreq>\n';
+    xml += '    <priority>0.7</priority>\n';
+    xml += '  </url>\n';
+
+    xml += '  <url>\n';
+    xml += `    <loc>${baseUrl}/care-guides</loc>\n`;
+    xml += `    <lastmod>${currentDate}</lastmod>\n`;
+    xml += '    <changefreq>weekly</changefreq>\n';
+    xml += '    <priority>0.7</priority>\n';
+    xml += '  </url>\n';
+
     // Static pages
     const staticPages = [
-      { path: '/blog', priority: '0.7', changefreq: 'weekly' },
       { path: '/faq', priority: '0.6', changefreq: 'monthly' },
-      { path: '/contact', priority: '0.5', changefreq: 'monthly' },
-      { path: '/about', priority: '0.5', changefreq: 'monthly' },
+      { path: '/returns', priority: '0.5', changefreq: 'monthly' },
     ];
 
     staticPages.forEach(page => {

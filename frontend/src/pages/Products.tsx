@@ -11,6 +11,8 @@ import Dropdown from '@/components/Dropdown';
 import { SlidersHorizontal, Layers, ArrowUpDown, Star, Package, Tag, Search } from 'lucide-react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import SEO from '@/components/SEO';
+import StructuredData from '@/components/StructuredData';
+import { useSEO } from '@/hooks/useSEO';
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -181,16 +183,41 @@ const Products = () => {
     return [...baseKeywords, 'dog food', 'cat food', 'pet toys', 'pet accessories'].join(', ');
   };
 
-  const productsUrl = `https://petshiwu.com/products${location.search ? location.search : ''}`;
+  // Generate SEO metadata using hook
+  const seoData = useSEO({
+    title: getProductsTitle().replace(' | petshiwu', ''),
+    description: getProductsDescription(),
+    keywords: getProductsKeywords().split(', '),
+    type: 'collection',
+    context: {
+      petType: petType || undefined
+    },
+    breadcrumbs: [
+      { name: 'Home', url: '/' },
+      { name: 'Products', url: '/products' }
+    ],
+    items: filteredProducts.slice(0, 20).map((product) => ({
+      name: product.name,
+      url: `/products/${product.slug}`,
+      image: product.images[0]
+    }))
+  });
 
   return (
     <>
       <SEO
-        title={getProductsTitle()}
-        description={getProductsDescription()}
-        keywords={getProductsKeywords()}
-        url={productsUrl}
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+        url={seoData.canonicalUrl}
+        type="website"
       />
+      {seoData.collectionPageSchema && (
+        <StructuredData type="collectionPage" data={seoData.collectionPageSchema} />
+      )}
+      {seoData.breadcrumbSchema && (
+        <StructuredData type="breadcrumb" data={seoData.breadcrumbSchema} />
+      )}
       <div className="container mx-auto px-4 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8">

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/products';
@@ -7,6 +7,9 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import Dropdown from '@/components/Dropdown';
 import { SlidersHorizontal, ArrowUpDown, ChevronRight, Home } from 'lucide-react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
+import SEO from '@/components/SEO';
+import StructuredData from '@/components/StructuredData';
+import { useSEO } from '@/hooks/useSEO';
 
 const PetType = () => {
   const { petType } = useParams<{ petType: string }>();
@@ -63,6 +66,29 @@ const PetType = () => {
 
   const petTypeDisplay = petType ? petType.charAt(0).toUpperCase() + petType.slice(1) : '';
 
+  // Generate SEO metadata
+  const seoData = useSEO({
+    title: `${petTypeDisplay} Products - Premium Pet Supplies`,
+    description: `Shop premium ${petTypeDisplay.toLowerCase()} products including food, treats, toys, and accessories. Quality products, fast shipping, great prices at petshiwu.`,
+    keywords: [
+      `${petTypeDisplay.toLowerCase()} products`,
+      `${petTypeDisplay.toLowerCase()} food`,
+      `${petTypeDisplay.toLowerCase()} supplies`,
+      `${petTypeDisplay.toLowerCase()} accessories`
+    ],
+    type: 'collection',
+    context: { petType },
+    breadcrumbs: [
+      { name: 'Home', url: '/' },
+      { name: petTypeDisplay, url: `/${petType}` }
+    ],
+    items: products?.data.slice(0, 20).map((product) => ({
+      name: product.name,
+      url: `/products/${product.slug}`,
+      image: product.images[0]
+    })) || []
+  });
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 lg:px-8 py-12">
@@ -72,8 +98,22 @@ const PetType = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 lg:px-8 py-8">
-      {/* Breadcrumbs */}
+    <>
+      <SEO
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+        url={seoData.canonicalUrl}
+        type="website"
+      />
+      {seoData.collectionPageSchema && (
+        <StructuredData type="collectionPage" data={seoData.collectionPageSchema} />
+      )}
+      {seoData.breadcrumbSchema && (
+        <StructuredData type="breadcrumb" data={seoData.breadcrumbSchema} />
+      )}
+      <div className="container mx-auto px-4 lg:px-8 py-8">
+        {/* Breadcrumbs */}
       <nav className="mb-6" aria-label="Breadcrumb">
         <ol className="flex items-center space-x-2 text-sm text-gray-600">
           <li className="flex items-center">
@@ -264,6 +304,7 @@ const PetType = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

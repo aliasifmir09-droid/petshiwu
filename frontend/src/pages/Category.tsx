@@ -9,6 +9,8 @@ import Dropdown from '@/components/Dropdown';
 import { SlidersHorizontal, ArrowUpDown, ChevronRight, Home } from 'lucide-react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import SEO from '@/components/SEO';
+import StructuredData from '@/components/StructuredData';
+import { useSEO } from '@/hooks/useSEO';
 
 const Category = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -137,6 +139,40 @@ const Category = () => {
 
   const breadcrumbs = buildBreadcrumbs();
 
+  // Generate SEO metadata
+  const seoData = useSEO({
+    title: category
+      ? (petTypeDisplay
+        ? `${category.name} for ${petTypeDisplay}`
+        : category.name)
+      : 'Category',
+    description: category
+      ? (petTypeDisplay
+        ? `Shop ${category.name} for ${petTypeDisplay} at petshiwu. Quality products, great prices, fast shipping.`
+        : `Shop ${category.name} at petshiwu. Quality pet supplies, great prices, fast shipping.`)
+      : 'Shop pet supplies at petshiwu.',
+    keywords: [
+      category?.name || '',
+      petTypeDisplay,
+      'pet supplies',
+      'online pet store'
+    ].filter(Boolean),
+    type: 'collection',
+    context: {
+      petType: category?.petType,
+      category: category?.name
+    },
+    breadcrumbs: breadcrumbs.map((crumb) => ({
+      name: crumb.label,
+      url: crumb.path
+    })),
+    items: filteredProducts.slice(0, 20).map((product) => ({
+      name: product.name,
+      url: `/products/${product.slug}`,
+      image: product.images[0]
+    }))
+  });
+
   // Memoize filtered products to prevent unnecessary re-renders
   const filteredProducts = useMemo(() => {
     if (!products?.data) return [];
@@ -150,33 +186,6 @@ const Category = () => {
   const petTypeDisplay = category && category.petType && category.petType !== 'all' && category.petType !== 'other-animals'
     ? category.petType.charAt(0).toUpperCase() + category.petType.slice(1)
     : '';
-  
-  const categoryTitle = category
-    ? (petTypeDisplay
-      ? `${category.name} for ${petTypeDisplay} | petshiwu`
-      : `${category.name} | petshiwu`)
-    : 'Category | petshiwu';
-  
-  const categoryDescription = category
-    ? (petTypeDisplay
-      ? `Shop ${category.name} for ${petTypeDisplay} at petshiwu. Quality products, great prices, fast shipping.`
-      : `Shop ${category.name} at petshiwu. Quality pet supplies, great prices, fast shipping.`)
-    : 'Shop pet supplies at petshiwu. Quality products, great prices, fast shipping.';
-  
-  const categoryKeywords = category
-    ? [
-        category.name,
-        petTypeDisplay,
-        petTypeDisplay === 'Dog' ? 'dog food' : '',
-        petTypeDisplay === 'Cat' ? 'cat food' : '',
-        'pet supplies',
-        'online pet store'
-      ].filter(Boolean).join(', ')
-    : 'pet supplies, online pet store';
-
-  const categoryUrl = category
-    ? `https://petshiwu.com/category/${category.slug}${petType ? `?petType=${petType}` : ''}`
-    : 'https://petshiwu.com/category';
 
   const updateFilters = (key: string, value: string) => {
     const newParams = new URLSearchParams(searchParams);
@@ -236,11 +245,18 @@ const Category = () => {
   return (
     <>
       <SEO
-        title={categoryTitle}
-        description={categoryDescription}
-        keywords={categoryKeywords}
-        url={categoryUrl}
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+        url={seoData.canonicalUrl}
+        type="website"
       />
+      {seoData.collectionPageSchema && (
+        <StructuredData type="collectionPage" data={seoData.collectionPageSchema} />
+      )}
+      {seoData.breadcrumbSchema && (
+        <StructuredData type="breadcrumb" data={seoData.breadcrumbSchema} />
+      )}
       <div className="container mx-auto px-4 lg:px-8 py-8">
         {/* Breadcrumbs */}
       <nav className="mb-6" aria-label="Breadcrumb">
