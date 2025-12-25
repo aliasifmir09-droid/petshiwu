@@ -106,7 +106,7 @@ const Header = () => {
   };
 
   // Learning Center Categories Component
-  const LearningCategories = () => {
+  const LearningCategories = ({ onLinkClick }: { onLinkClick?: () => void } = {}) => {
     const { data: categories } = useQuery({
       queryKey: ['blog-categories', 'learning'],
       queryFn: () => blogService.getBlogCategories(),
@@ -127,21 +127,17 @@ const Header = () => {
 
     return (
       <ul className="space-y-1">
-        <li>
-          <Link
-            to="/care-guides"
-            className="text-xs font-semibold text-[#1E3A8A] hover:text-[#1E40AF] block transition-colors py-1 mb-1"
-          >
-            Care Guides →
-          </Link>
-        </li>
         {displayCategories.map((cat: any, index: number) => {
           const name = typeof cat === 'string' ? cat : cat.name;
           return (
             <li key={index}>
               <Link
                 to={`/learning?category=${encodeURIComponent(name)}`}
-                className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
+                onClick={onLinkClick}
+                className={onLinkClick 
+                  ? "block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                  : "text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
+                }
               >
                 {name}
               </Link>
@@ -1180,26 +1176,67 @@ const Header = () => {
                   <span>Today's Deals</span>
                 </Link>
               </li>
-              {/* Learning Center */}
+              {/* Learning Center - Expandable */}
               <li>
-                <Link
-                  to="/learning"
-                  className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
+                <button
+                  onClick={toggleLearningMenu}
+                  className="w-full flex items-center justify-between gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
                 >
-                  <span className="text-xl">📚</span>
-                  <span>Learning</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/products"
-                  className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="text-xl">💊</span>
-                  <span>Pharmacy</span>
-                </Link>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">📚</span>
+                    <span>Learning</span>
+                  </div>
+                  <ChevronRight 
+                    size={18} 
+                    className={`transition-transform ${isLearningExpanded ? 'rotate-90' : ''}`}
+                  />
+                </button>
+                {isLearningExpanded && (
+                  <div className="ml-6 mt-2 space-y-2 pb-2">
+                    {/* Learning Center Link */}
+                    <Link
+                      to="/learning"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setIsLearningExpanded(false);
+                      }}
+                      className="block py-2 px-3 text-sm font-semibold text-[#1E3A8A] hover:underline"
+                    >
+                      Learning Center →
+                    </Link>
+                    {/* Care Guides Link */}
+                    <Link
+                      to="/care-guides"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setIsLearningExpanded(false);
+                      }}
+                      className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                    >
+                      Care Guides →
+                    </Link>
+                    {/* Learning Categories */}
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold text-gray-700 px-3 py-1">Categories</p>
+                      <LearningCategories 
+                        onLinkClick={() => {
+                          setMobileMenuOpen(false);
+                          setIsLearningExpanded(false);
+                        }}
+                      />
+                    </div>
+                    {/* New Pet Section */}
+                    <div className="border-t pt-2 mt-2">
+                      <p className="text-xs font-semibold text-gray-700 px-3 py-1 mb-1">New Pet</p>
+                      <NewPetCategories 
+                        onLinkClick={() => {
+                          setMobileMenuOpen(false);
+                          setIsLearningExpanded(false);
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
               </li>
               <li>
                 <Link
