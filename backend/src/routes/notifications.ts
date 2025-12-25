@@ -4,7 +4,7 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { protect, admin } from '../middleware/auth';
+import { protect, authorize } from '../middleware/auth';
 import { orderNotificationEmitter } from '../utils/orderNotifications';
 import logger from '../utils/logger';
 
@@ -14,7 +14,7 @@ const router = Router();
  * SSE endpoint for real-time order notifications
  * GET /api/notifications/orders
  */
-router.get('/orders', protect, admin, (req: Request, res: Response) => {
+router.get('/orders', protect, authorize('admin'), (req: Request, res: Response) => {
   // Set headers for SSE
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
