@@ -362,6 +362,14 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       // Normalize order ID before sending response
       const normalizedOrder = normalizeOrderId(order[0]);
       
+      // Check if normalizedOrder is null before using it
+      if (!normalizedOrder) {
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to create order'
+        });
+      }
+      
       // Emit real-time notification for new order (non-blocking)
       try {
         const { notifyNewOrder } = await import('../utils/orderNotifications');
