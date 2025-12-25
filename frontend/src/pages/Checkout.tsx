@@ -90,20 +90,30 @@ const StripePaymentWrapper = ({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Lazy load Stripe Elements and Stripe.js only when this component mounts
-    // This ensures Stripe.js script is only loaded when user actually needs to pay
-    Promise.all([
-      import('@stripe/react-stripe-js'),
-      getStripe()
-    ]).then(([stripeReactModule, stripe]) => {
-      setElementsComponent(() => stripeReactModule.Elements);
-      setStripeInstance(stripe);
-      setIsLoading(false);
-    }).catch((error) => {
-      console.error('Failed to load Stripe:', error);
-      onError('Failed to load payment form. Please refresh the page and try again.');
-      setIsLoading(false);
-    });
+    // Defer Stripe loading to avoid blocking main thread
+    // Use requestIdleCallback if available, otherwise use setTimeout
+    const loadStripe = () => {
+      Promise.all([
+        import('@stripe/react-stripe-js'),
+        getStripe()
+      ]).then(([stripeReactModule, stripe]) => {
+        setElementsComponent(() => stripeReactModule.Elements);
+        setStripeInstance(stripe);
+        setIsLoading(false);
+      }).catch((error) => {
+        console.error('Failed to load Stripe:', error);
+        onError('Failed to load payment form. Please refresh the page and try again.');
+        setIsLoading(false);
+      });
+    };
+
+    // Defer loading to next idle period to avoid blocking main thread
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(loadStripe, { timeout: 2000 });
+    } else {
+      // Fallback: use setTimeout with a small delay to yield to browser
+      setTimeout(loadStripe, 0);
+    }
   }, [onError]);
 
   if (isLoading || !ElementsComponent || !stripeInstance) {

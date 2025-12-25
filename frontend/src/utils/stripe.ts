@@ -6,6 +6,7 @@ export const getStripe = async (): Promise<any> => {
   // Lazy load the Stripe module only when needed
   if (!stripeModule) {
     try {
+      // Use dynamic import with chunk splitting to avoid blocking
       stripeModule = await import('@stripe/stripe-js');
     } catch (error) {
       console.error('Failed to load Stripe:', error);
@@ -21,8 +22,23 @@ export const getStripe = async (): Promise<any> => {
       return Promise.resolve(null);
     }
 
-    // Only load Stripe.js script when getStripe is actually called
-    stripePromise = stripeModule.loadStripe(publishableKey);
+    // Load Stripe.js script with defer to avoid blocking main thread
+    // The loadStripe function loads the script asynchronously, but we can further defer it
+    stripePromise = new Promise((resolve, reject) => {
+      // Use requestIdleCallback if available to load during idle time
+      const loadStripeScript = () => {
+        stripeModule.loadStripe(publishableKey)
+          .then(resolve)
+          .catch(reject);
+      };
+
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadStripeScript, { timeout: 1000 });
+      } else {
+        // Fallback: small delay to yield to browser
+        setTimeout(loadStripeScript, 0);
+      }
+    });
   }
 
   return stripePromise;
