@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { slideshowService } from '@/services/slideshow';
 import LoadingSpinner from './LoadingSpinner';
+import { Helmet } from 'react-helmet-async';
 
 const HeroSlideshow = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -16,6 +17,9 @@ const HeroSlideshow = () => {
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
     refetchOnWindowFocus: false
   });
+
+  // Preload the first slide image (LCP image) for better performance
+  const firstSlideImage = slides.length > 0 ? (slides[0].leftImage || slides[0].imageUrl) : null;
 
   // Auto-advance slides every 5 seconds (only if slides exist)
   useEffect(() => {
@@ -59,9 +63,16 @@ const HeroSlideshow = () => {
   }
 
   return (
-    <div className="w-full mt-4">
-      {/* Main Slideshow */}
-      <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-4">
+    <>
+      {/* Preload LCP image for first slide */}
+      {firstSlideImage && (
+        <Helmet>
+          <link rel="preload" as="image" href={firstSlideImage} fetchPriority="high" />
+        </Helmet>
+      )}
+      <div className="w-full mt-4">
+        {/* Main Slideshow */}
+        <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-4">
         <div className="relative w-full overflow-hidden bg-white rounded-xl shadow-lg">
           {/* Slides Container */}
           <div className="relative w-full h-[260px] md:h-[280px] lg:h-[300px]">
@@ -131,6 +142,10 @@ const HeroSlideshow = () => {
                       <img
                         src={slide.leftImage || slide.imageUrl}
                         alt={slide.title}
+                        width={576}
+                        height={432}
+                        loading={index === 0 ? "eager" : "lazy"}
+                        fetchPriority={index === 0 ? "high" : "auto"}
                         className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700"
                         onError={(e) => {
                           // Fallback to imageUrl if leftImage fails
@@ -186,6 +201,7 @@ const HeroSlideshow = () => {
 
       {/* Enhanced Promotional Cards Section */}
     </div>
+    </>
   );
 };
 
