@@ -23,6 +23,58 @@ router.get('/orders', protect, authorize('admin'), (req: Request, res: Response)
     return !isCleanedUp && !res.writableEnded && !res.destroyed && res.writable;
   };
 
+  // Helper function to check if error is an expected disconnect
+  const isExpectedDisconnect = (error: any): boolean => {
+    if (!error) return false;
+    
+    // Check error code
+    if (error.code === 'ECONNRESET' || error.code === 'EPIPE' || error.code === 'ECONNABORTED') {
+      return true;
+    }
+    
+    // Check error message (handle both string and object errors)
+    // Try multiple ways to extract the error message
+    let errorMessage = '';
+    if (typeof error === 'string') {
+      errorMessage = error;
+    } else if (error?.message) {
+      errorMessage = error.message;
+    } else if (error?.toString) {
+      errorMessage = error.toString();
+    } else {
+      // Try JSON.stringify as last resort
+      try {
+        errorMessage = JSON.stringify(error);
+      } catch {
+        errorMessage = String(error);
+      }
+    }
+    
+    const lowerMessage = errorMessage.toLowerCase();
+    
+    // Check for various disconnect-related messages
+    if (lowerMessage.includes('aborted') || 
+        lowerMessage.includes('econnreset') || 
+        lowerMessage.includes('epipe') ||
+        lowerMessage.includes('broken pipe') ||
+        lowerMessage.includes('socket hang up') ||
+        lowerMessage.includes('connection reset') ||
+        lowerMessage.includes('write after end') ||
+        lowerMessage.includes('cannot write after end')) {
+      return true;
+    }
+    
+    // Also check if error is an Error object with specific properties
+    if (error instanceof Error) {
+      const errorName = error.name?.toLowerCase() || '';
+      if (errorName.includes('abort') || errorName.includes('reset')) {
+        return true;
+      }
+    }
+    
+    return false;
+  };
+
   // Helper function to safely write to response
   const safeWrite = (data: string): boolean => {
     if (!isWritable()) {
@@ -32,15 +84,12 @@ router.get('/orders', protect, authorize('admin'), (req: Request, res: Response)
       res.write(data);
       return true;
     } catch (error: any) {
-      // "aborted" errors are expected when client disconnects
-      if (error?.code === 'ECONNRESET' || error?.message?.includes('aborted')) {
-        // Expected disconnect, don't log as error
+      // Expected disconnect errors, don't log
+      if (isExpectedDisconnect(error)) {
         return false;
       }
       // Only log unexpected errors
-      if (error?.code !== 'EPIPE') {
-        logger.debug('SSE write error (expected on disconnect):', error?.message || error);
-      }
+      logger.debug('SSE write error (unexpected):', error?.message || error);
       return false;
     }
   };
@@ -115,8 +164,7 @@ router.get('/orders', protect, authorize('admin'), (req: Request, res: Response)
 
   // Handle request errors
   req.on('error', (error: any) => {
-    // "aborted" and "ECONNRESET" are expected when clients disconnect
-    if (error?.code === 'ECONNRESET' || error?.message?.includes('aborted')) {
+    if (isExpectedDisconnect(error)) {
       // Expected disconnect, don't log as error
       cleanup();
       return;
@@ -128,8 +176,7 @@ router.get('/orders', protect, authorize('admin'), (req: Request, res: Response)
 
   // Handle response errors
   res.on('error', (error: any) => {
-    // "aborted" and "ECONNRESET" are expected when clients disconnect
-    if (error?.code === 'ECONNRESET' || error?.message?.includes('aborted')) {
+    if (isExpectedDisconnect(error)) {
       // Expected disconnect, don't log as error
       cleanup();
       return;
