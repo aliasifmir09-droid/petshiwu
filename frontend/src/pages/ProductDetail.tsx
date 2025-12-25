@@ -567,8 +567,11 @@ const ProductDetail = () => {
                 }`}
               >
                 <img 
-                  src={normalizeImageUrl(image)} 
+                  src={getOptimizedImageUrl(image, { width: 150, height: 150, format: 'webp', quality: 'auto' })} 
                   alt={`${product.name} ${index + 1}`} 
+                  width={150}
+                  height={150}
+                  loading="lazy"
                   onError={(e) => {
                     handleImageError(e, `${product.name} ${index + 1}`);
                     // Suppress console errors for failed image loads (403, 404, etc.)
