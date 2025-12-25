@@ -9,9 +9,14 @@
     <link rel="icon" href="/logo.png" type="image/png" />
     <meta name="theme-color" content="#1E3A8A" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Preconnect for faster DNS lookup -->
+    <!-- Preconnect for faster DNS lookup - Critical origins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Preconnect to backend API for faster initial requests -->
+    <link rel="preconnect" href="https://pet-shop-backend-totp.onrender.com" crossorigin>
+    <!-- Preconnect to image CDNs for faster image loading -->
+    <link rel="preconnect" href="https://s7d2.scene7.com" crossorigin>
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
     <!-- Preconnect for Tawk.to (lazy loaded but preconnect helps when it loads) -->
     <link rel="preconnect" href="https://embed.tawk.to">
     <link rel="dns-prefetch" href="https://embed.tawk.to">
