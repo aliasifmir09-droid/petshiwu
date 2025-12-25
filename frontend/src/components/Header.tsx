@@ -831,7 +831,7 @@ const Header = () => {
                   
                 {/* Today's Deals */}
                 <li className="flex-shrink-0">
-                  <Link to="/products?featured=true" className="flex items-center gap-0.5 lg:gap-1 bg-red-500 text-white px-1.5 lg:px-2.5 py-1 lg:py-1.5 rounded-full hover:bg-red-600 transition-colors shadow-md hover:shadow-lg font-semibold whitespace-nowrap text-[10px] lg:text-xs">
+                  <Link to="/products?featured=true" className="flex items-center gap-0.5 lg:gap-1 bg-red-600 text-white px-1.5 lg:px-2.5 py-1 lg:py-1.5 rounded-full hover:bg-red-700 transition-colors shadow-md hover:shadow-lg font-bold whitespace-nowrap text-[10px] lg:text-xs">
                     <span className="text-[10px] lg:text-xs">🔥</span>
                     <span>Today's Deals</span>
                   </Link>
@@ -1167,7 +1167,7 @@ const Header = () => {
               <li>
                 <Link
                   to="/products?featured=true"
-                  className="flex items-center gap-3 py-3 px-3 font-semibold bg-red-50 text-red-600 rounded-lg"
+                  className="flex items-center gap-3 py-3 px-3 font-bold bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span className="text-xl">🔥</span>
@@ -1441,7 +1441,7 @@ const Header = () => {
               <Link
                 to="/products?featured=true"
                 onClick={() => setIsLeftSidebarOpen(false)}
-                className="flex items-center gap-3 py-3 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold mb-3"
+                className="flex items-center gap-3 py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-bold mb-3"
               >
                 <span>🔥</span>
                 <span>Today's Deals</span>
