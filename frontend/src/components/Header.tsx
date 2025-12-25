@@ -1178,6 +1178,17 @@ const Header = () => {
                   <span>Today's Deals</span>
                 </Link>
               </li>
+              {/* Learning Center */}
+              <li>
+                <Link
+                  to="/learning"
+                  className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span className="text-xl">📚</span>
+                  <span>Learning</span>
+                </Link>
+              </li>
               <li>
                 <Link
                   to="/products"
