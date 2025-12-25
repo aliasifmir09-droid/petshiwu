@@ -4,7 +4,7 @@
 User-agent: *
 Allow: /
 
-# Disallow private/user pages
+# Disallow private/user pages (should not be indexed)
 Disallow: /checkout
 Disallow: /profile
 Disallow: /orders
@@ -12,12 +12,22 @@ Disallow: /wishlist
 Disallow: /cart
 Disallow: /admin
 Disallow: /dashboard
+Disallow: /login
+Disallow: /register
+Disallow: /verify-email
+Disallow: /reset-password
+Disallow: /forgot-password
+Disallow: /resend-verification
+Disallow: /403
+Disallow: /404
 
 # Allow important pages
 Allow: /products
 Allow: /category
-Allow: /blog
+Allow: /learning
+Allow: /care-guides
 Allow: /faq
+Allow: /search
 
 # Sitemap location
 Sitemap: https://www.petshiwu.com/sitemap.xml

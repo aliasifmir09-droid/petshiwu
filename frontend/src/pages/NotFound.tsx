@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, RefreshCw, ArrowLeft, Home } from 'lucide-react';
+import SEO from '@/components/SEO';
 
 const NotFound = () => {
   const navigate = useNavigate();
@@ -17,7 +18,14 @@ const NotFound = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4">
+    <>
+      <SEO
+        title="404 - Page Not Found"
+        description="The page you're looking for doesn't exist or has been moved."
+        url="/404"
+        noindex={true}
+      />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4">
       <div className="max-w-md w-full text-center">
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
           {/* Error Icon */}
@@ -72,6 +80,7 @@ const NotFound = () => {
         </p>
       </div>
     </div>
+    </>
   );
 };
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/products';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { trackSearch } from '@/utils/analytics';
 import { useDebounce } from '@/hooks/useDebounce';
+import SEO from '@/components/SEO';
+import { useSEO } from '@/hooks/useSEO';
 
 const AdvancedSearch = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -129,8 +131,15 @@ const AdvancedSearch = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-6">Advanced Search</h1>
+    <>
+      <SEO
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+        url={seoData.canonicalUrl}
+      />
+      <div className="container mx-auto px-4 py-12">
+        <h1 className="text-3xl font-bold mb-6">Advanced Search</h1>
 
       {/* Search Bar */}
       <div className="relative mb-6">
@@ -284,6 +293,7 @@ const AdvancedSearch = () => {
 
       {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
     </div>
+    </>
   );
 };
 

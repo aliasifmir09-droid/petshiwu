@@ -7,6 +7,7 @@ import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { trackLogin } from '@/utils/analytics';
 import { validateEmail, sanitizeFormData } from '@/utils/inputValidation';
+import SEO from '@/components/SEO';
 
 interface LoginData {
   email: string;
@@ -83,7 +84,14 @@ const Login = () => {
   const isRegistered = searchParams.get('registered') === 'true';
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+    <>
+      <SEO
+        title="Login - petshiwu"
+        description="Sign in to your petshiwu account to access your orders, wishlist, and personalized recommendations."
+        url="/login"
+        noindex={true}
+      />
+      <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
@@ -169,6 +177,7 @@ const Login = () => {
         />
       )}
     </div>
+    </>
   );
 };
 
