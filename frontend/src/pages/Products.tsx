@@ -31,20 +31,19 @@ const Products = () => {
   const brand = searchParams.get('brand') || '';
   const inStock = searchParams.get('inStock') || '';
 
-  // Scroll to top immediately when navigating to this page
+  // Scroll to top immediately when navigating to this page (pathname change)
   useEffect(() => {
-    // Scroll immediately on component mount and route changes
+    // Only scroll to top when pathname changes (different route), not on query param changes
     window.scrollTo({ top: 0, behavior: 'auto' });
-    // Also use setTimeout as a fallback to ensure scroll happens after render
     const timeoutId = setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'auto' });
     }, 0);
     return () => clearTimeout(timeoutId);
-  }, [location.pathname, location.search]); // Trigger on route or query change
+  }, [location.pathname]); // Only trigger on route change, not query params
 
-  // Scroll to top smoothly when filters change (within same page)
+  // Scroll to top smoothly when filters change (but NOT when only page changes)
   useEffect(() => {
-    // Small delay to ensure smooth scroll works properly
+    // Don't scroll when only page number changes - maintain scroll position for pagination
     const timeoutId = setTimeout(() => {
       if (hasScrolledRef.current) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -53,7 +52,7 @@ const Products = () => {
       }
     }, 100);
     return () => clearTimeout(timeoutId);
-  }, [page, petType, category, search, sort, featured, minRating, brand, inStock]);
+  }, [petType, category, search, sort, featured, minRating, brand, inStock]); // Removed 'page' from dependencies
 
   // Redirect to category page if category query parameter exists
   useEffect(() => {
