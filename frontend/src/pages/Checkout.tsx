@@ -86,15 +86,27 @@ const StripePaymentWrapper = ({
   onCancel: () => void;
 }) => {
   const [ElementsComponent, setElementsComponent] = useState<React.ComponentType<any> | null>(null);
+  const [stripeInstance, setStripeInstance] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Lazy load Stripe Elements only when this component mounts
-    import('@stripe/react-stripe-js').then(module => {
-      setElementsComponent(() => module.Elements);
+    // Lazy load Stripe Elements and Stripe.js only when this component mounts
+    // This ensures Stripe.js script is only loaded when user actually needs to pay
+    Promise.all([
+      import('@stripe/react-stripe-js'),
+      getStripe()
+    ]).then(([stripeReactModule, stripe]) => {
+      setElementsComponent(() => stripeReactModule.Elements);
+      setStripeInstance(stripe);
+      setIsLoading(false);
+    }).catch((error) => {
+      console.error('Failed to load Stripe:', error);
+      onError('Failed to load payment form. Please refresh the page and try again.');
+      setIsLoading(false);
     });
-  }, []);
+  }, [onError]);
 
-  if (!ElementsComponent) {
+  if (isLoading || !ElementsComponent || !stripeInstance) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-center py-8">
@@ -114,7 +126,7 @@ const StripePaymentWrapper = ({
         </div>
       </div>
     }>
-      <ElementsComponent stripe={getStripe()} options={{ clientSecret }}>
+      <ElementsComponent stripe={stripeInstance} options={{ clientSecret }}>
         <PaymentForm
           clientSecret={clientSecret}
           amount={total}
