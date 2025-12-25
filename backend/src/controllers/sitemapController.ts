@@ -221,10 +221,19 @@ export const generateSitemap = async (req: Request, res: Response) => {
     xml += '    <priority>0.7</priority>\n';
     xml += '  </url>\n';
 
+    // Search page
+    xml += '  <url>\n';
+    xml += `    <loc>${baseUrl}/search</loc>\n`;
+    xml += `    <lastmod>${currentDate}</lastmod>\n`;
+    xml += '    <changefreq>weekly</changefreq>\n';
+    xml += '    <priority>0.7</priority>\n';
+    xml += '  </url>\n';
+
     // Static pages
     const staticPages = [
       { path: '/faq', priority: '0.6', changefreq: 'monthly' },
       { path: '/returns', priority: '0.5', changefreq: 'monthly' },
+      { path: '/donate', priority: '0.4', changefreq: 'monthly' },
     ];
 
     staticPages.forEach(page => {
