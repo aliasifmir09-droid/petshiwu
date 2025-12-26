@@ -1,18 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import DOMPurify from 'dompurify';
 import { productService } from '@/services/products';
 import { reviewService } from '@/services/reviews';
-import { recommendationService } from '@/services/recommendations';
-import { socialService } from '@/services/social';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ProductCard from '@/components/ProductCard';
-import RecentlyViewed from '@/components/RecentlyViewed';
 import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home, Share2, Facebook, Twitter, Mail, Copy, Check } from 'lucide-react';
-import { FormattedDescription } from '@/utils/descriptionFormatter';
 import { normalizeImageUrl, handleImageError, getOptimizedImageUrl, generateSrcSet } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
 import { FREE_SHIPPING_THRESHOLD } from '@/config/constants';
@@ -23,6 +18,42 @@ import { addToRecentlyViewed } from '@/utils/recentlyViewed';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import { safeError } from '@/utils/safeLogger';
+
+// Lazy load heavy dependencies
+const RecentlyViewed = lazy(() => import('@/components/RecentlyViewed'));
+const FormattedDescription = lazy(() => 
+  import('@/utils/descriptionFormatter').then(module => ({ default: module.FormattedDescription }))
+);
+
+// Lazy load DOMPurify - heavy library (~50KB+)
+let dompurifyPromise: Promise<typeof import('dompurify')> | null = null;
+const getDOMPurify = async () => {
+  if (!dompurifyPromise) {
+    dompurifyPromise = import('dompurify');
+  }
+  const DOMPurify = await dompurifyPromise;
+  return DOMPurify.default;
+};
+
+// Lazy load recommendation service - only when product is loaded
+let recommendationServicePromise: Promise<typeof import('@/services/recommendations')> | null = null;
+const getRecommendationService = async () => {
+  if (!recommendationServicePromise) {
+    recommendationServicePromise = import('@/services/recommendations');
+  }
+  const module = await recommendationServicePromise;
+  return module.recommendationService;
+};
+
+// Lazy load social service - only when user clicks share
+let socialServicePromise: Promise<typeof import('@/services/social')> | null = null;
+const getSocialService = async () => {
+  if (!socialServicePromise) {
+    socialServicePromise = import('@/services/social');
+  }
+  const module = await socialServicePromise;
+  return module.socialService;
+};
 
 const ProductDetail = () => {
   const { slug, petType } = useParams<{ 
@@ -80,44 +111,106 @@ const ProductDetail = () => {
     gcTime: 5 * 60 * 1000 // Cache for 5 minutes
   });
 
-  // Get all recommendations (optimized - uses recommendation service with better caching)
+  // Lazy load recommendations - only fetch when product is loaded and user scrolls near recommendations section
+  const [shouldLoadRecommendations, setShouldLoadRecommendations] = useState(false);
+  
+  // Get all recommendations (lazy loaded)
   const { data: recommendations } = useQuery({
     queryKey: ['recommendations', product?._id],
-    queryFn: () => recommendationService.getRecommendations(String(product?._id), 8),
-    enabled: !!product?._id,
-    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
-    gcTime: 15 * 60 * 1000 // Cache for 15 minutes
+    queryFn: async () => {
+      const service = await getRecommendationService();
+      return service.getRecommendations(String(product?._id), 8);
+    },
+    enabled: !!product?._id && shouldLoadRecommendations,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 15 * 60 * 1000
   });
 
-  // Get "Frequently Bought Together" separately
+  // Get "Frequently Bought Together" separately (lazy loaded)
   const { data: frequentlyBoughtTogether } = useQuery({
     queryKey: ['frequently-bought-together', product?._id],
-    queryFn: () => recommendationService.getFrequentlyBoughtTogether(String(product?._id), 4),
-    enabled: !!product?._id,
+    queryFn: async () => {
+      const service = await getRecommendationService();
+      return service.getFrequentlyBoughtTogether(String(product?._id), 4);
+    },
+    enabled: !!product?._id && shouldLoadRecommendations,
     staleTime: 5 * 60 * 1000,
     gcTime: 15 * 60 * 1000
   });
 
-  // Get "Customers Also Bought" separately
+  // Get "Customers Also Bought" separately (lazy loaded)
   const { data: customersAlsoBought } = useQuery({
     queryKey: ['customers-also-bought', product?._id],
-    queryFn: () => recommendationService.getCustomersAlsoBought(String(product?._id), 8),
-    enabled: !!product?._id,
+    queryFn: async () => {
+      const service = await getRecommendationService();
+      return service.getCustomersAlsoBought(String(product?._id), 8);
+    },
+    enabled: !!product?._id && shouldLoadRecommendations,
     staleTime: 5 * 60 * 1000,
     gcTime: 15 * 60 * 1000
   });
 
+  // Lazy load social links - only when user clicks share button
+  const [shouldLoadSocialLinks, setShouldLoadSocialLinks] = useState(false);
   const { data: socialLinks } = useQuery({
     queryKey: ['social-links', product?._id],
-    queryFn: () => socialService.getProductShareLinks(String(product?._id)),
-    enabled: !!product?._id
+    queryFn: async () => {
+      const service = await getSocialService();
+      return service.getProductShareLinks(String(product?._id));
+    },
+    enabled: !!product?._id && shouldLoadSocialLinks
   });
 
   const { toast, showToast, hideToast } = useToast();
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [dompurifyLoaded, setDOMPurifyLoaded] = useState(false);
+  const [sanitizeFunction, setSanitizeFunction] = useState<((html: string, config?: any) => string) | null>(null);
+
+  // Lazy load DOMPurify for review sanitization
+  useEffect(() => {
+    if (reviews && reviews.data.length > 0 && !dompurifyLoaded) {
+      getDOMPurify().then(DOMPurify => {
+        setSanitizeFunction(() => (html: string, config?: any) => String(DOMPurify.sanitize(html, config)));
+        setDOMPurifyLoaded(true);
+      }).catch(() => {
+        // Fallback: simple text extraction if DOMPurify fails
+        setSanitizeFunction(() => (html: string) => html.replace(/<[^>]*>/g, ''));
+        setDOMPurifyLoaded(true);
+      });
+    }
+  }, [reviews, dompurifyLoaded]);
+
+  // Lazy load recommendations when user scrolls near recommendations section
+  useEffect(() => {
+    if (!product?._id || shouldLoadRecommendations) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setShouldLoadRecommendations(true);
+        }
+      },
+      { rootMargin: '200px' } // Start loading 200px before section is visible
+    );
+
+    const target = document.getElementById('recommendations-section');
+    if (target) {
+      observer.observe(target);
+    }
+
+    return () => {
+      if (target) {
+        observer.unobserve(target);
+      }
+    };
+  }, [product?._id, shouldLoadRecommendations]);
 
   const handleShare = async (platform: string) => {
+    // Lazy load social service when user clicks share
+    if (!shouldLoadSocialLinks) {
+      setShouldLoadSocialLinks(true);
+    }
     if (!socialLinks) {
       showToast('Share links not available. Please try again.', 'error');
       return;
@@ -415,10 +508,23 @@ const ProductDetail = () => {
     ? `${product.name.substring(0, 47)}... | petshiwu`
     : `${product.name} | petshiwu`;
   
-  // Create description from product description or fallback
-  const productDescription = product.description 
-    ? DOMPurify.sanitize(product.description, { ALLOWED_TAGS: [] }).substring(0, 150).trim() + (product.description.length > 150 ? '...' : '')
-    : `Buy ${product.name} for ${product.petType || 'pets'} at petshiwu. Quality products, fast shipping, great prices.`;
+  // Create description from product description or fallback (lazy load DOMPurify)
+  const [productDescription, setProductDescription] = useState<string>('');
+  
+  useEffect(() => {
+    if (product?.description) {
+      // Lazy load DOMPurify for description sanitization
+      getDOMPurify().then(DOMPurify => {
+        const sanitized = String(DOMPurify.sanitize(product.description, { ALLOWED_TAGS: [] })).substring(0, 150).trim() + (product.description.length > 150 ? '...' : '');
+        setProductDescription(sanitized);
+      }).catch(() => {
+        // Fallback if DOMPurify fails to load
+        setProductDescription(product.description.substring(0, 150).trim() + (product.description.length > 150 ? '...' : ''));
+      });
+    } else {
+      setProductDescription(`Buy ${product?.name || 'product'} for ${product?.petType || 'pets'} at petshiwu. Quality products, fast shipping, great prices.`);
+    }
+  }, [product?.description, product?.name, product?.petType]);
   
   // Build keywords
   const categoryName = typeof product.category === 'object' && product.category?.name 
@@ -886,7 +992,12 @@ const ProductDetail = () => {
             </button>
             <div className="relative">
               <button
-                onClick={() => setShowShareMenu(!showShareMenu)}
+                onClick={() => {
+                  setShowShareMenu(!showShareMenu);
+                  if (!shouldLoadSocialLinks) {
+                    setShouldLoadSocialLinks(true);
+                  }
+                }}
                 className="px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold text-gray-700 hover:border-primary-600 hover:text-primary-600 transition-colors"
               >
                 <Share2 size={20} />
@@ -1009,7 +1120,9 @@ const ProductDetail = () => {
 
         <div className="prose max-w-none">
           <div className="mb-6">
-            <FormattedDescription description={product.description} />
+            <Suspense fallback={<div className="text-gray-700">{product.description?.substring(0, 200)}...</div>}>
+              <FormattedDescription description={product.description} />
+            </Suspense>
           </div>
 
           {product.features && product.features.length > 0 && (
@@ -1081,7 +1194,7 @@ const ProductDetail = () => {
                     </div>
                     {review.title && (
                       <h4 className="font-bold text-lg text-gray-900 mb-1">
-                        {DOMPurify.sanitize(review.title, { ALLOWED_TAGS: [] })}
+                        {sanitizeFunction ? sanitizeFunction(review.title, { ALLOWED_TAGS: [] }) : review.title.replace(/<[^>]*>/g, '')}
                       </h4>
                     )}
                   </div>
@@ -1094,7 +1207,7 @@ const ProductDetail = () => {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900">
-                      {DOMPurify.sanitize(review.user.firstName, { ALLOWED_TAGS: [] })}
+                      {sanitizeFunction ? sanitizeFunction(review.user.firstName, { ALLOWED_TAGS: [] }) : review.user.firstName.replace(/<[^>]*>/g, '')}
                     </p>
                     <p className="text-sm text-gray-500">
                       {new Date(review.createdAt).toLocaleDateString('en-US', { 
@@ -1109,10 +1222,10 @@ const ProductDetail = () => {
                 {/* Review Comment */}
                 {review.comment && (
                   <p className="text-gray-700 leading-relaxed">
-                    {DOMPurify.sanitize(review.comment, { 
+                    {sanitizeFunction ? sanitizeFunction(review.comment, { 
                       ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'ul', 'ol', 'li'],
                       ALLOWED_ATTR: []
-                    })}
+                    }) : review.comment.replace(/<script[^>]*>.*?<\/script>/gi, '').replace(/<[^>]+>/g, '')}
                   </p>
                 )}
 
@@ -1176,6 +1289,8 @@ const ProductDetail = () => {
         )}
       </div>
 
+      {/* Recommendations Section - Lazy loaded when user scrolls near */}
+      <div id="recommendations-section">
       {/* Frequently Bought Together Section */}
       {frequentlyBoughtTogether && frequentlyBoughtTogether.length > 0 && (
         <div className="mt-16 border-t pt-12">
@@ -1238,10 +1353,13 @@ const ProductDetail = () => {
           </div>
         </div>
       )}
+      </div>
 
-      {/* Recently Viewed Section */}
+      {/* Recently Viewed Section - Lazy loaded */}
       <div className="mt-16 border-t pt-12">
-        <RecentlyViewed limit={8} showTitle={true} showClearButton={false} />
+        <Suspense fallback={<div className="text-center py-8 text-gray-500">Loading recently viewed...</div>}>
+          <RecentlyViewed limit={8} showTitle={true} showClearButton={false} />
+        </Suspense>
       </div>
 
       {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
