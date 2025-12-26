@@ -3,9 +3,9 @@ import { Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white" style={{ minHeight: '400px', contain: 'layout style paint' }}>
+    <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8" style={{ minHeight: '300px' }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* About */}
           <div>
             <div className="flex items-center gap-3 mb-4">
@@ -16,6 +16,7 @@ const Footer = () => {
                 height={56}
                 className="h-14 w-14 object-contain drop-shadow-lg"
                 loading="lazy"
+                style={{ aspectRatio: '1 / 1' }}
               />
               <h3 className="text-xl font-black bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent" style={{ fontFamily: "'Nunito', sans-serif" }}>
                 Petshiwu
