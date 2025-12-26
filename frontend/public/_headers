@@ -5,6 +5,18 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
+# JavaScript files in /js/ directory (Vite build output)
+/js/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# CSS files
+/*.css
+  Cache-Control: public, max-age=31536000, immutable
+
+# JavaScript files
+/*.js
+  Cache-Control: public, max-age=31536000, immutable
+
 # Images - cache for 1 year
 /*.png
   Cache-Control: public, max-age=31536000, immutable
