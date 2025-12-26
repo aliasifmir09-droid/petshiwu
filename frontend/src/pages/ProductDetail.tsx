@@ -339,6 +339,25 @@ const ProductDetail = () => {
     }
   }, [availableStock, quantity]);
 
+  // Create description from product description or fallback (lazy load DOMPurify)
+  // MUST be called before any conditional returns to maintain hook order
+  const [productDescription, setProductDescription] = useState<string>('');
+  
+  useEffect(() => {
+    if (product?.description) {
+      // Lazy load DOMPurify for description sanitization
+      getDOMPurify().then(DOMPurify => {
+        const sanitized = String(DOMPurify.sanitize(product.description, { ALLOWED_TAGS: [] })).substring(0, 150).trim() + (product.description.length > 150 ? '...' : '');
+        setProductDescription(sanitized);
+      }).catch(() => {
+        // Fallback if DOMPurify fails to load
+        setProductDescription(product.description.substring(0, 150).trim() + (product.description.length > 150 ? '...' : ''));
+      });
+    } else {
+      setProductDescription(`Buy ${product?.name || 'product'} for ${product?.petType || 'pets'} at petshiwu. Quality products, fast shipping, great prices.`);
+    }
+  }, [product?.description, product?.name, product?.petType]);
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 lg:px-8 py-12">
@@ -507,24 +526,6 @@ const ProductDetail = () => {
   const productTitle = product.name.length > 50 
     ? `${product.name.substring(0, 47)}... | petshiwu`
     : `${product.name} | petshiwu`;
-  
-  // Create description from product description or fallback (lazy load DOMPurify)
-  const [productDescription, setProductDescription] = useState<string>('');
-  
-  useEffect(() => {
-    if (product?.description) {
-      // Lazy load DOMPurify for description sanitization
-      getDOMPurify().then(DOMPurify => {
-        const sanitized = String(DOMPurify.sanitize(product.description, { ALLOWED_TAGS: [] })).substring(0, 150).trim() + (product.description.length > 150 ? '...' : '');
-        setProductDescription(sanitized);
-      }).catch(() => {
-        // Fallback if DOMPurify fails to load
-        setProductDescription(product.description.substring(0, 150).trim() + (product.description.length > 150 ? '...' : ''));
-      });
-    } else {
-      setProductDescription(`Buy ${product?.name || 'product'} for ${product?.petType || 'pets'} at petshiwu. Quality products, fast shipping, great prices.`);
-    }
-  }, [product?.description, product?.name, product?.petType]);
   
   // Build keywords
   const categoryName = typeof product.category === 'object' && product.category?.name 

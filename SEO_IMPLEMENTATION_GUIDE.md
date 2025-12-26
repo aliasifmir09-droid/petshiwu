@@ -225,7 +225,7 @@ import Breadcrumbs from '@/components/Breadcrumbs';
    - Use WebP or AVIF format when possible
 
 4. **Create Content Pages**
-   - About Us page
+   - About Us page"
    - Shipping Information page
    - Return Policy page
    - FAQ page with structured data
