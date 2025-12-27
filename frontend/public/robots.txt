@@ -1,6 +1,7 @@
 # Robots.txt for petshiwu.com
 # Optimized for search engine crawling
 # Only standard robots.txt directives are used (User-agent, Allow, Disallow, Sitemap, Crawl-delay)
+# Note: If using Cloudflare, disable "Managed robots.txt" feature to prevent non-standard directives
 
 User-agent: *
 Allow: /
