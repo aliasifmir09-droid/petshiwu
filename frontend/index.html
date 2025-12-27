@@ -9,6 +9,10 @@
     <link rel="icon" href="/logo.png" type="image/png" />
     <meta name="theme-color" content="#1E3A8A" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Critical: Preload LCP image (logo) for fastest rendering -->
+    <link rel="preload" as="image" href="/logo.avif" type="image/avif" fetchpriority="high" />
+    <link rel="preload" as="image" href="/logo.webp" type="image/webp" fetchpriority="high" />
+    <link rel="preload" as="image" href="/logo.png" type="image/png" fetchpriority="high" />
     <!-- Critical: Preconnect to backend API FIRST (most important for LCP) -->
     <link rel="dns-prefetch" href="https://pet-shop-backend-totp.onrender.com">
     <link rel="preconnect" href="https://pet-shop-backend-totp.onrender.com" crossorigin>
