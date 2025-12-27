@@ -29,7 +29,7 @@
       ]
     },
     {
-      "source": "/js/(.*)",
+      "source": "/assets/js/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
