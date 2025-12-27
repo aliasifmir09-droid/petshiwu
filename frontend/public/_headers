@@ -1,51 +1,51 @@
 # Cache headers for static assets
 # This file is used by Netlify/Render to set cache headers
 
-# JavaScript and CSS files - cache for 1 year (immutable with hash)
+# JavaScript and CSS files - cache for 30 days (immutable with hash)
 # All assets directory (JS, CSS, images, fonts)
 /assets/*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
 # JavaScript files in /assets/js/ directory (Vite build output)
 /assets/js/*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
 # CSS files
 /*.css
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
 # JavaScript files
 /*.js
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
-# Images - cache for 1 year
+# Images - cache for 30 days
 /*.png
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
 /*.jpg
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
 /*.jpeg
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
 /*.webp
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
 /*.avif
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
 /*.svg
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
-# Fonts - cache for 1 year
+# Fonts - cache for 30 days
 /*.woff
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
 /*.woff2
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
 /*.ttf
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
 # HTML files - short cache (5 minutes)
 /*.html
@@ -58,20 +58,20 @@
 
 # Root-level static files - explicit patterns for better matching
 /logo.png
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
 # Category images - explicit patterns
 /category-*.png
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
 /category-*.avif
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
 # Ensure all PNG files get long cache (catches any missed patterns)
 /*.png
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 
 # Ensure all AVIF files get long cache
 /*.avif
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=2592000, immutable
 

@@ -18,26 +18,26 @@
   AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
 </IfModule>
 
-# Cache static assets - 1 year for immutable assets
+# Cache static assets - 30 days for immutable assets
 <IfModule mod_expires.c>
   ExpiresActive On
-  # Images - 1 year
-  ExpiresByType image/jpg "access plus 1 year"
-  ExpiresByType image/jpeg "access plus 1 year"
-  ExpiresByType image/gif "access plus 1 year"
-  ExpiresByType image/png "access plus 1 year"
-  ExpiresByType image/webp "access plus 1 year"
-  ExpiresByType image/avif "access plus 1 year"
-  ExpiresByType image/svg+xml "access plus 1 year"
-  # Fonts - 1 year
-  ExpiresByType font/woff "access plus 1 year"
-  ExpiresByType font/woff2 "access plus 1 year"
-  ExpiresByType application/font-woff "access plus 1 year"
-  ExpiresByType application/font-woff2 "access plus 1 year"
-  # JavaScript and CSS - 1 year (with hash in filename, so immutable)
-  ExpiresByType text/css "access plus 1 year"
-  ExpiresByType application/javascript "access plus 1 year"
-  ExpiresByType text/javascript "access plus 1 year"
+  # Images - 30 days
+  ExpiresByType image/jpg "access plus 30 days"
+  ExpiresByType image/jpeg "access plus 30 days"
+  ExpiresByType image/gif "access plus 30 days"
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/webp "access plus 30 days"
+  ExpiresByType image/avif "access plus 30 days"
+  ExpiresByType image/svg+xml "access plus 30 days"
+  # Fonts - 30 days
+  ExpiresByType font/woff "access plus 30 days"
+  ExpiresByType font/woff2 "access plus 30 days"
+  ExpiresByType application/font-woff "access plus 30 days"
+  ExpiresByType application/font-woff2 "access plus 30 days"
+  # JavaScript and CSS - 30 days (with hash in filename, so immutable)
+  ExpiresByType text/css "access plus 30 days"
+  ExpiresByType application/javascript "access plus 30 days"
+  ExpiresByType text/javascript "access plus 30 days"
   # HTML - 5 minutes (can change)
   ExpiresByType text/html "access plus 5 minutes"
 </IfModule>
@@ -49,9 +49,9 @@
     Header set Content-Type "application/xml; charset=utf-8"
     Header set Cache-Control "public, max-age=3600"
   </FilesMatch>
-  # Assets with hash in filename are immutable - cache for 1 year
+  # Assets with hash in filename are immutable - cache for 30 days
   <FilesMatch "\.(js|css|png|jpg|jpeg|gif|webp|avif|svg|woff|woff2|ttf|eot)$">
-    Header set Cache-Control "public, max-age=31536000, immutable"
+    Header set Cache-Control "public, max-age=2592000, immutable"
   </FilesMatch>
   # HTML files - short cache
   <FilesMatch "\.html$">
@@ -59,7 +59,7 @@
   </FilesMatch>
   # Specific static files
   <FilesMatch "^(logo|category-).*\.(png|jpg|jpeg|webp|avif)$">
-    Header set Cache-Control "public, max-age=31536000, immutable"
+    Header set Cache-Control "public, max-age=2592000, immutable"
   </FilesMatch>
 </IfModule>
 
