@@ -369,15 +369,40 @@ const Header = () => {
             {/* Logo with Enhanced Animation */}
             <Link to="/" className="flex items-center gap-2 lg:gap-3 flex-shrink-0 group">
             <div className="relative">
-              <img 
-                src="/logo.png" 
-                alt="petshiwu Logo" 
-                width={80}
-                height={80}
-                className="h-16 w-16 md:h-20 md:w-20 object-contain transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 drop-shadow-2xl relative z-10"
-                loading="eager"
-                fetchPriority="high"
-              />
+              <picture>
+                {/* AVIF format with responsive sizes */}
+                <source 
+                  srcSet="/logo.avif" 
+                  type="image/avif"
+                  media="(min-width: 768px)"
+                />
+                <source 
+                  srcSet="/logo.avif" 
+                  type="image/avif"
+                />
+                {/* WebP format with responsive sizes */}
+                <source 
+                  srcSet="/logo.webp" 
+                  type="image/webp"
+                  media="(min-width: 768px)"
+                />
+                <source 
+                  srcSet="/logo.webp" 
+                  type="image/webp"
+                />
+                {/* PNG fallback with proper sizing */}
+                <img 
+                  src="/logo.png" 
+                  alt="petshiwu Logo" 
+                  width={80}
+                  height={80}
+                  className="h-16 w-16 md:h-20 md:w-20 object-contain transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 drop-shadow-2xl relative z-10"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  sizes="(max-width: 768px) 64px, 80px"
+                />
+              </picture>
               {/* Glow effect on hover */}
               <div className="absolute inset-0 bg-white/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             </div>

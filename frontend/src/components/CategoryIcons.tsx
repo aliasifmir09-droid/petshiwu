@@ -31,23 +31,39 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
                 <div className={`absolute inset-0 w-full h-full rounded-full bg-gradient-to-br ${category.color} flex items-center justify-center ${imageError ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                   <Icon size={32} className="text-white sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14" />
                 </div>
-                {/* Image that should be visible */}
-                <img 
-                  src={category.image} 
-                  alt=""
-                  width={170}
-                  height={170}
-                  className={`w-full h-full object-contain object-center p-2 sm:p-3 ${imageError ? 'opacity-0 absolute' : 'opacity-100 relative'} transition-transform duration-300`}
-                  onError={() => {
-                    setImageError(true);
-                  }}
-                  onLoad={() => {
-                    setImageError(false);
-                  }}
-                  loading="eager"
-                  style={{ display: imageError ? 'none' : 'block' }}
-                  aria-hidden="true"
-                />
+                {/* Image that should be visible - with modern format fallbacks */}
+                <picture>
+                  {category.image.endsWith('.avif') && (
+                    <>
+                      <source srcSet={category.image.replace('.avif', '.avif')} type="image/avif" />
+                      <source srcSet={category.image.replace('.avif', '.webp')} type="image/webp" />
+                      <source srcSet={category.image.replace('.avif', '.png')} type="image/png" />
+                    </>
+                  )}
+                  {category.image.endsWith('.png') && (
+                    <>
+                      <source srcSet={category.image.replace('.png', '.avif')} type="image/avif" />
+                      <source srcSet={category.image.replace('.png', '.webp')} type="image/webp" />
+                    </>
+                  )}
+                  <img 
+                    src={category.image} 
+                    alt=""
+                    width={170}
+                    height={170}
+                    className={`w-full h-full object-contain object-center p-2 sm:p-3 ${imageError ? 'opacity-0 absolute' : 'opacity-100 relative'} transition-transform duration-300`}
+                    onError={() => {
+                      setImageError(true);
+                    }}
+                    onLoad={() => {
+                      setImageError(false);
+                    }}
+                    loading="eager"
+                    decoding="async"
+                    style={{ display: imageError ? 'none' : 'block' }}
+                    aria-hidden="true"
+                  />
+                </picture>
                 {/* Decorative overlay on hover - matching Home page style */}
                 <div className="absolute inset-0 rounded-full bg-gradient-to-t from-blue-600/20 via-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 {/* Pulse effect on hover - matching Home page style */}
@@ -133,7 +149,7 @@ const CategoryIcons = () => {
       link: '/products?search=vitamins+supplements',
       color: 'from-green-500 to-emerald-600',
       // Image: Blue pill bottle with paw print label + white bone
-      image: '/category-vitamins-supplements1.png'
+      image: '/category-vitamins-supplements.png'
     },
     {
       icon: Cookie,
