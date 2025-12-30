@@ -75,9 +75,9 @@ const HeroSlideshow = () => {
         {/* Main Slideshow */}
         <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-4">
         <div className="relative w-full overflow-hidden bg-white rounded-xl shadow-lg">
-          {/* Slides Container - Fixed height to prevent layout shift */}
+          {/* Slides Container - Increased height on mobile to fit content */}
           <div 
-            className="relative w-full h-[260px] md:h-[280px] lg:h-[300px]"
+            className="relative w-full h-[400px] sm:h-[420px] md:h-[280px] lg:h-[300px]"
             style={{ contain: 'layout style paint' }} // Prevent layout shifts
           >
             {slides.map((slide, index) => (
@@ -92,7 +92,7 @@ const HeroSlideshow = () => {
                   <div className="flex flex-col md:grid md:grid-cols-2 h-full">
                     
                     {/* Content Section - Top on mobile, Left on desktop */}
-                    <div className="relative flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-hidden flex-shrink-0 md:flex-shrink">
+                    <div className="relative flex items-center justify-center p-2 sm:p-3 md:p-6 overflow-visible flex-shrink-0 md:flex-shrink h-auto md:h-full">
                       {/* Modern Diagonal Striped Pattern */}
                       <div className="absolute inset-0 opacity-80" style={{
                         backgroundImage: `repeating-linear-gradient(
@@ -116,7 +116,7 @@ const HeroSlideshow = () => {
                       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 animate-pulse"></div>
 
                       {/* Content Card with Glass Effect - Optimized for mobile */}
-                      <div className="relative bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 shadow-xl max-w-sm w-full border border-white/50 transform hover:scale-105 transition-transform duration-300">
+                      <div className="relative bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl p-2.5 sm:p-3 md:p-6 shadow-xl max-w-sm w-full border border-white/50 transform hover:scale-105 transition-transform duration-300">
                         <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-md">
                           SALE
                         </div>
@@ -143,10 +143,9 @@ const HeroSlideshow = () => {
 
                     {/* Image Section - Bottom on mobile, Right on desktop */}
                     <div 
-                      className="relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex-1 min-h-[120px] sm:min-h-[160px] md:min-h-0" 
+                      className="relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex-1 h-[200px] sm:h-[220px] md:h-full md:min-h-0" 
                       style={{ 
-                        contain: 'layout style paint',
-                        aspectRatio: '16 / 9' // Reserve space to prevent layout shift
+                        contain: 'layout style paint'
                       }}
                     >
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
@@ -167,7 +166,7 @@ const HeroSlideshow = () => {
                         decoding={index === 0 ? "sync" : "async"}
                         className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700"
                         style={{ 
-                          aspectRatio: '16 / 9', // Prevent layout shift on mobile
+                          objectFit: 'cover', // Ensure image covers container without distortion
                           contentVisibility: index === 0 ? 'auto' : 'auto',
                           containIntrinsicSize: index === 0 ? '576px 432px' : undefined
                         }}
