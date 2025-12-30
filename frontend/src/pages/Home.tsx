@@ -510,44 +510,54 @@ const Home = () => {
               Your trusted partner for all your pet's needs
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 stagger-animation">
-            <div className="group bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-2 border border-white/20">
-              <div className="bg-gradient-to-br from-blue-400 to-blue-600 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-xl">
-                <div className="text-5xl float">🚚</div>
+          {/* Mobile: Horizontal scroll, Desktop: Grid */}
+          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 lg:gap-8 overflow-x-auto md:overflow-visible pb-2 md:pb-0 scrollbar-hide stagger-animation">
+            <div className="group bg-white/10 backdrop-blur-lg rounded-xl md:rounded-2xl p-4 md:p-8 text-center shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-2 border border-white/20 flex-shrink-0 w-[160px] md:w-auto">
+              <div className="bg-gradient-to-br from-blue-400 to-blue-600 w-12 h-12 md:w-24 md:h-24 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4 group-hover:scale-110 transition-transform shadow-xl">
+                <div className="text-2xl md:text-5xl float">🚚</div>
               </div>
-              <h3 className="text-2xl font-black mb-3 text-white">Free Shipping</h3>
-              <p className="text-white/90 leading-relaxed text-lg mb-4">
+              <h3 className="text-sm md:text-2xl font-black mb-1 md:mb-3 text-white">Free Shipping</h3>
+              <p className="text-white/90 leading-relaxed text-xs md:text-lg mb-0 md:mb-4">
                 Get free delivery on orders over $75
               </p>
             </div>
-            <div className="group bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-2 border border-white/20">
-              <div className="bg-gradient-to-br from-yellow-400 to-orange-500 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-xl">
-                <div className="text-5xl float" style={{animationDelay: '1s'}}>⭐</div>
+            <div className="group bg-white/10 backdrop-blur-lg rounded-xl md:rounded-2xl p-4 md:p-8 text-center shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-2 border border-white/20 flex-shrink-0 w-[160px] md:w-auto">
+              <div className="bg-gradient-to-br from-yellow-400 to-orange-500 w-12 h-12 md:w-24 md:h-24 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4 group-hover:scale-110 transition-transform shadow-xl">
+                <div className="text-2xl md:text-5xl float" style={{animationDelay: '1s'}}>⭐</div>
               </div>
-              <h3 className="text-2xl font-black mb-3 text-white">Premium Quality</h3>
-              <p className="text-white/90 leading-relaxed text-lg mb-4">
+              <h3 className="text-sm md:text-2xl font-black mb-1 md:mb-3 text-white">Premium Quality</h3>
+              <p className="text-white/90 leading-relaxed text-xs md:text-lg mb-0 md:mb-4">
                 Only verified & trusted brands
               </p>
             </div>
-            <div className="group bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-2 border border-white/20">
-              <div className="bg-gradient-to-br from-green-400 to-emerald-600 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-xl">
-                <div className="text-5xl float" style={{animationDelay: '0.5s'}}>💳</div>
+            <div className="group bg-white/10 backdrop-blur-lg rounded-xl md:rounded-2xl p-4 md:p-8 text-center shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-2 border border-white/20 flex-shrink-0 w-[160px] md:w-auto">
+              <div className="bg-gradient-to-br from-green-400 to-emerald-600 w-12 h-12 md:w-24 md:h-24 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4 group-hover:scale-110 transition-transform shadow-xl">
+                <div className="text-2xl md:text-5xl float" style={{animationDelay: '0.5s'}}>💳</div>
               </div>
-              <h3 className="text-2xl font-black mb-3 text-white">Secure Payment</h3>
-              <p className="text-white/90 leading-relaxed text-lg mb-4">
+              <h3 className="text-sm md:text-2xl font-black mb-1 md:mb-3 text-white">Secure Payment</h3>
+              <p className="text-white/90 leading-relaxed text-xs md:text-lg mb-0 md:mb-4">
                 Safe and encrypted transactions
               </p>
             </div>
-            <div className="group bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-2 border border-white/20">
-              <div className="bg-gradient-to-br from-purple-400 to-pink-600 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-xl">
-                <div className="text-5xl float" style={{animationDelay: '1.5s'}}>🔄</div>
+            <div className="group bg-white/10 backdrop-blur-lg rounded-xl md:rounded-2xl p-4 md:p-8 text-center shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-2 border border-white/20 flex-shrink-0 w-[160px] md:w-auto">
+              <div className="bg-gradient-to-br from-purple-400 to-pink-600 w-12 h-12 md:w-24 md:h-24 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4 group-hover:scale-110 transition-transform shadow-xl">
+                <div className="text-2xl md:text-5xl float" style={{animationDelay: '1.5s'}}>🔄</div>
               </div>
-              <h3 className="text-2xl font-black mb-3 text-white">Easy Returns</h3>
-              <p className="text-white/90 leading-relaxed text-lg mb-4">
+              <h3 className="text-sm md:text-2xl font-black mb-1 md:mb-3 text-white">Easy Returns</h3>
+              <p className="text-white/90 leading-relaxed text-xs md:text-lg mb-0 md:mb-4">
                 Hassle-free return policy
               </p>
             </div>
           </div>
+          <style>{`
+            .scrollbar-hide::-webkit-scrollbar {
+              display: none;
+            }
+            .scrollbar-hide {
+              -ms-overflow-style: none;
+              scrollbar-width: none;
+            }
+          `}</style>
         </div>
       </section>
 
