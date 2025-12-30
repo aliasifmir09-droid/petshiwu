@@ -90,9 +90,9 @@ export const validateArray = <T>(arr: any, validator: (item: any) => boolean): a
 };
 
 /**
- * Safely validates and returns data or null
+ * Safely validates and returns data or undefined
  */
-export const safeValidate = <T>(data: any, validator: (data: any) => boolean): T | null => {
-  return validator(data) ? data as T : null;
+export const safeValidate = <T>(data: any, validator: (data: any) => boolean): T | undefined => {
+  return validator(data) ? data as T : undefined;
 };
 
