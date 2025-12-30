@@ -127,7 +127,10 @@ const Home = () => {
       </div>
 
       {/* Shop by Pet Type - Enhanced Modern Design */}
-      <section className="py-8 sm:py-12 md:py-16 bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden">
+      <section 
+        className="py-8 sm:py-12 md:py-16 bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden"
+        style={{ contain: 'layout style paint' }} // Prevent layout shifts
+      >
         {/* Decorative background elements */}
         <div className="absolute top-0 left-0 w-48 h-48 sm:w-72 sm:h-72 bg-blue-200 rounded-full opacity-10 blur-3xl z-0"></div>
         <div className="absolute bottom-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-purple-200 rounded-full opacity-10 blur-3xl z-0"></div>
@@ -260,7 +263,13 @@ const Home = () => {
             </div>
 
             {/* Mobile: Centered Grid Layout */}
-            <div className="md:hidden flex flex-wrap justify-center items-center gap-4 sm:gap-6 px-2">
+            <div 
+              className="md:hidden flex flex-wrap justify-center items-center gap-4 sm:gap-6 px-2"
+              style={{ 
+                minHeight: '280px', // Reserve space to prevent layout shift
+                contain: 'layout style paint' // Prevent layout shifts
+              }}
+            >
               {[
                 { 
                   name: 'Dog', 
@@ -302,12 +311,19 @@ const Home = () => {
                 <div
                   key={`${category.slug}-${index}`}
                   className="flex flex-col items-center gap-2 sm:gap-3 group cursor-pointer active:scale-95 transition-transform duration-200"
+                  style={{ 
+                    width: '112px', // Fixed width on mobile
+                    flexShrink: 0 // Prevent shrinking
+                  }}
                   onClick={() => {
                     navigate(`/products?petType=${category.slug}`);
                   }}
                 >
                   {/* Circular Image with Enhanced Gradient Border - Smaller on Mobile */}
-                  <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[2px] sm:p-[3px] transform group-active:scale-105 transition-all duration-200 shadow-md group-active:shadow-lg">
+                  <div 
+                    className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[2px] sm:p-[3px] transform group-active:scale-105 transition-all duration-200 shadow-md group-active:shadow-lg"
+                    style={{ aspectRatio: '1 / 1' }} // Ensure square aspect ratio
+                  >
                     <div className="w-full h-full rounded-full overflow-hidden bg-white">
                       <img 
                         src={getOptimizedImageUrl(category.image, { width: 200, height: 200, format: 'webp', isMobile: true })} 
@@ -317,12 +333,14 @@ const Home = () => {
                         width={200}
                         height={200}
                         className="w-full h-full object-cover"
+                        style={{ aspectRatio: '1 / 1' }} // Prevent layout shift
                         onError={(e) => {
                           const target = e.currentTarget;
                           const svg = `<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#6b7280" text-anchor="middle" dy=".3em">${category.name}</text></svg>`;
                           target.src = `data:image/svg+xml;base64,${btoa(svg)}`;
                         }}
                         loading="lazy"
+                        decoding="async"
                       />
                     </div>
                   </div>
