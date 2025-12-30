@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import Product from '../models/Product';
-import { formatProductDescription } from './descriptionFormatter';
-import { connectDatabase } from './database';
+import { formatProductDescription } from '../utils/descriptionFormatter';
+import { connectDatabase } from '../utils/database';
 import dotenv from 'dotenv';
 
 // Load environment variables

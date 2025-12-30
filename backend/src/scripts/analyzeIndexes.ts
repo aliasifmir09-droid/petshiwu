@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { connectDatabase } from './database';
+import { connectDatabase } from '../utils/database';
 import mongoose from 'mongoose';
 
 dotenv.config();

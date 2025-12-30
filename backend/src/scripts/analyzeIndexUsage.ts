@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import Product from '../models/Product';
-import logger from './logger';
+import logger from '../utils/logger';
 
 /**
  * Analyze MongoDB index usage for Product collection

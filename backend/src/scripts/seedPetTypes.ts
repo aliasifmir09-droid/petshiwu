@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { connectDatabase } from './database';
+import { connectDatabase } from '../utils/database';
 import PetType from '../models/PetType';
 
 const defaultPetTypes = [

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import User from '../models/User';
-import { connectDatabase } from './database';
+import { connectDatabase } from '../utils/database';
 
 const createAdminUser = async () => {
   try {

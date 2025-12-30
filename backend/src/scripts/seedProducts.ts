@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { connectDatabase } from './database';
+import { connectDatabase } from '../utils/database';
 import User from '../models/User';
 import Category from '../models/Category';
 import Product from '../models/Product';

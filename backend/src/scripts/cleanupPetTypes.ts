@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import Product from '../models/Product';
 import Category from '../models/Category';
-import { connectDatabase } from './database';
+import { connectDatabase } from '../utils/database';
 
 /**
  * Database Cleanup Script - Remove Pet Types except Dog & Cat

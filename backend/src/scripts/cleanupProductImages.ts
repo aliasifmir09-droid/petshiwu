@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
-import { connectDatabase } from './database';
+import { connectDatabase } from '../utils/database';
 import Product from '../models/Product';
-import { deleteFromCloudinary, isCloudinaryConfigured } from './cloudinary';
+import { deleteFromCloudinary, isCloudinaryConfigured } from '../utils/cloudinary';
 import mongoose from 'mongoose';
 
 dotenv.config();

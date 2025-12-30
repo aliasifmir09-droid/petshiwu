@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import EmailTemplate from '../models/EmailTemplate';
-import { connectDatabase } from './database';
-import logger from './logger';
+import { connectDatabase } from '../utils/database';
+import logger from '../utils/logger';
 
 const defaultTemplates = [
   {

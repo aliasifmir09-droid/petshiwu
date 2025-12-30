@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import Product from '../models/Product';
-import { connectDatabase } from './database';
+import { connectDatabase } from '../utils/database';
 import dotenv from 'dotenv';
 import * as readline from 'readline';
 
