@@ -36,7 +36,17 @@ const StatsGrid = ({
             title="Export order statistics"
           >
             <Download size={14} />
-            Export Stats
+            Export Order Stats
+          </button>
+        )}
+        {onExportProductStats && (
+          <button
+            onClick={onExportProductStats}
+            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+            title="Export product statistics"
+          >
+            <Download size={14} />
+            Export Product Stats
           </button>
         )}
       </div>
