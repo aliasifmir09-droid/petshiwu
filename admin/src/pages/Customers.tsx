@@ -72,30 +72,61 @@ const Customers = () => {
 
   // Fetch selected customer's orders
   // Ensure customerId in queryKey is always a string to prevent React Query serialization issues
-  const customerIdForQuery = selectedCustomer?._id 
-    ? (typeof selectedCustomer._id === 'string' ? selectedCustomer._id : String(selectedCustomer._id || ''))
-    : null;
+  const getValidCustomerId = (customer: Customer | null): string | null => {
+    if (!customer || !customer._id) return null;
+    
+    let id: string;
+    if (typeof customer._id === 'string') {
+      id = customer._id;
+    } else if (customer._id && typeof customer._id === 'object') {
+      // Handle MongoDB ObjectId or similar objects
+      const obj = customer._id as { toString?: () => string; _id?: string; id?: string };
+      if (obj.toString && typeof obj.toString === 'function') {
+        const str = obj.toString();
+        id = str && str !== '[object Object]' ? str : '';
+      } else if (obj._id && typeof obj._id === 'string') {
+        id = obj._id;
+      } else if (obj.id && typeof obj.id === 'string') {
+        id = obj.id;
+      } else {
+        id = '';
+      }
+    } else {
+      id = String(customer._id || '');
+    }
+    
+    // Validate the ID
+    if (!id || id === 'undefined' || id === 'null' || id === '[object Object]' || id.trim() === '') {
+      console.error('Invalid customer ID detected:', customer._id, 'converted to:', id);
+      return null;
+    }
+    
+    return id;
+  };
+  
+  const customerIdForQuery = getValidCustomerId(selectedCustomer);
   
   const { data: customerOrders, isLoading: ordersLoading, error: ordersError } = useQuery({
     queryKey: ['customer-orders', customerIdForQuery],
     queryFn: async () => {
-      if (!selectedCustomer || !customerIdForQuery) return [];
+      if (!customerIdForQuery) {
+        console.warn('Skipping customer orders fetch: invalid customer ID');
+        return [];
+      }
       try {
-        // Ensure _id is converted to string to prevent [object Object] in URL
-        if (!customerIdForQuery || customerIdForQuery === 'undefined' || customerIdForQuery === 'null') {
-          console.error('Invalid customer ID:', selectedCustomer._id);
-          return [];
-        }
-        
         const response = await adminService.getCustomerOrders(customerIdForQuery);
         return response.data || [];
-      } catch (error) {
-        console.error('Error fetching customer orders:', error);
+      } catch (error: any) {
+        // Only log if it's not a 404 (which might be expected for customers with no orders)
+        if (error?.response?.status !== 404) {
+          console.error('Error fetching customer orders:', error);
+        }
         return [];
       }
     },
-    enabled: !!selectedCustomer && !!customerIdForQuery && customerIdForQuery !== 'undefined' && customerIdForQuery !== 'null',
-    retry: 1
+    enabled: !!selectedCustomer && !!customerIdForQuery,
+    retry: false, // Don't retry on 404 errors
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
   });
 
   const customers = customersData?.data || [];
