@@ -1,4 +1,4 @@
-import { AlertCircle, TrendingUp, TrendingDown, CheckCircle, Info } from 'lucide-react';
+import { AlertCircle, CheckCircle, Info } from 'lucide-react';
 
 interface Insight {
   type: 'success' | 'warning' | 'info' | 'error';

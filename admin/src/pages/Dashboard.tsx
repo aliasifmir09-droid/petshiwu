@@ -7,7 +7,7 @@ import ErrorMessage from '@/components/ErrorMessage';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import StatsGrid from '@/components/dashboard/StatsGrid';
 import InsightsCard from '@/components/dashboard/InsightsCard';
-import { AlertTriangle, ExternalLink, FolderTree, ChevronRight, Inbox, Eye, Package, Download, ArrowUpDown, Search, Filter, Moon, Sun, BarChart3 } from 'lucide-react';
+import { AlertTriangle, ExternalLink, FolderTree, ChevronRight, Inbox, Eye, Package, Download, ArrowUpDown, Search, Filter } from 'lucide-react';
 import { normalizeImageUrl, getPlaceholderImage } from '@/utils/imageUtils';
 import { formatDate, normalizeMonthName } from '@/utils/dateUtils';
 import { QUERY_CONFIG, UI, MONTH_NAMES, CHART_MARGINS } from '@/utils/dashboardConstants';
