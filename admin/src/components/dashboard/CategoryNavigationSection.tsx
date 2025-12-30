@@ -9,7 +9,7 @@ interface CategoryNavigationSectionProps {
 }
 
 // Helper function to safely convert any ID to a unique string key
-const getUniqueKey = (id: string | number | undefined | null, index: number, prefix: string = 'item'): string => {
+const getUniqueKey = (id: string | number | undefined | null | { toString?: () => string; valueOf?: () => unknown }, index: number, prefix: string = 'item'): string => {
   if (id === null || id === undefined) {
     return `${prefix}-${index}`;
   }

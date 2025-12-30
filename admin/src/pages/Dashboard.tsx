@@ -1,6 +1,5 @@
 import { useQuery, useQueryClient, useQueries } from '@tanstack/react-query';
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import { adminService } from '@/services/adminService';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ErrorMessage from '@/components/ErrorMessage';
@@ -13,7 +12,6 @@ import CategoryChart from '@/components/dashboard/CategoryChart';
 import CategoryNavigationSection from '@/components/dashboard/CategoryNavigationSection';
 import RecentOrdersTable from '@/components/dashboard/RecentOrdersTable';
 import { usePerformanceMetrics } from '@/hooks/usePerformanceMetrics';
-import { AlertTriangle } from 'lucide-react';
 import { normalizeMonthName } from '@/utils/dateUtils';
 import { QUERY_CONFIG, UI, MONTH_NAMES } from '@/utils/dashboardConstants';
 import { validateOrderStats, validateProductStats, safeValidate } from '@/utils/dataValidation';

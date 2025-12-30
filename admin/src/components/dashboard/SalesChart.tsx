@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { AlertTriangle, Download } from 'lucide-react';
 import {
   LineChart,
@@ -10,7 +9,7 @@ import {
   ResponsiveContainer,
   Legend
 } from 'recharts';
-import { UI, MONTH_NAMES } from '@/utils/dashboardConstants';
+import { UI } from '@/utils/dashboardConstants';
 import { MonthlySale } from '@/pages/Dashboard';
 import { exportSalesData } from '@/utils/exportUtils';
 import HelpIcon from '@/components/dashboard/HelpIcon';

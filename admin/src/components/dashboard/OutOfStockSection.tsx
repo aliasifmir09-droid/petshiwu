@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, ExternalLink, Package, Download, ArrowUpDown, Search } from 'lucide-react';
+import { AlertTriangle, ExternalLink, Package, Download, ArrowUpDown, Search, ChevronRight } from 'lucide-react';
 import { normalizeImageUrl, getPlaceholderImage } from '@/utils/imageUtils';
 import { UI } from '@/utils/dashboardConstants';
 import { Product, OutOfStockData } from '@/pages/Dashboard';
@@ -25,7 +25,7 @@ const OutOfStockSection = ({
   const [search, setSearch] = useState('');
 
   // Helper function to safely convert any ID to a unique string key
-  const getUniqueKey = (id: string | number | undefined | null, index: number, prefix: string = 'item'): string => {
+  const getUniqueKey = (id: string | number | undefined | null | { toString?: () => string; valueOf?: () => unknown }, index: number, prefix: string = 'item'): string => {
     if (id === null || id === undefined) {
       return `${prefix}-${index}`;
     }
