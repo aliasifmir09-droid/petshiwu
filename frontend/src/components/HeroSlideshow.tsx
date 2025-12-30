@@ -75,8 +75,11 @@ const HeroSlideshow = () => {
         {/* Main Slideshow */}
         <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-4">
         <div className="relative w-full overflow-hidden bg-white rounded-xl shadow-lg">
-          {/* Slides Container */}
-          <div className="relative w-full h-[260px] md:h-[280px] lg:h-[300px]">
+          {/* Slides Container - Fixed height to prevent layout shift */}
+          <div 
+            className="relative w-full h-[260px] md:h-[280px] lg:h-[300px]"
+            style={{ contain: 'layout style paint' }} // Prevent layout shifts
+          >
             {slides.map((slide, index) => (
               <div
                 key={slide._id || slide.id}
