@@ -210,8 +210,8 @@ const HeroSlideshow = () => {
             <ChevronRight size={20} className="sm:w-5 sm:h-5" />
           </button>
 
-          {/* Modern Slide Indicators */}
-          <div className="absolute bottom-2 md:bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 md:gap-2 z-10 bg-white/70 backdrop-blur-sm px-2 py-1 md:px-2.5 md:py-1 rounded-full shadow-md">
+          {/* Modern Slide Indicators - Hidden on mobile, visible on desktop */}
+          <div className="hidden md:flex absolute bottom-3 left-1/2 -translate-x-1/2 gap-2 z-10 bg-white/70 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-md">
             {slides.map((_, index) => (
               <button
                 key={index}
