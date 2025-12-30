@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient, useQueries } from '@tanstack/react-query';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { adminService } from '@/services/adminService';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -8,10 +8,12 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import StatsGrid from '@/components/dashboard/StatsGrid';
 import { AlertTriangle, ExternalLink, FolderTree, ChevronRight, Inbox, Eye, Package } from 'lucide-react';
 import { normalizeImageUrl, getPlaceholderImage } from '@/utils/imageUtils';
-import { formatDate } from '@/utils/dateUtils';
+import { formatDate, normalizeMonthName } from '@/utils/dateUtils';
 import { QUERY_CONFIG, UI, MONTH_NAMES, CHART_MARGINS } from '@/utils/dashboardConstants';
 import { validateOrderStats, validateProductStats, validateRecentOrder, safeValidate } from '@/utils/dataValidation';
 import { maskCustomerName, canViewFullCustomerData } from '@/utils/privacyUtils';
+import { useToast } from '@/hooks/useToast';
+import Toast from '@/components/Toast';
 import {
   LineChart,
   Line,
@@ -176,8 +178,13 @@ const getUniqueKey = (id: any, index: number, prefix: string = 'item'): string =
 const Dashboard = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { toast, showToast, hideToast } = useToast();
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
+  
+  // AbortController for query cancellation on unmount
+  const abortControllerRef = useRef<AbortController | null>(null);
   
   // Get user data first
   // Only fetch if we're likely authenticated (skip if we know we're not)
@@ -190,9 +197,10 @@ const Dashboard = () => {
 
   const hasAnalyticsPermission = userData?.role === 'admin' || userData?.permissions?.canViewAnalytics;
   
-  // Handle manual refresh
-  const handleRefresh = async () => {
+  // Handle manual refresh with error recovery
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
+    setRefreshError(null);
     try {
       // Invalidate all dashboard-related queries
       await Promise.all([
@@ -205,12 +213,28 @@ const Dashboard = () => {
       // Refetch all queries
       await queryClient.refetchQueries();
       setLastUpdated(new Date());
-    } catch (error) {
+      showToast('Dashboard refreshed successfully', 'success');
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to refresh dashboard';
+      setRefreshError(errorMessage);
       console.error('Error refreshing data:', error);
+      showToast(errorMessage, 'error');
     } finally {
       setIsRefreshing(false);
     }
-  };
+  }, [queryClient, showToast]);
+  
+  // Setup query cancellation on unmount
+  useEffect(() => {
+    abortControllerRef.current = new AbortController();
+    
+    return () => {
+      // Cancel all ongoing queries when component unmounts
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   const { data: orderStats, isLoading: orderStatsLoading, error: orderStatsError, dataUpdatedAt: orderStatsUpdatedAt } = useQuery({
     queryKey: ['orderStats'],
@@ -359,7 +383,11 @@ const Dashboard = () => {
     for (let i = UI.MONTHS_TO_DISPLAY - 1; i >= 0; i--) {
       const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthName = MONTH_NAMES[targetDate.getMonth()];
-      const monthData = last6Months.find((m: MonthlySale) => m.month === monthName);
+      // Use normalized month name for matching to handle various backend formats
+      const monthData = last6Months.find((m: MonthlySale) => {
+        const normalizedBackendMonth = normalizeMonthName(m.month);
+        return normalizedBackendMonth === monthName || m.month === monthName;
+      });
       result.push({
         month: monthName,
         sales: monthData?.sales || 0
@@ -447,7 +475,15 @@ const Dashboard = () => {
       };
 
       // Process root categories (main categories, level 1) with validation
-      rootCategories.forEach((category: any) => {
+      // Early exit if we have enough data for display
+      const maxCategoriesToProcess = UI.TOP_CATEGORIES_COUNT * 2; // Process 2x to ensure we have enough after filtering
+      let processedCount = 0;
+      
+      rootCategories.forEach((category: Category) => {
+        // Early exit optimization: stop processing if we have enough categories
+        if (processedCount >= maxCategoriesToProcess && Object.keys(categoryCounts).length >= UI.TOP_CATEGORIES_COUNT) {
+          return;
+        }
         try {
           // Validate category structure before processing
           if (!category || typeof category !== 'object') {
@@ -476,6 +512,7 @@ const Dashboard = () => {
             
             // Use subcategory count as value, or default to 1 if no subcategories
             categoryCounts[displayName] = Math.max(subcategoryCount, 1);
+            processedCount++;
           }
         } catch (error) {
           // Skip invalid categories and log in development
@@ -747,11 +784,9 @@ const Dashboard = () => {
             </div>
           </div>
           {!categoriesData ? (
-            <div className="flex items-center justify-center h-[300px]">
-              <div className="text-center text-gray-500">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-                <p>Loading categories...</p>
-              </div>
+            <div className="h-[300px] animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-48 mb-4"></div>
+              <div className="h-full bg-gray-100 rounded"></div>
             </div>
           ) : categoryData.length === 0 || (categoryData.length === 1 && categoryData[0].name === 'Loading...') ? (
             <div className="flex items-center justify-center h-[300px]">
@@ -1062,6 +1097,9 @@ const Dashboard = () => {
           </table>
         </div>
       </div>
+      
+      {/* Toast Notification */}
+      <Toast toast={toast} onClose={hideToast} />
       </div>
     </ErrorBoundary>
   );

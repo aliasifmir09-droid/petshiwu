@@ -62,3 +62,42 @@ export const formatDateTime = (date: string | Date | number | null | undefined):
   }
 };
 
+/**
+ * Normalizes month names to a consistent format
+ * Handles various month name formats from backend (full names, abbreviations, etc.)
+ * @param month - Month name in any format
+ * @returns Normalized month abbreviation (Jan, Feb, etc.)
+ */
+export const normalizeMonthName = (month: string): string => {
+  if (!month || typeof month !== 'string') return month;
+  
+  const monthMap: Record<string, string> = {
+    'january': 'Jan',
+    'jan': 'Jan',
+    'february': 'Feb',
+    'feb': 'Feb',
+    'march': 'Mar',
+    'mar': 'Mar',
+    'april': 'Apr',
+    'apr': 'Apr',
+    'may': 'May',
+    'june': 'Jun',
+    'jun': 'Jun',
+    'july': 'Jul',
+    'jul': 'Jul',
+    'august': 'Aug',
+    'aug': 'Aug',
+    'september': 'Sep',
+    'sept': 'Sep',
+    'october': 'Oct',
+    'oct': 'Oct',
+    'november': 'Nov',
+    'nov': 'Nov',
+    'december': 'Dec',
+    'dec': 'Dec',
+  };
+  
+  const normalized = month.toLowerCase().trim();
+  return monthMap[normalized] || month; // Return original if not found
+};
+
