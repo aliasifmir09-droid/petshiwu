@@ -80,24 +80,85 @@ const Customers = () => {
       id = customer._id;
     } else if (customer._id && typeof customer._id === 'object') {
       // Handle MongoDB ObjectId or similar objects
-      const obj = customer._id as { toString?: () => string; _id?: string; id?: string };
+      const obj = customer._id as any;
+      
+      // Try toString() first (MongoDB ObjectId has this)
       if (obj.toString && typeof obj.toString === 'function') {
-        const str = obj.toString();
-        id = str && str !== '[object Object]' ? str : '';
-      } else if (obj._id && typeof obj._id === 'string') {
-        id = obj._id;
-      } else if (obj.id && typeof obj.id === 'string') {
-        id = obj.id;
-      } else {
-        id = '';
+        try {
+          const str = obj.toString();
+          if (str && str !== '[object Object]' && typeof str === 'string' && str.length > 0) {
+            id = str;
+          } else {
+            // If toString() returns [object Object], try other methods
+            throw new Error('toString returned invalid value');
+          }
+        } catch (e) {
+          // toString failed, try other methods
+          id = '';
+        }
+      }
+      
+      // If toString didn't work, try other properties
+      if (!id || id === '') {
+        if (obj._id && typeof obj._id === 'string') {
+          id = obj._id;
+        } else if (obj.id && typeof obj.id === 'string') {
+          id = obj.id;
+        } else if (obj.value && typeof obj.value === 'string') {
+          id = obj.value;
+        } else if (obj.buffer && typeof obj.buffer === 'object') {
+          // MongoDB ObjectId with buffer - try to extract hex string
+          // ObjectId buffer is typically 12 bytes, can be converted to hex
+          try {
+            // If it's a Uint8Array or Buffer, convert to hex
+            if (obj.buffer instanceof Uint8Array || Array.isArray(obj.buffer)) {
+              const hex = Array.from(obj.buffer)
+                .map((b: number) => b.toString(16).padStart(2, '0'))
+                .join('');
+              if (hex && hex.length === 24) { // MongoDB ObjectId is 24 hex chars
+                id = hex;
+              } else {
+                id = '';
+              }
+            } else {
+              id = '';
+            }
+          } catch (e) {
+            id = '';
+          }
+        } else {
+          // Last resort: try JSON.stringify and extract any string values
+          try {
+            const json = JSON.stringify(obj);
+            // Try to find a string that looks like an ID (24 hex chars for MongoDB)
+            const hexMatch = json.match(/"([0-9a-fA-F]{24})"/);
+            if (hexMatch && hexMatch[1]) {
+              id = hexMatch[1];
+            } else {
+              id = '';
+            }
+          } catch (e) {
+            id = '';
+          }
+        }
       }
     } else {
       id = String(customer._id || '');
     }
     
-    // Validate the ID
+    // Validate the ID - MongoDB ObjectId should be 24 hex characters
     if (!id || id === 'undefined' || id === 'null' || id === '[object Object]' || id.trim() === '') {
-      console.error('Invalid customer ID detected:', customer._id, 'converted to:', id);
+      console.warn('Invalid customer ID detected:', customer._id, 'converted to:', id);
+      return null;
+    }
+    
+    // Additional validation: MongoDB ObjectId should be 24 hex characters
+    if (id.length !== 24 || !/^[0-9a-fA-F]{24}$/.test(id)) {
+      console.warn('Customer ID does not match MongoDB ObjectId format:', id);
+      // Still return it if it's a valid string, might be a different ID format
+      if (id.length > 0 && id.length < 100) {
+        return id; // Allow non-ObjectId formats
+      }
       return null;
     }
     
