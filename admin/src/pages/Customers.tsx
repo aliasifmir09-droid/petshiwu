@@ -108,7 +108,7 @@ const Customers = () => {
           try {
             // If it's a Uint8Array or Buffer, convert to hex
             if (obj.buffer instanceof Uint8Array) {
-              const bufferArray = Array.from(obj.buffer);
+              const bufferArray = Array.from(obj.buffer) as number[];
               const hex = bufferArray
                 .map((b: number) => b.toString(16).padStart(2, '0'))
                 .join('');
@@ -116,7 +116,7 @@ const Customers = () => {
                 id = hex;
               }
             } else if (Array.isArray(obj.buffer)) {
-              const hex = obj.buffer
+              const hex = (obj.buffer as unknown[])
                 .map((b: unknown) => {
                   const num = typeof b === 'number' ? b : Number(b);
                   return isNaN(num) ? '00' : num.toString(16).padStart(2, '0');
