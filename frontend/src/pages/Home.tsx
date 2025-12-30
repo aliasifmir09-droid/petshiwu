@@ -262,11 +262,10 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Mobile: Centered Grid Layout */}
+            {/* Mobile: Horizontal Scroll Layout */}
             <div 
-              className="md:hidden flex flex-wrap justify-center items-center gap-4 sm:gap-6 px-2"
+              className="md:hidden flex overflow-x-auto gap-3 px-2 pb-2 scrollbar-hide"
               style={{ 
-                minHeight: '280px', // Reserve space to prevent layout shift
                 contain: 'layout style paint' // Prevent layout shifts
               }}
             >
@@ -310,10 +309,9 @@ const Home = () => {
               ].map((category, index) => (
                 <div
                   key={`${category.slug}-${index}`}
-                  className="flex flex-col items-center gap-2 sm:gap-3 group cursor-pointer active:scale-95 transition-transform duration-200"
+                  className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform duration-200 flex-shrink-0"
                   style={{ 
-                    width: '112px', // Fixed width on mobile
-                    flexShrink: 0 // Prevent shrinking
+                    width: '90px' // Compact width on mobile
                   }}
                   onClick={() => {
                     navigate(`/products?petType=${category.slug}`);
@@ -321,17 +319,17 @@ const Home = () => {
                 >
                   {/* Circular Image with Enhanced Gradient Border - Smaller on Mobile */}
                   <div 
-                    className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[2px] sm:p-[3px] transform group-active:scale-105 transition-all duration-200 shadow-md group-active:shadow-lg"
+                    className="relative w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[2px] transform group-active:scale-105 transition-all duration-200 shadow-md group-active:shadow-lg"
                     style={{ aspectRatio: '1 / 1' }} // Ensure square aspect ratio
                   >
                     <div className="w-full h-full rounded-full overflow-hidden bg-white">
                       <img 
-                        src={getOptimizedImageUrl(category.image, { width: 200, height: 200, format: 'webp', isMobile: true })} 
-                        srcSet={generateSrcSet(category.image, [112, 200, 300], { format: 'webp', isMobile: true })}
-                        sizes="(max-width: 640px) 112px, (max-width: 1024px) 200px, 300px"
+                        src={getOptimizedImageUrl(category.image, { width: 80, height: 80, format: 'webp', isMobile: true })} 
+                        srcSet={generateSrcSet(category.image, [80, 112, 160], { format: 'webp', isMobile: true })}
+                        sizes="80px"
                         alt={category.name}
-                        width={200}
-                        height={200}
+                        width={80}
+                        height={80}
                         className="w-full h-full object-cover"
                         style={{ aspectRatio: '1 / 1' }} // Prevent layout shift
                         onError={(e) => {
@@ -344,8 +342,8 @@ const Home = () => {
                       />
                     </div>
                   </div>
-                  {/* Label - Smaller on Mobile */}
-                  <p className="text-xs sm:text-sm font-bold text-gray-800 text-center leading-tight max-w-[90px] sm:max-w-[100px]">
+                  {/* Label - Compact on Mobile */}
+                  <p className="text-[10px] font-bold text-gray-800 text-center leading-tight max-w-[90px]">
                     {category.name}
                   </p>
                 </div>
