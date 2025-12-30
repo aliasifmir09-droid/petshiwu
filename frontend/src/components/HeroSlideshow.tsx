@@ -10,17 +10,28 @@ import { normalizeImageUrl, generateSrcSet } from '@/utils/imageUtils';
 const HeroSlideshow = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Fetch slides from API
+  // Fetch slides from API - Optimized for LCP
   const { data: slides = [], isLoading } = useQuery({
     queryKey: ['slideshow', 'active'],
     queryFn: slideshowService.getActiveSlides,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    // Prioritize this query for faster LCP image discovery
+    retry: 1, // Reduce retries for faster failure
+    retryDelay: 100 // Faster retry
   });
 
   // Preload the first slide image (LCP image) for better performance
-  const firstSlideImage = slides.length > 0 ? (slides[0].leftImage || slides[0].imageUrl) : null;
+  // Use mobile-optimized size for faster loading
+  const firstSlideImage = slides.length > 0 
+    ? normalizeImageUrl(slides[0].leftImage || slides[0].imageUrl, { 
+        width: 320, 
+        height: 240, 
+        format: 'auto',
+        isMobile: true 
+      })
+    : null;
 
   // Auto-advance slides every 5 seconds (only if slides exist)
   useEffect(() => {
@@ -150,12 +161,20 @@ const HeroSlideshow = () => {
                     >
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                       <img
-                        src={normalizeImageUrl(slide.leftImage || slide.imageUrl, { 
-                          width: 576, 
-                          height: 432, 
-                          format: 'auto',
-                          isMobile: true 
-                        })}
+                        src={index === 0 
+                          ? normalizeImageUrl(slide.leftImage || slide.imageUrl, { 
+                              width: 320, 
+                              height: 240, 
+                              format: 'auto',
+                              isMobile: true 
+                            })
+                          : normalizeImageUrl(slide.leftImage || slide.imageUrl, { 
+                              width: 576, 
+                              height: 432, 
+                              format: 'auto',
+                              isMobile: true 
+                            })
+                        }
                         srcSet={generateSrcSet(slide.leftImage || slide.imageUrl, [320, 576, 768], { format: 'auto' })}
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 576px"
                         alt={slide.title}
@@ -166,9 +185,9 @@ const HeroSlideshow = () => {
                         decoding={index === 0 ? "sync" : "async"}
                         className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700"
                         style={{ 
-                          objectFit: 'cover', // Ensure image covers container without distortion
-                          contentVisibility: index === 0 ? 'auto' : 'auto',
-                          containIntrinsicSize: index === 0 ? '576px 432px' : undefined
+                          objectFit: 'cover',
+                          willChange: index === 0 ? 'contents' : undefined, // Optimize rendering for LCP
+                          containIntrinsicSize: index === 0 ? '320px 240px' : '576px 432px'
                         }}
                         onError={(e) => {
                           // Fallback to imageUrl if leftImage fails
