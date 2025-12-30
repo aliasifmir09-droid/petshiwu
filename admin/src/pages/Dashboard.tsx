@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { adminService } from '@/services/adminService';
 import StatCard from '@/components/StatCard';
-import { DollarSign, Package, ShoppingCart, TrendingUp, AlertTriangle, ExternalLink, FolderTree, ChevronRight, Inbox } from 'lucide-react';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { DollarSign, Package, ShoppingCart, TrendingUp, AlertTriangle, ExternalLink, FolderTree, ChevronRight, Inbox, Eye } from 'lucide-react';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
+import { formatDate } from '@/utils/dateUtils';
 import {
   LineChart,
   Line,
@@ -163,9 +165,11 @@ const getUniqueKey = (id: any, index: number, prefix: string = 'item'): string =
 };
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  
   // Get user data first
   // Only fetch if we're likely authenticated (skip if we know we're not)
-  const { data: userData } = useQuery({
+  const { data: userData, isLoading: userDataLoading } = useQuery({
     queryKey: ['user-info'],
     queryFn: () => adminService.getMe(),
     retry: false, // Don't retry on 401 - it's expected if not authenticated
@@ -185,7 +189,7 @@ const Dashboard = () => {
     refetchOnWindowFocus: true, // Refetch when user returns to tab
   });
 
-  const { data: productStats, isLoading: productStatsLoading, error: productStatsError } = useQuery({
+  const { data: productStats, isLoading: productStatsLoading, error: productStatsError } = useQuery<ProductStats>({
     queryKey: ['productStats'],
     queryFn: adminService.getProductStats,
     enabled: hasAnalyticsPermission, // Only fetch if user has permission
@@ -196,7 +200,7 @@ const Dashboard = () => {
   });
 
   // Get out-of-stock products - limited to 10 for performance
-  const { data: outOfStockData, isLoading: outOfStockLoading, error: outOfStockError } = useQuery({
+  const { data: outOfStockData, isLoading: outOfStockLoading, error: outOfStockError } = useQuery<OutOfStockData>({
     queryKey: ['products', 'out-of-stock'],
     queryFn: () => adminService.getProducts({ inStock: false, limit: 10 }),
     retry: 2, // Retry failed requests
@@ -324,82 +328,141 @@ const Dashboard = () => {
   }, [orderStats]);
 
   // Generate category data from actual navigation menu categories - MEMOIZED for performance
+  // Added validation and error handling for category structure
   const categoryData = useMemo(() => {
-    if (!categoriesData?.data || !Array.isArray(categoriesData.data)) {
-      // Fallback mock data if categories not loaded yet
-      return [
-        { name: 'Loading...', value: 0 }
-      ];
-    }
-
-    const rootCategories = categoriesData.data; // Backend returns hierarchical structure (root categories with subcategories)
-    const categoryCounts: { [key: string]: number } = {};
-
-    // Helper function to recursively count all subcategories at any level
-    const countAllSubcategories = (category: Category): number => {
-      if (!category.subcategories || !Array.isArray(category.subcategories) || category.subcategories.length === 0) {
-        return 0;
+    try {
+      if (!categoriesData?.data || !Array.isArray(categoriesData.data)) {
+        // Fallback mock data if categories not loaded yet
+        return [
+          { name: 'Loading...', value: 0 }
+        ];
       }
-      
-      let count = category.subcategories.length;
-      // Also count nested subcategories (level 3)
-      category.subcategories.forEach((subcat: Category) => {
-        if (subcat.subcategories && Array.isArray(subcat.subcategories)) {
-          count += subcat.subcategories.length;
+
+      const rootCategories = categoriesData.data; // Backend returns hierarchical structure (root categories with subcategories)
+      const categoryCounts: { [key: string]: number } = {};
+
+      // Helper function to recursively count all subcategories at any level
+      // Added validation to prevent crashes with unexpected data
+      const countAllSubcategories = (category: Category): number => {
+        try {
+          // Validate category structure
+          if (!category || typeof category !== 'object') {
+            return 0;
+          }
+          
+          if (!category.subcategories || !Array.isArray(category.subcategories) || category.subcategories.length === 0) {
+            return 0;
+          }
+          
+          let count = category.subcategories.length;
+          // Also count nested subcategories (level 3) with validation
+          category.subcategories.forEach((subcat: Category) => {
+            try {
+              if (subcat && typeof subcat === 'object' && subcat.subcategories && Array.isArray(subcat.subcategories)) {
+                count += subcat.subcategories.length;
+              }
+            } catch (error) {
+              // Silently skip invalid nested subcategories
+              if (import.meta.env.DEV) {
+                console.warn('Invalid nested subcategory structure:', error);
+              }
+            }
+          });
+          
+          return count;
+        } catch (error) {
+          // Return 0 if counting fails
+          if (import.meta.env.DEV) {
+            console.warn('Error counting subcategories:', error);
+          }
+          return 0;
+        }
+      };
+
+      // Process root categories (main categories, level 1) with validation
+      rootCategories.forEach((category: any) => {
+        try {
+          // Validate category structure before processing
+          if (!category || typeof category !== 'object') {
+            return; // Skip invalid categories
+          }
+          
+          // Main categories are those without parentCategory (backend returns hierarchical structure)
+          // So rootCategories array contains only main categories with their subcategories
+          const isMainCategory = !category.parentCategory || 
+                                category.parentCategory === null ||
+                                (typeof category.parentCategory === 'object' && !category.parentCategory._id) ||
+                                category.level === 1;
+
+          if (isMainCategory) {
+            // Validate category name exists
+            const categoryName = category.name || 'Unnamed Category';
+            
+            // Determine pet type icon/prefix
+            const petTypePrefix = category.petType === 'dog' ? '🐕 ' : 
+                                 category.petType === 'cat' ? '🐱 ' : 
+                                 category.petType === 'other-animals' ? '🐾 ' : '';
+            const displayName = `${petTypePrefix}${categoryName}`;
+            
+            // Count subcategories for this main category with error handling
+            const subcategoryCount = countAllSubcategories(category);
+            
+            // Use subcategory count as value, or default to 1 if no subcategories
+            categoryCounts[displayName] = Math.max(subcategoryCount, 1);
+          }
+        } catch (error) {
+          // Skip invalid categories and log in development
+          if (import.meta.env.DEV) {
+            console.warn('Error processing category:', error);
+          }
         }
       });
-      
-      return count;
-    };
 
-    // Process root categories (main categories, level 1)
-    rootCategories.forEach((category: any) => {
-      // Main categories are those without parentCategory (backend returns hierarchical structure)
-      // So rootCategories array contains only main categories with their subcategories
-      const isMainCategory = !category.parentCategory || 
-                            category.parentCategory === null ||
-                            (typeof category.parentCategory === 'object' && !category.parentCategory._id) ||
-                            category.level === 1;
+      // Convert to array format for chart, sorted by value (descending)
+      const chartData = Object.entries(categoryCounts)
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 15); // Top 15 categories
 
-      if (isMainCategory) {
-        // Determine pet type icon/prefix
-        const petTypePrefix = category.petType === 'dog' ? '🐕 ' : 
-                             category.petType === 'cat' ? '🐱 ' : 
-                             category.petType === 'other-animals' ? '🐾 ' : '';
-        const displayName = `${petTypePrefix}${category.name}`;
-        
-        // Count subcategories for this main category
-        const subcategoryCount = countAllSubcategories(category);
-        
-        // Use subcategory count as value, or default to 1 if no subcategories
-        categoryCounts[displayName] = Math.max(subcategoryCount, 1);
+      return chartData.length > 0 ? chartData : [
+        { name: 'No categories found', value: 0 }
+      ];
+    } catch (error) {
+      // Return safe fallback data if entire process fails
+      if (import.meta.env.DEV) {
+        console.error('Error generating category data:', error);
       }
-    });
-
-
-    // Convert to array format for chart, sorted by value (descending)
-    const chartData = Object.entries(categoryCounts)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 15); // Top 15 categories
-
-    return chartData.length > 0 ? chartData : [
-      { name: 'No categories found', value: 0 }
-    ];
+      return [
+        { name: 'Error loading categories', value: 0 }
+      ];
+    }
   }, [categoriesData?.data]);
 
-  return (
-    <div className="space-y-8">
-      {/* Header Section with Gradient */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-8 shadow-xl">
-        <div className="relative z-10">
-          <h1 className="text-4xl font-black text-white mb-2 animate-fade-in-up">
-            Dashboard Overview
-          </h1>
-          <p className="text-blue-100 text-lg animate-fade-in-up">
-            Welcome back! Here's what's happening with your store today.
-          </p>
+  // Show loading state while checking permissions
+  if (userDataLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen" role="status" aria-label="Loading dashboard">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard...</p>
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <ErrorBoundary>
+      <div className="space-y-8" role="main" aria-label="Dashboard overview">
+        {/* Header Section with Gradient */}
+        <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-8 shadow-xl">
+          <div className="relative z-10">
+            <h1 className="text-4xl font-black text-white mb-2 animate-fade-in-up">
+              Dashboard Overview
+            </h1>
+            <p className="text-blue-100 text-lg animate-fade-in-up">
+              Welcome back! Here's what's happening with your store today.
+            </p>
+          </div>
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-300 opacity-10 rounded-full blur-3xl"></div>
@@ -407,9 +470,9 @@ const Dashboard = () => {
 
       {/* Permission Error Alert */}
       {hasPermissionError && (
-        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-500 rounded-xl p-6 shadow-lg animate-fade-in-up">
+        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-500 rounded-xl p-6 shadow-lg animate-fade-in-up" role="alert" aria-live="polite">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 bg-yellow-100 p-3 rounded-full">
+            <div className="flex-shrink-0 bg-yellow-100 p-3 rounded-full" aria-hidden="true">
               <AlertTriangle className="text-yellow-600" size={24} />
             </div>
             <div className="flex-1">
@@ -427,9 +490,9 @@ const Dashboard = () => {
 
       {/* Error Messages */}
       {orderStatsError && (
-        <div className="bg-red-50 border-l-4 border-red-500 rounded-xl p-4 shadow-lg">
+        <div className="bg-red-50 border-l-4 border-red-500 rounded-xl p-4 shadow-lg" role="alert" aria-live="polite">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="text-red-600" size={20} />
+            <AlertTriangle className="text-red-600" size={20} aria-hidden="true" />
             <div>
               <h3 className="text-red-800 font-semibold">Failed to load order statistics</h3>
               <p className="text-red-600 text-sm">Please refresh the page or try again later.</p>
@@ -439,9 +502,9 @@ const Dashboard = () => {
       )}
 
       {productStatsError && (
-        <div className="bg-red-50 border-l-4 border-red-500 rounded-xl p-4 shadow-lg">
+        <div className="bg-red-50 border-l-4 border-red-500 rounded-xl p-4 shadow-lg" role="alert" aria-live="polite">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="text-red-600" size={20} />
+            <AlertTriangle className="text-red-600" size={20} aria-hidden="true" />
             <div>
               <h3 className="text-red-800 font-semibold">Failed to load product statistics</h3>
               <p className="text-red-600 text-sm">Please refresh the page or try again later.</p>
@@ -451,7 +514,7 @@ const Dashboard = () => {
       )}
 
       {/* Stats Grid with Staggered Animation */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-animation">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-animation" role="region" aria-label="Statistics overview">
         {orderStatsLoading || productStatsLoading ? (
           // Skeleton loaders for stats cards
           <>
@@ -481,7 +544,7 @@ const Dashboard = () => {
             />
             <StatCard
               title="Total Products"
-              value={productStats?.totalProducts ?? 0}
+              value={(productStats as ProductStats | undefined)?.totalProducts ?? 0}
               icon={Package}
               color="yellow"
             />
@@ -617,10 +680,10 @@ const Dashboard = () => {
       {/* Charts - Enhanced */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Sales Chart */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition-all hover-lift animate-fade-in-up">
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition-all hover-lift animate-fade-in-up" role="region" aria-label="Sales overview chart">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-black text-gray-900">Sales Overview</h2>
-            <div className="bg-gradient-to-r from-blue-100 to-indigo-100 px-4 py-2 rounded-lg">
+            <div className="bg-gradient-to-r from-blue-100 to-indigo-100 px-4 py-2 rounded-lg" aria-label="Time period">
               <p className="text-sm font-bold text-blue-800">Last 6 Months</p>
             </div>
           </div>
@@ -651,10 +714,10 @@ const Dashboard = () => {
         </div>
 
         {/* Category Chart */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition-all hover-lift animate-fade-in-up">
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition-all hover-lift animate-fade-in-up" role="region" aria-label="Category distribution chart">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-black text-gray-900">Navigation Menu Categories</h2>
-            <div className="bg-gradient-to-r from-green-100 to-emerald-100 px-4 py-2 rounded-lg">
+            <div className="bg-gradient-to-r from-green-100 to-emerald-100 px-4 py-2 rounded-lg" aria-label="Chart description">
               <p className="text-sm font-bold text-green-800">Main Categories by Pet Type</p>
             </div>
           </div>
@@ -830,19 +893,20 @@ const Dashboard = () => {
       </div>
 
       {/* Recent Orders - Enhanced */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all animate-fade-in-up">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all animate-fade-in-up" role="region" aria-label="Recent orders">
         <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
           <h2 className="text-2xl font-black text-gray-900">Recent Orders</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full" aria-label="Recent orders table">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" scope="col">Order ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" scope="col">Customer</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" scope="col">Total</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" scope="col">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" scope="col">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" scope="col">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -871,62 +935,96 @@ const Dashboard = () => {
                 </>
               ) : orderStatsError ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-red-600">
+                  <td colSpan={6} className="px-6 py-8 text-center text-red-600">
                     Failed to load recent orders. Please refresh the page.
                   </td>
                 </tr>
-              ) : (orderStats as OrderStats | undefined)?.recentOrders && Array.isArray((orderStats as OrderStats).recentOrders) && (orderStats as OrderStats).recentOrders.length > 0 ? (
-                ((orderStats as OrderStats).recentOrders as RecentOrder[]).map((order: RecentOrder, index: number) => {
-                  if (!order) return null;
-                  return (
-                    <tr key={getUniqueKey(order?._id, index, 'order')} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm font-medium">{order.orderNumber || 'N/A'}</td>
-                      <td className="px-6 py-4 text-sm">
-                        {order.user?.firstName || ''} {order.user?.lastName || ''}
-                        {!order.user?.firstName && !order.user?.lastName && 'Guest'}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        ${(order.totalPrice ?? 0).toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          order.orderStatus === 'delivered' ? 'bg-green-100 text-green-800' :
-                          order.orderStatus === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                          order.orderStatus === 'processing' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {order.orderStatus || 'Unknown'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center justify-center">
-                      <Inbox className="text-gray-400 mb-3" size={48} />
-                      <p className="text-gray-500 font-medium text-lg">No recent orders</p>
-                      <p className="text-gray-400 text-sm mt-1">Orders will appear here once customers start placing them</p>
-                      <Link
-                        to="/orders"
-                        className="mt-4 inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm"
+              ) : (() => {
+                const orderStatsData = orderStats as OrderStats | undefined;
+                const recentOrders = orderStatsData?.recentOrders;
+                if (recentOrders && Array.isArray(recentOrders) && recentOrders.length > 0) {
+                  return recentOrders.map((order: RecentOrder, index: number) => {
+                    if (!order) return null;
+                    const orderId = order._id || order.orderNumber || '';
+                    return (
+                      <tr 
+                        key={getUniqueKey(order?._id, index, 'order')} 
+                        className="hover:bg-gray-50 cursor-pointer transition-colors"
+                        onClick={() => {
+                          if (orderId) {
+                            navigate(`/orders?orderId=${orderId}`);
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if ((e.key === 'Enter' || e.key === ' ') && orderId) {
+                            e.preventDefault();
+                            navigate(`/orders?orderId=${orderId}`);
+                          }
+                        }}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`View details for order ${order.orderNumber || orderId}`}
                       >
-                        View All Orders
-                        <ChevronRight size={16} />
-                      </Link>
-                    </div>
-                  </td>
-                </tr>
-              )}
+                        <td className="px-6 py-4 text-sm font-medium">{order.orderNumber || 'N/A'}</td>
+                        <td className="px-6 py-4 text-sm">
+                          {order.user?.firstName || ''} {order.user?.lastName || ''}
+                          {!order.user?.firstName && !order.user?.lastName && 'Guest'}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          ${(order.totalPrice ?? 0).toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            order.orderStatus === 'delivered' ? 'bg-green-100 text-green-800' :
+                            order.orderStatus === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                            order.orderStatus === 'processing' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`} aria-label={`Order status: ${order.orderStatus || 'Unknown'}`}>
+                            {order.orderStatus || 'Unknown'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600">
+                          {order.createdAt ? formatDate(order.createdAt) : 'N/A'}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          <Link
+                            to={`/orders${orderId ? `?orderId=${orderId}` : ''}`}
+                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium"
+                            onClick={(e) => e.stopPropagation()}
+                            aria-label={`View details for order ${order.orderNumber || orderId}`}
+                          >
+                            <Eye size={16} aria-hidden="true" />
+                            <span>View</span>
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  });
+                }
+                return (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <Inbox className="text-gray-400 mb-3" size={48} />
+                        <p className="text-gray-500 font-medium text-lg">No recent orders</p>
+                        <p className="text-gray-400 text-sm mt-1">Orders will appear here once customers start placing them</p>
+                        <Link
+                          to="/orders"
+                          className="mt-4 inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm"
+                        >
+                          View All Orders
+                          <ChevronRight size={16} />
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })()}
             </tbody>
           </table>
         </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 };
 
