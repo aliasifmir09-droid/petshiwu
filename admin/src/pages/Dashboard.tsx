@@ -1025,6 +1025,7 @@ const Dashboard = () => {
           </table>
         </div>
       </div>
+      </div>
     </ErrorBoundary>
   );
 };
