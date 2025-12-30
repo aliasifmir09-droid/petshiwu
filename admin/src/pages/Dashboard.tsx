@@ -6,7 +6,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import ErrorMessage from '@/components/ErrorMessage';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import StatsGrid from '@/components/dashboard/StatsGrid';
-import { AlertTriangle, ExternalLink, FolderTree, ChevronRight, Inbox, Eye, Package } from 'lucide-react';
+import { AlertTriangle, ExternalLink, FolderTree, ChevronRight, Inbox, Eye, Package, Download, ArrowUpDown, Search, Filter } from 'lucide-react';
 import { normalizeImageUrl, getPlaceholderImage } from '@/utils/imageUtils';
 import { formatDate, normalizeMonthName } from '@/utils/dateUtils';
 import { QUERY_CONFIG, UI, MONTH_NAMES, CHART_MARGINS } from '@/utils/dashboardConstants';
@@ -14,6 +14,7 @@ import { validateOrderStats, validateProductStats, validateRecentOrder, safeVali
 import { maskCustomerName, canViewFullCustomerData } from '@/utils/privacyUtils';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
+import { exportOrderStats, exportProductStats, exportRecentOrders, exportSalesData, exportOutOfStockProducts } from '@/utils/exportUtils';
 import {
   LineChart,
   Line,
@@ -181,6 +182,21 @@ const Dashboard = () => {
   const { toast, showToast, hideToast } = useToast();
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Date range filter for sales chart
+  const [dateRange, setDateRange] = useState<'7d' | '30d' | '3m' | '6m' | '1y'>('6m');
+  
+  // Out-of-stock sorting and filtering
+  const [outOfStockSortBy, setOutOfStockSortBy] = useState<'name' | 'brand' | 'stock'>('name');
+  const [outOfStockSortOrder, setOutOfStockSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [outOfStockSearch, setOutOfStockSearch] = useState('');
+  
+  // Recent orders filtering and sorting
+  const [ordersStatusFilter, setOrdersStatusFilter] = useState<string>('');
+  const [ordersSortBy, setOrdersSortBy] = useState<'date' | 'total' | 'status'>('date');
+  const [ordersSortOrder, setOrdersSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [ordersPage, setOrdersPage] = useState(1);
+  const ordersPerPage = 5;
   
   // AbortController for query cancellation on unmount
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -354,34 +370,44 @@ const Dashboard = () => {
   // Check if user has permission issues
   const hasPermissionError = !hasAnalyticsPermission;
 
-  // Calculate real sales data from orderStats
+  // Calculate real sales data from orderStats with date range filter
   // Optimized: depend on specific property instead of entire object to prevent unnecessary recalculations
   const monthlySales = validatedOrderStats?.monthlySales;
   const salesData = useMemo((): MonthlySale[] => {
     if (!monthlySales || !Array.isArray(monthlySales)) {
       // Return empty data structure if no data available
-      return [
-        { month: 'Jan', sales: 0 },
-        { month: 'Feb', sales: 0 },
-        { month: 'Mar', sales: 0 },
-        { month: 'Apr', sales: 0 },
-        { month: 'May', sales: 0 },
-        { month: 'Jun', sales: 0 }
-      ];
+      const monthsToShow = dateRange === '7d' ? 1 : dateRange === '30d' ? 1 : dateRange === '3m' ? 3 : dateRange === '6m' ? 6 : 12;
+      return Array.from({ length: monthsToShow }, (_, i) => {
+        const targetDate = new Date();
+        targetDate.setMonth(targetDate.getMonth() - (monthsToShow - 1 - i));
+        return { month: MONTH_NAMES[targetDate.getMonth()], sales: 0 };
+      });
     }
 
-    // Get last 6 months of data
-    const last6Months = monthlySales.slice(-6);
+    // Determine months to display based on date range
+    let monthsToDisplay = 6;
+    if (dateRange === '7d' || dateRange === '30d') {
+      monthsToDisplay = 1; // Show current month for daily/weekly views
+    } else if (dateRange === '3m') {
+      monthsToDisplay = 3;
+    } else if (dateRange === '6m') {
+      monthsToDisplay = 6;
+    } else if (dateRange === '1y') {
+      monthsToDisplay = 12;
+    }
     
-    // If we have less than 6 months, pad with zeros
+    // Get data for the selected range
+    const rangeData = monthlySales.slice(-monthsToDisplay);
+    
+    // If we have less than required months, pad with zeros
     const now = new Date();
     const result: MonthlySale[] = [];
     
-    for (let i = UI.MONTHS_TO_DISPLAY - 1; i >= 0; i--) {
+    for (let i = monthsToDisplay - 1; i >= 0; i--) {
       const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthName = MONTH_NAMES[targetDate.getMonth()];
       // Use normalized month name for matching to handle various backend formats
-      const monthData = last6Months.find((m: MonthlySale) => {
+      const monthData = rangeData.find((m: MonthlySale) => {
         const normalizedBackendMonth = normalizeMonthName(m.month);
         return normalizedBackendMonth === monthName || m.month === monthName;
       });
@@ -392,7 +418,7 @@ const Dashboard = () => {
     }
     
     return result;
-  }, [monthlySales]);
+  }, [monthlySales, dateRange]);
 
   // Calculate real trend values
   // Optimized: depend on specific properties instead of entire object to prevent unnecessary recalculations
@@ -594,6 +620,18 @@ const Dashboard = () => {
         isRefreshing={isRefreshing}
         revenueTrend={revenueTrend}
         ordersTrend={ordersTrend}
+        onExportOrderStats={() => {
+          if (validatedOrderStats) {
+            exportOrderStats(validatedOrderStats);
+            showToast('Order statistics exported successfully', 'success');
+          }
+        }}
+        onExportProductStats={() => {
+          if (productStats) {
+            exportProductStats(productStats);
+            showToast('Product statistics exported successfully', 'success');
+          }
+        }}
       />
 
       {/* Out of Stock Alert - Enhanced */}
@@ -627,7 +665,32 @@ const Dashboard = () => {
 
       {!outOfStockLoading && !outOfStockError && (
         <>
-          {outOfStockData?.data && Array.isArray(outOfStockData.data) && outOfStockData.data.length > 0 ? (
+          {outOfStockData?.data && Array.isArray(outOfStockData.data) && outOfStockData.data.length > 0 ? (() => {
+            // Filter and sort out-of-stock products
+            const filteredProducts = (outOfStockData.data as Product[]).filter((product: Product) => {
+              if (!outOfStockSearch) return true;
+              const searchLower = outOfStockSearch.toLowerCase();
+              return (
+                product.name?.toLowerCase().includes(searchLower) ||
+                product.brand?.toLowerCase().includes(searchLower)
+              );
+            });
+            
+            const sortedProducts = [...filteredProducts].sort((a, b) => {
+              let comparison = 0;
+              if (outOfStockSortBy === 'name') {
+                comparison = (a.name || '').localeCompare(b.name || '');
+              } else if (outOfStockSortBy === 'brand') {
+                comparison = (a.brand || '').localeCompare(b.brand || '');
+              } else if (outOfStockSortBy === 'stock') {
+                comparison = (a.totalStock || 0) - (b.totalStock || 0);
+              }
+              return outOfStockSortOrder === 'asc' ? comparison : -comparison;
+            });
+            
+            const displayedProducts = sortedProducts.slice(0, UI.OUT_OF_STOCK_DISPLAY_LIMIT);
+            
+            return (
         <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 border-l-4 border-red-600 rounded-xl p-6 shadow-xl animate-fade-in-up relative overflow-hidden">
           {/* Pulsing background effect */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-red-200 opacity-20 rounded-full blur-2xl animate-pulse-slow"></div>
@@ -637,19 +700,65 @@ const Dashboard = () => {
               <AlertTriangle className="text-red-600" size={28} />
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-2xl font-black text-red-900">
-                  ⚠️ Out of Stock Alert
-                </h3>
-                <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse-slow">
-                  {outOfStockData.data.length} Products
-                </span>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-2xl font-black text-red-900">
+                    ⚠️ Out of Stock Alert
+                  </h3>
+                  <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse-slow">
+                    {filteredProducts.length} Products
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    exportOutOfStockProducts(outOfStockData.data as any[]);
+                    showToast('Out-of-stock products exported successfully', 'success');
+                  }}
+                  className="flex items-center gap-2 bg-white hover:bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
+                  title="Export to CSV"
+                >
+                  <Download size={16} />
+                  Export
+                </button>
               </div>
               <p className="text-red-800 mb-4 font-medium leading-relaxed">
                 The following products are out of stock and cannot be purchased by customers. Please restock as soon as possible to avoid lost sales.
               </p>
+              
+              {/* Search and Sort Controls */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={outOfStockSearch}
+                    onChange={(e) => setOutOfStockSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-red-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <select
+                    value={outOfStockSortBy}
+                    onChange={(e) => setOutOfStockSortBy(e.target.value as 'name' | 'brand' | 'stock')}
+                    className="px-3 py-2 border border-red-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+                  >
+                    <option value="name">Sort by Name</option>
+                    <option value="brand">Sort by Brand</option>
+                    <option value="stock">Sort by Stock</option>
+                  </select>
+                  <button
+                    onClick={() => setOutOfStockSortOrder(outOfStockSortOrder === 'asc' ? 'desc' : 'asc')}
+                    className="px-3 py-2 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+                    title={`Sort ${outOfStockSortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
+                  >
+                    <ArrowUpDown size={16} className={outOfStockSortOrder === 'desc' ? 'rotate-180' : ''} />
+                  </button>
+                </div>
+              </div>
+              
               <div className="space-y-2 mb-4">
-                {(outOfStockData.data as Product[]).slice(0, UI.OUT_OF_STOCK_DISPLAY_LIMIT).map((product: Product, prodIndex: number) => (
+                {displayedProducts.map((product: Product, prodIndex: number) => (
                   <div key={getUniqueKey(product?._id, prodIndex, 'product')} className="flex items-center justify-between bg-white p-4 rounded-lg border-2 border-red-200 hover:border-red-400 transition-all hover-lift shadow-sm">
                     <div className="flex items-center gap-3">
                       <img
@@ -677,9 +786,14 @@ const Dashboard = () => {
                     </Link>
                   </div>
                 ))}
-                {outOfStockData.data.length > UI.OUT_OF_STOCK_DISPLAY_LIMIT && (
+                {filteredProducts.length > UI.OUT_OF_STOCK_DISPLAY_LIMIT && (
                   <p className="text-sm text-red-800 font-semibold bg-red-100 px-4 py-2 rounded-lg inline-block">
-                    + {outOfStockData.data.length - UI.OUT_OF_STOCK_DISPLAY_LIMIT} more products out of stock
+                    + {filteredProducts.length - UI.OUT_OF_STOCK_DISPLAY_LIMIT} more products out of stock
+                  </p>
+                )}
+                {outOfStockSearch && filteredProducts.length === 0 && (
+                  <p className="text-sm text-red-600 font-medium text-center py-4">
+                    No products found matching "{outOfStockSearch}"
                   </p>
                 )}
               </div>
@@ -693,7 +807,8 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-          ) : (
+            );
+          })() : (
             <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
               <div className="flex flex-col items-center justify-center py-12">
                 <div className="bg-green-100 p-4 rounded-full mb-4">
@@ -720,8 +835,29 @@ const Dashboard = () => {
         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition-all hover-lift animate-fade-in-up" role="region" aria-label="Sales overview chart">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-black text-gray-900">Sales Overview</h2>
-            <div className="bg-gradient-to-r from-blue-100 to-indigo-100 px-4 py-2 rounded-lg" aria-label="Time period">
-              <p className="text-sm font-bold text-blue-800">Last 6 Months</p>
+            <div className="flex items-center gap-3">
+              <select
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value as '7d' | '30d' | '3m' | '6m' | '1y')}
+                className="bg-gradient-to-r from-blue-100 to-indigo-100 px-4 py-2 rounded-lg text-sm font-bold text-blue-800 border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                aria-label="Time period"
+              >
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last 30 Days</option>
+                <option value="3m">Last 3 Months</option>
+                <option value="6m">Last 6 Months</option>
+                <option value="1y">Last Year</option>
+              </select>
+              <button
+                onClick={() => {
+                  exportSalesData(salesData);
+                  showToast('Sales data exported successfully', 'success');
+                }}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-colors"
+                title="Export sales data to CSV"
+              >
+                <Download size={16} />
+              </button>
             </div>
           </div>
           {orderStatsLoading ? (
@@ -956,7 +1092,72 @@ const Dashboard = () => {
       {/* Recent Orders - Enhanced */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all animate-fade-in-up" role="region" aria-label="Recent orders">
         <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-          <h2 className="text-2xl font-black text-gray-900">Recent Orders</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-black text-gray-900">Recent Orders</h2>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  const orders = validatedOrderStats?.recentOrders || [];
+                  if (orders.length > 0) {
+                    exportRecentOrders(orders as any[]);
+                    showToast('Orders exported successfully', 'success');
+                  }
+                }}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
+                title="Export recent orders to CSV"
+              >
+                <Download size={16} />
+                Export
+              </button>
+              <Link
+                to="/orders"
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm"
+              >
+                View All
+                <ChevronRight size={16} />
+              </Link>
+            </div>
+          </div>
+          
+          {/* Filters and Sorting */}
+          <div className="flex flex-col sm:flex-row gap-3 mt-4">
+            <div className="flex items-center gap-2">
+              <Filter size={16} className="text-gray-500" />
+              <select
+                value={ordersStatusFilter}
+                onChange={(e) => {
+                  setOrdersStatusFilter(e.target.value);
+                  setOrdersPage(1);
+                }}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <ArrowUpDown size={16} className="text-gray-500" />
+              <select
+                value={ordersSortBy}
+                onChange={(e) => setOrdersSortBy(e.target.value as 'date' | 'total' | 'status')}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="date">Sort by Date</option>
+                <option value="total">Sort by Total</option>
+                <option value="status">Sort by Status</option>
+              </select>
+              <button
+                onClick={() => setOrdersSortOrder(ordersSortOrder === 'asc' ? 'desc' : 'asc')}
+                className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                title={`Sort ${ordersSortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
+              >
+                <ArrowUpDown size={16} className={ordersSortOrder === 'desc' ? 'rotate-180' : ''} />
+              </button>
+            </div>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full" aria-label="Recent orders table">
@@ -1005,9 +1206,38 @@ const Dashboard = () => {
                 const recentOrders = orderStatsData?.recentOrders;
                 if (recentOrders && Array.isArray(recentOrders) && recentOrders.length > 0) {
                   // Filter and validate orders
-                  const validOrders = recentOrders.filter(validateRecentOrder);
+                  let validOrders = recentOrders.filter(validateRecentOrder);
                   
-                  return validOrders.map((order: RecentOrder, index: number) => {
+                  // Apply status filter
+                  if (ordersStatusFilter) {
+                    validOrders = validOrders.filter((order: RecentOrder) => 
+                      order.orderStatus?.toLowerCase() === ordersStatusFilter.toLowerCase()
+                    );
+                  }
+                  
+                  // Sort orders
+                  validOrders = [...validOrders].sort((a, b) => {
+                    let comparison = 0;
+                    if (ordersSortBy === 'date') {
+                      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                      comparison = dateA - dateB;
+                    } else if (ordersSortBy === 'total') {
+                      comparison = (a.totalPrice ?? 0) - (b.totalPrice ?? 0);
+                    } else if (ordersSortBy === 'status') {
+                      comparison = (a.orderStatus || '').localeCompare(b.orderStatus || '');
+                    }
+                    return ordersSortOrder === 'asc' ? comparison : -comparison;
+                  });
+                  
+                  // Paginate orders
+                  const totalPages = Math.ceil(validOrders.length / ordersPerPage);
+                  const startIndex = (ordersPage - 1) * ordersPerPage;
+                  const paginatedOrders = validOrders.slice(startIndex, startIndex + ordersPerPage);
+                  
+                  return (
+                    <>
+                      {paginatedOrders.map((order: RecentOrder, index: number) => {
                     if (!order) return null;
                     const orderId = order._id || order.orderNumber || '';
                     
@@ -1068,8 +1298,42 @@ const Dashboard = () => {
                           </Link>
                         </td>
                       </tr>
-                    );
-                  });
+                      );
+                      })}
+                      
+                      {/* Pagination */}
+                      {totalPages > 1 && (
+                        <tr>
+                          <td colSpan={6} className="px-6 py-4">
+                            <div className="flex items-center justify-between">
+                              <div className="text-sm text-gray-600">
+                                Showing {startIndex + 1} to {Math.min(startIndex + ordersPerPage, validOrders.length)} of {validOrders.length} orders
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => setOrdersPage(prev => Math.max(1, prev - 1))}
+                                  disabled={ordersPage === 1}
+                                  className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                                >
+                                  Previous
+                                </button>
+                                <span className="text-sm text-gray-600">
+                                  Page {ordersPage} of {totalPages}
+                                </span>
+                                <button
+                                  onClick={() => setOrdersPage(prev => Math.min(totalPages, prev + 1))}
+                                  disabled={ordersPage === totalPages}
+                                  className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                                >
+                                  Next
+                                </button>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  );
                 }
                 return (
                   <tr>

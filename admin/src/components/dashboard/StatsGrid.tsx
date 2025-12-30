@@ -1,5 +1,5 @@
 import StatCard from '@/components/StatCard';
-import { DollarSign, Package, ShoppingCart, TrendingUp, RefreshCw } from 'lucide-react';
+import { DollarSign, Package, ShoppingCart, TrendingUp, RefreshCw, Download } from 'lucide-react';
 import { UI } from '@/utils/dashboardConstants';
 import { OrderStats, ProductStats } from '@/pages/Dashboard';
 
@@ -11,6 +11,8 @@ interface StatsGridProps {
   isRefreshing: boolean;
   revenueTrend: { value: string; isPositive: boolean } | null;
   ordersTrend: { value: string; isPositive: boolean } | null;
+  onExportOrderStats?: () => void;
+  onExportProductStats?: () => void;
 }
 
 const StatsGrid = ({
@@ -21,9 +23,24 @@ const StatsGrid = ({
   isRefreshing,
   revenueTrend,
   ordersTrend,
+  onExportOrderStats,
+  onExportProductStats,
 }: StatsGridProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-animation" role="region" aria-label="Statistics overview">
+    <div className="space-y-4">
+      <div className="flex items-center justify-end gap-2">
+        {onExportOrderStats && (
+          <button
+            onClick={onExportOrderStats}
+            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+            title="Export order statistics"
+          >
+            <Download size={14} />
+            Export Stats
+          </button>
+        )}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-animation" role="region" aria-label="Statistics overview">
       {/* Subtle refresh indicator */}
       {(orderStatsLoading || productStatsLoading || isRefreshing) && (
         <div className="col-span-full flex items-center justify-center gap-2 text-sm text-gray-500 mb-2">
@@ -84,6 +101,7 @@ const StatsGrid = ({
           />
         </>
       )}
+      </div>
     </div>
   );
 };
