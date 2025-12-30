@@ -214,7 +214,7 @@ const Dashboard = () => {
   });
   
   // Performance metrics (dev mode only)
-  const { metrics, addMetric } = usePerformanceMetrics(import.meta.env.DEV);
+  const { metrics } = usePerformanceMetrics(import.meta.env.DEV);
   
   // AbortController for query cancellation on unmount
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -1107,7 +1107,7 @@ const Dashboard = () => {
                   width={60}
                 />
                 <Tooltip 
-                  formatter={(value: any, name: string, props: any) => {
+                  formatter={(value: any, _name: string, props: any) => {
                     const currentValue = Number(value);
                     const previousValue = props.payload?.previousSales || 0;
                     const change = previousValue > 0 
