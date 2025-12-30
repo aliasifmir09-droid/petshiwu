@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { slideshowService } from '@/services/slideshow';
 import LoadingSpinner from './LoadingSpinner';
 import { Helmet } from 'react-helmet-async';
+import { normalizeImageUrl, generateSrcSet } from '@/utils/imageUtils';
 
 const HeroSlideshow = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -138,10 +139,23 @@ const HeroSlideshow = () => {
                     </div>
 
                     {/* Image Section - Bottom on mobile, Right on desktop */}
-                    <div className="relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex-1 min-h-[120px] sm:min-h-[160px] md:min-h-0" style={{ contain: 'layout' }}>
+                    <div 
+                      className="relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex-1 min-h-[120px] sm:min-h-[160px] md:min-h-0" 
+                      style={{ 
+                        contain: 'layout style paint',
+                        aspectRatio: '16 / 9' // Reserve space to prevent layout shift
+                      }}
+                    >
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                       <img
-                        src={slide.leftImage || slide.imageUrl}
+                        src={normalizeImageUrl(slide.leftImage || slide.imageUrl, { 
+                          width: 576, 
+                          height: 432, 
+                          format: 'auto',
+                          isMobile: true 
+                        })}
+                        srcSet={generateSrcSet(slide.leftImage || slide.imageUrl, [320, 576, 768], { format: 'auto' })}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 576px"
                         alt={slide.title}
                         width={576}
                         height={432}
@@ -150,13 +164,18 @@ const HeroSlideshow = () => {
                         decoding={index === 0 ? "sync" : "async"}
                         className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700"
                         style={{ 
+                          aspectRatio: '16 / 9', // Prevent layout shift on mobile
                           contentVisibility: index === 0 ? 'auto' : 'auto',
                           containIntrinsicSize: index === 0 ? '576px 432px' : undefined
                         }}
                         onError={(e) => {
                           // Fallback to imageUrl if leftImage fails
                           if (slide.leftImage && slide.imageUrl && (e.target as HTMLImageElement).src !== slide.imageUrl) {
-                            (e.target as HTMLImageElement).src = slide.imageUrl;
+                            (e.target as HTMLImageElement).src = normalizeImageUrl(slide.imageUrl, { 
+                              width: 576, 
+                              height: 432, 
+                              format: 'auto' 
+                            });
                           }
                         }}
                       />
