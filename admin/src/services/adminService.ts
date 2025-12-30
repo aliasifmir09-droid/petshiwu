@@ -201,7 +201,12 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
 
   // Products
   getProducts: async (params?: any) => {
-    const response = await api.get('/products', { params });
+    // Convert boolean inStock to string for backend compatibility
+    const processedParams = params ? { ...params } : {};
+    if (processedParams.inStock !== undefined && typeof processedParams.inStock === 'boolean') {
+      processedParams.inStock = String(processedParams.inStock);
+    }
+    const response = await api.get('/products', { params: processedParams });
     return response.data;
   },
 
