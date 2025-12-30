@@ -332,8 +332,8 @@ const Dashboard = () => {
     retry: 2, // Retry failed requests
     staleTime: QUERY_CONFIG.ORDER_STATS_STALE_TIME,
     gcTime: QUERY_CONFIG.ORDER_STATS_GC_TIME,
-    refetchInterval: QUERY_CONFIG.ORDER_STATS_REFETCH_INTERVAL,
-    refetchOnWindowFocus: true, // Refetch when user returns to tab
+    refetchInterval: QUERY_CONFIG.ORDER_STATS_REFETCH_INTERVAL, // Now polls every 2 minutes instead of 20 seconds
+    refetchOnWindowFocus: false, // Disabled - manual refresh button available if needed
   });
   
   // Update last updated timestamp when data changes
@@ -359,7 +359,7 @@ const Dashboard = () => {
         retry: 2,
         staleTime: QUERY_CONFIG.PRODUCT_STATS_STALE_TIME,
         gcTime: QUERY_CONFIG.PRODUCT_STATS_GC_TIME,
-        refetchOnWindowFocus: true,
+        refetchOnWindowFocus: false, // Disabled - product stats don't need to refresh on window focus
       },
       {
         queryKey: ['products', 'out-of-stock'],
@@ -367,7 +367,7 @@ const Dashboard = () => {
         retry: 2,
         staleTime: QUERY_CONFIG.OUT_OF_STOCK_STALE_TIME,
         gcTime: QUERY_CONFIG.OUT_OF_STOCK_GC_TIME,
-        refetchOnWindowFocus: true,
+        refetchOnWindowFocus: false, // Disabled - out of stock doesn't need to refresh on window focus
       },
       {
         queryKey: ['admin-categories'],

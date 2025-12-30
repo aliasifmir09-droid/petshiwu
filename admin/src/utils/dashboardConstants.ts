@@ -15,9 +15,9 @@ export const TIME = {
 export const QUERY_CONFIG = {
   // Stale time (how long data is considered fresh)
   USER_DATA_STALE_TIME: TIME.FIVE_MINUTES,
-  ORDER_STATS_STALE_TIME: 30 * TIME.SECOND,
-  PRODUCT_STATS_STALE_TIME: 10 * TIME.SECOND,
-  OUT_OF_STOCK_STALE_TIME: 10 * TIME.SECOND,
+  ORDER_STATS_STALE_TIME: 2 * TIME.MINUTE, // 2 minutes - order stats change more frequently
+  PRODUCT_STATS_STALE_TIME: 5 * TIME.MINUTE, // 5 minutes - product stats don't change as frequently
+  OUT_OF_STOCK_STALE_TIME: 2 * TIME.MINUTE, // 2 minutes - out of stock needs moderate freshness
   CATEGORIES_STALE_TIME: TIME.FIVE_MINUTES,
   PET_TYPES_STALE_TIME: TIME.FIVE_MINUTES,
   
@@ -28,8 +28,8 @@ export const QUERY_CONFIG = {
   CATEGORIES_GC_TIME: TIME.TEN_MINUTES,
   PET_TYPES_GC_TIME: TIME.TEN_MINUTES,
   
-  // Refetch intervals
-  ORDER_STATS_REFETCH_INTERVAL: 20 * TIME.SECOND, // Poll every 20 seconds
+  // Refetch intervals (set to false to disable automatic polling)
+  ORDER_STATS_REFETCH_INTERVAL: 2 * TIME.MINUTE, // Poll every 2 minutes instead of 20 seconds
 } as const;
 
 // UI constants
