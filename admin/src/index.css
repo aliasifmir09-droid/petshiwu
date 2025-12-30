@@ -374,5 +374,88 @@ body {
   animation: pulse 2s infinite;
 }
 
+/* ========== PRINT STYLES ========== */
+@media print {
+  /* Hide non-essential elements */
+  button,
+  .no-print,
+  nav,
+  aside,
+  .sidebar,
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  /* Ensure full width for print */
+  body,
+  main,
+  .print\\:w-full {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Remove shadows and borders for cleaner print */
+  .shadow-lg,
+  .shadow-xl,
+  .shadow-2xl {
+    box-shadow: none !important;
+  }
+
+  /* Ensure charts are visible */
+  svg,
+  canvas {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Page breaks */
+  .print\\:break-after {
+    page-break-after: always;
+  }
+
+  .print\\:break-before {
+    page-break-before: always;
+  }
+
+  /* Avoid breaking inside elements */
+  .print\\:break-inside-avoid {
+    page-break-inside: avoid;
+  }
+
+  /* Print header */
+  .print-header {
+    display: block;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #000;
+  }
+
+  .print-header h1 {
+    font-size: 24px;
+    margin: 0;
+  }
+
+  .print-header .print-date {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+  }
+
+  /* Ensure text is black for print */
+  * {
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  /* Charts should be black and white friendly */
+  .recharts-cartesian-grid {
+    stroke: #ccc !important;
+  }
+
+  .recharts-line {
+    stroke-width: 2px !important;
+  }
+}
+
 
 

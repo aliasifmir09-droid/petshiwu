@@ -1,4 +1,4 @@
-import { RefreshCw, Clock, Moon, Sun } from 'lucide-react';
+import { RefreshCw, Clock, Moon, Sun, Printer } from 'lucide-react';
 import { formatDateTime } from '@/utils/dateUtils';
 import { UI } from '@/utils/dashboardConstants';
 
@@ -25,8 +25,17 @@ const DashboardHeader = ({ onRefresh, isRefreshing, lastUpdated, isDarkMode, onT
           </div>
           <div className="flex items-center gap-2">
             <button
+              onClick={() => window.print()}
+              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 no-print"
+              aria-label="Print dashboard"
+              title="Print dashboard report"
+            >
+              <Printer size={UI.ICON_SIZE_MEDIUM} />
+              <span>Print</span>
+            </button>
+            <button
               onClick={onToggleDarkMode}
-              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105"
+              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 no-print"
               aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
               title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
@@ -36,7 +45,7 @@ const DashboardHeader = ({ onRefresh, isRefreshing, lastUpdated, isDarkMode, onT
             <button
               onClick={onRefresh}
               disabled={isRefreshing}
-              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed no-print"
               aria-label="Refresh dashboard data"
             >
               <RefreshCw size={UI.ICON_SIZE_MEDIUM} className={isRefreshing ? 'animate-spin' : ''} />

@@ -1,6 +1,7 @@
 import { LucideIcon } from 'lucide-react';
 import { TrendingUp, TrendingDown, HelpCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useCountUp } from '@/hooks/useCountUp';
 
 interface StatCardProps {
   title: string;
@@ -16,6 +17,32 @@ interface StatCardProps {
 
 const StatCard = ({ title, value, icon: Icon, trend, color = 'blue', tooltip }: StatCardProps) => {
   const [showTooltip, setShowTooltip] = useState(false);
+  const [isHighlighted, setIsHighlighted] = useState(false);
+  const previousValueRef = useRef<string | number>(value);
+  
+  // Extract numeric value for counting animation
+  const numericValue = typeof value === 'string' 
+    ? parseFloat(value.replace(/[^0-9.-]/g, '')) || 0
+    : value;
+  
+  const animatedValue = useCountUp(numericValue, { duration: 1000 });
+  
+  // Format the animated value to match original format
+  const displayValue = typeof value === 'string' && value.includes('$')
+    ? `$${animatedValue}`
+    : typeof value === 'string' && value.includes('%')
+    ? `${animatedValue}%`
+    : animatedValue;
+  
+  // Highlight when value changes
+  useEffect(() => {
+    if (previousValueRef.current !== value && previousValueRef.current !== 0) {
+      setIsHighlighted(true);
+      const timer = setTimeout(() => setIsHighlighted(false), 1000);
+      return () => clearTimeout(timer);
+    }
+    previousValueRef.current = value;
+  }, [value]);
   
   const gradientClasses = {
     blue: 'from-blue-500 to-indigo-600',
@@ -58,7 +85,15 @@ const StatCard = ({ title, value, icon: Icon, trend, color = 'blue', tooltip }: 
               </div>
             )}
           </div>
-          <h3 className="text-4xl font-black text-gray-900 mb-3 animate-count-up">{value}</h3>
+          <h3 
+            className={`text-4xl font-black mb-3 transition-all duration-500 ${
+              isHighlighted 
+                ? 'text-blue-600 scale-110' 
+                : 'text-gray-900 scale-100'
+            }`}
+          >
+            {displayValue}
+          </h3>
           {trend && (
             <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold ${
               trend.isPositive 

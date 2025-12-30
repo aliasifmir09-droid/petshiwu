@@ -7,6 +7,8 @@ import ErrorMessage from '@/components/ErrorMessage';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import StatsGrid from '@/components/dashboard/StatsGrid';
 import InsightsCard from '@/components/dashboard/InsightsCard';
+import HelpIcon from '@/components/dashboard/HelpIcon';
+import { usePerformanceMetrics } from '@/hooks/usePerformanceMetrics';
 import { AlertTriangle, ExternalLink, FolderTree, ChevronRight, Inbox, Eye, Package, Download, ArrowUpDown, Search, Filter } from 'lucide-react';
 import { normalizeImageUrl, getPlaceholderImage } from '@/utils/imageUtils';
 import { formatDate, normalizeMonthName } from '@/utils/dateUtils';
@@ -210,6 +212,9 @@ const Dashboard = () => {
     const saved = localStorage.getItem('darkMode');
     return saved ? saved === 'true' : false;
   });
+  
+  // Performance metrics (dev mode only)
+  const { metrics, addMetric } = usePerformanceMetrics(import.meta.env.DEV);
   
   // AbortController for query cancellation on unmount
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -745,13 +750,41 @@ const Dashboard = () => {
   return (
     <ErrorBoundary>
       <div className="space-y-8" role="main" aria-label="Dashboard overview">
-        <DashboardHeader 
+        {/* Print Header */}
+        <div className="print-header hidden print:block">
+          <h1>Dashboard Report</h1>
+          <div className="print-date">Generated: {new Date().toLocaleString()}</div>
+        </div>
+        
+        <DashboardHeader
           onRefresh={handleRefresh}
           isRefreshing={isRefreshing}
           lastUpdated={lastUpdated}
           isDarkMode={isDarkMode}
           onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
         />
+        
+        {/* Performance Metrics (Dev Mode Only) */}
+        {import.meta.env.DEV && metrics.length > 0 && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm no-print">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-bold text-yellow-800">Performance Metrics (Dev Mode)</h3>
+              <button
+                onClick={() => window.location.reload()}
+                className="text-yellow-600 hover:text-yellow-800 underline"
+              >
+                Clear
+              </button>
+            </div>
+            <div className="space-y-1">
+              {metrics.map((metric, index) => (
+                <div key={index} className="text-yellow-700">
+                  {metric.name}: {metric.duration.toFixed(2)}ms
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
       {/* Permission Error Alert */}
       {hasPermissionError && (
@@ -1006,7 +1039,13 @@ const Dashboard = () => {
         {/* Sales Chart */}
         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition-all hover-lift animate-fade-in-up" role="region" aria-label="Sales overview chart">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-black text-gray-900">Sales Overview</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-2xl font-black text-gray-900">Sales Overview</h2>
+              <HelpIcon 
+                content="This chart shows your sales revenue over time. Use the date range selector to view different periods. Enable comparison mode to compare with the previous period."
+                position="right"
+              />
+            </div>
             <div className="flex items-center gap-3">
               <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                 <input
@@ -1068,12 +1107,36 @@ const Dashboard = () => {
                   width={60}
                 />
                 <Tooltip 
-                  formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Sales']}
+                  formatter={(value: any, name: string, props: any) => {
+                    const currentValue = Number(value);
+                    const previousValue = props.payload?.previousSales || 0;
+                    const change = previousValue > 0 
+                      ? ((currentValue - previousValue) / previousValue * 100).toFixed(1)
+                      : null;
+                    const totalSales = salesData.reduce((sum: number, item: any) => sum + item.sales, 0);
+                    const percentageOfTotal = totalSales > 0
+                      ? ((currentValue / totalSales) * 100).toFixed(1)
+                      : null;
+                    
+                    let tooltipText = `$${currentValue.toFixed(2)}`;
+                    if (change) {
+                      const changeSymbol = Number(change) >= 0 ? '↑' : '↓';
+                      tooltipText += `\n${changeSymbol} ${Math.abs(Number(change))}% vs previous period`;
+                    }
+                    if (percentageOfTotal) {
+                      tooltipText += `\n${percentageOfTotal}% of total`;
+                    }
+                    
+                    return [tooltipText, 'Sales'];
+                  }}
                   contentStyle={{ 
                     fontSize: '12px',
-                    padding: '8px',
-                    borderRadius: '6px'
+                    padding: '12px',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    whiteSpace: 'pre-line'
                   }}
+                  labelStyle={{ fontWeight: 'bold', marginBottom: '4px' }}
                 />
                 <Legend wrapperStyle={{ fontSize: '12px' }} />
                 <Line 
@@ -1105,7 +1168,13 @@ const Dashboard = () => {
         {/* Category Chart */}
         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition-all hover-lift animate-fade-in-up" role="region" aria-label="Category distribution chart">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-black text-gray-900">Navigation Menu Categories</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-2xl font-black text-gray-900">Navigation Menu Categories</h2>
+              <HelpIcon 
+                content="This chart displays category distribution. Switch between subcategory count, product count, or revenue views using the dropdown."
+                position="right"
+              />
+            </div>
             <div className="flex items-center gap-3">
               <select
                 value={categoryViewMode}
