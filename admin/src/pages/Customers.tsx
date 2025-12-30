@@ -106,28 +106,44 @@ const Customers = () => {
           // MongoDB ObjectId with buffer - try to extract hex string
           // ObjectId buffer is typically 12 bytes, can be converted to hex
           try {
+            let bufferValues: number[] = [];
+            
             // If it's a Uint8Array or Buffer, convert to hex
             if (obj.buffer instanceof Uint8Array) {
-              const bufferArray = Array.from(obj.buffer) as number[];
-              const hex = bufferArray
+              bufferValues = Array.from(obj.buffer) as number[];
+            } else if (Array.isArray(obj.buffer)) {
+              bufferValues = (obj.buffer as unknown[])
+                .map((b: unknown) => {
+                  const num = typeof b === 'number' ? b : Number(b);
+                  return isNaN(num) ? 0 : num;
+                });
+            } else {
+              // Handle object with numeric keys (e.g., {0: 105, 1: 56, ...})
+              const bufferObj = obj.buffer as Record<string | number, unknown>;
+              bufferValues = [];
+              for (let i = 0; i < 12; i++) { // MongoDB ObjectId is 12 bytes
+                const value = bufferObj[i];
+                if (value !== undefined) {
+                  const num = typeof value === 'number' ? value : Number(value);
+                  bufferValues.push(isNaN(num) ? 0 : num);
+                } else {
+                  break; // Stop if we hit undefined
+                }
+              }
+            }
+            
+            // Convert buffer values to hex string
+            if (bufferValues.length === 12) {
+              const hex = bufferValues
                 .map((b: number) => b.toString(16).padStart(2, '0'))
                 .join('');
               if (hex && hex.length === 24) { // MongoDB ObjectId is 24 hex chars
                 id = hex;
               }
-            } else if (Array.isArray(obj.buffer)) {
-              const hex = (obj.buffer as unknown[])
-                .map((b: unknown) => {
-                  const num = typeof b === 'number' ? b : Number(b);
-                  return isNaN(num) ? '00' : num.toString(16).padStart(2, '0');
-                })
-                .join('');
-              if (hex && hex.length === 24) {
-                id = hex;
-              }
             }
           } catch (e) {
             // Buffer conversion failed
+            console.warn('Failed to convert buffer to hex:', e);
           }
         }
         
