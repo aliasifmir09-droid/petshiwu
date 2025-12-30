@@ -181,7 +181,6 @@ const Dashboard = () => {
   const { toast, showToast, hideToast } = useToast();
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [refreshError, setRefreshError] = useState<string | null>(null);
   
   // AbortController for query cancellation on unmount
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -200,7 +199,6 @@ const Dashboard = () => {
   // Handle manual refresh with error recovery
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    setRefreshError(null);
     try {
       // Invalidate all dashboard-related queries
       await Promise.all([
@@ -216,7 +214,6 @@ const Dashboard = () => {
       showToast('Dashboard refreshed successfully', 'success');
     } catch (error: any) {
       const errorMessage = error?.message || 'Failed to refresh dashboard';
-      setRefreshError(errorMessage);
       console.error('Error refreshing data:', error);
       showToast(errorMessage, 'error');
     } finally {
