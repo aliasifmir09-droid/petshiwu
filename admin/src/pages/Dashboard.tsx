@@ -103,8 +103,9 @@ const Dashboard = () => {
     queryFn: adminService.getProductStats,
     enabled: hasAnalyticsPermission, // Only fetch if user has permission
     retry: false,
-    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+    staleTime: 10 * 1000, // Cache for 10 seconds (reduced from 2 minutes for faster updates)
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
   });
 
   // Get out-of-stock products - limited to 10 for performance
@@ -112,8 +113,9 @@ const Dashboard = () => {
     queryKey: ['products', 'out-of-stock'],
     queryFn: () => adminService.getProducts({ inStock: false, limit: 10 }),
     retry: false,
-    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+    staleTime: 10 * 1000, // Cache for 10 seconds (reduced from 2 minutes for faster updates)
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
   });
 
   // Get categories and pet types for navigation menu

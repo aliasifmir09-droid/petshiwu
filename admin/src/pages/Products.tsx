@@ -259,7 +259,15 @@ const Products = () => {
     onSuccess: () => {
       setSelectedProducts(new Set());
       setShowBulkModal(false);
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      // Invalidate all product-related queries
+      queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
+      // Invalidate dashboard queries for immediate updates
+      queryClient.invalidateQueries({ queryKey: ['productStats'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock-notification'] });
+      // Refetch dashboard stats immediately
+      queryClient.refetchQueries({ queryKey: ['productStats'], type: 'active' });
+      queryClient.refetchQueries({ queryKey: ['products', 'out-of-stock'], type: 'active' });
       showToast('Products updated successfully', 'success');
     },
     onError: (error: any) => {
@@ -272,7 +280,15 @@ const Products = () => {
     onSuccess: () => {
       setSelectedProducts(new Set());
       setShowBulkModal(false);
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      // Invalidate all product-related queries
+      queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
+      // Invalidate dashboard queries for immediate updates
+      queryClient.invalidateQueries({ queryKey: ['productStats'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock-notification'] });
+      // Refetch dashboard stats immediately
+      queryClient.refetchQueries({ queryKey: ['productStats'], type: 'active' });
+      queryClient.refetchQueries({ queryKey: ['products', 'out-of-stock'], type: 'active' });
       showToast('Category assigned successfully', 'success');
     },
     onError: (error: any) => {

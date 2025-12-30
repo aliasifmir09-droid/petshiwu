@@ -224,8 +224,15 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
   const createMutation = useMutation({
     mutationFn: adminService.createProduct,
     onSuccess: async () => {
-      // Only invalidate - it will automatically refetch if query is active
+      // Invalidate all product-related queries
       queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
+      // Invalidate dashboard queries for immediate updates
+      queryClient.invalidateQueries({ queryKey: ['productStats'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock-notification'] });
+      // Refetch dashboard stats immediately
+      queryClient.refetchQueries({ queryKey: ['productStats'], type: 'active' });
+      queryClient.refetchQueries({ queryKey: ['products', 'out-of-stock'], type: 'active' });
       showToast('Product created successfully!', 'success');
       onClose();
     },
@@ -260,16 +267,51 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
 
   const updateMutation = useMutation({
     mutationFn: (data: any) => adminService.updateProduct(product._id, data),
-    onSuccess: async () => {
-      // Invalidate and refetch to ensure fresh data
-      await queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
-      await queryClient.invalidateQueries({ queryKey: ['product', product.slug || product._id] });
-      // Refetch the products list to ensure it's up to date
-      await queryClient.refetchQueries({ queryKey: ['products'], exact: false });
+    onSuccess: async (updatedProduct) => {
+      // Optimistically update the product in all product list queries
+      queryClient.setQueriesData(
+        { queryKey: ['products'], exact: false },
+        (oldData: any) => {
+          if (!oldData || !oldData.data) return oldData;
+          
+          // Update the product in the list if it exists
+          const updatedData = oldData.data.map((p: any) => 
+            String(p._id) === String(product._id) ? updatedProduct : p
+          );
+          
+          return {
+            ...oldData,
+            data: updatedData
+          };
+        }
+      );
+      
+      // Update individual product query
+      queryClient.setQueryData(
+        ['product', product.slug || product._id],
+        updatedProduct
+      );
+      
+      // Invalidate and refetch to ensure fresh data (runs in background)
+      queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['product', product.slug || product._id] });
+      
+      // Invalidate dashboard queries for immediate updates
+      queryClient.invalidateQueries({ queryKey: ['productStats'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock-notification'] });
+      
+      // Refetch dashboard stats immediately (only active queries)
+      queryClient.refetchQueries({ queryKey: ['productStats'], type: 'active' });
+      queryClient.refetchQueries({ queryKey: ['products', 'out-of-stock'], type: 'active' });
+      
       showToast('Product updated successfully!', 'success');
       onClose();
     },
     onError: (error: any) => {
+      // Rollback optimistic updates by invalidating queries
+      queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['product', product.slug || product._id] });
       showToast(error.response?.data?.message || 'Failed to update product', 'error');
     }
   });
