@@ -212,7 +212,7 @@ const HeroSlideshow = () => {
           </button>
 
           {/* Modern Slide Indicators */}
-          <div className="absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10 bg-white/70 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md">
+          <div className="absolute bottom-2 md:bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 md:gap-2 z-10 bg-white/70 backdrop-blur-sm px-2 py-1 md:px-2.5 md:py-1 rounded-full shadow-md">
             {slides.map((_, index) => (
               <button
                 key={index}
@@ -224,11 +224,11 @@ const HeroSlideshow = () => {
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
                 style={{ 
-                  minWidth: '44px', 
-                  minHeight: '44px',
-                  width: index === currentSlide ? '32px' : '12px',
-                  height: '12px',
-                  padding: index === currentSlide ? '0' : '16px'
+                  minWidth: '24px', 
+                  minHeight: '24px',
+                  width: index === currentSlide ? '20px' : '8px',
+                  height: '8px',
+                  padding: index === currentSlide ? '0' : '8px'
                 }}
               />
             ))}
