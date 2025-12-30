@@ -3,7 +3,7 @@ import EmailTemplate from '../models/EmailTemplate';
 import { AuthRequest } from '../middleware/auth';
 import { extractObjectId } from '../utils/types';
 import logger from '../utils/logger';
-import { seedEmailTemplates } from '../utils/seedEmailTemplates';
+import { seedEmailTemplates } from '../scripts/seedEmailTemplates';
 
 // Helper function to normalize email template _id to string
 const normalizeTemplateId = (template: any): any => {
