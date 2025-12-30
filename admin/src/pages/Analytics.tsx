@@ -129,9 +129,27 @@ const Analytics = () => {
       ? ((avgOrderValue - prevAvgOrderValue) / prevAvgOrderValue) * 100
       : avgOrderValue > 0 ? 100 : 0;
 
-    // Unique customers
-    const uniqueCustomers = new Set(currentOrders.map((o: any) => o.user?._id || o.user)).size;
-    const prevUniqueCustomers = new Set(previousOrders.map((o: any) => o.user?._id || o.user)).size;
+    // Unique customers - ensure we always use string IDs
+    const uniqueCustomers = new Set(
+      currentOrders
+        .map((o: any) => {
+          const userId = o.user?._id;
+          if (!userId) return null;
+          // Ensure userId is a string to prevent [object Object] in URLs
+          return typeof userId === 'string' ? userId : String(userId || '');
+        })
+        .filter((id: string | null) => id && id !== 'undefined' && id !== 'null')
+    ).size;
+    const prevUniqueCustomers = new Set(
+      previousOrders
+        .map((o: any) => {
+          const userId = o.user?._id;
+          if (!userId) return null;
+          // Ensure userId is a string to prevent [object Object] in URLs
+          return typeof userId === 'string' ? userId : String(userId || '');
+        })
+        .filter((id: string | null) => id && id !== 'undefined' && id !== 'null')
+    ).size;
     const customerGrowth = prevUniqueCustomers > 0
       ? ((uniqueCustomers - prevUniqueCustomers) / prevUniqueCustomers) * 100
       : uniqueCustomers > 0 ? 100 : 0;
@@ -909,8 +927,13 @@ const Analytics = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {advancedAnalytics.customerLifetimeValue.topCustomers.slice(0, 10).map((customer: any) => (
-                        <tr key={customer.userId} className="hover:bg-gray-50">
+                      {advancedAnalytics.customerLifetimeValue.topCustomers.slice(0, 10).map((customer: any, index: number) => {
+                        // Ensure userId is a string to prevent [object Object] in keys/URLs
+                        const userId = customer.userId 
+                          ? (typeof customer.userId === 'string' ? customer.userId : String(customer.userId || ''))
+                          : `customer-${index}`;
+                        return (
+                        <tr key={userId} className="hover:bg-gray-50">
                           <td className="px-4 py-3 text-sm">
                             {customer.email || `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || 'Unknown'}
                           </td>
@@ -918,7 +941,8 @@ const Analytics = () => {
                           <td className="px-4 py-3 text-right text-sm">{customer.orderCount}</td>
                           <td className="px-4 py-3 text-right text-sm">${customer.averageOrderValue.toFixed(2)}</td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
