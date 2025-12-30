@@ -2066,6 +2066,20 @@ export const createProduct = async (req: AuthRequest, res: Response, next: NextF
     }
 
     const product = await Product.create(productData);
+    
+    // Populate category for response
+    await product.populate('category', 'name slug');
+
+    // Invalidate cache for product lists (new product affects lists)
+    // Do this in parallel with response to not block the request
+    const cacheInvalidationPromises = [
+      cache.delPattern('products:*') // Invalidate all product list caches
+    ];
+    
+    // Don't await - let it run in background
+    Promise.all(cacheInvalidationPromises).catch(err => {
+      logger.error('Error invalidating product cache:', err);
+    });
 
     res.status(201).json({
       success: true,
@@ -2099,6 +2113,8 @@ export const createProduct = async (req: AuthRequest, res: Response, next: NextF
 // Update product (Admin)
 export const updateProduct = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    const productId = req.params.id;
+    
     // Convert attributes objects to Maps for variants if present
     const updateData = { ...req.body };
     if (updateData.variants && Array.isArray(updateData.variants)) {
@@ -2120,7 +2136,7 @@ export const updateProduct = async (req: AuthRequest, res: Response, next: NextF
 
     // Use findById + save instead of findByIdAndUpdate to trigger pre-save hooks
     // This ensures totalStock and inStock are recalculated from variants
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(productId).lean(false); // Don't use lean() - we need the document instance
 
     if (!product) {
       return res.status(404).json({
@@ -2139,8 +2155,21 @@ export const updateProduct = async (req: AuthRequest, res: Response, next: NextF
     // Save to trigger pre-save hooks (which will recalculate totalStock and inStock)
     await product.save();
 
-    // Populate category after save
+    // Populate category after save (only needed fields for response)
     await product.populate('category', 'name slug');
+
+    // Invalidate cache for this product and all product lists
+    // Do this in parallel with response to not block the request
+    const cacheInvalidationPromises = [
+      cache.del(cacheKeys.product(productId)),
+      cache.del(cacheKeys.product(product.slug)),
+      cache.delPattern('products:*') // Invalidate all product list caches
+    ];
+    
+    // Don't await - let it run in background
+    Promise.all(cacheInvalidationPromises).catch(err => {
+      logger.error('Error invalidating product cache:', err);
+    });
 
     res.status(200).json({
       success: true,

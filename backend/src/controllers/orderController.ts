@@ -1497,6 +1497,101 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
       }
     ]);
 
+    // Calculate monthly sales revenue (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    const monthlySales = await Order.aggregate([
+      {
+        $match: {
+          paymentStatus: 'paid',
+          createdAt: { $gte: sixMonthsAgo }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          sales: { $sum: '$totalPrice' },
+          orderCount: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { '_id.year': 1, '_id.month': 1 }
+      }
+    ]);
+
+    // Format monthly sales data with month names
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const formattedMonthlySales = monthlySales.map((item: any) => ({
+      month: monthNames[item._id.month - 1],
+      sales: item.sales || 0,
+      orderCount: item.orderCount || 0
+    }));
+
+    // Calculate current month and previous month revenue for trends
+    const now = new Date();
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+
+    const currentMonthRevenue = await Order.aggregate([
+      {
+        $match: {
+          paymentStatus: 'paid',
+          createdAt: { $gte: currentMonthStart }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: '$totalPrice' }
+        }
+      }
+    ]);
+
+    const previousMonthRevenue = await Order.aggregate([
+      {
+        $match: {
+          paymentStatus: 'paid',
+          createdAt: { 
+            $gte: previousMonthStart,
+            $lte: previousMonthEnd
+          }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: '$totalPrice' }
+        }
+      }
+    ]);
+
+    const currentMonthTotal = currentMonthRevenue[0]?.total || 0;
+    const previousMonthTotal = previousMonthRevenue[0]?.total || 0;
+    const revenueTrend = previousMonthTotal > 0 
+      ? ((currentMonthTotal - previousMonthTotal) / previousMonthTotal) * 100 
+      : 0;
+
+    // Calculate current month and previous month order counts for trends
+    const currentMonthOrders = await Order.countDocuments({
+      createdAt: { $gte: currentMonthStart }
+    });
+
+    const previousMonthOrders = await Order.countDocuments({
+      createdAt: { 
+        $gte: previousMonthStart,
+        $lte: previousMonthEnd
+      }
+    });
+
+    const ordersTrend = previousMonthOrders > 0
+      ? ((currentMonthOrders - previousMonthOrders) / previousMonthOrders) * 100
+      : 0;
+
     // Get recent orders
     const recentOrders = await Order.find()
       .populate('user', 'firstName lastName email')
@@ -1517,6 +1612,13 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
         donationCount,
         averageDonation,
         monthlyDonations,
+        monthlySales: formattedMonthlySales,
+        revenueTrend,
+        ordersTrend,
+        currentMonthRevenue: currentMonthTotal,
+        previousMonthRevenue: previousMonthTotal,
+        currentMonthOrders,
+        previousMonthOrders,
         recentOrders
       }
     });

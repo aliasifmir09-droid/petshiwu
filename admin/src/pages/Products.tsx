@@ -259,16 +259,26 @@ const Products = () => {
     onSuccess: () => {
       setSelectedProducts(new Set());
       setShowBulkModal(false);
-      // Invalidate all product-related queries
-      queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
-      // Invalidate dashboard queries for immediate updates
-      queryClient.invalidateQueries({ queryKey: ['productStats'] });
-      queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock'] });
-      queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock-notification'] });
-      // Refetch dashboard stats immediately
-      queryClient.refetchQueries({ queryKey: ['productStats'], type: 'active' });
-      queryClient.refetchQueries({ queryKey: ['products', 'out-of-stock'], type: 'active' });
+      // Show success immediately
       showToast('Products updated successfully', 'success');
+      
+      // Invalidate and refetch in parallel (runs in background)
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['products'], exact: false }),
+        queryClient.invalidateQueries({ queryKey: ['productStats'] }),
+        queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock'] }),
+        queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock-notification'] })
+      ]).then(() => {
+        // Refetch only active queries in parallel
+        Promise.all([
+          queryClient.refetchQueries({ queryKey: ['productStats'], type: 'active' }),
+          queryClient.refetchQueries({ queryKey: ['products', 'out-of-stock'], type: 'active' })
+        ]).catch(err => {
+          console.error('Error refetching queries:', err);
+        });
+      }).catch(err => {
+        console.error('Error invalidating queries:', err);
+      });
     },
     onError: (error: any) => {
       showToast(error.response?.data?.message || 'Failed to update products', 'error');
@@ -280,16 +290,26 @@ const Products = () => {
     onSuccess: () => {
       setSelectedProducts(new Set());
       setShowBulkModal(false);
-      // Invalidate all product-related queries
-      queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
-      // Invalidate dashboard queries for immediate updates
-      queryClient.invalidateQueries({ queryKey: ['productStats'] });
-      queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock'] });
-      queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock-notification'] });
-      // Refetch dashboard stats immediately
-      queryClient.refetchQueries({ queryKey: ['productStats'], type: 'active' });
-      queryClient.refetchQueries({ queryKey: ['products', 'out-of-stock'], type: 'active' });
+      // Show success immediately
       showToast('Category assigned successfully', 'success');
+      
+      // Invalidate and refetch in parallel (runs in background)
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['products'], exact: false }),
+        queryClient.invalidateQueries({ queryKey: ['productStats'] }),
+        queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock'] }),
+        queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock-notification'] })
+      ]).then(() => {
+        // Refetch only active queries in parallel
+        Promise.all([
+          queryClient.refetchQueries({ queryKey: ['productStats'], type: 'active' }),
+          queryClient.refetchQueries({ queryKey: ['products', 'out-of-stock'], type: 'active' })
+        ]).catch(err => {
+          console.error('Error refetching queries:', err);
+        });
+      }).catch(err => {
+        console.error('Error invalidating queries:', err);
+      });
     },
     onError: (error: any) => {
       showToast(error.response?.data?.message || 'Failed to assign category', 'error');

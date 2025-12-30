@@ -87,32 +87,32 @@ const Dashboard = () => {
 
   const hasAnalyticsPermission = userData?.role === 'admin' || userData?.permissions?.canViewAnalytics;
 
-  const { data: orderStats } = useQuery({
+  const { data: orderStats, isLoading: orderStatsLoading, error: orderStatsError } = useQuery({
     queryKey: ['orderStats'],
     queryFn: adminService.getOrderStats,
     enabled: hasAnalyticsPermission, // Only fetch if user has permission
-    retry: false,
+    retry: 2, // Retry failed requests
     staleTime: 30 * 1000, // Cache for 30 seconds (reduced for faster updates)
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchInterval: 20000, // Poll every 20 seconds for new orders (fallback if SSE fails)
     refetchOnWindowFocus: true, // Refetch when user returns to tab
   });
 
-  const { data: productStats } = useQuery({
+  const { data: productStats, isLoading: productStatsLoading, error: productStatsError } = useQuery({
     queryKey: ['productStats'],
     queryFn: adminService.getProductStats,
     enabled: hasAnalyticsPermission, // Only fetch if user has permission
-    retry: false,
+    retry: 2, // Retry failed requests
     staleTime: 10 * 1000, // Cache for 10 seconds (reduced from 2 minutes for faster updates)
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: true, // Refetch when user returns to tab
   });
 
   // Get out-of-stock products - limited to 10 for performance
-  const { data: outOfStockData } = useQuery({
+  const { data: outOfStockData, isLoading: outOfStockLoading, error: outOfStockError } = useQuery({
     queryKey: ['products', 'out-of-stock'],
     queryFn: () => adminService.getProducts({ inStock: false, limit: 10 }),
-    retry: false,
+    retry: 2, // Retry failed requests
     staleTime: 10 * 1000, // Cache for 10 seconds (reduced from 2 minutes for faster updates)
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: true, // Refetch when user returns to tab
@@ -173,15 +173,63 @@ const Dashboard = () => {
   // Check if user has permission issues
   const hasPermissionError = !hasAnalyticsPermission;
 
-  // Mock data for sales chart
-  const salesData = [
-    { month: 'Jan', sales: 4000 },
-    { month: 'Feb', sales: 3000 },
-    { month: 'Mar', sales: 5000 },
-    { month: 'Apr', sales: 4500 },
-    { month: 'May', sales: 6000 },
-    { month: 'Jun', sales: 5500 }
-  ];
+  // Calculate real sales data from orderStats
+  const salesData = useMemo(() => {
+    if (!orderStats?.monthlySales || !Array.isArray(orderStats.monthlySales)) {
+      // Return empty data structure if no data available
+      return [
+        { month: 'Jan', sales: 0 },
+        { month: 'Feb', sales: 0 },
+        { month: 'Mar', sales: 0 },
+        { month: 'Apr', sales: 0 },
+        { month: 'May', sales: 0 },
+        { month: 'Jun', sales: 0 }
+      ];
+    }
+
+    // Get last 6 months of data
+    const last6Months = orderStats.monthlySales.slice(-6);
+    
+    // If we have less than 6 months, pad with zeros
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const now = new Date();
+    const result = [];
+    
+    for (let i = 5; i >= 0; i--) {
+      const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthName = monthNames[targetDate.getMonth()];
+      const monthData = last6Months.find((m: any) => m.month === monthName);
+      result.push({
+        month: monthName,
+        sales: monthData?.sales || 0
+      });
+    }
+    
+    return result;
+  }, [orderStats?.monthlySales]);
+
+  // Calculate real trend values
+  const revenueTrend = useMemo(() => {
+    if (!orderStats?.revenueTrend && orderStats?.revenueTrend !== 0) {
+      return null;
+    }
+    const trend = orderStats.revenueTrend;
+    return {
+      value: `${Math.abs(trend).toFixed(1)}% ${trend >= 0 ? 'increase' : 'decrease'} from last month`,
+      isPositive: trend >= 0
+    };
+  }, [orderStats?.revenueTrend]);
+
+  const ordersTrend = useMemo(() => {
+    if (!orderStats?.ordersTrend && orderStats?.ordersTrend !== 0) {
+      return null;
+    }
+    const trend = orderStats.ordersTrend;
+    return {
+      value: `${Math.abs(trend).toFixed(1)}% ${trend >= 0 ? 'increase' : 'decrease'} from last month`,
+      isPositive: trend >= 0
+    };
+  }, [orderStats?.ordersTrend]);
 
   // Generate category data from actual navigation menu categories - MEMOIZED for performance
   const categoryData = useMemo(() => {
@@ -285,38 +333,84 @@ const Dashboard = () => {
         </div>
       )}
 
+      {/* Error Messages */}
+      {orderStatsError && (
+        <div className="bg-red-50 border-l-4 border-red-500 rounded-xl p-4 shadow-lg">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="text-red-600" size={20} />
+            <div>
+              <h3 className="text-red-800 font-semibold">Failed to load order statistics</h3>
+              <p className="text-red-600 text-sm">Please refresh the page or try again later.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {productStatsError && (
+        <div className="bg-red-50 border-l-4 border-red-500 rounded-xl p-4 shadow-lg">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="text-red-600" size={20} />
+            <div>
+              <h3 className="text-red-800 font-semibold">Failed to load product statistics</h3>
+              <p className="text-red-600 text-sm">Please refresh the page or try again later.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Stats Grid with Staggered Animation */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-animation">
         <StatCard
           title="Total Revenue"
-          value={`$${orderStats?.totalRevenue?.toFixed(2) || '0.00'}`}
+          value={orderStatsLoading ? 'Loading...' : `$${(orderStats?.totalRevenue ?? 0).toFixed(2)}`}
           icon={DollarSign}
           color="green"
-          trend={{ value: '12.5% from last month', isPositive: true }}
+          trend={revenueTrend || undefined}
         />
         <StatCard
           title="Total Orders"
-          value={orderStats?.totalOrders || 0}
+          value={orderStatsLoading ? 'Loading...' : (orderStats?.totalOrders ?? 0)}
           icon={ShoppingCart}
           color="blue"
-          trend={{ value: '8.2% from last month', isPositive: true }}
+          trend={ordersTrend || undefined}
         />
         <StatCard
           title="Total Products"
-          value={productStats?.totalProducts || 0}
+          value={productStatsLoading ? 'Loading...' : (productStats?.totalProducts ?? 0)}
           icon={Package}
           color="yellow"
         />
         <StatCard
           title="Pending Orders"
-          value={orderStats?.pendingOrders || 0}
+          value={orderStatsLoading ? 'Loading...' : (orderStats?.pendingOrders ?? 0)}
           icon={TrendingUp}
           color="red"
         />
       </div>
 
       {/* Out of Stock Alert - Enhanced */}
-      {outOfStockData && outOfStockData.data.length > 0 && (
+      {outOfStockError && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-500 rounded-xl p-4 shadow-lg">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="text-yellow-600" size={20} />
+            <div>
+              <h3 className="text-yellow-800 font-semibold">Failed to load out-of-stock products</h3>
+              <p className="text-yellow-600 text-sm">Please refresh the page or try again later.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {outOfStockLoading && (
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+            <span className="ml-3 text-gray-600">Loading out-of-stock products...</span>
+          </div>
+        </div>
+      )}
+
+      {!outOfStockLoading && !outOfStockError && outOfStockData?.data && Array.isArray(outOfStockData.data) && outOfStockData.data.length > 0 && (
         <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 border-l-4 border-red-600 rounded-xl p-6 shadow-xl animate-fade-in-up relative overflow-hidden">
           {/* Pulsing background effect */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-red-200 opacity-20 rounded-full blur-2xl animate-pulse-slow"></div>
@@ -391,16 +485,32 @@ const Dashboard = () => {
               <p className="text-sm font-bold text-blue-800">Last 6 Months</p>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={salesData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="sales" stroke="#0284c7" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
+          {orderStatsLoading ? (
+            <div className="flex items-center justify-center h-[300px]">
+              <div className="text-center text-gray-500">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p>Loading sales data...</p>
+              </div>
+            </div>
+          ) : orderStatsError ? (
+            <div className="flex items-center justify-center h-[300px]">
+              <div className="text-center text-red-600">
+                <AlertTriangle className="mx-auto mb-2" size={32} />
+                <p>Failed to load sales data</p>
+              </div>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={salesData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Sales']} />
+                <Legend />
+                <Line type="monotone" dataKey="sales" stroke="#0284c7" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
 
         {/* Category Chart */}
@@ -599,28 +709,51 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {orderStats?.recentOrders?.map((order: any, index: number) => (
-                <tr key={getUniqueKey(order?._id, index, 'order')} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm font-medium">{order.orderNumber}</td>
-                  <td className="px-6 py-4 text-sm">
-                    {order.user?.firstName} {order.user?.lastName}
-                  </td>
-                  <td className="px-6 py-4 text-sm">${order.totalPrice.toFixed(2)}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      order.orderStatus === 'delivered' ? 'bg-green-100 text-green-800' :
-                      order.orderStatus === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                      order.orderStatus === 'processing' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {order.orderStatus}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {new Date(order.createdAt).toLocaleDateString()}
+              {orderStatsLoading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center">
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                      <span className="ml-3 text-gray-600">Loading orders...</span>
+                    </div>
                   </td>
                 </tr>
-              )) || (
+              ) : orderStatsError ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-red-600">
+                    Failed to load recent orders. Please refresh the page.
+                  </td>
+                </tr>
+              ) : orderStats?.recentOrders && Array.isArray(orderStats.recentOrders) && orderStats.recentOrders.length > 0 ? (
+                orderStats.recentOrders.map((order: any, index: number) => {
+                  if (!order) return null;
+                  return (
+                    <tr key={getUniqueKey(order?._id, index, 'order')} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 text-sm font-medium">{order.orderNumber || 'N/A'}</td>
+                      <td className="px-6 py-4 text-sm">
+                        {order.user?.firstName || ''} {order.user?.lastName || ''}
+                        {!order.user?.firstName && !order.user?.lastName && 'Guest'}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        ${(order.totalPrice ?? 0).toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          order.orderStatus === 'delivered' ? 'bg-green-100 text-green-800' :
+                          order.orderStatus === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                          order.orderStatus === 'processing' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {order.orderStatus || 'Unknown'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
                 <tr>
                   <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
                     No recent orders

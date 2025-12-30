@@ -223,18 +223,28 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
 
   const createMutation = useMutation({
     mutationFn: adminService.createProduct,
-    onSuccess: async () => {
-      // Invalidate all product-related queries
-      queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
-      // Invalidate dashboard queries for immediate updates
-      queryClient.invalidateQueries({ queryKey: ['productStats'] });
-      queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock'] });
-      queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock-notification'] });
-      // Refetch dashboard stats immediately
-      queryClient.refetchQueries({ queryKey: ['productStats'], type: 'active' });
-      queryClient.refetchQueries({ queryKey: ['products', 'out-of-stock'], type: 'active' });
+    onSuccess: () => {
+      // Show success immediately
       showToast('Product created successfully!', 'success');
       onClose();
+      
+      // Invalidate and refetch in parallel (runs in background)
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['products'], exact: false }),
+        queryClient.invalidateQueries({ queryKey: ['productStats'] }),
+        queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock'] }),
+        queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock-notification'] })
+      ]).then(() => {
+        // Refetch only active queries in parallel
+        Promise.all([
+          queryClient.refetchQueries({ queryKey: ['productStats'], type: 'active' }),
+          queryClient.refetchQueries({ queryKey: ['products', 'out-of-stock'], type: 'active' })
+        ]).catch(err => {
+          console.error('Error refetching queries:', err);
+        });
+      }).catch(err => {
+        console.error('Error invalidating queries:', err);
+      });
     },
     onError: (error: any) => {
       
@@ -267,7 +277,11 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
 
   const updateMutation = useMutation({
     mutationFn: (data: any) => adminService.updateProduct(product._id, data),
-    onSuccess: async (updatedProduct) => {
+    onSuccess: (updatedProduct) => {
+      // Show success immediately - don't wait for refetches
+      showToast('Product updated successfully!', 'success');
+      onClose();
+      
       // Optimistically update the product in all product list queries
       queryClient.setQueriesData(
         { queryKey: ['products'], exact: false },
@@ -292,21 +306,24 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
         updatedProduct
       );
       
-      // Invalidate and refetch to ensure fresh data (runs in background)
-      queryClient.invalidateQueries({ queryKey: ['products'], exact: false });
-      queryClient.invalidateQueries({ queryKey: ['product', product.slug || product._id] });
-      
-      // Invalidate dashboard queries for immediate updates
-      queryClient.invalidateQueries({ queryKey: ['productStats'] });
-      queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock'] });
-      queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock-notification'] });
-      
-      // Refetch dashboard stats immediately (only active queries)
-      queryClient.refetchQueries({ queryKey: ['productStats'], type: 'active' });
-      queryClient.refetchQueries({ queryKey: ['products', 'out-of-stock'], type: 'active' });
-      
-      showToast('Product updated successfully!', 'success');
-      onClose();
+      // Invalidate and refetch in parallel (runs in background, doesn't block UI)
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['products'], exact: false }),
+        queryClient.invalidateQueries({ queryKey: ['product', product.slug || product._id] }),
+        queryClient.invalidateQueries({ queryKey: ['productStats'] }),
+        queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock'] }),
+        queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock-notification'] })
+      ]).then(() => {
+        // Refetch only active queries in parallel
+        Promise.all([
+          queryClient.refetchQueries({ queryKey: ['productStats'], type: 'active' }),
+          queryClient.refetchQueries({ queryKey: ['products', 'out-of-stock'], type: 'active' })
+        ]).catch(err => {
+          console.error('Error refetching queries:', err);
+        });
+      }).catch(err => {
+        console.error('Error invalidating queries:', err);
+      });
     },
     onError: (error: any) => {
       // Rollback optimistic updates by invalidating queries
