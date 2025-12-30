@@ -360,32 +360,47 @@ const Dashboard = () => {
 
       {/* Stats Grid with Staggered Animation */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-animation">
-        <StatCard
-          title="Total Revenue"
-          value={orderStatsLoading ? 'Loading...' : `$${(orderStats?.totalRevenue ?? 0).toFixed(2)}`}
-          icon={DollarSign}
-          color="green"
-          trend={revenueTrend || undefined}
-        />
-        <StatCard
-          title="Total Orders"
-          value={orderStatsLoading ? 'Loading...' : (orderStats?.totalOrders ?? 0)}
-          icon={ShoppingCart}
-          color="blue"
-          trend={ordersTrend || undefined}
-        />
-        <StatCard
-          title="Total Products"
-          value={productStatsLoading ? 'Loading...' : (productStats?.totalProducts ?? 0)}
-          icon={Package}
-          color="yellow"
-        />
-        <StatCard
-          title="Pending Orders"
-          value={orderStatsLoading ? 'Loading...' : (orderStats?.pendingOrders ?? 0)}
-          icon={TrendingUp}
-          color="red"
-        />
+        {orderStatsLoading || productStatsLoading ? (
+          // Skeleton loaders for stats cards
+          <>
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-24 mb-4"></div>
+                <div className="h-10 bg-gray-200 rounded w-32 mb-3"></div>
+                <div className="h-6 bg-gray-200 rounded w-40"></div>
+              </div>
+            ))}
+          </>
+        ) : (
+          <>
+            <StatCard
+              title="Total Revenue"
+              value={`$${(orderStats?.totalRevenue ?? 0).toFixed(2)}`}
+              icon={DollarSign}
+              color="green"
+              trend={revenueTrend || undefined}
+            />
+            <StatCard
+              title="Total Orders"
+              value={orderStats?.totalOrders ?? 0}
+              icon={ShoppingCart}
+              color="blue"
+              trend={ordersTrend || undefined}
+            />
+            <StatCard
+              title="Total Products"
+              value={productStats?.totalProducts ?? 0}
+              icon={Package}
+              color="yellow"
+            />
+            <StatCard
+              title="Pending Orders"
+              value={orderStats?.pendingOrders ?? 0}
+              icon={TrendingUp}
+              color="red"
+            />
+          </>
+        )}
       </div>
 
       {/* Out of Stock Alert - Enhanced */}
@@ -403,9 +418,20 @@ const Dashboard = () => {
 
       {outOfStockLoading && (
         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-            <span className="ml-3 text-gray-600">Loading out-of-stock products...</span>
+          <div className="animate-pulse">
+            <div className="h-6 bg-gray-200 rounded w-48 mb-4"></div>
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                  <div className="w-14 h-14 bg-gray-200 rounded-lg"></div>
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-24"></div>
+                  </div>
+                  <div className="h-8 bg-gray-200 rounded w-20"></div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -486,11 +512,9 @@ const Dashboard = () => {
             </div>
           </div>
           {orderStatsLoading ? (
-            <div className="flex items-center justify-center h-[300px]">
-              <div className="text-center text-gray-500">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p>Loading sales data...</p>
-              </div>
+            <div className="h-[300px] animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-32 mb-4"></div>
+              <div className="h-full bg-gray-100 rounded"></div>
             </div>
           ) : orderStatsError ? (
             <div className="flex items-center justify-center h-[300px]">
@@ -710,14 +734,28 @@ const Dashboard = () => {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {orderStatsLoading ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center">
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                      <span className="ml-3 text-gray-600">Loading orders...</span>
-                    </div>
-                  </td>
-                </tr>
+                // Skeleton loaders for table rows
+                <>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <tr key={i} className="animate-pulse">
+                      <td className="px-6 py-4">
+                        <div className="h-4 bg-gray-200 rounded w-24"></div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="h-4 bg-gray-200 rounded w-32"></div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="h-4 bg-gray-200 rounded w-16"></div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="h-6 bg-gray-200 rounded w-20"></div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="h-4 bg-gray-200 rounded w-20"></div>
+                      </td>
+                    </tr>
+                  ))}
+                </>
               ) : orderStatsError ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-8 text-center text-red-600">
