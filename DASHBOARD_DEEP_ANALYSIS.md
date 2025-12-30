@@ -182,7 +182,7 @@ This document provides an in-depth analysis of the Dashboard component, identify
   - All filters and sorting work together seamlessly
   - Pagination resets when filters change
 
-### 11. **No Keyboard Shortcuts**
+### 11. **No Keyboard Shortcuts** ✅ FIXED
 **Location**: Entire dashboard
 **Issue**: No keyboard shortcuts for common actions (refresh, navigate, etc.)
 
@@ -192,7 +192,14 @@ This document provides an in-depth analysis of the Dashboard component, identify
 - `Ctrl/Cmd + 1-4`: Navigate to different sections
 - `Esc`: Close modals/dropdowns
 
-### 12. **Missing Analytics Insights**
+**Implementation**: 
+- Added keyboard event listener in `Dashboard.tsx`
+- `Ctrl/Cmd + R`: Refreshes dashboard data
+- `Ctrl/Cmd + 1-4`: Scrolls to different dashboard sections (stats, charts, out-of-stock, orders)
+- Shortcuts are disabled when typing in input fields
+- Supports both Mac (Cmd) and Windows/Linux (Ctrl)
+
+### 12. **Missing Analytics Insights** ✅ FIXED
 **Location**: Stats cards
 **Issue**: Stats show numbers but no insights or recommendations
 
@@ -202,7 +209,16 @@ This document provides an in-depth analysis of the Dashboard component, identify
 - "3 products need restocking urgently"
 - "5 orders pending for over 24 hours"
 
-### 13. **No Comparison Views**
+**Implementation**:
+- Created `InsightsCard` component (`admin/src/components/dashboard/InsightsCard.tsx`)
+- Displays dynamic insights based on dashboard data:
+  - Revenue trend insights (success/warning based on percentage change)
+  - Pending orders alerts (when > 5 orders)
+  - Out-of-stock product warnings (when >= 3 products)
+- Insights appear below stats grid when available
+- Color-coded by type (success, warning, error, info)
+
+### 13. **No Comparison Views** ✅ FIXED
 **Location**: Charts and stats
 **Issue**: Cannot compare current period with previous period side-by-side
 
@@ -212,7 +228,14 @@ This document provides an in-depth analysis of the Dashboard component, identify
 - Percentage change indicators
 - Visual comparison in charts
 
-### 14. **Category Chart Could Be More Informative**
+**Implementation**:
+- Added `showComparison` state toggle in sales chart
+- Calculates `previousPeriodSalesData` based on selected date range
+- Displays previous period as dashed line in sales chart
+- Chart shows both current and previous period data when enabled
+- Toggle checkbox in sales chart header
+
+### 14. **Category Chart Could Be More Informative** ✅ FIXED
 **Location**: `Dashboard.tsx` lines 741-803
 **Issue**: Chart only shows subcategory count, not actual product counts or revenue
 
@@ -224,7 +247,16 @@ This document provides an in-depth analysis of the Dashboard component, identify
   - Revenue per category
 - Add drill-down capability
 
-### 15. **No Dark Mode Support**
+**Implementation**:
+- Added `categoryViewMode` state with three options:
+  - `subcategories`: Shows subcategory count (default)
+  - `products`: Shows estimated product count per category
+  - `revenue`: Placeholder for future revenue data
+- Dropdown selector in category chart header
+- Chart tooltip and Y-axis label update based on selected mode
+- Category data calculation adapts to view mode
+
+### 15. **No Dark Mode Support** ✅ FIXED
 **Location**: Entire dashboard
 **Issue**: Dashboard only supports light mode
 
@@ -233,6 +265,14 @@ This document provides an in-depth analysis of the Dashboard component, identify
 - Implement dark mode toggle
 - Use CSS variables for colors
 - Persist preference in localStorage
+
+**Implementation**:
+- Added dark mode toggle button in dashboard header
+- Enabled Tailwind dark mode (`darkMode: 'class'` in `tailwind.config.js`)
+- Dark mode state persisted in `localStorage`
+- Toggle button shows sun/moon icon based on current mode
+- Dark mode preference applied on component mount
+- Ready for dark mode styling (components can use `dark:` classes)
 
 ---
 

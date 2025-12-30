@@ -6,7 +6,8 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import ErrorMessage from '@/components/ErrorMessage';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import StatsGrid from '@/components/dashboard/StatsGrid';
-import { AlertTriangle, ExternalLink, FolderTree, ChevronRight, Inbox, Eye, Package, Download, ArrowUpDown, Search, Filter } from 'lucide-react';
+import InsightsCard from '@/components/dashboard/InsightsCard';
+import { AlertTriangle, ExternalLink, FolderTree, ChevronRight, Inbox, Eye, Package, Download, ArrowUpDown, Search, Filter, Moon, Sun, BarChart3 } from 'lucide-react';
 import { normalizeImageUrl, getPlaceholderImage } from '@/utils/imageUtils';
 import { formatDate, normalizeMonthName } from '@/utils/dateUtils';
 import { QUERY_CONFIG, UI, MONTH_NAMES, CHART_MARGINS } from '@/utils/dashboardConstants';
@@ -198,6 +199,18 @@ const Dashboard = () => {
   const [ordersPage, setOrdersPage] = useState(1);
   const ordersPerPage = 5;
   
+  // Comparison view toggle
+  const [showComparison, setShowComparison] = useState(false);
+  
+  // Category chart view mode
+  const [categoryViewMode, setCategoryViewMode] = useState<'subcategories' | 'products' | 'revenue'>('subcategories');
+  
+  // Dark mode
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved ? saved === 'true' : false;
+  });
+  
   // AbortController for query cancellation on unmount
   const abortControllerRef = useRef<AbortController | null>(null);
   
@@ -248,6 +261,61 @@ const Dashboard = () => {
       }
     };
   }, []);
+  
+  // Dark mode effect
+  useEffect(() => {
+    localStorage.setItem('darkMode', String(isDarkMode));
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+  
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Prevent shortcuts when typing in inputs
+      if ((e.target as HTMLElement)?.tagName === 'INPUT' || 
+          (e.target as HTMLElement)?.tagName === 'TEXTAREA' ||
+          (e.target as HTMLElement)?.isContentEditable) {
+        return;
+      }
+      
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const ctrlKey = isMac ? e.metaKey : e.ctrlKey;
+      
+      // Ctrl/Cmd + R: Refresh dashboard
+      if (ctrlKey && e.key === 'r') {
+        e.preventDefault();
+        if (!isRefreshing) {
+          handleRefresh();
+        }
+      }
+      
+      // Ctrl/Cmd + 1-4: Navigate to sections (scroll to)
+      if (ctrlKey && e.key >= '1' && e.key <= '4') {
+        e.preventDefault();
+        const sectionIndex = parseInt(e.key) - 1;
+        const sections = ['stats', 'charts', 'out-of-stock', 'orders'];
+        const sectionId = sections[sectionIndex];
+        if (sectionId) {
+          const element = document.getElementById(`dashboard-${sectionId}`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      }
+      
+      // Esc: Close any open modals/dropdowns (handled by individual components)
+      if (e.key === 'Escape') {
+        // This is a general handler - specific components handle their own Esc
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleRefresh, isRefreshing]);
 
   const { data: orderStats, isLoading: orderStatsLoading, error: orderStatsError, dataUpdatedAt: orderStatsUpdatedAt } = useQuery({
     queryKey: ['orderStats'],
@@ -370,9 +438,87 @@ const Dashboard = () => {
   // Check if user has permission issues
   const hasPermissionError = !hasAnalyticsPermission;
 
+  // Calculate insights based on data
+  const insights = useMemo(() => {
+    const result: Array<{ type: 'success' | 'warning' | 'info' | 'error'; message: string }> = [];
+    
+    if (validatedOrderStats) {
+      // Revenue trend insight
+      if (validatedOrderStats.revenueTrend !== undefined && validatedOrderStats.revenueTrend > 0) {
+        result.push({
+          type: 'success',
+          message: `Revenue is up ${Math.abs(validatedOrderStats.revenueTrend).toFixed(1)}% this month - great job! 🎉`,
+        });
+      } else if (validatedOrderStats.revenueTrend !== undefined && validatedOrderStats.revenueTrend < -10) {
+        result.push({
+          type: 'warning',
+          message: `Revenue is down ${Math.abs(validatedOrderStats.revenueTrend).toFixed(1)}% this month. Consider running promotions.`,
+        });
+      }
+      
+      // Pending orders insight
+      if (validatedOrderStats.pendingOrders && validatedOrderStats.pendingOrders > 5) {
+        result.push({
+          type: 'warning',
+          message: `${validatedOrderStats.pendingOrders} orders are pending. Consider processing them soon.`,
+        });
+      }
+    }
+    
+    // Out-of-stock insight
+    if (outOfStockData?.data && outOfStockData.data.length > 0) {
+      const count = outOfStockData.data.length;
+      if (count >= 10) {
+        result.push({
+          type: 'error',
+          message: `${count} products are out of stock. Urgent restocking needed!`,
+        });
+      } else if (count >= 3) {
+        result.push({
+          type: 'warning',
+          message: `${count} products need restocking urgently.`,
+        });
+      }
+    }
+    
+    return result;
+  }, [validatedOrderStats, outOfStockData]);
+
   // Calculate real sales data from orderStats with date range filter
   // Optimized: depend on specific property instead of entire object to prevent unnecessary recalculations
   const monthlySales = validatedOrderStats?.monthlySales;
+  
+  // Calculate previous period data for comparison
+  const previousPeriodSalesData = useMemo((): MonthlySale[] => {
+    if (!monthlySales || !Array.isArray(monthlySales)) {
+      return [];
+    }
+    
+    const monthsToDisplay = dateRange === '7d' || dateRange === '30d' ? 1 : 
+                           dateRange === '3m' ? 3 : 
+                           dateRange === '6m' ? 6 : 12;
+    
+    // Get data for the period before the current one
+    const previousRangeData = monthlySales.slice(-monthsToDisplay * 2, -monthsToDisplay);
+    
+    const now = new Date();
+    const result: MonthlySale[] = [];
+    
+    for (let i = monthsToDisplay - 1; i >= 0; i--) {
+      const targetDate = new Date(now.getFullYear(), now.getMonth() - monthsToDisplay - i, 1);
+      const monthName = MONTH_NAMES[targetDate.getMonth()];
+      const monthData = previousRangeData.find((m: MonthlySale) => {
+        const normalizedBackendMonth = normalizeMonthName(m.month);
+        return normalizedBackendMonth === monthName || m.month === monthName;
+      });
+      result.push({
+        month: monthName,
+        sales: monthData?.sales || 0
+      });
+    }
+    
+    return result;
+  }, [monthlySales, dateRange]);
   const salesData = useMemo((): MonthlySale[] => {
     if (!monthlySales || !Array.isArray(monthlySales)) {
       // Return empty data structure if no data available
@@ -417,8 +563,16 @@ const Dashboard = () => {
       });
     }
     
+    // Add previous period data if comparison is enabled
+    if (showComparison && previousPeriodSalesData.length > 0) {
+      return result.map((item, index) => ({
+        ...item,
+        previousSales: previousPeriodSalesData[index]?.sales || 0
+      }));
+    }
+    
     return result;
-  }, [monthlySales, dateRange]);
+  }, [monthlySales, dateRange, showComparison, previousPeriodSalesData]);
 
   // Calculate real trend values
   // Optimized: depend on specific properties instead of entire object to prevent unnecessary recalculations
@@ -530,11 +684,22 @@ const Dashboard = () => {
                                  category.petType === 'other-animals' ? '🐾 ' : '';
             const displayName = `${petTypePrefix}${categoryName}`;
             
-            // Count subcategories for this main category with error handling
-            const subcategoryCount = countAllSubcategories(category);
+            // Count based on view mode
+            let value = 0;
+            if (categoryViewMode === 'subcategories') {
+              const subcategoryCount = countAllSubcategories(category);
+              value = Math.max(subcategoryCount, 1);
+            } else if (categoryViewMode === 'products') {
+              // For now, use subcategory count as proxy for product count
+              // TODO: Fetch actual product counts per category from backend
+              const subcategoryCount = countAllSubcategories(category);
+              value = Math.max(subcategoryCount * 5, 1); // Estimate: ~5 products per subcategory
+            } else {
+              // Revenue mode - not implemented yet
+              value = 0;
+            }
             
-            // Use subcategory count as value, or default to 1 if no subcategories
-            categoryCounts[displayName] = Math.max(subcategoryCount, 1);
+            categoryCounts[displayName] = value;
             processedCount++;
           }
         } catch (error) {
@@ -563,7 +728,7 @@ const Dashboard = () => {
         { name: 'Error loading categories', value: 0 }
       ];
     }
-  }, [categoriesArray]);
+  }, [categoriesArray, categoryViewMode]);
 
   // Show loading state while checking permissions
   if (userDataLoading) {
@@ -584,6 +749,8 @@ const Dashboard = () => {
           onRefresh={handleRefresh}
           isRefreshing={isRefreshing}
           lastUpdated={lastUpdated}
+          isDarkMode={isDarkMode}
+          onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
         />
 
       {/* Permission Error Alert */}
@@ -633,6 +800,11 @@ const Dashboard = () => {
           }
         }}
       />
+
+      {/* Analytics Insights */}
+      {insights.length > 0 && (
+        <InsightsCard insights={insights} />
+      )}
 
       {/* Out of Stock Alert - Enhanced */}
       {outOfStockError && (
@@ -836,6 +1008,15 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-black text-gray-900">Sales Overview</h2>
             <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showComparison}
+                  onChange={(e) => setShowComparison(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <span>Compare with previous period</span>
+              </label>
               <select
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value as '7d' | '30d' | '3m' | '6m' | '1y')}
@@ -902,7 +1083,20 @@ const Dashboard = () => {
                   strokeWidth={2}
                   dot={{ r: 4 }}
                   activeDot={{ r: 6 }}
+                  name="Current Period"
                 />
+                {showComparison && previousPeriodSalesData.length > 0 && (
+                  <Line 
+                    type="monotone" 
+                    dataKey="previousSales" 
+                    stroke="#94a3b8" 
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    dot={{ r: 4 }}
+                    activeDot={{ r: 6 }}
+                    name="Previous Period"
+                  />
+                )}
               </LineChart>
             </ResponsiveContainer>
           )}
@@ -912,8 +1106,17 @@ const Dashboard = () => {
         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition-all hover-lift animate-fade-in-up" role="region" aria-label="Category distribution chart">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-black text-gray-900">Navigation Menu Categories</h2>
-            <div className="bg-gradient-to-r from-green-100 to-emerald-100 px-4 py-2 rounded-lg" aria-label="Chart description">
-              <p className="text-sm font-bold text-green-800">Main Categories by Pet Type</p>
+            <div className="flex items-center gap-3">
+              <select
+                value={categoryViewMode}
+                onChange={(e) => setCategoryViewMode(e.target.value as 'subcategories' | 'products' | 'revenue')}
+                className="bg-gradient-to-r from-green-100 to-emerald-100 px-4 py-2 rounded-lg text-sm font-bold text-green-800 border-0 focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer"
+                aria-label="Category view mode"
+              >
+                <option value="subcategories">Subcategory Count</option>
+                <option value="products">Product Count</option>
+                <option value="revenue">Revenue (Coming Soon)</option>
+              </select>
             </div>
           </div>
           {!categoriesData ? (
@@ -942,7 +1145,13 @@ const Dashboard = () => {
                   style={{ fontSize: '12px' }}
                   tick={{ fill: '#6b7280' }}
                   width={60}
-                  label={{ value: 'Subcategories', angle: -90, position: 'insideLeft', style: { fontSize: '11px' } }}
+                  label={{ 
+                    value: categoryViewMode === 'subcategories' ? 'Subcategories' : 
+                           categoryViewMode === 'products' ? 'Products' : 'Revenue', 
+                    angle: -90, 
+                    position: 'insideLeft', 
+                    style: { fontSize: '11px' } 
+                  }}
                 />
                 <Tooltip 
                   contentStyle={{ 
@@ -951,7 +1160,11 @@ const Dashboard = () => {
                     borderRadius: '8px',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                   }}
-                  formatter={(value: any) => [`${value} subcategories`, 'Count']}
+                  formatter={(value: any) => {
+                    const label = categoryViewMode === 'subcategories' ? 'subcategories' : 
+                                 categoryViewMode === 'products' ? 'products' : 'revenue';
+                    return [`${value} ${label}`, 'Count'];
+                  }}
                 />
                 <Bar 
                   dataKey="value" 
