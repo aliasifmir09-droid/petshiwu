@@ -37,7 +37,6 @@ export const handleError = (
   error: unknown,
   context?: string
 ): { userMessage: string; logMessage: string } => {
-  const timestamp = new Date().toISOString();
   const contextInfo = context ? ` [${context}]` : '';
 
   // Handle AppError instances

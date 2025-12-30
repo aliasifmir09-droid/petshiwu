@@ -15,7 +15,7 @@ import { formatDate, normalizeMonthName } from '@/utils/dateUtils';
 import { QUERY_CONFIG, UI, MONTH_NAMES, CHART_MARGINS } from '@/utils/dashboardConstants';
 import { validateOrderStats, validateProductStats, validateRecentOrder, safeValidate } from '@/utils/dataValidation';
 import { maskCustomerName, canViewFullCustomerData } from '@/utils/privacyUtils';
-import { ORDER_STATUS, ORDER_STATUS_COLORS, isValidOrderStatus } from '@/utils/constants';
+import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS, isValidOrderStatus } from '@/utils/constants';
 import { handleError, safeLogError } from '@/utils/errorHandling';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
@@ -125,8 +125,9 @@ interface CategoryGroup {
 export type { OrderStats, ProductStats, RecentOrder, MonthlySale, Product, OutOfStockData, Category, PetType, CategoryGroup };
 
 // Helper function to safely convert any ID to a unique string key
-const getUniqueKey = (id: string | undefined | null, index: number, prefix: string = 'item'): string => {
-  if (!id && id !== 0) {
+const getUniqueKey = (id: string | number | undefined | null | { toString?: () => string; valueOf?: () => unknown }, index: number, prefix: string = 'item'): string => {
+  // Handle null/undefined
+  if (id === null || id === undefined) {
     return `${prefix}-${index}`;
   }
   
@@ -141,7 +142,7 @@ const getUniqueKey = (id: string | undefined | null, index: number, prefix: stri
   }
   
   // Handle object IDs (Mongoose ObjectId, etc.)
-  if (typeof id === 'object') {
+  if (typeof id === 'object' && id !== null) {
     // Try toString() method first (Mongoose ObjectId has this)
     if (id.toString && typeof id.toString === 'function') {
       try {
@@ -1115,7 +1116,7 @@ const Dashboard = () => {
                   width={60}
                 />
                 <Tooltip 
-                  formatter={(value: unknown, _name: string, props: { payload?: { previousSales?: number } }) => {
+                  formatter={(value: unknown, _: string, props: { payload?: { previousSales?: number } }) => {
                     const currentValue = Number(value) || 0;
                     const previousValue = props.payload?.previousSales || 0;
                     const change = previousValue > 0 
