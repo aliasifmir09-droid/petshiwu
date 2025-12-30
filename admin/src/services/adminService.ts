@@ -419,7 +419,12 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
   },
 
   getCustomerOrders: async (customerId: string) => {
-    const response = await api.get(`/users/customers/${customerId}/orders`);
+    // Ensure customerId is a string to prevent [object Object] in URL
+    const id = typeof customerId === 'string' ? customerId : String(customerId || '');
+    if (!id || id === 'undefined' || id === 'null') {
+      throw new Error('Invalid customer ID provided');
+    }
+    const response = await api.get(`/users/customers/${encodeURIComponent(id)}/orders`);
     return response.data;
   },
 

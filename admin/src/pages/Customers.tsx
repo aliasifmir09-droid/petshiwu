@@ -76,13 +76,24 @@ const Customers = () => {
     queryFn: async () => {
       if (!selectedCustomer) return [];
       try {
-        const response = await adminService.getCustomerOrders(selectedCustomer._id);
+        // Ensure _id is converted to string to prevent [object Object] in URL
+        const customerId = typeof selectedCustomer._id === 'string' 
+          ? selectedCustomer._id 
+          : String(selectedCustomer._id || '');
+        
+        if (!customerId || customerId === 'undefined' || customerId === 'null') {
+          console.error('Invalid customer ID:', selectedCustomer._id);
+          return [];
+        }
+        
+        const response = await adminService.getCustomerOrders(customerId);
         return response.data || [];
       } catch (error) {
+        console.error('Error fetching customer orders:', error);
         return [];
       }
     },
-    enabled: !!selectedCustomer,
+    enabled: !!selectedCustomer && !!selectedCustomer._id,
     retry: 1
   });
 
