@@ -1,12 +1,15 @@
-import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useQuery, useQueryClient, useQueries } from '@tanstack/react-query';
+import { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { adminService } from '@/services/adminService';
-import StatCard from '@/components/StatCard';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import { DollarSign, Package, ShoppingCart, TrendingUp, AlertTriangle, ExternalLink, FolderTree, ChevronRight, Inbox, Eye } from 'lucide-react';
-import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
+import ErrorMessage from '@/components/ErrorMessage';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import StatsGrid from '@/components/dashboard/StatsGrid';
+import { AlertTriangle, ExternalLink, FolderTree, ChevronRight, Inbox, Eye } from 'lucide-react';
+import { normalizeImageUrl, getPlaceholderImage } from '@/utils/imageUtils';
 import { formatDate } from '@/utils/dateUtils';
+import { QUERY_CONFIG, UI, MONTH_NAMES, CHART_MARGINS } from '@/utils/dashboardConstants';
 import {
   LineChart,
   Line,
@@ -108,6 +111,9 @@ interface CategoryGroup {
   totalSubcategories: number;
 }
 
+// Export types for use in sub-components
+export type { OrderStats, ProductStats, RecentOrder, MonthlySale, Product, OutOfStockData, Category, PetType, CategoryGroup };
+
 // Helper function to safely convert any ID to a unique string key
 const getUniqueKey = (id: any, index: number, prefix: string = 'item'): string => {
   if (!id && id !== 0) {
@@ -167,6 +173,9 @@ const getUniqueKey = (id: any, index: number, prefix: string = 'item'): string =
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Get user data first
   // Only fetch if we're likely authenticated (skip if we know we're not)
@@ -174,68 +183,120 @@ const Dashboard = () => {
     queryKey: ['user-info'],
     queryFn: () => adminService.getMe(),
     retry: false, // Don't retry on 401 - it's expected if not authenticated
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: QUERY_CONFIG.USER_DATA_STALE_TIME,
   });
 
   const hasAnalyticsPermission = userData?.role === 'admin' || userData?.permissions?.canViewAnalytics;
+  
+  // Handle manual refresh
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      // Invalidate all dashboard-related queries
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['orderStats'] }),
+        queryClient.invalidateQueries({ queryKey: ['productStats'] }),
+        queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock'] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-categories'] }),
+        queryClient.invalidateQueries({ queryKey: ['pet-types'] }),
+      ]);
+      // Refetch all queries
+      await queryClient.refetchQueries();
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
-  const { data: orderStats, isLoading: orderStatsLoading, error: orderStatsError } = useQuery({
+  const { data: orderStats, isLoading: orderStatsLoading, error: orderStatsError, dataUpdatedAt: orderStatsUpdatedAt } = useQuery({
     queryKey: ['orderStats'],
     queryFn: adminService.getOrderStats,
     enabled: hasAnalyticsPermission, // Only fetch if user has permission
     retry: 2, // Retry failed requests
-    staleTime: 30 * 1000, // Cache for 30 seconds (reduced for faster updates)
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
-    refetchInterval: 20000, // Poll every 20 seconds for new orders (fallback if SSE fails)
+    staleTime: QUERY_CONFIG.ORDER_STATS_STALE_TIME,
+    gcTime: QUERY_CONFIG.ORDER_STATS_GC_TIME,
+    refetchInterval: QUERY_CONFIG.ORDER_STATS_REFETCH_INTERVAL,
     refetchOnWindowFocus: true, // Refetch when user returns to tab
   });
+  
+  // Update last updated timestamp when data changes
+  useEffect(() => {
+    if (orderStatsUpdatedAt) {
+      setLastUpdated(new Date(orderStatsUpdatedAt));
+    }
+  }, [orderStatsUpdatedAt]);
 
-  const { data: productStats, isLoading: productStatsLoading, error: productStatsError } = useQuery({
-    queryKey: ['productStats'],
-    queryFn: adminService.getProductStats,
-    enabled: hasAnalyticsPermission, // Only fetch if user has permission
-    retry: 2, // Retry failed requests
-    staleTime: 10 * 1000, // Cache for 10 seconds (reduced from 2 minutes for faster updates)
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
-    refetchOnWindowFocus: true, // Refetch when user returns to tab
-  }) as { data: ProductStats | undefined; isLoading: boolean; error: Error | null };
-
-  // Get out-of-stock products - limited to 10 for performance
-  const { data: outOfStockData, isLoading: outOfStockLoading, error: outOfStockError } = useQuery({
-    queryKey: ['products', 'out-of-stock'],
-    queryFn: () => adminService.getProducts({ inStock: false, limit: 10 }),
-    retry: 2, // Retry failed requests
-    staleTime: 10 * 1000, // Cache for 10 seconds (reduced from 2 minutes for faster updates)
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
-    refetchOnWindowFocus: true, // Refetch when user returns to tab
-  }) as { data: OutOfStockData | undefined; isLoading: boolean; error: Error | null };
-
-  // Get categories and pet types for navigation menu
-  const { data: categoriesData } = useQuery({
-    queryKey: ['admin-categories'],
-    queryFn: adminService.getAllCategoriesAdmin,
-    retry: 2, // Retry failed requests
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+  // Use useQueries for parallel fetching of independent queries
+  // This ensures all queries start fetching simultaneously rather than sequentially
+  const [
+    productStatsQuery,
+    outOfStockQuery,
+    categoriesQuery,
+    petTypesQuery
+  ] = useQueries({
+    queries: [
+      {
+        queryKey: ['productStats'],
+        queryFn: adminService.getProductStats,
+        enabled: hasAnalyticsPermission,
+        retry: 2,
+        staleTime: QUERY_CONFIG.PRODUCT_STATS_STALE_TIME,
+        gcTime: QUERY_CONFIG.PRODUCT_STATS_GC_TIME,
+        refetchOnWindowFocus: true,
+      },
+      {
+        queryKey: ['products', 'out-of-stock'],
+        queryFn: () => adminService.getProducts({ inStock: false, limit: UI.OUT_OF_STOCK_FETCH_LIMIT }),
+        retry: 2,
+        staleTime: QUERY_CONFIG.OUT_OF_STOCK_STALE_TIME,
+        gcTime: QUERY_CONFIG.OUT_OF_STOCK_GC_TIME,
+        refetchOnWindowFocus: true,
+      },
+      {
+        queryKey: ['admin-categories'],
+        queryFn: adminService.getAllCategoriesAdmin,
+        retry: 2,
+        staleTime: QUERY_CONFIG.CATEGORIES_STALE_TIME,
+        gcTime: QUERY_CONFIG.CATEGORIES_GC_TIME,
+      },
+      {
+        queryKey: ['pet-types'],
+        queryFn: adminService.getPetTypes,
+        retry: 2,
+        staleTime: QUERY_CONFIG.PET_TYPES_STALE_TIME,
+        gcTime: QUERY_CONFIG.PET_TYPES_GC_TIME,
+      },
+    ],
   });
 
-  const { data: petTypesData } = useQuery({
-    queryKey: ['pet-types'],
-    queryFn: adminService.getPetTypes,
-    retry: 2, // Retry failed requests
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
-  });
+  // Extract data from parallel queries
+  const productStats = productStatsQuery.data as ProductStats | undefined;
+  const productStatsLoading = productStatsQuery.isLoading;
+  const productStatsError = productStatsQuery.error;
+
+  const outOfStockData = outOfStockQuery.data as OutOfStockData | undefined;
+  const outOfStockLoading = outOfStockQuery.isLoading;
+  const outOfStockError = outOfStockQuery.error;
+
+  const categoriesData = categoriesQuery.data;
+  const petTypesData = petTypesQuery.data;
 
   // Group categories by pet type - MEMOIZED for performance
+  // Optimized: use stable references to prevent unnecessary recalculations
+  const categoriesArray = categoriesData?.data;
+  const petTypesArray = petTypesData?.data;
   const categoriesByPet = useMemo((): Record<string, CategoryGroup> => {
-    if (!categoriesData?.data || !petTypesData?.data) return {};
+    if (!categoriesArray || !Array.isArray(categoriesArray) || !petTypesArray || !Array.isArray(petTypesArray)) {
+      return {};
+    }
     
     const grouped: Record<string, CategoryGroup> = {};
-    const allCategories = categoriesData.data as Category[];
+    const allCategories = categoriesArray as Category[];
     
     // Initialize with pet types
-    (petTypesData.data as PetType[]).forEach((petType: PetType) => {
+    (petTypesArray as PetType[]).forEach((petType: PetType) => {
       if (petType.slug) {
         grouped[petType.slug] = {
           petType: petType,
@@ -262,15 +323,16 @@ const Dashboard = () => {
     });
 
     return grouped;
-  }, [categoriesData?.data, petTypesData?.data]);
+  }, [categoriesArray, petTypesArray]);
 
   // Check if user has permission issues
   const hasPermissionError = !hasAnalyticsPermission;
 
   // Calculate real sales data from orderStats
+  // Optimized: depend on specific property instead of entire object to prevent unnecessary recalculations
+  const monthlySales = orderStats?.monthlySales;
   const salesData = useMemo((): MonthlySale[] => {
-    const orderStatsData = orderStats as OrderStats | undefined;
-    if (!orderStatsData?.monthlySales || !Array.isArray(orderStatsData.monthlySales)) {
+    if (!monthlySales || !Array.isArray(monthlySales)) {
       // Return empty data structure if no data available
       return [
         { month: 'Jan', sales: 0 },
@@ -283,16 +345,15 @@ const Dashboard = () => {
     }
 
     // Get last 6 months of data
-    const last6Months = orderStatsData.monthlySales.slice(-6);
+    const last6Months = monthlySales.slice(-6);
     
     // If we have less than 6 months, pad with zeros
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const now = new Date();
     const result: MonthlySale[] = [];
     
-    for (let i = 5; i >= 0; i--) {
+    for (let i = UI.MONTHS_TO_DISPLAY - 1; i >= 0; i--) {
       const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthName = monthNames[targetDate.getMonth()];
+      const monthName = MONTH_NAMES[targetDate.getMonth()];
       const monthData = last6Months.find((m: MonthlySale) => m.month === monthName);
       result.push({
         month: monthName,
@@ -301,45 +362,45 @@ const Dashboard = () => {
     }
     
     return result;
-  }, [orderStats]);
+  }, [monthlySales]);
 
   // Calculate real trend values
+  // Optimized: depend on specific properties instead of entire object to prevent unnecessary recalculations
+  const revenueTrendValue = orderStats?.revenueTrend;
   const revenueTrend = useMemo(() => {
-    const orderStatsData = orderStats as OrderStats | undefined;
-    if (orderStatsData?.revenueTrend === undefined || orderStatsData.revenueTrend === null) {
+    if (revenueTrendValue === undefined || revenueTrendValue === null) {
       return null;
     }
-    const trend = orderStatsData.revenueTrend;
     return {
-      value: `${Math.abs(trend).toFixed(1)}% ${trend >= 0 ? 'increase' : 'decrease'} from last month`,
-      isPositive: trend >= 0
+      value: `${Math.abs(revenueTrendValue).toFixed(1)}% ${revenueTrendValue >= 0 ? 'increase' : 'decrease'} from last month`,
+      isPositive: revenueTrendValue >= 0
     };
-  }, [orderStats]);
+  }, [revenueTrendValue]);
 
+  const ordersTrendValue = orderStats?.ordersTrend;
   const ordersTrend = useMemo(() => {
-    const orderStatsData = orderStats as OrderStats | undefined;
-    if (orderStatsData?.ordersTrend === undefined || orderStatsData.ordersTrend === null) {
+    if (ordersTrendValue === undefined || ordersTrendValue === null) {
       return null;
     }
-    const trend = orderStatsData.ordersTrend;
     return {
-      value: `${Math.abs(trend).toFixed(1)}% ${trend >= 0 ? 'increase' : 'decrease'} from last month`,
-      isPositive: trend >= 0
+      value: `${Math.abs(ordersTrendValue).toFixed(1)}% ${ordersTrendValue >= 0 ? 'increase' : 'decrease'} from last month`,
+      isPositive: ordersTrendValue >= 0
     };
-  }, [orderStats]);
+  }, [ordersTrendValue]);
 
   // Generate category data from actual navigation menu categories - MEMOIZED for performance
   // Added validation and error handling for category structure
+  // Optimized: use stable reference to prevent unnecessary recalculations
   const categoryData = useMemo(() => {
     try {
-      if (!categoriesData?.data || !Array.isArray(categoriesData.data)) {
+      if (!categoriesArray || !Array.isArray(categoriesArray)) {
         // Fallback mock data if categories not loaded yet
         return [
           { name: 'Loading...', value: 0 }
         ];
       }
 
-      const rootCategories = categoriesData.data; // Backend returns hierarchical structure (root categories with subcategories)
+      const rootCategories = categoriesArray; // Backend returns hierarchical structure (root categories with subcategories)
       const categoryCounts: { [key: string]: number } = {};
 
       // Helper function to recursively count all subcategories at any level
@@ -423,7 +484,7 @@ const Dashboard = () => {
       const chartData = Object.entries(categoryCounts)
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value)
-        .slice(0, 15); // Top 15 categories
+        .slice(0, UI.TOP_CATEGORIES_COUNT);
 
       return chartData.length > 0 ? chartData : [
         { name: 'No categories found', value: 0 }
@@ -437,139 +498,72 @@ const Dashboard = () => {
         { name: 'Error loading categories', value: 0 }
       ];
     }
-  }, [categoriesData?.data]);
+  }, [categoriesArray]);
 
   // Show loading state while checking permissions
   if (userDataLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen" role="status" aria-label="Loading dashboard">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading dashboard...</p>
+      return (
+        <div className="flex items-center justify-center min-h-screen" role="status" aria-label="Loading dashboard">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading dashboard...</p>
+          </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
   return (
     <ErrorBoundary>
       <div className="space-y-8" role="main" aria-label="Dashboard overview">
-        {/* Header Section with Gradient */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-8 shadow-xl">
-          <div className="relative z-10">
-            <h1 className="text-4xl font-black text-white mb-2 animate-fade-in-up">
-              Dashboard Overview
-            </h1>
-            <p className="text-blue-100 text-lg animate-fade-in-up">
-              Welcome back! Here's what's happening with your store today.
-            </p>
-          </div>
-          {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-300 opacity-10 rounded-full blur-3xl"></div>
-        </div>
+        <DashboardHeader 
+          onRefresh={handleRefresh}
+          isRefreshing={isRefreshing}
+          lastUpdated={lastUpdated}
+        />
 
       {/* Permission Error Alert */}
       {hasPermissionError && (
-        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-500 rounded-xl p-6 shadow-lg animate-fade-in-up" role="alert" aria-live="polite">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 bg-yellow-100 p-3 rounded-full" aria-hidden="true">
-              <AlertTriangle className="text-yellow-600" size={24} />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-xl font-bold text-yellow-900 mb-2">
-                Limited Access
-              </h3>
-              <p className="text-yellow-700 leading-relaxed">
-                Your account doesn't have permission to view analytics and statistics. 
-                Please contact an administrator to grant you the <strong>"canViewAnalytics"</strong> permission.
-              </p>
-            </div>
-          </div>
-        </div>
+        <ErrorMessage
+          title="Limited Access"
+          message="Your account doesn't have permission to view analytics and statistics. Please contact an administrator to grant you the 'canViewAnalytics' permission."
+          variant="warning"
+        />
       )}
 
       {/* Error Messages */}
       {orderStatsError && (
-        <div className="bg-red-50 border-l-4 border-red-500 rounded-xl p-4 shadow-lg" role="alert" aria-live="polite">
-          <div className="flex items-center gap-3">
-            <AlertTriangle className="text-red-600" size={20} aria-hidden="true" />
-            <div>
-              <h3 className="text-red-800 font-semibold">Failed to load order statistics</h3>
-              <p className="text-red-600 text-sm">Please refresh the page or try again later.</p>
-            </div>
-          </div>
-        </div>
+        <ErrorMessage
+          title="Failed to load order statistics"
+          message="Please refresh the page or try again later."
+          variant="error"
+        />
       )}
 
       {productStatsError && (
-        <div className="bg-red-50 border-l-4 border-red-500 rounded-xl p-4 shadow-lg" role="alert" aria-live="polite">
-          <div className="flex items-center gap-3">
-            <AlertTriangle className="text-red-600" size={20} aria-hidden="true" />
-            <div>
-              <h3 className="text-red-800 font-semibold">Failed to load product statistics</h3>
-              <p className="text-red-600 text-sm">Please refresh the page or try again later.</p>
-            </div>
-          </div>
-        </div>
+        <ErrorMessage
+          title="Failed to load product statistics"
+          message="Please refresh the page or try again later."
+          variant="error"
+        />
       )}
 
-      {/* Stats Grid with Staggered Animation */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-animation" role="region" aria-label="Statistics overview">
-        {orderStatsLoading || productStatsLoading ? (
-          // Skeleton loaders for stats cards
-          <>
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-24 mb-4"></div>
-                <div className="h-10 bg-gray-200 rounded w-32 mb-3"></div>
-                <div className="h-6 bg-gray-200 rounded w-40"></div>
-              </div>
-            ))}
-          </>
-        ) : (
-          <>
-            <StatCard
-              title="Total Revenue"
-              value={`$${(orderStats?.totalRevenue ?? 0).toFixed(2)}`}
-              icon={DollarSign}
-              color="green"
-              trend={revenueTrend || undefined}
-            />
-            <StatCard
-              title="Total Orders"
-              value={orderStats?.totalOrders ?? 0}
-              icon={ShoppingCart}
-              color="blue"
-              trend={ordersTrend || undefined}
-            />
-            <StatCard
-              title="Total Products"
-              value={(productStats as ProductStats | undefined)?.totalProducts ?? 0}
-              icon={Package}
-              color="yellow"
-            />
-            <StatCard
-              title="Pending Orders"
-              value={orderStats?.pendingOrders ?? 0}
-              icon={TrendingUp}
-              color="red"
-            />
-          </>
-        )}
-      </div>
+      <StatsGrid
+        orderStats={orderStats}
+        productStats={productStats}
+        orderStatsLoading={orderStatsLoading}
+        productStatsLoading={productStatsLoading}
+        isRefreshing={isRefreshing}
+        revenueTrend={revenueTrend}
+        ordersTrend={ordersTrend}
+      />
 
       {/* Out of Stock Alert - Enhanced */}
       {outOfStockError && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-500 rounded-xl p-4 shadow-lg">
-          <div className="flex items-center gap-3">
-            <AlertTriangle className="text-yellow-600" size={20} />
-            <div>
-              <h3 className="text-yellow-800 font-semibold">Failed to load out-of-stock products</h3>
-              <p className="text-yellow-600 text-sm">Please refresh the page or try again later.</p>
-            </div>
-          </div>
-        </div>
+        <ErrorMessage
+          title="Failed to load out-of-stock products"
+          message="Please refresh the page or try again later."
+          variant="warning"
+        />
       )}
 
       {outOfStockLoading && (
@@ -577,7 +571,7 @@ const Dashboard = () => {
           <div className="animate-pulse">
             <div className="h-6 bg-gray-200 rounded w-48 mb-4"></div>
             <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
+              {Array.from({ length: UI.OUT_OF_STOCK_SKELETON_COUNT }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
                   <div className="w-14 h-14 bg-gray-200 rounded-lg"></div>
                   <div className="flex-1">
@@ -616,13 +610,16 @@ const Dashboard = () => {
                 The following products are out of stock and cannot be purchased by customers. Please restock as soon as possible to avoid lost sales.
               </p>
               <div className="space-y-2 mb-4">
-                {(outOfStockData.data as Product[]).slice(0, 5).map((product: Product, prodIndex: number) => (
+                {(outOfStockData.data as Product[]).slice(0, UI.OUT_OF_STOCK_DISPLAY_LIMIT).map((product: Product, prodIndex: number) => (
                   <div key={getUniqueKey(product?._id, prodIndex, 'product')} className="flex items-center justify-between bg-white p-4 rounded-lg border-2 border-red-200 hover:border-red-400 transition-all hover-lift shadow-sm">
                     <div className="flex items-center gap-3">
                       <img
-                        src={normalizeImageUrl(product.images?.[0])}
-                        alt={product.name}
-                        onError={(e) => handleImageError(e, product.name)}
+                        src={normalizeImageUrl(product.images?.[0]) || getPlaceholderImage(product.name || 'Product')}
+                        alt={product.name || 'Product'}
+                        onError={(e) => {
+                          const img = e.currentTarget;
+                          img.src = getPlaceholderImage(product.name || 'Product');
+                        }}
                         className="w-14 h-14 object-cover rounded-lg shadow-md"
                       />
                       <div>
@@ -641,9 +638,9 @@ const Dashboard = () => {
                     </Link>
                   </div>
                 ))}
-                {outOfStockData.data.length > 5 && (
+                {outOfStockData.data.length > UI.OUT_OF_STOCK_DISPLAY_LIMIT && (
                   <p className="text-sm text-red-800 font-semibold bg-red-100 px-4 py-2 rounded-lg inline-block">
-                    + {outOfStockData.data.length - 5} more products out of stock
+                    + {outOfStockData.data.length - UI.OUT_OF_STOCK_DISPLAY_LIMIT} more products out of stock
                   </p>
                 )}
               </div>
@@ -701,7 +698,7 @@ const Dashboard = () => {
               </div>
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={UI.CHART_HEIGHT}>
               <LineChart data={salesData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
@@ -734,8 +731,8 @@ const Dashboard = () => {
               <p className="text-gray-500">No categories found</p>
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={categoryData} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
+            <ResponsiveContainer width="100%" height={UI.CHART_HEIGHT}>
+              <BarChart data={categoryData} margin={{ top: CHART_MARGINS.TOP, right: CHART_MARGINS.RIGHT, left: CHART_MARGINS.LEFT, bottom: CHART_MARGINS.BOTTOM }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis 
                   dataKey="name" 
@@ -914,7 +911,7 @@ const Dashboard = () => {
               {orderStatsLoading ? (
                 // Skeleton loaders for table rows
                 <>
-                  {[1, 2, 3, 4, 5].map((i) => (
+                  {Array.from({ length: UI.RECENT_ORDERS_SKELETON_COUNT }).map((_, i) => (
                     <tr key={i} className="animate-pulse">
                       <td className="px-6 py-4">
                         <div className="h-4 bg-gray-200 rounded w-24"></div>

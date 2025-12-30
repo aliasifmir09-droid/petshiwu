@@ -147,63 +147,130 @@
   - Displays before rendering dashboard content
   - Includes proper `role="status"` and `aria-label` for accessibility
 
-### 17. **Image Error Handling Could Be Better**
+### 17. **Image Error Handling Could Be Better** ✅ FIXED
 - **Location**: Line 347
 - **Issue**: Basic image error handling, but no fallback image
 - **Impact**: Broken image icons when images fail to load
 - **Fix**: Add placeholder/fallback image
+- **Status**: ✅ Fixed - Enhanced image error handling:
+  - Added `getPlaceholderImage()` as fallback in `src` attribute
+  - Improved `onError` handler to use placeholder with product name
+  - Images now always display a placeholder SVG if they fail to load
+  - Uses the existing `handleImageError` utility which sets a data URI placeholder
 
-### 18. **No Refresh Button**
+### 18. **No Refresh Button** ✅ FIXED
 - **Location**: Dashboard header
 - **Issue**: No manual refresh button to force data reload
 - **Impact**: Users must refresh entire page to get fresh data
 - **Fix**: Add refresh button that invalidates and refetches all queries
+- **Status**: ✅ Fixed - Added refresh button in dashboard header:
+  - Button with RefreshCw icon in the header section
+  - Invalidates all dashboard-related queries (orderStats, productStats, out-of-stock products, categories, pet-types)
+  - Refetches all queries when clicked
+  - Shows "Refreshing..." state with spinning icon during refresh
+  - Disabled state while refreshing to prevent multiple simultaneous refreshes
+  - Includes proper ARIA label for accessibility
 
-### 19. **Stats Cards Show 0 for Undefined**
+### 19. **Stats Cards Show 0 for Undefined** ✅ FIXED
 - **Location**: Lines 292, 299, 306, 312
 - **Issue**: Shows "0" or "0.00" when data is undefined, which might be misleading
 - **Impact**: Users might think there's actually 0 orders/products when data just hasn't loaded
 - **Fix**: Show loading state or "N/A" until data is loaded
+- **Status**: ✅ Fixed - Updated all stat cards to show "N/A" when data is undefined:
+  - Total Revenue: Shows "N/A" instead of "$0.00" when `orderStats?.totalRevenue` is undefined
+  - Total Orders: Shows "N/A" instead of 0 when `orderStats?.totalOrders` is undefined
+  - Total Products: Shows "N/A" instead of 0 when `productStats?.totalProducts` is undefined
+  - Pending Orders: Shows "N/A" instead of 0 when `orderStats?.pendingOrders` is undefined
+  - All cards check both loading state and undefined values before displaying "N/A"
 
-### 20. **No Data Refresh Indicators**
+### 20. **No Data Refresh Indicators** ✅ FIXED
 - **Location**: Dashboard
 - **Issue**: No visual indication when data is being refreshed in background
 - **Impact**: Users don't know when data is updating
 - **Fix**: Add subtle loading indicators or "Last updated" timestamp
+- **Status**: ✅ Fixed - Added comprehensive refresh indicators:
+  - "Last updated" timestamp in header showing when data was last refreshed (formatted with date and time)
+  - Subtle "Updating data..." indicator above stats grid when data is loading or refreshing
+  - Spinning refresh icon in header button during manual refresh
+  - Uses `dataUpdatedAt` from React Query to track when data was last updated
+  - Updates timestamp automatically when data refreshes (including background refreshes)
 
 ## 📊 Performance Issues
 
-### 21. **Multiple Sequential Queries**
+### 21. **Multiple Sequential Queries** ✅ FIXED
 - **Location**: Lines 90-136
 - **Issue**: 6 separate queries that could be optimized or batched
 - **Impact**: Slower initial load time
 - **Fix**: Consider batching related queries or using parallel fetching
+- **Status**: ✅ Fixed - Optimized query fetching using `useQueries` hook:
+  - Replaced 4 separate `useQuery` calls with a single `useQueries` call for parallel fetching
+  - Queries now start fetching simultaneously: `productStats`, `outOfStockData`, `categoriesData`, and `petTypesData`
+  - This ensures all independent queries execute in parallel rather than sequentially
+  - `orderStats` remains separate as it has different configuration (refetchInterval, etc.)
+  - `userData` remains separate as it's needed to determine `hasAnalyticsPermission` before other queries
+  - All queries maintain their individual configurations (staleTime, retry, etc.)
+  - Significantly reduces initial load time by fetching multiple resources concurrently
 
-### 22. **Unnecessary Re-renders**
+### 22. **Unnecessary Re-renders** ✅ FIXED
 - **Location**: useMemo dependencies
 - **Issue**: Some memoized values might recalculate unnecessarily
 - **Impact**: Performance degradation
 - **Fix**: Review and optimize useMemo dependencies
+- **Status**: ✅ Fixed - Optimized all `useMemo` dependencies to prevent unnecessary recalculations:
+  - **salesData**: Changed dependency from `orderStats` (entire object) to `orderStats?.monthlySales` (specific property)
+  - **revenueTrend**: Changed dependency from `orderStats` to `orderStats?.revenueTrend` (specific property)
+  - **ordersTrend**: Changed dependency from `orderStats` to `orderStats?.ordersTrend` (specific property)
+  - **categoriesByPet**: Changed dependencies from `categoriesData?.data, petTypesData?.data` to stable references `categoriesArray, petTypesArray`
+  - **categoryData**: Changed dependency from `categoriesData?.data` to `categoriesArray` (stable reference)
+  - Memoized values now only recalculate when the specific data they depend on actually changes
+  - Prevents unnecessary recalculations when parent objects are recreated but data hasn't changed
+  - Improves performance by reducing computational overhead during re-renders
 
 ## 🔧 Code Quality Issues
 
-### 23. **Magic Numbers**
+### 23. **Magic Numbers** ✅ FIXED
 - **Location**: Throughout (e.g., 5, 10, 15, 20)
 - **Issue**: Hardcoded numbers without constants
 - **Impact**: Hard to maintain and understand
 - **Fix**: Extract to named constants
+- **Status**: ✅ Fixed - Created `dashboardConstants.ts` with centralized constants:
+  - **TIME constants**: `SECOND`, `MINUTE`, `FIVE_MINUTES`, `TEN_MINUTES` for time calculations
+  - **QUERY_CONFIG constants**: All query stale times, GC times, and refetch intervals
+  - **UI constants**: Skeleton counts, chart heights, display limits, icon sizes, grid columns
+  - **CHART_MARGINS constants**: Chart margin values
+  - **MONTH_NAMES array**: Month name constants
+  - Replaced all magic numbers throughout Dashboard component with named constants
+  - Makes code more maintainable and easier to understand
+  - Single source of truth for configuration values
 
-### 24. **Long Component**
+### 24. **Long Component** ✅ FIXED
 - **Location**: Entire file (640+ lines)
 - **Issue**: Dashboard component is too large and does too much
 - **Impact**: Hard to maintain and test
 - **Fix**: Break into smaller sub-components
+- **Status**: ✅ Fixed - Refactored Dashboard into smaller, focused components:
+  - **DashboardHeader**: Header section with title, refresh button, and last updated timestamp
+  - **StatsGrid**: Statistics cards grid with loading states and skeleton loaders
+  - **ErrorMessage**: Reusable standardized error message component (used throughout)
+  - Main Dashboard component now focuses on data fetching and orchestration
+  - Each sub-component has a single responsibility
+  - Components are easier to test, maintain, and reuse
+  - Reduced main component complexity significantly
 
-### 25. **Inconsistent Error Messages**
+### 25. **Inconsistent Error Messages** ✅ FIXED
 - **Location**: Error handling
 - **Issue**: No standardized error message format
 - **Impact**: Inconsistent user experience
 - **Fix**: Create error message utility/component
+- **Status**: ✅ Fixed - Created standardized `ErrorMessage` component:
+  - **Features**: Title, optional message, variant support (error/warning/info), optional dismiss button
+  - **Consistent styling**: All error messages use the same visual design
+  - **Accessibility**: Proper ARIA labels and roles
+  - **Variants**: Support for error (red), warning (yellow), and info (blue) variants
+  - Replaced all inline error message JSX with the standardized component
+  - Used throughout Dashboard for: permission errors, order stats errors, product stats errors, out-of-stock errors
+  - Ensures consistent user experience across all error states
+  - Easy to maintain and update error styling in one place
 
 ## 🎨 UI/UX Issues
 
