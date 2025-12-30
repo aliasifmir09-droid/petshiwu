@@ -141,6 +141,16 @@ const Dashboard = () => {
   // AbortController for query cancellation on unmount
   const abortControllerRef = useRef<AbortController | null>(null);
   
+  // Stable reference helpers for memoization
+  // Create stable hash from array for dependency tracking
+  const getArrayHash = useCallback((arr: unknown[] | undefined): string => {
+    if (!arr || !Array.isArray(arr)) return '';
+    // Use length + first/last item IDs for quick comparison
+    const firstId = (arr[0] as { _id?: string })?._id || '';
+    const lastId = arr.length > 1 ? (arr[arr.length - 1] as { _id?: string })?._id || '' : '';
+    return `${arr.length}-${firstId}-${lastId}`;
+  }, []);
+  
   // Get user data first
   // Only fetch if we're likely authenticated (skip if we know we're not)
   const { data: userData, isLoading: userDataLoading } = useQuery({
@@ -176,7 +186,8 @@ const Dashboard = () => {
     setLastRefreshTime(now);
     setIsRefreshing(true);
     try {
-      // Invalidate all dashboard-related queries
+      // Invalidate and selectively refetch only dashboard-related queries
+      // This prevents refetching all queries in the cache, improving performance
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['orderStats'] }),
         queryClient.invalidateQueries({ queryKey: ['productStats'] }),
@@ -184,8 +195,14 @@ const Dashboard = () => {
         queryClient.invalidateQueries({ queryKey: ['admin-categories'] }),
         queryClient.invalidateQueries({ queryKey: ['pet-types'] }),
       ]);
-      // Refetch all queries
-      await queryClient.refetchQueries();
+      // Selectively refetch only the dashboard queries we invalidated
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: ['orderStats'] }),
+        queryClient.refetchQueries({ queryKey: ['productStats'] }),
+        queryClient.refetchQueries({ queryKey: ['products', 'out-of-stock'] }),
+        queryClient.refetchQueries({ queryKey: ['admin-categories'] }),
+        queryClient.refetchQueries({ queryKey: ['pet-types'] }),
+      ]);
       setLastUpdated(new Date());
       showToast('Dashboard refreshed successfully', 'success');
     } catch (error) {
@@ -352,6 +369,11 @@ const Dashboard = () => {
   // Optimized: use stable references to prevent unnecessary recalculations
   const categoriesArray = categoriesData?.data;
   const petTypesArray = petTypesData?.data;
+  
+  // Create stable hash references for memoization dependencies
+  const categoriesHash = useMemo(() => getArrayHash(categoriesArray as unknown[]), [categoriesArray, getArrayHash]);
+  const petTypesHash = useMemo(() => getArrayHash(petTypesArray as unknown[]), [petTypesArray, getArrayHash]);
+  
   const categoriesByPet = useMemo((): Record<string, CategoryGroup> => {
     if (!categoriesArray || !Array.isArray(categoriesArray) || !petTypesArray || !Array.isArray(petTypesArray)) {
       return {};
@@ -388,7 +410,7 @@ const Dashboard = () => {
     });
 
     return grouped;
-  }, [categoriesArray, petTypesArray]);
+  }, [categoriesHash, petTypesHash, categoriesArray, petTypesArray]);
 
   // Check if user has permission issues
   const hasPermissionError = !hasAnalyticsPermission;
@@ -555,7 +577,9 @@ const Dashboard = () => {
 
   // Generate category data from actual navigation menu categories - MEMOIZED for performance
   // Added validation and error handling for category structure
-  // Optimized: use stable reference to prevent unnecessary recalculations
+  // Optimized: use stable hash reference to prevent unnecessary recalculations
+  const categoryDataHash = useMemo(() => getArrayHash(categoriesArray as unknown[]), [categoriesArray, getArrayHash]);
+  
   const categoryData = useMemo(() => {
     try {
       if (!categoriesArray || !Array.isArray(categoriesArray)) {
@@ -688,7 +712,7 @@ const Dashboard = () => {
         { name: 'Error loading categories', value: 0 }
       ];
     }
-  }, [categoriesArray, categoryViewMode]);
+  }, [categoryDataHash, categoryViewMode, categoriesArray]);
 
   // Show loading state while checking permissions
   if (userDataLoading) {
