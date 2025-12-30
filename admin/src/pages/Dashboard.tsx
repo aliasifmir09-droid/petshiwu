@@ -463,10 +463,10 @@ const Dashboard = () => {
               Welcome back! Here's what's happening with your store today.
             </p>
           </div>
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-300 opacity-10 rounded-full blur-3xl"></div>
-      </div>
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-300 opacity-10 rounded-full blur-3xl"></div>
+        </div>
 
       {/* Permission Error Alert */}
       {hasPermissionError && (
