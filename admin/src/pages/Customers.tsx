@@ -75,7 +75,7 @@ const Customers = () => {
   const getValidCustomerId = (customer: Customer | null): string | null => {
     if (!customer || !customer._id) return null;
     
-    let id: string;
+    let id: string = '';
     if (typeof customer._id === 'string') {
       id = customer._id;
     } else if (customer._id && typeof customer._id === 'object') {
@@ -88,13 +88,9 @@ const Customers = () => {
           const str = obj.toString();
           if (str && str !== '[object Object]' && typeof str === 'string' && str.length > 0) {
             id = str;
-          } else {
-            // If toString() returns [object Object], try other methods
-            throw new Error('toString returned invalid value');
           }
         } catch (e) {
-          // toString failed, try other methods
-          id = '';
+          // toString failed, will try other methods below
         }
       }
       
@@ -111,34 +107,41 @@ const Customers = () => {
           // ObjectId buffer is typically 12 bytes, can be converted to hex
           try {
             // If it's a Uint8Array or Buffer, convert to hex
-            if (obj.buffer instanceof Uint8Array || Array.isArray(obj.buffer)) {
-              const hex = Array.from(obj.buffer)
+            if (obj.buffer instanceof Uint8Array) {
+              const bufferArray = Array.from(obj.buffer);
+              const hex = bufferArray
                 .map((b: number) => b.toString(16).padStart(2, '0'))
                 .join('');
               if (hex && hex.length === 24) { // MongoDB ObjectId is 24 hex chars
                 id = hex;
-              } else {
-                id = '';
               }
-            } else {
-              id = '';
+            } else if (Array.isArray(obj.buffer)) {
+              const hex = obj.buffer
+                .map((b: unknown) => {
+                  const num = typeof b === 'number' ? b : Number(b);
+                  return isNaN(num) ? '00' : num.toString(16).padStart(2, '0');
+                })
+                .join('');
+              if (hex && hex.length === 24) {
+                id = hex;
+              }
             }
           } catch (e) {
-            id = '';
+            // Buffer conversion failed
           }
-        } else {
-          // Last resort: try JSON.stringify and extract any string values
+        }
+        
+        // Last resort: try JSON.stringify and extract any string values
+        if (!id || id === '') {
           try {
             const json = JSON.stringify(obj);
             // Try to find a string that looks like an ID (24 hex chars for MongoDB)
             const hexMatch = json.match(/"([0-9a-fA-F]{24})"/);
             if (hexMatch && hexMatch[1]) {
               id = hexMatch[1];
-            } else {
-              id = '';
             }
           } catch (e) {
-            id = '';
+            // JSON stringify failed
           }
         }
       }
