@@ -387,7 +387,15 @@ const Dashboard = () => {
   });
 
   // Extract and validate data from parallel queries
-  const productStats = safeValidate<ProductStats>(productStatsQuery.data, validateProductStats);
+  // Memoize productStats to prevent unnecessary re-renders and count-up animations
+  const productStats = useMemo(() => {
+    return safeValidate<ProductStats>(productStatsQuery.data, validateProductStats);
+  }, [
+    productStatsQuery.data?.totalProducts,
+    productStatsQuery.data?.outOfStockProducts,
+    productStatsQuery.data?.featuredProducts,
+    productStatsQuery.data?.productsByCategory,
+  ]);
   const productStatsLoading = productStatsQuery.isLoading;
   const productStatsError = productStatsQuery.error;
 

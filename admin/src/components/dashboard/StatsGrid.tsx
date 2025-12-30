@@ -1,5 +1,6 @@
 import StatCard from '@/components/StatCard';
 import { DollarSign, Package, ShoppingCart, TrendingUp, RefreshCw, Download } from 'lucide-react';
+import { useMemo } from 'react';
 import { UI } from '@/utils/dashboardConstants';
 import { OrderStats, ProductStats } from '@/pages/Dashboard';
 
@@ -26,6 +27,14 @@ const StatsGrid = ({
   onExportOrderStats,
   onExportProductStats,
 }: StatsGridProps) => {
+  // Memoize values to prevent unnecessary re-renders and count-up animation restarts
+  const totalProductsValue = useMemo(() => {
+    if (productStatsLoading || productStats?.totalProducts === undefined) {
+      return 'N/A';
+    }
+    return productStats.totalProducts;
+  }, [productStatsLoading, productStats?.totalProducts]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-end gap-2">
@@ -93,9 +102,7 @@ const StatsGrid = ({
           />
           <StatCard
             title="Total Products"
-            value={productStatsLoading || productStats?.totalProducts === undefined
-              ? 'N/A'
-              : productStats.totalProducts}
+            value={totalProductsValue}
             icon={Package}
             color="yellow"
             tooltip="Total number of products in your inventory. Includes both active and inactive products."

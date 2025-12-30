@@ -23,14 +23,13 @@ export const useCountUp = (
       return;
     }
 
-    // If end value changed, restart animation
+    // Only restart animation if the value actually changed
     if (previousEndRef.current !== end) {
       previousEndRef.current = end;
       setIsAnimating(true);
       startTimeRef.current = null;
-    }
-
-    if (!isAnimating && startOnMount) {
+    } else if (!isAnimating && startOnMount && count === 0) {
+      // First mount - start animation
       setIsAnimating(true);
       startTimeRef.current = null;
     }
