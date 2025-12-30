@@ -80,6 +80,7 @@ interface OutOfStockData {
   };
 }
 
+
 interface Category {
   _id?: string;
   name?: string;
@@ -189,7 +190,7 @@ const Dashboard = () => {
     refetchOnWindowFocus: true, // Refetch when user returns to tab
   });
 
-  const { data: productStats, isLoading: productStatsLoading, error: productStatsError } = useQuery<ProductStats>({
+  const { data: productStats, isLoading: productStatsLoading, error: productStatsError } = useQuery({
     queryKey: ['productStats'],
     queryFn: adminService.getProductStats,
     enabled: hasAnalyticsPermission, // Only fetch if user has permission
@@ -197,17 +198,17 @@ const Dashboard = () => {
     staleTime: 10 * 1000, // Cache for 10 seconds (reduced from 2 minutes for faster updates)
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: true, // Refetch when user returns to tab
-  });
+  }) as { data: ProductStats | undefined; isLoading: boolean; error: Error | null };
 
   // Get out-of-stock products - limited to 10 for performance
-  const { data: outOfStockData, isLoading: outOfStockLoading, error: outOfStockError } = useQuery<OutOfStockData>({
+  const { data: outOfStockData, isLoading: outOfStockLoading, error: outOfStockError } = useQuery({
     queryKey: ['products', 'out-of-stock'],
     queryFn: () => adminService.getProducts({ inStock: false, limit: 10 }),
     retry: 2, // Retry failed requests
     staleTime: 10 * 1000, // Cache for 10 seconds (reduced from 2 minutes for faster updates)
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: true, // Refetch when user returns to tab
-  });
+  }) as { data: OutOfStockData | undefined; isLoading: boolean; error: Error | null };
 
   // Get categories and pet types for navigation menu
   const { data: categoriesData } = useQuery({
@@ -876,7 +877,7 @@ const Dashboard = () => {
                   </div>
 
                   {/* View All Link */}
-                  {data.mainCategories.length > 0 && (
+                  {data && data.mainCategories && data.mainCategories.length > 0 && (
                     <Link
                       to={`/categories?petType=${petTypeSlug}`}
                       className="mt-4 inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 text-sm font-semibold w-full justify-center py-2 rounded-lg hover:bg-indigo-50 transition-colors"
