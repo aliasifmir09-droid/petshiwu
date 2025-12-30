@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { adminService } from '@/services/adminService';
 import StatCard from '@/components/StatCard';
-import { DollarSign, Package, ShoppingCart, TrendingUp, AlertTriangle, ExternalLink, FolderTree, ChevronRight } from 'lucide-react';
+import { DollarSign, Package, ShoppingCart, TrendingUp, AlertTriangle, ExternalLink, FolderTree, ChevronRight, Inbox } from 'lucide-react';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import {
   LineChart,
@@ -17,6 +17,93 @@ import {
   ResponsiveContainer,
   Legend
 } from 'recharts';
+
+// TypeScript interfaces for type safety
+interface OrderUser {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}
+
+interface RecentOrder {
+  _id?: string;
+  orderNumber?: string;
+  user?: OrderUser;
+  totalPrice?: number;
+  orderStatus?: string;
+  createdAt?: string | Date;
+}
+
+interface MonthlySale {
+  month: string;
+  sales: number;
+  orderCount?: number;
+}
+
+interface OrderStats {
+  totalOrders?: number;
+  pendingOrders?: number;
+  processingOrders?: number;
+  shippedOrders?: number;
+  deliveredOrders?: number;
+  totalRevenue?: number;
+  revenueTrend?: number;
+  ordersTrend?: number;
+  monthlySales?: MonthlySale[];
+  recentOrders?: RecentOrder[];
+}
+
+interface ProductStats {
+  totalProducts?: number;
+  outOfStockProducts?: number;
+  featuredProducts?: number;
+  productsByCategory?: Array<{
+    categoryName: string;
+    count: number;
+  }>;
+}
+
+interface Product {
+  _id?: string;
+  name?: string;
+  brand?: string;
+  images?: string[];
+  totalStock?: number;
+}
+
+interface OutOfStockData {
+  data?: Product[];
+  pagination?: {
+    total?: number;
+  };
+}
+
+interface Category {
+  _id?: string;
+  name?: string;
+  slug?: string;
+  parentCategory?: string | Category | null;
+  petType?: string;
+  isActive?: boolean;
+  subcategories?: Category[];
+  level?: number;
+}
+
+interface PetType {
+  _id?: string;
+  name?: string;
+  slug?: string;
+  icon?: string;
+  description?: string;
+  isActive?: boolean;
+}
+
+interface CategoryGroup {
+  petType: PetType;
+  mainCategories: Category[];
+  totalCategories: number;
+  totalSubcategories: number;
+}
 
 // Helper function to safely convert any ID to a unique string key
 const getUniqueKey = (id: any, index: number, prefix: string = 'item'): string => {
@@ -122,7 +209,7 @@ const Dashboard = () => {
   const { data: categoriesData } = useQuery({
     queryKey: ['admin-categories'],
     queryFn: adminService.getAllCategoriesAdmin,
-    retry: false,
+    retry: 2, // Retry failed requests
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
@@ -130,30 +217,32 @@ const Dashboard = () => {
   const { data: petTypesData } = useQuery({
     queryKey: ['pet-types'],
     queryFn: adminService.getPetTypes,
-    retry: false,
+    retry: 2, // Retry failed requests
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   // Group categories by pet type - MEMOIZED for performance
-  const categoriesByPet = useMemo(() => {
+  const categoriesByPet = useMemo((): Record<string, CategoryGroup> => {
     if (!categoriesData?.data || !petTypesData?.data) return {};
     
-    const grouped: any = {};
-    const allCategories = categoriesData.data;
+    const grouped: Record<string, CategoryGroup> = {};
+    const allCategories = categoriesData.data as Category[];
     
     // Initialize with pet types
-    petTypesData.data.forEach((petType: any) => {
-      grouped[petType.slug] = {
-        petType: petType,
-        mainCategories: [],
-        totalCategories: 0,
-        totalSubcategories: 0
-      };
+    (petTypesData.data as PetType[]).forEach((petType: PetType) => {
+      if (petType.slug) {
+        grouped[petType.slug] = {
+          petType: petType,
+          mainCategories: [],
+          totalCategories: 0,
+          totalSubcategories: 0
+        };
+      }
     });
 
     // Group categories
-    allCategories.forEach((category: any) => {
+    allCategories.forEach((category: Category) => {
       const petTypeSlug = category.petType || 'all';
       if (grouped[petTypeSlug]) {
         if (!category.parentCategory) {
@@ -174,8 +263,9 @@ const Dashboard = () => {
   const hasPermissionError = !hasAnalyticsPermission;
 
   // Calculate real sales data from orderStats
-  const salesData = useMemo(() => {
-    if (!orderStats?.monthlySales || !Array.isArray(orderStats.monthlySales)) {
+  const salesData = useMemo((): MonthlySale[] => {
+    const orderStatsData = orderStats as OrderStats | undefined;
+    if (!orderStatsData?.monthlySales || !Array.isArray(orderStatsData.monthlySales)) {
       // Return empty data structure if no data available
       return [
         { month: 'Jan', sales: 0 },
@@ -188,17 +278,17 @@ const Dashboard = () => {
     }
 
     // Get last 6 months of data
-    const last6Months = orderStats.monthlySales.slice(-6);
+    const last6Months = orderStatsData.monthlySales.slice(-6);
     
     // If we have less than 6 months, pad with zeros
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const now = new Date();
-    const result = [];
+    const result: MonthlySale[] = [];
     
     for (let i = 5; i >= 0; i--) {
       const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthName = monthNames[targetDate.getMonth()];
-      const monthData = last6Months.find((m: any) => m.month === monthName);
+      const monthData = last6Months.find((m: MonthlySale) => m.month === monthName);
       result.push({
         month: monthName,
         sales: monthData?.sales || 0
@@ -206,30 +296,32 @@ const Dashboard = () => {
     }
     
     return result;
-  }, [orderStats?.monthlySales]);
+  }, [orderStats]);
 
   // Calculate real trend values
   const revenueTrend = useMemo(() => {
-    if (!orderStats?.revenueTrend && orderStats?.revenueTrend !== 0) {
+    const orderStatsData = orderStats as OrderStats | undefined;
+    if (orderStatsData?.revenueTrend === undefined || orderStatsData.revenueTrend === null) {
       return null;
     }
-    const trend = orderStats.revenueTrend;
+    const trend = orderStatsData.revenueTrend;
     return {
       value: `${Math.abs(trend).toFixed(1)}% ${trend >= 0 ? 'increase' : 'decrease'} from last month`,
       isPositive: trend >= 0
     };
-  }, [orderStats?.revenueTrend]);
+  }, [orderStats]);
 
   const ordersTrend = useMemo(() => {
-    if (!orderStats?.ordersTrend && orderStats?.ordersTrend !== 0) {
+    const orderStatsData = orderStats as OrderStats | undefined;
+    if (orderStatsData?.ordersTrend === undefined || orderStatsData.ordersTrend === null) {
       return null;
     }
-    const trend = orderStats.ordersTrend;
+    const trend = orderStatsData.ordersTrend;
     return {
       value: `${Math.abs(trend).toFixed(1)}% ${trend >= 0 ? 'increase' : 'decrease'} from last month`,
       isPositive: trend >= 0
     };
-  }, [orderStats?.ordersTrend]);
+  }, [orderStats]);
 
   // Generate category data from actual navigation menu categories - MEMOIZED for performance
   const categoryData = useMemo(() => {
@@ -244,14 +336,14 @@ const Dashboard = () => {
     const categoryCounts: { [key: string]: number } = {};
 
     // Helper function to recursively count all subcategories at any level
-    const countAllSubcategories = (category: any): number => {
+    const countAllSubcategories = (category: Category): number => {
       if (!category.subcategories || !Array.isArray(category.subcategories) || category.subcategories.length === 0) {
         return 0;
       }
       
       let count = category.subcategories.length;
       // Also count nested subcategories (level 3)
-      category.subcategories.forEach((subcat: any) => {
+      category.subcategories.forEach((subcat: Category) => {
         if (subcat.subcategories && Array.isArray(subcat.subcategories)) {
           count += subcat.subcategories.length;
         }
@@ -436,7 +528,9 @@ const Dashboard = () => {
         </div>
       )}
 
-      {!outOfStockLoading && !outOfStockError && outOfStockData?.data && Array.isArray(outOfStockData.data) && outOfStockData.data.length > 0 && (
+      {!outOfStockLoading && !outOfStockError && (
+        <>
+          {outOfStockData?.data && Array.isArray(outOfStockData.data) && outOfStockData.data.length > 0 ? (
         <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 border-l-4 border-red-600 rounded-xl p-6 shadow-xl animate-fade-in-up relative overflow-hidden">
           {/* Pulsing background effect */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-red-200 opacity-20 rounded-full blur-2xl animate-pulse-slow"></div>
@@ -458,7 +552,7 @@ const Dashboard = () => {
                 The following products are out of stock and cannot be purchased by customers. Please restock as soon as possible to avoid lost sales.
               </p>
               <div className="space-y-2 mb-4">
-                {outOfStockData.data.slice(0, 5).map((product: any, prodIndex: number) => (
+                {(outOfStockData.data as Product[]).slice(0, 5).map((product: Product, prodIndex: number) => (
                   <div key={getUniqueKey(product?._id, prodIndex, 'product')} className="flex items-center justify-between bg-white p-4 rounded-lg border-2 border-red-200 hover:border-red-400 transition-all hover-lift shadow-sm">
                     <div className="flex items-center gap-3">
                       <img
@@ -499,6 +593,25 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+          ) : (
+            <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="bg-green-100 p-4 rounded-full mb-4">
+                  <Package className="text-green-600" size={48} />
+                </div>
+                <p className="text-gray-700 font-semibold text-xl mb-2">All products are in stock!</p>
+                <p className="text-gray-500 text-sm">Great job managing your inventory. No action needed.</p>
+                <Link
+                  to="/products"
+                  className="mt-4 inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm"
+                >
+                  View All Products
+                  <ChevronRight size={16} />
+                </Link>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Charts - Enhanced */}
@@ -637,7 +750,7 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Object.entries(categoriesByPet).map(([petTypeSlug, data]: [string, any]) => (
+              {Object.entries(categoriesByPet).map(([petTypeSlug, data]: [string, CategoryGroup]) => (
                 <div
                   key={petTypeSlug}
                   className="bg-white rounded-xl p-5 border-2 border-indigo-100 hover:border-indigo-300 transition-all hover-lift shadow-md"
@@ -677,7 +790,7 @@ const Dashboard = () => {
                     {data.mainCategories.length === 0 ? (
                       <p className="text-sm text-gray-500 italic">No main categories yet</p>
                     ) : (
-                      data.mainCategories.map((category: any, catIndex: number) => (
+                      data.mainCategories.map((category: Category, catIndex: number) => (
                         <Link
                           key={getUniqueKey(category?._id, catIndex, 'category')}
                           to="/categories"
@@ -762,8 +875,8 @@ const Dashboard = () => {
                     Failed to load recent orders. Please refresh the page.
                   </td>
                 </tr>
-              ) : orderStats?.recentOrders && Array.isArray(orderStats.recentOrders) && orderStats.recentOrders.length > 0 ? (
-                orderStats.recentOrders.map((order: any, index: number) => {
+              ) : (orderStats as OrderStats | undefined)?.recentOrders && Array.isArray((orderStats as OrderStats).recentOrders) && (orderStats as OrderStats).recentOrders.length > 0 ? (
+                ((orderStats as OrderStats).recentOrders as RecentOrder[]).map((order: RecentOrder, index: number) => {
                   if (!order) return null;
                   return (
                     <tr key={getUniqueKey(order?._id, index, 'order')} className="hover:bg-gray-50">
@@ -793,8 +906,19 @@ const Dashboard = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                    No recent orders
+                  <td colSpan={5} className="px-6 py-12 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <Inbox className="text-gray-400 mb-3" size={48} />
+                      <p className="text-gray-500 font-medium text-lg">No recent orders</p>
+                      <p className="text-gray-400 text-sm mt-1">Orders will appear here once customers start placing them</p>
+                      <Link
+                        to="/orders"
+                        className="mt-4 inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm"
+                      >
+                        View All Orders
+                        <ChevronRight size={16} />
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               )}
