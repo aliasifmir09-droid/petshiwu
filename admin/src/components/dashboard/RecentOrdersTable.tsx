@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Download, ChevronRight, Inbox, Eye, ArrowUpDown, Filter } from 'lucide-react';
 import { RecentOrder, OrderStats } from '@/pages/Dashboard';
@@ -54,7 +54,7 @@ const getUniqueKey = (id: string | number | undefined | null | { toString?: () =
   return `${prefix}-${index}`;
 };
 
-const RecentOrdersTable = ({
+const RecentOrdersTable = memo(({
   orderStats,
   orderStatsLoading,
   orderStatsError,
@@ -382,7 +382,9 @@ const RecentOrdersTable = ({
       </div>
     </div>
   );
-};
+});
+
+RecentOrdersTable.displayName = 'RecentOrdersTable';
 
 export default RecentOrdersTable;
 

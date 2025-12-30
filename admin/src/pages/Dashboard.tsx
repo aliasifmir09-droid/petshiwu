@@ -6,11 +6,12 @@ import ErrorMessage from '@/components/ErrorMessage';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import StatsGrid from '@/components/dashboard/StatsGrid';
 import InsightsCard from '@/components/dashboard/InsightsCard';
+import { lazy, Suspense } from 'react';
 import OutOfStockSection from '@/components/dashboard/OutOfStockSection';
-import SalesChart from '@/components/dashboard/SalesChart';
-import CategoryChart from '@/components/dashboard/CategoryChart';
 import CategoryNavigationSection from '@/components/dashboard/CategoryNavigationSection';
-import RecentOrdersTable from '@/components/dashboard/RecentOrdersTable';
+// Lazy load chart components for better code splitting
+const SalesChart = lazy(() => import('@/components/dashboard/SalesChart'));
+const CategoryChart = lazy(() => import('@/components/dashboard/CategoryChart'));
 import { usePerformanceMetrics } from '@/hooks/usePerformanceMetrics';
 import { normalizeMonthName } from '@/utils/dateUtils';
 import { QUERY_CONFIG, UI, MONTH_NAMES } from '@/utils/dashboardConstants';
@@ -841,23 +842,27 @@ const Dashboard = () => {
 
       {/* Charts - Enhanced */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SalesChart
-          salesData={salesData}
-          previousPeriodSalesData={previousPeriodSalesData}
-          orderStatsLoading={orderStatsLoading}
-          orderStatsError={orderStatsError}
-          showComparison={showComparison}
-          dateRange={dateRange}
-          onShowComparisonChange={setShowComparison}
-          onDateRangeChange={setDateRange}
-          onExportSuccess={(message) => showToast(message, 'success')}
-        />
-        <CategoryChart
-          categoryData={categoryData}
-          categoriesLoading={!categoriesData}
-          categoryViewMode={categoryViewMode}
-          onViewModeChange={setCategoryViewMode}
-        />
+        <Suspense fallback={<div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 h-[400px] animate-pulse"><div className="h-full bg-gray-100 rounded"></div></div>}>
+          <SalesChart
+            salesData={salesData}
+            previousPeriodSalesData={previousPeriodSalesData}
+            orderStatsLoading={orderStatsLoading}
+            orderStatsError={orderStatsError}
+            showComparison={showComparison}
+            dateRange={dateRange}
+            onShowComparisonChange={setShowComparison}
+            onDateRangeChange={setDateRange}
+            onExportSuccess={(message) => showToast(message, 'success')}
+          />
+        </Suspense>
+        <Suspense fallback={<div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 h-[400px] animate-pulse"><div className="h-full bg-gray-100 rounded"></div></div>}>
+          <CategoryChart
+            categoryData={categoryData}
+            categoriesLoading={!categoriesData}
+            categoryViewMode={categoryViewMode}
+            onViewModeChange={setCategoryViewMode}
+          />
+        </Suspense>
       </div>
 
       {/* Navigation Menu Categories - New Section */}

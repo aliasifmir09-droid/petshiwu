@@ -573,57 +573,93 @@ export const ORDER_STATUS = {
 
 ## 🚀 Performance Optimizations
 
-### 33. **Image Loading Optimization**
-**Location**: `Dashboard.tsx` lines 621-629
+### 33. **Image Loading Optimization** ✅ FIXED
+**Location**: `OutOfStockSection.tsx` line 201
 **Issue**: Out-of-stock product images load without lazy loading or optimization
 
-**Recommendation**:
+**Status**: ✅ **FIXED**
+- Added `loading="lazy"` attribute to all product images in OutOfStockSection
+- Images now load lazily, improving initial page load performance
+- Reduces bandwidth usage and improves user experience
+
+**Implementation**:
 ```typescript
-// Add lazy loading
 <img
   loading="lazy"
-  src={normalizeImageUrl(product.images?.[0])}
+  src={normalizeImageUrl(product.images?.[0]) || getPlaceholderImage(product.name || 'Product')}
+  alt={product.name || 'Product'}
   // ... other props
 />
-
-// Or use next/image equivalent for React
 ```
 
-### 34. **Chart Rendering Optimization**
-**Location**: Charts (lines 706-801)
+### 34. **Chart Rendering Optimization** ✅ FIXED
+**Location**: `SalesChart.tsx`, `CategoryChart.tsx`
 **Issue**: Charts re-render on every data update, even if data hasn't changed
 
-**Recommendation**: 
-- Memoize chart components
-- Use `React.memo` for chart wrappers
-- Only re-render when data actually changes
+**Status**: ✅ **FIXED**
+- Wrapped `SalesChart` and `CategoryChart` components with `React.memo`
+- Added `useCallback` hooks for event handlers to prevent unnecessary re-renders
+- Charts now only re-render when their props actually change
+- Improved performance by reducing unnecessary chart re-renders
 
-### 35. **Query Optimization**
+**Implementation**:
+- `SalesChart` and `CategoryChart` are now memoized components
+- Event handlers use `useCallback` to maintain stable references
+- Components only re-render when data or relevant props change
+
+### 35. **Query Optimization** ⚠️ PARTIALLY ADDRESSED
 **Location**: `Dashboard.tsx` lines 215-274
 **Issue**: Some queries fetch more data than needed
 
-**Recommendation**: 
-- Review query parameters
-- Add field selection to reduce payload
-- Consider GraphQL for flexible queries
+**Status**: ⚠️ **PARTIALLY ADDRESSED**
+- Query stale times have been optimized (5 minutes for product stats, 2 minutes for order stats)
+- Window focus refetch disabled to reduce unnecessary requests
+- Query intervals adjusted to reasonable polling frequencies
 
-### 36. **Bundle Size Optimization**
-**Location**: Imports
+**Remaining Recommendations**: 
+- Consider adding field selection to reduce payload size
+- Review if all fields are needed from each query
+- Future: Consider GraphQL for flexible queries if API supports it
+
+### 36. **Bundle Size Optimization** ✅ FIXED
+**Location**: `Dashboard.tsx` imports
 **Issue**: Recharts library might be large
 
-**Recommendation**: 
-- Check if all Recharts components are needed
-- Consider code splitting
-- Lazy load chart components
+**Status**: ✅ **FIXED**
+- Implemented lazy loading for chart components using `React.lazy()` and `Suspense`
+- `SalesChart` and `CategoryChart` are now code-split and loaded on demand
+- Reduces initial bundle size by deferring chart library loading
+- Charts load asynchronously when needed, improving initial page load
 
-### 37. **Memoization Improvements**
-**Location**: Multiple useMemo hooks
+**Implementation**:
+```typescript
+const SalesChart = lazy(() => import('@/components/dashboard/SalesChart'));
+const CategoryChart = lazy(() => import('@/components/dashboard/CategoryChart'));
+
+// Used with Suspense boundaries
+<Suspense fallback={<LoadingSkeleton />}>
+  <SalesChart {...props} />
+</Suspense>
+```
+
+### 37. **Memoization Improvements** ✅ FIXED
+**Location**: Multiple components
 **Issue**: Some calculations could be further optimized
 
-**Recommendation**: 
-- Review all useMemo dependencies
-- Consider useCallback for functions passed as props
-- Use React.memo for child components
+**Status**: ✅ **FIXED**
+- All major dashboard components now use `React.memo`:
+  - `OutOfStockSection` - memoized
+  - `SalesChart` - memoized with `useCallback` for handlers
+  - `CategoryChart` - memoized with `useCallback` for handlers
+  - `RecentOrdersTable` - memoized
+- Event handlers use `useCallback` to prevent unnecessary re-renders
+- `useMemo` hooks reviewed and optimized with proper dependencies
+- Components only re-render when their specific props change
+
+**Implementation**:
+- All child components wrapped with `React.memo`
+- Callback functions use `useCallback` with proper dependencies
+- Memoization prevents unnecessary re-renders throughout the component tree
 
 ---
 

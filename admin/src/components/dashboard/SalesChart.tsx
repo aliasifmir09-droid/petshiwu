@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import { AlertTriangle, Download } from 'lucide-react';
 import {
   LineChart,
@@ -26,7 +27,7 @@ interface SalesChartProps {
   onExportSuccess: (message: string) => void;
 }
 
-const SalesChart = ({
+const SalesChart = memo(({
   salesData,
   previousPeriodSalesData,
   orderStatsLoading,
@@ -37,6 +38,19 @@ const SalesChart = ({
   onDateRangeChange,
   onExportSuccess,
 }: SalesChartProps) => {
+  const handleExport = useCallback(() => {
+    exportSalesData(salesData);
+    onExportSuccess('Sales data exported successfully');
+  }, [salesData, onExportSuccess]);
+
+  const handleComparisonChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onShowComparisonChange(e.target.checked);
+  }, [onShowComparisonChange]);
+
+  const handleDateRangeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    onDateRangeChange(e.target.value as '7d' | '30d' | '3m' | '6m' | '1y');
+  }, [onDateRangeChange]);
+
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition-all hover-lift animate-fade-in-up" role="region" aria-label="Sales overview chart">
       <div className="flex items-center justify-between mb-6">
@@ -52,14 +66,14 @@ const SalesChart = ({
             <input
               type="checkbox"
               checked={showComparison}
-              onChange={(e) => onShowComparisonChange(e.target.checked)}
+              onChange={handleComparisonChange}
               className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
             />
             <span>Compare with previous period</span>
           </label>
           <select
             value={dateRange}
-            onChange={(e) => onDateRangeChange(e.target.value as '7d' | '30d' | '3m' | '6m' | '1y')}
+            onChange={handleDateRangeChange}
             className="bg-gradient-to-r from-blue-100 to-indigo-100 px-4 py-2 rounded-lg text-sm font-bold text-blue-800 border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
             aria-label="Time period"
           >
@@ -70,10 +84,7 @@ const SalesChart = ({
             <option value="1y">Last Year</option>
           </select>
           <button
-            onClick={() => {
-              exportSalesData(salesData);
-              onExportSuccess('Sales data exported successfully');
-            }}
+            onClick={handleExport}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-colors"
             title="Export sales data to CSV"
           >
@@ -166,7 +177,9 @@ const SalesChart = ({
       )}
     </div>
   );
-};
+});
+
+SalesChart.displayName = 'SalesChart';
 
 export default SalesChart;
 

@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import {
   BarChart,
   Bar,
@@ -22,12 +23,16 @@ interface CategoryChartProps {
   onViewModeChange: (mode: 'subcategories' | 'products' | 'revenue') => void;
 }
 
-const CategoryChart = ({
+const CategoryChart = memo(({
   categoryData,
   categoriesLoading,
   categoryViewMode,
   onViewModeChange,
 }: CategoryChartProps) => {
+  const handleViewModeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    onViewModeChange(e.target.value as 'subcategories' | 'products' | 'revenue');
+  }, [onViewModeChange]);
+
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition-all hover-lift animate-fade-in-up" role="region" aria-label="Category distribution chart">
       <div className="flex items-center justify-between mb-6">
@@ -41,7 +46,7 @@ const CategoryChart = ({
         <div className="flex items-center gap-3">
           <select
             value={categoryViewMode}
-            onChange={(e) => onViewModeChange(e.target.value as 'subcategories' | 'products' | 'revenue')}
+            onChange={handleViewModeChange}
             className="bg-gradient-to-r from-green-100 to-emerald-100 px-4 py-2 rounded-lg text-sm font-bold text-green-800 border-0 focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer"
             aria-label="Category view mode"
           >
@@ -115,7 +120,9 @@ const CategoryChart = ({
       )}
     </div>
   );
-};
+});
+
+CategoryChart.displayName = 'CategoryChart';
 
 export default CategoryChart;
 

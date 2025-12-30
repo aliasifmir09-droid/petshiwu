@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, ExternalLink, Package, Download, ArrowUpDown, Search, ChevronRight } from 'lucide-react';
 import { normalizeImageUrl, getPlaceholderImage } from '@/utils/imageUtils';
@@ -14,7 +14,7 @@ interface OutOfStockSectionProps {
   onExportSuccess: (message: string) => void;
 }
 
-const OutOfStockSection = ({
+const OutOfStockSection = memo(({
   outOfStockData,
   outOfStockLoading,
   outOfStockError,
@@ -199,6 +199,7 @@ const OutOfStockSection = ({
               <div key={getUniqueKey(product?._id, prodIndex, 'product')} className="flex items-center justify-between bg-white p-4 rounded-lg border-2 border-red-200 hover:border-red-400 transition-all hover-lift shadow-sm">
                 <div className="flex items-center gap-3">
                   <img
+                    loading="lazy"
                     src={normalizeImageUrl(product.images?.[0]) || getPlaceholderImage(product.name || 'Product')}
                     alt={product.name || 'Product'}
                     onError={(e) => {
@@ -245,7 +246,9 @@ const OutOfStockSection = ({
       </div>
     </div>
   );
-};
+});
+
+OutOfStockSection.displayName = 'OutOfStockSection';
 
 export default OutOfStockSection;
 
