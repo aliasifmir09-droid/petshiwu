@@ -3,26 +3,33 @@
  * Provides functions to mask or format customer information appropriately
  */
 
+import { sanitizeString } from './sanitizeUtils';
+
 /**
  * Masks customer name for privacy - shows first name and last initial
  * Example: "John Doe" -> "John D."
+ * Also sanitizes input to prevent XSS attacks
  */
 export const maskCustomerName = (firstName?: string, lastName?: string): string => {
-  if (!firstName && !lastName) {
+  // Sanitize inputs first
+  const safeFirst = sanitizeString(firstName);
+  const safeLast = sanitizeString(lastName);
+  
+  if (!safeFirst && !safeLast) {
     return 'Guest';
   }
   
-  if (firstName && lastName) {
-    const lastInitial = lastName.charAt(0).toUpperCase();
-    return `${firstName} ${lastInitial}.`;
+  if (safeFirst && safeLast) {
+    const lastInitial = safeLast.charAt(0).toUpperCase();
+    return `${safeFirst} ${lastInitial}.`;
   }
   
-  if (firstName) {
-    return firstName;
+  if (safeFirst) {
+    return safeFirst;
   }
   
-  if (lastName) {
-    return `${lastName.charAt(0).toUpperCase()}.`;
+  if (safeLast) {
+    return `${safeLast.charAt(0).toUpperCase()}.`;
   }
   
   return 'Guest';

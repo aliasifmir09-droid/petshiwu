@@ -210,8 +210,28 @@ const Dashboard = () => {
 
   const hasAnalyticsPermission = userData?.role === 'admin' || userData?.permissions?.canViewAnalytics;
   
-  // Handle manual refresh with error recovery
+  // Rate limiting for refresh - prevent abuse
+  const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
+  const REFRESH_COOLDOWN = 2000; // 2 seconds cooldown between refreshes
+
+  // Handle manual refresh with error recovery and rate limiting
   const handleRefresh = useCallback(async () => {
+    const now = Date.now();
+    const timeSinceLastRefresh = now - lastRefreshTime;
+
+    // Rate limiting: prevent refresh if called too soon
+    if (timeSinceLastRefresh < REFRESH_COOLDOWN) {
+      const remainingTime = Math.ceil((REFRESH_COOLDOWN - timeSinceLastRefresh) / 1000);
+      showToast(`Please wait ${remainingTime} second${remainingTime > 1 ? 's' : ''} before refreshing again`, 'warning');
+      return;
+    }
+
+    // Prevent multiple simultaneous refreshes
+    if (isRefreshing) {
+      return;
+    }
+
+    setLastRefreshTime(now);
     setIsRefreshing(true);
     try {
       // Invalidate all dashboard-related queries
@@ -233,7 +253,7 @@ const Dashboard = () => {
     } finally {
       setIsRefreshing(false);
     }
-  }, [queryClient, showToast]);
+  }, [queryClient, showToast, lastRefreshTime, isRefreshing]);
   
   // Setup query cancellation on unmount
   useEffect(() => {

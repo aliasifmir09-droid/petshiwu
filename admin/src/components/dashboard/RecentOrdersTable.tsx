@@ -5,6 +5,7 @@ import { RecentOrder, OrderStats } from '@/pages/Dashboard';
 import { formatDate } from '@/utils/dateUtils';
 import { validateRecentOrder } from '@/utils/dataValidation';
 import { maskCustomerName, canViewFullCustomerData } from '@/utils/privacyUtils';
+import { sanitizeCustomerName } from '@/utils/sanitizeUtils';
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS, isValidOrderStatus } from '@/utils/constants';
 import { exportRecentOrders } from '@/utils/exportUtils';
 import { UI } from '@/utils/dashboardConstants';
@@ -279,8 +280,9 @@ const RecentOrdersTable = memo(({
             {paginatedOrders.map((order: RecentOrder, index: number) => {
               if (!order) return null;
               const orderId = order._id || order.orderNumber || '';
+              // Sanitize customer name to prevent XSS attacks
               const customerName = canViewFullData
-                ? `${order.user?.firstName || ''} ${order.user?.lastName || ''}`.trim() || 'Guest'
+                ? sanitizeCustomerName(order.user?.firstName, order.user?.lastName)
                 : maskCustomerName(order.user?.firstName, order.user?.lastName);
 
               return (

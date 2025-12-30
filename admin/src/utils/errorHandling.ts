@@ -3,6 +3,8 @@
  * Provides consistent error handling patterns across the application
  */
 
+import { sanitizeErrorMessage, sanitizeErrorObject } from './sanitizeUtils';
+
 export interface ErrorInfo {
   message: string;
   code?: string;
@@ -32,6 +34,7 @@ export class AppError extends Error {
 /**
  * Standard error handler
  * Logs errors consistently and returns user-friendly messages
+ * Sanitizes sensitive data before logging
  */
 export const handleError = (
   error: unknown,
@@ -41,10 +44,14 @@ export const handleError = (
 
   // Handle AppError instances
   if (error instanceof AppError) {
-    const logMessage = `AppError${contextInfo}: ${error.message}${error.code ? ` (Code: ${error.code})` : ''}${error.context ? ` Context: ${JSON.stringify(error.context)}` : ''}`;
+    // Sanitize error message and context
+    const sanitizedMessage = sanitizeErrorMessage(error.message);
+    const sanitizedContext = error.context ? sanitizeErrorObject(error.context) : undefined;
+    const logMessage = `AppError${contextInfo}: ${sanitizedMessage}${error.code ? ` (Code: ${error.code})` : ''}${sanitizedContext ? ` Context: ${JSON.stringify(sanitizedContext)}` : ''}`;
     
+    // Only log in development mode to prevent sensitive data exposure
     if (import.meta.env.DEV) {
-      console.error(logMessage, error);
+      console.error(logMessage, sanitizedContext || error);
     }
 
     return {
@@ -55,10 +62,14 @@ export const handleError = (
 
   // Handle Error instances
   if (error instanceof Error) {
-    const logMessage = `Error${contextInfo}: ${error.message}${error.stack ? `\nStack: ${error.stack}` : ''}`;
+    // Sanitize error message and stack trace
+    const sanitizedMessage = sanitizeErrorMessage(error.message);
+    const sanitizedStack = error.stack ? sanitizeErrorMessage(error.stack) : undefined;
+    const logMessage = `Error${contextInfo}: ${sanitizedMessage}${sanitizedStack ? `\nStack: ${sanitizedStack}` : ''}`;
     
+    // Only log in development mode
     if (import.meta.env.DEV) {
-      console.error(logMessage, error);
+      console.error(logMessage);
     }
 
     return {
@@ -69,10 +80,12 @@ export const handleError = (
 
   // Handle unknown error types
   const errorString = String(error);
-  const logMessage = `Unknown error${contextInfo}: ${errorString}`;
+  const sanitizedError = sanitizeErrorMessage(errorString);
+  const logMessage = `Unknown error${contextInfo}: ${sanitizedError}`;
   
+  // Only log in development mode
   if (import.meta.env.DEV) {
-    console.error(logMessage, error);
+    console.error(logMessage);
   }
 
   return {
@@ -83,13 +96,18 @@ export const handleError = (
 
 /**
  * Safe error logger
- * Only logs in development mode
+ * Only logs in development mode and sanitizes sensitive data
  */
 export const safeLogError = (error: unknown, context?: string): void => {
+  // Always sanitize before logging, even in dev mode
+  const { logMessage } = handleError(error, context);
+  
+  // Only log in development mode to prevent sensitive data exposure in production
   if (import.meta.env.DEV) {
-    const { logMessage } = handleError(error, context);
     console.error(logMessage);
   }
+  // In production, consider sending to error tracking service (Sentry, etc.)
+  // with sanitized data only
 };
 
 /**
