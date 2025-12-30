@@ -71,29 +71,30 @@ const Customers = () => {
   });
 
   // Fetch selected customer's orders
+  // Ensure customerId in queryKey is always a string to prevent React Query serialization issues
+  const customerIdForQuery = selectedCustomer?._id 
+    ? (typeof selectedCustomer._id === 'string' ? selectedCustomer._id : String(selectedCustomer._id || ''))
+    : null;
+  
   const { data: customerOrders, isLoading: ordersLoading, error: ordersError } = useQuery({
-    queryKey: ['customer-orders', selectedCustomer?._id],
+    queryKey: ['customer-orders', customerIdForQuery],
     queryFn: async () => {
-      if (!selectedCustomer) return [];
+      if (!selectedCustomer || !customerIdForQuery) return [];
       try {
         // Ensure _id is converted to string to prevent [object Object] in URL
-        const customerId = typeof selectedCustomer._id === 'string' 
-          ? selectedCustomer._id 
-          : String(selectedCustomer._id || '');
-        
-        if (!customerId || customerId === 'undefined' || customerId === 'null') {
+        if (!customerIdForQuery || customerIdForQuery === 'undefined' || customerIdForQuery === 'null') {
           console.error('Invalid customer ID:', selectedCustomer._id);
           return [];
         }
         
-        const response = await adminService.getCustomerOrders(customerId);
+        const response = await adminService.getCustomerOrders(customerIdForQuery);
         return response.data || [];
       } catch (error) {
         console.error('Error fetching customer orders:', error);
         return [];
       }
     },
-    enabled: !!selectedCustomer && !!selectedCustomer._id,
+    enabled: !!selectedCustomer && !!customerIdForQuery && customerIdForQuery !== 'undefined' && customerIdForQuery !== 'null',
     retry: 1
   });
 

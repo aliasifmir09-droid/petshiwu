@@ -418,12 +418,35 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
     return response.data;
   },
 
-  getCustomerOrders: async (customerId: string) => {
+  getCustomerOrders: async (customerId: string | unknown) => {
     // Ensure customerId is a string to prevent [object Object] in URL
-    const id = typeof customerId === 'string' ? customerId : String(customerId || '');
-    if (!id || id === 'undefined' || id === 'null') {
-      throw new Error('Invalid customer ID provided');
+    // Handle case where customerId might be an object (MongoDB ObjectId)
+    let id: string;
+    if (typeof customerId === 'string') {
+      id = customerId;
+    } else if (customerId && typeof customerId === 'object') {
+      // Try to extract string from object (e.g., MongoDB ObjectId)
+      const obj = customerId as { toString?: () => string; _id?: string; id?: string };
+      if (obj.toString && typeof obj.toString === 'function') {
+        const str = obj.toString();
+        id = str && str !== '[object Object]' ? str : '';
+      } else if (obj._id && typeof obj._id === 'string') {
+        id = obj._id;
+      } else if (obj.id && typeof obj.id === 'string') {
+        id = obj.id;
+      } else {
+        id = '';
+      }
+    } else {
+      id = String(customerId || '');
     }
+    
+    // Validate the ID
+    if (!id || id === 'undefined' || id === 'null' || id === '[object Object]' || id.trim() === '') {
+      console.error('Invalid customer ID provided:', customerId, 'converted to:', id);
+      throw new Error(`Invalid customer ID provided: ${JSON.stringify(customerId)}`);
+    }
+    
     const response = await api.get(`/users/customers/${encodeURIComponent(id)}/orders`);
     return response.data;
   },
