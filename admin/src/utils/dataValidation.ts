@@ -64,30 +64,7 @@ export const validateRecentOrder = (order: any): boolean => {
   return true;
 };
 
-/**
- * Validates Product structure
- */
-export const validateProduct = (product: any): boolean => {
-  if (!product || typeof product !== 'object') return false;
-  
-  // Should have at least an ID or name
-  if (!product._id && !product.name) return false;
-  
-  // If images exists, should be an array
-  if (product.images !== undefined && !Array.isArray(product.images)) {
-    return false;
-  }
-  
-  return true;
-};
 
-/**
- * Validates array of items with a validator function
- */
-export const validateArray = <T>(arr: any, validator: (item: any) => boolean): arr is T[] => {
-  if (!Array.isArray(arr)) return false;
-  return arr.every(validator);
-};
 
 /**
  * Safely validates and returns data or undefined

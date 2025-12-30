@@ -35,20 +35,6 @@ export const maskCustomerName = (firstName?: string, lastName?: string): string 
   return 'Guest';
 };
 
-/**
- * Gets customer initials for display
- * Example: "John Doe" -> "JD"
- */
-export const getCustomerInitials = (firstName?: string, lastName?: string): string => {
-  if (!firstName && !lastName) {
-    return 'G';
-  }
-  
-  const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : '';
-  const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
-  
-  return `${firstInitial}${lastInitial}` || 'G';
-};
 
 /**
  * Checks if user has permission to view full customer data

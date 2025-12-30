@@ -23,16 +23,15 @@ import Toast from '@/components/Toast';
 import { exportOrderStats, exportProductStats } from '@/utils/exportUtils';
 
 // TypeScript interfaces for type safety
-interface OrderUser {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-}
 
 interface RecentOrder {
   _id?: string;
   orderNumber?: string;
-  user?: OrderUser;
+  user?: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+  };
   totalPrice?: number;
   orderStatus?: string;
   createdAt?: string | Date;
@@ -113,63 +112,6 @@ interface CategoryGroup {
 // Export types for use in sub-components
 export type { OrderStats, ProductStats, RecentOrder, MonthlySale, Product, OutOfStockData, Category, PetType, CategoryGroup };
 
-// Helper function to safely convert any ID to a unique string key
-const getUniqueKey = (id: string | number | undefined | null | { toString?: () => string; valueOf?: () => unknown }, index: number, prefix: string = 'item'): string => {
-  // Handle null/undefined
-  if (id === null || id === undefined) {
-    return `${prefix}-${index}`;
-  }
-  
-  // Handle string IDs
-  if (typeof id === 'string') {
-    return `${id}-${index}`; // Add index to ensure uniqueness
-  }
-  
-  // Handle number IDs
-  if (typeof id === 'number') {
-    return `${id}-${index}`;
-  }
-  
-  // Handle object IDs (Mongoose ObjectId, etc.)
-  if (typeof id === 'object' && id !== null) {
-    // Try toString() method first (Mongoose ObjectId has this)
-    if (id.toString && typeof id.toString === 'function') {
-      try {
-        const str = id.toString();
-        if (str && str !== '[object Object]') {
-          return `${str}-${index}`;
-        }
-      } catch (e) {
-        // Fall through to other methods
-      }
-    }
-    
-    // Try valueOf() method
-    if (id.valueOf && typeof id.valueOf === 'function') {
-      try {
-        const val = id.valueOf();
-        if (val && val !== id) {
-          return getUniqueKey(val, index, prefix);
-        }
-      } catch (e) {
-        // Fall through
-      }
-    }
-    
-    // Last resort: JSON.stringify (but this might not work for circular refs)
-    try {
-      const json = JSON.stringify(id);
-      if (json && json !== '{}' && json !== 'null') {
-        return `${json}-${index}`;
-      }
-    } catch (e) {
-      // Fall through to index-based key
-    }
-  }
-  
-  // Fallback: use index only
-  return `${prefix}-${index}`;
-};
 
 const Dashboard = () => {
   const queryClient = useQueryClient();
@@ -709,8 +651,7 @@ const Dashboard = () => {
               const subcategoryCount = countAllSubcategories(category);
               value = Math.max(subcategoryCount, 1);
             } else if (categoryViewMode === 'products') {
-              // For now, use subcategory count as proxy for product count
-              // TODO: Fetch actual product counts per category from backend
+              // Use subcategory count as proxy for product count
               const subcategoryCount = countAllSubcategories(category);
               value = Math.max(subcategoryCount * 5, 1); // Estimate: ~5 products per subcategory
             } else {
