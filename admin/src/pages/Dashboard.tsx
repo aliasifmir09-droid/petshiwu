@@ -15,6 +15,8 @@ import { formatDate, normalizeMonthName } from '@/utils/dateUtils';
 import { QUERY_CONFIG, UI, MONTH_NAMES, CHART_MARGINS } from '@/utils/dashboardConstants';
 import { validateOrderStats, validateProductStats, validateRecentOrder, safeValidate } from '@/utils/dataValidation';
 import { maskCustomerName, canViewFullCustomerData } from '@/utils/privacyUtils';
+import { ORDER_STATUS, ORDER_STATUS_COLORS, isValidOrderStatus } from '@/utils/constants';
+import { handleError, safeLogError } from '@/utils/errorHandling';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { exportOrderStats, exportProductStats, exportRecentOrders, exportSalesData, exportOutOfStockProducts } from '@/utils/exportUtils';
@@ -123,7 +125,7 @@ interface CategoryGroup {
 export type { OrderStats, ProductStats, RecentOrder, MonthlySale, Product, OutOfStockData, Category, PetType, CategoryGroup };
 
 // Helper function to safely convert any ID to a unique string key
-const getUniqueKey = (id: any, index: number, prefix: string = 'item'): string => {
+const getUniqueKey = (id: string | undefined | null, index: number, prefix: string = 'item'): string => {
   if (!id && id !== 0) {
     return `${prefix}-${index}`;
   }
@@ -246,10 +248,10 @@ const Dashboard = () => {
       await queryClient.refetchQueries();
       setLastUpdated(new Date());
       showToast('Dashboard refreshed successfully', 'success');
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to refresh dashboard';
-      console.error('Error refreshing data:', error);
-      showToast(errorMessage, 'error');
+    } catch (error) {
+      const { userMessage } = handleError(error, 'Dashboard refresh');
+      safeLogError(error, 'Dashboard refresh');
+      showToast(userMessage, 'error');
     } finally {
       setIsRefreshing(false);
     }
@@ -615,7 +617,13 @@ const Dashboard = () => {
         ];
       }
 
-      const rootCategories = categoriesArray; // Backend returns hierarchical structure (root categories with subcategories)
+      // Validate and type categories array
+      if (!Array.isArray(categoriesArray)) {
+        return [{ name: 'No categories found', value: 0 }];
+      }
+      const rootCategories: Category[] = categoriesArray.filter((cat): cat is Category => 
+        cat && typeof cat === 'object' && 'name' in cat
+      );
       const categoryCounts: { [key: string]: number } = {};
 
       // Helper function to recursively count all subcategories at any level
@@ -916,7 +924,7 @@ const Dashboard = () => {
                 </div>
                 <button
                   onClick={() => {
-                    exportOutOfStockProducts(outOfStockData.data as any[]);
+                    exportOutOfStockProducts(outOfStockData.data as Product[]);
                     showToast('Out-of-stock products exported successfully', 'success');
                   }}
                   className="flex items-center gap-2 bg-white hover:bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
@@ -1107,13 +1115,13 @@ const Dashboard = () => {
                   width={60}
                 />
                 <Tooltip 
-                  formatter={(value: any, _name: string, props: any) => {
-                    const currentValue = Number(value);
+                  formatter={(value: unknown, _name: string, props: { payload?: { previousSales?: number } }) => {
+                    const currentValue = Number(value) || 0;
                     const previousValue = props.payload?.previousSales || 0;
                     const change = previousValue > 0 
                       ? ((currentValue - previousValue) / previousValue * 100).toFixed(1)
                       : null;
-                    const totalSales = salesData.reduce((sum: number, item: any) => sum + item.sales, 0);
+                    const totalSales = salesData.reduce((sum: number, item: MonthlySale) => sum + (item.sales || 0), 0);
                     const percentageOfTotal = totalSales > 0
                       ? ((currentValue / totalSales) * 100).toFixed(1)
                       : null;
@@ -1229,7 +1237,7 @@ const Dashboard = () => {
                     borderRadius: '8px',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                   }}
-                  formatter={(value: any) => {
+                  formatter={(value: unknown) => {
                     const label = categoryViewMode === 'subcategories' ? 'subcategories' : 
                                  categoryViewMode === 'products' ? 'products' : 'revenue';
                     return [`${value} ${label}`, 'Count'];
@@ -1239,7 +1247,7 @@ const Dashboard = () => {
                   dataKey="value" 
                   fill="url(#colorGradient)" 
                   radius={[8, 8, 0, 0]}
-                  label={{ position: 'top', formatter: (value: any) => `${value}` }}
+                  label={{ position: 'top', formatter: (value: unknown) => `${value}` }}
                 />
                 <defs>
                   <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
@@ -1381,7 +1389,7 @@ const Dashboard = () => {
                 onClick={() => {
                   const orders = validatedOrderStats?.recentOrders || [];
                   if (orders.length > 0) {
-                    exportRecentOrders(orders as any[]);
+                    exportRecentOrders(orders as RecentOrder[]);
                     showToast('Orders exported successfully', 'success');
                   }
                 }}
@@ -1556,14 +1564,23 @@ const Dashboard = () => {
                           ${(order.totalPrice ?? 0).toFixed(2)}
                         </td>
                         <td className="px-6 py-4 text-sm">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            order.orderStatus === 'delivered' ? 'bg-green-100 text-green-800' :
-                            order.orderStatus === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                            order.orderStatus === 'processing' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`} aria-label={`Order status: ${order.orderStatus || 'Unknown'}`}>
-                            {order.orderStatus || 'Unknown'}
-                          </span>
+                          {(() => {
+                            const status = order.orderStatus || '';
+                            const isValidStatus = isValidOrderStatus(status);
+                            const statusColors = isValidStatus 
+                              ? ORDER_STATUS_COLORS[status]
+                              : { bg: 'bg-gray-100', text: 'text-gray-800' };
+                            const statusLabel = isValidStatus ? ORDER_STATUS_LABELS[status] : status || 'Unknown';
+                            
+                            return (
+                              <span 
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors.bg} ${statusColors.text}`}
+                                aria-label={`Order status: ${statusLabel}`}
+                              >
+                                {statusLabel}
+                              </span>
+                            );
+                          })()}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600">
                           {order.createdAt ? formatDate(order.createdAt) : 'N/A'}
