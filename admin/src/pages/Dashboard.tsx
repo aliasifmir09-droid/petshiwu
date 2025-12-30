@@ -763,6 +763,27 @@ const Dashboard = () => {
 
   return (
     <ErrorBoundary>
+      {/* Skip links for keyboard navigation */}
+      <div className="sr-only focus-within:not-sr-only focus-within:absolute focus-within:z-50 focus-within:top-4 focus-within:left-4">
+        <a
+          href="#dashboard-stats"
+          className="block bg-blue-600 text-white px-4 py-2 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          Skip to Statistics
+        </a>
+        <a
+          href="#dashboard-charts"
+          className="block bg-blue-600 text-white px-4 py-2 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          Skip to Charts
+        </a>
+        <a
+          href="#dashboard-orders"
+          className="block bg-blue-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          Skip to Recent Orders
+        </a>
+      </div>
       <div className="space-y-8" role="main" aria-label="Dashboard overview">
         {/* Print Header */}
         <div className="print-header hidden print:block">
@@ -862,7 +883,7 @@ const Dashboard = () => {
       />
 
       {/* Charts - Enhanced */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <section id="dashboard-charts" aria-label="Sales and category charts" className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Suspense fallback={<div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 h-[400px] animate-pulse"><div className="h-full bg-gray-100 rounded"></div></div>}>
           <SalesChart
             salesData={salesData}
@@ -884,7 +905,7 @@ const Dashboard = () => {
             onViewModeChange={setCategoryViewMode}
           />
         </Suspense>
-      </div>
+      </section>
 
       {/* Navigation Menu Categories - New Section */}
       <CategoryNavigationSection
@@ -894,7 +915,8 @@ const Dashboard = () => {
       />
 
       {/* Recent Orders - Enhanced */}
-      <RecentOrdersTable
+      <section id="dashboard-orders" aria-label="Recent orders">
+        <RecentOrdersTable
         orderStats={validatedOrderStats}
         orderStatsLoading={orderStatsLoading}
         orderStatsError={orderStatsError}
@@ -902,6 +924,7 @@ const Dashboard = () => {
         userPermissions={userData?.permissions}
         onExportSuccess={(message: string) => showToast(message, 'success')}
       />
+      </section>
       
       {/* Toast Notification */}
       <Toast toast={toast} onClose={hideToast} />

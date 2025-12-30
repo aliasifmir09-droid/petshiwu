@@ -9,6 +9,8 @@ import { sanitizeCustomerName } from '@/utils/sanitizeUtils';
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS, isValidOrderStatus } from '@/utils/constants';
 import { exportRecentOrders } from '@/utils/exportUtils';
 import { UI } from '@/utils/dashboardConstants';
+import EmptyState from '@/components/EmptyState';
+import { SkeletonTableRow } from '@/components/Skeleton';
 
 interface RecentOrdersTableProps {
   orderStats: OrderStats | undefined;
@@ -82,7 +84,7 @@ const RecentOrdersTable = memo(({
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full" aria-label="Recent orders table">
+          <table className="w-full hidden md:table" aria-label="Recent orders table">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" scope="col">Order ID</th>
@@ -94,27 +96,19 @@ const RecentOrdersTable = memo(({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {Array.from({ length: UI.RECENT_ORDERS_SKELETON_COUNT }).map((_, i) => (
-                <tr key={i} className="animate-pulse">
-                  <td className="px-6 py-4">
-                    <div className="h-4 bg-gray-200 rounded w-24"></div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="h-4 bg-gray-200 rounded w-32"></div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="h-4 bg-gray-200 rounded w-16"></div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="h-6 bg-gray-200 rounded w-20"></div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="h-4 bg-gray-200 rounded w-20"></div>
-                  </td>
-                </tr>
-              ))}
+              <SkeletonTableRow count={UI.RECENT_ORDERS_SKELETON_COUNT} />
             </tbody>
           </table>
+          {/* Mobile card view */}
+          <div className="md:hidden space-y-3 p-4">
+            {Array.from({ length: UI.RECENT_ORDERS_SKELETON_COUNT }).map((_, i) => (
+              <div key={i} className="bg-gray-50 rounded-lg p-4 animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-24 mb-3"></div>
+                <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-16"></div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -140,27 +134,23 @@ const RecentOrdersTable = memo(({
             <h2 className="text-2xl font-black text-gray-900">Recent Orders</h2>
             <Link
               to="/orders"
-              className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm"
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
             >
               View All
               <ChevronRight size={16} />
             </Link>
           </div>
         </div>
-        <div className="p-12 text-center">
-          <div className="flex flex-col items-center justify-center">
-            <Inbox className="text-gray-400 mb-3" size={48} />
-            <p className="text-gray-500 font-medium text-lg">No recent orders</p>
-            <p className="text-gray-400 text-sm mt-1">Orders will appear here once customers start placing them</p>
-            <Link
-              to="/orders"
-              className="mt-4 inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm"
-            >
-              View All Orders
-              <ChevronRight size={16} />
-            </Link>
-          </div>
-        </div>
+        <EmptyState
+          icon={Inbox}
+          title="No recent orders"
+          description="Orders will appear here once customers start placing them. You can view all orders in the Orders page."
+          action={{
+            label: 'View All Orders',
+            onClick: () => navigate('/orders'),
+            href: '/orders',
+          }}
+        />
       </div>
     );
   }
@@ -265,7 +255,8 @@ const RecentOrdersTable = memo(({
         </div>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full" aria-label="Recent orders table">
+        {/* Desktop table view */}
+        <table className="w-full hidden md:table" aria-label="Recent orders table">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" scope="col">Order ID</th>
@@ -285,10 +276,17 @@ const RecentOrdersTable = memo(({
                 ? sanitizeCustomerName(order.user?.firstName, order.user?.lastName)
                 : maskCustomerName(order.user?.firstName, order.user?.lastName);
 
+              const status = order.orderStatus || '';
+              const isValidStatus = isValidOrderStatus(status);
+              const statusColors = isValidStatus
+                ? ORDER_STATUS_COLORS[status]
+                : { bg: 'bg-gray-100', text: 'text-gray-800' };
+              const statusLabel = isValidStatus ? ORDER_STATUS_LABELS[status] : status || 'Unknown';
+
               return (
                 <tr
                   key={getUniqueKey(order?._id, index, 'order')}
-                  className="hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="hover:bg-gray-50 cursor-pointer transition-colors focus-within:bg-gray-50"
                   onClick={() => {
                     if (orderId) {
                       navigate(`/orders?orderId=${orderId}`);
@@ -312,23 +310,12 @@ const RecentOrdersTable = memo(({
                     ${(order.totalPrice ?? 0).toFixed(2)}
                   </td>
                   <td className="px-6 py-4 text-sm">
-                    {(() => {
-                      const status = order.orderStatus || '';
-                      const isValidStatus = isValidOrderStatus(status);
-                      const statusColors = isValidStatus
-                        ? ORDER_STATUS_COLORS[status]
-                        : { bg: 'bg-gray-100', text: 'text-gray-800' };
-                      const statusLabel = isValidStatus ? ORDER_STATUS_LABELS[status] : status || 'Unknown';
-
-                      return (
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors.bg} ${statusColors.text}`}
-                          aria-label={`Order status: ${statusLabel}`}
-                        >
-                          {statusLabel}
-                        </span>
-                      );
-                    })()}
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors.bg} ${statusColors.text}`}
+                      aria-label={`Order status: ${statusLabel}`}
+                    >
+                      {statusLabel}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {order.createdAt ? formatDate(order.createdAt) : 'N/A'}
@@ -336,7 +323,7 @@ const RecentOrdersTable = memo(({
                   <td className="px-6 py-4 text-sm">
                     <Link
                       to={`/orders${orderId ? `?orderId=${orderId}` : ''}`}
-                      className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium"
+                      className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
                       onClick={(e) => e.stopPropagation()}
                       aria-label={`View details for order ${order.orderNumber || orderId}`}
                     >
@@ -381,6 +368,76 @@ const RecentOrdersTable = memo(({
             )}
           </tbody>
         </table>
+
+        {/* Mobile card view */}
+        <div className="md:hidden space-y-3 p-4">
+          {paginatedOrders.map((order: RecentOrder, index: number) => {
+            if (!order) return null;
+            const orderId = order._id || order.orderNumber || '';
+            const customerName = canViewFullData
+              ? sanitizeCustomerName(order.user?.firstName, order.user?.lastName)
+              : maskCustomerName(order.user?.firstName, order.user?.lastName);
+            const status = order.orderStatus || '';
+            const isValidStatus = isValidOrderStatus(status);
+            const statusColors = isValidStatus
+              ? ORDER_STATUS_COLORS[status]
+              : { bg: 'bg-gray-100', text: 'text-gray-800' };
+            const statusLabel = isValidStatus ? ORDER_STATUS_LABELS[status] : status || 'Unknown';
+
+            return (
+              <div
+                key={getUniqueKey(order?._id, index, 'order')}
+                className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer focus-within:ring-2 focus-within:ring-blue-500"
+                onClick={() => {
+                  if (orderId) {
+                    navigate(`/orders?orderId=${orderId}`);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if ((e.key === 'Enter' || e.key === ' ') && orderId) {
+                    e.preventDefault();
+                    navigate(`/orders?orderId=${orderId}`);
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`View details for order ${order.orderNumber || orderId}`}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <p className="font-semibold text-gray-900">Order #{order.orderNumber || 'N/A'}</p>
+                    <p className="text-sm text-gray-600">{customerName}</p>
+                  </div>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors.bg} ${statusColors.text}`}
+                    aria-label={`Order status: ${statusLabel}`}
+                  >
+                    {statusLabel}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+                  <div>
+                    <p className="text-xs text-gray-500">Total</p>
+                    <p className="font-semibold text-gray-900">${(order.totalPrice ?? 0).toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Date</p>
+                    <p className="text-sm text-gray-600">{order.createdAt ? formatDate(order.createdAt) : 'N/A'}</p>
+                  </div>
+                  <Link
+                    to={`/orders${orderId ? `?orderId=${orderId}` : ''}`}
+                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label={`View details for order ${order.orderNumber || orderId}`}
+                  >
+                    <Eye size={16} aria-hidden="true" />
+                    <span className="text-sm">View</span>
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
