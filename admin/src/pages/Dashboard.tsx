@@ -10,6 +10,8 @@ import { AlertTriangle, ExternalLink, FolderTree, ChevronRight, Inbox, Eye, Pack
 import { normalizeImageUrl, getPlaceholderImage } from '@/utils/imageUtils';
 import { formatDate } from '@/utils/dateUtils';
 import { QUERY_CONFIG, UI, MONTH_NAMES, CHART_MARGINS } from '@/utils/dashboardConstants';
+import { validateOrderStats, validateProductStats, validateRecentOrder, safeValidate } from '@/utils/dataValidation';
+import { maskCustomerName, canViewFullCustomerData } from '@/utils/privacyUtils';
 import {
   LineChart,
   Line,
@@ -271,8 +273,8 @@ const Dashboard = () => {
     ],
   });
 
-  // Extract data from parallel queries
-  const productStats = productStatsQuery.data as ProductStats | undefined;
+  // Extract and validate data from parallel queries
+  const productStats = safeValidate<ProductStats>(productStatsQuery.data, validateProductStats);
   const productStatsLoading = productStatsQuery.isLoading;
   const productStatsError = productStatsQuery.error;
 
@@ -282,6 +284,9 @@ const Dashboard = () => {
 
   const categoriesData = categoriesQuery.data;
   const petTypesData = petTypesQuery.data;
+  
+  // Validate orderStats
+  const validatedOrderStats = safeValidate<OrderStats>(orderStats, validateOrderStats);
 
   // Group categories by pet type - MEMOIZED for performance
   // Optimized: use stable references to prevent unnecessary recalculations
@@ -330,7 +335,7 @@ const Dashboard = () => {
 
   // Calculate real sales data from orderStats
   // Optimized: depend on specific property instead of entire object to prevent unnecessary recalculations
-  const monthlySales = orderStats?.monthlySales;
+  const monthlySales = validatedOrderStats?.monthlySales;
   const salesData = useMemo((): MonthlySale[] => {
     if (!monthlySales || !Array.isArray(monthlySales)) {
       // Return empty data structure if no data available
@@ -366,7 +371,7 @@ const Dashboard = () => {
 
   // Calculate real trend values
   // Optimized: depend on specific properties instead of entire object to prevent unnecessary recalculations
-  const revenueTrendValue = orderStats?.revenueTrend;
+  const revenueTrendValue = validatedOrderStats?.revenueTrend;
   const revenueTrend = useMemo(() => {
     if (revenueTrendValue === undefined || revenueTrendValue === null) {
       return null;
@@ -377,7 +382,7 @@ const Dashboard = () => {
     };
   }, [revenueTrendValue]);
 
-  const ordersTrendValue = orderStats?.ordersTrend;
+  const ordersTrendValue = validatedOrderStats?.ordersTrend;
   const ordersTrend = useMemo(() => {
     if (ordersTrendValue === undefined || ordersTrendValue === null) {
       return null;
@@ -548,7 +553,7 @@ const Dashboard = () => {
       )}
 
       <StatsGrid
-        orderStats={orderStats}
+        orderStats={validatedOrderStats}
         productStats={productStats}
         orderStatsLoading={orderStatsLoading}
         productStatsLoading={productStatsLoading}
@@ -698,14 +703,36 @@ const Dashboard = () => {
               </div>
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height={UI.CHART_HEIGHT}>
-              <LineChart data={salesData}>
+            <ResponsiveContainer width="100%" height={UI.CHART_HEIGHT} className="min-h-[250px] sm:min-h-[300px]">
+              <LineChart data={salesData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Sales']} />
-                <Legend />
-                <Line type="monotone" dataKey="sales" stroke="#0284c7" strokeWidth={2} />
+                <XAxis 
+                  dataKey="month" 
+                  style={{ fontSize: '12px' }}
+                  tick={{ fill: '#6b7280' }}
+                />
+                <YAxis 
+                  style={{ fontSize: '12px' }}
+                  tick={{ fill: '#6b7280' }}
+                  width={60}
+                />
+                <Tooltip 
+                  formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Sales']}
+                  contentStyle={{ 
+                    fontSize: '12px',
+                    padding: '8px',
+                    borderRadius: '6px'
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: '12px' }} />
+                <Line 
+                  type="monotone" 
+                  dataKey="sales" 
+                  stroke="#0284c7" 
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
               </LineChart>
             </ResponsiveContainer>
           )}
@@ -731,7 +758,7 @@ const Dashboard = () => {
               <p className="text-gray-500">No categories found</p>
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height={UI.CHART_HEIGHT}>
+            <ResponsiveContainer width="100%" height={UI.CHART_HEIGHT} className="min-h-[250px] sm:min-h-[300px]">
               <BarChart data={categoryData} margin={{ top: CHART_MARGINS.TOP, right: CHART_MARGINS.RIGHT, left: CHART_MARGINS.LEFT, bottom: CHART_MARGINS.BOTTOM }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis 
@@ -740,10 +767,14 @@ const Dashboard = () => {
                   textAnchor="end"
                   height={100}
                   style={{ fontSize: '11px', fontWeight: 'bold' }}
+                  tick={{ fill: '#6b7280' }}
+                  interval={0}
                 />
                 <YAxis 
                   style={{ fontSize: '12px' }}
-                  label={{ value: 'Subcategories', angle: -90, position: 'insideLeft' }}
+                  tick={{ fill: '#6b7280' }}
+                  width={60}
+                  label={{ value: 'Subcategories', angle: -90, position: 'insideLeft', style: { fontSize: '11px' } }}
                 />
                 <Tooltip 
                   contentStyle={{ 
@@ -938,12 +969,22 @@ const Dashboard = () => {
                   </td>
                 </tr>
               ) : (() => {
-                const orderStatsData = orderStats as OrderStats | undefined;
+                const orderStatsData = validatedOrderStats;
                 const recentOrders = orderStatsData?.recentOrders;
                 if (recentOrders && Array.isArray(recentOrders) && recentOrders.length > 0) {
-                  return recentOrders.map((order: RecentOrder, index: number) => {
+                  // Filter and validate orders
+                  const validOrders = recentOrders.filter(validateRecentOrder);
+                  
+                  return validOrders.map((order: RecentOrder, index: number) => {
                     if (!order) return null;
                     const orderId = order._id || order.orderNumber || '';
+                    
+                    // Privacy: Mask customer names based on permissions
+                    const canViewFullData = canViewFullCustomerData(userData?.role, userData?.permissions);
+                    const customerName = canViewFullData
+                      ? `${order.user?.firstName || ''} ${order.user?.lastName || ''}`.trim() || 'Guest'
+                      : maskCustomerName(order.user?.firstName, order.user?.lastName);
+                    
                     return (
                       <tr 
                         key={getUniqueKey(order?._id, index, 'order')} 
@@ -964,9 +1005,8 @@ const Dashboard = () => {
                         aria-label={`View details for order ${order.orderNumber || orderId}`}
                       >
                         <td className="px-6 py-4 text-sm font-medium">{order.orderNumber || 'N/A'}</td>
-                        <td className="px-6 py-4 text-sm">
-                          {order.user?.firstName || ''} {order.user?.lastName || ''}
-                          {!order.user?.firstName && !order.user?.lastName && 'Guest'}
+                        <td className="px-6 py-4 text-sm" title={canViewFullData ? undefined : 'Customer name masked for privacy'}>
+                          {customerName}
                         </td>
                         <td className="px-6 py-4 text-sm">
                           ${(order.totalPrice ?? 0).toFixed(2)}

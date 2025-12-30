@@ -52,6 +52,7 @@ const StatsGrid = ({
             icon={DollarSign}
             color="green"
             trend={revenueTrend || undefined}
+            tooltip="Total revenue from all completed orders. This includes all sales revenue."
           />
           <StatCard
             title="Total Orders"
@@ -61,6 +62,7 @@ const StatsGrid = ({
             icon={ShoppingCart}
             color="blue"
             trend={ordersTrend || undefined}
+            tooltip="Total number of orders placed by customers. Includes all order statuses."
           />
           <StatCard
             title="Total Products"
@@ -69,6 +71,7 @@ const StatsGrid = ({
               : productStats.totalProducts}
             icon={Package}
             color="yellow"
+            tooltip="Total number of products in your inventory. Includes both active and inactive products."
           />
           <StatCard
             title="Pending Orders"
@@ -77,6 +80,7 @@ const StatsGrid = ({
               : orderStats.pendingOrders}
             icon={TrendingUp}
             color="red"
+            tooltip="Number of orders awaiting processing. These orders need attention to be fulfilled."
           />
         </>
       )}
