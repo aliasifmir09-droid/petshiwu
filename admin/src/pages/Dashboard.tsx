@@ -6,7 +6,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import ErrorMessage from '@/components/ErrorMessage';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import StatsGrid from '@/components/dashboard/StatsGrid';
-import { AlertTriangle, ExternalLink, FolderTree, ChevronRight, Inbox, Eye } from 'lucide-react';
+import { AlertTriangle, ExternalLink, FolderTree, ChevronRight, Inbox, Eye, Package } from 'lucide-react';
 import { normalizeImageUrl, getPlaceholderImage } from '@/utils/imageUtils';
 import { formatDate } from '@/utils/dateUtils';
 import { QUERY_CONFIG, UI, MONTH_NAMES, CHART_MARGINS } from '@/utils/dashboardConstants';
