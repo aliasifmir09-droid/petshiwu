@@ -9,6 +9,7 @@ import InsightsCard from '@/components/dashboard/InsightsCard';
 import { lazy, Suspense } from 'react';
 import OutOfStockSection from '@/components/dashboard/OutOfStockSection';
 import CategoryNavigationSection from '@/components/dashboard/CategoryNavigationSection';
+import RecentOrdersTable from '@/components/dashboard/RecentOrdersTable';
 // Lazy load chart components for better code splitting
 const SalesChart = lazy(() => import('@/components/dashboard/SalesChart'));
 const CategoryChart = lazy(() => import('@/components/dashboard/CategoryChart'));
@@ -837,7 +838,7 @@ const Dashboard = () => {
         outOfStockData={outOfStockData}
         outOfStockLoading={outOfStockLoading}
         outOfStockError={outOfStockError}
-        onExportSuccess={(message) => showToast(message, 'success')}
+        onExportSuccess={(message: string) => showToast(message, 'success')}
       />
 
       {/* Charts - Enhanced */}
@@ -852,7 +853,7 @@ const Dashboard = () => {
             dateRange={dateRange}
             onShowComparisonChange={setShowComparison}
             onDateRangeChange={setDateRange}
-            onExportSuccess={(message) => showToast(message, 'success')}
+            onExportSuccess={(message: string) => showToast(message, 'success')}
           />
         </Suspense>
         <Suspense fallback={<div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 h-[400px] animate-pulse"><div className="h-full bg-gray-100 rounded"></div></div>}>
@@ -879,7 +880,7 @@ const Dashboard = () => {
         orderStatsError={orderStatsError}
         userRole={userData?.role}
         userPermissions={userData?.permissions}
-        onExportSuccess={(message) => showToast(message, 'success')}
+        onExportSuccess={(message: string) => showToast(message, 'success')}
       />
       
       {/* Toast Notification */}

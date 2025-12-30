@@ -1,4 +1,4 @@
-import { useState, memo, useCallback } from 'react';
+import { useState, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, ExternalLink, Package, Download, ArrowUpDown, Search, ChevronRight } from 'lucide-react';
 import { normalizeImageUrl, getPlaceholderImage } from '@/utils/imageUtils';
