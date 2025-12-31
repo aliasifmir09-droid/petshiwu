@@ -2,9 +2,14 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { connectDatabase } from '../utils/database';
 import User from '../models/User';
+import logger from '../utils/logger';
 
 dotenv.config();
 
+/**
+ * Creates a test customer user in the database
+ * Used for development and testing purposes
+ */
 const createCustomer = async () => {
   try {
     await connectDatabase();
@@ -15,10 +20,10 @@ const createCustomer = async () => {
     const existingUser = await User.findOne({ email });
     
     if (existingUser) {
-      console.log('✅ Test customer already exists!');
-      console.log('\n📧 Login Credentials:');
-      console.log('   Email: customer@test.com');
-      console.log('\n🌐 Login at: http://localhost:5173/login\n');
+      logger.info('✅ Test customer already exists!');
+      logger.info('\n📧 Login Credentials:');
+      logger.info('   Email: customer@test.com');
+      logger.info('\n🌐 Login at: http://localhost:5173/login\n');
       await mongoose.connection.close();
       process.exit(0);
     }
@@ -33,20 +38,20 @@ const createCustomer = async () => {
       role: 'customer'
     });
 
-    console.log('✅ Test customer created successfully!\n');
-    console.log('📧 Login Credentials:');
-    console.log('   Email: customer@test.com');
-    console.log('\n👤 Customer Details:');
-    console.log(`   Name: ${customer.firstName} ${customer.lastName}`);
-    console.log(`   Email: ${customer.email}`);
-    console.log(`   Phone: ${customer.phone}`);
-    console.log(`   Role: ${customer.role}`);
-    console.log('\n🌐 Login at: http://localhost:5173/login\n');
+    logger.info('✅ Test customer created successfully!\n');
+    logger.info('📧 Login Credentials:');
+    logger.info('   Email: customer@test.com');
+    logger.info('\n👤 Customer Details:');
+    logger.info(`   Name: ${customer.firstName} ${customer.lastName}`);
+    logger.info(`   Email: ${customer.email}`);
+    logger.info(`   Phone: ${customer.phone}`);
+    logger.info(`   Role: ${customer.role}`);
+    logger.info('\n🌐 Login at: http://localhost:5173/login\n');
 
     await mongoose.connection.close();
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error creating customer:', error);
+    logger.error('❌ Error creating customer:', error);
     process.exit(1);
   }
 };

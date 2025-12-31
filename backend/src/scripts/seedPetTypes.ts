@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { connectDatabase } from '../utils/database';
 import PetType from '../models/PetType';
+import logger from '../utils/logger';
 
 const defaultPetTypes = [
   {
@@ -53,29 +54,33 @@ const defaultPetTypes = [
   }
 ];
 
+/**
+ * Seeds the database with default pet types
+ * Skips seeding if pet types already exist
+ */
 const seedPetTypes = async () => {
   try {
     await connectDatabase();
-    console.log('✅ Connected to database');
+    logger.info('✅ Connected to database');
 
     // Check if pet types already exist
     const existingCount = await PetType.countDocuments();
     
     if (existingCount > 0) {
-      console.log(`✅ Pet types already exist (${existingCount} types found)`);
+      logger.info(`✅ Pet types already exist (${existingCount} types found)`);
       await mongoose.connection.close();
       process.exit(0);
     }
 
     // Create default pet types
     await PetType.insertMany(defaultPetTypes);
-    console.log('✅ Successfully seeded default pet types:');
-    defaultPetTypes.forEach(pt => console.log(`  - ${pt.icon} ${pt.name}`));
+    logger.info('✅ Successfully seeded default pet types:');
+    defaultPetTypes.forEach(pt => logger.info(`  - ${pt.icon} ${pt.name}`));
 
     await mongoose.connection.close();
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error seeding pet types:', error);
+    logger.error('❌ Error seeding pet types:', error);
     process.exit(1);
   }
 };

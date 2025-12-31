@@ -3,6 +3,7 @@ import Product from '../models/Product';
 import { connectDatabase } from '../utils/database';
 import dotenv from 'dotenv';
 import path from 'path';
+import logger from '../utils/logger';
 
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
@@ -12,18 +13,22 @@ interface DuplicateGroup {
   count: number;
 }
 
+/**
+ * Finds and removes duplicate products from the database
+ * @param dryRun - If true, only reports duplicates without removing them
+ */
 const findAndRemoveDuplicates = async (dryRun: boolean = true) => {
   try {
-    console.log('🔍 Starting duplicate product detection...\n');
+    logger.info('🔍 Starting duplicate product detection...\n');
     
     // Connect to database
     await connectDatabase();
     
     // Find duplicates by name + brand combination
-    console.log('📊 Analyzing products for duplicates...\n');
+    logger.info('📊 Analyzing products for duplicates...\n');
     
     const allProducts = await Product.find({}).lean();
-    console.log(`Total products in database: ${allProducts.length}\n`);
+    logger.info(`Total products in database: ${allProducts.length}\n`);
     
     // Group by name + brand (most common duplicate scenario)
     const nameBrandMap = new Map<string, any[]>();
@@ -92,19 +97,19 @@ const findAndRemoveDuplicates = async (dryRun: boolean = true) => {
     }
     
     if (duplicateGroups.length === 0) {
-      console.log('✅ No duplicates found! Database is clean.\n');
+      logger.info('✅ No duplicates found! Database is clean.\n');
       await mongoose.connection.close();
       return;
     }
     
-    console.log(`⚠️  Found ${duplicateGroups.length} duplicate groups:\n`);
+    logger.info(`⚠️  Found ${duplicateGroups.length} duplicate groups:\n`);
     
     let totalDuplicatesToRemove = 0;
     const productsToDelete: string[] = [];
     
     for (const group of duplicateGroups) {
-      console.log(`\n📦 ${group.key}`);
-      console.log(`   Found ${group.count} products:`);
+      logger.info(`\n📦 ${group.key}`);
+      logger.info(`   Found ${group.count} products:`);
       
       // Sort by createdAt (keep the oldest one)
       const sorted = group.products.sort((a, b) => {
@@ -117,24 +122,24 @@ const findAndRemoveDuplicates = async (dryRun: boolean = true) => {
       const toKeep = sorted[0];
       const toDelete = sorted.slice(1);
       
-      console.log(`   ✅ Keeping: ${toKeep.name} (ID: ${toKeep._id}, Created: ${toKeep.createdAt})`);
+      logger.info(`   ✅ Keeping: ${toKeep.name} (ID: ${toKeep._id}, Created: ${toKeep.createdAt})`);
       
       for (const product of toDelete) {
-        console.log(`   ❌ Will delete: ${product.name} (ID: ${product._id}, Created: ${product.createdAt})`);
+        logger.info(`   ❌ Will delete: ${product.name} (ID: ${product._id}, Created: ${product.createdAt})`);
         productsToDelete.push(String(product._id));
         totalDuplicatesToRemove++;
       }
     }
     
-    console.log(`\n📊 Summary:`);
-    console.log(`   Total duplicate groups: ${duplicateGroups.length}`);
-    console.log(`   Total products to remove: ${totalDuplicatesToRemove}`);
+    logger.info(`\n📊 Summary:`);
+    logger.info(`   Total duplicate groups: ${duplicateGroups.length}`);
+    logger.info(`   Total products to remove: ${totalDuplicatesToRemove}`);
     
     if (dryRun) {
-      console.log(`\n🔍 DRY RUN MODE - No products were deleted.`);
-      console.log(`   To actually delete duplicates, run with: npm run remove-duplicates`);
+      logger.info(`\n🔍 DRY RUN MODE - No products were deleted.`);
+      logger.info(`   To actually delete duplicates, run with: npm run remove-duplicates`);
     } else {
-      console.log(`\n🗑️  Removing duplicates...`);
+      logger.info(`\n🗑️  Removing duplicates...`);
       
       // Delete duplicates
       let deletedCount = 0;
@@ -145,19 +150,19 @@ const findAndRemoveDuplicates = async (dryRun: boolean = true) => {
             deletedCount++;
           }
         } catch (error: any) {
-          console.error(`   ❌ Error deleting product ${productId}: ${error.message}`);
+          logger.error(`   ❌ Error deleting product ${productId}: ${error.message}`);
         }
       }
       
-      console.log(`\n✅ Successfully deleted ${deletedCount} duplicate products!`);
-      console.log(`   Remaining products: ${allProducts.length - deletedCount}`);
+      logger.info(`\n✅ Successfully deleted ${deletedCount} duplicate products!`);
+      logger.info(`   Remaining products: ${allProducts.length - deletedCount}`);
     }
     
     await mongoose.connection.close();
-    console.log('\n✅ Process completed!\n');
+    logger.info('\n✅ Process completed!\n');
     
   } catch (error: any) {
-    console.error('❌ Error:', error);
+    logger.error('❌ Error:', error);
     await mongoose.connection.close();
     process.exit(1);
   }
@@ -169,8 +174,8 @@ const runScript = async () => {
   const dryRun = !args.includes('--delete');
 
   if (!dryRun) {
-    console.log('⚠️  WARNING: This will permanently delete duplicate products!');
-    console.log('   Press Ctrl+C to cancel, or wait 5 seconds to continue...\n');
+    logger.info('⚠️  WARNING: This will permanently delete duplicate products!');
+    logger.info('   Press Ctrl+C to cancel, or wait 5 seconds to continue...\n');
     await new Promise(resolve => setTimeout(resolve, 5000));
   }
 
@@ -178,7 +183,7 @@ const runScript = async () => {
 };
 
 runScript().catch((error) => {
-  console.error('❌ Script error:', error);
+  logger.error('❌ Script error:', error);
   process.exit(1);
 });
 

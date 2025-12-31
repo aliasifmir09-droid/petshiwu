@@ -5,9 +5,15 @@ import Category from '../models/Category';
 import Product from '../models/Product';
 import PetType from '../models/PetType';
 import mongoose from 'mongoose';
+import logger from '../utils/logger';
 
 dotenv.config();
 
+/**
+ * Seeds the database with product and category data
+ * WARNING: This is a destructive operation that deletes all existing products and categories
+ * Protected in production - requires FORCE_SEED=true to run
+ */
 const seedProducts = async () => {
   try {
     // PRODUCTION PROTECTION: Prevent accidental data deletion
@@ -15,22 +21,22 @@ const seedProducts = async () => {
     const forceSeed = process.env.FORCE_SEED === 'true';
     
     if (isProduction && !forceSeed) {
-      console.error('\n❌❌❌ PRODUCTION SEED BLOCKED ❌❌❌\n');
-      console.error('⚠️  WARNING: Seed script is blocked in production to prevent data loss!');
-      console.error('   This script will DELETE ALL existing products and categories.\n');
-      console.error('   To run in production, you MUST set:');
-      console.error('   FORCE_SEED=true\n');
-      console.error('   Example:');
-      console.error('   FORCE_SEED=true npm run seed-products\n');
-      console.error('   ⚠️  This is a DESTRUCTIVE operation. Use with extreme caution!\n');
+      logger.error('\n❌❌❌ PRODUCTION SEED BLOCKED ❌❌❌\n');
+      logger.error('⚠️  WARNING: Seed script is blocked in production to prevent data loss!');
+      logger.error('   This script will DELETE ALL existing products and categories.\n');
+      logger.error('   To run in production, you MUST set:');
+      logger.error('   FORCE_SEED=true\n');
+      logger.error('   Example:');
+      logger.error('   FORCE_SEED=true npm run seed-products\n');
+      logger.error('   ⚠️  This is a DESTRUCTIVE operation. Use with extreme caution!\n');
       process.exit(1);
     }
 
     if (isProduction && forceSeed) {
-      console.warn('\n⚠️⚠️⚠️  PRODUCTION SEED MODE ⚠️⚠️⚠️\n');
-      console.warn('⚠️  WARNING: You are about to DELETE ALL products and categories!');
-      console.warn('   Users and Pet Types will be preserved.\n');
-      console.warn('   Waiting 5 seconds before proceeding...\n');
+      logger.warn('\n⚠️⚠️⚠️  PRODUCTION SEED MODE ⚠️⚠️⚠️\n');
+      logger.warn('⚠️  WARNING: You are about to DELETE ALL products and categories!');
+      logger.warn('   Users and Pet Types will be preserved.\n');
+      logger.warn('   Waiting 5 seconds before proceeding...\n');
       await new Promise(resolve => setTimeout(resolve, 5000));
     }
 
@@ -40,29 +46,29 @@ const seedProducts = async () => {
     const productCount = await Product.countDocuments({});
     const categoryCount = await Category.countDocuments({});
 
-    console.log('\n📊 Current Database State:');
-    console.log(`   Products: ${productCount}`);
-    console.log(`   Categories: ${categoryCount}\n`);
+    logger.info('\n📊 Current Database State:');
+    logger.info(`   Products: ${productCount}`);
+    logger.info(`   Categories: ${categoryCount}\n`);
 
     if (isProduction && forceSeed) {
-      console.warn('⚠️  PROCEEDING WITH DELETION IN 3 SECONDS...\n');
+      logger.warn('⚠️  PROCEEDING WITH DELETION IN 3 SECONDS...\n');
       await new Promise(resolve => setTimeout(resolve, 3000));
     }
 
-    console.log('🌱 Starting comprehensive product seeding...\n');
+    logger.info('🌱 Starting comprehensive product seeding...\n');
 
     // Clear existing products (but keep users and pet types)
     await Product.deleteMany({});
     await Category.deleteMany({});
 
-    console.log('✅ Existing products and categories cleared\n');
+    logger.info('✅ Existing products and categories cleared\n');
 
     // Verify pet types exist
     const petTypes = await PetType.find();
-    console.log(`📦 Found ${petTypes.length} pet types\n`);
+    logger.info(`📦 Found ${petTypes.length} pet types\n`);
 
     // ==================== DOG CATEGORIES ====================
-    console.log('Creating Dog categories...');
+    logger.info('Creating Dog categories...');
     
     const dogFoodCategory = await Category.create({
       name: 'Dog Food',
@@ -110,7 +116,7 @@ const seedProducts = async () => {
     });
 
     // ==================== CAT CATEGORIES ====================
-    console.log('Creating Cat categories...');
+    logger.info('Creating Cat categories...');
     
     const catFoodCategory = await Category.create({
       name: 'Cat Food',
@@ -157,10 +163,10 @@ const seedProducts = async () => {
       image: 'https://images.unsplash.com/photo-1516750931-78a5b16a4014?w=400&h=400&fit=crop&q=90'
     });
 
-    console.log('✅ Categories created\n');
+    logger.info('✅ Categories created\n');
 
     // ==================== DOG PRODUCTS ====================
-    console.log('Creating Dog products...');
+    logger.info('Creating Dog products...');
     
     const dogProducts = [
       // DOG FOOD
@@ -611,10 +617,10 @@ const seedProducts = async () => {
     ];
 
     await Product.insertMany(dogProducts);
-    console.log(`✅ Created ${dogProducts.length} dog products\n`);
+    logger.info(`✅ Created ${dogProducts.length} dog products\n`);
 
     // ==================== CAT PRODUCTS ====================
-    console.log('Creating Cat products...');
+    logger.info('Creating Cat products...');
     
     const catProducts = [
       // CAT FOOD
@@ -1028,33 +1034,33 @@ const seedProducts = async () => {
     ];
 
     await Product.insertMany(catProducts);
-    console.log(`✅ Created ${catProducts.length} cat products\n`);
+    logger.info(`✅ Created ${catProducts.length} cat products\n`);
 
     // ==================== SUMMARY ====================
     const totalProducts = await Product.countDocuments();
     const totalCategories = await Category.countDocuments();
     
-    console.log('\n🎉 ==================== SEEDING COMPLETE ==================== 🎉\n');
-    console.log(`✅ Total Categories: ${totalCategories}`);
-    console.log(`✅ Total Products: ${totalProducts}`);
-    console.log(`   - Dog Products: ${dogProducts.length}`);
-    console.log(`   - Cat Products: ${catProducts.length}`);
-    console.log('\n📦 Product Categories:');
-    console.log('   🐕 Dog: Food, Treats, Toys, Supplies, Health');
-    console.log('   🐱 Cat: Food, Treats, Toys, Litter, Supplies');
-    console.log('\n💡 Features:');
-    console.log('   - High-quality product images from Unsplash');
-    console.log('   - Multiple variants (sizes, colors)');
-    console.log('   - Competitive pricing with compare-at prices');
-    console.log('   - Detailed descriptions and features');
-    console.log('   - Customer ratings and reviews');
-    console.log('   - Autoship eligibility and discounts');
-    console.log('\n🛒 All products are now available for customers to add to cart!\n');
+    logger.info('\n🎉 ==================== SEEDING COMPLETE ==================== 🎉\n');
+    logger.info(`✅ Total Categories: ${totalCategories}`);
+    logger.info(`✅ Total Products: ${totalProducts}`);
+    logger.info(`   - Dog Products: ${dogProducts.length}`);
+    logger.info(`   - Cat Products: ${catProducts.length}`);
+    logger.info('\n📦 Product Categories:');
+    logger.info('   🐕 Dog: Food, Treats, Toys, Supplies, Health');
+    logger.info('   🐱 Cat: Food, Treats, Toys, Litter, Supplies');
+    logger.info('\n💡 Features:');
+    logger.info('   - High-quality product images from Unsplash');
+    logger.info('   - Multiple variants (sizes, colors)');
+    logger.info('   - Competitive pricing with compare-at prices');
+    logger.info('   - Detailed descriptions and features');
+    logger.info('   - Customer ratings and reviews');
+    logger.info('   - Autoship eligibility and discounts');
+    logger.info('\n🛒 All products are now available for customers to add to cart!\n');
 
     await mongoose.connection.close();
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error seeding products:', error);
+    logger.error('❌ Error seeding products:', error);
     process.exit(1);
   }
 };

@@ -1,39 +1,44 @@
 import mongoose from 'mongoose';
 import { connectDatabase } from '../utils/database';
 import PetType from '../models/PetType';
+import logger from '../utils/logger';
 
+/**
+ * Checks and displays all pet types in the database
+ * Also checks for the existence of "other-animals" pet type
+ */
 const checkPetTypes = async () => {
   try {
     await connectDatabase();
-    console.log('✅ Connected to database\n');
+    logger.info('✅ Connected to database\n');
 
     const petTypes = await PetType.find().sort({ order: 1 });
 
-    console.log(`📊 Found ${petTypes.length} pet types:\n`);
+    logger.info(`📊 Found ${petTypes.length} pet types:\n`);
     
     petTypes.forEach((pt, index) => {
-      console.log(`${index + 1}. ${pt.icon} ${pt.name}`);
-      console.log(`   - Slug: ${pt.slug}`);
-      console.log(`   - Active: ${pt.isActive ? '✅ Yes' : '❌ No'}`);
-      console.log(`   - Order: ${pt.order}`);
-      console.log('');
+      logger.info(`${index + 1}. ${pt.icon} ${pt.name}`);
+      logger.info(`   - Slug: ${pt.slug}`);
+      logger.info(`   - Active: ${pt.isActive ? '✅ Yes' : '❌ No'}`);
+      logger.info(`   - Order: ${pt.order}`);
+      logger.info('');
     });
 
     // Check specifically for "other-animals"
     const otherAnimals = petTypes.find(pt => pt.slug === 'other-animals');
     
     if (otherAnimals) {
-      console.log('✅ "Other Animals" pet type exists!');
-      console.log(`   Active: ${otherAnimals.isActive ? 'Yes' : 'No (You need to activate it!)'}`);
+      logger.info('✅ "Other Animals" pet type exists!');
+      logger.info(`   Active: ${otherAnimals.isActive ? 'Yes' : 'No (You need to activate it!)'}`);
     } else {
-      console.log('❌ "Other Animals" pet type NOT FOUND!');
-      console.log('   Please create it from the Pet Types admin page.');
+      logger.info('❌ "Other Animals" pet type NOT FOUND!');
+      logger.info('   Please create it from the Pet Types admin page.');
     }
 
     await mongoose.connection.close();
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error:', error);
+    logger.error('❌ Error:', error);
     process.exit(1);
   }
 };

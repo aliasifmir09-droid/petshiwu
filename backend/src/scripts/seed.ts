@@ -5,9 +5,15 @@ import Category from '../models/Category';
 import Product from '../models/Product';
 import PetType from '../models/PetType';
 import mongoose from 'mongoose';
+import logger from '../utils/logger';
 
 dotenv.config();
 
+/**
+ * Seeds the database with initial data (users, categories, products, pet types)
+ * WARNING: This is a destructive operation that deletes all existing data
+ * Protected in production - requires FORCE_SEED=true to run
+ */
 const seedData = async () => {
   try {
     // PRODUCTION PROTECTION: Prevent accidental data deletion
@@ -15,22 +21,22 @@ const seedData = async () => {
     const forceSeed = process.env.FORCE_SEED === 'true';
     
     if (isProduction && !forceSeed) {
-      console.error('\n❌❌❌ PRODUCTION SEED BLOCKED ❌❌❌\n');
-      console.error('⚠️  WARNING: Seed script is blocked in production to prevent data loss!');
-      console.error('   This script will DELETE ALL existing data (users, products, categories, pet types).\n');
-      console.error('   To run in production, you MUST set:');
-      console.error('   FORCE_SEED=true\n');
-      console.error('   Example:');
-      console.error('   FORCE_SEED=true npm run seed\n');
-      console.error('   ⚠️  This is a DESTRUCTIVE operation. Use with extreme caution!\n');
+      logger.error('\n❌❌❌ PRODUCTION SEED BLOCKED ❌❌❌\n');
+      logger.error('⚠️  WARNING: Seed script is blocked in production to prevent data loss!');
+      logger.error('   This script will DELETE ALL existing data (users, products, categories, pet types).\n');
+      logger.error('   To run in production, you MUST set:');
+      logger.error('   FORCE_SEED=true\n');
+      logger.error('   Example:');
+      logger.error('   FORCE_SEED=true npm run seed\n');
+      logger.error('   ⚠️  This is a DESTRUCTIVE operation. Use with extreme caution!\n');
       process.exit(1);
     }
 
     if (isProduction && forceSeed) {
-      console.warn('\n⚠️⚠️⚠️  PRODUCTION SEED MODE ⚠️⚠️⚠️\n');
-      console.warn('⚠️  WARNING: You are about to DELETE ALL existing data!');
-      console.warn('   This includes: Users, Products, Categories, Pet Types\n');
-      console.warn('   Waiting 5 seconds before proceeding...\n');
+      logger.warn('\n⚠️⚠️⚠️  PRODUCTION SEED MODE ⚠️⚠️⚠️\n');
+      logger.warn('⚠️  WARNING: You are about to DELETE ALL existing data!');
+      logger.warn('   This includes: Users, Products, Categories, Pet Types\n');
+      logger.warn('   Waiting 5 seconds before proceeding...\n');
       await new Promise(resolve => setTimeout(resolve, 5000));
     }
 
@@ -42,14 +48,14 @@ const seedData = async () => {
     const categoryCount = await Category.countDocuments({});
     const petTypeCount = await PetType.countDocuments({});
 
-    console.log('\n📊 Current Database State:');
-    console.log(`   Users: ${userCount}`);
-    console.log(`   Products: ${productCount}`);
-    console.log(`   Categories: ${categoryCount}`);
-    console.log(`   Pet Types: ${petTypeCount}\n`);
+    logger.info('\n📊 Current Database State:');
+    logger.info(`   Users: ${userCount}`);
+    logger.info(`   Products: ${productCount}`);
+    logger.info(`   Categories: ${categoryCount}`);
+    logger.info(`   Pet Types: ${petTypeCount}\n`);
 
     if (isProduction && forceSeed) {
-      console.warn('⚠️  PROCEEDING WITH DELETION IN 3 SECONDS...\n');
+      logger.warn('⚠️  PROCEEDING WITH DELETION IN 3 SECONDS...\n');
       await new Promise(resolve => setTimeout(resolve, 3000));
     }
 
@@ -59,7 +65,7 @@ const seedData = async () => {
     await Product.deleteMany({});
     await PetType.deleteMany({});
 
-    console.log('✅ Existing data cleared');
+    logger.info('✅ Existing data cleared');
 
     // ===== CREATE PET TYPES =====
     const dogPetType = await PetType.create({
@@ -89,7 +95,7 @@ const seedData = async () => {
       order: 3
     });
 
-    console.log('Pet types created (3 total)');
+    logger.info('Pet types created (3 total)');
 
     // Create admin user
     const admin = await User.create({
@@ -102,8 +108,8 @@ const seedData = async () => {
     });
 
     if (process.env.NODE_ENV === 'production' && !process.env.ADMIN_PASSWORD) {
-      console.warn('⚠️  WARNING: Using default password for admin user in production!');
-      console.warn('   Please set ADMIN_PASSWORD environment variable and change the password immediately.');
+      logger.warn('⚠️  WARNING: Using default password for admin user in production!');
+      logger.warn('   Please set ADMIN_PASSWORD environment variable and change the password immediately.');
     }
 
     // Create demo customer
@@ -116,7 +122,7 @@ const seedData = async () => {
       phone: '555-0200'
     });
 
-    console.log('Users created');
+    logger.info('Users created');
 
     // ===== CREATE CATEGORIES FROM NAVIGATION MENU =====
     
@@ -391,7 +397,7 @@ const seedData = async () => {
     ]);
 
     const totalCategories = await Category.countDocuments();
-    console.log(`Categories created (${totalCategories} total - includes main categories and subcategories)`);
+    logger.info(`Categories created (${totalCategories} total - includes main categories and subcategories)`);
 
     // ===== CREATE PRODUCTS =====
     
@@ -849,33 +855,33 @@ const seedData = async () => {
 
     await Product.insertMany(products);
 
-    console.log('Products created (20 total)');
-    console.log('\n=== Seed Data Summary ===');
-    console.log('Admin User:');
-    console.log('  Email: admin@petshiwu.com');
-    console.log('\nCustomer User:');
-    console.log('  Email: customer@example.com');
-    console.log('\nPet Types: 3');
-    console.log('  - Dog 🐕');
-    console.log('  - Cat 🐱');
-    console.log('  - Other Animals 🐾');
+    logger.info('Products created (20 total)');
+    logger.info('\n=== Seed Data Summary ===');
+    logger.info('Admin User:');
+    logger.info('  Email: admin@petshiwu.com');
+    logger.info('\nCustomer User:');
+    logger.info('  Email: customer@example.com');
+    logger.info('\nPet Types: 3');
+    logger.info('  - Dog 🐕');
+    logger.info('  - Cat 🐱');
+    logger.info('  - Other Animals 🐾');
     const mainCategoriesCount = await Category.countDocuments({ level: 1 });
     const subcategoriesCount = await Category.countDocuments({ level: 2 });
-    console.log(`\nCategories: ${totalCategories} total`);
-    console.log(`  - Main Categories (Level 1): ${mainCategoriesCount}`);
-    console.log(`  - Subcategories (Level 2): ${subcategoriesCount}`);
-    console.log('  - Dog: Food (6 subcategories), Treats (7), Health & Pharmacy (7), Supplies (8), Toys (6), Cleaning & Potty (4), Grooming (6)');
-    console.log('  - Cat: Food (7 subcategories), Litter (5), Treats (6), Supplies (7), Health & Pharmacy (7), Trees/Condos/Scratchers (4), Toys (6)');
-    console.log('\nProducts: 20');
-    console.log('  - Dog Products: 10');
-    console.log('  - Cat Products: 10');
-    console.log('\n=== Seeding Complete ===');
-    console.log('\n✅ Navigation menu will now display Dog, Cat, and Other Animals');
+    logger.info(`\nCategories: ${totalCategories} total`);
+    logger.info(`  - Main Categories (Level 1): ${mainCategoriesCount}`);
+    logger.info(`  - Subcategories (Level 2): ${subcategoriesCount}`);
+    logger.info('  - Dog: Food (6 subcategories), Treats (7), Health & Pharmacy (7), Supplies (8), Toys (6), Cleaning & Potty (4), Grooming (6)');
+    logger.info('  - Cat: Food (7 subcategories), Litter (5), Treats (6), Supplies (7), Health & Pharmacy (7), Trees/Condos/Scratchers (4), Toys (6)');
+    logger.info('\nProducts: 20');
+    logger.info('  - Dog Products: 10');
+    logger.info('  - Cat Products: 10');
+    logger.info('\n=== Seeding Complete ===');
+    logger.info('\n✅ Navigation menu will now display Dog, Cat, and Other Animals');
 
     await mongoose.connection.close();
     process.exit(0);
   } catch (error) {
-    console.error('Error seeding data:', error);
+    logger.error('Error seeding data:', error);
     process.exit(1);
   }
 };

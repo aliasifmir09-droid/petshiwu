@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Product from '../models/Product';
 import { connectDatabase } from '../utils/database';
+import logger from '../utils/logger';
 
 dotenv.config();
 
@@ -12,10 +13,10 @@ dotenv.config();
 const fixProductStock = async () => {
   try {
     await connectDatabase();
-    console.log('✅ Connected to database\n');
+    logger.info('✅ Connected to database\n');
 
     const products = await Product.find({ deletedAt: null });
-    console.log(`📦 Found ${products.length} products to check\n`);
+    logger.info(`📦 Found ${products.length} products to check\n`);
 
     let fixed = 0;
     let alreadyCorrect = 0;
@@ -50,25 +51,25 @@ const fixProductStock = async () => {
           product.inStock = calculatedInStock;
           await product.save();
           fixed++;
-          console.log(`✅ Fixed: ${product.name} - Stock: ${calculatedTotalStock}, InStock: ${calculatedInStock}`);
+          logger.info(`✅ Fixed: ${product.name} - Stock: ${calculatedTotalStock}, InStock: ${calculatedInStock}`);
         } else {
           alreadyCorrect++;
         }
       } catch (error: any) {
         errors++;
-        console.error(`❌ Error fixing product ${product.name}:`, error.message);
+        logger.error(`❌ Error fixing product ${product.name}:`, error.message);
       }
     }
 
-    console.log('\n📊 Summary:');
-    console.log(`   Fixed: ${fixed}`);
-    console.log(`   Already correct: ${alreadyCorrect}`);
-    console.log(`   Errors: ${errors}`);
-    console.log(`   Total: ${products.length}`);
+    logger.info('\n📊 Summary:');
+    logger.info(`   Fixed: ${fixed}`);
+    logger.info(`   Already correct: ${alreadyCorrect}`);
+    logger.info(`   Errors: ${errors}`);
+    logger.info(`   Total: ${products.length}`);
 
     process.exit(0);
   } catch (error: any) {
-    console.error('❌ Error:', error);
+    logger.error('❌ Error:', error);
     process.exit(1);
   }
 };

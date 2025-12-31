@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { connectDatabase } from '../utils/database';
+import logger from '../utils/logger';
 
 dotenv.config();
 
@@ -11,7 +12,7 @@ dotenv.config();
  */
 const fixCategoryIndex = async () => {
   try {
-    console.log('🔄 Connecting to database...');
+    logger.info('🔄 Connecting to database...');
     await connectDatabase();
 
     const db = mongoose.connection.db;
@@ -19,46 +20,46 @@ const fixCategoryIndex = async () => {
       throw new Error('Database connection not established');
     }
 
-    console.log('📋 Checking existing indexes on categories collection...');
+    logger.info('📋 Checking existing indexes on categories collection...');
     const collection = db.collection('categories');
     const indexes = await collection.indexes();
     
-    console.log('Current indexes:');
+    logger.info('Current indexes:');
     indexes.forEach(index => {
-      console.log(`  - ${index.name}: ${JSON.stringify(index.key)}`);
+      logger.info(`  - ${index.name}: ${JSON.stringify(index.key)}`);
     });
 
     // Drop the old unique index on 'name' if it exists
     const nameIndexExists = indexes.some(index => index.key.name === 1 && Object.keys(index.key).length === 1);
     
     if (nameIndexExists) {
-      console.log('\n🗑️  Dropping old unique index on "name" field...');
+      logger.info('\n🗑️  Dropping old unique index on "name" field...');
       await collection.dropIndex('name_1');
-      console.log('✅ Successfully dropped old index');
+      logger.info('✅ Successfully dropped old index');
     } else {
-      console.log('\n✓ No old "name" index found - already removed or never existed');
+      logger.info('\n✓ No old "name" index found - already removed or never existed');
     }
 
-    console.log('\n📋 Updated indexes:');
+    logger.info('\n📋 Updated indexes:');
     const newIndexes = await collection.indexes();
     newIndexes.forEach(index => {
-      console.log(`  - ${index.name}: ${JSON.stringify(index.key)}`);
+      logger.info(`  - ${index.name}: ${JSON.stringify(index.key)}`);
     });
 
-    console.log('\n✅ Migration complete!');
-    console.log('ℹ️  The new compound index (name + petType + parentCategory) will be created automatically when the server starts.');
-    console.log('ℹ️  This allows subcategories with the same name under different pet types or parent categories.');
+    logger.info('\n✅ Migration complete!');
+    logger.info('ℹ️  The new compound index (name + petType + parentCategory) will be created automatically when the server starts.');
+    logger.info('ℹ️  This allows subcategories with the same name under different pet types or parent categories.');
 
   } catch (error: any) {
     if (error.code === 27 || error.message.includes('index not found')) {
-      console.log('✓ Index already removed or does not exist');
+      logger.info('✓ Index already removed or does not exist');
     } else {
-      console.error('❌ Error during migration:', error);
+      logger.error('❌ Error during migration:', error);
       process.exit(1);
     }
   } finally {
     await mongoose.connection.close();
-    console.log('\n🔌 Database connection closed');
+    logger.info('\n🔌 Database connection closed');
   }
 };
 

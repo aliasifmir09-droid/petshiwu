@@ -3,6 +3,7 @@ import Product from '../models/Product';
 import { connectDatabase } from '../utils/database';
 import dotenv from 'dotenv';
 import * as readline from 'readline';
+import logger from '../utils/logger';
 
 // Load environment variables
 dotenv.config();
@@ -13,22 +14,22 @@ dotenv.config();
  */
 const deleteAllProducts = async () => {
   try {
-    console.log('\n' + '='.repeat(60));
-    console.log('⚠️  WARNING: DESTRUCTIVE OPERATION ⚠️');
-    console.log('='.repeat(60));
-    console.log('This script will DELETE ALL PRODUCTS from the database.');
-    console.log('This action CANNOT be undone!\n');
+    logger.info('\n' + '='.repeat(60));
+    logger.info('⚠️  WARNING: DESTRUCTIVE OPERATION ⚠️');
+    logger.info('='.repeat(60));
+    logger.info('This script will DELETE ALL PRODUCTS from the database.');
+    logger.info('This action CANNOT be undone!\n');
 
     // Connect to database
     await connectDatabase();
-    console.log('✅ Connected to MongoDB\n');
+    logger.info('✅ Connected to MongoDB\n');
 
     // Count existing products
     const productCount = await Product.countDocuments({});
-    console.log(`📦 Found ${productCount} products in the database\n`);
+    logger.info(`📦 Found ${productCount} products in the database\n`);
 
     if (productCount === 0) {
-      console.log('ℹ️  No products to delete. Database is already empty.');
+      logger.info('ℹ️  No products to delete. Database is already empty.');
       await mongoose.connection.close();
       process.exit(0);
     }
@@ -36,14 +37,14 @@ const deleteAllProducts = async () => {
     // Show a few example product names
     const sampleProducts = await Product.find({}).limit(5).select('name').lean();
     if (sampleProducts.length > 0) {
-      console.log('📋 Sample products that will be deleted:');
+      logger.info('📋 Sample products that will be deleted:');
       sampleProducts.forEach((p, idx) => {
-        console.log(`   ${idx + 1}. ${p.name}`);
+        logger.info(`   ${idx + 1}. ${p.name}`);
       });
       if (productCount > 5) {
-        console.log(`   ... and ${productCount - 5} more products\n`);
+        logger.info(`   ... and ${productCount - 5} more products\n`);
       } else {
-        console.log('');
+        logger.info('');
       }
     }
 
@@ -61,32 +62,32 @@ const deleteAllProducts = async () => {
     });
 
     if (answer !== 'DELETE ALL') {
-      console.log('\n❌ Deletion cancelled. Products were NOT deleted.\n');
+      logger.info('\n❌ Deletion cancelled. Products were NOT deleted.\n');
       await mongoose.connection.close();
       process.exit(0);
     }
 
-    console.log('\n🗑️  Deleting all products...\n');
+    logger.info('\n🗑️  Deleting all products...\n');
     
     // Delete all products
     const result = await Product.deleteMany({});
     
-    console.log('='.repeat(60));
-    console.log('📊 Deletion Summary:');
-    console.log(`   ✅ Deleted: ${result.deletedCount} products`);
-    console.log('='.repeat(60) + '\n');
+    logger.info('='.repeat(60));
+    logger.info('📊 Deletion Summary:');
+    logger.info(`   ✅ Deleted: ${result.deletedCount} products`);
+    logger.info('='.repeat(60) + '\n');
 
     // Verify deletion
     const remainingCount = await Product.countDocuments({});
     if (remainingCount === 0) {
-      console.log('✅ Success! All products have been deleted from the database.\n');
+      logger.info('✅ Success! All products have been deleted from the database.\n');
     } else {
-      console.log(`⚠️  Warning: ${remainingCount} products still remain in the database.\n`);
+      logger.info(`⚠️  Warning: ${remainingCount} products still remain in the database.\n`);
     }
 
     // Close connection
     await mongoose.connection.close();
-    console.log('✅ Database connection closed\n');
+    logger.info('✅ Database connection closed\n');
     
     return {
       success: true,
@@ -94,7 +95,7 @@ const deleteAllProducts = async () => {
       remaining: remainingCount
     };
   } catch (error: any) {
-    console.error('❌ Deletion failed:', error.message);
+    logger.error('❌ Deletion failed:', error.message);
     if (mongoose.connection.readyState === 1) {
       await mongoose.connection.close();
     }
@@ -106,11 +107,11 @@ const deleteAllProducts = async () => {
 if (require.main === module) {
   deleteAllProducts()
     .then(() => {
-      console.log('✅ Operation completed successfully!');
+      logger.info('✅ Operation completed successfully!');
       process.exit(0);
     })
     .catch((error) => {
-      console.error('\n❌ Operation failed:', error);
+      logger.error('\n❌ Operation failed:', error);
       process.exit(1);
     });
 }

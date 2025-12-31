@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import { connectDatabase } from '../utils/database';
 import mongoose from 'mongoose';
+import logger from '../utils/logger';
 
 dotenv.config();
 
@@ -15,12 +16,12 @@ const cleanupProductsIndexes = async (options: {
 }) => {
   try {
     await connectDatabase();
-    console.log('✅ Connected to database\n');
+    logger.info('✅ Connected to database\n');
 
     const { dryRun, removeRedundant, removeDeletedAtIndexes } = options;
 
     if (dryRun) {
-      console.log('🔍 DRY RUN MODE - No indexes will be dropped\n');
+      logger.info('🔍 DRY RUN MODE - No indexes will be dropped\n');
     }
 
     const db = mongoose.connection.db;
@@ -32,11 +33,11 @@ const cleanupProductsIndexes = async (options: {
     const indexes = await db.collection(collectionName).indexes();
     const stats = await db.command({ collStats: collectionName });
 
-    console.log('📊 Products Collection Index Analysis\n');
-    console.log('='.repeat(70));
-    console.log(`   Current Indexes: ${indexes.length}`);
-    console.log(`   Index Size: ${((stats.totalIndexSize || 0) / 1024 / 1024).toFixed(2)} MB`);
-    console.log(`   Data Size: ${((stats.size || 0) / 1024 / 1024).toFixed(2)} MB\n`);
+    logger.info('📊 Products Collection Index Analysis\n');
+    logger.info('='.repeat(70));
+    logger.info(`   Current Indexes: ${indexes.length}`);
+    logger.info(`   Index Size: ${((stats.totalIndexSize || 0) / 1024 / 1024).toFixed(2)} MB`);
+    logger.info(`   Data Size: ${((stats.size || 0) / 1024 / 1024).toFixed(2)} MB\n`);
 
     // Essential indexes that should NEVER be dropped
     const essentialIndexes = [
@@ -62,7 +63,7 @@ const cleanupProductsIndexes = async (options: {
     const singleFieldRedundant: string[] = [];
     const lowCardinalityIndexes: string[] = [];
 
-    console.log('🔍 Analyzing indexes...\n');
+    logger.info('🔍 Analyzing indexes...\n');
 
     // Group indexes by pattern
     const indexPatterns = new Map<string, any[]>();
@@ -128,68 +129,68 @@ const cleanupProductsIndexes = async (options: {
     });
 
     // Display analysis
-    console.log('📋 Index Analysis Results:\n');
+    logger.info('📋 Index Analysis Results:\n');
 
     if (redundantIndexes.length > 0) {
-      console.log(`   🔴 Duplicate Indexes (${redundantIndexes.length}):`);
+      logger.info(`   🔴 Duplicate Indexes (${redundantIndexes.length}):`);
       redundantIndexes.forEach(name => {
         const idx = indexes.find((i: any) => i.name === name);
         if (idx) {
           const keys = Object.keys(idx.key).map(k => `${k}:${idx.key[k]}`).join(', ');
-          console.log(`      - ${name} ({${keys}})`);
+          logger.info(`      - ${name} ({${keys}})`);
         }
       });
-      console.log('');
+      logger.info('');
     }
 
     if (deletedAtIndexes.length > 0) {
-      console.log(`   🟡 DeletedAt Indexes (${deletedAtIndexes.length}):`);
+      logger.info(`   🟡 DeletedAt Indexes (${deletedAtIndexes.length}):`);
       deletedAtIndexes.forEach(name => {
         const idx = indexes.find((i: any) => i.name === name);
         if (idx) {
           const keys = Object.keys(idx.key).map(k => `${k}:${idx.key[k]}`).join(', ');
-          console.log(`      - ${name} ({${keys}})`);
+          logger.info(`      - ${name} ({${keys}})`);
         }
       });
-      console.log('');
+      logger.info('');
     }
 
     if (singleFieldRedundant.length > 0) {
-      console.log(`   🟠 Single-Field Redundant (${singleFieldRedundant.length}):`);
+      logger.info(`   🟠 Single-Field Redundant (${singleFieldRedundant.length}):`);
       singleFieldRedundant.forEach(name => {
         const idx = indexes.find((i: any) => i.name === name);
         if (idx) {
           const keys = Object.keys(idx.key).map(k => `${k}:${idx.key[k]}`).join(', ');
-          console.log(`      - ${name} ({${keys}})`);
+          logger.info(`      - ${name} ({${keys}})`);
         }
       });
-      console.log('');
+      logger.info('');
     }
 
     if (lowCardinalityIndexes.length > 0) {
-      console.log(`   🟢 Low Cardinality (${lowCardinalityIndexes.length}):`);
+      logger.info(`   🟢 Low Cardinality (${lowCardinalityIndexes.length}):`);
       lowCardinalityIndexes.forEach(name => {
         const idx = indexes.find((i: any) => i.name === name);
         if (idx) {
           const keys = Object.keys(idx.key).map(k => `${k}:${idx.key[k]}`).join(', ');
-          console.log(`      - ${name} ({${keys}})`);
+          logger.info(`      - ${name} ({${keys}})`);
         }
       });
-      console.log('');
+      logger.info('');
     }
 
     // Indexes to keep
-    console.log('   ✅ Indexes to Keep:');
+    logger.info('   ✅ Indexes to Keep:');
     keepIndexes.forEach(name => {
       const idx = indexes.find((i: any) => i.name === name);
       if (idx) {
         const keys = Object.keys(idx.key).map(k => `${k}:${idx.key[k]}`).join(', ');
         const isUnique = idx.unique ? ' [UNIQUE]' : '';
         const isText = idx.textIndexVersion ? ' [TEXT]' : '';
-        console.log(`      - ${name} ({${keys}})${isUnique}${isText}`);
+        logger.info(`      - ${name} ({${keys}})${isUnique}${isText}`);
       }
     });
-    console.log('');
+    logger.info('');
 
     // Calculate what would be removed
     const indexesToRemove = [
@@ -199,58 +200,58 @@ const cleanupProductsIndexes = async (options: {
       ...lowCardinalityIndexes,
     ].filter((name, index, self) => self.indexOf(name) === index); // Remove duplicates
 
-    console.log('='.repeat(70));
-    console.log('📊 Summary:');
-    console.log('='.repeat(70));
-    console.log(`   Total Indexes: ${indexes.length}`);
-    console.log(`   Indexes to Keep: ${keepIndexes.length}`);
-    console.log(`   Indexes to Remove: ${indexesToRemove.length}`);
-    console.log(`   Estimated Reduction: ${((indexesToRemove.length / indexes.length) * 100).toFixed(1)}%`);
+    logger.info('='.repeat(70));
+    logger.info('📊 Summary:');
+    logger.info('='.repeat(70));
+    logger.info(`   Total Indexes: ${indexes.length}`);
+    logger.info(`   Indexes to Keep: ${keepIndexes.length}`);
+    logger.info(`   Indexes to Remove: ${indexesToRemove.length}`);
+    logger.info(`   Estimated Reduction: ${((indexesToRemove.length / indexes.length) * 100).toFixed(1)}%`);
 
     if (indexesToRemove.length > 0) {
-      console.log(`\n   Indexes that would be removed:`);
+      logger.info(`\n   Indexes that would be removed:`);
       indexesToRemove.forEach(name => {
-        console.log(`      - ${name}`);
+        logger.info(`      - ${name}`);
       });
     }
 
     // Remove indexes
     if (indexesToRemove.length > 0 && !dryRun) {
-      console.log('\n🗑️  Removing indexes...\n');
+      logger.info('\n🗑️  Removing indexes...\n');
       let removed = 0;
       let failed = 0;
 
       for (const indexName of indexesToRemove) {
         try {
           await db.collection(collectionName).dropIndex(indexName);
-          console.log(`   ✅ Dropped: ${indexName}`);
+          logger.info(`   ✅ Dropped: ${indexName}`);
           removed++;
         } catch (error: any) {
-          console.log(`   ❌ Failed to drop: ${indexName} - ${error.message}`);
+          logger.info(`   ❌ Failed to drop: ${indexName} - ${error.message}`);
           failed++;
         }
       }
 
-      console.log(`\n   Removed: ${removed}, Failed: ${failed}`);
+      logger.info(`\n   Removed: ${removed}, Failed: ${failed}`);
       
       // Show new stats
       const newStats = await db.command({ collStats: collectionName });
       const newIndexes = await db.collection(collectionName).indexes();
-      console.log(`\n   New Index Count: ${newIndexes.length}`);
-      console.log(`   New Index Size: ${((newStats.totalIndexSize || 0) / 1024 / 1024).toFixed(2)} MB`);
+      logger.info(`\n   New Index Count: ${newIndexes.length}`);
+      logger.info(`   New Index Size: ${((newStats.totalIndexSize || 0) / 1024 / 1024).toFixed(2)} MB`);
       const reduction = ((stats.totalIndexSize || 0) - (newStats.totalIndexSize || 0)) / 1024 / 1024;
-      console.log(`   Size Reduction: ${reduction.toFixed(2)} MB`);
+      logger.info(`   Size Reduction: ${reduction.toFixed(2)} MB`);
     } else if (dryRun && indexesToRemove.length > 0) {
-      console.log('\n⚠️  This was a DRY RUN - no indexes were dropped');
-      console.log('   Run without --dry-run to apply changes\n');
+      logger.info('\n⚠️  This was a DRY RUN - no indexes were dropped');
+      logger.info('   Run without --dry-run to apply changes\n');
     } else if (indexesToRemove.length === 0) {
-      console.log('\n✅ No redundant indexes found to remove\n');
+      logger.info('\n✅ No redundant indexes found to remove\n');
     }
 
     await mongoose.connection.close();
-    console.log('✅ Analysis complete!\n');
+    logger.info('✅ Analysis complete!\n');
   } catch (error: any) {
-    console.error('❌ Error:', error.message);
+    logger.error('❌ Error:', error.message);
     process.exit(1);
   }
 };
@@ -264,7 +265,7 @@ const options: any = {
 };
 
 if (args.includes('--help') || args.length === 0) {
-  console.log(`
+  logger.info(`
 📊 Products Collection Index Cleanup
 
 Usage:

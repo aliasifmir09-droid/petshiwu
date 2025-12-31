@@ -2,10 +2,14 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import User from '../models/User';
 import { connectDatabase } from '../utils/database';
+import logger from '../utils/logger';
 
 dotenv.config();
 
-// Grant all permissions to a staff user
+/**
+ * Grants all permissions to a staff or admin user
+ * @param email - The email address of the user to grant permissions to
+ */
 const grantPermissions = async (email: string) => {
   try {
     await connectDatabase();
@@ -13,12 +17,12 @@ const grantPermissions = async (email: string) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      console.error(`User with email ${email} not found`);
+      logger.error(`User with email ${email} not found`);
       process.exit(1);
     }
 
     if (user.role === 'customer') {
-      console.error('Cannot grant permissions to a customer account. User must be admin or staff.');
+      logger.error('Cannot grant permissions to a customer account. User must be admin or staff.');
       process.exit(1);
     }
 
@@ -35,12 +39,12 @@ const grantPermissions = async (email: string) => {
 
     await user.save();
 
-    console.log(`✅ All permissions granted to ${user.firstName} ${user.lastName} (${email})`);
-    console.log('Permissions:', user.permissions);
+    logger.info(`✅ All permissions granted to ${user.firstName} ${user.lastName} (${email})`);
+    logger.info(`Permissions: ${JSON.stringify(user.permissions)}`);
     
     process.exit(0);
   } catch (error) {
-    console.error('Error granting permissions:', error);
+    logger.error('Error granting permissions:', error);
     process.exit(1);
   }
 };
@@ -49,8 +53,8 @@ const grantPermissions = async (email: string) => {
 const email = process.argv[2];
 
 if (!email) {
-  console.log('Usage: npm run grant-permissions <email>');
-  console.log('Example: npm run grant-permissions staff@example.com');
+  logger.info('Usage: npm run grant-permissions <email>');
+  logger.info('Example: npm run grant-permissions staff@example.com');
   process.exit(1);
 }
 

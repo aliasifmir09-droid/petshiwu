@@ -1,19 +1,24 @@
 import mongoose from 'mongoose';
 import User from '../models/User';
 import { connectDatabase } from '../utils/database';
+import logger from '../utils/logger';
 
+/**
+ * Creates an admin user in the database
+ * Uses ADMIN_PASSWORD environment variable if set, otherwise defaults to 'admin123'
+ */
 const createAdminUser = async () => {
   try {
     await connectDatabase();
-    console.log('Connected to database');
+    logger.info('Connected to database');
 
     // Check if admin already exists
     const existingAdmin = await User.findOne({ email: 'admin@petshiwu.com' });
     
     if (existingAdmin) {
-      console.log('✓ Admin user already exists');
-      console.log('Email:', existingAdmin.email);
-      console.log('Role:', existingAdmin.role);
+      logger.info('✓ Admin user already exists');
+      logger.info(`Email: ${existingAdmin.email}`);
+      logger.info(`Role: ${existingAdmin.role}`);
       await mongoose.connection.close();
       process.exit(0);
     }
@@ -30,23 +35,23 @@ const createAdminUser = async () => {
       addresses: []
     });
 
-    console.log('\n✅ Admin user created successfully!');
-    console.log('═══════════════════════════════════');
-    console.log('Email:', admin.email);
+    logger.info('\n✅ Admin user created successfully!');
+    logger.info('═══════════════════════════════════');
+    logger.info(`Email: ${admin.email}`);
     // NEVER log passwords - security risk
     if (!process.env.ADMIN_PASSWORD) {
-      console.log('⚠️  WARNING: Using default password. Set ADMIN_PASSWORD env var for production!');
+      logger.warn('⚠️  WARNING: Using default password. Set ADMIN_PASSWORD env var for production!');
     }
-    console.log('Role:', admin.role);
-    console.log('═══════════════════════════════════');
-    console.log('\nYou can now login to the admin dashboard at:');
-    console.log('http://localhost:5174');
+    logger.info(`Role: ${admin.role}`);
+    logger.info('═══════════════════════════════════');
+    logger.info('\nYou can now login to the admin dashboard at:');
+    logger.info('http://localhost:5174');
 
     await mongoose.connection.close();
-    console.log('\nDatabase connection closed');
+    logger.info('\nDatabase connection closed');
     process.exit(0);
   } catch (error) {
-    console.error('Error creating admin user:', error);
+    logger.error('Error creating admin user:', error);
     await mongoose.connection.close();
     process.exit(1);
   }

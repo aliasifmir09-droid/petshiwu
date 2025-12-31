@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import Product from '../models/Product';
 import Category from '../models/Category';
 import { connectDatabase } from '../utils/database';
+import logger from '../utils/logger';
 
 /**
  * Database Cleanup Script - Remove Pet Types except Dog & Cat
@@ -14,56 +15,56 @@ import { connectDatabase } from '../utils/database';
 
 const cleanupPetTypes = async () => {
   try {
-    console.log('🧹 Starting pet type cleanup...\n');
+    logger.info('🧹 Starting pet type cleanup...\n');
     
     await connectDatabase();
-    console.log('✅ Connected to database\n');
+    logger.info('✅ Connected to database\n');
 
     // Pet types to remove
     const petTypesToRemove = ['bird', 'fish', 'small-pet', 'reptile'];
 
     // 1. Clean up Products
-    console.log('📦 Cleaning up Products...');
+    logger.info('📦 Cleaning up Products...');
     const productsToDelete = await Product.find({ 
       petType: { $in: petTypesToRemove } 
     });
     
-    console.log(`   Found ${productsToDelete.length} products to delete:`);
+    logger.info(`   Found ${productsToDelete.length} products to delete:`);
     productsToDelete.forEach(p => {
-      console.log(`   - ${p.name} (${p.petType})`);
+      logger.info(`   - ${p.name} (${p.petType})`);
     });
 
     if (productsToDelete.length > 0) {
       const productResult = await Product.deleteMany({ 
         petType: { $in: petTypesToRemove } 
       });
-      console.log(`   ✅ Deleted ${productResult.deletedCount} products\n`);
+      logger.info(`   ✅ Deleted ${productResult.deletedCount} products\n`);
     } else {
-      console.log(`   ℹ️  No products to delete\n`);
+      logger.info(`   ℹ️  No products to delete\n`);
     }
 
     // 2. Clean up Categories
-    console.log('📂 Cleaning up Categories...');
+    logger.info('📂 Cleaning up Categories...');
     const categoriesToDelete = await Category.find({ 
       petType: { $in: petTypesToRemove } 
     });
     
-    console.log(`   Found ${categoriesToDelete.length} categories to delete:`);
+    logger.info(`   Found ${categoriesToDelete.length} categories to delete:`);
     categoriesToDelete.forEach(c => {
-      console.log(`   - ${c.name} (${c.petType})`);
+      logger.info(`   - ${c.name} (${c.petType})`);
     });
 
     if (categoriesToDelete.length > 0) {
       const categoryResult = await Category.deleteMany({ 
         petType: { $in: petTypesToRemove } 
       });
-      console.log(`   ✅ Deleted ${categoryResult.deletedCount} categories\n`);
+      logger.info(`   ✅ Deleted ${categoryResult.deletedCount} categories\n`);
     } else {
-      console.log(`   ℹ️  No categories to delete\n`);
+      logger.info(`   ℹ️  No categories to delete\n`);
     }
 
     // 3. Summary
-    console.log('📊 Summary:');
+    logger.info('📊 Summary:');
     const remainingProducts = await Product.countDocuments();
     const remainingCategories = await Category.countDocuments();
     const dogProducts = await Product.countDocuments({ petType: 'dog' });
@@ -72,21 +73,21 @@ const cleanupPetTypes = async () => {
     const catCategories = await Category.countDocuments({ petType: 'cat' });
     const allCategories = await Category.countDocuments({ petType: 'all' });
 
-    console.log(`   Total Products Remaining: ${remainingProducts}`);
-    console.log(`     - Dog Products: ${dogProducts}`);
-    console.log(`     - Cat Products: ${catProducts}`);
-    console.log(`   Total Categories Remaining: ${remainingCategories}`);
-    console.log(`     - Dog Categories: ${dogCategories}`);
-    console.log(`     - Cat Categories: ${catCategories}`);
-    console.log(`     - All Pets Categories: ${allCategories}`);
+    logger.info(`   Total Products Remaining: ${remainingProducts}`);
+    logger.info(`     - Dog Products: ${dogProducts}`);
+    logger.info(`     - Cat Products: ${catProducts}`);
+    logger.info(`   Total Categories Remaining: ${remainingCategories}`);
+    logger.info(`     - Dog Categories: ${dogCategories}`);
+    logger.info(`     - Cat Categories: ${catCategories}`);
+    logger.info(`     - All Pets Categories: ${allCategories}`);
 
-    console.log('\n✅ Cleanup completed successfully!');
-    console.log('🐕 Only Dog and Cat products remain in the database.');
+    logger.info('\n✅ Cleanup completed successfully!');
+    logger.info('🐕 Only Dog and Cat products remain in the database.');
 
     await mongoose.connection.close();
     process.exit(0);
   } catch (error) {
-    console.error('\n❌ Error during cleanup:', error);
+    logger.error('\n❌ Error during cleanup:', error);
     await mongoose.connection.close();
     process.exit(1);
   }

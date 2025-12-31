@@ -2,10 +2,15 @@ import mongoose from 'mongoose';
 import Product from '../models/Product';
 import Category from '../models/Category';
 import { connectDatabase } from '../utils/database';
+import logger from '../utils/logger';
 
+/**
+ * Adds slugs to existing products and categories that don't have them
+ * Generates slugs from names and handles duplicate slug conflicts
+ */
 const addSlugsToExistingData = async () => {
   try {
-    console.log('🔄 Starting slug migration...');
+    logger.info('🔄 Starting slug migration...');
     
     // Connect to database
     await connectDatabase();
@@ -19,7 +24,7 @@ const addSlugsToExistingData = async () => {
       ]
     });
     
-    console.log(`📦 Found ${productsWithoutSlugs.length} products without slugs`);
+    logger.info(`📦 Found ${productsWithoutSlugs.length} products without slugs`);
     
     for (const product of productsWithoutSlugs) {
       if (product.name) {
@@ -30,16 +35,16 @@ const addSlugsToExistingData = async () => {
         
         try {
           await product.save();
-          console.log(`✅ Updated product: ${product.name} -> ${product.slug}`);
+          logger.info(`✅ Updated product: ${product.name} -> ${product.slug}`);
         } catch (error: any) {
           if (error.code === 11000) {
             // Duplicate slug, add product ID to make it unique
             const productId = product._id as mongoose.Types.ObjectId;
             product.slug = `${product.slug}-${productId.toString().slice(-6)}`;
             await product.save();
-            console.log(`✅ Updated product (with ID): ${product.name} -> ${product.slug}`);
+            logger.info(`✅ Updated product (with ID): ${product.name} -> ${product.slug}`);
           } else {
-            console.error(`❌ Error updating product ${product.name}:`, error.message);
+            logger.error(`❌ Error updating product ${product.name}:`, error.message);
           }
         }
       }
@@ -54,7 +59,7 @@ const addSlugsToExistingData = async () => {
       ]
     });
     
-    console.log(`📁 Found ${categoriesWithoutSlugs.length} categories without slugs`);
+    logger.info(`📁 Found ${categoriesWithoutSlugs.length} categories without slugs`);
     
     for (const category of categoriesWithoutSlugs) {
       if (category.name) {
@@ -65,28 +70,28 @@ const addSlugsToExistingData = async () => {
         
         try {
           await category.save();
-          console.log(`✅ Updated category: ${category.name} -> ${category.slug}`);
+          logger.info(`✅ Updated category: ${category.name} -> ${category.slug}`);
         } catch (error: any) {
           if (error.code === 11000) {
             // Duplicate slug, add category ID to make it unique
             const categoryId = category._id as mongoose.Types.ObjectId;
             category.slug = `${category.slug}-${categoryId.toString().slice(-6)}`;
             await category.save();
-            console.log(`✅ Updated category (with ID): ${category.name} -> ${category.slug}`);
+            logger.info(`✅ Updated category (with ID): ${category.name} -> ${category.slug}`);
           } else {
-            console.error(`❌ Error updating category ${category.name}:`, error.message);
+            logger.error(`❌ Error updating category ${category.name}:`, error.message);
           }
         }
       }
     }
     
-    console.log('✅ Slug migration completed!');
-    console.log(`   - Products updated: ${productsWithoutSlugs.length}`);
-    console.log(`   - Categories updated: ${categoriesWithoutSlugs.length}`);
+    logger.info('✅ Slug migration completed!');
+    logger.info(`   - Products updated: ${productsWithoutSlugs.length}`);
+    logger.info(`   - Categories updated: ${categoriesWithoutSlugs.length}`);
     
     process.exit(0);
   } catch (error) {
-    console.error('❌ Migration failed:', error);
+    logger.error('❌ Migration failed:', error);
     process.exit(1);
   }
 };

@@ -3,6 +3,7 @@ import Product from '../models/Product';
 import { formatProductDescription } from '../utils/descriptionFormatter';
 import { connectDatabase } from '../utils/database';
 import dotenv from 'dotenv';
+import logger from '../utils/logger';
 
 // Load environment variables
 dotenv.config();
@@ -13,39 +14,39 @@ dotenv.config();
  */
 const formatAllProductDescriptions = async () => {
   try {
-    console.log('🔄 Starting to format all product descriptions...\n');
+    logger.info('🔄 Starting to format all product descriptions...\n');
 
     // Connect to database using existing utility
     await connectDatabase();
-    console.log('✅ Connected to MongoDB\n');
+    logger.info('✅ Connected to MongoDB\n');
 
     // Get all products, prioritizing those with longer descriptions
     const products = await Product.find({}).lean();
-    console.log(`📦 Found ${products.length} products to process\n`);
+    logger.info(`📦 Found ${products.length} products to process\n`);
     
     // Find products with longer descriptions (likely to have headings)
     const productsWithLongDescriptions = products.filter(p => 
       p.description && p.description.length > 100
     );
-    console.log(`📝 Found ${productsWithLongDescriptions.length} products with descriptions > 100 characters\n`);
+    logger.info(`📝 Found ${productsWithLongDescriptions.length} products with descriptions > 100 characters\n`);
     
     // Show a few examples of longer descriptions
     if (productsWithLongDescriptions.length > 0) {
-      console.log('📋 Sample products with longer descriptions:');
+      logger.info('📋 Sample products with longer descriptions:');
       productsWithLongDescriptions.slice(0, 3).forEach((p, idx) => {
-        console.log(`\n   ${idx + 1}. ${p.name}`);
-        console.log(`      Description length: ${p.description.length} chars`);
-        console.log(`      Preview: ${p.description.substring(0, 300)}...`);
-        console.log(`      Has colon pattern: ${/:\s*/.test(p.description)}`);
-        console.log(`      Has known heading: ${/(Key\s*Benefits?|Features?\s*&?\s*Benefits?|Item\s*Number|Brand|Food\s*Type|Breed\s*Size|Life\s*Stage|Nutritional\s*Benefits?|Health\s*Considerations?|Flavor|Weight|Ingredients?|Guaranteed\s*Analysis|Caloric\s*Content|Transition\s*Instructions?|Species|Warranty|Dimensions?|Color|Size|Material|Care\s*Instructions?):/i.test(p.description)}`);
-        console.log(`      Has markdown: ${p.description.includes('**')}`);
+        logger.info(`\n   ${idx + 1}. ${p.name}`);
+        logger.info(`      Description length: ${p.description.length} chars`);
+        logger.info(`      Preview: ${p.description.substring(0, 300)}...`);
+        logger.info(`      Has colon pattern: ${/:\s*/.test(p.description)}`);
+        logger.info(`      Has known heading: ${/(Key\s*Benefits?|Features?\s*&?\s*Benefits?|Item\s*Number|Brand|Food\s*Type|Breed\s*Size|Life\s*Stage|Nutritional\s*Benefits?|Health\s*Considerations?|Flavor|Weight|Ingredients?|Guaranteed\s*Analysis|Caloric\s*Content|Transition\s*Instructions?|Species|Warranty|Dimensions?|Color|Size|Material|Care\s*Instructions?):/i.test(p.description)}`);
+        logger.info(`      Has markdown: ${p.description.includes('**')}`);
         // Test formatting on this product
         const testFormatted = formatProductDescription(p.description);
-        console.log(`      Formatted preview: ${testFormatted.substring(0, 300)}...`);
-        console.log(`      Formatted has markdown: ${testFormatted.includes('**')}`);
-        console.log(`      Would update: ${testFormatted !== p.description}`);
+        logger.info(`      Formatted preview: ${testFormatted.substring(0, 300)}...`);
+        logger.info(`      Formatted has markdown: ${testFormatted.includes('**')}`);
+        logger.info(`      Would update: ${testFormatted !== p.description}`);
       });
-      console.log('\n');
+      logger.info('\n');
     }
 
     let updated = 0;
@@ -59,7 +60,7 @@ const formatAllProductDescriptions = async () => {
     const batchSize = 50;
     for (let i = 0; i < products.length; i += batchSize) {
       const batch = products.slice(i, i + batchSize);
-      console.log(`Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(products.length / batchSize)} (${batch.length} products)...`);
+      logger.info(`Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(products.length / batchSize)} (${batch.length} products)...`);
 
       for (const product of batch) {
         try {
@@ -131,46 +132,46 @@ const formatAllProductDescriptions = async () => {
               { $set: { description: formattedDescription } }
             );
             updated++;
-            console.log(`   ✓ Updated: ${product.name.substring(0, 50)}${product.name.length > 50 ? '...' : ''}`);
+            logger.info(`   ✓ Updated: ${product.name.substring(0, 50)}${product.name.length > 50 ? '...' : ''}`);
             if (updated <= 5) {
               // Show first few examples
-              console.log(`      Before: ${originalDescription.substring(0, 100)}...`);
-              console.log(`      After: ${formattedDescription.substring(0, 100)}...`);
+              logger.info(`      Before: ${originalDescription.substring(0, 100)}...`);
+              logger.info(`      After: ${formattedDescription.substring(0, 100)}...`);
             }
           } else {
             skipped++;
           }
         } catch (error: any) {
           errors++;
-          console.error(`   ✗ Error updating product ${product._id}:`, error.message);
+          logger.error(`   ✗ Error updating product ${product._id}:`, error.message);
         }
       }
     }
 
-    console.log('\n' + '='.repeat(60));
-    console.log('📊 Migration Summary:');
-    console.log(`   ✅ Updated: ${updated} products`);
-    console.log(`   ⏭️  Skipped: ${skipped} products (no description or already formatted)`);
-    console.log(`   ❌ Errors: ${errors} products`);
-    console.log(`   📦 Total: ${products.length} products`);
-    console.log(`   📝 Products with headings detected: ${productsWithHeadings}`);
-    console.log(`   ✨ Products already with markdown: ${productsWithMarkdown}`);
-    console.log(`   🔄 Products needing formatting: ${productsNeedingFormat}`);
-    console.log('='.repeat(60) + '\n');
+    logger.info('\n' + '='.repeat(60));
+    logger.info('📊 Migration Summary:');
+    logger.info(`   ✅ Updated: ${updated} products`);
+    logger.info(`   ⏭️  Skipped: ${skipped} products (no description or already formatted)`);
+    logger.info(`   ❌ Errors: ${errors} products`);
+    logger.info(`   📦 Total: ${products.length} products`);
+    logger.info(`   📝 Products with headings detected: ${productsWithHeadings}`);
+    logger.info(`   ✨ Products already with markdown: ${productsWithMarkdown}`);
+    logger.info(`   🔄 Products needing formatting: ${productsNeedingFormat}`);
+    logger.info('='.repeat(60) + '\n');
     
     if (updated === 0 && productsNeedingFormat === 0) {
-      console.log('ℹ️  Note: No products were updated because:');
-      console.log('   - Most products have short descriptions (just product names)');
-      console.log('   - Products with headings are already formatted');
-      console.log('   - No products were found with unformatted headings\n');
-      console.log('💡 To format descriptions:');
-      console.log('   - Import products via CSV with headings like "Key Benefits:", "Weight:", etc.');
-      console.log('   - The formatter will automatically apply formatting during CSV import\n');
+      logger.info('ℹ️  Note: No products were updated because:');
+      logger.info('   - Most products have short descriptions (just product names)');
+      logger.info('   - Products with headings are already formatted');
+      logger.info('   - No products were found with unformatted headings\n');
+      logger.info('💡 To format descriptions:');
+      logger.info('   - Import products via CSV with headings like "Key Benefits:", "Weight:", etc.');
+      logger.info('   - The formatter will automatically apply formatting during CSV import\n');
     }
 
     // Close connection
     await mongoose.connection.close();
-    console.log('✅ Database connection closed\n');
+    logger.info('✅ Database connection closed\n');
     
     return {
       success: true,
@@ -180,7 +181,7 @@ const formatAllProductDescriptions = async () => {
       total: products.length
     };
   } catch (error: any) {
-    console.error('❌ Migration failed:', error.message);
+    logger.error('❌ Migration failed:', error.message);
     if (mongoose.connection.readyState === 1) {
       await mongoose.connection.close();
     }
@@ -192,11 +193,11 @@ const formatAllProductDescriptions = async () => {
 if (require.main === module) {
   formatAllProductDescriptions()
     .then(() => {
-      console.log('✅ Migration completed successfully!');
+      logger.info('✅ Migration completed successfully!');
       process.exit(0);
     })
     .catch((error) => {
-      console.error('\n❌ Migration failed:', error);
+      logger.error('\n❌ Migration failed:', error);
       process.exit(1);
     });
 }

@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import { connectDatabase } from '../utils/database';
 import mongoose from 'mongoose';
+import logger from '../utils/logger';
 
 dotenv.config();
 
@@ -15,12 +16,12 @@ const cleanupIndexes = async (options: {
 }) => {
   try {
     await connectDatabase();
-    console.log('✅ Connected to database\n');
+    logger.info('✅ Connected to database\n');
 
     const { collection, dryRun, removeUnused, removeDuplicates } = options;
 
     if (dryRun) {
-      console.log('🔍 DRY RUN MODE - No indexes will be dropped\n');
+      logger.info('🔍 DRY RUN MODE - No indexes will be dropped\n');
     }
 
     const db = mongoose.connection.db;
@@ -32,16 +33,16 @@ const cleanupIndexes = async (options: {
       : (await db.listCollections().toArray()).map(c => c.name);
     const collections = allCollections;
 
-    console.log('📊 Index Cleanup Analysis\n');
-    console.log('='.repeat(70));
+    logger.info('📊 Index Cleanup Analysis\n');
+    logger.info('='.repeat(70));
 
     for (const collName of collections) {
       const indexes = await db.collection(collName).indexes();
       const stats = await db.command({ collStats: collName });
       
-      console.log(`\n📁 Collection: ${collName}`);
-      console.log(`   Current Indexes: ${indexes.length}`);
-      console.log(`   Index Size: ${((stats.totalIndexSize || 0) / 1024 / 1024).toFixed(2)} MB`);
+      logger.info(`\n📁 Collection: ${collName}`);
+      logger.info(`   Current Indexes: ${indexes.length}`);
+      logger.info(`   Index Size: ${((stats.totalIndexSize || 0) / 1024 / 1024).toFixed(2)} MB`);
 
       // Essential indexes that should never be dropped
       const essentialIndexes = ['_id_', 'slug_1', 'slug_1_unique'];
@@ -68,75 +69,75 @@ const cleanupIndexes = async (options: {
         }
 
         if (duplicates.length > 0) {
-          console.log(`\n   🔍 Found ${duplicates.length} potential duplicate index(es):`);
+          logger.info(`\n   🔍 Found ${duplicates.length} potential duplicate index(es):`);
           for (const dupName of duplicates) {
             const idx = indexes.find((i: any) => i.name === dupName);
             if (idx) {
               const keys = Object.keys(idx.key).map(k => `${k}:${idx.key[k]}`).join(', ');
-              console.log(`      - ${dupName} ({${keys}})`);
+              logger.info(`      - ${dupName} ({${keys}})`);
               
               if (!dryRun && !essentialIndexes.includes(dupName)) {
                 try {
                   await db.collection(collName).dropIndex(dupName);
-                  console.log(`      ✅ Dropped: ${dupName}`);
+                  logger.info(`      ✅ Dropped: ${dupName}`);
                 } catch (error: any) {
-                  console.log(`      ❌ Failed to drop: ${dupName} - ${error.message}`);
+                  logger.info(`      ❌ Failed to drop: ${dupName} - ${error.message}`);
                 }
               } else if (dryRun) {
-                console.log(`      🔍 Would drop: ${dupName}`);
+                logger.info(`      🔍 Would drop: ${dupName}`);
               }
             }
           }
         } else {
-          console.log(`\n   ✅ No duplicate indexes found`);
+          logger.info(`\n   ✅ No duplicate indexes found`);
         }
       }
 
       // List all indexes
-      console.log(`\n   Current Indexes:`);
+      logger.info(`\n   Current Indexes:`);
       indexes.forEach((index: any, idx: number) => {
         const indexName = index.name;
         const indexKeys = Object.keys(index.key).map(key => `${key}:${index.key[key]}`).join(', ');
         const isEssential = essentialIndexes.includes(indexName);
         const marker = isEssential ? '🔒' : '  ';
         
-        console.log(`     ${marker} ${idx + 1}. ${indexName} ({${indexKeys}})`);
+        logger.info(`     ${marker} ${idx + 1}. ${indexName} ({${indexKeys}})`);
         if (isEssential) {
-          console.log(`        ⚠️  Essential - will not be dropped`);
+          logger.info(`        ⚠️  Essential - will not be dropped`);
         }
       });
     }
 
     // Recommendations
-    console.log('\n' + '='.repeat(70));
-    console.log('💡 Recommendations:');
-    console.log('='.repeat(70));
-    console.log('\n   1. Review indexes in MongoDB Atlas:');
-    console.log('      - Go to Collections → products → Indexes tab');
-    console.log('      - Check which indexes are actually used');
-    console.log('      - Look for "Index Usage" statistics');
+    logger.info('\n' + '='.repeat(70));
+    logger.info('💡 Recommendations:');
+    logger.info('='.repeat(70));
+    logger.info('\n   1. Review indexes in MongoDB Atlas:');
+    logger.info('      - Go to Collections → products → Indexes tab');
+    logger.info('      - Check which indexes are actually used');
+    logger.info('      - Look for "Index Usage" statistics');
     
-    console.log('\n   2. Safe to remove (if not used):');
-    console.log('      - Indexes on fields rarely queried');
-    console.log('      - Single-field indexes covered by compound indexes');
-    console.log('      - Indexes on low-cardinality fields (boolean, enum)');
+    logger.info('\n   2. Safe to remove (if not used):');
+    logger.info('      - Indexes on fields rarely queried');
+    logger.info('      - Single-field indexes covered by compound indexes');
+    logger.info('      - Indexes on low-cardinality fields (boolean, enum)');
     
-    console.log('\n   3. Keep these essential indexes:');
-    console.log('      - _id (automatic)');
-    console.log('      - slug (for product lookups)');
-    console.log('      - category, petType (for filtering)');
-    console.log('      - Compound indexes for common queries');
+    logger.info('\n   3. Keep these essential indexes:');
+    logger.info('      - _id (automatic)');
+    logger.info('      - slug (for product lookups)');
+    logger.info('      - category, petType (for filtering)');
+    logger.info('      - Compound indexes for common queries');
 
     if (dryRun) {
-      console.log('\n⚠️  This was a DRY RUN - no indexes were dropped');
-      console.log('   Run without --dry-run to apply changes\n');
+      logger.info('\n⚠️  This was a DRY RUN - no indexes were dropped');
+      logger.info('   Run without --dry-run to apply changes\n');
     } else {
-      console.log('\n✅ Cleanup completed!\n');
+      logger.info('\n✅ Cleanup completed!\n');
     }
 
     await mongoose.connection.close();
   } catch (error: any) {
-    console.error('❌ Error:', error.message);
+    logger.error('❌ Error:', error.message);
     process.exit(1);
   }
 };
@@ -154,7 +155,7 @@ if (collectionIndex !== -1 && args[collectionIndex + 1]) {
 }
 
 if (args.includes('--help') || args.length === 0) {
-  console.log(`
+  logger.info(`
 📊 Index Cleanup Utility
 
 Usage:

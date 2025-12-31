@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import { connectDatabase } from '../utils/database';
 import mongoose from 'mongoose';
+import logger from '../utils/logger';
 
 dotenv.config();
 
@@ -10,7 +11,7 @@ dotenv.config();
 const analyzeIndexes = async () => {
   try {
     await connectDatabase();
-    console.log('✅ Connected to database\n');
+    logger.info('✅ Connected to database\n');
 
     const db = mongoose.connection.db;
     if (!db) {
@@ -18,8 +19,8 @@ const analyzeIndexes = async () => {
     }
     const collections = await db.listCollections().toArray();
 
-    console.log('📊 Database Index Analysis\n');
-    console.log('='.repeat(70));
+    logger.info('📊 Database Index Analysis\n');
+    logger.info('='.repeat(70));
 
     let totalIndexSize = 0;
     let totalDataSize = 0;
@@ -42,25 +43,25 @@ const analyzeIndexes = async () => {
       const indexSizeMB = (indexSize / 1024 / 1024).toFixed(2);
       const ratio = dataSize > 0 ? ((indexSize / dataSize) * 100).toFixed(1) : 'N/A';
 
-      console.log(`\n📁 Collection: ${collection.name}`);
-      console.log(`   Documents: ${docCount.toLocaleString()}`);
-      console.log(`   Data Size: ${dataSizeMB} MB`);
-      console.log(`   Indexes: ${indexCount}`);
-      console.log(`   Index Size: ${indexSizeMB} MB`);
-      console.log(`   Index/Data Ratio: ${ratio}%`);
+      logger.info(`\n📁 Collection: ${collection.name}`);
+      logger.info(`   Documents: ${docCount.toLocaleString()}`);
+      logger.info(`   Data Size: ${dataSizeMB} MB`);
+      logger.info(`   Indexes: ${indexCount}`);
+      logger.info(`   Index Size: ${indexSizeMB} MB`);
+      logger.info(`   Index/Data Ratio: ${ratio}%`);
 
       // Show problematic collections
       if (indexSize > dataSize && dataSize > 0) {
-        console.log(`   ⚠️  WARNING: Indexes larger than data!`);
+        logger.info(`   ⚠️  WARNING: Indexes larger than data!`);
       }
 
       if (indexCount > 10) {
-        console.log(`   ⚠️  WARNING: Many indexes (${indexCount}) - consider reviewing`);
+        logger.info(`   ⚠️  WARNING: Many indexes (${indexCount}) - consider reviewing`);
       }
 
       // List all indexes
       if (indexes.length > 0) {
-        console.log(`\n   Index Details:`);
+        logger.info(`\n   Index Details:`);
         indexes.forEach((index: any, idx: number) => {
           const indexName = index.name;
           const indexKeys = Object.keys(index.key).map(key => `${key}:${index.key[key]}`).join(', ');
@@ -68,36 +69,36 @@ const analyzeIndexes = async () => {
           const isSparse = index.sparse ? ' [SPARSE]' : '';
           const isText = index.textIndexVersion ? ' [TEXT]' : '';
           
-          console.log(`     ${idx + 1}. ${indexName}`);
-          console.log(`        Keys: {${indexKeys}}${isUnique}${isSparse}${isText}`);
+          logger.info(`     ${idx + 1}. ${indexName}`);
+          logger.info(`        Keys: {${indexKeys}}${isUnique}${isSparse}${isText}`);
         });
       }
     }
 
     // Summary
-    console.log('\n' + '='.repeat(70));
-    console.log('📊 Overall Summary:');
-    console.log('='.repeat(70));
-    console.log(`   Total Collections: ${collections.length}`);
+    logger.info('\n' + '='.repeat(70));
+    logger.info('📊 Overall Summary:');
+    logger.info('='.repeat(70));
+    logger.info(`   Total Collections: ${collections.length}`);
     const productsCount = await db.collection('products').countDocuments();
     const usersCount = await db.collection('users').countDocuments();
     const ordersCount = await db.collection('orders').countDocuments();
-    console.log(`   Total Documents: ${productsCount + usersCount + ordersCount}`);
-    console.log(`   Total Data Size: ${(totalDataSize / 1024 / 1024).toFixed(2)} MB`);
-    console.log(`   Total Indexes: ${totalIndexes}`);
-    console.log(`   Total Index Size: ${(totalIndexSize / 1024 / 1024).toFixed(2)} MB`);
+    logger.info(`   Total Documents: ${productsCount + usersCount + ordersCount}`);
+    logger.info(`   Total Data Size: ${(totalDataSize / 1024 / 1024).toFixed(2)} MB`);
+    logger.info(`   Total Indexes: ${totalIndexes}`);
+    logger.info(`   Total Index Size: ${(totalIndexSize / 1024 / 1024).toFixed(2)} MB`);
     
     const overallRatio = totalDataSize > 0 ? ((totalIndexSize / totalDataSize) * 100).toFixed(1) : 'N/A';
-    console.log(`   Overall Index/Data Ratio: ${overallRatio}%`);
+    logger.info(`   Overall Index/Data Ratio: ${overallRatio}%`);
 
     if (totalIndexSize > totalDataSize) {
-      console.log(`\n   ⚠️  WARNING: Total index size (${(totalIndexSize / 1024 / 1024).toFixed(2)} MB) is larger than data size (${(totalDataSize / 1024 / 1024).toFixed(2)} MB)!`);
-      console.log(`   💡 Consider reviewing and removing unused indexes.\n`);
+      logger.info(`\n   ⚠️  WARNING: Total index size (${(totalIndexSize / 1024 / 1024).toFixed(2)} MB) is larger than data size (${(totalDataSize / 1024 / 1024).toFixed(2)} MB)!`);
+      logger.info(`   💡 Consider reviewing and removing unused indexes.\n`);
     }
 
     // Recommendations
-    console.log('\n💡 Recommendations:');
-    console.log('='.repeat(70));
+    logger.info('\n💡 Recommendations:');
+    logger.info('='.repeat(70));
     
     const productsCollection = collections.find(c => c.name === 'products');
     if (productsCollection) {
@@ -105,10 +106,10 @@ const analyzeIndexes = async () => {
       const productsIndexes = await db.collection('products').indexes();
       
       if (productsIndexes.length > 15) {
-        console.log(`\n   1. Products collection has ${productsIndexes.length} indexes`);
-        console.log(`      - Review which indexes are actually used by your queries`);
-        console.log(`      - Consider removing indexes on rarely-queried fields`);
-        console.log(`      - Compound indexes can replace multiple single-field indexes`);
+        logger.info(`\n   1. Products collection has ${productsIndexes.length} indexes`);
+        logger.info(`      - Review which indexes are actually used by your queries`);
+        logger.info(`      - Consider removing indexes on rarely-queried fields`);
+        logger.info(`      - Compound indexes can replace multiple single-field indexes`);
       }
 
       // Check for duplicate indexes
@@ -120,28 +121,28 @@ const analyzeIndexes = async () => {
       );
       
       if (duplicates.length > 0) {
-        console.log(`\n   2. Found potential duplicate indexes`);
-        console.log(`      - Review indexes with similar key patterns`);
+        logger.info(`\n   2. Found potential duplicate indexes`);
+        logger.info(`      - Review indexes with similar key patterns`);
       }
     }
 
-    console.log(`\n   3. Essential indexes to keep:`);
-    console.log(`      - _id (automatic, cannot be removed)`);
-    console.log(`      - slug (for product lookups)`);
-    console.log(`      - category (for filtering)`);
-    console.log(`      - petType (for filtering)`);
-    console.log(`      - isActive, isFeatured (for filtering)`);
-    console.log(`      - Compound indexes for common query patterns`);
+    logger.info(`\n   3. Essential indexes to keep:`);
+    logger.info(`      - _id (automatic, cannot be removed)`);
+    logger.info(`      - slug (for product lookups)`);
+    logger.info(`      - category (for filtering)`);
+    logger.info(`      - petType (for filtering)`);
+    logger.info(`      - isActive, isFeatured (for filtering)`);
+    logger.info(`      - Compound indexes for common query patterns`);
 
-    console.log(`\n   4. Indexes you might be able to remove:`);
-    console.log(`      - Indexes on fields rarely used in queries`);
-    console.log(`      - Single-field indexes that are part of compound indexes`);
-    console.log(`      - Indexes on low-cardinality fields (like boolean flags)`);
+    logger.info(`\n   4. Indexes you might be able to remove:`);
+    logger.info(`      - Indexes on fields rarely used in queries`);
+    logger.info(`      - Single-field indexes that are part of compound indexes`);
+    logger.info(`      - Indexes on low-cardinality fields (like boolean flags)`);
 
     await mongoose.connection.close();
-    console.log('\n✅ Analysis complete!\n');
+    logger.info('\n✅ Analysis complete!\n');
   } catch (error: any) {
-    console.error('❌ Error:', error.message);
+    logger.error('❌ Error:', error.message);
     process.exit(1);
   }
 };

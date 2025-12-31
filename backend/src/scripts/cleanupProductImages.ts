@@ -3,6 +3,7 @@ import { connectDatabase } from '../utils/database';
 import Product from '../models/Product';
 import { deleteFromCloudinary, isCloudinaryConfigured } from '../utils/cloudinary';
 import mongoose from 'mongoose';
+import logger from '../utils/logger';
 
 dotenv.config();
 
@@ -57,20 +58,20 @@ const cleanupProductImages = async (options: {
 }) => {
   try {
     await connectDatabase();
-    console.log('✅ Connected to database\n');
+    logger.info('✅ Connected to database\n');
 
     const { deleteFromCloudinary: deleteCloudinary, removeFromDatabase, productId, deleteAllProducts, dryRun } = options;
 
     if (dryRun) {
-      console.log('🔍 DRY RUN MODE - No changes will be made\n');
+      logger.info('🔍 DRY RUN MODE - No changes will be made\n');
     }
 
     // Check Cloudinary configuration
     if (deleteCloudinary && !isCloudinaryConfigured()) {
-      console.error('❌ Cloudinary is not configured!');
-      console.error('   Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in .env\n');
+      logger.error('❌ Cloudinary is not configured!');
+      logger.error('   Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in .env\n');
       if (deleteCloudinary) {
-        console.log('⚠️  Skipping Cloudinary deletion, continuing with database cleanup...\n');
+        logger.info('⚠️  Skipping Cloudinary deletion, continuing with database cleanup...\n');
       }
     }
 
@@ -83,10 +84,10 @@ const cleanupProductImages = async (options: {
       ? await Product.find({})
       : await Product.find(query);
 
-    console.log(`📦 Found ${products.length} product(s) to process\n`);
+    logger.info(`📦 Found ${products.length} product(s) to process\n`);
 
     if (products.length === 0) {
-      console.log('ℹ️  No products found. Exiting.\n');
+      logger.info('ℹ️  No products found. Exiting.\n');
       await mongoose.connection.close();
       return;
     }
@@ -97,7 +98,7 @@ const cleanupProductImages = async (options: {
     let totalImagesProcessed = 0;
 
     for (const product of products) {
-      console.log(`\n📦 Processing: ${product.name} (${product._id})`);
+      logger.info(`\n📦 Processing: ${product.name} (${product._id})`);
       
       const allImageUrls: string[] = [
         ...(product.images || []),
@@ -107,10 +108,10 @@ const cleanupProductImages = async (options: {
         ]) || [])
       ];
 
-      console.log(`   Found ${allImageUrls.length} image(s)`);
+      logger.info(`   Found ${allImageUrls.length} image(s)`);
 
       if (allImageUrls.length === 0) {
-        console.log('   ⏭️  No images to process');
+        logger.info('   ⏭️  No images to process');
         continue;
       }
 
@@ -122,20 +123,20 @@ const cleanupProductImages = async (options: {
           const publicId = extractPublicId(imageUrl);
           
           if (!publicId) {
-            console.log(`   ⚠️  Could not extract public_id from: ${imageUrl.substring(0, 50)}...`);
+            logger.info(`   ⚠️  Could not extract public_id from: ${imageUrl.substring(0, 50)}...`);
             continue;
           }
 
           if (dryRun) {
-            console.log(`   🔍 Would delete from Cloudinary: ${publicId}`);
+            logger.info(`   🔍 Would delete from Cloudinary: ${publicId}`);
             cloudinaryDeleted++;
           } else {
             try {
               await deleteFromCloudinary(publicId, 'image');
-              console.log(`   ✅ Deleted from Cloudinary: ${publicId}`);
+              logger.info(`   ✅ Deleted from Cloudinary: ${publicId}`);
               cloudinaryDeleted++;
             } catch (error: any) {
-              console.log(`   ❌ Failed to delete from Cloudinary: ${publicId} - ${error.message}`);
+              logger.info(`   ❌ Failed to delete from Cloudinary: ${publicId} - ${error.message}`);
               cloudinaryFailed++;
             }
           }
@@ -145,7 +146,7 @@ const cleanupProductImages = async (options: {
       // Remove from database
       if (removeFromDatabase) {
         if (dryRun) {
-          console.log(`   🔍 Would remove images from database`);
+          logger.info(`   🔍 Would remove images from database`);
           databaseUpdated++;
         } else {
           // Clear product images
@@ -164,40 +165,40 @@ const cleanupProductImages = async (options: {
           }
           
           await product.save();
-          console.log(`   ✅ Removed images from database`);
+          logger.info(`   ✅ Removed images from database`);
           databaseUpdated++;
         }
       }
     }
 
     // Summary
-    console.log('\n' + '='.repeat(50));
-    console.log('📊 Cleanup Summary:');
-    console.log('='.repeat(50));
-    console.log(`   Products processed: ${products.length}`);
-    console.log(`   Total images processed: ${totalImagesProcessed}`);
+    logger.info('\n' + '='.repeat(50));
+    logger.info('📊 Cleanup Summary:');
+    logger.info('='.repeat(50));
+    logger.info(`   Products processed: ${products.length}`);
+    logger.info(`   Total images processed: ${totalImagesProcessed}`);
     
     if (deleteCloudinary) {
-      console.log(`   Cloudinary deletions: ${cloudinaryDeleted}`);
+      logger.info(`   Cloudinary deletions: ${cloudinaryDeleted}`);
       if (cloudinaryFailed > 0) {
-        console.log(`   Cloudinary failures: ${cloudinaryFailed}`);
+        logger.info(`   Cloudinary failures: ${cloudinaryFailed}`);
       }
     }
     
     if (removeFromDatabase) {
-      console.log(`   Database updates: ${databaseUpdated}`);
+      logger.info(`   Database updates: ${databaseUpdated}`);
     }
     
     if (dryRun) {
-      console.log('\n⚠️  This was a DRY RUN - no changes were made');
-      console.log('   Run without --dry-run to apply changes\n');
+      logger.info('\n⚠️  This was a DRY RUN - no changes were made');
+      logger.info('   Run without --dry-run to apply changes\n');
     } else {
-      console.log('\n✅ Cleanup completed!\n');
+      logger.info('\n✅ Cleanup completed!\n');
     }
 
     await mongoose.connection.close();
   } catch (error: any) {
-    console.error('❌ Error:', error.message);
+    logger.error('❌ Error:', error.message);
     process.exit(1);
   }
 };
@@ -223,7 +224,7 @@ if (args.includes('--delete-all-products')) {
 
 // Show help
 if (args.includes('--help') || args.length === 0) {
-  console.log(`
+  logger.info(`
 🗑️  Product Images Cleanup Utility
 
 Usage:
