@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { optimizeMongooseSettings, enableQueryLogging, logConnectionPoolStatus } from './databaseOptimization';
+import { enableQueryProfiling } from './queryProfiler';
 import logger from './logger';
 
 export const connectDatabase = async () => {

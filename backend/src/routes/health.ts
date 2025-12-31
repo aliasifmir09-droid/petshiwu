@@ -3,6 +3,8 @@ import { checkDatabaseHealth, getConnectionPoolStatus } from '../utils/databaseO
 import { isDatabaseConnected } from '../utils/database';
 import { getRedisStatus } from '../utils/cache';
 import { getQueueStats } from '../utils/jobQueue';
+import { getSlowQueries, getQueryStats } from '../utils/queryProfiler';
+import logger from '../utils/logger';
 
 const router = express.Router();
 
@@ -82,6 +84,34 @@ router.get('/pool', async (req, res) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * PERFORMANCE FIX: Get query performance stats
+ * GET /api/health/queries
+ */
+router.get('/queries', async (req, res) => {
+  try {
+    const slowQueries = await getSlowQueries(10);
+    const stats = getQueryStats();
+    
+    res.json({
+      success: true,
+      data: {
+        slowQueries,
+        stats,
+        threshold: parseInt(process.env.SLOW_QUERY_THRESHOLD_MS || '100', 10),
+      },
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    logger.error('Error getting query stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get query statistics',
       error: error.message,
     });
   }

@@ -49,6 +49,9 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000, // Increase warning limit to 1MB
     // Enable minification with esbuild (faster) or terser (more aggressive)
     minify: 'esbuild', // Use esbuild for faster builds, or 'terser' for better compression
+    // PERFORMANCE FIX: Optimize for mobile - smaller chunks, better code splitting
+    target: 'es2015', // Support modern browsers, reduce bundle size
+    cssCodeSplit: true, // Split CSS for better caching
     // Additional minification options
     terserOptions: undefined, // Will use esbuild minify options instead
     rollupOptions: {

@@ -26,6 +26,7 @@ import type { SanitizedObject } from './types/common';
 import logger from './utils/logger';
 import { initializeJobQueues } from './utils/jobQueue';
 import { startEmailWorker } from './workers/emailWorker';
+import { responseTimeMiddleware } from './middleware/responseTime';
 
 // Load env vars
 dotenv.config();
@@ -534,6 +535,10 @@ if (process.env.NODE_ENV === 'development' && process.env.VERIFY_COMPRESSION ===
     next();
   });
 }
+
+// PERFORMANCE FIX: Response time monitoring
+// Track API response times for performance analysis
+app.use(responseTimeMiddleware);
 
 // Cookie parser - Must be before CORS to parse cookies correctly
 app.use(cookieParser());

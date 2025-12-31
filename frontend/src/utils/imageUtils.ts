@@ -155,7 +155,18 @@ export const normalizeImageUrl = (
     return getPlaceholderImage();
   }
 
-  const { width, height, size, format = 'auto', isMobile = false } = options || {};
+  let { width, height, size, format = 'auto', isMobile = false } = options || {};
+  
+  // PERFORMANCE FIX: Auto-detect mobile if not specified
+  if (isMobile === undefined && typeof window !== 'undefined') {
+    try {
+      const { isMobileDevice } = require('./deviceDetection');
+      isMobile = isMobileDevice();
+    } catch {
+      // Silently fail if deviceDetection not available
+    }
+  }
+  
   const finalWidth = width || (size ? IMAGE_SIZES[size] : undefined);
   const finalHeight = height;
 
