@@ -857,6 +857,7 @@ app.use('/api/search-analytics', searchAnalyticsRoutes); // Routes handle authen
 app.use('/api/cart', cartRoutes);
 app.use('/api/payment-methods', legacyRouteDeprecation, paymentMethodRoutes);
 app.use('/api/recommendations', legacyRouteDeprecation, recommendationAnalyticsRoutes);
+app.use('/api/reorder-suggestions', legacyRouteDeprecation, reorderSuggestionsRoutes);
 
 // Sitemap route (no API prefix for SEO) - must be before content-type middleware
 // This ensures it returns XML, not HTML
