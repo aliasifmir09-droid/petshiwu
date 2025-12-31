@@ -629,11 +629,21 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
       }
     }
 
-    // Validate password length
+    // SECURITY FIX: Apply same password complexity rules as registration
+    // Validate password length and complexity
     if (password.length < 8) {
       return res.status(400).json({
         success: false,
         message: 'Password must be at least 8 characters long'
+      });
+    }
+
+    // Validate password complexity (uppercase, lowercase, number)
+    const passwordComplexityRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
+    if (!passwordComplexityRegex.test(password)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must contain at least one uppercase letter, one lowercase letter, and one number'
       });
     }
 

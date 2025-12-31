@@ -40,10 +40,17 @@ export const sendTokenResponse = (userId: string, statusCode: number, res: Respo
     expiresDays = parseInt(expiresIn.replace('h', '')) / 24;
   }
 
-  // For cross-subdomain cookies (e.g., different Render subdomains), we need sameSite: 'none' with secure: true
-  // sameSite: 'strict' blocks cookies across different subdomains (e.g., frontend.onrender.com -> backend.onrender.com)
-  // sameSite: 'lax' works for same domain but not for cross-site
-  // sameSite: 'none' with secure: true is required for cross-site cookies (different subdomains on Render)
+  // SECURITY NOTE: sameSite: 'none' is required for cross-subdomain cookies on Render.com
+  // This is necessary because frontend and backend are on different subdomains (e.g., frontend.onrender.com -> backend.onrender.com)
+  // Security considerations:
+  // - sameSite: 'strict' blocks cookies across different subdomains (would break authentication)
+  // - sameSite: 'lax' works for same domain but not for cross-subdomain requests
+  // - sameSite: 'none' with secure: true is required for cross-subdomain cookies
+  // Risk mitigation: 
+  // - secure flag is always true in production (HTTPS only)
+  // - httpOnly flag prevents JavaScript access (XSS protection)
+  // - Cookies are only sent to whitelisted origins (CORS protection)
+  // Alternative: Use same domain for frontend/backend if possible (would allow sameSite: 'lax')
   const isProduction = process.env.NODE_ENV === 'production';
   
   // Get cookie domain from environment or leave undefined (browser will use current domain)

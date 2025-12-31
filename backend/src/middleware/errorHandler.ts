@@ -30,14 +30,26 @@ export const errorHandler = (err: Error | AppError, req: Request, res: Response,
   }
 
   // Mongoose validation error
+  // SECURITY FIX: Use generic message in production to prevent information disclosure
   if (err.name === 'ValidationError') {
     const mongooseError = err as { errors?: Record<string, { message: string }> };
-    const message = mongooseError.errors 
-      ? Object.values(mongooseError.errors)
-          .map((val) => val.message)
-          .join(', ')
-      : 'Validation error';
-    error = { message, statusCode: 400 };
+    if (process.env.NODE_ENV === 'production') {
+      // Generic message in production to prevent information disclosure
+      error = { message: 'Validation failed. Please check your input and try again.', statusCode: 400 };
+      // Log detailed error server-side only
+      if (mongooseError.errors) {
+        const detailedErrors = Object.values(mongooseError.errors).map((val) => val.message).join(', ');
+        logger.warn('Validation error details (server-side only):', detailedErrors);
+      }
+    } else {
+      // Detailed message in development for debugging
+      const message = mongooseError.errors 
+        ? Object.values(mongooseError.errors)
+            .map((val) => val.message)
+            .join(', ')
+        : 'Validation error';
+      error = { message, statusCode: 400 };
+    }
   }
 
   // JWT errors - don't expose details

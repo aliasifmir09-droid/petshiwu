@@ -3,6 +3,7 @@ import multer, { FileFilterCallback } from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { cloudinaryUpload, isCloudinaryConfigured } from '../utils/cloudinary';
+import logger from '../utils/logger';
 
 // Fallback to local storage if Cloudinary is not configured
 const uploadsDir = path.join(__dirname, '../../uploads');
@@ -20,19 +21,26 @@ const localStorage = multer.diskStorage({
   }
 });
 
+// SECURITY FIX: Enhanced file filter with initial validation
+// File signature validation happens after upload in the route handler
 const fileFilter = (req: any, file: { fieldname: string; originalname: string; mimetype: string }, cb: FileFilterCallback) => {
-  // Allow images and videos
-  const allowedImageTypes = /jpeg|jpg|png|gif|webp|svg/;
-  const allowedVideoTypes = /mp4|webm|ogg|mov|avi/;
-  
-  const extname = file.originalname.toLowerCase();
-  const isImage = allowedImageTypes.test(extname) || file.mimetype.startsWith('image/');
-  const isVideo = allowedVideoTypes.test(extname) || file.mimetype.startsWith('video/');
-  
-  if (isImage || isVideo) {
+  try {
+    // Allow images and videos
+    const allowedImageTypes = /jpeg|jpg|png|gif|webp|svg/;
+    const allowedVideoTypes = /mp4|webm|ogg|mov|avi/;
+    
+    const extname = file.originalname.toLowerCase();
+    const isImage = allowedImageTypes.test(extname) || file.mimetype.startsWith('image/');
+    const isVideo = allowedVideoTypes.test(extname) || file.mimetype.startsWith('video/');
+    
+    if (!isImage && !isVideo) {
+      return cb(new Error('Only image and video files are allowed'));
+    }
+    
     return cb(null, true);
-  } else {
-    cb(new Error('Only image and video files are allowed'));
+  } catch (error: any) {
+    logger.error('File filter error:', error);
+    return cb(new Error('File validation failed'));
   }
 };
 

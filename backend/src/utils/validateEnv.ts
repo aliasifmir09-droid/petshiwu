@@ -37,6 +37,7 @@ export const validateEnv = () => {
   }
 
   if (missing.length > 0) {
+    // Use console.error here because logger might not be initialized yet during startup
     console.error('\n❌ Missing required environment variables:');
     missing.forEach(key => console.error(`   - ${key}`));
     console.error('\nPlease set these variables in your .env file or environment.\n');
@@ -44,12 +45,14 @@ export const validateEnv = () => {
   }
 
   if (warnings.length > 0) {
+    // Use console.warn here because logger might not be initialized yet during startup
     console.warn('\n⚠️  Environment variable warnings:');
     warnings.forEach(warning => console.warn(`   - ${warning}`));
     console.warn('');
   }
 
   if (missing.length === 0 && warnings.length === 0) {
+    // Use console.log here because logger might not be initialized yet during startup
     console.log('✅ All environment variables validated successfully\n');
   }
 };

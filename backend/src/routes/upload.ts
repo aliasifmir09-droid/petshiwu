@@ -59,8 +59,50 @@ const handleUploadError = (error: any, req: Request, res: Response, next: NextFu
   next();
 };
 
+// SECURITY: File signature validation middleware (validates after upload)
+const validateUploadedFile = async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.file) {
+    return next();
+  }
+
+  const file = req.file as any;
+  
+  // Validate file signature if file is saved locally
+  if (file.path && !file.path.includes('cloudinary.com')) {
+    try {
+      const { validateFileSignature } = await import('../utils/fileSignatureValidation');
+      const isValid = await validateFileSignature(file.path, file.mimetype);
+      if (!isValid) {
+        // Delete the invalid file
+        const fs = require('fs');
+        if (fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path);
+        }
+        return res.status(400).json({
+          success: false,
+          message: 'File type validation failed. The file content does not match the declared file type.'
+        });
+      }
+    } catch (error) {
+      // If validation fails, reject the file
+      const fs = require('fs');
+      if (file.path && fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+      return res.status(400).json({
+        success: false,
+        message: 'File validation failed'
+      });
+    }
+  }
+  // For Cloudinary uploads, validation happens on their side
+  // We trust Cloudinary's validation, but could add additional checks if needed
+  
+  next();
+};
+
 // Upload single file (image or video)
-router.post('/single', protect, authorize('admin'), upload.single('image'), handleUploadError, (req: Request, res: Response) => {
+router.post('/single', protect, authorize('admin'), upload.single('image'), handleUploadError, validateUploadedFile, (req: Request, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({

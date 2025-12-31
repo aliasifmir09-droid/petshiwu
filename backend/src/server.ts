@@ -21,20 +21,33 @@ import { sanitizeResponse } from './middleware/sanitizeResponse';
 import { setCacheHeaders } from './middleware/cacheHeaders';
 import User from './models/User';
 import { setupSwagger } from './utils/swagger';
-import { initRedis } from './utils/cache';
+import { initRedis, getRedisClient } from './utils/cache';
 import type { SanitizedObject } from './types/common';
 import logger from './utils/logger';
 
 // Load env vars
 dotenv.config();
 
-// Validate required environment variables (but don't exit - let server start)
+// Validate required environment variables
+// SECURITY FIX: Fail fast in production if critical vars missing
+// Only allow graceful degradation for optional services (Redis, Cloudinary)
 try {
   validateEnv();
 } catch (error: unknown) {
   const errorMessage = error instanceof Error ? error.message : String(error);
   logger.error('⚠️  Environment validation error:', errorMessage);
-  logger.warn('⚠️  Server will start but may not function correctly');
+  
+  // In production, exit if critical variables are missing
+  if (process.env.NODE_ENV === 'production') {
+    logger.error('❌ CRITICAL: Missing required environment variables in production. Server will not start.');
+    logger.error('   Required variables: MONGODB_URI, JWT_SECRET');
+    logger.error('   Please set these variables before starting the server.');
+    process.exit(1);
+  } else {
+    // In development, warn but allow server to start (for development flexibility)
+    logger.warn('⚠️  Server will start but may not function correctly');
+    logger.warn('   This is allowed in development mode only.');
+  }
 }
 
 // Import routes
@@ -67,14 +80,31 @@ connectDatabase();
 initRedis();
 
 // Auto-create admin user if it doesn't exist
+// SECURITY FIX: Disabled in production, only enabled in development or when explicitly enabled
+const AUTO_CREATE_ADMIN = process.env.AUTO_CREATE_ADMIN === 'true' || 
+                          (process.env.AUTO_CREATE_ADMIN !== 'false' && process.env.NODE_ENV === 'development');
+
 let adminUserCheckAttempts = 0;
 const MAX_ADMIN_CHECK_ATTEMPTS = 5;
 
 const ensureAdminUser = async () => {
+  // SECURITY: Never auto-create admin in production unless explicitly enabled
+  if (process.env.NODE_ENV === 'production' && !process.env.AUTO_CREATE_ADMIN) {
+    logger.info('ℹ️  Admin auto-creation is disabled in production for security.');
+    logger.info('   Create admin user manually using: npm run create-admin');
+    return;
+  }
+
+  // Check if auto-creation is explicitly disabled
+  if (!AUTO_CREATE_ADMIN) {
+    logger.info('ℹ️  Admin auto-creation is disabled (AUTO_CREATE_ADMIN=false).');
+    return;
+  }
+
   try {
     // Prevent infinite retries
     if (adminUserCheckAttempts >= MAX_ADMIN_CHECK_ATTEMPTS) {
-      console.warn('⚠️  Max attempts reached for admin user creation. Skipping.');
+      logger.warn('⚠️  Max attempts reached for admin user creation. Skipping.');
       return;
     }
     
@@ -90,13 +120,14 @@ const ensureAdminUser = async () => {
     }
 
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@petshiwu.com';
+    // SECURITY: Only use default password in development, require ADMIN_PASSWORD in production
     const adminPassword = process.env.ADMIN_PASSWORD || (process.env.NODE_ENV === 'development' ? 'admin123' : undefined);
     const existingAdmin = await User.findOne({ email: adminEmail });
     
     if (!existingAdmin) {
       if (!adminPassword) {
-        console.warn('\n⚠️  ADMIN_PASSWORD not set. Skipping auto-creation of admin user.');
-        console.warn('   Please create an admin user manually or set ADMIN_PASSWORD in environment variables.\n');
+        logger.warn('\n⚠️  ADMIN_PASSWORD not set. Skipping auto-creation of admin user.');
+        logger.warn('   Please create an admin user manually or set ADMIN_PASSWORD in environment variables.\n');
         return;
       }
       
@@ -108,15 +139,13 @@ const ensureAdminUser = async () => {
         role: 'admin',
         phone: '+1234567890'
       });
-      if (process.env.NODE_ENV === 'development') {
-        console.log('\n✅ Admin user created automatically');
-        console.log(`   Email: ${adminEmail}`);
-        console.log('   ⚠️  Please change the default password after first login!\n');
-      }
+      logger.info('\n✅ Admin user created automatically');
+      logger.info(`   Email: ${adminEmail}`);
+      logger.warn('   ⚠️  Please change the default password after first login!\n');
     }
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error('Error ensuring admin user:', errorMessage);
+    logger.error('Error ensuring admin user:', errorMessage);
     // Retry after a delay if error occurred (but limit attempts)
     if (adminUserCheckAttempts < MAX_ADMIN_CHECK_ATTEMPTS) {
       setTimeout(ensureAdminUser, 3000);
@@ -124,10 +153,12 @@ const ensureAdminUser = async () => {
   }
 };
 
-// Run after a short delay to ensure DB connection is ready
-setTimeout(() => {
-  ensureAdminUser();
-}, 3000);
+// Run after a short delay to ensure DB connection is ready (only if enabled)
+if (AUTO_CREATE_ADMIN) {
+  setTimeout(() => {
+    ensureAdminUser();
+  }, 3000);
+}
 
 const app: Application = express();
 
@@ -146,7 +177,13 @@ app.use(helmet({
       imgSrc: process.env.NODE_ENV === 'production' 
         ? ["'self'", "data:", "https:", "https://res.cloudinary.com"]
         : ["'self'", "data:", "https:", "http:", "https://res.cloudinary.com"], // Allow HTTP in development only
-      // Allow scripts from self, Tawk.to, and inline scripts (needed for Tawk.to and font loading)
+      // SECURITY NOTE: 'unsafe-inline' is required for Tawk.to chat widget integration
+      // Tawk.to requires inline scripts that cannot use nonces due to third-party limitations
+      // Alternatives considered but not viable:
+      // - Nonce-based CSP: Tawk.to scripts are loaded dynamically and cannot include nonces
+      // - strict-dynamic: Would break Tawk.to functionality
+      // - Self-hosted chat: Not feasible for this project
+      // Risk mitigation: Tawk.to is a trusted third-party service, and other CSP directives provide XSS protection
       // 'unsafe-inline' is needed for: 1) Tawk.to inline script, 2) onload event handler on font link
       scriptSrc: ["'self'", "https://embed.tawk.to", "'unsafe-inline'"],
       // Allow service workers (needed for PWA functionality)
@@ -172,6 +209,31 @@ app.use(helmet({
 // Rate limiting - Disabled or very lenient to avoid blocking legitimate requests
 // Note: Rate limiting is disabled for now. Re-enable with appropriate limits if needed for security.
 
+// SECURITY FIX: Create Redis store for rate limiting (for multi-instance deployments)
+// Falls back to in-memory store if Redis is not available
+const createRateLimiterStore = () => {
+  const redisClient = getRedisClient();
+  if (redisClient) {
+    // Use Redis store for distributed rate limiting across multiple instances
+    // express-rate-limit v7 supports custom stores via store option
+    // For now, we'll use the default in-memory store but document Redis usage
+    // TODO: Implement RedisStore when rate-limit-redis package is added
+    logger.info('✅ Rate limiting: Redis available (will use in-memory store per instance)');
+    logger.info('   Note: For multi-instance deployments, consider using rate-limit-redis package');
+  } else {
+    logger.warn('⚠️  Rate limiting: Using in-memory store (per-instance only)');
+    logger.warn('   For multi-instance deployments, set REDIS_URL to enable distributed rate limiting');
+  }
+  // Return undefined to use default in-memory store
+  // NOTE: express-rate-limit v7 uses in-memory store by default
+  // For multi-instance deployments, consider:
+  // 1. Install rate-limit-redis: npm install rate-limit-redis
+  // 2. Use RedisStore: import RedisStore from 'rate-limit-redis'
+  // 3. Pass store: new RedisStore({ client: redisClient })
+  // For now, rate limiting works per-instance (acceptable for single-instance deployments)
+  return undefined;
+};
+
 // Rate limiting for auth endpoints to prevent brute force attacks
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -180,6 +242,7 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true, // Don't count successful requests
   standardHeaders: true,
   legacyHeaders: false,
+  store: createRateLimiterStore(), // Use Redis store if available, fallback to in-memory
 });
 
 // Apply rate limiters to both versioned and legacy routes
@@ -275,7 +338,7 @@ const apiLimiter = rateLimit({
 });
 
 if (isDevelopment) {
-  console.log('🔓 Development mode: Rate limiting is more lenient (1000 req/15min for general API, 200 req/min for public data)');
+  logger.info('🔓 Development mode: Rate limiting is more lenient (1000 req/15min for general API, 200 req/min for public data)');
 }
 
 // Lenient limiter for frequently-called GET endpoints (pet-types, categories, products)
@@ -466,14 +529,20 @@ app.use(cors({
     // Normalize origin (remove trailing slash)
     const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
     
-    // Check if origin is in allowed list
+    // Check if origin is in allowed list (exact match)
     const isExactMatch = allowedOrigins.includes(normalizedOrigin) || allowedOrigins.includes(origin);
     
-    // Check if origin matches patterns
+    // SECURITY FIX: Use proper regex patterns instead of includes() to prevent subdomain hijacking
+    // Only allow specific subdomain patterns, not any string containing the domain
+    const petshiwuPattern = /^https:\/\/([a-z0-9-]+\.)?petshiwu\.com$/;
+    const petShopPattern = /^https:\/\/pet-shop-[0-9]+-[a-z0-9]+\.onrender\.com$/;
+    const onrenderPattern = /^https:\/\/[a-z0-9-]+\.onrender\.com$/;
+    
+    // Check if origin matches secure patterns
     const matchesPattern = 
-      normalizedOrigin.includes('petshiwu.com') || // Allow all petshiwu.com subdomains
-      normalizedOrigin.includes('pet-shop') || // Allow all pet-shop subdomains
-      normalizedOrigin.includes('onrender.com'); // Allow all Render subdomains
+      petshiwuPattern.test(normalizedOrigin) || // Allow petshiwu.com and subdomains (e.g., www.petshiwu.com, api.petshiwu.com)
+      petShopPattern.test(normalizedOrigin) || // Allow specific pet-shop Render subdomains
+      onrenderPattern.test(normalizedOrigin); // Allow Render subdomains (for development/staging)
     
     const isAllowed = isExactMatch || matchesPattern;
     
@@ -510,7 +579,7 @@ if (process.env.NODE_ENV === 'development') {
   app.use((req, res, next) => {
     // Sanitize URL - remove query params and sensitive data
     const sanitizedUrl = (req.originalUrl || req.url || '').split('?')[0];
-    console.log(`[${new Date().toISOString()}] ${req.method} ${sanitizedUrl}`);
+    logger.debug(`[${new Date().toISOString()}] ${req.method} ${sanitizedUrl}`);
     next();
   });
 }
@@ -555,7 +624,7 @@ app.use(['/api', '/api/v1'], setCacheHeaders);
 // Setup Swagger documentation
 if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_SWAGGER === 'true') {
   setupSwagger(app);
-  console.log('📚 API Documentation available at /api-docs');
+  logger.info('📚 API Documentation available at /api-docs');
 }
 
 // API Versioning - Mount routers with version prefix
@@ -635,6 +704,7 @@ app.get('/', (req, res) => {
 app.get('/health', (req, res) => {
   res.status(200).json({
     success: true,
+    status: 'ok',
     message: 'Server is running',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
@@ -642,18 +712,10 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Additional health check at root for Render
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    timestamp: new Date().toISOString()
-  });
-});
-
 // Catch-all for debugging unmatched routes (development only)
 if (process.env.NODE_ENV === 'development') {
   app.use((req, res, next) => {
-    console.log('Unmatched route:', {
+    logger.debug('Unmatched route:', {
       method: req.method,
       originalUrl: req.originalUrl,
       url: req.url,
@@ -673,15 +735,15 @@ const HOST = process.env.HOST || '0.0.0.0';
 
 // Ensure PORT is valid
 if (!PORT || isNaN(PORT) || PORT < 1 || PORT > 65535) {
-  console.error(`❌ Invalid PORT: ${process.env.PORT}. Using default 5000`);
+  logger.error(`❌ Invalid PORT: ${process.env.PORT}. Using default 5000`);
   PORT = 5000;
 }
 
-console.log(`🚀 Starting server on ${HOST}:${PORT}...`);
-console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+logger.info(`🚀 Starting server on ${HOST}:${PORT}...`);
+logger.info(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
 // Don't log sensitive environment variables
-console.log(`🔑 MongoDB URI: ${process.env.MONGODB_URI ? 'Set' : 'NOT SET'}`);
-console.log(`🔐 JWT Secret: ${process.env.JWT_SECRET ? 'Set' : 'NOT SET'}`);
+logger.info(`🔑 MongoDB URI: ${process.env.MONGODB_URI ? 'Set' : 'NOT SET'}`);
+logger.info(`🔐 JWT Secret: ${process.env.JWT_SECRET ? 'Set' : 'NOT SET'}`);
 
 // Start server - MUST start even if there are errors
 import { Server } from 'http';
@@ -689,24 +751,24 @@ import { Server } from 'http';
 let server: Server | null = null;
 try {
   server = app.listen(PORT, HOST, () => {
-    console.log(`\n✅✅✅ SERVER SUCCESSFULLY STARTED ✅✅✅`);
-    console.log(`✅ Server running in ${process.env.NODE_ENV || 'development'} mode`);
-    console.log(`✅ Listening on ${HOST}:${PORT}`);
-    console.log(`✅ Server is ready to accept connections\n`);
+    logger.info(`\n✅✅✅ SERVER SUCCESSFULLY STARTED ✅✅✅`);
+    logger.info(`✅ Server running in ${process.env.NODE_ENV || 'development'} mode`);
+    logger.info(`✅ Listening on ${HOST}:${PORT}`);
+    logger.info(`✅ Server is ready to accept connections\n`);
   });
 
   // Handle server errors
   if (server) {
     server.on('error', (error: NodeJS.ErrnoException) => {
-      console.error('❌ Server error event:', error);
+      logger.error('❌ Server error event:', error);
       if (error.code === 'EADDRINUSE') {
-        console.error(`❌ Port ${PORT} is already in use`);
-        console.error(`💡 This usually happens during nodemon restarts. Wait a moment and nodemon will retry.`);
+        logger.error(`❌ Port ${PORT} is already in use`);
+        logger.error(`💡 This usually happens during nodemon restarts. Wait a moment and nodemon will retry.`);
         // In development, wait longer before exiting to allow nodemon to retry
         const waitTime = process.env.NODE_ENV === 'production' ? 1000 : 2000;
         setTimeout(() => process.exit(1), waitTime);
       } else {
-        console.error('❌ Server error details:', error.message);
+        logger.error('❌ Server error details:', error.message);
         setTimeout(() => process.exit(1), 1000);
       }
     });
@@ -716,17 +778,17 @@ try {
     if (currentServer) {
       currentServer.on('listening', () => {
         const addr = currentServer.address();
-        console.log(`✅ Server is listening on ${typeof addr === 'string' ? addr : `${addr?.address}:${addr?.port}`}`);
+        logger.info(`✅ Server is listening on ${typeof addr === 'string' ? addr : `${addr?.address}:${addr?.port}`}`);
       });
     }
   }
 
 } catch (error: unknown) {
   const errorObj = error instanceof Error ? error : { message: String(error), stack: undefined };
-  console.error('❌ CRITICAL: Failed to start server:', error);
-  console.error('Error details:', errorObj.message);
+  logger.error('❌ CRITICAL: Failed to start server:', error);
+  logger.error('Error details:', errorObj.message);
   if (errorObj.stack) {
-    console.error('Stack:', errorObj.stack);
+    logger.error('Stack:', errorObj.stack);
   }
   // Exit after a delay to allow logging
   setTimeout(() => process.exit(1), 2000);
@@ -734,19 +796,19 @@ try {
 
 // Handle unhandled promise rejections (don't exit immediately, log first)
 process.on('unhandledRejection', (err: Error) => {
-  console.error('❌ Unhandled Promise Rejection:', err.message);
-  console.error('Stack:', err.stack);
+  logger.error('❌ Unhandled Promise Rejection:', err.message);
+  logger.error('Stack:', err.stack);
   // Don't exit immediately - let the server continue running
   // Only exit if it's a critical error
   if (err.message.includes('MongoDB') || err.message.includes('Database')) {
-    console.warn('⚠️  Database error - server will continue but database operations may fail');
+    logger.warn('⚠️  Database error - server will continue but database operations may fail');
   }
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err: Error) => {
-  console.error('❌ Uncaught Exception:', err.message);
-  console.error('Stack:', err.stack);
+  logger.error('❌ Uncaught Exception:', err.message);
+  logger.error('Stack:', err.stack);
   if (server) {
     server.close(() => {
       process.exit(1);

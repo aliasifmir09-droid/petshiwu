@@ -30,7 +30,9 @@ export const STOCK_ALERT_CHECK_INTERVAL = 60 * 60 * 1000; // 1 hour
 
 // Email configuration
 export const EMAIL_VERIFICATION_EXPIRY_HOURS = 24; // 24 hours
-export const PASSWORD_RESET_EXPIRY_HOURS = 0.25; // 15 minutes
+// Password reset token expiration - configurable via environment variable (default: 1 hour for better UX)
+// Can be set to 0.25 (15 min), 0.5 (30 min), 1 (1 hour), etc.
+export const PASSWORD_RESET_EXPIRY_HOURS = parseFloat(process.env.PASSWORD_RESET_EXPIRY_HOURS || '1'); // Default: 1 hour
 
 // Review configuration
 export const MIN_REVIEW_LENGTH = 10;
