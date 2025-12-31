@@ -1,8 +1,9 @@
-import Cart from '../models/Cart';
+import Cart, { ICart } from '../models/Cart';
 import User from '../models/User';
 import { getEmailQueue, addEmailJob } from '../utils/jobQueue';
 import { sendCartAbandonmentEmail } from '../utils/emailService';
 import logger from '../utils/logger';
+import mongoose from 'mongoose';
 
 /**
  * Check for abandoned carts and send recovery emails
@@ -64,7 +65,7 @@ export const checkAbandonedCarts = async (): Promise<void> => {
                 firstName,
                 cartItems,
                 cartUrl,
-                cartId: cart._id.toString()
+                cartId: (cart._id as mongoose.Types.ObjectId).toString()
               },
               async () => {
                 await sendCartAbandonmentEmail(email, firstName, cartItems, cartUrl);
@@ -80,7 +81,8 @@ export const checkAbandonedCarts = async (): Promise<void> => {
           }
         }
       } catch (error: any) {
-        logger.error(`Error processing abandoned cart ${cart._id}:`, error.message);
+        const cartId = (cart._id as mongoose.Types.ObjectId).toString();
+        logger.error(`Error processing abandoned cart ${cartId}:`, error.message);
         // Continue with next cart even if one fails
       }
     }
