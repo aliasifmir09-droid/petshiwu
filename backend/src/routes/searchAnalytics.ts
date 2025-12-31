@@ -1,15 +1,14 @@
 import express from 'express';
 import { getSearchAnalytics, getSearchSuggestions } from '../controllers/searchAnalyticsController';
-import { authenticate } from '../middleware/auth';
-import { requireRole } from '../middleware/permissions';
-import { validateRequest } from '../middleware/validateRequest';
+import { protect, authorize } from '../middleware/auth';
+import { validate } from '../middleware/validateRequest';
 import { query } from 'express-validator';
 
 const router = express.Router();
 
 // All routes require authentication and admin role
-router.use(authenticate);
-router.use(requireRole('admin'));
+router.use(protect);
+router.use(authorize('admin'));
 
 /**
  * @route   GET /api/search/analytics
@@ -23,7 +22,7 @@ router.get(
     query('endDate').optional().isISO8601().withMessage('End date must be a valid ISO 8601 date'),
     query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
   ],
-  validateRequest,
+  validate,
   getSearchAnalytics
 );
 
@@ -38,7 +37,7 @@ router.get(
     query('q').trim().notEmpty().withMessage('Search query is required'),
     query('limit').optional().isInt({ min: 1, max: 50 }).withMessage('Limit must be between 1 and 50'),
   ],
-  validateRequest,
+  validate,
   getSearchSuggestions
 );
 

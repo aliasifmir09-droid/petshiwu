@@ -6,8 +6,7 @@ import {
   clearSearchHistory,
   trackSearchClick,
 } from '../controllers/searchHistoryController';
-import { authenticate } from '../middleware/auth';
-import { validateRequest } from '../middleware/validateRequest';
+import { validate } from '../middleware/validateRequest';
 import { body, param, query } from 'express-validator';
 
 const router = express.Router();
@@ -24,7 +23,7 @@ router.post(
     body('filters').optional().isObject(),
     body('resultsCount').optional().isInt({ min: 0 }),
   ],
-  validateRequest,
+  validate,
   saveSearchHistory
 );
 
@@ -36,7 +35,7 @@ router.post(
 router.get(
   '/',
   [query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100')],
-  validateRequest,
+  validate,
   getSearchHistory
 );
 
@@ -55,7 +54,7 @@ router.delete('/', clearSearchHistory);
 router.delete(
   '/:id',
   [param('id').isMongoId().withMessage('Invalid search history ID')],
-  validateRequest,
+  validate,
   deleteSearchHistory
 );
 
@@ -71,7 +70,7 @@ router.post(
     body('productId').isMongoId().withMessage('Product ID is required'),
     body('position').optional().isInt({ min: 0 }).withMessage('Position must be a non-negative integer'),
   ],
-  validateRequest,
+  validate,
   trackSearchClick
 );
 

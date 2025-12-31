@@ -10,7 +10,7 @@ import { cache } from '../utils/cache';
 export const saveSearchHistory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = (req as any).user?._id;
-    const sessionId = req.sessionID || req.headers['x-session-id'] as string;
+    const sessionId = (req as any).sessionID || (req.headers['x-session-id'] as string);
     const { query, filters, resultsCount } = req.body;
 
     if (!query || typeof query !== 'string' || query.trim().length === 0) {
@@ -56,7 +56,7 @@ export const saveSearchHistory = async (req: Request, res: Response, next: NextF
 export const getSearchHistory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = (req as any).user?._id;
-    const sessionId = req.sessionID || req.headers['x-session-id'] as string;
+    const sessionId = (req as any).sessionID || (req.headers['x-session-id'] as string);
     const limit = parseInt(req.query.limit as string) || 20;
 
     if (!userId && !sessionId) {
@@ -108,7 +108,7 @@ export const getSearchHistory = async (req: Request, res: Response, next: NextFu
 export const deleteSearchHistory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = (req as any).user?._id;
-    const sessionId = req.sessionID || req.headers['x-session-id'] as string;
+    const sessionId = (req as any).sessionID || (req.headers['x-session-id'] as string);
     const { id } = req.params;
 
     const query: any = { _id: id };
@@ -147,7 +147,7 @@ export const deleteSearchHistory = async (req: Request, res: Response, next: Nex
 export const clearSearchHistory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = (req as any).user?._id;
-    const sessionId = req.sessionID || req.headers['x-session-id'] as string;
+    const sessionId = (req as any).sessionID || (req.headers['x-session-id'] as string);
 
     if (!userId && !sessionId) {
       return res.status(400).json({
@@ -185,7 +185,7 @@ export const clearSearchHistory = async (req: Request, res: Response, next: Next
 export const trackSearchClick = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = (req as any).user?._id;
-    const sessionId = req.sessionID || req.headers['x-session-id'] as string;
+    const sessionId = (req as any).sessionID || (req.headers['x-session-id'] as string);
     const { id } = req.params;
     const { productId, position } = req.body;
 

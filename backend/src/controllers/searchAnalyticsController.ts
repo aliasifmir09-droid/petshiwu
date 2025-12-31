@@ -55,7 +55,7 @@ export const getSearchAnalytics = async (req: Request, res: Response, next: Next
           },
         },
       },
-      { $sort: { count: -1 } },
+      { $sort: { count: -1 as const } },
       { $limit: parseInt(limit as string) },
     ];
 
@@ -80,7 +80,7 @@ export const getSearchAnalytics = async (req: Request, res: Response, next: Next
           uniqueSessions: { $size: '$uniqueSessions' },
         },
       },
-      { $sort: { date: 1 } },
+      { $sort: { date: 1 as const } },
     ];
 
     // Get zero-result searches (searches with no results)
@@ -92,7 +92,7 @@ export const getSearchAnalytics = async (req: Request, res: Response, next: Next
           count: { $sum: 1 },
         },
       },
-      { $sort: { count: -1 } },
+      { $sort: { count: -1 as const } },
       { $limit: parseInt(limit as string) },
     ];
 
@@ -192,7 +192,7 @@ export const getSearchSuggestions = async (req: Request, res: Response, next: Ne
           count: { $sum: 1 },
         },
       },
-      { $sort: { count: -1 } },
+      { $sort: { count: -1 as const } },
       { $limit: limit },
     ];
 
