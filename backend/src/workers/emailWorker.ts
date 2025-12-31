@@ -7,6 +7,7 @@ import {
   sendOrderDeliveredEmail,
 } from '../utils/emailService';
 import logger from '../utils/logger';
+import { Job } from 'bull';
 
 /**
  * Email worker - processes email jobs from the queue
@@ -23,35 +24,35 @@ export const startEmailWorker = (): void => {
   logger.info('📧 Starting email worker...');
 
   // Process verification emails
-  emailQueue.process('verification', async (job) => {
+  emailQueue.process('verification', async (job: Job) => {
     const { email, token, firstName } = job.data;
     logger.info(`Processing verification email job for ${email}`);
     await sendVerificationEmail(email, token, firstName);
   });
 
   // Process password reset emails
-  emailQueue.process('password-reset', async (job) => {
+  emailQueue.process('password-reset', async (job: Job) => {
     const { email, token, firstName } = job.data;
     logger.info(`Processing password reset email job for ${email}`);
     await sendPasswordResetEmail(email, token, firstName);
   });
 
   // Process order confirmation emails
-  emailQueue.process('order-confirmation', async (job) => {
+  emailQueue.process('order-confirmation', async (job: Job) => {
     const { email, firstName, orderNumber, orderData } = job.data;
     logger.info(`Processing order confirmation email job for order ${orderNumber}`);
     await sendOrderConfirmationEmail(email, firstName, orderNumber, orderData);
   });
 
   // Process order cancellation emails
-  emailQueue.process('order-cancellation', async (job) => {
+  emailQueue.process('order-cancellation', async (job: Job) => {
     const { email, firstName, orderNumber, orderData } = job.data;
     logger.info(`Processing order cancellation email job for order ${orderNumber}`);
     await sendOrderCancellationEmail(email, firstName, orderNumber, orderData);
   });
 
   // Process order delivered emails
-  emailQueue.process('order-delivered', async (job) => {
+  emailQueue.process('order-delivered', async (job: Job) => {
     const { email, firstName, orderNumber, orderData } = job.data;
     logger.info(`Processing order delivered email job for order ${orderNumber}`);
     await sendOrderDeliveredEmail(email, firstName, orderNumber, orderData);

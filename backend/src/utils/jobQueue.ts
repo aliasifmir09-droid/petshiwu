@@ -1,11 +1,11 @@
-import Bull from 'bull';
+import Bull, { Queue } from 'bull';
 import { getRedisClient } from './cache';
 import logger from './logger';
 
 // Job queue instance (null if Redis not available)
-let emailQueue: Bull.Queue | null = null;
-let imageProcessingQueue: Bull.Queue | null = null;
-let csvProcessingQueue: Bull.Queue | null = null;
+let emailQueue: Queue | null = null;
+let imageProcessingQueue: Queue | null = null;
+let csvProcessingQueue: Queue | null = null;
 
 /**
  * Initialize job queues with Redis
@@ -251,7 +251,7 @@ export const getQueueStats = async () => {
  * Clean up job queues (graceful shutdown)
  */
 export const closeJobQueues = async (): Promise<void> => {
-  const queues = [emailQueue, imageProcessingQueue, csvProcessingQueue].filter(Boolean) as Bull.Queue[];
+  const queues = [emailQueue, imageProcessingQueue, csvProcessingQueue].filter(Boolean) as Queue[];
   
   await Promise.all(
     queues.map(async (queue) => {

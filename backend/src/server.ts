@@ -26,8 +26,6 @@ import type { SanitizedObject } from './types/common';
 import logger from './utils/logger';
 import { initializeJobQueues } from './utils/jobQueue';
 import { startEmailWorker } from './workers/emailWorker';
-import { initializeJobQueues } from './utils/jobQueue';
-import { startEmailWorker } from './workers/emailWorker';
 
 // Load env vars
 dotenv.config();

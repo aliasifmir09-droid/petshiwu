@@ -243,14 +243,23 @@ export const searchAutocomplete = async (req: Request, res: Response, next: Next
       await cache.set(autocompleteCacheKey, products, 120);
     }
 
-    // Search categories
-    const categories = await Category.find({
-      isActive: true,
-      $or: [
-        { name: searchRegex },
+    // Search categories - use text search if available, otherwise regex
+    const categorySearchQuery: any = {
+      isActive: true
+    };
+    
+    if (searchText.length >= 2) {
+      // Use text search if available, otherwise use optimized regex
+      const escapedText = searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const searchRegex = new RegExp(escapedText, 'i');
+      categorySearchQuery.$or = [
+        { $text: { $search: searchText } }, // Text search
+        { name: searchRegex }, // Fallback regex
         { slug: searchRegex }
-      ]
-    })
+      ];
+    }
+    
+    const categories = await Category.find(categorySearchQuery)
       .select('name slug petType')
       .limit(5)
       .lean();

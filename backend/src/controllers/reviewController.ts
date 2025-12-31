@@ -62,7 +62,7 @@ export const getProductReviews = async (req: Request, res: Response, next: NextF
           count: { $sum: 1 }
         }
       },
-      { $sort: { _id: -1 } }
+      { $sort: { _id: -1 as const } }
     ];
 
     const ratingDistribution = await executeCachedAggregation(

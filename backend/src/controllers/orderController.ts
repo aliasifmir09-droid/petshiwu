@@ -1568,7 +1568,7 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
               }
             },
             {
-              $sort: { '_id.year': 1, '_id.month': 1 }
+              $sort: { '_id.year': 1 as const, '_id.month': 1 as const }
             },
             {
               $limit: 12
@@ -1593,7 +1593,7 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
               }
             },
             {
-              $sort: { '_id.year': 1, '_id.month': 1 }
+              $sort: { '_id.year': 1 as const, '_id.month': 1 as const }
             }
           ]
         }
