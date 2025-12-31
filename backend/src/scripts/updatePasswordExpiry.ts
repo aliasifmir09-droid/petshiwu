@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import User from '../models/User';
 import { connectDatabase } from '../utils/database';
+import logger from '../utils/logger';
 
 dotenv.config();
 
@@ -11,10 +12,10 @@ dotenv.config();
  */
 const updatePasswordExpiry = async () => {
   try {
-    console.log('🔄 Connecting to database...');
+    logger.info('🔄 Connecting to database...');
     await connectDatabase();
 
-    console.log('🔍 Finding admin and staff users without password expiry dates...');
+    logger.info('🔍 Finding admin and staff users without password expiry dates...');
     
     // Find all admin and staff users who don't have passwordChangedAt set
     const users = await User.find({
@@ -23,16 +24,16 @@ const updatePasswordExpiry = async () => {
     });
 
     if (users.length === 0) {
-      console.log('✅ All admin and staff users already have password expiry dates set.');
+      logger.info('✅ All admin and staff users already have password expiry dates set.');
       process.exit(0);
     }
 
-    console.log(`📝 Found ${users.length} user(s) to update:`);
+    logger.info(`📝 Found ${users.length} user(s) to update:`);
     users.forEach(user => {
-      console.log(`   - ${user.firstName} ${user.lastName} (${user.email}) - ${user.role}`);
+      logger.info(`   - ${user.firstName} ${user.lastName} (${user.email}) - ${user.role}`);
     });
 
-    console.log('\n🔧 Updating users...');
+    logger.info('\n🔧 Updating users...');
     
     const now = new Date();
     const expiresAt = new Date();
@@ -44,16 +45,16 @@ const updatePasswordExpiry = async () => {
       user.passwordExpiresAt = expiresAt;
       await user.save({ validateBeforeSave: false }); // Skip validation to avoid triggering password hash
       updated++;
-      console.log(`   ✓ Updated ${user.email}`);
+      logger.info(`   ✓ Updated ${user.email}`);
     }
 
-    console.log(`\n✅ Successfully updated ${updated} user(s)`);
-    console.log(`📅 Password expiry date set to: ${expiresAt.toLocaleDateString()}`);
-    console.log('\n⚠️  Note: Users will need to change their password within 30 days.');
+    logger.info(`\n✅ Successfully updated ${updated} user(s)`);
+    logger.info(`📅 Password expiry date set to: ${expiresAt.toLocaleDateString()}`);
+    logger.warn('\n⚠️  Note: Users will need to change their password within 30 days.');
     
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error updating password expiry:', error);
+    logger.error('❌ Error updating password expiry:', error);
     process.exit(1);
   }
 };

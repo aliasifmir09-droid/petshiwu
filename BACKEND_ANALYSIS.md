@@ -1115,32 +1115,56 @@ The backend demonstrates strong security practices with multiple layers of prote
    - **Priority:** High (for code reliability)
 
 #### Medium Priority
-1. **Complete Logging Migration**
-   - **Current State:** ~660 console.log instances remain in scripts/ directory
-   - **Impact:** Low (scripts don't require structured logging, but consistency is good)
-   - **Recommendation:** Consider replacing in frequently-used scripts
-   - **Priority:** Medium (nice-to-have)
+1. **Complete Logging Migration** ✅ **FIXED**
+   - **Status:** ✅ **RESOLVED** - Replaced console.log with Winston logger in frequently-used scripts
+   - **Fix Applied:**
+     - Replaced console.log/error/warn in `updatePasswordExpiry.ts` (7 instances) → logger.info/error/warn
+     - Replaced console.log/error/warn in `updateCategoryLevels.ts` (9 instances) → logger.info/error/warn
+   - **Remaining Instances:**
+     - ~650 instances remain in other scripts (low priority - scripts don't require structured logging)
+   - **Result:** Frequently-used scripts now use structured logging
 
-2. **Redis Store for Rate Limiting**
-   - **Current State:** In-memory store works for single-instance deployments
-   - **Impact:** Multi-instance deployments need Redis store
-   - **Recommendation:** Implement when scaling to multiple instances
-   - **Priority:** Medium (when needed for scaling)
-   - **Status:** Documented in TODO.md
+2. **Redis Store for Rate Limiting** ✅ **FIXED**
+   - **Status:** ✅ **RESOLVED** - Implemented custom Redis store for distributed rate limiting
+   - **Fix Applied:**
+     - Created `redisRateLimitStore.ts` with custom Redis store implementation
+     - Implements express-rate-limit Store interface
+     - Uses existing ioredis client from cache.ts
+     - Automatically falls back to in-memory store if Redis unavailable
+     - Added to all rate limiters (auth, registration, password reset, orders, donations, uploads, etc.)
+   - **Benefits:**
+     - Distributed rate limiting across multiple instances
+     - Shared rate limit counters via Redis
+     - Automatic fallback to in-memory if Redis unavailable
+   - **Result:** Rate limiting now supports multi-instance deployments with Redis
 
 #### Low Priority
-1. **Further Query Optimization**
-   - **Current State:** Category population optimized conditionally
-   - **Impact:** Could be further optimized for frontend requests
-   - **Recommendation:** Fetch all categories in one query and build hierarchy in memory
-   - **Priority:** Low (current implementation works well)
-   - **Status:** Documented in TODO.md
+1. **Further Query Optimization** ✅ **FIXED**
+   - **Status:** ✅ **RESOLVED** - Category population optimized to fetch all categories in one query
+   - **Fix Applied:**
+     - Frontend requests now fetch all categories in one query
+     - Build category hierarchy in memory (up to 3 levels)
+     - Eliminates N+1 queries completely for frontend requests
+     - Admin and featured queries still use simplified population (faster)
+   - **Performance Improvement:**
+     - Reduced from N+1 queries to 2 queries total (products + all categories)
+     - Hierarchy built in memory (O(n) complexity)
+   - **Result:** Category population fully optimized, no N+1 queries
 
-2. **Type Definitions**
-   - **Current State:** Some `any` types found in complex scenarios
-   - **Impact:** Low (TypeScript strict mode helps catch issues)
-   - **Recommendation:** Gradually replace `any` with proper types
-   - **Priority:** Low (code works correctly)
+2. **Type Definitions** ✅ **FIXED**
+   - **Status:** ✅ **RESOLVED** - Replaced `any` types with proper TypeScript types
+   - **Fix Applied:**
+     - Created `ProductVariant`, `ProductWithVariants`, `NormalizedProduct` interfaces
+     - Replaced `any` in `recalculateStock()` function
+     - Replaced `any` in `normalizeProductId()` function
+     - Replaced `any` in `normalizeProducts()` function
+     - Replaced `any` in category hierarchy building
+     - Added `CategoryMapEntry` and `CategoryHierarchy` interfaces
+   - **Type Safety:**
+     - All product normalization functions now properly typed
+     - Category hierarchy building properly typed
+     - Better IDE autocomplete and type checking
+   - **Result:** Improved type safety, better developer experience
 
 3. **Documentation**
    - **Current State:** Most functions have JSDoc comments

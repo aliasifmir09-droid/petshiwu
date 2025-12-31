@@ -211,27 +211,18 @@ app.use(helmet({
 
 // SECURITY FIX: Create Redis store for rate limiting (for multi-instance deployments)
 // Falls back to in-memory store if Redis is not available
-const createRateLimiterStore = () => {
-  const redisClient = getRedisClient();
-  if (redisClient) {
-    // Use Redis store for distributed rate limiting across multiple instances
-    // express-rate-limit v7 supports custom stores via store option
-    // For now, we'll use the default in-memory store but document Redis usage
-    // TODO: Implement RedisStore when rate-limit-redis package is added
-    logger.info('✅ Rate limiting: Redis available (will use in-memory store per instance)');
-    logger.info('   Note: For multi-instance deployments, consider using rate-limit-redis package');
+import { createRedisRateLimitStore } from './utils/redisRateLimitStore';
+
+const createRateLimiterStore = (windowMs?: number) => {
+  const redisStore = createRedisRateLimitStore(windowMs);
+  if (redisStore) {
+    logger.info('✅ Rate limiting: Using Redis store for distributed rate limiting');
+    return redisStore;
   } else {
     logger.warn('⚠️  Rate limiting: Using in-memory store (per-instance only)');
     logger.warn('   For multi-instance deployments, set REDIS_URL to enable distributed rate limiting');
+    return undefined; // Use default in-memory store
   }
-  // Return undefined to use default in-memory store
-  // NOTE: express-rate-limit v7 uses in-memory store by default
-  // For multi-instance deployments, consider:
-  // 1. Install rate-limit-redis: npm install rate-limit-redis
-  // 2. Use RedisStore: import RedisStore from 'rate-limit-redis'
-  // 3. Pass store: new RedisStore({ client: redisClient })
-  // For now, rate limiting works per-instance (acceptable for single-instance deployments)
-  return undefined;
 };
 
 // Rate limiting for auth endpoints to prevent brute force attacks
@@ -242,7 +233,7 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true, // Don't count successful requests
   standardHeaders: true,
   legacyHeaders: false,
-  store: createRateLimiterStore(), // Use Redis store if available, fallback to in-memory
+  store: createRateLimiterStore(15 * 60 * 1000), // Use Redis store if available, fallback to in-memory
 });
 
 // Apply rate limiters to both versioned and legacy routes
@@ -257,6 +248,7 @@ const registerLimiter = rateLimit({
   message: 'Too many registration attempts from this IP, please try again after 1 hour.',
   standardHeaders: true,
   legacyHeaders: false,
+  store: createRateLimiterStore(60 * 60 * 1000),
 });
 
 // Rate limiting for password update to prevent brute force
@@ -266,6 +258,7 @@ const passwordUpdateLimiter = rateLimit({
   message: 'Too many password update attempts from this IP, please try again after 15 minutes.',
   standardHeaders: true,
   legacyHeaders: false,
+  store: createRateLimiterStore(15 * 60 * 1000),
 });
 
 // Rate limiting for password reset (forgot password) to prevent abuse and email spam
@@ -276,6 +269,7 @@ const forgotPasswordLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: false, // Count all requests (even successful ones) to prevent email spam
+  store: createRateLimiterStore(60 * 60 * 1000),
 });
 
 // Rate limiting for password reset (reset password) to prevent brute force
@@ -286,6 +280,7 @@ const resetPasswordLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true, // Don't count successful resets
+  store: createRateLimiterStore(15 * 60 * 1000),
 });
 
 // Rate limiting for order creation to prevent abuse (POST only)
@@ -295,6 +290,7 @@ const orderCreationLimiter = rateLimit({
   message: 'Too many order creation attempts from this IP, please try again after 15 minutes.',
   standardHeaders: true,
   legacyHeaders: false,
+  store: createRateLimiterStore(15 * 60 * 1000),
 });
 
 // Rate limiting for donation endpoints to prevent abuse
@@ -304,6 +300,7 @@ const donationLimiter = rateLimit({
   message: 'Too many donation attempts from this IP, please try again after 15 minutes.',
   standardHeaders: true,
   legacyHeaders: false,
+  store: createRateLimiterStore(15 * 60 * 1000),
 });
 
 // Rate limiting for file uploads to prevent DoS
@@ -313,6 +310,7 @@ const uploadLimiter = rateLimit({
   message: 'Too many file upload attempts from this IP, please try again after 15 minutes.',
   standardHeaders: true,
   legacyHeaders: false,
+  store: createRateLimiterStore(15 * 60 * 1000),
 });
 
 // Rate limiting for auth status check (/me) - more lenient since it's called frequently
@@ -323,6 +321,7 @@ const authStatusLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true, // Don't count successful requests
+  store: createRateLimiterStore(1 * 60 * 1000),
 });
 
 // General API rate limiting to prevent DoS attacks
@@ -335,6 +334,7 @@ const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: isDevelopment, // In development, don't count successful GET requests
+  store: createRateLimiterStore(15 * 60 * 1000),
 });
 
 if (isDevelopment) {
@@ -350,6 +350,7 @@ const publicDataLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true, // Don't count successful requests
+  store: createRateLimiterStore(1 * 60 * 1000),
 });
 
 // Apply rate limiting to specific critical endpoints BEFORE general API limiter

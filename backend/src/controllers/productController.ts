@@ -11,13 +11,43 @@ import logger from '../utils/logger';
 import { cache, cacheKeys } from '../utils/cache';
 import { safeToString } from '../utils/types';
 
+// Type definitions for product normalization
+interface ProductVariant {
+  stock?: number;
+  attributes?: Map<string, string> | { [key: string]: string };
+  [key: string]: unknown;
+}
+
+interface ProductWithVariants {
+  variants?: ProductVariant[];
+  totalStock?: number;
+  _id?: unknown;
+  category?: unknown;
+  [key: string]: unknown;
+}
+
+interface NormalizedProduct {
+  _id: string;
+  totalStock: number;
+  inStock: boolean;
+  category?: {
+    _id: string;
+    [key: string]: unknown;
+  };
+  variants?: Array<{
+    attributes: { [key: string]: string };
+    [key: string]: unknown;
+  }>;
+  [key: string]: unknown;
+}
+
 // Helper function to recalculate stock from variants
-const recalculateStock = (product: any): { totalStock: number; inStock: boolean } => {
+const recalculateStock = (product: ProductWithVariants): { totalStock: number; inStock: boolean } => {
   let calculatedTotalStock = 0;
   
   // Calculate total stock from variants
   if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
-    calculatedTotalStock = product.variants.reduce((total: number, variant: any) => {
+    calculatedTotalStock = product.variants.reduce((total: number, variant: ProductVariant) => {
       const variantStock = variant.stock || 0;
       return total + variantStock;
     }, 0);
@@ -35,37 +65,42 @@ const recalculateStock = (product: any): { totalStock: number; inStock: boolean 
 };
 
 // Helper function to normalize product _id to string and convert Maps to objects
-const normalizeProductId = (product: any): any => {
-  if (!product) return product;
+const normalizeProductId = (product: ProductWithVariants | null): NormalizedProduct | null => {
+  if (!product) return null;
   
   // Convert to plain object if it's a Mongoose document
-  const plainProduct = product.toObject ? product.toObject() : product;
+  const plainProduct = (product as { toObject?: () => ProductWithVariants }).toObject 
+    ? (product as { toObject: () => ProductWithVariants }).toObject() 
+    : product;
   
   // Recalculate stock from variants to ensure accuracy
   const stockData = recalculateStock(plainProduct);
   
   // Normalize product _id
-  const normalized: any = {
+  const normalized: NormalizedProduct = {
     ...plainProduct,
-    _id: plainProduct._id ? String(plainProduct._id) : plainProduct._id,
+    _id: plainProduct._id ? String(plainProduct._id) : '',
     totalStock: stockData.totalStock,
     inStock: stockData.inStock
-  };
+  } as NormalizedProduct;
   
   // Normalize category._id if category is populated
-  if (normalized.category && typeof normalized.category === 'object' && normalized.category._id) {
-    normalized.category = {
-      ...normalized.category,
-      _id: typeof normalized.category._id === 'object' && normalized.category._id.toString
-        ? normalized.category._id.toString()
-        : String(normalized.category._id)
-    };
+  if (normalized.category && typeof normalized.category === 'object' && normalized.category !== null) {
+    const category = normalized.category as { _id?: unknown };
+    if (category._id) {
+      normalized.category = {
+        ...(normalized.category as Record<string, unknown>),
+        _id: typeof category._id === 'object' && 'toString' in category._id && typeof category._id.toString === 'function'
+          ? category._id.toString()
+          : String(category._id)
+      } as { _id: string; [key: string]: unknown };
+    }
   }
   
   // Convert variant attributes Maps to plain objects for JSON serialization
   if (normalized.variants && Array.isArray(normalized.variants)) {
-    normalized.variants = normalized.variants.map((variant: any) => {
-      const variantCopy = { ...variant };
+    normalized.variants = normalized.variants.map((variant: ProductVariant) => {
+      const variantCopy = { ...variant } as { attributes?: Map<string, string> | { [key: string]: string }; [key: string]: unknown };
       // Convert Map to plain object if it's a Map
       if (variantCopy.attributes instanceof Map) {
         const attributesObj: { [key: string]: string } = {};
@@ -82,8 +117,8 @@ const normalizeProductId = (product: any): any => {
 };
 
 // Helper function to normalize array of products
-const normalizeProducts = (products: any[]): any[] => {
-  return products.map(normalizeProductId);
+const normalizeProducts = (products: ProductWithVariants[]): NormalizedProduct[] => {
+  return products.map(normalizeProductId).filter((p): p is NormalizedProduct => p !== null);
 };
 
 // CSV Import function
@@ -1638,26 +1673,13 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
         select: 'name slug petType' // Simplified - don't need deep nesting for home page
       });
     } else {
-      // PERFORMANCE FIX: Optimize category population to reduce N+1 queries
-      // Instead of nested populate (which can cause multiple queries),
-      // we'll fetch categories separately and build hierarchy in memory
-      // This is more efficient for large result sets
+      // PERFORMANCE FIX: Optimize category population - fetch all categories in one query and build hierarchy in memory
+      // This eliminates N+1 queries completely by fetching all categories upfront
+      // Only populate category ID, we'll build full hierarchy in memory
       productsQuery.populate({
         path: 'category',
-        select: 'name slug parentCategory petType',
-        // Note: Nested populate is kept for now but could be optimized further
-        // by fetching all categories first and building hierarchy in memory
-        populate: {
-          path: 'parentCategory',
-          select: 'name slug parentCategory',
-          populate: {
-            path: 'parentCategory',
-            select: 'name slug'
-          }
-        }
+        select: '_id name slug parentCategory petType'
       });
-      // TODO: Further optimization - fetch all categories in one query and build hierarchy in memory
-      // This would eliminate N+1 queries completely
     }
 
     // Conditionally apply select() only if selectFields is defined
@@ -1670,6 +1692,77 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       .skip(skip)
       .limit(limit)
       .lean(); // Use lean() for better performance (returns plain JS objects)
+
+    // PERFORMANCE FIX: Build category hierarchy in memory for frontend requests
+    // Fetch all categories in one query and build hierarchy map
+    interface CategoryMapEntry {
+      _id: string;
+      name: string;
+      slug: string;
+      petType: string;
+      parentCategory: string | null;
+    }
+    
+    interface CategoryHierarchy {
+      _id: string;
+      name: string;
+      slug: string;
+      petType: string;
+      parentCategory?: CategoryHierarchy | null;
+    }
+    
+    let categoryHierarchyMap: Map<string, CategoryMapEntry> | null = null;
+    if (!isAdminRequest && !isFeaturedQuery) {
+      const allCategories = await Category.find({ isActive: true })
+        .select('_id name slug parentCategory petType')
+        .lean();
+      
+      // Build a map of category ID to category object
+      categoryHierarchyMap = new Map();
+      allCategories.forEach(cat => {
+        if (cat._id) {
+          categoryHierarchyMap!.set(cat._id.toString(), {
+            _id: cat._id.toString(),
+            name: cat.name,
+            slug: cat.slug,
+            petType: cat.petType,
+            parentCategory: cat.parentCategory ? cat.parentCategory.toString() : null
+          });
+        }
+      });
+      
+      // Build hierarchy for each category (up to 3 levels)
+      const buildCategoryHierarchy = (categoryId: string | null, depth: number = 0): CategoryHierarchy | null => {
+        if (!categoryId || depth > 2 || !categoryHierarchyMap) return null;
+        
+        const category = categoryHierarchyMap.get(categoryId);
+        if (!category) return null;
+        
+        const result: CategoryHierarchy = {
+          _id: category._id,
+          name: category.name,
+          slug: category.slug,
+          petType: category.petType
+        };
+        
+        if (category.parentCategory && depth < 2) {
+          result.parentCategory = buildCategoryHierarchy(category.parentCategory, depth + 1);
+        }
+        
+        return result;
+      };
+      
+      // Attach full hierarchy to each product's category
+      products.forEach((product: ProductWithVariants) => {
+        if (product.category && typeof product.category === 'object' && product.category !== null) {
+          const category = product.category as { _id?: unknown };
+          if (category._id) {
+            const categoryId = String(category._id);
+            product.category = buildCategoryHierarchy(categoryId) as unknown;
+          }
+        }
+      });
+    }
 
     // Filter out any products that might have been deleted (extra safety check)
     // Also remove duplicates by _id (in case of database duplicates)

@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Category from '../models/Category';
 import { connectDatabase } from '../utils/database';
+import logger from '../utils/logger';
 
 dotenv.config();
 
@@ -13,20 +14,20 @@ dotenv.config();
  */
 const updateCategoryLevels = async () => {
   try {
-    console.log('🔄 Connecting to database...');
+    logger.info('🔄 Connecting to database...');
     await connectDatabase();
 
-    console.log('📋 Fetching all categories...');
+    logger.info('📋 Fetching all categories...');
     const categories = await Category.find({}).lean();
     
     if (categories.length === 0) {
-      console.log('✓ No categories found');
+      logger.info('✓ No categories found');
       mongoose.connection.close();
       return;
     }
 
-    console.log(`Found ${categories.length} categories`);
-    console.log('\n🔧 Calculating levels...\n');
+    logger.info(`Found ${categories.length} categories`);
+    logger.info('\n🔧 Calculating levels...\n');
 
     // Create a map for quick lookups
     const categoryMap = new Map();
@@ -40,7 +41,7 @@ const updateCategoryLevels = async () => {
       
       // Prevent infinite loops
       if (visited.has(catId)) {
-        console.warn(`⚠️  Circular reference detected for category: ${category.name}`);
+        logger.warn(`⚠️  Circular reference detected for category: ${category.name}`);
         return 1;
       }
       
@@ -72,19 +73,19 @@ const updateCategoryLevels = async () => {
           { runValidators: false }
         );
         
-        console.log(`✓ Set "${category.name}" (${category.petType}) to level ${calculatedLevel}`);
+        logger.info(`✓ Set "${category.name}" (${category.petType}) to level ${calculatedLevel}`);
         updated++;
       } catch (error: any) {
-        console.error(`❌ Error updating "${category.name}":`, error.message);
+        logger.error(`❌ Error updating "${category.name}":`, error.message);
         errors++;
       }
     }
 
-    console.log('\n✅ Migration complete!');
-    console.log(`   Updated: ${updated} categories`);
-    console.log(`   Unchanged: ${categories.length - updated - errors} categories`);
+    logger.info('\n✅ Migration complete!');
+    logger.info(`   Updated: ${updated} categories`);
+    logger.info(`   Unchanged: ${categories.length - updated - errors} categories`);
     if (errors > 0) {
-      console.log(`   Errors: ${errors} categories`);
+      logger.error(`   Errors: ${errors} categories`);
     }
 
     // Show level distribution
@@ -93,17 +94,17 @@ const updateCategoryLevels = async () => {
       { $sort: { _id: 1 } }
     ]);
 
-    console.log('\n📊 Category distribution by level:');
+    logger.info('\n📊 Category distribution by level:');
     levelCounts.forEach((item) => {
-      console.log(`   Level ${item._id}: ${item.count} categories`);
+      logger.info(`   Level ${item._id}: ${item.count} categories`);
     });
 
   } catch (error: any) {
-    console.error('❌ Error during migration:', error);
+    logger.error('❌ Error during migration:', error);
     process.exit(1);
   } finally {
     await mongoose.connection.close();
-    console.log('\n🔌 Database connection closed');
+    logger.info('\n🔌 Database connection closed');
   }
 };
 
