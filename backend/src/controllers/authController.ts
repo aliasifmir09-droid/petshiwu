@@ -3,6 +3,7 @@ import User from '../models/User';
 import { sendTokenResponse } from '../utils/generateToken';
 import { AuthRequest } from '../middleware/auth';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../utils/emailService';
+import { addEmailJob } from '../utils/jobQueue';
 import crypto from 'crypto';
 import logger from '../utils/logger';
 import { safeToString } from '../utils/types';
@@ -70,8 +71,18 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     await user.save({ validateBeforeSave: false });
 
     try {
-      // Send verification email
-      await sendVerificationEmail(user.email, verificationToken, user.firstName);
+      // Send verification email via background job (non-blocking)
+      await addEmailJob(
+        'verification',
+        {
+          email: user.email,
+          token: verificationToken,
+          firstName: user.firstName
+        },
+        async () => {
+          await sendVerificationEmail(user.email, verificationToken, user.firstName);
+        }
+      );
       
       res.status(201).json({
         success: true,
@@ -406,13 +417,24 @@ export const resendVerificationEmail = async (req: Request, res: Response, next:
     await user.save({ validateBeforeSave: false });
 
     try {
-      await sendVerificationEmail(user.email, verificationToken, user.firstName);
+      // Send verification email via background job (non-blocking)
+      await addEmailJob(
+        'verification',
+        {
+          email: user.email,
+          token: verificationToken,
+          firstName: user.firstName
+        },
+        async () => {
+          await sendVerificationEmail(user.email, verificationToken, user.firstName);
+        }
+      );
       res.status(200).json({
         success: true,
         message: 'Verification email sent successfully. Please check your email.'
       });
     } catch (emailError: any) {
-      logger.error('Error sending verification email:', emailError);
+      logger.error('Error queuing verification email:', emailError);
       return res.status(500).json({
         success: false,
         message: 'Error sending verification email. Please try again later.'
@@ -527,17 +549,24 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
 
     logger.info(`Reset token generated, attempting to send email to: ${email}`);
 
-    // Send email asynchronously (don't wait for it to complete)
-    // This improves response time - email will be sent in background
-    sendPasswordResetEmail(user.email, resetToken, user.firstName)
-      .then(() => {
+    // Send email via background job queue (non-blocking)
+    // PERFORMANCE FIX: Email sending moved to background job queue
+    await addEmailJob(
+      'password-reset',
+      {
+        email: user.email,
+        token: resetToken,
+        firstName: user.firstName
+      },
+      async () => {
+        await sendPasswordResetEmail(user.email, resetToken, user.firstName);
         logger.info(`✅ Password reset email sent successfully to ${email}`);
-      })
-      .catch((emailError: unknown) => {
-        const errorMessage = emailError instanceof Error ? emailError.message : String(emailError);
-        logger.error(`❌ Error sending password reset email to ${email}:`, errorMessage);
-        // Don't fail the request if email fails - user can request again
-      });
+      }
+    ).catch((emailError: unknown) => {
+      const errorMessage = emailError instanceof Error ? emailError.message : String(emailError);
+      logger.error(`❌ Error queuing password reset email to ${email}:`, errorMessage);
+      // Don't fail the request if email fails - user can request again
+    });
 
     // Return success immediately (email is being sent in background)
     return res.status(200).json({

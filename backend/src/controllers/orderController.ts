@@ -9,6 +9,7 @@ import { asyncHandler, NotFoundError, UnauthorizedError, ValidationError } from 
 import { sendOrderConfirmationEmail, sendOrderCancellationEmail, sendOrderDeliveredEmail } from '../utils/emailService';
 import logger from '../utils/logger';
 import { executeCachedAggregation } from '../utils/aggregationCache';
+import { addEmailJob } from '../utils/jobQueue';
 
 import type { StripeInstance, OrderItemInput, NormalizedOrderItem, NormalizedOrder } from '../types/common';
 
@@ -386,7 +387,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         logger.error('Error sending order notification:', notificationError);
       }
       
-      // Send order confirmation email (non-blocking - don't fail order if email fails)
+      // Send order confirmation email via background job (non-blocking)
+      // PERFORMANCE FIX: Email sending moved to background job queue
       try {
         const user = await User.findById(req.user._id).select('email firstName lastName').lean();
         if (user && user.email && normalizedOrder) {
@@ -394,36 +396,61 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
           const fullOrder = await Order.findById(normalizedOrder._id).lean();
           
           if (fullOrder && fullOrder.orderNumber) {
-            sendOrderConfirmationEmail(
-              user.email,
-              user.firstName || 'Customer',
-              fullOrder.orderNumber,
+            await addEmailJob(
+              'order-confirmation',
               {
-                items: fullOrder.items.map((item) => ({
-                  name: item.name,
-                  quantity: item.quantity,
-                  price: item.price,
-                  image: item.image
-                })),
-                totalPrice: fullOrder.totalPrice,
-                itemsPrice: fullOrder.itemsPrice,
-                shippingPrice: fullOrder.shippingPrice,
-                taxPrice: fullOrder.taxPrice,
-                donationAmount: fullOrder.donationAmount,
-                shippingAddress: fullOrder.shippingAddress,
-                paymentMethod: fullOrder.paymentMethod,
-                orderStatus: fullOrder.orderStatus,
-                createdAt: fullOrder.createdAt
+                email: user.email,
+                firstName: user.firstName || 'Customer',
+                orderNumber: fullOrder.orderNumber,
+                orderData: {
+                  items: fullOrder.items.map((item) => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                    image: item.image
+                  })),
+                  totalPrice: fullOrder.totalPrice,
+                  itemsPrice: fullOrder.itemsPrice,
+                  shippingPrice: fullOrder.shippingPrice,
+                  taxPrice: fullOrder.taxPrice,
+                  donationAmount: fullOrder.donationAmount,
+                  shippingAddress: fullOrder.shippingAddress,
+                  paymentMethod: fullOrder.paymentMethod,
+                  orderStatus: fullOrder.orderStatus,
+                  createdAt: fullOrder.createdAt
+                }
+              },
+              async () => {
+                // Fallback: execute synchronously if queue not available
+                await sendOrderConfirmationEmail(
+                  user.email,
+                  user.firstName || 'Customer',
+                  fullOrder.orderNumber,
+                  {
+                    items: fullOrder.items.map((item) => ({
+                      name: item.name,
+                      quantity: item.quantity,
+                      price: item.price,
+                      image: item.image
+                    })),
+                    totalPrice: fullOrder.totalPrice,
+                    itemsPrice: fullOrder.itemsPrice,
+                    shippingPrice: fullOrder.shippingPrice,
+                    taxPrice: fullOrder.taxPrice,
+                    donationAmount: fullOrder.donationAmount,
+                    shippingAddress: fullOrder.shippingAddress,
+                    paymentMethod: fullOrder.paymentMethod,
+                    orderStatus: fullOrder.orderStatus,
+                    createdAt: fullOrder.createdAt
+                  }
+                );
               }
-            ).catch((error) => {
-              // Log error but don't fail the order creation
-              logger.error('Failed to send order confirmation email:', error);
-            });
+            );
           }
         }
       } catch (emailError) {
         // Log error but don't fail the order creation
-        logger.error('Error preparing order confirmation email:', emailError);
+        logger.error('Error queuing order confirmation email:', emailError);
       }
       
       if (!normalizedOrder) {
@@ -925,36 +952,56 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response, next: N
 
     await order.save();
 
-    // Send delivery email if order was just marked as delivered
+    // Send delivery email if order was just marked as delivered (via background job)
     if (orderStatus === 'delivered' && !wasDelivered) {
       try {
         const user = await User.findById(order.user).select('email firstName lastName').lean();
         if (user && user.email) {
           const fullOrder = await Order.findById(order._id).lean();
           if (fullOrder && fullOrder.orderNumber) {
-            sendOrderDeliveredEmail(
-              user.email,
-              user.firstName || 'Customer',
-              fullOrder.orderNumber,
+            await addEmailJob(
+              'order-delivered',
               {
-                items: fullOrder.items.map((item) => ({
-                  name: item.name,
-                  quantity: item.quantity,
-                  price: item.price,
-                  image: item.image
-                })),
-                totalPrice: fullOrder.totalPrice,
-                trackingNumber: fullOrder.trackingNumber,
-                deliveredAt: fullOrder.deliveredAt || new Date(),
-                shippingAddress: fullOrder.shippingAddress
+                email: user.email,
+                firstName: user.firstName || 'Customer',
+                orderNumber: fullOrder.orderNumber,
+                orderData: {
+                  items: fullOrder.items.map((item) => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                    image: item.image
+                  })),
+                  totalPrice: fullOrder.totalPrice,
+                  trackingNumber: fullOrder.trackingNumber,
+                  deliveredAt: fullOrder.deliveredAt || new Date(),
+                  shippingAddress: fullOrder.shippingAddress
+                }
+              },
+              async () => {
+                await sendOrderDeliveredEmail(
+                  user.email,
+                  user.firstName || 'Customer',
+                  fullOrder.orderNumber,
+                  {
+                    items: fullOrder.items.map((item) => ({
+                      name: item.name,
+                      quantity: item.quantity,
+                      price: item.price,
+                      image: item.image
+                    })),
+                    totalPrice: fullOrder.totalPrice,
+                    trackingNumber: fullOrder.trackingNumber,
+                    deliveredAt: fullOrder.deliveredAt || new Date(),
+                    shippingAddress: fullOrder.shippingAddress
+                  }
+                );
               }
-            ).catch((error) => {
-              logger.error('Failed to send order delivered email:', error);
-            });
+            );
           }
         }
       } catch (emailError) {
-        logger.error('Error preparing order delivered email:', emailError);
+        logger.error('Error queuing order delivered email:', emailError);
       }
     }
 
@@ -1372,35 +1419,55 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
 
       const normalizedOrder = normalizeOrderId(order);
       
-      // Send cancellation email (non-blocking)
+      // Send cancellation email via background job (non-blocking)
       try {
         const user = await User.findById(order.user).select('email firstName lastName').lean();
         if (user && user.email) {
           const fullOrder = await Order.findById(order._id).lean();
           if (fullOrder && fullOrder.orderNumber) {
-            sendOrderCancellationEmail(
-              user.email,
-              user.firstName || 'Customer',
-              fullOrder.orderNumber,
+            await addEmailJob(
+              'order-cancellation',
               {
-                items: fullOrder.items.map((item) => ({
-                  name: item.name,
-                  quantity: item.quantity,
-                  price: item.price,
-                  image: item.image
-                })),
-                totalPrice: fullOrder.totalPrice,
-                cancellationReason: reason || 'Customer request',
-                refundAmount: fullOrder.totalPrice, // Full refund for cancelled orders
-                createdAt: fullOrder.createdAt
+                email: user.email,
+                firstName: user.firstName || 'Customer',
+                orderNumber: fullOrder.orderNumber,
+                orderData: {
+                  items: fullOrder.items.map((item) => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                    image: item.image
+                  })),
+                  totalPrice: fullOrder.totalPrice,
+                  cancellationReason: reason || 'Customer request',
+                  refundAmount: fullOrder.totalPrice, // Full refund for cancelled orders
+                  createdAt: fullOrder.createdAt
+                }
+              },
+              async () => {
+                await sendOrderCancellationEmail(
+                  user.email,
+                  user.firstName || 'Customer',
+                  fullOrder.orderNumber,
+                  {
+                    items: fullOrder.items.map((item) => ({
+                      name: item.name,
+                      quantity: item.quantity,
+                      price: item.price,
+                      image: item.image
+                    })),
+                    totalPrice: fullOrder.totalPrice,
+                    cancellationReason: reason || 'Customer request',
+                    refundAmount: fullOrder.totalPrice,
+                    createdAt: fullOrder.createdAt
+                  }
+                );
               }
-            ).catch((error) => {
-              logger.error('Failed to send order cancellation email:', error);
-            });
+            );
           }
         }
       } catch (emailError) {
-        logger.error('Error preparing order cancellation email:', emailError);
+        logger.error('Error queuing order cancellation email:', emailError);
       }
 
       res.status(200).json({

@@ -2,6 +2,7 @@ import express from 'express';
 import { checkDatabaseHealth, getConnectionPoolStatus } from '../utils/databaseOptimization';
 import { isDatabaseConnected } from '../utils/database';
 import { getRedisStatus } from '../utils/cache';
+import { getQueueStats } from '../utils/jobQueue';
 
 const router = express.Router();
 
@@ -54,15 +55,48 @@ router.get('/', async (req, res) => {
 });
 
 /**
- * Database connection pool status
+ * Database connection pool status with detailed metrics
  * GET /api/health/pool
  */
-router.get('/pool', (req, res) => {
+router.get('/pool', async (req, res) => {
   try {
     const poolStatus = getConnectionPoolStatus();
+    const dbHealth = await checkDatabaseHealth();
+    
     res.json({
       success: true,
-      data: poolStatus,
+      data: {
+        ...poolStatus,
+        health: dbHealth,
+        metrics: {
+          poolUtilization: poolStatus.maxPoolSize && poolStatus.currentConnections 
+            ? Math.round((poolStatus.currentConnections / poolStatus.maxPoolSize) * 100) 
+            : 0,
+          activeUtilization: poolStatus.maxPoolSize && poolStatus.activeConnections
+            ? Math.round((poolStatus.activeConnections / poolStatus.maxPoolSize) * 100)
+            : 0,
+        },
+      },
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * Job queue statistics
+ * GET /api/health/queues
+ */
+router.get('/queues', async (req, res) => {
+  try {
+    const queueStats = await getQueueStats();
+    res.json({
+      success: true,
+      data: queueStats,
       timestamp: new Date().toISOString(),
     });
   } catch (error: any) {

@@ -24,6 +24,8 @@ import { setupSwagger } from './utils/swagger';
 import { initRedis, getRedisClient } from './utils/cache';
 import type { SanitizedObject } from './types/common';
 import logger from './utils/logger';
+import { initializeJobQueues } from './utils/jobQueue';
+import { startEmailWorker } from './workers/emailWorker';
 
 // Load env vars
 dotenv.config();
@@ -78,6 +80,12 @@ connectDatabase();
 
 // Initialize Redis cache (non-blocking, app works without Redis)
 initRedis();
+
+// Initialize job queues (requires Redis, falls back gracefully if unavailable)
+import { initializeJobQueues } from './utils/jobQueue';
+import { startEmailWorker } from './workers/emailWorker';
+initializeJobQueues();
+startEmailWorker();
 
 // Auto-create admin user if it doesn't exist
 // SECURITY FIX: Disabled in production, only enabled in development or when explicitly enabled
@@ -490,17 +498,44 @@ app.use((req, res, next) => {
 });
 
 // Response compression - Gzip/Deflate (Optimized)
+// PERFORMANCE FIX: Enhanced compression with better settings
 app.use(compression({
-  level: 6, // Optimal balance (1-9, default is 6)
-  threshold: 1024, // Only compress responses > 1KB
+  level: 6, // Optimal balance (1-9, default is 6) - good compression without high CPU
+  threshold: 1024, // Only compress responses > 1KB (reduces CPU for small responses)
   filter: (req: express.Request, res: express.Response) => {
     // Don't compress if client doesn't support it
     if (req.headers['x-no-compression']) {
       return false;
     }
+    // Don't compress already compressed content (images, videos, etc.)
+    const contentType = res.getHeader('content-type') as string;
+    if (contentType && (
+      contentType.includes('image/') ||
+      contentType.includes('video/') ||
+      contentType.includes('application/zip') ||
+      contentType.includes('application/gzip')
+    )) {
+      return false;
+    }
     return compression.filter(req, res);
   }
 }));
+
+// Verify compression is working (log in development)
+if (process.env.NODE_ENV === 'development' && process.env.VERIFY_COMPRESSION === 'true') {
+  app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const originalEnd = res.end;
+    res.end = function(chunk?: any, encoding?: any) {
+      const contentEncoding = res.getHeader('content-encoding');
+      const contentLength = res.getHeader('content-length');
+      if (contentEncoding && contentLength) {
+        logger.debug(`Response compressed: ${contentEncoding}, size: ${contentLength} bytes`);
+      }
+      return originalEnd.call(this, chunk, encoding);
+    };
+    next();
+  });
+}
 
 // Cookie parser - Must be before CORS to parse cookies correctly
 app.use(cookieParser());
