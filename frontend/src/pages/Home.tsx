@@ -15,11 +15,12 @@ import { normalizeImageUrl, generateSrcSet, getOptimizedImageUrl } from '@/utils
 
 const Home = () => {
   const navigate = useNavigate();
+  // PERFORMANCE FIX: Optimized cache times - featured products are semi-static
   const { data: featuredProducts, isLoading } = useQuery({
     queryKey: ['products', 'featured'],
     queryFn: () => productService.getProducts({ featured: true, limit: 8 }),
-    staleTime: 5 * 60 * 1000, // 5 minutes - featured products don't change often
-    gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache longer
+    staleTime: 10 * 60 * 1000, // 10 minutes - featured products don't change often (semi-static)
+    gcTime: 30 * 60 * 1000, // 30 minutes - keep in cache longer
     refetchOnWindowFocus: false, // Don't refetch on window focus for home page
     refetchOnMount: false // Don't refetch on mount if data exists
   });

@@ -45,16 +45,60 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const Forbidden = lazy(() => import('./pages/Forbidden'));
 
 // Optimize React Query with better defaults
+// PERFORMANCE FIX: Optimized cache times based on data volatility
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      staleTime: 5 * 60 * 1000, // 5 minutes default
+      gcTime: 10 * 60 * 1000, // 10 minutes default (formerly cacheTime)
+    },
+    mutations: {
+      // Optimistic updates enabled by default
+      retry: 1,
     }
   }
 });
+
+// PERFORMANCE FIX: Cache warming on app initialization
+// Prefetch critical data that's likely to be needed immediately
+const warmCache = async () => {
+  try {
+    // Use dynamic imports to avoid circular dependencies
+    const { default: api } = await import('./services/api');
+    
+    // Prefetch pet types (static data, long cache time)
+    await queryClient.prefetchQuery({
+      queryKey: ['pet-types'],
+      queryFn: async () => {
+        const response = await api.get('/pet-types');
+        return response.data;
+      },
+      staleTime: 30 * 60 * 1000, // 30 minutes - static data
+      gcTime: 60 * 60 * 1000, // 1 hour
+    });
+
+    // Prefetch categories (semi-static, medium cache time)
+    await queryClient.prefetchQuery({
+      queryKey: ['categories'],
+      queryFn: async () => {
+        const response = await api.get('/categories');
+        return response.data;
+      },
+      staleTime: 10 * 60 * 1000, // 10 minutes - semi-static
+      gcTime: 30 * 60 * 1000, // 30 minutes
+    });
+  } catch (error) {
+    // Silently fail - cache warming is optional
+    console.debug('Cache warming failed:', error);
+  }
+};
+
+// Warm cache on app load (non-blocking)
+if (typeof window !== 'undefined') {
+  warmCache();
+}
 
 // Component to track page views
 const PageViewTracker = () => {

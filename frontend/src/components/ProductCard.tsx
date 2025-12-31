@@ -7,6 +7,8 @@ import { useCartStore } from '@/stores/cartStore';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { normalizeImageUrl, handleImageError, generateSrcSet, getOptimalImageSize } from '@/utils/imageUtils';
 import { useImageLoadTracker } from '@/hooks/useImageLoadTracker';
+import { usePrefetch } from '@/hooks/usePrefetch';
+import { preloadProductImages } from '@/utils/imagePreloader';
 
 interface ProductCardProps {
   product: Product;
@@ -19,14 +21,29 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
   const { addToCart } = useCartStore();
   const { markImageFailed } = useImageLoadTracker();
+  const { prefetchProduct } = usePrefetch();
+  
   // Convert _id to string if it's an object (MongoDB ObjectId)
   const productId = product._id ? String(product._id) : null;
   const inWishlist = productId ? isInWishlist(productId) : false;
   const [isHovered, setIsHovered] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   
-  // Memoize mouse handlers
-  const handleMouseEnter = useCallback(() => setIsHovered(true), []);
+  // Memoize mouse handlers with prefetching
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+    // PERFORMANCE FIX: Prefetch product data and images on hover
+    if (product.slug) {
+      prefetchProduct(product.slug);
+      // Preload product images
+      if (product.images && product.images.length > 0) {
+        preloadProductImages(product.images).catch(() => {
+          // Silently fail - prefetching is optional
+        });
+      }
+    }
+  }, [product.slug, product.images, prefetchProduct]);
+  
   const handleMouseLeave = useCallback(() => setIsHovered(false), []);
   
   // Memoize star indices

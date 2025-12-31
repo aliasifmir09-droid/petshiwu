@@ -5,6 +5,7 @@ import { productService } from '@/services/products';
 import { reviewService } from '@/services/reviews';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
+import { usePrefetch } from '@/hooks/usePrefetch';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ProductCard from '@/components/ProductCard';
 import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home, Share2, Facebook, Twitter, Mail, Copy, Check } from 'lucide-react';
@@ -98,9 +99,30 @@ const ProductDetail = () => {
     queryFn: () => productService.getProduct(actualProductSlug),
     enabled: !!actualProductSlug,
     retry: 1,
-    staleTime: 2 * 60 * 1000, // Consider fresh for 2 minutes
+    staleTime: 2 * 60 * 1000, // Consider fresh for 2 minutes (semi-static)
     gcTime: 10 * 60 * 1000 // Cache for 10 minutes
   });
+
+  // PERFORMANCE FIX: Prefetch related products when product loads
+  const { prefetchRelatedProducts, prefetchProductReviews } = usePrefetch();
+  
+  useEffect(() => {
+    if (product?._id) {
+      const productId = String(product._id);
+      // Prefetch related products and reviews
+      prefetchRelatedProducts(productId);
+      prefetchProductReviews(productId);
+      
+      // Preload product images
+      if (product.images && product.images.length > 0) {
+        import('@/utils/imagePreloader').then(({ preloadProductImages }) => {
+          preloadProductImages(product.images || []).catch(() => {
+            // Silently fail
+          });
+        });
+      }
+    }
+  }, [product?._id, product?.images, prefetchRelatedProducts, prefetchProductReviews]);
 
   const [reviewSort] = useState('newest');
   const { data: reviews } = useQuery({

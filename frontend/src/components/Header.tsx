@@ -38,7 +38,7 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Fetch pet types with error handling and localStorage caching
+  // PERFORMANCE FIX: Optimized cache times - pet types are static data
   const { data: petTypesResponse, isError: petTypesError } = useQuery({
     queryKey: ['pet-types'],
     queryFn: async () => {
@@ -50,12 +50,12 @@ const Header = () => {
       return response.data;
     },
     retry: 1, // Reduce retries to prevent rate limiting
-    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (pet types don't change often)
-    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
+    staleTime: 30 * 60 * 1000, // 30 minutes - static data (pet types don't change often)
+    gcTime: 60 * 60 * 1000, // 1 hour - keep in cache longer for static data
     refetchOnWindowFocus: false, // Don't refetch on window focus to reduce requests
   });
 
-  // Fetch categories - backend cache is now properly cleared on updates
+  // PERFORMANCE FIX: Optimized cache times - categories are semi-static
   const { data: categoriesResponse, isError: categoriesError, refetch: refetchCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
@@ -63,10 +63,10 @@ const Header = () => {
       return response.data;
     },
     retry: 2,
-    staleTime: 30 * 1000, // Consider fresh for 30 seconds to reduce refetch frequency
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
-    refetchOnWindowFocus: true, // Refetch when user comes back to tab
-    refetchOnMount: true, // Always refetch when component mounts
+    staleTime: 10 * 60 * 1000, // 10 minutes - semi-static (categories don't change often)
+    gcTime: 30 * 60 * 1000, // 30 minutes - keep in cache longer
+    refetchOnWindowFocus: false, // Don't refetch on window focus (categories are cached)
+    refetchOnMount: false, // Don't refetch on mount if data exists (categories are cached)
   });
 
   // Listen for category updates from admin dashboard using BroadcastChannel

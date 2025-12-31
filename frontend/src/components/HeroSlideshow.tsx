@@ -22,6 +22,35 @@ const HeroSlideshow = () => {
     retryDelay: 100 // Faster retry
   });
 
+  // PERFORMANCE FIX: Preload hero images for better LCP
+  useEffect(() => {
+    if (slides.length === 0) return;
+    
+    // Preload first 2 slides (LCP images)
+    const imagesToPreload = slides.slice(0, 2).map(slide => 
+      normalizeImageUrl(slide.leftImage || slide.imageUrl, { 
+        width: 1200, 
+        height: 600, 
+        format: 'auto'
+      })
+    );
+    
+    // Preload images
+    imagesToPreload.forEach(src => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = src;
+      document.head.appendChild(link);
+    });
+    
+    // Also preload using Image objects for better browser support
+    imagesToPreload.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, [slides]);
+
   // Preload the first slide image (LCP image) for better performance
   // Use mobile-optimized size for faster loading
   const firstSlideImage = slides.length > 0 
