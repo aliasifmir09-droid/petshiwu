@@ -13,12 +13,12 @@ This file tracks TODO comments and technical debt items found in the codebase.
 
 ## Medium Priority
 
-### 2. Redis Store for Rate Limiting
+### 2. Redis Store for Rate Limiting ✅ **COMPLETED**
 - **Location:** `backend/src/server.ts:220`
-- **Status:** Pending
-- **Description:** Implement RedisStore for rate limiting when `rate-limit-redis` package is added
-- **Current State:** Uses in-memory store (works for single instance, not for multi-instance)
-- **Priority:** Medium (scalability improvement)
+- **Status:** ✅ **COMPLETED**
+- **Description:** Custom Redis store implemented for distributed rate limiting
+- **Implementation:** Created `backend/src/utils/redisRateLimitStore.ts` with custom Store implementation
+- **Result:** Rate limiting now supports multi-instance deployments with Redis
 
 ### 3. Refresh Token Storage
 - **Location:** `backend/src/utils/refreshToken.ts:103`
@@ -29,12 +29,12 @@ This file tracks TODO comments and technical debt items found in the codebase.
 
 ## Low Priority / Optimization
 
-### 4. Category Query Optimization
+### 4. Category Query Optimization ✅ **COMPLETED**
 - **Location:** `backend/src/controllers/productController.ts:1659`
-- **Status:** Pending
-- **Description:** Further optimize category population by fetching all categories in one query and building hierarchy in memory
-- **Current State:** Uses nested populate (works but could be optimized)
-- **Priority:** Low (performance optimization)
+- **Status:** ✅ **COMPLETED**
+- **Description:** Category population optimized to fetch all categories in one query and build hierarchy in memory
+- **Implementation:** Frontend requests now fetch all categories in one query, build hierarchy in memory (eliminates N+1 queries)
+- **Result:** No N+1 queries, fully optimized category population
 
 ---
 
