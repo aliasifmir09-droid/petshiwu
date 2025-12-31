@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import express, { Application } from 'express';
+import express, { Application, Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import morgan from 'morgan';
@@ -622,9 +622,17 @@ app.use((req, res, next) => {
 app.use(['/api', '/api/v1'], setCacheHeaders);
 
 // Setup Swagger documentation
-if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_SWAGGER === 'true') {
+// SECURITY: Swagger is disabled in production by default for security
+// Only enable if explicitly needed via ENABLE_SWAGGER=true
+const isSwaggerEnabled = process.env.NODE_ENV !== 'production' || process.env.ENABLE_SWAGGER === 'true';
+if (isSwaggerEnabled) {
   setupSwagger(app);
   logger.info('📚 API Documentation available at /api-docs');
+  if (process.env.NODE_ENV === 'production') {
+    logger.warn('⚠️  Swagger is enabled in production. Consider disabling for security.');
+  }
+} else {
+  logger.info('ℹ️  Swagger documentation is disabled (production mode). Set ENABLE_SWAGGER=true to enable.');
 }
 
 // API Versioning - Mount routers with version prefix
@@ -647,27 +655,46 @@ app.use(`${API_PREFIX}/faqs`, faqRoutes);
 app.use(`${API_PREFIX}/slideshow`, slideshowRoutes);
 app.use(`${API_PREFIX}/notifications`, notificationRoutes);
 
-// Legacy routes (without version) - redirect to v1 for backward compatibility
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/reviews', reviewRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/pet-types', petTypeRoutes);
-app.use('/api/donations', donationRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/bulk', bulkOperationsRoutes);
-app.use('/api/export', exportRoutes);
-app.use('/api/email-templates', emailTemplateRoutes);
-app.use('/api/test', testEmailRoutes);
-app.use('/api/blogs', blogRoutes);
-app.use('/api/care-guides', careGuideRoutes); // Legacy route
-app.use('/api/faqs', faqRoutes); // Legacy route
-app.use('/api/slideshow', slideshowRoutes); // Legacy route
-app.use('/api/notifications', notificationRoutes); // Legacy route
-app.use('/api/health', healthRoutes);
+// Legacy routes (without version) - for backward compatibility
+// DEPRECATION NOTICE: Legacy routes are maintained for backward compatibility
+// Plan: Legacy routes will be deprecated in a future version (target: Q2 2025)
+// Recommendation: Migrate to versioned routes (/api/v1/*) for future compatibility
+// Legacy routes will log deprecation warnings in production after deprecation date
+const DEPRECATION_DATE = new Date('2025-06-01'); // Target deprecation date
+const isAfterDeprecation = new Date() >= DEPRECATION_DATE;
+
+// Middleware to add deprecation warning to legacy routes
+const legacyRouteDeprecation = (req: Request, res: Response, next: NextFunction) => {
+  if (isAfterDeprecation && process.env.NODE_ENV === 'production') {
+    // Add deprecation warning header
+    res.setHeader('X-API-Deprecation', 'true');
+    res.setHeader('X-API-Deprecation-Date', DEPRECATION_DATE.toISOString());
+    res.setHeader('X-API-Deprecation-Message', 'This endpoint is deprecated. Please migrate to /api/v1/* endpoints.');
+    logger.warn(`Deprecated API endpoint accessed: ${req.method} ${req.originalUrl}`);
+  }
+  next();
+};
+
+app.use('/api/auth', legacyRouteDeprecation, authRoutes);
+app.use('/api/products', legacyRouteDeprecation, productRoutes);
+app.use('/api/categories', legacyRouteDeprecation, categoryRoutes);
+app.use('/api/orders', legacyRouteDeprecation, orderRoutes);
+app.use('/api/reviews', legacyRouteDeprecation, reviewRoutes);
+app.use('/api/upload', legacyRouteDeprecation, uploadRoutes);
+app.use('/api/users', legacyRouteDeprecation, userRoutes);
+app.use('/api/pet-types', legacyRouteDeprecation, petTypeRoutes);
+app.use('/api/donations', legacyRouteDeprecation, donationRoutes);
+app.use('/api/analytics', legacyRouteDeprecation, analyticsRoutes);
+app.use('/api/bulk', legacyRouteDeprecation, bulkOperationsRoutes);
+app.use('/api/export', legacyRouteDeprecation, exportRoutes);
+app.use('/api/email-templates', legacyRouteDeprecation, emailTemplateRoutes);
+app.use('/api/test', legacyRouteDeprecation, testEmailRoutes);
+app.use('/api/blogs', legacyRouteDeprecation, blogRoutes);
+app.use('/api/care-guides', legacyRouteDeprecation, careGuideRoutes);
+app.use('/api/faqs', legacyRouteDeprecation, faqRoutes);
+app.use('/api/slideshow', legacyRouteDeprecation, slideshowRoutes);
+app.use('/api/notifications', legacyRouteDeprecation, notificationRoutes);
+app.use('/api/health', healthRoutes); // Health check doesn't need deprecation warning
 
 // Sitemap route (no API prefix for SEO) - must be before content-type middleware
 // This ensures it returns XML, not HTML
