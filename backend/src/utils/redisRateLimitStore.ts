@@ -18,7 +18,7 @@ interface RedisRateLimitStoreOptions {
  * Implements the Store interface required by express-rate-limit v7
  */
 export class RedisRateLimitStore implements Store {
-  private prefix: string;
+  readonly prefix: string;
   private redisClient: Redis | null;
   private windowMs: number;
 

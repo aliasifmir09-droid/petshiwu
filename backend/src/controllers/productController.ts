@@ -19,10 +19,11 @@ interface ProductVariant {
 }
 
 interface ProductWithVariants {
-  variants?: ProductVariant[];
+  variants?: ProductVariant[] | Array<{ [key: string]: unknown }>;
   totalStock?: number;
   _id?: unknown;
   category?: unknown;
+  toObject?: () => ProductWithVariants;
   [key: string]: unknown;
 }
 
@@ -65,13 +66,15 @@ const recalculateStock = (product: ProductWithVariants): { totalStock: number; i
 };
 
 // Helper function to normalize product _id to string and convert Maps to objects
-const normalizeProductId = (product: ProductWithVariants | null): NormalizedProduct | null => {
+// Accepts Mongoose documents (IProduct) or plain objects (ProductWithVariants)
+const normalizeProductId = (product: ProductWithVariants | null | unknown): NormalizedProduct | null => {
   if (!product) return null;
   
   // Convert to plain object if it's a Mongoose document
-  const plainProduct = (product as { toObject?: () => ProductWithVariants }).toObject 
-    ? (product as { toObject: () => ProductWithVariants }).toObject() 
-    : product;
+  const productWithToObject = product as { toObject?: () => unknown };
+  const plainProduct = (productWithToObject.toObject && typeof productWithToObject.toObject === 'function')
+    ? productWithToObject.toObject() as ProductWithVariants
+    : product as ProductWithVariants;
   
   // Recalculate stock from variants to ensure accuracy
   const stockData = recalculateStock(plainProduct);
@@ -99,17 +102,26 @@ const normalizeProductId = (product: ProductWithVariants | null): NormalizedProd
   
   // Convert variant attributes Maps to plain objects for JSON serialization
   if (normalized.variants && Array.isArray(normalized.variants)) {
-    normalized.variants = normalized.variants.map((variant: ProductVariant) => {
-      const variantCopy = { ...variant } as { attributes?: Map<string, string> | { [key: string]: string }; [key: string]: unknown };
+    normalized.variants = normalized.variants.map((variant: ProductVariant | { [key: string]: unknown }) => {
+      const variantCopy = { ...variant } as { attributes?: Map<string, string> | { [key: string]: string } | undefined; [key: string]: unknown };
       // Convert Map to plain object if it's a Map
+      let finalAttributes: { [key: string]: string };
       if (variantCopy.attributes instanceof Map) {
-        const attributesObj: { [key: string]: string } = {};
+        finalAttributes = {};
         variantCopy.attributes.forEach((value: string, key: string) => {
-          attributesObj[key] = value;
+          finalAttributes[key] = value;
         });
-        variantCopy.attributes = attributesObj;
+      } else if (variantCopy.attributes && typeof variantCopy.attributes === 'object') {
+        // Already a plain object
+        finalAttributes = variantCopy.attributes as { [key: string]: string };
+      } else {
+        // Ensure attributes exists (even if empty) to match NormalizedProduct type
+        finalAttributes = {};
       }
-      return variantCopy;
+      return {
+        ...variantCopy,
+        attributes: finalAttributes
+      } as { attributes: { [key: string]: string }; [key: string]: unknown };
     });
   }
   
