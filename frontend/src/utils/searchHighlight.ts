@@ -117,7 +117,7 @@ export const HighlightText: React.FC<{
   searchTerms: string[];
   highlightClassName?: string;
 }> = ({ text, searchTerms, highlightClassName = 'highlight' }) => {
-  const parts = highlightSearchTerms(text, searchTerms, highlightClassName);
+  const parts = highlightSearchTerms(text, searchTerms);
 
   return React.createElement(
     React.Fragment,
