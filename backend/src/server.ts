@@ -726,18 +726,11 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health check endpoint (used by Render to verify server is running)
-// Note: More detailed health check is available at /api/health (via healthRoutes)
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    status: 'ok',
-    message: 'Server is running',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
+// CODE QUALITY FIX: Removed duplicate /health route
+// Health check endpoint is now only available at /api/health (via healthRoutes)
+// This provides comprehensive health information including database and Redis status
+// For Render.com monitoring, use /api/health endpoint
+// The previous /health endpoint was redundant and has been removed
 
 // Catch-all for debugging unmatched routes (development only)
 if (process.env.NODE_ENV === 'development') {

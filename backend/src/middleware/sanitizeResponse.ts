@@ -1,5 +1,6 @@
 /// <reference types="node" />
 import { Request, Response, NextFunction } from 'express';
+import logger from '../utils/logger';
 
 /**
  * Sanitize response data to prevent data leakage
@@ -34,7 +35,7 @@ export const sanitizeResponse = (req: Request, res: Response, next: NextFunction
     } catch (error) {
       // If sanitization fails, log and return original data (don't crash)
       if (process.env.NODE_ENV === 'development') {
-        console.error('Response sanitization error:', error);
+        logger.error('Response sanitization error:', error);
       }
     }
     return originalJson.call(this, data);

@@ -2,6 +2,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User, { IUser } from '../models/User';
+import logger from '../utils/logger';
 
 // Extend Express Request type to include cookies
 declare global {
@@ -54,7 +55,7 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
       // Debug: Log minimal information in development only
       // Never log cookie values, headers, or sensitive request data
       if (process.env.NODE_ENV === 'development') {
-        console.log('Auth Debug - No token found:', {
+        logger.debug('Auth Debug - No token found:', {
           hasCookies: !!req.cookies,
           cookieCount: req.cookies ? Object.keys(req.cookies).length : 0,
           url: req.url,
@@ -157,7 +158,7 @@ export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFu
     } catch (error: unknown) {
       // Invalid/expired token - set user to null and continue (don't return 401)
       if (process.env.NODE_ENV === 'development') {
-        console.log('OptionalAuth: Token verification failed (expected if not logged in)');
+        logger.debug('OptionalAuth: Token verification failed (expected if not logged in)');
       }
       req.user = undefined;
       next();
@@ -165,7 +166,7 @@ export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFu
   } catch (error: unknown) {
     // Any other error - log in development, set user to null and continue
     if (process.env.NODE_ENV === 'development') {
-      console.error('OptionalAuth error:', error);
+      logger.error('OptionalAuth error:', error);
     }
     req.user = undefined;
     next();

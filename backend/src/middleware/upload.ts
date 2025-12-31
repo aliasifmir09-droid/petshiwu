@@ -57,7 +57,7 @@ const localUpload = multer({
 const cloudinaryUploadWithErrorHandling = (req: any, res: any, next: any) => {
   cloudinaryUpload.single('image')(req, res, (err: any) => {
     if (err) {
-      console.error('Cloudinary upload error:', err);
+      logger.error('Cloudinary upload error:', err);
       // If Cloudinary fails, we could fall back to local storage here
       // For now, just pass the error
       return next(err);

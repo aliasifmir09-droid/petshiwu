@@ -67,7 +67,7 @@ const normalizeImageUrl = (imageUrl: string | undefined | null, backendUrl: stri
   if (imageUrl.startsWith('http://')) {
     if (isProduction) {
       // In production, reject HTTP URLs for security (mixed content)
-      console.warn('HTTP image URL rejected in production:', imageUrl);
+      logger.warn('HTTP image URL rejected in production:', imageUrl);
       return ''; // Return empty string to indicate invalid URL
     }
     // In development, allow HTTP for local testing
