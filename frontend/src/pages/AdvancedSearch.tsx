@@ -12,8 +12,6 @@ import { trackSearch } from '@/utils/analytics';
 import { useDebounce } from '@/hooks/useDebounce';
 import SEO from '@/components/SEO';
 import { useSEO } from '@/hooks/useSEO';
-import searchHistoryService from '@/services/searchHistory';
-import { addToSearchHistory, getRecentSearches } from '@/utils/searchHistory';
 
 const AdvancedSearch = () => {
   const [searchParams, setSearchParams] = useSearchParams();

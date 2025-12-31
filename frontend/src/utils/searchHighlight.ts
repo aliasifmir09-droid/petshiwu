@@ -52,13 +52,11 @@ export const highlightSearchTerm = (
  * Highlight search terms in text
  * @param text The text to highlight
  * @param searchTerms Array of search terms to highlight
- * @param className CSS class to apply to highlighted text (default: 'highlight')
  * @returns Array of text parts with highlighted terms
  */
 export const highlightSearchTerms = (
   text: string,
-  searchTerms: string[],
-  className: string = 'highlight'
+  searchTerms: string[]
 ): Array<{ text: string; highlight: boolean }> => {
   if (!text || !searchTerms || searchTerms.length === 0) {
     return [{ text, highlight: false }];
