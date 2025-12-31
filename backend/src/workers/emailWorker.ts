@@ -5,6 +5,7 @@ import {
   sendOrderConfirmationEmail,
   sendOrderCancellationEmail,
   sendOrderDeliveredEmail,
+  sendCartAbandonmentEmail,
 } from '../utils/emailService';
 import logger from '../utils/logger';
 import { Job } from 'bull';
@@ -59,6 +60,13 @@ export const startEmailWorker = (): void => {
         const { email, firstName, orderNumber, orderData } = job.data;
         logger.info(`Processing order delivered email job for order ${orderNumber}`);
         await sendOrderDeliveredEmail(email, firstName, orderNumber, orderData);
+      });
+
+      // Process cart abandonment emails
+      emailQueue.process('cart-abandonment', async (job: Job) => {
+        const { email, firstName, cartItems, cartUrl } = job.data;
+        logger.info(`Processing cart abandonment email job for ${email}`);
+        await sendCartAbandonmentEmail(email, firstName, cartItems, cartUrl);
       });
 
       logger.info('✅ Email worker started successfully');

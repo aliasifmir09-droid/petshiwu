@@ -160,7 +160,7 @@ export const getCSVProcessingQueue = (): Queue | null => {
  * Falls back to synchronous execution if queue not available
  */
 export const addEmailJob = async (
-  jobType: 'verification' | 'password-reset' | 'order-confirmation' | 'order-cancellation' | 'order-delivered',
+  jobType: 'verification' | 'password-reset' | 'order-confirmation' | 'order-cancellation' | 'order-delivered' | 'cart-abandonment',
   data: any,
   executeFn: () => Promise<void>
 ): Promise<void> => {

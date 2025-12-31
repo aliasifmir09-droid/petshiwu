@@ -763,3 +763,106 @@ export const sendPasswordResetEmail = async (email: string, token: string, first
     throw error;
   }
 };
+
+/**
+ * Send cart abandonment recovery email
+ */
+export const sendCartAbandonmentEmail = async (
+  email: string,
+  firstName: string,
+  cartItems: Array<{ name: string; image?: string; quantity: number; price: number }>,
+  cartUrl: string
+) => {
+  try {
+    const transporter = createTransporter();
+    const frontendUrl = process.env.FRONTEND_URL || 'https://petshiwu.com';
+
+    // Calculate total
+    const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    const mailOptions = {
+      from: `"Petshiwu" <${process.env.SMTP_USER || 'noreply@petshiwu.com'}>`,
+      to: email,
+      subject: 'Complete Your Purchase - Your Cart is Waiting! 🛒',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Complete Your Purchase</title>
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0;">🛒 Your Cart is Waiting!</h1>
+          </div>
+          <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+            <p>Hi ${firstName},</p>
+            <p>We noticed you left some items in your cart. Don't miss out on these great products!</p>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h2 style="margin-top: 0;">Your Cart Items:</h2>
+              ${cartItems.map(item => `
+                <div style="display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #eee;">
+                  ${item.image ? `<img src="${item.image}" alt="${item.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 15px;">` : ''}
+                  <div style="flex: 1;">
+                    <p style="margin: 0; font-weight: bold;">${item.name}</p>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Quantity: ${item.quantity} × $${item.price.toFixed(2)}</p>
+                  </div>
+                  <div style="font-weight: bold; color: #667eea;">$${(item.price * item.quantity).toFixed(2)}</div>
+                </div>
+              `).join('')}
+              <div style="padding: 15px; border-top: 2px solid #667eea; margin-top: 15px;">
+                <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: bold;">
+                  <span>Total:</span>
+                  <span style="color: #667eea;">$${total.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${cartUrl}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                Complete Your Purchase →
+              </a>
+            </div>
+
+            <p style="color: #666; font-size: 14px; margin-top: 30px;">
+              This link will remain active for 7 days. If you have any questions, feel free to contact us!
+            </p>
+            <p style="color: #666; font-size: 12px; margin-top: 20px;">
+              Best regards,<br>
+              The Petshiwu Team
+            </p>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+        Complete Your Purchase
+        
+        Hi ${firstName},
+        
+        We noticed you left some items in your cart. Don't miss out on these great products!
+        
+        Your Cart Items:
+        ${cartItems.map(item => `- ${item.name} (${item.quantity} × $${item.price.toFixed(2)}) = $${(item.price * item.quantity).toFixed(2)}`).join('\n')}
+        
+        Total: $${total.toFixed(2)}
+        
+        Complete your purchase here: ${cartUrl}
+        
+        This link will remain active for 7 days.
+        
+        Best regards,
+        The Petshiwu Team
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    logger.info(`✅ Cart abandonment email sent to ${email}: ${info.messageId}`);
+    return info;
+  } catch (error: any) {
+    logger.error(`❌ Error sending cart abandonment email to ${email}:`, error.message);
+    throw error;
+  }
+};

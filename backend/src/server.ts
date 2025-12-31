@@ -26,6 +26,7 @@ import type { SanitizedObject } from './types/common';
 import logger from './utils/logger';
 import { initializeJobQueues } from './utils/jobQueue';
 import { startEmailWorker } from './workers/emailWorker';
+import { startCartAbandonmentWorker } from './workers/cartAbandonmentWorker';
 import { responseTimeMiddleware } from './middleware/responseTime';
 import { initializeAPM } from './utils/apm';
 
@@ -141,6 +142,7 @@ import healthRoutes from './routes/health';
 import notificationRoutes from './routes/notifications';
 import searchHistoryRoutes from './routes/searchHistory';
 import searchAnalyticsRoutes from './routes/searchAnalytics';
+import cartRoutes from './routes/cart';
 import { generateSitemap } from './controllers/sitemapController';
 
 // Connect to database (non-blocking - errors handled internally)
@@ -185,6 +187,7 @@ initializeAPM().catch((error: unknown) => {
 try {
   initializeJobQueues();
   startEmailWorker();
+  startCartAbandonmentWorker(); // Start cart abandonment recovery worker
 } catch (error: unknown) {
   const errorMessage = error instanceof Error ? error.message : String(error);
   try {
@@ -845,6 +848,7 @@ app.use('/api/notifications', legacyRouteDeprecation, notificationRoutes);
 app.use('/api/health', healthRoutes); // Health check doesn't need deprecation warning
 app.use('/api/search-history', searchHistoryRoutes); // Routes handle authentication internally
 app.use('/api/search-analytics', searchAnalyticsRoutes); // Routes handle authentication and authorization internally
+app.use('/api/cart', cartRoutes);
 
 // Sitemap route (no API prefix for SEO) - must be before content-type middleware
 // This ensures it returns XML, not HTML
