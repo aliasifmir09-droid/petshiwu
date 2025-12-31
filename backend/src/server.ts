@@ -138,11 +138,13 @@ import blogRoutes from './routes/blogs';
 import careGuideRoutes from './routes/careGuides';
 import faqRoutes from './routes/faqs';
 import slideshowRoutes from './routes/slideshow';
+import paymentMethodRoutes from './routes/paymentMethods';
 import healthRoutes from './routes/health';
 import notificationRoutes from './routes/notifications';
 import searchHistoryRoutes from './routes/searchHistory';
 import searchAnalyticsRoutes from './routes/searchAnalytics';
 import cartRoutes from './routes/cart';
+import paymentMethodRoutes from './routes/paymentMethods';
 import { generateSitemap } from './controllers/sitemapController';
 
 // Connect to database (non-blocking - errors handled internally)
@@ -849,6 +851,7 @@ app.use('/api/health', healthRoutes); // Health check doesn't need deprecation w
 app.use('/api/search-history', searchHistoryRoutes); // Routes handle authentication internally
 app.use('/api/search-analytics', searchAnalyticsRoutes); // Routes handle authentication and authorization internally
 app.use('/api/cart', cartRoutes);
+app.use('/api/payment-methods', legacyRouteDeprecation, paymentMethodRoutes);
 
 // Sitemap route (no API prefix for SEO) - must be before content-type middleware
 // This ensures it returns XML, not HTML
