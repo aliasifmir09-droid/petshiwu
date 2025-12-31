@@ -12,16 +12,16 @@ let csvProcessingQueue: Queue | null = null;
  * Falls back gracefully if Redis is not available
  */
 export const initializeJobQueues = (): void => {
-  const redisClient = getRedisClient();
-  
-  if (!redisClient) {
-    logger.warn('⚠️  Redis not available. Job queues will not be initialized.');
-    logger.warn('   Background job processing will be disabled.');
-    logger.warn('   Heavy operations will run synchronously.');
-    return;
-  }
-
   try {
+    const redisClient = getRedisClient();
+    
+    if (!redisClient) {
+      logger.warn('⚠️  Redis not available. Job queues will not be initialized.');
+      logger.warn('   Background job processing will be disabled.');
+      logger.warn('   Heavy operations will run synchronously.');
+      return;
+    }
+
     // Get Redis connection string for Bull
     const redisUrl = process.env.REDIS_URL;
     if (!redisUrl) {
@@ -29,9 +29,11 @@ export const initializeJobQueues = (): void => {
       return;
     }
 
-    // Email queue - for sending emails asynchronously
-    emailQueue = new Bull('email-queue', redisUrl, {
-      defaultJobOptions: {
+    // CRITICAL FIX: Wrap Bull initialization in try-catch to prevent uncaught exceptions
+    try {
+      // Email queue - for sending emails asynchronously
+      emailQueue = new Bull('email-queue', redisUrl, {
+        defaultJobOptions: {
         attempts: 3, // Retry failed jobs 3 times
         backoff: {
           type: 'exponential',
@@ -44,11 +46,11 @@ export const initializeJobQueues = (): void => {
         removeOnFail: {
           age: 7 * 24 * 3600, // Keep failed jobs for 7 days
         },
-      },
-      settings: {
-        maxStalledCount: 1, // Mark job as failed if it stalls once
-      },
-    });
+        },
+        settings: {
+          maxStalledCount: 1, // Mark job as failed if it stalls once
+        },
+      });
 
     // Image processing queue - for image optimization/processing
     imageProcessingQueue = new Bull('image-processing-queue', redisUrl, {
@@ -111,10 +113,24 @@ export const initializeJobQueues = (): void => {
       logger.error(`❌ CSV processing job ${job?.id} failed:`, err.message);
     });
 
-    logger.info('✅ Job queues initialized successfully');
-  } catch (error: any) {
-    logger.error('❌ Error initializing job queues:', error.message);
+      logger.info('✅ Job queues initialized successfully');
+    } catch (bullError: unknown) {
+      const errorMessage = bullError instanceof Error ? bullError.message : String(bullError);
+      logger.error('❌ Error initializing Bull queues:', errorMessage);
+      logger.warn('⚠️  Background job processing will be disabled.');
+      // Reset queues to null on error
+      emailQueue = null;
+      imageProcessingQueue = null;
+      csvProcessingQueue = null;
+    }
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error('❌ Error initializing job queues:', errorMessage);
     logger.warn('⚠️  Background job processing will be disabled.');
+    // Reset queues to null on error
+    emailQueue = null;
+    imageProcessingQueue = null;
+    csvProcessingQueue = null;
   }
 };
 
