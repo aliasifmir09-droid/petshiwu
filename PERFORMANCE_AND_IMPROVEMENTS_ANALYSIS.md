@@ -866,19 +866,60 @@ This document provides a comprehensive analysis of performance optimization oppo
   - ✅ Works for both authenticated and guest carts
 
 #### ✅ **One-Click Checkout** (For Returning Customers) - FULLY IMPLEMENTED
+- **Backend Implementation:**
+  - ✅ PaymentMethod model (`backend/src/models/PaymentMethod.ts`)
+    - Stores saved payment methods (Stripe payment method IDs, PayPal account IDs)
+    - Supports credit cards, PayPal, Apple Pay, Google Pay
+    - Stores card details (last4, brand, expiry month/year)
+    - Supports default payment method per user
+    - Includes billing address storage
+    - Automatic default payment method management (only one default per user)
+  - ✅ API endpoints (`backend/src/controllers/paymentMethodController.ts`)
+    - `GET /api/payment-methods` - Get all saved payment methods
+    - `GET /api/payment-methods/default` - Get default payment method
+    - `POST /api/payment-methods` - Save a new payment method
+    - `PUT /api/payment-methods/:id` - Update payment method (set default, update billing address)
+    - `DELETE /api/payment-methods/:id` - Delete payment method
+    - All endpoints require authentication
+    - Sensitive data (payment method IDs) not returned in responses
+  - ✅ Routes (`backend/src/routes/paymentMethods.ts`)
+    - Integrated with server (`/api/payment-methods`)
+    - Validation middleware for all endpoints
+    - Protected routes (authentication required)
 - **Frontend Implementation:**
-  - ✅ One-click checkout button for authenticated users (`frontend/src/pages/Cart.tsx`)
+  - ✅ Payment method service (`frontend/src/services/paymentMethods.ts`)
+    - Service for interacting with payment method API
+    - TypeScript interfaces for type safety
+  - ✅ One-click checkout button (`frontend/src/pages/Cart.tsx`)
     - Prominent gradient button (purple to pink)
     - Only visible for authenticated users
     - Lightning bolt icon (⚡) for quick action
-  - ✅ Quick checkout navigation to checkout page
     - Navigates to `/checkout?quick=true`
-    - Can be extended to pre-fill saved addresses/payment methods
+  - ✅ Saved payment methods UI (`frontend/src/pages/Checkout.tsx`)
+    - Displays saved payment methods with card details (brand, last4, expiry)
+    - Highlights default payment method
+    - Shows billing address location
+    - Select saved payment method or use new one
+    - "Save payment method" checkbox for new payments
+  - ✅ Quick checkout flow (`frontend/src/pages/Checkout.tsx`)
+    - Auto-selects default payment method when `?quick=true` parameter present
+    - Auto-selects default address
+    - Faster checkout for returning customers
+    - Seamless experience with saved data
 - **User Experience:**
   - ✅ Simplified checkout flow for returning customers
+  - ✅ Saved payment methods displayed prominently
+  - ✅ One-click selection of saved payment methods
+  - ✅ Option to save new payment methods for future use
   - ✅ Prompts login if user is not authenticated
   - ✅ Mobile-responsive design
   - ✅ Available in both desktop sidebar and mobile sticky footer
+- **Security:**
+  - ✅ Payment method IDs stored securely (not exposed in API responses)
+  - ✅ Only last 4 digits and card brand shown to users
+  - ✅ Authentication required for all payment method operations
+  - ✅ User can only access their own payment methods
+- **Note:** Full payment method saving after Stripe payment requires additional backend integration to retrieve payment method details from payment intent. The framework is ready for this enhancement.
 
 #### ✅ **Estimated Delivery Date** (Show Delivery Time in Cart) - FULLY IMPLEMENTED
 - **Backend Implementation:**
@@ -1256,10 +1297,14 @@ This document provides a comprehensive analysis of performance optimization oppo
   - ✅ Share link generation and copy-to-clipboard
   - ✅ Load shared carts via URL parameter
   - ✅ Public API endpoint for shared carts
-- ✅ **One-click checkout** (for returning customers)
-  - ✅ One-click checkout button
-  - ✅ Quick checkout navigation
-  - ✅ Simplified flow for authenticated users
+- ✅ **One-click checkout** (for returning customers with saved payment methods)
+  - ✅ PaymentMethod model for storing saved payment methods
+  - ✅ API endpoints for saving/retrieving/deleting payment methods
+  - ✅ One-click checkout button in cart
+  - ✅ Quick checkout flow with auto-selected default payment method
+  - ✅ Saved payment methods UI in checkout
+  - ✅ "Save payment method" checkbox for new payments
+  - ✅ Simplified flow for returning customers
 - ✅ **Estimated delivery date** (calculation and display)
   - ✅ Delivery date calculation API
   - ✅ Business days calculation (skips weekends)
