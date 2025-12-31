@@ -1,0 +1,293 @@
+{
+  "timestamp": "2025-12-31T11:14:50.564Z",
+  "totalSize": 831286,
+  "totalSizeKB": 811.802734375,
+  "initialSize": 75527,
+  "initialSizeKB": 73.7568359375,
+  "vendorSize": 335141,
+  "vendorSizeKB": 327.2861328125,
+  "chunks": [
+    {
+      "name": "js\\react-vendor-y6Jr9oSJ.js",
+      "size": 212640,
+      "sizeKB": 207.65625,
+      "type": "js"
+    },
+    {
+      "name": "index-CCl1S1tI.css",
+      "size": 75527,
+      "sizeKB": 73.7568359375,
+      "type": "css"
+    },
+    {
+      "name": "js\\utils-vendor-DkdbjY8n.js",
+      "size": 59236,
+      "sizeKB": 57.84765625,
+      "type": "js"
+    },
+    {
+      "name": "js\\vendor-BnCQXEg3.js",
+      "size": 55275,
+      "sizeKB": 53.9794921875,
+      "type": "js"
+    },
+    {
+      "name": "js\\checkout-BLoxSNXI.js",
+      "size": 50706,
+      "sizeKB": 49.517578125,
+      "type": "js"
+    },
+    {
+      "name": "js\\product-Ll2IDJmm.js",
+      "size": 50278,
+      "sizeKB": 49.099609375,
+      "type": "js"
+    },
+    {
+      "name": "js\\header-DKyL4rku.js",
+      "size": 44714,
+      "sizeKB": 43.666015625,
+      "type": "js"
+    },
+    {
+      "name": "js\\order-dd8-s6Ma.js",
+      "size": 35163,
+      "sizeKB": 34.3388671875,
+      "type": "js"
+    },
+    {
+      "name": "js\\Home-g6zsfkWx.js",
+      "size": 34248,
+      "sizeKB": 33.4453125,
+      "type": "js"
+    },
+    {
+      "name": "js\\auth-DZhjmSsX.js",
+      "size": 31271,
+      "sizeKB": 30.5380859375,
+      "type": "js"
+    },
+    {
+      "name": "js\\index-rWoIpcZr.js",
+      "size": 17727,
+      "sizeKB": 17.3115234375,
+      "type": "js"
+    },
+    {
+      "name": "js\\user-oo3aGOyG.js",
+      "size": 15593,
+      "sizeKB": 15.2275390625,
+      "type": "js"
+    },
+    {
+      "name": "js\\Donate-Cu0QIOm3.js",
+      "size": 14414,
+      "sizeKB": 14.076171875,
+      "type": "js"
+    },
+    {
+      "name": "js\\ProductComparison-A1vcblaU.js",
+      "size": 12376,
+      "sizeKB": 12.0859375,
+      "type": "js"
+    },
+    {
+      "name": "js\\product-components-DQMyDXyl.js",
+      "size": 10322,
+      "sizeKB": 10.080078125,
+      "type": "js"
+    },
+    {
+      "name": "js\\ResetPassword-CNSqAUVI.js",
+      "size": 8800,
+      "sizeKB": 8.59375,
+      "type": "js"
+    },
+    {
+      "name": "js\\Category-_ZUdQzL3.js",
+      "size": 8658,
+      "sizeKB": 8.455078125,
+      "type": "js"
+    },
+    {
+      "name": "js\\AdvancedSearch-CO6JKGkm.js",
+      "size": 7204,
+      "sizeKB": 7.03515625,
+      "type": "js"
+    },
+    {
+      "name": "js\\Favorites-DhMzCa7b.js",
+      "size": 6931,
+      "sizeKB": 6.7685546875,
+      "type": "js"
+    },
+    {
+      "name": "js\\CareGuides-jpoNXNnr.js",
+      "size": 6422,
+      "sizeKB": 6.271484375,
+      "type": "js"
+    },
+    {
+      "name": "js\\CareGuideDetail-Bg0QeCoo.js",
+      "size": 6376,
+      "sizeKB": 6.2265625,
+      "type": "js"
+    },
+    {
+      "name": "js\\PetType-CTrJ2QSL.js",
+      "size": 6322,
+      "sizeKB": 6.173828125,
+      "type": "js"
+    },
+    {
+      "name": "js\\BlogDetail-FaMzgzNu.js",
+      "size": 6044,
+      "sizeKB": 5.90234375,
+      "type": "js"
+    },
+    {
+      "name": "js\\FAQ-D312AoNr.js",
+      "size": 5894,
+      "sizeKB": 5.755859375,
+      "type": "js"
+    },
+    {
+      "name": "js\\Learning-Dll_lAQx.js",
+      "size": 5853,
+      "sizeKB": 5.7158203125,
+      "type": "js"
+    },
+    {
+      "name": "js\\Returns-DATIAWX_.js",
+      "size": 5280,
+      "sizeKB": 5.15625,
+      "type": "js"
+    },
+    {
+      "name": "js\\state-vendor-C5tJd--n.js",
+      "size": 5238,
+      "sizeKB": 5.115234375,
+      "type": "js"
+    },
+    {
+      "name": "js\\ForgotPassword-C-MmWBRP.js",
+      "size": 3994,
+      "sizeKB": 3.900390625,
+      "type": "js"
+    },
+    {
+      "name": "js\\PaymentForm-CbjJzlNk.js",
+      "size": 3400,
+      "sizeKB": 3.3203125,
+      "type": "js"
+    },
+    {
+      "name": "js\\descriptionFormatter-BYt1m0Wm.js",
+      "size": 3169,
+      "sizeKB": 3.0947265625,
+      "type": "js"
+    },
+    {
+      "name": "js\\StockAlerts-CjHamAZd.js",
+      "size": 3056,
+      "sizeKB": 2.984375,
+      "type": "js"
+    },
+    {
+      "name": "js\\VerifyEmail-DqNh9GBT.js",
+      "size": 2792,
+      "sizeKB": 2.7265625,
+      "type": "js"
+    },
+    {
+      "name": "js\\ResendVerification-SImQgBUe.js",
+      "size": 2673,
+      "sizeKB": 2.6103515625,
+      "type": "js"
+    },
+    {
+      "name": "js\\Forbidden-DwxzwKTm.js",
+      "size": 2191,
+      "sizeKB": 2.1396484375,
+      "type": "js"
+    },
+    {
+      "name": "js\\NotFound-BQHsTL06.js",
+      "size": 2128,
+      "sizeKB": 2.078125,
+      "type": "js"
+    },
+    {
+      "name": "js\\RecentlyViewed-CLON-jzL.js",
+      "size": 1947,
+      "sizeKB": 1.9013671875,
+      "type": "js"
+    },
+    {
+      "name": "js\\payment-vendor-BCCu7gPj.js",
+      "size": 1764,
+      "sizeKB": 1.72265625,
+      "type": "js"
+    },
+    {
+      "name": "js\\stripe-BvIaqYRX.js",
+      "size": 1100,
+      "sizeKB": 1.07421875,
+      "type": "js"
+    },
+    {
+      "name": "js\\suppressNetworkErrors-OtmQv34A.js",
+      "size": 1061,
+      "sizeKB": 1.0361328125,
+      "type": "js"
+    },
+    {
+      "name": "js\\queryPersistence-CB64ZDCQ.js",
+      "size": 988,
+      "sizeKB": 0.96484375,
+      "type": "js"
+    },
+    {
+      "name": "js\\careGuides-Be49tBH2.js",
+      "size": 694,
+      "sizeKB": 0.677734375,
+      "type": "js"
+    },
+    {
+      "name": "js\\recommendations-ifM15Ynp.js",
+      "size": 609,
+      "sizeKB": 0.5947265625,
+      "type": "js"
+    },
+    {
+      "name": "js\\safeLogger-BqORYluN.js",
+      "size": 560,
+      "sizeKB": 0.546875,
+      "type": "js"
+    },
+    {
+      "name": "js\\PayPalButton-BJoIB-Jg.js",
+      "size": 348,
+      "sizeKB": 0.33984375,
+      "type": "js"
+    },
+    {
+      "name": "js\\social-3tVGu6Tt.js",
+      "size": 300,
+      "sizeKB": 0.29296875,
+      "type": "js"
+    }
+  ],
+  "budgets": {
+    "initial": 200,
+    "total": 1000,
+    "chunk": 300,
+    "vendor": 500
+  },
+  "passed": {
+    "total": true,
+    "initial": true,
+    "vendor": true,
+    "chunks": true
+  }
+}
