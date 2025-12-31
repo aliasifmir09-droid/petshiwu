@@ -76,15 +76,45 @@ import healthRoutes from './routes/health';
 import notificationRoutes from './routes/notifications';
 import { generateSitemap } from './controllers/sitemapController';
 
-// Connect to database
-connectDatabase();
+// Connect to database (non-blocking - errors handled internally)
+// CRITICAL FIX: Wrap async operations in try-catch to prevent uncaught exceptions
+connectDatabase().catch((error: unknown) => {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  try {
+    logger.error('❌ Database connection error (non-fatal):', errorMessage);
+  } catch {
+    console.error('❌ Database connection error (non-fatal):', errorMessage);
+  }
+  // Don't exit - server can start without database (will fail on first request)
+});
 
 // Initialize Redis cache (non-blocking, app works without Redis)
-initRedis();
+try {
+  initRedis();
+} catch (error: unknown) {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  try {
+    logger.warn('⚠️  Redis initialization error (non-fatal):', errorMessage);
+  } catch {
+    console.warn('⚠️  Redis initialization error (non-fatal):', errorMessage);
+  }
+  // Don't exit - app works without Redis
+}
 
 // Initialize job queues (requires Redis, falls back gracefully if unavailable)
-initializeJobQueues();
-startEmailWorker();
+// CRITICAL FIX: Wrap in try-catch to prevent uncaught exceptions
+try {
+  initializeJobQueues();
+  startEmailWorker();
+} catch (error: unknown) {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  try {
+    logger.warn('⚠️  Job queue initialization error (non-fatal):', errorMessage);
+  } catch {
+    console.warn('⚠️  Job queue initialization error (non-fatal):', errorMessage);
+  }
+  // Don't exit - app works without job queues (emails will be sent synchronously)
+}
 
 // Auto-create admin user if it doesn't exist
 // SECURITY FIX: Disabled in production, only enabled in development or when explicitly enabled
@@ -854,25 +884,58 @@ try {
 }
 
 // Handle unhandled promise rejections (don't exit immediately, log first)
-process.on('unhandledRejection', (err: Error) => {
-  logger.error('❌ Unhandled Promise Rejection:', err.message);
-  logger.error('Stack:', err.stack);
+process.on('unhandledRejection', (reason: unknown, promise: Promise<any>) => {
+  const error = reason instanceof Error ? reason : new Error(String(reason));
+  const errorMessage = error.message || String(reason);
+  const errorStack = error.stack || 'No stack trace available';
+  
+  // Use both logger and console for critical errors (logger might not be ready)
+  try {
+    logger.error('❌ Unhandled Promise Rejection:', errorMessage);
+    logger.error('Stack:', errorStack);
+  } catch {
+    console.error('❌ Unhandled Promise Rejection:', errorMessage);
+    console.error('Stack:', errorStack);
+  }
+  
   // Don't exit immediately - let the server continue running
   // Only exit if it's a critical error
-  if (err.message.includes('MongoDB') || err.message.includes('Database')) {
-    logger.warn('⚠️  Database error - server will continue but database operations may fail');
+  if (errorMessage.includes('MongoDB') || errorMessage.includes('Database')) {
+    try {
+      logger.warn('⚠️  Database error - server will continue but database operations may fail');
+    } catch {
+      console.warn('⚠️  Database error - server will continue but database operations may fail');
+    }
   }
 });
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (err: Error) => {
-  logger.error('❌ Uncaught Exception:', err.message);
-  logger.error('Stack:', err.stack);
+// CRITICAL FIX: Improved error handling to prevent server crashes on startup
+process.on('uncaughtException', (err: unknown) => {
+  const error = err instanceof Error ? err : new Error(String(err));
+  const errorMessage = error.message || String(err);
+  const errorStack = error.stack || 'No stack trace available';
+  
+  // Use both logger and console for critical errors (logger might not be ready)
+  try {
+    logger.error('❌ Uncaught Exception:', errorMessage);
+    logger.error('Stack:', errorStack);
+  } catch {
+    console.error('❌ Uncaught Exception:', errorMessage);
+    console.error('Stack:', errorStack);
+  }
+  
+  // Gracefully shutdown server if it's running
   if (server) {
     server.close(() => {
       process.exit(1);
     });
+    // Force exit after 5 seconds if server doesn't close
+    setTimeout(() => {
+      process.exit(1);
+    }, 5000);
   } else {
+    // If server hasn't started yet, exit immediately
     process.exit(1);
   }
 });
