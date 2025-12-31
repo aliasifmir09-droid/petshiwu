@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import {
   BarChart,
   Bar,
@@ -32,6 +32,12 @@ const CategoryChart = memo(({
   const handleViewModeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     onViewModeChange(e.target.value as 'subcategories' | 'products' | 'revenue');
   }, [onViewModeChange]);
+
+  // PERFORMANCE FIX: Memoize chart data to prevent unnecessary re-renders
+  const chartData = useMemo(() => {
+    if (!categoryData || categoryData.length === 0) return [];
+    return categoryData;
+  }, [categoryData]);
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition-all hover-lift animate-fade-in-up" role="region" aria-label="Category distribution chart">
@@ -67,7 +73,7 @@ const CategoryChart = memo(({
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={UI.CHART_HEIGHT} className="min-h-[250px] sm:min-h-[300px]">
-          <BarChart data={categoryData} margin={{ top: CHART_MARGINS.TOP, right: CHART_MARGINS.RIGHT, left: CHART_MARGINS.LEFT, bottom: CHART_MARGINS.BOTTOM }}>
+          <BarChart data={chartData} margin={{ top: CHART_MARGINS.TOP, right: CHART_MARGINS.RIGHT, left: CHART_MARGINS.LEFT, bottom: CHART_MARGINS.BOTTOM }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis 
               dataKey="name" 

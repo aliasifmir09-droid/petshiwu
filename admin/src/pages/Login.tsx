@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
+import { useDashboardPrefetch } from '@/hooks/useDashboardPrefetch';
 
 interface LoginProps {
   onLogin: (user: any) => void;
@@ -10,6 +11,7 @@ interface LoginProps {
 
 const Login = ({ onLogin }: LoginProps) => {
   const { toast, showToast, hideToast } = useToast();
+  const { prefetchDashboardData } = useDashboardPrefetch();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -50,6 +52,12 @@ const Login = ({ onLogin }: LoginProps) => {
         }
         
         onLogin(user);
+        
+        // PERFORMANCE FIX: Prefetch dashboard data before navigation
+        prefetchDashboardData().catch(() => {
+          // Silently fail - prefetching is optional
+        });
+        
         // Force reload to ensure App.tsx picks up the user
         window.location.href = '/';
       } catch (error: any) {

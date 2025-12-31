@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient, useQueries } from '@tanstack/react-query';
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { adminService } from '@/services/adminService';
+import { useDashboardPrefetch } from '@/hooks/useDashboardPrefetch';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ErrorMessage from '@/components/ErrorMessage';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -116,8 +117,20 @@ export type { OrderStats, ProductStats, RecentOrder, MonthlySale, Product, OutOf
 const Dashboard = () => {
   const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
+  const { prefetchDashboardData } = useDashboardPrefetch();
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // PERFORMANCE FIX: Prefetch dashboard data on mount if cache is empty
+  useEffect(() => {
+    const hasCachedData = queryClient.getQueryData(['orderStats']) || 
+                         queryClient.getQueryData(['productStats']);
+    if (!hasCachedData) {
+      prefetchDashboardData().catch(() => {
+        // Silently fail - prefetching is optional
+      });
+    }
+  }, [queryClient, prefetchDashboardData]);
   
   // Date range filter for sales chart
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '3m' | '6m' | '1y'>('6m');

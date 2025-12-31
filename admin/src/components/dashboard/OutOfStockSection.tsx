@@ -1,4 +1,4 @@
-import { useState, memo } from 'react';
+import { useState, memo, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, ExternalLink, Package, Download, ArrowUpDown, Search, ChevronRight } from 'lucide-react';
 import { normalizeImageUrl, getPlaceholderImage } from '@/utils/imageUtils';
@@ -23,6 +23,9 @@ const OutOfStockSection = memo(({
   const [sortBy, setSortBy] = useState<'name' | 'brand' | 'stock'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [search, setSearch] = useState('');
+  // PERFORMANCE FIX: Add pagination for out-of-stock products
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = UI.OUT_OF_STOCK_DISPLAY_LIMIT;
 
   // Helper function to safely convert any ID to a unique string key
   const getUniqueKey = (id: string | number | undefined | null | { toString?: () => string; valueOf?: () => unknown }, index: number, prefix: string = 'item'): string => {
@@ -113,19 +116,31 @@ const OutOfStockSection = memo(({
     );
   });
 
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    let comparison = 0;
-    if (sortBy === 'name') {
-      comparison = (a.name || '').localeCompare(b.name || '');
-    } else if (sortBy === 'brand') {
-      comparison = (a.brand || '').localeCompare(b.brand || '');
-    } else if (sortBy === 'stock') {
-      comparison = (a.totalStock || 0) - (b.totalStock || 0);
-    }
-    return sortOrder === 'asc' ? comparison : -comparison;
-  });
+  // PERFORMANCE FIX: Memoize sorted products to prevent unnecessary re-sorting
+  const sortedProducts = useMemo(() => {
+    return [...filteredProducts].sort((a, b) => {
+      let comparison = 0;
+      if (sortBy === 'name') {
+        comparison = (a.name || '').localeCompare(b.name || '');
+      } else if (sortBy === 'brand') {
+        comparison = (a.brand || '').localeCompare(b.brand || '');
+      } else if (sortBy === 'stock') {
+        comparison = (a.totalStock || 0) - (b.totalStock || 0);
+      }
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+  }, [filteredProducts, sortBy, sortOrder]);
 
-  const displayedProducts = sortedProducts.slice(0, UI.OUT_OF_STOCK_DISPLAY_LIMIT);
+  // PERFORMANCE FIX: Paginate out-of-stock products
+  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const displayedProducts = sortedProducts.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, sortBy, sortOrder]);
 
   return (
     <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 border-l-4 border-red-600 rounded-xl p-6 shadow-xl animate-fade-in-up relative overflow-hidden">
@@ -224,10 +239,32 @@ const OutOfStockSection = memo(({
                 </Link>
               </div>
             ))}
-            {filteredProducts.length > UI.OUT_OF_STOCK_DISPLAY_LIMIT && (
-              <p className="text-sm text-red-800 font-semibold bg-red-100 px-4 py-2 rounded-lg inline-block">
-                + {filteredProducts.length - UI.OUT_OF_STOCK_DISPLAY_LIMIT} more products out of stock
-              </p>
+            {/* PERFORMANCE FIX: Pagination controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-red-200">
+                <p className="text-sm text-red-800 font-semibold">
+                  Showing {startIndex + 1}-{Math.min(endIndex, sortedProducts.length)} of {sortedProducts.length} products
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-700 transition-colors"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-red-800 font-semibold">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-700 transition-colors"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
             )}
             {search && filteredProducts.length === 0 && (
               <p className="text-sm text-red-600 font-medium text-center py-4">

@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { AlertTriangle, Download } from 'lucide-react';
 import {
   LineChart,
@@ -50,6 +50,24 @@ const SalesChart = memo(({
   const handleDateRangeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     onDateRangeChange(e.target.value as '7d' | '30d' | '3m' | '6m' | '1y');
   }, [onDateRangeChange]);
+
+  // PERFORMANCE FIX: Memoize chart data to prevent unnecessary re-renders
+  const chartData = useMemo(() => {
+    if (!salesData || salesData.length === 0) return [];
+    
+    // Combine current and previous period data for comparison
+    if (showComparison && previousPeriodSalesData && previousPeriodSalesData.length > 0) {
+      return salesData.map((item, index) => {
+        const previousItem = previousPeriodSalesData[index];
+        return {
+          ...item,
+          previousSales: previousItem?.sales || 0,
+        };
+      });
+    }
+    
+    return salesData;
+  }, [salesData, previousPeriodSalesData, showComparison]);
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition-all hover-lift animate-fade-in-up" role="region" aria-label="Sales overview chart">
@@ -106,7 +124,7 @@ const SalesChart = memo(({
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={UI.CHART_HEIGHT} className="min-h-[250px] sm:min-h-[300px]">
-          <LineChart data={salesData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+          <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis 
               dataKey="month" 
