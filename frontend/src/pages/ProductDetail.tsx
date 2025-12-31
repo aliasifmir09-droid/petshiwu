@@ -124,14 +124,23 @@ const ProductDetail = () => {
     }
   }, [product?._id, product?.images, prefetchRelatedProducts, prefetchProductReviews]);
 
-  const [reviewSort] = useState('newest');
+  const [reviewSort, setReviewSort] = useState('newest');
+  const [reviewRatingFilter, setReviewRatingFilter] = useState<number | undefined>(undefined);
+  const [verifiedPurchaseOnly, setVerifiedPurchaseOnly] = useState(false);
+  
   const { data: reviews } = useQuery({
-    queryKey: ['reviews', product?._id, reviewSort],
-    queryFn: () => reviewService.getProductReviews(product!._id, 1, 10, undefined, reviewSort),
+    queryKey: ['reviews', product?._id, reviewSort, reviewRatingFilter, verifiedPurchaseOnly],
+    queryFn: () => reviewService.getProductReviews(product!._id, 1, 10, reviewRatingFilter, reviewSort),
     enabled: !!product && !!product._id,
     staleTime: 1 * 60 * 1000, // Consider fresh for 1 minute
     gcTime: 5 * 60 * 1000 // Cache for 5 minutes
   });
+
+  // Filter reviews client-side for verified purchase (since backend doesn't support this filter yet)
+  const filteredReviews = reviews?.data ? (verifiedPurchaseOnly 
+    ? reviews.data.filter(review => review.verifiedPurchase)
+    : reviews.data
+  ) : [];
 
   // Lazy load recommendations - only fetch when product is loaded and user scrolls near recommendations section
   const [shouldLoadRecommendations, setShouldLoadRecommendations] = useState(false);
@@ -686,6 +695,23 @@ const ProductDetail = () => {
               )}
             </div>
           </div>
+          {/* Product Video (if available) */}
+          {product.video && (
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">Product Video</h3>
+              <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                <video
+                  src={product.video}
+                  controls
+                  className="w-full h-full object-cover"
+                  preload="metadata"
+                >
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-4 gap-2">
             {displayImages?.map((image: string, index: number) => (
               <button
@@ -1192,9 +1218,56 @@ const ProductDetail = () => {
           )}
         </div>
 
-        {reviews && reviews.data.length > 0 ? (
+        {/* Review Filters */}
+        {reviews && reviews.data.length > 0 && (
+          <div className="mb-6 flex flex-wrap items-center gap-4 bg-white p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">Filter by Rating:</label>
+              <select
+                value={reviewRatingFilter || ''}
+                onChange={(e) => setReviewRatingFilter(e.target.value ? parseInt(e.target.value) : undefined)}
+                className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="">All Ratings</option>
+                <option value="5">5 Stars</option>
+                <option value="4">4 Stars</option>
+                <option value="3">3 Stars</option>
+                <option value="2">2 Stars</option>
+                <option value="1">1 Star</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="verified-only"
+                checked={verifiedPurchaseOnly}
+                onChange={(e) => setVerifiedPurchaseOnly(e.target.checked)}
+                className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+              />
+              <label htmlFor="verified-only" className="text-sm font-medium text-gray-700 cursor-pointer">
+                Verified Purchase Only
+              </label>
+            </div>
+            <div className="flex items-center gap-2 ml-auto">
+              <label className="text-sm font-medium text-gray-700">Sort by:</label>
+              <select
+                value={reviewSort}
+                onChange={(e) => setReviewSort(e.target.value)}
+                className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="highest">Highest Rating</option>
+                <option value="lowest">Lowest Rating</option>
+                <option value="most-helpful">Most Helpful</option>
+              </select>
+            </div>
+          </div>
+        )}
+
+        {filteredReviews.length > 0 ? (
           <div className="space-y-6">
-            {reviews.data.map((review) => (
+            {filteredReviews.map((review) => (
               <div key={review._id} className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                 {/* Review Header */}
                 <div className="flex items-start justify-between mb-3">
@@ -1293,13 +1366,26 @@ const ProductDetail = () => {
             ))}
 
             {/* Show More Reviews Link */}
-            {reviews.data.length >= 5 && (
+            {filteredReviews.length >= 5 && (
               <div className="text-center pt-4">
                 <button className="text-primary-600 hover:text-primary-700 font-semibold hover:underline">
                   View All {product.totalReviews} Reviews
                 </button>
               </div>
             )}
+          </div>
+        ) : reviews && reviews.data.length > 0 && filteredReviews.length === 0 ? (
+          <div className="bg-white rounded-lg p-8 text-center border border-gray-200">
+            <p className="text-gray-600 text-lg font-medium">No reviews match your filters</p>
+            <button
+              onClick={() => {
+                setReviewRatingFilter(undefined);
+                setVerifiedPurchaseOnly(false);
+              }}
+              className="mt-4 text-primary-600 hover:text-primary-700 font-semibold hover:underline"
+            >
+              Clear Filters
+            </button>
           </div>
         ) : (
           <div className="bg-white rounded-lg p-8 text-center border border-gray-200">

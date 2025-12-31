@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { generateProductUrl } from '@/utils/productUrl';
-import { Heart, Star, ShoppingCart, TrendingUp, Clock } from 'lucide-react';
+import { Heart, Star, ShoppingCart, TrendingUp, Clock, Eye } from 'lucide-react';
 import { Product } from '@/types';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useCartStore } from '@/stores/cartStore';
@@ -10,6 +10,7 @@ import { useImageLoadTracker } from '@/hooks/useImageLoadTracker';
 import { usePrefetch } from '@/hooks/usePrefetch';
 import { preloadProductImages } from '@/utils/imagePreloader';
 import { highlightSearchTerm } from '@/utils/searchHighlight';
+import QuickViewModal from './QuickViewModal';
 
 interface ProductCardProps {
   product: Product;
@@ -30,6 +31,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
   const inWishlist = productId ? isInWishlist(productId) : false;
   const [isHovered, setIsHovered] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
+  const [showQuickView, setShowQuickView] = useState(false);
   
   // Memoize mouse handlers with prefetching
   const handleMouseEnter = useCallback(() => {
@@ -160,12 +162,26 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
         {/* Wishlist Button */}
         <button
           onClick={handleWishlistToggle}
-          className={`absolute top-3 right-3 p-3.5 rounded-full bg-white/95 backdrop-blur-md shadow-xl hover:scale-125 transition-all duration-300 transform min-w-[44px] min-h-[44px] flex items-center justify-center ${
+          className={`absolute top-3 right-3 p-3.5 rounded-full bg-white/95 backdrop-blur-md shadow-xl hover:scale-125 transition-all duration-300 transform min-w-[44px] min-h-[44px] flex items-center justify-center z-20 ${
             inWishlist ? 'text-red-500 ring-2 ring-red-300 animate-wiggle' : 'text-gray-400 hover:text-red-500'
           }`}
           aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
         >
           <Heart size={20} fill={inWishlist ? 'currentColor' : 'none'} strokeWidth={2.5} />
+        </button>
+
+        {/* Quick View Button - Appears on Hover */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setShowQuickView(true);
+          }}
+          className="absolute bottom-3 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-white/95 backdrop-blur-md rounded-full shadow-xl hover:scale-110 transition-all duration-300 opacity-0 group-hover:opacity-100 z-20 flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-primary-600"
+          aria-label="Quick view"
+        >
+          <Eye size={16} />
+          <span>Quick View</span>
         </button>
       </div>
 
@@ -308,6 +324,15 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
           </p>
         )}
       </div>
+
+      {/* Quick View Modal */}
+      {product.slug && (
+        <QuickViewModal
+          productSlug={product.slug}
+          isOpen={showQuickView}
+          onClose={() => setShowQuickView(false)}
+        />
+      )}
     </Link>
   );
 });

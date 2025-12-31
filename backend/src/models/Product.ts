@@ -24,6 +24,7 @@ export interface IProduct extends Document {
   brand: string;
   category: mongoose.Types.ObjectId;
   images: string[];
+  video?: string; // Optional product video URL (Cloudinary supports video uploads)
   variants: IProductVariant[];
   basePrice: number;
   compareAtPrice?: number;
@@ -114,6 +115,10 @@ const productSchema = new Schema<IProduct>(
       type: String,
       required: true
     }],
+    video: {
+      type: String,
+      default: undefined // Optional product video URL (Cloudinary supports video uploads)
+    },
     variants: [productVariantSchema],
     basePrice: {
       type: Number,
