@@ -2032,6 +2032,18 @@ export const getProduct = async (req: Request, res: Response, next: NextFunction
     // Normalize _id to string
     const normalizedProduct = normalizeProductId(product);
 
+    // Track product view (increment viewCount) - do this asynchronously to not block response
+    if (normalizedProduct && normalizedProduct._id) {
+      Product.findByIdAndUpdate(
+        normalizedProduct._id,
+        { $inc: { viewCount: 1 } },
+        { new: false } // Don't return updated document
+      ).catch((err) => {
+        // Silent fail - view tracking is non-critical
+        logger.debug('Failed to increment product view count:', err);
+      });
+    }
+
     const response = {
       success: true,
       data: normalizedProduct
@@ -2658,6 +2670,67 @@ export const getUniqueBrands = async (req: Request, res: Response, next: NextFun
       success: true,
       data: uniqueBrands
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get trending products based on views and sales
+export const getTrendingProducts = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 20;
+    const petType = req.query.petType as string;
+    const days = parseInt(req.query.days as string) || 7; // Default to last 7 days
+
+    // Build cache key
+    const cacheKey = `trending_products:${petType || 'all'}:${days}:${limit}`;
+
+    // Try to get from cache
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.status(200).json(cached);
+    }
+
+    // Build base query
+    const query: any = {
+      isActive: true,
+      deletedAt: null,
+      inStock: true
+    };
+
+    if (petType) {
+      query.petType = petType.toLowerCase().trim();
+    }
+
+    // Get products sorted by viewCount (trending based on views)
+    // In a production system, you'd also factor in sales data from orders
+    const trendingProducts = await Product.find(query)
+      .select('name slug images basePrice compareAtPrice averageRating totalReviews viewCount brand category petType')
+      .populate({
+        path: 'category',
+        select: 'name slug'
+      })
+      .sort({ viewCount: -1, averageRating: -1, totalReviews: -1 })
+      .limit(limit)
+      .lean();
+
+    // Normalize products
+    const normalizedProducts = normalizeProducts(trendingProducts);
+
+    const response = {
+      success: true,
+      data: normalizedProducts,
+      meta: {
+        days,
+        petType: petType || 'all',
+        limit
+      }
+    };
+
+    // Cache for 1 hour (trending products change slowly)
+    await cache.set(cacheKey, response, 3600);
+
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }

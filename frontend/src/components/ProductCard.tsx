@@ -18,9 +18,12 @@ interface ProductCardProps {
   index?: number;
   priority?: boolean;
   searchTerm?: string;
+  recommendationType?: 'frequently-bought-together' | 'customers-also-bought' | 'you-may-also-like' | 'similar-products' | 'trending' | 'personalized';
+  sourceProductId?: string;
+  onRecommendationClick?: (productId: string, recommendationType: string, position: number) => void;
 }
 
-const ProductCard = memo(({ product, hideCartButton = false, index, priority = false, searchTerm }: ProductCardProps) => {
+const ProductCard = memo(({ product, hideCartButton = false, index, priority = false, searchTerm, recommendationType, sourceProductId, onRecommendationClick }: ProductCardProps) => {
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
   const { addToCart } = useCartStore();
   const { markImageFailed } = useImageLoadTracker();
@@ -100,6 +103,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
   return (
     <Link
       to={generateProductUrl(product)}
+      onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-blue-300 hover:-translate-y-2 relative animate-fade-in-up hover-lift flex flex-col h-full w-full"

@@ -39,6 +39,7 @@ export interface IProduct extends Document {
   inStock: boolean;
   totalStock: number;
   lowStockThreshold?: number; // Alert when stock falls below this number
+  viewCount: number; // Track product views for trending calculation
   deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -168,6 +169,11 @@ const productSchema = new Schema<IProduct>(
       type: Number,
       min: 0,
       default: null // null means use category default or global default
+    },
+    viewCount: {
+      type: Number,
+      default: 0,
+      min: 0
     },
     deletedAt: {
       type: Date,

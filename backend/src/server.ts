@@ -141,6 +141,7 @@ import slideshowRoutes from './routes/slideshow';
 import paymentMethodRoutes from './routes/paymentMethods';
 import healthRoutes from './routes/health';
 import notificationRoutes from './routes/notifications';
+import recommendationAnalyticsRoutes from './routes/recommendationAnalytics';
 import searchHistoryRoutes from './routes/searchHistory';
 import searchAnalyticsRoutes from './routes/searchAnalytics';
 import cartRoutes from './routes/cart';
@@ -807,6 +808,7 @@ app.use(`${API_PREFIX}/care-guides`, careGuideRoutes);
 app.use(`${API_PREFIX}/faqs`, faqRoutes);
 app.use(`${API_PREFIX}/slideshow`, slideshowRoutes);
 app.use(`${API_PREFIX}/notifications`, notificationRoutes);
+app.use(`${API_PREFIX}/recommendations`, recommendationAnalyticsRoutes);
 
 // Legacy routes (without version) - for backward compatibility
 // DEPRECATION NOTICE: Legacy routes are maintained for backward compatibility

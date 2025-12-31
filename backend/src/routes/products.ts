@@ -10,6 +10,7 @@ import {
   restoreProduct,
   getProductStats,
   getUniqueBrands,
+  getTrendingProducts,
   importProductsFromCSV,
   importProductsFromJSON,
   downloadJSONTemplate
@@ -39,6 +40,7 @@ router.get('/cursor', getProductsCursor); // Cursor-based pagination (optimized 
 router.get('/search', searchValidation, advancedSearch); // Advanced search with filters
 router.get('/search/autocomplete', searchValidation, searchAutocomplete); // Search autocomplete
 router.get('/brands', getUniqueBrands); // Public endpoint for unique brands
+router.get('/trending', getTrendingProducts); // Get trending products based on views and sales
 router.get('/stats', protect, checkPermission('canViewAnalytics'), getProductStats);
 router.get('/compare', productIdsValidation, compareProducts); // GET /api/products/compare?productIds=id1,id2,id3 (requires 2+ IDs)
 router.get('/compare/suggestions', productIdsValidationForSuggestions, getComparisonSuggestions); // GET /api/products/compare/suggestions?productIds=id1 (allows 1+ IDs)

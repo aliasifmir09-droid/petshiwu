@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { trackProductView, trackAddToWishlist, trackProductComparison, trackShare } from '@/utils/analytics';
 import { addToRecentlyViewed } from '@/utils/recentlyViewed';
+import recommendationAnalyticsService from '@/services/recommendationAnalytics';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import { safeError } from '@/utils/safeLogger';
@@ -1413,7 +1414,13 @@ const ProductDetail = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {frequentlyBoughtTogether.map((product: any, index: number) => (
               <div key={`fbt-${product._id ? String(product._id) : 'no-id'}-${index}`} className="flex">
-                <ProductCard product={product} />
+                <ProductCard 
+                  product={product} 
+                  recommendationType="frequently-bought-together"
+                  sourceProductId={product?._id ? String(product._id) : undefined}
+                  onRecommendationClick={handleRecommendationClick}
+                  index={index}
+                />
               </div>
             ))}
           </div>
@@ -1433,7 +1440,13 @@ const ProductDetail = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {customersAlsoBought.map((product: any, index: number) => (
               <div key={`cab-${product._id ? String(product._id) : 'no-id'}-${index}`} className="flex">
-                <ProductCard product={product} />
+                <ProductCard 
+                  product={product} 
+                  recommendationType="customers-also-bought"
+                  sourceProductId={product?._id ? String(product._id) : undefined}
+                  onRecommendationClick={handleRecommendationClick}
+                  index={index}
+                />
               </div>
             ))}
           </div>
@@ -1456,7 +1469,13 @@ const ProductDetail = () => {
               .slice(0, 8)
               .map((product, index) => (
                 <div key={`rec-${product._id ? String(product._id) : 'no-id'}-${index}`} className="flex">
-                  <ProductCard product={product} />
+                  <ProductCard 
+                    product={product} 
+                    recommendationType="you-may-also-like"
+                    sourceProductId={product?._id ? String(product._id) : undefined}
+                    onRecommendationClick={handleRecommendationClick}
+                    index={index}
+                  />
                 </div>
               ))}
           </div>
