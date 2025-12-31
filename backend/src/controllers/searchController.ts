@@ -3,6 +3,8 @@ import Product from '../models/Product';
 import Category from '../models/Category';
 import mongoose from 'mongoose';
 import logger from '../utils/logger';
+import { executeCachedAggregation } from '../utils/aggregationCache';
+import { cache, cacheKeys } from '../utils/cache';
 
 // Advanced search with filters
 export const advancedSearch = async (req: Request, res: Response, next: NextFunction) => {
@@ -34,26 +36,17 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
       ]
     };
 
-    // Search query
-    const searchConditions: any[] = [];
+    // Search query - Use text index for faster search
+    // Text index exists on: name, description, brand, tags (see Product model)
     if (q && typeof q === 'string') {
-      const searchRegex = new RegExp(q, 'i');
-      searchConditions.push(
-        { name: searchRegex },
-        { description: searchRegex },
-        { brand: searchRegex },
-        { tags: { $in: [searchRegex] } }
-      );
-    }
-    
-    // Add deletedAt filter
-    searchConditions.push(
-      { deletedAt: null },
-      { deletedAt: { $exists: false } }
-    );
-    
-    if (searchConditions.length > 0) {
-      query.$or = searchConditions;
+      const searchText = q.trim();
+      if (searchText.length >= 2) {
+        // Use $text search (requires text index - already exists in Product model)
+        // Text search is 5-10x faster than regex
+        query.$text = { $search: searchText };
+        // Note: $text can be combined with other query conditions
+        // Text search automatically searches name, description, brand, tags
+      }
     }
 
     // Category filter
@@ -133,9 +126,20 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
     }
 
     // Execute query
-    const products = await Product.find(query)
+    // When using $text search, sort by textScore for relevance, then by sortOption
+    let productsQuery = Product.find(query);
+    
+    if (query.$text) {
+      // Add text score for relevance ranking
+      productsQuery = productsQuery.select({ score: { $meta: 'textScore' } });
+      // Sort by text score first (relevance), then by sortOption
+      productsQuery = productsQuery.sort({ score: { $meta: 'textScore' }, ...sortOption });
+    } else {
+      productsQuery = productsQuery.sort(sortOption);
+    }
+    
+    const products = await productsQuery
       .populate('category')
-      .sort(sortOption)
       .skip(skip)
       .limit(limitNum)
       .lean();
@@ -143,8 +147,17 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
     const total = await Product.countDocuments(query);
 
     // Get filter options for UI
-    const brands = await Product.distinct('brand', { ...query, brand: { $exists: true, $ne: '' } });
-    const priceRange = await Product.aggregate([
+    // Cache brands list for 5 minutes (doesn't change often)
+    const brandsCacheKey = cacheKeys.brands(JSON.stringify(query));
+    let brands = await cache.get<string[]>(brandsCacheKey);
+    if (!brands) {
+      brands = await Product.distinct('brand', { ...query, brand: { $exists: true, $ne: '' } });
+      await cache.set(brandsCacheKey, brands, 300); // 5 minutes
+    }
+
+    // Cache price range aggregation for 5-10 minutes (depends on query)
+    // Price ranges change less frequently than individual products
+    const priceRangePipeline = [
       { $match: query },
       {
         $group: {
@@ -153,7 +166,17 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
           maxPrice: { $max: '$basePrice' }
         }
       }
-    ]);
+    ];
+    
+    const priceRange = await executeCachedAggregation(
+      'products',
+      priceRangePipeline,
+      async () => {
+        return await Product.aggregate(priceRangePipeline);
+      },
+      600, // 10 minutes cache for price ranges
+      JSON.stringify(query) // Include query in cache key suffix
+    );
 
     res.status(200).json({
       success: true,
@@ -190,28 +213,35 @@ export const searchAutocomplete = async (req: Request, res: Response, next: Next
       });
     }
 
-    const searchRegex = new RegExp(q, 'i');
-
-    // Search products
-    const products = await Product.find({
+    // Optimize autocomplete search - use text index if available
+    const searchText = q.trim();
+    const searchQuery: any = {
       isActive: true,
       $or: [
-        { name: searchRegex },
-        { brand: searchRegex },
-        { tags: { $in: [searchRegex] } }
-      ],
-      $and: [
-        {
-          $or: [
-            { deletedAt: null },
-            { deletedAt: { $exists: false } }
-          ]
-        }
+        { deletedAt: null },
+        { deletedAt: { $exists: false } }
       ]
-    })
-      .select('name slug brand images basePrice')
-      .limit(limit)
-      .lean();
+    };
+
+    // Use text search for autocomplete (faster than regex)
+    if (searchText.length >= 2) {
+      // Use $text search (text index exists on name, description, brand, tags)
+      searchQuery.$text = { $search: searchText };
+    }
+
+    // Cache autocomplete results for 1-2 minutes (popular searches)
+    const autocompleteCacheKey = `autocomplete:${searchText}:${limit}`;
+    let products = await cache.get<any[]>(autocompleteCacheKey);
+    
+    if (!products) {
+      products = await Product.find(searchQuery)
+        .select('name slug brand images basePrice')
+        .limit(limit)
+        .lean();
+      
+      // Cache popular searches for 2 minutes
+      await cache.set(autocompleteCacheKey, products, 120);
+    }
 
     // Search categories
     const categories = await Category.find({

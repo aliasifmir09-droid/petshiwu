@@ -276,6 +276,11 @@ productSchema.index({
 // This allows multiple products with no variants (null SKUs) without duplicate key errors
 productSchema.index({ 'variants.sku': 1 }, { unique: true, sparse: true });
 
+// Indexes for aggregation queries optimization
+productSchema.index({ basePrice: 1, category: 1, isActive: 1 }); // For price range aggregations
+productSchema.index({ basePrice: 1, rating: 1 }); // For price and rating aggregations
+productSchema.index({ category: 1, basePrice: 1 }); // For category-based price aggregations
+
 // Note: slug, basePrice, averageRating, createdAt, isFeatured+isActive indexes already exist in schema
 
 export default mongoose.model<IProduct>('Product', productSchema);

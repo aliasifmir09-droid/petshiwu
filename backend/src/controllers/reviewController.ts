@@ -3,6 +3,7 @@ import Review from '../models/Review';
 import Order from '../models/Order';
 import { AuthRequest } from '../middleware/auth';
 import { extractObjectId } from '../utils/types';
+import { executeCachedAggregation } from '../utils/aggregationCache';
 
 // Get reviews for a product with sorting
 export const getProductReviews = async (req: Request, res: Response, next: NextFunction) => {
@@ -51,8 +52,9 @@ export const getProductReviews = async (req: Request, res: Response, next: NextF
 
     const total = await Review.countDocuments(query);
 
-    // Calculate rating distribution
-    const ratingDistribution = await Review.aggregate([
+    // Calculate rating distribution - Cache for 5 minutes
+    // Rating distributions don't change frequently unless new reviews are added
+    const ratingDistributionPipeline = [
       { $match: query },
       {
         $group: {
@@ -61,7 +63,17 @@ export const getProductReviews = async (req: Request, res: Response, next: NextF
         }
       },
       { $sort: { _id: -1 } }
-    ]);
+    ];
+
+    const ratingDistribution = await executeCachedAggregation(
+      'reviews',
+      ratingDistributionPipeline,
+      async () => {
+        return await Review.aggregate(ratingDistributionPipeline);
+      },
+      300, // 5 minutes cache
+      req.params.productId // Include productId in cache key
+    );
 
     res.status(200).json({
       success: true,

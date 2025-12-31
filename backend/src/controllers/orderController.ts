@@ -8,6 +8,7 @@ import { safeToString, extractObjectId } from '../utils/types';
 import { asyncHandler, NotFoundError, UnauthorizedError, ValidationError } from '../utils/errors';
 import { sendOrderConfirmationEmail, sendOrderCancellationEmail, sendOrderDeliveredEmail } from '../utils/emailService';
 import logger from '../utils/logger';
+import { executeCachedAggregation } from '../utils/aggregationCache';
 
 import type { StripeInstance, OrderItemInput, NormalizedOrderItem, NormalizedOrder } from '../types/common';
 
@@ -1471,57 +1472,79 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
     const donationCount = ordersWithDonations.length;
     const averageDonation = donationCount > 0 ? totalDonations / donationCount : 0;
 
-    // Monthly donation breakdown (last 12 months)
-    const monthlyDonations = await Order.aggregate([
-      {
-        $match: {
-          donationAmount: { $gt: 0 },
-          createdAt: { $gte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) }
-        }
-      },
-      {
-        $group: {
-          _id: {
-            year: { $year: '$createdAt' },
-            month: { $month: '$createdAt' }
-          },
-          total: { $sum: '$donationAmount' },
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $sort: { '_id.year': 1, '_id.month': 1 }
-      },
-      {
-        $limit: 12
-      }
-    ]);
-
-    // Calculate monthly sales revenue (last 6 months)
+    // Use $facet to combine multiple aggregations in a single pipeline for better performance
+    // This reduces database round-trips from 2 to 1
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-    
-    const monthlySales = await Order.aggregate([
+    const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
+
+    // Combined aggregation using $facet - executes both aggregations in parallel
+    const combinedStatsPipeline = [
       {
-        $match: {
-          paymentStatus: 'paid',
-          createdAt: { $gte: sixMonthsAgo }
+        $facet: {
+          // Monthly donations (last 12 months)
+          monthlyDonations: [
+            {
+              $match: {
+                donationAmount: { $gt: 0 },
+                createdAt: { $gte: oneYearAgo }
+              }
+            },
+            {
+              $group: {
+                _id: {
+                  year: { $year: '$createdAt' },
+                  month: { $month: '$createdAt' }
+                },
+                total: { $sum: '$donationAmount' },
+                count: { $sum: 1 }
+              }
+            },
+            {
+              $sort: { '_id.year': 1, '_id.month': 1 }
+            },
+            {
+              $limit: 12
+            }
+          ],
+          // Monthly sales (last 6 months)
+          monthlySales: [
+            {
+              $match: {
+                paymentStatus: 'paid',
+                createdAt: { $gte: sixMonthsAgo }
+              }
+            },
+            {
+              $group: {
+                _id: {
+                  year: { $year: '$createdAt' },
+                  month: { $month: '$createdAt' }
+                },
+                sales: { $sum: '$totalPrice' },
+                orderCount: { $sum: 1 }
+              }
+            },
+            {
+              $sort: { '_id.year': 1, '_id.month': 1 }
+            }
+          ]
         }
-      },
-      {
-        $group: {
-          _id: {
-            year: { $year: '$createdAt' },
-            month: { $month: '$createdAt' }
-          },
-          sales: { $sum: '$totalPrice' },
-          orderCount: { $sum: 1 }
-        }
-      },
-      {
-        $sort: { '_id.year': 1, '_id.month': 1 }
       }
-    ]);
+    ];
+
+    // Cache combined stats for 5 minutes (dashboard stats don't need real-time accuracy)
+    const combinedStats = await executeCachedAggregation(
+      'orders',
+      combinedStatsPipeline,
+      async () => {
+        return await Order.aggregate(combinedStatsPipeline);
+      },
+      300 // 5 minutes cache
+    );
+
+    const monthlyDonations = combinedStats[0]?.monthlyDonations || [];
+    const monthlySales = combinedStats[0]?.monthlySales || [];
 
     // Format monthly sales data with month names
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -1537,38 +1560,57 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
     const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
-    const currentMonthRevenue = await Order.aggregate([
+    // Use $facet to combine current and previous month revenue in single query
+    const revenueTrendPipeline = [
       {
-        $match: {
-          paymentStatus: 'paid',
-          createdAt: { $gte: currentMonthStart }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: '$totalPrice' }
+        $facet: {
+          currentMonth: [
+            {
+              $match: {
+                paymentStatus: 'paid',
+                createdAt: { $gte: currentMonthStart }
+              }
+            },
+            {
+              $group: {
+                _id: null,
+                total: { $sum: '$totalPrice' }
+              }
+            }
+          ],
+          previousMonth: [
+            {
+              $match: {
+                paymentStatus: 'paid',
+                createdAt: { 
+                  $gte: previousMonthStart,
+                  $lte: previousMonthEnd
+                }
+              }
+            },
+            {
+              $group: {
+                _id: null,
+                total: { $sum: '$totalPrice' }
+              }
+            }
+          ]
         }
       }
-    ]);
+    ];
 
-    const previousMonthRevenue = await Order.aggregate([
-      {
-        $match: {
-          paymentStatus: 'paid',
-          createdAt: { 
-            $gte: previousMonthStart,
-            $lte: previousMonthEnd
-          }
-        }
+    // Cache revenue trend for 2 minutes (more frequent updates needed)
+    const revenueTrendResult = await executeCachedAggregation(
+      'orders',
+      revenueTrendPipeline,
+      async () => {
+        return await Order.aggregate(revenueTrendPipeline);
       },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: '$totalPrice' }
-        }
-      }
-    ]);
+      120 // 2 minutes cache
+    );
+
+    const currentMonthRevenue = revenueTrendResult[0]?.currentMonth || [];
+    const previousMonthRevenue = revenueTrendResult[0]?.previousMonth || [];
 
     const currentMonthTotal = currentMonthRevenue[0]?.total || 0;
     const previousMonthTotal = previousMonthRevenue[0]?.total || 0;
