@@ -57,34 +57,41 @@ const transports: winston.transport[] = [
 
 // If in production, also log to file
 if (process.env.NODE_ENV === 'production') {
-  // Ensure logs directory exists
-  const logsDir = path.join(process.cwd(), 'logs');
-  if (!fs.existsSync(logsDir)) {
-    fs.mkdirSync(logsDir, { recursive: true });
+  // CRITICAL FIX: Wrap file system operations in try-catch to prevent uncaught exceptions
+  let logsDir: string | null = null;
+  try {
+    // Ensure logs directory exists
+    logsDir = path.join(process.cwd(), 'logs');
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+
+    // Error log file
+    transports.push(
+      new winston.transports.File({
+        filename: path.join(logsDir, 'error.log'),
+        level: 'error',
+        format: winston.format.combine(
+          winston.format.timestamp(),
+          winston.format.json(),
+        ),
+      })
+    );
+
+    // Combined log file (all logs)
+    transports.push(
+      new winston.transports.File({
+        filename: path.join(logsDir, 'combined.log'),
+        format: winston.format.combine(
+          winston.format.timestamp(),
+          winston.format.json(),
+        ),
+      })
+    );
+  } catch (error: unknown) {
+    // If we can't create logs directory or file transports, just log to console
+    console.warn('⚠️  Could not create file transports, using console only:', error instanceof Error ? error.message : String(error));
   }
-
-  // Error log file
-  transports.push(
-    new winston.transports.File({
-      filename: path.join(logsDir, 'error.log'),
-      level: 'error',
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json(),
-      ),
-    })
-  );
-
-  // Combined log file (all logs)
-  transports.push(
-    new winston.transports.File({
-      filename: path.join(logsDir, 'combined.log'),
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json(),
-      ),
-    })
-  );
 }
 
 // Create the logger

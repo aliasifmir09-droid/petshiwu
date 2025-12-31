@@ -31,6 +31,70 @@ import { responseTimeMiddleware } from './middleware/responseTime';
 // Load env vars
 dotenv.config();
 
+// CRITICAL FIX: Register uncaught exception handler as early as possible
+// This must be before any other code that might throw
+process.on('uncaughtException', (err: unknown) => {
+  // Always use console.error first (logger might not be initialized)
+  console.error('❌❌❌ UNCAUGHT EXCEPTION ❌❌❌');
+  
+  // Try to extract error information
+  let errorMessage = 'Unknown error';
+  let errorStack = 'No stack trace available';
+  let errorName = 'Error';
+  let errorDetails: any = null;
+  
+  if (err instanceof Error) {
+    errorMessage = err.message || 'Error without message';
+    errorStack = err.stack || 'No stack trace available';
+    errorName = err.name || 'Error';
+    errorDetails = {
+      name: err.name,
+      message: err.message,
+      stack: err.stack,
+    };
+  } else if (typeof err === 'string') {
+    errorMessage = err;
+    errorDetails = { type: 'string', value: err };
+  } else if (err && typeof err === 'object') {
+    try {
+      errorMessage = JSON.stringify(err);
+      errorDetails = err;
+    } catch {
+      errorMessage = String(err);
+      errorDetails = { type: 'object', value: String(err) };
+    }
+  } else {
+    errorMessage = String(err);
+    errorDetails = { type: 'primitive', value: err };
+  }
+  
+  // Log to console (always works)
+  console.error('Error Name:', errorName);
+  console.error('Error Message:', errorMessage);
+  console.error('Error Stack:', errorStack);
+  console.error('Error Details:', errorDetails);
+  console.error('Error Type:', typeof err);
+  console.error('Error Constructor:', (err as any)?.constructor?.name || 'Unknown');
+  
+  // Try to use logger if available
+  try {
+    if (logger && typeof logger.error === 'function') {
+      logger.error('❌ Uncaught Exception:', errorMessage);
+      logger.error('Error Name:', errorName);
+      logger.error('Error Stack:', errorStack);
+      if (errorDetails) {
+        logger.error('Error Details:', errorDetails);
+      }
+    }
+  } catch (loggerError) {
+    console.error('Logger also failed:', loggerError);
+  }
+  
+  // Exit immediately - don't try to close server as it might not be initialized
+  console.error('Exiting due to uncaught exception...');
+  process.exit(1);
+});
+
 // Validate required environment variables
 // SECURITY FIX: Fail fast in production if critical vars missing
 // Only allow graceful degradation for optional services (Redis, Cloudinary)
@@ -909,36 +973,8 @@ process.on('unhandledRejection', (reason: unknown, promise: Promise<any>) => {
   }
 });
 
-// Handle uncaught exceptions
-// CRITICAL FIX: Improved error handling to prevent server crashes on startup
-process.on('uncaughtException', (err: unknown) => {
-  const error = err instanceof Error ? err : new Error(String(err));
-  const errorMessage = error.message || String(err);
-  const errorStack = error.stack || 'No stack trace available';
-  
-  // Use both logger and console for critical errors (logger might not be ready)
-  try {
-    logger.error('❌ Uncaught Exception:', errorMessage);
-    logger.error('Stack:', errorStack);
-  } catch {
-    console.error('❌ Uncaught Exception:', errorMessage);
-    console.error('Stack:', errorStack);
-  }
-  
-  // Gracefully shutdown server if it's running
-  if (server) {
-    server.close(() => {
-      process.exit(1);
-    });
-    // Force exit after 5 seconds if server doesn't close
-    setTimeout(() => {
-      process.exit(1);
-    }, 5000);
-  } else {
-    // If server hasn't started yet, exit immediately
-    process.exit(1);
-  }
-});
+// Note: Uncaught exception handler is registered at the top of the file (after imports and dotenv.config)
+// This ensures it's available before any code runs that might throw
 
 export default app;
 
