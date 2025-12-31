@@ -8,8 +8,24 @@ import logger from '../utils/logger';
 export const responseTimeMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const startTime = Date.now();
   
-  // Track response time when response finishes
-  res.on('finish', () => {
+  // CRITICAL FIX: Set header before response is sent, not in 'finish' event
+  // The 'finish' event fires after headers are sent, causing "Cannot set headers after they are sent" error
+  
+  // Store original methods to intercept response
+  const originalEnd = res.end;
+  const originalSend = res.send;
+  const originalJson = res.json;
+  
+  // Helper function to set header and log (only if headers not sent)
+  const setResponseTimeHeader = () => {
+    if (!res.headersSent) {
+      const duration = Date.now() - startTime;
+      res.setHeader('X-Response-Time', `${duration}ms`);
+    }
+  };
+  
+  // Helper function to log response time
+  const logResponseTime = () => {
     const duration = Date.now() - startTime;
     const { method, originalUrl } = req;
     const statusCode = res.statusCode;
@@ -21,9 +37,34 @@ export const responseTimeMiddleware = (req: Request, res: Response, next: NextFu
       // Log moderately slow requests (> 200ms) as info
       logger.info(`API request: ${method} ${originalUrl} - ${duration}ms - Status: ${statusCode}`);
     }
-    
-    // Add response time header for client-side monitoring
-    res.setHeader('X-Response-Time', `${duration}ms`);
+  };
+  
+  // Override res.end to set header before sending
+  res.end = function (chunk?: any, encoding?: any, cb?: any) {
+    setResponseTimeHeader();
+    logResponseTime();
+    return originalEnd.call(this, chunk, encoding, cb);
+  };
+  
+  // Override res.send to set header before sending
+  res.send = function (body?: any) {
+    setResponseTimeHeader();
+    logResponseTime();
+    return originalSend.call(this, body);
+  };
+  
+  // Override res.json to set header before sending
+  res.json = function (body?: any) {
+    setResponseTimeHeader();
+    logResponseTime();
+    return originalJson.call(this, body);
+  };
+  
+  // Fallback: Log in 'finish' event (but don't set header - it's too late)
+  res.on('finish', () => {
+    // Only log if header wasn't already set (fallback logging)
+    // Don't try to set header here as response is already sent
+    logResponseTime();
   });
   
   next();
