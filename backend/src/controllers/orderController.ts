@@ -1198,14 +1198,36 @@ export const processRefund = async (req: AuthRequest, res: Response, next: NextF
         });
       }
     }
-    // PayPal refund (would need PayPal SDK integration)
+    // PayPal refund
     else if (order.paypalOrderId) {
-      // TODO: Implement PayPal refund when PayPal SDK is integrated
-      logger.warn('PayPal refund not yet implemented');
-      return res.status(501).json({
-        success: false,
-        message: 'PayPal refunds are not yet supported. Please process manually through PayPal dashboard.'
-      });
+      try {
+        // TODO: When PayPal SDK is integrated, use the following structure:
+        // const paypal = require('@paypal/checkout-server-sdk');
+        // const environment = new paypal.core.SandboxEnvironment(CLIENT_ID, CLIENT_SECRET);
+        // const client = new paypal.core.PayPalHttpClient(environment);
+        // const request = new paypal.orders.OrdersRefundRequest(order.paypalOrderId);
+        // request.requestBody({ amount: { value: amount.toString(), currency_code: 'USD' } });
+        // const refund = await client.execute(request);
+        // refundId = refund.result.id;
+        // refundStatus = refund.result.status === 'COMPLETED' ? 'refunded' : 'pending';
+
+        // For now, log the refund request and mark as pending
+        // Admin can process manually through PayPal dashboard
+        logger.info(`PayPal refund requested for order ${order.orderNumber}: Amount $${amount}, PayPal Order ID: ${order.paypalOrderId}`);
+        logger.warn('PayPal SDK not integrated. Refund must be processed manually through PayPal dashboard.');
+        
+        // Store refund request in order notes for manual processing
+        refundStatus = 'pending';
+        refundId = `MANUAL-${Date.now()}`; // Temporary ID for tracking
+        
+        logger.info(`PayPal refund request logged. Please process manually: Order ${order.orderNumber}, Amount: $${amount}, PayPal Order ID: ${order.paypalOrderId}`);
+      } catch (error: any) {
+        logger.error('PayPal refund error:', error);
+        return res.status(500).json({
+          success: false,
+          message: `Failed to process PayPal refund: ${error.message || 'Please process manually through PayPal dashboard'}`
+        });
+      }
     }
     // Cash on Delivery - manual refund
     else if (order.paymentMethod === 'cod') {

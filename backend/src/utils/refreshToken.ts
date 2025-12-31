@@ -100,10 +100,16 @@ export const hashToken = (token: string): string => {
 };
 
 /**
- * TODO: Implement refresh token storage in User model
- * - Add refreshToken field (hashed)
- * - Add refreshTokenExpires field
- * - Add method to revoke refresh token
- * - Add method to check if refresh token is valid
+ * ✅ COMPLETED: Refresh token storage in User model
+ * - ✅ Added refreshToken field (hashed) to User model
+ * - ✅ Added refreshTokenExpires field to User model
+ * - ✅ Added setRefreshToken() method to store hashed token
+ * - ✅ Added revokeRefreshToken() method to revoke tokens
+ * - ✅ Added isRefreshTokenValid() method to validate tokens
+ * 
+ * Usage:
+ * - Call user.setRefreshToken(token, expiresAt) to store a refresh token
+ * - Call user.revokeRefreshToken() to revoke the current refresh token
+ * - Call user.isRefreshTokenValid(token) to validate a refresh token
  */
 

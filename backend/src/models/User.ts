@@ -34,6 +34,8 @@ export interface IUser extends Document {
   emailVerificationExpires?: Date;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
+  refreshToken?: string; // Hashed refresh token
+  refreshTokenExpires?: Date;
   addresses: IAddress[];
   wishlist: mongoose.Types.ObjectId[];
   passwordChangedAt?: Date;
@@ -45,6 +47,9 @@ export interface IUser extends Document {
   getDaysUntilPasswordExpires(): number;
   generateEmailVerificationToken(): string;
   generatePasswordResetToken(): string;
+  setRefreshToken(token: string, expiresAt: Date): Promise<void>;
+  revokeRefreshToken(): Promise<void>;
+  isRefreshTokenValid(token: string): Promise<boolean>;
 }
 
 const addressSchema = new Schema<IAddress>({
@@ -132,6 +137,14 @@ const userSchema = new Schema<IUser>(
       select: false // Don't include in queries by default
     },
     passwordResetExpires: {
+      type: Date,
+      select: false
+    },
+    refreshToken: {
+      type: String,
+      select: false // Don't include in queries by default
+    },
+    refreshTokenExpires: {
       type: Date,
       select: false
     }
@@ -228,6 +241,40 @@ userSchema.methods.generatePasswordResetToken = function (): string {
   this.passwordResetExpires = new Date(Date.now() + PASSWORD_RESET_EXPIRY_HOURS * 60 * 60 * 1000);
   
   return token;
+};
+
+// Set refresh token (hashed before storing)
+userSchema.methods.setRefreshToken = async function (token: string, expiresAt: Date): Promise<void> {
+  const crypto = require('crypto');
+  // Hash the token before storing (similar to password)
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+  this.refreshToken = hashedToken;
+  this.refreshTokenExpires = expiresAt;
+  await this.save();
+};
+
+// Revoke refresh token
+userSchema.methods.revokeRefreshToken = async function (): Promise<void> {
+  this.refreshToken = undefined;
+  this.refreshTokenExpires = undefined;
+  await this.save();
+};
+
+// Check if refresh token is valid
+userSchema.methods.isRefreshTokenValid = async function (token: string): Promise<boolean> {
+  if (!this.refreshToken || !this.refreshTokenExpires) {
+    return false;
+  }
+
+  // Check if token has expired
+  if (new Date() > this.refreshTokenExpires) {
+    return false;
+  }
+
+  // Hash the provided token and compare with stored hash
+  const crypto = require('crypto');
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+  return hashedToken === this.refreshToken;
 };
 
 // Performance indexes

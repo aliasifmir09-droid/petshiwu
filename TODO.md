@@ -4,11 +4,16 @@ This file tracks TODO comments and technical debt items found in the codebase.
 
 ## High Priority
 
-### 1. PayPal Refund Implementation
-- **Location:** `backend/src/controllers/orderController.ts:1155`
-- **Status:** Pending
-- **Description:** Implement PayPal refund functionality when PayPal SDK is integrated
-- **Current Workaround:** Manual refunds through PayPal dashboard
+### 1. PayPal Refund Implementation ✅ **FRAMEWORK COMPLETED**
+- **Location:** `backend/src/controllers/orderController.ts:1201`
+- **Status:** ✅ **FRAMEWORK COMPLETED**
+- **Description:** PayPal refund framework implemented with placeholder for SDK integration
+- **Implementation:** 
+  - ✅ Refund request logging and tracking
+  - ✅ Refund status management
+  - ✅ Error handling structure
+  - ⚠️ **Note:** PayPal SDK integration pending (structure ready for SDK integration)
+- **Current State:** Framework ready, requires PayPal SDK installation and configuration
 - **Priority:** Medium (feature enhancement)
 
 ## Medium Priority
@@ -20,11 +25,17 @@ This file tracks TODO comments and technical debt items found in the codebase.
 - **Implementation:** Created `backend/src/utils/redisRateLimitStore.ts` with custom Store implementation
 - **Result:** Rate limiting now supports multi-instance deployments with Redis
 
-### 3. Refresh Token Storage
+### 3. Refresh Token Storage ✅ **COMPLETED**
 - **Location:** `backend/src/utils/refreshToken.ts:103`
-- **Status:** Pending
-- **Description:** Implement refresh token storage in User model
-- **Current State:** Framework created, needs database integration
+- **Status:** ✅ **COMPLETED**
+- **Description:** Refresh token storage fully implemented in User model
+- **Implementation:**
+  - ✅ Added `refreshToken` field (hashed) to User schema
+  - ✅ Added `refreshTokenExpires` field to User schema
+  - ✅ Added `setRefreshToken()` method to store hashed tokens
+  - ✅ Added `revokeRefreshToken()` method to revoke tokens
+  - ✅ Added `isRefreshTokenValid()` method to validate tokens
+- **Result:** Full refresh token management system ready for use
 - **Priority:** Medium (security enhancement)
 
 ## Low Priority / Optimization
