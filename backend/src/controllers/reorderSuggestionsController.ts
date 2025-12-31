@@ -306,10 +306,11 @@ export const getProductReorderSuggestion = async (req: AuthRequest, res: Respons
       },
       {
         $group: {
-        _id: '$items.product',
-        totalUnitsSold: { $sum: '$items.quantity' },
-        orderCount: { $sum: 1 },
-        lastOrderDate: { $max: '$createdAt' },
+          _id: '$items.product',
+          totalUnitsSold: { $sum: '$items.quantity' },
+          orderCount: { $sum: 1 },
+          lastOrderDate: { $max: '$createdAt' },
+        },
       },
     ];
 
