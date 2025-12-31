@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import Product from '../models/Product';
 import Category from '../models/Category';
+import logger from '../utils/logger';
 
 // Helper function to build SEO-friendly product URL (matches frontend format)
 const buildProductUrl = (product: any, frontendUrl: string): string => {
