@@ -26,6 +26,8 @@ import type { SanitizedObject } from './types/common';
 import logger from './utils/logger';
 import { initializeJobQueues } from './utils/jobQueue';
 import { startEmailWorker } from './workers/emailWorker';
+import { initializeJobQueues } from './utils/jobQueue';
+import { startEmailWorker } from './workers/emailWorker';
 
 // Load env vars
 dotenv.config();
@@ -82,8 +84,6 @@ connectDatabase();
 initRedis();
 
 // Initialize job queues (requires Redis, falls back gracefully if unavailable)
-import { initializeJobQueues } from './utils/jobQueue';
-import { startEmailWorker } from './workers/emailWorker';
 initializeJobQueues();
 startEmailWorker();
 
