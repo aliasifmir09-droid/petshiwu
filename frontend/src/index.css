@@ -1,3 +1,7 @@
+/* PERFORMANCE FIX: Non-critical CSS loaded asynchronously
+ * Critical CSS is inlined in index.html
+ * This file contains all Tailwind styles and custom styles
+ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -9,6 +9,10 @@
     <link rel="icon" href="/logo.png" type="image/png" />
     <meta name="theme-color" content="#1E3A8A" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- PERFORMANCE FIX: Inline critical CSS for faster FCP -->
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Fira Sans','Droid Sans','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background:linear-gradient(to bottom,#fff 0%,#f9fafb 100%);font-display:optional}header{background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.1)}.loading-spinner{display:flex;align-items:center;justify-content:center;min-height:200px}img{max-width:100%;height:auto}button{cursor:pointer;border:none;background:none}
+    </style>
     <!-- Critical: Preload LCP image (logo) for fastest rendering -->
     <link rel="preload" as="image" href="/logo.avif" type="image/avif" fetchpriority="high" />
     <link rel="preload" as="image" href="/logo.webp" type="image/webp" fetchpriority="high" />
@@ -23,21 +27,27 @@
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
     <link rel="dns-prefetch" href="https://s7d2.scene7.com">
     <link rel="preconnect" href="https://s7d2.scene7.com" crossorigin>
-    <!-- Preconnect for fonts (less critical, can be deferred) -->
+    <!-- PERFORMANCE FIX: Preconnect for fonts (critical for font loading) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- PERFORMANCE FIX: Prefetch likely next pages -->
+    <link rel="prefetch" href="/products">
+    <link rel="prefetch" href="/category">
     <!-- Preconnect for Tawk.to (lazy loaded, low priority) -->
     <link rel="dns-prefetch" href="https://embed.tawk.to">
-    <!-- Non-blocking font loading with optional display to prevent layout shifts -->
+    <!-- PERFORMANCE FIX: Defer non-critical font loading -->
     <link 
-      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;600;700&display=optional" 
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" 
       rel="stylesheet"
       media="print"
-      onload="this.media='all'"
+      onload="this.media='all';this.onload=null"
     >
     <noscript>
-      <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;600;700&display=optional" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     </noscript>
+    <!-- PERFORMANCE FIX: Preload critical fonts -->
+    <link rel="preload" href="https://fonts.gstatic.com/s/nunito/v26/XRXI3I6Li01BKofAjsOUYevI.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://fonts.gstatic.com/s/poppins/v21/pxiEyp8kv8JHgFVrJJfecg.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#1E3A8A" />
     <title>petshiwu - Everything Your Pet Needs</title>
