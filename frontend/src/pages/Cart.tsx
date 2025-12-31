@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useAuthStore } from '@/stores/authStore';
-import { Trash2, ShoppingBag, AlertTriangle, Heart, Share2, Copy, Check, Zap } from 'lucide-react';
+import { Trash2, ShoppingBag, AlertTriangle, Heart, Share2, Check, Zap } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import EmptyState from '@/components/EmptyState';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
