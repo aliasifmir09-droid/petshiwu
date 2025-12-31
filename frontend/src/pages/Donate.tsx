@@ -1,12 +1,91 @@
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Heart, CreditCard, Lock, Shield, ArrowLeft } from 'lucide-react';
+import { Heart, CreditCard, Shield, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { donationService } from '@/services/donations';
+import { getStripe } from '@/utils/stripe';
+import PaymentForm from '@/components/PaymentForm';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 type PaymentMethod = 'credit_card' | 'paypal' | 'apple_pay' | 'google_pay';
+
+// Wrapper component for lazy-loaded Stripe Elements
+const StripePaymentWrapper = ({ 
+  clientSecret, 
+  amount, 
+  onSuccess, 
+  onError, 
+  onCancel 
+}: {
+  clientSecret: string;
+  amount: number;
+  onSuccess: (paymentIntentId: string) => void;
+  onError: (error: string) => void;
+  onCancel: () => void;
+}) => {
+  const [ElementsComponent, setElementsComponent] = useState<React.ComponentType<any> | null>(null);
+  const [stripeInstance, setStripeInstance] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Defer Stripe loading to avoid blocking main thread
+    const loadStripe = () => {
+      Promise.all([
+        import('@stripe/react-stripe-js'),
+        getStripe()
+      ]).then(([stripeReactModule, stripe]) => {
+        setElementsComponent(() => stripeReactModule.Elements);
+        setStripeInstance(stripe);
+        setIsLoading(false);
+      }).catch((error) => {
+        console.error('Failed to load Stripe:', error);
+        onError('Failed to load payment form. Please refresh the page and try again.');
+        setIsLoading(false);
+      });
+    };
+
+    // Defer loading to next idle period to avoid blocking main thread
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(loadStripe, { timeout: 2000 });
+    } else {
+      setTimeout(loadStripe, 0);
+    }
+  }, [onError]);
+
+  if (isLoading || !ElementsComponent || !stripeInstance) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center justify-center py-8">
+          <LoadingSpinner size="md" />
+          <span className="ml-3 text-gray-600">Loading payment form...</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Suspense fallback={
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center justify-center py-8">
+          <LoadingSpinner size="md" />
+          <span className="ml-3 text-gray-600">Loading payment form...</span>
+        </div>
+      </div>
+    }>
+      <ElementsComponent stripe={stripeInstance} options={{ clientSecret }}>
+        <PaymentForm
+          clientSecret={clientSecret}
+          amount={amount}
+          onSuccess={onSuccess}
+          onError={onError}
+          onCancel={onCancel}
+        />
+      </ElementsComponent>
+    </Suspense>
+  );
+};
 
 const Donate = () => {
   const navigate = useNavigate();
@@ -20,13 +99,12 @@ const Donate = () => {
   const [customAmount, setCustomAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('credit_card');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [donationId, setDonationId] = useState<string | null>(null);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
 
-  // Payment details
+  // Payment details for non-Stripe methods
   const [paymentDetails, setPaymentDetails] = useState({
-    cardNumber: '',
-    cardName: '',
-    expiryDate: '',
-    cvv: '',
     email: user?.email || '',
     firstName: user?.firstName || '',
     lastName: user?.lastName || ''
@@ -50,38 +128,53 @@ const Donate = () => {
     }
   };
 
-  const formatCardNumber = (value: string) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-    const matches = v.match(/\d{4,16}/g);
-    const match = (matches && matches[0]) || '';
-    const parts = [];
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4));
-    }
-    if (parts.length) {
-      return parts.join(' ');
-    } else {
-      return v;
-    }
-  };
+  // Create payment intent when payment method changes
+  useEffect(() => {
+    const createPaymentIntent = async () => {
+      if (donationAmount <= 0) return;
 
-  const formatExpiryDate = (value: string) => {
-    const v = value.replace(/\D/g, '');
-    if (v.length >= 2) {
-      return v.substring(0, 2) + '/' + v.substring(2, 4);
-    }
-    return v;
-  };
+      // PayPal doesn't use Stripe payment intents - it has its own flow
+      if (paymentMethod === 'paypal') {
+        setShowPaymentForm(false);
+        setClientSecret(null);
+        return;
+      }
 
-  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatCardNumber(e.target.value);
-    setPaymentDetails({ ...paymentDetails, cardNumber: formatted });
-  };
+      if (paymentMethod !== 'credit_card' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay') {
+        return;
+      }
 
-  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatExpiryDate(e.target.value);
-    setPaymentDetails({ ...paymentDetails, expiryDate: formatted });
-  };
+      if (!clientSecret && !isProcessing && donationAmount > 0) {
+        setIsProcessing(true);
+        try {
+          const intentResponse = await donationService.createDonationIntent({
+            amount: donationAmount,
+            paymentMethod: paymentMethod,
+            email: paymentDetails.email,
+            firstName: paymentDetails.firstName,
+            lastName: paymentDetails.lastName
+          });
+
+          if (intentResponse.success && intentResponse.data?.clientSecret) {
+            setClientSecret(intentResponse.data.clientSecret);
+            setDonationId(intentResponse.data.donationId || null);
+            setShowPaymentForm(true);
+          } else {
+            showToast('Failed to initialize payment. Please try again.', 'error');
+          }
+        } catch (error: any) {
+          showToast(
+            error.response?.data?.message || 'Payment initialization failed. Please try again.',
+            'error'
+          );
+        } finally {
+          setIsProcessing(false);
+        }
+      }
+    };
+
+    createPaymentIntent();
+  }, [paymentMethod, donationAmount, paymentDetails.email, paymentDetails.firstName, paymentDetails.lastName]);
 
   const validateForm = () => {
     if (donationAmount <= 0) {
@@ -89,88 +182,62 @@ const Donate = () => {
       return false;
     }
 
-    if (paymentMethod === 'credit_card') {
-      if (paymentDetails.cardNumber.replace(/\s/g, '').length < 13) {
-        showToast('Please enter a valid card number', 'error');
-        return false;
-      }
-      if (!paymentDetails.cardName.trim()) {
-        showToast('Please enter the cardholder name', 'error');
-        return false;
-      }
-      if (paymentDetails.expiryDate.length !== 5) {
-        showToast('Please enter a valid expiry date (MM/YY)', 'error');
-        return false;
-      }
-      if (paymentDetails.cvv.length < 3) {
-        showToast('Please enter a valid CVV', 'error');
-        return false;
-      }
-    }
-
     if (!paymentDetails.email.trim()) {
       showToast('Please enter your email address', 'error');
+      return false;
+    }
+
+    if (!paymentDetails.firstName.trim() || !paymentDetails.lastName.trim()) {
+      showToast('Please enter your full name', 'error');
       return false;
     }
 
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
+  const handlePaymentSuccess = async (_paymentIntentId: string) => {
+    if (!donationId) {
+      showToast('Donation ID not found. Please try again.', 'error');
       return;
     }
 
-    setIsProcessing(true);
-
     try {
-      // Create donation intent with backend
-      const intentResponse = await donationService.createDonationIntent({
-        amount: donationAmount,
-        paymentMethod: paymentMethod,
-        email: paymentDetails.email,
-        firstName: paymentDetails.firstName,
-        lastName: paymentDetails.lastName
+      const confirmResponse = await donationService.confirmDonation({
+        donationId: donationId
       });
 
-      if (intentResponse.success && intentResponse.data.clientSecret) {
-        // For now, we'll confirm immediately (in production, use Stripe.js to handle payment)
-        // TODO: Integrate Stripe.js Elements for secure card processing
-        const confirmResponse = await donationService.confirmDonation({
-          donationId: intentResponse.data.donationId
-        });
-
-        if (confirmResponse.success) {
-          showToast(
-            `Thank you for your generous donation of $${donationAmount.toFixed(2)}! Your contribution makes a difference.`,
-            'success'
-          );
-          
-          // Redirect after success
-          setTimeout(() => {
-            navigate('/');
-          }, 2000);
-        } else {
-          showToast('Payment processing failed. Please try again.', 'error');
-          setIsProcessing(false);
-        }
+      if (confirmResponse.success) {
+        showToast(
+          `Thank you for your generous donation of $${donationAmount.toFixed(2)}! Your contribution makes a difference.`,
+          'success'
+        );
+        
+        // Redirect after success
+        setTimeout(() => {
+          navigate('/');
+        }, 2000);
       } else {
-        showToast('Failed to initialize payment. Please try again.', 'error');
+        showToast('Payment processing failed. Please try again.', 'error');
         setIsProcessing(false);
       }
     } catch (error: any) {
-      // Use safe error logging
-      import('@/utils/safeLogger').then(({ safeError }) => {
-        safeError('Donation error', error);
-      });
       showToast(
         error.response?.data?.message || 'An error occurred. Please try again.',
         'error'
       );
       setIsProcessing(false);
     }
+  };
+
+  const handlePaymentError = (error: string) => {
+    showToast(error, 'error');
+    setIsProcessing(false);
+  };
+
+  const handlePaymentCancel = () => {
+    setShowPaymentForm(false);
+    setClientSecret(null);
+    setIsProcessing(false);
   };
 
   return (
@@ -196,7 +263,7 @@ const Donate = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Form */}
           <div className="lg:col-span-2 space-y-6">
             {/* Donation Amount */}
@@ -364,120 +431,61 @@ const Donate = () => {
               </div>
             </div>
 
-            {/* Payment Details */}
-            {paymentMethod === 'credit_card' && (
+            {/* Stripe Payment Form */}
+            {showPaymentForm && clientSecret && paymentMethod !== 'paypal' && (
+              <StripePaymentWrapper
+                clientSecret={clientSecret}
+                amount={donationAmount}
+                onSuccess={handlePaymentSuccess}
+                onError={handlePaymentError}
+                onCancel={handlePaymentCancel}
+              />
+            )}
+
+            {/* Contact Information */}
+            {!showPaymentForm && (
               <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <Lock className="text-green-500" size={24} />
-                  Payment Details
-                </h2>
-
-                <div className="space-y-4">
+                <h2 className="text-xl font-bold mb-4">Contact Information</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Card Number *
+                      First Name *
                     </label>
                     <input
                       type="text"
-                      maxLength={19}
-                      value={paymentDetails.cardNumber}
-                      onChange={handleCardNumberChange}
-                      placeholder="1234 5678 9012 3456"
+                      value={paymentDetails.firstName}
+                      onChange={(e) => setPaymentDetails({ ...paymentDetails, firstName: e.target.value })}
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Cardholder Name *
+                      Last Name *
                     </label>
                     <input
                       type="text"
-                      value={paymentDetails.cardName}
-                      onChange={(e) => setPaymentDetails({ ...paymentDetails, cardName: e.target.value })}
-                      placeholder="John Doe"
+                      value={paymentDetails.lastName}
+                      onChange={(e) => setPaymentDetails({ ...paymentDetails, lastName: e.target.value })}
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     />
                   </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Expiry Date *
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={5}
-                        value={paymentDetails.expiryDate}
-                        onChange={handleExpiryChange}
-                        placeholder="MM/YY"
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        CVV *
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={4}
-                        value={paymentDetails.cvv}
-                        onChange={(e) => setPaymentDetails({ ...paymentDetails, cvv: e.target.value.replace(/\D/g, '') })}
-                        placeholder="123"
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      value={paymentDetails.email}
+                      onChange={(e) => setPaymentDetails({ ...paymentDetails, email: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
                   </div>
                 </div>
               </div>
             )}
-
-            {/* Contact Information */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-bold mb-4">Contact Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    First Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={paymentDetails.firstName}
-                    onChange={(e) => setPaymentDetails({ ...paymentDetails, firstName: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Last Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={paymentDetails.lastName}
-                    onChange={(e) => setPaymentDetails({ ...paymentDetails, lastName: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    value={paymentDetails.email}
-                    onChange={(e) => setPaymentDetails({ ...paymentDetails, email: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
 
             {/* Security Notice */}
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
@@ -485,7 +493,7 @@ const Donate = () => {
               <div>
                 <p className="text-sm font-semibold text-green-900 mb-1">Secure Payment</p>
                 <p className="text-xs text-green-700">
-                  Your payment information is encrypted and secure. We use industry-standard SSL encryption to protect your data.
+                  Your payment information is encrypted and secure. We use industry-standard SSL encryption and Stripe to protect your data.
                 </p>
               </div>
             </div>
@@ -517,30 +525,40 @@ const Donate = () => {
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={isProcessing || donationAmount <= 0}
-                className="w-full bg-gradient-to-r from-pink-500 to-red-500 text-white py-4 rounded-lg font-bold text-lg hover:from-pink-600 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                {isProcessing ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Processing...
-                  </span>
-                ) : (
-                  `Donate $${donationAmount > 0 ? donationAmount.toFixed(2) : '0.00'}`
-                )}
-              </button>
+              {!showPaymentForm && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (validateForm()) {
+                      // Payment intent will be created automatically via useEffect
+                      if (paymentMethod === 'paypal') {
+                        showToast('PayPal integration coming soon. Please use credit card.', 'info');
+                      }
+                    }
+                  }}
+                  disabled={isProcessing || donationAmount <= 0}
+                  className="w-full bg-gradient-to-r from-pink-500 to-red-500 text-white py-4 rounded-lg font-bold text-lg hover:from-pink-600 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  {isProcessing ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Processing...
+                    </span>
+                  ) : (
+                    `Continue to Payment`
+                  )}
+                </button>
+              )}
 
               <p className="text-xs text-gray-500 text-center mt-4">
                 By donating, you agree to our terms and conditions
               </p>
             </div>
           </div>
-        </form>
+        </div>
       </div>
 
       {/* Toast Notification */}
@@ -556,4 +574,3 @@ const Donate = () => {
 };
 
 export default Donate;
-
