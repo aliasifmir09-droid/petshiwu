@@ -28,11 +28,13 @@ export const highlightSearchTerm = (
     if (match.index > lastIndex) {
       parts.push(text.substring(lastIndex, match.index));
     }
-    // Add the highlighted match
+    // Add the highlighted match using React.createElement
     parts.push(
-      <span key={`highlight-${keyIndex++}`} className={highlightClassName}>
-        {match[0]}
-      </span>
+      React.createElement(
+        'span',
+        { key: `highlight-${keyIndex++}`, className: highlightClassName },
+        match[0]
+      )
     );
     lastIndex = match.index + match[0].length;
   }
@@ -112,28 +114,20 @@ const escapeRegex = (str: string): string => {
  * @param highlightClassName CSS class to apply to highlighted text (default: 'highlight')
  * @returns JSX element with highlighted text
  */
-export const HighlightText = ({
-  text,
-  searchTerms,
-  highlightClassName = 'highlight',
-}: {
+export const HighlightText: React.FC<{
   text: string;
   searchTerms: string[];
   highlightClassName?: string;
-}) => {
+}> = ({ text, searchTerms, highlightClassName = 'highlight' }) => {
   const parts = highlightSearchTerms(text, searchTerms, highlightClassName);
 
-  return (
-    <>
-      {parts.map((part, index) =>
-        part.highlight ? (
-          <mark key={index} className={highlightClassName}>
-            {part.text}
-          </mark>
-        ) : (
-          <span key={index}>{part.text}</span>
-        )
-      )}
-    </>
+  return React.createElement(
+    React.Fragment,
+    null,
+    ...parts.map((part, index) =>
+      part.highlight
+        ? React.createElement('mark', { key: index, className: highlightClassName }, part.text)
+        : React.createElement('span', { key: index }, part.text)
+    )
   );
 };
