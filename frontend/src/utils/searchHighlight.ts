@@ -1,6 +1,50 @@
+import React from 'react';
+
 /**
- * Utility functions for highlighting search terms in text
+ * Highlights occurrences of a search term within a given text.
+ * @param text The full text to search within.
+ * @param searchTerm The term to highlight.
+ * @param highlightClassName The CSS class to apply to highlighted parts.
+ * @returns A ReactNode array with highlighted spans.
  */
+export const highlightSearchTerm = (
+  text: string,
+  searchTerm: string,
+  highlightClassName: string = 'bg-yellow-200 font-semibold'
+): React.ReactNode[] => {
+  if (!searchTerm || searchTerm.trim() === '') {
+    return [text];
+  }
+
+  const parts: React.ReactNode[] = [];
+  const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedTerm})`, 'gi');
+  let lastIndex = 0;
+  let match;
+  let keyIndex = 0;
+
+  while ((match = regex.exec(text)) !== null) {
+    // Add the text before the match
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index));
+    }
+    // Add the highlighted match
+    parts.push(
+      <span key={`highlight-${keyIndex++}`} className={highlightClassName}>
+        {match[0]}
+      </span>
+    );
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add any remaining text after the last match
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+
+  // If no matches found, return the original text
+  return parts.length > 0 ? parts : [text];
+};
 
 /**
  * Highlight search terms in text
@@ -93,4 +137,3 @@ export const HighlightText = ({
     </>
   );
 };
-
