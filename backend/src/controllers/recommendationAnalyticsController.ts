@@ -232,8 +232,8 @@ export const getRecommendationAnalytics = async (req: AuthRequest, res: Response
         $project: {
           totalClicks: 1,
           uniqueProductsCount: { $size: '$uniqueProducts' },
-          uniqueUsersCount: { $size: { $filter: { input: '$uniqueUsers', as: 'user', cond: { $ne: ['$$user', null] } } },
-          uniqueSessionsCount: { $size: { $filter: { input: '$uniqueSessions', as: 'session', cond: { $ne: ['$$session', null] } } },
+          uniqueUsersCount: { $size: { $filter: { input: '$uniqueUsers', as: 'user', cond: { $ne: ['$$user', null] } } } },
+          uniqueSessionsCount: { $size: { $filter: { input: '$uniqueSessions', as: 'session', cond: { $ne: ['$$session', null] } } } },
         },
       },
     ];
