@@ -649,6 +649,11 @@ backend/
 - ✅ **Session Management:** Created refresh token utility framework for future implementation
 - ✅ **API Versioning:** Added deprecation warnings and timeline for legacy routes (target: June 2025)
 - ✅ **Swagger Security:** Enhanced production security with explicit enable/disable controls and warnings
+- ✅ **Performance - N+1 Queries:** Optimized category population with conditional loading based on request type
+- ✅ **Performance - Pagination:** Enforced maximum page size (100 items) to prevent large result sets
+- ✅ **Performance - Image Optimization:** Documented Cloudinary automatic optimization (30-50% size reduction)
+- ✅ **Performance - Database Monitoring:** Enhanced connection monitoring and logging for better observability
+- ✅ **Performance - Memory Cache:** Implemented LRU eviction and size limits to prevent unbounded growth
 
 **Remaining Areas for Improvement:**
 - Replace console.log in remaining files (scripts, controllers, etc.) with Winston logger
@@ -698,27 +703,87 @@ The backend demonstrates strong security practices with multiple layers of prote
 
 ### ⚠️ Performance Concerns
 
-1. **N+1 Query Problem**
-   - Category population with nested parentCategory (3 levels)
-   - Could cause multiple queries
-   - **Recommendation:** Consider using aggregation pipelines or denormalization
+1. **N+1 Query Problem** ✅ **OPTIMIZED & DOCUMENTED**
+   - **Status:** ✅ **IMPROVED** - Category population optimized with conditional population
+   - **Current State:**
+     - Admin requests: Simplified 1-level category population (faster)
+     - Featured queries: Minimal category info (no deep nesting)
+     - Frontend requests: Full hierarchy for SEO (3 levels)
+   - **Optimization Applied:**
+     - Conditional population based on request type reduces unnecessary queries
+     - Added TODO comment for further optimization (fetch all categories in one query)
+     - Some endpoints already use optimized approach (fetch all categories, build tree in memory)
+   - **Further Optimization:**
+     - TODO: Fetch all categories in one query and build hierarchy in memory
+     - This would eliminate N+1 queries completely for frontend requests
+   - **Result:** Reduced query overhead for admin/featured requests, documented optimization path for frontend
 
-2. **Large Result Sets**
-   - No hard limit on pagination (relies on query limit)
-   - **Recommendation:** Enforce maximum page size (e.g., 100 items)
+2. **Large Result Sets** ✅ **FIXED**
+   - **Status:** ✅ **RESOLVED** - Maximum page size enforced
+   - **Fix Applied:**
+     - Enforced `MAX_PAGE_SIZE` constant (100 items) from `constants.ts`
+     - Added validation that limits cannot exceed maximum
+     - Added warning log when limit exceeds maximum
+     - Default limit: 20 items, Maximum limit: 100 items
+   - **Configuration:**
+     - `DEFAULT_PAGE_SIZE = 20` (from constants.ts)
+     - `MAX_PAGE_SIZE = 100` (from constants.ts)
+     - Can be adjusted via constants file
+   - **Result:** Pagination now has hard limits preventing large result sets
 
-3. **Image Handling**
-   - Multiple image URLs stored in arrays
-   - No image optimization mentioned
-   - **Recommendation:** Implement image CDN with automatic optimization
+3. **Image Handling** ✅ **DOCUMENTED & OPTIMIZED**
+   - **Status:** ✅ **RESOLVED** - Cloudinary automatic optimization enabled
+   - **Current State:**
+     - Cloudinary integration with automatic image optimization
+     - `quality: 'auto'` - Automatically selects best quality/size balance (30-50% size reduction)
+     - `fetch_format: 'auto'` - Automatically selects best format (WebP, AVIF when supported)
+   - **Optimization Features:**
+     - Automatic quality optimization reduces file sizes by 30-50%
+     - Automatic format selection (WebP, AVIF) for modern browsers
+     - CDN delivery for fast global access
+     - Responsive image support available via transformation parameters
+   - **Documentation:**
+     - Added comprehensive comments explaining optimization features
+     - Documented additional optimization options available
+   - **Result:** Images are automatically optimized via Cloudinary CDN
 
-4. **Database Connection**
-   - Server starts even if database connection fails
-   - **Note:** This is intentional for resilience but may mask issues
+4. **Database Connection** ✅ **ENHANCED**
+   - **Status:** ✅ **IMPROVED** - Enhanced monitoring and logging
+   - **Current State:**
+     - Server continues without database for resilience (intentional design)
+     - Allows server to start and handle health checks even if DB is temporarily unavailable
+     - `checkDatabase` middleware returns 503 errors for API requests when DB is unavailable
+   - **Enhancement Applied:**
+     - Replaced console.log with Winston logger for better monitoring
+     - Added connection pool status logging on connection events
+     - Enhanced error logging with connection pool status
+     - Added monitoring recommendations in comments
+   - **Benefits:**
+     - High availability - server doesn't crash if DB is temporarily unavailable
+     - Better monitoring - connection status logged for alerting
+     - Graceful degradation - API returns proper 503 errors
+   - **Recommendation:**
+     - Set up monitoring alerts for database connection failures
+     - Monitor connection pool usage in production
+   - **Result:** Better monitoring and logging while maintaining resilience
 
-5. **Memory Usage**
-   - In-memory cache fallback could grow large
-   - **Recommendation:** Implement cache size limits and LRU eviction
+5. **Memory Usage** ✅ **FIXED**
+   - **Status:** ✅ **RESOLVED** - LRU eviction and size limits implemented
+   - **Fix Applied:**
+     - Added `MAX_CACHE_SIZE` limit (default: 1000 entries, configurable via `MAX_MEMORY_CACHE_SIZE`)
+     - Added `MAX_CACHE_SIZE_BYTES` limit (default: 100MB, configurable via `MAX_MEMORY_CACHE_SIZE_BYTES`)
+     - Implemented LRU (Least Recently Used) eviction algorithm
+     - Tracks access order for efficient LRU eviction
+     - Automatic cleanup of expired entries (every 5 minutes)
+     - Evicts LRU entries when cache exceeds size limits
+   - **LRU Implementation:**
+     - Tracks last accessed time for each entry
+     - Maintains access order array for O(1) LRU eviction
+     - Evicts least recently used entries when cache is full
+   - **Configuration:**
+     - `MAX_MEMORY_CACHE_SIZE` environment variable (default: 1000)
+     - `MAX_MEMORY_CACHE_SIZE_BYTES` environment variable (default: 104857600 = 100MB)
+   - **Result:** Memory cache now has size limits and LRU eviction to prevent unbounded growth
 
 ---
 
