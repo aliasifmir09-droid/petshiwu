@@ -12,6 +12,8 @@ import { trackSearch } from '@/utils/analytics';
 import { useDebounce } from '@/hooks/useDebounce';
 import SEO from '@/components/SEO';
 import { useSEO } from '@/hooks/useSEO';
+import searchHistoryService from '@/services/searchHistory';
+import { addToSearchHistory, getRecentSearches } from '@/utils/searchHistory';
 
 const AdvancedSearch = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -289,7 +291,7 @@ const AdvancedSearch = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {searchResults.data.map((product) => (
-              <ProductCard key={product._id} product={product} />
+              <ProductCard key={product._id} product={product} searchTerm={query} />
             ))}
           </div>
         </>

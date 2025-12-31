@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import Product from '../models/Product';
 import Category from '../models/Category';
+import SearchHistory from '../models/SearchHistory';
 import mongoose from 'mongoose';
 import logger from '../utils/logger';
 import { executeCachedAggregation } from '../utils/aggregationCache';

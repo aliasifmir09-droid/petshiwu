@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { safeError } from './sanitizeLogs';
 import { AppError, createErrorResponse } from '../utils/errors';
 import logger from '../utils/logger';
+import { recordError, addCustomAttribute } from '../utils/apm';
 
 export const errorHandler = (err: Error | AppError, req: Request, res: Response, next: NextFunction) => {
   let error: { message: string; statusCode: number; name?: string } = {
@@ -16,6 +17,19 @@ export const errorHandler = (err: Error | AppError, req: Request, res: Response,
   } else {
     safeError('Error occurred:', err);
   }
+
+  // Record error to APM
+  recordError(err, {
+    url: req.originalUrl,
+    method: req.method,
+    statusCode: error.statusCode,
+    userAgent: req.get('user-agent'),
+    ip: req.ip,
+  });
+  
+  // Add error context to APM
+  addCustomAttribute('error.name', err.name || 'Error');
+  addCustomAttribute('error.statusCode', error.statusCode);
 
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {

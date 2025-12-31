@@ -27,6 +27,7 @@ import logger from './utils/logger';
 import { initializeJobQueues } from './utils/jobQueue';
 import { startEmailWorker } from './workers/emailWorker';
 import { responseTimeMiddleware } from './middleware/responseTime';
+import { initializeAPM } from './utils/apm';
 
 // Load env vars
 dotenv.config();
@@ -138,6 +139,8 @@ import faqRoutes from './routes/faqs';
 import slideshowRoutes from './routes/slideshow';
 import healthRoutes from './routes/health';
 import notificationRoutes from './routes/notifications';
+import searchHistoryRoutes from './routes/searchHistory';
+import searchAnalyticsRoutes from './routes/searchAnalytics';
 import { generateSitemap } from './controllers/sitemapController';
 
 // Connect to database (non-blocking - errors handled internally)
@@ -164,6 +167,18 @@ try {
   }
   // Don't exit - app works without Redis
 }
+
+// Initialize APM (Application Performance Monitoring)
+// CRITICAL FIX: Initialize APM before other services
+initializeAPM().catch((error: unknown) => {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  try {
+    logger.warn('⚠️  APM initialization error (non-fatal):', errorMessage);
+  } catch {
+    console.warn('⚠️  APM initialization error (non-fatal):', errorMessage);
+  }
+  // Don't exit - app works without APM (uses built-in logging)
+});
 
 // Initialize job queues (requires Redis, falls back gracefully if unavailable)
 // CRITICAL FIX: Wrap in try-catch to prevent uncaught exceptions
@@ -828,6 +843,8 @@ app.use('/api/faqs', legacyRouteDeprecation, faqRoutes);
 app.use('/api/slideshow', legacyRouteDeprecation, slideshowRoutes);
 app.use('/api/notifications', legacyRouteDeprecation, notificationRoutes);
 app.use('/api/health', healthRoutes); // Health check doesn't need deprecation warning
+app.use('/api/search-history', searchHistoryRoutes); // Routes handle authentication internally
+app.use('/api/search-analytics', searchAnalyticsRoutes); // Routes handle authentication and authorization internally
 
 // Sitemap route (no API prefix for SEO) - must be before content-type middleware
 // This ensures it returns XML, not HTML

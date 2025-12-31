@@ -9,15 +9,17 @@ import { normalizeImageUrl, handleImageError, generateSrcSet, getOptimalImageSiz
 import { useImageLoadTracker } from '@/hooks/useImageLoadTracker';
 import { usePrefetch } from '@/hooks/usePrefetch';
 import { preloadProductImages } from '@/utils/imagePreloader';
+import { highlightSearchTerm } from '@/utils/searchHighlight';
 
 interface ProductCardProps {
   product: Product;
   hideCartButton?: boolean;
   index?: number;
   priority?: boolean;
+  searchTerm?: string;
 }
 
-const ProductCard = memo(({ product, hideCartButton = false, index, priority = false }: ProductCardProps) => {
+const ProductCard = memo(({ product, hideCartButton = false, index, priority = false, searchTerm }: ProductCardProps) => {
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
   const { addToCart } = useCartStore();
   const { markImageFailed } = useImageLoadTracker();
@@ -177,7 +179,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
 
           {/* Name */}
           <h3 className="font-bold text-gray-900 mb-2 line-clamp-3 min-h-[4rem] text-sm group-hover:text-blue-700 transition-colors leading-snug">
-            {product.name}
+            {searchTerm ? highlightSearchTerm(product.name, searchTerm) : product.name}
           </h3>
 
           {/* Rating - Only render if there are reviews */}

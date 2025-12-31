@@ -16,7 +16,8 @@
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:admin\"",
     "build:frontend": "cd frontend && npm run build",
     "build:admin": "cd admin && npm run build",
-    "build": "npm run build:frontend && npm run build:admin"
+    "build": "npm run build:frontend && npm run build:admin",
+    "check:performance": "node scripts/performance-budget.js"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import logger from '../utils/logger';
+import { startTransaction, recordMetric, addCustomAttribute } from '../utils/apm';
 
 /**
  * Response time monitoring middleware
