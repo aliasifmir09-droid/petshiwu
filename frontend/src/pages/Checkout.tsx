@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { orderService } from '@/services/orders';
 import { productService } from '@/services/products';
 import { addressService } from '@/services/addresses';
-import paymentMethodService, { PaymentMethod } from '@/services/paymentMethods';
+import paymentMethodService from '@/services/paymentMethods';
 import { Address } from '@/types';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
@@ -194,10 +194,9 @@ const Checkout = () => {
   const [orderNotes, setOrderNotes] = useState('');
   const [selectedSavedPaymentMethod, setSelectedSavedPaymentMethod] = useState<string | null>(null);
   const [savePaymentMethod, setSavePaymentMethod] = useState(false);
-  const [isQuickCheckout, setIsQuickCheckout] = useState(false);
 
   // Fetch saved payment methods if user is logged in
-  const { data: savedPaymentMethods = [], refetch: refetchPaymentMethods } = useQuery({
+  const { data: savedPaymentMethods = [] } = useQuery({
     queryKey: ['payment-methods'],
     queryFn: async () => {
       const response = await paymentMethodService.getPaymentMethods();
@@ -211,7 +210,6 @@ const Checkout = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('quick') === 'true') {
-      setIsQuickCheckout(true);
       // Auto-select default payment method if available
       if (savedPaymentMethods.length > 0) {
         const defaultMethod = savedPaymentMethods.find(pm => pm.isDefault) || savedPaymentMethods[0];

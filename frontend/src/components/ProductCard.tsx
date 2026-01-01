@@ -35,6 +35,14 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
   const [isHovered, setIsHovered] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const [showQuickView, setShowQuickView] = useState(false);
+
+  // Handle click on product card - track recommendation clicks if applicable
+  const handleClick = useCallback(() => {
+    if (onRecommendationClick && recommendationType && productId && sourceProductId) {
+      const position = index !== undefined ? index : 0;
+      onRecommendationClick(productId, recommendationType, position);
+    }
+  }, [onRecommendationClick, recommendationType, productId, sourceProductId, index]);
   
   // Memoize mouse handlers with prefetching
   const handleMouseEnter = useCallback(() => {

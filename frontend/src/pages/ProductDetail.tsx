@@ -16,7 +16,6 @@ import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { trackProductView, trackAddToWishlist, trackProductComparison, trackShare } from '@/utils/analytics';
 import { addToRecentlyViewed } from '@/utils/recentlyViewed';
-import recommendationAnalyticsService from '@/services/recommendationAnalytics';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import { safeError } from '@/utils/safeLogger';
@@ -295,6 +294,25 @@ const ProductDetail = () => {
     
     // Track product comparison
     trackProductComparison([productId]);
+  };
+
+  // Handle recommendation click tracking
+  const handleRecommendationClick = async (productId: string, recommendationType: string, position: number) => {
+    if (!product?._id) return;
+    
+    try {
+      // Lazy load recommendation analytics service
+      const { default: recommendationAnalyticsService } = await import('@/services/recommendationAnalytics');
+      await recommendationAnalyticsService.trackClick({
+        productId,
+        sourceProductId: String(product._id),
+        recommendationType: recommendationType as 'frequently-bought-together' | 'customers-also-bought' | 'you-may-also-like' | 'similar-products' | 'trending' | 'personalized',
+        position
+      });
+    } catch (error) {
+      // Silently fail - analytics tracking should not break the UI
+      safeError('Failed to track recommendation click', error);
+    }
   };
 
   // Reset zoom when image changes

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/products';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
-import { X, Heart, ShoppingCart, Star, Truck, Shield, RotateCcw, Sparkles } from 'lucide-react';
+import { X, Heart, ShoppingCart, Star } from 'lucide-react';
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
 import { useNavigate } from 'react-router-dom';
@@ -60,19 +60,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
       ? product.variants[selectedVariant] 
       : undefined;
     
-    addToCart({
-      product: product._id,
-      name: product.name,
-      price: variant?.price || product.price,
-      image: product.images?.[0] || '',
-      quantity,
-      variant: variant ? {
-        sku: variant.sku,
-        size: variant.size,
-        weight: variant.weight,
-        attributes: variant.attributes
-      } : undefined
-    });
+    addToCart(product, variant, quantity);
     
     showToast('Product added to cart!', 'success');
   };
@@ -96,7 +84,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
 
   return (
     <>
-      <Toast toast={toast} onClose={hideToast} />
+      {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
       
       {/* Backdrop */}
       <div
@@ -182,11 +170,11 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
                     <span className="text-3xl font-bold text-gray-900">
                       ${product.variants && product.variants.length > 0 && product.variants[selectedVariant]
                         ? product.variants[selectedVariant].price.toFixed(2)
-                        : product.price.toFixed(2)}
+                        : product.basePrice.toFixed(2)}
                     </span>
-                    {product.originalPrice && product.originalPrice > product.price && (
+                    {product.compareAtPrice && product.compareAtPrice > product.basePrice && (
                       <span className="ml-2 text-lg text-gray-500 line-through">
-                        ${product.originalPrice.toFixed(2)}
+                        ${product.compareAtPrice.toFixed(2)}
                       </span>
                     )}
                   </div>
