@@ -115,7 +115,7 @@ export const getRecommendationAnalytics = async (req: AuthRequest, res: Response
     }
 
     // Get click-through rates by recommendation type
-    const clickThroughRatePipeline = [
+    const clickThroughRatePipeline: any[] = [
       { $match: dateFilter },
       {
         $group: {
@@ -140,7 +140,7 @@ export const getRecommendationAnalytics = async (req: AuthRequest, res: Response
       { $sort: { totalClicks: -1 } },
     ];
 
-    const clickThroughRates = await executeCachedAggregation(
+    const clickThroughRates = await executeCachedAggregation<any[]>(
       'recommendationclicks',
       clickThroughRatePipeline,
       () => RecommendationClick.aggregate(clickThroughRatePipeline),
@@ -149,7 +149,7 @@ export const getRecommendationAnalytics = async (req: AuthRequest, res: Response
     );
 
     // Get most clicked products
-    const mostClickedProductsPipeline = [
+    const mostClickedProductsPipeline: any[] = [
       { $match: dateFilter },
       {
         $group: {
@@ -182,7 +182,7 @@ export const getRecommendationAnalytics = async (req: AuthRequest, res: Response
       { $limit: parseInt(limit as string) || 20 },
     ];
 
-    const mostClickedProducts = await executeCachedAggregation(
+    const mostClickedProducts = await executeCachedAggregation<any[]>(
       'recommendationclicks',
       mostClickedProductsPipeline,
       () => RecommendationClick.aggregate(mostClickedProductsPipeline),
@@ -191,7 +191,7 @@ export const getRecommendationAnalytics = async (req: AuthRequest, res: Response
     );
 
     // Get clicks by position
-    const clicksByPositionPipeline = [
+    const clicksByPositionPipeline: any[] = [
       { $match: dateFilter },
       {
         $group: {
@@ -208,7 +208,7 @@ export const getRecommendationAnalytics = async (req: AuthRequest, res: Response
       { $sort: { position: 1 } },
     ];
 
-    const clicksByPosition = await executeCachedAggregation(
+    const clicksByPosition = await executeCachedAggregation<any[]>(
       'recommendationclicks',
       clicksByPositionPipeline,
       () => RecommendationClick.aggregate(clicksByPositionPipeline),
@@ -217,7 +217,7 @@ export const getRecommendationAnalytics = async (req: AuthRequest, res: Response
     );
 
     // Get overall statistics
-    const overallStatsPipeline = [
+    const overallStatsPipeline: any[] = [
       { $match: dateFilter },
       {
         $group: {
@@ -249,10 +249,10 @@ export const getRecommendationAnalytics = async (req: AuthRequest, res: Response
     const response = {
       success: true,
       data: {
-        clickThroughRates: clickThroughRates || [],
-        mostClickedProducts: mostClickedProducts || [],
-        clicksByPosition: clicksByPosition || [],
-        overallStats: overallStats && Array.isArray(overallStats) && overallStats.length > 0 ? overallStats[0] : {
+        clickThroughRates: (clickThroughRates || []) as any[],
+        mostClickedProducts: (mostClickedProducts || []) as any[],
+        clicksByPosition: (clicksByPosition || []) as any[],
+        overallStats: (Array.isArray(overallStats) && overallStats.length > 0) ? overallStats[0] : {
           totalClicks: 0,
           uniqueProductsCount: 0,
           uniqueUsersCount: 0,

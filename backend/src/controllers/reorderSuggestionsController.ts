@@ -85,7 +85,7 @@ export const getReorderSuggestions = async (req: AuthRequest, res: Response, nex
       .lean();
 
     // Get sales data for all products in the date range
-    const salesDataPipeline = [
+    const salesDataPipeline: any[] = [
       {
         $match: {
           orderStatus: { $in: ['delivered', 'shipped'] }, // Only count fulfilled orders
@@ -116,7 +116,7 @@ export const getReorderSuggestions = async (req: AuthRequest, res: Response, nex
 
     // Create a map for quick lookup
     const salesMap = new Map();
-    (salesData || []).forEach((item: any) => {
+    ((salesData as any[]) || []).forEach((item: any) => {
       salesMap.set(item._id.toString(), {
         totalUnitsSold: item.totalUnitsSold || 0,
         orderCount: item.orderCount || 0,
