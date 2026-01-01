@@ -142,10 +142,10 @@ export const getRecommendationAnalytics = async (req: AuthRequest, res: Response
 
     const clickThroughRates = await executeCachedAggregation(
       'recommendationclicks',
-      'click_through_rates',
       clickThroughRatePipeline,
+      () => RecommendationClick.aggregate(clickThroughRatePipeline),
       300, // 5 minutes cache
-      dateFilter
+      JSON.stringify(dateFilter)
     );
 
     // Get most clicked products
@@ -184,10 +184,10 @@ export const getRecommendationAnalytics = async (req: AuthRequest, res: Response
 
     const mostClickedProducts = await executeCachedAggregation(
       'recommendationclicks',
-      'most_clicked_products',
       mostClickedProductsPipeline,
+      () => RecommendationClick.aggregate(mostClickedProductsPipeline),
       300, // 5 minutes cache
-      dateFilter
+      JSON.stringify(dateFilter)
     );
 
     // Get clicks by position
@@ -210,10 +210,10 @@ export const getRecommendationAnalytics = async (req: AuthRequest, res: Response
 
     const clicksByPosition = await executeCachedAggregation(
       'recommendationclicks',
-      'clicks_by_position',
       clicksByPositionPipeline,
+      () => RecommendationClick.aggregate(clicksByPositionPipeline),
       300, // 5 minutes cache
-      dateFilter
+      JSON.stringify(dateFilter)
     );
 
     // Get overall statistics
@@ -238,12 +238,12 @@ export const getRecommendationAnalytics = async (req: AuthRequest, res: Response
       },
     ];
 
-    const overallStats = await executeCachedAggregation(
+    const overallStats = await executeCachedAggregation<any[]>(
       'recommendationclicks',
-      'overall_stats',
       overallStatsPipeline,
+      () => RecommendationClick.aggregate(overallStatsPipeline),
       300, // 5 minutes cache
-      dateFilter
+      JSON.stringify(dateFilter)
     );
 
     const response = {
@@ -252,7 +252,7 @@ export const getRecommendationAnalytics = async (req: AuthRequest, res: Response
         clickThroughRates: clickThroughRates || [],
         mostClickedProducts: mostClickedProducts || [],
         clicksByPosition: clicksByPosition || [],
-        overallStats: overallStats && overallStats.length > 0 ? overallStats[0] : {
+        overallStats: overallStats && Array.isArray(overallStats) && overallStats.length > 0 ? overallStats[0] : {
           totalClicks: 0,
           uniqueProductsCount: 0,
           uniqueUsersCount: 0,

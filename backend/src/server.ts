@@ -146,7 +146,6 @@ import searchHistoryRoutes from './routes/searchHistory';
 import reorderSuggestionsRoutes from './routes/reorderSuggestions';
 import searchAnalyticsRoutes from './routes/searchAnalytics';
 import cartRoutes from './routes/cart';
-import paymentMethodRoutes from './routes/paymentMethods';
 import { generateSitemap } from './controllers/sitemapController';
 
 // Connect to database (non-blocking - errors handled internally)

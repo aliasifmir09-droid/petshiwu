@@ -106,17 +106,17 @@ export const getReorderSuggestions = async (req: AuthRequest, res: Response, nex
       },
     ];
 
-    const salesData = await executeCachedAggregation(
+    const salesData = await executeCachedAggregation<any[]>(
       'orders',
-      'sales_data',
       salesDataPipeline,
+      () => Order.aggregate(salesDataPipeline),
       300, // 5 minutes cache
-      { startDate, endDate }
+      JSON.stringify({ startDate, endDate })
     );
 
     // Create a map for quick lookup
     const salesMap = new Map();
-    salesData.forEach((item: any) => {
+    (salesData || []).forEach((item: any) => {
       salesMap.set(item._id.toString(), {
         totalUnitsSold: item.totalUnitsSold || 0,
         orderCount: item.orderCount || 0,
