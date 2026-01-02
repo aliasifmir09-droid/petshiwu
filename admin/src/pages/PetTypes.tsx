@@ -109,12 +109,16 @@ const PetTypes = () => {
   });
 
   // Sort pet types by order, then by name as fallback
+  // PERFORMANCE FIX: Ensure proper sorting with null/undefined handling
   const petTypes: PetType[] = useMemo(() => {
     const types = petTypesResponse?.data || [];
     return [...types].sort((a, b) => {
-      // First sort by order
-      if (a.order !== b.order) {
-        return (a.order || 0) - (b.order || 0);
+      // First sort by order (handle null/undefined by treating as 0)
+      const orderA = a.order !== null && a.order !== undefined ? a.order : 0;
+      const orderB = b.order !== null && b.order !== undefined ? b.order : 0;
+      
+      if (orderA !== orderB) {
+        return orderA - orderB;
       }
       // If order is the same, sort by name
       return a.name.localeCompare(b.name);
@@ -170,22 +174,33 @@ const PetTypes = () => {
     onError: onMutationError()
   });
 
-  // Handle reorder (move up or down)
+  // Handle reorder (move up or down by 1 position)
+  // Each click moves the pet-type 1 position in the specified direction
   const handleReorder = (petTypeId: string, direction: 'up' | 'down') => {
     const currentIndex = petTypes.findIndex(pt => pt._id === petTypeId);
-    if (currentIndex === -1) return;
+    if (currentIndex === -1) {
+      console.warn(`Pet type ${petTypeId} not found in list`);
+      return;
+    }
 
+    // Calculate new index (move by 1 position)
     const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    if (newIndex < 0 || newIndex >= petTypes.length) return;
+    
+    // Validate bounds
+    if (newIndex < 0 || newIndex >= petTypes.length) {
+      console.warn(`Cannot move ${direction}: already at ${direction === 'up' ? 'top' : 'bottom'}`);
+      return;
+    }
 
     // Create new array with swapped positions
+    // This swaps the current item with the adjacent item (1 position up or down)
     const newOrder = [...petTypes];
     [newOrder[currentIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[currentIndex]];
 
-    // Extract IDs in new order
+    // Extract IDs in new order (this represents the new order after swapping)
     const petTypeIds = newOrder.map(pt => pt._id);
     
-    // Call reorder mutation
+    // Call reorder mutation - backend will assign sequential order values (0, 1, 2, 3...)
     reorderMutation.mutate(petTypeIds);
   };
 

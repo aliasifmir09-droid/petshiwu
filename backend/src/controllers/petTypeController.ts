@@ -162,14 +162,48 @@ export const reorderPetTypes = async (req: AuthRequest, res: Response, next: Nex
         success: false,
         message: 'petTypeIds must be an array'
       });
+    });
+
+    if (petTypeIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'petTypeIds array cannot be empty'
+      });
     }
 
-    // Update order for each pet type
+    // Validate all IDs exist
+    const existingPetTypes = await PetType.find({ _id: { $in: petTypeIds } }).select('_id').lean();
+    if (existingPetTypes.length !== petTypeIds.length) {
+      return res.status(400).json({
+        success: false,
+        message: 'Some pet type IDs are invalid'
+      });
+    }
+
+    // PERFORMANCE FIX: Update order for each pet type
+    // Each pet type gets a sequential order value (0, 1, 2, 3, ...)
+    // This ensures clean ordering without gaps
     const updates = petTypeIds.map((id, index) =>
-      PetType.findByIdAndUpdate(id, { order: index })
+      PetType.findByIdAndUpdate(
+        id, 
+        { order: index },
+        { new: false, runValidators: true }
+      )
     );
 
     await Promise.all(updates);
+
+    // PERFORMANCE FIX: Clear any pet type caches to ensure frontend sees updated order
+    const { cache } = await import('../utils/cache');
+    try {
+      // Clear pet types cache patterns
+      await cache.delPattern('pet-types:*');
+      await cache.delPattern('petTypes:*');
+    } catch (cacheError: any) {
+      // Log but don't fail if cache clearing fails
+      const logger = (await import('../utils/logger')).default;
+      logger.warn('Failed to clear pet types cache:', cacheError.message);
+    }
 
     res.status(200).json({
       success: true,
