@@ -82,8 +82,8 @@ const cartSchema = new Schema<ICart>(
     },
     lastUpdated: {
       type: Date,
-      default: Date.now,
-      index: true
+      default: Date.now
+      // Index is defined below using schema.index() to avoid duplicate index warning
     },
     abandonedAt: Date,
     recoveryEmailSent: {
