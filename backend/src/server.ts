@@ -674,58 +674,73 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) {
-      logger.debug('CORS: Allowing request with no origin');
-      return callback(null, true);
-    }
-    
-    // Normalize origin (remove trailing slash)
-    const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
-    
-    // Check if origin is in allowed list (exact match)
-    const isExactMatch = allowedOrigins.includes(normalizedOrigin) || allowedOrigins.includes(origin);
-    
-    // SECURITY FIX: Use proper regex patterns instead of includes() to prevent subdomain hijacking
-    // Only allow specific subdomain patterns, not any string containing the domain
-    const petshiwuPattern = /^https:\/\/([a-z0-9-]+\.)?petshiwu\.com$/;
-    const petShopPattern = /^https:\/\/pet-shop-[0-9]+-[a-z0-9]+\.onrender\.com$/;
-    const onrenderPattern = /^https:\/\/[a-z0-9-]+\.onrender\.com$/;
-    
-    // Check if origin matches secure patterns
-    const matchesPattern = 
-      petshiwuPattern.test(normalizedOrigin) || // Allow petshiwu.com and subdomains (e.g., www.petshiwu.com, api.petshiwu.com)
-      petShopPattern.test(normalizedOrigin) || // Allow specific pet-shop Render subdomains
-      onrenderPattern.test(normalizedOrigin); // Allow Render subdomains (for development/staging)
-    
-    const isAllowed = isExactMatch || matchesPattern;
-    
-    if (isAllowed) {
-      logger.debug(`CORS: Allowing origin: ${normalizedOrigin}`);
-      callback(null, true);
-    } else {
-      // SECURITY FIX: Block unauthorized origins in production
-      if (process.env.NODE_ENV === 'production') {
-        logger.warn(`CORS: Blocking unauthorized origin: ${normalizedOrigin}`);
-        logger.warn(`CORS: Allowed origins: ${allowedOrigins.join(', ')}`);
-        return callback(new Error('Not allowed by CORS'), false);
+    try {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) {
+        logger.debug('CORS: Allowing request with no origin');
+        return callback(null, true);
       }
-      // In development, allow but log warning
-      if (process.env.NODE_ENV === 'development') {
-        logger.warn(`CORS: Allowing origin ${normalizedOrigin} in development mode`);
-        callback(null, true);
+      
+      // Normalize origin (remove trailing slash and convert to lowercase for comparison)
+      const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+      
+      // Check if origin is in allowed list (exact match, case-insensitive)
+      const normalizedAllowedOrigins = allowedOrigins.map(o => o.toLowerCase());
+      const isExactMatch = normalizedAllowedOrigins.includes(normalizedOrigin.toLowerCase()) || 
+                          allowedOrigins.includes(normalizedOrigin) || 
+                          allowedOrigins.includes(origin);
+      
+      // SECURITY FIX: Use proper regex patterns instead of includes() to prevent subdomain hijacking
+      // Only allow specific subdomain patterns, not any string containing the domain
+      const petshiwuPattern = /^https:\/\/([a-z0-9-]+\.)?petshiwu\.com$/i; // Case-insensitive
+      const petShopPattern = /^https:\/\/pet-shop-[0-9]+-[a-z0-9]+\.onrender\.com$/i;
+      const onrenderPattern = /^https:\/\/[a-z0-9-]+\.onrender\.com$/i;
+      
+      // Check if origin matches secure patterns
+      const matchesPattern = 
+        petshiwuPattern.test(normalizedOrigin) || // Allow petshiwu.com and subdomains (e.g., www.petshiwu.com, dashboard.petshiwu.com)
+        petShopPattern.test(normalizedOrigin) || // Allow specific pet-shop Render subdomains
+        onrenderPattern.test(normalizedOrigin); // Allow Render subdomains (for development/staging)
+      
+      const isAllowed = isExactMatch || matchesPattern;
+      
+      if (isAllowed) {
+        logger.debug(`CORS: Allowing origin: ${normalizedOrigin}`);
+        return callback(null, true);
       } else {
-        // Default: block unknown origins
-        logger.warn(`CORS: Blocking origin: ${normalizedOrigin}`);
-        callback(new Error('Not allowed by CORS'), false);
+        // SECURITY FIX: Block unauthorized origins in production
+        if (process.env.NODE_ENV === 'production') {
+          logger.warn(`CORS: Blocking unauthorized origin: ${normalizedOrigin}`);
+          logger.warn(`CORS: Allowed origins: ${allowedOrigins.join(', ')}`);
+          logger.warn(`CORS: Pattern match - petshiwu: ${petshiwuPattern.test(normalizedOrigin)}, petShop: ${petShopPattern.test(normalizedOrigin)}, onrender: ${onrenderPattern.test(normalizedOrigin)}`);
+          return callback(new Error('Not allowed by CORS'), false);
+        }
+        // In development, allow but log warning
+        if (process.env.NODE_ENV === 'development') {
+          logger.warn(`CORS: Allowing origin ${normalizedOrigin} in development mode`);
+          return callback(null, true);
+        } else {
+          // Default: block unknown origins
+          logger.warn(`CORS: Blocking origin: ${normalizedOrigin}`);
+          return callback(new Error('Not allowed by CORS'), false);
+        }
       }
+    } catch (error: any) {
+      // If there's an error in CORS logic, log it but allow the request in development
+      logger.error(`CORS: Error processing origin: ${error.message}`);
+      if (process.env.NODE_ENV === 'development') {
+        return callback(null, true);
+      }
+      return callback(error, false);
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-CSRF-Token'],
   exposedHeaders: ['Authorization'],
-  maxAge: 86400 // Cache preflight requests for 24 hours
+  maxAge: 86400, // Cache preflight requests for 24 hours
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
 
 // Request logging middleware (development only) - sanitize URLs
@@ -813,21 +828,24 @@ app.use(`${API_PREFIX}/reorder-suggestions`, reorderSuggestionsRoutes);
 
 // Legacy routes (without version) - for backward compatibility
 // DEPRECATION NOTICE: Legacy routes are maintained for backward compatibility
-// Plan: Legacy routes will be deprecated in a future version (target: Q2 2025)
+// Plan: Legacy routes will be deprecated in a future version (target: Q2 2026)
 // Recommendation: Migrate to versioned routes (/api/v1/*) for future compatibility
 // Legacy routes will log deprecation warnings in production after deprecation date
-const DEPRECATION_DATE = new Date('2025-06-01'); // Target deprecation date
+const DEPRECATION_DATE = new Date('2026-06-01'); // Updated deprecation date - routes still in use
 const isAfterDeprecation = new Date() >= DEPRECATION_DATE;
 
 // Middleware to add deprecation warning to legacy routes
+// DISABLED: Deprecation warnings disabled until v1 routes are fully implemented
 const legacyRouteDeprecation = (req: Request, res: Response, next: NextFunction) => {
-  if (isAfterDeprecation && process.env.NODE_ENV === 'production') {
-    // Add deprecation warning header
-    res.setHeader('X-API-Deprecation', 'true');
-    res.setHeader('X-API-Deprecation-Date', DEPRECATION_DATE.toISOString());
-    res.setHeader('X-API-Deprecation-Message', 'This endpoint is deprecated. Please migrate to /api/v1/* endpoints.');
-    logger.warn(`Deprecated API endpoint accessed: ${req.method} ${req.originalUrl}`);
-  }
+  // Temporarily disabled deprecation warnings - routes are still actively used
+  // Uncomment when v1 routes are ready for migration
+  // if (isAfterDeprecation && process.env.NODE_ENV === 'production') {
+  //   // Add deprecation warning header
+  //   res.setHeader('X-API-Deprecation', 'true');
+  //   res.setHeader('X-API-Deprecation-Date', DEPRECATION_DATE.toISOString());
+  //   res.setHeader('X-API-Deprecation-Message', 'This endpoint is deprecated. Please migrate to /api/v1/* endpoints.');
+  //   logger.warn(`Deprecated API endpoint accessed: ${req.method} ${req.originalUrl}`);
+  // }
   next();
 };
 
