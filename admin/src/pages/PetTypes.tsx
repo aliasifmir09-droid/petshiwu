@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Plus, Edit, Trash2, GripVertical, X } from 'lucide-react';
+import { Plus, Edit, Trash2, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { adminService } from '@/services/adminService';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
@@ -103,15 +103,29 @@ const PetTypes = () => {
   // Fetch pet types
   const { data: petTypesResponse, isLoading } = useQuery({
     queryKey: ['admin-pet-types'],
-    queryFn: adminService.getAllPetTypesAdmin
+    queryFn: adminService.getAllPetTypesAdmin,
+    refetchOnMount: true, // Always refetch to ensure we get all pet types including Fish
+    staleTime: 0 // Don't cache - always fetch fresh data
   });
 
-  const petTypes: PetType[] = petTypesResponse?.data || [];
+  // Sort pet types by order, then by name as fallback
+  const petTypes: PetType[] = useMemo(() => {
+    const types = petTypesResponse?.data || [];
+    return [...types].sort((a, b) => {
+      // First sort by order
+      if (a.order !== b.order) {
+        return (a.order || 0) - (b.order || 0);
+      }
+      // If order is the same, sort by name
+      return a.name.localeCompare(b.name);
+    });
+  }, [petTypesResponse?.data]);
 
   // Auto-refresh hook - automatically refreshes queries after mutations
   // This ensures the page shows updated data immediately after create/update/delete
+  // Note: 'pet-types' is the frontend query key, so reordering will update the frontend nav
   const { onMutationSuccess, onMutationError } = useAutoRefresh(
-    ['admin-pet-types', 'pet-types'], // Query keys to refresh
+    ['admin-pet-types', 'pet-types'], // Query keys to refresh (includes frontend cache)
     { showToast } // Pass toast function for automatic success/error messages
   );
 
@@ -148,6 +162,32 @@ const PetTypes = () => {
     }),
     onError: onMutationError()
   });
+
+  // Reorder pet types mutation
+  const reorderMutation = useMutation({
+    mutationFn: adminService.reorderPetTypes,
+    onSuccess: onMutationSuccess('Pet types reordered successfully!'),
+    onError: onMutationError()
+  });
+
+  // Handle reorder (move up or down)
+  const handleReorder = (petTypeId: string, direction: 'up' | 'down') => {
+    const currentIndex = petTypes.findIndex(pt => pt._id === petTypeId);
+    if (currentIndex === -1) return;
+
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0 || newIndex >= petTypes.length) return;
+
+    // Create new array with swapped positions
+    const newOrder = [...petTypes];
+    [newOrder[currentIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[currentIndex]];
+
+    // Extract IDs in new order
+    const petTypeIds = newOrder.map(pt => pt._id);
+    
+    // Call reorder mutation
+    reorderMutation.mutate(petTypeIds);
+  };
 
   const handleOpenModal = (petType?: PetType) => {
     if (petType) {
@@ -282,9 +322,24 @@ const PetTypes = () => {
                 {petTypes.map((petType, index) => (
                   <tr key={getUniqueKey(petType?._id, index, 'pettype')} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <button className="text-gray-400 hover:text-gray-600 cursor-move">
-                        <GripVertical size={20} />
-                      </button>
+                      <div className="flex flex-col gap-1">
+                        <button
+                          onClick={() => handleReorder(petType._id, 'up')}
+                          disabled={index === 0 || reorderMutation.isPending}
+                          className="text-gray-400 hover:text-primary-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          title="Move up"
+                        >
+                          <ArrowUp size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleReorder(petType._id, 'down')}
+                          disabled={index === petTypes.length - 1 || reorderMutation.isPending}
+                          className="text-gray-400 hover:text-primary-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          title="Move down"
+                        >
+                          <ArrowDown size={16} />
+                        </button>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-3xl">
                       {petType.icon}
