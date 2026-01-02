@@ -370,6 +370,7 @@ const Dashboard = () => {
         retry: 2,
         staleTime: QUERY_CONFIG.CATEGORIES_STALE_TIME,
         gcTime: QUERY_CONFIG.CATEGORIES_GC_TIME,
+        refetchOnMount: true, // PERFORMANCE FIX: Always refetch on mount if data is stale to ensure UI sync
       },
       {
         queryKey: ['pet-types'],
@@ -377,7 +378,7 @@ const Dashboard = () => {
         retry: 2,
         staleTime: QUERY_CONFIG.PET_TYPES_STALE_TIME,
         gcTime: QUERY_CONFIG.PET_TYPES_GC_TIME,
-        refetchOnMount: true, // Always refetch when component mounts to get latest data
+        refetchOnMount: true, // PERFORMANCE FIX: Always refetch on mount if data is stale to ensure UI sync
       },
     ],
   });

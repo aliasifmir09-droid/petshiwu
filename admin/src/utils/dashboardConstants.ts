@@ -20,8 +20,8 @@ export const QUERY_CONFIG = {
   ORDER_STATS_STALE_TIME: 30 * TIME.SECOND, // 30 seconds - order stats change frequently, need to stay in sync
   PRODUCT_STATS_STALE_TIME: 30 * TIME.SECOND, // 30 seconds - product stats need to stay in sync with mutations
   OUT_OF_STOCK_STALE_TIME: 30 * TIME.SECOND, // 30 seconds - out of stock needs to stay in sync
-  CATEGORIES_STALE_TIME: TIME.FIVE_MINUTES,
-  PET_TYPES_STALE_TIME: TIME.FIVE_MINUTES,
+  CATEGORIES_STALE_TIME: 30 * TIME.SECOND, // 30 seconds - categories need to stay in sync with mutations
+  PET_TYPES_STALE_TIME: 30 * TIME.SECOND, // 30 seconds - pet types need to stay in sync with mutations (CRITICAL FIX)
   
   // Garbage collection time (how long to keep unused data in cache)
   ORDER_STATS_GC_TIME: TIME.FIVE_MINUTES,

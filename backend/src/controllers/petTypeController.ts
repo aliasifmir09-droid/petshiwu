@@ -89,6 +89,18 @@ export const createPetType = async (req: AuthRequest, res: Response, next: NextF
   try {
     const petType = await PetType.create(req.body);
 
+    // PERFORMANCE FIX: Clear pet type caches to ensure frontend sees new pet type immediately
+    const { cache } = await import('../utils/cache');
+    try {
+      // Clear pet types cache patterns
+      await cache.delPattern('pet-types:*');
+      await cache.delPattern('petTypes:*');
+    } catch (cacheError: any) {
+      // Log but don't fail if cache clearing fails
+      const logger = (await import('../utils/logger')).default;
+      logger.warn('Failed to clear pet types cache:', cacheError.message);
+    }
+
     // Normalize _id to string
     const normalizedPetType = normalizePetTypeId(petType);
 
@@ -119,6 +131,19 @@ export const updatePetType = async (req: AuthRequest, res: Response, next: NextF
     // Save to trigger pre-save middleware
     await petType.save();
 
+    // PERFORMANCE FIX: Clear pet type caches to ensure frontend sees updated pet type immediately
+    // This is critical for Dashboard sync - without this, Dashboard shows stale data
+    const { cache } = await import('../utils/cache');
+    try {
+      // Clear pet types cache patterns
+      await cache.delPattern('pet-types:*');
+      await cache.delPattern('petTypes:*');
+    } catch (cacheError: any) {
+      // Log but don't fail if cache clearing fails
+      const logger = (await import('../utils/logger')).default;
+      logger.warn('Failed to clear pet types cache:', cacheError.message);
+    }
+
     // Normalize _id to string
     const normalizedPetType = normalizePetTypeId(petType);
 
@@ -141,6 +166,18 @@ export const deletePetType = async (req: AuthRequest, res: Response, next: NextF
         success: false,
         message: 'Pet type not found'
       });
+    }
+
+    // PERFORMANCE FIX: Clear pet type caches to ensure frontend sees deleted pet type immediately
+    const { cache } = await import('../utils/cache');
+    try {
+      // Clear pet types cache patterns
+      await cache.delPattern('pet-types:*');
+      await cache.delPattern('petTypes:*');
+    } catch (cacheError: any) {
+      // Log but don't fail if cache clearing fails
+      const logger = (await import('../utils/logger')).default;
+      logger.warn('Failed to clear pet types cache:', cacheError.message);
     }
 
     res.status(200).json({

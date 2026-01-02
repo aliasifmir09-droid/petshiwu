@@ -131,10 +131,11 @@ export const useAutoRefresh = (
           );
 
           // Refetch all specified query keys to immediately show updated data
-          // Note: We only refetch the original mutation keys, not Dashboard keys
-          // Dashboard will refetch automatically when it detects stale data
+          // PERFORMANCE FIX: Also refetch Dashboard queries if they were invalidated
+          // This ensures Dashboard updates immediately instead of waiting for staleTime to expire
+          const allKeysToRefetch = [...allQueryKeys, ...dashboardQueriesToInvalidate];
           await Promise.all(
-            allQueryKeys.map((key) => {
+            allKeysToRefetch.map((key) => {
               const keyArray = Array.isArray(key) ? key : [key];
               return queryClient.refetchQueries({
                 queryKey: keyArray,
