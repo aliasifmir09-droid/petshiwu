@@ -14,10 +14,12 @@ export const TIME = {
 // Query configuration constants
 export const QUERY_CONFIG = {
   // Stale time (how long data is considered fresh)
+  // PERFORMANCE FIX: Reduced stale times to ensure Dashboard UI stays in sync
+  // When queries are invalidated, they will refetch immediately if stale
   USER_DATA_STALE_TIME: TIME.FIVE_MINUTES,
-  ORDER_STATS_STALE_TIME: 2 * TIME.MINUTE, // 2 minutes - order stats change more frequently
-  PRODUCT_STATS_STALE_TIME: 5 * TIME.MINUTE, // 5 minutes - product stats don't change as frequently
-  OUT_OF_STOCK_STALE_TIME: 2 * TIME.MINUTE, // 2 minutes - out of stock needs moderate freshness
+  ORDER_STATS_STALE_TIME: 30 * TIME.SECOND, // 30 seconds - order stats change frequently, need to stay in sync
+  PRODUCT_STATS_STALE_TIME: 30 * TIME.SECOND, // 30 seconds - product stats need to stay in sync with mutations
+  OUT_OF_STOCK_STALE_TIME: 30 * TIME.SECOND, // 30 seconds - out of stock needs to stay in sync
   CATEGORIES_STALE_TIME: TIME.FIVE_MINUTES,
   PET_TYPES_STALE_TIME: TIME.FIVE_MINUTES,
   

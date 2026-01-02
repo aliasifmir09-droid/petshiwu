@@ -319,6 +319,7 @@ const Dashboard = () => {
     gcTime: QUERY_CONFIG.ORDER_STATS_GC_TIME,
     refetchInterval: QUERY_CONFIG.ORDER_STATS_REFETCH_INTERVAL, // Now polls every 2 minutes instead of 20 seconds
     refetchOnWindowFocus: false, // Disabled - manual refresh button available if needed
+    refetchOnMount: true, // PERFORMANCE FIX: Always refetch on mount if data is stale to ensure UI sync
   });
   
   // Update last updated timestamp when data changes
@@ -352,6 +353,7 @@ const Dashboard = () => {
         staleTime: QUERY_CONFIG.PRODUCT_STATS_STALE_TIME,
         gcTime: QUERY_CONFIG.PRODUCT_STATS_GC_TIME,
         refetchOnWindowFocus: false, // Disabled - product stats don't need to refresh on window focus
+        refetchOnMount: true, // PERFORMANCE FIX: Always refetch on mount if data is stale to ensure UI sync
       },
       {
         queryKey: ['products', 'out-of-stock'],
@@ -360,6 +362,7 @@ const Dashboard = () => {
         staleTime: QUERY_CONFIG.OUT_OF_STOCK_STALE_TIME,
         gcTime: QUERY_CONFIG.OUT_OF_STOCK_GC_TIME,
         refetchOnWindowFocus: false, // Disabled - out of stock doesn't need to refresh on window focus
+        refetchOnMount: true, // PERFORMANCE FIX: Always refetch on mount if data is stale to ensure UI sync
       },
       {
         queryKey: ['admin-categories'],
