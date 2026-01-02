@@ -896,7 +896,7 @@ export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFu
     // Get total count and orders in parallel
     // PERFORMANCE FIX: Add allowDiskUse for large datasets
     const [orders, total] = await Promise.all([
-      Order.aggregate(aggregationPipeline).allowDiskUse(true),
+      Order.aggregate(aggregationPipeline, { allowDiskUse: true }),
       Order.countDocuments(matchQuery).maxTimeMS(5000)
     ]);
 

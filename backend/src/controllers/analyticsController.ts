@@ -70,7 +70,7 @@ export const getAdvancedAnalytics = async (req: AuthRequest, res: Response, next
       {
         $limit: 100
       }
-    ]).allowDiskUse(true);
+    ], { allowDiskUse: true });
 
     // Calculate average CLV
     const avgCLV = customerLTV.length > 0
@@ -110,7 +110,7 @@ export const getAdvancedAnalytics = async (req: AuthRequest, res: Response, next
       {
         $limit: 50
       }
-    ]).allowDiskUse(true);
+    ], { allowDiskUse: true });
     
     // PERFORMANCE FIX: Fetch product info separately for top products only (much faster)
     const topProductIds = productPerformance.slice(0, 50).map((p: any) => p.productId);
@@ -162,7 +162,7 @@ export const getAdvancedAnalytics = async (req: AuthRequest, res: Response, next
       {
         $sort: { '_id.year': 1, '_id.month': 1, '_id.week': 1 }
       }
-    ]).allowDiskUse(true);
+    ], { allowDiskUse: true });
 
     // Calculate forecast for next 30 days
     const recentWeeks = salesForecast.slice(-4); // Last 4 weeks
@@ -187,7 +187,7 @@ export const getAdvancedAnalytics = async (req: AuthRequest, res: Response, next
           totalSold: { $sum: '$items.quantity' }
         }
       }
-    ]).allowDiskUse(true);
+    ], { allowDiskUse: true });
     
     const salesMap = new Map();
     productSales.forEach((sale: any) => {

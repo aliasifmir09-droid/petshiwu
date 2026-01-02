@@ -2643,7 +2643,7 @@ export const getProductStats = async (req: Request, res: Response, next: NextFun
       }
     ];
 
-    const statsResult = await Product.aggregate(statsPipeline).allowDiskUse(true);
+    const statsResult = await Product.aggregate(statsPipeline, { allowDiskUse: true });
     const stats = statsResult[0] || {};
 
     const totalProducts = stats.totalCount?.[0]?.count || 0;
@@ -2661,8 +2661,10 @@ export const getProductStats = async (req: Request, res: Response, next: NextFun
     
     // Build a map for quick lookup
     const categoryMap = new Map<string, string>();
-    categories.forEach((cat: { _id: mongoose.Types.ObjectId; name: string }) => {
-      categoryMap.set(cat._id.toString(), cat.name);
+    categories.forEach((cat: any) => {
+      if (cat._id) {
+        categoryMap.set(cat._id.toString(), cat.name || 'Unknown Category');
+      }
     });
     
     // Attach category names to the byCategory results

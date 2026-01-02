@@ -80,7 +80,7 @@ export const getProductRecommendations = async (req: AuthRequest, res: Response,
           { $sort: { count: -1, totalQuantity: -1 } },
           // Limit results
           { $limit: limit }
-        ]).allowDiskUse(true);
+        ], { allowDiskUse: true });
 
         if (alsoBought.length > 0) {
           const productIdsToFetch = alsoBought.map((item: any) => item._id);

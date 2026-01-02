@@ -559,7 +559,7 @@ export const getDatabaseStats = async (req: AuthRequest, res: Response, next: Ne
           ]
         }
       }
-    ]).allowDiskUse(true);
+    ], { allowDiskUse: true });
 
     const usersResult = usersStats[0] || {};
     const roleMap = (usersResult.byRole || []).reduce((acc: any, item: any) => {
@@ -596,7 +596,7 @@ export const getDatabaseStats = async (req: AuthRequest, res: Response, next: Ne
           ]
         }
       }
-    ]).allowDiskUse(true);
+    ], { allowDiskUse: true });
 
     const productsResult = productsStats[0] || {};
     const productsStatusMap = (productsResult.byStatus || []).reduce((acc: any, item: any) => {
@@ -623,7 +623,7 @@ export const getDatabaseStats = async (req: AuthRequest, res: Response, next: Ne
           ]
         }
       }
-    ]).allowDiskUse(true);
+    ], { allowDiskUse: true });
 
     const ordersResult = ordersStats[0] || {};
     const ordersStatusMap = (ordersResult.byStatus || []).reduce((acc: any, item: any) => {
@@ -642,7 +642,7 @@ export const getDatabaseStats = async (req: AuthRequest, res: Response, next: Ne
           ]
         }
       }
-    ]).allowDiskUse(true);
+    ], { allowDiskUse: true });
 
     // 5. Reviews stats - single aggregation
     const reviewsStats = await Review.aggregate([
@@ -659,7 +659,7 @@ export const getDatabaseStats = async (req: AuthRequest, res: Response, next: Ne
           ]
         }
       }
-    ]).allowDiskUse(true);
+    ], { allowDiskUse: true });
 
     const reviewsResult = reviewsStats[0] || {};
     const reviewsApprovalMap = (reviewsResult.byApproval || []).reduce((acc: any, item: any) => {
@@ -682,7 +682,7 @@ export const getDatabaseStats = async (req: AuthRequest, res: Response, next: Ne
           ]
         }
       }
-    ]).allowDiskUse(true);
+    ], { allowDiskUse: true });
 
     const donationsResult = donationsStats[0] || {};
     const donationsStatusMap = (donationsResult.byStatus || []).reduce((acc: any, item: any) => {
@@ -702,7 +702,7 @@ export const getDatabaseStats = async (req: AuthRequest, res: Response, next: Ne
           totalDonations: { $sum: { $ifNull: ['$donationAmount', 0] } }
         }
       }
-    ]).allowDiskUse(true);
+    ], { allowDiskUse: true });
 
     const financial = financialStats[0] || { totalRevenue: 0, totalDonations: 0 };
 
