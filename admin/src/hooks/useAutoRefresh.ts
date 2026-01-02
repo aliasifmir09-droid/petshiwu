@@ -2,18 +2,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 
 /**
- * Dashboard query keys that should be invalidated when relevant data changes
- * This ensures the Dashboard UI stays in sync with data changes across the app
- */
-const DASHBOARD_QUERY_KEYS = [
-  'orderStats',
-  'productStats',
-  ['products', 'out-of-stock'],
-  'admin-categories',
-  'pet-types',
-] as const;
-
-/**
  * Determine which Dashboard queries should be invalidated based on the mutation query keys
  * This prevents unnecessary invalidations while ensuring Dashboard stays in sync
  */
