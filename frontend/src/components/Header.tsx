@@ -299,24 +299,8 @@ const Header = () => {
     });
   };
 
-  // Build dynamic menus for each pet type
-  // Use dynamic menus from database, with fallback to empty array if no categories loaded
-  const dogMegaMenu = Array.isArray(categories) && categories.length > 0 ? buildDynamicMegaMenu('dog') : [];
-  const catMegaMenu = Array.isArray(categories) && categories.length > 0 ? buildDynamicMegaMenu('cat') : [];
-  const otherAnimalsMegaMenu = Array.isArray(categories) && categories.length > 0 ? buildDynamicMegaMenu('other-animals') : [];
-
-  const dogSpecialLinks = [
-    'Dog Deals',
-    'New Dog Supplies',
-    'Pet Parent Supplies',
-    'Shop all Dog'
-  ];
-
-  const catSpecialLinks = [
-    'Cat Deals',
-    'Pet Parent Supplies',
-    'Shop all Cat'
-  ];
+  // Note: Dynamic menus are now built on-demand for each pet type in the render function
+  // This ensures all pet types use the same menu structure and styling
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -623,9 +607,7 @@ const Header = () => {
                 {/* Dynamic Pet Types with Dropdowns */}
                   {petTypes.map((petType: any) => {
                     const petCategories = getCategoriesForPetType(petType.slug);
-                    const isSpecialDogMenu = petType.slug === 'dog';
-                    const isSpecialCatMenu = petType.slug === 'cat';
-                    const isSpecialOtherAnimalsMenu = petType.slug === 'other-animals';
+                    const megaMenu = Array.isArray(categories) && categories.length > 0 ? buildDynamicMegaMenu(petType.slug) : [];
                     
                     return (
                       <li key={petType.slug} className="relative group flex-shrink-0">
@@ -635,165 +617,42 @@ const Header = () => {
                         >
                           <span className="text-sm lg:text-base flex-shrink-0 leading-none">{petType.icon}</span>
                           <span className="text-xs lg:text-sm whitespace-nowrap">{petType.name}</span>
-                          {(petCategories.length > 0 || isSpecialDogMenu || isSpecialCatMenu || isSpecialOtherAnimalsMenu) && (
+                          {petCategories.length > 0 && (
                             <ChevronDown size={14} className="opacity-60 group-hover:opacity-100 transition-opacity" />
                           )}
                         </Link>
                         
-                        {/* Special Dog Mega Menu */}
-                        {isSpecialDogMenu && (
+                        {/* Unified Mega Menu for ALL pet types - same design */}
+                        {petCategories.length > 0 && (
                           <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                            <div className="grid grid-cols-4 gap-6">
-                              {dogMegaMenu.map((section: MenuSection) => (
-                                <div key={section._id || section.slug} className="space-y-2">
-                                  <Link
-                                    to={`/category/${section.slug}?petType=dog`}
-                                    className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors block"
-                                  >
-                                    {section.title} →
-                                  </Link>
-                                  <ul className="space-y-1">
-                                    {section.items.map((item: MenuItem | string) => (
-                                      <li key={typeof item === 'object' ? item.slug : String(item)}>
-                                        <Link
-                                          to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=dog`}
-                                          className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
-                                        >
-                                          {typeof item === 'object' ? item.name : item}
-                                        </Link>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              ))}
-                            </div>
-                            
-                            {/* Special Links */}
-                            <div className="mt-4 pt-4 border-t border-gray-200 flex flex-wrap gap-3">
-                              {dogSpecialLinks.map((link, idx) => (
-                                <Link
-                                  key={idx}
-                                  to={`/dog`}
-                                  className="text-xs font-semibold text-[#1E3A8A] hover:underline"
-                                >
-                                  {link} →
-                                </Link>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Special Cat Mega Menu */}
-                        {isSpecialCatMenu && (
-                          <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                            <div className="grid grid-cols-4 gap-6">
-                              {catMegaMenu.map((section: MenuSection) => (
-                                <div key={section._id || section.slug} className="space-y-2">
-                                  <Link
-                                    to={`/category/${section.slug}?petType=cat`}
-                                    className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors block"
-                                  >
-                                    {section.title} →
-                                  </Link>
-                                  <ul className="space-y-1">
-                                    {section.items.map((item: MenuItem | string) => (
-                                      <li key={typeof item === 'object' ? item.slug : String(item)}>
-                                        <Link
-                                          to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=cat`}
-                                          className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
-                                        >
-                                          {typeof item === 'object' ? item.name : item}
-                                        </Link>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              ))}
-                            </div>
-                            
-                            {/* Special Links */}
-                            <div className="mt-4 pt-4 border-t border-gray-200 flex flex-wrap gap-3">
-                              {catSpecialLinks.map((link, idx) => (
-                                <Link
-                                  key={idx}
-                                  to={`/cat`}
-                                  className="text-xs font-semibold text-[#1E3A8A] hover:underline"
-                                >
-                                  {link} →
-                                </Link>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Special Other Animals Mega Menu */}
-                        {isSpecialOtherAnimalsMenu && (
-                          <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[900px] max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                            <div className="grid grid-cols-4 gap-6">
-                              {otherAnimalsMegaMenu.map((section: MenuSection) => (
-                                <div key={section._id || section.slug} className="space-y-2">
-                                  <Link
-                                    to={`/category/${section.slug}?petType=other-animals`}
-                                    className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors block"
-                                  >
-                                    {section.title} →
-                                  </Link>
-                                  <ul className="space-y-1">
-                                    {section.items.map((item: MenuItem | string) => (
-                                      <li key={typeof item === 'object' ? item.slug : String(item)}>
-                                        <Link
-                                          to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=other-animals`}
-                                          className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
-                                        >
-                                          {typeof item === 'object' ? item.name : item}
-                                        </Link>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Regular Dropdown Mega Menu for other pet types */}
-                        {!isSpecialDogMenu && !isSpecialCatMenu && !isSpecialOtherAnimalsMenu && petCategories.length > 0 && (
-                          <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 min-w-[280px] max-w-sm max-h-[500px] overflow-y-auto opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                            {false ? (
-                              // Special display for "Other Animals" - show categories as animal types
-                              <div className="space-y-3">
-                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                                  Shop by Animal
-                                </p>
-                                <div className="grid grid-cols-2 gap-3">
-                                  {petCategories.map((category: any) => (
+                            {megaMenu.length > 0 ? (
+                              // Use 4-column grid layout when we have menu sections (same as dog/cat)
+                              <div className="grid grid-cols-4 gap-6">
+                                {megaMenu.map((section: MenuSection) => (
+                                  <div key={section._id || section.slug} className="space-y-2">
                                     <Link
-                                      key={category._id}
-                                      to={`/category/${category.slug}${category.petType && category.petType !== 'all' ? `?petType=${category.petType}` : ''}`}
-                                      className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-blue-50 hover:text-[#1E3A8A] transition-all group/item"
+                                      to={`/category/${section.slug}?petType=${petType.slug}`}
+                                      className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors block"
                                     >
-                                      {category.image && (
-                                        <img 
-                                          src={category.image} 
-                                          alt={category.name}
-                                          className="w-12 h-12 object-cover rounded-full"
-                                        />
-                                      )}
-                                      <span className="text-sm font-semibold text-center group-hover/item:text-[#1E3A8A]">
-                                        {category.name}
-                                      </span>
+                                      {section.title} →
                                     </Link>
-                                  ))}
-                                </div>
-                                <Link
-                                  to={`/${petType.slug}`}
-                                  className="text-sm font-semibold text-[#1E3A8A] hover:underline mt-3 block text-center"
-                                >
-                                  View All {petType.name} →
-                                </Link>
+                                    <ul className="space-y-1">
+                                      {section.items.map((item: MenuItem | string) => (
+                                        <li key={typeof item === 'object' ? item.slug : String(item)}>
+                                          <Link
+                                            to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=${petType.slug}`}
+                                            className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
+                                          >
+                                            {typeof item === 'object' ? item.name : item}
+                                          </Link>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                ))}
                               </div>
                             ) : (
-                              // Standard display for other pet types - show categories with all subcategory levels
+                              // Fallback: Show categories in single column if no menu structure
                               <div className="grid grid-cols-1 gap-3">
                                 {petCategories.map((category: any) => {
                                   const subcategories = getSubcategories(category._id);
@@ -976,13 +835,11 @@ const Header = () => {
               {petTypes.map((petType: any) => {
                 const petCategories = getCategoriesForPetType(petType.slug);
                 const isExpanded = expandedMobilePetTypes.has(petType.slug);
-                const isSpecialDogMenu = petType.slug === 'dog';
-                const isSpecialCatMenu = petType.slug === 'cat';
-                const isSpecialOtherAnimalsMenu = petType.slug === 'other-animals';
+                const megaMenu = Array.isArray(categories) && categories.length > 0 ? buildDynamicMegaMenu(petType.slug) : [];
                 
                 return (
                   <li key={petType.slug}>
-                    {(petCategories.length > 0 || isSpecialDogMenu || isSpecialCatMenu || isSpecialOtherAnimalsMenu) ? (
+                    {petCategories.length > 0 ? (
                       // Pet type with categories - expandable
                       <>
                         <button
@@ -999,16 +856,16 @@ const Header = () => {
                           />
                         </button>
                         
-                        {/* Categories dropdown */}
+                        {/* Categories dropdown - unified for all pet types */}
                         {isExpanded && (
                           <div className="ml-6 mt-2 space-y-2 overflow-x-hidden max-w-full">
-                            {isSpecialDogMenu ? (
-                              // Special hardcoded Dog menu
+                            {megaMenu.length > 0 ? (
+                              // Use mega menu structure when available (same as desktop)
                               <>
-                                {dogMegaMenu.map((section: MenuSection) => (
+                                {megaMenu.map((section: MenuSection) => (
                                   <div key={section._id || section.slug} className="space-y-1 mb-3">
                                     <Link
-                                      to={`/category/${section.slug}?petType=dog`}
+                                      to={`/category/${section.slug}?petType=${petType.slug}`}
                                       onClick={() => setMobileMenuOpen(false)}
                                       className="text-sm font-bold text-gray-900 px-3 block hover:text-[#1E3A8A] transition-colors"
                                     >
@@ -1018,89 +875,7 @@ const Header = () => {
                                       {section.items.map((item: MenuItem | string) => (
                                         <Link
                                           key={typeof item === 'object' ? item.slug : String(item)}
-                                          to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=dog`}
-                                          onClick={() => setMobileMenuOpen(false)}
-                                          className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
-                                        >
-                                          {typeof item === 'object' ? item.name : item}
-                                        </Link>
-                                      ))}
-                                    </div>
-                                  </div>
-                                ))}
-                                
-                                {/* Special links */}
-                                <div className="border-t pt-2 mt-2">
-                                  {dogSpecialLinks.map((link, idx) => (
-                                    <Link
-                                      key={idx}
-                                      to={`/dog`}
-                                      onClick={() => setMobileMenuOpen(false)}
-                                      className="block py-2 px-3 text-sm font-semibold text-[#1E3A8A] hover:underline truncate overflow-hidden"
-                                    >
-                                      {link} →
-                                    </Link>
-                                  ))}
-                                </div>
-                              </>
-                            ) : isSpecialCatMenu ? (
-                              // Special hardcoded Cat menu
-                              <>
-                                {catMegaMenu.map((section: MenuSection) => (
-                                  <div key={section._id || section.slug} className="space-y-1 mb-3">
-                                    <Link
-                                      to={`/category/${section.slug}?petType=cat`}
-                                      onClick={() => setMobileMenuOpen(false)}
-                                      className="text-sm font-bold text-gray-900 px-3 block hover:text-[#1E3A8A] transition-colors"
-                                    >
-                                      {section.title} →
-                                    </Link>
-                                    <div className="space-y-1">
-                                      {section.items.map((item: MenuItem | string) => (
-                                        <Link
-                                          key={typeof item === 'object' ? item.slug : String(item)}
-                                          to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=cat`}
-                                          onClick={() => setMobileMenuOpen(false)}
-                                          className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
-                                        >
-                                          {typeof item === 'object' ? item.name : item}
-                                        </Link>
-                                      ))}
-                                    </div>
-                                  </div>
-                                ))}
-                                
-                                {/* Special links */}
-                                <div className="border-t pt-2 mt-2">
-                                  {catSpecialLinks.map((link, idx) => (
-                                    <Link
-                                      key={idx}
-                                      to={`/cat`}
-                                      onClick={() => setMobileMenuOpen(false)}
-                                      className="block py-2 px-3 text-sm font-semibold text-[#1E3A8A] hover:underline truncate overflow-hidden"
-                                    >
-                                      {link} →
-                                    </Link>
-                                  ))}
-                                </div>
-                              </>
-                            ) : isSpecialOtherAnimalsMenu ? (
-                              // Special hardcoded Other Animals menu
-                              <>
-                                {otherAnimalsMegaMenu.map((section: MenuSection) => (
-                                  <div key={section._id || section.slug} className="space-y-1 mb-3">
-                                    <Link
-                                      to={`/category/${section.slug}?petType=other-animals`}
-                                      onClick={() => setMobileMenuOpen(false)}
-                                      className="text-sm font-bold text-gray-900 px-3 block hover:text-[#1E3A8A] transition-colors"
-                                    >
-                                      {section.title} →
-                                    </Link>
-                                    <div className="space-y-1">
-                                      {section.items.map((item: MenuItem | string) => (
-                                        <Link
-                                          key={typeof item === 'object' ? item.slug : String(item)}
-                                          to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=other-animals`}
+                                          to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=${petType.slug}`}
                                           onClick={() => setMobileMenuOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                         >
@@ -1112,7 +887,7 @@ const Header = () => {
                                 ))}
                               </>
                             ) : (
-                              // Standard display for other pet types - with all subcategory levels
+                              // Fallback: Show categories with subcategories
                               <>
                                 {petCategories.map((category: any) => {
                                   const subcategories = getSubcategories(category._id);
@@ -1368,13 +1143,11 @@ const Header = () => {
               {petTypes.map((petType: any) => {
                 const petCategories = getCategoriesForPetType(petType.slug);
                 const isExpanded = expandedMobilePetTypes.has(petType.slug);
-                const isSpecialDogMenu = petType.slug === 'dog';
-                const isSpecialCatMenu = petType.slug === 'cat';
-                const isSpecialOtherAnimalsMenu = petType.slug === 'other-animals';
+                const megaMenu = Array.isArray(categories) && categories.length > 0 ? buildDynamicMegaMenu(petType.slug) : [];
 
                 return (
                   <li key={petType.slug}>
-                    {(petCategories.length > 0 || isSpecialDogMenu || isSpecialCatMenu || isSpecialOtherAnimalsMenu) ? (
+                    {petCategories.length > 0 ? (
                       <>
                         <button
                           onClick={() => toggleMobilePetType(petType.slug)}
@@ -1390,15 +1163,16 @@ const Header = () => {
                           />
                         </button>
 
-                        {/* Categories dropdown */}
+                        {/* Categories dropdown - unified for all pet types */}
                         {isExpanded && (
                           <div className="ml-6 mt-2 space-y-2">
-                            {isSpecialDogMenu ? (
+                            {megaMenu.length > 0 ? (
+                              // Use mega menu structure when available (same as desktop)
                               <>
-                                {dogMegaMenu.map((section: MenuSection) => (
+                                {megaMenu.map((section: MenuSection) => (
                                   <div key={section._id || section.slug} className="space-y-1 mb-3">
                                     <Link
-                                      to={`/category/${section.slug}?petType=dog`}
+                                      to={`/category/${section.slug}?petType=${petType.slug}`}
                                       onClick={() => setIsLeftSidebarOpen(false)}
                                       className="text-sm font-bold text-gray-900 px-3 block hover:text-[#1E3A8A] transition-colors"
                                     >
@@ -1408,59 +1182,7 @@ const Header = () => {
                                       {section.items.map((item: MenuItem | string) => (
                                         <Link
                                           key={typeof item === 'object' ? item.slug : String(item)}
-                                          to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=dog`}
-                                          onClick={() => setIsLeftSidebarOpen(false)}
-                                          className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-                                        >
-                                          {typeof item === 'object' ? item.name : item}
-                                        </Link>
-                                      ))}
-                                    </div>
-                                  </div>
-                                ))}
-                              </>
-                            ) : isSpecialCatMenu ? (
-                              <>
-                                {catMegaMenu.map((section: MenuSection) => (
-                                  <div key={section._id || section.slug} className="space-y-1 mb-3">
-                                    <Link
-                                      to={`/category/${section.slug}?petType=cat`}
-                                      onClick={() => setIsLeftSidebarOpen(false)}
-                                      className="text-sm font-bold text-gray-900 px-3 block hover:text-[#1E3A8A] transition-colors"
-                                    >
-                                      {section.title} →
-                                    </Link>
-                                    <div className="space-y-1">
-                                      {section.items.map((item: MenuItem | string) => (
-                                        <Link
-                                          key={typeof item === 'object' ? item.slug : String(item)}
-                                          to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=cat`}
-                                          onClick={() => setIsLeftSidebarOpen(false)}
-                                          className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-                                        >
-                                          {typeof item === 'object' ? item.name : item}
-                                        </Link>
-                                      ))}
-                                    </div>
-                                  </div>
-                                ))}
-                              </>
-                            ) : isSpecialOtherAnimalsMenu ? (
-                              <>
-                                {otherAnimalsMegaMenu.map((section: MenuSection) => (
-                                  <div key={section._id || section.slug} className="space-y-1 mb-3">
-                                    <Link
-                                      to={`/category/${section.slug}?petType=other-animals`}
-                                      onClick={() => setIsLeftSidebarOpen(false)}
-                                      className="text-sm font-bold text-gray-900 px-3 block hover:text-[#1E3A8A] transition-colors"
-                                    >
-                                      {section.title} →
-                                    </Link>
-                                    <div className="space-y-1">
-                                      {section.items.map((item: MenuItem | string) => (
-                                        <Link
-                                          key={typeof item === 'object' ? item.slug : String(item)}
-                                          to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=other-animals`}
+                                          to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=${petType.slug}`}
                                           onClick={() => setIsLeftSidebarOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
                                         >
@@ -1472,34 +1194,37 @@ const Header = () => {
                                 ))}
                               </>
                             ) : (
-                              petCategories.map((category: any) => {
-                                const subcategories = getSubcategories(category._id);
-                                return (
-                                  <div key={category._id} className="space-y-1">
-                                    <Link
-                                      to={`/category/${category.slug}${category.petType && category.petType !== 'all' ? `?petType=${category.petType}` : ''}`}
-                                      onClick={() => setIsLeftSidebarOpen(false)}
-                                      className="block py-2 px-3 font-semibold text-gray-900 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-                                    >
-                                      {category.name}
-                                    </Link>
-                                    {subcategories.length > 0 && (
-                                      <div className="ml-3 space-y-1">
-                                        {subcategories.map((sub: any) => (
-                                          <Link
-                                            key={sub._id}
-                                            to={`/category/${sub.slug}${sub.petType && sub.petType !== 'all' ? `?petType=${sub.petType}` : ''}`}
-                                            onClick={() => setIsLeftSidebarOpen(false)}
-                                            className="block py-1.5 px-3 text-sm text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-                                          >
-                                            {sub.name}
-                                          </Link>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })
+                              // Fallback: Show categories with subcategories
+                              <>
+                                {petCategories.map((category: any) => {
+                                  const subcategories = getSubcategories(category._id);
+                                  return (
+                                    <div key={category._id} className="space-y-1">
+                                      <Link
+                                        to={`/category/${category.slug}${category.petType && category.petType !== 'all' ? `?petType=${category.petType}` : ''}`}
+                                        onClick={() => setIsLeftSidebarOpen(false)}
+                                        className="block py-2 px-3 font-semibold text-gray-900 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                                      >
+                                        {category.name}
+                                      </Link>
+                                      {subcategories.length > 0 && (
+                                        <div className="ml-3 space-y-1">
+                                          {subcategories.map((sub: any) => (
+                                            <Link
+                                              key={sub._id}
+                                              to={`/category/${sub.slug}${sub.petType && sub.petType !== 'all' ? `?petType=${sub.petType}` : ''}`}
+                                              onClick={() => setIsLeftSidebarOpen(false)}
+                                              className="block py-1.5 px-3 text-sm text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                                            >
+                                              {sub.name}
+                                            </Link>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </>
                             )}
                           </div>
                         )}
