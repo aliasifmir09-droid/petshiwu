@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { X, Plus, Trash2, Upload, Link2 } from 'lucide-react';
@@ -130,6 +130,30 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
     queryKey: ['categories'],
     queryFn: adminService.getCategories
   });
+
+  // Fetch pet types from API to sync with side menu
+  const { data: petTypesResponse } = useQuery({
+    queryKey: ['pet-types'],
+    queryFn: adminService.getPetTypes,
+    staleTime: 30 * 1000, // Cache for 30 seconds
+    refetchOnMount: true, // Always refetch to ensure we get all pet types
+  });
+
+  // Sort pet types by order, then by name (same as PetTypes page)
+  const sortedPetTypes = useMemo(() => {
+    const types = petTypesResponse?.data || [];
+    return [...types].sort((a, b) => {
+      // First sort by order (handle null/undefined by treating as 0)
+      const orderA = a.order !== null && a.order !== undefined ? a.order : 0;
+      const orderB = b.order !== null && b.order !== undefined ? b.order : 0;
+      
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+      // If order is the same, sort by name
+      return a.name.localeCompare(b.name);
+    });
+  }, [petTypesResponse?.data]);
 
   // Update formData when product changes (for editing)
   useEffect(() => {
@@ -875,8 +899,16 @@ const ProductForm = ({ product, onClose }: ProductFormProps) => {
                     onChange={(e) => handlePetTypeChange(e.target.value)}
                     className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >
-                    <option value="dog">Dog</option>
-                    <option value="cat">Cat</option>
+                    <option value="">Select a pet type</option>
+                    {sortedPetTypes.map((petType: { _id: string; slug: string; name: string; icon?: string; isActive?: boolean }) => {
+                      // Only show active pet types (or all if isActive is undefined for backward compatibility)
+                      if (petType.isActive === false) return null;
+                      return (
+                        <option key={petType._id} value={petType.slug}>
+                          {petType.icon ? `${petType.icon} ${petType.name}` : petType.name}
+                        </option>
+                      );
+                    })}
                   </select>
                 ) : (
                   <div className="flex gap-2">
