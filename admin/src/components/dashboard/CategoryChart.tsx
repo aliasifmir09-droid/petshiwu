@@ -19,8 +19,8 @@ interface CategoryChartData {
 interface CategoryChartProps {
   categoryData: CategoryChartData[];
   categoriesLoading: boolean;
-  categoryViewMode: 'subcategories' | 'products' | 'revenue';
-  onViewModeChange: (mode: 'subcategories' | 'products' | 'revenue') => void;
+  categoryViewMode: 'subcategories' | 'products';
+  onViewModeChange: (mode: 'subcategories' | 'products') => void;
 }
 
 const CategoryChart = memo(({
