@@ -869,7 +869,7 @@ const Header = () => {
                                       onClick={() => setMobileMenuOpen(false)}
                                       className="text-sm font-bold text-gray-900 px-3 block hover:text-[#1E3A8A] transition-colors"
                                     >
-                                      {section.title} →
+                                      {decodeHtmlEntities(section.title)} →
                                     </Link>
                                     <div className="space-y-1">
                                       {section.items.map((item: MenuItem | string) => (
@@ -1176,7 +1176,7 @@ const Header = () => {
                                       onClick={() => setIsLeftSidebarOpen(false)}
                                       className="text-sm font-bold text-gray-900 px-3 block hover:text-[#1E3A8A] transition-colors"
                                     >
-                                      {section.title} →
+                                      {decodeHtmlEntities(section.title)} →
                                     </Link>
                                     <div className="space-y-1">
                                       {section.items.map((item: MenuItem | string) => (
@@ -1205,7 +1205,7 @@ const Header = () => {
                                         onClick={() => setIsLeftSidebarOpen(false)}
                                         className="block py-2 px-3 font-semibold text-gray-900 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
                                       >
-                                        {category.name}
+                                        {decodeHtmlEntities(category.name)}
                                       </Link>
                                       {subcategories.length > 0 && (
                                         <div className="ml-3 space-y-1">
