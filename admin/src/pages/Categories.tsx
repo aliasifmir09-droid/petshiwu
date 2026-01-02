@@ -294,15 +294,25 @@ const CategoriesNew = () => {
 
           {/* Pet Type */}
           <div className="text-sm">
-            <span className={`px-3 py-1 rounded-full text-white font-medium ${
-              category.petType === 'dog' ? 'bg-blue-500' :
-              category.petType === 'cat' ? 'bg-purple-500' :
-              'bg-gray-500'
-            }`}>
-              {category.petType === 'dog' ? '🐕 Dog' :
-               category.petType === 'cat' ? '🐈 Cat' :
-               '🐾 All Pets'}
-            </span>
+            {(() => {
+              // Look up pet type from API data (not hardcoded)
+              const petType = petTypesResponse?.data?.find((pt: any) => pt.slug === category.petType);
+              const displayText = petType 
+                ? `${petType.icon || ''} ${petType.name}`.trim()
+                : category.petType === 'all' 
+                  ? '🐾 All Pets'
+                  : category.petType || 'All Pets';
+              const bgColor = category.petType === 'dog' ? 'bg-blue-500' :
+                             category.petType === 'cat' ? 'bg-purple-500' :
+                             category.petType === 'all' ? 'bg-gray-500' :
+                             petType ? 'bg-indigo-500' : 'bg-gray-500';
+              
+              return (
+                <span className={`px-3 py-1 rounded-full text-white font-medium ${bgColor}`}>
+                  {displayText}
+                </span>
+              );
+            })()}
           </div>
 
           {/* Subcategory Count */}
