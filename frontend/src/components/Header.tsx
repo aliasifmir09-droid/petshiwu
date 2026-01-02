@@ -634,7 +634,7 @@ const Header = () => {
                                       to={`/category/${section.slug}?petType=${petType.slug}`}
                                       className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors block"
                                     >
-                                      {section.title} →
+                                      {decodeHtmlEntities(section.title)} →
                                     </Link>
                                     <ul className="space-y-1">
                                       {section.items.map((item: MenuItem | string) => (
@@ -643,7 +643,7 @@ const Header = () => {
                                             to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=${petType.slug}`}
                                             className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
                                           >
-                                            {typeof item === 'object' ? item.name : item}
+                                            {decodeHtmlEntities(typeof item === 'object' ? item.name : item)}
                                           </Link>
                                         </li>
                                       ))}
@@ -663,7 +663,7 @@ const Header = () => {
                                         to={`/category/${category.slug}${category.petType && category.petType !== 'all' ? `?petType=${category.petType}` : ''}`}
                                         className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] block transition-colors"
                                       >
-                                        {category.name}
+                                        {decodeHtmlEntities(category.name)}
                                       </Link>
                                       
                                       {subcategories.length > 0 && (
@@ -677,7 +677,7 @@ const Header = () => {
                                                   to={`/category/${sub.slug}${sub.petType && sub.petType !== 'all' ? `?petType=${sub.petType}` : ''}`}
                                                   className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors font-medium py-0.5"
                                                 >
-                                                  {sub.name}
+                                                  {decodeHtmlEntities(sub.name)}
                                                 </Link>
                                                 
                                                 {/* 3rd Level Subcategories */}
@@ -689,7 +689,7 @@ const Header = () => {
                                                           to={`/category/${subSub.slug}${subSub.petType && subSub.petType !== 'all' ? `?petType=${subSub.petType}` : ''}`}
                                                           className="text-[10px] text-gray-500 hover:text-[#1E3A8A] block transition-colors py-0.5"
                                                         >
-                                                          • {subSub.name}
+                                                          • {decodeHtmlEntities(subSub.name)}
                                                         </Link>
                                                       </li>
                                                     ))}
@@ -879,7 +879,7 @@ const Header = () => {
                                           onClick={() => setMobileMenuOpen(false)}
                                           className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                         >
-                                          {typeof item === 'object' ? item.name : item}
+                                          {decodeHtmlEntities(typeof item === 'object' ? item.name : item)}
                                         </Link>
                                       ))}
                                     </div>
@@ -899,7 +899,7 @@ const Header = () => {
                                         onClick={() => setMobileMenuOpen(false)}
                                         className="block py-2 px-3 text-sm font-semibold text-gray-900 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                       >
-                                        {category.name}
+                                        {decodeHtmlEntities(category.name)}
                                       </Link>
                                       
                                       {subcategories.length > 0 && (
@@ -914,7 +914,7 @@ const Header = () => {
                                                   onClick={() => setMobileMenuOpen(false)}
                                                   className="block py-1.5 px-3 text-sm text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors font-medium truncate overflow-hidden"
                                                 >
-                                                  {sub.name}
+                                                  {decodeHtmlEntities(sub.name)}
                                                 </Link>
                                                 
                                                 {/* 3rd Level Subcategories */}
@@ -927,7 +927,7 @@ const Header = () => {
                                                         onClick={() => setMobileMenuOpen(false)}
                                                         className="block py-1 px-3 text-xs text-gray-500 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                                       >
-                                                        • {subSub.name}
+                                                        • {decodeHtmlEntities(subSub.name)}
                                                       </Link>
                                                     ))}
                                                   </div>
@@ -1216,7 +1216,7 @@ const Header = () => {
                                               onClick={() => setIsLeftSidebarOpen(false)}
                                               className="block py-1.5 px-3 text-sm text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
                                             >
-                                              {sub.name}
+                                              {decodeHtmlEntities(sub.name)}
                                             </Link>
                                           ))}
                                         </div>
