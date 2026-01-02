@@ -11,6 +11,7 @@ import ConfirmationModal from './ConfirmationModal';
 import { useToast } from '@/hooks/useToast';
 import Toast from './Toast';
 import SearchSuggestions from './SearchSuggestions';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const Header = () => {
   const navigate = useNavigate();
