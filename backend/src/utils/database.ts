@@ -3,6 +3,48 @@ import { optimizeMongooseSettings, enableQueryLogging, logConnectionPoolStatus }
 import { enableQueryProfiling } from './queryProfiler';
 import logger from './logger';
 
+// Track reconnection attempts
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 10;
+const RECONNECT_DELAY = 5000; // 5 seconds
+
+const attemptReconnect = async (mongoUri: string, isProduction: boolean) => {
+  if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+    logger.error(`❌ Max reconnection attempts (${MAX_RECONNECT_ATTEMPTS}) reached. Stopping reconnection attempts.`);
+    return;
+  }
+
+  reconnectAttempts++;
+  logger.info(`🔄 Reconnection attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}...`);
+  
+  try {
+    await mongoose.connect(mongoUri, {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 10000,
+      family: 4,
+      readPreference: (process.env.MONGODB_READ_PREFERENCE || 'primary') as any,
+      readConcern: { level: 'majority' },
+      writeConcern: { w: 'majority', j: true },
+      maxPoolSize: parseInt(process.env.MONGODB_MAX_POOL_SIZE || '100', 10),
+      minPoolSize: parseInt(process.env.MONGODB_MIN_POOL_SIZE || '10', 10),
+      maxIdleTimeMS: 60000,
+      heartbeatFrequencyMS: 10000,
+      retryWrites: true,
+      retryReads: true,
+      compressors: ['zlib'] as any,
+    });
+    
+    reconnectAttempts = 0; // Reset on successful connection
+    logger.info('✅ MongoDB reconnected successfully after disconnection');
+  } catch (error: any) {
+    logger.warn(`⚠️  Reconnection attempt ${reconnectAttempts} failed: ${error.message}`);
+    if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+      setTimeout(() => attemptReconnect(mongoUri, isProduction), RECONNECT_DELAY);
+    }
+  }
+};
+
 export const connectDatabase = async () => {
   try {
     // Force IPv4 connection
@@ -82,9 +124,13 @@ export const connectDatabase = async () => {
       if (isProduction) {
         logConnectionPoolStatus();
       }
+      // Attempt automatic reconnection
+      reconnectAttempts = 0; // Reset counter for new disconnection
+      setTimeout(() => attemptReconnect(mongoUri, isProduction), RECONNECT_DELAY);
     });
     
     mongoose.connection.on('reconnected', () => {
+      reconnectAttempts = 0; // Reset counter on successful reconnection
       logger.info('✅ MongoDB reconnected successfully');
       // Restore buffering setting after reconnection
       mongoose.set('bufferCommands', isProduction);
