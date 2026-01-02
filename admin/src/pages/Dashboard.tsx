@@ -62,6 +62,7 @@ interface ProductStats {
   outOfStockProducts?: number;
   featuredProducts?: number;
   productsByCategory?: Array<{
+    categoryId: string;
     categoryName: string;
     count: number;
   }>;
@@ -800,7 +801,7 @@ const Dashboard = () => {
               if (categoryId && productStats?.productsByCategory) {
                 // Find matching category in productStats
                 const categoryProductData = productStats.productsByCategory.find(
-                  (pc: { categoryId?: string }) => pc.categoryId === categoryId
+                  (pc) => pc.categoryId === categoryId
                 );
                 if (categoryProductData && categoryProductData.count) {
                   value = categoryProductData.count;
@@ -821,12 +822,12 @@ const Dashboard = () => {
                   
                   // Sum product counts for this category and all subcategories
                   value = productStats.productsByCategory
-                    .filter((pc: { categoryId?: string }) => 
+                    .filter((pc) => 
                       pc.categoryId && allCategoryIds.includes(pc.categoryId)
                     )
-                    .reduce((sum: number, pc: { count?: number }) => sum + (pc.count || 0), 0);
+                    .reduce((sum, pc) => sum + (pc.count || 0), 0);
                   
-                  // Ensure at least 1 for display
+                  // Ensure at least 0 for display (can be 0 if no products)
                   value = Math.max(value, 0);
                 }
               } else {
