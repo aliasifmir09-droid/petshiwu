@@ -146,7 +146,7 @@ const CategoriesNew = () => {
         description: category.description || '',
         petType: category.petType,
         parentCategory: category.parentCategory?._id ? String(category.parentCategory._id) : '',
-        isActive: category.isActive
+        isActive: category.isActive !== undefined ? category.isActive : true
       });
     } else {
       setEditingCategory(null);
@@ -276,7 +276,7 @@ const CategoriesNew = () => {
                   Sub-Subcategory
                 </span>
               )}
-              {!category.isActive && (
+              {(category.isActive === false) && (
                 <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
                   Inactive
                 </span>
@@ -667,7 +667,7 @@ const CategoriesNew = () => {
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={formData.isActive}
+                    checked={formData.isActive === true}
                     onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                     className="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                   />
