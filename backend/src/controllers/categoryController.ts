@@ -130,7 +130,7 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
 
     // PERFORMANCE FIX: Remove populate, fetch parent categories separately for better performance
     const categories = await Category.find(query)
-      .select('_id name slug description petType parentCategory position isActive createdAt')
+      .select('_id name slug description image petType parentCategory position isActive createdAt')
       .sort({ position: 1, createdAt: -1 })
       .lean();
 

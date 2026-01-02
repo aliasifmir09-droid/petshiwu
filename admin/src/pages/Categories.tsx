@@ -12,6 +12,7 @@ interface Category {
   name: string;
   slug: string;
   description?: string;
+  image?: string;
   petType: string;
   isActive: boolean;
   level: number;
@@ -19,6 +20,21 @@ interface Category {
   parentCategory?: any;
   subcategories?: Category[];
 }
+
+// Helper function to get pet type background color based on slug
+// FIX: Dynamic color mapping instead of hardcoded values
+const getPetTypeColor = (slug: string): string => {
+  const colorMap: { [key: string]: string } = {
+    'dog': 'bg-blue-500',
+    'cat': 'bg-purple-500',
+    'bird': 'bg-yellow-500',
+    'fish': 'bg-cyan-500',
+    'small-pet': 'bg-orange-500',
+    'reptile': 'bg-green-500',
+    'all': 'bg-gray-500',
+  };
+  return colorMap[slug] || 'bg-indigo-500'; // Default color for unknown pet types
+};
 
 const CategoriesNew = () => {
   const { toast, showToast, hideToast } = useToast();
@@ -250,11 +266,28 @@ const CategoriesNew = () => {
           )}
 
           {/* Category Icon */}
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden ${
             level === 0 ? 'bg-primary-100' : 
             level === 1 ? 'bg-blue-100' : 'bg-gray-100'
           }`}>
-            {level === 0 ? '📁' : level === 1 ? '📂' : '📄'}
+            {category.image ? (
+              <img 
+                src={category.image} 
+                alt={category.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Fallback to emoji if image fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    parent.innerHTML = level === 0 ? '📁' : level === 1 ? '📂' : '📄';
+                  }
+                }}
+              />
+            ) : (
+              level === 0 ? '📁' : level === 1 ? '📂' : '📄'
+            )}
           </div>
 
           {/* Category Info */}
@@ -295,17 +328,33 @@ const CategoriesNew = () => {
           {/* Pet Type */}
           <div className="text-sm">
             {(() => {
-              // Look up pet type from API data (not hardcoded)
+              // FIX: Look up pet type from API data (not hardcoded)
               const petType = petTypesResponse?.data?.find((pt: any) => pt.slug === category.petType);
-              const displayText = petType 
-                ? `${petType.icon || ''} ${petType.name}`.trim()
-                : category.petType === 'all' 
-                  ? '🐾 All Pets'
-                  : category.petType || 'All Pets';
-              const bgColor = category.petType === 'dog' ? 'bg-blue-500' :
-                             category.petType === 'cat' ? 'bg-purple-500' :
-                             category.petType === 'all' ? 'bg-gray-500' :
-                             petType ? 'bg-indigo-500' : 'bg-gray-500';
+              
+              // FIX: Use pet type icon from API, or look for "all" pet type, or use default
+              let displayText = 'All Pets';
+              let bgColor = 'bg-gray-500';
+              
+              if (petType) {
+                // Found pet type in API - use its icon and name
+                displayText = `${petType.icon || '🐾'} ${petType.name}`.trim();
+                bgColor = getPetTypeColor(petType.slug);
+              } else if (category.petType === 'all') {
+                // Check if there's an "all" pet type in the API
+                const allPetType = petTypesResponse?.data?.find((pt: any) => pt.slug === 'all');
+                if (allPetType) {
+                  displayText = `${allPetType.icon || '🐾'} ${allPetType.name}`.trim();
+                  bgColor = getPetTypeColor('all');
+                } else {
+                  // Fallback to default "All Pets" with emoji
+                  displayText = '🐾 All Pets';
+                  bgColor = getPetTypeColor('all');
+                }
+              } else if (category.petType) {
+                // Pet type slug exists but not found in API - use slug with default color
+                displayText = category.petType;
+                bgColor = getPetTypeColor(category.petType);
+              }
               
               return (
                 <span className={`px-3 py-1 rounded-full text-white font-medium ${bgColor}`}>

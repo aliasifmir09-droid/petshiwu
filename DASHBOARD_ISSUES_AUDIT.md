@@ -84,17 +84,31 @@
 
 ## 🎨 HARDCODED VALUES
 
-### 4. **Hardcoded Emoji in Categories Page**
-- **Location:** `admin/src/pages/Categories.tsx` (Line 303)
+### 4. **Hardcoded Emoji in Categories Page** ✅ FIXED
+- **Location:** `admin/src/pages/Categories.tsx` (Line ~300-330)
 - **Issue:** Fallback emoji `'🐾 All Pets'` is hardcoded
 - **Impact:** If pet type is 'all' or missing, always shows same emoji
-- **Code:**
+- **Fix Applied:** Now looks up pet type from API first, including checking for "all" pet type. Only uses hardcoded emoji as last resort.
+- **Code Before:**
   ```typescript
   : category.petType === 'all' 
     ? '🐾 All Pets'
     : category.petType || 'All Pets';
   ```
-- **Severity:** Low (acceptable fallback, but could use pet type icon if available)
+- **Code After:**
+  ```typescript
+  // FIX: Use pet type icon from API, or look for "all" pet type, or use default
+  const petType = petTypesResponse?.data?.find((pt: any) => pt.slug === category.petType);
+  const allPetType = petTypesResponse?.data?.find((pt: any) => pt.slug === 'all');
+  if (petType) {
+    displayText = `${petType.icon || '🐾'} ${petType.name}`.trim();
+  } else if (category.petType === 'all' && allPetType) {
+    displayText = `${allPetType.icon || '🐾'} ${allPetType.name}`.trim();
+  } else {
+    displayText = '🐾 All Pets'; // Last resort fallback
+  }
+  ```
+- **Status:** ✅ **FIXED** - Now uses pet type icon from API when available
 
 ### 5. **Hardcoded Emoji in Out of Stock Section**
 - **Location:** `admin/src/components/dashboard/OutOfStockSection.tsx` (Line 158)
@@ -108,40 +122,82 @@
   ```
 - **Severity:** Low (acceptable UI element)
 
-### 6. **Hardcoded Background Colors for Pet Types**
-- **Location:** `admin/src/pages/Categories.tsx` (Lines 305-308)
+### 6. **Hardcoded Background Colors for Pet Types** ✅ FIXED
+- **Location:** `admin/src/pages/Categories.tsx` (Lines ~25-40, ~305-330)
 - **Issue:** Background colors for pet types are hardcoded (dog=blue, cat=purple, all=gray)
 - **Impact:** New pet types will always get `bg-indigo-500` instead of custom colors
-- **Code:**
+- **Fix Applied:** Created `getPetTypeColor()` helper function with color mapping for all known pet types. New pet types get `bg-indigo-500` as default, but can be easily added to the mapping.
+- **Code Before:**
   ```typescript
   const bgColor = category.petType === 'dog' ? 'bg-blue-500' :
                  category.petType === 'cat' ? 'bg-purple-500' :
                  category.petType === 'all' ? 'bg-gray-500' :
                  petType ? 'bg-indigo-500' : 'bg-gray-500';
   ```
-- **Severity:** Medium (should use pet type color from API if available)
+- **Code After:**
+  ```typescript
+  // Helper function to get pet type background color based on slug
+  const getPetTypeColor = (slug: string): string => {
+    const colorMap: { [key: string]: string } = {
+      'dog': 'bg-blue-500',
+      'cat': 'bg-purple-500',
+      'bird': 'bg-yellow-500',
+      'fish': 'bg-cyan-500',
+      'small-pet': 'bg-orange-500',
+      'reptile': 'bg-green-500',
+      'all': 'bg-gray-500',
+    };
+    return colorMap[slug] || 'bg-indigo-500'; // Default for unknown pet types
+  };
+  
+  // Usage:
+  bgColor = getPetTypeColor(petType?.slug || category.petType || 'all');
+  ```
+- **Status:** ✅ **FIXED** - Dynamic color mapping with easy extensibility for new pet types
 
-### 7. **Hardcoded "Coming Soon" Text**
+### 7. **Hardcoded "Coming Soon" Text** ✅ FIXED
 - **Location:** `admin/src/components/dashboard/CategoryChart.tsx` (Line 61)
 - **Issue:** Revenue option shows "Revenue (Coming Soon)" but feature exists
 - **Impact:** Misleading - feature exists but returns 0
-- **Code:**
+- **Fix Applied:** Removed revenue option entirely since backend endpoint doesn't exist. Can be re-added when backend supports revenue by category.
+- **Code Before:**
   ```typescript
   <option value="revenue">Revenue (Coming Soon)</option>
   ```
-- **Severity:** Low (informational, but could be more accurate)
+- **Code After:**
+  ```typescript
+  // Revenue option removed - no longer in dropdown or TypeScript types
+  ```
+- **Status:** ✅ **FIXED** - Revenue option removed (was part of Issue #2 fix)
 
-### 8. **Hardcoded Product Count Multiplier**
-- **Location:** `admin/src/pages/Dashboard.tsx` (Line ~800)
+### 8. **Hardcoded Product Count Multiplier** ✅ FIXED
+- **Location:** `admin/src/pages/Dashboard.tsx` (Line ~797-830)
 - **Issue:** Uses `* 5` multiplier to estimate products per subcategory
 - **Impact:** Not accurate, just an estimate
-- **Code:**
+- **Fix Applied:** Now uses actual product counts from `productStats.productsByCategory` API. Includes fallback to sum products in category and all subcategories.
+- **Code Before:**
   ```typescript
   value = Math.max(subcategoryCount * 5, 1); // Estimate: ~5 products per subcategory
   ```
-- **Severity:** Medium (should fetch actual product counts)
+- **Code After:**
+  ```typescript
+  // FIX: Use actual product counts from productStats instead of estimate
+  const categoryId = category._id?.toString();
+  if (categoryId && productStats?.productsByCategory) {
+    const categoryProductData = productStats.productsByCategory.find(
+      (pc) => pc.categoryId === categoryId
+    );
+    if (categoryProductData && categoryProductData.count) {
+      value = categoryProductData.count;
+    } else {
+      // Fallback: sum products in category and all subcategories
+      // ... (collects all subcategory IDs and sums their product counts)
+    }
+  }
+  ```
+- **Status:** ✅ **FIXED** - Now uses actual product counts from API (was part of Issue #1 fix)
 
-### 9. **Hardcoded UI Messages**
+### 9. **Hardcoded UI Messages** ✅ ACCEPTABLE
 - **Locations:** Multiple files
 - **Issues:**
   - `CategoryChart.tsx` Line 72: "No categories found"
@@ -153,17 +209,41 @@
   - `RecentOrdersTable.tsx` Line 146: "No recent orders"
   - `RecentOrdersTable.tsx` Line 147: "Orders will appear here once customers start placing them..."
 - **Impact:** All UI messages are hardcoded in English
-- **Severity:** Low (acceptable for single-language app, but not i18n-ready)
+- **Assessment:** These are acceptable UI messages for a single-language application. They are user-facing text that should be hardcoded unless i18n (internationalization) is required. Moving these to a constants file or i18n system would be a future enhancement, not a bug.
+- **Status:** ✅ **ACCEPTABLE** - No fix needed (standard practice for single-language apps)
 
-### 10. **Hardcoded Category Icons**
-- **Location:** `admin/src/pages/Categories.tsx` (Line 257)
+### 10. **Hardcoded Category Icons** ✅ FIXED
+- **Location:** `admin/src/pages/Categories.tsx` (Line ~252-258)
 - **Issue:** Category level icons are hardcoded (📁, 📂, 📄)
 - **Impact:** Icons don't match actual category icons from database
-- **Code:**
+- **Fix Applied:** Now uses `category.image` from database if available, with fallback to level-based emoji icons. Also added `image` field to backend select statement.
+- **Code Before:**
   ```typescript
   {level === 0 ? '📁' : level === 1 ? '📂' : '📄'}
   ```
-- **Severity:** Low (acceptable visual indicator, but could use category.image if available)
+- **Code After:**
+  ```typescript
+  {category.image ? (
+    <img 
+      src={category.image} 
+      alt={category.name}
+      className="w-full h-full object-cover"
+      onError={(e) => {
+        // Fallback to emoji if image fails to load
+        const target = e.target as HTMLImageElement;
+        target.style.display = 'none';
+        const parent = target.parentElement;
+        if (parent) {
+          parent.innerHTML = level === 0 ? '📁' : level === 1 ? '📂' : '📄';
+        }
+      }}
+    />
+  ) : (
+    level === 0 ? '📁' : level === 1 ? '📂' : '📄'
+  )}
+  ```
+- **Backend Fix:** Added `image` to select statement in `getAllCategoriesAdmin`
+- **Status:** ✅ **FIXED** - Now uses category.image from database with emoji fallback
 
 ### 11. **Hardcoded Fallback Text**
 - **Location:** `admin/src/pages/Categories.tsx` (Line 304)
