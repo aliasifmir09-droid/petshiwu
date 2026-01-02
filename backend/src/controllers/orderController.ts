@@ -10,6 +10,7 @@ import { sendOrderConfirmationEmail, sendOrderCancellationEmail, sendOrderDelive
 import logger from '../utils/logger';
 import { executeCachedAggregation } from '../utils/aggregationCache';
 import { addEmailJob } from '../utils/jobQueue';
+import { cache } from '../utils/cache';
 
 import type { StripeInstance, OrderItemInput, NormalizedOrderItem, NormalizedOrder } from '../types/common';
 
@@ -1601,6 +1602,14 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
 // Get order stats (Admin)
 export const getOrderStats = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    // PERFORMANCE FIX: Cache entire response for 2 minutes to avoid running 4 aggregations on every request
+    const cacheKey = 'orders:stats:all';
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      logger.debug(`Cache HIT: ${cacheKey}`);
+      return res.status(200).json(cached);
+    }
+
     // PERFORMANCE FIX: Use a single aggregation pipeline to calculate all stats at once
     // This replaces multiple sequential queries with one efficient aggregation
     const statsPipeline = [
@@ -1654,37 +1663,15 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
       }
     ];
 
-    const statsResult = await executeCachedAggregation(
-      'orders',
-      statsPipeline,
-      async () => {
-        return await Order.aggregate(statsPipeline as any, { allowDiskUse: true });
-      },
-      300 // 5 minutes cache
-    );
-
-    const stats = statsResult[0] || {};
-    const statusCounts = (stats.statusCounts || []).reduce((acc: any, item: any) => {
-      acc[item._id] = item.count;
-      return acc;
-    }, {});
-
-    const totalOrders = stats.totalCount?.[0]?.count || 0;
-    const pendingOrders = statusCounts.pending || 0;
-    const processingOrders = statusCounts.processing || 0;
-    const shippedOrders = statusCounts.shipped || 0;
-    const deliveredOrders = statusCounts.delivered || 0;
-    const totalRevenue = stats.revenue?.[0]?.totalRevenue || 0;
-    const donationStats = stats.donations?.[0] || {};
-    const totalDonations = donationStats.totalDonations || 0;
-    const donationCount = donationStats.donationCount || 0;
-    const averageDonation = donationStats.averageDonation || 0;
-
-    // Use $facet to combine multiple aggregations in a single pipeline for better performance
-    // This reduces database round-trips from 2 to 1
+    // PERFORMANCE FIX: Run all aggregations in parallel instead of sequentially
+    // This reduces total time from sum of all aggregations to max of all aggregations
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
     const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
+    const now = new Date();
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
     // Combined aggregation using $facet - executes both aggregations in parallel
     const combinedStatsPipeline = [
@@ -1740,33 +1727,6 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
         }
       }
     ];
-
-    // Cache combined stats for 5 minutes (dashboard stats don't need real-time accuracy)
-    const combinedStats = await executeCachedAggregation(
-      'orders',
-      combinedStatsPipeline,
-      async () => {
-        return await Order.aggregate(combinedStatsPipeline as any, { allowDiskUse: true });
-      },
-      300 // 5 minutes cache
-    );
-
-    const monthlyDonations = combinedStats[0]?.monthlyDonations || [];
-    const monthlySales = combinedStats[0]?.monthlySales || [];
-
-    // Format monthly sales data with month names
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const formattedMonthlySales = monthlySales.map((item: any) => ({
-      month: monthNames[item._id.month - 1],
-      sales: item.sales || 0,
-      orderCount: item.orderCount || 0
-    }));
-
-    // Calculate current month and previous month revenue and order counts for trends
-    const now = new Date();
-    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
     // PERFORMANCE FIX: Combine revenue trends and order counts into single aggregation
     const revenueTrendPipeline = [
@@ -1836,15 +1796,61 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
       }
     ];
 
-    // Cache revenue trend for 2 minutes (more frequent updates needed)
-    const revenueTrendResult = await executeCachedAggregation(
-      'orders',
-      revenueTrendPipeline,
-      async () => {
-        return await Order.aggregate(revenueTrendPipeline as any, { allowDiskUse: true });
-      },
-      120 // 2 minutes cache
-    );
+    // Run all aggregations in parallel
+    const [statsResult, combinedStats, revenueTrendResult] = await Promise.all([
+      executeCachedAggregation(
+        'orders',
+        statsPipeline,
+        async () => {
+          return await Order.aggregate(statsPipeline as any, { allowDiskUse: true });
+        },
+        300 // 5 minutes cache
+      ),
+      executeCachedAggregation(
+        'orders',
+        combinedStatsPipeline,
+        async () => {
+          return await Order.aggregate(combinedStatsPipeline as any, { allowDiskUse: true });
+        },
+        300 // 5 minutes cache
+      ),
+      executeCachedAggregation(
+        'orders',
+        revenueTrendPipeline,
+        async () => {
+          return await Order.aggregate(revenueTrendPipeline as any, { allowDiskUse: true });
+        },
+        120 // 2 minutes cache
+      )
+    ]);
+
+    const stats = statsResult[0] || {};
+    const statusCounts = (stats.statusCounts || []).reduce((acc: any, item: any) => {
+      acc[item._id] = item.count;
+      return acc;
+    }, {});
+
+    const totalOrders = stats.totalCount?.[0]?.count || 0;
+    const pendingOrders = statusCounts.pending || 0;
+    const processingOrders = statusCounts.processing || 0;
+    const shippedOrders = statusCounts.shipped || 0;
+    const deliveredOrders = statusCounts.delivered || 0;
+    const totalRevenue = stats.revenue?.[0]?.totalRevenue || 0;
+    const donationStats = stats.donations?.[0] || {};
+    const totalDonations = donationStats.totalDonations || 0;
+    const donationCount = donationStats.donationCount || 0;
+    const averageDonation = donationStats.averageDonation || 0;
+
+    const monthlyDonations = combinedStats[0]?.monthlyDonations || [];
+    const monthlySales = combinedStats[0]?.monthlySales || [];
+
+    // Format monthly sales data with month names
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const formattedMonthlySales = monthlySales.map((item: any) => ({
+      month: monthNames[item._id.month - 1],
+      sales: item.sales || 0,
+      orderCount: item.orderCount || 0
+    }));
 
     const trendData = revenueTrendResult[0] || {};
     const currentMonthTotal = trendData.currentMonthRevenue?.[0]?.total || 0;
@@ -1860,103 +1866,50 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
       ? ((currentMonthOrders - previousMonthOrders) / previousMonthOrders) * 100
       : 0;
 
-    // Get recent orders (cached separately as it's frequently accessed)
-    const recentOrders = await executeCachedAggregation(
-      'orders',
-      [
-        {
-          $sort: { createdAt: -1 }
-        },
-        {
-          $limit: 5
-        },
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'user',
-            foreignField: '_id',
-            as: 'userData',
-            pipeline: [
-              {
-                $project: {
-                  firstName: 1,
-                  lastName: 1,
-                  email: 1
-                }
-              }
-            ]
-          }
-        },
-        {
-          $unwind: {
-            path: '$userData',
-            preserveNullAndEmptyArrays: true
-          }
-        },
-        {
-          $project: {
-            _id: 1,
-            orderNumber: 1,
-            totalPrice: 1,
-            orderStatus: 1,
-            paymentStatus: 1,
-            createdAt: 1,
-            user: {
-              firstName: '$userData.firstName',
-              lastName: '$userData.lastName',
-              email: '$userData.email'
-            }
-          }
-        }
-      ],
-      async () => {
-        return await Order.aggregate([
-          { $sort: { createdAt: -1 } },
-          { $limit: 5 },
-          {
-            $lookup: {
-              from: 'users',
-              localField: 'user',
-              foreignField: '_id',
-              as: 'userData',
-              pipeline: [
-                {
-                  $project: {
-                    firstName: 1,
-                    lastName: 1,
-                    email: 1
-                  }
-                }
-              ]
-            }
-          },
-          {
-            $unwind: {
-              path: '$userData',
-              preserveNullAndEmptyArrays: true
-            }
-          },
-          {
-            $project: {
-              _id: 1,
-              orderNumber: 1,
-              totalPrice: 1,
-              orderStatus: 1,
-              paymentStatus: 1,
-              createdAt: 1,
-              user: {
-                firstName: '$userData.firstName',
-                lastName: '$userData.lastName',
-                email: '$userData.email'
-              }
-            }
-          }
-        ]);
-      },
-      60 // 1 minute cache for recent orders
-    );
+    // PERFORMANCE FIX: Run all aggregations in parallel instead of sequentially
+    // This reduces total time from sum of all aggregations to max of all aggregations
+    const [recentOrders] = await Promise.all([
+      // Get recent orders (simplified - no expensive $lookup, fetch user data separately if needed)
+      Order.find({})
+        .select('_id orderNumber totalPrice orderStatus paymentStatus createdAt user')
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean()
+        .maxTimeMS(3000)
+    ]);
 
-    res.status(200).json({
+    // Fetch user data separately for recent orders (more efficient than $lookup)
+    const userIds = recentOrders
+      .map((order: any) => order.user)
+      .filter((id: any): id is mongoose.Types.ObjectId => id !== null && id !== undefined);
+    
+    const usersMap = new Map();
+    if (userIds.length > 0) {
+      const uniqueUserIds = Array.from(new Set(userIds.map(id => id.toString())))
+        .map(id => new mongoose.Types.ObjectId(id));
+      const User = (await import('../models/User')).default;
+      const users = await User.find({ _id: { $in: uniqueUserIds } })
+        .select('firstName lastName email')
+        .lean();
+      users.forEach((user: any) => {
+        usersMap.set(user._id.toString(), user);
+      });
+    }
+
+    // Attach user data to recent orders
+    const recentOrdersWithUsers = recentOrders.map((order: any) => {
+      const userData = order.user ? usersMap.get(order.user.toString()) : null;
+      return {
+        ...order,
+        user: userData ? {
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email
+        } : null
+      };
+    });
+
+    const response = {
       success: true,
       data: {
         totalOrders,
@@ -1976,9 +1929,14 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
         previousMonthRevenue: previousMonthTotal,
         currentMonthOrders,
         previousMonthOrders,
-        recentOrders: recentOrders || []
+        recentOrders: recentOrdersWithUsers || []
       }
-    });
+    };
+
+    // Cache entire response for 2 minutes (120 seconds)
+    await cache.set(cacheKey, response, 120);
+
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }
