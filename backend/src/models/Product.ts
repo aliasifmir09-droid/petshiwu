@@ -232,6 +232,9 @@ productSchema.pre('save', function (next) {
 productSchema.index({ name: 'text', description: 'text', brand: 'text', tags: 'text' }); // Text search
 productSchema.index({ category: 1, isActive: 1, deletedAt: 1 }); // For filtering active products by category
 productSchema.index({ petType: 1, isActive: 1, deletedAt: 1 }); // For filtering by pet type
+// PERFORMANCE FIX: Add compound index for petType + sort=newest queries
+// This optimizes queries like /api/products?petType=dog&sort=newest
+productSchema.index({ petType: 1, isActive: 1, createdAt: -1, deletedAt: 1 }); // For petType + newest sorting
 productSchema.index({ brand: 1, deletedAt: 1 }); // Brand filter
 productSchema.index({ totalStock: 1, isActive: 1, deletedAt: 1 }); // Stock filtering
 productSchema.index({ petType: 1, category: 1, isActive: 1, deletedAt: 1 }); // Compound index for common queries

@@ -1686,7 +1686,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     const productsQuery = Product.find(query)
       .maxTimeMS(5000); // 5 second timeout to prevent slow queries
     
-    // PERFORMANCE FIX: Hint index usage for inStock and featured queries to ensure optimal performance
+    // PERFORMANCE FIX: Hint index usage for inStock, featured, and petType queries to ensure optimal performance
     if (!isAdminRequest) {
       try {
         if (req.query.inStock !== undefined) {
@@ -1695,6 +1695,12 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
         } else if (req.query.featured === 'true') {
           // Use compound index { isFeatured: 1, isActive: 1, createdAt: -1 } for featured queries
           productsQuery.hint({ isFeatured: 1, isActive: 1, createdAt: -1 });
+        } else if (req.query.petType && (req.query.sort === 'newest' || !req.query.sort)) {
+          // Use compound index { petType: 1, isActive: 1, createdAt: -1, deletedAt: 1 } for petType + newest queries
+          productsQuery.hint({ petType: 1, isActive: 1, createdAt: -1, deletedAt: 1 });
+        } else if (req.query.petType) {
+          // Use petType index for other petType queries
+          productsQuery.hint({ petType: 1, isActive: 1, deletedAt: 1 });
         }
       } catch (hintError) {
         // If hint fails (e.g., index doesn't exist), continue without hint
@@ -1737,6 +1743,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       .lean(); // Use lean() for better performance (returns plain JS objects)
 
     // PERFORMANCE FIX: Build category hierarchy in memory for frontend requests
+    // Only build hierarchy if products have categories (skip if no categories in results)
     // Fetch all categories in one query and build hierarchy map
     interface CategoryMapEntry {
       _id: string;
@@ -1754,8 +1761,13 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       parentCategory?: CategoryHierarchy | null;
     }
     
+    // PERFORMANCE FIX: Only build category hierarchy if products have categories
+    // Check if any product has a category before fetching all categories
+    const hasCategories = !isAdminRequest && !isFeaturedQuery && products.some((p: any) => p.category);
+    
     let categoryHierarchyMap: Map<string, CategoryMapEntry> | null = null;
-    if (!isAdminRequest && !isFeaturedQuery) {
+    if (hasCategories) {
+      // Only fetch categories if we have products with categories
       const allCategories = await Category.find({ isActive: true })
         .select('_id name slug parentCategory petType')
         .lean();
