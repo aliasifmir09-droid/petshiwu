@@ -181,8 +181,9 @@ const Dashboard = () => {
   });
 
   // Check if user is authenticated (user data loaded and no error)
-  const isAuthenticated = !userDataLoading && !userDataError && userData;
-  const hasAnalyticsPermission = userData?.role === 'admin' || userData?.permissions?.canViewAnalytics;
+  // Convert to strict boolean for React Query's enabled option
+  const isAuthenticated = Boolean(!userDataLoading && !userDataError && userData);
+  const hasAnalyticsPermission = Boolean(userData?.role === 'admin' || userData?.permissions?.canViewAnalytics);
   
   // Rate limiting for refresh - prevent abuse
   const [lastRefreshTime, setLastRefreshTime] = useState<number>(0);
