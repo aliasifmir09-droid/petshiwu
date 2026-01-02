@@ -820,26 +820,85 @@ export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFu
     const limit = parseInt(req.query.limit as string) || 20;
     const skip = (page - 1) * limit;
 
-    const query: Record<string, unknown> = {};
+    const matchQuery: Record<string, unknown> = {};
 
     // Filter by status
     if (req.query.status) {
-      query.orderStatus = req.query.status;
+      matchQuery.orderStatus = req.query.status;
     }
 
     // Filter by payment status
     if (req.query.paymentStatus) {
-      query.paymentStatus = req.query.paymentStatus;
+      matchQuery.paymentStatus = req.query.paymentStatus;
     }
 
-    const orders = await Order.find(query)
-      .populate('user', 'firstName lastName email')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean(); // Use lean() to get plain JavaScript objects
+    // PERFORMANCE FIX: Use aggregation with $lookup instead of populate for better performance
+    // This is especially important for small limit queries (like limit=1)
+    const aggregationPipeline = [
+      {
+        $match: matchQuery
+      },
+      {
+        $sort: { createdAt: -1 }
+      },
+      {
+        $skip: skip
+      },
+      {
+        $limit: limit
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'userData',
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+                email: 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        $unwind: {
+          path: '$userData',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          orderNumber: 1,
+          user: {
+            firstName: '$userData.firstName',
+            lastName: '$userData.lastName',
+            email: '$userData.email'
+          },
+          items: 1,
+          totalPrice: 1,
+          orderStatus: 1,
+          paymentStatus: 1,
+          shippingAddress: 1,
+          billingAddress: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          donationAmount: 1,
+          trackingNumber: 1
+        }
+      }
+    ];
 
-    const total = await Order.countDocuments(query);
+    // Get total count and orders in parallel
+    // PERFORMANCE FIX: Add allowDiskUse for large datasets
+    const [orders, total] = await Promise.all([
+      Order.aggregate(aggregationPipeline).allowDiskUse(true),
+      Order.countDocuments(matchQuery).maxTimeMS(5000)
+    ]);
 
     // Normalize order IDs to strings
     const normalizedOrders = orders.map((order) => normalizeOrderId(order));
@@ -1542,24 +1601,84 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
 // Get order stats (Admin)
 export const getOrderStats = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const totalOrders = await Order.countDocuments();
-    const pendingOrders = await Order.countDocuments({ orderStatus: 'pending' });
-    const processingOrders = await Order.countDocuments({ orderStatus: 'processing' });
-    const shippedOrders = await Order.countDocuments({ orderStatus: 'shipped' });
-    const deliveredOrders = await Order.countDocuments({ orderStatus: 'delivered' });
+    // PERFORMANCE FIX: Use a single aggregation pipeline to calculate all stats at once
+    // This replaces multiple sequential queries with one efficient aggregation
+    const statsPipeline = [
+      {
+        $facet: {
+          // Count orders by status
+          statusCounts: [
+            {
+              $group: {
+                _id: '$orderStatus',
+                count: { $sum: 1 }
+              }
+            }
+          ],
+          // Total revenue from paid orders
+          revenue: [
+            {
+              $match: { paymentStatus: 'paid' }
+            },
+            {
+              $group: {
+                _id: null,
+                totalRevenue: { $sum: '$totalPrice' }
+              }
+            }
+          ],
+          // Donation statistics
+          donations: [
+            {
+              $match: { donationAmount: { $gt: 0 } }
+            },
+            {
+              $group: {
+                _id: null,
+                totalDonations: { $sum: '$donationAmount' },
+                donationCount: { $sum: 1 },
+                averageDonation: { $avg: '$donationAmount' }
+              }
+            }
+          ],
+          // Total orders count
+          totalCount: [
+            {
+              $group: {
+                _id: null,
+                count: { $sum: 1 }
+              }
+            }
+          ]
+        }
+      }
+    ];
 
-    // Calculate total revenue
-    const paidOrders = await Order.find({ paymentStatus: 'paid' })
-      .select('totalPrice donationAmount')
-      .lean();
-    const totalRevenue = paidOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+    const statsResult = await executeCachedAggregation(
+      'orders',
+      statsPipeline,
+      async () => {
+        return await Order.aggregate(statsPipeline);
+      },
+      300 // 5 minutes cache
+    );
 
-    // Calculate donation statistics
-    const ordersWithDonations = await Order.find({ donationAmount: { $gt: 0 } })
-      .lean();
-    const totalDonations = ordersWithDonations.reduce((sum, order) => sum + (order.donationAmount || 0), 0);
-    const donationCount = ordersWithDonations.length;
-    const averageDonation = donationCount > 0 ? totalDonations / donationCount : 0;
+    const stats = statsResult[0] || {};
+    const statusCounts = (stats.statusCounts || []).reduce((acc: any, item: any) => {
+      acc[item._id] = item.count;
+      return acc;
+    }, {});
+
+    const totalOrders = stats.totalCount?.[0]?.count || 0;
+    const pendingOrders = statusCounts.pending || 0;
+    const processingOrders = statusCounts.processing || 0;
+    const shippedOrders = statusCounts.shipped || 0;
+    const deliveredOrders = statusCounts.delivered || 0;
+    const totalRevenue = stats.revenue?.[0]?.totalRevenue || 0;
+    const donationStats = stats.donations?.[0] || {};
+    const totalDonations = donationStats.totalDonations || 0;
+    const donationCount = donationStats.donationCount || 0;
+    const averageDonation = donationStats.averageDonation || 0;
 
     // Use $facet to combine multiple aggregations in a single pipeline for better performance
     // This reduces database round-trips from 2 to 1
@@ -1643,17 +1762,17 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
       orderCount: item.orderCount || 0
     }));
 
-    // Calculate current month and previous month revenue for trends
+    // Calculate current month and previous month revenue and order counts for trends
     const now = new Date();
     const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
-    // Use $facet to combine current and previous month revenue in single query
+    // PERFORMANCE FIX: Combine revenue trends and order counts into single aggregation
     const revenueTrendPipeline = [
       {
         $facet: {
-          currentMonth: [
+          currentMonthRevenue: [
             {
               $match: {
                 paymentStatus: 'paid',
@@ -1667,7 +1786,7 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
               }
             }
           ],
-          previousMonth: [
+          previousMonthRevenue: [
             {
               $match: {
                 paymentStatus: 'paid',
@@ -1681,6 +1800,35 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
               $group: {
                 _id: null,
                 total: { $sum: '$totalPrice' }
+              }
+            }
+          ],
+          currentMonthOrders: [
+            {
+              $match: {
+                createdAt: { $gte: currentMonthStart }
+              }
+            },
+            {
+              $group: {
+                _id: null,
+                count: { $sum: 1 }
+              }
+            }
+          ],
+          previousMonthOrders: [
+            {
+              $match: {
+                createdAt: { 
+                  $gte: previousMonthStart,
+                  $lte: previousMonthEnd
+                }
+              }
+            },
+            {
+              $group: {
+                _id: null,
+                count: { $sum: 1 }
               }
             }
           ]
@@ -1698,37 +1846,115 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
       120 // 2 minutes cache
     );
 
-    const currentMonthRevenue = revenueTrendResult[0]?.currentMonth || [];
-    const previousMonthRevenue = revenueTrendResult[0]?.previousMonth || [];
+    const trendData = revenueTrendResult[0] || {};
+    const currentMonthTotal = trendData.currentMonthRevenue?.[0]?.total || 0;
+    const previousMonthTotal = trendData.previousMonthRevenue?.[0]?.total || 0;
+    const currentMonthOrders = trendData.currentMonthOrders?.[0]?.count || 0;
+    const previousMonthOrders = trendData.previousMonthOrders?.[0]?.count || 0;
 
-    const currentMonthTotal = currentMonthRevenue[0]?.total || 0;
-    const previousMonthTotal = previousMonthRevenue[0]?.total || 0;
     const revenueTrend = previousMonthTotal > 0 
       ? ((currentMonthTotal - previousMonthTotal) / previousMonthTotal) * 100 
       : 0;
-
-    // Calculate current month and previous month order counts for trends
-    const currentMonthOrders = await Order.countDocuments({
-      createdAt: { $gte: currentMonthStart }
-    });
-
-    const previousMonthOrders = await Order.countDocuments({
-      createdAt: { 
-        $gte: previousMonthStart,
-        $lte: previousMonthEnd
-      }
-    });
 
     const ordersTrend = previousMonthOrders > 0
       ? ((currentMonthOrders - previousMonthOrders) / previousMonthOrders) * 100
       : 0;
 
-    // Get recent orders
-    const recentOrders = await Order.find()
-      .populate('user', 'firstName lastName email')
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .lean();
+    // Get recent orders (cached separately as it's frequently accessed)
+    const recentOrders = await executeCachedAggregation(
+      'orders',
+      [
+        {
+          $sort: { createdAt: -1 }
+        },
+        {
+          $limit: 5
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user',
+            foreignField: '_id',
+            as: 'userData',
+            pipeline: [
+              {
+                $project: {
+                  firstName: 1,
+                  lastName: 1,
+                  email: 1
+                }
+              }
+            ]
+          }
+        },
+        {
+          $unwind: {
+            path: '$userData',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            orderNumber: 1,
+            totalPrice: 1,
+            orderStatus: 1,
+            paymentStatus: 1,
+            createdAt: 1,
+            user: {
+              firstName: '$userData.firstName',
+              lastName: '$userData.lastName',
+              email: '$userData.email'
+            }
+          }
+        }
+      ],
+      async () => {
+        return await Order.aggregate([
+          { $sort: { createdAt: -1 } },
+          { $limit: 5 },
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'user',
+              foreignField: '_id',
+              as: 'userData',
+              pipeline: [
+                {
+                  $project: {
+                    firstName: 1,
+                    lastName: 1,
+                    email: 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            $unwind: {
+              path: '$userData',
+              preserveNullAndEmptyArrays: true
+            }
+          },
+          {
+            $project: {
+              _id: 1,
+              orderNumber: 1,
+              totalPrice: 1,
+              orderStatus: 1,
+              paymentStatus: 1,
+              createdAt: 1,
+              user: {
+                firstName: '$userData.firstName',
+                lastName: '$userData.lastName',
+                email: '$userData.email'
+              }
+            }
+          }
+        ]);
+      },
+      60 // 1 minute cache for recent orders
+    );
 
     res.status(200).json({
       success: true,
@@ -1750,7 +1976,7 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
         previousMonthRevenue: previousMonthTotal,
         currentMonthOrders,
         previousMonthOrders,
-        recentOrders
+        recentOrders: recentOrders || []
       }
     });
   } catch (error) {

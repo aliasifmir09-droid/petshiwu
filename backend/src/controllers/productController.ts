@@ -1378,7 +1378,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     
     const skip = (page - 1) * limit;
 
-    // Generate cache key from query parameters
+    // Generate cache key from query parameters (include all filters)
     const queryString = JSON.stringify({
       page,
       limit,
@@ -1386,7 +1386,10 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       petType: req.query.petType,
       brand: req.query.brand,
       search: req.query.search,
-      sort: req.query.sort
+      sort: req.query.sort,
+      inStock: req.query.inStock,
+      featured: req.query.featured,
+      isActive: req.query.isActive
     });
     const cacheKey = cacheKeys.products(queryString);
 
@@ -1592,8 +1595,16 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     }
 
     // Filter by in stock
+    // PERFORMANCE FIX: Optimize inStock filtering to use compound index efficiently
     if (req.query.inStock !== undefined) {
-      baseQuery.inStock = req.query.inStock === 'true';
+      const inStockValue = req.query.inStock === 'true';
+      baseQuery.inStock = inStockValue;
+      
+      // For non-admin requests, ensure isActive is set first to match index { inStock: 1, isActive: 1 }
+      // This helps MongoDB use the compound index efficiently
+      if (!isAdminRequest && baseQuery.isActive === undefined) {
+        baseQuery.isActive = true;
+      }
     }
 
     // Filter by featured - IMPORTANT: Only show products with isFeatured: true
@@ -1670,6 +1681,19 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     // Connection-level readPreference ensures we read from primary (not stale replica)
     const productsQuery = Product.find(query)
       .maxTimeMS(5000); // 5 second timeout to prevent slow queries
+    
+    // PERFORMANCE FIX: Hint index usage for inStock queries to ensure optimal performance
+    // When filtering by inStock, use the compound index { inStock: 1, isActive: 1 }
+    if (req.query.inStock !== undefined && !isAdminRequest) {
+      // MongoDB will automatically choose the best index, but we can hint for inStock queries
+      // The compound index { inStock: 1, isActive: 1 } is optimal for this query pattern
+      try {
+        productsQuery.hint({ inStock: 1, isActive: 1 });
+      } catch (hintError) {
+        // If hint fails (e.g., index doesn't exist), continue without hint
+        logger.debug('Index hint not applied, MongoDB will choose optimal index');
+      }
+    }
 
     // Optimize category population based on request type
     if (isAdminRequest) {
@@ -1802,7 +1826,19 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
 
     // Count total using countDocuments (much faster than fetching all products)
     // This uses indexes and doesn't load documents into memory
-    const total = await Product.countDocuments(query).maxTimeMS(5000);
+    const countQuery = Product.countDocuments(query).maxTimeMS(5000);
+    
+    // PERFORMANCE FIX: Hint index usage for count queries with inStock filter
+    if (req.query.inStock !== undefined && !isAdminRequest) {
+      try {
+        countQuery.hint({ inStock: 1, isActive: 1 });
+      } catch (hintError) {
+        // If hint fails, continue without hint
+        logger.debug('Index hint not applied for count query');
+      }
+    }
+    
+    const total = await countQuery;
 
     // Normalize _id to string for all products (use filtered products)
     const normalizedProducts = normalizeProducts(activeProducts);
@@ -2064,6 +2100,14 @@ export const getRelatedProducts = async (req: Request, res: Response, next: Next
     const identifier = req.params.id;
     const limit = parseInt(req.query.limit as string) || 8;
 
+    // PERFORMANCE FIX: Cache related products for 5 minutes
+    const cacheKey = `related:products:${identifier}:${limit}`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      logger.debug(`Cache HIT: ${cacheKey}`);
+      return res.status(200).json(cached);
+    }
+
     // First, get the current product to know its category and petType
     let currentProduct;
     currentProduct = await Product.findOne({ slug: identifier })
@@ -2089,64 +2133,75 @@ export const getRelatedProducts = async (req: Request, res: Response, next: Next
       });
     }
 
-    // Find products that match both category AND petType first
-    const exactMatches = await Product.find({
+    // PERFORMANCE FIX: Use single query with $or to get all related products at once
+    // This reduces from 2-3 queries to 1 query
+    const relatedProductsQuery: any = {
       isActive: true,
-      _id: { $ne: currentProduct._id },
-      category: currentProduct.category,
-      petType: currentProduct.petType
+      _id: { $ne: currentProduct._id }
+    };
+
+    // Build query to get exact matches first, then partial matches
+    // Use $or to get both category and petType matches in one query
+    const relatedProducts = await Product.find({
+      ...relatedProductsQuery,
+      $or: [
+        { category: currentProduct.category, petType: currentProduct.petType }, // Exact matches
+        { category: currentProduct.category }, // Same category
+        { petType: currentProduct.petType } // Same pet type
+      ]
     })
-      .maxTimeMS(5000) // 5 second timeout
+      .maxTimeMS(5000)
       .select('name slug images basePrice compareAtPrice averageRating totalReviews brand category petType isFeatured inStock totalStock variants')
       .populate({
         path: 'category',
-        select: 'name slug petType' // Simplified for related products
+        select: 'name slug petType'
       })
-      .sort({ averageRating: -1, totalReviews: -1 })
-      .limit(limit)
+      .sort({ 
+        // Sort exact matches first (both category and petType match)
+        // Then by rating
+        averageRating: -1, 
+        totalReviews: -1 
+      })
+      .limit(limit * 2) // Get more to filter exact matches
       .lean();
 
-    // If we need more products, find ones that match either category OR petType
-    let relatedProducts = exactMatches;
+    // Separate exact matches from partial matches
+    const exactMatches = relatedProducts.filter((p: any) => 
+      p.category?._id?.toString() === currentProduct.category?.toString() &&
+      p.petType === currentProduct.petType
+    ).slice(0, limit);
+
+    // If we need more, add partial matches
+    let finalProducts = exactMatches;
     if (exactMatches.length < limit) {
-      const remainingLimit = limit - exactMatches.length;
-      const partialMatches = await Product.find({
-        isActive: true,
-        _id: { 
-          $ne: currentProduct._id,
-          $nin: exactMatches.map((p: any) => p._id)
-        },
-        $or: [
-          { category: currentProduct.category },
-          { petType: currentProduct.petType }
-        ]
-      })
-        .maxTimeMS(5000) // 5 second timeout
-        .select('name slug images basePrice compareAtPrice averageRating totalReviews brand category petType isFeatured inStock totalStock variants')
-        .populate({
-        path: 'category',
-        select: 'name slug petType' // Simplified for related products
-        })
-        .sort({ averageRating: -1, totalReviews: -1 })
-        .limit(remainingLimit)
-        .lean();
-      
-      relatedProducts = [...exactMatches, ...partialMatches];
+      const partialMatches = relatedProducts
+        .filter((p: any) => 
+          !exactMatches.some((em: any) => em._id.toString() === p._id.toString())
+        )
+        .slice(0, limit - exactMatches.length);
+      finalProducts = [...exactMatches, ...partialMatches];
+    } else {
+      finalProducts = exactMatches.slice(0, limit);
     }
 
     // Normalize _id to string for all related products
-    const normalizedRelatedProducts = normalizeProducts(relatedProducts);
+    const normalizedRelatedProducts = normalizeProducts(finalProducts);
 
-    res.status(200).json({
+    const response = {
       success: true,
       data: normalizedRelatedProducts,
       pagination: {
         page: 1,
         limit,
-        total: relatedProducts.length,
+        total: finalProducts.length,
         pages: 1
       }
-    });
+    };
+
+    // Cache for 5 minutes (300 seconds)
+    await cache.set(cacheKey, response, 300);
+
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }
@@ -2513,22 +2568,111 @@ export const restoreProduct = async (req: AuthRequest, res: Response, next: Next
 // Get product statistics (Admin)
 export const getProductStats = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const totalProducts = await Product.countDocuments({ isActive: true });
-    const outOfStockProducts = await Product.countDocuments({ inStock: false, isActive: true });
-    const featuredProducts = await Product.countDocuments({ isFeatured: true, isActive: true });
-    
-    // Get products by category
-    const productsByCategory = await Product.aggregate([
-      { $match: { isActive: true } },
-      { $group: { _id: '$category', count: { $sum: 1 } } },
-      { $lookup: { from: 'categories', localField: '_id', foreignField: '_id', as: 'categoryInfo' } },
-      { $unwind: '$categoryInfo' },
-      { $project: { categoryName: '$categoryInfo.name', count: 1 } },
-      { $sort: { count: -1 } },
-      { $limit: 10 }
-    ]);
+    // PERFORMANCE FIX: Cache stats for 5 minutes since they don't change frequently
+    const cacheKey = cacheKeys.productStats();
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      logger.debug(`Cache HIT: ${cacheKey}`);
+      return res.status(200).json(cached);
+    }
 
-    res.status(200).json({
+    // PERFORMANCE FIX: Use a single aggregation pipeline to calculate all stats at once
+    // This replaces 3 separate countDocuments calls with one efficient aggregation
+    // Optimized: Removed expensive $lookup, will fetch category names separately
+    const statsPipeline = [
+      {
+        $match: { 
+          isActive: true,
+          $or: [
+            { deletedAt: null },
+            { deletedAt: { $exists: false } }
+          ]
+        }
+      },
+      {
+        $facet: {
+          // Total products count
+          totalCount: [
+            {
+              $group: {
+                _id: null,
+                count: { $sum: 1 }
+              }
+            }
+          ],
+          // Out of stock products count
+          outOfStockCount: [
+            {
+              $match: { inStock: false }
+            },
+            {
+              $group: {
+                _id: null,
+                count: { $sum: 1 }
+              }
+            }
+          ],
+          // Featured products count
+          featuredCount: [
+            {
+              $match: { isFeatured: true }
+            },
+            {
+              $group: {
+                _id: null,
+                count: { $sum: 1 }
+              }
+            }
+          ],
+          // Products by category (optimized: no $lookup, just group by category ID)
+          byCategory: [
+            {
+              $group: {
+                _id: '$category',
+                count: { $sum: 1 }
+              }
+            },
+            {
+              $sort: { count: -1 }
+            },
+            {
+              $limit: 10
+            }
+          ]
+        }
+      }
+    ];
+
+    const statsResult = await Product.aggregate(statsPipeline).allowDiskUse(true);
+    const stats = statsResult[0] || {};
+
+    const totalProducts = stats.totalCount?.[0]?.count || 0;
+    const outOfStockProducts = stats.outOfStockCount?.[0]?.count || 0;
+    const featuredProducts = stats.featuredCount?.[0]?.count || 0;
+    
+    // PERFORMANCE FIX: Fetch category names in a single optimized query instead of $lookup
+    // This is much faster than $lookup which does a collection scan
+    const categoryIds = (stats.byCategory || []).map((item: { _id: mongoose.Types.ObjectId }) => item._id);
+    const categories = categoryIds.length > 0 
+      ? await Category.find({ _id: { $in: categoryIds } })
+          .select('_id name')
+          .lean()
+      : [];
+    
+    // Build a map for quick lookup
+    const categoryMap = new Map<string, string>();
+    categories.forEach((cat: { _id: mongoose.Types.ObjectId; name: string }) => {
+      categoryMap.set(cat._id.toString(), cat.name);
+    });
+    
+    // Attach category names to the byCategory results
+    const productsByCategory = (stats.byCategory || []).map((item: { _id: mongoose.Types.ObjectId; count: number }) => ({
+      categoryId: item._id.toString(),
+      categoryName: categoryMap.get(item._id.toString()) || 'Unknown Category',
+      count: item.count
+    }));
+
+    const response = {
       success: true,
       data: {
         totalProducts,
@@ -2536,7 +2680,12 @@ export const getProductStats = async (req: Request, res: Response, next: NextFun
         featuredProducts,
         productsByCategory
       }
-    });
+    };
+
+    // Cache for 5 minutes (300 seconds)
+    await cache.set(cacheKey, response, 300);
+
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }

@@ -4,6 +4,7 @@ import Order from '../models/Order';
 import { AuthRequest } from '../middleware/auth';
 import mongoose from 'mongoose';
 import logger from '../utils/logger';
+import { cache } from '../utils/cache';
 
 // Get intelligent product recommendations
 export const getProductRecommendations = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -11,6 +12,14 @@ export const getProductRecommendations = async (req: AuthRequest, res: Response,
     const identifier = req.params.id;
     const userId = req.user?._id;
     const limit = parseInt(req.query.limit as string) || 8;
+
+    // PERFORMANCE FIX: Cache recommendations for 5 minutes
+    const cacheKey = `recommendations:${identifier}:${limit}:${userId || 'anonymous'}`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      logger.debug(`Cache HIT: ${cacheKey}`);
+      return res.status(200).json(cached);
+    }
 
     // Get current product - try slug first, then ID
     let currentProduct = await Product.findOne({ slug: identifier, deletedAt: null })
@@ -71,7 +80,7 @@ export const getProductRecommendations = async (req: AuthRequest, res: Response,
           { $sort: { count: -1, totalQuantity: -1 } },
           // Limit results
           { $limit: limit }
-        ]);
+        ]).allowDiskUse(true);
 
         if (alsoBought.length > 0) {
           const productIdsToFetch = alsoBought.map((item: any) => item._id);
@@ -133,7 +142,7 @@ export const getProductRecommendations = async (req: AuthRequest, res: Response,
         { $sort: { orderCount: -1 } },
         // Limit
         { $limit: limit - recommendations.length }
-      ]);
+      ]).allowDiskUse(true);
 
       if (frequentlyBoughtTogether.length > 0) {
         const productIdsToFetch = frequentlyBoughtTogether
@@ -287,7 +296,7 @@ export const getProductRecommendations = async (req: AuthRequest, res: Response,
     // Limit final results
     const finalRecommendations = recommendations.slice(0, limit);
 
-    res.status(200).json({
+    const response = {
       success: true,
       data: finalRecommendations,
       meta: {
@@ -299,7 +308,12 @@ export const getProductRecommendations = async (req: AuthRequest, res: Response,
           you_may_also_like: finalRecommendations.filter(r => r.recommendationType === 'you_may_also_like').length
         }
       }
-    });
+    };
+
+    // Cache for 5 minutes (300 seconds)
+    await cache.set(cacheKey, response, 300);
+
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }
@@ -310,6 +324,14 @@ export const getFrequentlyBoughtTogether = async (req: Request, res: Response, n
   try {
     const identifier = req.params.id;
     const limit = parseInt(req.query.limit as string) || 4;
+
+    // PERFORMANCE FIX: Cache frequently bought together for 5 minutes
+    const cacheKey = `frequently-bought:${identifier}:${limit}`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      logger.debug(`Cache HIT: ${cacheKey}`);
+      return res.status(200).json(cached);
+    }
 
     // Get current product - try slug first, then ID
     let currentProduct = await Product.findOne({ slug: identifier, deletedAt: null }).lean();
@@ -354,7 +376,7 @@ export const getFrequentlyBoughtTogether = async (req: Request, res: Response, n
       },
       { $sort: { orderCount: -1, totalQuantity: -1 } },
       { $limit: limit }
-    ]);
+    ]).allowDiskUse(true);
 
     if (frequentlyBought.length === 0) {
       return res.status(200).json({
@@ -381,10 +403,15 @@ export const getFrequentlyBoughtTogether = async (req: Request, res: Response, n
       })
       .filter(Boolean);
 
-    res.status(200).json({
+    const response = {
       success: true,
       data: sortedProducts
-    });
+    };
+
+    // Cache for 5 minutes (300 seconds)
+    await cache.set(cacheKey, response, 300);
+
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }

@@ -5,6 +5,7 @@ import User from '../models/User';
 import { AuthRequest } from '../middleware/auth';
 import mongoose from 'mongoose';
 import logger from '../utils/logger';
+import { cache } from '../utils/cache';
 
 /**
  * Get advanced analytics including:
@@ -21,7 +22,15 @@ export const getAdvancedAnalytics = async (req: AuthRequest, res: Response, next
     const days = period === '7d' ? 7 : period === '30d' ? 30 : period === '90d' ? 90 : period === '1y' ? 365 : 30;
     const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
     
-    // 1. Customer Lifetime Value (CLV)
+    // PERFORMANCE FIX: Cache analytics for 5 minutes since they're expensive to compute
+    const cacheKey = `analytics:advanced:${period}`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      logger.debug(`Cache HIT: ${cacheKey}`);
+      return res.status(200).json(cached);
+    }
+    
+    // 1. Customer Lifetime Value (CLV) - Optimized: removed $lookup, fetch user data separately if needed
     const customerLTV = await Order.aggregate([
       {
         $match: {
@@ -40,22 +49,8 @@ export const getAdvancedAnalytics = async (req: AuthRequest, res: Response, next
         }
       },
       {
-        $lookup: {
-          from: 'users',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'userInfo'
-        }
-      },
-      {
-        $unwind: { path: '$userInfo', preserveNullAndEmptyArrays: true }
-      },
-      {
         $project: {
           userId: '$_id',
-          email: '$userInfo.email',
-          firstName: '$userInfo.firstName',
-          lastName: '$userInfo.lastName',
           totalSpent: 1,
           orderCount: 1,
           averageOrderValue: 1,
@@ -75,14 +70,14 @@ export const getAdvancedAnalytics = async (req: AuthRequest, res: Response, next
       {
         $limit: 100
       }
-    ]);
+    ]).allowDiskUse(true);
 
     // Calculate average CLV
     const avgCLV = customerLTV.length > 0
       ? customerLTV.reduce((sum, c) => sum + c.totalSpent, 0) / customerLTV.length
       : 0;
 
-    // 2. Product Performance Metrics
+    // 2. Product Performance Metrics - Optimized: fetch product info separately to avoid expensive $lookup
     const productPerformance = await Order.aggregate([
       {
         $match: {
@@ -101,34 +96,12 @@ export const getAdvancedAnalytics = async (req: AuthRequest, res: Response, next
         }
       },
       {
-        $lookup: {
-          from: 'products',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'productInfo'
-        }
-      },
-      {
-        $unwind: { path: '$productInfo', preserveNullAndEmptyArrays: true }
-      },
-      {
         $project: {
           productId: '$_id',
-          productName: '$productInfo.name',
-          productSlug: '$productInfo.slug',
           totalSold: 1,
           totalRevenue: 1,
           orderCount: 1,
-          averagePrice: 1,
-          currentStock: '$productInfo.totalStock',
-          inStock: '$productInfo.inStock',
-          conversionRate: {
-            $cond: [
-              { $gt: ['$productInfo.totalStock', 0] },
-              { $divide: ['$totalSold', { $add: ['$productInfo.totalStock', '$totalSold'] }] },
-              0
-            ]
-          }
+          averagePrice: 1
         }
       },
       {
@@ -137,7 +110,34 @@ export const getAdvancedAnalytics = async (req: AuthRequest, res: Response, next
       {
         $limit: 50
       }
-    ]);
+    ]).allowDiskUse(true);
+    
+    // PERFORMANCE FIX: Fetch product info separately for top products only (much faster)
+    const topProductIds = productPerformance.slice(0, 50).map((p: any) => p.productId);
+    const productInfoMap = new Map();
+    if (topProductIds.length > 0) {
+      const products = await Product.find({ _id: { $in: topProductIds } })
+        .select('name slug totalStock inStock')
+        .lean();
+      products.forEach((p: any) => {
+        productInfoMap.set(p._id.toString(), p);
+      });
+    }
+    
+    // Attach product info to performance data
+    const enrichedProductPerformance = productPerformance.map((p: any) => {
+      const productInfo = productInfoMap.get(p.productId?.toString());
+      return {
+        ...p,
+        productName: productInfo?.name || 'Unknown',
+        productSlug: productInfo?.slug || '',
+        currentStock: productInfo?.totalStock || 0,
+        inStock: productInfo?.inStock || false,
+        conversionRate: productInfo?.totalStock > 0
+          ? p.totalSold / (productInfo.totalStock + p.totalSold)
+          : 0
+      };
+    });
 
     // 3. Sales Forecasting (Simple linear regression based on recent trends)
     const salesForecast = await Order.aggregate([
@@ -162,7 +162,7 @@ export const getAdvancedAnalytics = async (req: AuthRequest, res: Response, next
       {
         $sort: { '_id.year': 1, '_id.month': 1, '_id.week': 1 }
       }
-    ]);
+    ]).allowDiskUse(true);
 
     // Calculate forecast for next 30 days
     const recentWeeks = salesForecast.slice(-4); // Last 4 weeks
@@ -171,90 +171,54 @@ export const getAdvancedAnalytics = async (req: AuthRequest, res: Response, next
       : 0;
     const forecastedRevenue = avgWeeklyRevenue * 4.33; // ~4.33 weeks in a month
 
-    // 4. Inventory Turnover
-    const inventoryTurnover = await Product.aggregate([
+    // 4. Inventory Turnover - PERFORMANCE FIX: Optimized to avoid expensive $lookup
+    // First, get product sales from orders (more efficient)
+    const productSales = await Order.aggregate([
       {
         $match: {
-          isActive: true,
-          totalStock: { $gt: 0 }
+          paymentStatus: 'paid',
+          createdAt: { $gte: startDate }
         }
       },
-      {
-        $lookup: {
-          from: 'orders',
-          localField: '_id',
-          foreignField: 'items.product',
-          as: 'orders'
-        }
-      },
-      {
-        $unwind: { path: '$orders', preserveNullAndEmptyArrays: true }
-      },
-      {
-        $match: {
-          'orders.paymentStatus': 'paid',
-          'orders.createdAt': { $gte: startDate }
-        }
-      },
+      { $unwind: '$items' },
       {
         $group: {
-          _id: '$_id',
-          productName: { $first: '$name' },
-          currentStock: { $first: '$totalStock' },
-          totalSold: {
-            $sum: {
-              $let: {
-                vars: {
-                  item: {
-                    $arrayElemAt: [
-                      {
-                        $filter: {
-                          input: '$orders.items',
-                          as: 'item',
-                          cond: { $eq: ['$$item.product', '$_id'] }
-                        }
-                      },
-                      0
-                    ]
-                  }
-                },
-                in: '$$item.quantity'
-              }
-            }
-          }
+          _id: '$items.product',
+          totalSold: { $sum: '$items.quantity' }
         }
-      },
-      {
-        $project: {
-          productId: '$_id',
-          productName: 1,
-          currentStock: 1,
-          totalSold: { $ifNull: ['$totalSold', 0] },
-          turnoverRate: {
-            $cond: [
-              { $gt: ['$currentStock', 0] },
-              { $divide: [{ $ifNull: ['$totalSold', 0] }, '$currentStock'] },
-              0
-            ]
-          },
-          daysToSellOut: {
-            $cond: [
-              { $gt: [{ $ifNull: ['$totalSold', 0] }, 0] },
-              { $divide: ['$currentStock', { $divide: [{ $ifNull: ['$totalSold', 0] }, days] }] },
-              999
-            ]
-          }
-        }
-      },
-      {
-        $sort: { turnoverRate: -1 }
-      },
-      {
-        $limit: 50
       }
-    ]);
+    ]).allowDiskUse(true);
+    
+    const salesMap = new Map();
+    productSales.forEach((sale: any) => {
+      salesMap.set(sale._id?.toString(), sale.totalSold);
+    });
+    
+    // Then get products and calculate turnover
+    const products = await Product.find({
+      isActive: true,
+      totalStock: { $gt: 0 }
+    })
+      .select('name totalStock')
+      .limit(50)
+      .lean();
+    
+    const inventoryTurnover = products.map((product: any) => {
+      const totalSold = salesMap.get(product._id.toString()) || 0;
+      const turnoverRate = product.totalStock > 0 ? totalSold / product.totalStock : 0;
+      const daysToSellOut = totalSold > 0 ? product.totalStock / (totalSold / days) : 999;
+      
+      return {
+        productId: product._id,
+        productName: product.name,
+        currentStock: product.totalStock,
+        totalSold,
+        turnoverRate,
+        daysToSellOut
+      };
+    }).sort((a, b) => b.turnoverRate - a.turnoverRate).slice(0, 50);
 
-    res.status(200).json({
+    const response = {
       success: true,
       data: {
         period,
@@ -264,8 +228,8 @@ export const getAdvancedAnalytics = async (req: AuthRequest, res: Response, next
           totalCustomers: customerLTV.length
         },
         productPerformance: {
-          topProducts: productPerformance,
-          totalProducts: productPerformance.length
+          topProducts: enrichedProductPerformance,
+          totalProducts: enrichedProductPerformance.length
         },
         salesForecast: {
           historical: salesForecast,
@@ -283,7 +247,12 @@ export const getAdvancedAnalytics = async (req: AuthRequest, res: Response, next
           slowMovingProducts: inventoryTurnover.filter(p => p.turnoverRate < 0.1).length
         }
       }
-    });
+    };
+    
+    // Cache for 5 minutes (300 seconds)
+    await cache.set(cacheKey, response, 300);
+    
+    res.status(200).json(response);
   } catch (error: any) {
     logger.error('Error fetching advanced analytics:', error);
     next(error);

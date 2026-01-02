@@ -288,7 +288,8 @@ export const cacheKeys = {
   faqs: (category?: string, petType?: string, search?: string) => 
     `faqs:${category || 'all'}:${petType || 'all'}:${search || ''}`,
   faqCategories: () => `faqCategories:all`,
-  slideshow: (type: string) => `slideshow:${type}`
+  slideshow: (type: string) => `slideshow:${type}`,
+  productStats: () => `productStats:all`
 };
 
 // Cache middleware for Express routes

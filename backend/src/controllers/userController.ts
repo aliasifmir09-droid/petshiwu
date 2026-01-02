@@ -4,6 +4,7 @@ import User from '../models/User';
 import { AuthRequest } from '../middleware/auth';
 import { extractObjectId, safeToObjectId } from '../utils/types';
 import logger from '../utils/logger';
+import { cache, cacheKeys } from '../utils/cache';
 
 // Get all staff users (admin only)
 export const getStaffUsers = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -355,6 +356,14 @@ export const getWishlist = async (req: AuthRequest, res: Response, next: NextFun
   try {
     const userId = req.user?._id;
 
+    // PERFORMANCE FIX: Cache wishlist for 2 minutes (wishlist changes infrequently)
+    const cacheKey = `wishlist:${userId}`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      logger.debug(`Cache HIT: ${cacheKey}`);
+      return res.status(200).json(cached);
+    }
+
     const user = await User.findById(userId).populate({
       path: 'wishlist',
       select: 'name slug images basePrice compareAtPrice brand averageRating totalReviews inStock isActive',
@@ -371,10 +380,15 @@ export const getWishlist = async (req: AuthRequest, res: Response, next: NextFun
     // Filter out null products (in case some were deleted)
     const wishlistProducts = user.wishlist.filter((product: any) => product !== null);
 
-    res.status(200).json({
+    const response = {
       success: true,
       data: wishlistProducts
-    });
+    };
+
+    // Cache for 2 minutes (120 seconds)
+    await cache.set(cacheKey, response, 120);
+
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }
@@ -504,6 +518,14 @@ export const deleteCustomer = async (req: AuthRequest, res: Response, next: Next
 // Get database statistics (admin only)
 export const getDatabaseStats = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    // PERFORMANCE FIX: Cache stats for 5 minutes since they don't change frequently
+    const cacheKey = 'database:stats:all';
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      logger.debug(`Cache HIT: ${cacheKey}`);
+      return res.status(200).json(cached);
+    }
+
     // Dynamically import models to avoid circular dependencies
     const Order = (await import('../models/Order')).default;
     const Product = (await import('../models/Product')).default;
@@ -511,65 +533,233 @@ export const getDatabaseStats = async (req: AuthRequest, res: Response, next: Ne
     const Review = (await import('../models/Review')).default;
     const Donation = (await import('../models/Donation')).default;
 
-    // Get counts for all collections
+    // PERFORMANCE FIX: Use aggregation pipelines instead of multiple countDocuments calls
+    // This reduces database round-trips from 20+ to 6 parallel aggregations
+    
+    // 1. Users stats - single aggregation
+    const usersStats = await User.aggregate([
+      {
+        $facet: {
+          total: [{ $count: 'count' }],
+          byRole: [
+            {
+              $group: {
+                _id: '$role',
+                count: { $sum: 1 }
+              }
+            }
+          ],
+          byStatus: [
+            {
+              $group: {
+                _id: '$isActive',
+                count: { $sum: 1 }
+              }
+            }
+          ]
+        }
+      }
+    ]).allowDiskUse(true);
+
+    const usersResult = usersStats[0] || {};
+    const roleMap = (usersResult.byRole || []).reduce((acc: any, item: any) => {
+      acc[item._id] = item.count;
+      return acc;
+    }, {});
+    const statusMap = (usersResult.byStatus || []).reduce((acc: any, item: any) => {
+      acc[item._id ? 'active' : 'inactive'] = item.count;
+      return acc;
+    }, {});
+
+    // 2. Products stats - single aggregation
+    const productsStats = await Product.aggregate([
+      {
+        $facet: {
+          total: [{ $count: 'count' }],
+          byStatus: [
+            {
+              $group: {
+                _id: '$isActive',
+                count: { $sum: 1 }
+              }
+            }
+          ],
+          byStock: [
+            {
+              $group: {
+                _id: {
+                  $cond: [{ $gt: ['$inStock', false] }, 'inStock', 'outOfStock']
+                },
+                count: { $sum: 1 }
+              }
+            }
+          ]
+        }
+      }
+    ]).allowDiskUse(true);
+
+    const productsResult = productsStats[0] || {};
+    const productsStatusMap = (productsResult.byStatus || []).reduce((acc: any, item: any) => {
+      acc[item._id ? 'active' : 'inactive'] = item.count;
+      return acc;
+    }, {});
+    const stockMap = (productsResult.byStock || []).reduce((acc: any, item: any) => {
+      acc[item._id] = item.count;
+      return acc;
+    }, {});
+
+    // 3. Orders stats - single aggregation
+    const ordersStats = await Order.aggregate([
+      {
+        $facet: {
+          total: [{ $count: 'count' }],
+          byStatus: [
+            {
+              $group: {
+                _id: '$orderStatus',
+                count: { $sum: 1 }
+              }
+            }
+          ]
+        }
+      }
+    ]).allowDiskUse(true);
+
+    const ordersResult = ordersStats[0] || {};
+    const ordersStatusMap = (ordersResult.byStatus || []).reduce((acc: any, item: any) => {
+      acc[item._id] = item.count;
+      return acc;
+    }, {});
+
+    // 4. Categories stats - single aggregation
+    const categoriesStats = await Category.aggregate([
+      {
+        $facet: {
+          total: [{ $count: 'count' }],
+          active: [
+            { $match: { isActive: true } },
+            { $count: 'count' }
+          ]
+        }
+      }
+    ]).allowDiskUse(true);
+
+    // 5. Reviews stats - single aggregation
+    const reviewsStats = await Review.aggregate([
+      {
+        $facet: {
+          total: [{ $count: 'count' }],
+          byApproval: [
+            {
+              $group: {
+                _id: '$isApproved',
+                count: { $sum: 1 }
+              }
+            }
+          ]
+        }
+      }
+    ]).allowDiskUse(true);
+
+    const reviewsResult = reviewsStats[0] || {};
+    const reviewsApprovalMap = (reviewsResult.byApproval || []).reduce((acc: any, item: any) => {
+      acc[item._id ? 'approved' : 'pending'] = item.count;
+      return acc;
+    }, {});
+
+    // 6. Donations stats - single aggregation
+    const donationsStats = await Donation.aggregate([
+      {
+        $facet: {
+          total: [{ $count: 'count' }],
+          byStatus: [
+            {
+              $group: {
+                _id: '$status',
+                count: { $sum: 1 }
+              }
+            }
+          ]
+        }
+      }
+    ]).allowDiskUse(true);
+
+    const donationsResult = donationsStats[0] || {};
+    const donationsStatusMap = (donationsResult.byStatus || []).reduce((acc: any, item: any) => {
+      acc[item._id] = item.count;
+      return acc;
+    }, {});
+
+    // 7. Financial stats - optimized aggregation instead of fetching all orders
+    const financialStats = await Order.aggregate([
+      {
+        $match: { paymentStatus: 'paid' }
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$totalPrice' },
+          totalDonations: { $sum: { $ifNull: ['$donationAmount', 0] } }
+        }
+      }
+    ]).allowDiskUse(true);
+
+    const financial = financialStats[0] || { totalRevenue: 0, totalDonations: 0 };
+
     const stats = {
       users: {
-        total: await User.countDocuments(),
-        customers: await User.countDocuments({ role: 'customer' }),
-        admins: await User.countDocuments({ role: 'admin' }),
-        staff: await User.countDocuments({ role: 'staff' }),
-        active: await User.countDocuments({ isActive: true }),
-        inactive: await User.countDocuments({ isActive: false })
+        total: usersResult.total?.[0]?.count || 0,
+        customers: roleMap.customer || 0,
+        admins: roleMap.admin || 0,
+        staff: roleMap.staff || 0,
+        active: statusMap.active || 0,
+        inactive: statusMap.inactive || 0
       },
       products: {
-        total: await Product.countDocuments(),
-        active: await Product.countDocuments({ isActive: true }),
-        inactive: await Product.countDocuments({ isActive: false }),
-        inStock: await Product.countDocuments({ 'variants.0.stock': { $gt: 0 } }),
-        outOfStock: await Product.countDocuments({ 'variants.0.stock': { $lte: 0 } })
+        total: productsResult.total?.[0]?.count || 0,
+        active: productsStatusMap.active || 0,
+        inactive: productsStatusMap.inactive || 0,
+        inStock: stockMap.inStock || 0,
+        outOfStock: stockMap.outOfStock || 0
       },
       orders: {
-        total: await Order.countDocuments(),
-        pending: await Order.countDocuments({ orderStatus: 'pending' }),
-        processing: await Order.countDocuments({ orderStatus: 'processing' }),
-        shipped: await Order.countDocuments({ orderStatus: 'shipped' }),
-        delivered: await Order.countDocuments({ orderStatus: 'delivered' }),
-        cancelled: await Order.countDocuments({ orderStatus: 'cancelled' })
+        total: ordersResult.total?.[0]?.count || 0,
+        pending: ordersStatusMap.pending || 0,
+        processing: ordersStatusMap.processing || 0,
+        shipped: ordersStatusMap.shipped || 0,
+        delivered: ordersStatusMap.delivered || 0,
+        cancelled: ordersStatusMap.cancelled || 0
       },
       categories: {
-        total: await Category.countDocuments(),
-        active: await Category.countDocuments({ isActive: true })
+        total: categoriesStats[0]?.total?.[0]?.count || 0,
+        active: categoriesStats[0]?.active?.[0]?.count || 0
       },
       reviews: {
-        total: await Review.countDocuments(),
-        approved: await Review.countDocuments({ isApproved: true }),
-        pending: await Review.countDocuments({ isApproved: false })
+        total: reviewsResult.total?.[0]?.count || 0,
+        approved: reviewsApprovalMap.approved || 0,
+        pending: reviewsApprovalMap.pending || 0
       },
       donations: {
-        total: await Donation.countDocuments(),
-        completed: await Donation.countDocuments({ status: 'completed' }),
-        pending: await Donation.countDocuments({ status: 'pending' })
+        total: donationsResult.total?.[0]?.count || 0,
+        completed: donationsStatusMap.completed || 0,
+        pending: donationsStatusMap.pending || 0
+      },
+      financial: {
+        totalRevenue: financial.totalRevenue || 0,
+        totalDonations: financial.totalDonations || 0,
+        totalWithDonations: (financial.totalRevenue || 0) + (financial.totalDonations || 0)
       }
     };
 
-    // Calculate total revenue from paid orders
-    const paidOrders = await Order.find({ paymentStatus: 'paid' })
-      .select('totalPrice donationAmount')
-      .lean();
-    const totalRevenue = paidOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
-    const totalDonations = paidOrders.reduce((sum, order) => sum + (order.donationAmount || 0), 0);
-
-    res.status(200).json({
+    const response = {
       success: true,
-      data: {
-        ...stats,
-        financial: {
-          totalRevenue,
-          totalDonations,
-          totalWithDonations: totalRevenue + totalDonations
-        }
-      }
-    });
+      data: stats
+    };
+
+    // Cache for 5 minutes (300 seconds)
+    await cache.set(cacheKey, response, 300);
+
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }
