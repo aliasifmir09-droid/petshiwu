@@ -2579,7 +2579,7 @@ export const getProductStats = async (req: Request, res: Response, next: NextFun
     // PERFORMANCE FIX: Use a single aggregation pipeline to calculate all stats at once
     // This replaces 3 separate countDocuments calls with one efficient aggregation
     // Optimized: Removed expensive $lookup, will fetch category names separately
-    const statsPipeline = [
+    const statsPipeline: mongoose.PipelineStage[] = [
       {
         $match: { 
           isActive: true,
@@ -2643,7 +2643,7 @@ export const getProductStats = async (req: Request, res: Response, next: NextFun
       }
     ];
 
-    const statsResult = await Product.aggregate(statsPipeline, { allowDiskUse: true });
+    const statsResult = await Product.aggregate(statsPipeline as any, { allowDiskUse: true });
     const stats = statsResult[0] || {};
 
     const totalProducts = stats.totalCount?.[0]?.count || 0;

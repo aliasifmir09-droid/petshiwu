@@ -834,7 +834,7 @@ export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFu
 
     // PERFORMANCE FIX: Use aggregation with $lookup instead of populate for better performance
     // This is especially important for small limit queries (like limit=1)
-    const aggregationPipeline = [
+    const aggregationPipeline: mongoose.PipelineStage[] = [
       {
         $match: matchQuery
       },
@@ -896,7 +896,7 @@ export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFu
     // Get total count and orders in parallel
     // PERFORMANCE FIX: Add allowDiskUse for large datasets
     const [orders, total] = await Promise.all([
-      Order.aggregate(aggregationPipeline, { allowDiskUse: true }),
+      Order.aggregate(aggregationPipeline as any, { allowDiskUse: true }),
       Order.countDocuments(matchQuery).maxTimeMS(5000)
     ]);
 
