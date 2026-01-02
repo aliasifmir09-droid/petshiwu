@@ -178,7 +178,7 @@ const Dashboard = () => {
   const [showComparison, setShowComparison] = useState(false);
   
   // Category chart view mode
-  const [categoryViewMode, setCategoryViewMode] = useState<'subcategories' | 'products' | 'revenue'>('subcategories');
+  const [categoryViewMode, setCategoryViewMode] = useState<'subcategories' | 'products'>('subcategories');
   
   // Dark mode
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -795,11 +795,46 @@ const Dashboard = () => {
               const subcategoryCount = countAllSubcategories(category);
               value = Math.max(subcategoryCount, 1);
             } else if (categoryViewMode === 'products') {
-              // Use subcategory count as proxy for product count
-              const subcategoryCount = countAllSubcategories(category);
-              value = Math.max(subcategoryCount * 5, 1); // Estimate: ~5 products per subcategory
+              // FIX: Use actual product counts from productStats instead of estimate
+              const categoryId = category._id?.toString();
+              if (categoryId && productStats?.productsByCategory) {
+                // Find matching category in productStats
+                const categoryProductData = productStats.productsByCategory.find(
+                  (pc: { categoryId?: string }) => pc.categoryId === categoryId
+                );
+                if (categoryProductData && categoryProductData.count) {
+                  value = categoryProductData.count;
+                } else {
+                  // Fallback: count products in this category and all subcategories
+                  const allCategoryIds = [categoryId];
+                  const collectCategoryIds = (cat: Category) => {
+                    if (cat.subcategories && Array.isArray(cat.subcategories)) {
+                      cat.subcategories.forEach((sub: Category) => {
+                        if (sub._id) {
+                          allCategoryIds.push(sub._id.toString());
+                        }
+                        collectCategoryIds(sub);
+                      });
+                    }
+                  };
+                  collectCategoryIds(category);
+                  
+                  // Sum product counts for this category and all subcategories
+                  value = productStats.productsByCategory
+                    .filter((pc: { categoryId?: string }) => 
+                      pc.categoryId && allCategoryIds.includes(pc.categoryId)
+                    )
+                    .reduce((sum: number, pc: { count?: number }) => sum + (pc.count || 0), 0);
+                  
+                  // Ensure at least 1 for display
+                  value = Math.max(value, 0);
+                }
+              } else {
+                // Fallback if productStats not available
+                value = 0;
+              }
             } else {
-              // Revenue mode - not implemented yet
+              // Revenue mode - removed (not available without backend endpoint)
               value = 0;
             }
             
@@ -832,7 +867,7 @@ const Dashboard = () => {
         { name: 'Error loading categories', value: 0 }
       ];
     }
-  }, [categoryDataHash, categoryViewMode, categoriesArray, petTypesArray]);
+  }, [categoryDataHash, categoryViewMode, categoriesArray, petTypesArray, productStats]);
 
   // Show loading state while checking permissions
   if (userDataLoading) {

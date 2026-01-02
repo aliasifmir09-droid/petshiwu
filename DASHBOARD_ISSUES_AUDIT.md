@@ -7,35 +7,78 @@
 
 ## 🔄 SYNC ISSUES
 
-### 1. **Category Chart Product Count Estimation**
-- **Location:** `admin/src/pages/Dashboard.tsx` (Line ~800)
+### 1. **Category Chart Product Count Estimation** ✅ FIXED
+- **Location:** `admin/src/pages/Dashboard.tsx` (Line ~797-830)
 - **Issue:** Product count is estimated using hardcoded multiplier: `subcategoryCount * 5`
 - **Impact:** Chart shows estimated product counts, not actual data
-- **Code:**
+- **Fix Applied:** Now uses actual product counts from `productStats.productsByCategory` API data
+- **Code Before:**
   ```typescript
   value = Math.max(subcategoryCount * 5, 1); // Estimate: ~5 products per subcategory
   ```
-- **Severity:** Low (acceptable estimate for display, but not actual data)
+- **Code After:**
+  ```typescript
+  // FIX: Use actual product counts from productStats instead of estimate
+  const categoryId = category._id?.toString();
+  if (categoryId && productStats?.productsByCategory) {
+    const categoryProductData = productStats.productsByCategory.find(
+      (pc: { categoryId?: string }) => pc.categoryId === categoryId
+    );
+    if (categoryProductData && categoryProductData.count) {
+      value = categoryProductData.count;
+    } else {
+      // Fallback: sum products in category and all subcategories
+      // ... (collects all subcategory IDs and sums their product counts)
+    }
+  }
+  ```
+- **Status:** ✅ **FIXED** - Now uses actual product counts from API
 
-### 2. **Revenue Mode Not Implemented**
-- **Location:** `admin/src/pages/Dashboard.tsx` (Line ~802-803)
+### 2. **Revenue Mode Not Implemented** ✅ FIXED
+- **Location:** `admin/src/pages/Dashboard.tsx` (Line ~802-803) and `CategoryChart.tsx`
 - **Issue:** Revenue view mode exists but always returns 0
 - **Impact:** Revenue chart option doesn't work
-- **Code:**
+- **Fix Applied:** Removed revenue option from UI since it requires backend endpoint that doesn't exist
+- **Code Before:**
   ```typescript
   } else {
     // Revenue mode - not implemented yet
     value = 0;
   }
   ```
-- **Severity:** Medium (feature exists but non-functional)
+- **Code After:**
+  ```typescript
+  // Revenue mode - removed (not available without backend endpoint)
+  value = 0;
+  ```
+- **Changes:**
+  - Removed `'revenue'` from `categoryViewMode` type definition
+  - Removed "Revenue (Coming Soon)" option from dropdown
+  - Updated TypeScript types to only allow 'subcategories' | 'products'
+- **Status:** ✅ **FIXED** - Revenue option removed (can be re-added when backend endpoint is available)
 
-### 3. **Stale Time Configuration**
+### 3. **Stale Time Configuration** ✅ FIXED
 - **Location:** `admin/src/utils/dashboardConstants.ts`
 - **Issue:** All Dashboard queries use 30-second staleTime
 - **Impact:** May cause unnecessary refetches if data changes frequently
-- **Note:** This is actually a good practice for keeping data fresh, but could be optimized per query type
-- **Severity:** Low (working as intended, but could be optimized)
+- **Fix Applied:** Optimized stale times per query type based on data change frequency
+- **Code Before:**
+  ```typescript
+  ORDER_STATS_STALE_TIME: 30 * TIME.SECOND,
+  PRODUCT_STATS_STALE_TIME: 30 * TIME.SECOND,
+  OUT_OF_STOCK_STALE_TIME: 30 * TIME.SECOND,
+  CATEGORIES_STALE_TIME: 30 * TIME.SECOND,
+  PET_TYPES_STALE_TIME: 30 * TIME.SECOND,
+  ```
+- **Code After:**
+  ```typescript
+  ORDER_STATS_STALE_TIME: 30 * TIME.SECOND, // Order stats change frequently
+  PRODUCT_STATS_STALE_TIME: 30 * TIME.SECOND, // Product stats change frequently
+  OUT_OF_STOCK_STALE_TIME: 30 * TIME.SECOND, // Out of stock changes frequently
+  CATEGORIES_STALE_TIME: 2 * TIME.MINUTE, // Categories change less frequently
+  PET_TYPES_STALE_TIME: 5 * TIME.MINUTE, // Pet types change very rarely
+  ```
+- **Status:** ✅ **FIXED** - Optimized stale times per query type
 
 ---
 

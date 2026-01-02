@@ -30,7 +30,7 @@ const CategoryChart = memo(({
   onViewModeChange,
 }: CategoryChartProps) => {
   const handleViewModeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    onViewModeChange(e.target.value as 'subcategories' | 'products' | 'revenue');
+    onViewModeChange(e.target.value as 'subcategories' | 'products');
   }, [onViewModeChange]);
 
   // PERFORMANCE FIX: Memoize chart data to prevent unnecessary re-renders
@@ -58,7 +58,6 @@ const CategoryChart = memo(({
           >
             <option value="subcategories">Subcategory Count</option>
             <option value="products">Product Count</option>
-            <option value="revenue">Revenue (Coming Soon)</option>
           </select>
         </div>
       </div>
@@ -89,8 +88,7 @@ const CategoryChart = memo(({
               tick={{ fill: '#6b7280' }}
               width={60}
               label={{ 
-                value: categoryViewMode === 'subcategories' ? 'Subcategories' : 
-                       categoryViewMode === 'products' ? 'Products' : 'Revenue', 
+                value: categoryViewMode === 'subcategories' ? 'Subcategories' : 'Products', 
                 angle: -90, 
                 position: 'insideLeft', 
                 style: { fontSize: '11px' } 
@@ -104,8 +102,7 @@ const CategoryChart = memo(({
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
               }}
               formatter={(value: unknown) => {
-                const label = categoryViewMode === 'subcategories' ? 'subcategories' : 
-                             categoryViewMode === 'products' ? 'products' : 'revenue';
+                const label = categoryViewMode === 'subcategories' ? 'subcategories' : 'products';
                 return [`${value} ${label}`, 'Count'];
               }}
             />
