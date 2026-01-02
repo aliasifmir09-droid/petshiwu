@@ -169,39 +169,6 @@ const Dashboard = () => {
     };
   }, []);
   
-  // SCROLL POSITION RESTORATION: Restore scroll position after content loads
-  useEffect(() => {
-    // Only restore once per mount
-    if (scrollRestoredRef.current) return;
-    
-    // Wait for queries to finish loading before restoring scroll
-    const shouldRestore = !orderStatsLoading && !productStatsLoading && 
-                         !outOfStockLoading && !categoriesQuery.isLoading && 
-                         !petTypesQuery.isLoading;
-    
-    if (shouldRestore) {
-      // Small delay to ensure DOM is fully rendered
-      const timeoutId = setTimeout(() => {
-        try {
-          const savedPosition = sessionStorage.getItem(SCROLL_POSITION_KEY);
-          if (savedPosition) {
-            const scrollY = parseInt(savedPosition, 10);
-            if (!isNaN(scrollY) && scrollY > 0) {
-              window.scrollTo({
-                top: scrollY,
-                behavior: 'auto' // Instant scroll, not smooth
-              });
-              scrollRestoredRef.current = true;
-            }
-          }
-        } catch (error) {
-          // Silently handle sessionStorage errors
-        }
-      }, 100);
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [orderStatsLoading, productStatsLoading, outOfStockLoading, categoriesQuery.isLoading, petTypesQuery.isLoading]);
   
   // Date range filter for sales chart
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '3m' | '6m' | '1y'>('6m');
@@ -476,6 +443,40 @@ const Dashboard = () => {
 
   const categoriesData = categoriesQuery.data;
   const petTypesData = petTypesQuery.data;
+  
+  // SCROLL POSITION RESTORATION: Restore scroll position after content loads
+  useEffect(() => {
+    // Only restore once per mount
+    if (scrollRestoredRef.current) return;
+    
+    // Wait for queries to finish loading before restoring scroll
+    const shouldRestore = !orderStatsLoading && !productStatsLoading && 
+                         !outOfStockLoading && !categoriesQuery.isLoading && 
+                         !petTypesQuery.isLoading;
+    
+    if (shouldRestore) {
+      // Small delay to ensure DOM is fully rendered
+      const timeoutId = setTimeout(() => {
+        try {
+          const savedPosition = sessionStorage.getItem(SCROLL_POSITION_KEY);
+          if (savedPosition) {
+            const scrollY = parseInt(savedPosition, 10);
+            if (!isNaN(scrollY) && scrollY > 0) {
+              window.scrollTo({
+                top: scrollY,
+                behavior: 'auto' // Instant scroll, not smooth
+              });
+              scrollRestoredRef.current = true;
+            }
+          }
+        } catch (error) {
+          // Silently handle sessionStorage errors
+        }
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [orderStatsLoading, productStatsLoading, outOfStockLoading, categoriesQuery.isLoading, petTypesQuery.isLoading]);
   
   // Validate orderStats
   const validatedOrderStats = safeValidate<OrderStats>(orderStats, validateOrderStats);
