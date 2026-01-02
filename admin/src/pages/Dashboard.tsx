@@ -166,13 +166,22 @@ const Dashboard = () => {
   
   // Get user data first
   // Only fetch if we're likely authenticated (skip if we know we're not)
-  const { data: userData, isLoading: userDataLoading } = useQuery({
+  const { data: userData, isLoading: userDataLoading, isError: userDataError } = useQuery({
     queryKey: ['user-info'],
     queryFn: () => adminService.getMe(),
-    retry: false, // Don't retry on 401 - it's expected if not authenticated
+    retry: (failureCount, error: any) => {
+      // Don't retry on 401 (Unauthorized) - user needs to login
+      if (error?.response?.status === 401) {
+        return false;
+      }
+      // Retry once for other errors
+      return failureCount < 1;
+    },
     staleTime: QUERY_CONFIG.USER_DATA_STALE_TIME,
   });
 
+  // Check if user is authenticated (user data loaded and no error)
+  const isAuthenticated = !userDataLoading && !userDataError && userData;
   const hasAnalyticsPermission = userData?.role === 'admin' || userData?.permissions?.canViewAnalytics;
   
   // Rate limiting for refresh - prevent abuse
@@ -297,8 +306,14 @@ const Dashboard = () => {
   const { data: orderStats, isLoading: orderStatsLoading, error: orderStatsError, dataUpdatedAt: orderStatsUpdatedAt } = useQuery({
     queryKey: ['orderStats'],
     queryFn: adminService.getOrderStats,
-    enabled: hasAnalyticsPermission, // Only fetch if user has permission
-    retry: 2, // Retry failed requests
+    enabled: hasAnalyticsPermission && isAuthenticated, // Only fetch if authenticated and has permission
+    retry: (failureCount, error: any) => {
+      // Don't retry on 401 - user needs to login
+      if (error?.response?.status === 401) {
+        return false;
+      }
+      return failureCount < 2;
+    },
     staleTime: QUERY_CONFIG.ORDER_STATS_STALE_TIME,
     gcTime: QUERY_CONFIG.ORDER_STATS_GC_TIME,
     refetchInterval: QUERY_CONFIG.ORDER_STATS_REFETCH_INTERVAL, // Now polls every 2 minutes instead of 20 seconds
@@ -314,6 +329,7 @@ const Dashboard = () => {
 
   // Use useQueries for parallel fetching of independent queries
   // This ensures all queries start fetching simultaneously rather than sequentially
+  // Only enable queries if user data is loaded and not in error state
   const [
     productStatsQuery,
     outOfStockQuery,
@@ -324,8 +340,14 @@ const Dashboard = () => {
       {
         queryKey: ['productStats'],
         queryFn: adminService.getProductStats,
-        enabled: hasAnalyticsPermission,
-        retry: 2,
+        enabled: hasAnalyticsPermission && isAuthenticated, // Only fetch if authenticated
+        retry: (failureCount, error: any) => {
+          // Don't retry on 401 - user needs to login
+          if (error?.response?.status === 401) {
+            return false;
+          }
+          return failureCount < 2;
+        },
         staleTime: QUERY_CONFIG.PRODUCT_STATS_STALE_TIME,
         gcTime: QUERY_CONFIG.PRODUCT_STATS_GC_TIME,
         refetchOnWindowFocus: false, // Disabled - product stats don't need to refresh on window focus

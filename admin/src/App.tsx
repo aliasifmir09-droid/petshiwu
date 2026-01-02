@@ -28,7 +28,14 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false, // Don't refetch on window focus for better performance
       refetchOnMount: true, // Refetch if data is stale (default behavior)
-      retry: 1,
+      retry: (failureCount, error: any) => {
+        // Don't retry on 401 (Unauthorized) - user needs to login
+        if (error?.response?.status === 401) {
+          return false;
+        }
+        // Retry once for other errors
+        return failureCount < 1;
+      },
       staleTime: 30 * 1000, // Consider data fresh for 30 seconds (prevents unnecessary refetches)
       gcTime: 5 * 60 * 1000, // Cache for 5 minutes (formerly cacheTime)
     }
@@ -112,6 +119,56 @@ function App() {
     // Clear user state immediately to prevent redirect loops
     setUser(null);
     
+    // SECURITY: Clear all caches to prevent data leakage after logout
+    // 1. Clear React Query cache (all API response data)
+    queryClient.clear();
+    
+    // 2. Clear localStorage (user preferences, cached data)
+    try {
+      localStorage.clear();
+    } catch (error) {
+      // Silently handle localStorage errors (may fail in private mode)
+    }
+    
+    // 3. Clear sessionStorage (temporary session data)
+    try {
+      sessionStorage.clear();
+    } catch (error) {
+      // Silently handle sessionStorage errors (may fail in private mode)
+    }
+    
+    // 4. Clear any IndexedDB caches (if used)
+    try {
+      if ('indexedDB' in window) {
+        // Clear all IndexedDB databases
+        const databases = await indexedDB.databases();
+        await Promise.all(
+          databases.map(db => {
+            return new Promise((resolve, reject) => {
+              const deleteReq = indexedDB.deleteDatabase(db.name || '');
+              deleteReq.onsuccess = () => resolve(undefined);
+              deleteReq.onerror = () => reject(deleteReq.error);
+              deleteReq.onblocked = () => resolve(undefined); // Ignore blocked
+            });
+          })
+        );
+      }
+    } catch (error) {
+      // Silently handle IndexedDB errors
+    }
+    
+    // 5. Clear service worker caches (if any)
+    try {
+      if ('serviceWorker' in navigator && 'caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(cacheName => caches.delete(cacheName))
+        );
+      }
+    } catch (error) {
+      // Silently handle cache API errors
+    }
+    
     try {
       // Phase 2: Cookie-Only - Call logout endpoint to clear httpOnly cookie
       // Backend handles cookie clearing, no localStorage to manage
@@ -122,10 +179,10 @@ function App() {
       // Silently handle logout errors - state already cleared
     }
     
-    // Small delay to ensure cookie is cleared, then redirect
+    // Small delay to ensure all caches are cleared, then redirect
     setTimeout(() => {
       window.location.href = '/login';
-    }, 50);
+    }, 100);
   };
 
   // Loading component for Suspense fallback

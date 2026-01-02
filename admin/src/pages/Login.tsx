@@ -3,7 +3,6 @@ import { useMutation } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
-import { useDashboardPrefetch } from '@/hooks/useDashboardPrefetch';
 
 interface LoginProps {
   onLogin: (user: any) => void;
@@ -11,7 +10,6 @@ interface LoginProps {
 
 const Login = ({ onLogin }: LoginProps) => {
   const { toast, showToast, hideToast } = useToast();
-  const { prefetchDashboardData } = useDashboardPrefetch();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -35,11 +33,27 @@ const Login = ({ onLogin }: LoginProps) => {
     },
     onSuccess: async () => {
       try {
-        // Small delay to ensure cookie is set before making authenticated requests
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Increased delay to ensure cookie is fully set and propagated before making authenticated requests
+        // This prevents 401 errors that occur when queries run before authentication is confirmed
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Fetch user information using cookie
-        const user = await adminService.getMe();
+        // Retry logic: Try to fetch user info with retries in case cookie isn't ready yet
+        let user = null;
+        let retries = 3;
+        while (!user && retries > 0) {
+          try {
+            user = await adminService.getMe();
+            if (user) break;
+          } catch (error: any) {
+            retries--;
+            if (retries > 0) {
+              // Wait a bit longer before retrying
+              await new Promise(resolve => setTimeout(resolve, 500));
+            } else {
+              throw error;
+            }
+          }
+        }
         
         if (!user) {
           showToast('Error fetching user information. Please try again.', 'error');
@@ -53,12 +67,10 @@ const Login = ({ onLogin }: LoginProps) => {
         
         onLogin(user);
         
-        // PERFORMANCE FIX: Prefetch dashboard data before navigation
-        prefetchDashboardData().catch(() => {
-          // Silently fail - prefetching is optional
-        });
+        // Don't prefetch here - let the Dashboard component handle it after authentication is confirmed
+        // This prevents queries from running before the cookie is fully ready
         
-        // Force reload to ensure App.tsx picks up the user
+        // Force reload to ensure App.tsx picks up the user and clears any stale state
         window.location.href = '/';
       } catch (error: any) {
         // Use safe error logging to prevent data leakage
