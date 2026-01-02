@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { Plus, Edit, Trash2, Mail, X, Save } from 'lucide-react';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import ConfirmationModal from '@/components/ConfirmationModal';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 // Helper function to safely convert any ID to a unique string key
 const getUniqueKey = (id: any, index: number, prefix: string = 'item'): string => {
@@ -54,7 +55,6 @@ const getUniqueKey = (id: any, index: number, prefix: string = 'item'): string =
 };
 
 const EmailTemplates = () => {
-  const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
   const [showModal, setShowModal] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
@@ -76,28 +76,27 @@ const EmailTemplates = () => {
   // Handle both response formats: { data: [...] } or [...]
   const templates = Array.isArray(templatesData) ? templatesData : (templatesData?.data || []);
 
+  // Auto-refresh hook - automatically refreshes queries after mutations
+  const { onMutationSuccess, onMutationError } = useAutoRefresh(
+    ['emailTemplates'],
+    { showToast }
+  );
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingTemplate(null);
+    setFormData({ name: '', subject: '', body: '', variables: [], isActive: true });
+  };
+
   const createMutation = useMutation({
     mutationFn: adminService.createEmailTemplate,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['emailTemplates'] });
-      setShowModal(false);
-      setFormData({ name: '', subject: '', body: '', variables: [], isActive: true });
-      showToast('Email template created successfully', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to create template', 'error');
-    }
+    onSuccess: onMutationSuccess('Email template created successfully', handleCloseModal),
+    onError: onMutationError()
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => adminService.updateEmailTemplate(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['emailTemplates'] });
-      setShowModal(false);
-      setEditingTemplate(null);
-      setFormData({ name: '', subject: '', body: '', variables: [], isActive: true });
-      showToast('Email template updated successfully', 'success');
-    },
+    onSuccess: onMutationSuccess('Email template updated successfully', handleCloseModal),
     onError: (error: any) => {
       showToast(error.response?.data?.message || 'Failed to update template', 'error');
     }
@@ -105,14 +104,10 @@ const EmailTemplates = () => {
 
   const deleteMutation = useMutation({
     mutationFn: adminService.deleteEmailTemplate,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['emailTemplates'] });
+    onSuccess: onMutationSuccess('Email template deleted successfully', () => {
       setDeleteConfirm({ isOpen: false });
-      showToast('Email template deleted successfully', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to delete template', 'error');
-    }
+    }),
+    onError: onMutationError()
   });
 
   const handleCreate = () => {

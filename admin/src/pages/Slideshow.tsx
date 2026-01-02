@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { Plus, Edit, Trash2, Eye, EyeOff, ArrowUp, ArrowDown, Upload, Link2 } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { normalizeImageUrl } from '@/utils/imageUtils';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 interface Slide {
   _id: string;
@@ -22,7 +23,6 @@ interface Slide {
 }
 
 const Slideshow = () => {
-  const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
   const [showModal, setShowModal] = useState(false);
   const [editingSlide, setEditingSlide] = useState<Slide | null>(null);
@@ -39,57 +39,45 @@ const Slideshow = () => {
     retry: false
   });
 
+  // Auto-refresh hook - automatically refreshes queries after mutations
+  const { onMutationSuccess, onMutationError } = useAutoRefresh(
+    ['slideshow'],
+    { showToast }
+  );
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingSlide(null);
+  };
+
   // Create slide mutation
   const createMutation = useMutation({
     mutationFn: (data: any) => adminService.createSlide(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['slideshow'] });
-      showToast('Slide created successfully', 'success');
-      setShowModal(false);
-      setEditingSlide(null);
-    },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to create slide', 'error');
-    }
+    onSuccess: onMutationSuccess('Slide created successfully', handleCloseModal),
+    onError: onMutationError()
   });
 
   // Update slide mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => adminService.updateSlide(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['slideshow'] });
-      showToast('Slide updated successfully', 'success');
-      setShowModal(false);
-      setEditingSlide(null);
-    },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to update slide', 'error');
-    }
+    onSuccess: onMutationSuccess('Slide updated successfully', handleCloseModal),
+    onError: onMutationError()
   });
 
   // Delete slide mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) => adminService.deleteSlide(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['slideshow'] });
-      showToast('Slide deleted successfully', 'success');
+    onSuccess: onMutationSuccess('Slide deleted successfully', () => {
       setDeleteConfirm({ isOpen: false });
-    },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to delete slide', 'error');
-    }
+    }),
+    onError: onMutationError()
   });
 
   // Reorder slides mutation
   const reorderMutation = useMutation({
     mutationFn: (slides: Array<{ id: string; order: number }>) => adminService.reorderSlides(slides),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['slideshow'] });
-      showToast('Slides reordered successfully', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to reorder slides', 'error');
-    }
+    onSuccess: onMutationSuccess('Slides reordered successfully'),
+    onError: onMutationError()
   });
 
   const handleCreate = () => {
@@ -156,13 +144,8 @@ const Slideshow = () => {
   // Seed slides mutation
   const seedMutation = useMutation({
     mutationFn: () => adminService.seedSlideshow(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['slideshow'] });
-      showToast('Dummy slides created successfully', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to seed slides', 'error');
-    }
+    onSuccess: onMutationSuccess('Dummy slides created successfully'),
+    onError: onMutationError()
   });
 
   const sortedSlides = slides ? [...slides].sort((a, b) => a.order - b.order) : [];

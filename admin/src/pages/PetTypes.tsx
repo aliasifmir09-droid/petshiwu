@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Plus, Edit, Trash2, GripVertical, X } from 'lucide-react';
 import { adminService } from '@/services/adminService';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 // Helper function to safely convert any ID to a unique string key
 // This ensures React keys are always strings, never objects
@@ -84,7 +85,6 @@ interface PetType {
 }
 
 const PetTypes = () => {
-  const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
   const [showModal, setShowModal] = useState(false);
   const [editingPetType, setEditingPetType] = useState<PetType | null>(null);
@@ -108,52 +108,45 @@ const PetTypes = () => {
 
   const petTypes: PetType[] = petTypesResponse?.data || [];
 
-  // Create pet type mutation
+  // Auto-refresh hook - automatically refreshes queries after mutations
+  // This ensures the page shows updated data immediately after create/update/delete
+  const { onMutationSuccess, onMutationError } = useAutoRefresh(
+    ['admin-pet-types', 'pet-types'], // Query keys to refresh
+    { showToast } // Pass toast function for automatic success/error messages
+  );
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingPetType(null);
+    setFormData({
+      name: '',
+      icon: '🐾',
+      description: '',
+      isActive: true
+    });
+  };
+
+  // Create pet type mutation - automatically refreshes the page
   const createMutation = useMutation({
     mutationFn: adminService.createPetType,
-    onSuccess: () => {
-      // Invalidate and refetch all pet type-related queries
-      queryClient.invalidateQueries({ queryKey: ['admin-pet-types'] });
-      queryClient.invalidateQueries({ queryKey: ['pet-types'] });
-      queryClient.refetchQueries({ queryKey: ['admin-pet-types'] });
-      showToast('Pet type created successfully!', 'success');
-      handleCloseModal();
-    },
-    onError: (error: any) => {
-      showToast(error?.message || error?.response?.data?.message || 'Failed to create pet type', 'error');
-    }
+    onSuccess: onMutationSuccess('Pet type created successfully!', handleCloseModal),
+    onError: onMutationError()
   });
 
-  // Update pet type mutation
+  // Update pet type mutation - automatically refreshes the page
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => adminService.updatePetType(id, data),
-    onSuccess: () => {
-      // Invalidate and refetch all pet type-related queries
-      queryClient.invalidateQueries({ queryKey: ['admin-pet-types'] });
-      queryClient.invalidateQueries({ queryKey: ['pet-types'] });
-      queryClient.refetchQueries({ queryKey: ['admin-pet-types'] });
-      showToast('Pet type updated successfully!', 'success');
-      handleCloseModal();
-    },
-    onError: (error: any) => {
-      showToast(error?.message || error?.response?.data?.message || 'Failed to update pet type', 'error');
-    }
+    onSuccess: onMutationSuccess('Pet type updated successfully!', handleCloseModal),
+    onError: onMutationError()
   });
 
-  // Delete pet type mutation
+  // Delete pet type mutation - automatically refreshes the page
   const deleteMutation = useMutation({
     mutationFn: adminService.deletePetType,
-    onSuccess: () => {
-      // Invalidate and refetch all pet type-related queries
-      queryClient.invalidateQueries({ queryKey: ['admin-pet-types'] });
-      queryClient.invalidateQueries({ queryKey: ['pet-types'] });
-      queryClient.refetchQueries({ queryKey: ['admin-pet-types'] });
-      showToast('Pet type deleted successfully!', 'success');
+    onSuccess: onMutationSuccess('Pet type deleted successfully!', () => {
       setDeleteConfirm({ isOpen: false });
-    },
-    onError: (error: any) => {
-      showToast(error?.message || error?.response?.data?.message || 'Failed to delete pet type', 'error');
-    }
+    }),
+    onError: onMutationError()
   });
 
   const handleOpenModal = (petType?: PetType) => {
@@ -175,17 +168,6 @@ const PetTypes = () => {
       });
     }
     setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setEditingPetType(null);
-    setFormData({
-      name: '',
-      icon: '🐾',
-      description: '',
-      isActive: true
-    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {

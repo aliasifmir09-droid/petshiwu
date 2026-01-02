@@ -13,6 +13,7 @@ import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import { safeError } from '@/utils/safeLogger';
 import { useDebounce } from '@/hooks/useDebounce';
 import SearchSuggestions from '@/components/SearchSuggestions';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 const Products = () => {
   const queryClient = useQueryClient();
@@ -66,6 +67,12 @@ const Products = () => {
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
+
+  // Auto-refresh hook for bulk operations
+  const { onMutationSuccess, onMutationError } = useAutoRefresh(
+    ['products', 'productStats', ['products', 'out-of-stock'], ['products', 'out-of-stock-notification']],
+    { showToast }
+  );
 
   const deleteMutation = useMutation({
     mutationFn: adminService.deleteProduct,
@@ -256,64 +263,20 @@ const Products = () => {
 
   const bulkUpdateMutation = useMutation({
     mutationFn: (updates: any) => adminService.bulkUpdateProducts(Array.from(selectedProducts), updates),
-    onSuccess: () => {
+    onSuccess: onMutationSuccess('Products updated successfully', () => {
       setSelectedProducts(new Set());
       setShowBulkModal(false);
-      // Show success immediately
-      showToast('Products updated successfully', 'success');
-      
-      // Invalidate and refetch in parallel (runs in background)
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['products'], exact: false }),
-        queryClient.invalidateQueries({ queryKey: ['productStats'] }),
-        queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock'] }),
-        queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock-notification'] })
-      ]).then(() => {
-        // Refetch only active queries in parallel
-        Promise.all([
-          queryClient.refetchQueries({ queryKey: ['productStats'], type: 'active' }),
-          queryClient.refetchQueries({ queryKey: ['products', 'out-of-stock'], type: 'active' })
-        ]).catch(err => {
-          console.error('Error refetching queries:', err);
-        });
-      }).catch(err => {
-        console.error('Error invalidating queries:', err);
-      });
-    },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to update products', 'error');
-    }
+    }),
+    onError: onMutationError()
   });
 
   const bulkAssignCategoryMutation = useMutation({
     mutationFn: (categoryId: string) => adminService.bulkAssignCategory(Array.from(selectedProducts), categoryId),
-    onSuccess: () => {
+    onSuccess: onMutationSuccess('Category assigned successfully', () => {
       setSelectedProducts(new Set());
       setShowBulkModal(false);
-      // Show success immediately
-      showToast('Category assigned successfully', 'success');
-      
-      // Invalidate and refetch in parallel (runs in background)
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['products'], exact: false }),
-        queryClient.invalidateQueries({ queryKey: ['productStats'] }),
-        queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock'] }),
-        queryClient.invalidateQueries({ queryKey: ['products', 'out-of-stock-notification'] })
-      ]).then(() => {
-        // Refetch only active queries in parallel
-        Promise.all([
-          queryClient.refetchQueries({ queryKey: ['productStats'], type: 'active' }),
-          queryClient.refetchQueries({ queryKey: ['products', 'out-of-stock'], type: 'active' })
-        ]).catch(err => {
-          console.error('Error refetching queries:', err);
-        });
-      }).catch(err => {
-        console.error('Error invalidating queries:', err);
-      });
-    },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to assign category', 'error');
-    }
+    }),
+    onError: onMutationError()
   });
 
   const exportProductsMutation = useMutation({

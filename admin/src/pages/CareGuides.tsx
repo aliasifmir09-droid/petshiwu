@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { Plus, Edit, Trash2, Search, Eye, EyeOff, BookOpen, Calendar, Upload, Link2, X, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/useToast';
 import Dropdown from '@/components/Dropdown';
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import { CareGuide, CareGuideFormData, CareGuideCategory } from '@/types/careGuide';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 // Helper function to safely convert any ID to a unique string key
 const getUniqueKey = (id: unknown, index: number, prefix: string = 'item'): string => {
@@ -48,7 +49,6 @@ const getUniqueKey = (id: unknown, index: number, prefix: string = 'item'): stri
 };
 
 const CareGuides = () => {
-  const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
@@ -93,47 +93,38 @@ const CareGuides = () => {
     retry: false
   });
 
+  // Auto-refresh hook - automatically refreshes queries after mutations
+  const { onMutationSuccess, onMutationError } = useAutoRefresh(
+    ['care-guides', 'care-guide-categories'],
+    { showToast }
+  );
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingGuide(null);
+  };
+
   // Create care guide mutation
   const createMutation = useMutation({
     mutationFn: (data: any) => adminService.createCareGuide(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['care-guides'] });
-      queryClient.invalidateQueries({ queryKey: ['care-guide-categories'] });
-      setShowModal(false);
-      showToast('Care guide created successfully!', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error?.response?.data?.message || 'Failed to create care guide', 'error');
-    }
+    onSuccess: onMutationSuccess('Care guide created successfully!', handleCloseModal),
+    onError: onMutationError()
   });
 
   // Update care guide mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => adminService.updateCareGuide(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['care-guides'] });
-      queryClient.invalidateQueries({ queryKey: ['care-guide-categories'] });
-      setShowModal(false);
-      setEditingGuide(null);
-      showToast('Care guide updated successfully!', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error?.response?.data?.message || 'Failed to update care guide', 'error');
-    }
+    onSuccess: onMutationSuccess('Care guide updated successfully!', handleCloseModal),
+    onError: onMutationError()
   });
 
   // Delete care guide mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) => adminService.deleteCareGuide(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['care-guides'] });
-      queryClient.invalidateQueries({ queryKey: ['care-guide-categories'] });
+    onSuccess: onMutationSuccess('Care guide deleted successfully!', () => {
       setDeleteConfirm({ isOpen: false });
-      showToast('Care guide deleted successfully!', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error?.response?.data?.message || 'Failed to delete care guide', 'error');
-    }
+    }),
+    onError: onMutationError()
   });
 
   const handleEdit = (guide: CareGuide) => {

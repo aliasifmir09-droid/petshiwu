@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Plus, Edit, Trash2, X, Save, ChevronRight, ChevronDown, FolderTree } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import api from '@/services/api';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 interface Category {
   _id: string;
@@ -18,7 +19,6 @@ interface Category {
 }
 
 const CategoriesNew = () => {
-  const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
@@ -48,6 +48,24 @@ const CategoriesNew = () => {
 
   const categories = categoriesResponse?.data || [];
 
+  // Auto-refresh hook - automatically refreshes queries after mutations
+  const { onMutationSuccess, onMutationError } = useAutoRefresh(
+    ['admin-categories', 'categories'],
+    { showToast }
+  );
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingCategory(null);
+    setFormData({
+      name: '',
+      description: '',
+      petType: 'all',
+      parentCategory: '',
+      isActive: true
+    });
+  };
+
   // Get flat list of all categories for parent selection
   const flatCategories = () => {
     const flat: Category[] = [];
@@ -69,17 +87,8 @@ const CategoriesNew = () => {
       const response = await api.post('/categories', data);
       return response.data;
     },
-    onSuccess: () => {
-      // Invalidate all category-related queries
-      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      queryClient.refetchQueries({ queryKey: ['admin-categories'] });
-      showToast('Category created successfully!', 'success');
-      handleCloseModal();
-    },
-    onError: (error: any) => {
-      showToast(error.message || 'Failed to create category', 'error');
-    }
+    onSuccess: onMutationSuccess('Category created successfully!', handleCloseModal),
+    onError: onMutationError()
   });
 
   const updateMutation = useMutation({
@@ -88,17 +97,8 @@ const CategoriesNew = () => {
       const response = await api.put(`/categories/${id}`, data);
       return response.data;
     },
-    onSuccess: () => {
-      // Invalidate all category-related queries
-      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      queryClient.refetchQueries({ queryKey: ['admin-categories'] });
-      showToast('Category updated successfully!', 'success');
-      handleCloseModal();
-    },
-    onError: (error: any) => {
-      showToast(error.message || 'Failed to update category', 'error');
-    }
+    onSuccess: onMutationSuccess('Category updated successfully!', handleCloseModal),
+    onError: onMutationError()
   });
 
   const deleteMutation = useMutation({
@@ -113,14 +113,9 @@ const CategoriesNew = () => {
       const response = await api.delete(`/categories/${encodeURIComponent(categoryId)}`);
       return response.data;
     },
-    onSuccess: () => {
-      // Invalidate all category-related queries
-      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      queryClient.refetchQueries({ queryKey: ['admin-categories'] });
-      showToast('Category deleted successfully!', 'success');
+    onSuccess: onMutationSuccess('Category deleted successfully!', () => {
       setDeleteConfirm({ isOpen: false });
-    },
+    }),
     onError: (error: any) => {
       // Use safe error logging
       import('@/utils/safeLogger').then(({ safeError }) => {
@@ -165,18 +160,6 @@ const CategoriesNew = () => {
       });
     }
     setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setEditingCategory(null);
-    setFormData({
-      name: '',
-      description: '',
-      petType: 'all',
-      parentCategory: '',
-      isActive: true
-    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {

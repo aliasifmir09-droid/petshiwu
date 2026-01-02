@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { adminService } from '@/services/adminService';
 import { Plus, Edit2, Trash2, Key, Shield, X, User, Lock, Users, Save, Eye, EyeOff } from 'lucide-react';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 interface StaffUser {
   _id: string;
@@ -77,8 +78,6 @@ const Settings = () => {
     }
   });
 
-  const queryClient = useQueryClient();
-
   // Fetch current user info
   const { data: currentUser } = useQuery({
     queryKey: ['user-info'],
@@ -104,59 +103,45 @@ const Settings = () => {
     enabled: currentUser?.role === 'admin' // Only fetch if user is admin
   });
 
+  // Auto-refresh hook for staff users
+  const { onMutationSuccess: onStaffMutationSuccess, onMutationError: onStaffMutationError } = useAutoRefresh(
+    ['staff-users', 'user-info'],
+    { showToast }
+  );
+
+  // Auto-refresh hook for profile updates
+  const { onMutationSuccess: onProfileMutationSuccess, onMutationError: onProfileMutationError } = useAutoRefresh(
+    ['user-info', 'staff-users'],
+    { showToast }
+  );
+
   // Create staff mutation
   const createMutation = useMutation({
     mutationFn: (data: any) => adminService.createStaffUser(data),
-    onSuccess: async () => {
-      // Invalidate and refetch to sync across all components
-      await queryClient.invalidateQueries({ queryKey: ['staff-users'] });
-      await queryClient.refetchQueries({ queryKey: ['staff-users'] });
+    onSuccess: onStaffMutationSuccess('Staff user created successfully!', () => {
       setShowModal(false);
       resetForm();
-      showToast('Staff user created successfully!', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to create staff user', 'error');
-    }
+    }),
+    onError: onStaffMutationError()
   });
 
   // Update staff mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => 
       adminService.updateStaffUser(id, data),
-    onSuccess: async () => {
-      // Invalidate and refetch to sync across all components
-      await queryClient.invalidateQueries({ queryKey: ['staff-users'] });
-      await queryClient.refetchQueries({ queryKey: ['staff-users'] });
-      
-      // If updating the current logged-in user, also refresh their info
-      if (editingUser?._id === currentUser?._id) {
-        await queryClient.invalidateQueries({ queryKey: ['user-info'] });
-        await queryClient.refetchQueries({ queryKey: ['user-info'] });
-      }
-      
+    onSuccess: onStaffMutationSuccess('Staff user updated successfully! Changes synced across the system.', () => {
       setShowModal(false);
       setEditingUser(null);
       resetForm();
-      showToast('Staff user updated successfully! Changes synced across the system.', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to update staff user', 'error');
-    }
+    }, editingUser?._id === currentUser?._id ? ['user-info', 'staff-users'] : ['staff-users']),
+    onError: onStaffMutationError()
   });
 
   // Delete staff mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) => adminService.deleteStaffUser(id),
-    onSuccess: async () => {
-      // Invalidate and refetch to sync across all components
-      await queryClient.invalidateQueries({ queryKey: ['staff-users'] });
-      await queryClient.refetchQueries({ queryKey: ['staff-users'] });
-      showToast('Staff user deleted successfully!', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to delete staff user', 'error');
-    }
+    onSuccess: onStaffMutationSuccess('Staff user deleted successfully!'),
+    onError: onStaffMutationError()
   });
 
   const resetForm = () => {
@@ -237,39 +222,21 @@ const Settings = () => {
   // Update profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: (data: any) => adminService.updateStaffUser(currentUser._id, data),
-    onSuccess: async () => {
-      // Invalidate all user-related queries to sync data across the system
-      await queryClient.invalidateQueries({ queryKey: ['user-info'] });
-      await queryClient.refetchQueries({ queryKey: ['user-info'] });
-      
-      // Also invalidate staff users list if admin is updating their own profile
-      if (currentUser.role === 'admin') {
-        await queryClient.invalidateQueries({ queryKey: ['staff-users'] });
-      }
-      
-      showToast('Profile updated successfully!', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to update profile', 'error');
-    }
+    onSuccess: onProfileMutationSuccess('Profile updated successfully!', undefined, 
+      currentUser.role === 'admin' ? ['user-info', 'staff-users'] : ['user-info']),
+    onError: onProfileMutationError()
   });
 
   // Change password mutation  
   const changePasswordMutation = useMutation({
     mutationFn: (data: any) => adminService.changePassword(data),
-    onSuccess: async () => {
-      // Clear password fields
+    onSuccess: onProfileMutationSuccess('Password changed successfully! Your new password is now active.', () => {
       setPasswordData({
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
       });
-      
-      // Invalidate user info to sync any changes
-      await queryClient.invalidateQueries({ queryKey: ['user-info'] });
-      
-      showToast('Password changed successfully! Your new password is now active.', 'success');
-    },
+    }),
     onError: (error: any) => {
       // Handle validation errors
       if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {

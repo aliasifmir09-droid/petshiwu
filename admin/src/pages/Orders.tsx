@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { Eye, Search, MapPin, X, AlertCircle, CheckCircle, Filter as FilterIcon, Download, RotateCcw } from 'lucide-react';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Dropdown from '@/components/Dropdown';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 const Orders = () => {
-  const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
@@ -35,6 +35,12 @@ const Orders = () => {
     refetchOnWindowFocus: true, // Refetch when user returns to tab
   });
 
+  // Auto-refresh hook - automatically refreshes queries after mutations
+  const { onMutationSuccess, onMutationError } = useAutoRefresh(
+    ['orders', 'orderStats'],
+    { showToast }
+  );
+
   const getPaymentMethodLabel = (method: string) => {
     const labels: any = {
       cod: 'Cash on Delivery',
@@ -49,19 +55,11 @@ const Orders = () => {
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
       adminService.updateOrderStatus(id, data),
-    onSuccess: () => {
-      // Invalidate and refetch all order-related queries
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
-      queryClient.refetchQueries({ queryKey: ['orders'] });
-      showToast('Order status updated successfully', 'success');
+    onSuccess: onMutationSuccess('Order status updated successfully', () => {
       setShowStatusConfirm(false);
       setPendingStatusChange(null);
-    },
-    onError: () => {
-      showToast('Failed to update order status', 'error');
-      setShowStatusConfirm(false);
-      setPendingStatusChange(null);
-    }
+    }),
+    onError: onMutationError()
   });
 
   const handleStatusChange = (orderId: any, newStatus: string) => {
@@ -126,12 +124,11 @@ const Orders = () => {
     }
     adminService.updatePaymentStatus(orderId, { paymentStatus: 'paid' })
       .then(() => {
-        // Invalidate and refetch all order-related queries
-        queryClient.invalidateQueries({ queryKey: ['orders'] });
-        queryClient.refetchQueries({ queryKey: ['orders'] });
-        setShowDetailsModal(false);
-        setShowPaymentConfirm(false);
-        showToast('Payment status updated successfully', 'success');
+        // Use auto-refresh to update queries
+        onMutationSuccess('Payment status updated successfully', () => {
+          setShowDetailsModal(false);
+          setShowPaymentConfirm(false);
+        })();
       })
       .catch(() => {
         setShowPaymentConfirm(false);
@@ -142,18 +139,13 @@ const Orders = () => {
   const refundMutation = useMutation({
     mutationFn: ({ orderId, amount, reason }: { orderId: string; amount: number; reason?: string }) =>
       adminService.processRefund(orderId, { amount, reason }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
-      queryClient.refetchQueries({ queryKey: ['orders'] });
+    onSuccess: onMutationSuccess('Refund processed successfully', () => {
       setShowRefundModal(false);
       setShowDetailsModal(false);
       setRefundAmount('');
       setRefundReason('');
-      showToast('Refund processed successfully', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Failed to process refund', 'error');
-    }
+    }),
+    onError: onMutationError()
   });
 
   const handleRefund = () => {

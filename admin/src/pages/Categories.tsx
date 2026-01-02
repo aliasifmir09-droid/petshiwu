@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Plus, Edit, Trash2, X, Save, ChevronRight, ChevronDown, FolderTree, ArrowUp, ArrowDown } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { adminService } from '@/services/adminService';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 interface Category {
   _id: string;
@@ -20,7 +21,6 @@ interface Category {
 }
 
 const CategoriesNew = () => {
-  const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
@@ -54,8 +54,19 @@ const CategoriesNew = () => {
   });
 
   const categories = categoriesResponse?.data || [];
-  
-  
+
+  // Auto-refresh hook - automatically refreshes queries after mutations
+  const { onMutationSuccess, onMutationError } = useAutoRefresh(
+    ['admin-categories', 'categories'],
+    { showToast }
+  );
+
+  // Helper to notify frontend via BroadcastChannel
+  const notifyFrontend = () => {
+    const channel = new BroadcastChannel('category-updates');
+    channel.postMessage('categories-updated');
+    channel.close();
+  };
 
   // Get flat list of all categories for parent selection
   const flatCategories = () => {
@@ -74,86 +85,38 @@ const CategoriesNew = () => {
 
   const createMutation = useMutation({
     mutationFn: adminService.createCategory,
-    onSuccess: () => {
-      // Backend cache is now cleared automatically, notify frontend via BroadcastChannel
-      const channel = new BroadcastChannel('category-updates');
-      channel.postMessage('categories-updated');
-      channel.close();
-      
-      // Invalidate all category-related queries
-      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      queryClient.refetchQueries({ queryKey: ['admin-categories'] });
-      queryClient.refetchQueries({ queryKey: ['categories'] });
-      showToast('Category created successfully!', 'success');
+    onSuccess: onMutationSuccess('Category created successfully!', () => {
+      notifyFrontend();
       handleCloseModal();
-    },
-    onError: (error: any) => {
-      showToast(error.message || 'Failed to create category', 'error');
-    }
+    }),
+    onError: onMutationError()
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => adminService.updateCategory(id, data),
-    onSuccess: () => {
-      // Backend cache is now cleared automatically, notify frontend via BroadcastChannel
-      const channel = new BroadcastChannel('category-updates');
-      channel.postMessage('categories-updated');
-      channel.close();
-      
-      // Invalidate all category-related queries
-      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      queryClient.refetchQueries({ queryKey: ['admin-categories'] });
-      queryClient.refetchQueries({ queryKey: ['categories'] });
-      showToast('Category updated successfully!', 'success');
+    onSuccess: onMutationSuccess('Category updated successfully!', () => {
+      notifyFrontend();
       handleCloseModal();
-    },
-    onError: (error: any) => {
-      showToast(error.message || 'Failed to update category', 'error');
-    }
+    }),
+    onError: onMutationError()
   });
 
   const deleteMutation = useMutation({
     mutationFn: adminService.deleteCategory,
-    onSuccess: () => {
-      // Backend cache is now cleared automatically, notify frontend via BroadcastChannel
-      const channel = new BroadcastChannel('category-updates');
-      channel.postMessage('categories-updated');
-      channel.close();
-      
-      // Invalidate all category-related queries
-      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      queryClient.refetchQueries({ queryKey: ['admin-categories'] });
-      queryClient.refetchQueries({ queryKey: ['categories'] });
-      showToast('Category deleted successfully!', 'success');
+    onSuccess: onMutationSuccess('Category deleted successfully!', () => {
+      notifyFrontend();
       setDeleteConfirm({ isOpen: false });
-    },
-    onError: (error: any) => {
-      showToast(error.message || 'Failed to delete category', 'error');
-    }
+    }),
+    onError: onMutationError()
   });
 
   const positionMutation = useMutation({
     mutationFn: ({ id, direction }: { id: string; direction: 'up' | 'down' | 'left' | 'right' }) => 
       adminService.updateCategoryPosition(id, direction),
-    onSuccess: () => {
-      // Backend cache is now cleared automatically, notify frontend via BroadcastChannel
-      const channel = new BroadcastChannel('category-updates');
-      channel.postMessage('categories-updated');
-      channel.close();
-      
-      // Invalidate all category-related queries
-      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      queryClient.refetchQueries({ queryKey: ['admin-categories'] });
-      queryClient.refetchQueries({ queryKey: ['categories'] });
-      showToast('Category position updated successfully!', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error.response?.data?.message || error.message || 'Failed to update category position', 'error');
-    }
+    onSuccess: onMutationSuccess('Category position updated successfully!', () => {
+      notifyFrontend();
+    }),
+    onError: onMutationError()
   });
 
   const handlePositionChange = (category: Category, direction: 'up' | 'down' | 'left' | 'right') => {

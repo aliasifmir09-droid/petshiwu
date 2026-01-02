@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { Plus, Edit, Trash2, Search, Eye, EyeOff, HelpCircle, ThumbsUp, ThumbsDown } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
@@ -7,6 +7,7 @@ import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import Dropdown from '@/components/Dropdown';
 import { FAQ, FAQFormData } from '@/types/faq';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 // Helper function to safely convert any ID to a unique string key
 const getUniqueKey = (id: unknown, index: number, prefix: string = 'item'): string => {
@@ -47,7 +48,6 @@ const getUniqueKey = (id: unknown, index: number, prefix: string = 'item'): stri
 };
 
 const FAQs = () => {
-  const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
@@ -74,50 +74,39 @@ const FAQs = () => {
     retry: false
   });
 
+  // Auto-refresh hook - automatically refreshes queries after mutations
+  const { onMutationSuccess, onMutationError } = useAutoRefresh(
+    ['faqs', 'faq-categories'],
+    { showToast }
+  );
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingFAQ(null);
+  };
 
   // Create FAQ mutation
   const createMutation = useMutation({
     mutationFn: (data: FAQFormData) => adminService.createFAQ(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['faqs'] });
-      queryClient.invalidateQueries({ queryKey: ['faq-categories'] });
-      setShowModal(false);
-      setEditingFAQ(null);
-      showToast('FAQ created successfully!', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error?.response?.data?.message || 'Failed to create FAQ', 'error');
-    }
+    onSuccess: onMutationSuccess('FAQ created successfully!', handleCloseModal),
+    onError: onMutationError()
   });
 
   // Update FAQ mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: FAQFormData }) =>
       adminService.updateFAQ(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['faqs'] });
-      queryClient.invalidateQueries({ queryKey: ['faq-categories'] });
-      setShowModal(false);
-      setEditingFAQ(null);
-      showToast('FAQ updated successfully!', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error?.response?.data?.message || 'Failed to update FAQ', 'error');
-    }
+    onSuccess: onMutationSuccess('FAQ updated successfully!', handleCloseModal),
+    onError: onMutationError()
   });
 
   // Delete FAQ mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) => adminService.deleteFAQ(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['faqs'] });
-      queryClient.invalidateQueries({ queryKey: ['faq-categories'] });
+    onSuccess: onMutationSuccess('FAQ deleted successfully!', () => {
       setDeleteConfirm({ isOpen: false });
-      showToast('FAQ deleted successfully!', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error?.response?.data?.message || 'Failed to delete FAQ', 'error');
-    }
+    }),
+    onError: onMutationError()
   });
 
   const handleCreate = () => {

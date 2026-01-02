@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { Plus, Edit, Trash2, Search, Eye, EyeOff, FileText, Calendar, User, Upload, Link2, X } from 'lucide-react';
 import ConfirmationModal from '@/components/ConfirmationModal';
@@ -9,6 +9,7 @@ import Dropdown from '@/components/Dropdown';
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import { Blog, BlogFormData, BlogCategory } from '@/types/blog';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 // Helper function to safely convert any ID to a unique string key
 const getUniqueKey = (id: unknown, index: number, prefix: string = 'item'): string => {
@@ -49,7 +50,6 @@ const getUniqueKey = (id: unknown, index: number, prefix: string = 'item'): stri
 };
 
 const Blogs = () => {
-  const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 300); // Debounce search input by 300ms
@@ -93,48 +93,38 @@ const Blogs = () => {
     retry: false
   });
 
+  // Auto-refresh hook - automatically refreshes queries after mutations
+  const { onMutationSuccess, onMutationError } = useAutoRefresh(
+    ['blogs', 'blog-categories'],
+    { showToast }
+  );
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingBlog(null);
+  };
+
   // Create blog mutation
   const createMutation = useMutation({
     mutationFn: (data: any) => adminService.createBlog(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blogs'] });
-      queryClient.invalidateQueries({ queryKey: ['blog-categories'] });
-      setShowModal(false);
-      setEditingBlog(null);
-      showToast('Blog created successfully!', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error?.response?.data?.message || 'Failed to create blog', 'error');
-    }
+    onSuccess: onMutationSuccess('Blog created successfully!', handleCloseModal),
+    onError: onMutationError()
   });
 
   // Update blog mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => adminService.updateBlog(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blogs'] });
-      queryClient.invalidateQueries({ queryKey: ['blog-categories'] });
-      setShowModal(false);
-      setEditingBlog(null);
-      showToast('Blog updated successfully!', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error?.response?.data?.message || 'Failed to update blog', 'error');
-    }
+    onSuccess: onMutationSuccess('Blog updated successfully!', handleCloseModal),
+    onError: onMutationError()
   });
 
   // Delete blog mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) => adminService.deleteBlog(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blogs'] });
-      queryClient.invalidateQueries({ queryKey: ['blog-categories'] });
+    onSuccess: onMutationSuccess('Blog deleted successfully!', () => {
       setDeleteConfirm({ isOpen: false });
-      showToast('Blog deleted successfully!', 'success');
-    },
-    onError: (error: any) => {
-      showToast(error?.response?.data?.message || 'Failed to delete blog', 'error');
-    }
+    }),
+    onError: onMutationError()
   });
 
   const handleEdit = async (blog: any) => {
