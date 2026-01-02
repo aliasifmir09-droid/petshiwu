@@ -358,6 +358,7 @@ const Dashboard = () => {
       {
         queryKey: ['products', 'out-of-stock'],
         queryFn: () => adminService.getProducts({ inStock: false, limit: UI.OUT_OF_STOCK_FETCH_LIMIT }),
+        enabled: hasAnalyticsPermission && isAuthenticated, // CRITICAL FIX: Only fetch if authenticated and has permission
         retry: 2,
         staleTime: QUERY_CONFIG.OUT_OF_STOCK_STALE_TIME,
         gcTime: QUERY_CONFIG.OUT_OF_STOCK_GC_TIME,
@@ -367,6 +368,7 @@ const Dashboard = () => {
       {
         queryKey: ['admin-categories'],
         queryFn: adminService.getAllCategoriesAdmin,
+        enabled: hasAnalyticsPermission && isAuthenticated, // CRITICAL FIX: Only fetch if authenticated and has permission (admin endpoint requires auth)
         retry: 2,
         staleTime: QUERY_CONFIG.CATEGORIES_STALE_TIME,
         gcTime: QUERY_CONFIG.CATEGORIES_GC_TIME,
@@ -375,6 +377,7 @@ const Dashboard = () => {
       {
         queryKey: ['pet-types'],
         queryFn: adminService.getPetTypes,
+        enabled: hasAnalyticsPermission && isAuthenticated, // CRITICAL FIX: Only fetch if authenticated and has permission (for consistency)
         retry: 2,
         staleTime: QUERY_CONFIG.PET_TYPES_STALE_TIME,
         gcTime: QUERY_CONFIG.PET_TYPES_GC_TIME,
