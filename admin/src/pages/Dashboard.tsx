@@ -779,10 +779,14 @@ const Dashboard = () => {
             // Validate category name exists
             const categoryName = category.name || 'Unnamed Category';
             
-            // Determine pet type icon/prefix
-            const petTypePrefix = category.petType === 'dog' ? '🐕 ' : 
-                                 category.petType === 'cat' ? '🐱 ' : 
-                                 category.petType === 'other-animals' ? '🐾 ' : '';
+            // Determine pet type icon/prefix from API data (not hardcoded)
+            let petTypePrefix = '';
+            if (category.petType && petTypesArray && Array.isArray(petTypesArray)) {
+              const petType = (petTypesArray as PetType[]).find((pt: PetType) => pt.slug === category.petType);
+              if (petType && petType.icon) {
+                petTypePrefix = `${petType.icon} `;
+              }
+            }
             const displayName = `${petTypePrefix}${categoryName}`;
             
             // Count based on view mode
@@ -828,7 +832,7 @@ const Dashboard = () => {
         { name: 'Error loading categories', value: 0 }
       ];
     }
-  }, [categoryDataHash, categoryViewMode, categoriesArray]);
+  }, [categoryDataHash, categoryViewMode, categoriesArray, petTypesArray]);
 
   // Show loading state while checking permissions
   if (userDataLoading) {
