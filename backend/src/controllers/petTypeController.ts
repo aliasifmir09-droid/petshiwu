@@ -162,7 +162,7 @@ export const reorderPetTypes = async (req: AuthRequest, res: Response, next: Nex
         success: false,
         message: 'petTypeIds must be an array'
       });
-    });
+    }
 
     if (petTypeIds.length === 0) {
       return res.status(400).json({
