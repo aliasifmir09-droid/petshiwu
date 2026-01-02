@@ -1612,6 +1612,10 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       const featuredValue = String(req.query.featured).toLowerCase() === 'true';
       if (featuredValue) {
         baseQuery.isFeatured = true;
+        // PERFORMANCE FIX: For featured queries, ensure isActive is set to match index
+        if (!isAdminRequest && baseQuery.isActive === undefined) {
+          baseQuery.isActive = true;
+        }
       }
     }
 
@@ -1682,13 +1686,16 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     const productsQuery = Product.find(query)
       .maxTimeMS(5000); // 5 second timeout to prevent slow queries
     
-    // PERFORMANCE FIX: Hint index usage for inStock queries to ensure optimal performance
-    // When filtering by inStock, use the compound index { inStock: 1, isActive: 1 }
-    if (req.query.inStock !== undefined && !isAdminRequest) {
-      // MongoDB will automatically choose the best index, but we can hint for inStock queries
-      // The compound index { inStock: 1, isActive: 1 } is optimal for this query pattern
+    // PERFORMANCE FIX: Hint index usage for inStock and featured queries to ensure optimal performance
+    if (!isAdminRequest) {
       try {
-        productsQuery.hint({ inStock: 1, isActive: 1 });
+        if (req.query.inStock !== undefined) {
+          // Use compound index { inStock: 1, isActive: 1 } for inStock queries
+          productsQuery.hint({ inStock: 1, isActive: 1 });
+        } else if (req.query.featured === 'true') {
+          // Use compound index { isFeatured: 1, isActive: 1, createdAt: -1 } for featured queries
+          productsQuery.hint({ isFeatured: 1, isActive: 1, createdAt: -1 });
+        }
       } catch (hintError) {
         // If hint fails (e.g., index doesn't exist), continue without hint
         logger.debug('Index hint not applied, MongoDB will choose optimal index');

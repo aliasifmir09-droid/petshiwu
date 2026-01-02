@@ -109,6 +109,14 @@ export const getCategories = async (req: Request, res: Response, next: NextFunct
 // Get all categories for admin (includes inactive)
 export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    // PERFORMANCE FIX: Cache admin categories for 5 minutes since they don't change frequently
+    const cacheKey = `categories:admin:${req.query.petType || 'all'}:${req.query.parentOnly || 'all'}`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      logger.debug(`Cache HIT: ${cacheKey}`);
+      return res.status(200).json(cached);
+    }
+
     const query: any = {};
 
     if (req.query.petType) {
@@ -120,17 +128,44 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
       query.parentCategory = null;
     }
 
+    // PERFORMANCE FIX: Remove populate, fetch parent categories separately for better performance
     const categories = await Category.find(query)
-      .populate('parentCategory', 'name slug petType')
-      .sort({ position: 1, createdAt: -1 }) // Sort by position first, then by creation date
+      .select('_id name slug petType parentCategory position createdAt')
+      .sort({ position: 1, createdAt: -1 })
       .lean();
+
+    // Fetch parent categories in a single query if needed
+    const parentIds = categories
+      .map(cat => cat.parentCategory)
+      .filter((id): id is mongoose.Types.ObjectId => id !== null && id !== undefined);
+    
+    const parentCategoriesMap = new Map();
+    if (parentIds.length > 0) {
+      const uniqueParentIds = Array.from(new Set(parentIds.map(id => id.toString())))
+        .map(id => new mongoose.Types.ObjectId(id));
+      const parents = await Category.find({ _id: { $in: uniqueParentIds } })
+        .select('_id name slug petType')
+        .lean();
+      parents.forEach((parent: any) => {
+        parentCategoriesMap.set(parent._id.toString(), parent);
+      });
+    }
+
+    // Attach parent category info
+    const categoriesWithParents = categories.map((cat: any) => {
+      if (cat.parentCategory) {
+        const parentId = cat.parentCategory.toString();
+        cat.parentCategory = parentCategoriesMap.get(parentId) || null;
+      }
+      return cat;
+    });
 
     // Build hierarchical structure
     const categoryMap = new Map();
     const rootCategories: any[] = [];
 
     // First pass: create a map of all categories
-    categories.forEach(cat => {
+    categoriesWithParents.forEach(cat => {
       // Since we're using .lean(), cat is already a plain object, not a Mongoose document
       const catObj: any = { ...cat };
       catObj.subcategories = [];
@@ -139,7 +174,7 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
     });
 
     // Second pass: build hierarchy and sort subcategories by position
-    for (const cat of categories) {
+    for (const cat of categoriesWithParents) {
       const catId = cat._id as mongoose.Types.ObjectId;
       const catObj = categoryMap.get(catId.toString());
       if (!catObj) continue;
@@ -179,11 +214,16 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
     // Normalize all category IDs to strings
     const normalizedRootCategories = normalizeCategories(rootCategories);
 
-    res.status(200).json({
+    const response = {
       success: true,
       data: normalizedRootCategories,
       total: categories.length
-    });
+    };
+
+    // Cache for 5 minutes (300 seconds)
+    await cache.set(cacheKey, response, 300);
+
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }

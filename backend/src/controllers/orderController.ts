@@ -1658,7 +1658,7 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
       'orders',
       statsPipeline,
       async () => {
-        return await Order.aggregate(statsPipeline);
+        return await Order.aggregate(statsPipeline as any, { allowDiskUse: true });
       },
       300 // 5 minutes cache
     );
@@ -1746,7 +1746,7 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
       'orders',
       combinedStatsPipeline,
       async () => {
-        return await Order.aggregate(combinedStatsPipeline);
+        return await Order.aggregate(combinedStatsPipeline as any, { allowDiskUse: true });
       },
       300 // 5 minutes cache
     );
@@ -1841,7 +1841,7 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
       'orders',
       revenueTrendPipeline,
       async () => {
-        return await Order.aggregate(revenueTrendPipeline);
+        return await Order.aggregate(revenueTrendPipeline as any, { allowDiskUse: true });
       },
       120 // 2 minutes cache
     );
