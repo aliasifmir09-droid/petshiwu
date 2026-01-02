@@ -120,6 +120,8 @@ const Dashboard = () => {
   const { prefetchDashboardData } = useDashboardPrefetch();
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const scrollRestoredRef = useRef(false);
+  const SCROLL_POSITION_KEY = 'dashboard-scroll-position';
   
   // PERFORMANCE FIX: Prefetch dashboard data on mount if cache is empty
   useEffect(() => {
@@ -131,6 +133,75 @@ const Dashboard = () => {
       });
     }
   }, [queryClient, prefetchDashboardData]);
+  
+  // SCROLL POSITION RESTORATION: Save scroll position on scroll (throttled)
+  useEffect(() => {
+    let ticking = false;
+    const saveScrollPosition = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          try {
+            sessionStorage.setItem(SCROLL_POSITION_KEY, window.scrollY.toString());
+          } catch (error) {
+            // Silently handle sessionStorage errors (may fail in private mode)
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    
+    window.addEventListener('scroll', saveScrollPosition, { passive: true });
+    
+    // Also save on beforeunload to catch refresh
+    const handleBeforeUnload = () => {
+      try {
+        sessionStorage.setItem(SCROLL_POSITION_KEY, window.scrollY.toString());
+      } catch (error) {
+        // Silently handle sessionStorage errors
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('scroll', saveScrollPosition);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+  
+  // SCROLL POSITION RESTORATION: Restore scroll position after content loads
+  useEffect(() => {
+    // Only restore once per mount
+    if (scrollRestoredRef.current) return;
+    
+    // Wait for queries to finish loading before restoring scroll
+    const shouldRestore = !orderStatsLoading && !productStatsLoading && 
+                         !outOfStockLoading && !categoriesQuery.isLoading && 
+                         !petTypesQuery.isLoading;
+    
+    if (shouldRestore) {
+      // Small delay to ensure DOM is fully rendered
+      const timeoutId = setTimeout(() => {
+        try {
+          const savedPosition = sessionStorage.getItem(SCROLL_POSITION_KEY);
+          if (savedPosition) {
+            const scrollY = parseInt(savedPosition, 10);
+            if (!isNaN(scrollY) && scrollY > 0) {
+              window.scrollTo({
+                top: scrollY,
+                behavior: 'auto' // Instant scroll, not smooth
+              });
+              scrollRestoredRef.current = true;
+            }
+          }
+        } catch (error) {
+          // Silently handle sessionStorage errors
+        }
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [orderStatsLoading, productStatsLoading, outOfStockLoading, categoriesQuery.isLoading, petTypesQuery.isLoading]);
   
   // Date range filter for sales chart
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '3m' | '6m' | '1y'>('6m');
