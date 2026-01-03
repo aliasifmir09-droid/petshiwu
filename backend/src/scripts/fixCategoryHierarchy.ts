@@ -330,6 +330,7 @@ const fixCategoryHierarchy = async () => {
       if (fix.targetCategory) {
         const targetCategoryId = fix.targetCategory._id;
         const targetCategoryName = fix.targetCategory.name;
+        let mergedIntoExisting = false; // Track if we merged into existing root
 
         // Step 1: Reassign products from incorrect category to target category
         if (fix.incorrectCategory.productCount > 0) {
@@ -346,19 +347,112 @@ const fixCategoryHierarchy = async () => {
           logger.info(`   ✅ Reassigned ${productUpdateResult.modifiedCount} product(s) to "${targetCategoryName}"`);
         }
 
-        // Step 2: Promote target category to root level (Level 1)
-        await Category.findByIdAndUpdate(targetCategoryId, {
-          $set: {
-            parentCategory: null,
-            level: 1
+        // Step 2: Check if a root category with the same name and petType already exists
+        const existingRootCategory = await Category.findOne({
+          name: targetCategoryName,
+          petType: fix.incorrectCategory.petType,
+          parentCategory: null,
+          _id: { $ne: targetCategoryId }, // Exclude the target category itself
+          isActive: true
+        }).lean();
+
+        if (existingRootCategory) {
+          // Merge: Move products and children to existing root category, then delete target
+          logger.info(`   ⚠️  Root category "${targetCategoryName}" already exists. Merging...`);
+          
+          const existingRootId = existingRootCategory._id as mongoose.Types.ObjectId;
+          
+          // Move products from target to existing root
+          const productsInTarget = await Product.countDocuments({
+            category: targetCategoryId,
+            deletedAt: null
+          });
+          
+          if (productsInTarget > 0) {
+            await Product.updateMany(
+              { category: targetCategoryId, deletedAt: null },
+              { $set: { category: existingRootId } }
+            );
+            logger.info(`   ✅ Moved ${productsInTarget} product(s) from "${targetCategoryName}" to existing root category`);
           }
-        });
-        totalCategoriesPromoted++;
-        logger.info(`   ✅ Promoted "${targetCategoryName}" to root level (Level 1)`);
+          
+          // Move children from target to existing root
+          const childrenOfTarget = await Category.find({
+            parentCategory: targetCategoryId,
+            isActive: true
+          }).select('_id name').lean();
+          
+          if (childrenOfTarget.length > 0) {
+            const childIds = childrenOfTarget.map(c => c._id as mongoose.Types.ObjectId);
+            await Category.updateMany(
+              { _id: { $in: childIds }, isActive: true },
+              {
+                $set: {
+                  parentCategory: existingRootId,
+                  level: 2
+                }
+              }
+            );
+            logger.info(`   ✅ Moved ${childrenOfTarget.length} child category/categories to existing root category`);
+            
+            // Update grandchildren levels
+            for (const childId of childIds) {
+              const grandchildren = await Category.find({
+                parentCategory: childId,
+                isActive: true
+              }).select('_id').lean();
+              
+              if (grandchildren.length > 0) {
+                const grandchildIds = grandchildren.map(gc => gc._id as mongoose.Types.ObjectId);
+                await Category.updateMany(
+                  { _id: { $in: grandchildIds }, isActive: true },
+                  { $set: { level: 3 } }
+                );
+              }
+            }
+          }
+          
+          // Delete the target category (it's been merged)
+          await Category.findByIdAndDelete(targetCategoryId);
+          logger.info(`   🗑️  Deleted duplicate category "${targetCategoryName}" (merged into existing root)`);
+          
+          mergedIntoExisting = true;
+          
+          // Update siblings to point to existing root (instead of deleted target)
+          if (fix.incorrectCategory.childCategories.length > 1) {
+            const siblingIds = fix.incorrectCategory.childCategories
+              .slice(1)
+              .map(child => child._id);
+
+            if (siblingIds.length > 0) {
+              await Category.updateMany(
+                { _id: { $in: siblingIds }, isActive: true },
+                {
+                  $set: {
+                    parentCategory: existingRootId,
+                    level: 2
+                  }
+                }
+              );
+              totalCategoriesUpdated += siblingIds.length;
+              logger.info(`   ✅ Updated ${siblingIds.length} sibling category/categories to point to existing root`);
+            }
+          }
+        } else {
+          // No conflict - promote to root level
+          await Category.findByIdAndUpdate(targetCategoryId, {
+            $set: {
+              parentCategory: null,
+              level: 1
+            }
+          });
+          totalCategoriesPromoted++;
+          logger.info(`   ✅ Promoted "${targetCategoryName}" to root level (Level 1)`);
+        }
 
         // Step 3: Update sibling categories (other children of incorrect category)
-        // Make them children of the target category
-        if (fix.incorrectCategory.childCategories.length > 1) {
+        // Make them children of the target category (skip if we merged)
+        if (!mergedIntoExisting && fix.incorrectCategory.childCategories.length > 1) {
           const siblingIds = fix.incorrectCategory.childCategories
             .slice(1) // Skip first child (target category)
             .map(child => child._id);
