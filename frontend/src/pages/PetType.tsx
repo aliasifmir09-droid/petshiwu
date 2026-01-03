@@ -12,9 +12,13 @@ import StructuredData from '@/components/StructuredData';
 import { useSEO } from '@/hooks/useSEO';
 
 const PetType = () => {
-  const { petType } = useParams<{ petType: string }>();
+  const { petType: petTypeParam } = useParams<{ petType: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(false);
+
+  // Normalize petType to slug format (hyphens) - handles both "small-pet" and "small pet" from URL
+  // This ensures consistency with backend expectations
+  const petType = petTypeParam ? petTypeParam.toLowerCase().trim().replace(/\s+/g, '-') : '';
 
   const page = parseInt(searchParams.get('page') || '1');
   const sort = searchParams.get('sort') || 'newest';
@@ -69,7 +73,10 @@ const PetType = () => {
     setSearchParams(newParams);
   };
 
-  const petTypeDisplay = petType ? petType.charAt(0).toUpperCase() + petType.slice(1) : '';
+  // Convert slug format to display format (e.g., "small-pet" -> "Small Pet")
+  const petTypeDisplay = petType 
+    ? petType.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+    : '';
 
   // Generate SEO metadata
   const seoData = useSEO({
