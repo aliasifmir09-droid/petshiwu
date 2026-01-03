@@ -162,19 +162,39 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
       
       return response.data;
     } catch (error: any) {
-      // Improve error message
+      // Improve error message - extract actual error from backend
       if (error.response) {
         // Server responded with error
-        const errorMessage = error.response.data?.message || 
+        const status = error.response.status;
+        const data = error.response.data;
+        
+        // Handle rate limiting (429) with specific message
+        if (status === 429) {
+          const rateLimitMessage = data?.message || 
+                                 data?.error?.message || 
+                                 'Too many login attempts. Please try again later.';
+          const retryAfter = data?.retryAfter || data?.error?.retryAfter;
+          
+          if (retryAfter) {
+            const minutes = Math.ceil(retryAfter / 60);
+            throw new Error(`${rateLimitMessage} Please wait ${minutes} minute(s) before trying again.`);
+          }
+          throw new Error(rateLimitMessage);
+        }
+        
+        // Handle other errors with actual message from backend
+        const errorMessage = data?.message || 
+                           data?.error?.message ||
+                           data?.error ||
                            error.response.statusText || 
-                           `Server error: ${error.response.status}`;
+                           `Server error: ${status}`;
         throw new Error(errorMessage);
       } else if (error.request) {
         // Request was made but no response received
         throw new Error('No response from server. Please check your connection.');
       } else {
-        // Error in request setup
-        throw error;
+        // Error in request setup - use the error message if available
+        throw error instanceof Error ? error : new Error(error?.message || 'An unexpected error occurred');
       }
     }
   },

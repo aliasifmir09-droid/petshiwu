@@ -5,6 +5,7 @@ import { authService } from '@/services/auth';
 import { useToast } from '@/hooks/useToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { trackPasswordReset } from '@/utils/analytics';
+import { extractErrorMessage } from '@/utils/errorHandler';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -26,10 +27,9 @@ const ForgotPassword = () => {
         showToast(response.message || 'Failed to send password reset email', 'error');
       }
     } catch (error: any) {
-      showToast(
-        error.response?.data?.message || 'Failed to send password reset email. Please try again.',
-        'error'
-      );
+      // Extract proper error message (handles rate limiting and other errors)
+      const errorMessage = extractErrorMessage(error);
+      showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
     }

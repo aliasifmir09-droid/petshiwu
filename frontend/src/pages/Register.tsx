@@ -7,6 +7,7 @@ import PasswordStrength from '@/components/PasswordStrength';
 import { useToast } from '@/hooks/useToast';
 import { trackSignUp } from '@/utils/analytics';
 import { validateEmail, validateName, validatePassword, sanitizeFormData } from '@/utils/inputValidation';
+import { extractErrorMessage } from '@/utils/errorHandler';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -39,7 +40,9 @@ const Register = () => {
       }, 2000);
     },
     onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Registration failed', 'error');
+      // Extract proper error message (handles rate limiting and other errors)
+      const errorMessage = extractErrorMessage(error);
+      showToast(errorMessage, 'error');
     }
   });
 

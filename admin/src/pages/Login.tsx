@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
+import { extractErrorMessage } from '@/utils/errorHandler';
 
 interface LoginProps {
   onLogin: (user: any) => void;
@@ -76,9 +77,8 @@ const Login = ({ onLogin }: LoginProps) => {
         // Use safe error logging to prevent data leakage
         const { safeError } = await import('@/utils/safeLogger');
         safeError('Error after login', error);
-        const errorMessage = error.response?.data?.message || 
-                           error.message || 
-                           'Error fetching user information. Please try again.';
+        // Extract proper error message (handles rate limiting and other errors)
+        const errorMessage = extractErrorMessage(error);
         showToast(errorMessage, 'error');
       }
     },
@@ -89,9 +89,8 @@ const Login = ({ onLogin }: LoginProps) => {
       });
       // Don't show error if it's just about missing token (expected in Phase 2)
       if (!error?.message?.includes('token') && !error?.message?.includes('Token')) {
-        const errorMessage = error.response?.data?.message || 
-                            error.message || 
-                            'Login failed. Please check your credentials.';
+        // Extract proper error message (handles rate limiting and other errors)
+        const errorMessage = extractErrorMessage(error);
         showToast(errorMessage, 'error');
       }
     }

@@ -7,6 +7,7 @@ import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { trackLogin } from '@/utils/analytics';
 import { validateEmail, sanitizeFormData } from '@/utils/inputValidation';
+import { extractErrorMessage } from '@/utils/errorHandler';
 import SEO from '@/components/SEO';
 
 interface LoginData {
@@ -57,7 +58,9 @@ const Login = () => {
     onError: (error: any) => {
       // Don't show error if it's just about missing token (expected in Phase 2)
       if (!error?.message?.includes('token') && !error?.message?.includes('Token')) {
-        showToast(error.response?.data?.message || 'Login failed', 'error');
+        // Extract proper error message (handles rate limiting and other errors)
+        const errorMessage = extractErrorMessage(error);
+        showToast(errorMessage, 'error');
       }
     }
   });

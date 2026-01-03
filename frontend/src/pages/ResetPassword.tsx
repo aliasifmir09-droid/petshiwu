@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/authStore';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import PasswordStrength from '@/components/PasswordStrength';
 import { trackPasswordReset } from '@/utils/analytics';
+import { extractErrorMessage } from '@/utils/errorHandler';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -125,8 +126,8 @@ const ResetPassword = () => {
         showToast(response.message || 'Failed to reset password', 'error');
       }
     } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || 'Failed to reset password. The link may have expired.';
+      // Extract proper error message (handles rate limiting and other errors)
+      const errorMessage = extractErrorMessage(error);
       setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
