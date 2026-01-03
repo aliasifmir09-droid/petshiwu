@@ -214,65 +214,160 @@ export const searchAutocomplete = async (req: Request, res: Response, next: Next
       });
     }
 
-    // Optimize autocomplete search - use text index if available
+    // Optimize autocomplete search - use text index if available, fallback to regex
     const searchText = q.trim();
-    const searchQuery: any = {
-      isActive: true,
-      $or: [
-        { deletedAt: null },
-        { deletedAt: { $exists: false } }
-      ]
-    };
-
-    // Use text search for autocomplete (faster than regex)
-    if (searchText.length >= 2) {
-      // Use $text search (text index exists on name, description, brand, tags)
-      searchQuery.$text = { $search: searchText };
-    }
-
+    const searchRegex = new RegExp(searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    
     // Cache autocomplete results for 1-2 minutes (popular searches)
     const autocompleteCacheKey = `autocomplete:${searchText}:${limit}`;
     let products = await cache.get<any[]>(autocompleteCacheKey);
     
     if (!products) {
-      products = await Product.find(searchQuery)
-        .select('name slug brand images basePrice')
-        .limit(limit)
-        .lean();
+      // Try text search first (faster if index exists)
+      const baseQuery: any = {
+        isActive: true,
+        $or: [
+          { deletedAt: null },
+          { deletedAt: { $exists: false } }
+        ]
+      };
+
+      try {
+        // Try $text search first (requires text index)
+        const textSearchQuery = {
+          ...baseQuery,
+          $text: { $search: searchText }
+        };
+        
+        products = await Product.find(textSearchQuery)
+          .select('name slug brand images basePrice')
+          .limit(limit)
+          .lean();
+        
+        // If text search returns no results, fallback to regex search
+        if (products.length === 0) {
+          const regexSearchQuery = {
+            isActive: true,
+            $or: [
+              { deletedAt: null },
+              { deletedAt: { $exists: false } }
+            ],
+            $and: [
+              {
+                $or: [
+                  { name: searchRegex },
+                  { description: searchRegex },
+                  { brand: searchRegex },
+                  { tags: { $in: [searchRegex] } }
+                ]
+              }
+            ]
+          };
+          
+          products = await Product.find(regexSearchQuery)
+            .select('name slug brand images basePrice')
+            .limit(limit)
+            .lean();
+        }
+      } catch (error: any) {
+        // If $text search fails (e.g., text index doesn't exist), use regex fallback
+        logger.debug(`Text search failed, using regex fallback: ${error.message}`);
+        
+        const regexSearchQuery = {
+          isActive: true,
+          $or: [
+            { deletedAt: null },
+            { deletedAt: { $exists: false } }
+          ],
+          $and: [
+            {
+              $or: [
+                { name: searchRegex },
+                { description: searchRegex },
+                { brand: searchRegex },
+                { tags: { $in: [searchRegex] } }
+              ]
+            }
+          ]
+        };
+        
+        products = await Product.find(regexSearchQuery)
+          .select('name slug brand images basePrice')
+          .limit(limit)
+          .lean();
+      }
       
       // Cache popular searches for 2 minutes
       await cache.set(autocompleteCacheKey, products, 120);
     }
 
-    // Search categories - use text search if available, otherwise regex
-    const categorySearchQuery: any = {
-      isActive: true
-    };
+    // Search categories - use text search if available, fallback to regex
+    const escapedText = searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const categorySearchRegex = new RegExp(escapedText, 'i');
     
-    if (searchText.length >= 2) {
-      // Use text search if available, otherwise use optimized regex
-      const escapedText = searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const searchRegex = new RegExp(escapedText, 'i');
-      categorySearchQuery.$or = [
-        { $text: { $search: searchText } }, // Text search
-        { name: searchRegex }, // Fallback regex
-        { slug: searchRegex }
-      ];
+    let categories: any[] = [];
+    
+    try {
+      // Try text search first
+      const textCategoryQuery = {
+        isActive: true,
+        $text: { $search: searchText }
+      };
+      
+      categories = await Category.find(textCategoryQuery)
+        .select('name slug petType')
+        .limit(5)
+        .lean();
+      
+      // If no results, fallback to regex
+      if (categories.length === 0) {
+        const regexCategoryQuery = {
+          isActive: true,
+          $or: [
+            { name: categorySearchRegex },
+            { slug: categorySearchRegex }
+          ]
+        };
+        
+        categories = await Category.find(regexCategoryQuery)
+          .select('name slug petType')
+          .limit(5)
+          .lean();
+      }
+    } catch (error: any) {
+      // If text search fails, use regex fallback
+      logger.debug(`Category text search failed, using regex fallback: ${error.message}`);
+      
+      const regexCategoryQuery = {
+        isActive: true,
+        $or: [
+          { name: categorySearchRegex },
+          { slug: categorySearchRegex }
+        ]
+      };
+      
+      categories = await Category.find(regexCategoryQuery)
+        .select('name slug petType')
+        .limit(5)
+        .lean();
     }
-    
-    const categories = await Category.find(categorySearchQuery)
-      .select('name slug petType')
-      .limit(5)
-      .lean();
 
     res.status(200).json({
       success: true,
       data: {
-        products,
-        categories
+        products: products || [],
+        categories: categories || []
       }
     });
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    logger.error('Error in searchAutocomplete:', error);
+    // Return empty results on error instead of failing
+    res.status(200).json({
+      success: true,
+      data: {
+        products: [],
+        categories: []
+      }
+    });
   }
 };

@@ -146,7 +146,7 @@ const CategoryIcons = () => {
     {
       icon: HeartPulse,
       title: 'Vitamins & supplements',
-      link: '/products?search=vitamins+supplements',
+      link: '/products?vitaminsFilter=true&supplementsFilter=true',
       color: 'from-green-500 to-emerald-600',
       // Image: Blue pill bottle with paw print label + white bone
       image: '/category-vitamins-supplements.png'

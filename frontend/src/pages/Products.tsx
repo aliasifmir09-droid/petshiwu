@@ -30,6 +30,8 @@ const Products = () => {
   const minRating = searchParams.get('minRating') || '';
   const brand = searchParams.get('brand') || '';
   const inStock = searchParams.get('inStock') || '';
+  const vitaminsFilter = searchParams.get('vitaminsFilter') === 'true';
+  const supplementsFilter = searchParams.get('supplementsFilter') === 'true';
 
   // Scroll to top immediately when navigating to this page (pathname change)
   useEffect(() => {
@@ -58,7 +60,7 @@ const Products = () => {
       }
     }, 100);
     return () => clearTimeout(timeoutId);
-  }, [petType, category, search, sort, featured, minRating, brand, inStock]); // Removed 'page' from dependencies
+  }, [petType, category, search, sort, featured, minRating, brand, inStock, vitaminsFilter, supplementsFilter]); // Removed 'page' from dependencies
 
   // Redirect to category page if category query parameter exists
   useEffect(() => {
@@ -85,15 +87,28 @@ const Products = () => {
     };
   }, [category, navigate, searchParams, setSearchParams]);
 
+  // Build search query - if vitamins/supplements filters are active, combine them with OR logic
+  const buildSearchQuery = () => {
+    if (vitaminsFilter && supplementsFilter) {
+      // Use OR logic: search for products containing "vitamins" OR "supplements"
+      return 'vitamins supplements';
+    } else if (vitaminsFilter) {
+      return 'vitamins';
+    } else if (supplementsFilter) {
+      return 'supplements';
+    }
+    return search || undefined;
+  };
+
   const { data: products, isLoading, error, refetch } = useQuery({
-    queryKey: ['products', page, petType, category, search, sort, featured, minRating, brand, inStock],
+    queryKey: ['products', page, petType, category, search, sort, featured, minRating, brand, inStock, vitaminsFilter, supplementsFilter],
     queryFn: () =>
       productService.getProducts({
         page,
         limit: 20,
         petType: petType || undefined,
         category: undefined, // Don't filter by category here - redirect instead
-        search: search || undefined,
+        search: buildSearchQuery(),
         sort: sort as any,
         featured: featured || undefined,
         minPrice: undefined,
@@ -243,7 +258,7 @@ const Products = () => {
       </div>
 
       {/* Active Filters Display */}
-      {(petType || category || brand || minRating || inStock || search) && (
+      {(petType || category || brand || minRating || inStock || search || vitaminsFilter || supplementsFilter) && (
         <div className="mb-6 flex flex-wrap items-center gap-2">
           <span className="text-sm font-medium text-gray-700">Active Filters:</span>
           {petType && (
@@ -262,6 +277,42 @@ const Products = () => {
               Category: {categories.find((c) => c._id === category)?.name}
               <button
                 onClick={() => updateFilters('category', '')}
+                className="hover:text-primary-900"
+              >
+                ×
+              </button>
+            </span>
+          )}
+          {vitaminsFilter && (
+            <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm">
+              Vitamins
+              <button
+                onClick={() => {
+                  const newParams = new URLSearchParams(searchParams);
+                  newParams.delete('vitaminsFilter');
+                  if (!newParams.get('supplementsFilter')) {
+                    newParams.set('page', '1');
+                  }
+                  setSearchParams(newParams);
+                }}
+                className="hover:text-primary-900"
+              >
+                ×
+              </button>
+            </span>
+          )}
+          {supplementsFilter && (
+            <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm">
+              Supplements
+              <button
+                onClick={() => {
+                  const newParams = new URLSearchParams(searchParams);
+                  newParams.delete('supplementsFilter');
+                  if (!newParams.get('vitaminsFilter')) {
+                    newParams.set('page', '1');
+                  }
+                  setSearchParams(newParams);
+                }}
                 className="hover:text-primary-900"
               >
                 ×
@@ -301,7 +352,7 @@ const Products = () => {
               </button>
             </span>
           )}
-          {search && (
+          {search && !vitaminsFilter && !supplementsFilter && (
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm">
               Search: "{search}"
               <button

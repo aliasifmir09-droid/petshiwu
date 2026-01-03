@@ -1624,20 +1624,46 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     
     // Search by name, description, brand, or tags
     if (req.query.search) {
-      // Use $and to combine base query with search conditions
-      query = {
-        $and: [
-          baseQuery,
-          {
-            $or: [
-              { name: { $regex: req.query.search, $options: 'i' } },
-              { description: { $regex: req.query.search, $options: 'i' } },
-              { brand: { $regex: req.query.search, $options: 'i' } },
-              { tags: { $in: [new RegExp(req.query.search as string, 'i')] } }
-            ]
-          }
-        ]
-      };
+      const searchTerm = String(req.query.search).trim();
+      
+      // Check if search contains multiple terms (space-separated) - use OR logic
+      const searchTerms = searchTerm.split(/\s+/).filter(term => term.length > 0);
+      
+      if (searchTerms.length > 1) {
+        // Multiple terms: search for products containing ANY of the terms (OR logic)
+        const searchConditions = searchTerms.map(term => ({
+          $or: [
+            { name: { $regex: term, $options: 'i' } },
+            { description: { $regex: term, $options: 'i' } },
+            { brand: { $regex: term, $options: 'i' } },
+            { tags: { $in: [new RegExp(term, 'i')] } }
+          ]
+        }));
+        
+        query = {
+          $and: [
+            baseQuery,
+            {
+              $or: searchConditions
+            }
+          ]
+        };
+      } else {
+        // Single term: search in all fields
+        query = {
+          $and: [
+            baseQuery,
+            {
+              $or: [
+                { name: { $regex: searchTerm, $options: 'i' } },
+                { description: { $regex: searchTerm, $options: 'i' } },
+                { brand: { $regex: searchTerm, $options: 'i' } },
+                { tags: { $in: [new RegExp(searchTerm, 'i')] } }
+              ]
+            }
+          ]
+        };
+      }
     }
 
     // Determine sort order based on query parameter
