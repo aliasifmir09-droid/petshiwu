@@ -103,9 +103,9 @@ const PetTypes = () => {
 
   // Fetch pet types
   // CRITICAL: Set staleTime to 0 and refetchOnMount to ensure immediate updates after mutations
-  const { data: petTypesResponse, isLoading, refetch } = useQuery({
+  const { data: petTypesResponse, isLoading } = useQuery({
     queryKey: ['admin-pet-types'],
-    queryFn: adminService.getAllPetTypesAdmin,
+    queryFn: () => adminService.getAllPetTypesAdmin(false), // Wrap in arrow function for React Query
     refetchOnMount: true, // Always refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window regains focus
     staleTime: 0, // Always consider data stale - refetch immediately when invalidated
@@ -115,7 +115,9 @@ const PetTypes = () => {
   // Sort pet types by order, then by name as fallback
   // PERFORMANCE FIX: Ensure proper sorting with null/undefined handling
   const petTypes: PetType[] = useMemo(() => {
-    const types = petTypesResponse?.data || [];
+    // Handle the response structure: service returns { success, total, data }
+    const response = petTypesResponse as { success?: boolean; total?: number; data?: PetType[] } | undefined;
+    const types = response?.data || [];
     return [...types].sort((a, b) => {
       // First sort by order (handle null/undefined by treating as 0)
       const orderA = a.order !== null && a.order !== undefined ? a.order : 0;
@@ -127,7 +129,7 @@ const PetTypes = () => {
       // If order is the same, sort by name
       return a.name.localeCompare(b.name);
     });
-  }, [petTypesResponse?.data]);
+  }, [petTypesResponse]);
 
   // Auto-refresh hook - automatically refreshes queries after mutations
   // This ensures the page shows updated data immediately after create/update/delete
