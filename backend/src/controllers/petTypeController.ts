@@ -43,6 +43,16 @@ export const getPetTypes = async (req: Request, res: Response, next: NextFunctio
 // Get all pet types for admin (includes inactive)
 export const getAllPetTypesAdmin = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    // PERFORMANCE FIX: Cache admin pet types for 30 seconds (admin dashboard needs faster updates)
+    const { cache } = await import('../utils/cache');
+    const cacheKey = 'pet-types:admin:all';
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      const logger = (await import('../utils/logger')).default;
+      logger.debug(`Cache HIT: ${cacheKey}`);
+      return res.status(200).json(cached);
+    }
+
     const petTypes = await PetType.find()
       .sort({ order: 1, createdAt: -1 })
       .lean();
@@ -50,11 +60,16 @@ export const getAllPetTypesAdmin = async (req: AuthRequest, res: Response, next:
     // Normalize _id to string for all pet types
     const normalizedPetTypes = normalizePetTypes(petTypes);
 
-    res.status(200).json({
+    const response = {
       success: true,
       total: normalizedPetTypes.length,
       data: normalizedPetTypes
-    });
+    };
+
+    // Cache for 30 seconds (admin dashboard needs faster updates)
+    await cache.set(cacheKey, response, 30);
+
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }
@@ -92,9 +107,11 @@ export const createPetType = async (req: AuthRequest, res: Response, next: NextF
     // PERFORMANCE FIX: Clear pet type caches to ensure frontend sees new pet type immediately
     const { cache } = await import('../utils/cache');
     try {
-      // Clear pet types cache patterns
+      // Clear pet types cache patterns (including admin cache)
       await cache.delPattern('pet-types:*');
       await cache.delPattern('petTypes:*');
+      // CRITICAL: Clear admin pet types cache for immediate dashboard updates
+      await cache.del('pet-types:admin:all');
     } catch (cacheError: any) {
       // Log but don't fail if cache clearing fails
       const logger = (await import('../utils/logger')).default;
@@ -171,9 +188,11 @@ export const deletePetType = async (req: AuthRequest, res: Response, next: NextF
     // PERFORMANCE FIX: Clear pet type caches to ensure frontend sees deleted pet type immediately
     const { cache } = await import('../utils/cache');
     try {
-      // Clear pet types cache patterns
+      // Clear pet types cache patterns (including admin cache)
       await cache.delPattern('pet-types:*');
       await cache.delPattern('petTypes:*');
+      // CRITICAL: Clear admin pet types cache for immediate dashboard updates
+      await cache.del('pet-types:admin:all');
     } catch (cacheError: any) {
       // Log but don't fail if cache clearing fails
       const logger = (await import('../utils/logger')).default;
