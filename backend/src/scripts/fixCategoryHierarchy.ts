@@ -49,8 +49,61 @@ const fixCategoryHierarchy = async () => {
     logger.info('🔧 Fix Category Hierarchy (Remove Pet Type Categories)');
     logger.info('='.repeat(60) + '\n');
 
+    // Enable command buffering for scripts (allows queries before connection is ready)
+    mongoose.set('bufferCommands', true);
+    
     // Connect to database
     await connectDatabase();
+    
+    // Wait for connection to be ready (with timeout)
+    if (mongoose.connection.readyState !== 1) {
+      logger.info('⏳ Waiting for MongoDB connection...');
+      let connectionReady = false;
+      
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          if (!connectionReady) {
+            reject(new Error('Connection timeout: MongoDB did not connect within 30 seconds. Please check your MONGODB_URI in .env file.'));
+          }
+        }, 30000);
+        
+        const checkConnection = () => {
+          if (mongoose.connection.readyState === 1) {
+            connectionReady = true;
+            clearTimeout(timeout);
+            mongoose.connection.removeListener('connected', checkConnection);
+            resolve();
+          }
+        };
+        
+        // Check immediately
+        if (mongoose.connection.readyState === 1) {
+          connectionReady = true;
+          clearTimeout(timeout);
+          resolve();
+        } else {
+          // Wait for connection event
+          mongoose.connection.once('connected', checkConnection);
+          
+          // Also poll every 100ms as fallback
+          const pollInterval = setInterval(() => {
+            if (mongoose.connection.readyState === 1) {
+              connectionReady = true;
+              clearInterval(pollInterval);
+              clearTimeout(timeout);
+              mongoose.connection.removeListener('connected', checkConnection);
+              resolve();
+            }
+          }, 100);
+          
+          // Clean up polling on timeout
+          setTimeout(() => {
+            clearInterval(pollInterval);
+          }, 30000);
+        }
+      });
+    }
+    
     logger.info('✅ Connected to MongoDB\n');
 
     // Fetch all pet types
