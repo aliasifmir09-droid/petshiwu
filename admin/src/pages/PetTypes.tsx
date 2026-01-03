@@ -151,25 +151,63 @@ const PetTypes = () => {
   };
 
   // Create pet type mutation - automatically refreshes the page
+  // CRITICAL: Force cache bypass to ensure new pet type appears immediately
   const createMutation = useMutation({
     mutationFn: adminService.createPetType,
-    onSuccess: onMutationSuccess('Pet type created successfully!', handleCloseModal),
+    onSuccess: async () => {
+      // CRITICAL: Force a fresh fetch by bypassing cache to ensure new pet type appears
+      // This ensures the admin dashboard shows the new pet type immediately
+      await queryClient.invalidateQueries({ queryKey: ['admin-pet-types'], exact: false });
+      // Refetch with cache bypass to force fresh data from database
+      await queryClient.refetchQueries({ 
+        queryKey: ['admin-pet-types'], 
+        exact: false,
+        type: 'active' // Only refetch active queries
+      });
+      // Then run the standard success handler (invalidates and refetches all related queries including frontend)
+      const successHandler = onMutationSuccess('Pet type created successfully!', handleCloseModal);
+      await successHandler();
+    },
     onError: onMutationError()
   });
 
   // Update pet type mutation - automatically refreshes the page
+  // CRITICAL: Force cache bypass to ensure updated pet type appears immediately
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => adminService.updatePetType(id, data),
-    onSuccess: onMutationSuccess('Pet type updated successfully!', handleCloseModal),
+    onSuccess: async () => {
+      // CRITICAL: Force a fresh fetch by bypassing cache to ensure updates appear
+      await queryClient.invalidateQueries({ queryKey: ['admin-pet-types'], exact: false });
+      await queryClient.refetchQueries({ 
+        queryKey: ['admin-pet-types'], 
+        exact: false,
+        type: 'active'
+      });
+      // Then run the standard success handler
+      const successHandler = onMutationSuccess('Pet type updated successfully!', handleCloseModal);
+      await successHandler();
+    },
     onError: onMutationError()
   });
 
   // Delete pet type mutation - automatically refreshes the page
+  // CRITICAL: Force cache bypass to ensure deleted pet type is removed immediately
   const deleteMutation = useMutation({
     mutationFn: adminService.deletePetType,
-    onSuccess: onMutationSuccess('Pet type deleted successfully!', () => {
-      setDeleteConfirm({ isOpen: false });
-    }),
+    onSuccess: async () => {
+      // CRITICAL: Force a fresh fetch by bypassing cache to ensure deletion is reflected
+      await queryClient.invalidateQueries({ queryKey: ['admin-pet-types'], exact: false });
+      await queryClient.refetchQueries({ 
+        queryKey: ['admin-pet-types'], 
+        exact: false,
+        type: 'active'
+      });
+      // Then run the standard success handler
+      const successHandler = onMutationSuccess('Pet type deleted successfully!', () => {
+        setDeleteConfirm({ isOpen: false });
+      });
+      await successHandler();
+    },
     onError: onMutationError()
   });
 

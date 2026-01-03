@@ -114,20 +114,35 @@ export const getPetType = async (req: Request, res: Response, next: NextFunction
 // Create new pet type (Admin)
 export const createPetType = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    // CRITICAL: Set order to last position if not provided
+    // This ensures new pet types appear at the end of the list
+    if (req.body.order === undefined || req.body.order === null) {
+      const lastPetType = await PetType.findOne().sort({ order: -1 }).select('order').lean();
+      req.body.order = lastPetType && lastPetType.order !== undefined 
+        ? lastPetType.order + 1 
+        : 0;
+    }
+    
     const petType = await PetType.create(req.body);
 
-    // PERFORMANCE FIX: Clear pet type caches to ensure frontend sees new pet type immediately
+    // CRITICAL: Clear cache with explicit error handling and logging
+    // This ensures the new pet type appears immediately in both frontend and admin
+    const logger = (await import('../utils/logger')).default;
     const { cache } = await import('../utils/cache');
+    
     try {
-      // Clear pet types cache patterns (including admin cache)
-      await cache.delPattern('pet-types:*');
-      await cache.delPattern('petTypes:*');
-      // CRITICAL: Clear admin pet types cache for immediate dashboard updates
-      await cache.del('pet-types:admin:all');
+      // Explicitly clear the admin cache key first (most important for dashboard)
+      const deletedAdmin = await cache.del('pet-types:admin:all');
+      logger.debug(`Cleared admin cache after create: ${deletedAdmin ? 'success' : 'key not found'}`);
+      
+      // Clear pet types cache patterns (for frontend and other caches)
+      const deletedPattern1 = await cache.delPattern('pet-types:*');
+      const deletedPattern2 = await cache.delPattern('petTypes:*');
+      logger.debug(`Cleared cache patterns after create: pet-types:* (${deletedPattern1} keys), petTypes:* (${deletedPattern2} keys)`);
     } catch (cacheError: any) {
-      // Log but don't fail if cache clearing fails
-      const logger = (await import('../utils/logger')).default;
-      logger.warn('Failed to clear pet types cache:', cacheError.message);
+      // Log but don't fail if cache clearing fails - database update is more important
+      logger.error('Failed to clear pet types cache after create:', cacheError.message);
+      logger.warn('Cache clearing failed, but pet type was created. Admin may need to refresh.');
     }
 
     // Normalize _id to string
