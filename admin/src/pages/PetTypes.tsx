@@ -119,13 +119,6 @@ const PetTypes = () => {
     const response = petTypesResponse as { success?: boolean; total?: number; data?: PetType[] } | undefined;
     const types = response?.data || [];
     
-    // DEBUG: Log to help diagnose missing pet types
-    if (types.length > 0) {
-      console.log(`[PetTypes] Loaded ${types.length} pet types:`, types.map(t => ({ name: t.name, slug: t.slug, isActive: t.isActive, order: t.order })));
-    } else {
-      console.warn('[PetTypes] No pet types found in response:', response);
-    }
-    
     return [...types].sort((a, b) => {
       // First sort by order (handle null/undefined by treating as 0)
       const orderA = a.order !== null && a.order !== undefined ? a.order : 0;
