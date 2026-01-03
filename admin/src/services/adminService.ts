@@ -592,8 +592,10 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
     return response.data;
   },
 
-  getAllPetTypesAdmin: async () => {
-    const response = await api.get('/pet-types/admin/all');
+  getAllPetTypesAdmin: async (bypassCache: boolean = false) => {
+    // Add cache-busting parameter if needed to force fresh data
+    const params = bypassCache ? { nocache: 'true', _t: Date.now() } : {};
+    const response = await api.get('/pet-types/admin/all', { params });
     return response.data;
   },
 

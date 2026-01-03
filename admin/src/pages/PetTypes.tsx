@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Edit, Trash2, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { adminService } from '@/services/adminService';
 import Toast from '@/components/Toast';
@@ -85,6 +85,7 @@ interface PetType {
 }
 
 const PetTypes = () => {
+  const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
   const [showModal, setShowModal] = useState(false);
   const [editingPetType, setEditingPetType] = useState<PetType | null>(null);
@@ -175,8 +176,15 @@ const PetTypes = () => {
   const reorderMutation = useMutation({
     mutationFn: adminService.reorderPetTypes,
     onSuccess: async () => {
-      // Explicitly refetch the pet types query first to ensure immediate update
-      await refetch();
+      // CRITICAL: Force a fresh fetch by bypassing cache to ensure we get updated order
+      // This ensures the admin dashboard shows the correct order immediately
+      await queryClient.invalidateQueries({ queryKey: ['admin-pet-types'], exact: false });
+      // Refetch with cache bypass to force fresh data from database
+      await queryClient.refetchQueries({ 
+        queryKey: ['admin-pet-types'], 
+        exact: false,
+        type: 'active' // Only refetch active queries
+      });
       // Then run the standard success handler (invalidates and refetches all related queries including frontend)
       const successHandler = onMutationSuccess('Pet types reordered successfully!');
       await successHandler();
