@@ -1,4 +1,4 @@
-# 🐾 petshiwu - Pet E-Commerce Platform
+# 🐾 Prevue Pet - Pet E-Commerce Platform
 
 A **complete, production-ready** full-stack e-commerce platform for pet products, featuring a modern customer-facing website, powerful admin dashboard, and robust backend API.
 
@@ -174,7 +174,7 @@ npm run dev:admin      # Admin Dashboard
 
 | Role | Email | Password | Access |
 |------|-------|----------|--------|
-| **Admin** | admin@petshiwu.com | admin123 | Full dashboard access |
+| **Admin** | admin@prevuepet.com | admin123 | Full dashboard access |
 | **Customer** | customer@example.com | password123 | Shopping & orders |
 
 ## 📸 Screenshots
@@ -325,7 +325,7 @@ curl http://localhost:5000/api/products
 # Login
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@petshiwu.com","password":"2581769As@"}'
+  -d '{"email":"admin@prevuepet.com","password":"2581769As@"}'
 ```
 
 ### Test Credentials

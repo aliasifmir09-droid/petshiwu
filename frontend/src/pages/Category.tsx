@@ -161,7 +161,6 @@ const Category = () => {
 
   // Generate SEO metadata
   const categoryName = category ? decodeHtmlEntities(category.name) : '';
-  const categoryDescription = category ? decodeHtmlEntities(category.description || '') : '';
   const seoData = useSEO({
     title: category
       ? (petTypeDisplay
