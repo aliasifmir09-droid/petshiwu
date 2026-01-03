@@ -376,40 +376,131 @@ const fixCategoryHierarchy = async () => {
             logger.info(`   ✅ Moved ${productsInTarget} product(s) from "${targetCategoryName}" to existing root category`);
           }
           
-          // Move children from target to existing root
+          // Move children from target to existing root (check for duplicates first)
           const childrenOfTarget = await Category.find({
             parentCategory: targetCategoryId,
             isActive: true
-          }).select('_id name').lean();
+          }).select('_id name slug petType').lean();
           
           if (childrenOfTarget.length > 0) {
-            const childIds = childrenOfTarget.map(c => c._id as mongoose.Types.ObjectId);
-            await Category.updateMany(
-              { _id: { $in: childIds }, isActive: true },
-              {
-                $set: {
-                  parentCategory: existingRootId,
-                  level: 2
+            let movedCount = 0;
+            let mergedCount = 0;
+            
+            for (const child of childrenOfTarget) {
+              const childId = child._id as mongoose.Types.ObjectId;
+              const childName = child.name;
+              const childPetType = child.petType || fix.incorrectCategory.petType;
+              
+              // Check if a child with the same name already exists under the existing root
+              const existingChild = await Category.findOne({
+                name: childName,
+                petType: childPetType,
+                parentCategory: existingRootId,
+                _id: { $ne: childId },
+                isActive: true
+              }).lean();
+              
+              if (existingChild) {
+                // Merge: Move products and grandchildren to existing child, then delete duplicate
+                const existingChildId = existingChild._id as mongoose.Types.ObjectId;
+                
+                // Move products from duplicate child to existing child
+                const productsInDuplicate = await Product.countDocuments({
+                  category: childId,
+                  deletedAt: null
+                });
+                
+                if (productsInDuplicate > 0) {
+                  await Product.updateMany(
+                    { category: childId, deletedAt: null },
+                    { $set: { category: existingChildId } }
+                  );
+                  logger.info(`   ✅ Merged ${productsInDuplicate} product(s) from duplicate "${childName}" to existing child`);
+                }
+                
+                // Move grandchildren from duplicate child to existing child
+                const grandchildrenOfDuplicate = await Category.find({
+                  parentCategory: childId,
+                  isActive: true
+                }).select('_id name').lean();
+                
+                if (grandchildrenOfDuplicate.length > 0) {
+                  const grandchildIds = grandchildrenOfDuplicate.map(gc => gc._id as mongoose.Types.ObjectId);
+                  
+                  // Check for duplicate grandchildren before moving
+                  for (const grandchild of grandchildrenOfDuplicate) {
+                    const grandchildId = grandchild._id as mongoose.Types.ObjectId;
+                    const grandchildName = grandchild.name;
+                    
+                    const existingGrandchild = await Category.findOne({
+                      name: grandchildName,
+                      petType: childPetType,
+                      parentCategory: existingChildId,
+                      _id: { $ne: grandchildId },
+                      isActive: true
+                    }).lean();
+                    
+                    if (existingGrandchild) {
+                      // Merge grandchild products
+                      const productsInGrandchild = await Product.countDocuments({
+                        category: grandchildId,
+                        deletedAt: null
+                      });
+                      
+                      if (productsInGrandchild > 0) {
+                        await Product.updateMany(
+                          { category: grandchildId, deletedAt: null },
+                          { $set: { category: existingGrandchild._id as mongoose.Types.ObjectId } }
+                        );
+                      }
+                      
+                      // Delete duplicate grandchild
+                      await Category.findByIdAndDelete(grandchildId);
+                    } else {
+                      // Move grandchild to existing child
+                      await Category.findByIdAndUpdate(grandchildId, {
+                        $set: {
+                          parentCategory: existingChildId,
+                          level: 3
+                        }
+                      });
+                    }
+                  }
+                  
+                  logger.info(`   ✅ Moved/merged ${grandchildrenOfDuplicate.length} grandchild category/categories`);
+                }
+                
+                // Delete duplicate child
+                await Category.findByIdAndDelete(childId);
+                mergedCount++;
+                logger.info(`   ✅ Merged duplicate child "${childName}" into existing child`);
+              } else {
+                // No duplicate - move child to existing root
+                await Category.findByIdAndUpdate(childId, {
+                  $set: {
+                    parentCategory: existingRootId,
+                    level: 2
+                  }
+                });
+                movedCount++;
+                
+                // Update grandchildren levels
+                const grandchildren = await Category.find({
+                  parentCategory: childId,
+                  isActive: true
+                }).select('_id').lean();
+                
+                if (grandchildren.length > 0) {
+                  const grandchildIds = grandchildren.map(gc => gc._id as mongoose.Types.ObjectId);
+                  await Category.updateMany(
+                    { _id: { $in: grandchildIds }, isActive: true },
+                    { $set: { level: 3 } }
+                  );
                 }
               }
-            );
-            logger.info(`   ✅ Moved ${childrenOfTarget.length} child category/categories to existing root category`);
-            
-            // Update grandchildren levels
-            for (const childId of childIds) {
-              const grandchildren = await Category.find({
-                parentCategory: childId,
-                isActive: true
-              }).select('_id').lean();
-              
-              if (grandchildren.length > 0) {
-                const grandchildIds = grandchildren.map(gc => gc._id as mongoose.Types.ObjectId);
-                await Category.updateMany(
-                  { _id: { $in: grandchildIds }, isActive: true },
-                  { $set: { level: 3 } }
-                );
-              }
             }
+            
+            logger.info(`   ✅ Processed ${childrenOfTarget.length} child category/categories (${movedCount} moved, ${mergedCount} merged)`);
           }
           
           // Delete the target category (it's been merged)
@@ -419,24 +510,115 @@ const fixCategoryHierarchy = async () => {
           mergedIntoExisting = true;
           
           // Update siblings to point to existing root (instead of deleted target)
+          // Check for duplicates before moving
           if (fix.incorrectCategory.childCategories.length > 1) {
-            const siblingIds = fix.incorrectCategory.childCategories
-              .slice(1)
-              .map(child => child._id);
-
-            if (siblingIds.length > 0) {
-              await Category.updateMany(
-                { _id: { $in: siblingIds }, isActive: true },
-                {
+            const siblings = fix.incorrectCategory.childCategories.slice(1);
+            
+            for (const sibling of siblings) {
+              const siblingId = sibling._id;
+              const siblingName = sibling.name;
+              const siblingPetType = fix.incorrectCategory.petType;
+              
+              // Check if sibling already exists under existing root
+              const existingSibling = await Category.findOne({
+                name: siblingName,
+                petType: siblingPetType,
+                parentCategory: existingRootId,
+                _id: { $ne: siblingId },
+                isActive: true
+              }).lean();
+              
+              if (existingSibling) {
+                // Merge sibling
+                const existingSiblingId = existingSibling._id as mongoose.Types.ObjectId;
+                
+                // Move products
+                const productsInSibling = await Product.countDocuments({
+                  category: siblingId,
+                  deletedAt: null
+                });
+                
+                if (productsInSibling > 0) {
+                  await Product.updateMany(
+                    { category: siblingId, deletedAt: null },
+                    { $set: { category: existingSiblingId } }
+                  );
+                }
+                
+                // Move grandchildren
+                const grandchildrenOfSibling = await Category.find({
+                  parentCategory: siblingId,
+                  isActive: true
+                }).select('_id name').lean();
+                
+                for (const grandchild of grandchildrenOfSibling) {
+                  const grandchildId = grandchild._id as mongoose.Types.ObjectId;
+                  const grandchildName = grandchild.name;
+                  
+                  const existingGrandchild = await Category.findOne({
+                    name: grandchildName,
+                    petType: siblingPetType,
+                    parentCategory: existingSiblingId,
+                    _id: { $ne: grandchildId },
+                    isActive: true
+                  }).lean();
+                  
+                  if (existingGrandchild) {
+                    // Merge grandchild products
+                    const productsInGrandchild = await Product.countDocuments({
+                      category: grandchildId,
+                      deletedAt: null
+                    });
+                    
+                    if (productsInGrandchild > 0) {
+                      await Product.updateMany(
+                        { category: grandchildId, deletedAt: null },
+                        { $set: { category: existingGrandchild._id as mongoose.Types.ObjectId } }
+                      );
+                    }
+                    
+                    await Category.findByIdAndDelete(grandchildId);
+                  } else {
+                    await Category.findByIdAndUpdate(grandchildId, {
+                      $set: {
+                        parentCategory: existingSiblingId,
+                        level: 3
+                      }
+                    });
+                  }
+                }
+                
+                // Delete duplicate sibling
+                await Category.findByIdAndDelete(siblingId);
+                logger.info(`   ✅ Merged duplicate sibling "${siblingName}" into existing category`);
+              } else {
+                // No duplicate - move sibling to existing root
+                await Category.findByIdAndUpdate(siblingId, {
                   $set: {
                     parentCategory: existingRootId,
                     level: 2
                   }
+                });
+                
+                // Update grandchildren levels
+                const grandchildren = await Category.find({
+                  parentCategory: siblingId,
+                  isActive: true
+                }).select('_id').lean();
+                
+                if (grandchildren.length > 0) {
+                  const grandchildIds = grandchildren.map(gc => gc._id as mongoose.Types.ObjectId);
+                  await Category.updateMany(
+                    { _id: { $in: grandchildIds }, isActive: true },
+                    { $set: { level: 3 } }
+                  );
                 }
-              );
-              totalCategoriesUpdated += siblingIds.length;
-              logger.info(`   ✅ Updated ${siblingIds.length} sibling category/categories to point to existing root`);
+              }
+              
+              totalCategoriesUpdated++;
             }
+            
+            logger.info(`   ✅ Updated ${siblings.length} sibling category/categories`);
           }
         } else {
           // No conflict - promote to root level
