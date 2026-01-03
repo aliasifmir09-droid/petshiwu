@@ -28,27 +28,34 @@ const deleteRecentProducts = async () => {
       output: process.stdout
     });
 
-    // Ask for number of days
-    const daysInput = await new Promise<string>((resolve) => {
-      rl.question('📅 How many days back should we delete products from? (e.g., 1 for last 24 hours, 7 for last week): ', (input) => {
+    // Ask for number of hours
+    const hoursInput = await new Promise<string>((resolve) => {
+      rl.question('⏰ How many hours back should we delete products from? (e.g., 8, 12, 15, 24, 30, 48): ', (input) => {
         resolve(input.trim());
       });
     });
 
-    const days = parseInt(daysInput, 10);
-    if (isNaN(days) || days <= 0) {
+    const hours = parseFloat(hoursInput);
+    if (isNaN(hours) || hours <= 0) {
       logger.error('❌ Invalid input. Please enter a positive number.');
       rl.close();
       await mongoose.connection.close();
       process.exit(1);
     }
 
-    // Calculate the cutoff date
+    // Calculate the cutoff date (current time minus specified hours)
     const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - days);
-    cutoffDate.setHours(0, 0, 0, 0); // Start of that day
+    cutoffDate.setTime(cutoffDate.getTime() - (hours * 60 * 60 * 1000));
 
-    logger.info(`\n📊 Looking for products created after: ${cutoffDate.toLocaleString()}\n`);
+    // Format hours display
+    const hoursDisplay = hours < 24 
+      ? `${hours} hour(s)` 
+      : hours === 24 
+        ? '24 hours (1 day)'
+        : `${hours} hours (${(hours / 24).toFixed(1)} days)`;
+
+    logger.info(`\n📊 Looking for products created after: ${cutoffDate.toLocaleString()}`);
+    logger.info(`⏰ Time period: Last ${hoursDisplay}\n`);
 
     // Find products created after the cutoff date
     const recentProducts = await Product.find({
@@ -69,7 +76,7 @@ const deleteRecentProducts = async () => {
       process.exit(0);
     }
 
-    logger.info(`📦 Found ${productCount} product(s) created in the last ${days} day(s):\n`);
+    logger.info(`📦 Found ${productCount} product(s) created in the last ${hoursDisplay}:\n`);
 
     // Show preview of products that will be deleted
     logger.info('📋 Products that will be deleted:');
@@ -109,7 +116,7 @@ const deleteRecentProducts = async () => {
     logger.info('='.repeat(60));
     logger.info('📊 Deletion Summary:');
     logger.info(`   ✅ Deleted: ${result.deletedCount} product(s)`);
-    logger.info(`   📅 Time period: Last ${days} day(s)`);
+    logger.info(`   ⏰ Time period: Last ${hoursDisplay}`);
     logger.info(`   📅 Cutoff date: ${cutoffDate.toLocaleString()}`);
     logger.info('='.repeat(60) + '\n');
 
