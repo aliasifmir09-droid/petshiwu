@@ -72,6 +72,11 @@ categorySchema.pre('save', async function (next) {
     this.slug = this.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
   }
 
+  // Normalize petType to slug format (replace spaces with hyphens) for consistency
+  if (this.isModified('petType') && this.petType && this.petType !== 'all') {
+    this.petType = this.petType.toLowerCase().trim().replace(/\s+/g, '-');
+  }
+
   // Calculate level based on parent category
   if (this.parentCategory) {
     try {

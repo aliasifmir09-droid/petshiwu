@@ -84,7 +84,9 @@ export const getCategories = async (req: Request, res: Response, next: NextFunct
     const query: any = { isActive: true };
 
     if (petType) {
-      query.petType = petType;
+      // Normalize petType and match both hyphenated and space-separated versions
+      const normalizedPetType = petType.toLowerCase().trim().replace(/\s+/g, '-');
+      query.petType = { $in: [normalizedPetType, normalizedPetType.replace(/-/g, ' ')] };
     }
 
     const categories = await Category.find(query)
@@ -236,7 +238,9 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
 export const getCategory = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const identifier = req.params.id;
-    const petType = req.query.petType ? String(req.query.petType).toLowerCase().trim() : null;
+    // Normalize petType to handle both "small-pet" (slug) and "small pet" (space) formats
+    const petTypeParam = req.query.petType ? String(req.query.petType).toLowerCase().trim() : null;
+    const petType = petTypeParam ? petTypeParam.replace(/\s+/g, '-') : null;
     
     // Try to get from cache
     const cacheKey = cacheKeys.category(`${identifier}-${petType || 'all'}`);
@@ -247,10 +251,12 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
     }
     
     // Build base query with petType filter if provided
+    // Match both hyphenated (slug) and space-separated versions for backward compatibility
     const buildQuery = (slugQuery: any) => {
       const query: any = { ...slugQuery, isActive: true };
       if (petType) {
-        query.petType = petType;
+        // Match both "small-pet" and "small pet" formats
+        query.petType = { $in: [petType, petType.replace(/-/g, ' ')] };
       }
       return query;
     };
@@ -261,7 +267,8 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
     if (mongoose.Types.ObjectId.isValid(identifier)) {
       const idQuery: any = { _id: identifier };
       if (petType) {
-        idQuery.petType = petType;
+        // Match both hyphenated and space-separated versions
+        idQuery.petType = { $in: [petType, petType.replace(/-/g, ' ')] };
       }
       category = await Category.findOne(idQuery)
         .populate({
@@ -300,7 +307,8 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
       if (!category) {
         const query: any = { slug: normalizedSlug };
         if (petType) {
-          query.petType = petType;
+          // Match both hyphenated and space-separated versions
+          query.petType = { $in: [petType, petType.replace(/-/g, ' ')] };
         }
         category = await populateParentChain(Category.findOne(query)).lean();
       }
@@ -515,6 +523,11 @@ export const createCategory = async (req: AuthRequest, res: Response, next: Next
         : 0;
     }
     
+    // Normalize petType to slug format before creating
+    if (req.body.petType && req.body.petType !== 'all') {
+      req.body.petType = String(req.body.petType).toLowerCase().trim().replace(/\s+/g, '-');
+    }
+    
     const category = await Category.create(req.body);
 
     // Clear category caches to ensure frontend sees the new category
@@ -546,6 +559,11 @@ export const updateCategory = async (req: AuthRequest, res: Response, next: Next
 
     // Store old petType before update (for cache clearing)
     const oldPetType = category.petType;
+    
+    // Normalize petType to slug format before updating
+    if (req.body.petType && req.body.petType !== 'all') {
+      req.body.petType = String(req.body.petType).toLowerCase().trim().replace(/\s+/g, '-');
+    }
     
     // Update fields
     Object.assign(category, req.body);

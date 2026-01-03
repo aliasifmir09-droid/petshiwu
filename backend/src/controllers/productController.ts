@@ -231,7 +231,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
       // Try to find existing category
       const query: any = {
         name: { $regex: new RegExp(`^${trimmedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
-        petType: petType.toLowerCase()
+        petType: petType.toLowerCase().trim().replace(/\s+/g, '-')
       };
       
       if (parentId) {
@@ -274,7 +274,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
         try {
           const newCategory = await Category.create({
             name: trimmedName,
-            petType: petType.toLowerCase(),
+            petType: petType.toLowerCase().trim().replace(/\s+/g, '-'),
             parentCategory: parentId,
             isActive: true,
             level: level,
@@ -350,7 +350,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
         }
         
         // Get pet type once for the entire category resolution
-        const petType = String(row.petType).toLowerCase().trim();
+        const petType = String(row.petType).toLowerCase().trim().replace(/\s+/g, '-');
         
         if (categoryPath.includes('>')) {
           // Hierarchical path detected
@@ -417,7 +417,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
             categoryId = foundCategory._id as mongoose.Types.ObjectId;
           } else {
             // It's a category name - find or create as root category
-            const petType = String(row.petType).toLowerCase().trim();
+            const petType = String(row.petType).toLowerCase().trim().replace(/\s+/g, '-');
             const createdId = await findOrCreateCategory(categoryPath, petType, null);
             categoryId = createdId;
           }
@@ -818,7 +818,7 @@ export const importProductsFromJSON = async (req: AuthRequest, res: Response, ne
       
       const query: any = {
         name: { $regex: new RegExp(`^${trimmedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
-        petType: petType.toLowerCase()
+        petType: petType.toLowerCase().trim().replace(/\s+/g, '-')
       };
       
       if (parentId) {
@@ -853,7 +853,7 @@ export const importProductsFromJSON = async (req: AuthRequest, res: Response, ne
         try {
           const newCategory = await Category.create({
             name: trimmedName,
-            petType: petType.toLowerCase(),
+            petType: petType.toLowerCase().trim().replace(/\s+/g, '-'),
             parentCategory: parentId,
             isActive: true,
             level: level,
@@ -1567,9 +1567,14 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       }
     }
 
-    // Filter by pet type - normalize to lowercase and trim for consistent matching
+    // Filter by pet type - normalize to handle both "small-pet" (slug) and "small pet" (space) formats
     if (req.query.petType) {
-      baseQuery.petType = String(req.query.petType).toLowerCase().trim();
+      const petTypeParam = String(req.query.petType).toLowerCase().trim();
+      // Normalize to hyphen format (slug format) - this is the standard
+      const normalizedPetType = petTypeParam.replace(/\s+/g, '-');
+      // Match both hyphenated (slug) and space-separated versions for backward compatibility
+      // This handles cases where categories/products might have "small pet" instead of "small-pet"
+      baseQuery.petType = { $in: [normalizedPetType, normalizedPetType.replace(/-/g, ' ')] };
     }
 
     // Filter by brand

@@ -203,6 +203,11 @@ productSchema.pre('save', function (next) {
   if (this.isModified('name') || !this.slug || this.slug.trim() === '') {
     this.slug = this.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
   }
+
+  // Normalize petType to slug format (replace spaces with hyphens) for consistency
+  if (this.isModified('petType') && this.petType) {
+    this.petType = this.petType.toLowerCase().trim().replace(/\s+/g, '-');
+  }
   
   // Always calculate total stock from variants (if variants exist)
   // This ensures totalStock and inStock are always in sync
