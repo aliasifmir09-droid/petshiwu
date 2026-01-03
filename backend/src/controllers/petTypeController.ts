@@ -53,6 +53,11 @@ export const getAllPetTypesAdmin = async (req: AuthRequest, res: Response, next:
       .sort({ order: 1, name: 1 }) // Sort by order, then name (consistent with frontend)
       .lean();
 
+    // DEBUG: Log all pet types found in database
+    const logger = (await import('../utils/logger')).default;
+    logger.info(`[getAllPetTypesAdmin] Found ${petTypes.length} pet types in database:`, 
+      petTypes.map(pt => ({ name: pt.name, slug: pt.slug, isActive: pt.isActive, order: pt.order })));
+
     // Normalize _id to string for all pet types
     const normalizedPetTypes = normalizePetTypes(petTypes);
 
@@ -61,6 +66,8 @@ export const getAllPetTypesAdmin = async (req: AuthRequest, res: Response, next:
       total: normalizedPetTypes.length,
       data: normalizedPetTypes
     };
+    
+    logger.info(`[getAllPetTypesAdmin] Returning ${normalizedPetTypes.length} pet types to admin`);
 
     // DO NOT CACHE - Admin endpoint must always return fresh data
     // This ensures immediate updates in admin dashboard
