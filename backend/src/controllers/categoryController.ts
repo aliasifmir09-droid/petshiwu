@@ -45,6 +45,9 @@ const clearCategoryCaches = async (petType?: string) => {
     // Clear all category list caches (for all petTypes)
     await cache.delPattern('categories:*');
     
+    // Clear admin category caches (CRITICAL: Admin dashboard needs immediate updates)
+    await cache.delPattern('categories:admin:*');
+    
     // Clear category tree caches
     await cache.delPattern('categoryTree:*');
     
@@ -58,7 +61,7 @@ const clearCategoryCaches = async (petType?: string) => {
     await cache.del(cacheKeys.categories());
     await cache.del(cacheKeys.categoryTree());
     
-    logger.debug('Category caches cleared');
+    logger.debug('Category caches cleared (including admin caches)');
   } catch (error: any) {
     logger.error('Error clearing category caches:', error.message);
     // Don't throw - cache clearing failure shouldn't break the operation
@@ -220,8 +223,8 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
       total: categories.length
     };
 
-    // Cache for 5 minutes (300 seconds)
-    await cache.set(cacheKey, response, 300);
+    // Cache for 30 seconds (admin dashboard needs faster updates)
+    await cache.set(cacheKey, response, 30);
 
     res.status(200).json(response);
   } catch (error) {
