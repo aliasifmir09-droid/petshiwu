@@ -348,14 +348,29 @@ const createRateLimiterStore = (windowMs?: number) => {
 };
 
 // Rate limiting for auth endpoints to prevent brute force attacks
+// SECURITY FIX: Increased limit to 15 attempts per 15 minutes to prevent legitimate users from being blocked
+// Still provides protection against brute force attacks while allowing for normal usage patterns
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Maximum 5 attempts per 15 minutes
-  message: 'Too many login attempts from this IP, please try again after 15 minutes.',
+  max: 15, // Maximum 15 attempts per 15 minutes (increased from 5)
+  message: {
+    error: 'Too many login attempts',
+    message: 'Too many login attempts from this IP. Please try again after 15 minutes.',
+    retryAfter: 15 * 60 // seconds
+  },
   skipSuccessfulRequests: true, // Don't count successful requests
   standardHeaders: true,
   legacyHeaders: false,
   store: createRateLimiterStore(15 * 60 * 1000), // Use Redis store if available, fallback to in-memory
+  // Custom handler to return JSON response
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      error: 'Too many login attempts',
+      message: 'Too many login attempts from this IP. Please try again after 15 minutes.',
+      retryAfter: 15 * 60 // seconds
+    });
+  }
 });
 
 // Apply rate limiters to both versioned and legacy routes
