@@ -60,48 +60,65 @@ const fixCategoryHierarchy = async () => {
       logger.info('⏳ Waiting for MongoDB connection...');
       let connectionReady = false;
       
-      await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          if (!connectionReady) {
-            reject(new Error('Connection timeout: MongoDB did not connect within 30 seconds. Please check your MONGODB_URI in .env file.'));
-          }
-        }, 30000);
-        
-        const checkConnection = () => {
-          if (mongoose.connection.readyState === 1) {
-            connectionReady = true;
-            clearTimeout(timeout);
-            mongoose.connection.removeListener('connected', checkConnection);
-            resolve();
-          }
-        };
-        
-        // Check immediately
-        if (mongoose.connection.readyState === 1) {
-          connectionReady = true;
-          clearTimeout(timeout);
-          resolve();
-        } else {
-          // Wait for connection event
-          mongoose.connection.once('connected', checkConnection);
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            if (!connectionReady) {
+              reject(new Error('Connection timeout: MongoDB did not connect within 30 seconds. Please check your MONGODB_URI in .env file.'));
+            }
+          }, 30000);
           
-          // Also poll every 100ms as fallback
-          const pollInterval = setInterval(() => {
+          const checkConnection = () => {
             if (mongoose.connection.readyState === 1) {
               connectionReady = true;
-              clearInterval(pollInterval);
               clearTimeout(timeout);
               mongoose.connection.removeListener('connected', checkConnection);
               resolve();
             }
-          }, 100);
+          };
           
-          // Clean up polling on timeout
-          setTimeout(() => {
-            clearInterval(pollInterval);
-          }, 30000);
-        }
-      });
+          // Check immediately
+          if (mongoose.connection.readyState === 1) {
+            connectionReady = true;
+            clearTimeout(timeout);
+            resolve();
+          } else {
+            // Wait for connection event
+            mongoose.connection.once('connected', checkConnection);
+            
+            // Also poll every 100ms as fallback
+            const pollInterval = setInterval(() => {
+              if (mongoose.connection.readyState === 1) {
+                connectionReady = true;
+                clearInterval(pollInterval);
+                clearTimeout(timeout);
+                mongoose.connection.removeListener('connected', checkConnection);
+                resolve();
+              }
+            }, 100);
+            
+            // Clean up polling on timeout
+            setTimeout(() => {
+              clearInterval(pollInterval);
+            }, 30000);
+          }
+        });
+      } catch (error: any) {
+        logger.error(`❌ Failed to connect to MongoDB: ${error.message}`);
+        logger.error('\n🔧 Please check:');
+        logger.error('1. MongoDB is running');
+        logger.error('2. MONGODB_URI in .env file is correct');
+        logger.error('3. Network connectivity to MongoDB server\n');
+        await mongoose.connection.close();
+        process.exit(1);
+      }
+    }
+    
+    // Verify connection is actually ready
+    if (mongoose.connection.readyState !== 1) {
+      logger.error('❌ MongoDB connection is not ready. Cannot proceed.');
+      await mongoose.connection.close();
+      process.exit(1);
     }
     
     logger.info('✅ Connected to MongoDB\n');
