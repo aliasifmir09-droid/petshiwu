@@ -26,6 +26,7 @@
     "format-product-descriptions": "ts-node src/utils/formatAllProductDescriptions.ts",
     "delete-all-products": "ts-node src/scripts/deleteAllProducts.ts",
     "delete-recent-products": "ts-node src/scripts/deleteRecentProducts.ts",
+    "fix-category-hierarchy": "ts-node src/scripts/fixCategoryHierarchy.ts",
     "fix-product-stock": "ts-node src/utils/fixProductStock.ts",
     "analyze-indexes": "ts-node src/utils/analyzeIndexUsage.ts",
     "test": "jest",
