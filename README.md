@@ -325,7 +325,7 @@ curl http://localhost:5000/api/products
 # Login
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@petshiwu.com","password":"admin123"}'
+  -d '{"email":"admin@petshiwu.com","password":"2581769As@"}'
 ```
 
 ### Test Credentials

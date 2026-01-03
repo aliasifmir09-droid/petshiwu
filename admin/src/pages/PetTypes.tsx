@@ -102,10 +102,11 @@ const PetTypes = () => {
 
   // Fetch pet types
   // CRITICAL: Set staleTime to 0 and refetchOnMount to ensure immediate updates after mutations
-  const { data: petTypesResponse, isLoading } = useQuery({
+  const { data: petTypesResponse, isLoading, refetch } = useQuery({
     queryKey: ['admin-pet-types'],
     queryFn: adminService.getAllPetTypesAdmin,
     refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window regains focus
     staleTime: 0, // Always consider data stale - refetch immediately when invalidated
     gcTime: 5 * 60 * 1000 // Keep in cache for 5 minutes for garbage collection
   });
@@ -170,9 +171,16 @@ const PetTypes = () => {
   });
 
   // Reorder pet types mutation
+  // CRITICAL: Explicitly refetch after reorder to ensure admin dashboard updates immediately
   const reorderMutation = useMutation({
     mutationFn: adminService.reorderPetTypes,
-    onSuccess: onMutationSuccess('Pet types reordered successfully!'),
+    onSuccess: async () => {
+      // Explicitly refetch the pet types query first to ensure immediate update
+      await refetch();
+      // Then run the standard success handler (invalidates and refetches all related queries including frontend)
+      const successHandler = onMutationSuccess('Pet types reordered successfully!');
+      await successHandler();
+    },
     onError: onMutationError()
   });
 

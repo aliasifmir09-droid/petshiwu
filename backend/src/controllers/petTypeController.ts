@@ -43,7 +43,7 @@ export const getPetTypes = async (req: Request, res: Response, next: NextFunctio
 // Get all pet types for admin (includes inactive)
 export const getAllPetTypesAdmin = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    // PERFORMANCE FIX: Cache admin pet types for 30 seconds (admin dashboard needs faster updates)
+    // PERFORMANCE FIX: Cache admin pet types for 5 seconds (admin dashboard needs very fast updates)
     const { cache } = await import('../utils/cache');
     const cacheKey = 'pet-types:admin:all';
     const cached = await cache.get(cacheKey);
@@ -66,8 +66,8 @@ export const getAllPetTypesAdmin = async (req: AuthRequest, res: Response, next:
       data: normalizedPetTypes
     };
 
-    // Cache for 30 seconds (admin dashboard needs faster updates)
-    await cache.set(cacheKey, response, 30);
+    // Cache for 5 seconds (admin dashboard needs very fast updates - reduced from 30s)
+    await cache.set(cacheKey, response, 5);
 
     res.status(200).json(response);
   } catch (error) {
@@ -149,10 +149,12 @@ export const updatePetType = async (req: AuthRequest, res: Response, next: NextF
     await petType.save();
 
     // PERFORMANCE FIX: Clear pet type caches to ensure frontend sees updated pet type immediately
-    // This is critical for Dashboard sync - without this, Dashboard shows stale data
+    // CRITICAL: Explicitly clear admin cache key to ensure admin dashboard updates immediately
     const { cache } = await import('../utils/cache');
     try {
-      // Clear pet types cache patterns
+      // Explicitly clear the admin cache key first (most important for dashboard)
+      await cache.del('pet-types:admin:all');
+      // Clear pet types cache patterns (for frontend and other caches)
       await cache.delPattern('pet-types:*');
       await cache.delPattern('petTypes:*');
     } catch (cacheError: any) {
@@ -250,9 +252,12 @@ export const reorderPetTypes = async (req: AuthRequest, res: Response, next: Nex
     await Promise.all(updates);
 
     // PERFORMANCE FIX: Clear any pet type caches to ensure frontend sees updated order
+    // CRITICAL: Explicitly clear admin cache key to ensure admin dashboard updates immediately
     const { cache } = await import('../utils/cache');
     try {
-      // Clear pet types cache patterns
+      // Explicitly clear the admin cache key first (most important for dashboard)
+      await cache.del('pet-types:admin:all');
+      // Clear pet types cache patterns (for frontend and other caches)
       await cache.delPattern('pet-types:*');
       await cache.delPattern('petTypes:*');
     } catch (cacheError: any) {
