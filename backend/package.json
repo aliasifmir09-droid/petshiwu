@@ -29,6 +29,8 @@
     "fix-category-hierarchy": "ts-node src/scripts/fixCategoryHierarchy.ts",
     "check-pet-types-db": "ts-node src/scripts/checkPetTypesInDB.ts",
     "add-other-animals": "ts-node src/scripts/addOtherAnimalsPetType.ts",
+    "check-small-pet-products": "ts-node src/scripts/checkSmallPetProducts.ts",
+    "fix-small-pet-products": "ts-node src/scripts/fixSmallPetProducts.ts",
     "fix-product-stock": "ts-node src/utils/fixProductStock.ts",
     "analyze-indexes": "ts-node src/utils/analyzeIndexUsage.ts",
     "test": "jest",

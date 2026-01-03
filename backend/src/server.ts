@@ -451,9 +451,10 @@ const uploadLimiter = rateLimit({
 });
 
 // Rate limiting for auth status check (/me) - more lenient since it's called frequently
+// Increased limit to prevent logout issues during frequent page refreshes
 const authStatusLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 30, // Maximum 30 requests per minute per IP (allows frequent checks during development)
+  max: 100, // Maximum 100 requests per minute per IP (increased from 30 to handle frequent refreshes)
   message: 'Too many auth status checks from this IP, please try again in a moment.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -544,7 +545,14 @@ app.use('/api/upload', uploadLimiter);
 
 // Apply general rate limiting to all other API routes (after specific limiters)
 // Note: GET endpoints for pet-types, categories, and products are handled above
-app.use('/api', apiLimiter);
+// Exclude /me endpoint from general limiter since it has its own specific limiter
+app.use('/api', (req, res, next) => {
+  // Skip general API limiter for /me endpoint (has its own authStatusLimiter)
+  if (req.path === '/v1/auth/me' || req.path === '/auth/me') {
+    return next();
+  }
+  return apiLimiter(req, res, next);
+});
 
 // Check database connection before processing API requests (except health check)
 app.use('/api', (req, res, next) => {

@@ -75,7 +75,14 @@ categorySchema.pre('save', async function (next) {
   // Calculate level based on parent category
   if (this.parentCategory) {
     try {
-      const CategoryModel = mongoose.model<ICategory>('Category');
+      // Safely get the Category model - check if it exists first
+      let CategoryModel;
+      if (mongoose.models.Category) {
+        CategoryModel = mongoose.models.Category;
+      } else {
+        // If model doesn't exist yet, use this.constructor (the model instance)
+        CategoryModel = this.constructor as any;
+      }
       const parent = await CategoryModel.findById(this.parentCategory);
       
       if (!parent) {

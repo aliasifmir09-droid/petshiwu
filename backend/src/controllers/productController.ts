@@ -1567,9 +1567,9 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       }
     }
 
-    // Filter by pet type
+    // Filter by pet type - normalize to lowercase and trim for consistent matching
     if (req.query.petType) {
-      baseQuery.petType = req.query.petType;
+      baseQuery.petType = String(req.query.petType).toLowerCase().trim();
     }
 
     // Filter by brand
