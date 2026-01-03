@@ -46,6 +46,23 @@ const checkPetTypes = async () => {
         logger.info(`   Found similar: ${similar.map(s => `${s.name} (${s.slug})`).join(', ')}`);
       }
     }
+    
+    // Check for "Other Animals" which might be the 7th pet type
+    const otherAnimals = await PetType.findOne({ 
+      $or: [
+        { name: 'Other Animals' },
+        { name: 'Other Animal' },
+        { slug: 'other-animals' },
+        { slug: 'other-animal' }
+      ]
+    }).lean();
+    
+    if (otherAnimals) {
+      logger.info(`\n✅ Found "Other Animals": ${JSON.stringify(otherAnimals, null, 2)}`);
+    } else {
+      logger.warn(`\n⚠️  "Other Animals" NOT FOUND in database!`);
+      logger.info('   This might be the missing 7th pet type.');
+    }
 
     await mongoose.connection.close();
     logger.info('\n✅ Check complete');
