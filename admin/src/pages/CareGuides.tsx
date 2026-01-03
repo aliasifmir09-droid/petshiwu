@@ -65,6 +65,7 @@ const CareGuides = () => {
   }>({ isOpen: false });
 
   // Fetch care guides
+  // CRITICAL: Set staleTime to 0 and refetchOnMount to ensure immediate updates after mutations
   const { data: guidesData, isLoading } = useQuery({
     queryKey: ['care-guides', 'admin', page, searchQuery, petTypeFilter, categoryFilter, difficultyFilter, isPublishedFilter],
     queryFn: () => adminService.getCareGuides({
@@ -76,21 +77,28 @@ const CareGuides = () => {
       difficulty: difficultyFilter || undefined,
       isPublished: isPublishedFilter ? isPublishedFilter === 'true' : undefined
     }),
-    retry: false
+    retry: false,
+    staleTime: 0, // Always consider data stale - refetch immediately when invalidated
+    refetchOnMount: true, // Always refetch when component mounts
+    gcTime: 5 * 60 * 1000 // Keep in cache for 5 minutes for garbage collection
   });
 
   // Fetch pet types for filter
   const { data: petTypesData } = useQuery({
     queryKey: ['pet-types'],
     queryFn: adminService.getPetTypes,
-    retry: false
+    retry: false,
+    staleTime: 0, // Always consider data stale - refetch immediately when invalidated
+    refetchOnMount: true // Always refetch when component mounts
   });
 
   // Fetch care guide categories
   const { data: categoriesData } = useQuery({
     queryKey: ['care-guide-categories', petTypeFilter],
     queryFn: () => adminService.getCareGuideCategories(petTypeFilter || undefined),
-    retry: false
+    retry: false,
+    staleTime: 0, // Always consider data stale - refetch immediately when invalidated
+    refetchOnMount: true // Always refetch when component mounts
   });
 
   // Auto-refresh hook - automatically refreshes queries after mutations

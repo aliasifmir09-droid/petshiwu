@@ -62,6 +62,7 @@ const FAQs = () => {
   }>({ isOpen: false });
 
   // Fetch FAQs
+  // CRITICAL: Set staleTime to 0 and refetchOnMount to ensure immediate updates after mutations
   const { data: faqsData, isLoading } = useQuery({
     queryKey: ['faqs', 'admin', page, searchQuery, categoryFilter, isPublishedFilter],
     queryFn: () => adminService.getFAQs({
@@ -71,7 +72,10 @@ const FAQs = () => {
       category: categoryFilter || undefined,
       isPublished: isPublishedFilter ? isPublishedFilter === 'true' : undefined
     }),
-    retry: false
+    retry: false,
+    staleTime: 0, // Always consider data stale - refetch immediately when invalidated
+    refetchOnMount: true, // Always refetch when component mounts
+    gcTime: 5 * 60 * 1000 // Keep in cache for 5 minutes for garbage collection
   });
 
   // Auto-refresh hook - automatically refreshes queries after mutations

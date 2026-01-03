@@ -62,12 +62,16 @@ const Customers = () => {
   const { toast, showToast, hideToast } = useToast();
 
   // Fetch customers
+  // CRITICAL: Set staleTime to 0 and refetchOnMount to ensure immediate updates after mutations
   const { data: customersData, isLoading } = useQuery({
     queryKey: ['customers'],
     queryFn: async () => {
       const response = await adminService.getCustomers();
       return response;
-    }
+    },
+    staleTime: 0, // Always consider data stale - refetch immediately when invalidated
+    refetchOnMount: true, // Always refetch when component mounts
+    gcTime: 5 * 60 * 1000 // Keep in cache for 5 minutes for garbage collection
   });
 
   // Fetch selected customer's orders
@@ -186,6 +190,7 @@ const Customers = () => {
   
   const customerIdForQuery = getValidCustomerId(selectedCustomer);
   
+  // CRITICAL: Set staleTime to 0 and refetchOnMount to ensure immediate updates after mutations
   const { data: customerOrders, isLoading: ordersLoading, error: ordersError } = useQuery({
     queryKey: ['customer-orders', customerIdForQuery],
     queryFn: async () => {
@@ -206,7 +211,9 @@ const Customers = () => {
     },
     enabled: !!selectedCustomer && !!customerIdForQuery,
     retry: false, // Don't retry on 404 errors
-    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+    staleTime: 0, // Always consider data stale - refetch immediately when invalidated
+    refetchOnMount: true, // Always refetch when component mounts
+    gcTime: 5 * 60 * 1000 // Keep in cache for 5 minutes for garbage collection
   });
 
   const customers = customersData?.data || [];

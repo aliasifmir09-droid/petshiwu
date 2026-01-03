@@ -101,11 +101,13 @@ const PetTypes = () => {
   }>({ isOpen: false });
 
   // Fetch pet types
+  // CRITICAL: Set staleTime to 0 and refetchOnMount to ensure immediate updates after mutations
   const { data: petTypesResponse, isLoading } = useQuery({
     queryKey: ['admin-pet-types'],
     queryFn: adminService.getAllPetTypesAdmin,
-    refetchOnMount: true, // Always refetch to ensure we get all pet types including Fish
-    staleTime: 0 // Don't cache - always fetch fresh data
+    refetchOnMount: true, // Always refetch when component mounts
+    staleTime: 0, // Always consider data stale - refetch immediately when invalidated
+    gcTime: 5 * 60 * 1000 // Keep in cache for 5 minutes for garbage collection
   });
 
   // Sort pet types by order, then by name as fallback

@@ -22,6 +22,7 @@ const Orders = () => {
   const [refundReason, setRefundReason] = useState<string>('');
   const [pendingStatusChange, setPendingStatusChange] = useState<{ orderId: string; status: string } | null>(null);
 
+  // CRITICAL: Set staleTime to 0 and refetchOnMount to ensure immediate updates after mutations
   const { data: ordersData, isLoading } = useQuery({
     queryKey: ['orders', page, statusFilter],
     queryFn: () => adminService.getAllOrders({ 
@@ -29,8 +30,9 @@ const Orders = () => {
       limit: 20, 
       status: statusFilter || undefined 
     }),
-    staleTime: 10 * 1000, // Cache for 10 seconds (reduced for faster updates)
-    gcTime: 2 * 60 * 1000, // Keep in cache for 2 minutes
+    staleTime: 0, // Always consider data stale - refetch immediately when invalidated
+    refetchOnMount: true, // Always refetch when component mounts
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes for garbage collection
     refetchInterval: 15000, // Poll every 15 seconds for new orders (fallback if SSE fails)
     refetchOnWindowFocus: true, // Refetch when user returns to tab
   });

@@ -39,6 +39,7 @@ const Products = () => {
     isBulk?: boolean;
   }>({ isOpen: false });
 
+  // CRITICAL: Set staleTime to 0 and refetchOnMount to ensure immediate updates after mutations
   const { data: productsData, isLoading, refetch } = useQuery({
     queryKey: ['products', page, debouncedSearch, categoryFilter, petTypeFilter, stockFilter],
     queryFn: () => adminService.getProducts({ 
@@ -49,8 +50,9 @@ const Products = () => {
       petType: petTypeFilter || undefined,
       inStock: stockFilter === 'in-stock' ? true : stockFilter === 'out-of-stock' ? false : undefined
     }),
-    staleTime: 30 * 1000, // Cache for 30 seconds (reduced from 0 to improve performance)
-    gcTime: 2 * 60 * 1000, // Cache for 2 minutes
+    staleTime: 0, // Always consider data stale - refetch immediately when invalidated
+    refetchOnMount: true, // Always refetch when component mounts
+    gcTime: 5 * 60 * 1000 // Keep in cache for 5 minutes for garbage collection
   });
 
   // Get out-of-stock products for notification bar - REDUCED LIMIT for performance

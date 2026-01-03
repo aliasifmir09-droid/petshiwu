@@ -68,9 +68,13 @@ const EmailTemplates = () => {
     isActive: true
   });
 
+  // CRITICAL: Set staleTime to 0 and refetchOnMount to ensure immediate updates after mutations
   const { data: templatesData, isLoading, refetch } = useQuery({
     queryKey: ['emailTemplates'],
-    queryFn: adminService.getEmailTemplates
+    queryFn: adminService.getEmailTemplates,
+    staleTime: 0, // Always consider data stale - refetch immediately when invalidated
+    refetchOnMount: true, // Always refetch when component mounts
+    gcTime: 5 * 60 * 1000 // Keep in cache for 5 minutes for garbage collection
   });
 
   // Handle both response formats: { data: [...] } or [...]
