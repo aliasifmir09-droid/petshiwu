@@ -164,6 +164,16 @@ const PetTypes = () => {
         exact: false,
         type: 'active' // Only refetch active queries
       });
+      
+      // CRITICAL: Notify frontend via BroadcastChannel for immediate update
+      try {
+        const channel = new BroadcastChannel('pet-types-updates');
+        channel.postMessage('pet-types-updated');
+        channel.close();
+      } catch (e) {
+        // BroadcastChannel not supported, continue anyway
+      }
+      
       // Then run the standard success handler (invalidates and refetches all related queries including frontend)
       const successHandler = onMutationSuccess('Pet type created successfully!', handleCloseModal);
       await successHandler();
@@ -183,6 +193,16 @@ const PetTypes = () => {
         exact: false,
         type: 'active'
       });
+      
+      // CRITICAL: Notify frontend via BroadcastChannel for immediate update
+      try {
+        const channel = new BroadcastChannel('pet-types-updates');
+        channel.postMessage('pet-types-updated');
+        channel.close();
+      } catch (e) {
+        // BroadcastChannel not supported, continue anyway
+      }
+      
       // Then run the standard success handler
       const successHandler = onMutationSuccess('Pet type updated successfully!', handleCloseModal);
       await successHandler();
@@ -202,6 +222,16 @@ const PetTypes = () => {
         exact: false,
         type: 'active'
       });
+      
+      // CRITICAL: Notify frontend via BroadcastChannel for immediate update
+      try {
+        const channel = new BroadcastChannel('pet-types-updates');
+        channel.postMessage('pet-types-updated');
+        channel.close();
+      } catch (e) {
+        // BroadcastChannel not supported, continue anyway
+      }
+      
       // Then run the standard success handler
       const successHandler = onMutationSuccess('Pet type deleted successfully!', () => {
         setDeleteConfirm({ isOpen: false });
@@ -225,6 +255,16 @@ const PetTypes = () => {
         exact: false,
         type: 'active' // Only refetch active queries
       });
+      
+      // CRITICAL: Notify frontend via BroadcastChannel for immediate update
+      try {
+        const channel = new BroadcastChannel('pet-types-updates');
+        channel.postMessage('pet-types-updated');
+        channel.close();
+      } catch (e) {
+        // BroadcastChannel not supported, continue anyway
+      }
+      
       // Then run the standard success handler (invalidates and refetches all related queries including frontend)
       const successHandler = onMutationSuccess('Pet types reordered successfully!');
       await successHandler();

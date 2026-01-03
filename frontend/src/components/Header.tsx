@@ -39,8 +39,8 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // PERFORMANCE FIX: Optimized cache times - pet types are static data
-  const { data: petTypesResponse, isError: petTypesError } = useQuery({
+  // CRITICAL: Pet types need to update within 10-30 seconds when admin makes changes
+  const { data: petTypesResponse, isError: petTypesError, refetch: refetchPetTypes } = useQuery({
     queryKey: ['pet-types'],
     queryFn: async () => {
       const response = await api.get('/pet-types');
@@ -51,10 +51,27 @@ const Header = () => {
       return response.data;
     },
     retry: 1, // Reduce retries to prevent rate limiting
-    staleTime: 30 * 60 * 1000, // 30 minutes - static data (pet types don't change often)
-    gcTime: 60 * 60 * 1000, // 1 hour - keep in cache longer for static data
-    refetchOnWindowFocus: false, // Don't refetch on window focus to reduce requests
+    staleTime: 20 * 1000, // 20 seconds - changes appear within 10-30 seconds
+    gcTime: 5 * 60 * 1000, // 5 minutes - keep in cache for garbage collection
+    refetchOnWindowFocus: true, // Refetch on window focus to get latest data
   });
+
+  // Listen for pet type updates from admin dashboard using BroadcastChannel
+  useEffect(() => {
+    // Use BroadcastChannel for efficient cross-tab communication
+    const channel = new BroadcastChannel('pet-types-updates');
+    
+    channel.onmessage = (event) => {
+      if (event.data === 'pet-types-updated') {
+        // Admin made changes, refetch pet types immediately
+        refetchPetTypes();
+      }
+    };
+
+    return () => {
+      channel.close();
+    };
+  }, [refetchPetTypes]);
 
   // PERFORMANCE FIX: Optimized cache times - categories are semi-static
   const { data: categoriesResponse, isError: categoriesError, refetch: refetchCategories } = useQuery({

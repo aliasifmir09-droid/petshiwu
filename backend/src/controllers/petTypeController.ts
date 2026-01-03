@@ -43,23 +43,10 @@ export const getPetTypes = async (req: Request, res: Response, next: NextFunctio
 // Get all pet types for admin (includes inactive)
 export const getAllPetTypesAdmin = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    // CRITICAL FIX: Disable caching for admin endpoint to ensure real-time data
-    // Admin users need immediate updates when they make changes
-    // The slight performance hit is worth the accuracy for admin operations
-    const { cache } = await import('../utils/cache');
-    const cacheKey = 'pet-types:admin:all';
+    // CRITICAL FIX: Completely disable caching for admin endpoint
+    // Admin dashboard needs real-time data - always fetch fresh from database
+    // This ensures admin sees changes immediately after making them
     
-    // Check cache but allow bypass with ?nocache=true query parameter
-    const bypassCache = req.query.nocache === 'true';
-    if (!bypassCache) {
-      const cached = await cache.get(cacheKey);
-      if (cached) {
-        const logger = (await import('../utils/logger')).default;
-        logger.debug(`Cache HIT: ${cacheKey}`);
-        return res.status(200).json(cached);
-      }
-    }
-
     // CRITICAL: Sort by order first, then name (consistent with frontend)
     // This ensures consistent ordering across frontend and admin
     const petTypes = await PetType.find()
@@ -75,11 +62,8 @@ export const getAllPetTypesAdmin = async (req: AuthRequest, res: Response, next:
       data: normalizedPetTypes
     };
 
-    // Only cache if not bypassing (for performance, but admin needs real-time data)
-    // Reduced to 1 second to minimize stale data issues
-    if (!bypassCache) {
-      await cache.set(cacheKey, response, 1); // 1 second cache for admin
-    }
+    // DO NOT CACHE - Admin endpoint must always return fresh data
+    // This ensures immediate updates in admin dashboard
 
     res.status(200).json(response);
   } catch (error) {
