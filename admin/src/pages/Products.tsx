@@ -70,6 +70,14 @@ const Products = () => {
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
+  // Fetch pet types for filter
+  const { data: petTypesData } = useQuery({
+    queryKey: ['pet-types'],
+    queryFn: adminService.getPetTypes,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+  });
+
   // Auto-refresh hook for bulk operations
   const { onMutationSuccess, onMutationError } = useAutoRefresh(
     ['products', 'productStats', ['products', 'out-of-stock'], ['products', 'out-of-stock-notification']],
@@ -490,9 +498,10 @@ const Products = () => {
           <Dropdown
             options={[
               { value: '', label: 'All Pet Types' },
-              { value: 'dog', label: 'Dog' },
-              { value: 'cat', label: 'Cat' },
-              { value: 'other-animals', label: 'Other Animals' }
+              ...(petTypesData?.data || []).map((pt: { _id: string; slug: string; name: string }) => ({
+                value: pt.slug,
+                label: pt.name
+              }))
             ]}
             value={petTypeFilter}
             onChange={(value) => {

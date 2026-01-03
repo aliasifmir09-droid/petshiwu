@@ -91,15 +91,18 @@ const Dropdown = ({
       const updatePosition = () => {
         if (dropdownRef.current) {
           const rect = dropdownRef.current.getBoundingClientRect();
+          // Use getBoundingClientRect() which gives viewport coordinates
+          // Since we're using fixed positioning, we don't need to add scroll offsets
           setMenuPosition({
-            top: rect.bottom + window.scrollY + 8,
-            left: rect.left + window.scrollX,
+            top: rect.bottom + 8, // 8px gap below the button
+            left: rect.left,
             width: rect.width
           });
         }
       };
 
       updatePosition();
+      // Listen to scroll events on window and all scrollable parents
       window.addEventListener('scroll', updatePosition, true);
       window.addEventListener('resize', updatePosition);
 
