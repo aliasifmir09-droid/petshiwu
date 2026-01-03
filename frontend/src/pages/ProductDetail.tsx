@@ -548,7 +548,17 @@ const ProductDetail = () => {
       });
       
       // Add all categories in the chain to breadcrumbs (in order: Supplies -> Toys -> Plush Toys)
+      // Skip categories that have the same name as the pet type to avoid duplication
       categoryChain.forEach((cat) => {
+        // Skip if category name matches pet type name (case-insensitive)
+        const petTypeDisplay = product.petType === 'other-animals' 
+          ? 'Other Animals' 
+          : product.petType ? product.petType.charAt(0).toUpperCase() + product.petType.slice(1) : '';
+        
+        if (petTypeDisplay && cat.name.toLowerCase() === petTypeDisplay.toLowerCase()) {
+          return; // Skip this category to avoid duplication
+        }
+        
         const categoryPath = `/category/${cat.slug}`;
         const categoryPathWithPetType = product.petType && product.petType !== 'other-animals'
           ? `${categoryPath}?petType=${product.petType}`
