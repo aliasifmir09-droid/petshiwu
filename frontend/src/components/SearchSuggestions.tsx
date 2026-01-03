@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { productService } from '@/services/products';
 import { Search, Package, FolderTree } from 'lucide-react';
 import { normalizeImageUrl } from '@/utils/imageUtils';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 interface SearchSuggestionsProps {
   query: string;
@@ -148,7 +149,7 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
                       <FolderTree size={20} className="text-gray-400 group-hover:text-blue-600" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600 truncate">
-                          {category.name}
+                          {decodeHtmlEntities(category.name)}
                         </p>
                         {category.petType && (
                           <p className="text-xs text-gray-500 mt-1 capitalize">

@@ -19,6 +19,7 @@ import { addToRecentlyViewed } from '@/utils/recentlyViewed';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import { safeError } from '@/utils/safeLogger';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 // Lazy load heavy dependencies
 const RecentlyViewed = lazy(() => import('@/components/RecentlyViewed'));
@@ -771,7 +772,7 @@ const ProductDetail = () => {
         {/* Product Info */}
         <div>
           <p className="text-sm text-gray-600 mb-2">{product.brand}</p>
-          <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
+          <h1 className="text-3xl font-bold mb-4">{decodeHtmlEntities(product.name)}</h1>
 
           {/* Rating */}
           <div className="flex items-center gap-4 mb-6">
@@ -1135,7 +1136,7 @@ const ProductDetail = () => {
                     to={`/category/${product.category.slug}${product.petType && product.category.petType !== 'all' ? `?petType=${product.category.petType}` : ''}`}
                     className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium hover:bg-primary-200 transition-colors cursor-pointer inline-block"
                   >
-                    {typeof product.category === 'object' && product.category?.name ? product.category.name : ''}
+                    {typeof product.category === 'object' && product.category?.name ? decodeHtmlEntities(product.category.name) : ''}
                   </Link>
                 )
               )}

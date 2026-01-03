@@ -12,6 +12,7 @@ import { ChevronRight, ChevronLeft, Star } from 'lucide-react';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import { normalizeImageUrl, generateSrcSet, getOptimizedImageUrl } from '@/utils/imageUtils';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -234,13 +235,13 @@ const Home = () => {
                             src={normalizeImageUrl(category.image, { width: 170, height: 170, format: 'auto' })} 
                             srcSet={generateSrcSet(category.image, [128, 170, 256])}
                             sizes="(max-width: 640px) 128px, 170px"
-                            alt={category.name}
+                            alt={decodeHtmlEntities(category.name)}
                             width={170}
                             height={170}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => {
                               const target = e.currentTarget;
-                              const svg = `<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#6b7280" text-anchor="middle" dy=".3em">${category.name}</text></svg>`;
+                              const svg = `<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#6b7280" text-anchor="middle" dy=".3em">${decodeHtmlEntities(category.name)}</text></svg>`;
                               target.src = `data:image/svg+xml;base64,${btoa(svg)}`;
                             }}
                             loading="lazy"
@@ -253,7 +254,7 @@ const Home = () => {
                       </div>
                       {/* Label with enhanced styling */}
                       <p className="text-base lg:text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300 text-center px-2 max-w-[140px] lg:max-w-[160px]">
-                        {category.name}
+                        {decodeHtmlEntities(category.name)}
                       </p>
                     </div>
                   </div>
@@ -345,7 +346,7 @@ const Home = () => {
                   </div>
                   {/* Label - Compact on Mobile */}
                   <p className="text-[10px] font-bold text-gray-800 text-center leading-tight max-w-[90px]">
-                    {category.name}
+                    {decodeHtmlEntities(category.name)}
                   </p>
                 </div>
               ))}

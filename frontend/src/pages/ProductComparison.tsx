@@ -9,6 +9,7 @@ import { X, Plus, CheckCircle, Star, DollarSign, Package, Award, Search } from '
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import EmptyState from '@/components/EmptyState';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const ProductComparison = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -481,7 +482,7 @@ const ProductComparison = () => {
               <td className="p-4 font-semibold">Category</td>
               {products.map((product) => (
                 <td key={product._id} className="p-4 text-center">
-                  {typeof product.category === 'object' ? product.category.name : 'N/A'}
+                  {typeof product.category === 'object' ? decodeHtmlEntities(product.category.name) : 'N/A'}
                 </td>
               ))}
             </tr>

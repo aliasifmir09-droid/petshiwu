@@ -11,6 +11,7 @@ import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import { useSEO } from '@/hooks/useSEO';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const Category = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -96,7 +97,7 @@ const Category = () => {
       
       while (parent && typeof parent === 'object') {
         ancestors.push({
-          name: parent.name,
+          name: decodeHtmlEntities(parent.name),
           slug: parent.slug
         });
         // Check if parent has a parent (grandparent)
@@ -111,7 +112,7 @@ const Category = () => {
       
       // Add current category
       categoryChain.push({
-        name: category.name,
+        name: decodeHtmlEntities(category.name),
         slug: category.slug
       });
       
@@ -123,7 +124,7 @@ const Category = () => {
           : categoryPath;
         
         crumbs.push({
-          label: cat.name,
+          label: decodeHtmlEntities(cat.name),
           path: categoryPathWithPetType
         });
       });
@@ -159,16 +160,18 @@ const Category = () => {
   }, [products?.data]);
 
   // Generate SEO metadata
+  const categoryName = category ? decodeHtmlEntities(category.name) : '';
+  const categoryDescription = category ? decodeHtmlEntities(category.description || '') : '';
   const seoData = useSEO({
     title: category
       ? (petTypeDisplay
-        ? `${category.name} for ${petTypeDisplay}`
-        : category.name)
+        ? `${categoryName} for ${petTypeDisplay}`
+        : categoryName)
       : 'Category',
     description: category
       ? (petTypeDisplay
-        ? `Shop ${category.name} for ${petTypeDisplay} at petshiwu. Quality products, great prices, fast shipping.`
-        : `Shop ${category.name} at petshiwu. Quality pet supplies, great prices, fast shipping.`)
+        ? `Shop ${categoryName} for ${petTypeDisplay} at petshiwu. Quality products, great prices, fast shipping.`
+        : `Shop ${categoryName} at petshiwu. Quality pet supplies, great prices, fast shipping.`)
       : 'Shop pet supplies at petshiwu.',
     keywords: [
       category?.name || '',
@@ -287,9 +290,9 @@ const Category = () => {
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">{category.name}</h1>
+        <h1 className="text-3xl font-bold mb-2">{decodeHtmlEntities(category.name)}</h1>
         {category.description && (
-          <p className="text-gray-600 mb-4">{category.description}</p>
+          <p className="text-gray-600 mb-4">{decodeHtmlEntities(category.description)}</p>
         )}
         {products && (
           <p className="text-gray-600">
