@@ -23,11 +23,7 @@ const ProductSchema = ({
 }: ProductSchemaProps) => {
   // Extract product data
   const productName = product.name || '';
-  const productDescription = product.description 
-    ? (typeof product.description === 'string' 
-        ? product.description 
-        : product.description.toString())
-    : '';
+  const productDescription = product.description || '';
   
   // Get product images - normalize URLs
   const normalizeImageUrl = (image: any): string => {
@@ -91,16 +87,6 @@ const ProductSchema = ({
     }
   };
 
-  // Add SKU if available
-  if (product.sku) {
-    (schema as any).sku = product.sku;
-  }
-
-  // Add MPN if available
-  if (product.mpn) {
-    (schema as any).mpn = product.mpn;
-  }
-
   // Add category if available
   if (categoryName) {
     (schema as any).category = categoryName;
@@ -117,10 +103,8 @@ const ProductSchema = ({
     };
   }
 
-  // Add GTIN if available
-  if (product.gtin) {
-    (schema as any).gtin = product.gtin;
-  }
+  // Note: SKU, MPN, and GTIN are not in the Product type definition
+  // If needed in the future, add them to the Product interface in types/index.ts
 
   return (
     <Helmet>

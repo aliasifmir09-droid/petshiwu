@@ -17,7 +17,6 @@ import Toast from '@/components/Toast';
 import { trackProductView, trackAddToWishlist, trackProductComparison, trackShare } from '@/utils/analytics';
 import { addToRecentlyViewed } from '@/utils/recentlyViewed';
 import SEO from '@/components/SEO';
-import StructuredData from '@/components/StructuredData';
 import ProductSchema from '@/components/ProductSchema';
 import { safeError } from '@/utils/safeLogger';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
