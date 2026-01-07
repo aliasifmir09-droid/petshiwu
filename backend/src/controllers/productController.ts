@@ -1843,10 +1843,27 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
         const category = categoryHierarchyMap.get(categoryId);
         if (!category) return null;
         
+        // Validate slug - ensure it's a valid string
+        const validSlug = category.slug && 
+                          typeof category.slug === 'string' && 
+                          category.slug.trim() !== '' &&
+                          category.slug.toLowerCase() !== 'undefined' &&
+                          category.slug.toLowerCase() !== 'null'
+                          ? category.slug.trim()
+                          : null;
+        
+        // If slug is invalid, try to get parent category instead (skip this level)
+        if (!validSlug) {
+          if (category.parentCategory && depth < 2) {
+            return buildCategoryHierarchy(category.parentCategory, depth);
+          }
+          return null;
+        }
+        
         const result: CategoryHierarchy = {
           _id: category._id,
           name: category.name,
-          slug: category.slug,
+          slug: validSlug,
           petType: category.petType
         };
         

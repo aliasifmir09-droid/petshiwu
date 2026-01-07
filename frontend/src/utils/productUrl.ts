@@ -37,9 +37,13 @@ export const generateProductUrl = (product: Product): string => {
         buildPathRecursive(current.parentCategory, visited);
       }
       
-      // Then add current category slug
-      if (current.slug) {
-        path.push(current.slug);
+      // Then add current category slug - validate it's a valid string
+      if (current.slug && 
+          typeof current.slug === 'string' && 
+          current.slug.trim() !== '' &&
+          current.slug.toLowerCase() !== 'undefined' &&
+          current.slug.toLowerCase() !== 'null') {
+        path.push(current.slug.trim());
       }
     };
     
@@ -49,12 +53,21 @@ export const generateProductUrl = (product: Product): string => {
 
   const categoryPath = buildCategoryPath(category);
   
-  // If we have category path, use SEO-friendly URL
+  // Filter out any invalid path segments (shouldn't happen, but safety check)
+  const validCategoryPath = categoryPath.filter(
+    segment => segment && 
+               typeof segment === 'string' && 
+               segment.trim() !== '' &&
+               segment.toLowerCase() !== 'undefined' &&
+               segment.toLowerCase() !== 'null'
+  );
+  
+  // If we have valid category path, use SEO-friendly URL
   // Even if we only have one category level, still use the new format
-  if (categoryPath.length > 0) {
+  if (validCategoryPath.length > 0) {
     // Use petType if available, otherwise fallback to 'products'
     const validPetType = petType || 'products';
-    return `/${validPetType}/${categoryPath.join('/')}/${productSlug}`;
+    return `/${validPetType}/${validCategoryPath.join('/')}/${productSlug}`;
   }
   
   // Fallback to simple URL if category path couldn't be built
