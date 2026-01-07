@@ -55,7 +55,7 @@ export const useSEO = (options: UseSEOOptions = {}) => {
   );
 
   const seoTitle = useMemo(
-    () => (title ? generateTitle(title) : 'petshiwu - Everything Your Pet Needs'),
+    () => (title ? generateTitle(title) : 'PetShiwu | Premium Pet Food, Toys & Accessories in USA'),
     [title]
   );
 
