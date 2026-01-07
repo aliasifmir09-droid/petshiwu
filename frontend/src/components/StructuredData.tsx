@@ -33,9 +33,36 @@ interface OrganizationSchema {
   };
 }
 
+interface LocalBusinessSchema {
+  name: string;
+  url: string;
+  logo?: string;
+  description?: string;
+  telephone: string;
+  address: {
+    streetAddress: string;
+    addressLocality: string;
+    addressRegion: string;
+    postalCode: string;
+    addressCountry: string;
+  };
+  geo?: {
+    latitude: number;
+    longitude: number;
+  };
+  openingHoursSpecification?: Array<{
+    dayOfWeek: string[];
+    opens: string;
+    closes: string;
+  }>;
+  priceRange?: string;
+  servesCuisine?: string;
+  areaServed?: string | string[];
+}
+
 interface StructuredDataProps {
-  type: 'product' | 'organization' | 'website' | 'breadcrumb' | 'itemList' | 'collectionPage' | 'faq' | 'review';
-  data: ProductSchema | OrganizationSchema | any;
+  type: 'product' | 'organization' | 'website' | 'breadcrumb' | 'itemList' | 'collectionPage' | 'faq' | 'review' | 'localBusiness';
+  data: ProductSchema | OrganizationSchema | LocalBusinessSchema | any;
 }
 
 const StructuredData = ({ type, data }: StructuredDataProps) => {
@@ -165,6 +192,62 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
         '@type': 'Product',
         ...data
       };
+      break;
+
+    case 'localBusiness':
+      const business = data as LocalBusinessSchema;
+      schema = {
+        '@context': 'https://schema.org/',
+        '@type': 'LocalBusiness',
+        name: business.name,
+        url: business.url,
+        description: business.description || 'Premium Pet Food, Toys & Accessories',
+        telephone: business.telephone,
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: business.address.streetAddress,
+          addressLocality: business.address.addressLocality,
+          addressRegion: business.address.addressRegion,
+          postalCode: business.address.postalCode,
+          addressCountry: business.address.addressCountry
+        }
+      };
+
+      if (business.logo) {
+        (schema as any).logo = business.logo;
+      }
+
+      if (business.geo) {
+        (schema as any).geo = {
+          '@type': 'GeoCoordinates',
+          latitude: business.geo.latitude,
+          longitude: business.geo.longitude
+        };
+      }
+
+      if (business.openingHoursSpecification && business.openingHoursSpecification.length > 0) {
+        (schema as any).openingHoursSpecification = business.openingHoursSpecification.map(hours => ({
+          '@type': 'OpeningHoursSpecification',
+          dayOfWeek: hours.dayOfWeek,
+          opens: hours.opens,
+          closes: hours.closes
+        }));
+      }
+
+      if (business.priceRange) {
+        (schema as any).priceRange = business.priceRange;
+      }
+
+      if (business.areaServed) {
+        (schema as any).areaServed = business.areaServed;
+      }
+
+      // Add sameAs for social media
+      (schema as any).sameAs = [
+        'https://www.facebook.com/petshiwu',
+        'https://www.instagram.com/petshiwu',
+        'https://twitter.com/petshiwu'
+      ];
       break;
 
     default:

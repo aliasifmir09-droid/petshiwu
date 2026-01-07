@@ -18,6 +18,7 @@ import { trackProductView, trackAddToWishlist, trackProductComparison, trackShar
 import { addToRecentlyViewed } from '@/utils/recentlyViewed';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
+import ProductSchema from '@/components/ProductSchema';
 import { safeError } from '@/utils/safeLogger';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
@@ -628,20 +629,9 @@ const ProductDetail = () => {
         rating={product.averageRating}
         ratingCount={product.totalReviews}
       />
-      <StructuredData
-        type="product"
-        data={{
-          name: product.name,
-          description: productDescription,
-          image: product.images?.map(img => normalizeImageUrl(img)) || [productImage],
-          brand: product.brand || 'petshiwu',
-          price: price,
-          currency: 'USD',
-          availability: selectedVariantData?.stock && selectedVariantData.stock > 0 ? 'InStock' : 'OutOfStock',
-          rating: product.averageRating,
-          ratingCount: product.totalReviews,
-          url: productUrl
-        }}
+      <ProductSchema
+        product={product}
+        selectedVariant={selectedVariantData}
       />
       <div className="container mx-auto px-4 lg:px-8 py-8">
       {/* Breadcrumb */}

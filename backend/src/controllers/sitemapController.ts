@@ -8,6 +8,18 @@ import PetType from '../models/PetType';
 import logger from '../utils/logger';
 
 /**
+ * Escape XML special characters
+ */
+const escapeXml = (unsafe: string): string => {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+};
+
+/**
  * Generate XML sitemap dynamically
  * GET /api/sitemap.xml
  */
@@ -102,6 +114,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
     });
 
     // Individual product pages - need category info for SEO-friendly URLs
+    // Also fetch images for image sitemap
     const productsWithCategory = await Product.find({ 
       isActive: true,
       $or: [
@@ -109,7 +122,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
         { deletedAt: { $exists: false } }
       ]
     })
-      .select('slug updatedAt petType category')
+      .select('slug updatedAt petType category images name')
       .populate('category', 'slug parentCategory')
       .sort({ updatedAt: -1 })
       .limit(10000)
@@ -165,6 +178,26 @@ export const generateSitemap = async (req: Request, res: Response) => {
       xml += `    <lastmod>${lastmod}</lastmod>\n`;
       xml += '    <changefreq>weekly</changefreq>\n';
       xml += '    <priority>0.8</priority>\n';
+      
+      // Add product images to sitemap for better SEO
+      if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+        // Include up to 5 images per product (Google's limit)
+        const imagesToInclude = product.images.slice(0, 5);
+        imagesToInclude.forEach((image: any) => {
+          if (image) {
+            const imageUrl = typeof image === 'string' ? image : (image.url || image);
+            if (imageUrl && imageUrl.trim() !== '') {
+              xml += '    <image:image>\n';
+              xml += `      <image:loc>${imageUrl}</image:loc>\n`;
+              if (product.name) {
+                xml += `      <image:title>${escapeXml(product.name)}</image:title>\n`;
+              }
+              xml += '    </image:image>\n';
+            }
+          }
+        });
+      }
+      
       xml += '  </url>\n';
       
       // Also include legacy /products/slug URL for backward compatibility
