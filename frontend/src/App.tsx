@@ -43,6 +43,12 @@ const CareGuideDetail = lazy(() => import('./pages/CareGuideDetail'));
 const FAQ = lazy(() => import('./pages/FAQ'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const Forbidden = lazy(() => import('./pages/Forbidden'));
+// SEO Landing Pages
+const SensitiveStomachDogs = lazy(() => import('./pages/seo/SensitiveStomachDogs'));
+const PickyEaters = lazy(() => import('./pages/seo/PickyEaters'));
+const AggressiveChewers = lazy(() => import('./pages/seo/AggressiveChewers'));
+// SEO Blog Posts
+const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
 
 // Optimize React Query with better defaults
 // PERFORMANCE FIX: Optimized cache times based on data volatility
@@ -254,6 +260,12 @@ function App() {
                           <Route path="/addresses" element={<AddressManagement />} />
                           <Route path="/stock-alerts" element={<StockAlerts />} />
                           <Route path="/search" element={<AdvancedSearch />} />
+                          {/* SEO Landing Pages */}
+                          <Route path="/best-dog-food-sensitive-stomach-diarrhea" element={<SensitiveStomachDogs />} />
+                          <Route path="/high-protein-dog-food-picky-eaters" element={<PickyEaters />} />
+                          <Route path="/durable-dog-toys-aggressive-chewers" element={<AggressiveChewers />} />
+                          {/* SEO Blog Posts */}
+                          <Route path="/learning/best-dog-foods-sensitive-stomachs" element={<BestFoodSensitiveStomach />} />
                           <Route path="/403" element={<Forbidden />} />
                           <Route path="/404" element={<NotFound />} />
                           {/* Less specific routes - pet type pages */}

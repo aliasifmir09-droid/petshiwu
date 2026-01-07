@@ -13,6 +13,7 @@ import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import { useSEO } from '@/hooks/useSEO';
+import HealthBehavioralFilters from '@/components/HealthBehavioralFilters';
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -88,20 +89,32 @@ const Products = () => {
   }, [category, navigate, searchParams, setSearchParams]);
 
   // Build search query - if vitamins/supplements filters are active, combine them with OR logic
+  // Also include health/behavioral filter terms
   const buildSearchQuery = () => {
+    const searchTerms: string[] = [];
+    
     if (vitaminsFilter && supplementsFilter) {
-      // Use OR logic: search for products containing "vitamins" OR "supplements"
-      return 'vitamins supplements';
+      searchTerms.push('vitamins', 'supplements');
     } else if (vitaminsFilter) {
-      return 'vitamins';
+      searchTerms.push('vitamins');
     } else if (supplementsFilter) {
-      return 'supplements';
+      searchTerms.push('supplements');
     }
-    return search || undefined;
+    
+    // Add health/behavioral filter terms
+    if (healthBehavioralFilters.length > 0) {
+      searchTerms.push(...healthBehavioralFilters);
+    }
+    
+    if (search) {
+      searchTerms.push(search);
+    }
+    
+    return searchTerms.length > 0 ? searchTerms.join(' ') : undefined;
   };
 
   const { data: products, isLoading, error, refetch } = useQuery({
-    queryKey: ['products', page, petType, category, search, sort, featured, minRating, brand, inStock, vitaminsFilter, supplementsFilter],
+    queryKey: ['products', page, petType, category, search, sort, featured, minRating, brand, inStock, vitaminsFilter, supplementsFilter, healthBehavioralFilters],
     queryFn: () =>
       productService.getProducts({
         page,
@@ -377,6 +390,23 @@ const Products = () => {
         <aside className={`${showFilters ? 'block' : 'hidden'} lg:block w-full lg:w-64 flex-shrink-0`}>
           <div className="bg-white rounded-lg shadow p-6 sticky top-24">
             <h2 className="font-semibold text-lg mb-4">Filters</h2>
+
+            {/* Health & Behavioral Filters */}
+            <div className="mb-6">
+              <HealthBehavioralFilters
+                selectedFilters={healthBehavioralFilters}
+                onFilterChange={(filters) => {
+                  const newParams = new URLSearchParams(searchParams);
+                  if (filters.length > 0) {
+                    newParams.set('filters', filters.join(','));
+                  } else {
+                    newParams.delete('filters');
+                  }
+                  newParams.set('page', '1');
+                  setSearchParams(newParams);
+                }}
+              />
+            </div>
 
             {/* Pet Type */}
             <div className="mb-6">
