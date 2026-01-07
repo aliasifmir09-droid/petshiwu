@@ -105,8 +105,8 @@ const Home = () => {
         type="organization"
         data={{
           name: 'petshiwu',
-          url: 'https://petshiwu.com',
-          logo: 'https://petshiwu.com/logo.png',
+          url: 'https://www.petshiwu.com',
+          logo: 'https://www.petshiwu.com/logo.png',
           description: 'Everything Your Pet Needs - Quality Pet Supplies Online',
           contactPoint: {
             telephone: '+1-626-342-0419',

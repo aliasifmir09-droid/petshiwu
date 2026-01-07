@@ -129,14 +129,33 @@ export const generateSitemap = async (req: Request, res: Response) => {
         const categorySlug = category.slug || '';
         const petTypeSlug = product.petType;
         
+        // Validate slugs - filter out undefined, null, or empty strings
+        const isValidSlug = (slug: string) => {
+          return slug && 
+                 typeof slug === 'string' && 
+                 slug.trim() !== '' &&
+                 slug.toLowerCase() !== 'undefined' &&
+                 slug.toLowerCase() !== 'null';
+        };
+        
         // Build category path if parent exists
-        let categoryPath = categorySlug;
-        if (category.parentCategory && typeof category.parentCategory === 'object') {
-          const parent = category.parentCategory as any;
-          categoryPath = `${parent.slug}/${categorySlug}`;
+        let categoryPath = '';
+        if (isValidSlug(categorySlug)) {
+          if (category.parentCategory && typeof category.parentCategory === 'object') {
+            const parent = category.parentCategory as any;
+            const parentSlug = parent.slug || '';
+            if (isValidSlug(parentSlug)) {
+              categoryPath = `${parentSlug}/${categorySlug}`;
+            } else {
+              categoryPath = categorySlug;
+            }
+          } else {
+            categoryPath = categorySlug;
+          }
         }
         
-        if (categoryPath && petTypeSlug) {
+        // Only use SEO-friendly URL if we have valid category path and pet type
+        if (categoryPath && isValidSlug(petTypeSlug) && isValidSlug(product.slug || '')) {
           productUrl = `${baseUrl}/${petTypeSlug}/${categoryPath}/${product.slug}`;
         }
       }

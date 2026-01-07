@@ -604,7 +604,7 @@ const ProductDetail = () => {
   ].filter(Boolean).join(', ');
 
   // Build product URL
-  const productUrl = `https://petshiwu.com${generateProductUrl(product)}`;
+  const productUrl = `https://www.petshiwu.com${generateProductUrl(product)}`;
   
   // Get product image for OG
   const productImage = product.images && product.images.length > 0

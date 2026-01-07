@@ -14,7 +14,7 @@ interface BreadcrumbsProps {
 const Breadcrumbs = ({ items }: BreadcrumbsProps) => {
   // Generate structured data for breadcrumbs
   const breadcrumbSchema = {
-    '@context': 'https://schema.org',
+    '@context': 'https://schema.org/',
     '@type': 'BreadcrumbList',
     itemListElement: items.map((item, index) => ({
       '@type': 'ListItem',

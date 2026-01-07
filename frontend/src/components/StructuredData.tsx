@@ -87,7 +87,7 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
     case 'organization':
       const org = data as OrganizationSchema;
       schema = {
-        '@context': 'https://schema.org',
+        '@context': 'https://schema.org/',
         '@type': 'Organization',
         name: org.name,
         url: org.url,
@@ -118,14 +118,14 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
 
     case 'website':
       schema = {
-        '@context': 'https://schema.org',
+        '@context': 'https://schema.org/',
         '@type': 'WebSite',
         name: 'petshiwu',
-        url: 'https://petshiwu.com',
+        url: 'https://www.petshiwu.com',
         description: 'Everything Your Pet Needs - Quality Pet Supplies Online',
         potentialAction: {
           '@type': 'SearchAction',
-          target: 'https://petshiwu.com/products?search={search_term_string}',
+          target: 'https://www.petshiwu.com/products?search={search_term_string}',
           'query-input': 'required name=search_term_string'
         }
       };
@@ -137,7 +137,7 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
 
     case 'itemList':
       schema = {
-        '@context': 'https://schema.org',
+        '@context': 'https://schema.org/',
         '@type': 'ItemList',
         ...data
       };
@@ -145,7 +145,7 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
 
     case 'collectionPage':
       schema = {
-        '@context': 'https://schema.org',
+        '@context': 'https://schema.org/',
         '@type': 'CollectionPage',
         ...data
       };
@@ -153,7 +153,7 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
 
     case 'faq':
       schema = {
-        '@context': 'https://schema.org',
+        '@context': 'https://schema.org/',
         '@type': 'FAQPage',
         mainEntity: Array.isArray(data) ? data : data.mainEntity || []
       };
@@ -161,7 +161,7 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
 
     case 'review':
       schema = {
-        '@context': 'https://schema.org',
+        '@context': 'https://schema.org/',
         '@type': 'Product',
         ...data
       };

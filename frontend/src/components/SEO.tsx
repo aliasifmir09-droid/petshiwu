@@ -25,7 +25,7 @@ const SEO = ({
   title = 'petshiwu - Everything Your Pet Needs | Premium Pet Food & Supplies',
   description = 'Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, birds, fish, reptiles, and small pets. Quality products, fast shipping, great prices. Free shipping on orders over $75.',
   keywords = 'pet supplies, dog food, cat food, pet toys, pet accessories, pet care, online pet store, premium pet food, dog treats, cat treats, pet bedding, pet grooming, pet health, pet nutrition, pet shop online, buy pet food online, pet supplies near me',
-  image = 'https://petshiwu.com/logo.png',
+  image = 'https://www.petshiwu.com/logo.png',
   url = 'https://www.petshiwu.com',
   type = 'website',
   price,

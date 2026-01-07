@@ -66,7 +66,7 @@ export const generateBreadcrumbSchema = (
   items: BreadcrumbItem[]
 ): object => {
   return {
-    '@context': 'https://schema.org',
+    '@context': 'https://schema.org/',
     '@type': 'BreadcrumbList',
     itemListElement: items.map((item, index) => ({
       '@type': 'ListItem',
@@ -86,7 +86,7 @@ export const generateItemListSchema = (
   description?: string
 ): object => {
   return {
-    '@context': 'https://schema.org',
+    '@context': 'https://schema.org/',
     '@type': 'ItemList',
     name,
     description,
@@ -111,7 +111,7 @@ export const generateCollectionPageSchema = (
   items: Array<{ name: string; url: string }>
 ): object => {
   return {
-    '@context': 'https://schema.org',
+    '@context': 'https://schema.org/',
     '@type': 'CollectionPage',
     name,
     description,
@@ -139,7 +139,7 @@ export interface FAQItem {
 
 export const generateFAQSchema = (faqs: FAQItem[]): object => {
   return {
-    '@context': 'https://schema.org',
+    '@context': 'https://schema.org/',
     '@type': 'FAQPage',
     mainEntity: faqs.map((faq) => ({
       '@type': 'Question',
@@ -166,7 +166,7 @@ export const generateReviewSchema = (
   reviewCount?: number
 ): object => {
   const schema: any = {
-    '@context': 'https://schema.org',
+    '@context': 'https://schema.org/',
     '@type': 'Product',
     aggregateRating: {
       '@type': 'AggregateRating',
@@ -301,7 +301,7 @@ export const generateOGImage = (image?: string): string => {
  */
 export const generateOrganizationSchema = (): object => {
   return {
-    '@context': 'https://schema.org',
+    '@context': 'https://schema.org/',
     '@type': 'Organization',
     name: 'petshiwu',
     url: BASE_URL,
