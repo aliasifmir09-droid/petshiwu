@@ -33,6 +33,7 @@ const Products = () => {
   const inStock = searchParams.get('inStock') || '';
   const vitaminsFilter = searchParams.get('vitaminsFilter') === 'true';
   const supplementsFilter = searchParams.get('supplementsFilter') === 'true';
+  const healthBehavioralFilters = searchParams.get('filters')?.split(',').filter(Boolean) || [];
 
   // Scroll to top immediately when navigating to this page (pathname change)
   useEffect(() => {

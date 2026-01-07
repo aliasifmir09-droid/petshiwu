@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/products';
@@ -200,9 +200,9 @@ const SEOLandingPage = ({
                   <ProductCard key={product._id} product={product} />
                 ))}
               </div>
-              {products.pagination && products.pagination.totalPages > 1 && (
+              {products.pagination && products.pagination.pages > 1 && (
                 <div className="flex justify-center gap-2 mt-8">
-                  {Array.from({ length: products.pagination.totalPages }, (_, i) => i + 1).map((pageNum) => (
+                  {Array.from({ length: products.pagination.pages }, (_, i) => i + 1).map((pageNum) => (
                     <Link
                       key={pageNum}
                       to={`?page=${pageNum}`}
