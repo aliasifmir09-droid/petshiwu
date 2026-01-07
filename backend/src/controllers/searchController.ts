@@ -37,15 +37,63 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
       ]
     };
 
-    // Search query - Use text index for faster search
+    // Search query - Use AND logic for better relevance (all terms must be present)
     // Text index exists on: name, description, brand, tags (see Product model)
     if (q && typeof q === 'string') {
       const searchText = q.trim();
       if (searchText.length >= 1) {
-        // Use $text search for 2+ characters (requires text index - already exists in Product model)
-        // For single character or when text search fails, use regex for better matching
+        // Split search text into terms
+        const searchTerms = searchText.split(/\s+/).filter(term => term.length > 0);
+        
         if (searchText.length >= 2) {
-          query.$text = { $search: searchText };
+          if (searchTerms.length > 1) {
+            // Multiple terms: Use AND logic - all terms must be present
+            // This ensures we only show relevant products, not all products
+            const escapedTerms = searchTerms.map(term => 
+              term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+            );
+            
+            // Build AND conditions - all terms must appear in name OR description
+            const andConditions = escapedTerms.map(term => ({
+              $or: [
+                { name: { $regex: term, $options: 'i' } },
+                { description: { $regex: term, $options: 'i' } },
+                { brand: { $regex: term, $options: 'i' } },
+                { tags: { $in: [new RegExp(term, 'i')] } }
+              ]
+            }));
+            
+            // Also try exact match in product name (highest priority)
+            const exactNameRegex = new RegExp(
+              searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 
+              'i'
+            );
+            
+            query = {
+              isActive: true,
+              $and: [
+                {
+                  $or: [
+                    { deletedAt: null },
+                    { deletedAt: { $exists: false } }
+                  ]
+                },
+                {
+                  $or: [
+                    // Exact name match (highest priority)
+                    { name: exactNameRegex },
+                    // All terms must be present (AND logic) - combine all AND conditions
+                    {
+                      $and: andConditions
+                    }
+                  ]
+                }
+              ]
+            };
+          } else {
+            // Single term: use text search for better performance
+            query.$text = { $search: searchText };
+          }
         } else {
           // For single character, use regex search for better matching
           const searchRegex = new RegExp(searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
@@ -69,8 +117,6 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
             ]
           };
         }
-        // Note: $text can be combined with other query conditions
-        // Text search automatically searches name, description, brand, tags
       }
     }
 

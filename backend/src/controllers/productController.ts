@@ -1635,8 +1635,14 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       const searchTerms = searchTerm.split(/\s+/).filter(term => term.length > 0);
       
       if (searchTerms.length > 1) {
-        // Multiple terms: search for products containing ANY of the terms (OR logic)
-        const searchConditions = searchTerms.map(term => ({
+        // Multiple terms: Use AND logic - ALL terms must be present for better relevance
+        // This ensures we only show relevant products, not all products
+        const escapedTerms = searchTerms.map(term => 
+          term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        );
+        
+        // Build AND conditions - each term must appear somewhere (name, description, brand, or tags)
+        const andConditions = escapedTerms.map(term => ({
           $or: [
             { name: { $regex: term, $options: 'i' } },
             { description: { $regex: term, $options: 'i' } },
@@ -1645,11 +1651,24 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
           ]
         }));
         
+        // Also try exact match in product name (highest priority)
+        const exactNameRegex = new RegExp(
+          searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 
+          'i'
+        );
+        
         query = {
           $and: [
             baseQuery,
             {
-              $or: searchConditions
+              $or: [
+                // Exact name match (highest priority)
+                { name: exactNameRegex },
+                // All terms must be present (AND logic) - combine all AND conditions
+                {
+                  $and: andConditions
+                }
+              ]
             }
           ]
         };
