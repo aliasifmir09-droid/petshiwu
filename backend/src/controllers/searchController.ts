@@ -29,7 +29,7 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
     const skip = (pageNum - 1) * limitNum;
 
     // Build query
-    const query: any = {
+    let query: any = {
       isActive: true,
       $or: [
         { deletedAt: null },
