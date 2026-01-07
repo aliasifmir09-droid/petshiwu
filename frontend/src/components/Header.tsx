@@ -425,7 +425,7 @@ const Header = () => {
                   setShowSuggestions(true);
                 }}
                 onFocus={() => {
-                  if (searchQuery.length >= 2) {
+                  if (searchQuery.length >= 1) {
                     setShowSuggestions(true);
                   }
                 }}

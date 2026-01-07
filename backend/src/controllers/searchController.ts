@@ -41,10 +41,34 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
     // Text index exists on: name, description, brand, tags (see Product model)
     if (q && typeof q === 'string') {
       const searchText = q.trim();
-      if (searchText.length >= 2) {
-        // Use $text search (requires text index - already exists in Product model)
-        // Text search is 5-10x faster than regex
-        query.$text = { $search: searchText };
+      if (searchText.length >= 1) {
+        // Use $text search for 2+ characters (requires text index - already exists in Product model)
+        // For single character or when text search fails, use regex for better matching
+        if (searchText.length >= 2) {
+          query.$text = { $search: searchText };
+        } else {
+          // For single character, use regex search for better matching
+          const searchRegex = new RegExp(searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+          query = {
+            isActive: true,
+            $and: [
+              {
+                $or: [
+                  { deletedAt: null },
+                  { deletedAt: { $exists: false } }
+                ]
+              },
+              {
+                $or: [
+                  { name: searchRegex },
+                  { description: searchRegex },
+                  { brand: searchRegex },
+                  { tags: { $in: [searchRegex] } }
+                ]
+              }
+            ]
+          };
+        }
         // Note: $text can be combined with other query conditions
         // Text search automatically searches name, description, brand, tags
       }
@@ -204,7 +228,7 @@ export const searchAutocomplete = async (req: Request, res: Response, next: Next
     const { q } = req.query;
     const limit = parseInt(req.query.limit as string) || 10;
 
-    if (!q || typeof q !== 'string' || q.length < 2) {
+    if (!q || typeof q !== 'string' || q.trim().length < 1) {
       return res.status(200).json({
         success: true,
         data: {
@@ -232,19 +256,25 @@ export const searchAutocomplete = async (req: Request, res: Response, next: Next
         ]
       };
 
+      // Initialize products array
+      products = [];
+      
       try {
-        // Try $text search first (requires text index)
-        const textSearchQuery = {
-          ...baseQuery,
-          $text: { $search: searchText }
-        };
+        // Try $text search first (requires text index) - only for 2+ characters
+        if (searchText.length >= 2) {
+          const textSearchQuery = {
+            ...baseQuery,
+            $text: { $search: searchText }
+          };
+          
+          products = await Product.find(textSearchQuery)
+            .select('name slug brand images basePrice')
+            .limit(limit)
+            .lean();
+        }
         
-        products = await Product.find(textSearchQuery)
-          .select('name slug brand images basePrice')
-          .limit(limit)
-          .lean();
-        
-        // If text search returns no results, fallback to regex search
+        // If text search returns no results or query is too short, use regex search
+        // Regex search works better for single characters and partial matches in descriptions
         if (products.length === 0) {
           const regexSearchQuery = {
             isActive: true,

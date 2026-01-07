@@ -21,11 +21,11 @@ interface SearchSuggestionsProps {
 const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestionsProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Fetch suggestions when query is at least 2 characters
+  // Fetch suggestions when query is at least 1 character
   const { data: suggestions, isLoading } = useQuery({
     queryKey: ['search-suggestions', query],
     queryFn: () => productService.getSearchSuggestions(query),
-    enabled: isOpen && query.length >= 2,
+    enabled: isOpen && query.length >= 1,
     staleTime: 30 * 1000,
     gcTime: 2 * 60 * 1000,
   });
@@ -58,7 +58,7 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
     }
   }, [isOpen, onClose]);
 
-  if (!isOpen || query.length < 2) {
+  if (!isOpen || query.length < 1) {
     return null;
   }
 
