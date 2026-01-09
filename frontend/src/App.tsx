@@ -41,6 +41,7 @@ const BlogDetail = lazy(() => import('./pages/BlogDetail'));
 const CareGuides = lazy(() => import('./pages/CareGuides'));
 const CareGuideDetail = lazy(() => import('./pages/CareGuideDetail'));
 const FAQ = lazy(() => import('./pages/FAQ'));
+const About = lazy(() => import('./pages/About'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const Forbidden = lazy(() => import('./pages/Forbidden'));
 // SEO Landing Pages
@@ -241,6 +242,7 @@ function App() {
                           <Route path="/care-guides" element={<CareGuides />} />
                           <Route path="/care-guides/:slug" element={<CareGuideDetail />} />
                           <Route path="/faq" element={<FAQ />} />
+                          <Route path="/about" element={<About />} />
                           <Route path="/cart" element={<Cart />} />
                           <Route path="/checkout" element={<Checkout />} />
                           <Route path="/login" element={<Login />} />
