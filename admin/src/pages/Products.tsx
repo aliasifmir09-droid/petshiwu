@@ -28,6 +28,9 @@ const Products = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [petTypeFilter, setPetTypeFilter] = useState('');
   const [stockFilter, setStockFilter] = useState('');
+  const [brandFilter, setBrandFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [featuredFilter, setFeaturedFilter] = useState('');
   const [dismissedNotification, setDismissedNotification] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [showBulkModal, setShowBulkModal] = useState(false);
@@ -41,14 +44,17 @@ const Products = () => {
 
   // CRITICAL: Set staleTime to 0 and refetchOnMount to ensure immediate updates after mutations
   const { data: productsData, isLoading, refetch } = useQuery({
-    queryKey: ['products', page, debouncedSearch, categoryFilter, petTypeFilter, stockFilter],
+    queryKey: ['products', page, debouncedSearch, categoryFilter, petTypeFilter, stockFilter, brandFilter, statusFilter, featuredFilter],
     queryFn: () => adminService.getProducts({ 
       page, 
       limit: 20, 
       search: debouncedSearch || undefined,
       category: categoryFilter || undefined,
       petType: petTypeFilter || undefined,
-      inStock: stockFilter === 'in-stock' ? true : stockFilter === 'out-of-stock' ? false : undefined
+      brand: brandFilter || undefined,
+      inStock: stockFilter === 'in-stock' ? true : stockFilter === 'out-of-stock' ? false : undefined,
+      isActive: statusFilter === 'active' ? true : statusFilter === 'inactive' ? false : undefined,
+      featured: featuredFilter === 'featured' ? true : featuredFilter === 'not-featured' ? false : undefined
     }),
     staleTime: 0, // Always consider data stale - refetch immediately when invalidated
     refetchOnMount: true, // Always refetch when component mounts
@@ -76,6 +82,17 @@ const Products = () => {
     queryFn: adminService.getPetTypes,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+  });
+
+  // Fetch unique brands for filter
+  const { data: brands } = useQuery({
+    queryKey: ['brands', petTypeFilter, categoryFilter],
+    queryFn: () => adminService.getUniqueBrands(
+      categoryFilter || undefined,
+      petTypeFilter || undefined
+    ),
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (brands don't change often)
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
   });
 
   // Auto-refresh hook for bulk operations
@@ -427,16 +444,17 @@ const Products = () => {
           <Filter size={20} className="text-gray-600" />
           <h3 className="font-semibold">Filters & Search</h3>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="relative">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <div className="relative lg:col-span-2">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
-              placeholder="Search products..."
+              placeholder="Search products by name, brand, description..."
               value={searchQuery || ''}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 setShowSuggestions(true);
+                setPage(1); // Reset to first page on search
               }}
               onFocus={() => {
                 if (searchQuery.length >= 2) {
@@ -452,9 +470,34 @@ const Products = () => {
               onSelect={(query) => {
                 setSearchQuery(query);
                 setShowSuggestions(false);
+                setPage(1); // Reset to first page on search
               }}
             />
           </div>
+          <Dropdown
+            options={[
+              { value: '', label: 'All Pet Types' },
+              ...(petTypesData?.data || []).map((pt: { _id: string; slug: string; name: string }) => ({
+                value: pt.slug,
+                label: pt.name
+              }))
+            ]}
+            value={petTypeFilter}
+            onChange={(value) => {
+              setPetTypeFilter(value);
+              setPage(1); // Reset to first page on filter change
+              // Clear category and brand filters when pet type changes
+              if (value) {
+                const selectedCat = categories?.find((cat: any) => cat._id === categoryFilter);
+                if (selectedCat && selectedCat.petType !== value) {
+                  setCategoryFilter('');
+                }
+                setBrandFilter('');
+              }
+            }}
+            icon={<Layers size={18} />}
+            size="md"
+          />
           <Dropdown
             options={[
               { value: '', label: 'All Categories' },
@@ -484,6 +527,7 @@ const Products = () => {
             value={categoryFilter}
             onChange={(value) => {
               setCategoryFilter(value);
+              setPage(1); // Reset to first page on filter change
               // If category is selected, optionally auto-set pet type if not already set
               if (value && !petTypeFilter) {
                 const selectedCat = categories?.find((cat: any) => cat._id === value);
@@ -491,30 +535,28 @@ const Products = () => {
                   setPetTypeFilter(selectedCat.petType);
                 }
               }
+              // Clear brand filter when category changes
+              setBrandFilter('');
             }}
             icon={<FolderTree size={18} />}
             size="md"
           />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <Dropdown
             options={[
-              { value: '', label: 'All Pet Types' },
-              ...(petTypesData?.data || []).map((pt: { _id: string; slug: string; name: string }) => ({
-                value: pt.slug,
-                label: pt.name
-              }))
+              { value: '', label: 'All Brands' },
+              ...((brands || []).map((brand: string) => ({
+                value: brand,
+                label: brand
+              })))
             ]}
-            value={petTypeFilter}
+            value={brandFilter}
             onChange={(value) => {
-              setPetTypeFilter(value);
-              // Clear category filter if selected category doesn't match new pet type
-              if (value && categoryFilter) {
-                const selectedCat = categories?.find((cat: any) => cat._id === categoryFilter);
-                if (selectedCat && selectedCat.petType !== value) {
-                  setCategoryFilter('');
-                }
-              }
+              setBrandFilter(value);
+              setPage(1); // Reset to first page on filter change
             }}
-            icon={<Layers size={18} />}
+            icon={<Package size={18} />}
             size="md"
           />
           <Dropdown
@@ -524,10 +566,59 @@ const Products = () => {
               { value: 'out-of-stock', label: 'Out of Stock' }
             ]}
             value={stockFilter}
-            onChange={setStockFilter}
+            onChange={(value) => {
+              setStockFilter(value);
+              setPage(1); // Reset to first page on filter change
+            }}
             icon={<Package size={18} />}
             size="md"
           />
+          <Dropdown
+            options={[
+              { value: '', label: 'All Status' },
+              { value: 'active', label: 'Active' },
+              { value: 'inactive', label: 'Inactive' }
+            ]}
+            value={statusFilter}
+            onChange={(value) => {
+              setStatusFilter(value);
+              setPage(1); // Reset to first page on filter change
+            }}
+            icon={<Settings size={18} />}
+            size="md"
+          />
+          <Dropdown
+            options={[
+              { value: '', label: 'All Featured' },
+              { value: 'featured', label: 'Featured' },
+              { value: 'not-featured', label: 'Not Featured' }
+            ]}
+            value={featuredFilter}
+            onChange={(value) => {
+              setFeaturedFilter(value);
+              setPage(1); // Reset to first page on filter change
+            }}
+            icon={<Settings size={18} />}
+            size="md"
+          />
+          {(searchQuery || categoryFilter || petTypeFilter || stockFilter || brandFilter || statusFilter || featuredFilter) && (
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setCategoryFilter('');
+                setPetTypeFilter('');
+                setStockFilter('');
+                setBrandFilter('');
+                setStatusFilter('');
+                setFeaturedFilter('');
+                setPage(1);
+              }}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+            >
+              <X size={18} />
+              Clear Filters
+            </button>
+          )}
         </div>
       </div>
 

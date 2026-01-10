@@ -221,10 +221,16 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
 
   // Products
   getProducts: async (params?: any) => {
-    // Convert boolean inStock to string for backend compatibility
+    // Convert boolean filters to strings for backend compatibility
     const processedParams = params ? { ...params } : {};
     if (processedParams.inStock !== undefined && typeof processedParams.inStock === 'boolean') {
       processedParams.inStock = String(processedParams.inStock);
+    }
+    if (processedParams.isActive !== undefined && typeof processedParams.isActive === 'boolean') {
+      processedParams.isActive = String(processedParams.isActive);
+    }
+    if (processedParams.featured !== undefined && typeof processedParams.featured === 'boolean') {
+      processedParams.featured = String(processedParams.featured);
     }
     const response = await api.get('/products', { params: processedParams });
     return response.data;
@@ -284,6 +290,16 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
 
   getProductStats: async () => {
     const response = await api.get('/products/stats');
+    return response.data.data;
+  },
+
+  getUniqueBrands: async (categoryId?: string, petType?: string) => {
+    const response = await api.get('/products/brands', {
+      params: {
+        ...(categoryId && { category: categoryId }),
+        ...(petType && { petType })
+      }
+    });
     return response.data.data;
   },
 

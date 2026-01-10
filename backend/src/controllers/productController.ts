@@ -1420,8 +1420,11 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     if (!isAdminRequest) {
       baseQuery.isActive = true;
     } else if (req.query.isActive !== undefined) {
-      // Admin can filter by isActive if specified
-      baseQuery.isActive = req.query.isActive === 'true';
+      // Admin can filter by isActive if specified (support both 'true' and 'false')
+      const isActiveParam = String(req.query.isActive).toLowerCase();
+      if (isActiveParam === 'true' || isActiveParam === 'false') {
+        baseQuery.isActive = isActiveParam === 'true';
+      }
     }
 
     // Filter by category - include subcategories
@@ -1612,11 +1615,11 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       }
     }
 
-    // Filter by featured - IMPORTANT: Only show products with isFeatured: true
+    // Filter by featured - Support both true and false for admin requests
     if (req.query.featured !== undefined) {
-      const featuredValue = String(req.query.featured).toLowerCase() === 'true';
-      if (featuredValue) {
-        baseQuery.isFeatured = true;
+      const featuredParam = String(req.query.featured).toLowerCase();
+      if (featuredParam === 'true' || featuredParam === 'false') {
+        baseQuery.isFeatured = featuredParam === 'true';
         // PERFORMANCE FIX: For featured queries, ensure isActive is set to match index
         if (!isAdminRequest && baseQuery.isActive === undefined) {
           baseQuery.isActive = true;
@@ -1631,15 +1634,26 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     if (req.query.search) {
       const searchTerm = String(req.query.search).trim();
       
-      // Check if search contains multiple terms (space-separated) - use OR logic
+      // Escape special regex characters properly, including special Unicode characters
+      const escapeRegex = (str: string) => {
+        // Replace special regex characters, but preserve spaces for phrase matching
+        return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      };
+      
+      // Check if search contains multiple terms (space-separated)
       const searchTerms = searchTerm.split(/\s+/).filter(term => term.length > 0);
       
       if (searchTerms.length > 1) {
-        // Multiple terms: Use AND logic - ALL terms must be present for better relevance
-        // This ensures we only show relevant products, not all products
-        const escapedTerms = searchTerms.map(term => 
-          term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        );
+        // Multiple terms: Prioritize exact phrase match, then AND logic for individual terms
+        
+        // Escape the entire search term for exact phrase matching
+        const escapedExactPhrase = escapeRegex(searchTerm);
+        
+        // Build exact phrase match regex (highest priority)
+        const exactPhraseRegex = new RegExp(escapedExactPhrase, 'i');
+        
+        // Escape individual terms for AND matching
+        const escapedTerms = searchTerms.map(term => escapeRegex(term));
         
         // Build AND conditions - each term must appear somewhere (name, description, brand, or tags)
         const andConditions = escapedTerms.map(term => ({
@@ -1651,18 +1665,19 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
           ]
         }));
         
-        // Also try exact match in product name (highest priority)
-        const exactNameRegex = new RegExp(
-          searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 
-          'i'
-        );
+        // Also try exact match in product name (second highest priority after phrase match)
+        const exactNameRegex = new RegExp(escapedExactPhrase, 'i');
         
         query = {
           $and: [
             baseQuery,
             {
               $or: [
-                // Exact name match (highest priority)
+                // Exact phrase match anywhere (highest priority) - matches complete phrase
+                { name: exactPhraseRegex },
+                { description: exactPhraseRegex },
+                { brand: exactPhraseRegex },
+                // Exact phrase in product name (second highest priority)
                 { name: exactNameRegex },
                 // All terms must be present (AND logic) - combine all AND conditions
                 {
@@ -1673,16 +1688,22 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
           ]
         };
       } else {
-        // Single term: search in all fields
+        // Single term: search in all fields, prioritize exact match in name
+        const escapedTerm = escapeRegex(searchTerm);
+        const termRegex = new RegExp(escapedTerm, 'i');
+        
         query = {
           $and: [
             baseQuery,
             {
               $or: [
-                { name: { $regex: searchTerm, $options: 'i' } },
-                { description: { $regex: searchTerm, $options: 'i' } },
-                { brand: { $regex: searchTerm, $options: 'i' } },
-                { tags: { $in: [new RegExp(searchTerm, 'i')] } }
+                // Exact match in name (highest priority for single terms)
+                { name: { $regex: `^${escapedTerm}$`, $options: 'i' } },
+                // Partial match in name
+                { name: termRegex },
+                { description: termRegex },
+                { brand: termRegex },
+                { tags: { $in: [termRegex] } }
               ]
             }
           ]
@@ -2782,15 +2803,23 @@ export const getProductStats = async (req: Request, res: Response, next: NextFun
 // Get unique brands (optimized - no need to fetch all products)
 export const getUniqueBrands = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    // Check if this is an admin request
+    const isAdminRequest = (req as any).user && 
+      ((req as any).user.role === 'admin' || (req as any).user.permissions?.canManageProducts);
+    
     // Build filter query
     const filterQuery: any = {
-      isActive: true,
       brand: { $exists: true, $nin: [null, ''] },
       $or: [
         { deletedAt: null },
         { deletedAt: { $exists: false } }
       ]
     };
+    
+    // Only filter by isActive for non-admin requests
+    if (!isAdminRequest) {
+      filterQuery.isActive = true;
+    }
 
     // Filter by category if provided
     if (req.query.category) {
