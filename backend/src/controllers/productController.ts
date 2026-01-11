@@ -1634,28 +1634,43 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     if (req.query.search) {
       const searchTerm = String(req.query.search).trim();
       
+      // Normalize the search term - normalize whitespace and handle special characters
+      const normalizeSearchTerm = (str: string) => {
+        // Normalize multiple spaces to single space
+        return str.replace(/\s+/g, ' ').trim();
+      };
+      
       // Escape special regex characters properly, including special Unicode characters
       const escapeRegex = (str: string) => {
         // Replace special regex characters, but preserve spaces for phrase matching
+        // Don't escape Unicode characters like ®, they should match as-is
         return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       };
       
+      const normalizedSearchTerm = normalizeSearchTerm(searchTerm);
+      
       // Check if search contains multiple terms (space-separated)
-      const searchTerms = searchTerm.split(/\s+/).filter(term => term.length > 0);
+      const searchTerms = normalizedSearchTerm.split(/\s+/).filter(term => term.length > 0);
       
       if (searchTerms.length > 1) {
         // Multiple terms: Prioritize exact phrase match, then AND logic for individual terms
         
-        // Escape the entire search term for exact phrase matching
-        const escapedExactPhrase = escapeRegex(searchTerm);
-        
-        // Build exact phrase match regex (highest priority)
+        // Try multiple search strategies with increasing flexibility
+        // Strategy 1: Exact phrase match (highest priority)
+        // Escape only regex metacharacters, preserve Unicode chars like ®, &, etc.
+        const escapedExactPhrase = escapeRegex(normalizedSearchTerm);
         const exactPhraseRegex = new RegExp(escapedExactPhrase, 'i');
         
-        // Escape individual terms for AND matching
-        const escapedTerms = searchTerms.map(term => escapeRegex(term));
+        // Strategy 2: Flexible whitespace (handle multiple spaces/tabs)
+        const flexibleWhitespace = normalizedSearchTerm.replace(/\s+/g, '\\s+');
+        const flexibleWhitespaceRegex = new RegExp(escapeRegex(flexibleWhitespace), 'i');
         
-        // Build AND conditions - each term must appear somewhere (name, description, brand, or tags)
+        // Strategy 3: Word-by-word with flexible spacing
+        const escapedTerms = searchTerms.map(term => escapeRegex(term));
+        const wordByWordPhrase = escapedTerms.join('\\s+');
+        const wordByWordRegex = new RegExp(wordByWordPhrase, 'i');
+        
+        // Strategy 4: All words must be present (AND logic) - most flexible
         const andConditions = escapedTerms.map(term => ({
           $or: [
             { name: { $regex: term, $options: 'i' } },
@@ -1665,23 +1680,38 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
           ]
         }));
         
-        // Also try exact match in product name (second highest priority after phrase match)
-        const exactNameRegex = new RegExp(escapedExactPhrase, 'i');
+        // Strategy 5: Match at least 80% of words (very lenient fallback)
+        const minWordsRequired = Math.ceil(searchTerms.length * 0.8);
+        const partialMatchConditions = escapedTerms.slice(0, minWordsRequired).map(term => ({
+          $or: [
+            { name: { $regex: term, $options: 'i' } },
+            { description: { $regex: term, $options: 'i' } },
+            { brand: { $regex: term, $options: 'i' } }
+          ]
+        }));
         
         query = {
           $and: [
             baseQuery,
             {
               $or: [
-                // Exact phrase match anywhere (highest priority) - matches complete phrase
+                // Priority 1: Exact phrase match in name (highest priority)
                 { name: exactPhraseRegex },
+                // Priority 2: Flexible whitespace in name
+                { name: flexibleWhitespaceRegex },
+                // Priority 3: Word-by-word match in name
+                { name: wordByWordRegex },
+                // Priority 4: Exact phrase in description
                 { description: exactPhraseRegex },
+                // Priority 5: Exact phrase in brand
                 { brand: exactPhraseRegex },
-                // Exact phrase in product name (second highest priority)
-                { name: exactNameRegex },
-                // All terms must be present (AND logic) - combine all AND conditions
+                // Priority 6: All words present (AND logic)
                 {
                   $and: andConditions
+                },
+                // Priority 7: Most words present (80% threshold) - very lenient fallback
+                {
+                  $and: partialMatchConditions
                 }
               ]
             }
@@ -1689,7 +1719,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
         };
       } else {
         // Single term: search in all fields, prioritize exact match in name
-        const escapedTerm = escapeRegex(searchTerm);
+        const escapedTerm = escapeRegex(normalizedSearchTerm);
         const termRegex = new RegExp(escapedTerm, 'i');
         
         query = {
@@ -1699,7 +1729,9 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
               $or: [
                 // Exact match in name (highest priority for single terms)
                 { name: { $regex: `^${escapedTerm}$`, $options: 'i' } },
-                // Partial match in name
+                // Partial match in name (starts with)
+                { name: { $regex: `^${escapedTerm}`, $options: 'i' } },
+                // Partial match in name (contains)
                 { name: termRegex },
                 { description: termRegex },
                 { brand: termRegex },
