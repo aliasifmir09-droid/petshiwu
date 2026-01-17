@@ -60,27 +60,17 @@ const FAQ = () => {
   };
 
   // Group FAQs by category
-  const faqsByCategory = faqs?.reduce((acc, faq) => {
-    if (!acc[faq.category]) {
-      acc[faq.category] = [];
-    }
-    acc[faq.category].push(faq);
-    return acc;
-  }, {} as Record<string, FAQ[]>) || {};
+  const faqsByCategory = useMemo(() => {
+    return faqs?.reduce((acc, faq) => {
+      if (!acc[faq.category]) {
+        acc[faq.category] = [];
+      }
+      acc[faq.category].push(faq);
+      return acc;
+    }, {} as Record<string, FAQ[]>) || {};
+  }, [faqs]);
 
-  const allCategories = categories || [];
-
-  if (faqsLoading || categoriesLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="container mx-auto px-4">
-          <LoadingSpinner size="lg" />
-        </div>
-      </div>
-    );
-  }
-
-  // Generate structured data for SEO (FAQPage schema)
+  // Generate structured data for SEO (FAQPage schema) - MUST be before conditional returns
   const faqStructuredData = useMemo(() => {
     if (!faqs || faqs.length === 0) return null;
 
@@ -98,12 +88,25 @@ const FAQ = () => {
     };
   }, [faqs]);
 
-  // Enhanced SEO description
+  // Enhanced SEO description - MUST be before conditional returns
   const seoDescription = useMemo(() => {
     const totalFAQs = faqs?.length || 0;
     const categories = Object.keys(faqsByCategory).length;
     return `Get answers to ${totalFAQs}+ frequently asked questions about pet products, shipping, returns, orders, payment, and more. Browse ${categories} categories of FAQs to find what you need at PetShiwu.`;
   }, [faqs, faqsByCategory]);
+
+  const allCategories = categories || [];
+
+  // Conditional return MUST come after all hooks
+  if (faqsLoading || categoriesLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="container mx-auto px-4">
+          <LoadingSpinner size="lg" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
