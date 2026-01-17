@@ -297,7 +297,7 @@ const FAQ = () => {
                       );
                     })}
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           )}
