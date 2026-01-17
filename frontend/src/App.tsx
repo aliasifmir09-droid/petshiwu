@@ -28,6 +28,7 @@ const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const Profile = lazy(() => import('./pages/Profile'));
 const ProductComparison = lazy(() => import('./pages/ProductComparison'));
 const Returns = lazy(() => import('./pages/Returns'));
+const ReturnPolicy = lazy(() => import('./pages/ReturnPolicy'));
 const AddressManagement = lazy(() => import('./pages/AddressManagement'));
 const StockAlerts = lazy(() => import('./pages/StockAlerts'));
 const AdvancedSearch = lazy(() => import('./pages/AdvancedSearch'));
@@ -259,6 +260,7 @@ function App() {
                           <Route path="/favorites" element={<Favorites />} />
                           <Route path="/compare" element={<ProductComparison />} />
                           <Route path="/returns" element={<Returns />} />
+                          <Route path="/return-policy" element={<ReturnPolicy />} />
                           <Route path="/addresses" element={<AddressManagement />} />
                           <Route path="/stock-alerts" element={<StockAlerts />} />
                           <Route path="/search" element={<AdvancedSearch />} />

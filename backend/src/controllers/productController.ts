@@ -196,13 +196,19 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
       errors: [] as Array<{ row: number; error: string }>
     };
 
-    // OPTIMIZATION: Pre-fetch all existing slugs in one query (much faster than checking one-by-one)
+    // OPTIMIZATION: Pre-fetch all existing slugs and name+brand combinations in one query (much faster than checking one-by-one)
     const existingSlugs = new Set<string>();
-    const allExistingProducts = await Product.find({}).select('slug').lean();
-    allExistingProducts.forEach((p: { slug?: string }) => {
+    const existingNameBrandSet = new Set<string>(); // Track name+brand combinations to prevent duplicates
+    const allExistingProducts = await Product.find({}).select('slug name brand').lean();
+    allExistingProducts.forEach((p: { slug?: string; name?: string; brand?: string }) => {
       if (p.slug) existingSlugs.add(p.slug);
+      // Create normalized key for name+brand check (case-insensitive, trimmed)
+      if (p.name && p.brand) {
+        const key = `${String(p.name).toLowerCase().trim()}_${String(p.brand).toLowerCase().trim()}`;
+        existingNameBrandSet.add(key);
+      }
     });
-    logger.debug(`[CSV IMPORT] Pre-loaded ${existingSlugs.size} existing product slugs`);
+    logger.debug(`[CSV IMPORT] Pre-loaded ${existingSlugs.size} existing product slugs and ${existingNameBrandSet.size} name+brand combinations`);
 
     // OPTIMIZATION: Cache for categories to avoid redundant lookups
     const categoryCache = new Map<string, mongoose.Types.ObjectId>();
@@ -212,6 +218,7 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
     const BATCH_SIZE = 50;
     const productsToInsert: any[] = [];
     const productRowMap = new Map<number, number>(); // Maps product index to row number
+    const currentImportNameBrandSet = new Set<string>(); // Track duplicates within the same import file
 
     // Helper function to find or create category in hierarchy (with caching)
     const findOrCreateCategory = async (categoryName: string, petType: string, parentId: mongoose.Types.ObjectId | null = null): Promise<mongoose.Types.ObjectId> => {
@@ -495,6 +502,32 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           continue;
         }
         
+        // Check for duplicate product by name+brand (both in database and within this import)
+        const productName = String(row.name).trim();
+        const productBrand = String(row.brand).trim();
+        const nameBrandKey = `${productName.toLowerCase()}_${productBrand.toLowerCase()}`;
+        
+        if (existingNameBrandSet.has(nameBrandKey)) {
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            error: `Product with name "${productName}" and brand "${productBrand}" already exists in the database`
+          });
+          continue;
+        }
+        
+        if (currentImportNameBrandSet.has(nameBrandKey)) {
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            error: `Duplicate product found in CSV file: "${productName}" by "${productBrand}" (already processed in this import)`
+          });
+          continue;
+        }
+        
+        // Add to current import set to catch duplicates within the same file
+        currentImportNameBrandSet.add(nameBrandKey);
+        
         // categoryId is already a valid ObjectId from findOrCreateCategory
         const categoryObjectId = categoryId;
         
@@ -576,6 +609,16 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
           try {
             const insertedProducts = await Product.insertMany(productsToInsert, { ordered: false });
             results.success += insertedProducts.length;
+            
+            // Update existingSlugs Set with newly inserted products to prevent duplicates in subsequent batches
+            insertedProducts.forEach((p: { slug?: string; name?: string; brand?: string }) => {
+              if (p.slug) existingSlugs.add(p.slug);
+              if (p.name && p.brand) {
+                const key = `${String(p.name).toLowerCase().trim()}_${String(p.brand).toLowerCase().trim()}`;
+                existingNameBrandSet.add(key);
+              }
+            });
+            
             productsToInsert.length = 0; // Clear array
             productRowMap.clear();
             logger.info(`[CSV IMPORT] Batch inserted ${insertedProducts.length} products`);
@@ -637,6 +680,16 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
       try {
         const insertedProducts = await Product.insertMany(productsToInsert, { ordered: false });
         results.success += insertedProducts.length;
+        
+        // Update existingSlugs Set with newly inserted products
+        insertedProducts.forEach((p: { slug?: string; name?: string; brand?: string }) => {
+          if (p.slug) existingSlugs.add(p.slug);
+          if (p.name && p.brand) {
+            const key = `${String(p.name).toLowerCase().trim()}_${String(p.brand).toLowerCase().trim()}`;
+            existingNameBrandSet.add(key);
+          }
+        });
+        
         logger.info(`[CSV IMPORT] Final batch inserted ${insertedProducts.length} products`);
       } catch (batchError: any) {
         // Handle partial batch failures
@@ -790,13 +843,19 @@ export const importProductsFromJSON = async (req: AuthRequest, res: Response, ne
       errors: [] as Array<{ index: number; error: string }>
     };
 
-    // OPTIMIZATION: Pre-fetch all existing slugs in one query
+    // OPTIMIZATION: Pre-fetch all existing slugs and name+brand combinations in one query
     const existingSlugs = new Set<string>();
-    const allExistingProducts = await Product.find({}).select('slug').lean();
-    allExistingProducts.forEach((p: { slug?: string }) => {
+    const existingNameBrandSet = new Set<string>(); // Track name+brand combinations to prevent duplicates
+    const allExistingProducts = await Product.find({}).select('slug name brand').lean();
+    allExistingProducts.forEach((p: { slug?: string; name?: string; brand?: string }) => {
       if (p.slug) existingSlugs.add(p.slug);
+      // Create normalized key for name+brand check (case-insensitive, trimmed)
+      if (p.name && p.brand) {
+        const key = `${String(p.name).toLowerCase().trim()}_${String(p.brand).toLowerCase().trim()}`;
+        existingNameBrandSet.add(key);
+      }
     });
-    logger.debug(`[JSON IMPORT] Pre-loaded ${existingSlugs.size} existing product slugs`);
+    logger.debug(`[JSON IMPORT] Pre-loaded ${existingSlugs.size} existing product slugs and ${existingNameBrandSet.size} name+brand combinations`);
 
     // OPTIMIZATION: Cache for categories
     const categoryCache = new Map<string, mongoose.Types.ObjectId>();
@@ -896,6 +955,7 @@ export const importProductsFromJSON = async (req: AuthRequest, res: Response, ne
     const BATCH_SIZE = 50;
     const productsToInsert: any[] = [];
     const productIndexMap = new Map<number, number>();
+    const currentImportNameBrandSet = new Set<string>(); // Track duplicates within the same import file
 
     // Process each product
     for (let i = 0; i < products.length; i++) {
@@ -979,6 +1039,32 @@ export const importProductsFromJSON = async (req: AuthRequest, res: Response, ne
             categoryId = await findOrCreateCategory(categoryPath, petType, null);
           }
         }
+
+        // Check for duplicate product by name+brand (both in database and within this import)
+        const productName = String(product.name).trim();
+        const productBrand = String(product.brand).trim();
+        const nameBrandKey = `${productName.toLowerCase()}_${productBrand.toLowerCase()}`;
+        
+        if (existingNameBrandSet.has(nameBrandKey)) {
+          results.failed++;
+          results.errors.push({
+            index,
+            error: `Product with name "${productName}" and brand "${productBrand}" already exists in the database`
+          });
+          continue;
+        }
+        
+        if (currentImportNameBrandSet.has(nameBrandKey)) {
+          results.failed++;
+          results.errors.push({
+            index,
+            error: `Duplicate product found in JSON file: "${productName}" by "${productBrand}" (already processed in this import)`
+          });
+          continue;
+        }
+        
+        // Add to current import set to catch duplicates within the same file
+        currentImportNameBrandSet.add(nameBrandKey);
 
         // Parse images
         let images: string[] = [];
@@ -1111,6 +1197,16 @@ export const importProductsFromJSON = async (req: AuthRequest, res: Response, ne
           try {
             const insertedProducts = await Product.insertMany(productsToInsert, { ordered: false });
             results.success += insertedProducts.length;
+            
+            // Update existingSlugs Set with newly inserted products to prevent duplicates in subsequent batches
+            insertedProducts.forEach((p: { slug?: string; name?: string; brand?: string }) => {
+              if (p.slug) existingSlugs.add(p.slug);
+              if (p.name && p.brand) {
+                const key = `${String(p.name).toLowerCase().trim()}_${String(p.brand).toLowerCase().trim()}`;
+                existingNameBrandSet.add(key);
+              }
+            });
+            
             productsToInsert.length = 0;
             productIndexMap.clear();
             logger.info(`[JSON IMPORT] Batch inserted ${insertedProducts.length} products`);
@@ -1166,6 +1262,16 @@ export const importProductsFromJSON = async (req: AuthRequest, res: Response, ne
       try {
         const insertedProducts = await Product.insertMany(productsToInsert, { ordered: false });
         results.success += insertedProducts.length;
+        
+        // Update existingSlugs Set with newly inserted products
+        insertedProducts.forEach((p: { slug?: string; name?: string; brand?: string }) => {
+          if (p.slug) existingSlugs.add(p.slug);
+          if (p.name && p.brand) {
+            const key = `${String(p.name).toLowerCase().trim()}_${String(p.brand).toLowerCase().trim()}`;
+            existingNameBrandSet.add(key);
+          }
+        });
+        
         logger.info(`[JSON IMPORT] Final batch inserted ${insertedProducts.length} products`);
       } catch (batchError: any) {
         if (batchError.writeErrors) {

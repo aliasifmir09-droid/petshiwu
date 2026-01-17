@@ -65,8 +65,8 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/returns" className="hover:text-white">
-                  Returns & Exchanges
+                <Link to="/return-policy" className="hover:text-white">
+                  Return & Exchange Policy
                 </Link>
               </li>
               <li>
