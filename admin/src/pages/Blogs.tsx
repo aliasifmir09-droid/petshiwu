@@ -754,10 +754,8 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isLoading }: BlogFormModalProp
               onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               rows={2}
-              placeholder="Short description (max 500 characters)"
-              maxLength={500}
+              placeholder="Short description"
             />
-            <p className="text-xs text-gray-500 mt-1">{formData.excerpt.length}/500</p>
           </div>
 
           <div>
@@ -799,8 +797,7 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isLoading }: BlogFormModalProp
                 value={formData.metaTitle}
                 onChange={(e) => setFormData({ ...formData, metaTitle: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="SEO title (max 60 characters)"
-                maxLength={60}
+                placeholder="SEO title"
               />
             </div>
 
@@ -811,8 +808,7 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isLoading }: BlogFormModalProp
                 onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 rows={2}
-                placeholder="SEO description (max 160 characters)"
-                maxLength={160}
+                placeholder="SEO description"
               />
             </div>
           </div>

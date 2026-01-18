@@ -38,7 +38,6 @@ const blogSchema = new Schema<IBlog>(
     },
     excerpt: {
       type: String,
-      maxlength: 500,
       trim: true
     },
     featuredImage: {
@@ -79,12 +78,10 @@ const blogSchema = new Schema<IBlog>(
     },
     metaTitle: {
       type: String,
-      maxlength: 60,
       trim: true
     },
     metaDescription: {
       type: String,
-      maxlength: 160,
       trim: true
     }
   },
