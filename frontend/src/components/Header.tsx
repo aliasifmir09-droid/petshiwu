@@ -371,8 +371,8 @@ const Header = () => {
             )}
             {/* Logo with Enhanced Animation */}
             <Link to="/" className="flex items-center gap-2 lg:gap-3 flex-shrink-0 group">
-            <div className="relative" style={{ width: '64px', height: '64px', overflow: 'hidden' }}>
-              <picture style={{ display: 'block', clipPath: 'inset(0 50% 0 0)', width: '100%', height: '100%' }}>
+            <div className="relative h-16 w-16 md:h-20 md:w-20 overflow-hidden">
+              <picture>
                 {/* AVIF format with responsive sizes */}
                 <source 
                   srcSet="/logo.avif" 
@@ -397,20 +397,19 @@ const Header = () => {
                 <img 
                   src="/logo.png" 
                   alt="petshiwu Logo" 
-                  width={128}
-                  height={128}
-                  className="transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 drop-shadow-2xl relative z-10"
+                  width={80}
+                  height={80}
+                  className="h-16 w-16 md:h-20 md:w-20 transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 drop-shadow-2xl relative z-10"
                   style={{ 
-                    width: '128px',
-                    height: '128px',
                     objectFit: 'cover',
                     objectPosition: 'left center',
-                    marginLeft: '-64px'
+                    clipPath: 'inset(0 50% 0 0)',
+                    width: '200%'
                   }}
                   loading="eager"
                   fetchPriority="high"
                   decoding="async"
-                  sizes="64px"
+                  sizes="(max-width: 768px) 64px, 80px"
                 />
               </picture>
               {/* Glow effect on hover */}
