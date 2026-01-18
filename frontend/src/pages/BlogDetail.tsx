@@ -171,36 +171,80 @@ const BlogDetail = () => {
         .blog-content {
           line-height: 1.8;
           color: #374151;
+          font-size: 1.125rem;
+        }
+        .blog-content > *:first-child {
+          margin-top: 0 !important;
+        }
+        .blog-content > *:last-child {
+          margin-bottom: 0 !important;
         }
         .blog-content h1,
         .blog-content h2,
         .blog-content h3,
-        .blog-content h4 {
+        .blog-content h4,
+        .blog-content h5,
+        .blog-content h6 {
           font-weight: bold;
-          margin-top: 2rem;
+          margin-top: 2.5rem;
           margin-bottom: 1rem;
           color: #111827;
+          line-height: 1.3;
         }
-        .blog-content h1 { font-size: 2rem; }
-        .blog-content h2 { font-size: 1.75rem; }
-        .blog-content h3 { font-size: 1.5rem; }
-        .blog-content h4 { font-size: 1.25rem; }
+        .blog-content h1 { 
+          font-size: 2.25rem;
+          margin-top: 3rem;
+        }
+        .blog-content h2 { 
+          font-size: 1.875rem;
+          margin-top: 2.5rem;
+        }
+        .blog-content h3 { 
+          font-size: 1.5rem;
+        }
+        .blog-content h4 { 
+          font-size: 1.25rem;
+        }
+        .blog-content h5,
+        .blog-content h6 {
+          font-size: 1.125rem;
+        }
         .blog-content p {
           margin-bottom: 1.5rem;
+          line-height: 1.8;
+          color: #374151;
+        }
+        .blog-content p:empty {
+          display: none;
+        }
+        .blog-content div {
+          margin-bottom: 1.5rem;
+          line-height: 1.8;
+        }
+        .blog-content div:empty {
+          display: none;
         }
         .blog-content ul,
         .blog-content ol {
           margin-bottom: 1.5rem;
+          margin-top: 1rem;
           padding-left: 2rem;
+          line-height: 1.8;
         }
         .blog-content li {
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.75rem;
+          line-height: 1.8;
+          color: #374151;
+        }
+        .blog-content li:last-child {
+          margin-bottom: 0;
         }
         .blog-content img {
           max-width: 100%;
           height: auto;
           border-radius: 0.5rem;
           margin: 2rem 0;
+          display: block;
         }
         .blog-content a {
           color: #2563eb;
@@ -211,17 +255,20 @@ const BlogDetail = () => {
         }
         .blog-content blockquote {
           border-left: 4px solid #3b82f6;
-          padding-left: 1.5rem;
+          padding: 1rem 1.5rem;
           margin: 2rem 0;
           font-style: italic;
           color: #6b7280;
+          background-color: #f9fafb;
+          border-radius: 0 0.5rem 0.5rem 0;
         }
         .blog-content code {
           background-color: #f3f4f6;
           padding: 0.25rem 0.5rem;
           border-radius: 0.25rem;
-          font-family: monospace;
+          font-family: 'Courier New', monospace;
           font-size: 0.9em;
+          color: #dc2626;
         }
         .blog-content pre {
           background-color: #1f2937;
@@ -230,11 +277,44 @@ const BlogDetail = () => {
           border-radius: 0.5rem;
           overflow-x: auto;
           margin: 2rem 0;
+          line-height: 1.6;
         }
         .blog-content pre code {
           background-color: transparent;
           padding: 0;
           color: inherit;
+        }
+        .blog-content table {
+          width: 100%;
+          margin: 2rem 0;
+          border-collapse: collapse;
+        }
+        .blog-content table th,
+        .blog-content table td {
+          padding: 0.75rem;
+          border: 1px solid #e5e7eb;
+          text-align: left;
+        }
+        .blog-content table th {
+          background-color: #f3f4f6;
+          font-weight: bold;
+        }
+        .blog-content hr {
+          margin: 2rem 0;
+          border: none;
+          border-top: 2px solid #e5e7eb;
+        }
+        .blog-content strong,
+        .blog-content b {
+          font-weight: 700;
+          color: #111827;
+        }
+        .blog-content em,
+        .blog-content i {
+          font-style: italic;
+        }
+        .blog-content u {
+          text-decoration: underline;
         }
       `}</style>
     </div>
