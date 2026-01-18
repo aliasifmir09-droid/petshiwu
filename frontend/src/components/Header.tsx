@@ -371,7 +371,7 @@ const Header = () => {
             )}
             {/* Logo with Enhanced Animation */}
             <Link to="/" className="flex items-center gap-2 lg:gap-3 flex-shrink-0 group">
-            <div className="relative">
+            <div className="relative h-16 w-16 md:h-20 md:w-20 overflow-hidden">
               <picture>
                 {/* AVIF format with responsive sizes */}
                 <source 
@@ -397,18 +397,27 @@ const Header = () => {
                 <img 
                   src="/logo.png" 
                   alt="petshiwu Logo" 
-                  width={200}
+                  width={160}
                   height={80}
-                  className="h-12 md:h-16 object-contain transform group-hover:scale-105 transition-all duration-500 drop-shadow-2xl relative z-10"
+                  className="h-16 w-16 md:h-20 md:w-20 transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 drop-shadow-2xl relative z-10"
+                  style={{ 
+                    objectFit: 'cover',
+                    objectPosition: 'left center',
+                    clipPath: 'inset(0 50% 0 0)',
+                    width: '200%'
+                  }}
                   loading="eager"
                   fetchPriority="high"
                   decoding="async"
-                  sizes="(max-width: 768px) 150px, 200px"
+                  sizes="(max-width: 768px) 64px, 80px"
                 />
               </picture>
               {/* Glow effect on hover */}
               <div className="absolute inset-0 bg-white/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
             </div>
+              <span className="text-xl lg:text-2xl xl:text-3xl font-black text-white tracking-tight transition-all duration-300" style={{ fontFamily: "'Nunito', sans-serif" }}>
+                Petshiwu
+              </span>
             </Link>
 
             {/* Search Bar - Desktop with Enhanced Design */}
