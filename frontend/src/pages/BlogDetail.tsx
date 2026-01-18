@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { blogService } from '@/services/blogs';
 import { Calendar, User, Eye, ArrowLeft, Tag } from 'lucide-react';
 import DOMPurify from 'dompurify';
-import { decodeHtmlEntities, normalizeBlogContent } from '@/utils/htmlUtils';
+import { normalizeBlogContent } from '@/utils/htmlUtils';
 
 const BlogDetail = () => {
   const { slug } = useParams<{ slug: string }>();
