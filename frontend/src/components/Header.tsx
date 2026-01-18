@@ -650,22 +650,25 @@ const Header = () => {
                                 {megaMenu.map((section: MenuSection) => (
                                   <div key={section._id || section.slug} className="space-y-2">
                                     <Link
-                                      to={`/category/${section.slug}?petType=${petType.slug}`}
+                                      to={generateCategoryUrl(section.slug, petType.slug)}
                                       className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors block"
                                     >
                                       {decodeHtmlEntities(section.title)} →
                                     </Link>
                                     <ul className="space-y-1">
-                                      {section.items.map((item: MenuItem | string) => (
-                                        <li key={typeof item === 'object' ? item.slug : String(item)}>
-                                          <Link
-                                            to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=${petType.slug}`}
-                                            className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
-                                          >
-                                            {decodeHtmlEntities(typeof item === 'object' ? item.name : item)}
-                                          </Link>
-                                        </li>
-                                      ))}
+                                      {section.items.map((item: MenuItem | string) => {
+                                        const itemSlug = typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'));
+                                        return (
+                                          <li key={typeof item === 'object' ? item.slug : String(item)}>
+                                            <Link
+                                              to={generateCategoryUrl(itemSlug, petType.slug)}
+                                              className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
+                                            >
+                                              {decodeHtmlEntities(typeof item === 'object' ? item.name : item)}
+                                            </Link>
+                                          </li>
+                                        );
+                                      })}
                                     </ul>
                                   </div>
                                 ))}
@@ -679,7 +682,7 @@ const Header = () => {
                                   return (
                                     <div key={category._id} className="space-y-1.5 pb-2 border-b border-gray-100 last:border-b-0 last:pb-0">
                                       <Link
-                                        to={`/category/${category.slug}${category.petType && category.petType !== 'all' ? `?petType=${category.petType}` : ''}`}
+                                        to={generateCategoryUrl(category.slug, category.petType)}
                                         className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] block transition-colors"
                                       >
                                         {decodeHtmlEntities(category.name)}
@@ -693,7 +696,7 @@ const Header = () => {
                                             return (
                                               <li key={sub._id} className="space-y-0.5">
                                                 <Link
-                                                  to={`/category/${sub.slug}${sub.petType && sub.petType !== 'all' ? `?petType=${sub.petType}` : ''}`}
+                                                  to={generateCategoryUrl(sub.slug, sub.petType)}
                                                   className="text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors font-medium py-0.5"
                                                 >
                                                   {decodeHtmlEntities(sub.name)}
@@ -705,7 +708,7 @@ const Header = () => {
                                                     {subSubcategories.map((subSub: any) => (
                                                       <li key={subSub._id}>
                                                         <Link
-                                                          to={`/category/${subSub.slug}${subSub.petType && subSub.petType !== 'all' ? `?petType=${subSub.petType}` : ''}`}
+                                                          to={generateCategoryUrl(subSub.slug, subSub.petType)}
                                                           className="text-[10px] text-gray-500 hover:text-[#1E3A8A] block transition-colors py-0.5"
                                                         >
                                                           • {decodeHtmlEntities(subSub.name)}
@@ -884,23 +887,26 @@ const Header = () => {
                                 {megaMenu.map((section: MenuSection) => (
                                   <div key={section._id || section.slug} className="space-y-1 mb-3">
                                     <Link
-                                      to={`/category/${section.slug}?petType=${petType.slug}`}
+                                      to={generateCategoryUrl(section.slug, petType.slug)}
                                       onClick={() => setMobileMenuOpen(false)}
                                       className="text-sm font-bold text-gray-900 px-3 block hover:text-[#1E3A8A] transition-colors"
                                     >
                                       {decodeHtmlEntities(section.title)} →
                                     </Link>
                                     <div className="space-y-1">
-                                      {section.items.map((item: MenuItem | string) => (
-                                        <Link
-                                          key={typeof item === 'object' ? item.slug : String(item)}
-                                          to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=${petType.slug}`}
-                                          onClick={() => setMobileMenuOpen(false)}
-                                          className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
-                                        >
-                                          {decodeHtmlEntities(typeof item === 'object' ? item.name : item)}
-                                        </Link>
-                                      ))}
+                                      {section.items.map((item: MenuItem | string) => {
+                                        const itemSlug = typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'));
+                                        return (
+                                          <Link
+                                            key={typeof item === 'object' ? item.slug : String(item)}
+                                            to={generateCategoryUrl(itemSlug, petType.slug)}
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
+                                          >
+                                            {decodeHtmlEntities(typeof item === 'object' ? item.name : item)}
+                                          </Link>
+                                        );
+                                      })}
                                     </div>
                                   </div>
                                 ))}
@@ -914,7 +920,7 @@ const Header = () => {
                                   return (
                                     <div key={category._id} className="space-y-1">
                                       <Link
-                                        to={`/category/${category.slug}${category.petType && category.petType !== 'all' ? `?petType=${category.petType}` : ''}`}
+                                        to={generateCategoryUrl(category.slug, category.petType)}
                                         onClick={() => setMobileMenuOpen(false)}
                                         className="block py-2 px-3 text-sm font-semibold text-gray-900 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                       >
@@ -929,7 +935,7 @@ const Header = () => {
                                             return (
                                               <div key={sub._id} className="space-y-1">
                                                 <Link
-                                                  to={`/category/${sub.slug}${sub.petType && sub.petType !== 'all' ? `?petType=${sub.petType}` : ''}`}
+                                                  to={generateCategoryUrl(sub.slug, sub.petType)}
                                                   onClick={() => setMobileMenuOpen(false)}
                                                   className="block py-1.5 px-3 text-sm text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors font-medium truncate overflow-hidden"
                                                 >
@@ -942,7 +948,7 @@ const Header = () => {
                                                     {subSubcategories.map((subSub: any) => (
                                                       <Link
                                                         key={subSub._id}
-                                                        to={`/category/${subSub.slug}${subSub.petType && subSub.petType !== 'all' ? `?petType=${subSub.petType}` : ''}`}
+                                                        to={generateCategoryUrl(subSub.slug, subSub.petType)}
                                                         onClick={() => setMobileMenuOpen(false)}
                                                         className="block py-1 px-3 text-xs text-gray-500 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
                                                       >
@@ -1191,7 +1197,7 @@ const Header = () => {
                                 {megaMenu.map((section: MenuSection) => (
                                   <div key={section._id || section.slug} className="space-y-1 mb-3">
                                     <Link
-                                      to={`/category/${section.slug}?petType=${petType.slug}`}
+                                      to={generateCategoryUrl(section.slug, petType.slug)}
                                       onClick={() => setIsLeftSidebarOpen(false)}
                                       className="text-sm font-bold text-gray-900 px-3 block hover:text-[#1E3A8A] transition-colors"
                                     >
