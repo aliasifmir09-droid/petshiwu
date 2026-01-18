@@ -69,23 +69,27 @@ const BlogDetail = () => {
           {/* Header */}
           <header className="mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-sm font-semibold text-blue-600 uppercase">
-                {blog.category}
-              </span>
+              {blog.category && (
+                <span className="text-sm font-semibold text-blue-600 uppercase tracking-wide">
+                  {blog.category}
+                </span>
+              )}
               {blog.petType && blog.petType !== 'all' && (
                 <span className="text-sm text-gray-500 capitalize">
-                  • {blog.petType}
+                  {blog.category && '• '}{blog.petType}
                 </span>
               )}
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">
               {blog.title}
             </h1>
             <div className="flex items-center gap-6 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <User size={16} />
-                <span>{blog.author?.name || blog.author?.email || 'Unknown'}</span>
-              </div>
+              {blog.author?.name && (
+                <div className="flex items-center gap-2">
+                  <User size={16} />
+                  <span>{blog.author.name}</span>
+                </div>
+              )}
               <div className="flex items-center gap-2">
                 <Calendar size={16} />
                 <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
