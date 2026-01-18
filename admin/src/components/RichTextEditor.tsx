@@ -39,10 +39,8 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
 
         // Create a temporary div to hold the pasted HTML
         const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = pastedHtml;
-        
-        // Clean up the HTML (remove scripts, styles that could be malicious)
-        const cleanHtml = cleanPastedHtml(tempDiv.innerHTML);
+        // Clean up the HTML (remove scripts, styles that could be malicious) before setting innerHTML
+        tempDiv.innerHTML = cleanPastedHtml(pastedHtml);
         
         const fragment = document.createDocumentFragment();
         while (tempDiv.firstChild) {
@@ -96,31 +94,6 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
     // We'll keep them here for exact formatting preservation
     
     return cleaned;
-  };
-
-  const insertText = (beforeText: string, afterText: string = '') => {
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0 || !editorRef.current) return;
-
-    const range = selection.getRangeAt(0);
-    const selectedText = range.toString();
-    
-    // If text is selected, wrap it; otherwise, insert the tags at cursor
-    if (selectedText) {
-      range.deleteContents();
-      const textNode = document.createTextNode(beforeText + selectedText + afterText);
-      range.insertNode(textNode);
-    } else {
-      const textNode = document.createTextNode(beforeText + afterText);
-      range.insertNode(textNode);
-      range.collapse(false);
-    }
-
-    selection.removeAllRanges();
-    selection.addRange(range);
-    editorRef.current.focus();
-    
-    handleInput();
   };
 
   const handleBold = () => {
