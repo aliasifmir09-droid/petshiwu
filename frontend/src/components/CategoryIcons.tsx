@@ -138,7 +138,7 @@ const CategoryIcons = () => {
     {
       icon: UtensilsCrossed,
       title: 'Dog food',
-      link: '/category/food?petType=dog',
+      link: '/dog/food',
       color: 'from-blue-500 to-blue-600',
       // Image: Blue bag with paw print + blue bowl with kibble
       image: '/category-dog-food.avif'
@@ -162,7 +162,7 @@ const CategoryIcons = () => {
     {
       icon: Fish,
       title: 'Cat food',
-      link: '/category/food?petType=cat',
+      link: '/cat/food',
       color: 'from-purple-500 to-purple-600',
       // Image: Stack of three blue cat food cans
       image: '/category-cat-food.avif'

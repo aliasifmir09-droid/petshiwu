@@ -91,3 +91,23 @@ export const extractProductSlugFromUrl = (urlPath: string): string => {
   return parts[parts.length - 1] || '';
 };
 
+/**
+ * Generates SEO-friendly category URL
+ * Format: /{petType}/{categorySlug} (e.g., /dog/food)
+ * Falls back to /category/{slug}?petType=... if petType is not available
+ */
+export const generateCategoryUrl = (categorySlug: string, petType?: string): string => {
+  // If we have petType, use new SEO-friendly format
+  if (petType && petType !== 'all' && petType !== 'other-animals') {
+    return `/${petType}/${categorySlug}`;
+  }
+  
+  // Fallback to old format with query parameter
+  if (petType) {
+    return `/category/${categorySlug}?petType=${petType}`;
+  }
+  
+  // No petType, use simple category URL
+  return `/category/${categorySlug}`;
+};
+

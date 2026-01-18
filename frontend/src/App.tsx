@@ -237,6 +237,8 @@ function App() {
                           <Route path="/" element={<Home />} />
                           <Route path="/products" element={<Products />} />
                           <Route path="/products/:slug" element={<ProductDetail />} />
+                          {/* SEO-friendly category URLs: /:petType/:categorySlug (e.g., /dog/food) */}
+                          <Route path="/:petType/:categorySlug" element={<Category />} />
                           <Route path="/category/:slug" element={<Category />} />
                           <Route path="/learning" element={<Learning />} />
                           <Route path="/learning/:slug" element={<BlogDetail />} />

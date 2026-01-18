@@ -12,18 +12,29 @@ import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import { useSEO } from '@/hooks/useSEO';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
+import { generateCategoryUrl } from '@/utils/productUrl';
 
 const Category = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug, categorySlug, petType: petTypeParam } = useParams<{ 
+    slug?: string; 
+    categorySlug?: string;
+    petType?: string;
+  }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(false);
+
+  // Support both route formats:
+  // - Old: /category/:slug?petType=...
+  // - New: /:petType/:categorySlug (e.g., /dog/food)
+  const categorySlugFromUrl = categorySlug || slug || '';
+  const petTypeFromUrl = petTypeParam || searchParams.get('petType') || '';
 
   const page = parseInt(searchParams.get('page') || '1');
   const sort = searchParams.get('sort') || 'newest';
   const brand = searchParams.get('brand') || '';
   const minRating = searchParams.get('minRating') || '';
   const inStock = searchParams.get('inStock') || '';
-  const petType = searchParams.get('petType') || '';
+  const petType = petTypeFromUrl;
 
   // Scroll to top when page changes (pagination)
   useEffect(() => {
@@ -32,9 +43,9 @@ const Category = () => {
 
   // Fetch category by slug (with petType filter if provided)
   const { data: category, isLoading: isLoadingCategory, error: categoryError } = useQuery({
-    queryKey: ['category', slug, petType],
-    queryFn: () => categoryService.getCategory(slug!, petType || undefined),
-    enabled: !!slug,
+    queryKey: ['category', categorySlugFromUrl, petType],
+    queryFn: () => categoryService.getCategory(categorySlugFromUrl, petType || undefined),
+    enabled: !!categorySlugFromUrl,
     retry: 1
   });
 
@@ -118,24 +129,24 @@ const Category = () => {
       
       // Add all categories in the chain to breadcrumbs (in order: Supplies -> Toys -> Plush Toys)
       categoryChain.forEach((cat) => {
-        const categoryPath = `/category/${cat.slug}`;
-        const categoryPathWithPetType = currentPetType && category.petType !== 'all'
-          ? `${categoryPath}?petType=${category.petType}`
-          : categoryPath;
+        // Use new URL format if petType is available
+        const categoryPath = generateCategoryUrl(cat.slug, currentPetType && category.petType !== 'all' ? category.petType : undefined);
         
         crumbs.push({
           label: decodeHtmlEntities(cat.name),
-          path: categoryPathWithPetType
+          path: categoryPath
         });
       });
-    } else if (slug) {
-      // Fallback if category not loaded yet
-      const fallbackPath = `/category/${slug}`;
-      const fallbackPathWithPetType = currentPetType
+    } else if (categorySlugFromUrl) {
+      // Fallback if category not loaded yet - use new URL format if petType is available
+      const fallbackPath = currentPetType && petTypeParam
+        ? `/${currentPetType}/${categorySlugFromUrl}`
+        : `/category/${categorySlugFromUrl}`;
+      const fallbackPathWithPetType = currentPetType && !petTypeParam
         ? `${fallbackPath}?petType=${currentPetType}`
         : fallbackPath;
       crumbs.push({
-        label: slug.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
+        label: categorySlugFromUrl.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
         path: fallbackPathWithPetType
       });
     }
@@ -210,7 +221,7 @@ const Category = () => {
   // Handle error or category not found
   if (categoryError || (!category && !isLoadingCategory)) {
     const errorMessage = (categoryError as any)?.response?.data?.message || 
-      `The category "${slug?.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}" doesn't exist.`;
+      `The category "${categorySlugFromUrl?.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}" doesn't exist.`;
     
     return (
       <div className="container mx-auto px-4 lg:px-8 py-12">

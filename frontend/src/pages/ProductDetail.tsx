@@ -10,7 +10,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import ProductCard from '@/components/ProductCard';
 import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home, Share2, Facebook, Twitter, Mail, Copy, Check } from 'lucide-react';
 import { normalizeImageUrl, handleImageError, getOptimizedImageUrl, generateSrcSet } from '@/utils/imageUtils';
-import { generateProductUrl } from '@/utils/productUrl';
+import { generateProductUrl, generateCategoryUrl } from '@/utils/productUrl';
 import { FREE_SHIPPING_THRESHOLD } from '@/config/constants';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
@@ -1122,7 +1122,7 @@ const ProductDetail = () => {
                   </span>
                 ) : (
                   <Link
-                    to={`/category/${product.category.slug}${product.petType && product.category.petType !== 'all' ? `?petType=${product.category.petType}` : ''}`}
+                    to={generateCategoryUrl(product.category.slug, product.petType || product.category.petType)}
                     className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium hover:bg-primary-200 transition-colors cursor-pointer inline-block"
                   >
                     {typeof product.category === 'object' && product.category?.name ? decodeHtmlEntities(product.category.name) : ''}

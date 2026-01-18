@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/useToast';
 import Toast from './Toast';
 import SearchSuggestions from './SearchSuggestions';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
+import { generateCategoryUrl } from '@/utils/productUrl';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -1197,16 +1198,19 @@ const Header = () => {
                                       {decodeHtmlEntities(section.title)} →
                                     </Link>
                                     <div className="space-y-1">
-                                      {section.items.map((item: MenuItem | string) => (
-                                        <Link
-                                          key={typeof item === 'object' ? item.slug : String(item)}
-                                          to={`/category/${typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'))}?petType=${petType.slug}`}
-                                          onClick={() => setIsLeftSidebarOpen(false)}
-                                          className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-                                        >
-                                          {typeof item === 'object' ? item.name : item}
-                                        </Link>
-                                      ))}
+                                      {section.items.map((item: MenuItem | string) => {
+                                        const itemSlug = typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'));
+                                        return (
+                                          <Link
+                                            key={typeof item === 'object' ? item.slug : String(item)}
+                                            to={generateCategoryUrl(itemSlug, petType.slug)}
+                                            onClick={() => setIsLeftSidebarOpen(false)}
+                                            className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+                                          >
+                                            {typeof item === 'object' ? item.name : item}
+                                          </Link>
+                                        );
+                                      })}
                                     </div>
                                   </div>
                                 ))}
@@ -1219,7 +1223,7 @@ const Header = () => {
                                   return (
                                     <div key={category._id} className="space-y-1">
                                       <Link
-                                        to={`/category/${category.slug}${category.petType && category.petType !== 'all' ? `?petType=${category.petType}` : ''}`}
+                                        to={generateCategoryUrl(category.slug, category.petType)}
                                         onClick={() => setIsLeftSidebarOpen(false)}
                                         className="block py-2 px-3 font-semibold text-gray-900 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
                                       >
@@ -1230,7 +1234,7 @@ const Header = () => {
                                           {subcategories.map((sub: any) => (
                                             <Link
                                               key={sub._id}
-                                              to={`/category/${sub.slug}${sub.petType && sub.petType !== 'all' ? `?petType=${sub.petType}` : ''}`}
+                                              to={generateCategoryUrl(sub.slug, sub.petType)}
                                               onClick={() => setIsLeftSidebarOpen(false)}
                                               className="block py-1.5 px-3 text-sm text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
                                             >
