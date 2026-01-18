@@ -2,6 +2,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { blogService } from '@/services/blogs';
 import { Calendar, User, Eye, ArrowLeft, Tag } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 const BlogDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -119,7 +120,13 @@ const BlogDetail = () => {
           {/* Content */}
           <div className="prose prose-lg max-w-none mb-8">
             <div
-              dangerouslySetInnerHTML={{ __html: blog.content }}
+              dangerouslySetInnerHTML={{ 
+                __html: DOMPurify.sanitize(blog.content || '', {
+                  ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'img', 'code', 'pre'],
+                  ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class'],
+                  KEEP_CONTENT: true
+                })
+              }}
               className="blog-content"
             />
           </div>
