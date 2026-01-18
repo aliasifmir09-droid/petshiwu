@@ -127,8 +127,9 @@ const BlogDetail = () => {
             <div
               dangerouslySetInnerHTML={{ 
                 __html: DOMPurify.sanitize(decodeHtmlEntities(blog.content) || '', {
-                  ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'img', 'code', 'pre'],
-                  ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class'],
+                  ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'b', 'i', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'img', 'code', 'pre', 'div', 'span', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'hr'],
+                  ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'style', 'width', 'height', 'colspan', 'rowspan', 'align'],
+                  ALLOW_DATA_ATTR: false,
                   KEEP_CONTENT: true
                 })
               }}

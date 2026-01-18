@@ -10,7 +10,7 @@ import { normalizeImageUrl } from '@/utils/imageUtils';
 import { Blog, BlogFormData, BlogCategory } from '@/types/blog';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
-import RichTextToolbar from '@/components/RichTextToolbar';
+import RichTextEditor from '@/components/RichTextEditor';
 
 // Helper function to safely convert any ID to a unique string key
 const getUniqueKey = (id: unknown, index: number, prefix: string = 'item'): string => {
@@ -454,7 +454,6 @@ interface BlogFormModalProps {
 
 const BlogFormModal = ({ blog, onClose, onSubmit, isLoading }: BlogFormModalProps) => {
   const { showToast } = useToast();
-  const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [formData, setFormData] = useState({
     title: blog?.title || '',
     content: blog?.content || '',
@@ -568,6 +567,13 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isLoading }: BlogFormModalProp
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!formData.content || formData.content.trim() === '' || formData.content === '<br>' || formData.content === '<div><br></div>') {
+      showToast('Content is required', 'error');
+      return;
+    }
+    
     // Convert tags string to array for API submission
     const tagsArray = formData.tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0);
     onSubmit({
@@ -760,22 +766,10 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isLoading }: BlogFormModalProp
 
           <div>
             <label className="block text-sm font-medium mb-2">Content *</label>
-            <div className="border border-gray-300 rounded-lg overflow-hidden">
-              <RichTextToolbar
-                textareaRef={contentTextareaRef}
-                value={formData.content}
-                onChange={(value) => setFormData({ ...formData, content: value })}
-              />
-              <textarea
-                ref={contentTextareaRef}
-                required
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                className="w-full px-4 py-2 border-0 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-y"
-                rows={15}
-                placeholder="Blog content (HTML supported)"
-              />
-            </div>
+            <RichTextEditor
+              value={formData.content}
+              onChange={(value) => setFormData({ ...formData, content: value })}
+            />
           </div>
 
           <div>
