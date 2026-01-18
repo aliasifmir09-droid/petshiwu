@@ -590,19 +590,28 @@ app.use((req, res, next) => {
     return text.replace(/[&<>"']/g, (m) => map[m]);
   };
 
-  // Sanitize request body strings
+  // Sanitize request body strings, but skip HTML content fields for blogs/care guides
+  // These fields need to accept HTML for rich text editing
+  const htmlContentFields = ['content', 'body', 'description']; // Fields that should contain HTML
+  const isHtmlContentRoute = req.path.includes('/blogs') || req.path.includes('/care-guides');
+  
   if (req.body && typeof req.body === 'object') {
-    const sanitizeObject = (obj: unknown): SanitizedObject => {
+    const sanitizeObject = (obj: unknown, isInHtmlField: boolean = false): SanitizedObject => {
       if (typeof obj === 'string') {
+        // Skip escaping for HTML content fields
+        if (isInHtmlField && isHtmlContentRoute) {
+          return obj;
+        }
         return escapeHtml(obj);
       }
       if (Array.isArray(obj)) {
-        return obj.map(sanitizeObject);
+        return obj.map(item => sanitizeObject(item, isInHtmlField));
       }
       if (obj && typeof obj === 'object' && obj.constructor === Object) {
         const sanitized: { [key: string]: SanitizedObject } = {};
         for (const key in obj) {
-          sanitized[key] = sanitizeObject((obj as Record<string, unknown>)[key]);
+          const isHtmlField = htmlContentFields.includes(key.toLowerCase());
+          sanitized[key] = sanitizeObject((obj as Record<string, unknown>)[key], isHtmlField);
         }
         return sanitized;
       }

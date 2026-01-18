@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { blogService } from '@/services/blogs';
 import { Calendar, User, Eye, ArrowLeft, Tag } from 'lucide-react';
 import DOMPurify from 'dompurify';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const BlogDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -121,7 +122,7 @@ const BlogDetail = () => {
           <div className="prose prose-lg max-w-none mb-8">
             <div
               dangerouslySetInnerHTML={{ 
-                __html: DOMPurify.sanitize(blog.content || '', {
+                __html: DOMPurify.sanitize(decodeHtmlEntities(blog.content) || '', {
                   ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'img', 'code', 'pre'],
                   ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class'],
                   KEEP_CONTENT: true
