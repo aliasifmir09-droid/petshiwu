@@ -369,51 +369,15 @@ const Header = () => {
                 <Menu size={28} className="text-white" />
               </button>
             )}
-            {/* Logo with Enhanced Animation */}
-            <Link to="/" className="flex items-center gap-2 lg:gap-3 flex-shrink-0 group">
-            <div className="relative" style={{ height: '64px', width: 'auto' }}>
-              <picture>
-                {/* AVIF format with responsive sizes */}
-                <source 
-                  srcSet="/logo.avif" 
-                  type="image/avif"
-                  media="(min-width: 768px)"
-                />
-                <source 
-                  srcSet="/logo.avif" 
-                  type="image/avif"
-                />
-                {/* WebP format with responsive sizes */}
-                <source 
-                  srcSet="/logo.webp" 
-                  type="image/webp"
-                  media="(min-width: 768px)"
-                />
-                <source 
-                  srcSet="/logo.webp" 
-                  type="image/webp"
-                />
-                {/* PNG fallback with proper sizing */}
-                <img 
-                  src="/logo.png" 
-                  alt="petshiwu Logo" 
-                  width={200}
-                  height={80}
-                  className="h-12 md:h-16 object-contain transform group-hover:scale-105 transition-all duration-500 drop-shadow-2xl relative z-10"
-                  style={{ 
-                    WebkitMaskImage: 'linear-gradient(to right, black 0%, black 45%, transparent 47%, transparent 53%, black 55%, black 100%)',
-                    maskImage: 'linear-gradient(to right, black 0%, black 45%, transparent 47%, transparent 53%, black 55%, black 100%)'
-                  }}
-                  loading="eager"
-                  fetchPriority="high"
-                  decoding="async"
-                  sizes="(max-width: 768px) 150px, 200px"
-                />
-              </picture>
-              {/* Glow effect on hover */}
-              <div className="absolute inset-0 bg-white/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-            </div>
-              <span className="text-xl lg:text-2xl xl:text-3xl font-black text-white tracking-tight transition-all duration-300" style={{ fontFamily: "'Nunito', sans-serif" }}>
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2 flex-shrink-0">
+              <img 
+                src="/logo.png" 
+                alt="petshiwu Logo" 
+                className="h-12 md:h-16 object-contain"
+                loading="eager"
+              />
+              <span className="text-xl font-bold text-white">
                 Petshiwu
               </span>
             </Link>
