@@ -109,12 +109,11 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
       
       // Convert Word-specific elements to standard HTML
       const tagName = el.tagName.toLowerCase();
+      const classAttr = el.getAttribute('class') || '';
+      const styleAttr = el.getAttribute('style') || '';
       
       // Handle Word paragraph styles
       if (tagName === 'p') {
-        const classAttr = el.getAttribute('class') || '';
-        const styleAttr = el.getAttribute('style') || '';
-        
         // Convert Word heading styles to actual headings
         if (classAttr.match(/Heading[1-6]/i) || classAttr.match(/MsoHeading/i)) {
           const headingMatch = classAttr.match(/Heading(\d)/i);
