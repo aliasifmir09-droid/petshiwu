@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { Bold, Italic, Underline, List, ListOrdered } from 'lucide-react';
 
 interface RichTextToolbarProps {
@@ -25,7 +24,8 @@ const RichTextToolbar = ({ textareaRef, value, onChange }: RichTextToolbarProps)
     // Restore cursor position
     setTimeout(() => {
       textarea.focus();
-      const newCursorPos = start + beforeText.length + (selectedText || beforeText.length) + afterText.length;
+      const selectedLength = selectedText ? selectedText.length : 0;
+      const newCursorPos = start + beforeText.length + selectedLength + afterText.length;
       textarea.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
   };
