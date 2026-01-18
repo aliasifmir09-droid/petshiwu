@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { Plus, Edit, Trash2, Search, Eye, EyeOff, FileText, Calendar, User, Upload, Link2, X } from 'lucide-react';
@@ -10,6 +10,7 @@ import { normalizeImageUrl } from '@/utils/imageUtils';
 import { Blog, BlogFormData, BlogCategory } from '@/types/blog';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
+import RichTextToolbar from '@/components/RichTextToolbar';
 
 // Helper function to safely convert any ID to a unique string key
 const getUniqueKey = (id: unknown, index: number, prefix: string = 'item'): string => {
@@ -453,6 +454,7 @@ interface BlogFormModalProps {
 
 const BlogFormModal = ({ blog, onClose, onSubmit, isLoading }: BlogFormModalProps) => {
   const { showToast } = useToast();
+  const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [formData, setFormData] = useState({
     title: blog?.title || '',
     content: blog?.content || '',
@@ -760,14 +762,22 @@ const BlogFormModal = ({ blog, onClose, onSubmit, isLoading }: BlogFormModalProp
 
           <div>
             <label className="block text-sm font-medium mb-2">Content *</label>
-            <textarea
-              required
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              rows={15}
-              placeholder="Blog content (HTML supported)"
-            />
+            <div className="border border-gray-300 rounded-lg overflow-hidden">
+              <RichTextToolbar
+                textareaRef={contentTextareaRef}
+                value={formData.content}
+                onChange={(value) => setFormData({ ...formData, content: value })}
+              />
+              <textarea
+                ref={contentTextareaRef}
+                required
+                value={formData.content}
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                className="w-full px-4 py-2 border-0 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-y"
+                rows={15}
+                placeholder="Blog content (HTML supported)"
+              />
+            </div>
           </div>
 
           <div>
