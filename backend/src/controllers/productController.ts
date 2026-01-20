@@ -2870,18 +2870,14 @@ export const getProductStats = async (req: Request, res: Response, next: NextFun
             }
           ],
           // Products by category (optimized: no $lookup, just group by category ID)
+          // Note: This returns direct category assignments only, subcategory products
+          // need to be aggregated to parent categories in the response below
           byCategory: [
             {
               $group: {
                 _id: '$category',
                 count: { $sum: 1 }
               }
-            },
-            {
-              $sort: { count: -1 }
-            },
-            {
-              $limit: 10
             }
           ]
         }
@@ -2895,29 +2891,104 @@ export const getProductStats = async (req: Request, res: Response, next: NextFun
     const outOfStockProducts = stats.outOfStockCount?.[0]?.count || 0;
     const featuredProducts = stats.featuredCount?.[0]?.count || 0;
     
-    // PERFORMANCE FIX: Fetch category names in a single optimized query instead of $lookup
-    // This is much faster than $lookup which does a collection scan
-    const categoryIds = (stats.byCategory || []).map((item: { _id: mongoose.Types.ObjectId }) => item._id);
-    const categories = categoryIds.length > 0 
-      ? await Category.find({ _id: { $in: categoryIds } })
-          .select('_id name')
+    // PERFORMANCE FIX: Fetch category names and hierarchy in a single optimized query
+    // Also fetch all categories (not just those with products) to build parent aggregations
+    const categoryIdsWithProducts = (stats.byCategory || []).map((item: { _id: mongoose.Types.ObjectId }) => item._id);
+    
+    // Fetch categories with products to get their names
+    const categoriesWithProducts = categoryIdsWithProducts.length > 0 
+      ? await Category.find({ _id: { $in: categoryIdsWithProducts } })
+          .select('_id name parentCategory')
           .lean()
       : [];
     
-    // Build a map for quick lookup
+    // Build a map for quick lookup of category names
     const categoryMap = new Map<string, string>();
-    categories.forEach((cat: any) => {
+    categoriesWithProducts.forEach((cat: any) => {
       if (cat._id) {
         categoryMap.set(cat._id.toString(), cat.name || 'Unknown Category');
       }
     });
     
-    // Attach category names to the byCategory results
-    const productsByCategory = (stats.byCategory || []).map((item: { _id: mongoose.Types.ObjectId; count: number }) => ({
-      categoryId: item._id.toString(),
-      categoryName: categoryMap.get(item._id.toString()) || 'Unknown Category',
-      count: item.count
-    }));
+    // Create direct product counts map
+    const directProductCounts = new Map<string, number>();
+    (stats.byCategory || []).forEach((item: { _id: mongoose.Types.ObjectId; count: number }) => {
+      directProductCounts.set(item._id.toString(), item.count);
+    });
+    
+    // Fetch all categories to build parent-child relationships for aggregation
+    const allCategories = await Category.find({ isActive: true })
+      .select('_id parentCategory')
+      .lean();
+    
+    // Build parent chain for each category (find all ancestors)
+    const categoryParentMap = new Map<string, string[]>(); // categoryId -> [parentId, grandParentId, ...]
+    const categoryObjMap = new Map<string, any>();
+    
+    allCategories.forEach((cat: any) => {
+      if (cat._id) {
+        categoryObjMap.set(cat._id.toString(), cat);
+        categoryParentMap.set(cat._id.toString(), []);
+      }
+    });
+    
+    // Build parent chains (find all ancestors for each category)
+    const buildParentChain = (categoryId: string, visited = new Set<string>()): string[] => {
+      if (visited.has(categoryId)) return [];
+      visited.add(categoryId);
+      
+      const category = categoryObjMap.get(categoryId);
+      if (!category || !category.parentCategory) return [];
+      
+      const parentId = category.parentCategory.toString();
+      const grandParents = buildParentChain(parentId, visited);
+      return [parentId, ...grandParents];
+    };
+    
+    // Calculate parent chains for all categories with products
+    categoryIdsWithProducts.forEach((categoryId) => {
+      const catIdStr = categoryId.toString();
+      const parents = buildParentChain(catIdStr);
+      categoryParentMap.set(catIdStr, parents);
+    });
+    
+    // Aggregate product counts: add each category's products to all its parent categories
+    const aggregatedCounts = new Map<string, number>();
+    
+    // Start with direct counts
+    directProductCounts.forEach((count, categoryId) => {
+      aggregatedCounts.set(categoryId, count);
+      
+      // Add count to all parent categories
+      const parents = categoryParentMap.get(categoryId) || [];
+      parents.forEach((parentId: string) => {
+        aggregatedCounts.set(parentId, (aggregatedCounts.get(parentId) || 0) + count);
+      });
+    });
+    
+    // Fetch names for all categories that need to be in the response (including parents)
+    const allCategoryIdsInResponse = Array.from(aggregatedCounts.keys());
+    const allCategoriesForNames = await Category.find({ 
+      _id: { $in: allCategoryIdsInResponse.map(id => new mongoose.Types.ObjectId(id)) }
+    })
+      .select('_id name')
+      .lean();
+    
+    allCategoriesForNames.forEach((cat: any) => {
+      if (cat._id) {
+        categoryMap.set(cat._id.toString(), cat.name || 'Unknown Category');
+      }
+    });
+    
+    // Build final productsByCategory array with aggregated counts
+    const productsByCategory = Array.from(aggregatedCounts.entries())
+      .map(([categoryId, count]) => ({
+        categoryId,
+        categoryName: categoryMap.get(categoryId) || 'Unknown Category',
+        count
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 20); // Limit to top 20 categories for performance
 
     const response = {
       success: true,
