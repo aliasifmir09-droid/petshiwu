@@ -2946,7 +2946,7 @@ export const getProductStats = async (req: Request, res: Response, next: NextFun
     };
     
     // Calculate parent chains for all categories with products
-    categoryIdsWithProducts.forEach((categoryId) => {
+    categoryIdsWithProducts.forEach((categoryId: mongoose.Types.ObjectId) => {
       const catIdStr = categoryId.toString();
       const parents = buildParentChain(catIdStr);
       categoryParentMap.set(catIdStr, parents);
