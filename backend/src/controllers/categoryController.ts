@@ -225,8 +225,8 @@ export const getAllCategoriesAdmin = async (req: AuthRequest, res: Response, nex
       total: categories.length
     };
 
-    // Cache for 30 seconds (admin dashboard needs faster updates)
-    await cache.set(cacheKey, response, 30);
+    // Cache for 5 minutes (300 seconds) - same as product stats
+    await cache.set(cacheKey, response, 300);
 
     res.status(200).json(response);
   } catch (error) {
@@ -532,6 +532,10 @@ export const createCategory = async (req: AuthRequest, res: Response, next: Next
 
     // Clear category caches to ensure frontend sees the new category
     await clearCategoryCaches(req.body.petType);
+    
+    // Clear product stats cache (dashboard needs to show updated category counts)
+    const { cacheKeys } = await import('../utils/cache');
+    await cache.del(cacheKeys.productStats());
 
     // Normalize _id to string
     const normalizedCategory = normalizeCategoryId(category);
@@ -584,6 +588,9 @@ export const updateCategory = async (req: AuthRequest, res: Response, next: Next
       const newCategoryCacheKey = cacheKeys.category(`${category._id}-${req.body.petType}`);
       await cache.del(newCategoryCacheKey);
     }
+    
+    // Clear product stats cache (dashboard needs to show updated category counts)
+    await cache.del(cacheKeys.productStats());
 
     // Normalize _id to string
     const normalizedCategory = normalizeCategoryId(category);
@@ -768,6 +775,9 @@ export const deleteCategory = async (req: AuthRequest, res: Response, next: Next
     // Also clear individual category cache
     const categoryCacheKey = cacheKeys.category(`${categoryId}-${category.petType || 'all'}`);
     await cache.del(categoryCacheKey);
+    
+    // Clear product stats cache (dashboard needs to show updated category counts)
+    await cache.del(cacheKeys.productStats());
 
     res.status(200).json({
       success: true,

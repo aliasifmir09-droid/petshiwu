@@ -1933,8 +1933,8 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
       }
     };
 
-    // Cache entire response for 2 minutes (120 seconds)
-    await cache.set(cacheKey, response, 120);
+    // Cache for 5 minutes (300 seconds) - same as product stats
+    await cache.set(cacheKey, response, 300);
 
     res.status(200).json(response);
   } catch (error) {

@@ -727,6 +727,9 @@ export const importProductsFromCSV = async (req: AuthRequest, res: Response, nex
       fs.unlinkSync(csvFilePath);
     }
 
+    // Clear product stats cache after import (dashboard needs updated counts)
+    await cache.del(cacheKeys.productStats());
+
     // Return results
     res.status(200).json({
       success: true,
@@ -1305,6 +1308,9 @@ export const importProductsFromJSON = async (req: AuthRequest, res: Response, ne
     if (jsonFilePath && fs.existsSync(jsonFilePath)) {
       fs.unlinkSync(jsonFilePath);
     }
+
+    // Clear product stats cache after import (dashboard needs updated counts)
+    await cache.del(cacheKeys.productStats());
 
     // Return results
     res.status(200).json({
@@ -2501,10 +2507,11 @@ export const createProduct = async (req: AuthRequest, res: Response, next: NextF
     // Populate category for response
     await product.populate('category', 'name slug');
 
-    // Invalidate cache for product lists (new product affects lists)
+    // Invalidate cache for product lists and stats (new product affects lists and dashboard stats)
     // Do this in parallel with response to not block the request
     const cacheInvalidationPromises = [
-      cache.delPattern('products:*') // Invalidate all product list caches
+      cache.delPattern('products:*'), // Invalidate all product list caches
+      cache.del(cacheKeys.productStats()) // Clear product stats cache for dashboard
     ];
     
     // Don't await - let it run in background
@@ -2589,12 +2596,13 @@ export const updateProduct = async (req: AuthRequest, res: Response, next: NextF
     // Populate category after save (only needed fields for response)
     await product.populate('category', 'name slug');
 
-    // Invalidate cache for this product and all product lists
+    // Invalidate cache for this product, all product lists, and stats
     // Do this in parallel with response to not block the request
     const cacheInvalidationPromises = [
       cache.del(cacheKeys.product(productId)),
       cache.del(cacheKeys.product(product.slug)),
-      cache.delPattern('products:*') // Invalidate all product list caches
+      cache.delPattern('products:*'), // Invalidate all product list caches
+      cache.del(cacheKeys.productStats()) // Clear product stats cache for dashboard
     ];
     
     // Don't await - let it run in background
@@ -2790,6 +2798,15 @@ export const deleteProduct = async (req: AuthRequest, res: Response, next: NextF
       userEmail,
       userRole,
       timestamp: new Date().toISOString()
+    });
+
+    // Invalidate cache for product lists and stats (background, don't block response)
+    const cacheInvalidationPromises = [
+      cache.delPattern('products:*'), // Invalidate all product list caches
+      cache.del(cacheKeys.productStats()) // Clear product stats cache for dashboard
+    ];
+    Promise.all(cacheInvalidationPromises).catch(err => {
+      logger.error('Error invalidating product cache:', err);
     });
 
     // Return success immediately - no need to wait for verification
