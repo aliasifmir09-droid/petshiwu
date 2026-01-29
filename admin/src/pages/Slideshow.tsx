@@ -430,73 +430,24 @@ const SlideModal = ({ slide, onClose, onSubmit, isLoading }: SlideModalProps) =>
           </h2>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle *</label>
-            <input
-              type="text"
-              name="subtitle"
-              value={formData.subtitle}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Button Text *</label>
-              <input
-                type="text"
-                name="buttonText"
-                value={formData.buttonText}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+          {/* Banner Image Section - Primary */}
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Banner Image (Required)</h3>
+            <div className="bg-blue-100 p-3 rounded-lg mb-4">
+              <p className="text-sm font-semibold text-gray-800 mb-2">📐 Default Banner Size (Perfect for Mobile & Desktop):</p>
+              <div className="bg-white p-2 rounded border border-blue-300">
+                <p className="text-base font-bold text-blue-700 mb-1">1920 × 720 pixels</p>
+                <p className="text-xs text-gray-600">16:6 aspect ratio (8:3) - Works perfectly on all devices</p>
+              </div>
+              <p className="text-xs text-gray-600 mt-2">💡 This size ensures your banner looks perfect on both mobile phones and desktop screens. The banner will automatically scale to fit all screen sizes while maintaining the correct proportions.</p>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Button Link *</label>
-              <input
-                type="text"
-                name="buttonLink"
-                value={formData.buttonLink}
-                onChange={handleChange}
-                required
-                placeholder="/products"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Image *</label>
+            <p className="text-sm text-gray-600 mb-4">Upload a complete banner image. The image will be displayed full-width on the homepage.</p>
             
-            {/* Toggle between URL and Upload */}
-            <div className="flex gap-2 mb-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Banner Image URL *</label>
+              
+                {/* Toggle between URL and Upload */}
+              <div className="flex gap-2 mb-2">
               <button
                 type="button"
                 onClick={() => setImageInputMode('url')}
@@ -521,9 +472,9 @@ const SlideModal = ({ slide, onClose, onSubmit, isLoading }: SlideModalProps) =>
                 <Upload size={16} />
                 Upload
               </button>
-            </div>
+              </div>
 
-            {imageInputMode === 'url' ? (
+              {imageInputMode === 'url' ? (
               <>
                 <input
                   type="url"
@@ -535,34 +486,111 @@ const SlideModal = ({ slide, onClose, onSubmit, isLoading }: SlideModalProps) =>
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </>
-            ) : (
-              <div>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                  onChange={handleImageUpload}
-                  disabled={uploading}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-                {uploading && (
-                  <p className="mt-1 text-sm text-gray-500">Uploading image...</p>
-                )}
-              </div>
-            )}
+              ) : (
+                <div>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                  {uploading && (
+                    <p className="mt-1 text-sm text-gray-500">Uploading image...</p>
+                  )}
+                </div>
+              )}
 
-            {imagePreview && (
-              <div className="mt-2 w-32 h-20 rounded-lg overflow-hidden bg-gray-100">
-                <img
-                  src={normalizeImageUrl(imagePreview)}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/placeholder-image.png';
-                  }}
+              {imagePreview && (
+                <div className="mt-4 w-full rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-300">
+                  <p className="text-xs text-gray-500 p-2 bg-gray-50">Banner Preview:</p>
+                  <img
+                    src={normalizeImageUrl(imagePreview)}
+                    alt="Banner Preview"
+                    className="w-full h-auto max-h-[300px] object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/placeholder-image.png';
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Link Section */}
+          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Banner Link (Optional)</h3>
+            <p className="text-sm text-gray-600 mb-4">If provided, clicking the banner will navigate to this link.</p>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Link URL</label>
+              <input
+                type="text"
+                name="buttonLink"
+                value={formData.buttonLink}
+                onChange={handleChange}
+                placeholder="/products or https://example.com"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <p className="mt-1 text-xs text-gray-500">Leave empty if banner should not be clickable</p>
+            </div>
+          </div>
+
+          {/* Additional Fields (Optional - for metadata) */}
+          <details className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <summary className="text-sm font-medium text-gray-700 cursor-pointer hover:text-gray-900">
+              Additional Fields (Optional)
+            </summary>
+            <div className="mt-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  placeholder="For internal reference only"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-            )}
-          </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
+                <input
+                  type="text"
+                  name="subtitle"
+                  value={formData.subtitle}
+                  onChange={handleChange}
+                  placeholder="For internal reference only"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={2}
+                  placeholder="For internal reference only"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Button Text</label>
+                <input
+                  type="text"
+                  name="buttonText"
+                  value={formData.buttonText}
+                  onChange={handleChange}
+                  placeholder="For internal reference only"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+          </details>
 
           <div className="grid grid-cols-2 gap-4">
             <div>

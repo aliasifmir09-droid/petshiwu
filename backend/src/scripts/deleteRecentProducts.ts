@@ -5,150 +5,99 @@ import dotenv from 'dotenv';
 import * as readline from 'readline';
 import logger from '../utils/logger';
 
-// Load environment variables
 dotenv.config();
 
 /**
- * Deletes products uploaded within a specified time period
- * Usage: npm run script:delete-recent-products
+ * Deletes products added in the last X minutes.
+ * Usage: npm run delete-recent-products [minutes] [--yes | -y]
+ * Default: 5 minutes if no argument provided.
+ * Example: npm run delete-recent-products 10         (prompt for confirmation)
+ *          npm run delete-recent-products 5 --yes    (skip prompt, delete immediately)
  */
+const DEFAULT_MINUTES = 5;
+
 const deleteRecentProducts = async () => {
   try {
-    logger.info('\n' + '='.repeat(60));
-    logger.info('🗑️  Delete Recently Uploaded Products');
-    logger.info('='.repeat(60) + '\n');
+    const args = process.argv.slice(2);
+    const skipConfirm = args.includes('--yes') || args.includes('-y');
+    const minutesArg = args.find((a) => a !== '--yes' && a !== '-y' && !a.startsWith('-'));
+    const minutes = minutesArg ? parseInt(minutesArg, 10) : DEFAULT_MINUTES;
 
-    // Connect to database
+    if (isNaN(minutes) || minutes < 1) {
+      logger.warn(`Invalid minutes "${minutesArg}". Using default: ${DEFAULT_MINUTES} minutes.`);
+    }
+
+    const effectiveMinutes = isNaN(minutes) || minutes < 1 ? DEFAULT_MINUTES : minutes;
+    const cutoff = new Date(Date.now() - effectiveMinutes * 60 * 1000);
+
+    logger.info('\n' + '='.repeat(60));
+    logger.info('🗑️  Delete Recently Added Products (by minutes)');
+    logger.info('='.repeat(60));
+    logger.info(`   Time window: last ${effectiveMinutes} minute(s)`);
+    logger.info(`   Cutoff: products created before ${cutoff.toISOString()} will be KEPT.`);
+    logger.info(`   Products created AFTER that will be DELETED.\n`);
+
     await connectDatabase();
     logger.info('✅ Connected to MongoDB\n');
 
-    // Create readline interface for user input
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
-
-    // Ask for number of hours
-    const hoursInput = await new Promise<string>((resolve) => {
-      rl.question('⏰ How many hours back should we delete products from? (e.g., 8, 12, 15, 24, 30, 48): ', (input) => {
-        resolve(input.trim());
-      });
-    });
-
-    const hours = parseFloat(hoursInput);
-    if (isNaN(hours) || hours <= 0) {
-      logger.error('❌ Invalid input. Please enter a positive number.');
-      rl.close();
-      await mongoose.connection.close();
-      process.exit(1);
-    }
-
-    // Calculate the cutoff date (current time minus specified hours)
-    const cutoffDate = new Date();
-    cutoffDate.setTime(cutoffDate.getTime() - (hours * 60 * 60 * 1000));
-
-    // Format hours display
-    const hoursDisplay = hours < 24 
-      ? `${hours} hour(s)` 
-      : hours === 24 
-        ? '24 hours (1 day)'
-        : `${hours} hours (${(hours / 24).toFixed(1)} days)`;
-
-    logger.info(`\n📊 Looking for products created after: ${cutoffDate.toLocaleString()}`);
-    logger.info(`⏰ Time period: Last ${hoursDisplay}\n`);
-
-    // Find products created after the cutoff date
     const recentProducts = await Product.find({
-      createdAt: { $gte: cutoffDate },
-      deletedAt: null // Only non-deleted products
+      createdAt: { $gte: cutoff },
     })
-      .select('name slug createdAt brand category')
-      .populate('category', 'name')
+      .select('name sku createdAt category petType')
       .sort({ createdAt: -1 })
       .lean();
 
     const productCount = recentProducts.length;
 
     if (productCount === 0) {
-      logger.info('ℹ️  No products found in the specified time period.');
-      rl.close();
+      logger.info(`ℹ️  No products found that were added in the last ${effectiveMinutes} minute(s).`);
       await mongoose.connection.close();
       process.exit(0);
+      return;
     }
 
-    logger.info(`📦 Found ${productCount} product(s) created in the last ${hoursDisplay}:\n`);
-
-    // Show preview of products that will be deleted
-    logger.info('📋 Products that will be deleted:');
-    logger.info('-'.repeat(60));
-    recentProducts.forEach((product, idx) => {
-      const categoryName = (product.category as any)?.name || 'N/A';
-      const createdDate = new Date(product.createdAt).toLocaleString();
-      logger.info(`   ${idx + 1}. ${product.name}`);
-      logger.info(`      Brand: ${product.brand} | Category: ${categoryName}`);
-      logger.info(`      Created: ${createdDate}`);
-      logger.info(`      Slug: ${product.slug}\n`);
+    logger.info(`📦 Found ${productCount} product(s) added in the last ${effectiveMinutes} minute(s):\n`);
+    recentProducts.forEach((p: any, idx: number) => {
+      const created = p.createdAt ? new Date(p.createdAt).toISOString() : '?';
+      logger.info(`   ${idx + 1}. ${p.name || '(no name)'} | SKU: ${p.sku || '—'} | ${created}`);
     });
-    logger.info('-'.repeat(60) + '\n');
+    logger.info('');
 
-    // Confirmation prompt
-    const answer = await new Promise<string>((resolve) => {
-      rl.question(`⚠️  Are you sure you want to delete these ${productCount} product(s)? Type "YES" to confirm: `, (input) => {
-        rl.close();
-        resolve(input.trim());
+    if (!skipConfirm) {
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
       });
-    });
 
-    if (answer !== 'YES') {
-      logger.info('\n❌ Deletion cancelled. Products were NOT deleted.\n');
-      await mongoose.connection.close();
-      process.exit(0);
+      const answer = await new Promise<string>((resolve) => {
+        rl.question(`⚠️  Type "DELETE" (all caps) to delete these ${productCount} product(s): `, (input) => {
+          rl.close();
+          resolve((input || '').trim());
+        });
+      });
+
+      if (answer !== 'DELETE') {
+        logger.info('\n❌ Deletion cancelled. (You must type exactly "DELETE" in all caps.) No products were deleted.\n');
+        await mongoose.connection.close();
+        process.exit(0);
+        return;
+      }
+    } else {
+      logger.info(`🗑️  --yes passed: deleting ${productCount} product(s) without confirmation...\n`);
     }
 
-    logger.info('\n🗑️  Deleting products...\n');
-    
-    // Delete products
-    const result = await Product.deleteMany({
-      createdAt: { $gte: cutoffDate },
-      deletedAt: null
-    });
-    
-    logger.info('='.repeat(60));
+    const ids = recentProducts.map((p: any) => p._id);
+    const result = await Product.deleteMany({ _id: { $in: ids } });
+
+    logger.info('\n' + '='.repeat(60));
     logger.info('📊 Deletion Summary:');
     logger.info(`   ✅ Deleted: ${result.deletedCount} product(s)`);
-    logger.info(`   ⏰ Time period: Last ${hoursDisplay}`);
-    logger.info(`   📅 Cutoff date: ${cutoffDate.toLocaleString()}`);
     logger.info('='.repeat(60) + '\n');
 
-    // Verify deletion
-    const remainingCount = await Product.countDocuments({
-      createdAt: { $gte: cutoffDate },
-      deletedAt: null
-    });
-    
-    if (remainingCount === 0) {
-      logger.info('✅ Success! All products from the specified period have been deleted.\n');
-    } else {
-      logger.info(`⚠️  Warning: ${remainingCount} product(s) still remain in the specified period.\n`);
-    }
-
-    // Show total products remaining
-    const totalRemaining = await Product.countDocuments({ deletedAt: null });
-    logger.info(`📦 Total products remaining in database: ${totalRemaining}\n`);
-
-    // Close connection
     await mongoose.connection.close();
-    logger.info('✅ Database connection closed\n');
-    
-    return {
-      success: true,
-      deleted: result.deletedCount,
-      remaining: remainingCount,
-      totalRemaining: totalRemaining
-    };
+    logger.info('✅ Database connection closed.\n');
   } catch (error: any) {
     logger.error('❌ Deletion failed:', error.message);
-    logger.error(error.stack);
     if (mongoose.connection.readyState === 1) {
       await mongoose.connection.close();
     }
@@ -156,18 +105,16 @@ const deleteRecentProducts = async () => {
   }
 };
 
-// Run if executed directly
 if (require.main === module) {
   deleteRecentProducts()
     .then(() => {
       logger.info('✅ Operation completed successfully!');
       process.exit(0);
     })
-    .catch((error) => {
-      logger.error('\n❌ Operation failed:', error);
+    .catch((err) => {
+      logger.error('\n❌ Operation failed:', err);
       process.exit(1);
     });
 }
 
 export default deleteRecentProducts;
-

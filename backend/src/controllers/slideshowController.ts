@@ -126,11 +126,11 @@ export const createSlide = async (req: AuthRequest, res: Response, next: NextFun
       order
     } = req.body;
 
-    // Validation
-    if (!title || !subtitle || !description || !buttonText || !buttonLink || !imageUrl) {
+    // Validation - Only imageUrl is required for simple banner design
+    if (!imageUrl) {
       return res.status(400).json({
         success: false,
-        message: 'Title, subtitle, description, buttonText, buttonLink, and imageUrl are required'
+        message: 'Image URL is required'
       });
     }
 
@@ -142,11 +142,11 @@ export const createSlide = async (req: AuthRequest, res: Response, next: NextFun
     }
 
     const slide = new Slideshow({
-      title,
-      subtitle,
-      description,
-      buttonText,
-      buttonLink,
+      title: title || 'Banner',
+      subtitle: subtitle || '',
+      description: description || '',
+      buttonText: buttonText || '',
+      buttonLink: buttonLink || '',
       imageUrl,
       backgroundColor: backgroundColor || 'bg-gradient-to-br from-blue-50 via-white to-purple-50',
       theme: theme || 'product',

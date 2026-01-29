@@ -28,7 +28,6 @@
     "format-product-descriptions": "ts-node src/utils/formatAllProductDescriptions.ts",
     "delete-all-products": "ts-node src/scripts/deleteAllProducts.ts",
     "delete-recent-products": "ts-node src/scripts/deleteRecentProducts.ts",
-    "delete-recent-by-category": "ts-node src/scripts/deleteRecentProductsByCategory.ts",
     "check-category-hierarchy": "ts-node src/scripts/checkCategoryHierarchy.ts",
     "fix-category-hierarchy": "ts-node src/scripts/fixCategoryHierarchy.ts",
     "check-pet-types-db": "ts-node src/scripts/checkPetTypesInDB.ts",

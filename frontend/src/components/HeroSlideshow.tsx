@@ -17,25 +17,23 @@ const HeroSlideshow = () => {
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
     refetchOnWindowFocus: false,
-    // Prioritize this query for faster LCP image discovery
-    retry: 1, // Reduce retries for faster failure
-    retryDelay: 100 // Faster retry
+    retry: 1,
+    retryDelay: 100
   });
 
-  // PERFORMANCE FIX: Preload hero images for better LCP
+  // Preload hero images for better LCP
   useEffect(() => {
     if (slides.length === 0) return;
     
-    // Preload first 2 slides (LCP images)
+    // Preload first 2 slides - optimized for 1920x720 (16:6 ratio)
     const imagesToPreload = slides.slice(0, 2).map(slide => 
       normalizeImageUrl(slide.leftImage || slide.imageUrl, { 
-        width: 1200, 
-        height: 600, 
+        width: 1920, 
+        height: 720, 
         format: 'auto'
       })
     );
     
-    // Preload images
     imagesToPreload.forEach(src => {
       const link = document.createElement('link');
       link.rel = 'preload';
@@ -44,25 +42,22 @@ const HeroSlideshow = () => {
       document.head.appendChild(link);
     });
     
-    // Also preload using Image objects for better browser support
     imagesToPreload.forEach(src => {
       const img = new Image();
       img.src = src;
     });
   }, [slides]);
 
-  // Preload the first slide image (LCP image) for better performance
-  // Use mobile-optimized size for faster loading
+  // Preload the first slide image (LCP image)
   const firstSlideImage = slides.length > 0 
     ? normalizeImageUrl(slides[0].leftImage || slides[0].imageUrl, { 
-        width: 320, 
-        height: 240, 
-        format: 'auto',
-        isMobile: true 
+        width: 1920, 
+        height: 720, 
+        format: 'auto'
       })
     : null;
 
-  // Auto-advance slides every 5 seconds (only if slides exist)
+  // Auto-advance slides every 5 seconds
   useEffect(() => {
     if (slides.length === 0) return;
     
@@ -90,7 +85,7 @@ const HeroSlideshow = () => {
     return (
       <div className="w-full mt-4">
         <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-4">
-          <div className="relative w-full overflow-hidden bg-white rounded-xl shadow-lg h-[260px] md:h-[280px] lg:h-[300px] flex items-center justify-center">
+          <div className="relative w-full overflow-hidden bg-gray-100 rounded-xl shadow-lg aspect-[16/6] flex items-center justify-center">
             <LoadingSpinner />
           </div>
         </div>
@@ -112,182 +107,113 @@ const HeroSlideshow = () => {
         </Helmet>
       )}
       <div className="w-full mt-4">
-        {/* Main Slideshow */}
         <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-4">
-        <div className="relative w-full overflow-hidden bg-white rounded-xl shadow-lg">
-          {/* Slides Container - Increased height on mobile to fit content */}
-          <div 
-            className="relative w-full h-[400px] sm:h-[420px] md:h-[280px] lg:h-[300px]"
-            style={{ contain: 'layout style paint' }} // Prevent layout shifts
-          >
-            {slides.map((slide, index) => (
-              <div
-                key={slide._id || slide.id}
-                className={`absolute inset-0 transition-all duration-1000 ${
-                  index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-                }`}
-              >
-                <div className={`w-full h-full ${slide.backgroundColor || 'bg-gradient-to-br from-blue-50 via-white to-purple-50'}`}>
-                  {/* Mobile: Stack vertically, Desktop: Side by side */}
-                  <div className="flex flex-col md:grid md:grid-cols-2 h-full">
-                    
-                    {/* Content Section - Top on mobile, Left on desktop */}
-                    <div className="relative flex items-center justify-center p-2 sm:p-3 md:p-6 overflow-visible flex-shrink-0 md:flex-shrink h-auto md:h-full">
-                      {/* Modern Diagonal Striped Pattern */}
-                      <div className="absolute inset-0 opacity-80" style={{
-                        backgroundImage: `repeating-linear-gradient(
-                          45deg,
-                          #1E3A8A 0px,
-                          #1E3A8A 30px,
-                          #3B82F6 30px,
-                          #3B82F6 50px,
-                          #ffffff 50px,
-                          #ffffff 60px,
-                          #EF4444 60px,
-                          #EF4444 90px,
-                          #ffffff 90px,
-                          #ffffff 100px,
-                          #1E3A8A 100px,
-                          #1E3A8A 130px
-                        )`
-                      }}></div>
-
-                      {/* Animated Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 animate-pulse"></div>
-
-                      {/* Content Card with Glass Effect - Optimized for mobile */}
-                      <div className="relative bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl p-2.5 sm:p-3 md:p-6 shadow-xl max-w-sm w-full border border-white/50 transform hover:scale-105 transition-transform duration-300">
-                        <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-md">
-                          SALE
-                        </div>
-                        <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-1 sm:mb-2 leading-tight">
-                          {slide.title}
-                        </h1>
-                        <p className="text-sm sm:text-base md:text-lg font-semibold text-gray-700 mb-0.5 sm:mb-1">
-                          {slide.subtitle}
-                        </p>
-                        <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-2 sm:mb-3 line-clamp-2">
-                          {slide.description}
-                        </p>
-                        <Link
-                          to={slide.buttonLink}
-                          className="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 duration-300"
-                        >
-                          {slide.buttonText} →
-                        </Link>
-                        <p className="text-[10px] sm:text-xs text-gray-500 mt-1 sm:mt-2 italic">
-                          *Exclusions apply.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Image Section - Bottom on mobile, Right on desktop */}
-                    <div 
-                      className="relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex-1 h-[200px] sm:h-[220px] md:h-full md:min-h-0" 
+          <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
+            {/* Slides Container - Full-width banner images with consistent 16:6 ratio for all devices */}
+            <div 
+              className="relative w-full aspect-[16/6]"
+              style={{ contain: 'layout style paint' }}
+            >
+              {slides.map((slide, index) => {
+                const imageUrl = slide.leftImage || slide.imageUrl;
+                const slideContent = (
+                  <div
+                    key={slide._id || slide.id}
+                    className={`absolute inset-0 transition-all duration-1000 ${
+                      index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                    }`}
+                  >
+                    <img
+                      src={normalizeImageUrl(imageUrl, { 
+                        width: 1920, 
+                        height: 720, 
+                        format: 'auto'
+                      })}
+                      srcSet={generateSrcSet(imageUrl, [640, 768, 1024, 1280, 1920], { format: 'auto' })}
+                      sizes="100vw"
+                      alt={slide.title || 'Banner'}
+                      width={1920}
+                      height={720}
+                      loading={index === 0 ? "eager" : "lazy"}
+                      fetchPriority={index === 0 ? "high" : "auto"}
+                      decoding={index === 0 ? "sync" : "async"}
+                      className="w-full h-full object-cover"
                       style={{ 
-                        contain: 'layout style paint'
+                        objectFit: 'cover',
+                        willChange: index === 0 ? 'contents' : undefined
                       }}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                      <img
-                        src={index === 0 
-                          ? normalizeImageUrl(slide.leftImage || slide.imageUrl, { 
-                              width: 320, 
-                              height: 240, 
-                              format: 'auto',
-                              isMobile: true 
-                            })
-                          : normalizeImageUrl(slide.leftImage || slide.imageUrl, { 
-                              width: 576, 
-                              height: 432, 
-                              format: 'auto',
-                              isMobile: true 
-                            })
+                      onError={(e) => {
+                        // Fallback handling
+                        const target = e.target as HTMLImageElement;
+                        if (target.src !== imageUrl) {
+                          target.src = imageUrl;
                         }
-                        srcSet={generateSrcSet(slide.leftImage || slide.imageUrl, [320, 576, 768], { format: 'auto' })}
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 576px"
-                        alt={slide.title}
-                        width={576}
-                        height={432}
-                        loading={index === 0 ? "eager" : "lazy"}
-                        fetchPriority={index === 0 ? "high" : "auto"}
-                        decoding={index === 0 ? "sync" : "async"}
-                        className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700"
-                        style={{ 
-                          objectFit: 'cover',
-                          willChange: index === 0 ? 'contents' : undefined, // Optimize rendering for LCP
-                          containIntrinsicSize: index === 0 ? '320px 240px' : '576px 432px'
-                        }}
-                        onError={(e) => {
-                          // Fallback to imageUrl if leftImage fails
-                          if (slide.leftImage && slide.imageUrl && (e.target as HTMLImageElement).src !== slide.imageUrl) {
-                            (e.target as HTMLImageElement).src = normalizeImageUrl(slide.imageUrl, { 
-                              width: 576, 
-                              height: 432, 
-                              format: 'auto' 
-                            });
-                          }
-                        }}
-                      />
-                      {/* Decorative Corner Badge - Hidden on very small screens */}
-                      <div className="hidden sm:block absolute top-2 right-2 sm:top-4 sm:right-4 bg-white/90 backdrop-blur-sm px-2 sm:px-4 py-1 sm:py-2 rounded-full shadow-lg">
-                        <p className="text-[10px] sm:text-xs font-bold text-blue-600">🐾 Trusted Quality</p>
-                      </div>
-                    </div>
+                      }}
+                    />
                   </div>
-                </div>
+                );
+
+                // Make banner clickable if buttonLink is provided
+                if (slide.buttonLink) {
+                  return (
+                    <Link
+                      key={slide._id || slide.id}
+                      to={slide.buttonLink}
+                      className="block"
+                    >
+                      {slideContent}
+                    </Link>
+                  );
+                }
+
+                return slideContent;
+              })}
+            </div>
+
+            {/* Navigation Arrows */}
+            {slides.length > 1 && (
+              <>
+                <button
+                  onClick={prevSlide}
+                  className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 hover:text-blue-600 p-2 md:p-3 rounded-full transition-all shadow-lg hover:shadow-xl z-20 transform hover:scale-110 duration-300"
+                  aria-label="Previous slide"
+                  style={{ minWidth: '44px', minHeight: '44px' }}
+                >
+                  <ChevronLeft size={20} className="md:w-6 md:h-6" />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 hover:text-blue-600 p-2 md:p-3 rounded-full transition-all shadow-lg hover:shadow-xl z-20 transform hover:scale-110 duration-300"
+                  aria-label="Next slide"
+                  style={{ minWidth: '44px', minHeight: '44px' }}
+                >
+                  <ChevronRight size={20} className="md:w-6 md:h-6" />
+                </button>
+              </>
+            )}
+
+            {/* Slide Indicators */}
+            {slides.length > 1 && (
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-20 bg-white/70 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md">
+                {slides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={`rounded-full transition-all duration-300 ${
+                      index === currentSlide
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 w-8 h-2'
+                        : 'bg-gray-400 hover:bg-gray-600 w-2 h-2'
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
               </div>
-            ))}
-          </div>
-
-          {/* Enhanced Navigation Arrows - Larger touch targets for mobile */}
-          <button
-            onClick={prevSlide}
-            className="absolute left-1 sm:left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white hover:bg-blue-600 text-gray-800 hover:text-white p-2.5 sm:p-3 md:p-3 rounded-full transition-all shadow-lg hover:shadow-xl z-10 transform hover:scale-110 duration-300 touch-manipulation"
-            aria-label="Previous slide"
-            style={{ minWidth: '44px', minHeight: '44px' }}
-          >
-            <ChevronLeft size={20} className="sm:w-5 sm:h-5" />
-          </button>
-          <button
-            onClick={nextSlide}
-            className="absolute right-1 sm:right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white hover:bg-blue-600 text-gray-800 hover:text-white p-2.5 sm:p-3 md:p-3 rounded-full transition-all shadow-lg hover:shadow-xl z-10 transform hover:scale-110 duration-300 touch-manipulation"
-            aria-label="Next slide"
-            style={{ minWidth: '44px', minHeight: '44px' }}
-          >
-            <ChevronRight size={20} className="sm:w-5 sm:h-5" />
-          </button>
-
-          {/* Modern Slide Indicators - Hidden on mobile, visible on desktop */}
-          <div className="hidden md:flex absolute bottom-3 left-1/2 -translate-x-1/2 gap-2 z-10 bg-white/70 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-md">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                className={`rounded-full transition-all duration-300 flex items-center justify-center ${
-                  index === currentSlide
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600'
-                    : 'bg-gray-400 hover:bg-gray-600'
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
-                style={{ 
-                  minWidth: '24px', 
-                  minHeight: '24px',
-                  width: index === currentSlide ? '20px' : '8px',
-                  height: '8px',
-                  padding: index === currentSlide ? '0' : '8px'
-                }}
-              />
-            ))}
+            )}
           </div>
         </div>
       </div>
-
-      {/* Enhanced Promotional Cards Section */}
-    </div>
     </>
   );
 };
 
 export default HeroSlideshow;
-

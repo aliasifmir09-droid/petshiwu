@@ -19,32 +19,37 @@ const slideshowSchema = new Schema<ISlideshow>(
   {
     title: {
       type: String,
-      required: [true, 'Title is required'],
+      required: false,
       trim: true,
+      default: 'Banner',
       maxlength: [100, 'Title cannot exceed 100 characters']
     },
     subtitle: {
       type: String,
-      required: [true, 'Subtitle is required'],
+      required: false,
       trim: true,
+      default: '',
       maxlength: [150, 'Subtitle cannot exceed 150 characters']
     },
     description: {
       type: String,
-      required: [true, 'Description is required'],
+      required: false,
       trim: true,
+      default: '',
       maxlength: [200, 'Description cannot exceed 200 characters']
     },
     buttonText: {
       type: String,
-      required: [true, 'Button text is required'],
+      required: false,
       trim: true,
+      default: '',
       maxlength: [50, 'Button text cannot exceed 50 characters']
     },
     buttonLink: {
       type: String,
-      required: [true, 'Button link is required'],
-      trim: true
+      required: false,
+      trim: true,
+      default: ''
     },
     imageUrl: {
       type: String,
