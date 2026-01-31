@@ -942,6 +942,18 @@ app.get('/', (req, res) => {
   });
 });
 
+// GET /api - API root info (when frontend base URL is /api)
+app.get('/api', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'PetShiwu API',
+    version: API_VERSION,
+    docs: '/api-docs',
+    health: '/api/health',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // CODE QUALITY FIX: Removed duplicate /health route
 // Health check endpoint is now only available at /api/health (via healthRoutes)
 // This provides comprehensive health information including database and Redis status
