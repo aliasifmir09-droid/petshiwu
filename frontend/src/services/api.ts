@@ -122,10 +122,11 @@ api.interceptors.response.use(
         }, 1000);
       }
     } else if (error.response?.status === 403) {
-      // Don't redirect for order endpoints - let the component handle the error
+      // Don't redirect for auth/login (email verification required) - let Login handle it
+      const isAuthLogin = url.includes('/auth/login');
+      const requiresVerification = error.response?.data?.requiresVerification;
       const isOrderEndpoint = url.includes('/orders/');
-      if (!isOrderEndpoint) {
-        // Redirect to 403 page for other endpoints
+      if (!isOrderEndpoint && !(isAuthLogin && requiresVerification)) {
         window.location.href = '/403';
       }
     } else if (error.response?.status === 404 && !isWishlistEndpoint && !isProductEndpoint) {

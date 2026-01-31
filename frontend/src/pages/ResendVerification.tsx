@@ -1,16 +1,25 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Mail, ArrowLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Mail, ArrowLeft, AlertCircle } from 'lucide-react';
 import api from '@/services/api';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { trackEmailVerification } from '@/utils/analytics';
 
 const ResendVerification = () => {
+  const [searchParams] = useSearchParams();
   const { toast, showToast, hideToast } = useToast();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const reason = searchParams.get('reason');
+  const fromLogin = reason === 'login';
+
+  useEffect(() => {
+    const emailParam = searchParams.get('email');
+    if (emailParam) setEmail(decodeURIComponent(emailParam));
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,11 +51,26 @@ const ResendVerification = () => {
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
         <div className="bg-white rounded-lg shadow-lg p-8">
+          {fromLogin && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 flex gap-3">
+              <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-amber-800">Email verification required</p>
+                <p className="text-amber-700 text-sm mt-1">
+                  Please verify your email address before logging in. Check your inbox for the verification link, or resend it below.
+                </p>
+              </div>
+            </div>
+          )}
           <div className="text-center mb-6">
             <Mail className="w-12 h-12 mx-auto mb-4 text-primary-600" />
-            <h1 className="text-2xl font-bold mb-2">Resend Verification Email</h1>
+            <h1 className="text-2xl font-bold mb-2">
+              {fromLogin ? 'Verify Your Email' : 'Resend Verification Email'}
+            </h1>
             <p className="text-gray-600">
-              Enter your email address and we'll send you a new verification link.
+              {fromLogin
+                ? "We've sent a verification link to your email. Didn't receive it? Enter your email below to resend."
+                : "Enter your email address and we'll send you a new verification link."}
             </p>
           </div>
 

@@ -56,9 +56,14 @@ const Login = () => {
       navigate(redirect);
     },
     onError: (error: any) => {
+      // Redirect to verify page when email not verified - use email from submitted data
+      if (error?.response?.status === 403 && error?.response?.data?.requiresVerification) {
+        const email = formData.email?.trim() || '';
+        navigate(`/resend-verification?email=${encodeURIComponent(email)}&reason=login`);
+        return;
+      }
       // Don't show error if it's just about missing token (expected in Phase 2)
       if (!error?.message?.includes('token') && !error?.message?.includes('Token')) {
-        // Extract proper error message (handles rate limiting and other errors)
         const errorMessage = extractErrorMessage(error);
         showToast(errorMessage, 'error');
       }
