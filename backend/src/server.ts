@@ -693,15 +693,19 @@ app.use(cookieParser());
 // Response sanitization - Remove sensitive data from responses
 app.use(sanitizeResponse);
 
-// Enable CORS
+// Enable CORS - merge env CORS_ORIGIN (comma-separated) with defaults
+const corsOriginEnv = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(o => o.trim()).filter(Boolean)
+  : [];
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:5173',
   process.env.ADMIN_URL || 'http://localhost:5174',
-  'https://pet-shop-1-d7ec.onrender.com', // Frontend production URL
-  'https://pet-shop-2-r3ed.onrender.com', // Admin production URL
-  'https://dashboard.petshiwu.com', // Admin dashboard production URL
-  'https://www.petshiwu.com', // Frontend production URL (with www)
-  'https://petshiwu.com', // Frontend production URL (without www)
+  ...corsOriginEnv,
+  'https://pet-shop-1-d7ec.onrender.com',
+  'https://pet-shop-2-r3ed.onrender.com',
+  'https://dashboard.petshiwu.com',
+  'https://www.petshiwu.com',
+  'https://petshiwu.com',
 ];
 
 app.use(cors({

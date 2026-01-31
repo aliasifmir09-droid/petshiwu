@@ -342,6 +342,20 @@ cd frontend
 npm test
 ```
 
+## 🔧 Troubleshooting
+
+### CORS errors (blocked by CORS policy)
+If the frontend at `https://www.petshiwu.com` cannot reach your backend API:
+1. **Set `CORS_ORIGIN`** on your backend (Render/env): `https://www.petshiwu.com,https://petshiwu.com`
+2. The backend also allows origins matching `petshiwu.com` by pattern—ensure your backend is deployed with the latest code
+3. **Match API URL**: Set `VITE_API_URL` when building the frontend to your backend URL (e.g. `https://your-backend.onrender.com/api`)
+
+### 403 on product images (Scene7 / PetSmart CDN)
+External CDNs (e.g. PetSmart’s `scene7.com`) may block hotlinking and return 403. Products with such images will show a placeholder instead of the original image. To fix: re-upload product images to Cloudinary or another allowed CDN.
+
+### 429 Too Many Requests
+Registration is limited to 3 attempts per hour per IP. If CORS failures cause retries, you may hit this limit. Fix CORS first; if needed, wait an hour before retrying registration.
+
 ## 📈 Roadmap & Future Enhancements
 
 **Phase 1: Core Features** ✅ (Completed)
@@ -410,3 +424,4 @@ MIT License - feel free to use this project for learning and commercial purposes
 ---
 
 **Made with ❤️ for pet lovers everywhere**
+

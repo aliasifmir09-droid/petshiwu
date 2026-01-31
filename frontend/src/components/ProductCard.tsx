@@ -33,7 +33,6 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
   const productId = product._id ? String(product._id) : null;
   const inWishlist = productId ? isInWishlist(productId) : false;
   const [isHovered, setIsHovered] = useState(false);
-  const [imageFailed, setImageFailed] = useState(false);
   const [showQuickView, setShowQuickView] = useState(false);
 
   // Handle click on product card - track recommendation clicks if applicable
@@ -67,10 +66,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
   // Determine loading priority (first 4 products or explicit priority)
   const shouldLoadEager = priority || (index !== undefined && index < 4);
   
-  // Hide product if image has failed to load
-  if (imageFailed) {
-    return null;
-  }
+  // Show placeholder when image fails (403, 404, etc.) instead of hiding product
 
   const handleWishlistToggle = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -142,11 +138,8 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
           {...(shouldLoadEager ? { fetchpriority: "high" as any } : { fetchpriority: "auto" as any })}
           onError={(e) => {
             handleImageError(e, product.name);
-            // Mark this product's image as failed - will hide the product
-            if (productId) {
-              markImageFailed(productId);
-              setImageFailed(true);
-            }
+            // Show placeholder instead of hiding - mark as failed for load tracking
+            if (productId) markImageFailed(productId);
             // Suppress console errors for failed image loads (403, 404, etc.)
             e.stopPropagation();
           }}
