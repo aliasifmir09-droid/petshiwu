@@ -116,23 +116,18 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
       
       {/* Logo */}
       <div className="p-6 border-b border-white/20 relative z-10">
-        <Link to="/" className="flex items-center gap-3 mb-1 group">
+        <Link to="/" className="flex justify-center mb-1 group">
           <div className="relative">
             <img 
               src="/logo.png" 
-              alt="petshiwu Logo" 
-              className="h-16 w-16 lg:h-20 lg:w-20 object-contain transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 drop-shadow-2xl relative z-10"
+              alt="Petshiwu Logo" 
+              className="h-20 w-20 lg:h-28 lg:w-28 object-contain transform group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl relative z-10"
             />
             {/* Glow effect on hover */}
             <div className="absolute inset-0 bg-white/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           </div>
-          <span className="text-2xl font-black text-white tracking-tight group-hover:tracking-wide transition-all duration-300 relative" style={{ fontFamily: "'Nunito', sans-serif" }}>
-            petshiwu
-            {/* Underline animation */}
-            <span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-yellow-300 to-pink-300 group-hover:w-full transition-all duration-500 rounded-full"></span>
-          </span>
         </Link>
-        <p className="text-xs text-blue-200 ml-20 mt-1">Admin Dashboard</p>
+        <p className="text-xs text-blue-200 text-center mt-2">Admin Dashboard</p>
         {userData && (
           <div className="mt-3 pt-3 border-t border-white/20">
             <p className="text-sm text-white font-semibold">

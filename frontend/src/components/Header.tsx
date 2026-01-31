@@ -124,83 +124,52 @@ const Header = () => {
     }
   };
 
-  // Learning Center Categories Component
-  const LearningCategories = ({ onLinkClick }: { onLinkClick?: () => void } = {}) => {
-    const { data: categories } = useQuery({
-      queryKey: ['blog-categories', 'learning'],
-      queryFn: () => blogService.getBlogCategories(),
-      retry: false,
-      staleTime: 10 * 60 * 1000
-    });
-
-    const learningCategories = [
-      'Dog Care',
-      'Cat Care',
-      'Fish Care',
-      'Fish Compatibility Guide'
-    ];
-
-    const displayCategories = categories && categories.length > 0 
-      ? categories.filter((cat: any) => learningCategories.includes(cat.name))
-      : learningCategories.map((name) => ({ name, count: 0 }));
-
-    return (
-      <ul className="space-y-1">
-        {displayCategories.map((cat: any, index: number) => {
-          const name = typeof cat === 'string' ? cat : cat.name;
-          return (
-            <li key={index}>
-              <Link
-                to={`/learning?category=${encodeURIComponent(name)}`}
-                onClick={onLinkClick}
-                className={onLinkClick 
-                  ? "block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-                  : "text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5"
-                }
-              >
-                {name}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    );
+  // Format pet type slug to display name
+  const formatPetTypeName = (slug: string) => {
+    if (slug === 'all') return 'General';
+    const pt = petTypes?.find((p: any) => p.slug === slug);
+    return pt?.name || slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   };
 
-  // New Pet Categories Component
-  const NewPetCategories = ({ onLinkClick }: { onLinkClick?: () => void }) => {
-    const { data: petTypes } = useQuery({
-      queryKey: ['pet-types'],
-      queryFn: async () => {
-        const response = await api.get('/pet-types');
-        return response.data;
-      },
+  // Learning Center - pet types only (one each). Click Dog → all dog blogs, Cat → all cat blogs.
+  const LearningCategories = ({ onLinkClick }: { onLinkClick?: () => void } = {}) => {
+    const { data: categoriesByPetType } = useQuery({
+      queryKey: ['blog-categories-by-pet-type'],
+      queryFn: () => blogService.getBlogCategoriesByPetType(),
       retry: false,
       staleTime: 10 * 60 * 1000
     });
 
-    const newPetTypes = ['Dog', 'Cat', 'Small Pet', 'Fish'];
-    const displayTypes = petTypes?.data 
-      ? petTypes.data.filter((pt: any) => newPetTypes.includes(pt.name))
-      : newPetTypes.map((name) => ({ name, slug: name.toLowerCase().replace(/\s+/g, '-') }));
+    const linkClass = onLinkClick
+      ? "block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
+      : "text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5";
+
+    if (!categoriesByPetType || categoriesByPetType.length === 0) {
+      return (
+        <p className="text-xs text-gray-500 px-3 py-2">No blogs yet. Add blogs in admin to see pet types here.</p>
+      );
+    }
+
+    // Dedupe by petType slug and sort for consistent display
+    const uniquePetTypes = [...new Map(
+      categoriesByPetType
+        .filter(({ categories }: { categories: unknown[] }) => categories.length > 0)
+        .map(({ petType }: { petType: string }) => [petType.toLowerCase(), petType])
+    ).values()];
 
     return (
-      <ul className="space-y-1">
-        {displayTypes.map((pt: any, index: number) => {
-          const name = typeof pt === 'string' ? pt : pt.name;
-          const slug = typeof pt === 'string' ? pt.toLowerCase().replace(/\s+/g, '-') : pt.slug;
-          return (
-            <li key={index}>
-              <Link
-                to={`/learning?petType=${slug}&category=New Pet`}
-                onClick={onLinkClick}
-                className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-              >
-                {name}
-              </Link>
-            </li>
-          );
-        })}
+      <ul className="space-y-0.5">
+        {uniquePetTypes.map((petType) => (
+          <li key={petType}>
+            <Link
+              to={`/learning?petType=${encodeURIComponent(petType)}`}
+              onClick={onLinkClick}
+              className={linkClass}
+            >
+              {formatPetTypeName(petType)}
+            </Link>
+          </li>
+        ))}
       </ul>
     );
   };
@@ -352,6 +321,197 @@ const Header = () => {
     setIsLearningExpanded(prev => !prev);
   };
 
+  /**
+   * Shared vertical nav content - used by both Mobile Menu and Left Sidebar.
+   * When updating nav bar items, update this function to keep all menus in sync.
+   */
+  const renderVerticalNavContent = (onLinkClick: () => void, options?: { compact?: boolean }) => {
+    const compact = options?.compact ?? false;
+    const px = compact ? 'px-3' : 'px-4';
+    const py = 'py-3';
+
+    return (
+      <>
+        {/* Pet Types with Categories */}
+        {petTypes.map((petType: any) => {
+          const petCategories = getCategoriesForPetType(petType.slug);
+          const isExpanded = expandedMobilePetTypes.has(petType.slug);
+          const megaMenu = Array.isArray(categories) && categories.length > 0 ? buildDynamicMegaMenu(petType.slug) : [];
+
+          return (
+            <li key={petType.slug}>
+              {petCategories.length > 0 ? (
+                <>
+                  <button
+                    onClick={() => toggleMobilePetType(petType.slug)}
+                    className={`w-full flex items-center justify-between gap-3 ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors overflow-hidden`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <span className="text-xl flex-shrink-0">{petType.icon}</span>
+                      <span className="truncate">{petType.name}</span>
+                    </div>
+                    <ChevronRight size={18} className={`transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                  </button>
+                  {isExpanded && (
+                    <div className={`ml-6 mt-2 space-y-2 ${compact ? '' : 'overflow-x-hidden max-w-full'}`}>
+                      {megaMenu.length > 0 ? (
+                        <>
+                          {megaMenu.map((section: MenuSection) => (
+                            <div key={section._id || section.slug} className="space-y-1 mb-3">
+                              <Link
+                                to={generateCategoryUrl(section.slug, petType.slug)}
+                                onClick={onLinkClick}
+                                className="text-sm font-bold text-gray-900 px-3 block hover:text-[#1E3A8A] transition-colors"
+                              >
+                                {decodeHtmlEntities(section.title)} →
+                              </Link>
+                              <div className="space-y-1">
+                                {section.items.map((item: MenuItem | string) => {
+                                  const itemSlug = typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'));
+                                  return (
+                                    <Link
+                                      key={typeof item === 'object' ? item.slug : String(item)}
+                                      to={generateCategoryUrl(itemSlug, petType.slug)}
+                                      onClick={onLinkClick}
+                                      className={`block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors ${compact ? '' : 'truncate overflow-hidden'}`}
+                                    >
+                                      {decodeHtmlEntities(typeof item === 'object' ? item.name : item)}
+                                    </Link>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      ) : (
+                        <>
+                          {petCategories.map((category: any) => {
+                            const subcategories = getSubcategories(category._id);
+                            return (
+                              <div key={category._id} className="space-y-1">
+                                <Link
+                                  to={generateCategoryUrl(category.slug, category.petType)}
+                                  onClick={onLinkClick}
+                                  className={`block py-2 px-3 text-sm font-semibold text-gray-900 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors ${compact ? '' : 'truncate overflow-hidden'}`}
+                                >
+                                  {decodeHtmlEntities(category.name)}
+                                </Link>
+                                {subcategories.length > 0 && (
+                                  <div className={compact ? 'ml-3' : 'ml-4'} style={{ marginTop: '0.25rem' }}>
+                                    {subcategories.map((sub: any) => {
+                                      const subSubcategories = getSubcategories(sub._id);
+                                      return (
+                                        <div key={sub._id} className="space-y-1">
+                                          <Link
+                                            to={generateCategoryUrl(sub.slug, sub.petType)}
+                                            onClick={onLinkClick}
+                                            className={`block py-1.5 px-3 text-sm text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors font-medium ${compact ? '' : 'truncate overflow-hidden'}`}
+                                          >
+                                            {decodeHtmlEntities(sub.name)}
+                                          </Link>
+                                          {subSubcategories.length > 0 && (
+                                            <div className={compact ? 'ml-3' : 'ml-4'} style={{ marginTop: '0.25rem' }}>
+                                              {subSubcategories.map((subSub: any) => (
+                                                <Link
+                                                  key={subSub._id}
+                                                  to={generateCategoryUrl(subSub.slug, subSub.petType)}
+                                                  onClick={onLinkClick}
+                                                  className={`block py-1 px-3 text-xs text-gray-500 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors ${compact ? '' : 'truncate overflow-hidden'}`}
+                                                >
+                                                  • {decodeHtmlEntities(subSub.name)}
+                                                </Link>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                          <Link
+                            to={`/${petType.slug}`}
+                            onClick={onLinkClick}
+                            className={`block py-2 px-3 text-sm font-semibold text-[#1E3A8A] hover:underline ${compact ? '' : 'truncate overflow-hidden'}`}
+                          >
+                            View All {petType.name} Products →
+                          </Link>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Link
+                  to={`/${petType.slug}`}
+                  onClick={onLinkClick}
+                  className={`flex items-center gap-3 ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors overflow-hidden`}
+                >
+                  <span className="text-xl flex-shrink-0">{petType.icon}</span>
+                  <span className="truncate">{petType.name}</span>
+                </Link>
+              )}
+            </li>
+          );
+        })}
+
+        {/* Today's Deals */}
+        <li>
+          <Link
+            to="/products?featured=true"
+            onClick={onLinkClick}
+            className={`flex items-center gap-3 ${py} ${px} font-bold bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors`}
+          >
+            <span className="text-xl">🔥</span>
+            <span>Today&apos;s Deals</span>
+          </Link>
+        </li>
+
+        {/* Learning Center - Expandable */}
+        <li>
+          <button
+            onClick={toggleLearningMenu}
+            className={`w-full flex items-center justify-between gap-3 ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors`}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-xl">📚</span>
+              <span>Learning</span>
+            </div>
+            <ChevronRight size={18} className={`transition-transform ${isLearningExpanded ? 'rotate-90' : ''}`} />
+          </button>
+          {isLearningExpanded && (
+            <div className="ml-6 mt-2 space-y-2 pb-2">
+              <Link to="/learning" onClick={onLinkClick} className="block py-2 px-3 text-sm font-semibold text-[#1E3A8A] hover:underline">
+                Learning Center →
+              </Link>
+              <Link to="/care-guides" onClick={onLinkClick} className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors">
+                Care Guides →
+              </Link>
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-gray-700 px-3 py-1">Categories</p>
+                <LearningCategories onLinkClick={onLinkClick} />
+              </div>
+            </div>
+          )}
+        </li>
+
+        {/* About */}
+        <li>
+          <Link
+            to="/about"
+            onClick={onLinkClick}
+            className={`flex items-center gap-3 ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors`}
+          >
+            <span className="text-xl">ℹ️</span>
+            <span>About Us</span>
+          </Link>
+        </li>
+      </>
+    );
+  };
+
   return (
     <>
       <header className="bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] sticky top-0 z-40 shadow-xl w-full">
@@ -370,16 +530,17 @@ const Header = () => {
               </button>
             )}
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 flex-shrink-0">
-              <img 
-                src="/logo.png" 
-                alt="petshiwu Logo" 
-                className="h-12 md:h-16 object-contain"
-                loading="eager"
-              />
-              <span className="text-xl font-bold text-white">
-                Petshiwu
-              </span>
+            <Link to="/" className="flex items-center flex-shrink-0 group">
+              <div className="relative">
+                <img 
+                  src="/logo.png" 
+                  alt="Petshiwu Logo" 
+                  className="h-16 md:h-24 object-contain transform group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl relative z-10"
+                  loading="eager"
+                />
+                {/* Glow effect on hover */}
+                <div className="absolute inset-0 bg-white/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              </div>
             </Link>
 
             {/* Search Bar - Desktop with Enhanced Design */}
@@ -729,23 +890,14 @@ const Header = () => {
                   
                   {/* Learning Center Dropdown Menu */}
                   <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[600px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    <div className="grid grid-cols-2 gap-6">
-                      {/* Learning Center Column */}
-                      <div className="space-y-2">
-                        <Link
-                          to="/learning"
-                          className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors block mb-3"
-                        >
-                          Learning Center →
-                        </Link>
-                        <LearningCategories />
-                      </div>
-                      
-                      {/* New Pet Column */}
-                      <div className="space-y-2">
-                        <h3 className="font-bold text-sm text-gray-900 mb-3">New Pet</h3>
-                        <NewPetCategories />
-                      </div>
+                    <div className="space-y-2">
+                      <Link
+                        to="/learning"
+                        className="font-bold text-sm text-gray-900 hover:text-[#1E3A8A] cursor-pointer transition-colors block mb-3"
+                      >
+                        Learning Center →
+                      </Link>
+                      <LearningCategories />
                     </div>
                   </div>
                 </li>
@@ -768,14 +920,20 @@ const Header = () => {
         {/* Overlay */}
         <div 
           className="fixed inset-0 bg-black/50 z-[45] lg:hidden"
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={() => {
+            setMobileMenuOpen(false);
+            setIsLearningExpanded(false);
+          }}
         />
         {/* Mobile Menu Panel */}
         <div className="fixed top-0 right-0 h-full w-[85vw] max-w-sm bg-white shadow-2xl z-[50] lg:hidden overflow-y-auto">
           <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between z-10">
             <h2 className="text-lg font-bold text-gray-900">Menu</h2>
             <button
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setIsLearningExpanded(false);
+              }}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               aria-label="Close Menu"
             >
@@ -821,230 +979,11 @@ const Header = () => {
               </div>
             </form>
             <ul className="space-y-1 text-gray-700 overflow-x-hidden">
-              {/* Dynamic Pet Types with Categories */}
-              {petTypes.map((petType: any) => {
-                const petCategories = getCategoriesForPetType(petType.slug);
-                const isExpanded = expandedMobilePetTypes.has(petType.slug);
-                const megaMenu = Array.isArray(categories) && categories.length > 0 ? buildDynamicMegaMenu(petType.slug) : [];
-                
-                return (
-                  <li key={petType.slug}>
-                    {petCategories.length > 0 ? (
-                      // Pet type with categories - expandable
-                      <>
-                        <button
-                          onClick={() => toggleMobilePetType(petType.slug)}
-                          className="w-full flex items-center justify-between gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors overflow-hidden"
-                        >
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <span className="text-xl flex-shrink-0">{petType.icon}</span>
-                            <span className="truncate">{petType.name}</span>
-                          </div>
-                          <ChevronRight 
-                            size={18} 
-                            className={`transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-                          />
-                        </button>
-                        
-                        {/* Categories dropdown - unified for all pet types */}
-                        {isExpanded && (
-                          <div className="ml-6 mt-2 space-y-2 overflow-x-hidden max-w-full">
-                            {megaMenu.length > 0 ? (
-                              // Use mega menu structure when available (same as desktop)
-                              <>
-                                {megaMenu.map((section: MenuSection) => (
-                                  <div key={section._id || section.slug} className="space-y-1 mb-3">
-                                    <Link
-                                      to={generateCategoryUrl(section.slug, petType.slug)}
-                                      onClick={() => setMobileMenuOpen(false)}
-                                      className="text-sm font-bold text-gray-900 px-3 block hover:text-[#1E3A8A] transition-colors"
-                                    >
-                                      {decodeHtmlEntities(section.title)} →
-                                    </Link>
-                                    <div className="space-y-1">
-                                      {section.items.map((item: MenuItem | string) => {
-                                        const itemSlug = typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'));
-                                        return (
-                                          <Link
-                                            key={typeof item === 'object' ? item.slug : String(item)}
-                                            to={generateCategoryUrl(itemSlug, petType.slug)}
-                                            onClick={() => setMobileMenuOpen(false)}
-                                            className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
-                                          >
-                                            {decodeHtmlEntities(typeof item === 'object' ? item.name : item)}
-                                          </Link>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                ))}
-                              </>
-                            ) : (
-                              // Fallback: Show categories with subcategories
-                              <>
-                                {petCategories.map((category: any) => {
-                                  const subcategories = getSubcategories(category._id);
-                                  
-                                  return (
-                                    <div key={category._id} className="space-y-1">
-                                      <Link
-                                        to={generateCategoryUrl(category.slug, category.petType)}
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className="block py-2 px-3 text-sm font-semibold text-gray-900 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
-                                      >
-                                        {decodeHtmlEntities(category.name)}
-                                      </Link>
-                                      
-                                      {subcategories.length > 0 && (
-                                        <div className="ml-4 space-y-1">
-                                          {subcategories.map((sub: any) => {
-                                            const subSubcategories = getSubcategories(sub._id);
-                                            
-                                            return (
-                                              <div key={sub._id} className="space-y-1">
-                                                <Link
-                                                  to={generateCategoryUrl(sub.slug, sub.petType)}
-                                                  onClick={() => setMobileMenuOpen(false)}
-                                                  className="block py-1.5 px-3 text-sm text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors font-medium truncate overflow-hidden"
-                                                >
-                                                  {decodeHtmlEntities(sub.name)}
-                                                </Link>
-                                                
-                                                {/* 3rd Level Subcategories */}
-                                                {subSubcategories.length > 0 && (
-                                                  <div className="ml-4 space-y-1">
-                                                    {subSubcategories.map((subSub: any) => (
-                                                      <Link
-                                                        key={subSub._id}
-                                                        to={generateCategoryUrl(subSub.slug, subSub.petType)}
-                                                        onClick={() => setMobileMenuOpen(false)}
-                                                        className="block py-1 px-3 text-xs text-gray-500 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors truncate overflow-hidden"
-                                                      >
-                                                        • {decodeHtmlEntities(subSub.name)}
-                                                      </Link>
-                                                    ))}
-                                                  </div>
-                                                )}
-                                              </div>
-                                            );
-                                          })}
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                                
-                                {/* View All */}
-                                <Link
-                                  to={`/${petType.slug}`}
-                                  onClick={() => setMobileMenuOpen(false)}
-                                  className="block py-2 px-3 text-sm font-semibold text-[#1E3A8A] hover:underline truncate overflow-hidden"
-                                >
-                                  View All {petType.name} Products →
-                                </Link>
-                              </>
-                            )}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      // Pet type without categories - direct link
-                      <Link
-                        to={`/${petType.slug}`}
-                        className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors overflow-hidden"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <span className="text-xl flex-shrink-0">{petType.icon}</span>
-                        <span className="truncate">{petType.name}</span>
-                      </Link>
-                    )}
-                  </li>
-                );
-              })}
-              
-              {/* Today's Deals */}
-              <li>
-                <Link
-                  to="/products?featured=true"
-                  className="flex items-center gap-3 py-3 px-3 font-bold bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="text-xl">🔥</span>
-                  <span>Today's Deals</span>
-                </Link>
-              </li>
-              {/* Learning Center - Expandable */}
-              <li>
-                <button
-                  onClick={toggleLearningMenu}
-                  className="w-full flex items-center justify-between gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">📚</span>
-                    <span>Learning</span>
-                  </div>
-                  <ChevronRight 
-                    size={18} 
-                    className={`transition-transform ${isLearningExpanded ? 'rotate-90' : ''}`}
-                  />
-                </button>
-                {isLearningExpanded && (
-                  <div className="ml-6 mt-2 space-y-2 pb-2">
-                    {/* Learning Center Link */}
-                    <Link
-                      to="/learning"
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        setIsLearningExpanded(false);
-                      }}
-                      className="block py-2 px-3 text-sm font-semibold text-[#1E3A8A] hover:underline"
-                    >
-                      Learning Center →
-                    </Link>
-                    {/* Care Guides Link */}
-                    <Link
-                      to="/care-guides"
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        setIsLearningExpanded(false);
-                      }}
-                      className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-                    >
-                      Care Guides →
-                    </Link>
-                    {/* Learning Categories */}
-                    <div className="space-y-1">
-                      <p className="text-xs font-semibold text-gray-700 px-3 py-1">Categories</p>
-                      <LearningCategories 
-                        onLinkClick={() => {
-                          setMobileMenuOpen(false);
-                          setIsLearningExpanded(false);
-                        }}
-                      />
-                    </div>
-                    {/* New Pet Section */}
-                    <div className="border-t pt-2 mt-2">
-                      <p className="text-xs font-semibold text-gray-700 px-3 py-1 mb-1">New Pet</p>
-                      <NewPetCategories 
-                        onLinkClick={() => {
-                          setMobileMenuOpen(false);
-                          setIsLearningExpanded(false);
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </li>
-              <li>
-                <Link
-                  to="/about"
-                  className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="text-xl">ℹ️</span>
-                  <span>About Us</span>
-                </Link>
-              </li>
+              {/* Shared nav content - same as Left Sidebar (update renderVerticalNavContent when changing nav) */}
+              {renderVerticalNavContent(() => {
+                setMobileMenuOpen(false);
+                setIsLearningExpanded(false);
+              }, { compact: true })}
               {isAuthenticated ? (
                 <>
                   <li>
@@ -1114,7 +1053,10 @@ const Header = () => {
         {/* Overlay */}
         <div 
           className="fixed inset-0 bg-black/50 z-50 lg:block hidden"
-          onClick={() => setIsLeftSidebarOpen(false)}
+          onClick={() => {
+            setIsLeftSidebarOpen(false);
+            setIsLearningExpanded(false);
+          }}
         />
         {/* Sidebar */}
         <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-2xl z-[60] transform transition-transform duration-300 ease-in-out overflow-y-auto">
@@ -1123,7 +1065,10 @@ const Header = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">Shop by Category</h2>
               <button
-                onClick={() => setIsLeftSidebarOpen(false)}
+                onClick={() => {
+                  setIsLeftSidebarOpen(false);
+                  setIsLearningExpanded(false);
+                }}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 aria-label="Close Menu"
               >
@@ -1131,133 +1076,13 @@ const Header = () => {
               </button>
             </div>
 
-            {/* Navigation Items */}
+            {/* Navigation Items - Shared with Mobile Menu (update renderVerticalNavContent when changing nav bar) */}
             <ul className="space-y-1">
-              {petTypes.map((petType: any) => {
-                const petCategories = getCategoriesForPetType(petType.slug);
-                const isExpanded = expandedMobilePetTypes.has(petType.slug);
-                const megaMenu = Array.isArray(categories) && categories.length > 0 ? buildDynamicMegaMenu(petType.slug) : [];
-
-                return (
-                  <li key={petType.slug}>
-                    {petCategories.length > 0 ? (
-                      <>
-                        <button
-                          onClick={() => toggleMobilePetType(petType.slug)}
-                          className="w-full flex items-center justify-between gap-3 py-3 px-4 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="text-xl">{petType.icon}</span>
-                            <span>{petType.name}</span>
-                          </div>
-                          <ChevronRight 
-                            size={18} 
-                            className={`transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-                          />
-                        </button>
-
-                        {/* Categories dropdown - unified for all pet types */}
-                        {isExpanded && (
-                          <div className="ml-6 mt-2 space-y-2">
-                            {megaMenu.length > 0 ? (
-                              // Use mega menu structure when available (same as desktop)
-                              <>
-                                {megaMenu.map((section: MenuSection) => (
-                                  <div key={section._id || section.slug} className="space-y-1 mb-3">
-                                    <Link
-                                      to={generateCategoryUrl(section.slug, petType.slug)}
-                                      onClick={() => setIsLeftSidebarOpen(false)}
-                                      className="text-sm font-bold text-gray-900 px-3 block hover:text-[#1E3A8A] transition-colors"
-                                    >
-                                      {decodeHtmlEntities(section.title)} →
-                                    </Link>
-                                    <div className="space-y-1">
-                                      {section.items.map((item: MenuItem | string) => {
-                                        const itemSlug = typeof item === 'object' ? item.slug : encodeURIComponent(String(item).toLowerCase().replace(/\s+/g, '-'));
-                                        return (
-                                          <Link
-                                            key={typeof item === 'object' ? item.slug : String(item)}
-                                            to={generateCategoryUrl(itemSlug, petType.slug)}
-                                            onClick={() => setIsLeftSidebarOpen(false)}
-                                            className="block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-                                          >
-                                            {typeof item === 'object' ? item.name : item}
-                                          </Link>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                ))}
-                              </>
-                            ) : (
-                              // Fallback: Show categories with subcategories
-                              <>
-                                {petCategories.map((category: any) => {
-                                  const subcategories = getSubcategories(category._id);
-                                  return (
-                                    <div key={category._id} className="space-y-1">
-                                      <Link
-                                        to={generateCategoryUrl(category.slug, category.petType)}
-                                        onClick={() => setIsLeftSidebarOpen(false)}
-                                        className="block py-2 px-3 font-semibold text-gray-900 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-                                      >
-                                        {decodeHtmlEntities(category.name)}
-                                      </Link>
-                                      {subcategories.length > 0 && (
-                                        <div className="ml-3 space-y-1">
-                                          {subcategories.map((sub: any) => (
-                                            <Link
-                                              key={sub._id}
-                                              to={generateCategoryUrl(sub.slug, sub.petType)}
-                                              onClick={() => setIsLeftSidebarOpen(false)}
-                                              className="block py-1.5 px-3 text-sm text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-                                            >
-                                              {decodeHtmlEntities(sub.name)}
-                                            </Link>
-                                          ))}
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </>
-                            )}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <Link
-                        to={`/${petType.slug}`}
-                        onClick={() => setIsLeftSidebarOpen(false)}
-                        className="flex items-center gap-3 py-3 px-4 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-                      >
-                        <span className="text-xl">{petType.icon}</span>
-                        <span>{petType.name}</span>
-                      </Link>
-                    )}
-                  </li>
-                );
+              {renderVerticalNavContent(() => {
+                setIsLeftSidebarOpen(false);
+                setIsLearningExpanded(false);
               })}
             </ul>
-
-            {/* Additional Links */}
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <Link
-                to="/products?featured=true"
-                onClick={() => setIsLeftSidebarOpen(false)}
-                className="flex items-center gap-3 py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-bold mb-3"
-              >
-                <span>🔥</span>
-                <span>Today's Deals</span>
-              </Link>
-              <Link
-                to="/about"
-                onClick={() => setIsLeftSidebarOpen(false)}
-                className="block py-3 px-4 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
-              >
-                About
-              </Link>
-            </div>
           </div>
         </div>
       </>

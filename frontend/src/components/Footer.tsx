@@ -9,24 +9,16 @@ const Footer = () => {
           {/* About */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <picture>
-                {/* AVIF format */}
-                <source srcSet="/logo.avif" type="image/avif" />
-                {/* WebP format */}
-                <source srcSet="/logo.webp" type="image/webp" />
-                {/* PNG fallback */}
-                <img 
-                  src="/logo.png" 
-                  alt="petshiwu Logo" 
-                  width={56}
-                  height={56}
-                  className="h-14 w-14 object-contain drop-shadow-lg"
-                  loading="lazy"
-                  decoding="async"
-                  style={{ aspectRatio: '1 / 1' }}
-                  sizes="56px"
-                />
-              </picture>
+              <img 
+                src="/logo.png" 
+                alt="Petshiwu Logo" 
+                width={56}
+                height={56}
+                className="h-14 w-14 object-contain drop-shadow-lg"
+                loading="lazy"
+                decoding="async"
+                style={{ aspectRatio: '1 / 1' }}
+              />
               <h3 className="text-xl font-black bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent" style={{ fontFamily: "'Nunito', sans-serif" }}>
                 Petshiwu
               </h3>

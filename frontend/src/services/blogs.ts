@@ -30,6 +30,11 @@ export interface BlogCategory {
   count: number;
 }
 
+export interface BlogCategoriesByPetType {
+  petType: string;
+  categories: BlogCategory[];
+}
+
 export const blogService = {
   getBlogs: async (params?: {
     petType?: string;
@@ -53,6 +58,11 @@ export const blogService = {
     const response = await api.get<ApiResponse<BlogCategory[]>>('/blogs/categories', {
       params: petType ? { petType } : {}
     });
+    return response.data.data;
+  },
+
+  getBlogCategoriesByPetType: async () => {
+    const response = await api.get<ApiResponse<BlogCategoriesByPetType[]>>('/blogs/categories-by-pet-type');
     return response.data.data;
   }
 };

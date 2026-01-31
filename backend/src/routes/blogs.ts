@@ -7,7 +7,8 @@ import {
   createBlog,
   updateBlog,
   deleteBlog,
-  getBlogCategories
+  getBlogCategories,
+  getBlogCategoriesByPetType
 } from '../controllers/blogController';
 import { protect, authorize } from '../middleware/auth';
 
@@ -16,6 +17,7 @@ const router = express.Router();
 // Public routes
 router.get('/', getPublishedBlogs);
 router.get('/categories', getBlogCategories);
+router.get('/categories-by-pet-type', getBlogCategoriesByPetType);
 router.get('/:slug', getBlogBySlug);
 
 // Admin routes (require authentication and admin role)

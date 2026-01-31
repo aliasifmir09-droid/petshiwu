@@ -108,7 +108,7 @@ const Login = ({ onLogin }: LoginProps) => {
           <div className="flex items-center justify-center gap-3 mb-2">
             <img 
               src="/logo.png" 
-              alt="petshiwu Logo" 
+              alt="Petshiwu Logo" 
               className="h-16 w-16 object-contain drop-shadow-lg"
             />
             <h1 className="text-4xl font-black bg-gradient-to-r from-gray-900 via-primary-600 to-gray-900 bg-clip-text text-transparent" style={{ fontFamily: "'Poppins', 'Inter', sans-serif" }}>

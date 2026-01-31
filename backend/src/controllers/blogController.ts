@@ -470,6 +470,46 @@ export const deleteBlog = async (req: AuthRequest, res: Response, next: NextFunc
   }
 };
 
+// Get blog categories grouped by pet type (public) - for Learning Center menu
+export const getBlogCategoriesByPetType = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const cacheKey = 'blog-categories-by-pet-type';
+    const cached = await cache.get(cacheKey);
+
+    if (cached) {
+      return res.json({
+        success: true,
+        data: cached
+      });
+    }
+
+    const petTypesInBlogs = await Blog.distinct('petType', { isPublished: true });
+    const result = await Promise.all(
+      petTypesInBlogs.map(async (petType) => {
+        const categories = await Blog.distinct('category', { isPublished: true, petType });
+        const categoriesWithCounts = await Promise.all(
+          categories.map(async (category) => {
+            const count = await Blog.countDocuments({ isPublished: true, petType, category });
+            return { name: category, count };
+          })
+        );
+        return { petType, categories: categoriesWithCounts };
+      })
+    );
+
+    // Cache for 10 minutes
+    await cache.set(cacheKey, result, 600);
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error: unknown) {
+    logger.error('Error fetching blog categories by pet type:', error);
+    next(error);
+  }
+};
+
 // Get blog categories (public)
 export const getBlogCategories = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -516,6 +556,7 @@ const clearBlogCaches = async () => {
   try {
     await cache.delPattern('blogs:*');
     await cache.delPattern('blog-categories:*');
+    await cache.del('blog-categories-by-pet-type');
     logger.debug('Blog caches cleared');
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
