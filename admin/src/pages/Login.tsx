@@ -109,7 +109,7 @@ const Login = ({ onLogin }: LoginProps) => {
             <img 
               src="/logo.png" 
               alt="Petshiwu Logo" 
-              className="h-16 w-16 object-contain drop-shadow-lg"
+              className="h-20 w-20 object-contain drop-shadow-lg"
             />
             <h1 className="text-4xl font-black bg-gradient-to-r from-gray-900 via-primary-600 to-gray-900 bg-clip-text text-transparent" style={{ fontFamily: "'Poppins', 'Inter', sans-serif" }}>
               petshiwu

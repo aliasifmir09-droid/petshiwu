@@ -121,7 +121,7 @@ const Sidebar = ({ onLogout }: SidebarProps) => {
             <img 
               src="/logo.png" 
               alt="Petshiwu Logo" 
-              className="h-20 w-20 lg:h-28 lg:w-28 object-contain transform group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl relative z-10"
+              className="h-24 w-24 lg:h-32 lg:w-32 object-contain transform group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl relative z-10"
             />
             {/* Glow effect on hover */}
             <div className="absolute inset-0 bg-white/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>

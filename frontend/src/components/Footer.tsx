@@ -12,9 +12,9 @@ const Footer = () => {
               <img 
                 src="/logo.png" 
                 alt="Petshiwu Logo" 
-                width={56}
-                height={56}
-                className="h-14 w-14 object-contain drop-shadow-lg"
+                width={80}
+                height={80}
+                className="h-20 w-20 object-contain drop-shadow-lg"
                 loading="lazy"
                 decoding="async"
                 style={{ aspectRatio: '1 / 1' }}

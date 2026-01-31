@@ -535,7 +535,7 @@ const Header = () => {
                 <img 
                   src="/logo.png" 
                   alt="Petshiwu Logo" 
-                  className="h-16 md:h-24 object-contain transform group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl relative z-10"
+                  className="h-20 md:h-28 object-contain transform group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl relative z-10"
                   loading="eager"
                 />
                 {/* Glow effect on hover */}
