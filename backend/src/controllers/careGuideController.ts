@@ -293,6 +293,11 @@ export const createCareGuide = async (req: AuthRequest, res: Response, next: Nex
     await cache.delPattern('careGuides:*');
     await cache.delPattern('careGuideCategories:*');
 
+    // Notify search engines when published
+    if (guide.isPublished) {
+      import('../utils/searchEnginePing').then(({ pingSearchEngines }) => pingSearchEngines());
+    }
+
     const normalizedGuide = normalizeCareGuideId(guide);
 
     res.status(201).json({
@@ -334,6 +339,11 @@ export const updateCareGuide = async (req: AuthRequest, res: Response, next: Nex
     await cache.delPattern('careGuides:*');
     await cache.delPattern('careGuideCategories:*');
     await cache.del(cacheKeys.careGuide(guide.slug));
+
+    // Notify search engines when published
+    if (guide.isPublished) {
+      import('../utils/searchEnginePing').then(({ pingSearchEngines }) => pingSearchEngines());
+    }
 
     const normalizedGuide = normalizeCareGuideId(guide);
 

@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { blogService, Blog } from '@/services/blogs';
 import { Search, Calendar, Eye, ChevronRight, BookOpen } from 'lucide-react';
 import Dropdown from '@/components/Dropdown';
+import SEO from '@/components/SEO';
 
 const Learning = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -67,8 +68,21 @@ const Learning = () => {
     return text.substring(0, maxLength) + '...';
   };
 
+  const petTypeLabel = petType ? ` - ${petType.charAt(0).toUpperCase() + petType.slice(1)}` : '';
+  const categoryLabel = category ? ` - ${category}` : '';
+  const params = new URLSearchParams();
+  if (petType) params.set('petType', petType);
+  if (category) params.set('category', category);
+  const queryString = params.toString();
+  const seoUrl = `https://www.petshiwu.com/learning${queryString ? `?${queryString}` : ''}`;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <SEO
+        title={`Learning Center${petTypeLabel}${categoryLabel} | Pet Care Tips & Guides`}
+        description="Expert pet care advice, tips, and guides for dogs, cats, fish, and more. Learn how to care for your pets with our comprehensive articles."
+        url={seoUrl}
+      />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">

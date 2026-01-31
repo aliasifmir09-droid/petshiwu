@@ -60,9 +60,20 @@ interface LocalBusinessSchema {
   areaServed?: string | string[];
 }
 
+interface ArticleSchema {
+  headline: string;
+  description?: string;
+  image?: string | string[];
+  author?: { name: string };
+  datePublished?: string;
+  dateModified?: string;
+  url: string;
+  publisher?: { name: string; logo?: string };
+}
+
 interface StructuredDataProps {
-  type: 'product' | 'organization' | 'website' | 'breadcrumb' | 'itemList' | 'collectionPage' | 'faq' | 'review' | 'localBusiness';
-  data: ProductSchema | OrganizationSchema | LocalBusinessSchema | any;
+  type: 'product' | 'organization' | 'website' | 'breadcrumb' | 'itemList' | 'collectionPage' | 'faq' | 'review' | 'localBusiness' | 'article';
+  data: ProductSchema | OrganizationSchema | LocalBusinessSchema | ArticleSchema | any;
 }
 
 const StructuredData = ({ type, data }: StructuredDataProps) => {
@@ -192,6 +203,38 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
         '@type': 'Product',
         ...data
       };
+      break;
+
+    case 'article':
+      const article = data as ArticleSchema;
+      schema = {
+        '@context': 'https://schema.org/',
+        '@type': 'Article',
+        headline: article.headline,
+        description: article.description || article.headline,
+        url: article.url,
+        author: article.author ? {
+          '@type': 'Person',
+          name: article.author.name
+        } : undefined,
+        datePublished: article.datePublished,
+        dateModified: article.dateModified || article.datePublished,
+        publisher: article.publisher ? {
+          '@type': 'Organization',
+          name: article.publisher.name,
+          logo: article.publisher.logo ? {
+            '@type': 'ImageObject',
+            url: article.publisher.logo
+          } : undefined
+        } : {
+          '@type': 'Organization',
+          name: 'PetShiwu',
+          logo: { '@type': 'ImageObject', url: 'https://www.petshiwu.com/logo.png' }
+        }
+      };
+      if (article.image) {
+        schema.image = Array.isArray(article.image) ? article.image : [article.image];
+      }
       break;
 
     case 'localBusiness':

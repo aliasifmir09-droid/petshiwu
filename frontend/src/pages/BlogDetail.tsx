@@ -5,6 +5,8 @@ import { Calendar, User, Eye, ArrowLeft, Tag } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { normalizeBlogContent } from '@/utils/htmlUtils';
 import { useMemo } from 'react';
+import SEO from '@/components/SEO';
+import StructuredData from '@/components/StructuredData';
 
 const BlogDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -79,8 +81,34 @@ const BlogDetail = () => {
     );
   }
 
+  const blogUrl = `https://www.petshiwu.com/learning/${blog.slug}`;
+
   return (
     <div className="min-h-screen bg-white">
+      <SEO
+        title={blog.metaTitle || blog.title}
+        description={blog.metaDescription || blog.excerpt || blog.title}
+        url={blogUrl}
+        type="article"
+        author={blog.author?.name}
+        publishedTime={blog.publishedAt}
+        modifiedTime={blog.updatedAt}
+        category={blog.category}
+        image={blog.featuredImage || 'https://www.petshiwu.com/logo.png'}
+      />
+      <StructuredData
+        type="article"
+        data={{
+          headline: blog.title,
+          description: blog.metaDescription || blog.excerpt || blog.title,
+          image: blog.featuredImage,
+          author: blog.author?.name ? { name: blog.author.name } : undefined,
+          datePublished: blog.publishedAt,
+          dateModified: blog.updatedAt,
+          url: blogUrl,
+          publisher: { name: 'PetShiwu', logo: 'https://www.petshiwu.com/logo.png' }
+        }}
+      />
       {/* Red border at top */}
       <div className="h-1 bg-red-600"></div>
       

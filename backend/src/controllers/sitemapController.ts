@@ -23,9 +23,13 @@ const escapeXml = (unsafe: string): string => {
  * Generate XML sitemap dynamically
  * GET /api/sitemap.xml
  */
+const getBaseUrl = (): string => {
+  return process.env.FRONTEND_URL || process.env.SITE_URL || process.env.CORS_ORIGIN?.split(',')[0]?.trim() || 'https://www.petshiwu.com';
+};
+
 export const generateSitemap = async (req: Request, res: Response) => {
   try {
-    const baseUrl = 'https://www.petshiwu.com';
+    const baseUrl = getBaseUrl().replace(/\/$/, '');
     const currentDate = new Date().toISOString().split('T')[0];
 
     // Note: Products are fetched later with category info for SEO-friendly URLs
@@ -93,7 +97,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
       .lean();
     
     petTypes.forEach(petType => {
-      // SEO-friendly URL: /petType instead of /products?petType=...
+      // SEO-friendly canonical URL: /petType
       xml += '  <url>\n';
       xml += `    <loc>${baseUrl}/${petType.slug}</loc>\n`;
       const lastmod = petType.updatedAt 
@@ -102,14 +106,6 @@ export const generateSitemap = async (req: Request, res: Response) => {
       xml += `    <lastmod>${lastmod}</lastmod>\n`;
       xml += '    <changefreq>weekly</changefreq>\n';
       xml += '    <priority>0.8</priority>\n';
-      xml += '  </url>\n';
-      
-      // Also include legacy query param URL for backward compatibility
-      xml += '  <url>\n';
-      xml += `    <loc>${baseUrl}/products?petType=${petType.slug}</loc>\n`;
-      xml += `    <lastmod>${lastmod}</lastmod>\n`;
-      xml += '    <changefreq>weekly</changefreq>\n';
-      xml += '    <priority>0.7</priority>\n';
       xml += '  </url>\n';
     });
 
@@ -199,16 +195,6 @@ export const generateSitemap = async (req: Request, res: Response) => {
       }
       
       xml += '  </url>\n';
-      
-      // Also include legacy /products/slug URL for backward compatibility
-      if (productUrl !== `${baseUrl}/products/${product.slug}`) {
-        xml += '  <url>\n';
-        xml += `    <loc>${baseUrl}/products/${product.slug}</loc>\n`;
-        xml += `    <lastmod>${lastmod}</lastmod>\n`;
-        xml += '    <changefreq>weekly</changefreq>\n';
-        xml += '    <priority>0.7</priority>\n';
-        xml += '  </url>\n';
-      }
     });
 
     // Category pages
@@ -283,6 +269,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
 
     // Static pages
     const staticPages = [
+      { path: '/about', priority: '0.7', changefreq: 'monthly' },
       { path: '/faq', priority: '0.6', changefreq: 'monthly' },
       { path: '/returns', priority: '0.5', changefreq: 'monthly' },
       { path: '/donate', priority: '0.4', changefreq: 'monthly' },

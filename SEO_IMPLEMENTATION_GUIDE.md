@@ -25,8 +25,9 @@ This guide documents the comprehensive SEO implementation for petshiwu.com to im
 - **Article Schema**: For blog posts (when implemented)
 
 ### 3. Technical SEO
-- **robots.txt**: Properly configured to guide search engine crawlers
-- **Dynamic Sitemap**: Auto-generated XML sitemap with all products, categories, and pages
+- **robots.txt**: Properly configured to guide search engine crawlers (no Crawl-delay)
+- **Dynamic Sitemap**: Auto-generated XML sitemap with all products, categories, blogs, care guides, and pages
+- **Auto-Crawl on Content Update**: When products, blogs, or care guides are created/updated, Google, Bing, and Yandex are pinged to re-crawl the sitemap
 - **Canonical URLs**: Prevent duplicate content
 - **Mobile Optimization**: Responsive design with proper viewport meta tags
 - **Page Speed**: Optimized images, lazy loading, code splitting
@@ -209,10 +210,11 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 
 ### Immediate Actions
 
-1. **Submit Sitemap to Google Search Console**
+1. **Submit Sitemap to Google Search Console** (one-time setup)
    - Go to https://search.google.com/search-console
    - Add property: `https://www.petshiwu.com`
    - Submit sitemap: `https://www.petshiwu.com/sitemap.xml`
+   - **Note**: New products and blogs automatically ping Google when added—no manual action needed
 
 2. **Verify Google Analytics**
    - Ensure `VITE_GA_MEASUREMENT_ID` is set in production

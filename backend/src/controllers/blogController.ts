@@ -348,6 +348,12 @@ export const createBlog = async (req: AuthRequest, res: Response, next: NextFunc
     // Clear blog caches
     await clearBlogCaches();
 
+    // Notify search engines to re-crawl sitemap (when published)
+    if (blog.isPublished) {
+      const { pingSearchEngines } = await import('../utils/searchEnginePing');
+      pingSearchEngines();
+    }
+
     const normalizedBlog = normalizeBlogId(blog);
 
     res.status(201).json({
@@ -412,6 +418,12 @@ export const updateBlog = async (req: AuthRequest, res: Response, next: NextFunc
     // Clear blog caches
     await clearBlogCaches();
     await cache.del(`blog:${blog.slug}`);
+
+    // Notify search engines to re-crawl sitemap (when published)
+    if (blog.isPublished) {
+      const { pingSearchEngines } = await import('../utils/searchEnginePing');
+      pingSearchEngines();
+    }
 
     const normalizedBlog = normalizeBlogId(blog);
 

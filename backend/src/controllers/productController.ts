@@ -2519,6 +2519,9 @@ export const createProduct = async (req: AuthRequest, res: Response, next: NextF
       logger.error('Error invalidating product cache:', err);
     });
 
+    // Notify search engines to re-crawl sitemap (auto-discover new products)
+    import('../utils/searchEnginePing').then(({ pingSearchEngines }) => pingSearchEngines());
+
     res.status(201).json({
       success: true,
       message: 'Product created successfully',
@@ -2609,6 +2612,9 @@ export const updateProduct = async (req: AuthRequest, res: Response, next: NextF
     Promise.all(cacheInvalidationPromises).catch(err => {
       logger.error('Error invalidating product cache:', err);
     });
+
+    // Notify search engines to re-crawl sitemap (auto-discover updated products)
+    import('../utils/searchEnginePing').then(({ pingSearchEngines }) => pingSearchEngines());
 
     res.status(200).json({
       success: true,

@@ -33,9 +33,6 @@ Allow: /search
 Allow: /returns
 Allow: /donate
 
-# Sitemap location
+# Sitemap location - submit to Google Search Console for faster indexing
 Sitemap: https://www.petshiwu.com/sitemap.xml
 Sitemap: https://petshiwu.com/sitemap.xml
-
-# Crawl delay (optional, helps prevent server overload)
-Crawl-delay: 1

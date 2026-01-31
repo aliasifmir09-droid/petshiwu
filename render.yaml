@@ -16,6 +16,9 @@ services:
       - key: CORS_ORIGIN
         # Update these after your first deploy with actual Render URLs
         value: https://pet-shop-frontend.onrender.com,https://pet-shop-admin.onrender.com
+      - key: FRONTEND_URL
+        # Canonical site URL for sitemap and SEO ping. Use production URL when deployed.
+        value: https://www.petshiwu.com
 
   - type: web
     name: pet-shop-frontend
