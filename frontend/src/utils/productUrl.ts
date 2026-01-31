@@ -1,18 +1,26 @@
 import { Product } from '@/types';
 
+/** Check if a slug is valid - never allow undefined, null, or empty in URLs */
+const isValidSlug = (val: unknown): val is string => {
+  if (val == null || typeof val !== 'string') return false;
+  const s = String(val).trim();
+  if (s === '') return false;
+  const lower = s.toLowerCase();
+  return lower !== 'undefined' && lower !== 'null';
+};
+
 /**
  * Generates SEO-friendly product URL with category hierarchy
  * Format: /{petType}/{categoryPath}/{productSlug}
- * Example: /cat/food-topper/reveal-all-life-stages-wet-cat-food
+ * Example: /cat/dry-food/reveal-all-life-stages-wet-cat-food
  * 
- * This function ensures consistent URLs for the same product regardless of
- * how the product data is structured, preventing duplicate links with different URLs.
+ * Never outputs "undefined" in URLs - invalid category slugs are skipped.
  */
 export const generateProductUrl = (product: Product): string => {
-  // Normalize slug: ensure it's a string and trim any whitespace
   const productSlug = (product.slug || product._id || '').toString().trim();
-  
-  // If no category, use simple URL
+  if (!productSlug) return '/products';
+
+  // If no category or category is string, use simple URL
   if (!product.category || typeof product.category === 'string') {
     return `/products/${productSlug}`;
   }
@@ -20,57 +28,33 @@ export const generateProductUrl = (product: Product): string => {
   const category = product.category;
   const petType = product.petType || 'products';
   
-  // Build category path from hierarchy (from root to current category)
+  // Build category path from hierarchy - only include valid slugs
   const buildCategoryPath = (cat: typeof category): string[] => {
     const path: string[] = [];
-    
-    // Helper to recursively build path from root to current
     const buildPathRecursive = (current: typeof category | undefined, visited = new Set<string>()): void => {
       if (!current || path.length >= 3) return;
+      const catId = current._id ? String(current._id) : '';
+      if (catId && visited.has(catId)) return;
+      if (catId) visited.add(catId);
       
-      const catId = current._id || '';
-      if (visited.has(catId)) return; // Prevent circular references
-      visited.add(catId);
-      
-      // If has parent, build parent path first
       if (current.parentCategory && typeof current.parentCategory === 'object') {
         buildPathRecursive(current.parentCategory, visited);
       }
       
-      // Then add current category slug - validate it's a valid string
-      if (current.slug && 
-          typeof current.slug === 'string' && 
-          current.slug.trim() !== '' &&
-          current.slug.toLowerCase() !== 'undefined' &&
-          current.slug.toLowerCase() !== 'null') {
-        path.push(current.slug.trim());
+      if (isValidSlug(current.slug)) {
+        path.push(String(current.slug).trim());
       }
     };
-    
     buildPathRecursive(cat);
     return path;
   };
 
-  const categoryPath = buildCategoryPath(category);
+  const categoryPath = buildCategoryPath(category).filter(isValidSlug);
   
-  // Filter out any invalid path segments (shouldn't happen, but safety check)
-  const validCategoryPath = categoryPath.filter(
-    segment => segment && 
-               typeof segment === 'string' && 
-               segment.trim() !== '' &&
-               segment.toLowerCase() !== 'undefined' &&
-               segment.toLowerCase() !== 'null'
-  );
-  
-  // If we have valid category path, use SEO-friendly URL
-  // Even if we only have one category level, still use the new format
-  if (validCategoryPath.length > 0) {
-    // Use petType if available, otherwise fallback to 'products'
-    const validPetType = petType || 'products';
-    return `/${validPetType}/${validCategoryPath.join('/')}/${productSlug}`;
+  if (categoryPath.length > 0 && isValidSlug(petType)) {
+    return `/${petType}/${categoryPath.join('/')}/${productSlug}`;
   }
   
-  // Fallback to simple URL if category path couldn't be built
   return `/products/${productSlug}`;
 };
 
@@ -94,20 +78,18 @@ export const extractProductSlugFromUrl = (urlPath: string): string => {
 /**
  * Generates SEO-friendly category URL
  * Format: /{petType}/{categorySlug} (e.g., /dog/food)
- * Falls back to /category/{slug}?petType=... if petType is not available
+ * Never outputs "undefined" - invalid slugs fall back to /products
  */
-export const generateCategoryUrl = (categorySlug: string, petType?: string): string => {
-  // If we have petType, use new SEO-friendly format
-  if (petType && petType !== 'all' && petType !== 'other-animals') {
-    return `/${petType}/${categorySlug}`;
-  }
+export const generateCategoryUrl = (categorySlug: string | undefined, petType?: string): string => {
+  if (!isValidSlug(categorySlug)) return '/products';
+  const slug = String(categorySlug).trim();
   
-  // Fallback to old format with query parameter
+  if (isValidSlug(petType) && petType !== 'all' && petType !== 'other-animals') {
+    return `/${petType}/${slug}`;
+  }
   if (petType) {
-    return `/category/${categorySlug}?petType=${petType}`;
+    return `/category/${slug}?petType=${petType}`;
   }
-  
-  // No petType, use simple category URL
-  return `/category/${categorySlug}`;
+  return `/category/${slug}`;
 };
 

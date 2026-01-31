@@ -354,14 +354,17 @@ const ProductDetail = () => {
   }, [product?._id]); // Reset to first image/variant when product changes
 
   // Redirect from old URL format (/products/slug) to new SEO-friendly format
+  // Also redirect if URL contains "undefined" (invalid category slug)
   useEffect(() => {
     if (product && slug) {
-      // If we're on the old URL format (/products/slug), redirect to new format
       const newUrl = generateProductUrl(product);
-      const currentPath = location.pathname; // BrowserRouter - no hash to remove
+      const currentPath = location.pathname;
       
-      // Only redirect if the new URL is different and we're on the old format
-      if (newUrl !== currentPath && currentPath.startsWith('/products/')) {
+      const shouldRedirect =
+        newUrl !== currentPath &&
+        (currentPath.startsWith('/products/') || currentPath.includes('/undefined/'));
+      
+      if (shouldRedirect) {
         navigate(newUrl, { replace: true });
       }
     }
@@ -528,47 +531,28 @@ const ProductDetail = () => {
       let parent = currentCategory.parentCategory;
       
       while (parent && typeof parent === 'object') {
-        ancestors.push({
-          name: parent.name,
-          slug: parent.slug
-        });
-        // Check if parent has a parent (grandparent)
+        if (parent.slug && String(parent.slug).toLowerCase() !== 'undefined') {
+          ancestors.push({ name: parent.name, slug: parent.slug });
+        }
         parent = parent.parentCategory;
       }
       
-      // Reverse ancestors to get top-to-bottom order (Supplies -> Toys)
       ancestors.reverse();
-      
-      // Add ancestors to chain
       categoryChain.push(...ancestors);
       
-      // Add current category (Plush Toys)
-      categoryChain.push({
-        name: currentCategory.name,
-        slug: currentCategory.slug
-      });
+      if (currentCategory.slug && String(currentCategory.slug).toLowerCase() !== 'undefined') {
+        categoryChain.push({ name: currentCategory.name, slug: currentCategory.slug });
+      }
       
-      // Add all categories in the chain to breadcrumbs (in order: Supplies -> Toys -> Plush Toys)
-      // Skip categories that have the same name as the pet type to avoid duplication
       categoryChain.forEach((cat) => {
-        // Skip if category name matches pet type name (case-insensitive)
+        if (!cat.slug || String(cat.slug).toLowerCase() === 'undefined') return;
         const petTypeDisplay = product.petType === 'other-animals' 
           ? 'Other Animals' 
           : product.petType ? product.petType.charAt(0).toUpperCase() + product.petType.slice(1) : '';
+        if (petTypeDisplay && cat.name?.toLowerCase() === petTypeDisplay.toLowerCase()) return;
         
-        if (petTypeDisplay && cat.name.toLowerCase() === petTypeDisplay.toLowerCase()) {
-          return; // Skip this category to avoid duplication
-        }
-        
-        const categoryPath = `/category/${cat.slug}`;
-        const categoryPathWithPetType = product.petType && product.petType !== 'other-animals'
-          ? `${categoryPath}?petType=${product.petType}`
-          : categoryPath;
-        
-        crumbs.push({
-          label: cat.name,
-          path: categoryPathWithPetType
-        });
+        const categoryPath = generateCategoryUrl(cat.slug, product.petType);
+        crumbs.push({ label: cat.name || 'Category', path: categoryPath });
       });
     }
 

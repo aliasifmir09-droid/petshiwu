@@ -78,6 +78,22 @@ describe('Product URL Utility', () => {
       // Should not have double slashes (except after protocol)
       expect(url.includes('//')).toBe(false);
     });
+
+    test('should never output "undefined" in URL', () => {
+      const productWithUndefinedCategorySlug = {
+        ...mockProduct,
+        category: {
+          _id: 'cat1',
+          name: 'Dry Food',
+          slug: 'undefined',
+          parentCategory: { slug: 'dry-food', _id: 'parent1' }
+        } as any
+      } as Product;
+      const url = generateProductUrl(productWithUndefinedCategorySlug);
+      expect(url).not.toContain('undefined');
+      // Should use parent slug (dry-food) only, or fallback to /products/slug
+      expect(url).toMatch(/\/products\/test-product|\/dog\/dry-food\/test-product/);
+    });
   });
 });
 

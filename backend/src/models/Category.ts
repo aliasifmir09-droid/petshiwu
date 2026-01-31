@@ -67,8 +67,9 @@ const categorySchema = new Schema<ICategory>(
 
 // Create slug from name and calculate level before saving
 categorySchema.pre('save', async function (next) {
-  // Always generate slug if name is modified or slug is missing/empty
-  if (this.isModified('name') || !this.slug || this.slug.trim() === '') {
+  const invalidSlug = !this.slug || this.slug.trim() === '' ||
+    this.slug.toLowerCase() === 'undefined' || this.slug.toLowerCase() === 'null';
+  if (this.isModified('name') || invalidSlug) {
     this.slug = this.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
   }
 

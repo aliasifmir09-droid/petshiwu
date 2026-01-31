@@ -110,7 +110,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
     });
 
     // Individual product pages - need category info for SEO-friendly URLs
-    // Also fetch images for image sitemap
+    // Populate parentCategory to get full hierarchy (avoid undefined in URLs)
     const productsWithCategory = await Product.find({ 
       isActive: true,
       $or: [
@@ -119,53 +119,50 @@ export const generateSitemap = async (req: Request, res: Response) => {
       ]
     })
       .select('slug updatedAt petType category images name')
-      .populate('category', 'slug parentCategory')
+      .populate({
+        path: 'category',
+        select: 'slug parentCategory',
+        populate: {
+          path: 'parentCategory',
+          select: 'slug parentCategory',
+          populate: { path: 'parentCategory', select: 'slug' }
+        }
+      })
       .sort({ updatedAt: -1 })
       .limit(10000)
       .lean();
+
+    const isValidSlug = (slug: unknown): slug is string => {
+      if (slug == null || typeof slug !== 'string') return false;
+      const s = String(slug).trim();
+      if (s === '') return false;
+      const lower = s.toLowerCase();
+      return lower !== 'undefined' && lower !== 'null';
+    };
+
+    const buildCategoryPathSegments = (cat: any): string[] => {
+      if (!cat || typeof cat !== 'object') return [];
+      const segments: string[] = [];
+      if (cat.parentCategory && typeof cat.parentCategory === 'object') {
+        segments.push(...buildCategoryPathSegments(cat.parentCategory));
+      }
+      if (isValidSlug(cat.slug)) {
+        segments.push(String(cat.slug).trim());
+      }
+      return segments;
+    };
 
     productsWithCategory.forEach(product => {
       const lastmod = product.updatedAt 
         ? new Date(product.updatedAt).toISOString().split('T')[0]
         : currentDate;
       
-      // Generate SEO-friendly URL: /petType/categoryPath/product-slug
-      // Fallback to /products/slug if category info not available
       let productUrl = `${baseUrl}/products/${product.slug}`;
       
-      if (product.petType && product.category && typeof product.category === 'object') {
-        const category = product.category as any;
-        const categorySlug = category.slug || '';
-        const petTypeSlug = product.petType;
-        
-        // Validate slugs - filter out undefined, null, or empty strings
-        const isValidSlug = (slug: string) => {
-          return slug && 
-                 typeof slug === 'string' && 
-                 slug.trim() !== '' &&
-                 slug.toLowerCase() !== 'undefined' &&
-                 slug.toLowerCase() !== 'null';
-        };
-        
-        // Build category path if parent exists
-        let categoryPath = '';
-        if (isValidSlug(categorySlug)) {
-          if (category.parentCategory && typeof category.parentCategory === 'object') {
-            const parent = category.parentCategory as any;
-            const parentSlug = parent.slug || '';
-            if (isValidSlug(parentSlug)) {
-              categoryPath = `${parentSlug}/${categorySlug}`;
-            } else {
-              categoryPath = categorySlug;
-            }
-          } else {
-            categoryPath = categorySlug;
-          }
-        }
-        
-        // Only use SEO-friendly URL if we have valid category path and pet type
-        if (categoryPath && isValidSlug(petTypeSlug) && isValidSlug(product.slug || '')) {
-          productUrl = `${baseUrl}/${petTypeSlug}/${categoryPath}/${product.slug}`;
+      if (product.petType && product.category && typeof product.category === 'object' && isValidSlug(product.slug)) {
+        const categoryPath = buildCategoryPathSegments(product.category as any);
+        if (categoryPath.length > 0 && isValidSlug(product.petType)) {
+          productUrl = `${baseUrl}/${product.petType}/${categoryPath.join('/')}/${product.slug}`;
         }
       }
       

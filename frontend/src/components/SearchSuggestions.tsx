@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { productService } from '@/services/products';
 import { Search, Package, FolderTree } from 'lucide-react';
 import { normalizeImageUrl } from '@/utils/imageUtils';
+import { generateCategoryUrl } from '@/utils/productUrl';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 interface SearchSuggestionsProps {
@@ -142,7 +143,7 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
                 {categories.map((category: any) => (
                   <li key={category._id || category.slug}>
                     <Link
-                      to={`/${category.petType}/${category.slug}`}
+                      to={generateCategoryUrl(category.slug, category.petType)}
                       onClick={() => onSelect(category.name)}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors group"
                     >
