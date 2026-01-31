@@ -28,9 +28,7 @@
     <!-- PERFORMANCE FIX: Preconnect for fonts (critical for font loading) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- PERFORMANCE FIX: Prefetch likely next pages -->
-    <link rel="prefetch" href="/products">
-    <link rel="prefetch" href="/category">
+    <!-- Prefetch disabled - can trigger 503 during host cold start on free tier -->
     <!-- Preconnect for Tawk.to (lazy loaded, low priority) -->
     <link rel="dns-prefetch" href="https://embed.tawk.to">
     <!-- PERFORMANCE FIX: Defer non-critical font loading -->
@@ -43,9 +41,7 @@
     <noscript>
       <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     </noscript>
-    <!-- PERFORMANCE FIX: Preload critical fonts -->
-    <link rel="preload" href="https://fonts.gstatic.com/s/nunito/v26/XRXI3I6Li01BKofAjsOUYevI.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="https://fonts.gstatic.com/s/poppins/v21/pxiEyp8kv8JHgFVrJJfecg.woff2" as="font" type="font/woff2" crossorigin>
+    <!-- Fonts loaded via stylesheet below - no manual preload (Google URLs can change) -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#1E3A8A" />
     <title>PetShiwu | Premium Pet Food, Toys & Accessories in USA</title>
