@@ -3,10 +3,20 @@ import Product from '../models/Product';
 import Category from '../models/Category';
 import logger from '../utils/logger';
 
+// Slug validation - never allow undefined, null, or empty in URLs (SEO)
+const isValidSlug = (val: unknown): val is string => {
+  if (val == null || typeof val !== 'string') return false;
+  const s = String(val).trim();
+  if (s === '') return false;
+  const lower = s.toLowerCase();
+  return lower !== 'undefined' && lower !== 'null';
+};
+
 // Helper function to build SEO-friendly product URL (matches frontend format)
 const buildProductUrl = (product: any, frontendUrl: string): string => {
-  const productSlug = product.slug || product._id?.toString() || '';
-  
+  const productSlug = (product.slug || product._id?.toString() || '').toString().trim();
+  if (!productSlug || !isValidSlug(productSlug)) return `${frontendUrl}/products`;
+
   // If no category or category is just a string ID, use simple URL
   if (!product.category || typeof product.category === 'string') {
     return `${frontendUrl}/products/${productSlug}`;
@@ -14,42 +24,31 @@ const buildProductUrl = (product: any, frontendUrl: string): string => {
 
   const category = product.category;
   const petType = product.petType || 'products';
-  
-  // Build category path from hierarchy (from root to current category)
+
+  // Build category path from hierarchy - only include valid slugs (no "undefined")
   const buildCategoryPath = (cat: any, visited = new Set<string>()): string[] => {
     const path: string[] = [];
-    
     const buildPathRecursive = (current: any): void => {
       if (!current || path.length >= 3) return;
-      
       const catId = current._id?.toString() || '';
-      if (visited.has(catId)) return; // Prevent circular references
+      if (visited.has(catId)) return;
       visited.add(catId);
-      
-      // If has parent, build parent path first
       if (current.parentCategory && typeof current.parentCategory === 'object') {
         buildPathRecursive(current.parentCategory);
       }
-      
-      // Then add current category slug
-      if (current.slug) {
-        path.push(current.slug);
+      if (isValidSlug(current.slug)) {
+        path.push(String(current.slug).trim());
       }
     };
-    
     buildPathRecursive(cat);
     return path;
   };
 
-  const categoryPath = buildCategoryPath(category);
-  
-  // If we have category path, use SEO-friendly URL
-  if (categoryPath.length > 0) {
-    const validPetType = petType || 'products';
-    return `${frontendUrl}/${validPetType}/${categoryPath.join('/')}/${productSlug}`;
+  const categoryPath = buildCategoryPath(category).filter(isValidSlug);
+
+  if (categoryPath.length > 0 && isValidSlug(petType)) {
+    return `${frontendUrl}/${petType}/${categoryPath.join('/')}/${productSlug}`;
   }
-  
-  // Fallback to simple URL
   return `${frontendUrl}/products/${productSlug}`;
 };
 

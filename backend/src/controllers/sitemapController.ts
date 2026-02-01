@@ -160,7 +160,8 @@ export const generateSitemap = async (req: Request, res: Response) => {
       let productUrl = `${baseUrl}/products/${product.slug}`;
       
       if (product.petType && product.category && typeof product.category === 'object' && isValidSlug(product.slug)) {
-        const categoryPath = buildCategoryPathSegments(product.category as any);
+        const rawPath = buildCategoryPathSegments(product.category as any);
+        const categoryPath = rawPath.filter(seg => isValidSlug(seg));
         if (categoryPath.length > 0 && isValidSlug(product.petType)) {
           productUrl = `${baseUrl}/${product.petType}/${categoryPath.join('/')}/${product.slug}`;
         }

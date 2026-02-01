@@ -30,6 +30,7 @@
     "delete-recent-products": "ts-node src/scripts/deleteRecentProducts.ts",
     "check-category-hierarchy": "ts-node src/scripts/checkCategoryHierarchy.ts",
     "fix-category-hierarchy": "ts-node src/scripts/fixCategoryHierarchy.ts",
+    "fix-category-slugs": "ts-node src/scripts/fixCategorySlugs.ts",
     "check-pet-types-db": "ts-node src/scripts/checkPetTypesInDB.ts",
     "add-other-animals": "ts-node src/scripts/addOtherAnimalsPetType.ts",
     "check-small-pet-products": "ts-node src/scripts/checkSmallPetProducts.ts",

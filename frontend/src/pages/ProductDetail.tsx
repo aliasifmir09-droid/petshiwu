@@ -360,9 +360,10 @@ const ProductDetail = () => {
       const newUrl = generateProductUrl(product);
       const currentPath = location.pathname;
       
+      const hasInvalidSegment = currentPath.includes('/undefined/') || currentPath.includes('/null/');
       const shouldRedirect =
         newUrl !== currentPath &&
-        (currentPath.startsWith('/products/') || currentPath.includes('/undefined/'));
+        (currentPath.startsWith('/products/') || hasInvalidSegment);
       
       if (shouldRedirect) {
         navigate(newUrl, { replace: true });
