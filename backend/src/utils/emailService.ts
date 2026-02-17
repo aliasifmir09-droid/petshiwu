@@ -3,6 +3,23 @@ import { Resend } from 'resend';
 import logger from './logger';
 import EmailTemplate from '../models/EmailTemplate';
 
+// Helper to get a clean frontend base URL (handles comma-separated env values)
+const getFrontendBaseUrl = (): string => {
+  const raw =
+    process.env.FRONTEND_URL ||
+    process.env.SITE_URL ||
+    process.env.CORS_ORIGIN ||
+    'https://www.petshiwu.com';
+
+  // If someone set multiple domains comma-separated, pick the first valid one
+  const first = raw.split(',')[0]?.trim();
+  if (!first) {
+    return 'https://www.petshiwu.com';
+  }
+  // Ensure no trailing slash to keep URL building consistent
+  return first.replace(/\/+$/, '');
+};
+
 // Initialize Resend client if API key is provided
 let resendClient: Resend | null = null;
 if (process.env.RESEND_API_KEY) {
@@ -95,14 +112,14 @@ export const sendVerificationEmail = async (email: string, token: string, firstN
       logger.warn(`⚠️  Email not configured. Skipping verification email to ${email}.`);
       logger.warn(`⚠️  In development, you can verify manually or configure email settings.`);
       // In development/test mode, log the verification link instead
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const frontendUrl = getFrontendBaseUrl();
       const verificationUrl = `${frontendUrl}/verify-email?token=${token}`;
       logger.info(`📧 Verification link for ${email}: ${verificationUrl}`);
       return { messageId: 'test-mode', accepted: [email] };
     }
 
     const transporter = createTransporter();
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = getFrontendBaseUrl();
     const verificationUrl = `${frontendUrl}/verify-email?token=${token}`;
 
     const mailOptions = {
@@ -166,7 +183,7 @@ export const sendVerificationEmail = async (email: string, token: string, firstN
     logger.error(`❌ Error sending verification email to ${email}:`, error.message);
     // In development, don't fail completely - log the link
     if (process.env.NODE_ENV !== 'production') {
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const frontendUrl = getFrontendBaseUrl();
       const verificationUrl = `${frontendUrl}/verify-email?token=${token}`;
       logger.warn(`📧 Fallback verification link for ${email}: ${verificationUrl}`);
     }
@@ -211,7 +228,7 @@ export const sendOrderConfirmationEmail = async (
     }
 
     const transporter = createTransporter();
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = getFrontendBaseUrl();
     const orderUrl = `${frontendUrl}/orders/${orderData.createdAt}`;
 
     const itemsHtml = orderData.items.map(item => `
@@ -553,7 +570,7 @@ export const sendOrderDeliveredEmail = async (
 
     const template = await getEmailTemplate('order_delivered', defaultSubject, defaultBody);
     
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = getFrontendBaseUrl();
     const shippingAddress = `${orderData.shippingAddress.firstName} ${orderData.shippingAddress.lastName}\n${orderData.shippingAddress.street}\n${orderData.shippingAddress.city}, ${orderData.shippingAddress.state} ${orderData.shippingAddress.zipCode}\n${orderData.shippingAddress.country}`;
     
     const variables = {
@@ -597,7 +614,7 @@ export const sendOrderDeliveredEmail = async (
 // Send password reset email
 export const sendPasswordResetEmail = async (email: string, token: string, firstName: string) => {
   try {
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = getFrontendBaseUrl();
     // Use HashRouter format (#/) for frontend routing
     const resetUrl = `${frontendUrl}/#/reset-password?token=${token}`;
     const fromEmail = process.env.SMTP_FROM || process.env.RESEND_FROM || 'noreply@petshiwu.com';
@@ -756,7 +773,7 @@ export const sendPasswordResetEmail = async (email: string, token: string, first
     
     // In development, don't fail completely - log the link
     if (process.env.NODE_ENV !== 'production') {
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const frontendUrl = getFrontendBaseUrl();
       const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
       logger.warn(`📧 Fallback password reset link for ${email}: ${resetUrl}`);
     }
