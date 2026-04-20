@@ -9,6 +9,11 @@ import logger from '../utils/logger';
 import { safeToString } from '../utils/types';
 import { PASSWORD_RESET_EXPIRY_HOURS } from '../config/constants';
 
+// Check if email sending is configured
+const isEmailConfigured = (): boolean => {
+  return !!(process.env.RESEND_API_KEY || process.env.SMTP_HOST);
+};
+
 /**
  * @swagger
  * /api/auth/register:
@@ -57,16 +62,35 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       });
     }
 
+    // FIX: If no email service configured, auto-verify so customers can login immediately
+    const emailConfigured = isEmailConfigured();
+
     const user = await User.create({
       firstName,
       lastName,
       email,
       password,
       phone,
-      emailVerified: false // New users need to verify email
+      emailVerified: !emailConfigured // Auto-verify if no email configured
     });
 
-    // Generate verification token
+    // If email is not configured, skip verification entirely - user can login right away
+    if (!emailConfigured) {
+      logger.warn('⚠️  Email not configured. Auto-verifying user so they can login immediately.');
+      return res.status(201).json({
+        success: true,
+        message: 'Registration successful! You can now log in.',
+        data: {
+          _id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          emailVerified: true
+        }
+      });
+    }
+
+    // Generate verification token (only if email is configured)
     const verificationToken = user.generateEmailVerificationToken();
     await user.save({ validateBeforeSave: false });
 
@@ -95,19 +119,23 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
           emailVerified: user.emailVerified
         }
       });
-   } catch (emailError: unknown) {
-      // If email sending fails, still create user but log error
+    } catch (emailError: unknown) {
+      // FIX: If email sending fails, auto-verify user so they can still login
       logger.error('Error sending verification email:', emailError);
-      // Don't fail registration if email fails - user can request resend
+      user.emailVerified = true;
+      user.emailVerificationToken = undefined;
+      user.emailVerificationExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+
       res.status(201).json({
         success: true,
-        message: 'Registration successful! However, we could not send the verification email. Please use the resend verification email feature.',
+        message: 'Registration successful! You can now log in.',
         data: {
           _id: user._id,
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-          emailVerified: user.emailVerified
+          emailVerified: true
         }
       });
     }
@@ -173,31 +201,38 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     }
 
     // Check if email is verified (only for customers, admin/staff are auto-verified)
-    // For backward compatibility: auto-verify existing users who don't have emailVerificationToken
-    // (users created before email verification was required)
     if (user.role === 'customer') {
-      // Check if verification token exists and is not expired
-      const hasValidToken = user.emailVerificationToken && 
-                            user.emailVerificationExpires && 
-                            new Date(user.emailVerificationExpires) > new Date();
-      
-      // If user doesn't have a valid verification token, they're an existing user - auto-verify them
-      if (!hasValidToken) {
-        // Existing user created before email verification or token expired - auto-verify
-        if (user.emailVerified === undefined || user.emailVerified === null || !user.emailVerified) {
+      // FIX: If email is not configured, always auto-verify on login
+      if (!isEmailConfigured()) {
+        if (!user.emailVerified) {
           user.emailVerified = true;
-          // Clear any expired tokens
           user.emailVerificationToken = undefined;
           user.emailVerificationExpires = undefined;
           await user.save({ validateBeforeSave: false });
         }
-      } else if (user.emailVerified === false) {
-        // New user who has a valid verification token but hasn't verified yet - require verification
-        return res.status(403).json({
-          success: false,
-          message: 'Please verify your email address before logging in. Check your email for the verification link.',
-          requiresVerification: true
-        });
+      } else {
+        // Check if verification token exists and is not expired
+        const hasValidToken = user.emailVerificationToken && 
+                              user.emailVerificationExpires && 
+                              new Date(user.emailVerificationExpires) > new Date();
+        
+        // If user doesn't have a valid verification token, they're an existing user - auto-verify them
+        if (!hasValidToken) {
+          // Existing user created before email verification or token expired - auto-verify
+          if (user.emailVerified === undefined || user.emailVerified === null || !user.emailVerified) {
+            user.emailVerified = true;
+            user.emailVerificationToken = undefined;
+            user.emailVerificationExpires = undefined;
+            await user.save({ validateBeforeSave: false });
+          }
+        } else if (user.emailVerified === false) {
+          // New user with valid token but hasn't verified yet - require verification
+          return res.status(403).json({
+            success: false,
+            message: 'Please verify your email address before logging in. Check your email for the verification link.',
+            requiresVerification: true
+          });
+        }
       }
     }
 
@@ -398,7 +433,6 @@ export const resendVerificationEmail = async (req: Request, res: Response, next:
     const user = await User.findOne({ email }).select('+emailVerificationToken +emailVerificationExpires');
 
     if (!user) {
-      // Don't reveal if user exists or not (security best practice)
       return res.status(200).json({
         success: true,
         message: 'If an account with this email exists and is not verified, a verification email has been sent.'
@@ -412,12 +446,23 @@ export const resendVerificationEmail = async (req: Request, res: Response, next:
       });
     }
 
+    // FIX: If email not configured, just auto-verify the user instead
+    if (!isEmailConfigured()) {
+      user.emailVerified = true;
+      user.emailVerificationToken = undefined;
+      user.emailVerificationExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+      return res.status(200).json({
+        success: true,
+        message: 'Your account has been verified. You can now log in.'
+      });
+    }
+
     // Generate new verification token
     const verificationToken = user.generateEmailVerificationToken();
     await user.save({ validateBeforeSave: false });
 
     try {
-      // Send verification email via background job (non-blocking)
       await addEmailJob(
         'verification',
         {
@@ -448,13 +493,9 @@ export const resendVerificationEmail = async (req: Request, res: Response, next:
 // Logout user
 export const logout = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Clear httpOnly cookie with same settings as when it was set
-    // Must match the cookie settings from generateToken.ts exactly
     const isProduction = process.env.NODE_ENV === 'production';
     const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
     
-    // Clear the cookie by setting it to expire in the past
-    // Use same options as login to ensure proper clearing
     const clearOptions: {
       expires: Date;
       httpOnly: boolean;
@@ -463,20 +504,17 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
       path: string;
       domain?: string;
     } = {
-      expires: new Date(0), // Expire immediately (past date)
+      expires: new Date(0),
       httpOnly: true,
-      secure: isProduction, // Must match login cookie settings
-      sameSite: (isProduction ? 'none' : 'lax') as 'strict' | 'lax' | 'none', // Must match login cookie settings
+      secure: isProduction,
+      sameSite: (isProduction ? 'none' : 'lax') as 'strict' | 'lax' | 'none',
       path: '/',
     };
     
-    // Only set domain if it was set during login
     if (cookieDomain) {
       clearOptions.domain = cookieDomain;
     }
     
-    // Clear both frontend and admin cookies to ensure complete logout
-    // Also clear old cookie name for backward compatibility
     res.cookie('frontend_token', '', clearOptions);
     res.cookie('admin_token', '', clearOptions);
     res.cookie('token', '', clearOptions);
@@ -528,11 +566,8 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
 
     logger.info(`Password reset requested for email: ${email}`);
 
-    // Find user by email
     const user = await User.findOne({ email }).select('+passwordResetToken +passwordResetExpires');
 
-    // Don't reveal if user exists or not (security best practice)
-    // Always return success message
     if (!user) {
       logger.info(`User not found for email: ${email}`);
       return res.status(200).json({
@@ -543,14 +578,11 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
 
     logger.info(`User found, generating reset token for: ${email}`);
 
-    // Generate reset token
     const resetToken = user.generatePasswordResetToken();
     await user.save({ validateBeforeSave: false });
 
     logger.info(`Reset token generated, attempting to send email to: ${email}`);
 
-    // Send email via background job queue (non-blocking)
-    // PERFORMANCE FIX: Email sending moved to background job queue
     await addEmailJob(
       'password-reset',
       {
@@ -565,10 +597,8 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
     ).catch((emailError: unknown) => {
       const errorMessage = emailError instanceof Error ? emailError.message : String(emailError);
       logger.error(`❌ Error queuing password reset email to ${email}:`, errorMessage);
-      // Don't fail the request if email fails - user can request again
     });
 
-    // Return success immediately (email is being sent in background)
     return res.status(200).json({
       success: true,
       message: 'If an account with this email exists, a password reset link has been sent.'
@@ -623,13 +653,11 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
       });
     }
 
-    // Hash the token to compare with stored hash
     const hashedToken = crypto
       .createHash('sha256')
       .update(token)
       .digest('hex');
 
-    // Find user with this token and check if it's not expired
     const user = await User.findOne({
       passwordResetToken: hashedToken,
       passwordResetExpires: { $gt: new Date() }
@@ -642,8 +670,6 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
       });
     }
 
-    // SECURITY: Check if a different user is logged in
-    // If someone is logged in, verify they're the same user requesting the reset
     const authReq = req as AuthRequest;
     if (authReq.user && authReq.user._id) {
       const loggedInUserId = safeToString(authReq.user._id);
@@ -658,8 +684,6 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
       }
     }
 
-    // SECURITY FIX: Apply same password complexity rules as registration
-    // Validate password length and complexity
     if (password.length < 8) {
       return res.status(400).json({
         success: false,
@@ -667,7 +691,6 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
       });
     }
 
-    // Validate password complexity (uppercase, lowercase, number)
     const passwordComplexityRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
     if (!passwordComplexityRegex.test(password)) {
       return res.status(400).json({
@@ -676,7 +699,6 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
       });
     }
 
-    // Set new password
     user.password = password;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
@@ -685,7 +707,6 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
 
     logger.info(`Password reset successful for user: ${user.email} (ID: ${user._id})`);
 
-    // Send token response (auto-login after reset)
     sendTokenResponse(safeToString(user._id), 200, res, req);
   } catch (error) {
     next(error);
@@ -721,13 +742,11 @@ export const verifyResetToken = async (req: Request, res: Response, next: NextFu
       });
     }
 
-    // Hash the token to compare with stored hash
     const hashedToken = crypto
       .createHash('sha256')
       .update(token)
       .digest('hex');
 
-    // Find user with this token and check if it's not expired
     const user = await User.findOne({
       passwordResetToken: hashedToken,
       passwordResetExpires: { $gt: new Date() }
@@ -750,4 +769,3 @@ export const verifyResetToken = async (req: Request, res: Response, next: NextFu
     next(error);
   }
 };
-
