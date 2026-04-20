@@ -1,76 +1,133 @@
-import jwt from 'jsonwebtoken';
-import { Response } from 'express';
+import axios from 'axios';
 
-export const generateToken = (id: string) => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error('JWT_SECRET is not configured. Please set JWT_SECRET in your environment variables.');
+// Extend AxiosRequestConfig to include our custom skipAuth property
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    skipAuth?: boolean;
   }
-  const expiresIn = process.env.JWT_EXPIRE || '30d';
-  return jwt.sign({ id }, secret, { 
-    expiresIn: expiresIn,
-    algorithm: 'HS256'
-  } as jwt.SignOptions);
+}
+
+// Use environment variable for API URL, fallback to relative path for local dev
+let API_URL = import.meta.env.VITE_API_URL || '/api';
+API_URL = API_URL.replace(/\/+$/, '');
+if (API_URL.startsWith('http') && !API_URL.endsWith('/api')) {
+  API_URL = `${API_URL}/api`;
+}
+API_URL = API_URL.replace(/\/+$/, '');
+
+// FIX: Token storage helpers - store token in localStorage as cross-domain fallback
+const TOKEN_KEY = 'petshiwu_token';
+
+export const saveToken = (token: string) => {
+  if (token) localStorage.setItem(TOKEN_KEY, token);
 };
 
-// Helper function to detect if request is from admin dashboard
-const isAdminRequest = (req: any): boolean => {
-  const origin = req.headers?.origin || req.headers?.referer || '';
-  const adminUrls = [
-    process.env.ADMIN_URL || 'http://localhost:5174',
-    'https://pet-shop-2-r3ed.onrender.com',
-    'https://dashboard.petshiwu.com',
-  ];
-  return adminUrls.some(url => origin.includes(url) || origin.includes('5174') || origin.includes('dashboard'));
+export const getToken = (): string | null => {
+  return localStorage.getItem(TOKEN_KEY);
 };
 
-export const sendTokenResponse = (userId: string, statusCode: number, res: Response, req?: any) => {
-  try {
-    const token = generateToken(userId);
+export const removeToken = () => {
+  localStorage.removeItem(TOKEN_KEY);
+};
 
-    const expiresIn = process.env.JWT_EXPIRE || '30d';
-    let expiresDays = 30;
-    if (expiresIn.endsWith('d')) {
-      expiresDays = parseInt(expiresIn.replace('d', ''));
-    } else if (expiresIn.endsWith('h')) {
-      expiresDays = parseInt(expiresIn.replace('h', '')) / 24;
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  withCredentials: true // Keep for cookie support
+});
+
+// FIX: Add Authorization header from localStorage token as cross-domain fallback
+// Cookies get rejected when backend (onrender.com) and frontend (petshiwu.com) are on different domains
+// Using Authorization header with localStorage token solves this completely
+api.interceptors.request.use(
+  (config: any) => {
+    if (!config.skipAuth) {
+      const token = getToken();
+      if (token) {
+        config.headers = config.headers || {};
+        config.headers['Authorization'] = `Bearer ${token}`;
+      }
     }
-
-    const isProduction = process.env.NODE_ENV === 'production';
-
-    // FIX: Do NOT set cookie domain when frontend and backend are on different domains.
-    // Setting COOKIE_DOMAIN to .petshiwu.com causes browsers to REJECT the cookie
-    // because the backend is on onrender.com, not petshiwu.com.
-    // Solution: Remove domain attribute entirely so cookie is scoped to the backend domain.
-    const options: {
-      expires: Date;
-      httpOnly: boolean;
-      secure: boolean;
-      sameSite: 'strict' | 'lax' | 'none';
-      path: string;
-      domain?: string;
-    } = {
-      expires: new Date(Date.now() + expiresDays * 24 * 60 * 60 * 1000),
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: (isProduction ? 'none' : 'lax') as 'strict' | 'lax' | 'none',
-      path: '/',
-      // NOTE: domain intentionally NOT set - fixes cross-domain cookie rejection
-    };
-
-    const isAdmin = req ? isAdminRequest(req) : false;
-    const cookieName = isAdmin ? 'admin_token' : 'frontend_token';
-
-    // FIX: Also return token in response body so frontend can store it
-    // This handles cases where cookies are blocked cross-domain (e.g. petshiwu.com -> onrender.com)
-    res.status(statusCode)
-      .cookie(cookieName, token, options)
-      .json({
-        success: true,
-        token: token, // FIX: Return token in body so frontend can use it as fallback
-        expiresIn: expiresDays * 24 * 60 * 60 // seconds
-      });
-  } catch (error: any) {
-    throw new Error(`Failed to generate token: ${error.message}`);
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-};
+);
+
+// FIX: Capture token from login/register responses and save to localStorage
+api.interceptors.response.use(
+  (response) => {
+    // If backend returns a token in response body, save it
+    if (response.data?.token) {
+      saveToken(response.data.token);
+    }
+    return response;
+  },
+  (error) => {
+    const url = error.config?.url || '';
+    const isWishlistEndpoint = url.includes('/wishlist');
+    const isProductEndpoint = url.includes('/products/');
+    const skipAuth = error.config?.skipAuth;
+    const isAuthMeEndpoint = url.includes('/auth/me');
+    
+    if (error.response?.status === 401) {
+      const isPublicEndpoint = url.includes('/auth/login') || 
+                               url.includes('/auth/register') || 
+                               url.includes('/auth/forgot-password') ||
+                               url.includes('/auth/reset-password') ||
+                               url.includes('/auth/logout') ||
+                               url.includes('/products') ||
+                               url.includes('/categories');
+      
+      if (isAuthMeEndpoint && skipAuth) {
+        return Promise.reject(error);
+      }
+      
+      const isNavigating = sessionStorage.getItem('_isNavigating') === 'true';
+      const navTimestamp = sessionStorage.getItem('_navTimestamp');
+      const isStale = navTimestamp && (Date.now() - parseInt(navTimestamp)) > 5000;
+      
+      if (!skipAuth && 
+          !isPublicEndpoint && 
+          !(isNavigating && !isStale) &&
+          window.location.pathname !== '/login' && 
+          window.location.pathname !== '/register' &&
+          window.location.pathname !== '/') {
+        sessionStorage.setItem('_isNavigating', 'true');
+        sessionStorage.setItem('_navTimestamp', Date.now().toString());
+        
+        // FIX: Clear token from localStorage on 401
+        removeToken();
+        
+        import('@/stores/authStore').then(({ useAuthStore }) => {
+          useAuthStore.getState().setUser(null);
+        });
+        
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+        
+        setTimeout(() => {
+          sessionStorage.removeItem('_isNavigating');
+          sessionStorage.removeItem('_navTimestamp');
+        }, 1000);
+      }
+    } else if (error.response?.status === 403) {
+      const isAuthLogin = url.includes('/auth/login');
+      const requiresVerification = error.response?.data?.requiresVerification;
+      const isOrderEndpoint = url.includes('/orders/');
+      if (!isOrderEndpoint && !(isAuthLogin && requiresVerification)) {
+        window.location.href = '/403';
+      }
+    } else if (error.response?.status === 404 && !isWishlistEndpoint && !isProductEndpoint) {
+      window.location.href = '/404';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export { API_URL };
+export default api;
