@@ -8,36 +8,47 @@ declare module 'axios' {
 }
 
 // Use environment variable for API URL, fallback to relative path for local dev
-// Normalize the URL: remove trailing slashes and ensure /api is included
 let API_URL = import.meta.env.VITE_API_URL || '/api';
-// Remove all trailing slashes
 API_URL = API_URL.replace(/\/+$/, '');
-// If it's a full URL and doesn't end with /api, add it
 if (API_URL.startsWith('http') && !API_URL.endsWith('/api')) {
   API_URL = `${API_URL}/api`;
 }
-// Final cleanup: ensure no trailing slash (axios will handle paths that start with /)
 API_URL = API_URL.replace(/\/+$/, '');
+
+// FIX: Token storage helpers - store token in localStorage as cross-domain fallback
+const TOKEN_KEY = 'petshiwu_token';
+
+export const saveToken = (token: string) => {
+  if (token) localStorage.setItem(TOKEN_KEY, token);
+};
+
+export const getToken = (): string | null => {
+  return localStorage.getItem(TOKEN_KEY);
+};
+
+export const removeToken = () => {
+  localStorage.removeItem(TOKEN_KEY);
+};
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json'
   },
-  withCredentials: true
+  withCredentials: true // Keep for cookie support
 });
 
-// Add token to requests
-// Phase 2: Cookie-Only - Rely solely on httpOnly cookies
-// Cookies are sent automatically via withCredentials: true
-// No Authorization header needed - backend only accepts cookies
+// FIX: Add Authorization header from localStorage token as cross-domain fallback
+// Cookies get rejected when backend (onrender.com) and frontend (petshiwu.com) are on different domains
+// Using Authorization header with localStorage token solves this completely
 api.interceptors.request.use(
   (config: any) => {
-    // Skip auth if skipAuth flag is set
     if (!config.skipAuth) {
-      // Phase 2: No Authorization header - httpOnly cookies sent automatically
-      // Backend only accepts tokens from httpOnly cookies (more secure)
-      // withCredentials: true ensures cookies are sent with all requests
+      const token = getToken();
+      if (token) {
+        config.headers = config.headers || {};
+        config.headers['Authorization'] = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -46,16 +57,16 @@ api.interceptors.request.use(
   }
 );
 
-// Handle response errors
+// FIX: Capture token from login/register responses and save to localStorage
 api.interceptors.response.use(
   (response) => {
-    // Phase 2: Cookie-Only - Ensure response structure is consistent
-    // Some analytics/wrapper code might expect a token field, but we don't return it anymore
-    // The cookie is set automatically by the browser, so we just return the response as-is
+    // If backend returns a token in response body, save it
+    if (response.data?.token) {
+      saveToken(response.data.token);
+    }
     return response;
   },
   (error) => {
-    // Don't redirect for certain endpoints that might legitimately return 404
     const url = error.config?.url || '';
     const isWishlistEndpoint = url.includes('/wishlist');
     const isProductEndpoint = url.includes('/products/');
@@ -63,9 +74,6 @@ api.interceptors.response.use(
     const isAuthMeEndpoint = url.includes('/auth/me');
     
     if (error.response?.status === 401) {
-      // Phase 2: No localStorage token to remove - cookies are cleared by backend on logout
-      // Only redirect if not already on login/register pages and not a public endpoint
-      // Also skip redirect if this is a logout request (skipAuth flag)
       const isPublicEndpoint = url.includes('/auth/login') || 
                                url.includes('/auth/register') || 
                                url.includes('/auth/forgot-password') ||
@@ -74,23 +82,13 @@ api.interceptors.response.use(
                                url.includes('/products') ||
                                url.includes('/categories');
       
-      // For /auth/me endpoint with skipAuth, silently handle 401 (expected when not logged in)
-      // This prevents browser network logs from showing 401 errors
       if (isAuthMeEndpoint && skipAuth) {
-        // Silently handle - this is expected when user is not authenticated
         return Promise.reject(error);
       }
       
-      // Don't redirect if skipAuth flag is set (e.g., during logout or initial load)
-      // Only redirect if:
-      // 1. Not a skipAuth request (e.g., logout)
-      // 2. Not a public endpoint
-      // 3. Not already on login/register/home pages
-      // 4. Not during a navigation (check if we're in the middle of a redirect)
-      // Use timestamp to prevent stale flags
       const isNavigating = sessionStorage.getItem('_isNavigating') === 'true';
       const navTimestamp = sessionStorage.getItem('_navTimestamp');
-      const isStale = navTimestamp && (Date.now() - parseInt(navTimestamp)) > 5000; // 5 second timeout
+      const isStale = navTimestamp && (Date.now() - parseInt(navTimestamp)) > 5000;
       
       if (!skipAuth && 
           !isPublicEndpoint && 
@@ -98,31 +96,26 @@ api.interceptors.response.use(
           window.location.pathname !== '/login' && 
           window.location.pathname !== '/register' &&
           window.location.pathname !== '/') {
-        // Mark that we're navigating to prevent loops (with timestamp)
         sessionStorage.setItem('_isNavigating', 'true');
         sessionStorage.setItem('_navTimestamp', Date.now().toString());
         
-        // Clear any stale auth state
-        // Use dynamic import to avoid circular dependency (api -> authStore -> api)
-        // Note: This won't create a separate chunk since authStore is statically imported elsewhere,
-        // but it prevents circular dependency issues. The Vite warning is expected and harmless.
+        // FIX: Clear token from localStorage on 401
+        removeToken();
+        
         import('@/stores/authStore').then(({ useAuthStore }) => {
           useAuthStore.getState().setUser(null);
         });
         
-        // Use pathname navigation (BrowserRouter handles it)
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
         
-        // Clear navigation flag after a short delay
         setTimeout(() => {
           sessionStorage.removeItem('_isNavigating');
           sessionStorage.removeItem('_navTimestamp');
         }, 1000);
       }
     } else if (error.response?.status === 403) {
-      // Don't redirect for auth/login (email verification required) - let Login handle it
       const isAuthLogin = url.includes('/auth/login');
       const requiresVerification = error.response?.data?.requiresVerification;
       const isOrderEndpoint = url.includes('/orders/');
@@ -130,8 +123,6 @@ api.interceptors.response.use(
         window.location.href = '/403';
       }
     } else if (error.response?.status === 404 && !isWishlistEndpoint && !isProductEndpoint) {
-      // Only redirect to 404 page for non-resource endpoints
-      // Wishlist and product endpoints might legitimately return 404
       window.location.href = '/404';
     }
     return Promise.reject(error);
@@ -140,6 +131,3 @@ api.interceptors.response.use(
 
 export { API_URL };
 export default api;
-
-
-
