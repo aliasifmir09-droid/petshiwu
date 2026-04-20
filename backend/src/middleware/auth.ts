@@ -15,7 +15,6 @@ declare global {
   }
 }
 
-// Use type intersection to ensure all Request properties are included
 export type AuthRequest = Request & {
   user?: IUser;
 };
@@ -28,36 +27,51 @@ const isAdminRequest = (req: Request): boolean => {
     'https://pet-shop-2-r3ed.onrender.com',
     'https://dashboard.petshiwu.com',
   ];
-  
-  // Check if origin matches admin URLs
   return adminUrls.some(url => origin.includes(url) || origin.includes('5174') || origin.includes('dashboard'));
+};
+
+// FIX: Helper to extract token from request
+// Checks cookies first, then falls back to Authorization header
+// This fixes cross-domain auth where cookies are rejected by browser
+const extractToken = (req: Request): string | undefined => {
+  const isAdmin = isAdminRequest(req);
+
+  // 1. Try cookies first (works when same domain)
+  let token: string | undefined;
+  if (isAdmin) {
+    token = req.cookies?.admin_token;
+  } else {
+    token = req.cookies?.frontend_token;
+  }
+
+  // 2. Fallback to old cookie name (backward compatibility)
+  if (!token && req.cookies?.token) {
+    token = req.cookies.token;
+  }
+
+  // 3. FIX: Fallback to Authorization header (fixes cross-domain cookie rejection)
+  // When frontend (petshiwu.com) calls backend (onrender.com), cookies are rejected
+  // So we also accept Bearer token from Authorization header
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    }
+  }
+
+  return token;
 };
 
 export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    let token;
-
-    // Check for token in appropriate cookie based on request origin
-    // Use separate cookies for frontend and admin to prevent cross-contamination
-    const isAdmin = isAdminRequest(req);
-    if (isAdmin) {
-      token = req.cookies?.admin_token;
-    } else {
-      token = req.cookies?.frontend_token;
-    }
-    
-    // Fallback to old cookie name for backward compatibility (migration period)
-    if (!token && req.cookies?.token) {
-      token = req.cookies.token;
-    }
+    const token = extractToken(req);
 
     if (!token) {
-      // Debug: Log minimal information in development only
-      // Never log cookie values, headers, or sensitive request data
       if (process.env.NODE_ENV === 'development') {
         logger.debug('Auth Debug - No token found:', {
           hasCookies: !!req.cookies,
           cookieCount: req.cookies ? Object.keys(req.cookies).length : 0,
+          hasAuthHeader: !!req.headers.authorization,
           url: req.url,
           method: req.method
         });
@@ -77,10 +91,8 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
           message: 'Server configuration error'
         });
       }
-      // Explicitly specify algorithm to prevent algorithm confusion attacks
+
       const decoded = jwt.verify(token, secret, { algorithms: ['HS256'] }) as { id: string };
-      
-      // Don't select password field for security
       const user = await User.findById(decoded.id);
 
       if (!user) {
@@ -106,28 +118,12 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
 /**
  * Optional authentication middleware
  * Does NOT return 401 if no token - instead sets req.user to null
- * Useful for endpoints that need to check auth status without requiring authentication
  */
 export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    let token;
-
-    // Check for token in appropriate cookie based on request origin
-    // Use separate cookies for frontend and admin to prevent cross-contamination
-    const isAdmin = isAdminRequest(req);
-    if (isAdmin) {
-      token = req.cookies?.admin_token;
-    } else {
-      token = req.cookies?.frontend_token;
-    }
-    
-    // Fallback to old cookie name for backward compatibility (migration period)
-    if (!token && req.cookies?.token) {
-      token = req.cookies.token;
-    }
+    const token = extractToken(req);
 
     if (!token) {
-      // No token - set user to null and continue (don't return 401)
       req.user = undefined;
       return next();
     }
@@ -135,28 +131,21 @@ export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFu
     try {
       const secret = process.env.JWT_SECRET;
       if (!secret) {
-        // Server error - set user to null and continue
         req.user = undefined;
         return next();
       }
-      
-      // Verify token
+
       const decoded = jwt.verify(token, secret, { algorithms: ['HS256'] }) as { id: string };
-      
-      // Find user
       const user = await User.findById(decoded.id);
 
       if (!user) {
-        // User not found - set user to null and continue (don't return 401)
         req.user = undefined;
         return next();
       }
 
-      // User found - set req.user and continue
       req.user = user;
       next();
     } catch (error: unknown) {
-      // Invalid/expired token - set user to null and continue (don't return 401)
       if (process.env.NODE_ENV === 'development') {
         logger.debug('OptionalAuth: Token verification failed (expected if not logged in)');
       }
@@ -164,7 +153,6 @@ export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFu
       next();
     }
   } catch (error: unknown) {
-    // Any other error - log in development, set user to null and continue
     if (process.env.NODE_ENV === 'development') {
       logger.error('OptionalAuth error:', error);
     }
@@ -192,6 +180,3 @@ export const authorize = (...roles: string[]) => {
     next();
   };
 };
-
-
-
