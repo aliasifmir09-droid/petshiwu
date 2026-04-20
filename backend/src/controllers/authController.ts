@@ -95,7 +95,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
           emailVerified: user.emailVerified
         }
       });
-    } catch (emailError: unknown) {
+   } catch (emailError: unknown) {
       // If email sending fails, still create user but log error
       logger.error('Error sending verification email:', emailError);
       // Don't fail registration if email fails - user can request resend
