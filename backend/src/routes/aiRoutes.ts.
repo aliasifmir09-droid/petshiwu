@@ -1,0 +1,12 @@
+import { Router } from 'express';
+import { getAIResponse } from '../aiService'; // Path to the file you just uploaded
+
+const router = Router();
+
+router.post('/chat', async (req, res) => {
+  const { message } = req.body;
+  const reply = await getAIResponse(message);
+  res.json({ reply });
+});
+
+export default router;
