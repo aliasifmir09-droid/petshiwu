@@ -1,0 +1,33 @@
+import { OpenAI } from 'openai';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+const KNOWLEDGE_BASE = `
+You are the official AI Assistant for Petshiwu, a premium pet supply retailer in the USA.
+- Free Shipping: Orders over $75.
+- Return Policy: 30-day satisfaction guarantee.
+- Contact: +1 (626) 342-0419 | support@petshiwu.com
+- Products: Purina, Hill's, Whisker City, etc.
+`;
+
+export const getAIResponse = async (userMessage: string) => {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: KNOWLEDGE_BASE },
+        { role: "user", content: userMessage },
+      ],
+    });
+
+    return response.choices[0].message.content;
+  } catch (error) {
+    console.error("AI Service Error:", error);
+    throw new Error("Failed to get response from AI");
+  }
+};
