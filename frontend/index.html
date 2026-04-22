@@ -9,60 +9,38 @@
     <link rel="icon" href="/logo.png" type="image/png" />
     <meta name="theme-color" content="#1E3A8A" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- PERFORMANCE FIX: Inline critical CSS for faster FCP -->
     <style>
       *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Fira Sans','Droid Sans','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background:linear-gradient(to bottom,#fff 0%,#f9fafb 100%);font-display:optional}header{background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.1)}.loading-spinner{display:flex;align-items:center;justify-content:center;min-height:200px}img{max-width:100%;height:auto}button{cursor:pointer;border:none;background:none}
     </style>
-    <!-- Critical: Preload LCP image (logo) for fastest rendering -->
     <link rel="preload" as="image" href="/logo.png" type="image/png" fetchpriority="high" />
-    <!-- Critical: Preconnect to backend API FIRST (most important for LCP) -->
     <link rel="dns-prefetch" href="https://pet-shop-backend-totp.onrender.com">
     <link rel="preconnect" href="https://pet-shop-backend-totp.onrender.com" crossorigin>
-    <!-- Prefetch slideshow API endpoint for faster LCP image discovery -->
-    <link rel="dns-prefetch" href="https://pet-shop-backend-totp.onrender.com/api/slideshow">
-    <!-- Preconnect to image CDNs for faster image loading (critical for LCP) -->
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
     <link rel="dns-prefetch" href="https://s7d2.scene7.com">
     <link rel="preconnect" href="https://s7d2.scene7.com" crossorigin>
-    <!-- PERFORMANCE FIX: Preconnect for fonts (critical for font loading) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Prefetch disabled - can trigger 503 during host cold start on free tier -->
-    <!-- Preconnect for Tawk.to (lazy loaded, low priority) -->
-    <link rel="dns-prefetch" href="https://embed.tawk.to">
-    <!-- PERFORMANCE FIX: Defer non-critical font loading -->
-    <link 
-      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" 
-      rel="stylesheet"
-      media="print"
-      onload="this.media='all';this.onload=null"
-    >
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all';this.onload=null">
     <noscript>
       <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     </noscript>
-    <!-- Fonts loaded via stylesheet below - no manual preload (Google URLs can change) -->
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#1E3A8A" />
     <title>PetShiwu | Premium Pet Food, Toys & Accessories in USA</title>
     <meta name="description" content="Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, and more at PetShiwu. Fast shipping, great prices. Free shipping on orders over $75.">
     <meta name="keywords" content="pet food, dog food, cat food, pet supplies, pet toys, pet accessories, online pet store, USA, premium pet food">
-    <!-- Additional SEO meta tags for better initial rendering -->
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="googlebot" content="index, follow">
     <link rel="canonical" href="https://www.petshiwu.com">
-    <!-- Open Graph for social sharing -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.petshiwu.com">
     <meta property="og:title" content="PetShiwu | Premium Pet Food, Toys & Accessories in USA">
     <meta property="og:description" content="Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, and more at PetShiwu. Fast shipping, great prices.">
     <meta property="og:image" content="https://www.petshiwu.com/logo.png">
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="PetShiwu | Premium Pet Food, Toys & Accessories in USA">
     <meta name="twitter:description" content="Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, and more at PetShiwu. Fast shipping, great prices.">
     <meta name="twitter:image" content="https://www.petshiwu.com/logo.png">
-    <!-- Initial structured data for SEO (before React loads) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org/",
@@ -107,7 +85,6 @@
     </script>
   </head>
   <body>
-    <!-- Initial visible content for SEO and users without JavaScript -->
     <noscript>
       <div style="padding: 20px; text-align: center; font-family: Arial, sans-serif;">
         <h1>PetShiwu - Premium Pet Food, Toys & Accessories</h1>
@@ -116,7 +93,6 @@
         <p><a href="https://www.petshiwu.com/products" style="color: #1E3A8A; text-decoration: underline;">Browse Products</a></p>
       </div>
     </noscript>
-    <!-- Loading state visible before React hydrates -->
     <div id="root">
       <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(to bottom, #fff 0%, #f9fafb 100%);">
         <div style="text-align: center; padding: 20px;">
@@ -127,62 +103,5 @@
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
-    
-    <!--Start of Tawk.to Script - Lazy Loaded for Performance-->
-    <script type="text/javascript">
-    // Lazy load Tawk.to after page load to improve initial page performance
-    function loadTawk() {
-      if (window.Tawk_API && window.Tawk_API.isLoaded) {
-        return; // Already loaded
-      }
-      var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-      (function(){
-        var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-        s1.async=true;
-        s1.src='https://embed.tawk.to/6921e5eced8113195e016894/1jam6k9ak';
-        s1.charset='UTF-8';
-        // Add error handling for CORS or network failures
-        s1.onerror = function() {
-          console.warn('Tawk.to chat widget failed to load. This is non-critical and the site will continue to function normally.');
-          // Clean up the failed script element
-          if (s1.parentNode) {
-            s1.parentNode.removeChild(s1);
-          }
-        };
-        s0.parentNode.insertBefore(s1,s0);
-      })();
-    }
-    
-    // Load Tawk.to after page is fully loaded (not blocking initial render)
-    if (document.readyState === 'complete') {
-      // Page already loaded, load immediately
-      setTimeout(loadTawk, 2000); // Wait 2 seconds after page load
-    } else {
-      // Wait for page to load
-      window.addEventListener('load', function() {
-        setTimeout(loadTawk, 2000); // Wait 2 seconds after page load
-      });
-    }
-    
-    // Also load on user interaction (scroll, click, etc.) for faster activation
-    var tawkLoaded = false;
-    function loadTawkOnInteraction() {
-      if (!tawkLoaded) {
-        tawkLoaded = true;
-        loadTawk();
-        // Remove listeners after first interaction
-        window.removeEventListener('scroll', loadTawkOnInteraction, { passive: true });
-        window.removeEventListener('click', loadTawkOnInteraction);
-        window.removeEventListener('touchstart', loadTawkOnInteraction, { passive: true });
-      }
-    }
-    window.addEventListener('scroll', loadTawkOnInteraction, { passive: true });
-    window.addEventListener('click', loadTawkOnInteraction);
-    window.addEventListener('touchstart', loadTawkOnInteraction, { passive: true });
-    </script>
-    <!--End of Tawk.to Script-->
   </body>
 </html>
-
-
-
