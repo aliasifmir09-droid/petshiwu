@@ -1,298 +1,369 @@
-import { useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAuthStore } from './stores/authStore';
-import { useWishlistStore } from './stores/wishlistStore';
-import { authService } from './services/auth';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import LoadingSpinner from './components/LoadingSpinner';
-import ErrorBoundaryWithReporting from './components/ErrorBoundaryWithReporting';
-import { initAnalytics, trackPageView } from './utils/analytics';
-import './index.css';
+import { useState, useRef, useEffect } from 'react';
 
-// Lazy load pages for code splitting and better performance
-const Home = lazy(() => import('./pages/Home'));
-const Products = lazy(() => import('./pages/Products'));
-const ProductDetail = lazy(() => import('./pages/ProductDetail'));
-const Category = lazy(() => import('./pages/Category'));
-const PetType = lazy(() => import('./pages/PetType'));
-const Cart = lazy(() => import('./pages/Cart'));
-const Checkout = lazy(() => import('./pages/Checkout'));
-const Login = lazy(() => import('./pages/Login'));
-const Register = lazy(() => import('./pages/Register'));
-const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
-const ResendVerification = lazy(() => import('./pages/ResendVerification'));
-const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
-const ResetPassword = lazy(() => import('./pages/ResetPassword'));
-const Profile = lazy(() => import('./pages/Profile'));
-const ProductComparison = lazy(() => import('./pages/ProductComparison'));
-const Returns = lazy(() => import('./pages/Returns'));
-const ReturnPolicy = lazy(() => import('./pages/ReturnPolicy'));
-const AddressManagement = lazy(() => import('./pages/AddressManagement'));
-const StockAlerts = lazy(() => import('./pages/StockAlerts'));
-const AdvancedSearch = lazy(() => import('./pages/AdvancedSearch'));
-const MyOrders = lazy(() => import('./pages/MyOrders'));
-const OrderDetail = lazy(() => import('./pages/OrderDetail'));
-const TrackOrder = lazy(() => import('./pages/TrackOrder'));
-const Donate = lazy(() => import('./pages/Donate'));
-const Favorites = lazy(() => import('./pages/Favorites'));
-const Learning = lazy(() => import('./pages/Learning'));
-const BlogDetail = lazy(() => import('./pages/BlogDetail'));
-const CareGuides = lazy(() => import('./pages/CareGuides'));
-const CareGuideDetail = lazy(() => import('./pages/CareGuideDetail'));
-const FAQ = lazy(() => import('./pages/FAQ'));
-const About = lazy(() => import('./pages/About'));
-const NotFound = lazy(() => import('./pages/NotFound'));
-const Forbidden = lazy(() => import('./pages/Forbidden'));
-// SEO Landing Pages
-const SensitiveStomachDogs = lazy(() => import('./pages/seo/SensitiveStomachDogs'));
-const PickyEaters = lazy(() => import('./pages/seo/PickyEaters'));
-const AggressiveChewers = lazy(() => import('./pages/seo/AggressiveChewers'));
-// SEO Blog Posts
-const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
-
-// Optimize React Query with better defaults
-// PERFORMANCE FIX: Optimized cache times based on data volatility
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes default
-      gcTime: 10 * 60 * 1000, // 10 minutes default (formerly cacheTime)
-    },
-    mutations: {
-      // Optimistic updates enabled by default
-      retry: 1,
-    }
-  }
-});
-
-// PERFORMANCE FIX: Cache warming on app initialization
-// Prefetch critical data that's likely to be needed immediately
-const warmCache = async () => {
-  try {
-    // Use dynamic imports to avoid circular dependencies
-    const { default: api } = await import('./services/api');
-    
-    // Prefetch pet types (static data, long cache time)
-    await queryClient.prefetchQuery({
-      queryKey: ['pet-types'],
-      queryFn: async () => {
-        const response = await api.get('/pet-types');
-        return response.data;
-      },
-      staleTime: 30 * 60 * 1000, // 30 minutes - static data
-      gcTime: 60 * 60 * 1000, // 1 hour
-    });
-
-    // Prefetch categories (semi-static, medium cache time)
-    await queryClient.prefetchQuery({
-      queryKey: ['categories'],
-      queryFn: async () => {
-        const response = await api.get('/categories');
-        return response.data;
-      },
-      staleTime: 10 * 60 * 1000, // 10 minutes - semi-static
-      gcTime: 30 * 60 * 1000, // 30 minutes
-    });
-  } catch (error) {
-    // Silently fail - cache warming is optional
-    console.debug('Cache warming failed:', error);
-  }
-};
-
-// Warm cache on app load (non-blocking)
-if (typeof window !== 'undefined') {
-  warmCache();
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
 }
 
-// Component to track page views
-const PageViewTracker = () => {
-  const location = useLocation();
+const SYSTEM_PROMPT = `You are PetShiwu's friendly AI product finder assistant named "Pawsy". PetShiwu is a premium US pet e-commerce store at petshiwu.com selling food, toys, accessories and supplies for dogs, cats, rabbits, birds, fish and other pets.
 
-  useEffect(() => {
-    // Track page view on route change
-    const path = location.pathname + location.search;
-    trackPageView(path, document.title);
-  }, [location]);
+Your job is to help customers find the right products. Keep responses short (2-4 sentences), warm and helpful. Suggest specific product types with brief reasons. Always end with a follow-up question to help narrow down what they need.
 
-  return null;
-};
+When suggesting products, mention you can help them search on the site. Never make up specific product names or prices.`;
 
-function App() {
-  const { setUser, setLoading } = useAuthStore();
-  const { syncWithBackend } = useWishlistStore();
+// Cute dog SVG face
+const DogFace = ({ size = 40 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Head */}
+    <circle cx="40" cy="42" r="28" fill="#F5A623"/>
+    {/* Left ear */}
+    <ellipse cx="18" cy="22" rx="10" ry="14" fill="#E8941A" transform="rotate(-15 18 22)"/>
+    {/* Right ear */}
+    <ellipse cx="62" cy="22" rx="10" ry="14" fill="#E8941A" transform="rotate(15 62 22)"/>
+    {/* Inner left ear */}
+    <ellipse cx="18" cy="23" rx="6" ry="9" fill="#F5C16C" transform="rotate(-15 18 23)"/>
+    {/* Inner right ear */}
+    <ellipse cx="62" cy="23" rx="6" ry="9" fill="#F5C16C" transform="rotate(15 62 23)"/>
+    {/* Face patch */}
+    <ellipse cx="40" cy="50" rx="18" ry="14" fill="#F5C16C"/>
+    {/* Left eye */}
+    <circle cx="30" cy="36" r="6" fill="white"/>
+    <circle cx="31" cy="36" r="3.5" fill="#2C1810"/>
+    <circle cx="32" cy="34.5" r="1.2" fill="white"/>
+    {/* Right eye */}
+    <circle cx="50" cy="36" r="6" fill="white"/>
+    <circle cx="51" cy="36" r="3.5" fill="#2C1810"/>
+    <circle cx="52" cy="34.5" r="1.2" fill="white"/>
+    {/* Nose */}
+    <ellipse cx="40" cy="47" rx="5" ry="3.5" fill="#2C1810"/>
+    {/* Nostrils */}
+    <circle cx="38" cy="47.5" r="1" fill="#1a0e0a"/>
+    <circle cx="42" cy="47.5" r="1" fill="#1a0e0a"/>
+    {/* Mouth */}
+    <path d="M36 52 Q40 56 44 52" stroke="#2C1810" strokeWidth="2" strokeLinecap="round" fill="none"/>
+    {/* Tongue */}
+    <ellipse cx="40" cy="55" rx="4" ry="3" fill="#FF6B8A"/>
+    {/* Cheek blush left */}
+    <ellipse cx="22" cy="46" rx="5" ry="3" fill="#FFB3C1" opacity="0.6"/>
+    {/* Cheek blush right */}
+    <ellipse cx="58" cy="46" rx="5" ry="3" fill="#FFB3C1" opacity="0.6"/>
+  </svg>
+);
 
-  // Initialize analytics on mount
-  useEffect(() => {
-    initAnalytics();
-    
-    // Suppress expected 401/403 network errors in console
-    import('./utils/suppressNetworkErrors').then(({ suppressNetworkErrors }) => {
-      suppressNetworkErrors();
-    });
-    
-    // Suppress image loading errors in console (403, 404, etc.)
-    // This prevents console spam from external CDN images that fail to load
-    const handleGlobalError = (event: ErrorEvent) => {
-      // Check if this is an image loading error
-      const target = event.target as HTMLElement;
-      if (target && target.tagName === 'IMG') {
-        // Suppress image loading errors (403, 404, CORS, etc.)
-        const errorMessage = event.message || '';
-        const errorSource = (event.filename || '').toLowerCase();
-        
-        if (
-          errorMessage.includes('403') ||
-          errorMessage.includes('404') ||
-          errorMessage.includes('Failed to load') ||
-          errorSource.includes('scene7') ||
-          errorSource.includes('petsmart') ||
-          (target as HTMLImageElement).src?.includes('scene7') ||
-          (target as HTMLImageElement).src?.includes('petsmart')
-        ) {
-          // Prevent the error from appearing in console
-          event.preventDefault();
-          event.stopPropagation();
-          return false;
-        }
-      }
-      return true;
-    };
-    
-    // Add global error listener for image errors
-    window.addEventListener('error', handleGlobalError, true);
-    
-    // Register service worker for offline support
-    if ('serviceWorker' in navigator && import.meta.env.PROD) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then(() => {
-          // Service Worker registered successfully - no need to log
-        })
-        .catch((error) => {
-          // Only log errors in development
-          if (import.meta.env.DEV) {
-            console.error('Service Worker registration failed:', error);
-          }
-        });
+// Small dog face for message avatar
+const DogAvatar = ({ size = 28 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="40" cy="42" r="28" fill="#F5A623"/>
+    <ellipse cx="18" cy="22" rx="10" ry="14" fill="#E8941A" transform="rotate(-15 18 22)"/>
+    <ellipse cx="62" cy="22" rx="10" ry="14" fill="#E8941A" transform="rotate(15 62 22)"/>
+    <ellipse cx="18" cy="23" rx="6" ry="9" fill="#F5C16C" transform="rotate(-15 18 23)"/>
+    <ellipse cx="62" cy="23" rx="6" ry="9" fill="#F5C16C" transform="rotate(15 62 23)"/>
+    <ellipse cx="40" cy="50" rx="18" ry="14" fill="#F5C16C"/>
+    <circle cx="30" cy="36" r="6" fill="white"/>
+    <circle cx="31" cy="36" r="3.5" fill="#2C1810"/>
+    <circle cx="32" cy="34.5" r="1.2" fill="white"/>
+    <circle cx="50" cy="36" r="6" fill="white"/>
+    <circle cx="51" cy="36" r="3.5" fill="#2C1810"/>
+    <circle cx="52" cy="34.5" r="1.2" fill="white"/>
+    <ellipse cx="40" cy="47" rx="5" ry="3.5" fill="#2C1810"/>
+    <path d="M36 52 Q40 56 44 52" stroke="#2C1810" strokeWidth="2" strokeLinecap="round" fill="none"/>
+    <ellipse cx="40" cy="55" rx="4" ry="3" fill="#FF6B8A"/>
+    <ellipse cx="22" cy="46" rx="5" ry="3" fill="#FFB3C1" opacity="0.6"/>
+    <ellipse cx="58" cy="46" rx="5" ry="3" fill="#FFB3C1" opacity="0.6"/>
+  </svg>
+);
+
+const SendIcon = ({ color = '#fff' }: { color?: string }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <path d="M22 2L11 13" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+export default function AIChatWidget() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: 'assistant',
+      content: "Woof! Hi there! I'm Pawsy, PetShiwu's AI assistant! I can help you find the perfect products for your furry friend! What kind of pet do you have? 🐾"
     }
-    
-    // Cleanup: remove error listener on unmount
-    return () => {
-      window.removeEventListener('error', handleGlobalError, true);
-    };
-  }, []);
+  ]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [isWagging, setIsWagging] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Wag animation on open
+  useEffect(() => {
+    if (isOpen) {
+      setIsWagging(true);
+      setTimeout(() => setIsWagging(false), 1000);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
-    const loadUser = async () => {
-      // Phase 2: Cookie-Only - Try to get user from backend using httpOnly cookie
-      // If cookie exists, request will succeed. If not, it will fail and we set user to null
-      // Use skipAuth=true to prevent 401 errors from being logged in browser console
-      try {
-        const user = await authService.getMe(true); // skipAuth=true prevents console spam
-        // Only set user if we got a valid response
-        if (user) {
-          setUser(user);
-          // Sync wishlist with backend after user loads
-          await syncWithBackend();
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        // No cookie or invalid cookie - user is not authenticated
-        // This is expected after logout, so don't log as error
-        // skipAuth flag ensures this 401 error is silently handled
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (isOpen && !isMinimized) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isOpen, isMinimized]);
 
-    loadUser();
-  }, [setUser, setLoading, syncWithBackend]);
+  useEffect(() => {
+    if (isOpen && !isMinimized) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [isOpen, isMinimized]);
+
+  const sendMessage = async (text?: string) => {
+    const userText = text || input.trim();
+    if (!userText || isLoading) return;
+    setInput('');
+    const newMessages: Message[] = [...messages, { role: 'user', content: userText }];
+    setMessages(newMessages);
+    setIsLoading(true);
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: SYSTEM_PROMPT,
+          messages: newMessages.map(m => ({ role: m.role, content: m.content }))
+        })
+      });
+      const data = await response.json();
+      const reply = data.content?.[0]?.text || "Woof! I'd love to help! Could you tell me more about your pet?";
+      setMessages([...newMessages, { role: 'assistant', content: reply }]);
+    } catch {
+      setMessages([...newMessages, { role: 'assistant', content: "Woof! I'm having a quick nap! Please try again in a moment. 🐾" }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const quickReplies = [
+    { label: '🐶 Dog food', text: 'I need dog food recommendations' },
+    { label: '🐱 Cat toys', text: 'What cat toys do you have?' },
+    { label: '🐰 Rabbit supplies', text: 'I need supplies for my rabbit' },
+    { label: '✨ Accessories', text: 'Show me pet accessories' },
+  ];
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter
-        future={{
-          v7_startTransition: true,
-          v7_relativeSplatPath: true,
-        }}
-      >
-        <PageViewTracker />
-        <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-1">
-            <ErrorBoundaryWithReporting>
-              <Suspense fallback={
-                <div className="container mx-auto px-4 py-12">
-                  <LoadingSpinner size="lg" />
+    <>
+      {/* Chat Window */}
+      {isOpen && (
+        <div style={{
+          position: 'fixed', bottom: '90px', right: '20px', width: '360px',
+          maxHeight: isMinimized ? '70px' : '540px',
+          background: '#fff', borderRadius: '20px',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.15)',
+          display: 'flex', flexDirection: 'column', overflow: 'hidden',
+          zIndex: 99999, transition: 'max-height 0.3s ease',
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          border: '2px solid #FFD98E',
+        }}>
+
+          {/* Header */}
+          <div style={{
+            background: 'linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%)',
+            padding: '12px 16px', display: 'flex', alignItems: 'center',
+            gap: '12px', cursor: 'pointer', flexShrink: 0,
+          }} onClick={() => setIsMinimized(!isMinimized)}>
+
+            {/* Dog avatar in header */}
+            <div style={{
+              width: '44px', height: '44px', borderRadius: '50%',
+              background: '#fff', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', flexShrink: 0,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              animation: isWagging ? 'headWag 0.3s ease 3' : 'none',
+            }}>
+              <DogFace size={38} />
+            </div>
+
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0, color: '#fff', fontWeight: 700, fontSize: '15px' }}>Pawsy</p>
+              <p style={{ margin: 0, color: 'rgba(255,255,255,0.85)', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80', display: 'inline-block' }}></span>
+                PetShiwu AI Assistant
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button onClick={(e) => { e.stopPropagation(); setIsMinimized(!isMinimized); }} style={{
+                background: 'rgba(255,255,255,0.2)', border: 'none',
+                color: '#fff', width: '28px', height: '28px', borderRadius: '50%',
+                cursor: 'pointer', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>{isMinimized ? '▲' : '▼'}</button>
+              <button onClick={(e) => { e.stopPropagation(); setIsOpen(false); }} style={{
+                background: 'rgba(255,255,255,0.2)', border: 'none',
+                color: '#fff', width: '28px', height: '28px', borderRadius: '50%',
+                cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>×</button>
+            </div>
+          </div>
+
+          {!isMinimized && (
+            <>
+              {/* Messages */}
+              <div style={{
+                flex: 1, overflowY: 'auto', padding: '16px',
+                display: 'flex', flexDirection: 'column', gap: '12px',
+                background: '#FFF9F0',
+              }}>
+                {messages.map((msg, i) => (
+                  <div key={i} style={{
+                    display: 'flex', gap: '8px',
+                    justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                    alignItems: 'flex-end',
+                  }}>
+                    {msg.role === 'assistant' && (
+                      <div style={{
+                        width: '32px', height: '32px', borderRadius: '50%',
+                        background: '#fff', border: '2px solid #FFD98E',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0,
+                      }}>
+                        <DogAvatar size={26} />
+                      </div>
+                    )}
+                    <div style={{
+                      background: msg.role === 'user' ? '#FF8C42' : '#fff',
+                      color: msg.role === 'user' ? '#fff' : '#2d1b00',
+                      border: msg.role === 'assistant' ? '1.5px solid #FFD98E' : 'none',
+                      borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '4px 18px 18px 18px',
+                      padding: '10px 14px', maxWidth: '78%',
+                      fontSize: '13px', lineHeight: '1.6',
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                    }}>
+                      {msg.content}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Typing indicator */}
+                {isLoading && (
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
+                    <div style={{
+                      width: '32px', height: '32px', borderRadius: '50%',
+                      background: '#fff', border: '2px solid #FFD98E',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <DogAvatar size={26} />
+                    </div>
+                    <div style={{
+                      background: '#fff', border: '1.5px solid #FFD98E',
+                      borderRadius: '4px 18px 18px 18px', padding: '12px 16px',
+                      display: 'flex', gap: '5px', alignItems: 'center',
+                    }}>
+                      {[0, 1, 2].map(i => (
+                        <div key={i} style={{
+                          width: '7px', height: '7px', borderRadius: '50%',
+                          background: '#FF8C42', opacity: 0.7,
+                          animation: 'chatBounce 1.2s infinite',
+                          animationDelay: `${i * 0.2}s`,
+                        }} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Quick replies */}
+              {messages.length <= 2 && (
+                <div style={{
+                  padding: '8px 12px', display: 'flex', gap: '6px',
+                  flexWrap: 'wrap', background: '#fff',
+                  borderTop: '1px solid #FFE8C0',
+                }}>
+                  {quickReplies.map((q, i) => (
+                    <button key={i} onClick={() => sendMessage(q.text)} style={{
+                      fontSize: '12px', padding: '5px 12px', borderRadius: '20px',
+                      border: '1.5px solid #FFD98E', background: '#FFF5E0',
+                      color: '#CC6A1A', cursor: 'pointer', fontWeight: 500,
+                    }}>{q.label}</button>
+                  ))}
                 </div>
-              }>
-                        <Routes>
-                          {/* Most specific routes first */}
-                          <Route path="/" element={<Home />} />
-                          <Route path="/products" element={<Products />} />
-                          <Route path="/products/:slug" element={<ProductDetail />} />
-                          {/* SEO-friendly category URLs: /:petType/:categorySlug (e.g., /dog/food) */}
-                          <Route path="/:petType/:categorySlug" element={<Category />} />
-                          <Route path="/category/:slug" element={<Category />} />
-                          <Route path="/learning" element={<Learning />} />
-                          <Route path="/learning/:slug" element={<BlogDetail />} />
-                          <Route path="/care-guides" element={<CareGuides />} />
-                          <Route path="/care-guides/:slug" element={<CareGuideDetail />} />
-                          <Route path="/faq" element={<FAQ />} />
-                          <Route path="/about" element={<About />} />
-                          <Route path="/cart" element={<Cart />} />
-                          <Route path="/checkout" element={<Checkout />} />
-                          <Route path="/login" element={<Login />} />
-                          <Route path="/register" element={<Register />} />
-                          <Route path="/verify-email" element={<VerifyEmail />} />
-                          <Route path="/resend-verification" element={<ResendVerification />} />
-                          <Route path="/forgot-password" element={<ForgotPassword />} />
-                          <Route path="/reset-password" element={<ResetPassword />} />
-                          <Route path="/profile" element={<Profile />} />
-                          <Route path="/orders/:id" element={<OrderDetail />} />
-                          <Route path="/orders" element={<MyOrders />} />
-                          <Route path="/track-order" element={<TrackOrder />} />
-                          <Route path="/donate" element={<Donate />} />
-                          <Route path="/favorites" element={<Favorites />} />
-                          <Route path="/compare" element={<ProductComparison />} />
-                          <Route path="/returns" element={<Returns />} />
-                          <Route path="/return-policy" element={<ReturnPolicy />} />
-                          <Route path="/addresses" element={<AddressManagement />} />
-                          <Route path="/stock-alerts" element={<StockAlerts />} />
-                          <Route path="/search" element={<AdvancedSearch />} />
-                          {/* SEO Landing Pages */}
-                          <Route path="/best-dog-food-sensitive-stomach-diarrhea" element={<SensitiveStomachDogs />} />
-                          <Route path="/high-protein-dog-food-picky-eaters" element={<PickyEaters />} />
-                          <Route path="/durable-dog-toys-aggressive-chewers" element={<AggressiveChewers />} />
-                          {/* SEO Blog Posts */}
-                          <Route path="/learning/best-dog-foods-sensitive-stomachs" element={<BestFoodSensitiveStomach />} />
-                          <Route path="/403" element={<Forbidden />} />
-                          <Route path="/404" element={<NotFound />} />
-                          {/* Less specific routes - pet type pages */}
-                          <Route path="/:petType" element={<PetType />} />
-                          {/* SEO-friendly product URLs with category hierarchy: /petType/categoryPath/productSlug */}
-                          {/* This catch-all route must come last to avoid intercepting specific routes */}
-                          <Route path="/:petType/*" element={<ProductDetail />} />
-                          {/* Final catch-all for 404 */}
-                          <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-            </ErrorBoundaryWithReporting>
-          </main>
-          <Footer />
+              )}
+
+              {/* Input */}
+              <div style={{
+                padding: '12px', display: 'flex', gap: '8px',
+                background: '#fff', borderTop: '1px solid #FFE8C0', flexShrink: 0,
+              }}>
+                <input
+                  ref={inputRef}
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && sendMessage()}
+                  placeholder="Ask Pawsy anything..."
+                  disabled={isLoading}
+                  style={{
+                    flex: 1, padding: '10px 14px', borderRadius: '24px',
+                    border: '1.5px solid #FFD98E', fontSize: '13px',
+                    outline: 'none', background: '#FFF9F0', color: '#2d1b00',
+                  }}
+                />
+                <button onClick={() => sendMessage()} disabled={isLoading || !input.trim()} style={{
+                  width: '42px', height: '42px', borderRadius: '50%',
+                  background: input.trim() ? '#FF8C42' : '#e2e8f0',
+                  border: 'none', cursor: input.trim() ? 'pointer' : 'not-allowed',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'background 0.2s', flexShrink: 0,
+                }}>
+                  <SendIcon color={input.trim() ? '#fff' : '#9ca3af'} />
+                </button>
+              </div>
+            </>
+          )}
         </div>
-      </BrowserRouter>
-    </QueryClientProvider>
+      )}
+
+      {/* Floating Dog Button */}
+      <button
+        onClick={() => { setIsOpen(!isOpen); setIsMinimized(false); }}
+        style={{
+          position: 'fixed', bottom: '20px', right: '20px',
+          width: '64px', height: '64px', borderRadius: '50%',
+          background: '#fff',
+          border: '3px solid #FF8C42',
+          cursor: 'pointer', zIndex: 99999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 4px 20px rgba(255,140,66,0.5)',
+          transition: 'transform 0.2s, box-shadow 0.2s',
+          padding: 0,
+        }}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.1)';
+          (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 24px rgba(255,140,66,0.6)';
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)';
+          (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 20px rgba(255,140,66,0.5)';
+        }}
+        aria-label="Chat with Pawsy AI assistant"
+      >
+        {isOpen
+          ? <span style={{ fontSize: '24px', color: '#FF8C42', fontWeight: 700, lineHeight: 1 }}>✕</span>
+          : <DogFace size={52} />
+        }
+      </button>
+
+      <style>{`
+        @keyframes chatBounce {
+          0%, 60%, 100% { transform: translateY(0); }
+          30% { transform: translateY(-5px); }
+        }
+        @keyframes headWag {
+          0% { transform: rotate(0deg); }
+          25% { transform: rotate(-10deg); }
+          75% { transform: rotate(10deg); }
+          100% { transform: rotate(0deg); }
+        }
+      `}</style>
+    </>
   );
 }
-
-export default App;
-
-
-
