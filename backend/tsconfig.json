@@ -18,8 +18,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node16",
-    "ignoreDeprecations": "6.0",
+    "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "typeRoots": ["./node_modules/@types", "../node_modules/@types"]
   },
