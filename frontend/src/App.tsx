@@ -1,3 +1,4 @@
+import AIChatWidget from './components/AIChatWidget';
 import { useState, useRef, useEffect } from 'react';
 
 interface Message {
@@ -367,3 +368,4 @@ export default function AIChatWidget() {
     </>
   );
 }
+}<AIChatWidget />
