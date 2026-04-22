@@ -18,13 +18,11 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
+    "ignoreDeprecations": "6.0",
     "allowSyntheticDefaultImports": true,
     "typeRoots": ["./node_modules/@types", "../node_modules/@types"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
-
-
-
