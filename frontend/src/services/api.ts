@@ -35,12 +35,10 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
-  withCredentials: true // Keep for cookie support
+  withCredentials: true
 });
 
-// FIX: Add Authorization header from localStorage token as cross-domain fallback
-// Cookies get rejected when backend (onrender.com) and frontend (petshiwu.com) are on different domains
-// Using Authorization header with localStorage token solves this completely
+// Add Authorization header from localStorage token
 api.interceptors.request.use(
   (config: any) => {
     if (!config.skipAuth) {
@@ -57,10 +55,9 @@ api.interceptors.request.use(
   }
 );
 
-// FIX: Capture token from login/register responses and save to localStorage
+// Capture token from login/register responses and save to localStorage
 api.interceptors.response.use(
   (response) => {
-    // If backend returns a token in response body, save it
     if (response.data?.token) {
       saveToken(response.data.token);
     }
@@ -68,48 +65,57 @@ api.interceptors.response.use(
   },
   (error) => {
     const url = error.config?.url || '';
+
+    // ✅ FIX: All endpoints that should NOT trigger a /404 redirect
     const isWishlistEndpoint = url.includes('/wishlist');
     const isProductEndpoint = url.includes('/products/');
+    const isCartEndpoint = url.includes('/cart');
+    const isDeliveryEndpoint = url.includes('/delivery');
+    const isOrderEndpoint = url.includes('/orders/');
+    const isSearchEndpoint = url.includes('/search');
+    const isRecommendationEndpoint = url.includes('/recommendations');
+    const isReorderEndpoint = url.includes('/reorder');
+    const isNotificationEndpoint = url.includes('/notifications');
+    const isBlogEndpoint = url.includes('/blogs') || url.includes('/care-guides');
     const skipAuth = error.config?.skipAuth;
     const isAuthMeEndpoint = url.includes('/auth/me');
-    
+
     if (error.response?.status === 401) {
-      const isPublicEndpoint = url.includes('/auth/login') || 
-                               url.includes('/auth/register') || 
+      const isPublicEndpoint = url.includes('/auth/login') ||
+                               url.includes('/auth/register') ||
                                url.includes('/auth/forgot-password') ||
                                url.includes('/auth/reset-password') ||
                                url.includes('/auth/logout') ||
                                url.includes('/products') ||
                                url.includes('/categories');
-      
+
       if (isAuthMeEndpoint && skipAuth) {
         return Promise.reject(error);
       }
-      
+
       const isNavigating = sessionStorage.getItem('_isNavigating') === 'true';
       const navTimestamp = sessionStorage.getItem('_navTimestamp');
       const isStale = navTimestamp && (Date.now() - parseInt(navTimestamp)) > 5000;
-      
-      if (!skipAuth && 
-          !isPublicEndpoint && 
+
+      if (!skipAuth &&
+          !isPublicEndpoint &&
           !(isNavigating && !isStale) &&
-          window.location.pathname !== '/login' && 
+          window.location.pathname !== '/login' &&
           window.location.pathname !== '/register' &&
           window.location.pathname !== '/') {
         sessionStorage.setItem('_isNavigating', 'true');
         sessionStorage.setItem('_navTimestamp', Date.now().toString());
-        
-        // FIX: Clear token from localStorage on 401
+
         removeToken();
-        
+
         import('@/stores/authStore').then(({ useAuthStore }) => {
           useAuthStore.getState().setUser(null);
         });
-        
+
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
-        
+
         setTimeout(() => {
           sessionStorage.removeItem('_isNavigating');
           sessionStorage.removeItem('_navTimestamp');
@@ -118,13 +124,29 @@ api.interceptors.response.use(
     } else if (error.response?.status === 403) {
       const isAuthLogin = url.includes('/auth/login');
       const requiresVerification = error.response?.data?.requiresVerification;
-      const isOrderEndpoint = url.includes('/orders/');
       if (!isOrderEndpoint && !(isAuthLogin && requiresVerification)) {
         window.location.href = '/403';
       }
-    } else if (error.response?.status === 404 && !isWishlistEndpoint && !isProductEndpoint) {
-      window.location.href = '/404';
+    } else if (error.response?.status === 404) {
+      // ✅ FIX: Only redirect to /404 for non-optional endpoints
+      // Never redirect for cart, delivery, wishlist, products or other optional API calls
+      const shouldSkip404Redirect =
+        isWishlistEndpoint ||
+        isProductEndpoint ||
+        isCartEndpoint ||
+        isDeliveryEndpoint ||
+        isOrderEndpoint ||
+        isSearchEndpoint ||
+        isRecommendationEndpoint ||
+        isReorderEndpoint ||
+        isNotificationEndpoint ||
+        isBlogEndpoint;
+
+      if (!shouldSkip404Redirect) {
+        window.location.href = '/404';
+      }
     }
+
     return Promise.reject(error);
   }
 );
