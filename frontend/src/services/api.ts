@@ -128,23 +128,10 @@ api.interceptors.response.use(
         window.location.href = '/403';
       }
     } else if (error.response?.status === 404) {
-      // ✅ FIX: Only redirect to /404 for non-optional endpoints
-      // Never redirect for cart, delivery, wishlist, products or other optional API calls
-      const shouldSkip404Redirect =
-        isWishlistEndpoint ||
-        isProductEndpoint ||
-        isCartEndpoint ||
-        isDeliveryEndpoint ||
-        isOrderEndpoint ||
-        isSearchEndpoint ||
-        isRecommendationEndpoint ||
-        isReorderEndpoint ||
-        isNotificationEndpoint ||
-        isBlogEndpoint;
-
-      if (!shouldSkip404Redirect) {
-        window.location.href = '/404';
-      }
+      // ✅ NUCLEAR FIX: Never redirect API calls to /404
+      // API 404s should be handled silently by the calling code
+      // React Router handles the /404 page for missing routes
+      // Do nothing here — let each component handle its own 404 errors
     }
 
     return Promise.reject(error);
