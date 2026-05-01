@@ -15,106 +15,168 @@ import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { useQuery } from '@tanstack/react-query';
 
+const safePrice = (item: any): number => {
+  try {
+    const p = item?.variant?.price ?? item?.product?.basePrice ?? item?.product?.price ?? 0;
+    const n = Number(p);
+    return isNaN(n) ? 0 : n;
+  } catch { return 0; }
+};
+
+const safeImage = (item: any): string => {
+  try {
+    return item?.product?.images?.[0] || item?.product?.image || item?.image || '';
+  } catch { return ''; }
+};
+
+const safeName = (item: any): string => {
+  try {
+    return item?.product?.name || item?.name || 'Product';
+  } catch { return 'Product'; }
+};
+
+const safeBrand = (item: any): string => {
+  try {
+    return item?.product?.brand || item?.brand || '';
+  } catch { return ''; }
+};
+
+const safeProductId = (item: any): string => {
+  try {
+    return item?.product?._id || item?.product?.id || item?._id || '';
+  } catch { return ''; }
+};
+
+const safeQuantity = (item: any): number => {
+  try {
+    const q = Number(item?.quantity);
+    return isNaN(q) || q < 1 ? 1 : q;
+  } catch { return 1; }
+};
+
 const Cart = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { items, removeFromCart, updateQuantity, getTotalPrice, clearCart } = useCartStore();
-  const { addToWishlist } = useWishlistStore();
-  const { isAuthenticated } = useAuthStore();
+
+  let storeItems: any[] = [];
+  let removeFromCart: Function = () => {};
+  let updateQuantity: Function = () => {};
+  let getTotalPrice: Function = () => 0;
+  let clearCart: Function = () => {};
+
+  try {
+    const cartStore = useCartStore();
+    storeItems = Array.isArray(cartStore.items) ? cartStore.items : [];
+    removeFromCart = cartStore.removeFromCart || (() => {});
+    updateQuantity = cartStore.updateQuantity || (() => {});
+    getTotalPrice = cartStore.getTotalPrice || (() => 0);
+    clearCart = cartStore.clearCart || (() => {});
+  } catch (e) {
+    console.warn('Cart store error:', e);
+  }
+
+  const items = storeItems.filter((item) => {
+    try { return item && (item.product || item.name); }
+    catch { return false; }
+  });
+
+  let addToWishlist: Function = async () => {};
+  try {
+    const wishlistStore = useWishlistStore();
+    addToWishlist = wishlistStore.addToWishlist || (async () => {});
+  } catch (e) {
+    console.warn('Wishlist store error:', e);
+  }
+
+  let isAuthenticated = false;
+  try {
+    const authStore = useAuthStore();
+    isAuthenticated = authStore.isAuthenticated || false;
+  } catch (e) {
+    console.warn('Auth store error:', e);
+  }
+
   const { toast, showToast, hideToast } = useToast();
-  
+
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     action: 'remove' | 'clear' | 'save-for-later' | null;
     productId?: string;
     variantSku?: string;
     productName?: string;
-  }>({
-    isOpen: false,
-    action: null
-  });
+  }>({ isOpen: false, action: null });
 
   const [shareId, setShareId] = useState<string | null>(null);
   const [shareLinkCopied, setShareLinkCopied] = useState(false);
   const [estimatedDelivery, setEstimatedDelivery] = useState<Date | null>(null);
 
-  // Check for shared cart on mount
   useEffect(() => {
     const shareParam = searchParams.get('share');
-    if (shareParam) {
-      loadSharedCart(shareParam);
-    }
+    if (shareParam) loadSharedCart(shareParam);
   }, [searchParams]);
 
-  // Load shared cart
-  const loadSharedCart = async (shareId: string) => {
+  const loadSharedCart = async (id: string) => {
     try {
-      const response = await cartService.getSharedCart(shareId);
-      if (response.success && response.data.items) {
+      const response = await cartService.getSharedCart(id);
+      if (response?.success && response?.data?.items) {
         showToast('Shared cart loaded!', 'success');
       }
-    } catch (error) {
+    } catch {
       showToast('Failed to load shared cart', 'error');
     }
   };
 
-  // ✅ FIXED: Get delivery estimate - wrapped in try/catch to prevent 404 redirect
   const { data: deliveryData } = useQuery({
     queryKey: ['delivery-estimate', 'standard'],
     queryFn: async () => {
-      try {
-        return await cartService.getDeliveryEstimate('standard');
-      } catch (error) {
-        // Silently fail — delivery estimate is optional, don't let it break the cart
-        return null;
-      }
+      try { return await cartService.getDeliveryEstimate('standard'); }
+      catch { return null; }
     },
     enabled: items.length > 0,
     staleTime: 5 * 60 * 1000,
-    retry: false, // ✅ Don't retry — prevents 404 from triggering global error handler
+    retry: false,
   });
 
   useEffect(() => {
-    if (deliveryData?.data?.estimatedDelivery) {
-      setEstimatedDelivery(new Date(deliveryData.data.estimatedDelivery));
-    }
+    try {
+      if (deliveryData?.data?.estimatedDelivery) {
+        setEstimatedDelivery(new Date(deliveryData.data.estimatedDelivery));
+      }
+    } catch { }
   }, [deliveryData]);
 
-  // Save cart to backend (for abandonment recovery)
   useEffect(() => {
-    if (items.length > 0) {
-      const saveCartToBackend = async () => {
-        try {
-          const cartItems = items.map(item => ({
-            product: item.product._id,
-            variant: item.variant,
-            quantity: item.quantity,
-            price: item.variant?.price || item.product.basePrice,
-            name: item.product.name,
-            image: item.product.images?.[0]
-          }));
+    if (items.length === 0) return;
+    const saveCartToBackend = async () => {
+      try {
+        const cartItems = items.map((item) => ({
+          product: safeProductId(item),
+          variant: item?.variant || null,
+          quantity: safeQuantity(item),
+          price: safePrice(item),
+          name: safeName(item),
+          image: safeImage(item),
+        })).filter((i) => i.product);
+        if (cartItems.length > 0) {
           await cartService.saveCart(cartItems, shareId || undefined);
-        } catch (error) {
-          // Silent fail - cart works without backend sync
         }
-      };
-      saveCartToBackend();
-    }
+      } catch { }
+    };
+    saveCartToBackend();
   }, [items, shareId]);
 
-  // Generate share link
   const generateShareLink = async () => {
     try {
-      const cartItems = items.map(item => ({
-        product: item.product._id,
-        variant: item.variant,
-        quantity: item.quantity,
-        price: item.variant?.price || item.product.basePrice,
-        name: item.product.name,
-        image: item.product.images?.[0]
-      }));
+      const cartItems = items.map((item) => ({
+        product: safeProductId(item),
+        variant: item?.variant || null,
+        quantity: safeQuantity(item),
+        price: safePrice(item),
+        name: safeName(item),
+        image: safeImage(item),
+      })).filter((i) => i.product);
       const response = await cartService.saveCart(cartItems);
-      if (response.success && response.data.shareId) {
+      if (response?.success && response?.data?.shareId) {
         setShareId(response.data.shareId);
         const shareUrl = `${window.location.origin}/cart?share=${response.data.shareId}`;
         await navigator.clipboard.writeText(shareUrl);
@@ -122,23 +184,21 @@ const Cart = () => {
         showToast('Cart link copied to clipboard!', 'success');
         setTimeout(() => setShareLinkCopied(false), 3000);
       }
-    } catch (error) {
+    } catch {
       showToast('Failed to generate share link', 'error');
     }
   };
 
-  // Save item for later (move to wishlist)
   const handleSaveForLater = async (productId: string) => {
     try {
       await addToWishlist(productId);
       removeFromCart(productId);
       showToast('Item saved to wishlist!', 'success');
-    } catch (error) {
+    } catch {
       showToast('Failed to save item to wishlist', 'error');
     }
   };
 
-  // One-click checkout
   const handleOneClickCheckout = () => {
     if (!isAuthenticated) {
       showToast('Please log in to use one-click checkout', 'warning');
@@ -148,18 +208,32 @@ const Cart = () => {
     navigate('/checkout?quick=true');
   };
 
-  const subtotal = getTotalPrice();
-  const shipping = subtotal > FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
-  const tax = subtotal * TAX_RATE;
+  const subtotal = (() => {
+    try {
+      const t = typeof getTotalPrice === 'function' ? getTotalPrice() : 0;
+      const n = Number(t);
+      if (isNaN(n)) return items.reduce((sum, item) => sum + safePrice(item) * safeQuantity(item), 0);
+      return n;
+    } catch {
+      return items.reduce((sum, item) => sum + safePrice(item) * safeQuantity(item), 0);
+    }
+  })();
+
+  const shipping = subtotal > (FREE_SHIPPING_THRESHOLD || 49) ? 0 : (STANDARD_SHIPPING_COST || 9.99);
+  const tax = subtotal * (TAX_RATE || 0.08);
   const total = subtotal + shipping + tax;
 
   const handleConfirmAction = () => {
-    if (confirmModal.action === 'remove' && confirmModal.productId) {
-      removeFromCart(confirmModal.productId, confirmModal.variantSku);
-    } else if (confirmModal.action === 'clear') {
-      clearCart();
-    } else if (confirmModal.action === 'save-for-later' && confirmModal.productId) {
-      handleSaveForLater(confirmModal.productId);
+    try {
+      if (confirmModal.action === 'remove' && confirmModal.productId) {
+        removeFromCart(confirmModal.productId, confirmModal.variantSku);
+      } else if (confirmModal.action === 'clear') {
+        clearCart();
+      } else if (confirmModal.action === 'save-for-later' && confirmModal.productId) {
+        handleSaveForLater(confirmModal.productId);
+      }
+    } catch (e) {
+      console.warn('Cart action error:', e);
     }
     setConfirmModal({ isOpen: false, action: null });
   };
@@ -173,7 +247,7 @@ const Cart = () => {
             icon={ShoppingBag}
             title="Your Cart is Empty"
             description="Looks like you haven't added any items to your cart yet. Start shopping to fill it up!"
-            action={{ label: "Start Shopping", to: "/products" }}
+            action={{ label: 'Start Shopping', to: '/products' }}
           />
         </div>
       </>
@@ -202,78 +276,80 @@ const Cart = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow">
-              {items.map((item) => {
-                const price = item.variant?.price || item.product.basePrice;
-                return (
-                  <div key={`${item.product._id}-${item.variant?.sku}`} className="flex gap-4 p-6 border-b last:border-b-0">
-                    {/* Image */}
-                    <Link to={generateProductUrl(item.product)} className="flex-shrink-0">
-                      <img
-                        src={normalizeImageUrl(item.product.images?.[0])}
-                        alt={item.product.name}
-                        onError={(e) => handleImageError(e, item.product.name)}
-                        className="w-24 h-24 object-cover rounded-lg"
-                      />
-                    </Link>
+              {items.map((item, index) => {
+                try {
+                  const productId = safeProductId(item);
+                  const price = safePrice(item);
+                  const quantity = safeQuantity(item);
+                  const name = safeName(item);
+                  const brand = safeBrand(item);
+                  const image = safeImage(item);
+                  const variantSku = item?.variant?.sku;
+                  const itemKey = `${productId}-${variantSku || index}`;
 
-                    {/* Info */}
-                    <div className="flex-1">
-                      <Link to={generateProductUrl(item.product)} className="hover:text-primary-600">
-                        <h3 className="font-semibold mb-1">{item.product.name}</h3>
+                  return (
+                    <div key={itemKey} className="flex gap-4 p-6 border-b last:border-b-0">
+                      <Link to={item?.product ? generateProductUrl(item.product) : '/products'} className="flex-shrink-0">
+                        <img
+                          src={normalizeImageUrl(image)}
+                          alt={name}
+                          onError={(e) => handleImageError(e, name)}
+                          className="w-24 h-24 object-cover rounded-lg"
+                        />
                       </Link>
-                      <p className="text-sm text-gray-600 mb-2">{item.product.brand}</p>
-                      {item.variant && (
-                        <p className="text-sm text-gray-600">
-                          Size: {item.variant.size || item.variant.weight}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Quantity & Price */}
-                    <div className="flex flex-col items-end gap-4">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => updateQuantity(item.product._id, item.quantity - 1, item.variant?.sku)}
-                          className="w-11 h-11 border border-gray-300 rounded hover:bg-gray-100 flex items-center justify-center text-lg font-semibold active:scale-95 transition-transform min-w-[44px] min-h-[44px]"
-                          aria-label="Decrease quantity"
-                        >-</button>
-                        <span className="w-12 text-center font-medium">{item.quantity}</span>
-                        <button
-                          onClick={() => updateQuantity(item.product._id, item.quantity + 1, item.variant?.sku)}
-                          className="w-11 h-11 border border-gray-300 rounded hover:bg-gray-100 flex items-center justify-center text-lg font-semibold active:scale-95 transition-transform min-w-[44px] min-h-[44px]"
-                          aria-label="Increase quantity"
-                        >+</button>
+                      <div className="flex-1">
+                        <Link to={item?.product ? generateProductUrl(item.product) : '/products'} className="hover:text-primary-600">
+                          <h3 className="font-semibold mb-1">{name}</h3>
+                        </Link>
+                        {brand && <p className="text-sm text-gray-600 mb-2">{brand}</p>}
+                        {item?.variant && (item.variant.size || item.variant.weight) && (
+                          <p className="text-sm text-gray-600">Size: {item.variant.size || item.variant.weight}</p>
+                        )}
                       </div>
-
-                      <p className="text-lg font-bold">${(price * item.quantity).toFixed(2)}</p>
-
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setConfirmModal({ isOpen: true, action: 'save-for-later', productId: item.product._id, variantSku: item.variant?.sku, productName: item.product.name })}
-                          className="text-blue-500 hover:text-blue-700 flex items-center gap-2 text-sm px-3 py-2 rounded-lg border border-blue-300 hover:bg-blue-50 transition-colors"
-                          aria-label="Save for later"
-                        >
-                          <Heart size={16} />
-                          <span className="hidden sm:inline">Save</span>
-                        </button>
-                        <button
-                          onClick={() => setConfirmModal({ isOpen: true, action: 'remove', productId: item.product._id, variantSku: item.variant?.sku, productName: item.product.name })}
-                          className="text-red-500 hover:text-red-700 flex items-center gap-2 text-sm px-3 py-2 rounded-lg border border-red-300 hover:bg-red-50 transition-colors"
-                          aria-label="Remove item from cart"
-                        >
-                          <Trash2 size={16} />
-                          <span className="hidden sm:inline">Remove</span>
-                        </button>
+                      <div className="flex flex-col items-end gap-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => updateQuantity(productId, quantity - 1, variantSku)}
+                            className="w-11 h-11 border border-gray-300 rounded hover:bg-gray-100 flex items-center justify-center text-lg font-semibold active:scale-95 transition-transform min-w-[44px] min-h-[44px]"
+                            aria-label="Decrease quantity"
+                          >-</button>
+                          <span className="w-12 text-center font-medium">{quantity}</span>
+                          <button
+                            onClick={() => updateQuantity(productId, quantity + 1, variantSku)}
+                            className="w-11 h-11 border border-gray-300 rounded hover:bg-gray-100 flex items-center justify-center text-lg font-semibold active:scale-95 transition-transform min-w-[44px] min-h-[44px]"
+                            aria-label="Increase quantity"
+                          >+</button>
+                        </div>
+                        <p className="text-lg font-bold">${(price * quantity).toFixed(2)}</p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setConfirmModal({ isOpen: true, action: 'save-for-later', productId, variantSku, productName: name })}
+                            className="text-blue-500 hover:text-blue-700 flex items-center gap-2 text-sm px-3 py-2 rounded-lg border border-blue-300 hover:bg-blue-50 transition-colors"
+                            aria-label="Save for later"
+                          >
+                            <Heart size={16} />
+                            <span className="hidden sm:inline">Save</span>
+                          </button>
+                          <button
+                            onClick={() => setConfirmModal({ isOpen: true, action: 'remove', productId, variantSku, productName: name })}
+                            className="text-red-500 hover:text-red-700 flex items-center gap-2 text-sm px-3 py-2 rounded-lg border border-red-300 hover:bg-red-50 transition-colors"
+                            aria-label="Remove item from cart"
+                          >
+                            <Trash2 size={16} />
+                            <span className="hidden sm:inline">Remove</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
+                  );
+                } catch (itemError) {
+                  console.warn('Skipping corrupted cart item:', itemError);
+                  return null;
+                }
               })}
             </div>
-
             <button
               onClick={() => setConfirmModal({ isOpen: true, action: 'clear' })}
               className="mt-6 text-red-500 hover:text-red-700 text-sm font-medium px-4 py-3 rounded-lg min-h-[44px] active:scale-95 transition-transform inline-flex items-center"
@@ -283,11 +359,9 @@ const Cart = () => {
             </button>
           </div>
 
-          {/* Order Summary - Desktop */}
           <div className="hidden lg:block">
             <div className="bg-white rounded-lg shadow p-6 sticky top-24">
               <h2 className="text-xl font-bold mb-6">Order Summary</h2>
-
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal</span>
@@ -316,13 +390,11 @@ const Cart = () => {
                   <span>${total.toFixed(2)}</span>
                 </div>
               </div>
-
-              {subtotal < FREE_SHIPPING_THRESHOLD && (
+              {subtotal < (FREE_SHIPPING_THRESHOLD || 49) && (
                 <p className="text-sm text-gray-600 mb-6">
-                  Add ${(FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2)} more for FREE shipping!
+                  Add ${((FREE_SHIPPING_THRESHOLD || 49) - subtotal).toFixed(2)} more for FREE shipping!
                 </p>
               )}
-
               {isAuthenticated && (
                 <button
                   onClick={handleOneClickCheckout}
@@ -332,14 +404,12 @@ const Cart = () => {
                   One-Click Checkout
                 </button>
               )}
-
               <button
                 onClick={() => navigate('/checkout')}
                 className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 mb-4"
               >
                 Proceed to Checkout
               </button>
-
               <Link to="/products" className="block text-center text-primary-600 hover:text-primary-700 font-medium">
                 Continue Shopping
               </Link>
@@ -347,7 +417,6 @@ const Cart = () => {
           </div>
         </div>
 
-        {/* Mobile: Sticky Checkout Button */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-2xl p-4 z-50 safe-area-inset-bottom">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-3">
@@ -360,9 +429,9 @@ const Cart = () => {
                   </span>
                 )}
               </div>
-              {subtotal < FREE_SHIPPING_THRESHOLD && (
+              {subtotal < (FREE_SHIPPING_THRESHOLD || 49) && (
                 <span className="text-xs text-blue-600 font-semibold text-right max-w-[120px]">
-                  Add ${(FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2)} for FREE shipping
+                  Add ${((FREE_SHIPPING_THRESHOLD || 49) - subtotal).toFixed(2)} for FREE shipping
                 </span>
               )}
             </div>
@@ -385,10 +454,8 @@ const Cart = () => {
           </div>
         </div>
 
-        {/* Bottom padding for mobile sticky button */}
         <div className="lg:hidden h-32"></div>
 
-        {/* Confirmation Modal */}
         <ConfirmationModal
           isOpen={confirmModal.isOpen}
           onClose={() => setConfirmModal({ isOpen: false, action: null })}
@@ -412,7 +479,7 @@ const Cart = () => {
           }
           cancelText="Cancel"
           confirmButtonClass={
-            confirmModal.action === 'save-for-later' ? "bg-blue-600 hover:bg-blue-700" : "bg-red-600 hover:bg-red-700"
+            confirmModal.action === 'save-for-later' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-red-600 hover:bg-red-700'
           }
           icon={
             <div className={`w-16 h-16 rounded-full flex items-center justify-center ${confirmModal.action === 'save-for-later' ? 'bg-blue-100' : 'bg-red-100'}`}>
