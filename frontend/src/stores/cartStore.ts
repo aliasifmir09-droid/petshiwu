@@ -15,7 +15,6 @@ interface CartState {
   getTotalPrice: () => number;
 }
 
-// BroadcastChannel for cross-tab synchronization
 let cartChannel: BroadcastChannel | null = null;
 
 if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
@@ -28,11 +27,9 @@ const broadcastCartUpdate = (items: CartItem[]) => {
   }
 };
 
-// Listen for cart updates from other tabs
 if (cartChannel) {
   cartChannel.onmessage = (event) => {
     if (event.data.type === 'cart-update') {
-      // Update cart from other tab
       useCartStore.getState().setItems(event.data.items);
     }
   };
@@ -44,24 +41,13 @@ export const useCartStore = create<CartState>()(
       items: [],
 
       addToCart: (product, variant, quantity = 1) => {
-        // Check if product/variant has stock
         const availableStock = variant?.stock || 0;
-        
-        // Silently reject if out of stock (UI already shows "Out of Stock" button disabled)
-        if (availableStock === 0) {
-          return;
-        }
+        if (availableStock === 0) return;
 
-        // Normalize product ID to string to prevent ObjectId issues
         const normalizedId = normalizeId(product._id) || String(product._id);
-
-        // Create normalized product with string _id
-        const normalizedProduct = {
-          ...product,
-          _id: normalizedId
-        };
-
+        const normalizedProduct = { ...product, _id: normalizedId };
         const items = get().items;
+
         const existingItemIndex = items.findIndex(
           (item) =>
             (normalizeId(item.product._id) || String(item.product._id)) === normalizedProduct._id &&
@@ -71,29 +57,16 @@ export const useCartStore = create<CartState>()(
         if (existingItemIndex > -1) {
           const currentQuantity = items[existingItemIndex].quantity;
           const newQuantity = currentQuantity + quantity;
-          
-          // Check if new quantity exceeds available stock
-          if (newQuantity > availableStock) {
-            // Silently prevent exceeding stock
-            return;
-          }
-          
+          if (newQuantity > availableStock) return;
           const newItems = [...items];
           newItems[existingItemIndex].quantity = newQuantity;
           set({ items: newItems });
           broadcastCartUpdate(newItems);
         } else {
-          // Check if requested quantity exceeds available stock
-          if (quantity > availableStock) {
-            // Silently prevent exceeding stock
-            return;
-          }
-          
+          if (quantity > availableStock) return;
           const newItems = [...items, { product: normalizedProduct, variant, quantity }];
           set({ items: newItems });
           broadcastCartUpdate(newItems);
-          
-          // Track add to cart
           const price = variant?.price || product.basePrice || 0;
           trackAddToCart(normalizedId, product.name, price, quantity);
         }
@@ -101,22 +74,18 @@ export const useCartStore = create<CartState>()(
 
       removeFromCart: (productId, variantSku) => {
         const normalizedProductId = normalizeId(productId) || String(productId);
-        
-        // Find item before removing for analytics
         const itemToRemove = get().items.find(
           (item) =>
             (normalizeId(item.product._id) || String(item.product._id)) === normalizedProductId &&
             item.variant?.sku === variantSku
         );
-        
         const newItems = get().items.filter(
           (item) =>
-            !((normalizeId(item.product._id) || String(item.product._id)) === normalizedProductId && item.variant?.sku === variantSku)
+            !((normalizeId(item.product._id) || String(item.product._id)) === normalizedProductId &&
+              item.variant?.sku === variantSku)
         );
         set({ items: newItems });
         broadcastCartUpdate(newItems);
-        
-        // Track remove from cart
         if (itemToRemove) {
           trackRemoveFromCart(normalizedProductId, itemToRemove.product.name);
         }
@@ -127,7 +96,6 @@ export const useCartStore = create<CartState>()(
           get().removeFromCart(productId, variantSku);
           return;
         }
-
         const normalizedProductId = normalizeId(productId) || String(productId);
         const items = get().items;
         const itemIndex = items.findIndex(
@@ -135,17 +103,10 @@ export const useCartStore = create<CartState>()(
             (normalizeId(item.product._id) || String(item.product._id)) === normalizedProductId &&
             item.variant?.sku === variantSku
         );
-
         if (itemIndex > -1) {
           const item = items[itemIndex];
           const availableStock = item.variant?.stock || 0;
-          
-          // Check if new quantity exceeds available stock
-          if (quantity > availableStock) {
-            // Silently prevent exceeding stock (cart UI shows max stock)
-            return;
-          }
-          
+          if (quantity > availableStock) return;
           const newItems = [...items];
           newItems[itemIndex].quantity = quantity;
           set({ items: newItems });
@@ -164,21 +125,25 @@ export const useCartStore = create<CartState>()(
       },
 
       getTotalItems: () => {
-        return get().items.reduce((total, item) => total + item.quantity, 0);
+        return get().items.reduce((total, item) => total + (Number(item?.quantity) || 0), 0);
       },
 
+      // ✅ FIXED — NaN-safe, handles missing basePrice/price
       getTotalPrice: () => {
         return get().items.reduce((total, item) => {
-          const price = item.variant?.price || item.product.basePrice;
-          return total + price * item.quantity;
+          try {
+            const p = item?.variant?.price ?? item?.product?.basePrice ?? item?.product?.price ?? 0;
+            const price = isNaN(Number(p)) ? 0 : Number(p);
+            const qty = isNaN(Number(item?.quantity)) ? 1 : Number(item.quantity);
+            return total + price * qty;
+          } catch {
+            return total;
+          }
         }, 0);
-      }
+      },
     }),
     {
-      name: 'cart-storage'
+      name: 'cart-storage',
     }
   )
 );
-
-
-
