@@ -435,20 +435,41 @@ app.get('/api', (req, res) => {
   res.status(200).json({ success: true, message: 'PetShiwu API', version: API_VERSION, docs: '/api-docs', health: '/api/health', timestamp: new Date().toISOString() });
 });
 
-// ✅ SPA FALLBACK FIX — Serves React app for all non-API routes
-// This fixes 404 errors on /cart, /checkout, /profile etc when page is refreshed
-const frontendDistPath = path.join(__dirname, '../../frontend/dist');
+// ─── SPA FALLBACK — serves React for all non-API routes ──────────────────────
+//
+// WHY ../../../ ?
+// TypeScript compiles backend/src/server.ts → backend/dist/src/server.js
+// So at runtime __dirname = /opt/render/project/src/backend/dist/src
+//
+// Path breakdown:
+//   ../   → backend/dist/       (out of src)
+//   ../../ → backend/            (out of dist)
+//   ../../../ → project root     (out of backend) ✅
+//   ../../../frontend/dist → /opt/render/project/src/frontend/dist ✅
+//
+const frontendDistPath = path.join(__dirname, '../../../frontend/dist');
+
+// Log the resolved path on startup so you can verify in Render logs
+logger.info(`📁 Serving frontend from: ${frontendDistPath}`);
+
 app.use(express.static(frontendDistPath, { maxAge: '1d', etag: true }));
+
 app.get('*', (req: Request, res: Response, next: NextFunction) => {
-  // Skip API routes — let them fall through to error handler
+  // Let API routes fall through to the error handler
   if (req.path.startsWith('/api')) return next();
-  // Serve React index.html for all other routes
+
+  // Serve React index.html for ALL other routes
+  // This fixes 404 on /checkout, /cart, /profile, /orders etc on direct load or refresh
   res.sendFile(path.join(frontendDistPath, 'index.html'), (err) => {
-    if (err) next(); // If file not found, continue to error handler
+    if (err) {
+      logger.error(`❌ Failed to serve index.html from ${frontendDistPath}:`, err.message);
+      next();
+    }
   });
 });
+// ─────────────────────────────────────────────────────────────────────────────
 
-// Error handler (must be last)
+// Error handlers — must be last
 app.use(notFound);
 app.use(errorHandler);
 
