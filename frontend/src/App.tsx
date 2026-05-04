@@ -9,7 +9,8 @@ import Footer from './components/Footer';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundaryWithReporting from './components/ErrorBoundaryWithReporting';
 import { initAnalytics, trackPageView } from './utils/analytics';
-import AIChatWidget from './components/AIChatWidget';
+import AnnouncementBar from './components/AnnouncementBar'; // ✅ NEW
+import AIPetAdvisor from './components/AIPetAdvisor';       // ✅ NEW (replaces AIChatWidget)
 import './index.css';
 
 // Lazy load pages for code splitting and better performance
@@ -184,6 +185,7 @@ function App() {
       >
         <PageViewTracker />
         <div className="flex flex-col min-h-screen">
+          <AnnouncementBar /> {/* ✅ NEW — rotating promo strip above header */}
           <Header />
           <main className="flex-1">
             <ErrorBoundaryWithReporting>
@@ -239,7 +241,7 @@ function App() {
           </main>
           <Footer />
         </div>
-        <AIChatWidget />
+        <AIPetAdvisor /> {/* ✅ NEW — Gemini AI pet advisor (replaces AIChatWidget) */}
       </BrowserRouter>
     </QueryClientProvider>
   );
