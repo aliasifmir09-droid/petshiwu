@@ -4,7 +4,7 @@
  * PERFORMANCE FIX: Enhanced with stale-while-revalidate, background sync, and cache versioning
  */
 
-const CACHE_VERSION = '2.0.0';
+const CACHE_VERSION = '3.0.0';
 const CACHE_NAME = `petshiwu-v${CACHE_VERSION}`;
 const RUNTIME_CACHE = `petshiwu-runtime-v${CACHE_VERSION}`;
 const API_CACHE = `petshiwu-api-v${CACHE_VERSION}`;
@@ -173,4 +173,3 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
-
