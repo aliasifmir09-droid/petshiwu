@@ -189,7 +189,7 @@ app.use(helmet({
         : ["'self'", "data:", "https:", "http:", "https://res.cloudinary.com"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
       workerSrc: ["'self'"],
-      connectSrc: ["'self'"],
+      connectSrc: ["'self'", "https://generativelanguage.googleapis.com"],
       frameSrc: ["'self'"],
       frameAncestors: ["'self'"],
       upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
@@ -360,15 +360,8 @@ if (!isCloudinaryConfigured()) {
   app.use('/uploads', express.static(path.join(__dirname, '../uploads'), { maxAge: '1d', etag: true, lastModified: true }));
 }
 
-app.use((req, res, next) => {
-  if (req.path === '/sitemap.xml') { return next(); }
-  const contentType = res.getHeader('content-type');
-  if (!contentType || typeof contentType === 'string') {
-    if (req.path?.endsWith('.html') || !contentType) { res.setHeader('Content-Type', 'text/html; charset=utf-8'); }
-    else if (contentType && typeof contentType === 'string' && contentType.includes('application/json')) { res.setHeader('Content-Type', 'application/json; charset=utf-8'); }
-  }
-  next();
-});
+// ✅ REMOVED: Bad Content-Type middleware that was overriding JS/CSS MIME types
+// causing "Failed to load module script" errors in browser
 
 app.use(['/api', '/api/v1'], setCacheHeaders);
 
