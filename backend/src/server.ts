@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import path from 'path';
+import fs from 'fs';
 import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
 import compression from 'compression';
@@ -437,23 +438,27 @@ app.get('/api', (req, res) => {
 
 // ─── SPA FALLBACK — serves React for all non-API routes ──────────────────────
 //
-// WHY ../../../ ?
-// TypeScript compiles backend/src/server.ts → backend/dist/src/server.js
-// So at runtime __dirname = /opt/render/project/src/backend/dist/src
+// ✅ Smart path detection — tries all possible Render locations automatically
+// Check Render logs for "🔍 Checking frontend path" to see which one was found
 //
-// Path breakdown:
-//   ../   → backend/dist/       (out of src)
-//   ../../ → backend/            (out of dist)
-//   ../../../ → project root     (out of backend) ✅
-//   ../../../frontend/dist → /opt/render/project/src/frontend/dist ✅
-//
-const frontendDistPath = path.join(__dirname, '../../../frontend/dist');
+const possibleFrontendPaths = [
+  path.join(__dirname, '../../../frontend/dist'),    // most likely: backend/dist/src → project/frontend/dist
+  path.join(__dirname, '../../../../frontend/dist'), // one level higher
+  path.join(__dirname, '../../frontend/dist'),       // one level lower
+  path.join(process.cwd(), 'frontend/dist'),         // from working directory
+  path.join(process.cwd(), '../frontend/dist'),      // parent of cwd
+];
 
-// Log the resolved path on startup so you can verify in Render logs
-logger.info(`📁 Serving frontend from: ${frontendDistPath}`);
+const frontendDistPath = possibleFrontendPaths.find(p => {
+  const exists = fs.existsSync(p);
+  logger.info(`🔍 Checking frontend path: ${p} → ${exists ? '✅ FOUND' : '❌ not found'}`);
+  return exists;
+}) || possibleFrontendPaths[0];
 
-// ✅ FIX: Serve static assets with cache, but NEVER cache index.html
-// This ensures browsers always load the latest React bundle after deploys
+logger.info(`📁 Using frontend dist: ${frontendDistPath}`);
+
+// ✅ Serve static assets with cache, but NEVER cache index.html
+// This ensures browsers always load the latest React bundle after every deploy
 app.use(express.static(frontendDistPath, {
   maxAge: '1d',
   etag: true,
@@ -470,7 +475,7 @@ app.get('*', (req: Request, res: Response, next: NextFunction) => {
   // Let API routes fall through to the error handler
   if (req.path.startsWith('/api')) return next();
 
-  // ✅ FIX: Never cache index.html — forces browser to always load latest build
+  // ✅ Never cache index.html — forces browser to always load latest build
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
