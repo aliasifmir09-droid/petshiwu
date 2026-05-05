@@ -23,7 +23,7 @@ const SYSTEM_PROMPT = `You are PetShiwu's friendly AI Pet Advisor. You help cust
 Your role:
 - Ask about the customer's pet (species, breed, age, health conditions if relevant)
 - Give short, friendly, practical advice (2-4 sentences max)
-- Use a warm, caring tone with pet emojis 🐾
+- Use a warm, caring tone with pet emojis
 - When recommending products, add a search command at the END of your response in this exact format:
   [SEARCH:dog food sensitive stomach]
 - Only add ONE search per response
@@ -67,13 +67,20 @@ async function askGemini(messages: Message[], userMessage: string): Promise<{ te
 
 async function searchProducts(query: string): Promise<Product[]> {
   try {
-    const res = await fetch(`/api/v1/products?search=${encodeURIComponent(query)}&limit=4`)
+    const res = await fetch('/api/v1/products?search=' + encodeURIComponent(query) + '&limit=4')
     if (!res.ok) return []
     const data = await res.json()
     return data.data?.products || data.data || []
   } catch {
     return []
   }
+}
+
+function getProductImage(product: Product): string {
+  if (product.images && product.images.length > 0 && product.images[0].url) {
+    return product.images[0].url
+  }
+  return '/logo.png'
 }
 
 const STARTER_PROMPTS = [
@@ -95,8 +102,10 @@ export default function AIPetAdvisor() {
 
   useEffect(() => {
     if (open) {
-      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
-      inputRef.current?.focus()
+      setTimeout(() => {
+        if (bottomRef.current) bottomRef.current.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+      if (inputRef.current) inputRef.current.focus()
     }
   }, [open, messages])
 
@@ -110,12 +119,12 @@ export default function AIPetAdvisor() {
     setLoading(true)
 
     try {
-      const { text: replyText, searchQuery } = await askGemini(messages, msg)
+      const result = await askGemini(messages, msg)
       let products: Product[] = []
-      if (searchQuery) {
-        products = await searchProducts(searchQuery)
+      if (result.searchQuery) {
+        products = await searchProducts(result.searchQuery)
       }
-      setMessages(prev => [...prev, { role: 'assistant', text: replyText, products }])
+      setMessages(prev => [...prev, { role: 'assistant', text: result.text, products: products }])
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', text: "Sorry, something went wrong. Please try again." }])
     } finally {
@@ -136,23 +145,23 @@ export default function AIPetAdvisor() {
       )}
 
       {open && (
-        <div className="fixed bottom-6 right-6 z-50 w-80 sm:w-96 bg-white rounded-2xl border border-gray-200 shadow-xl flex flex-col overflow-hidden" style={{ height: 520 }}>
-          
-          {/* Header */}
+        <div
+          className="fixed bottom-6 right-6 z-50 w-80 bg-white rounded-2xl border border-gray-200 shadow-xl flex flex-col overflow-hidden"
+          style={{ height: '520px' }}
+        >
           <div className="bg-blue-600 text-white px-4 py-3 flex items-center gap-3 flex-shrink-0">
             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
               <Bot size={16} />
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold">AI Pet Advisor</p>
-              <p className="text-xs text-blue-200">Powered by Gemini ✨</p>
+              <p className="text-xs text-blue-200">Powered by Gemini</p>
             </div>
             <button onClick={() => setOpen(false)} className="text-white/70 hover:text-white transition-colors">
               <X size={18} />
             </button>
           </div>
 
-          {/* Messages */}
           <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-3">
             {messages.map((msg, i) => (
               <div key={i} className="flex flex-col gap-2">
@@ -167,20 +176,22 @@ export default function AIPetAdvisor() {
                   </div>
                 </div>
 
-                {/* Product Cards */}
                 {msg.products && msg.products.length > 0 && (
                   <div className="ml-8 grid grid-cols-2 gap-2 mt-1">
-                    {msg.products.map(product => (
+                    {msg.products.map((product) => (
                       
                         key={product._id}
-                        href={`/products/${product.slug}`}
+                        href={'/products/' + product.slug}
                         className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow block"
                       >
                         <img
-                          src={product.images?.[0]?.url || '/logo.png'}
+                          src={getProductImage(product)}
                           alt={product.name}
                           className="w-full h-20 object-cover"
-                          onError={e => { (e.target as HTMLImageElement).src = '/logo.png' }}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement
+                            target.src = '/logo.png'
+                          }}
                         />
                         <div className="p-2">
                           <p className="text-xs font-medium text-gray-800 line-clamp-2 leading-tight">{product.name}</p>
@@ -188,7 +199,7 @@ export default function AIPetAdvisor() {
                             {product.salePrice ? (
                               <div className="flex items-center gap-1">
                                 <span className="text-xs font-bold text-blue-600">${product.salePrice.toFixed(2)}</span>
-                                <span className="text-[10px] text-gray-400 line-through">${product.price.toFixed(2)}</span>
+                                <span className="text-xs text-gray-400 line-through">${product.price.toFixed(2)}</span>
                               </div>
                             ) : (
                               <span className="text-xs font-bold text-blue-600">${product.price.toFixed(2)}</span>
@@ -196,7 +207,7 @@ export default function AIPetAdvisor() {
                           </div>
                           <div className="flex items-center justify-center gap-1 mt-1.5 bg-blue-600 text-white rounded-lg px-2 py-1">
                             <ShoppingCart size={9} />
-                            <span className="text-[10px] font-semibold">View Product</span>
+                            <span className="text-xs font-semibold">View Product</span>
                           </div>
                         </div>
                       </a>
@@ -220,7 +231,7 @@ export default function AIPetAdvisor() {
             {messages.length === 1 && (
               <div className="flex flex-col gap-2 mt-2">
                 <p className="text-xs text-gray-400 text-center">Try asking:</p>
-                {STARTER_PROMPTS.map(p => (
+                {STARTER_PROMPTS.map((p) => (
                   <button
                     key={p}
                     onClick={() => send(p)}
@@ -235,14 +246,13 @@ export default function AIPetAdvisor() {
             <div ref={bottomRef} />
           </div>
 
-          {/* Input */}
           <div className="border-t border-gray-100 px-3 py-3 flex gap-2 flex-shrink-0">
             <input
               ref={inputRef}
               type="text"
               value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && send()}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') send() }}
               placeholder="Ask about your pet..."
               className="flex-1 bg-gray-100 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-gray-400"
               disabled={loading}
