@@ -1,9 +1,19 @@
 import { useState, useRef, useEffect } from 'react'
-import { X, Send, Bot, User, Loader2, Sparkles } from 'lucide-react'
+import { X, Send, Bot, User, Loader2, Sparkles, ShoppingCart } from 'lucide-react'
 
 interface Message {
   role: 'user' | 'assistant'
   text: string
+  products?: Product[]
+}
+
+interface Product {
+  _id: string
+  name: string
+  price: number
+  salePrice?: number
+  images: { url: string }[]
+  slug: string
 }
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
@@ -12,50 +22,58 @@ const SYSTEM_PROMPT = `You are PetShiwu's friendly AI Pet Advisor. You help cust
 
 Your role:
 - Ask about the customer's pet (species, breed, age, health conditions if relevant)
-- Recommend specific product categories from the store
-- Give short, friendly, practical advice
-- Always end with a specific product suggestion or category to browse
-- Keep responses concise (2-4 sentences max)
-- Use a warm, caring tone
+- Give short, friendly, practical advice (2-4 sentences max)
+- Use a warm, caring tone with pet emojis 🐾
+- When recommending products, add a search command at the END of your response in this exact format:
+  [SEARCH:dog food sensitive stomach]
+- Only add ONE search per response
+- Only search when the customer is ready for product recommendations
 
-PetShiwu sells: food, treats, toys, beds, grooming, accessories, supplements for dogs, cats, birds, reptiles, fish, and small pets.
+PetShiwu sells: food, treats, toys, beds, grooming, accessories, supplements for dogs, cats, birds, reptiles, fish, and small pets.`
 
-Do NOT make up specific product names or prices. Recommend categories instead.`
-
-async function askGemini(messages: Message[], userMessage: string): Promise<string> {
+async function askGemini(messages: Message[], userMessage: string): Promise<{ text: string; searchQuery?: string }> {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY
-
-  if (!apiKey) {
-    return "I'm not fully set up yet — please add the VITE_GEMINI_API_KEY to your .env file!"
-  }
+  if (!apiKey) return { text: "I'm not fully set up yet!" }
 
   const history = messages.map(m => ({
     role: m.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: m.text }],
   }))
 
-  const body = {
-    system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-    contents: [
-      ...history,
-      { role: 'user', parts: [{ text: userMessage }] },
-    ],
-    generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 200,
-    },
-  }
-
   const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      contents: [...history, { role: 'user', parts: [{ text: userMessage }] }],
+      generationConfig: { temperature: 0.7, maxOutputTokens: 300 },
+    }),
   })
 
   if (!res.ok) throw new Error('API request failed')
-
   const data = await res.json()
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "Sorry, I couldn't get a response. Please try again."
+  const fullText = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "Sorry, I couldn't get a response."
+
+  const searchMatch = fullText.match(/\[SEARCH:(.*?)\]/)
+  if (searchMatch) {
+    return {
+      text: fullText.replace(/\[SEARCH:.*?\]/, '').trim(),
+      searchQuery: searchMatch[1].trim()
+    }
+  }
+
+  return { text: fullText }
+}
+
+async function searchProducts(query: string): Promise<Product[]> {
+  try {
+    const res = await fetch(`/api/v1/products?search=${encodeURIComponent(query)}&limit=4`)
+    if (!res.ok) return []
+    const data = await res.json()
+    return data.data?.products || data.data || []
+  } catch {
+    return []
+  }
 }
 
 const STARTER_PROMPTS = [
@@ -68,10 +86,7 @@ const STARTER_PROMPTS = [
 export default function AIPetAdvisor() {
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      text: "Hi! I'm PetShiwu's AI Pet Advisor 🐾 Tell me about your pet and I'll help you find exactly what they need!",
-    },
+    { role: 'assistant', text: "Hi! I'm PetShiwu's AI Pet Advisor 🐾 Tell me about your pet and I'll help you find exactly what they need!" },
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -80,7 +95,7 @@ export default function AIPetAdvisor() {
 
   useEffect(() => {
     if (open) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
       inputRef.current?.focus()
     }
   }, [open, messages])
@@ -95,19 +110,18 @@ export default function AIPetAdvisor() {
     setLoading(true)
 
     try {
-      const reply = await askGemini(messages, msg)
-      setMessages(prev => [...prev, { role: 'assistant', text: reply }])
+      const { text: replyText, searchQuery } = await askGemini(messages, msg)
+      let products: Product[] = []
+      if (searchQuery) {
+        products = await searchProducts(searchQuery)
+      }
+      setMessages(prev => [...prev, { role: 'assistant', text: replyText, products }])
     } catch {
-      setMessages(prev => [
-        ...prev,
-        { role: 'assistant', text: "Sorry, something went wrong. Please try again." },
-      ])
+      setMessages(prev => [...prev, { role: 'assistant', text: "Sorry, something went wrong. Please try again." }])
     } finally {
       setLoading(false)
     }
   }
-
-  const showStarters = messages.length === 1
 
   return (
     <>
@@ -122,34 +136,73 @@ export default function AIPetAdvisor() {
       )}
 
       {open && (
-        <div
-          className="fixed bottom-6 right-6 z-50 w-80 bg-white rounded-2xl border border-gray-200 shadow-xl flex flex-col overflow-hidden"
-          style={{ height: 480 }}
-        >
+        <div className="fixed bottom-6 right-6 z-50 w-80 sm:w-96 bg-white rounded-2xl border border-gray-200 shadow-xl flex flex-col overflow-hidden" style={{ height: 520 }}>
+          
+          {/* Header */}
           <div className="bg-blue-600 text-white px-4 py-3 flex items-center gap-3 flex-shrink-0">
             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
               <Bot size={16} />
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold">AI Pet Advisor</p>
-              <p className="text-xs text-blue-200">Powered by Gemini</p>
+              <p className="text-xs text-blue-200">Powered by Gemini ✨</p>
             </div>
-            <button onClick={() => setOpen(false)} className="text-white/70 hover:text-white">
+            <button onClick={() => setOpen(false)} className="text-white/70 hover:text-white transition-colors">
               <X size={18} />
             </button>
           </div>
 
+          {/* Messages */}
           <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-3">
             {messages.map((msg, i) => (
-              <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                <div className={`w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5 ${msg.role === 'assistant' ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                  {msg.role === 'assistant'
-                    ? <Bot size={12} className="text-blue-600" />
-                    : <User size={12} className="text-gray-500" />}
+              <div key={i} className="flex flex-col gap-2">
+                <div className={`flex gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                  <div className={`w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5 ${msg.role === 'assistant' ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                    {msg.role === 'assistant'
+                      ? <Bot size={12} className="text-blue-600" />
+                      : <User size={12} className="text-gray-500" />}
+                  </div>
+                  <div className={`max-w-[78%] text-sm px-3 py-2 rounded-2xl leading-relaxed ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-tr-sm' : 'bg-gray-100 text-gray-800 rounded-tl-sm'}`}>
+                    {msg.text}
+                  </div>
                 </div>
-                <div className={`max-w-[78%] text-sm px-3 py-2 rounded-2xl leading-relaxed ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-tr-sm' : 'bg-gray-100 text-gray-800 rounded-tl-sm'}`}>
-                  {msg.text}
-                </div>
+
+                {/* Product Cards */}
+                {msg.products && msg.products.length > 0 && (
+                  <div className="ml-8 grid grid-cols-2 gap-2 mt-1">
+                    {msg.products.map(product => (
+                      
+                        key={product._id}
+                        href={`/products/${product.slug}`}
+                        className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow block"
+                      >
+                        <img
+                          src={product.images?.[0]?.url || '/logo.png'}
+                          alt={product.name}
+                          className="w-full h-20 object-cover"
+                          onError={e => { (e.target as HTMLImageElement).src = '/logo.png' }}
+                        />
+                        <div className="p-2">
+                          <p className="text-xs font-medium text-gray-800 line-clamp-2 leading-tight">{product.name}</p>
+                          <div className="mt-1">
+                            {product.salePrice ? (
+                              <div className="flex items-center gap-1">
+                                <span className="text-xs font-bold text-blue-600">${product.salePrice.toFixed(2)}</span>
+                                <span className="text-[10px] text-gray-400 line-through">${product.price.toFixed(2)}</span>
+                              </div>
+                            ) : (
+                              <span className="text-xs font-bold text-blue-600">${product.price.toFixed(2)}</span>
+                            )}
+                          </div>
+                          <div className="flex items-center justify-center gap-1 mt-1.5 bg-blue-600 text-white rounded-lg px-2 py-1">
+                            <ShoppingCart size={9} />
+                            <span className="text-[10px] font-semibold">View Product</span>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
 
@@ -164,7 +217,7 @@ export default function AIPetAdvisor() {
               </div>
             )}
 
-            {showStarters && (
+            {messages.length === 1 && (
               <div className="flex flex-col gap-2 mt-2">
                 <p className="text-xs text-gray-400 text-center">Try asking:</p>
                 {STARTER_PROMPTS.map(p => (
@@ -182,6 +235,7 @@ export default function AIPetAdvisor() {
             <div ref={bottomRef} />
           </div>
 
+          {/* Input */}
           <div className="border-t border-gray-100 px-3 py-3 flex gap-2 flex-shrink-0">
             <input
               ref={inputRef}
