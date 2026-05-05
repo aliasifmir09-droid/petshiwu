@@ -14,26 +14,46 @@ interface RegisterData {
   phone?: string;
 }
 
+// Token storage helpers for mobile fallback
+const TOKEN_KEY = 'auth_token';
+
+export const getStoredToken = (): string | null => {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+};
+
+export const setStoredToken = (token: string): void => {
+  try {
+    localStorage.setItem(TOKEN_KEY, token);
+  } catch {}
+};
+
+export const clearStoredToken = (): void => {
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+  } catch {}
+};
+
 export const authService = {
   register: async (data: RegisterData) => {
     const response = await api.post<any>('/auth/register', data);
-    // Phase 2: Cookie-Only - Backend sets httpOnly cookie only
-    // No token returned in response, no localStorage needed
-    // httpOnly cookie is set automatically by backend and sent with requests via withCredentials
     return response.data;
   },
 
   login: async (data: LoginData) => {
     const response = await api.post<any>('/auth/login', data);
-    // Phase 2: Cookie-Only - Backend sets httpOnly cookie only
-    // No token returned in response, no localStorage needed
-    // httpOnly cookie is set automatically by backend and sent with requests via withCredentials
+    // Save token to localStorage as fallback for mobile (cookie may be blocked)
+    if (response.data?.token) {
+      setStoredToken(response.data.token);
+    }
     return response.data;
   },
 
   logout: async () => {
-    // Phase 2: Cookie-Only - Call logout endpoint to clear httpOnly cookie
-    // No localStorage to clear - backend handles cookie clearing
+    clearStoredToken();
     await api.post('/auth/logout');
   },
 
@@ -52,8 +72,6 @@ export const authService = {
       currentPassword,
       newPassword
     });
-    // Phase 2: Cookie-Only - Backend sets httpOnly cookie only
-    // No token returned, no localStorage needed
     return response.data;
   },
 
@@ -83,11 +101,6 @@ export const authService = {
 
   resetPassword: async (token: string, password: string) => {
     const response = await api.post<any>('/auth/reset-password', { token, password });
-    // Phase 2: Cookie-Only - Backend sets httpOnly cookie only
-    // No token returned, no localStorage needed
     return response.data;
   }
 };
-
-
-
