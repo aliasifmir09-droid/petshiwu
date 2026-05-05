@@ -141,16 +141,23 @@ function App() {
       return true;
     };
     window.addEventListener('error', handleGlobalError, true);
-    if ('serviceWorker' in navigator && import.meta.env.PROD) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then(() => {})
-        .catch((error) => {
-          if (import.meta.env.DEV) {
-            console.error('Service Worker registration failed:', error);
-          }
+
+    // ✅ FIX: Unregister ALL service workers and clear ALL caches
+    // The old service worker was serving stale cached files to every visitor.
+    // This permanently fixes it for all users worldwide on their next visit.
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const registration of registrations) {
+          registration.unregister();
+        }
+      });
+      caches.keys().then((cacheNames) => {
+        cacheNames.forEach((cacheName) => {
+          caches.delete(cacheName);
         });
+      });
     }
+
     return () => {
       window.removeEventListener('error', handleGlobalError, true);
     };
