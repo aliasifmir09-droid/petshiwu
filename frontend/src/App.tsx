@@ -9,11 +9,10 @@ import Footer from './components/Footer';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundaryWithReporting from './components/ErrorBoundaryWithReporting';
 import { initAnalytics, trackPageView } from './utils/analytics';
-import AnnouncementBar from './components/AnnouncementBar'; // ✅ NEW
-import AIPetAdvisor from './components/AIPetAdvisor';       // ✅ NEW (replaces AIChatWidget)
+import AnnouncementBar from './components/AnnouncementBar';
+import AIPetAdvisor from './components/AIPetAdvisor'; // Gemini AI powered — v2
 import './index.css';
 
-// Lazy load pages for code splitting and better performance
 const Home = lazy(() => import('./pages/Home'));
 const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
@@ -47,14 +46,11 @@ const FAQ = lazy(() => import('./pages/FAQ'));
 const About = lazy(() => import('./pages/About'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const Forbidden = lazy(() => import('./pages/Forbidden'));
-// SEO Landing Pages
 const SensitiveStomachDogs = lazy(() => import('./pages/seo/SensitiveStomachDogs'));
 const PickyEaters = lazy(() => import('./pages/seo/PickyEaters'));
 const AggressiveChewers = lazy(() => import('./pages/seo/AggressiveChewers'));
-// SEO Blog Posts
 const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
 
-// Optimize React Query with better defaults
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -69,7 +65,6 @@ const queryClient = new QueryClient({
   }
 });
 
-// PERFORMANCE FIX: Cache warming on app initialization
 const warmCache = async () => {
   try {
     const { default: api } = await import('./services/api');
@@ -100,7 +95,6 @@ if (typeof window !== 'undefined') {
   warmCache();
 }
 
-// Component to track page views
 const PageViewTracker = () => {
   const location = useLocation();
   useEffect(() => {
@@ -142,9 +136,6 @@ function App() {
     };
     window.addEventListener('error', handleGlobalError, true);
 
-    // ✅ FIX: Unregister ALL service workers and clear ALL caches
-    // The old service worker was serving stale cached files to every visitor.
-    // This permanently fixes it for all users worldwide on their next visit.
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         for (const registration of registrations) {
@@ -192,7 +183,7 @@ function App() {
       >
         <PageViewTracker />
         <div className="flex flex-col min-h-screen">
-          <AnnouncementBar /> {/* ✅ NEW — rotating promo strip above header */}
+          <AnnouncementBar />
           <Header />
           <main className="flex-1">
             <ErrorBoundaryWithReporting>
@@ -248,7 +239,7 @@ function App() {
           </main>
           <Footer />
         </div>
-        <AIPetAdvisor /> {/* ✅ NEW — Gemini AI pet advisor (replaces AIChatWidget) */}
+        <AIPetAdvisor />
       </BrowserRouter>
     </QueryClientProvider>
   );
