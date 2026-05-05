@@ -6,7 +6,6 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import path from 'path';
-import fs from 'fs';
 import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
 import compression from 'compression';
@@ -438,27 +437,15 @@ app.get('/api', (req, res) => {
 
 // ─── SPA FALLBACK — serves React for all non-API routes ──────────────────────
 //
-// ✅ Smart path detection — tries all possible Render locations automatically
-// Check Render logs for "🔍 Checking frontend path" to see which one was found
+// ✅ FIX: Use process.cwd() which always points to the repo root on Render
+// Render runs the server from /opt/render/project/src so this resolves to:
+// /opt/render/project/src/frontend/dist ✅
 //
-const possibleFrontendPaths = [
-  path.join(__dirname, '../../../frontend/dist'),    // most likely: backend/dist/src → project/frontend/dist
-  path.join(__dirname, '../../../../frontend/dist'), // one level higher
-  path.join(__dirname, '../../frontend/dist'),       // one level lower
-  path.join(process.cwd(), 'frontend/dist'),         // from working directory
-  path.join(process.cwd(), '../frontend/dist'),      // parent of cwd
-];
-
-const frontendDistPath = possibleFrontendPaths.find(p => {
-  const exists = fs.existsSync(p);
-  logger.info(`🔍 Checking frontend path: ${p} → ${exists ? '✅ FOUND' : '❌ not found'}`);
-  return exists;
-}) || possibleFrontendPaths[0];
-
-logger.info(`📁 Using frontend dist: ${frontendDistPath}`);
+const frontendDistPath = path.join(process.cwd(), 'frontend/dist');
+console.log(`📁 Serving frontend from: ${frontendDistPath}`);
 
 // ✅ Serve static assets with cache, but NEVER cache index.html
-// This ensures browsers always load the latest React bundle after every deploy
+// This ensures browsers always get the latest React bundle after every deploy
 app.use(express.static(frontendDistPath, {
   maxAge: '1d',
   etag: true,
@@ -483,7 +470,7 @@ app.get('*', (req: Request, res: Response, next: NextFunction) => {
   // Serve React index.html for ALL other routes
   res.sendFile(path.join(frontendDistPath, 'index.html'), (err) => {
     if (err) {
-      logger.error(`❌ Failed to serve index.html from ${frontendDistPath}:`, err.message);
+      console.error(`❌ Failed to serve index.html from ${frontendDistPath}:`, err.message);
       next();
     }
   });
@@ -499,21 +486,21 @@ const HOST = process.env.HOST || '0.0.0.0';
 
 if (!PORT || isNaN(PORT) || PORT < 1 || PORT > 65535) { PORT = 5000; }
 
-logger.info(`🚀 Starting server on ${HOST}:${PORT}...`);
-logger.info(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+console.log(`🚀 Starting server on ${HOST}:${PORT}...`);
+console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
 
 import { Server } from 'http';
 
 let server: Server | null = null;
 try {
   server = app.listen(PORT, HOST, () => {
-    logger.info(`\n✅✅✅ SERVER SUCCESSFULLY STARTED ✅✅✅`);
-    logger.info(`✅ Server running in ${process.env.NODE_ENV || 'development'} mode`);
-    logger.info(`✅ Listening on ${HOST}:${PORT}`);
+    console.log(`\n✅✅✅ SERVER SUCCESSFULLY STARTED ✅✅✅`);
+    console.log(`✅ Server running in ${process.env.NODE_ENV || 'development'} mode`);
+    console.log(`✅ Listening on ${HOST}:${PORT}`);
   });
   if (server) {
     server.on('error', (error: NodeJS.ErrnoException) => {
-      logger.error('❌ Server error event:', error);
+      console.error('❌ Server error event:', error);
       if (error.code === 'EADDRINUSE') {
         const waitTime = process.env.NODE_ENV === 'production' ? 1000 : 2000;
         setTimeout(() => process.exit(1), waitTime);
@@ -525,13 +512,13 @@ try {
     if (currentServer) {
       currentServer.on('listening', () => {
         const addr = currentServer.address();
-        logger.info(`✅ Server is listening on ${typeof addr === 'string' ? addr : `${addr?.address}:${addr?.port}`}`);
+        console.log(`✅ Server is listening on ${typeof addr === 'string' ? addr : `${addr?.address}:${addr?.port}`}`);
       });
     }
   }
 } catch (error: unknown) {
   const errorObj = error instanceof Error ? error : { message: String(error), stack: undefined };
-  logger.error('❌ CRITICAL: Failed to start server:', error);
+  console.error('❌ CRITICAL: Failed to start server:', error);
   setTimeout(() => process.exit(1), 2000);
 }
 
