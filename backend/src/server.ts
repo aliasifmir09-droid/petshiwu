@@ -28,7 +28,6 @@ import { startCartAbandonmentWorker } from './workers/cartAbandonmentWorker';
 import { responseTimeMiddleware } from './middleware/responseTime';
 import { initializeAPM } from './utils/apm';
 
-// Load env vars
 dotenv.config();
 
 process.on('uncaughtException', (err: unknown) => {
@@ -79,7 +78,6 @@ try {
   }
 }
 
-// Import routes
 import authRoutes from './routes/auth';
 import productRoutes from './routes/products';
 import categoryRoutes from './routes/categories';
@@ -189,10 +187,10 @@ app.use(helmet({
       imgSrc: process.env.NODE_ENV === 'production'
         ? ["'self'", "data:", "https:", "https://res.cloudinary.com"]
         : ["'self'", "data:", "https:", "http:", "https://res.cloudinary.com"],
-      scriptSrc: ["'self'", "https://embed.tawk.to", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
       workerSrc: ["'self'"],
-      connectSrc: ["'self'", "https://embed.tawk.to", "https://api.tawk.to"],
-      frameSrc: ["'self'", "https://embed.tawk.to"],
+      connectSrc: ["'self'"],
+      frameSrc: ["'self'"],
       frameAncestors: ["'self'"],
       upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
     }
@@ -435,17 +433,9 @@ app.get('/api', (req, res) => {
   res.status(200).json({ success: true, message: 'PetShiwu API', version: API_VERSION, docs: '/api-docs', health: '/api/health', timestamp: new Date().toISOString() });
 });
 
-// ─── SPA FALLBACK — serves React for all non-API routes ──────────────────────
-//
-// ✅ CONFIRMED FIX: Start command is "cd backend && node dist/server.js"
-// so process.cwd() = /opt/render/project/src/backend
-// Therefore frontend is at ../frontend/dist ✅
-//
 const frontendDistPath = path.join(process.cwd(), '../frontend/dist');
 console.log(`📁 Serving frontend from: ${frontendDistPath}`);
 
-// ✅ Serve static assets with cache, but NEVER cache index.html
-// This ensures browsers always get the latest React bundle after every deploy
 app.use(express.static(frontendDistPath, {
   maxAge: '1d',
   etag: true,
@@ -459,15 +449,10 @@ app.use(express.static(frontendDistPath, {
 }));
 
 app.get('*', (req: Request, res: Response, next: NextFunction) => {
-  // Let API routes fall through to the error handler
   if (req.path.startsWith('/api')) return next();
-
-  // ✅ Never cache index.html — forces browser to always load latest build
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
-
-  // Serve React index.html for ALL other routes
   res.sendFile(path.join(frontendDistPath, 'index.html'), (err) => {
     if (err) {
       console.error(`❌ Failed to serve index.html from ${frontendDistPath}:`, err.message);
@@ -475,9 +460,7 @@ app.get('*', (req: Request, res: Response, next: NextFunction) => {
     }
   });
 });
-// ─────────────────────────────────────────────────────────────────────────────
 
-// Error handlers — must be last
 app.use(notFound);
 app.use(errorHandler);
 
@@ -517,7 +500,6 @@ try {
     }
   }
 } catch (error: unknown) {
-  const errorObj = error instanceof Error ? error : { message: String(error), stack: undefined };
   console.error('❌ CRITICAL: Failed to start server:', error);
   setTimeout(() => process.exit(1), 2000);
 }
