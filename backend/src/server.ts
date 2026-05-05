@@ -437,11 +437,11 @@ app.get('/api', (req, res) => {
 
 // ─── SPA FALLBACK — serves React for all non-API routes ──────────────────────
 //
-// ✅ FIX: Use process.cwd() which always points to the repo root on Render
-// Render runs the server from /opt/render/project/src so this resolves to:
-// /opt/render/project/src/frontend/dist ✅
+// ✅ CONFIRMED FIX: Start command is "cd backend && node dist/server.js"
+// so process.cwd() = /opt/render/project/src/backend
+// Therefore frontend is at ../frontend/dist ✅
 //
-const frontendDistPath = path.join(process.cwd(), 'frontend/dist');
+const frontendDistPath = path.join(process.cwd(), '../frontend/dist');
 console.log(`📁 Serving frontend from: ${frontendDistPath}`);
 
 // ✅ Serve static assets with cache, but NEVER cache index.html
