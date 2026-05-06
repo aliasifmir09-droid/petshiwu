@@ -31,7 +31,7 @@ const STARTER_PROMPTS = [
 ]
 
 async function askBackend(messages: Message[], userMessage: string, petContext: PetContext): Promise<{ text: string; products: Product[] }> {
-  const res = await fetch('/api/v1/ai-advisor/chat', {
+  const res = await fetch('https://www.petshiwu.com/api/v1/ai-advisor/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ messages, userMessage, petContext })
@@ -59,7 +59,7 @@ export default function AIPetAdvisor() {
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [petContext, setPetContext] = useState<PetContext>({})
+  const [petContext] = useState<PetContext>({})
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
