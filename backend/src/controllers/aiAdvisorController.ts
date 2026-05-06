@@ -6,7 +6,7 @@ const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/
 
 const BREED_HEALTH_DATABASE = `
 DOG BREEDS:
-- Golden Retrievers: High risk of hip dysplasia and cancer. Recommend: Glucosamine, Chondroitin, joint supplements, and weight-control food.
+- Golden Retrievers: High risk of hip dysplasia and cancer. Recommend: Glucosamine, Chondroitin, joint supplements, weight-control food.
 - French Bulldogs: Prone to skin allergies and breathing issues. Recommend: Grain-free or Limited Ingredient Diets, omega supplements.
 - German Shepherds: Sensitive stomachs and hip issues. Recommend: Probiotics, highly digestible proteins, joint support.
 - Labrador Retrievers: Prone to obesity and joint problems. Recommend: Weight management food, portion control, joint supplements.
@@ -14,7 +14,7 @@ DOG BREEDS:
 - Poodles: Prone to ear infections and skin issues. Recommend: Omega-3 supplements, grain-free diets.
 - Beagles: Obesity-prone and sensitive ears. Recommend: Low-calorie food, dental chews.
 - Chihuahuas: Dental disease and hypoglycemia risk. Recommend: Small breed dental chews, small breed food.
-- Dachshunds: Spinal issues (IVDD). Recommend: Joint supplements, weight control food to reduce spine stress.
+- Dachshunds: Spinal issues (IVDD). Recommend: Joint supplements, weight control food.
 - Shih Tzus: Eye and skin issues. Recommend: Omega supplements, hypoallergenic food.
 - Yorkshire Terriers: Dental disease and sensitive digestion. Recommend: Small breed dental treats, sensitive stomach food.
 - Boxers: Heart issues and cancer risk. Recommend: Antioxidant-rich food, heart health supplements.
@@ -23,19 +23,19 @@ DOG BREEDS:
 - Rottweilers: Joint and heart issues. Recommend: Joint supplements, weight control.
 
 CAT BREEDS & TYPES:
-- Indoor Cats: Lower activity levels. Recommend: Hairball control food, weight management formulas, interactive toys.
-- Senior Cats (10+): Kidney health is priority. Recommend: Low phosphorus wet food, kidney support supplements.
-- Male Cats: Urinary tract health vital. Recommend: Urinary SO formulas, pH-balanced food, wet food for hydration.
+- Indoor Cats: Lower activity. Recommend: Hairball control food, weight management, interactive toys.
+- Senior Cats (10+): Kidney health priority. Recommend: Low phosphorus wet food, kidney support supplements.
+- Male Cats: Urinary tract health vital. Recommend: Urinary SO formulas, pH-balanced food, wet food.
 - Maine Coons: Heart disease (HCM) risk. Recommend: Taurine-rich food, heart support supplements.
 - Persian Cats: Respiratory and kidney issues. Recommend: Wet food for hydration, hairball control.
 - Siamese: Respiratory and dental issues. Recommend: Dental chews, high-quality protein food.
 - Bengal Cats: High energy. Recommend: High-protein raw or grain-free diets.
-- Ragdolls: HCM risk like Maine Coons. Recommend: Heart health food, taurine supplements.
+- Ragdolls: HCM risk. Recommend: Heart health food, taurine supplements.
 `;
 
 const NUTRITION_LOGIC = `
 CALORIE CALCULATION:
-- Base RER (Resting Energy Requirement) = 70 * (weight in kg)^0.75
+- Base RER = 70 * (weight in kg)^0.75
 - Puppy under 4 months: RER * 3.0
 - Puppy 4-12 months: RER * 2.0
 - Active adult dog: RER * 1.8
@@ -47,36 +47,68 @@ CALORIE CALCULATION:
 - Kitten: RER * 2.5
 - Pregnant/nursing: RER * 3.0
 
+INGREDIENT SCIENCE (explain the "why"):
+- DHA: Essential for kitten/puppy brain and eye development
+- Taurine: Critical for cat heart and eye health — cats cannot produce it themselves
+- Glucosamine + Chondroitin: Rebuilds joint cartilage, reduces arthritis pain
+- Omega-3 (EPA/DHA): Reduces inflammation, improves coat shine, supports heart health
+- Probiotics: Restore gut flora, reduce diarrhea and digestive upset
+- L-Carnitine: Burns fat, supports weight loss in overweight pets
+- Antioxidants (Vitamin E/C): Boost immune system, fight cellular aging
+
 LIFE STAGE GUIDELINES:
-- Puppies (0-12 months): Need DHA for brain development, calcium for bones, high protein.
-- Adult dogs (1-7 years): Balanced macros, dental health important, adjust calories to activity.
-- Senior dogs (7+ years): Joint support, lower calories, easier to digest proteins.
-- Kittens (0-12 months): High protein and fat, taurine essential, DHA for development.
-- Adult cats (1-10 years): High protein, taurine, hydration via wet food important.
-- Senior cats (10+ years): Kidney-friendly, low phosphorus, easy-to-chew food.
+- Puppies (0-12 months): High protein, DHA, calcium. Look for "puppy formula" or "all life stages".
+- Adult dogs (1-7 years): Balanced macros, dental health important.
+- Senior dogs (7+): Joint support, lower calories, easy-to-digest proteins.
+- Kittens (0-12 months): High protein and fat, taurine essential.
+- Adult cats (1-10 years): High protein, taurine, hydration via wet food.
+- Senior cats (10+): Low phosphorus, kidney-friendly, easy-to-chew.
 `;
 
 const BIRTHDAY_PROGRAM_INFO = `
 BIRTHDAY LOYALTY PROGRAM:
-- If you don't know the pet's birthday, politely ask: "By the way, when is [Pet Name]'s birthday? We love celebrating our furry friends!"
-- If the user shares a birthday, acknowledge warmly: "We'll make sure [Pet Name] gets a special birthday surprise from PetShiwu!"
-- If TODAY is the pet's birthday, celebrate: "HAPPY BIRTHDAY [Pet Name]! 🎂🐾 Use code BDAYGIFT at checkout to get a free treat (under $5) — our gift to your furry friend!"
-- Discount code: BDAYGIFT (free treat under $5)
+- If you don't know the pet's birthday, ask at a natural point: "By the way, when is [Pet Name]'s birthday? We love celebrating our furry friends!"
+- If the user shares a birthday, acknowledge warmly and mention the gift program.
+- If TODAY is the pet's birthday: "HAPPY BIRTHDAY [Pet Name]! 🎂🐾 Use code BDAYGIFT at checkout for a free treat (under $5) — our gift to your furry friend!"
+- Discount code: BDAYGIFT
 `;
 
-const SYSTEM_PROMPT = `You are PetShiwu's Ultra-Expert AI Pet Advisor and Concierge. You work for petshiwu.com, a premium US pet e-commerce store selling over 10,000 products.
+const COMPANY_POLICIES = `
+PETSHIWU COMPANY POLICIES:
+- Free shipping on all orders over $49
+- 30-day hassle-free returns
+- US-based expert customer support
+- Ships within the USA only
+- Over 10,000 products for dogs, cats, birds, reptiles, fish, and small animals
+- Website: petshiwu.com
+`;
 
-YOUR GOALS:
-1. Provide breed-specific health and nutrition advice immediately when a breed is mentioned.
-2. Calculate daily calorie needs when the user provides their pet's weight and activity level.
-3. Act as a Life-Stage Guide for puppies, kittens, adults, and seniors.
-4. Collect pet birthdays and celebrate them with the loyalty program.
-5. Recommend relevant products available on PetShiwu.com.
+const buildSystemPrompt = (inventorySnippet: string): string => `
+You are PetShiwu's Super AI Advisor — the ultimate expert for petshiwu.com, a premium US pet e-commerce store.
 
-BREED & HEALTH DATABASE:
+MISSION #1: DATA COLLECTION (MANDATORY ON FIRST MESSAGE)
+- ALWAYS start your very first response by asking for the pet's name and birthday.
+- Example: "Hi! I'd love to help. Before we start, what's your pet's name and birthday? We want to send a special treat (under $5) for their big day! 🎂🐾"
+- After greeting and asking for data, briefly answer their original question.
+- Once you have pet name and birthday, thank them warmly and proceed with full expert advice.
+- If petName and birthday are already in context, SKIP asking and go straight to helping.
+
+MISSION #2: EXPERT ADVICE (CATS & DOGS)
+- Provide breed-specific health tips immediately when a breed is mentioned.
+- Explain the "why" behind ingredients (e.g., "DHA supports kitten brain development").
+- Calculate daily calories when the user provides weight and activity level.
+- Guide by life stage: puppy, kitten, adult, senior.
+- Always recommend consulting a vet for serious health concerns.
+
+MISSION #3: REAL PRODUCT EXPERTISE
+- Use the inventory below to recommend real products with accurate prices.
+- When a user asks for a price, give the exact amount from the inventory list.
+- For products not in the snippet, use [SEARCH:search term] to find them.
+
+BREED & HEALTH DATA:
 ${BREED_HEALTH_DATABASE}
 
-NUTRITION & CALORIE GUIDELINES:
+NUTRITION SCIENCE:
 ${NUTRITION_LOGIC}
 
 BIRTHDAY PROGRAM:
@@ -84,41 +116,36 @@ ${BIRTHDAY_PROGRAM_INFO}
 
 HEALTH TO PRODUCT MAPPING:
 - Itchy skin / allergies -> Sensitive skin food, omega supplements, hypoallergenic treats
-- Digestive issues / diarrhea -> Sensitive stomach food, probiotics, digestive supplements
-- Joint pain / arthritis -> Joint supplements, glucosamine, chondroitin, orthopedic beds
+- Digestive issues -> Sensitive stomach food, probiotics, digestive supplements
+- Joint pain / arthritis -> Joint supplements, glucosamine, orthopedic beds
 - Anxiety / stress -> Calming treats, anxiety wraps, pheromone diffusers
 - Dental problems -> Dental chews, water additives, toothbrushes
 - Weight issues -> Weight management food, low-calorie treats
-- Dull coat -> Omega-3 supplements, grooming tools, coat-enhancing food
+- Dull coat -> Omega-3 supplements, grooming tools
 - Low energy -> High-protein food, energy supplements
-- Excessive shedding -> De-shedding tools, supplements, specialized shampoos
+- Excessive shedding -> De-shedding tools, supplements, shampoos
 - Urinary issues -> Urinary health food, wet food, pH-balanced formulas
 - Heart health -> Taurine supplements, heart health food
 - Kidney health -> Low phosphorus wet food, kidney support supplements
-- New puppy/kitten -> Starter food, training treats, beds, toys, crates, pee pads
+- New puppy/kitten -> Starter food, training treats, beds, toys, crates
 
-DATA COLLECTION (MANDATORY FIRST STEP):
-- On the VERY FIRST message, regardless of what the customer asks, you MUST:
-  1. Greet them warmly
-  2. Ask for their pet's name and birthday: "Before we dive in, could you share your pet's name and birthday? We want to make sure they get a special treat on their big day! 🎂🐾"
-  3. Then briefly answer their original question
-- Once you have the pet name and birthday, thank them warmly and proceed with full expert advice
-- If petName and birthday are already in the pet info context, skip asking and go straight to helping
+CURRENT INVENTORY SNAPSHOT (real products with prices):
+${inventorySnippet}
+
+${COMPANY_POLICIES}
 
 CONVERSATION STYLE:
 - Expert, empathetic, and proactive
-- If a user mentions a breed, IMMEDIATELY give a breed-specific health tip
-- If a user gives weight and activity level, calculate and share daily calorie needs
-- If you don't know the pet's birthday yet, ask at a natural point in the conversation
-- Always recommend consulting a vet for serious health concerns
+- If a breed is mentioned, IMMEDIATELY give a breed-specific health tip
+- If weight and activity level given, calculate and share daily calorie needs
 - Keep responses concise (4-6 sentences max)
 - Use pet emojis occasionally 🐾🐕🐈
 
 PRODUCT RULES:
-- When ready to recommend products, end your response with: [SEARCH:search term here]
-- Only include ONE search tag per response
-- Search terms should match product categories on PetShiwu.com
-- Do NOT make up specific product names or prices`;
+- Recommend real products from the inventory snapshot above when possible
+- For products not in the snapshot, end response with: [SEARCH:search term here]
+- Only ONE search tag per response
+- Do NOT make up product names or prices not in the inventory`;
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -126,7 +153,6 @@ interface ChatMessage {
 }
 
 interface PetContext {
-  
   birthday?: string;
   petName?: string;
   parentName?: string;
@@ -160,33 +186,20 @@ const buildBirthdayEmailHtml = (petName: string, parentName: string): string => 
     <tr>
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-
-          <!-- Header -->
           <tr>
             <td align="center" style="background:linear-gradient(135deg,#1a3c5e 0%,#2d6a9f 100%);padding:40px 40px 30px;">
               <p style="margin:0;font-size:48px;">🎂🐾</p>
-              <h1 style="margin:16px 0 8px;color:#ffffff;font-size:32px;font-weight:700;letter-spacing:-0.5px;">
-                Happy Birthday, ${petName}!
-              </h1>
+              <h1 style="margin:16px 0 8px;color:#ffffff;font-size:32px;font-weight:700;">Happy Birthday, ${petName}!</h1>
               <p style="margin:0;color:#a8d4f5;font-size:16px;">A special day deserves a special treat</p>
             </td>
           </tr>
-
-          <!-- Body -->
           <tr>
             <td style="padding:40px;">
+              <p style="margin:0 0 20px;color:#374151;font-size:16px;line-height:1.7;">Hi <strong>${parentName}</strong>,</p>
               <p style="margin:0 0 20px;color:#374151;font-size:16px;line-height:1.7;">
-                Hi <strong>${parentName}</strong>,
+                Today is a very special day — it's <strong>${petName}'s birthday!</strong> 🎉
+                We want to help you celebrate with a delicious surprise.
               </p>
-              <p style="margin:0 0 20px;color:#374151;font-size:16px;line-height:1.7;">
-                Today is a very special day at PetShiwu — it's <strong>${petName}'s birthday!</strong> 🎉
-                We know how much joy ${petName} brings to your life, and we want to help you celebrate in style.
-              </p>
-              <p style="margin:0 0 28px;color:#374151;font-size:16px;line-height:1.7;">
-                As a birthday gift from the PetShiwu family, we've got a delicious surprise waiting for ${petName}:
-              </p>
-
-              <!-- Gift Box -->
               <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#fff8e1,#fff3cd);border:2px dashed #f59e0b;border-radius:12px;margin-bottom:28px;">
                 <tr>
                   <td align="center" style="padding:28px;">
@@ -200,116 +213,52 @@ const buildBirthdayEmailHtml = (petName: string, parentName: string): string => 
                   </td>
                 </tr>
               </table>
-
-              <!-- Steps -->
               <h3 style="margin:0 0 16px;color:#1a3c5e;font-size:17px;font-weight:700;">How to redeem:</h3>
-              <table width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td style="padding:8px 0;">
-                    <table cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td style="width:32px;height:32px;background:#1a3c5e;border-radius:50%;text-align:center;vertical-align:middle;">
-                          <span style="color:#ffffff;font-size:14px;font-weight:700;">1</span>
-                        </td>
-                        <td style="padding-left:12px;color:#374151;font-size:15px;">Visit <a href="https://www.petshiwu.com" style="color:#2d6a9f;font-weight:600;">petshiwu.com</a></td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:8px 0;">
-                    <table cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td style="width:32px;height:32px;background:#1a3c5e;border-radius:50%;text-align:center;vertical-align:middle;">
-                          <span style="color:#ffffff;font-size:14px;font-weight:700;">2</span>
-                        </td>
-                        <td style="padding-left:12px;color:#374151;font-size:15px;">Add ${petName}'s favorite treat (under $5) to your cart</td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:8px 0;">
-                    <table cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td style="width:32px;height:32px;background:#1a3c5e;border-radius:50%;text-align:center;vertical-align:middle;">
-                          <span style="color:#ffffff;font-size:14px;font-weight:700;">3</span>
-                        </td>
-                        <td style="padding-left:12px;color:#374151;font-size:15px;">Enter code <strong style="color:#1a3c5e;">BDAYGIFT</strong> at checkout</td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- CTA Button -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:32px;">
+              <p style="margin:0 0 8px;color:#374151;font-size:15px;">1. Visit <a href="https://www.petshiwu.com" style="color:#2d6a9f;font-weight:600;">petshiwu.com</a></p>
+              <p style="margin:0 0 8px;color:#374151;font-size:15px;">2. Add ${petName}'s favorite treat (under $5) to your cart</p>
+              <p style="margin:0 0 28px;color:#374151;font-size:15px;">3. Enter code <strong style="color:#1a3c5e;">BDAYGIFT</strong> at checkout</p>
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
                 <tr>
                   <td align="center">
                     <a href="https://www.petshiwu.com/products?maxPrice=5&category=treats"
-                       style="display:inline-block;background:linear-gradient(135deg,#1a3c5e,#2d6a9f);color:#ffffff;font-size:16px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:50px;letter-spacing:0.5px;">
+                       style="display:inline-block;background:linear-gradient(135deg,#1a3c5e,#2d6a9f);color:#ffffff;font-size:16px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:50px;">
                       🛍️ Shop Birthday Treats Under $5
                     </a>
                   </td>
                 </tr>
               </table>
-
-              <p style="margin:32px 0 0;color:#374151;font-size:16px;line-height:1.7;">
-                Wishing you and <strong>${petName}</strong> a day filled with extra cuddles, belly rubs, and treats! 🐾
-              </p>
-              <p style="margin:8px 0 0;color:#374151;font-size:16px;">
-                Warmly,<br>
-                <strong>The PetShiwu Team</strong>
+              <p style="margin:0;color:#374151;font-size:16px;line-height:1.7;">
+                Wishing you and <strong>${petName}</strong> a day filled with cuddles, belly rubs, and treats! 🐾<br><br>
+                Warmly,<br><strong>The PetShiwu Team</strong>
               </p>
             </td>
           </tr>
-
-          <!-- Footer -->
           <tr>
             <td style="background:#f3f4f6;padding:24px 40px;text-align:center;">
-              <p style="margin:0 0 8px;color:#9ca3af;font-size:13px;">
-                © ${new Date().getFullYear()} PetShiwu · <a href="https://www.petshiwu.com" style="color:#6b7280;">petshiwu.com</a>
-              </p>
-              <p style="margin:0;color:#9ca3af;font-size:12px;">
-                You're receiving this because you registered ${petName}'s birthday with us 🐾
-              </p>
+              <p style="margin:0;color:#9ca3af;font-size:13px;">© ${new Date().getFullYear()} PetShiwu · <a href="https://www.petshiwu.com" style="color:#6b7280;">petshiwu.com</a></p>
             </td>
           </tr>
-
         </table>
       </td>
     </tr>
   </table>
 </body>
-</html>
-`;
+</html>`;
 
-const sendBirthdayEmail = async (
-  petName: string,
-  parentName: string,
-  parentEmail: string
-): Promise<void> => {
+const sendBirthdayEmail = async (petName: string, parentName: string, parentEmail: string): Promise<void> => {
   try {
     const resendApiKey = process.env.RESEND_API_KEY;
-    if (!resendApiKey) {
-      console.warn('RESEND_API_KEY not set — birthday email not sent');
-      return;
-    }
-
+    if (!resendApiKey) { console.warn('RESEND_API_KEY not set — birthday email skipped'); return; }
     const resend = new Resend(resendApiKey);
-    const fromEmail = process.env.RESEND_FROM || 'PetShiwu <hello@petshiwu.com>';
-
     await resend.emails.send({
-      from: fromEmail,
+      from: process.env.RESEND_FROM || 'PetShiwu <hello@petshiwu.com>',
       to: parentEmail,
-      subject: `Happy Birthday, ${petName}! 🎂 A special treat is waiting for you!`,
+      subject: `Happy Birthday, ${petName}! 🎂 A special treat is waiting!`,
       html: buildBirthdayEmailHtml(petName, parentName)
     });
-
     console.log(`🎂 Birthday email sent for ${petName} to ${parentEmail}`);
   } catch (error) {
-    console.error('Birthday email send error:', error);
-    // Non-fatal — don't let email failure break the chat response
+    console.error('Birthday email error:', error);
   }
 };
 
@@ -332,23 +281,48 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
       return;
     }
 
-    // Check birthday and send email if today is the day
+    // Check data collection status
+    const hasData = !!(petContext?.petName && petContext?.birthday);
     const birthdayCelebration = petContext?.birthday ? isBirthdayToday(petContext.birthday) : false;
 
-    // Check if pet name and birthday are already collected
-    const hasData = !!(petContext?.petName && petContext?.birthday);
-
+    // Send birthday email (non-blocking)
     if (birthdayCelebration && petContext?.parentEmail && petContext?.petName) {
-      const parentName = petContext.parentName || 'Pet Parent';
-      sendBirthdayEmail(petContext.petName, parentName, petContext.parentEmail);
+      sendBirthdayEmail(
+        petContext.petName,
+        petContext.parentName || 'Pet Parent',
+        petContext.parentEmail
+      );
     }
+
+    // Fetch real inventory snapshot (top 50 featured/in-stock products)
+    let inventorySnippet = 'Inventory temporarily unavailable — use [SEARCH:] for product lookups.';
+    try {
+      const featuredProducts = await Product.find({ isActive: true, stock: { $gt: 0 } })
+        .sort({ featured: -1, sold: -1 })
+        .select('name price salePrice brand category')
+        .limit(50)
+        .lean() as Array<{ name: string; price: number; salePrice?: number; brand?: string; category?: string }>;
+
+      if (featuredProducts.length > 0) {
+        inventorySnippet = featuredProducts.map(p => {
+          const displayPrice = p.salePrice && p.salePrice < p.price
+            ? `$${p.salePrice.toFixed(2)} (was $${p.price.toFixed(2)})`
+            : `$${p.price.toFixed(2)}`;
+          const meta = [p.brand, p.category].filter(Boolean).join(' · ');
+          return `- ${p.name}: ${displayPrice}${meta ? ` [${meta}]` : ''}`;
+        }).join('\n');
+      }
+    } catch (inventoryError) {
+      console.error('Inventory fetch error:', inventoryError);
+    }
+
+    const systemPrompt = buildSystemPrompt(inventorySnippet);
 
     const history = (messages || []).map((m: ChatMessage) => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.text }]
     }));
 
-    let enrichedMessage = userMessage;
     const contextParts: string[] = [];
 
     if (petContext && Object.keys(petContext).length > 0) {
@@ -359,27 +333,23 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
       if (contextStr) contextParts.push(`[Pet info: ${contextStr}]`);
     }
 
-    if (birthdayCelebration) {
-      const petName = petContext?.petName || 'your pet';
-      contextParts.push(`[IMPORTANT: Today is ${petName}'s birthday! Start your response with an enthusiastic birthday celebration and mention the BDAYGIFT discount code.]`);
-    }
-
     if (hasData) {
       contextParts.push(`[DATA ALREADY COLLECTED: Pet name and birthday on file. Skip data collection and provide expert advice directly.]`);
     }
 
-    if (contextParts.length > 0) {
-      enrichedMessage = `${contextParts.join(' ')} ${userMessage}`;
+    if (birthdayCelebration) {
+      const petName = petContext?.petName || 'your pet';
+      contextParts.push(`[IMPORTANT: Today is ${petName}'s birthday! Start with an enthusiastic birthday celebration and mention code BDAYGIFT for a free treat under $5.]`);
     }
 
+    const enrichedMessage = contextParts.length > 0
+      ? `${contextParts.join(' ')} ${userMessage}`
+      : userMessage;
+
     const body = {
-      system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      system_instruction: { parts: [{ text: systemPrompt }] },
       contents: history.concat([{ role: 'user', parts: [{ text: enrichedMessage }] }]),
-      generationConfig: {
-        temperature: 0.5,
-        maxOutputTokens: 500,
-        topP: 0.8
-      }
+      generationConfig: { temperature: 0.6, maxOutputTokens: 500, topP: 0.8 }
     };
 
     let geminiRes: globalThis.Response | null = null;
@@ -422,7 +392,6 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
     if (searchMatch) {
       const searchQuery = searchMatch[1].trim();
       replyText = fullText.replace(/\[SEARCH:.*?\]/, '').trim();
-
       try {
         const foundProducts = await Product.find({
           $or: [
@@ -436,7 +405,6 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
         .select('name price salePrice images slug brand category')
         .limit(4)
         .lean() as Record<string, unknown>[];
-
         products = foundProducts;
       } catch (searchError) {
         console.error('Product search error:', searchError);
@@ -445,12 +413,7 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
 
     res.status(200).json({
       success: true,
-      data: {
-        reply: replyText,
-        products,
-        requireData: !hasData,
-        birthdayCelebration
-      }
+      data: { reply: replyText, products, birthdayCelebration, requireData: !hasData }
     });
 
   } catch (error) {
