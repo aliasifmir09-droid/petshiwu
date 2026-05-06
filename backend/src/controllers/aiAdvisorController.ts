@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import Product from '../models/Product';
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 const SYSTEM_PROMPT = `You are PetShiwu's expert AI Pet Advisor. You work for petshiwu.com, a premium US pet e-commerce store.
 
