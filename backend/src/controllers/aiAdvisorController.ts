@@ -69,7 +69,7 @@ const BIRTHDAY_PROGRAM_INFO = `
 BIRTHDAY LOYALTY PROGRAM:
 - If you don't know the pet's birthday, ask at a natural point: "By the way, when is [Pet Name]'s birthday? We love celebrating our furry friends!"
 - If the user shares a birthday, acknowledge warmly and mention the gift program.
-- If TODAY is the pet's birthday: "HAPPY BIRTHDAY [Pet Name]! 🎂🐾 Use code BDAYGIFT at checkout for a free treat (under $5) — our gift to your furry friend!"
+- If TODAY is the pet's birthday: "HAPPY BIRTHDAY [Pet Name]! 🎂🐾 Use code BDAYGIFT at checkout for a special birthday gift — our treat for your furry friend!"
 - Discount code: BDAYGIFT
 `;
 
@@ -88,7 +88,7 @@ You are PetShiwu's Super AI Advisor — the ultimate expert for petshiwu.com, a 
 
 MISSION #1: DATA COLLECTION (MANDATORY ON FIRST MESSAGE)
 - ALWAYS start your very first response by asking for the pet's name and birthday.
-- Example: "Hi! I'd love to help. Before we start, what's your pet's name and birthday? We want to send a special treat (under $5) for their big day! 🎂🐾"
+- Example: "Hi! I'd love to help. Before we start, what's your pet's name and birthday? We want to send a special birthday gift for their big day! 🎂🐾"
 - After greeting and asking for data, briefly answer their original question.
 - Once you have pet name and birthday, thank them warmly and proceed with full expert advice.
 - If petName and birthday are already in context, SKIP asking and go straight to helping.
@@ -190,7 +190,7 @@ const buildBirthdayEmailHtml = (petName: string, parentName: string): string => 
             <td align="center" style="background:linear-gradient(135deg,#1a3c5e 0%,#2d6a9f 100%);padding:40px 40px 30px;">
               <p style="margin:0;font-size:48px;">🎂🐾</p>
               <h1 style="margin:16px 0 8px;color:#ffffff;font-size:32px;font-weight:700;">Happy Birthday, ${petName}!</h1>
-              <p style="margin:0;color:#a8d4f5;font-size:16px;">A special day deserves a special treat</p>
+              <p style="margin:0;color:#a8d4f5;font-size:16px;">A special day deserves a special gift</p>
             </td>
           </tr>
           <tr>
@@ -198,14 +198,14 @@ const buildBirthdayEmailHtml = (petName: string, parentName: string): string => 
               <p style="margin:0 0 20px;color:#374151;font-size:16px;line-height:1.7;">Hi <strong>${parentName}</strong>,</p>
               <p style="margin:0 0 20px;color:#374151;font-size:16px;line-height:1.7;">
                 Today is a very special day — it's <strong>${petName}'s birthday!</strong> 🎉
-                We want to help you celebrate with a delicious surprise.
+                We want to help you celebrate with a special surprise.
               </p>
               <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#fff8e1,#fff3cd);border:2px dashed #f59e0b;border-radius:12px;margin-bottom:28px;">
                 <tr>
                   <td align="center" style="padding:28px;">
                     <p style="margin:0 0 8px;font-size:36px;">🎁</p>
                     <h2 style="margin:0 0 8px;color:#92400e;font-size:20px;font-weight:700;">Your Birthday Gift</h2>
-                    <p style="margin:0 0 16px;color:#78350f;font-size:15px;">Get any treat under $5 — FREE with your next order!</p>
+                    <p style="margin:0 0 16px;color:#78350f;font-size:15px;">A FREE birthday gift with your next order — from us to your furry friend!</p>
                     <div style="background:#ffffff;border-radius:8px;padding:12px 24px;display:inline-block;">
                       <p style="margin:0;color:#6b7280;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Use code at checkout</p>
                       <p style="margin:4px 0 0;color:#1a3c5e;font-size:28px;font-weight:800;letter-spacing:4px;">BDAYGIFT</p>
@@ -215,14 +215,14 @@ const buildBirthdayEmailHtml = (petName: string, parentName: string): string => 
               </table>
               <h3 style="margin:0 0 16px;color:#1a3c5e;font-size:17px;font-weight:700;">How to redeem:</h3>
               <p style="margin:0 0 8px;color:#374151;font-size:15px;">1. Visit <a href="https://www.petshiwu.com" style="color:#2d6a9f;font-weight:600;">petshiwu.com</a></p>
-              <p style="margin:0 0 8px;color:#374151;font-size:15px;">2. Add ${petName}'s favorite treat (under $5) to your cart</p>
+              <p style="margin:0 0 8px;color:#374151;font-size:15px;">2. Add ${petName}'s favorite treat to your cart</p>
               <p style="margin:0 0 28px;color:#374151;font-size:15px;">3. Enter code <strong style="color:#1a3c5e;">BDAYGIFT</strong> at checkout</p>
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
                 <tr>
                   <td align="center">
-                    <a href="https://www.petshiwu.com/products?maxPrice=5&category=treats"
+                    <a href="https://www.petshiwu.com/products?category=treats"
                        style="display:inline-block;background:linear-gradient(135deg,#1a3c5e,#2d6a9f);color:#ffffff;font-size:16px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:50px;">
-                      🛍️ Shop Birthday Treats Under $5
+                      🛍️ Shop Birthday Gifts
                     </a>
                   </td>
                 </tr>
@@ -253,7 +253,7 @@ const sendBirthdayEmail = async (petName: string, parentName: string, parentEmai
     await resend.emails.send({
       from: process.env.RESEND_FROM || 'PetShiwu <hello@petshiwu.com>',
       to: parentEmail,
-      subject: `Happy Birthday, ${petName}! 🎂 A special treat is waiting!`,
+      subject: `Happy Birthday, ${petName}! 🎂 A special gift is waiting!`,
       html: buildBirthdayEmailHtml(petName, parentName)
     });
     console.log(`🎂 Birthday email sent for ${petName} to ${parentEmail}`);
@@ -281,11 +281,9 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
       return;
     }
 
-    // Check data collection status
     const hasData = !!(petContext?.petName && petContext?.birthday);
     const birthdayCelebration = petContext?.birthday ? isBirthdayToday(petContext.birthday) : false;
 
-    // Send birthday email (non-blocking)
     if (birthdayCelebration && petContext?.parentEmail && petContext?.petName) {
       sendBirthdayEmail(
         petContext.petName,
@@ -294,7 +292,6 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
       );
     }
 
-    // Fetch real inventory snapshot (top 50 featured/in-stock products)
     let inventorySnippet = 'Inventory temporarily unavailable — use [SEARCH:] for product lookups.';
     try {
       const featuredProducts = await Product.find({ isActive: true, stock: { $gt: 0 } })
@@ -339,7 +336,7 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
 
     if (birthdayCelebration) {
       const petName = petContext?.petName || 'your pet';
-      contextParts.push(`[IMPORTANT: Today is ${petName}'s birthday! Start with an enthusiastic birthday celebration and mention code BDAYGIFT for a free treat under $5.]`);
+      contextParts.push(`[IMPORTANT: Today is ${petName}'s birthday! Start with an enthusiastic birthday celebration and mention code BDAYGIFT for a free birthday gift.]`);
     }
 
     const enrichedMessage = contextParts.length > 0
