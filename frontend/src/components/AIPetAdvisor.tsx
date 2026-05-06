@@ -195,17 +195,8 @@ export default function AIPetAdvisor() {
                         const displayPrice = product.salePrice ? formatPrice(product.salePrice) : formatPrice(product.price)
                         const originalPrice = product.salePrice ? formatPrice(product.price) : null
                         return (
-                          
-                            key={product._id}
-                            href={'/products/' + product.slug}
-                            className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow block"
-                          >
-                            <img
-                              src={imgSrc}
-                              alt={product.name}
-                              className="w-full h-20 object-cover"
-                              onError={handleImageError}
-                            />
+                          <a key={product._id} href={'/products/' + product.slug} className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow block">
+                            <img src={imgSrc} alt={product.name} className="w-full h-20 object-cover" onError={handleImageError} />
                             <div className="p-2">
                               <p className="text-xs font-medium text-gray-800 line-clamp-2 leading-tight">{product.name}</p>
                               <div className="mt-1 flex items-center gap-1">
@@ -242,11 +233,7 @@ export default function AIPetAdvisor() {
                 <p className="text-xs text-gray-400 text-center">Try asking:</p>
                 {STARTER_PROMPTS.map(function(p) {
                   return (
-                    <button
-                      key={p}
-                      onClick={function() { send(p) }}
-                      className="text-xs text-left bg-blue-50 text-blue-700 border border-blue-100 px-3 py-2 rounded-xl hover:bg-blue-100 transition-colors"
-                    >
+                    <button key={p} onClick={function() { send(p) }} className="text-xs text-left bg-blue-50 text-blue-700 border border-blue-100 px-3 py-2 rounded-xl hover:bg-blue-100 transition-colors">
                       {p}
                     </button>
                   )
