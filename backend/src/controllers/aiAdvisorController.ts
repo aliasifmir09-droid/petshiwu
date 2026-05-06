@@ -118,7 +118,7 @@ interface ChatMessage {
 }
 
 interface PetContext {
-  [key: string]: string;
+  
   birthday?: string;
   petName?: string;
   parentName?: string;
