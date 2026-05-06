@@ -16,66 +16,29 @@ interface Product {
   slug: string
 }
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
-
-const SYSTEM_PROMPT = `You are PetShiwu's friendly AI Pet Advisor. You help customers find the right pet products from petshiwu.com.
-
-Your role:
-- Ask about the customer's pet (species, breed, age, health conditions if relevant)
-- Give short, friendly, practical advice (2-4 sentences max)
-- Use a warm, caring tone with pet emojis
-- When recommending products, add a search command at the END of your response in this exact format:
-  [SEARCH:dog food sensitive stomach]
-- Only add ONE search per response
-- Only search when the customer is ready for product recommendations
-
-PetShiwu sells: food, treats, toys, beds, grooming, accessories, supplements for dogs, cats, birds, reptiles, fish, and small pets.`
-
-async function askGemini(messages: Message[], userMessage: string): Promise<{ text: string; searchQuery?: string }> {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY
-  if (!apiKey) return { text: "I'm not fully set up yet!" }
-
-  const history = messages.map(function(m) {
-    return {
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.text }]
-    }
-  })
-
-  const res = await fetch(GEMINI_API_URL + '?key=' + apiKey, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      contents: history.concat([{ role: 'user', parts: [{ text: userMessage }] }]),
-      generationConfig: { temperature: 0.7, maxOutputTokens: 300 }
-    })
-  })
-
-  if (!res.ok) throw new Error('API request failed')
-  const data = await res.json()
-  const fullText = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] ? data.candidates[0].content.parts[0].text : "Sorry, I couldn't get a response."
-
-  const searchMatch = fullText.match(/\[SEARCH:(.*?)\]/)
-  if (searchMatch) {
-    return {
-      text: fullText.replace(/\[SEARCH:.*?\]/, '').trim(),
-      searchQuery: searchMatch[1].trim()
-    }
-  }
-
-  return { text: fullText }
+interface PetContext {
+  species?: string
+  breed?: string
+  age?: string
+  issue?: string
 }
 
-async function searchProducts(query: string): Promise<Product[]> {
-  try {
-    const res = await fetch('/api/v1/products?search=' + encodeURIComponent(query) + '&limit=4')
-    if (!res.ok) return []
-    const data = await res.json()
-    return data.data && data.data.products ? data.data.products : (data.data || [])
-  } catch {
-    return []
-  }
+const STARTER_PROMPTS = [
+  'My dog has itchy skin — what food should I try?',
+  'What do I need for a new kitten?',
+  'Best toys for a senior dog?',
+  'What supplements help with joint pain?'
+]
+
+async function askBackend(messages: Message[], userMessage: string, petContext: PetContext): Promise<{ text: string; products: Product[] }> {
+  const res = await fetch('/api/v1/ai-advisor/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages, userMessage, petContext })
+  })
+  if (!res.ok) throw new Error('Backend request failed')
+  const data = await res.json()
+  return { text: data.data.reply, products: data.data.products || [] }
 }
 
 function getImage(product: Product): string {
@@ -89,13 +52,6 @@ function formatPrice(num: number): string {
   return '$' + num.toFixed(2)
 }
 
-const STARTER_PROMPTS = [
-  'My dog has itchy skin — what food should I try?',
-  'What do I need for a new kitten?',
-  'Best toys for a senior dog?',
-  'What supplements help with joint pain?'
-]
-
 export default function AIPetAdvisor() {
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
@@ -103,6 +59,7 @@ export default function AIPetAdvisor() {
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [petContext, setPetContext] = useState<PetContext>({})
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -125,12 +82,8 @@ export default function AIPetAdvisor() {
     setLoading(true)
 
     try {
-      const result = await askGemini(messages, msg)
-      let products: Product[] = []
-      if (result.searchQuery) {
-        products = await searchProducts(result.searchQuery)
-      }
-      const assistantMsg: Message = { role: 'assistant', text: result.text, products: products }
+      const result = await askBackend(messages, msg, petContext)
+      const assistantMsg: Message = { role: 'assistant', text: result.text, products: result.products }
       setMessages(function(prev) { return prev.concat([assistantMsg]) })
     } catch {
       const errMsg: Message = { role: 'assistant', text: 'Sorry, something went wrong. Please try again.' }
@@ -160,7 +113,7 @@ export default function AIPetAdvisor() {
       {open && (
         <div
           className="fixed bottom-6 right-6 z-50 w-80 bg-white rounded-2xl border border-gray-200 shadow-xl flex flex-col overflow-hidden"
-          style={{ height: '520px' }}
+          style={{ height: '540px' }}
         >
           <div className="bg-blue-600 text-white px-4 py-3 flex items-center gap-3 flex-shrink-0">
             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
