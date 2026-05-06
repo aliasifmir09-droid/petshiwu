@@ -44,6 +44,11 @@ interface PetContext {
   [key: string]: string;
 }
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export const getAIAdvice = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { messages, userMessage, petContext } = req.body as {
@@ -89,15 +94,28 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
       }
     };
 
-    const geminiRes = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
+    let geminiRes: globalThis.Response | null = null;
+    let lastError = '';
 
-    if (!geminiRes.ok) {
-      const error = await geminiRes.text();
-      console.error('Gemini API error:', error);
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      geminiRes = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (geminiRes.ok) break;
+
+      lastError = await geminiRes.text();
+      console.error(`Gemini API error (attempt ${attempt}/${MAX_RETRIES}):`, lastError);
+
+      if (geminiRes.status !== 503 || attempt === MAX_RETRIES) break;
+
+      await sleep(RETRY_DELAY_MS * attempt);
+    }
+
+    if (!geminiRes || !geminiRes.ok) {
+      console.error('Gemini API failed after retries:', lastError);
       res.status(500).json({ success: false, message: 'AI service temporarily unavailable' });
       return;
     }
