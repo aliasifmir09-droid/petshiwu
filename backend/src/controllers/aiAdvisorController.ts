@@ -11,23 +11,23 @@ EXPERTISE:
 - Pet health conditions and appropriate product recommendations
 
 HEALTH TO PRODUCT MAPPING:
-- Itchy skin / scratching → Sensitive skin food, omega supplements, hypoallergenic treats
-- Digestive issues / diarrhea → Sensitive stomach food, probiotics, digestive supplements  
-- Joint pain / arthritis → Joint supplements, glucosamine, orthopedic beds
-- Anxiety / stress → Calming treats, anxiety wraps, pheromone diffusers
-- Dental problems → Dental chews, water additives, toothbrushes
-- Weight issues → Weight management food, low-calorie treats
-- Dull coat → Omega-3 supplements, grooming tools, coat-enhancing food
-- Low energy / lethargy → High-protein food, energy supplements, vet-recommended checkup
-- Excessive shedding → De-shedding tools, supplements, specialized shampoos
-- New puppy/kitten → Starter food, training treats, beds, toys, crates
+- Itchy skin / scratching -> Sensitive skin food, omega supplements, hypoallergenic treats
+- Digestive issues / diarrhea -> Sensitive stomach food, probiotics, digestive supplements
+- Joint pain / arthritis -> Joint supplements, glucosamine, orthopedic beds
+- Anxiety / stress -> Calming treats, anxiety wraps, pheromone diffusers
+- Dental problems -> Dental chews, water additives, toothbrushes
+- Weight issues -> Weight management food, low-calorie treats
+- Dull coat -> Omega-3 supplements, grooming tools, coat-enhancing food
+- Low energy / lethargy -> High-protein food, energy supplements
+- Excessive shedding -> De-shedding tools, supplements, specialized shampoos
+- New puppy/kitten -> Starter food, training treats, beds, toys, crates
 
 CONVERSATION STYLE:
 - Warm, empathetic, and expert
 - Ask clarifying questions about pet age, breed, and specific issues
 - Always recommend consulting a vet for serious health concerns
 - Keep responses concise (3-5 sentences max)
-- Use pet emojis occasionally 🐾
+- Use pet emojis occasionally
 
 PRODUCT RULES:
 - When ready to recommend products, end your response with: [SEARCH:search term here]
@@ -40,26 +40,34 @@ interface ChatMessage {
   text: string;
 }
 
-export const getAIAdvice = async (req: Request, res: Response, next: NextFunction) => {
+interface PetContext {
+  [key: string]: string;
+}
+
+export const getAIAdvice = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { messages, userMessage, petContext } = req.body;
+    const { messages, userMessage, petContext } = req.body as {
+      messages: ChatMessage[];
+      userMessage: string;
+      petContext: PetContext;
+    };
 
     if (!userMessage) {
-      return res.status(400).json({ success: false, message: 'User message is required' });
+      res.status(400).json({ success: false, message: 'User message is required' });
+      return;
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return res.status(500).json({ success: false, message: 'AI service not configured' });
+      res.status(500).json({ success: false, message: 'AI service not configured' });
+      return;
     }
 
-    // Build conversation history
     const history = (messages || []).map((m: ChatMessage) => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.text }]
     }));
 
-    // Add pet context to user message if available
     let enrichedMessage = userMessage;
     if (petContext && Object.keys(petContext).length > 0) {
       const contextStr = Object.entries(petContext)
@@ -78,11 +86,7 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
         temperature: 0.7,
         maxOutputTokens: 400,
         topP: 0.8
-      },
-      safetySettings: [
-        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' }
-      ]
+      }
     };
 
     const geminiRes = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
@@ -94,22 +98,35 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
     if (!geminiRes.ok) {
       const error = await geminiRes.text();
       console.error('Gemini API error:', error);
-      return res.status(500).json({ success: false, message: 'AI service temporarily unavailable' });
+      res.status(500).json({ success: false, message: 'AI service temporarily unavailable' });
+      return;
     }
 
-    const data = await geminiRes.json();
-    const fullText = data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm having trouble responding right now. Please try again!";
+    const responseData = await geminiRes.json() as {
+      candidates?: Array<{
+        content?: {
+          parts?: Array<{ text?: string }>
+        }
+      }>
+    };
 
-    // Extract search query if present
+    const fullText = responseData.candidates &&
+      responseData.candidates[0] &&
+      responseData.candidates[0].content &&
+      responseData.candidates[0].content.parts &&
+      responseData.candidates[0].content.parts[0] &&
+      responseData.candidates[0].content.parts[0].text
+        ? responseData.candidates[0].content.parts[0].text
+        : "I'm having trouble responding right now. Please try again!";
+
     const searchMatch = fullText.match(/\[SEARCH:(.*?)\]/);
     let replyText = fullText;
-    let products = [];
+    let products: Record<string, unknown>[] = [];
 
     if (searchMatch) {
       const searchQuery = searchMatch[1].trim();
       replyText = fullText.replace(/\[SEARCH:.*?\]/, '').trim();
 
-      // Search products from database
       try {
         const foundProducts = await Product.find({
           $or: [
@@ -122,7 +139,7 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
         })
         .select('name price salePrice images slug brand category')
         .limit(4)
-        .lean();
+        .lean() as Record<string, unknown>[];
 
         products = foundProducts;
       } catch (searchError) {
