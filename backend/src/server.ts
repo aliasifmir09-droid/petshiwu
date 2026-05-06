@@ -183,14 +183,20 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: process.env.NODE_ENV === 'production'
-        ? ["'self'", "data:", "https:", "https://res.cloudinary.com"]
-        : ["'self'", "data:", "https:", "http:", "https://res.cloudinary.com"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
+        ? ["'self'", "data:", "https:", "https://res.cloudinary.com", "https://maps.gstatic.com", "https://maps.googleapis.com"]
+        : ["'self'", "data:", "https:", "http:", "https://res.cloudinary.com", "https://maps.gstatic.com", "https://maps.googleapis.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://maps.googleapis.com", "https://maps.gstatic.com"],
       workerSrc: ["'self'"],
-      connectSrc: ["'self'", "https://generativelanguage.googleapis.com"],
+      connectSrc: [
+        "'self'",
+        "https://generativelanguage.googleapis.com",
+        "https://maps.googleapis.com",
+        "https://maps.gstatic.com",
+        "https://places.googleapis.com"
+      ],
       frameSrc: ["'self'"],
       frameAncestors: ["'self'"],
       upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
