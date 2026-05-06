@@ -301,7 +301,7 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
         .sort({ featured: -1, sold: -1 })
         .select('name price salePrice brand category')
         .limit(50)
-        .lean() as Array<{ name: string; price: number; salePrice?: number; brand?: string; category?: string }>;
+        .lean() as unknown as Array<{ name: string; price: number; salePrice?: number; brand?: string; category?: string }>;
 
       if (featuredProducts.length > 0) {
         inventorySnippet = featuredProducts.map(p => {
