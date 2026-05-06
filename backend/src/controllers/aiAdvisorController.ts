@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import Product from '../models/Product';
+import { Resend } from 'resend';
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
 
@@ -47,27 +48,39 @@ CALORIE CALCULATION:
 - Pregnant/nursing: RER * 3.0
 
 LIFE STAGE GUIDELINES:
-- Puppies (0-12 months): Need DHA for brain development, calcium for bones, high protein. Look for "puppy formula" or "all life stages".
+- Puppies (0-12 months): Need DHA for brain development, calcium for bones, high protein.
 - Adult dogs (1-7 years): Balanced macros, dental health important, adjust calories to activity.
-- Senior dogs (7+ years): Joint support (glucosamine), lower calories, easier to digest proteins, kidney-friendly.
+- Senior dogs (7+ years): Joint support, lower calories, easier to digest proteins.
 - Kittens (0-12 months): High protein and fat, taurine essential, DHA for development.
 - Adult cats (1-10 years): High protein, taurine, hydration via wet food important.
-- Senior cats (10+ years): Kidney-friendly, low phosphorus, easy-to-chew food, joint support.
+- Senior cats (10+ years): Kidney-friendly, low phosphorus, easy-to-chew food.
 `;
 
-const SYSTEM_PROMPT = `You are PetShiwu's Ultra-Expert AI Pet Advisor. You work for petshiwu.com, a premium US pet e-commerce store selling over 10,000 products.
+const BIRTHDAY_PROGRAM_INFO = `
+BIRTHDAY LOYALTY PROGRAM:
+- If you don't know the pet's birthday, politely ask: "By the way, when is [Pet Name]'s birthday? We love celebrating our furry friends!"
+- If the user shares a birthday, acknowledge warmly: "We'll make sure [Pet Name] gets a special birthday surprise from PetShiwu!"
+- If TODAY is the pet's birthday, celebrate: "HAPPY BIRTHDAY [Pet Name]! 🎂🐾 Use code BDAYGIFT at checkout to get a free treat (under $5) — our gift to your furry friend!"
+- Discount code: BDAYGIFT (free treat under $5)
+`;
+
+const SYSTEM_PROMPT = `You are PetShiwu's Ultra-Expert AI Pet Advisor and Concierge. You work for petshiwu.com, a premium US pet e-commerce store selling over 10,000 products.
 
 YOUR GOALS:
 1. Provide breed-specific health and nutrition advice immediately when a breed is mentioned.
 2. Calculate daily calorie needs when the user provides their pet's weight and activity level.
 3. Act as a Life-Stage Guide for puppies, kittens, adults, and seniors.
-4. Recommend relevant products available on PetShiwu.com.
+4. Collect pet birthdays and celebrate them with the loyalty program.
+5. Recommend relevant products available on PetShiwu.com.
 
 BREED & HEALTH DATABASE:
 ${BREED_HEALTH_DATABASE}
 
 NUTRITION & CALORIE GUIDELINES:
 ${NUTRITION_LOGIC}
+
+BIRTHDAY PROGRAM:
+${BIRTHDAY_PROGRAM_INFO}
 
 HEALTH TO PRODUCT MAPPING:
 - Itchy skin / allergies -> Sensitive skin food, omega supplements, hypoallergenic treats
@@ -88,7 +101,7 @@ CONVERSATION STYLE:
 - Expert, empathetic, and proactive
 - If a user mentions a breed, IMMEDIATELY give a breed-specific health tip
 - If a user gives weight and activity level, calculate and share daily calorie needs
-- Ask clarifying questions: pet name, age, breed, weight, health issues
+- If you don't know the pet's birthday yet, ask at a natural point in the conversation
 - Always recommend consulting a vet for serious health concerns
 - Keep responses concise (4-6 sentences max)
 - Use pet emojis occasionally 🐾🐕🐈
@@ -106,12 +119,191 @@ interface ChatMessage {
 
 interface PetContext {
   [key: string]: string;
+  birthday?: string;
+  petName?: string;
+  parentName?: string;
+  parentEmail?: string;
 }
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;
-
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const isBirthdayToday = (birthday: string): boolean => {
+  try {
+    const today = new Date();
+    const bday = new Date(birthday);
+    return today.getMonth() === bday.getMonth() && today.getDate() === bday.getDate();
+  } catch {
+    return false;
+  }
+};
+
+const buildBirthdayEmailHtml = (petName: string, parentName: string): string => `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday ${petName}!</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f9f5f0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9f5f0;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td align="center" style="background:linear-gradient(135deg,#1a3c5e 0%,#2d6a9f 100%);padding:40px 40px 30px;">
+              <p style="margin:0;font-size:48px;">🎂🐾</p>
+              <h1 style="margin:16px 0 8px;color:#ffffff;font-size:32px;font-weight:700;letter-spacing:-0.5px;">
+                Happy Birthday, ${petName}!
+              </h1>
+              <p style="margin:0;color:#a8d4f5;font-size:16px;">A special day deserves a special treat</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px;">
+              <p style="margin:0 0 20px;color:#374151;font-size:16px;line-height:1.7;">
+                Hi <strong>${parentName}</strong>,
+              </p>
+              <p style="margin:0 0 20px;color:#374151;font-size:16px;line-height:1.7;">
+                Today is a very special day at PetShiwu — it's <strong>${petName}'s birthday!</strong> 🎉
+                We know how much joy ${petName} brings to your life, and we want to help you celebrate in style.
+              </p>
+              <p style="margin:0 0 28px;color:#374151;font-size:16px;line-height:1.7;">
+                As a birthday gift from the PetShiwu family, we've got a delicious surprise waiting for ${petName}:
+              </p>
+
+              <!-- Gift Box -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#fff8e1,#fff3cd);border:2px dashed #f59e0b;border-radius:12px;margin-bottom:28px;">
+                <tr>
+                  <td align="center" style="padding:28px;">
+                    <p style="margin:0 0 8px;font-size:36px;">🎁</p>
+                    <h2 style="margin:0 0 8px;color:#92400e;font-size:20px;font-weight:700;">Your Birthday Gift</h2>
+                    <p style="margin:0 0 16px;color:#78350f;font-size:15px;">Get any treat under $5 — FREE with your next order!</p>
+                    <div style="background:#ffffff;border-radius:8px;padding:12px 24px;display:inline-block;">
+                      <p style="margin:0;color:#6b7280;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Use code at checkout</p>
+                      <p style="margin:4px 0 0;color:#1a3c5e;font-size:28px;font-weight:800;letter-spacing:4px;">BDAYGIFT</p>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Steps -->
+              <h3 style="margin:0 0 16px;color:#1a3c5e;font-size:17px;font-weight:700;">How to redeem:</h3>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:8px 0;">
+                    <table cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="width:32px;height:32px;background:#1a3c5e;border-radius:50%;text-align:center;vertical-align:middle;">
+                          <span style="color:#ffffff;font-size:14px;font-weight:700;">1</span>
+                        </td>
+                        <td style="padding-left:12px;color:#374151;font-size:15px;">Visit <a href="https://www.petshiwu.com" style="color:#2d6a9f;font-weight:600;">petshiwu.com</a></td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 0;">
+                    <table cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="width:32px;height:32px;background:#1a3c5e;border-radius:50%;text-align:center;vertical-align:middle;">
+                          <span style="color:#ffffff;font-size:14px;font-weight:700;">2</span>
+                        </td>
+                        <td style="padding-left:12px;color:#374151;font-size:15px;">Add ${petName}'s favorite treat (under $5) to your cart</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 0;">
+                    <table cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="width:32px;height:32px;background:#1a3c5e;border-radius:50%;text-align:center;vertical-align:middle;">
+                          <span style="color:#ffffff;font-size:14px;font-weight:700;">3</span>
+                        </td>
+                        <td style="padding-left:12px;color:#374151;font-size:15px;">Enter code <strong style="color:#1a3c5e;">BDAYGIFT</strong> at checkout</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA Button -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:32px;">
+                <tr>
+                  <td align="center">
+                    <a href="https://www.petshiwu.com/products?maxPrice=5&category=treats"
+                       style="display:inline-block;background:linear-gradient(135deg,#1a3c5e,#2d6a9f);color:#ffffff;font-size:16px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:50px;letter-spacing:0.5px;">
+                      🛍️ Shop Birthday Treats Under $5
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:32px 0 0;color:#374151;font-size:16px;line-height:1.7;">
+                Wishing you and <strong>${petName}</strong> a day filled with extra cuddles, belly rubs, and treats! 🐾
+              </p>
+              <p style="margin:8px 0 0;color:#374151;font-size:16px;">
+                Warmly,<br>
+                <strong>The PetShiwu Team</strong>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#f3f4f6;padding:24px 40px;text-align:center;">
+              <p style="margin:0 0 8px;color:#9ca3af;font-size:13px;">
+                © ${new Date().getFullYear()} PetShiwu · <a href="https://www.petshiwu.com" style="color:#6b7280;">petshiwu.com</a>
+              </p>
+              <p style="margin:0;color:#9ca3af;font-size:12px;">
+                You're receiving this because you registered ${petName}'s birthday with us 🐾
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`;
+
+const sendBirthdayEmail = async (
+  petName: string,
+  parentName: string,
+  parentEmail: string
+): Promise<void> => {
+  try {
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+      console.warn('RESEND_API_KEY not set — birthday email not sent');
+      return;
+    }
+
+    const resend = new Resend(resendApiKey);
+    const fromEmail = process.env.RESEND_FROM || 'PetShiwu <hello@petshiwu.com>';
+
+    await resend.emails.send({
+      from: fromEmail,
+      to: parentEmail,
+      subject: `Happy Birthday, ${petName}! 🎂 A special treat is waiting for you!`,
+      html: buildBirthdayEmailHtml(petName, parentName)
+    });
+
+    console.log(`🎂 Birthday email sent for ${petName} to ${parentEmail}`);
+  } catch (error) {
+    console.error('Birthday email send error:', error);
+    // Non-fatal — don't let email failure break the chat response
+  }
+};
 
 export const getAIAdvice = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -132,20 +324,37 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
       return;
     }
 
+    // Check birthday and send email if today is the day
+    const birthdayCelebration = petContext?.birthday ? isBirthdayToday(petContext.birthday) : false;
+
+    if (birthdayCelebration && petContext?.parentEmail && petContext?.petName) {
+      const parentName = petContext.parentName || 'Pet Parent';
+      sendBirthdayEmail(petContext.petName, parentName, petContext.parentEmail);
+    }
+
     const history = (messages || []).map((m: ChatMessage) => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.text }]
     }));
 
     let enrichedMessage = userMessage;
+    const contextParts: string[] = [];
+
     if (petContext && Object.keys(petContext).length > 0) {
       const contextStr = Object.entries(petContext)
         .filter(([, v]) => v)
         .map(([k, v]) => `${k}: ${v}`)
         .join(', ');
-      if (contextStr) {
-        enrichedMessage = `[Pet info: ${contextStr}] ${userMessage}`;
-      }
+      if (contextStr) contextParts.push(`[Pet info: ${contextStr}]`);
+    }
+
+    if (birthdayCelebration) {
+      const petName = petContext?.petName || 'your pet';
+      contextParts.push(`[IMPORTANT: Today is ${petName}'s birthday! Start your response with an enthusiastic birthday celebration and mention the BDAYGIFT discount code.]`);
+    }
+
+    if (contextParts.length > 0) {
+      enrichedMessage = `${contextParts.join(' ')} ${userMessage}`;
     }
 
     const body = {
@@ -185,21 +394,11 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
     }
 
     const responseData = await geminiRes.json() as {
-      candidates?: Array<{
-        content?: {
-          parts?: Array<{ text?: string }>
-        }
-      }>
+      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>
     };
 
-    const fullText = responseData.candidates &&
-      responseData.candidates[0] &&
-      responseData.candidates[0].content &&
-      responseData.candidates[0].content.parts &&
-      responseData.candidates[0].content.parts[0] &&
-      responseData.candidates[0].content.parts[0].text
-        ? responseData.candidates[0].content.parts[0].text
-        : "I'm having trouble responding right now. Please try again!";
+    const fullText = responseData.candidates?.[0]?.content?.parts?.[0]?.text
+      ?? "I'm having trouble responding right now. Please try again!";
 
     const searchMatch = fullText.match(/\[SEARCH:(.*?)\]/);
     let replyText = fullText;
@@ -233,7 +432,8 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
       success: true,
       data: {
         reply: replyText,
-        products: products
+        products,
+        birthdayCelebration
       }
     });
 
