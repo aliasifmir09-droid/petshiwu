@@ -104,6 +104,7 @@ import searchHistoryRoutes from './routes/searchHistory';
 import reorderSuggestionsRoutes from './routes/reorderSuggestions';
 import searchAnalyticsRoutes from './routes/searchAnalytics';
 import cartRoutes from './routes/cart';
+import aiAdvisorRoutes from './routes/aiAdvisor';
 import { generateSitemap } from './controllers/sitemapController';
 
 connectDatabase().catch((error: unknown) => {
@@ -360,9 +361,6 @@ if (!isCloudinaryConfigured()) {
   app.use('/uploads', express.static(path.join(__dirname, '../uploads'), { maxAge: '1d', etag: true, lastModified: true }));
 }
 
-// ✅ REMOVED: Bad Content-Type middleware that was overriding JS/CSS MIME types
-// causing "Failed to load module script" errors in browser
-
 app.use(['/api', '/api/v1'], setCacheHeaders);
 
 const isSwaggerEnabled = process.env.NODE_ENV !== 'production' || process.env.ENABLE_SWAGGER === 'true';
@@ -387,6 +385,7 @@ app.use(`${API_PREFIX}/slideshow`, slideshowRoutes);
 app.use(`${API_PREFIX}/notifications`, notificationRoutes);
 app.use(`${API_PREFIX}/recommendations`, recommendationAnalyticsRoutes);
 app.use(`${API_PREFIX}/reorder-suggestions`, reorderSuggestionsRoutes);
+app.use(`${API_PREFIX}/ai-advisor`, aiAdvisorRoutes);
 
 const legacyRouteDeprecation = (req: Request, res: Response, next: NextFunction) => { next(); };
 
@@ -416,6 +415,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/payment-methods', legacyRouteDeprecation, paymentMethodRoutes);
 app.use('/api/recommendations', legacyRouteDeprecation, recommendationAnalyticsRoutes);
 app.use('/api/reorder-suggestions', legacyRouteDeprecation, reorderSuggestionsRoutes);
+app.use('/api/ai-advisor', legacyRouteDeprecation, aiAdvisorRoutes);
 
 app.get('/sitemap.xml', (req, res) => {
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
