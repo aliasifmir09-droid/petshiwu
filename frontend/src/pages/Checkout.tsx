@@ -12,6 +12,7 @@ import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import CheckoutDonationModal from '@/components/CheckoutDonationModal';
+import { useGooglePlacesAutocomplete } from '@/hooks/useGooglePlacesAutocomplete';
 // Lazy load Stripe utility - only import when needed
 const getStripe = () => import('@/utils/stripe').then(m => m.getStripe());
 import { normalizeId } from '@/utils/idNormalizer';
@@ -24,9 +25,6 @@ import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/con
 // Lazy load payment components for better performance
 const PaymentForm = lazy(() => import('@/components/PaymentForm'));
 const PayPalButton = lazy(() => import('@/components/PayPalButton'));
-
-// Lazy load Stripe Elements - need to import Elements separately
-// We'll use dynamic import in the component when needed
 
 interface CreateOrderData {
   items: Array<{
@@ -91,8 +89,6 @@ const StripePaymentWrapper = ({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Defer Stripe loading to avoid blocking main thread
-    // Use requestIdleCallback if available, otherwise use setTimeout
     const loadStripe = () => {
       Promise.all([
         import('@stripe/react-stripe-js'),
@@ -108,11 +104,9 @@ const StripePaymentWrapper = ({
       });
     };
 
-    // Defer loading to next idle period to avoid blocking main thread
     if ('requestIdleCallback' in window) {
       requestIdleCallback(loadStripe, { timeout: 2000 });
     } else {
-      // Fallback: use setTimeout with a small delay to yield to browser
       setTimeout(loadStripe, 0);
     }
   }, [onError]);
@@ -173,6 +167,20 @@ const Checkout = () => {
     country: 'USA'
   });
 
+  // Google Places Autocomplete — auto-fills city, state, zip, country on street selection
+  const { inputRef: streetInputRef } = useGooglePlacesAutocomplete({
+    onAddressSelect: (address) => {
+      setShippingInfo(prev => ({
+        ...prev,
+        street: address.street,
+        city: address.city,
+        state: address.state,
+        zipCode: address.zipCode,
+        country: address.country || 'USA'
+      }));
+    }
+  });
+
   // Fetch saved addresses if user is logged in
   const { data: savedAddresses = [], refetch: refetchAddresses } = useQuery({
     queryKey: ['addresses'],
@@ -210,7 +218,6 @@ const Checkout = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('quick') === 'true') {
-      // Auto-select default payment method if available
       if (savedPaymentMethods.length > 0) {
         const defaultMethod = savedPaymentMethods.find(pm => pm.isDefault) || savedPaymentMethods[0];
         if (defaultMethod) {
@@ -244,7 +251,6 @@ const Checkout = () => {
     }
   }, [user, isAuthenticated]);
 
-  // Handle address selection
   const handleSelectAddress = (address: Address) => {
     setSelectedAddressId(address._id || null);
     setShowNewAddressForm(false);
@@ -258,13 +264,11 @@ const Checkout = () => {
     }));
   };
 
-  // Save address if requested (called before order submission)
   const saveAddressIfNeeded = async () => {
     if (saveNewAddress && isAuthenticated && showNewAddressForm) {
       if (!shippingInfo.street || !shippingInfo.city || !shippingInfo.state || !shippingInfo.zipCode) {
-        return; // Address validation will happen in form submission
+        return;
       }
-
       try {
         await addressService.createAddress({
           street: shippingInfo.street,
@@ -276,26 +280,19 @@ const Checkout = () => {
         });
         refetchAddresses();
       } catch (error: any) {
-        // Use safe error logging
         import('@/utils/safeLogger').then(({ safeError }) => {
           safeError('Failed to save address', error);
         });
-        // Don't block order submission if address save fails
       }
     }
   };
 
-  // Function to refresh product data from API
   const refreshCartProducts = async () => {
     try {
       const updatedItems = await Promise.all(
         items.map(async (item) => {
-          // Try to get a valid product ID
           let productId = normalizeId(item.product._id);
-          
-          // If we can't normalize it, try to extract from product object
           if (!productId) {
-            // Try to find the ID in the product object itself
             const possibleIdFields = ['_id', 'id', '$oid', 'oid'];
             for (const field of possibleIdFields) {
               const value = (item.product as any)[field];
@@ -305,39 +302,26 @@ const Checkout = () => {
               }
             }
           }
-          
           if (!productId) {
-            // Use safe error logging
             import('@/utils/safeLogger').then(({ safeWarn }) => {
               safeWarn('Cannot extract product ID for cart item');
             });
-            return item; // Return original item if we can't get ID
+            return item;
           }
-          
-          // Fetch fresh product data from API
           try {
             const freshProduct = await productService.getProduct(productId);
-            return {
-              ...item,
-              product: freshProduct
-            };
+            return { ...item, product: freshProduct };
           } catch (error) {
-            // Use safe error logging (only in development)
             import('@/utils/safeLogger').then(({ safeError }) => {
               safeError('Failed to refresh product', error);
             });
-            return item; // Return original item if fetch fails
+            return item;
           }
         })
       );
-      
-      // Update cart with refreshed products
       const { setItems } = useCartStore.getState();
       setItems(updatedItems);
-      
-      // Products refreshed silently
     } catch (error) {
-      // Use safe error logging
       import('@/utils/safeLogger').then(({ safeError }) => {
         safeError('Error refreshing cart products', error);
       });
@@ -354,10 +338,7 @@ const Checkout = () => {
     mutationFn: orderService.createOrder,
     onSuccess: async (order) => {
       clearCart();
-      // Ensure order ID is a string
       const orderId = String(order._id || '');
-      
-      // Track purchase
       const purchaseItems = items.map((item: any) => ({
         item_id: normalizeId(item.product._id) || String(item.product._id),
         item_name: item.product.name,
@@ -365,17 +346,13 @@ const Checkout = () => {
         quantity: item.quantity,
       }));
       trackPurchase(orderId, total, purchaseItems);
-      
-      // Invalidate related queries
       await queryClient.invalidateQueries({ queryKey: ['orders'] });
       await queryClient.invalidateQueries({ queryKey: ['order'] });
-      
       navigate(`/orders/${orderId}?newOrder=true`);
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || 'Failed to create order';
       const errorDetails = error.response?.data?.errors;
-      
       if (errorDetails && Array.isArray(errorDetails)) {
         const detailedMessage = `${errorMessage}\n${errorDetails.map((e: any) => e.message || e).join('\n')}`;
         showToast(detailedMessage, 'error');
@@ -385,10 +362,8 @@ const Checkout = () => {
     }
   });
 
-  // Create payment intent when payment method changes to non-COD (but not PayPal)
   useEffect(() => {
     const createPaymentIntent = async () => {
-      // PayPal doesn't use Stripe payment intents - it has its own flow
       if (paymentMethod === 'paypal') {
         setShowPayPalButton(true);
         setShowPaymentForm(false);
@@ -396,7 +371,6 @@ const Checkout = () => {
         setPaymentIntentId(null);
         return;
       }
-
       if (paymentMethod !== 'cod' && !clientSecret && !isProcessingPayment) {
         setIsProcessingPayment(true);
         try {
@@ -404,7 +378,6 @@ const Checkout = () => {
             totalPrice: total,
             paymentMethod: paymentMethod
           });
-
           if (paymentIntentResponse.success && paymentIntentResponse.data?.clientSecret) {
             setClientSecret(paymentIntentResponse.data.clientSecret);
             setPaymentIntentId(paymentIntentResponse.data.paymentIntentId);
@@ -412,10 +385,9 @@ const Checkout = () => {
             setShowPayPalButton(false);
           } else {
             showToast('Failed to initialize payment. Please try again or use Cash on Delivery.', 'error');
-            setPaymentMethod('cod'); // Fallback to COD
+            setPaymentMethod('cod');
           }
         } catch (error: any) {
-          // Use safe error logging
           import('@/utils/safeLogger').then(({ safeError }) => {
             safeError('Payment intent error', error);
           });
@@ -423,12 +395,11 @@ const Checkout = () => {
             error.response?.data?.message || 'Payment initialization failed. Please use Cash on Delivery.',
             'error'
           );
-          setPaymentMethod('cod'); // Fallback to COD
+          setPaymentMethod('cod');
         } finally {
           setIsProcessingPayment(false);
         }
       } else if (paymentMethod === 'cod') {
-        // Reset payment form when switching to COD
         setShowPaymentForm(false);
         setShowPayPalButton(false);
         setClientSecret(null);
@@ -436,45 +407,34 @@ const Checkout = () => {
         setPaypalOrderId(null);
       }
     };
-
     createPaymentIntent();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentMethod]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!isAuthenticated) {
       navigate('/login?redirect=/checkout');
       return;
     }
-
-    // For online payments, payment must be completed first
     if (paymentMethod !== 'cod' && paymentMethod !== 'paypal' && !paymentIntentId) {
       showToast('Please complete the payment first.', 'error');
       return;
     }
-
-    // For PayPal, order ID must be present
     if (paymentMethod === 'paypal' && !paypalOrderId) {
       showToast('Please complete the PayPal payment first.', 'error');
       return;
     }
-
-    // For COD, proceed directly. For online payments, payment should already be completed
     if (paymentMethod === 'cod') {
       await prepareAndSubmitOrder();
     } else if (paymentMethod === 'paypal') {
-      // PayPal payment already completed
       if (paypalOrderId) {
         await prepareAndSubmitOrder(undefined, paypalOrderId);
       }
     } else {
-      // For Stripe payments, if payment is already completed, proceed
       if (paymentIntentId) {
         await prepareAndSubmitOrder(paymentIntentId);
       } else {
-        // If payment not completed, show payment form
         if (!showPaymentForm && clientSecret) {
           setShowPaymentForm(true);
         } else if (!clientSecret) {
@@ -487,20 +447,11 @@ const Checkout = () => {
   const handlePaymentSuccess = async (confirmedPaymentIntentId: string) => {
     setPaymentIntentId(confirmedPaymentIntentId);
     setShowPaymentForm(false);
-    
-    // Save payment method if requested (requires fetching payment method details from Stripe)
     if (savePaymentMethod && isAuthenticated) {
       try {
-        // Note: In a full implementation, we would fetch the payment method details from Stripe
-        // and save them. For now, we'll just show a message that it will be saved.
-        // This would require backend endpoint to retrieve payment method from payment intent
         showToast('Payment method will be saved after order completion', 'info');
-      } catch (error) {
-        // Silent fail - payment method saving is optional
-      }
+      } catch (error) {}
     }
-    
-    // Proceed with order creation
     if (pendingOrderData) {
       const updatedOrderData: CreateOrderData = {
         ...pendingOrderData,
@@ -509,7 +460,6 @@ const Checkout = () => {
       createOrderMutation.mutate(updatedOrderData);
       setPendingOrderData(null);
     } else {
-      // If no pending order data, prepare it now
       await prepareAndSubmitOrder(confirmedPaymentIntentId);
     }
   };
@@ -529,8 +479,6 @@ const Checkout = () => {
   const handlePayPalSuccess = async (orderId: string, _payerId?: string) => {
     setPaypalOrderId(orderId);
     setShowPayPalButton(false);
-    
-    // Proceed with order creation
     await prepareAndSubmitOrder(undefined, orderId);
   };
 
@@ -546,47 +494,31 @@ const Checkout = () => {
   };
 
   const prepareAndSubmitOrder = async (confirmedPaymentIntentId?: string, paypalOrderIdParam?: string) => {
-    // Save address if user requested it
     await saveAddressIfNeeded();
-    
-    // Get current items (may be refreshed)
     let currentItems = items;
-    
-    // Validate all items have product IDs
     const itemsWithoutIds = currentItems.filter((item: any) => {
       const id = normalizeId(item.product._id);
       return !id || !/^[0-9a-fA-F]{24}$/.test(id);
     });
-    
     if (itemsWithoutIds.length > 0) {
-      // Try to auto-refresh products
       showToast('Refreshing cart items...', 'info');
       await refreshCartProducts();
-      
-      // Get refreshed items
       currentItems = useCartStore.getState().items;
-      
-      // Re-check after refresh
       const stillInvalid = currentItems.filter((item: any) => {
         const id = normalizeId(item.product._id);
         return !id || !/^[0-9a-fA-F]{24}$/.test(id);
       });
-      
       if (stillInvalid.length > 0) {
         showToast('Some products still have invalid IDs. Please remove them from cart and add again.', 'error');
         return;
       }
     }
-
-    // Prepare order data
     const orderData: CreateOrderData = {
       items: currentItems.map((item: any) => {
         const productId = normalizeId(item.product._id);
-        
         if (!productId || !/^[0-9a-fA-F]{24}$/.test(productId)) {
           throw new Error(`Invalid product ID for item: ${item.product.name}. Please remove this item from cart and add it again.`);
         }
-        
         return {
           product: productId,
           name: item.product.name,
@@ -620,8 +552,6 @@ const Checkout = () => {
       totalPrice: subtotal + shipping + tax + donationAmount,
       notes: orderNotes.trim() || undefined
     };
-
-    // Show donation modal before submitting
     setPendingOrderData(orderData);
     setShowDonationModal(true);
   };
@@ -629,8 +559,6 @@ const Checkout = () => {
   const handleDonationConfirm = (amount: number) => {
     setDonationAmount(amount);
     setShowDonationModal(false);
-    
-    // Update order data with donation
     if (pendingOrderData) {
       const updatedOrderData: CreateOrderData = {
         ...pendingOrderData,
@@ -644,7 +572,6 @@ const Checkout = () => {
 
   const handleDonationSkip = () => {
     setShowDonationModal(false);
-    // Submit order without donation
     if (pendingOrderData) {
       createOrderMutation.mutate(pendingOrderData);
       setPendingOrderData(null);
@@ -800,13 +727,20 @@ const Checkout = () => {
               {/* Address Form - Show if no saved addresses, or if "Add New" clicked, or if not logged in */}
               {(showNewAddressForm || savedAddresses.length === 0 || !isAuthenticated) && (
                 <div className="space-y-4">
+                  {/* Street Address with Google Places Autocomplete */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">Street Address *</label>
+                    <label className="block text-sm font-medium mb-2">
+                      Street Address *
+                      <span className="ml-2 text-xs text-primary-600 font-normal">🔍 Start typing for autocomplete</span>
+                    </label>
                     <input
+                      ref={streetInputRef}
                       type="text"
                       required
                       value={shippingInfo.street}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, street: e.target.value })}
+                      placeholder="Start typing your address..."
+                      autoComplete="off"
                       className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     />
                   </div>
@@ -895,7 +829,7 @@ const Checkout = () => {
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-bold mb-6">Payment Method</h2>
 
-              {/* Saved Payment Methods - Only show if logged in and has saved methods */}
+              {/* Saved Payment Methods */}
               {isAuthenticated && savedPaymentMethods.length > 0 && (
                 <div className="mb-6">
                   <label className="block text-sm font-medium mb-3">Saved Payment Methods</label>
@@ -927,7 +861,7 @@ const Checkout = () => {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="font-semibold text-gray-900">
-                                {pm.type === 'credit_card' ? 'Credit/Debit Card' : 
+                                {pm.type === 'credit_card' ? 'Credit/Debit Card' :
                                  pm.type === 'paypal' ? 'PayPal' :
                                  pm.type === 'apple_pay' ? 'Apple Pay' : 'Google Pay'}
                               </span>
@@ -972,9 +906,7 @@ const Checkout = () => {
                   <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
                     paymentMethod === 'cod' ? 'bg-primary-600' : 'border-2 border-gray-400'
                   }`}>
-                    {paymentMethod === 'cod' && (
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                    )}
+                    {paymentMethod === 'cod' && <div className="w-2 h-2 bg-white rounded-full"></div>}
                   </div>
                   <div className="flex-1 text-left">
                     <span className="font-semibold text-gray-900">Cash on Delivery (COD)</span>
@@ -995,9 +927,7 @@ const Checkout = () => {
                   <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
                     paymentMethod === 'credit_card' ? 'bg-primary-600' : 'border-2 border-gray-400'
                   }`}>
-                    {paymentMethod === 'credit_card' && (
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                    )}
+                    {paymentMethod === 'credit_card' && <div className="w-2 h-2 bg-white rounded-full"></div>}
                   </div>
                   <div className="flex-1 text-left">
                     <span className="font-semibold text-gray-900">Credit/Debit Card</span>
@@ -1018,9 +948,7 @@ const Checkout = () => {
                   <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
                     paymentMethod === 'paypal' ? 'bg-primary-600' : 'border-2 border-gray-400'
                   }`}>
-                    {paymentMethod === 'paypal' && (
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                    )}
+                    {paymentMethod === 'paypal' && <div className="w-2 h-2 bg-white rounded-full"></div>}
                   </div>
                   <div className="flex-1 text-left">
                     <span className="font-semibold text-gray-900">PayPal</span>
@@ -1029,7 +957,6 @@ const Checkout = () => {
                 </button>
               </div>
 
-              {/* Save Payment Method Checkbox - Only show for non-COD, non-saved methods */}
               {isAuthenticated && !selectedSavedPaymentMethod && paymentMethod !== 'cod' && (
                 <div className="mt-4 flex items-center gap-2">
                   <input
@@ -1062,7 +989,7 @@ const Checkout = () => {
               )}
             </div>
 
-            {/* Payment Form - Show when payment method is selected and client secret is ready */}
+            {/* Stripe Payment Form */}
             {showPaymentForm && clientSecret && paymentMethod !== 'cod' && paymentMethod !== 'paypal' && (
               <StripePaymentWrapper
                 clientSecret={clientSecret}
@@ -1073,7 +1000,7 @@ const Checkout = () => {
               />
             )}
 
-            {/* PayPal Button - Show when PayPal is selected */}
+            {/* PayPal Button */}
             {showPayPalButton && paymentMethod === 'paypal' && (
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center gap-3 mb-6">
@@ -1120,7 +1047,6 @@ const Checkout = () => {
           <div>
             <div className="bg-white rounded-lg shadow p-6 sticky top-24">
               <h2 className="text-xl font-bold mb-6">Order Summary</h2>
-
               <div className="space-y-4 mb-6">
                 {items.map((item) => {
                   const price = item.variant?.price || item.product.basePrice;
@@ -1146,7 +1072,6 @@ const Checkout = () => {
                   );
                 })}
               </div>
-
               <div className="space-y-3 border-t pt-4 mb-6">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal</span>
@@ -1179,7 +1104,6 @@ const Checkout = () => {
                   <span>${total.toFixed(2)}</span>
                 </div>
               </div>
-
               <button
                 type="submit"
                 disabled={createOrderMutation.isPending || isProcessingPayment}
@@ -1199,7 +1123,7 @@ const Checkout = () => {
         onConfirm={handleDonationConfirm}
       />
 
-      {/* Toast Notification */}
+      {/* Toast */}
       {toast.isVisible && (
         <Toast
           message={toast.message}
@@ -1213,6 +1137,3 @@ const Checkout = () => {
 };
 
 export default Checkout;
-
-
-
