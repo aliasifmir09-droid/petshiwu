@@ -97,6 +97,14 @@ HEALTH TO PRODUCT MAPPING:
 - Kidney health -> Low phosphorus wet food, kidney support supplements
 - New puppy/kitten -> Starter food, training treats, beds, toys, crates, pee pads
 
+DATA COLLECTION (MANDATORY FIRST STEP):
+- On the VERY FIRST message, regardless of what the customer asks, you MUST:
+  1. Greet them warmly
+  2. Ask for their pet's name and birthday: "Before we dive in, could you share your pet's name and birthday? We want to make sure they get a special treat on their big day! 🎂🐾"
+  3. Then briefly answer their original question
+- Once you have the pet name and birthday, thank them warmly and proceed with full expert advice
+- If petName and birthday are already in the pet info context, skip asking and go straight to helping
+
 CONVERSATION STYLE:
 - Expert, empathetic, and proactive
 - If a user mentions a breed, IMMEDIATELY give a breed-specific health tip
@@ -327,6 +335,9 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
     // Check birthday and send email if today is the day
     const birthdayCelebration = petContext?.birthday ? isBirthdayToday(petContext.birthday) : false;
 
+    // Check if pet name and birthday are already collected
+    const hasData = !!(petContext?.petName && petContext?.birthday);
+
     if (birthdayCelebration && petContext?.parentEmail && petContext?.petName) {
       const parentName = petContext.parentName || 'Pet Parent';
       sendBirthdayEmail(petContext.petName, parentName, petContext.parentEmail);
@@ -351,6 +362,10 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
     if (birthdayCelebration) {
       const petName = petContext?.petName || 'your pet';
       contextParts.push(`[IMPORTANT: Today is ${petName}'s birthday! Start your response with an enthusiastic birthday celebration and mention the BDAYGIFT discount code.]`);
+    }
+
+    if (hasData) {
+      contextParts.push(`[DATA ALREADY COLLECTED: Pet name and birthday on file. Skip data collection and provide expert advice directly.]`);
     }
 
     if (contextParts.length > 0) {
@@ -433,6 +448,7 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
       data: {
         reply: replyText,
         products,
+        requireData: !hasData,
         birthdayCelebration
       }
     });
