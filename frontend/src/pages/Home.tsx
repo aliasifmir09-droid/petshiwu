@@ -5,7 +5,6 @@ import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import HeroSlideshow from '@/components/HeroSlideshow';
 import SEO from '@/components/SEO';
-import StructuredData from '@/components/StructuredData';
 import TrustBadges from '@/components/TrustBadges';
 import CategoryIcons from '@/components/CategoryIcons';
 import { ChevronRight, ChevronLeft, Star, Gift, ShieldCheck, Sparkles, HeartPulse, MessageSquare } from 'lucide-react';
@@ -125,65 +124,6 @@ const Home = () => {
     <div className="relative">
       <SEO
         description="Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, birds, and more. Quality products, fast shipping, great prices."
-      />
-      <StructuredData
-        type="website"
-        data={{}}
-      />
-      <StructuredData
-        type="localBusiness"
-        data={{
-          name: 'PetShiwu',
-          url: 'https://www.petshiwu.com',
-          logo: 'https://www.petshiwu.com/logo.png',
-          description: 'Premium Pet Food, Toys & Accessories in USA',
-          telephone: '+1-626-342-0419',
-          address: {
-            streetAddress: '37-68 74th St',
-            addressLocality: 'Jackson Heights',
-            addressRegion: 'NY',
-            postalCode: '11372',
-            addressCountry: 'US'
-          },
-          geo: {
-            latitude: 40.7489,
-            longitude: -73.8850
-          },
-          openingHoursSpecification: [
-            {
-              dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-              opens: '09:00',
-              closes: '18:00'
-            },
-            {
-              dayOfWeek: ['Saturday'],
-              opens: '10:00',
-              closes: '17:00'
-            }
-          ],
-          priceRange: '$$',
-          areaServed: 'US'
-        }}
-      />
-      <StructuredData
-        type="organization"
-        data={{
-          name: 'PetShiwu',
-          url: 'https://www.petshiwu.com',
-          logo: 'https://www.petshiwu.com/logo.png',
-          description: 'Premium Pet Food, Toys & Accessories in USA',
-          contactPoint: {
-            telephone: '+1-626-342-0419',
-            contactType: 'customer service'
-          },
-          address: {
-            streetAddress: '37-68 74th St',
-            addressLocality: 'Jackson Heights',
-            addressRegion: 'NY',
-            postalCode: '11372',
-            addressCountry: 'US'
-          }
-        }}
       />
 
       <div className="container mx-auto px-4 lg:px-8 mt-4">
