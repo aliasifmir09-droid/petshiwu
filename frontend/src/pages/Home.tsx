@@ -7,47 +7,68 @@ import HeroSlideshow from '@/components/HeroSlideshow';
 import SEO from '@/components/SEO';
 import TrustBadges from '@/components/TrustBadges';
 import CategoryIcons from '@/components/CategoryIcons';
-import { ChevronRight, ChevronLeft, Star, Gift, ShieldCheck, Sparkles, HeartPulse, MessageSquare } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Star, Gift, ShieldCheck, Sparkles, HeartPulse, MessageSquare, Crown } from 'lucide-react';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import { normalizeImageUrl, generateSrcSet, getOptimizedImageUrl } from '@/utils/imageUtils';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
-// --- ROYAL BLUE IMPROVEMENTS COMPONENTS ---
+// --- ULTRA-PREMIUM ROYAL BLUE COMPONENTS ---
 const BirthdayBanner = () => (
-  <section className="relative overflow-hidden bg-[#003399] py-16 px-4 my-12 rounded-3xl mx-4 lg:mx-auto max-w-7xl shadow-2xl transition-all duration-500 hover:shadow-blue-500/20">
-    {/* Background Decorative Gift Icon */}
-    <div className="absolute top-0 right-0 -mt-10 -mr-10 opacity-10 animate-pulse">
-      <Gift size={300} color="white" />
-    </div>
-    
-    <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
-      {/* Text Content */}
-      <div className="flex-1 text-center lg:text-left text-white">
-        <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-          Every Tail Wags for a <span className="text-blue-200 italic">Birthday Surprise!</span>
-        </h2>
-        <p className="text-xl text-blue-100 mb-8 max-w-xl">
-          Tell our AI Advisor your pet's name and birthday to unlock a <span className="font-bold text-white">FREE BIRTHDAY GIFT</span> (under $5) every year. Let's celebrate your best friend together!
-        </p>
-        <button 
-          onClick={() => window.dispatchEvent(new CustomEvent('open-ai-chat'))} 
-          className="bg-white text-[#003399] px-8 py-4 rounded-full font-bold text-lg flex items-center gap-3 mx-auto lg:mx-0 shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
-        >
-          <MessageSquare size={24} /> Chat with AI Pet Advisor
-        </button>
+  <section className="relative overflow-hidden my-16 mx-4 lg:mx-auto max-w-7xl">
+    {/* Main Container with Deep Luxury Gradient */}
+    <div className="relative rounded-[2.5rem] bg-gradient-to-br from-[#001A4D] via-[#003399] to-[#0044CC] p-1 shadow-[0_20px_50px_rgba(0,51,153,0.3)] overflow-hidden">
+      
+      {/* Decorative Background Glows */}
+      <div className="absolute -top-24 -left-24 w-96 h-96 bg-blue-400 rounded-full opacity-20 blur-[100px]"></div>
+      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-purple-500 rounded-full opacity-20 blur-[100px]"></div>
+      
+      {/* Background Decorative Gift Icon */}
+      <div className="absolute top-0 right-0 -mt-16 -mr-16 opacity-5 rotate-12">
+        <Gift size={400} color="white" />
       </div>
 
-      {/* Image Content */}
-      <div className="flex-1 relative group">
-        <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 transition-transform duration-500 group-hover:rotate-1">
-          <img 
-            src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=800" 
-            className="rounded-xl shadow-inner w-full h-64 object-cover" 
-            alt="Happy Pet Celebration" 
-          />
-          <div className="absolute -top-6 -right-6 bg-yellow-400 text-blue-900 p-4 rounded-full font-bold shadow-xl rotate-12 animate-bounce">
-            FREE TREAT!
+      <div className="relative z-10 py-16 px-8 lg:px-16 flex flex-col lg:flex-row items-center justify-between gap-16">
+        {/* Luxury Text Content */}
+        <div className="flex-1 text-center lg:text-left text-white max-w-2xl">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-blue-200 text-sm font-bold uppercase tracking-[0.2em] mb-8">
+            <Crown size={16} /> Exclusive Celebration
+          </div>
+          <h2 className="text-5xl md:text-7xl font-black mb-8 leading-[1.1] tracking-tight">
+            Every Tail Wags for a <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-white to-blue-200 italic">Birthday Surprise</span>
+          </h2>
+          <p className="text-xl md:text-2xl text-blue-100/90 mb-10 leading-relaxed font-light">
+            Tell our AI Advisor your pet's name and birthday to unlock a 
+            <span className="font-bold text-white"> FREE BIRTHDAY GIFT </span> 
+            every year. Experience the gold standard of pet care.
+          </p>
+          <button 
+            onClick={() => window.dispatchEvent(new CustomEvent('open-ai-chat'))} 
+            className="group relative bg-white text-[#003399] px-10 py-5 rounded-2xl font-black text-xl flex items-center gap-4 mx-auto lg:mx-0 shadow-[0_10px_30px_rgba(255,255,255,0.2)] hover:shadow-[0_15px_40px_rgba(255,255,255,0.4)] hover:-translate-y-1 transition-all duration-300"
+          >
+            <MessageSquare size={28} className="group-hover:rotate-12 transition-transform" /> 
+            Chat with AI Pet Advisor
+            <div className="absolute inset-0 rounded-2xl border-2 border-white opacity-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"></div>
+          </button>
+        </div>
+
+        {/* Ultra-Premium Image Content */}
+        <div className="flex-1 relative w-full lg:w-auto">
+          <div className="relative p-2 rounded-[2rem] bg-gradient-to-tr from-white/20 to-transparent backdrop-blur-sm border border-white/10 shadow-2xl overflow-hidden group">
+            <img 
+              src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=1000" 
+              className="rounded-[1.8rem] w-full h-[450px] object-cover transition-transform duration-700 group-hover:scale-110" 
+              alt="Luxury Pet Celebration" 
+            />
+            {/* Glass Overlay on Image */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#001A4D]/60 via-transparent to-transparent opacity-60"></div>
+            
+            {/* Floating Luxury Badge */}
+            <div className="absolute -top-6 -right-6 bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-600 text-blue-900 px-8 py-8 rounded-full font-black shadow-[0_10px_30px_rgba(234,179,8,0.4)] rotate-12 animate-bounce flex flex-col items-center justify-center">
+              <span className="text-xs uppercase tracking-tighter">Complimentary</span>
+              <span className="text-2xl">FREE</span>
+              <span className="text-sm">TREAT</span>
+            </div>
           </div>
         </div>
       </div>
@@ -56,48 +77,56 @@ const BirthdayBanner = () => (
 );
 
 const SpecialistRow = () => (
-  <section className="py-12 bg-white border-y border-gray-100 my-12">
-    <div className="max-w-7xl mx-auto px-4 text-center">
-      <div className="flex justify-center mb-2">
-        <div className="h-1 w-12 bg-[#003399] rounded-full"></div>
+  <section className="py-24 bg-gradient-to-b from-white to-blue-50/50 border-y border-gray-100 my-16 relative overflow-hidden">
+    {/* Decorative Elements */}
+    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-[0.03] pointer-events-none">
+      <div className="grid grid-cols-6 h-full w-full">
+        {[...Array(24)].map((_, i) => <div key={i} className="border-l border-t border-[#003399]"></div>)}
       </div>
-      <h3 className="text-2xl font-bold text-gray-900 uppercase tracking-widest mb-2">Expert Specialist</h3>
-      <p className="text-gray-500 mb-10">Thoughtfully chosen. Expertly recommended. Perfect for every pet.</p>
+    </div>
+
+    <div className="max-w-7xl mx-auto px-4 text-center relative z-10">
+      <div className="flex flex-col items-center mb-16">
+        <div className="w-20 h-1 bg-gradient-to-r from-transparent via-[#003399] to-transparent mb-6"></div>
+        <h3 className="text-3xl md:text-4xl font-black text-gray-900 uppercase tracking-[0.3em] mb-4">Expert Specialist</h3>
+        <p className="text-gray-500 text-lg max-w-2xl font-light italic">"Thoughtfully chosen. Expertly recommended. Perfect for every pet."</p>
+      </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
         {[
           { 
-            icon: <ShieldCheck className="w-8 h-8 text-[#003399]" />, 
+            icon: <ShieldCheck className="w-10 h-10 text-white" />, 
             title: "Specialist-Curated", 
-            desc: "Handpicked by pet care experts for unmatched quality and safety." 
+            desc: "Handpicked by elite pet care experts for unmatched quality and safety." 
           },
           { 
-            icon: <Sparkles className="w-8 h-8 text-[#003399]" />, 
+            icon: <Sparkles className="w-10 h-10 text-white" />, 
             title: "AI-Powered Recs", 
-            desc: "Smart technology that understands your pet's unique needs." 
+            desc: "Advanced neural networks that understand your pet's unique biological needs." 
           },
           { 
-            icon: <HeartPulse className="w-8 h-8 text-[#003399]" />, 
+            icon: <HeartPulse className="w-10 h-10 text-white" />, 
             title: "Life-Stage Nutrition", 
-            desc: "Tailored nutrition for every stage of your pet's life journey." 
+            desc: "Precision nutrition protocols tailored for every stage of your pet's life journey." 
           }
         ].map((f, i) => (
           <div 
             key={i} 
-            className="flex flex-col items-center p-8 rounded-2xl bg-blue-50/50 border border-transparent hover:border-blue-100 hover:-translate-y-2 hover:bg-blue-50 transition-all duration-300 group"
+            className="relative group p-10 rounded-[2.5rem] bg-white border border-gray-100 shadow-[0_10px_40px_rgba(0,0,0,0.03)] hover:shadow-[0_30px_60px_rgba(0,51,153,0.1)] transition-all duration-500 hover:-translate-y-3"
           >
-            <div className="bg-white p-4 rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform duration-300">
+            <div className="bg-gradient-to-br from-[#003399] to-[#0066FF] w-20 h-20 rounded-2xl flex items-center justify-center mb-8 mx-auto shadow-lg group-hover:rotate-[10deg] transition-transform duration-500">
               {f.icon}
             </div>
-            <h4 className="text-lg font-bold text-gray-900 mb-2">{f.title}</h4>
-            <p className="text-gray-600 text-sm leading-relaxed">{f.desc}</p>
+            <h4 className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">{f.title}</h4>
+            <p className="text-gray-500 leading-relaxed font-light">{f.desc}</p>
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-1 bg-[#003399] group-hover:w-1/2 transition-all duration-500 rounded-full"></div>
           </div>
         ))}
       </div>
     </div>
   </section>
 );
-// --- END OF ROYAL BLUE IMPROVEMENTS ---
+// --- END OF ULTRA-PREMIUM COMPONENTS ---
 
 const Home = () => {
   const navigate = useNavigate();
@@ -230,12 +259,12 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ROYAL BLUE BIRTHDAY BANNER */}
+      {/* ULTRA-PREMIUM BIRTHDAY BANNER */}
       <BirthdayBanner />
 
       <CategoryIcons />
 
-      {/* ROYAL BLUE SPECIALIST ROW */}
+      {/* ULTRA-PREMIUM SPECIALIST ROW */}
       <SpecialistRow />
 
       <section className="py-16 bg-gradient-to-b from-white via-blue-50 to-white relative overflow-hidden text-center">
