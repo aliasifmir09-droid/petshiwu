@@ -15,12 +15,21 @@ import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 // --- ROYAL BLUE IMPROVEMENTS COMPONENTS ---
 const BirthdayBanner = () => (
-  <section className="relative overflow-hidden bg-gradient-to-r from-[#003399] to-[#0055CC] py-16 px-4 my-12 rounded-3xl mx-4 lg:mx-auto max-w-7xl shadow-2xl transition-all duration-500 hover:shadow-blue-500/20">
-    <div className="absolute top-0 right-0 -mt-10 -mr-10 opacity-10 animate-pulse"><Gift size={300} color="white" /></div>
+  <section className="relative overflow-hidden bg-[#003399] py-16 px-4 my-12 rounded-3xl mx-4 lg:mx-auto max-w-7xl shadow-2xl transition-all duration-500 hover:shadow-blue-500/20">
+    {/* Background Decorative Gift Icon */}
+    <div className="absolute top-0 right-0 -mt-10 -mr-10 opacity-10 animate-pulse">
+      <Gift size={300} color="white" />
+    </div>
+    
     <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
-      <div className="flex-1 text-center lg:text-left text-white animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <h2 className="text-4xl md:text-5xl font-bold mb-6">Every Tail Wags for a <span className="text-blue-200 italic">Birthday Surprise!</span></h2>
-        <p className="text-xl text-blue-100 mb-8">Tell our AI Advisor your pet's name and birthday to unlock a <span className="font-bold text-white">FREE BIRTHDAY GIFT</span> (under $5) every year. Let's celebrate your best friend together!</p>
+      {/* Text Content */}
+      <div className="flex-1 text-center lg:text-left text-white">
+        <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+          Every Tail Wags for a <span className="text-blue-200 italic">Birthday Surprise!</span>
+        </h2>
+        <p className="text-xl text-blue-100 mb-8 max-w-xl">
+          Tell our AI Advisor your pet's name and birthday to unlock a <span className="font-bold text-white">FREE BIRTHDAY GIFT</span> (under $5) every year. Let's celebrate your best friend together!
+        </p>
         <button 
           onClick={() => window.dispatchEvent(new CustomEvent('open-ai-chat'))} 
           className="bg-white text-[#003399] px-8 py-4 rounded-full font-bold text-lg flex items-center gap-3 mx-auto lg:mx-0 shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
@@ -28,10 +37,18 @@ const BirthdayBanner = () => (
           <MessageSquare size={24} /> Chat with AI Pet Advisor
         </button>
       </div>
+
+      {/* Image Content */}
       <div className="flex-1 relative group">
         <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 transition-transform duration-500 group-hover:rotate-1">
-          <img src="https://images.unsplash.com/photo-1513284499445-5a44f37be06a?auto=format&fit=crop&q=80&w=800" className="rounded-xl shadow-inner w-full h-64 object-cover" alt="Happy Pet" />
-          <div className="absolute -top-6 -right-6 bg-yellow-400 text-blue-900 p-4 rounded-full font-bold shadow-xl rotate-12 animate-bounce">FREE TREAT!</div>
+          <img 
+            src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=800" 
+            className="rounded-xl shadow-inner w-full h-64 object-cover" 
+            alt="Happy Pet Celebration" 
+          />
+          <div className="absolute -top-6 -right-6 bg-yellow-400 text-blue-900 p-4 rounded-full font-bold shadow-xl rotate-12 animate-bounce">
+            FREE TREAT!
+          </div>
         </div>
       </div>
     </div>
@@ -41,25 +58,46 @@ const BirthdayBanner = () => (
 const SpecialistRow = () => (
   <section className="py-12 bg-white border-y border-gray-100 my-12">
     <div className="max-w-7xl mx-auto px-4 text-center">
-      <div className="flex justify-center mb-2"><div className="h-1 w-12 bg-[#003399] rounded-full"></div></div>
+      <div className="flex justify-center mb-2">
+        <div className="h-1 w-12 bg-[#003399] rounded-full"></div>
+      </div>
       <h3 className="text-2xl font-bold text-gray-900 uppercase tracking-widest mb-2">Expert Specialist</h3>
       <p className="text-gray-500 mb-10">Thoughtfully chosen. Expertly recommended. Perfect for every pet.</p>
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {[
-          { icon: <ShieldCheck className="w-8 h-8 text-[#003399]" />, title: "Specialist-Curated", desc: "Handpicked by pet care experts for unmatched quality." },
-          { icon: <Sparkles className="w-8 h-8 text-[#003399]" />, title: "AI-Powered Recs", desc: "Smart technology that understands your pet's unique needs." },
-          { icon: <HeartPulse className="w-8 h-8 text-[#003399]" />, title: "Life-Stage Nutrition", desc: "Tailored nutrition for every stage of your pet's life." }
+          { 
+            icon: <ShieldCheck className="w-8 h-8 text-[#003399]" />, 
+            title: "Specialist-Curated", 
+            desc: "Handpicked by pet care experts for unmatched quality and safety." 
+          },
+          { 
+            icon: <Sparkles className="w-8 h-8 text-[#003399]" />, 
+            title: "AI-Powered Recs", 
+            desc: "Smart technology that understands your pet's unique needs." 
+          },
+          { 
+            icon: <HeartPulse className="w-8 h-8 text-[#003399]" />, 
+            title: "Life-Stage Nutrition", 
+            desc: "Tailored nutrition for every stage of your pet's life journey." 
+          }
         ].map((f, i) => (
-          <div key={i} className="flex flex-col items-center p-6 rounded-2xl bg-blue-50/50 border border-transparent hover:border-blue-100 hover:-translate-y-2 hover:bg-blue-50 transition-all duration-300 group">
-            <div className="bg-white p-4 rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform duration-300">{f.icon}</div>
-            <h4 className="text-lg font-bold mb-2">{f.title}</h4>
-            <p className="text-gray-600 text-sm">{f.desc}</p>
+          <div 
+            key={i} 
+            className="flex flex-col items-center p-8 rounded-2xl bg-blue-50/50 border border-transparent hover:border-blue-100 hover:-translate-y-2 hover:bg-blue-50 transition-all duration-300 group"
+          >
+            <div className="bg-white p-4 rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform duration-300">
+              {f.icon}
+            </div>
+            <h4 className="text-lg font-bold text-gray-900 mb-2">{f.title}</h4>
+            <p className="text-gray-600 text-sm leading-relaxed">{f.desc}</p>
           </div>
         ))}
       </div>
     </div>
   </section>
 );
+// --- END OF ROYAL BLUE IMPROVEMENTS ---
 
 const Home = () => {
   const navigate = useNavigate();
