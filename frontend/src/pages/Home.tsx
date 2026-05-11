@@ -14,7 +14,7 @@ import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import { normalizeImageUrl, generateSrcSet, getOptimizedImageUrl } from '@/utils/imageUtils';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
-// --- ROYAL BLUE IMPROVEMENTS COMPONENTS (TAILWIND MOTION VERSION) ---
+// --- ROYAL BLUE IMPROVEMENTS COMPONENTS ---
 const BirthdayBanner = () => (
   <section className="relative overflow-hidden bg-gradient-to-r from-[#003399] to-[#0055CC] py-16 px-4 my-12 rounded-3xl mx-4 lg:mx-auto max-w-7xl shadow-2xl transition-all duration-500 hover:shadow-blue-500/20">
     <div className="absolute top-0 right-0 -mt-10 -mr-10 opacity-10 animate-pulse"><Gift size={300} color="white" /></div>
@@ -29,7 +29,7 @@ const BirthdayBanner = () => (
           <MessageSquare size={24} /> Chat with AI Pet Advisor
         </button>
       </div>
-      <div className="flex-1 relative group animate-in zoom-in duration-1000">
+      <div className="flex-1 relative group">
         <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 transition-transform duration-500 group-hover:rotate-1">
           <img src="https://images.unsplash.com/photo-1513284499445-5a44f37be06a?auto=format&fit=crop&q=80&w=800" className="rounded-xl shadow-inner w-full h-64 object-cover" alt="Happy Pet" />
           <div className="absolute -top-6 -right-6 bg-yellow-400 text-blue-900 p-4 rounded-full font-bold shadow-xl rotate-12 animate-bounce">FREE TREAT!</div>
@@ -61,7 +61,6 @@ const SpecialistRow = () => (
     </div>
   </section>
 );
-// --- END OF ROYAL BLUE IMPROVEMENTS ---
 
 const Home = () => {
   const navigate = useNavigate();
@@ -124,14 +123,68 @@ const Home = () => {
 
   return (
     <div className="relative">
-      <SEO description="Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, birds, and more." />
-      <StructuredData type="website" data={{}} />
-      <StructuredData type="localBusiness" data={{
-        name: 'PetShiwu',
-        url: 'https://www.petshiwu.com',
-        logo: 'https://www.petshiwu.com/logo.png',
-        telephone: '+1-626-342-0419'
-      }} />
+      <SEO
+        description="Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, birds, and more. Quality products, fast shipping, great prices."
+      />
+      <StructuredData
+        type="website"
+        data={{}}
+      />
+      <StructuredData
+        type="localBusiness"
+        data={{
+          name: 'PetShiwu',
+          url: 'https://www.petshiwu.com',
+          logo: 'https://www.petshiwu.com/logo.png',
+          description: 'Premium Pet Food, Toys & Accessories in USA',
+          telephone: '+1-626-342-0419',
+          address: {
+            streetAddress: '37-68 74th St',
+            addressLocality: 'Jackson Heights',
+            addressRegion: 'NY',
+            postalCode: '11372',
+            addressCountry: 'US'
+          },
+          geo: {
+            latitude: 40.7489,
+            longitude: -73.8850
+          },
+          openingHoursSpecification: [
+            {
+              dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+              opens: '09:00',
+              closes: '18:00'
+            },
+            {
+              dayOfWeek: ['Saturday'],
+              opens: '10:00',
+              closes: '17:00'
+            }
+          ],
+          priceRange: '$$',
+          areaServed: 'US'
+        }}
+      />
+      <StructuredData
+        type="organization"
+        data={{
+          name: 'PetShiwu',
+          url: 'https://www.petshiwu.com',
+          logo: 'https://www.petshiwu.com/logo.png',
+          description: 'Premium Pet Food, Toys & Accessories in USA',
+          contactPoint: {
+            telephone: '+1-626-342-0419',
+            contactType: 'customer service'
+          },
+          address: {
+            streetAddress: '37-68 74th St',
+            addressLocality: 'Jackson Heights',
+            addressRegion: 'NY',
+            postalCode: '11372',
+            addressCountry: 'US'
+          }
+        }}
+      />
 
       <div className="container mx-auto px-4 lg:px-8 mt-4">
         <HeroSlideshow />
@@ -207,13 +260,13 @@ const Home = () => {
       {/* ROYAL BLUE SPECIALIST ROW */}
       <SpecialistRow />
 
-      <section className="py-16 bg-gradient-to-b from-white via-blue-50 to-white relative overflow-hidden">
-        <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center mb-12">
+      <section className="py-16 bg-gradient-to-b from-white via-blue-50 to-white relative overflow-hidden text-center">
+        <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-2 rounded-full font-bold text-sm mb-4 shadow-lg"><Star size={16} className="fill-white" /><span>Featured Products</span><Star size={16} className="fill-white" /></div>
           <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ background: 'linear-gradient(to right, #2563eb, #9333ea, #db2777)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', color: '#9333ea' }}>Trending Products</h2>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">Trusted by pet parents nationwide - premium quality products</p>
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-8">Trusted by pet parents nationwide - premium quality products</p>
           {isLoading ? <div className="py-12"><LoadingSpinner size="lg" /></div> : (
-            <div className="flex overflow-x-auto gap-4 md:gap-5 pb-4 scrollbar-hide mt-8">
+            <div className="flex overflow-x-auto gap-4 md:gap-5 pb-4 scrollbar-hide">
               {filteredFeaturedProducts.map((product, index) => (
                 <div key={product._id} className="flex-shrink-0 w-56 md:w-64"><ProductCard product={product} hideCartButton={true} index={index} /></div>
               ))}
