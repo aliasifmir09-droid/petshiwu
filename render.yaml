@@ -31,8 +31,7 @@ services:
     # All routes will serve index.html, allowing React Router to handle routing
     envVars:
       - key: VITE_API_URL
-        # Update with actual API URL after backend deploy if different
-        value: https://pet-shop-api.onrender.com/api
+        value: https://pet-shop-backend-totp.onrender.com/api
 
   - type: web
     name: pet-shop-admin
@@ -43,5 +42,4 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        # Update with actual API URL after backend deploy if different
-        value: https://pet-shop-api.onrender.com/api
+        value: https://pet-shop-backend-totp.onrender.com/api
