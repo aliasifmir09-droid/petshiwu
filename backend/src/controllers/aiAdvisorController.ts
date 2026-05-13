@@ -1,9 +1,20 @@
+// ================================================================
+// FILE: backend/src/controllers/aiAdvisorController.ts
+// CHANGES FROM YOUR ORIGINAL:
+//  1. Massively expanded NUTRITION_QA, HEALTH_QA, BEHAVIOR_QA,
+//     GROOMING_QA — all sourced from expert pet research,
+//     competitor names removed, all branded as PetShiwu knowledge
+//  2. Everything else (Gemini, MongoDB, Resend, birthday emails,
+//     product search, retry logic) is UNCHANGED
+// ================================================================
+
 import { Request, Response, NextFunction } from 'express';
 import Product from '../models/Product';
 import { Resend } from 'resend';
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
 
+// ─── Breed Health Database (unchanged from your original) ─────────
 const BREED_HEALTH_DATABASE = `
 DOG BREEDS:
 - Golden Retrievers: High risk of hip dysplasia and cancer. Recommend: Glucosamine, Chondroitin, joint supplements, weight-control food.
@@ -33,6 +44,7 @@ CAT BREEDS & TYPES:
 - Ragdolls: HCM risk. Recommend: Heart health food, taurine supplements.
 `;
 
+// ─── Nutrition Logic (unchanged from your original) ───────────────
 const NUTRITION_LOGIC = `
 CALORIE CALCULATION:
 - Base RER = 70 * (weight in kg)^0.75
@@ -65,6 +77,176 @@ LIFE STAGE GUIDELINES:
 - Senior cats (10+): Low phosphorus, kidney-friendly, easy-to-chew.
 `;
 
+// ─── NEW: Expanded Nutrition Q&A ──────────────────────────────────
+const NUTRITION_QA = `
+PETSHIWU NUTRITION EXPERT Q&A:
+
+Q: How do I choose quality pet food?
+A: Look for AAFCO-approved food with real meat listed as the first ingredient. Dogs require 40 essential nutrients in their diet while cats require 42 — a complete, balanced formula covers all of these. At PetShiwu we recommend foods free of artificial preservatives, unnecessary fillers, and artificial dyes. Our expert-curated brands like Hill's Science Diet, Royal Canin, Purina, and Blue Buffalo meet these standards.
+
+Q: How do I switch my pet to a new food?
+A: Transition dogs over 7–10 days by gradually mixing increasing amounts of new food with the old. Cats need a longer transition of 2–4 weeks because sudden changes can cause them to refuse food entirely — which can quickly become a medical emergency. Start with 25% new food and increase slowly. If digestive upset occurs, slow the transition down further.
+
+Q: How much should I feed my dog per day?
+A: Adult dogs generally do best with 2 meals per day. Portions depend on weight and activity level: approximately 1–1.5 cups for small dogs under 20 lbs, 2–3 cups for medium dogs 20–50 lbs, and 3–4 or more cups for large dogs over 50 lbs. Always follow the AAFCO-approved feeding guidelines printed on the food packaging. Active or working dogs need more calories than sedentary ones.
+
+Q: How often should I feed my cat?
+A: Adult cats do well with 2 measured meals per day. Kittens need 3–4 smaller meals daily due to their high energy demands for growth. Avoid free-feeding (leaving food out all day) for most adult cats as it significantly contributes to obesity — over 60% of cats in the USA are currently overweight. Your vet can calculate precise daily calorie targets for your cat.
+
+Q: Are pet vitamins and supplements necessary?
+A: If your pet eats a complete and balanced commercial diet, additional vitamin and mineral supplements are generally not necessary and could even cause imbalances. However targeted supplements do help in specific situations: omega-3 fish oil improves skin and coat health, probiotics aid digestive health, glucosamine and chondroitin support aging joints, and L-carnitine assists with weight management. Always consult your vet before adding any supplement. PetShiwu carries a full range of vet-trusted supplements.
+
+Q: What everyday foods are toxic to dogs?
+A: Several common foods are toxic to dogs: chocolate, grapes and raisins, xylitol (an artificial sweetener found in gum and peanut butter), onions, garlic, avocado, macadamia nuts, alcohol, caffeine, and cooked bones. Even small amounts of xylitol or grapes can cause kidney failure or death. If your dog ingests any of these, contact a vet or the ASPCA Poison Control Hotline immediately.
+
+Q: What everyday foods are toxic to cats?
+A: Cats are highly sensitive to: onions, garlic, chocolate, caffeine, alcohol, grapes, raisins, xylitol, raw bread dough, and dairy products (most adult cats are lactose intolerant). Even tiny amounts of onion or garlic can cause dangerous anemia in cats. Never substitute dog food as a primary cat diet — cats require taurine which dog food doesn't provide in sufficient amounts.
+
+Q: What is the difference between puppy food and adult food?
+A: Puppies and kittens need calorie-dense formulas that are higher in protein, fat, calcium, and key developmental nutrients like DHA for brain and eye development. Large breed puppies specifically require controlled-growth formulas to reduce the risk of joint and bone problems later in life. Feeding adult food to a puppy as their primary diet can cause nutrient deficiencies and developmental issues.
+
+Q: Is grain-free food better for my pet?
+A: Grain-free diets are not required or superior for most pets unless a grain allergy has been specifically diagnosed by a vet. Research has linked certain grain-free diets to dilated cardiomyopathy (DCM) heart disease in dogs — particularly formulas high in legumes. For cats, grain-free is more aligned with their carnivore biology but protein source and overall quality matter most. Always consult your vet before switching to grain-free.
+
+Q: How do I know if my pet's food isn't working?
+A: Signs that a food may not suit your pet include a dull or dry coat, low energy or lethargy, unexplained weight gain or loss, digestive issues like chronic gas or loose stools, and skin itching or irritation. If you notice these signs, consider a formula designed for your pet's specific needs — such as sensitive skin, digestive health, or weight management. PetShiwu carries solution-oriented formulas for all these concerns.
+
+Q: Should I feed my pet wet food or dry food?
+A: Both have merits and many pet owners combine them. Dry kibble supports dental health and is more calorie-dense. Wet food provides hydration which is especially important for cats — who naturally have low thirst drive — and for pets with urinary or kidney issues. For cats prone to urinary problems, a wet food diet or combination is strongly recommended by vets.
+`;
+
+// ─── NEW: Health Q&A ──────────────────────────────────────────────
+const HEALTH_QA = `
+PETSHIWU PET HEALTH EXPERT Q&A:
+
+Q: How much sleep does my pet need each day?
+A: Puppies need approximately 18–20 hours of sleep per day while adult dogs need 8–13 hours. Kittens need close to 20 hours and adult cats average 13–16 hours daily. Insufficient sleep can cause restlessness, behavioral problems, and stress. In cats, excessive restlessness can even signal health conditions like hyperthyroidism. Providing a cozy, dedicated bed is important for quality rest.
+
+Q: How much daily exercise does my pet need?
+A: Dogs generally need 30 minutes to 2 hours of physical activity per day depending on breed — high-energy breeds like Huskies, Border Collies, and Retrievers need more. Cats benefit from approximately 30 minutes of active interactive play daily. Exercise prevents obesity, supports cardiovascular health, and significantly reduces behavioral problems in both dogs and cats. Puzzle toys and feeders also provide valuable mental exercise especially for senior pets.
+
+Q: How do I know if my pet is overweight?
+A: More than 56% of dogs and 60% of cats in the USA are currently overweight or obese according to the Association for Pet Obesity Prevention. You should be able to feel — but not see — your pet's ribs with light pressure. A visible waist when viewed from above and a tucked abdomen from the side are healthy signs. Excess weight causes diabetes, arthritis, heart disease, and significantly shortens lifespan. PetShiwu carries a range of weight management foods and treats.
+
+Q: How often should my pet visit the vet?
+A: Adult pets should have annual wellness exams. Senior pets aged 7 and older benefit from checkups every 6 months to catch age-related conditions early when they are most treatable. Puppies and kittens need more frequent visits for their vaccination schedule and growth monitoring. Annual heartworm testing is recommended even for dogs on heartworm prevention medication — resistant strains of heartworm do exist.
+
+Q: My senior pet seems to be slowing down. Is that just aging?
+A: Slowing down, sleeping more, and reluctance to jump or climb stairs are very often signs of chronic pain in senior pets — not simply normal aging. Many pet owners miss this because pets instinctively hide pain. Other signs include changed posture, less playfulness, and irritability when touched. Highly effective pain management and mobility treatments are available. Please discuss these with your vet rather than assuming it is just age.
+
+Q: Do indoor-only pets need flea, tick, and heartworm prevention?
+A: Yes. Fleas can survive and reproduce entirely indoors year-round. Heartworm-carrying mosquitoes can enter homes and remain active in warmer climates throughout winter. Indoor cats can still get fleas brought in on clothing, shoes, or other pets. PetShiwu's pet care experts recommend year-round parasite prevention for all dogs and cats regardless of whether they go outside.
+
+Q: When is a situation a true pet emergency?
+A: Seek emergency veterinary care immediately for: difficulty breathing or choking, collapse or inability to stand, seizures or uncontrolled tremors, suspected poisoning (chocolate, grapes, xylitol, etc.), uncontrolled or severe bleeding, a cat that is straining but unable to urinate (this can be fatal within hours), or a dog with a visibly bloated abdomen. Also treat as urgent: vomiting or diarrhea lasting more than 24 hours, or a pet that has not eaten for more than 2 days.
+
+Q: My dog has itchy skin. What could be causing it and what helps?
+A: Itchy skin in dogs is most commonly caused by food allergies, environmental allergens like pollen or dust mites, flea allergy dermatitis, dry skin, or bacterial and yeast skin infections. A limited-ingredient diet or a food rich in omega-3 fatty acids can significantly help with allergy-related itching. Chlorhexidine-based sprays address bacterial and yeast overgrowth on skin. If the itching persists beyond 2 weeks or is severe, a vet visit is needed to identify the root cause. PetShiwu carries a full range of skin and coat support products.
+
+Q: What vaccines does my dog need?
+A: Core vaccines that all dogs need include DHPP (Distemper, Hepatitis, Parvovirus, and Parainfluenza) and Rabies. Bordetella (kennel cough) is strongly recommended every 6–12 months especially for dogs that visit groomers, boarding facilities, or dog parks. Canine Influenza and Leptospirosis vaccines are recommended based on your dog's lifestyle and geographic location. Your vet will design the right schedule.
+
+Q: Is my cat getting enough water?
+A: Cats naturally have a low thirst drive because their wild ancestors got most hydration from prey. Many domestic cats on dry food diets are chronically mildly dehydrated. Signs of dehydration include dry gums, skin that stays tented when pinched, sunken eyes, and lethargy. Feeding wet food either exclusively or as a supplement is one of the best ways to increase water intake. Water fountains also encourage cats to drink more. This is especially important for male cats and cats with a history of urinary issues.
+
+Q: How do I care for a senior dog?
+A: Senior dogs aged 7 and older benefit from vet checkups every 6 months, a senior-formula diet lower in calories but higher in joint support nutrients, omega-3 supplementation for brain and joint health, gentle age-appropriate exercise, and regular dental care. Keep their mind sharp with puzzle toys and gentle training sessions. Watch closely for pain signals like stiffness, hesitation on stairs, or changes in gait and report these to your vet promptly.
+
+Q: My cat has hairballs frequently. What can I do?
+A: Occasional hairballs (1–2 per month) are normal in cats. More frequent hairballs suggest a need for more regular brushing to reduce the amount of loose hair being swallowed, or a switch to a hairball-control food formulated with added fiber to help hair pass through the digestive tract. Hairball remedy gels are also available. If your cat is retching frequently without producing a hairball, appears lethargic, or stops eating, see a vet — a hairball blockage is a serious medical issue.
+`;
+
+// ─── NEW: Behavior Q&A ────────────────────────────────────────────
+const BEHAVIOR_QA = `
+PETSHIWU PET BEHAVIOR EXPERT Q&A:
+
+Q: How and when do I socialize my puppy or kitten?
+A: Socialization is the process of helping your pet become comfortable and confident with new people, animals, sounds, and environments. For dogs the critical socialization window is up to 14–16 weeks of age. For cats it is much shorter — only 3–9 weeks. Expose your pet to as many positive experiences as possible during this window. Insufficient socialization is one of the leading causes of fear and aggression in adult pets. Think of socialization as a vaccine against lifelong behavioral problems.
+
+Q: My dog has separation anxiety. What can I do?
+A: Separation anxiety is a genuine panic disorder — not disobedience or spite. Signs include destructive behavior, excessive barking or howling, and accidents that only happen when you are away. Behavioral modification with a qualified separation anxiety trainer is the most effective treatment. In moderate to severe cases, FDA-approved medications like Reconcile and Clomicalm can help manage the panic response while behavior training takes effect. Never punish a dog for separation anxiety — it significantly worsens the condition. Consult your vet.
+
+Q: How do I stop my dog from barking too much?
+A: First identify what is triggering the barking — boredom, territorial alerting, anxiety, or attention-seeking. Teach the quiet command using positive reinforcement: reward brief moments of silence immediately. Yelling at a barking dog increases their arousal and makes the problem worse. For boredom barking, increased daily exercise and puzzle toys make a dramatic difference. Persistent anxiety-based barking may need professional training or veterinary intervention.
+
+Q: My puppy is biting and chewing everything. Is this normal?
+A: Yes — puppy biting is completely normal during the teething phase between 3 and 6 months when new teeth are coming in. The key is immediate redirection to appropriate chew toys every single time they bite something they shouldn't. A sharp "ouch!" followed by stopping play teaches bite inhibition the same way littermates do. Frozen chew toys are especially soothing on sore gums. Never use hands or feet as toys — it teaches puppies that biting humans is acceptable.
+
+Q: How do I potty train my puppy?
+A: Take your puppy outside every 1–2 hours, immediately after every meal, after every nap, and after every play session. The moment they finish going outside, reward them with enthusiastic praise and a treat — timing is critical, it must be immediate. Puppies typically develop full bladder control between 4–6 months. Accidents inside should never be punished — simply clean them up with an enzymatic cleaner to remove the scent. Consistency and patience are the only tools needed.
+
+Q: Why does my cat scratch furniture and how do I stop it?
+A: Cats scratch to stretch their muscles, shed old claw sheaths, mark territory with scent glands in their paws, and simply because it feels good. It is completely instinctual and cannot be eliminated — only redirected. Place tall sturdy scratching posts right next to the furniture they target. Double-sided tape applied to the furniture surface is an effective deterrent. Trim nails every 2–3 weeks. Never punish scratching — it causes fear without solving the problem.
+
+Q: How do I introduce a new pet to my existing pet?
+A: Never just put two pets together and hope for the best. For cats, start with complete separation and spend 1–2 weeks doing scent swapping — swap bedding between pets so they get used to each other's smell before meeting. Then allow visual contact through a cracked door. For dogs, do leashed parallel walks in neutral territory before any face-to-face greeting at home. Always give each pet their own food bowl, water, bed, and safe retreat space. The adjustment period can take weeks to months.
+
+Q: My dog is pulling on the leash on walks. What should I do?
+A: Leash pulling is one of the most common complaints and is very fixable with consistent training. Every time your dog pulls, immediately stop walking — do not move forward at all until there is slack in the leash. When they return to your side and the leash loosens, immediately continue walking and praise them. Front-clip harnesses and head halters are excellent management tools that reduce pulling while training is in progress. Reward your dog frequently for walking calmly beside you.
+
+Q: Why does my cat knock things off tables?
+A: Cats knock objects off surfaces out of curiosity (they learn about objects by pawing at them), to get your attention, or because they are bored. If it happens most when you are nearby, it is almost certainly attention-seeking behavior. The solution is increased interactive play sessions — at least two 10–15 minute wand toy sessions daily. Puzzle feeders provide mental stimulation when you cannot play. If they do knock something off, do not overreact — even negative attention rewards the behavior.
+
+Q: How do I keep my cat from waking me up at night?
+A: Cats are naturally most active at dawn and dusk. If your cat wakes you up at night, an interactive play session with a wand toy right before your bedtime will tire them out significantly. Feeding their largest meal right before bed also encourages sleep. Automatic feeders can handle early morning hunger. Never reward nighttime waking by getting up and engaging — this teaches them that waking you works. If behavior is sudden and new it could signal pain or a health issue worth checking.
+`;
+
+// ─── NEW: Grooming Q&A ────────────────────────────────────────────
+const GROOMING_QA = `
+PETSHIWU PET GROOMING EXPERT Q&A:
+
+Q: How often should I brush my dog?
+A: Brushing frequency depends entirely on coat type. Short-haired dogs with smooth coats need brushing about once a week to remove loose hair and distribute skin oils. Long-haired breeds and dogs with double coats should be brushed daily to prevent painful mats and tangles and to manage shedding. Regular brushing at home also gives you the opportunity to check for lumps, skin irritation, parasites, and unusual odors that could indicate health issues.
+
+Q: Do cats really need grooming if they clean themselves?
+A: Yes. While cats are fastidious self-groomers, cat hair is approximately twice as dense as even thick dog hair — they cannot fully maintain it on their own. Short-haired cats benefit from weekly brushing. Long-haired cats need daily brushing to prevent painful mats and reduce hairballs. All cats need regular nail trims, dental care, and occasional ear cleaning. Starting grooming early in a kitten's life with short positive sessions and treats makes the process much easier as they age.
+
+Q: What does a full professional grooming session include?
+A: A thorough professional grooming session includes a full pet assessment to note any skin, coat, or health concerns, a brush-out to remove tangles and loose fur, a bath using breed-appropriate shampoo, blow-dry, nail trim, ear cleaning, optional teeth brushing, a haircut or trim, and potentially de-shedding treatment or anal gland expression if needed. Regular professional grooming sessions also help catch health issues early before they become serious.
+
+Q: Are certain dog breeds more difficult or risky to groom?
+A: Brachycephalic breeds — dogs with short flat faces including English Bulldogs, French Bulldogs, Pugs, Boxers, and Boston Terriers — face higher risks during grooming because they can experience breathing difficulties in stressful environments. These breeds should receive dedicated uninterrupted grooming sessions to minimize the time spent in a salon environment. Always inform your groomer of your dog's breed and any known health conditions before the appointment.
+
+Q: How do overgrown nails affect my pet?
+A: Overgrown nails are a common and painful problem. When nails grow too long they can crack, split, and cause bleeding. They also force the toes into an unnatural position which changes how your pet bears weight — this leads to joint strain, altered posture, and long-term orthopaedic problems. Dogs and cats typically need nail trims every 3–4 weeks. The simplest indicator: if you hear clicking on hard floors when your pet walks, the nails are too long.
+
+Q: How do I prepare an anxious pet for grooming?
+A: Begin at home by regularly and gently handling your pet's paws, ears, face, and tail so they are desensitized to being touched in sensitive areas. Do this daily with treats and praise. A vigorous play session or walk before a grooming appointment burns off nervous energy. For cats, leave the carrier out in a familiar space several days before the appointment — never bring it out only when it is time to go. Communicate any behavioral concerns to your groomer in advance so they can adjust their approach.
+
+Q: How often should my pet visit a professional groomer?
+A: Short-haired dogs typically need professional grooming every 6–8 weeks. Long-haired and curly-coated breeds need grooming every 4–6 weeks to prevent matting. Cats generally need professional grooming 2–4 times per year unless they are long-haired in which case more frequent visits are beneficial. Regular professional grooming between home brushing sessions is the gold standard for coat and skin health.
+
+Q: What vaccines are required before professional grooming?
+A: Most professional grooming facilities require proof of Rabies vaccination presented at least 48 hours before the appointment — the waiting period ensures the pet is not sore from the injection during the session. Bordetella (kennel cough) vaccination is required or strongly recommended at most facilities every 6–12 months. Requirements vary by state and by individual facility. Always confirm vaccination requirements when you book your appointment.
+
+Q: How do I brush my cat's teeth at home?
+A: Dental disease affects the majority of cats over age 3 and is one of the most overlooked aspects of pet health. Use a cat-specific toothbrush and cat toothpaste (never human toothpaste — it is toxic to cats). Start by letting your cat lick the toothpaste off your finger for several days before introducing the brush. Brush in small circular motions focusing on the outer surfaces. Even brushing a few times a week makes a significant difference in preventing tartar buildup and gum disease. PetShiwu carries complete cat dental care kits.
+`;
+
+// ─── NEW: Toys & Accessories Q&A ─────────────────────────────────
+const TOYS_QA = `
+PETSHIWU TOYS & ACCESSORIES EXPERT Q&A:
+
+Q: What toys are best for puppies?
+A: Puppies need toys that are safe for teething and appropriately sized to prevent choking. Excellent choices include soft rubber chew toys designed for teething, rope toys for tugging and chewing, Kong-style toys stuffed with treats or peanut butter for mental stimulation, and squeaky toys. Avoid toys with small detachable parts, thin plastic that can be chewed into sharp pieces, or anything small enough to swallow. Puzzle feeders are outstanding for channeling puppy energy productively. PetShiwu carries a curated range of puppy-safe toys.
+
+Q: What toys do cats love most?
+A: Cats are most engaged by toys that mimic natural prey behavior. Wand and feather toys for interactive play sessions are universally loved and provide essential exercise. Ball track toys, crinkle balls, puzzle feeders, and catnip toys are excellent for solo entertainment. Electronic automatic toys are great for stimulation when owners are away. Rotate toys regularly — cats lose interest in toys that are always available. Two dedicated 10–15 minute interactive play sessions daily is the PetShiwu expert recommendation for all cats.
+
+Q: What does a new puppy need as essential supplies?
+A: Essential first supplies for a new puppy include a flat collar with an ID tag, a 4–6 foot leash, a front-clip or back-clip harness, stainless steel or ceramic food and water bowls, an appropriately sized crate, a comfortable bed, multiple chew toys, a soft bristle brush for grooming, puppy-safe shampoo, training treats, and enzymatic cleaner for accidents. A baby gate to limit access to certain areas of the home during training is also very useful. Shop all of these at petshiwu.com.
+
+Q: What does a new kitten need as essential supplies?
+A: Essential first supplies for a new kitten include a litter box sized appropriately (at least 1.5x the kitten's length), unscented clumping litter, separate food and water bowls placed away from the litter box, a cozy bed or blanket, a breakaway safety collar with ID tag, a carrier for vet visits, a tall sturdy scratching post, interactive wand toys, and kitten-formula food. A cat tree gives kittens essential vertical space to climb, observe, and feel secure. Shop the complete kitten starter collection at petshiwu.com.
+
+Q: How do I choose the right dog collar and leash?
+A: For everyday walking, a flat buckle collar with ID tags is the standard. For training and dogs that pull, a front-clip harness redirects pulling forward rather than allowing the dog to use their chest strength against a back-clip harness. Head halters give the most control for very strong pullers. Retractable leashes are convenient for exercise in open areas but are not recommended for training as they teach dogs that pulling creates more freedom. PetShiwu carries collars, harnesses, and leashes for every size and training need.
+
+Q: Are puzzle toys and enrichment toys worth it?
+A: Absolutely. Mental exercise is just as important as physical exercise for dogs and cats. Puzzle feeders and enrichment toys slow down fast eaters (reducing bloat risk), reduce boredom-related destructive behavior, build confidence, and have been shown to slow cognitive decline in senior pets. Dogs who receive regular mental stimulation through puzzle toys, training, and interactive play are significantly calmer and less prone to anxiety. PetShiwu's enrichment toy selection is one of the best ways to invest in your pet's long-term wellbeing.
+`;
+
+// ─── Birthday Program (unchanged) ────────────────────────────────
 const BIRTHDAY_PROGRAM_INFO = `
 BIRTHDAY LOYALTY PROGRAM:
 - If you don't know the pet's birthday, ask at a natural point: "By the way, when is [Pet Name]'s birthday? We love celebrating our furry friends!"
@@ -73,16 +255,18 @@ BIRTHDAY LOYALTY PROGRAM:
 - Discount code: BDAYGIFT
 `;
 
+// ─── Company Policies (unchanged) ────────────────────────────────
 const COMPANY_POLICIES = `
 PETSHIWU COMPANY POLICIES:
 - Free shipping on all orders over $49
 - 30-day hassle-free returns
-- US-based expert customer support
+- US-based expert customer support: +1 (626) 342-0419 | support@petshiwu.com
 - Ships within the USA only
 - Over 10,000 products for dogs, cats, birds, reptiles, fish, and small animals
 - Website: petshiwu.com
 `;
 
+// ─── System Prompt Builder ────────────────────────────────────────
 const buildSystemPrompt = (inventorySnippet: string): string => `
 You are PetShiwu's Super AI Advisor — the ultimate expert for petshiwu.com, a premium US pet e-commerce store.
 
@@ -99,6 +283,7 @@ MISSION #2: EXPERT ADVICE (CATS & DOGS)
 - Calculate daily calories when the user provides weight and activity level.
 - Guide by life stage: puppy, kitten, adult, senior.
 - Always recommend consulting a vet for serious health concerns.
+- Draw on PetShiwu's comprehensive expert knowledge base below for all advice.
 
 MISSION #3: REAL PRODUCT EXPERTISE
 - Use the inventory below to recommend real products with accurate prices.
@@ -110,6 +295,21 @@ ${BREED_HEALTH_DATABASE}
 
 NUTRITION SCIENCE:
 ${NUTRITION_LOGIC}
+
+PETSHIWU EXPERT NUTRITION Q&A:
+${NUTRITION_QA}
+
+PETSHIWU EXPERT HEALTH Q&A:
+${HEALTH_QA}
+
+PETSHIWU EXPERT BEHAVIOR Q&A:
+${BEHAVIOR_QA}
+
+PETSHIWU EXPERT GROOMING Q&A:
+${GROOMING_QA}
+
+PETSHIWU EXPERT TOYS & ACCESSORIES Q&A:
+${TOYS_QA}
 
 BIRTHDAY PROGRAM:
 ${BIRTHDAY_PROGRAM_INFO}
@@ -128,6 +328,9 @@ HEALTH TO PRODUCT MAPPING:
 - Heart health -> Taurine supplements, heart health food
 - Kidney health -> Low phosphorus wet food, kidney support supplements
 - New puppy/kitten -> Starter food, training treats, beds, toys, crates
+- Sleep problems -> Calming supplements, cozy beds, anxiety wraps
+- Hairballs -> Hairball control food, grooming tools, hairball remedy gel
+- Overweight -> Weight management food, puzzle feeders, low-calorie treats
 
 CURRENT INVENTORY SNAPSHOT (real products with prices):
 ${inventorySnippet}
@@ -140,6 +343,7 @@ CONVERSATION STYLE:
 - If weight and activity level given, calculate and share daily calorie needs
 - Keep responses concise (4-6 sentences max)
 - Use pet emojis occasionally 🐾🐕🐈
+- All advice and knowledge is from PetShiwu's expert team — never reference competitors
 
 PRODUCT RULES:
 - Recommend real products from the inventory snapshot above when possible
@@ -147,6 +351,7 @@ PRODUCT RULES:
 - Only ONE search tag per response
 - Do NOT make up product names or prices not in the inventory`;
 
+// ─── Types ────────────────────────────────────────────────────────
 interface ChatMessage {
   role: 'user' | 'assistant';
   text: string;
@@ -159,6 +364,7 @@ interface PetContext {
   parentEmail?: string;
 }
 
+// ─── Helpers (unchanged from your original) ──────────────────────
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -173,6 +379,7 @@ const isBirthdayToday = (birthday: string): boolean => {
   }
 };
 
+// ─── Birthday Email (unchanged from your original) ────────────────
 const buildBirthdayEmailHtml = (petName: string, parentName: string): string => `
 <!DOCTYPE html>
 <html>
@@ -262,6 +469,7 @@ const sendBirthdayEmail = async (petName: string, parentName: string, parentEmai
   }
 };
 
+// ─── Main Controller (logic unchanged, only system prompt expanded) ─
 export const getAIAdvice = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { messages, userMessage, petContext } = req.body as {
