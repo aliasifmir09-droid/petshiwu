@@ -137,6 +137,20 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         errors: ['Street, city, state, and zip code are required']
       });
     }
+    if (!shippingAddress.firstName?.trim() || !shippingAddress.lastName?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide your first and last name for delivery',
+        errors: ['First name and last name are required for shipping']
+      });
+    }
+    if (!shippingAddress.phone?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a phone number for delivery contact',
+        errors: ['Phone number is required for delivery']
+      });
+    }
 
     // Normalize product IDs and validate items
     const normalizedItems = items.map((item: OrderItemInput): NormalizedOrderItem => {

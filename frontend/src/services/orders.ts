@@ -13,6 +13,7 @@ interface CreateOrderData {
   taxPrice: number;
   donationAmount?: number;
   totalPrice: number;
+  notes?: string;
 }
 
 export const orderService = {

@@ -417,6 +417,23 @@ const Checkout = () => {
       navigate('/login?redirect=/checkout');
       return;
     }
+    // Validate required fields before hitting the API
+    if (!shippingInfo.firstName?.trim()) {
+      showToast('Please enter your first name', 'error');
+      return;
+    }
+    if (!shippingInfo.lastName?.trim()) {
+      showToast('Please enter your last name', 'error');
+      return;
+    }
+    if (!shippingInfo.phone?.trim()) {
+      showToast('Please enter a phone number for delivery', 'error');
+      return;
+    }
+    if (!shippingInfo.street?.trim() || !shippingInfo.city?.trim() || !shippingInfo.state?.trim() || !shippingInfo.zipCode?.trim()) {
+      showToast('Please complete all required shipping address fields', 'error');
+      return;
+    }
     if (paymentMethod !== 'cod' && paymentMethod !== 'paypal' && !paymentIntentId) {
       showToast('Please complete the payment first.', 'error');
       return;
@@ -607,7 +624,7 @@ const Checkout = () => {
                 </div>
               )}
 
-              {/* Name and Email - Only show if NOT logged in */}
+              {/* Name and Email - Show if NOT logged in */}
               {!isAuthenticated && (
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
@@ -647,6 +664,32 @@ const Checkout = () => {
                       required
                       value={shippingInfo.phone}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, phone: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Name fields for logged-in users whose profile is missing first/last name */}
+              {isAuthenticated && (!user?.firstName || !user?.lastName) && (
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">First Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={shippingInfo.firstName}
+                      onChange={(e) => setShippingInfo({ ...shippingInfo, firstName: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Last Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={shippingInfo.lastName}
+                      onChange={(e) => setShippingInfo({ ...shippingInfo, lastName: e.target.value })}
                       className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     />
                   </div>
@@ -914,28 +957,39 @@ const Checkout = () => {
                   </div>
                 </button>
 
-                {/* Credit Card */}
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('credit_card')}
-                  className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${
-                    paymentMethod === 'credit_card'
-                      ? 'border-primary-600 bg-primary-50'
-                      : 'border-gray-300 bg-white hover:border-gray-400'
-                  }`}
-                >
-                  <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                    paymentMethod === 'credit_card' ? 'bg-primary-600' : 'border-2 border-gray-400'
-                  }`}>
-                    {paymentMethod === 'credit_card' && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                {/* Credit Card - only active when Stripe is configured */}
+                {import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ? (
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('credit_card')}
+                    className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${
+                      paymentMethod === 'credit_card'
+                        ? 'border-primary-600 bg-primary-50'
+                        : 'border-gray-300 bg-white hover:border-gray-400'
+                    }`}
+                  >
+                    <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                      paymentMethod === 'credit_card' ? 'bg-primary-600' : 'border-2 border-gray-400'
+                    }`}>
+                      {paymentMethod === 'credit_card' && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                    </div>
+                    <div className="flex-1 text-left">
+                      <span className="font-semibold text-gray-900">Credit/Debit Card</span>
+                      <p className="text-sm text-gray-600 mt-1">Pay securely with your card</p>
+                    </div>
+                  </button>
+                ) : (
+                  <div className="w-full flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg bg-gray-50 opacity-60 cursor-not-allowed">
+                    <div className="w-4 h-4 rounded-full border-2 border-gray-300"></div>
+                    <div className="flex-1 text-left">
+                      <span className="font-semibold text-gray-500">Credit/Debit Card</span>
+                      <p className="text-sm text-gray-400 mt-1">Coming soon - use Cash on Delivery for now</p>
+                    </div>
                   </div>
-                  <div className="flex-1 text-left">
-                    <span className="font-semibold text-gray-900">Credit/Debit Card</span>
-                    <p className="text-sm text-gray-600 mt-1">Pay securely with your card</p>
-                  </div>
-                </button>
+                )}
 
-                {/* PayPal */}
+                {/* PayPal - only active when PayPal is configured */}
+                {import.meta.env.VITE_PAYPAL_CLIENT_ID ? (
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('paypal')}
@@ -955,6 +1009,15 @@ const Checkout = () => {
                     <p className="text-sm text-gray-600 mt-1">Pay with your PayPal account</p>
                   </div>
                 </button>
+                ) : (
+                  <div className="w-full flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg bg-gray-50 opacity-60 cursor-not-allowed">
+                    <div className="w-4 h-4 rounded-full border-2 border-gray-300"></div>
+                    <div className="flex-1 text-left">
+                      <span className="font-semibold text-gray-500">PayPal</span>
+                      <p className="text-sm text-gray-400 mt-1">Coming soon - use Cash on Delivery for now</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {isAuthenticated && !selectedSavedPaymentMethod && paymentMethod !== 'cod' && (
