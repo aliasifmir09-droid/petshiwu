@@ -530,9 +530,17 @@ const Checkout = () => {
         return;
       }
     }
+    // Block checkout if any cart items are out of stock
+    const outOfStockItems = currentItems.filter((item: any) => item.product?.inStock === false);
+    if (outOfStockItems.length > 0) {
+      const names = outOfStockItems.map((item: any) => item.product.name).join(', ');
+      showToast(`"${names}" is out of stock. Please remove it from your cart before ordering.`, 'error');
+      return;
+    }
+
     const orderData: CreateOrderData = {
-      items: currentItems.map((item: any) => {
-        const productId = normalizeId(item.product._id);
+        items: currentItems.map((item: any) => {
+          const productId = normalizeId(item.product._id);
         if (!productId || !/^[0-9a-fA-F]{24}$/.test(productId)) {
           throw new Error(`Invalid product ID for item: ${item.product.name}. Please remove this item from cart and add it again.`);
         }

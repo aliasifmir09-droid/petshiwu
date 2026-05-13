@@ -490,8 +490,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       if (errorMessage.includes('not found') || errorMessage.includes('out of stock') || errorMessage.includes('Insufficient stock')) {
         return res.status(400).json({
           success: false,
-          message: errorMessage,
-          errors: [errorMessage]
+          message: errorMessage
         });
       }
       

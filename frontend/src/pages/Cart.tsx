@@ -304,6 +304,11 @@ const Cart = () => {
                           <h3 className="font-semibold mb-1">{name}</h3>
                         </Link>
                         {brand && <p className="text-sm text-gray-600 mb-2">{brand}</p>}
+                        {item?.product?.inStock === false && (
+                          <p className="text-sm font-medium text-red-600 mb-2">
+                            ⚠️ Out of stock - please remove before checkout
+                          </p>
+                        )}
                         {item?.variant && (item.variant.size || item.variant.weight) && (
                           <p className="text-sm text-gray-600">Size: {item.variant.size || item.variant.weight}</p>
                         )}
