@@ -51,6 +51,12 @@ const PickyEaters = lazy(() => import('./pages/seo/PickyEaters'));
 const AggressiveChewers = lazy(() => import('./pages/seo/AggressiveChewers'));
 const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
 
+/**
+ * NEW SEO CONTENT ROUTE
+ * Added for: Step 4 - Learning Center Strategy
+ */
+const SensitiveStomachGuide = lazy(() => import('./pages/learning/SensitiveStomachGuide'));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -224,10 +230,16 @@ function App() {
                   <Route path="/addresses" element={<AddressManagement />} />
                   <Route path="/stock-alerts" element={<StockAlerts />} />
                   <Route path="/search" element={<AdvancedSearch />} />
+                  
+                  {/* SEO LANDING PAGES */}
                   <Route path="/best-dog-food-sensitive-stomach-diarrhea" element={<SensitiveStomachDogs />} />
                   <Route path="/high-protein-dog-food-picky-eaters" element={<PickyEaters />} />
                   <Route path="/durable-dog-toys-aggressive-chewers" element={<AggressiveChewers />} />
+                  
+                  {/* NEW LEARNING CENTER GUIDES */}
+                  <Route path="/learning/best-dog-food-sensitive-stomach" element={<SensitiveStomachGuide />} />
                   <Route path="/learning/best-dog-foods-sensitive-stomachs" element={<BestFoodSensitiveStomach />} />
+                  
                   <Route path="/403" element={<Forbidden />} />
                   <Route path="/404" element={<NotFound />} />
                   <Route path="/:petType" element={<PetType />} />
