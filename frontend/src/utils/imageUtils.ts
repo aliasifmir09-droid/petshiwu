@@ -80,6 +80,10 @@ const optimizeCloudinaryUrl = (url: string, width?: number, height?: number, for
  * wsrv.nl is a free, open-source image proxy/CDN (images.weserv.nl).
  */
 const optimizeScene7Url = (url: string, width?: number, height?: number): string => {
+  // Already proxied through wsrv.nl — don't double-wrap
+  if (url.includes('wsrv.nl') || url.includes('weserv.nl')) {
+    return url;
+  }
   if (!url.includes('scene7.com')) {
     return url;
   }
