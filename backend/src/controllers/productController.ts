@@ -1834,6 +1834,14 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
         const escapedTerm = escapeRegex(normalizedSearchTerm);
         const termRegex = new RegExp(escapedTerm, 'i');
         
+        // Apostrophe-flexible regex: allows "hills" to match "Hill's", "daves" to match "Dave's", etc.
+        // Inserts optional apostrophe between each character so brand name apostrophes are ignored
+        const apostropheFlex = normalizedSearchTerm
+          .split('')
+          .map(c => escapeRegex(c))
+          .join("['\u2019]?");
+        const apostropheFlexRegex = new RegExp(apostropheFlex, 'i');
+        
         query = {
           $and: [
             baseQuery,
@@ -1845,6 +1853,9 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
                 { name: { $regex: `^${escapedTerm}`, $options: 'i' } },
                 // Partial match in name (contains)
                 { name: termRegex },
+                // Apostrophe-flexible match: "hills" matches "Hill's"
+                { name: apostropheFlexRegex },
+                { brand: apostropheFlexRegex },
                 { description: termRegex },
                 { brand: termRegex },
                 { tags: { $in: [termRegex] } }
