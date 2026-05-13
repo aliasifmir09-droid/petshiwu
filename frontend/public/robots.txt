@@ -1,12 +1,12 @@
-# Robots.txt for petshiwu.com
-# Optimized for search engine crawling
-# Only standard robots.txt directives are used (User-agent, Allow, Disallow, Sitemap, Crawl-delay)
-# Note: If using Cloudflare, disable "Managed robots.txt" feature to prevent non-standard directives
+# ============================================
+# PETSHIWU MASTER ROBOTS.TXT - SEO OPTIMIZED
+# Combined User Preferences + SEO Best Practices
+# ============================================
 
 User-agent: *
 Allow: /
 
-# Disallow private/user pages (should not be indexed)
+# Disallow private/user pages (Security & Duplicate Content Prevention)
 Disallow: /checkout
 Disallow: /profile
 Disallow: /orders
@@ -23,7 +23,11 @@ Disallow: /resend-verification
 Disallow: /403
 Disallow: /404
 
-# Allow important pages
+# Block search-specific query parameters to prevent duplicate indexing
+Disallow: /search?
+Disallow: /filter?
+
+# Allow high-value content for search engines
 Allow: /products
 Allow: /category
 Allow: /learning
@@ -32,7 +36,10 @@ Allow: /faq
 Allow: /search
 Allow: /returns
 Allow: /donate
+Allow: /about
+Allow: /contact
 
-# Sitemap location - submit to Google Search Console for faster indexing
+# Host and Sitemap information
+Host: https://www.petshiwu.com
 Sitemap: https://www.petshiwu.com/sitemap.xml
 Sitemap: https://petshiwu.com/sitemap.xml
