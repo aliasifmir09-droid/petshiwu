@@ -75,8 +75,9 @@ const optimizeCloudinaryUrl = (url: string, width?: number, height?: number, for
 };
 
 /**
- * Optimizes Adobe Scene7 image URL with size parameters
- * Scene7 URLs typically have wid=2000&hei=2000, we need to reduce this
+ * Proxies Adobe Scene7 (PetSmart CDN) images through wsrv.nl.
+ * This decouples us from PetSmart's CDN, adds caching, and serves WebP.
+ * wsrv.nl is a free, open-source image proxy/CDN (images.weserv.nl).
  */
 const optimizeScene7Url = (url: string, width?: number, height?: number): string => {
   if (!url.includes('scene7.com')) {
@@ -84,21 +85,28 @@ const optimizeScene7Url = (url: string, width?: number, height?: number): string
   }
 
   try {
+    // Strip the large wid/hei params from the scene7 URL before proxying
     const urlObj = new URL(url);
-    
-    // Always override width and height - Scene7 defaults to 2000x2000 which is too large
-    // Default to 400x400 if not specified (good for product cards)
     const targetWidth = width || 400;
     const targetHeight = height || 400;
-    
-    urlObj.searchParams.set('wid', targetWidth.toString());
-    urlObj.searchParams.set('hei', targetHeight.toString());
-    
-    // Add format optimization (WebP if supported)
-    urlObj.searchParams.set('fmt', 'webp');
-    urlObj.searchParams.set('qlt', '85'); // Quality 85% (good balance)
-    
-    return urlObj.toString();
+
+    // Keep the base scene7 URL clean (remove existing size params)
+    urlObj.searchParams.delete('wid');
+    urlObj.searchParams.delete('hei');
+    urlObj.searchParams.delete('fmt');
+    urlObj.searchParams.delete('qlt');
+    const cleanScene7Url = urlObj.toString();
+
+    // Route through wsrv.nl proxy — caches the image, serves WebP, not direct PetSmart CDN
+    const proxy = new URL('https://wsrv.nl/');
+    proxy.searchParams.set('url', cleanScene7Url);
+    proxy.searchParams.set('w', targetWidth.toString());
+    proxy.searchParams.set('h', targetHeight.toString());
+    proxy.searchParams.set('output', 'webp');
+    proxy.searchParams.set('q', '85');
+    proxy.searchParams.set('fit', 'inside');
+
+    return proxy.toString();
   } catch {
     return url;
   }

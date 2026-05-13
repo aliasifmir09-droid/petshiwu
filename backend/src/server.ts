@@ -186,8 +186,8 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: process.env.NODE_ENV === 'production'
-        ? ["'self'", "data:", "https:", "https://res.cloudinary.com", "https://maps.gstatic.com", "https://maps.googleapis.com"]
-        : ["'self'", "data:", "https:", "http:", "https://res.cloudinary.com", "https://maps.gstatic.com", "https://maps.googleapis.com"],
+        ? ["'self'", "data:", "https:", "https://res.cloudinary.com", "https://wsrv.nl", "https://maps.gstatic.com", "https://maps.googleapis.com"]
+        : ["'self'", "data:", "https:", "http:", "https://res.cloudinary.com", "https://wsrv.nl", "https://maps.gstatic.com", "https://maps.googleapis.com"],
       scriptSrc: ["'self'", "'unsafe-inline'", "https://maps.googleapis.com", "https://maps.gstatic.com"],
       workerSrc: ["'self'"],
       connectSrc: [

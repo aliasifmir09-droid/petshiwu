@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
 import { useWishlistStore } from './stores/wishlistStore';
@@ -240,6 +240,10 @@ function App() {
                   <Route path="/learning/best-dog-food-sensitive-stomach" element={<SensitiveStomachGuide />} />
                   <Route path="/learning/best-dog-foods-sensitive-stomachs" element={<BestFoodSensitiveStomach />} />
                   
+                  {/* Explicit routes that must NOT be caught by /:petType */}
+                  <Route path="/shop" element={<Products />} />
+                  <Route path="/deals" element={<Navigate to="/products?featured=true" replace />} />
+
                   <Route path="/403" element={<Forbidden />} />
                   <Route path="/404" element={<NotFound />} />
                   <Route path="/:petType" element={<PetType />} />

@@ -28,7 +28,7 @@ interface SEOProps {
  */
 const SEO = ({
   title = 'PetShiwu | Premium Pet Food, Toys & Accessories in USA',
-  description = 'Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, birds, fish, reptiles, and small pets. Quality products, fast shipping, great prices. Free shipping on orders over $75.',
+  description = 'Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, birds, fish, reptiles, and small pets. Quality products, fast shipping, great prices. Free shipping on orders over $49.',
   keywords = 'premium pet food, dog food online, cat food delivery, reptile supplies USA, bird food, pet toys, pet accessories, online pet store, PetShiwu, best dog treats, organic cat food, grain-free pet food',
   image = 'https://www.petshiwu.com/logo.png',
   url = 'https://www.petshiwu.com',

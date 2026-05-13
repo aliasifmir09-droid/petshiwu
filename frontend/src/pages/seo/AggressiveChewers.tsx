@@ -8,7 +8,7 @@ const AggressiveChewers = () => {
     <SEOLandingPage
       keyword="durable-dog-toys-aggressive-chewers"
       title="Durable Dog Toys for Aggressive Chewers | PetShiwu"
-      description="Find the most durable dog toys for aggressive chewers. Heavy-duty, long-lasting toys that withstand even the strongest jaws. Free shipping over $75. Satisfaction guaranteed."
+      description="Find the most durable dog toys for aggressive chewers. Heavy-duty, long-lasting toys that withstand even the strongest jaws. Free shipping over $49. Satisfaction guaranteed."
       h1="Durable Dog Toys for Aggressive Chewers"
       introContent="If your dog destroys toys in minutes, you know how frustrating and expensive it can be. Our collection features the most durable, heavy-duty dog toys specifically designed to withstand aggressive chewing. These toys are built to last, saving you money while keeping your dog safely entertained."
       problemPoints={[

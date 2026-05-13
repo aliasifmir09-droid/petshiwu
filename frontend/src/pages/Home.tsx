@@ -205,7 +205,7 @@ const Home = () => {
           <h2 className="text-4xl md:text-5xl font-black mb-4">What Makes Us Different</h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
             {[
-              { icon: '🚚', title: 'Free Shipping', desc: 'Over $75' },
+              { icon: '🚚', title: 'Free Shipping', desc: 'Over $49' },
               { icon: '⭐', title: 'Premium Quality', desc: 'Trusted brands' },
               { icon: '💳', title: 'Secure Payment', desc: 'Safe & Encrypted' },
               { icon: '🔄', title: 'Easy Returns', desc: 'Hassle-free' }

@@ -32,7 +32,7 @@ const PetType = () => {
   }, [page]);
 
   // Fetch all products for this pet type
-  const { data: products, isLoading } = useQuery({
+  const { data: products, isLoading, isError, refetch } = useQuery({
     queryKey: ['products', 'petType', petType, page, sort, brand, minRating, inStock],
     queryFn: () =>
       productService.getProducts({
@@ -45,9 +45,10 @@ const PetType = () => {
         inStock: inStock ? inStock === 'true' : undefined
       }),
     enabled: !!petType,
-    retry: 1,
-    staleTime: 30 * 1000, // Consider fresh for 30 seconds
-    gcTime: 5 * 60 * 1000 // Cache for 5 minutes
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000
   });
 
   // Get all products to extract unique brands (for filter options)
@@ -101,10 +102,16 @@ const PetType = () => {
     })) || []
   });
 
-  if (isLoading) {
+  if (isError) {
     return (
-      <div className="container mx-auto px-4 lg:px-8 py-12">
-        <LoadingSpinner size="lg" />
+      <div className="container mx-auto px-4 lg:px-8 py-12 text-center">
+        <p className="text-gray-500 mb-4">Couldn't load products. Please try again.</p>
+        <button
+          onClick={() => refetch()}
+          className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+        >
+          Retry
+        </button>
       </div>
     );
   }
@@ -240,8 +247,18 @@ const PetType = () => {
         {/* Products */}
         <div className="flex-1">
           {isLoading ? (
-            <div className="py-12">
-              <LoadingSpinner size="lg" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden animate-pulse">
+                  <div className="bg-gray-200 h-52 w-full" />
+                  <div className="p-4 space-y-3">
+                    <div className="bg-gray-200 h-3 rounded w-1/3" />
+                    <div className="bg-gray-200 h-4 rounded w-full" />
+                    <div className="bg-gray-200 h-4 rounded w-2/3" />
+                    <div className="bg-gray-200 h-8 rounded w-1/2 mt-2" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : products && products.data.length > 0 ? (
             <>
