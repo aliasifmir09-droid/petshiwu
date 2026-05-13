@@ -52,10 +52,10 @@ const AggressiveChewers = lazy(() => import('./pages/seo/AggressiveChewers'));
 const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
 
 /**
- * NEW SEO CONTENT ROUTE
- * Added for: Step 4 - Learning Center Strategy
+ * FIXED SEO ROUTE
+ * Matches your file at: frontend/src/pages/SensitiveStomachGuide.tsx
  */
-const SensitiveStomachGuide = lazy(() => import('./pages/learning/SensitiveStomachGuide'));
+const SensitiveStomachGuide = lazy(() => import('./pages/SensitiveStomachGuide'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
