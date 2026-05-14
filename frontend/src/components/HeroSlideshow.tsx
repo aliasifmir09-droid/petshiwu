@@ -280,11 +280,11 @@ const HeroSlideshow = () => {
                                 Tell our AI your pet's birthday and receive an exclusive <strong style={{ color:'#FDE68A' }}>20% OFF coupon</strong> + a <strong style={{ color:'#FDE68A' }}>FREE birthday gift</strong> delivered right on their special day!
                               </p>
                               <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:26 }}>
-                                {                                  ["🎁","Free birthday gift with your order"],["💸","20% OFF — code BDAYGIFT auto-unlocked"],["🚚","Free shipping on birthday orders"]].map(([icon,text]) => (
+                                  {[["🎁","Free birthday gift with your order"],["💸","20% OFF — code BDAYGIFT auto-unlocked"],["🚚","Free shipping on birthday orders"]].map(([icon,text]) => (
                                   <div key={text} style={{ display:'flex', alignItems:'center', gap:10, fontSize:13, color:'rgba(255,255,255,.88)', fontWeight:600 }}>
                                     <span style={{ fontSize:17, width:24, textAlign:'center' }}>{icon}</span>{text}
                                   </div>
-                                ))}
+                                  ))}
                               </div>
                               <button onClick={openChat} style={{ display:'inline-flex', alignItems:'center', gap:9, background:'#16a34a', color:'#fff', border:'none', borderRadius:100, padding:'15px 28px', fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:F, boxShadow:'0 4px 20px rgba(22,163,74,.45)' }}>
                                 🐾 Tell AI Your Pet's Birthday
