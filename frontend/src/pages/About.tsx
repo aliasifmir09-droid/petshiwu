@@ -23,8 +23,8 @@ const About = () => {
                   Your Trusted Partner in Pet Care
                 </h1>
                 <p className="text-base sm:text-lg text-blue-100 max-w-xl mb-6">
-                  With over 15 years of experience in the vibrant Dubai pet market, PetShiwu now brings
-                  its passion, expertise, and carefully curated products to pet parents across the USA.
+                  Rooted in a deep love for animals and over a decade of hands-on pet care experience,
+                  Petshiwu brings premium products and expert guidance to pet parents across the USA.
                 </p>
                 <p className="text-sm sm:text-base text-blue-100/90 max-w-xl">
                   We&apos;re here to support the special bond you share with your furry, feathered, or scaly
@@ -45,10 +45,9 @@ const About = () => {
                     </div>
                   </div>
                   <p className="text-sm sm:text-base text-blue-50 mb-4">
-                    PetShiwu was born from a deep love for animals and a proven commitment to their
-                    well-being. After serving pet parents for more than a decade in Dubai, we&apos;ve
-                    expanded to the USA to offer premium pet food, toys, and accessories through a
-                    seamless online experience.
+                    Petshiwu was born from a deep love for animals and a passion for helping pets thrive.
+                    Based in Jackson Heights, NY, we serve pet parents across the USA with premium food,
+                    toys, and accessories through a seamless online experience.
                   </p>
                   <p className="text-xs sm:text-sm text-blue-100/90">
                     We continuously listen to American pet owners to better understand their unique needs
