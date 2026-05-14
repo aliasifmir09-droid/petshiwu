@@ -8,6 +8,7 @@ import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import TrustBadges from '@/components/TrustBadges';
 import CategoryIcons from '@/components/CategoryIcons';
+import BirthdayBanner from '@/components/BirthdayBanner';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
@@ -89,10 +90,15 @@ const Home = () => {
         }
       }} />
 
+      {/* Hero Slideshow */}
       <div className="container mx-auto px-4 lg:px-8 mt-4">
         <HeroSlideshow />
       </div>
 
+      {/* Birthday Banner — full width, right below hero */}
+      <BirthdayBanner />
+
+      {/* Shop by Pet Type */}
       <section className="py-16 bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-12 relative z-30">
@@ -102,6 +108,7 @@ const Home = () => {
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">Find everything your furry friend needs</p>
           </div>
           <div className="relative overflow-visible">
+            {/* Desktop scroll */}
             <div className="hidden md:block relative">
               {showLeftArrow && (
                 <button onClick={() => scrollPetTypes('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 rounded-full shadow-lg">
@@ -135,6 +142,8 @@ const Home = () => {
                 ))}
               </div>
             </div>
+
+            {/* Mobile scroll */}
             <div className="md:hidden flex overflow-x-auto gap-3 px-2 pb-2 scrollbar-hide">
               {[
                 { name: 'Dog', slug: 'dog', image: 'https://images.unsplash.com/photo-1534361960057-19889db9621e?w=500&h=500&fit=crop&q=90' },
@@ -160,6 +169,7 @@ const Home = () => {
 
       <CategoryIcons />
 
+      {/* Trending Products */}
       <section className="py-16 bg-gradient-to-b from-white via-blue-50 to-white text-center">
         <div className="container mx-auto px-4 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-black mb-3" style={{ background: 'linear-gradient(to right, #2563eb, #9333ea, #db2777)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', color: '#9333ea' }}>
@@ -183,6 +193,7 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Premium CTA */}
       <section className="py-16 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 text-white text-center md:text-left">
         <div className="container mx-auto px-4 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex-1">
@@ -200,6 +211,7 @@ const Home = () => {
 
       <TrustBadges />
 
+      {/* What Makes Us Different */}
       <section className="py-20 bg-gradient-to-br from-blue-600 via-purple-700 to-pink-600 text-white text-center">
         <div className="container mx-auto px-4 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-black mb-4">What Makes Us Different</h2>
