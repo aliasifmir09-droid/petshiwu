@@ -280,7 +280,7 @@ const HeroSlideshow = () => {
                                 Tell our AI your pet's birthday and receive an exclusive <strong style={{ color:'#FDE68A' }}>20% OFF coupon</strong> + a <strong style={{ color:'#FDE68A' }}>FREE birthday gift</strong> delivered right on their special day!
                               </p>
                               <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:26 }}>
-                                {[["🎁","Free birthday gift with your order"],["💸","20% OFF — code BDAYGIFT auto-unlocked"],["🚚","Free shipping on birthday orders"]].map(([icon,text]) => (
+                                {                                  ["🎁","Free birthday gift with your order"],["💸","20% OFF — code BDAYGIFT auto-unlocked"],["🚚","Free shipping on birthday orders"]].map(([icon,text]) => (
                                   <div key={text} style={{ display:'flex', alignItems:'center', gap:10, fontSize:13, color:'rgba(255,255,255,.88)', fontWeight:600 }}>
                                     <span style={{ fontSize:17, width:24, textAlign:'center' }}>{icon}</span>{text}
                                   </div>
@@ -305,7 +305,7 @@ const HeroSlideshow = () => {
                                   </div>
                                 </div>
                                 <div style={{ padding:12, display:'flex', flexDirection:'column', gap:9, background:'#f8f9fc' }}>
-                                  {[[
+                                  {[
                                     { side:'bot', text:"What is your pet's birthday? 🎂" },
                                     { side:'usr', text:'📅 June 15' },
                                     { side:'cel', text:"🎉 We'll send a birthday gift & 20% OFF coupon on June 15th!" },
