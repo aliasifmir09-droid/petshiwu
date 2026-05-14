@@ -10,7 +10,9 @@
 
 import { Request, Response, NextFunction } from 'express';
 import Product from '../models/Product';
+import User from '../models/User';
 import { Resend } from 'resend';
+import jwt from 'jsonwebtoken';
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
 
@@ -498,6 +500,49 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
         petContext.parentName || 'Pet Parent',
         petContext.parentEmail
       );
+    }
+
+    // ── Persist pet data to MongoDB if user is authenticated ──────
+    if (petContext?.petName && petContext?.birthday) {
+      try {
+        const token = req.cookies?.frontend_token || (req.headers.authorization?.split(' ')[1]);
+        if (token) {
+          const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+          if (decoded?.id) {
+            const user = await User.findById(decoded.id);
+            if (user) {
+              // Parse birthday into MM-DD for daily matching
+              const bDate = new Date(petContext.birthday);
+              const mm = String(bDate.getMonth() + 1).padStart(2, '0');
+              const dd = String(bDate.getDate()).padStart(2, '0');
+              const birthdayMMDD = `${mm}-${dd}`;
+
+              // Check if pet already exists by name (avoid duplicates)
+              const existingPet = (user.pets || []).find(
+                (p: any) => p.petName.toLowerCase() === petContext.petName!.toLowerCase()
+              );
+              if (!existingPet) {
+                user.pets = user.pets || [];
+                (user.pets as any[]).push({
+                  petName: petContext.petName,
+                  birthday: petContext.birthday,
+                  birthdayMMDD,
+                  species: petContext.petType || undefined,
+                });
+                await user.save();
+                console.log(`🐾 Saved pet "${petContext.petName}" for user ${user.email}`);
+              } else if (existingPet.birthdayMMDD !== birthdayMMDD) {
+                // Update birthday if it changed
+                existingPet.birthday = petContext.birthday;
+                existingPet.birthdayMMDD = birthdayMMDD;
+                await user.save();
+              }
+            }
+          }
+        }
+      } catch (_err) {
+        // Non-fatal — don't block the AI response
+      }
     }
 
     let inventorySnippet = 'Inventory temporarily unavailable — use [SEARCH:] for product lookups.';

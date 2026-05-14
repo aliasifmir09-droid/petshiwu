@@ -25,6 +25,7 @@ import logger from './utils/logger';
 import { initializeJobQueues } from './utils/jobQueue';
 import { startEmailWorker } from './workers/emailWorker';
 import { startCartAbandonmentWorker } from './workers/cartAbandonmentWorker';
+import { startBirthdayWorker } from './workers/birthdayWorker';
 import { responseTimeMiddleware } from './middleware/responseTime';
 import { initializeAPM } from './utils/apm';
 
@@ -130,6 +131,7 @@ try {
   initializeJobQueues();
   startEmailWorker();
   startCartAbandonmentWorker();
+  startBirthdayWorker();
 } catch (error: unknown) {
   const errorMessage = error instanceof Error ? error.message : String(error);
   try { logger.warn('⚠️  Job queue initialization error (non-fatal):', errorMessage); }

@@ -20,6 +20,14 @@ export interface IPermissions {
   canManageSettings: boolean;
 }
 
+export interface IPet {
+  petName: string;
+  birthday: string;       // full date e.g. "2020-05-14"
+  birthdayMMDD: string;   // "MM-DD" e.g. "05-14" — used for daily birthday queries
+  species?: string;
+  birthdayEmailSentYear?: number; // last year we sent birthday email (avoid duplicates)
+}
+
 export interface IUser extends Document {
   firstName: string;
   lastName: string;
@@ -37,6 +45,7 @@ export interface IUser extends Document {
   refreshToken?: string; // Hashed refresh token
   refreshTokenExpires?: Date;
   addresses: IAddress[];
+  pets: IPet[];
   wishlist: mongoose.Types.ObjectId[];
   passwordChangedAt?: Date;
   passwordExpiresAt?: Date;
@@ -51,6 +60,14 @@ export interface IUser extends Document {
   revokeRefreshToken(): Promise<void>;
   isRefreshTokenValid(token: string): Promise<boolean>;
 }
+
+const petSchema = new Schema<IPet>({
+  petName: { type: String, required: true, trim: true },
+  birthday: { type: String, required: true },       // full date string "YYYY-MM-DD"
+  birthdayMMDD: { type: String, required: true },   // "MM-DD" for daily query
+  species: { type: String, trim: true },
+  birthdayEmailSentYear: { type: Number }
+});
 
 const addressSchema = new Schema<IAddress>({
   street: { type: String, required: true },
@@ -109,6 +126,7 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: true
     },
+    pets: [petSchema],
     addresses: [addressSchema],
     wishlist: [{
       type: Schema.Types.ObjectId,
