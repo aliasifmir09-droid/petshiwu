@@ -1,5 +1,4 @@
 // FILE: frontend/src/components/BirthdayBanner.tsx
-// Drop <BirthdayBanner /> on Home.tsx — auto-hides for returning customers
 
 import { useEffect, useRef, useState } from 'react'
 
@@ -111,9 +110,9 @@ export default function BirthdayBanner() {
     return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize) }
   }, [visible])
 
+  // ✅ Fires custom event — AIPetAdvisor listens and opens instantly
   function openChat() {
-    const btn = document.querySelector<HTMLButtonElement>('button[aria-label="Open Pawsy chat"], button[aria-label="Open AI chat assistant"]')
-    if (btn) btn.click()
+    window.dispatchEvent(new CustomEvent('openPetAdvisor'))
   }
 
   if (!visible) return null
