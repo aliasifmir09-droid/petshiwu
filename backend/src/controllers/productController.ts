@@ -1520,13 +1520,9 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     // Build query - products are now permanently deleted, so no need to filter by deletedAt
     // Admin can see inactive products, public can only see active products
     // Explicitly exclude any products that might have deletedAt set (backward compatibility)
-    const baseQuery: any = { 
-      // Explicitly exclude any products that might have deletedAt set (backward compatibility)
-      $or: [
-        { deletedAt: null },
-        { deletedAt: { $exists: false } }
-      ]
-    };
+    // deletedAt: null is index-friendly (hits the compound index directly)
+    // Products are permanently deleted now so this covers all live products
+    const baseQuery: any = { deletedAt: null };
     
     // Only filter by isActive for non-admin requests
     if (!isAdminRequest) {
@@ -2116,8 +2112,8 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       }
     };
 
-    // Cache the response (5 minutes for product listings)
-    await cache.set(cacheKey, response, 300);
+    // Cache the response (10 minutes for product listings)
+    await cache.set(cacheKey, response, 600);
 
     res.status(200).json(response);
   } catch (error) {

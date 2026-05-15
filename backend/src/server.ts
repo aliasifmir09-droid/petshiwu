@@ -19,6 +19,7 @@ import { sanitizeResponse } from './middleware/sanitizeResponse';
 import { setCacheHeaders } from './middleware/cacheHeaders';
 import User from './models/User';
 import { setupSwagger } from './utils/swagger';
+import { cache, cacheKeys } from './utils/cache';
 import { initRedis, getRedisClient } from './utils/cache';
 import type { SanitizedObject } from './types/common';
 import logger from './utils/logger';
@@ -138,6 +139,48 @@ try {
   catch { console.warn('⚠️  Job queue initialization error (non-fatal):', errorMessage); }
 }
 
+// Cache warming — pre-load popular queries into Redis on startup
+// so the first real customer request is fast (< 200ms) instead of hitting DB cold
+const warmCache = async () => {
+  try {
+    const BASE = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
+    const endpoints = [
+      '/api/products?limit=20',
+      '/api/products?limit=20&sort=featured',
+      '/api/categories',
+      '/api/pet-types',
+    ];
+    const http = await import('http');
+    for (const ep of endpoints) {
+      try {
+        // Check if already cached before hitting DB
+        let cacheKey: string;
+        if (ep.includes('categories')) cacheKey = cacheKeys.categories();
+        else if (ep.includes('pet-types')) cacheKey = 'petTypes:all';
+        else cacheKey = cacheKeys.products(ep.split('?')[1] || '');
+        const already = await cache.get(cacheKey);
+        if (!already) {
+          const url = new URL(ep, BASE);
+          await new Promise<void>((resolve) => {
+            const req = http.get(url.toString(), (res) => {
+              res.resume();
+              res.on('end', () => resolve());
+            });
+            req.on('error', () => resolve());
+            req.setTimeout(8000, () => { req.destroy(); resolve(); });
+          });
+        }
+      } catch { /* skip this endpoint on error */ }
+    }
+    logger.info('✅ Cache warm-up complete');
+  } catch (err: any) {
+    logger.warn('⚠️  Cache warm-up failed (non-fatal):', err.message);
+  }
+};
+
+// Run after a 5-second delay to let DB connection stabilize
+setTimeout(warmCache, 5000);
+
 const AUTO_CREATE_ADMIN = process.env.AUTO_CREATE_ADMIN === 'true' ||
   (process.env.AUTO_CREATE_ADMIN !== 'false' && process.env.NODE_ENV === 'development');
 
@@ -237,8 +280,8 @@ const donationLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, message: 
 const uploadLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: 'Too many file upload attempts from this IP, please try again after 15 minutes.', standardHeaders: true, legacyHeaders: false, store: createRateLimiterStore(15 * 60 * 1000) });
 const authStatusLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 100, message: 'Too many auth status checks from this IP, please try again in a moment.', standardHeaders: true, legacyHeaders: false, skipSuccessfulRequests: true, store: createRateLimiterStore(1 * 60 * 1000) });
 const isDevelopment = process.env.NODE_ENV !== 'production';
-const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: isDevelopment ? 1000 : 100, message: 'Too many requests from this IP, please try again later.', standardHeaders: true, legacyHeaders: false, skipSuccessfulRequests: isDevelopment, store: createRateLimiterStore(15 * 60 * 1000) });
-const publicDataLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: isDevelopment ? 200 : 100, message: 'Too many requests from this IP, please try again in a moment.', standardHeaders: true, legacyHeaders: false, skipSuccessfulRequests: true, store: createRateLimiterStore(1 * 60 * 1000) });
+const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: isDevelopment ? 1000 : 500, message: 'Too many requests from this IP, please try again later.', standardHeaders: true, legacyHeaders: false, skipSuccessfulRequests: isDevelopment, store: createRateLimiterStore(15 * 60 * 1000) });
+const publicDataLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: isDevelopment ? 500 : 300, message: 'Too many requests from this IP, please try again in a moment.', standardHeaders: true, legacyHeaders: false, skipSuccessfulRequests: true, store: createRateLimiterStore(1 * 60 * 1000) });
 
 app.use(['/api/v1/auth/login', '/api/auth/login'], authLimiter);
 app.use(['/api/v1/auth/register', '/api/auth/register'], registerLimiter);
