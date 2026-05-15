@@ -1,20 +1,69 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { productService } from '@/services/products';
 import ProductCard from '@/components/ProductCard';
-import { Search, X, SlidersHorizontal, ArrowLeft, Package } from 'lucide-react';
+import { Search, X, SlidersHorizontal, ArrowLeft, Package, Camera, Loader2, ImageIcon } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import SEO from '@/components/SEO';
 import { normalizeImageUrl } from '@/utils/imageUtils';
+import api from '@/services/api';
 
 const AdvancedSearch = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const [inputValue, setInputValue] = useState(searchParams.get('q') || '');
   const [showFilters, setShowFilters] = useState(false);
+
+  // Visual search state
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [visualResults, setVisualResults] = useState<any>(null);
+
+  const visualSearchMutation = useMutation({
+    mutationFn: async (file: File) => {
+      return new Promise<any>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            const dataUrl = e.target?.result as string;
+            const res = await api.post('/products/visual-search', {
+              image: dataUrl,
+              mimeType: file.type,
+            });
+            resolve(res.data);
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsDataURL(file);
+      });
+    },
+    onSuccess: (data) => {
+      setVisualResults(data);
+      setInputValue('');
+    },
+  });
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const previewUrl = URL.createObjectURL(file);
+    setPhotoPreview(previewUrl);
+    setVisualResults(null);
+    visualSearchMutation.mutate(file);
+    // Reset input so same file can be re-selected
+    e.target.value = '';
+  };
+
+  const clearPhoto = () => {
+    setPhotoPreview(null);
+    setVisualResults(null);
+    visualSearchMutation.reset();
+  };
   const [filters, setFilters] = useState({
     sort: searchParams.get('sort') || 'newest',
     inStock: searchParams.get('inStock') === 'true',
@@ -129,6 +178,27 @@ const AdvancedSearch = () => {
               )}
             </div>
 
+            {/* Camera / photo search button */}
+            <button
+              onClick={() => cameraInputRef.current?.click()}
+              className={`flex-shrink-0 p-2.5 rounded-xl border-2 transition-all ${
+                photoPreview ? 'border-blue-500 bg-blue-50 text-blue-600' : 'border-gray-200 text-gray-600 hover:border-blue-400'
+              }`}
+              aria-label="Search by photo"
+              title="Search by photo"
+            >
+              <Camera size={18} />
+            </button>
+            {/* Hidden file input — accept images, open camera on mobile */}
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={handlePhotoSelect}
+            />
+
             {/* Filter toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -217,17 +287,92 @@ const AdvancedSearch = () => {
           )}
         </div>
 
+        {/* ── Photo Search Panel ── */}
+        {photoPreview && (
+          <div className="max-w-3xl mx-auto px-4 pt-4">
+            <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
+              <div className="flex items-start gap-4">
+                {/* Preview image */}
+                <div className="relative flex-shrink-0">
+                  <img
+                    src={photoPreview}
+                    alt="Your photo"
+                    className="w-20 h-20 rounded-xl object-cover border border-gray-200"
+                  />
+                  <button
+                    onClick={clearPhoto}
+                    className="absolute -top-2 -right-2 bg-gray-800 text-white rounded-full p-0.5"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+
+                {/* Status */}
+                <div className="flex-1 min-w-0">
+                  {visualSearchMutation.isPending && (
+                    <div className="flex items-center gap-2 text-blue-600">
+                      <Loader2 size={18} className="animate-spin" />
+                      <span className="text-sm font-medium">Analyzing your photo with AI...</span>
+                    </div>
+                  )}
+                  {visualSearchMutation.isError && (
+                    <p className="text-sm text-red-500">
+                      Something went wrong. Please try again.
+                    </p>
+                  )}
+                  {visualResults?.identified && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <ImageIcon size={15} className="text-blue-600" />
+                        <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">AI identified</span>
+                      </div>
+                      <p className="text-sm font-bold text-gray-900 capitalize">{visualResults.identified.productType}</p>
+                      {visualResults.identified.description && (
+                        <p className="text-xs text-gray-500 mt-0.5">{visualResults.identified.description}</p>
+                      )}
+                    </div>
+                  )}
+                  {visualResults?.message && !visualResults?.identified && (
+                    <p className="text-sm text-gray-600">{visualResults.message}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ── Body ── */}
         <div className="max-w-3xl mx-auto px-4 pt-4">
 
+          {/* Visual search results */}
+          {visualResults?.data?.length > 0 && (
+            <div className="mb-6">
+              <p className="text-sm text-gray-600 mb-3">
+                <span className="font-semibold text-gray-900">{visualResults.data.length}</span> products matching your photo
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {visualResults.data.map((product: any) => (
+                  <ProductCard key={product._id} product={product} />
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Empty state — no query yet */}
-          {!inputValue && (
+          {!inputValue && !photoPreview && (
             <div className="text-center py-16">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search size={28} className="text-blue-600" />
               </div>
               <p className="text-lg font-semibold text-gray-800">Search for anything</p>
               <p className="text-sm text-gray-500 mt-1">Dog food, cat toys, leashes, beds...</p>
+              <button
+                onClick={() => cameraInputRef.current?.click()}
+                className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-sm text-blue-700 font-medium hover:bg-blue-100 transition-all"
+              >
+                <Camera size={15} />
+                Or search by photo
+              </button>
 
               {/* Quick searches */}
               <div className="flex flex-wrap justify-center gap-2 mt-6">
@@ -245,15 +390,15 @@ const AdvancedSearch = () => {
           )}
 
           {/* Searching indicator */}
-          {inputValue && isSearching && (
+          {inputValue && !photoPreview && isSearching && (
             <div className="flex items-center justify-center gap-2 py-8 text-gray-500">
               <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
               <span className="text-sm">Searching...</span>
             </div>
           )}
 
-          {/* Results */}
-          {!isSearching && debouncedQuery && products.length > 0 && (
+          {/* Text search results */}
+          {!photoPreview && !isSearching && debouncedQuery && products.length > 0 && (
             <>
               <div className="flex items-center justify-between mb-4">
                 <p className="text-sm text-gray-600">
@@ -270,7 +415,7 @@ const AdvancedSearch = () => {
           )}
 
           {/* No results */}
-          {!isSearching && debouncedQuery && products.length === 0 && (
+          {!photoPreview && !isSearching && debouncedQuery && products.length === 0 && (
             <div className="text-center py-16">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Package size={28} className="text-gray-400" />
