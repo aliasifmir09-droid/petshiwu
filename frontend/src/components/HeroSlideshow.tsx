@@ -1,338 +1,116 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { slideshowService } from '@/services/slideshow';
-import LoadingSpinner from './LoadingSpinner';
-import { Helmet } from 'react-helmet-async';
-import { normalizeImageUrl, generateSrcSet } from '@/utils/imageUtils';
 
-// ================================================================
-// STEP 1: Upload your 3 banner images to Cloudinary:
-//   Go to cloudinary.com → Media Library → Upload
-//   Then paste each URL below:
-// ================================================================
-const BANNER_1 = 'https://res.cloudinary.com/dtmes0dha/image/upload/petshiwu_banner_3.png'; // "Your One-Stop Shop"
-const BANNER_2 = 'https://res.cloudinary.com/dtmes0dha/image/upload/petshiwu_banner_1.png'; // "Premium Care"
-const BANNER_3 = 'https://res.cloudinary.com/dtmes0dha/image/upload/petshiwu_nyc_delivery_banner.png'; // "NYC Fastest Delivery"
-// ================================================================
-
-interface Slide {
-  _id: string;
-  id?: string;
-  title: string;
-  imageUrl: string;
-  leftImage?: string;
-  link: string;
-  type?: 'default' | 'birthdayBanner';
-}
-
-// ─── Dog SVG ──────────────────────────────────────────────────────
-const DogSVG = () => (
-  <svg width="150" height="190" viewBox="0 0 150 190" xmlns="http://www.w3.org/2000/svg"
-    style={{ animation: 'dogBob 2.2s ease-in-out infinite alternate', filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))' }}>
-    <polygon points="75,18 58,62 92,62" fill="#FF6B9D" stroke="#fff" strokeWidth="1.5"/>
-    <line x1="75" y1="18" x2="75" y2="10" stroke="#FDE68A" strokeWidth="2"/>
-    <circle cx="75" cy="9" r="5" fill="#FDE68A"/>
-    <line x1="61" y1="55" x2="57" y2="65" stroke="#A78BFA" strokeWidth="1.5"/>
-    <line x1="68" y1="58" x2="65" y2="68" stroke="#34D399" strokeWidth="1.5"/>
-    <line x1="82" y1="58" x2="85" y2="68" stroke="#60A5FA" strokeWidth="1.5"/>
-    <ellipse cx="46" cy="88" rx="18" ry="26" fill="#C8841A" transform="rotate(-18 46 88)"/>
-    <ellipse cx="104" cy="88" rx="18" ry="26" fill="#C8841A" transform="rotate(18 104 88)"/>
-    <circle cx="75" cy="100" r="42" fill="#E8A030"/>
-    <ellipse cx="75" cy="116" rx="20" ry="14" fill="#D4891C"/>
-    <circle cx="60" cy="92" r="8" fill="#1a1a1a"/>
-    <circle cx="90" cy="92" r="8" fill="#1a1a1a"/>
-    <circle cx="62" cy="90" r="3" fill="white"/>
-    <circle cx="92" cy="90" r="3" fill="white"/>
-    <ellipse cx="75" cy="110" rx="8" ry="6" fill="#1a1a1a"/>
-    <ellipse cx="73" cy="108" rx="2.5" ry="1.5" fill="rgba(255,255,255,0.4)"/>
-    <path d="M62 120 Q75 132 88 120" stroke="#1a1a1a" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-    <ellipse cx="75" cy="128" rx="9" ry="7" fill="#E55050"/>
-    <ellipse cx="75" cy="165" rx="32" ry="25" fill="#E8A030"/>
-    <ellipse cx="52" cy="182" rx="12" ry="8" fill="#D4891C"/>
-    <ellipse cx="98" cy="182" rx="12" ry="8" fill="#D4891C"/>
-    <polygon points="63,142 72,148 63,154" fill="#FF6B9D"/>
-    <polygon points="87,142 78,148 87,154" fill="#FF6B9D"/>
-    <circle cx="75" cy="148" r="5" fill="#FF6B9D"/>
-    <path d="M107 160 Q130 140 125 120" stroke="#C8841A" strokeWidth="10" fill="none" strokeLinecap="round"/>
-  </svg>
-);
-
-// ─── Cat SVG ──────────────────────────────────────────────────────
-const CatSVG = () => (
-  <svg width="145" height="190" viewBox="0 0 145 190" xmlns="http://www.w3.org/2000/svg"
-    style={{ animation: 'catBob 2.6s ease-in-out infinite alternate', filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))' }}>
-    <polygon points="72,16 55,58 89,58" fill="#60A5FA" stroke="#fff" strokeWidth="1.5"/>
-    <line x1="72" y1="16" x2="72" y2="8" stroke="#FDE68A" strokeWidth="2"/>
-    <circle cx="72" cy="7" r="5" fill="#FDE68A"/>
-    <line x1="58" y1="51" x2="54" y2="61" stroke="#FF6B9D" strokeWidth="1.5"/>
-    <line x1="65" y1="54" x2="62" y2="64" stroke="#34D399" strokeWidth="1.5"/>
-    <line x1="79" y1="54" x2="82" y2="64" stroke="#A78BFA" strokeWidth="1.5"/>
-    <polygon points="44,72 52,98 30,95" fill="#E8688A"/>
-    <polygon points="46,76 52,95 34,93" fill="#F9A8B8"/>
-    <polygon points="100,72 92,98 114,95" fill="#E8688A"/>
-    <polygon points="98,76 92,95 110,93" fill="#F9A8B8"/>
-    <circle cx="72" cy="105" r="40" fill="#F4A0B0"/>
-    <ellipse cx="72" cy="118" rx="22" ry="14" fill="#fff"/>
-    <ellipse cx="58" cy="98" rx="8" ry="9" fill="#1a1a1a"/>
-    <ellipse cx="86" cy="98" rx="8" ry="9" fill="#1a1a1a"/>
-    <ellipse cx="58" cy="98" rx="4" ry="7" fill="#2ecc71"/>
-    <ellipse cx="86" cy="98" rx="4" ry="7" fill="#2ecc71"/>
-    <ellipse cx="58" cy="98" rx="2" ry="6" fill="#1a1a1a"/>
-    <ellipse cx="86" cy="98" rx="2" ry="6" fill="#1a1a1a"/>
-    <circle cx="60" cy="95" r="2" fill="white"/>
-    <circle cx="88" cy="95" r="2" fill="white"/>
-    <polygon points="72,113 68,109 76,109" fill="#E8688A"/>
-    <path d="M68 114 Q72 120 76 114" stroke="#c0506a" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-    <line x1="30" y1="112" x2="58" y2="116" stroke="rgba(255,255,255,0.7)" strokeWidth="1.2"/>
-    <line x1="30" y1="118" x2="58" y2="118" stroke="rgba(255,255,255,0.7)" strokeWidth="1.2"/>
-    <line x1="86" y1="116" x2="114" y2="112" stroke="rgba(255,255,255,0.7)" strokeWidth="1.2"/>
-    <line x1="86" y1="118" x2="114" y2="118" stroke="rgba(255,255,255,0.7)" strokeWidth="1.2"/>
-    <ellipse cx="72" cy="165" rx="30" ry="24" fill="#F4A0B0"/>
-    <ellipse cx="50" cy="182" rx="12" ry="8" fill="#E8688A"/>
-    <ellipse cx="94" cy="182" rx="12" ry="8" fill="#E8688A"/>
-    <path d="M42 160 Q18 140 22 115 Q26 95 38 100" stroke="#E8688A" strokeWidth="9" fill="none" strokeLinecap="round"/>
-    <polygon points="60,138 68,144 60,150" fill="#60A5FA"/>
-    <polygon points="84,138 76,144 84,150" fill="#60A5FA"/>
-    <circle cx="72" cy="144" r="5" fill="#60A5FA"/>
-  </svg>
-);
-
-function openChat(e: React.MouseEvent) {
-  e.preventDefault();
-  e.stopPropagation();
-  window.dispatchEvent(new CustomEvent('openPetAdvisor'));
-}
+// ── Static banner slides (images served from /public) ────────────
+const SLIDES = [
+  {
+    id: 'slide-1',
+    src: '/banner-one-stop.jpg',
+    alt: 'Your One-Stop Shop for Every Pet\'s Joy',
+    link: '/products',
+  },
+  {
+    id: 'slide-2',
+    src: '/banner-birthday.png',
+    alt: 'Celebrate Your Pet\'s Birthday – 20% OFF + Free Gift',
+    link: '/products',
+  },
+  {
+    id: 'slide-3',
+    src: '/banner-premium-care.jpg',
+    alt: 'Petshiwu: Premium Care for Your Best Friends',
+    link: '/products',
+  },
+  {
+    id: 'slide-4',
+    src: '/banner-nyc-delivery.jpg',
+    alt: 'NYC\'s Fastest Pet Delivery',
+    link: '/products',
+  },
+];
 
 const HeroSlideshow = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [showBirthdayBanner, setShowBirthdayBanner] = useState(false);
 
+  // Auto-advance every 5 seconds
   useEffect(() => {
-    const key = Object.keys(localStorage).find(k => k.startsWith('petshiwu_profile_'));
-    setShowBirthdayBanner(!key);
-  }, []);
-
-  // ── 3 hardcoded banner slides ──────────────────────────────────
-  const staticSlides: Slide[] = [
-    { _id: 'banner-1', type: 'default', title: 'Your One-Stop Shop for Every Pet\'s Joy', link: '/products', imageUrl: BANNER_1 },
-    { _id: 'banner-2', type: 'default', title: 'Premium Care for Your Best Friends', link: '/products', imageUrl: BANNER_2 },
-    { _id: 'banner-3', type: 'default', title: "NYC's Fastest Pet Delivery", link: '/products', imageUrl: BANNER_3 },
-  ];
-
-  // ── Birthday banner (new customers only) ──────────────────────
-  const birthdaySlide: Slide = {
-    _id: 'birthday-banner',
-    type: 'birthdayBanner',
-    title: "Celebrate Your Pet's Birthday!",
-    link: '#',
-    imageUrl: '',
-  };
-
-  const slides: Slide[] = [
-    ...(showBirthdayBanner ? [birthdaySlide] : []),
-    ...staticSlides,
-  ];
-
-  // Preload all 3 banner images
-  useEffect(() => {
-    staticSlides.forEach(s => { new Image().src = s.imageUrl; });
-  }, []);
-
-  // Auto-advance every 5s
-  useEffect(() => {
-    if (slides.length === 0) return;
-    const timer = setInterval(() => setCurrentSlide(prev => (prev + 1) % slides.length), 5000);
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
+    }, 5000);
     return () => clearInterval(timer);
-  }, [slides.length]);
+  }, []);
 
-  // Confetti for birthday banner
-  useEffect(() => {
-    if (slides[currentSlide]?.type !== 'birthdayBanner') return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
-    resize();
-    window.addEventListener('resize', resize);
-    const COLS = ['#FFD700','#FF6B9D','#A78BFA','#34D399','#60A5FA','#F97316','#fff','#FCA5A5'];
-    const P: any[] = [];
-    for (let i = 0; i < 120; i++) P.push({ x: Math.random()*900, y: Math.random()*300-300, r: Math.random()*5+3, d: Math.random()*80+20, c: COLS[Math.floor(Math.random()*COLS.length)], t: 0, ti: Math.random()*.07+.05 });
-    let ang = 0, raf: number;
-    const draw = () => {
-      canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
-      ang += .01;
-      P.forEach(p => {
-        p.t += p.ti; p.y += (Math.cos(ang+p.d)+2)*.55; p.x += Math.sin(ang)*.4;
-        if (p.y > canvas.height) { p.y = -10; p.x = Math.random()*canvas.width; }
-        ctx.beginPath(); ctx.lineWidth = p.r; ctx.strokeStyle = p.c;
-        const tilt = Math.sin(p.t)*11;
-        ctx.moveTo(p.x+tilt+p.r/4, p.y); ctx.lineTo(p.x+tilt, p.y+tilt+p.r/4); ctx.stroke();
-      });
-      raf = requestAnimationFrame(draw);
-    };
-    draw();
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
-  }, [currentSlide, slides]);
-
-  const nextSlide = () => setCurrentSlide(prev => (prev + 1) % slides.length);
-  const prevSlide = () => setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
-  const goToSlide = (i: number) => setCurrentSlide(i);
-
-  if (slides.length === 0) return null;
-
-  const F = "'Nunito',sans-serif";
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + SLIDES.length) % SLIDES.length);
+  const goToSlide = (index: number) => setCurrentSlide(index);
 
   return (
-    <>
-      <Helmet>
-        <link rel="preload" as="image" href={BANNER_1} fetchPriority="high" />
-      </Helmet>
+    <div className="w-full mt-4">
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-4">
+        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
 
-      <div className="w-full mt-4">
-        <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-4">
-          <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
-            <div className="relative w-full aspect-[16/6]" style={{ contain: 'layout style paint' }}>
-
-              {slides.map((slide, index) => {
-
-                // ── Birthday Banner ────────────────────────────────
-                if (slide.type === 'birthdayBanner') {
-                  return (
-                    <div
-                      key={slide._id}
-                      className={`absolute inset-0 transition-all duration-1000 ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
-                      style={{ width:'100%', height:'100%', background:'linear-gradient(135deg,#3b0764 0%,#4c1d95 35%,#1e3a8a 70%,#1e40af 100%)', overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:F }}
-                    >
-                      <style>{`
-                        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap');
-                        @keyframes dogBob{from{transform:translateY(0) rotate(-2deg)}to{transform:translateY(-14px) rotate(2deg)}}
-                        @keyframes catBob{from{transform:translateY(0) rotate(2deg)}to{transform:translateY(-12px) rotate(-2deg)}}
-                      `}</style>
-                      <canvas ref={canvasRef} style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none', opacity:.65 }} />
-                      <div style={{ position:'absolute', top:-60, left:-60, width:280, height:280, background:'radial-gradient(circle,rgba(167,139,250,0.28) 0%,transparent 70%)', borderRadius:'50%' }} />
-                      <div style={{ position:'absolute', bottom:-40, right:'8%', width:220, height:220, background:'radial-gradient(circle,rgba(96,165,250,0.22) 0%,transparent 70%)', borderRadius:'50%' }} />
-                      <div style={{ position:'relative', zIndex:2, maxWidth:1100, width:'100%', display:'flex', alignItems:'center', flexWrap:'wrap', justifyContent:'center', padding:'0 28px' }}>
-                        <div style={{ flexShrink:0, marginRight:-10, zIndex:3 }}><DogSVG /></div>
-                        <div style={{ flex:'1 1 0', minWidth:0, display:'flex', alignItems:'center', gap:36, flexWrap:'wrap', justifyContent:'center', padding:'0 8px' }}>
-                          <div style={{ flex:'1 1 300px', minWidth:260 }}>
-                            <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(255,255,255,0.13)', border:'1px solid rgba(255,255,255,0.22)', borderRadius:100, padding:'6px 16px', fontSize:13, fontWeight:700, color:'#FDE68A', marginBottom:18 }}>🎂 Pet Birthday Rewards</div>
-                            <h2 style={{ margin:'0 0 14px', fontSize:'clamp(20px,3vw,38px)', fontWeight:900, lineHeight:1.1, color:'#fff' }}>
-                              Celebrate Your<br />
-                              <span style={{ background:'linear-gradient(90deg,#FDE68A,#FCA5A5)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>Pet's Birthday!</span>
-                            </h2>
-                            <p style={{ margin:'0 0 18px', fontSize:13.5, lineHeight:1.7, color:'rgba(255,255,255,.82)', maxWidth:340 }}>
-                              Tell our AI your pet's birthday and receive an exclusive <strong style={{ color:'#FDE68A' }}>20% OFF coupon</strong> + a <strong style={{ color:'#FDE68A' }}>FREE birthday gift</strong> on their special day!
-                            </p>
-                            <div style={{ display:'flex', flexDirection:'column', gap:7, marginBottom:22 }}>
-                              {[['🎁','Free birthday gift with your order'],['💸','20% OFF — code BDAYGIFT auto-unlocked'],['🚚','Free shipping on birthday orders']].map(([icon,text])=>(
-                                <div key={text} style={{ display:'flex', alignItems:'center', gap:10, fontSize:12.5, color:'rgba(255,255,255,.88)', fontWeight:600 }}>
-                                  <span style={{ fontSize:16, width:22, textAlign:'center' }}>{icon}</span>{text}
-                                </div>
-                              ))}
-                            </div>
-                            <button onClick={openChat} style={{ display:'inline-flex', alignItems:'center', gap:9, background:'#16a34a', color:'#fff', border:'none', borderRadius:100, padding:'13px 24px', fontSize:14, fontWeight:800, cursor:'pointer', fontFamily:F, boxShadow:'0 4px 20px rgba(22,163,74,.45)' }}>
-                              🐾 Tell AI Your Pet's Birthday
-                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                            </button>
-                            <p style={{ marginTop:10, fontSize:11, color:'rgba(255,255,255,.4)' }}>✓ Takes 10 seconds &nbsp;·&nbsp; ✓ Discount unlocked automatically</p>
-                          </div>
-                          <div style={{ flexShrink:0, width:260 }}>
-                            <div style={{ background:'rgba(255,255,255,.08)', border:'1px solid rgba(255,255,255,.16)', borderRadius:20, overflow:'hidden', boxShadow:'0 20px 50px rgba(0,0,0,.38)' }}>
-                              <div style={{ background:'linear-gradient(135deg,#1e3a8a,#1d4ed8)', padding:'11px 14px', display:'flex', alignItems:'center', gap:9 }}>
-                                <div style={{ width:30, height:30, borderRadius:'50%', background:'#F97316', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, flexShrink:0 }}>🐾</div>
-                                <div>
-                                  <div style={{ color:'#fff', fontWeight:800, fontSize:12.5, fontFamily:F }}>AI Pet Advisor</div>
-                                  <div style={{ color:'rgba(255,255,255,.6)', fontSize:10, fontFamily:F }}>Online now</div>
-                                </div>
-                              </div>
-                              <div style={{ padding:11, display:'flex', flexDirection:'column', gap:8, background:'#f8f9fc' }}>
-                                {[{s:'bot',t:"What is your pet's birthday? 🎂"},{s:'usr',t:'📅 June 15'},{s:'cel',t:"🎉 Birthday gift & 20% OFF on June 15th!"}].map((m,i)=>(
-                                  <div key={i} style={{ display:'flex', gap:6, alignItems:'flex-end', flexDirection:m.s==='usr'?'row-reverse':'row' }}>
-                                    {m.s!=='usr'&&<div style={{ width:21,height:21,borderRadius:'50%',background:'#1e3a8a',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,flexShrink:0 }}>🐾</div>}
-                                    <div style={{ maxWidth:165,padding:'7px 10px',borderRadius:12,fontSize:11.5,lineHeight:1.5,fontWeight:600,fontFamily:F,...(m.s==='bot'?{background:'#fff',border:'1px solid #e5e7eb',color:'#111827',borderBottomLeftRadius:3}:m.s==='usr'?{background:'linear-gradient(135deg,#7c3aed,#4f46e5)',color:'#fff',borderBottomRightRadius:3}:{background:'linear-gradient(135deg,#fef3c7,#fde68a)',border:'1px solid #fbbf24',color:'#92400e',borderBottomLeftRadius:3}) }}>{m.t}</div>
-                                  </div>
-                                ))}
-                                <div style={{ background:'linear-gradient(135deg,#16a34a,#15803d)',padding:'7px 11px',display:'flex',alignItems:'center',gap:6,borderRadius:8,marginTop:1 }}>
-                                  <span style={{ fontSize:15 }}>🎁</span>
-                                  <div>
-                                    <div style={{ color:'#fff',fontSize:10.5,fontWeight:800,fontFamily:F }}>Special birthday discount</div>
-                                    <div style={{ color:'rgba(255,255,255,.8)',fontSize:9.5,fontWeight:600,fontFamily:F }}>unlocked automatically on the day!</div>
-                                  </div>
-                                </div>
-                              </div>
-                              <div style={{ background:'#1e3a8a',padding:'7px 14px',textAlign:'center',fontSize:10.5,color:'rgba(255,255,255,.9)',fontWeight:700,fontFamily:F }}>🚚 Free Shipping on Birthday Orders ❤️</div>
-                            </div>
-                          </div>
-                        </div>
-                        <div style={{ flexShrink:0, marginLeft:-10, zIndex:3 }}><CatSVG /></div>
-                      </div>
-                    </div>
-                  );
-                }
-
-                // ── Regular Image Slide ────────────────────────────
-                const imageUrl = slide.leftImage || slide.imageUrl;
-                const imgEl = (
-                  <img
-                    src={imageUrl}
-                    alt={slide.title || 'Banner'}
-                    width={1920}
-                    height={720}
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                    fetchPriority={index === 0 ? 'high' : 'auto'}
-                    decoding={index === 0 ? 'sync' : 'async'}
-                    className="w-full h-full object-cover"
-                    style={{ objectFit: 'cover' }}
-                    onError={(e) => { const t = e.target as HTMLImageElement; if (t.src !== imageUrl) t.src = imageUrl; }}
-                  />
-                );
-
-                return (
-                  <Link
-                    key={slide._id || slide.id}
-                    to={slide.link || '/products'}
-                    className={`absolute inset-0 transition-all duration-1000 block ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
-                  >
-                    {imgEl}
-                  </Link>
-                );
-              })}
-            </div>
-
-            {/* Navigation Arrows */}
-            {slides.length > 1 && (
-              <>
-                <button onClick={prevSlide}
-                  className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 hover:text-blue-600 p-2 md:p-3 rounded-full transition-all shadow-lg hover:shadow-xl z-20 transform hover:scale-110 duration-300"
-                  aria-label="Previous slide" style={{ minWidth:'44px', minHeight:'44px' }}>
-                  <ChevronLeft size={20} className="md:w-6 md:h-6" />
-                </button>
-                <button onClick={nextSlide}
-                  className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 hover:text-blue-600 p-2 md:p-3 rounded-full transition-all shadow-lg hover:shadow-xl z-20 transform hover:scale-110 duration-300"
-                  aria-label="Next slide" style={{ minWidth:'44px', minHeight:'44px' }}>
-                  <ChevronRight size={20} className="md:w-6 md:h-6" />
-                </button>
-              </>
-            )}
-
-            {/* Slide Indicators */}
-            {slides.length > 1 && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-20 bg-white/70 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md">
-                {slides.map((_, i) => (
-                  <button key={i} onClick={() => goToSlide(i)}
-                    className={`rounded-full transition-all duration-300 ${i === currentSlide ? 'bg-gradient-to-r from-blue-600 to-purple-600 w-8 h-2' : 'bg-gray-400 hover:bg-gray-600 w-2 h-2'}`}
-                    aria-label={`Go to slide ${i + 1}`} />
-                ))}
-              </div>
-            )}
+          {/* Slides */}
+          <div className="relative w-full aspect-[16/6]">
+            {SLIDES.map((slide, index) => (
+              <Link
+                key={slide.id}
+                to={slide.link}
+                className={`absolute inset-0 transition-all duration-1000 ${
+                  index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                }`}
+              >
+                <img
+                  src={slide.src}
+                  alt={slide.alt}
+                  width={1920}
+                  height={720}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  fetchPriority={index === 0 ? 'high' : 'auto'}
+                  decoding={index === 0 ? 'sync' : 'async'}
+                  className="w-full h-full object-cover"
+                />
+              </Link>
+            ))}
           </div>
+
+          {/* Arrows */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 hover:text-blue-600 p-2 md:p-3 rounded-full transition-all shadow-lg hover:shadow-xl z-20 transform hover:scale-110 duration-300"
+            aria-label="Previous slide"
+            style={{ minWidth: '44px', minHeight: '44px' }}
+          >
+            <ChevronLeft size={20} className="md:w-6 md:h-6" />
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 hover:text-blue-600 p-2 md:p-3 rounded-full transition-all shadow-lg hover:shadow-xl z-20 transform hover:scale-110 duration-300"
+            aria-label="Next slide"
+            style={{ minWidth: '44px', minHeight: '44px' }}
+          >
+            <ChevronRight size={20} className="md:w-6 md:h-6" />
+          </button>
+
+          {/* Dot indicators */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-20 bg-white/70 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md">
+            {SLIDES.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`rounded-full transition-all duration-300 ${
+                  index === currentSlide
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 w-8 h-2'
+                    : 'bg-gray-400 hover:bg-gray-600 w-2 h-2'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
