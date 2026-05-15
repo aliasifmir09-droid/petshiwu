@@ -249,14 +249,14 @@ export default function AIPetAdvisor() {
     <div>
       {!open && (
         <button onClick={function () { setOpen(true) }}
-          className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full px-4 py-3 flex items-center gap-2 shadow-lg transition-all duration-200 active:scale-95">
+          className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full px-4 py-3 flex items-center gap-2 shadow-lg transition-all duration-200 active:scale-95">
           <Sparkles size={18} />
           <span className="text-sm font-semibold">Ask AI Pet Advisor</span>
         </button>
       )}
 
       {open && (
-        <div className="fixed bottom-6 right-6 z-50 w-80 bg-white rounded-2xl border border-gray-200 shadow-xl flex flex-col overflow-hidden" style={{ height: '540px' }}>
+        <div className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-50 w-80 bg-white rounded-2xl border border-gray-200 shadow-xl flex flex-col overflow-hidden" style={{ height: '540px' }}>
 
           {/* Header */}
           <div className="bg-blue-600 text-white px-4 py-3 flex items-center gap-3 flex-shrink-0">

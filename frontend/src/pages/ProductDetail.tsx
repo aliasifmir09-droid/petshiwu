@@ -1501,13 +1501,13 @@ const ProductDetail = () => {
           style={{ boxShadow: '0 -2px 12px rgba(0,0,0,0.10)' }}>
           {/* Price */}
           <div className="flex-shrink-0">
-            {product.salePrice && product.salePrice < product.price ? (
+            {product.salePrice != null && product.price != null && product.salePrice < product.price ? (
               <div>
-                <span className="text-lg font-black text-red-600">${product.salePrice.toFixed(2)}</span>
-                <span className="text-xs text-gray-400 line-through ml-1">${product.price.toFixed(2)}</span>
+                <span className="text-lg font-black text-red-600">${Number(product.salePrice).toFixed(2)}</span>
+                <span className="text-xs text-gray-400 line-through ml-1">${Number(product.price).toFixed(2)}</span>
               </div>
             ) : (
-              <span className="text-lg font-black text-gray-900">${product.price.toFixed(2)}</span>
+              <span className="text-lg font-black text-gray-900">${Number(product.price ?? 0).toFixed(2)}</span>
             )}
           </div>
           {/* Add to Cart button */}
