@@ -1,311 +1,330 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/products';
-import LoadingSpinner from '@/components/LoadingSpinner';
-import EmptyState from '@/components/EmptyState';
 import ProductCard from '@/components/ProductCard';
-import { Search, SlidersHorizontal } from 'lucide-react';
-import { useToast } from '@/hooks/useToast';
-import Toast from '@/components/Toast';
-import { trackSearch } from '@/utils/analytics';
+import { Search, X, SlidersHorizontal, ArrowLeft, Package } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import SEO from '@/components/SEO';
-import { useSEO } from '@/hooks/useSEO';
+import { normalizeImageUrl } from '@/utils/imageUtils';
 
 const AdvancedSearch = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { toast, showToast, hideToast } = useToast();
-  const [query, setQuery] = useState(searchParams.get('q') || '');
-  
-  // SEO
-  const seoData = useSEO({
-    title: query ? `Search Results for "${query}"` : 'Advanced Product Search',
-    description: query 
-      ? `Find the best pet products matching "${query}". Filter by price, rating, brand, and more.`
-      : 'Search for pet products with advanced filters. Find dog food, cat food, toys, and supplies by price, rating, brand, and more.',
-    keywords: query ? [query, 'pet products', 'search'] : ['pet product search', 'find pet supplies', 'pet product filters'],
-    type: 'website'
-  });
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const [inputValue, setInputValue] = useState(searchParams.get('q') || '');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
-    minPrice: searchParams.get('minPrice') || '',
-    maxPrice: searchParams.get('maxPrice') || '',
-    minRating: searchParams.get('minRating') || '',
+    sort: searchParams.get('sort') || 'newest',
     inStock: searchParams.get('inStock') === 'true',
-    category: searchParams.get('category') || '',
     petType: searchParams.get('petType') || '',
     brand: searchParams.get('brand') || '',
-    sort: searchParams.get('sort') || 'newest'
+    minPrice: searchParams.get('minPrice') || '',
+    maxPrice: searchParams.get('maxPrice') || '',
   });
 
-  const [autocompleteQuery, setAutocompleteQuery] = useState('');
-  const debouncedAutocompleteQuery = useDebounce(autocompleteQuery, 300); // Debounce autocomplete by 300ms
-  const [autocompleteResults, setAutocompleteResults] = useState<Array<{ type: string; name: string; slug: string; image?: string }>>([]);
-  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  // Debounce the search query — search fires 350ms after user stops typing
+  const debouncedQuery = useDebounce(inputValue.trim(), 350);
 
-  const { data: searchResults, isLoading } = useQuery({
-    queryKey: ['search', query, filters],
-    queryFn: () => productService.search(query, {
-      ...(filters.minPrice && { minPrice: parseFloat(filters.minPrice) }),
-      ...(filters.maxPrice && { maxPrice: parseFloat(filters.maxPrice) }),
-      ...(filters.minRating && { minRating: parseFloat(filters.minRating) }),
-      ...(filters.inStock && { inStock: true }),
-      ...(filters.category && { category: filters.category }),
-      ...(filters.petType && { petType: filters.petType }),
-      ...(filters.brand && { brand: filters.brand }),
-      sort: filters.sort,
-      page: 1,
-      limit: 20
-    }),
-    enabled: query.length > 0
-  });
-
+  // Auto-focus on mount (mobile keyboard opens immediately)
   useEffect(() => {
-    if (debouncedAutocompleteQuery.length > 2) {
-      productService.getSearchSuggestions(debouncedAutocompleteQuery, 10).then((response) => {
-        // Transform the response to match the expected format
-        const results: Array<{ type: string; name: string; slug: string; image?: string }> = [];
-        
-        // Add products
-        if (response.data?.products) {
-          response.data.products.forEach((product: any) => {
-            results.push({
-              type: 'product',
-              name: product.name,
-              slug: product.slug,
-              image: product.images?.[0]
-            });
-          });
-        }
-        
-        // Add categories
-        if (response.data?.categories) {
-          response.data.categories.forEach((category: any) => {
-            results.push({
-              type: 'category',
-              name: category.name,
-              slug: category.slug
-            });
-          });
-        }
-        
-        setAutocompleteResults(results);
-      });
+    inputRef.current?.focus();
+  }, []);
+
+  // Sync URL when debounced query changes
+  useEffect(() => {
+    if (debouncedQuery) {
+      const params = new URLSearchParams();
+      params.set('q', debouncedQuery);
+      if (filters.sort && filters.sort !== 'newest') params.set('sort', filters.sort);
+      if (filters.inStock) params.set('inStock', 'true');
+      if (filters.petType) params.set('petType', filters.petType);
+      if (filters.brand) params.set('brand', filters.brand);
+      if (filters.minPrice) params.set('minPrice', filters.minPrice);
+      if (filters.maxPrice) params.set('maxPrice', filters.maxPrice);
+      setSearchParams(params);
     } else {
-      setAutocompleteResults([]);
+      setSearchParams({});
     }
-  }, [debouncedAutocompleteQuery]);
+  }, [debouncedQuery, filters]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) {
-      showToast('Please enter a search query', 'warning');
-      return;
-    }
-    
-    // Track search
-    trackSearch(query, searchResults?.pagination?.total);
-    
-    const params = new URLSearchParams();
-    params.set('q', query);
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) params.set(key, String(value));
-    });
-    setSearchParams(params);
-  };
+  // Fetch results — fires automatically when debouncedQuery changes
+  const { data: searchResults, isLoading, isFetching } = useQuery({
+    queryKey: ['search', debouncedQuery, filters],
+    queryFn: () =>
+      productService.search(debouncedQuery, {
+        sort: filters.sort,
+        inStock: filters.inStock || undefined,
+        petType: filters.petType || undefined,
+        brand: filters.brand || undefined,
+        minPrice: filters.minPrice ? parseFloat(filters.minPrice) : undefined,
+        maxPrice: filters.maxPrice ? parseFloat(filters.maxPrice) : undefined,
+        page: 1,
+        limit: 24,
+      }),
+    enabled: debouncedQuery.length >= 1,
+    staleTime: 30 * 1000,
+  });
 
-  const clearFilters = () => {
-    setFilters({
-      minPrice: '',
-      maxPrice: '',
-      minRating: '',
-      inStock: false,
-      category: '',
-      petType: '',
-      brand: '',
-      sort: 'newest'
-    });
-    setSearchParams({ q: query });
-  };
+  const products = searchResults?.data || [];
+  const total = searchResults?.pagination?.total || 0;
+  const isSearching = isLoading || isFetching;
 
-  const handleAutocompleteSelect = (item: { type: string; slug: string }) => {
-    if (item.type === 'product') {
-      navigate(`/products/${item.slug}`);
-    } else if (item.type === 'category') {
-      navigate(`/category/${item.slug}`);
-    }
-    setShowAutocomplete(false);
-    setAutocompleteQuery('');
-  };
+  // Suggestions from autocomplete (shown while typing, before results)
+  const { data: suggestions } = useQuery({
+    queryKey: ['search-autocomplete', inputValue],
+    queryFn: () => productService.getSearchSuggestions(inputValue, 6),
+    enabled: inputValue.length >= 2 && products.length === 0 && !isSearching,
+    staleTime: 30 * 1000,
+  });
+  const suggestionProducts = suggestions?.data?.products || [];
 
   return (
     <>
       <SEO
-        title={seoData.title}
-        description={seoData.description}
-        keywords={seoData.keywords}
-        url={seoData.canonicalUrl}
+        title={debouncedQuery ? `"${debouncedQuery}" - Search Results` : 'Search Products'}
+        description="Search for pet food, toys, accessories and supplies."
+        keywords={['pet products', 'search', debouncedQuery].filter(Boolean)}
+        url={`https://www.petshiwu.com/search`}
       />
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold mb-6">Advanced Search</h1>
 
-      {/* Search Bar */}
-      <div className="relative mb-6">
-        <form onSubmit={handleSearch} className="flex gap-2">
-          <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setAutocompleteQuery(e.target.value);
-                setShowAutocomplete(e.target.value.length > 2);
-              }}
-              onFocus={() => setShowAutocomplete(autocompleteQuery.length > 2)}
-              placeholder="Search for products..."
-              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-            {showAutocomplete && autocompleteResults.length > 0 && (
-              <div className="absolute z-10 w-full mt-2 bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto">
-                {autocompleteResults.map((item, index) => (
+      <div className="min-h-screen bg-gray-50 pb-24 lg:pb-8">
+
+        {/* ── Sticky Search Header ── */}
+        <div className="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3"
+          style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+          <div className="flex items-center gap-3 max-w-3xl mx-auto">
+            {/* Back arrow on mobile */}
+            <button
+              onClick={() => navigate(-1)}
+              className="lg:hidden flex-shrink-0 p-2 -ml-1 text-gray-600 hover:text-gray-900"
+              aria-label="Go back"
+            >
+              <ArrowLeft size={22} />
+            </button>
+
+            {/* Search input */}
+            <div className="flex-1 relative">
+              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <input
+                ref={inputRef}
+                type="search"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder="Search products, brands..."
+                className="w-full pl-10 pr-10 py-2.5 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+              />
+              {inputValue && (
+                <button
+                  onClick={() => setInputValue('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label="Clear search"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+
+            {/* Filter toggle */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex-shrink-0 p-2.5 rounded-xl border-2 transition-all ${
+                showFilters ? 'border-blue-500 bg-blue-50 text-blue-600' : 'border-gray-200 text-gray-600'
+              }`}
+              aria-label="Filters"
+            >
+              <SlidersHorizontal size={18} />
+            </button>
+          </div>
+
+          {/* Filters panel */}
+          {showFilters && (
+            <div className="mt-3 pt-3 border-t border-gray-100 max-w-3xl mx-auto">
+              <div className="flex flex-wrap gap-2">
+                {/* Sort */}
+                <select
+                  value={filters.sort}
+                  onChange={(e) => setFilters({ ...filters, sort: e.target.value })}
+                  className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="newest">Newest</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="rating">Top Rated</option>
+                  <option value="featured">Featured</option>
+                </select>
+
+                {/* Pet type */}
+                <select
+                  value={filters.petType}
+                  onChange={(e) => setFilters({ ...filters, petType: e.target.value })}
+                  className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">All Pets</option>
+                  <option value="dog">Dog</option>
+                  <option value="cat">Cat</option>
+                  <option value="bird">Bird</option>
+                  <option value="fish">Fish</option>
+                  <option value="small-animal">Small Animal</option>
+                </select>
+
+                {/* In stock toggle */}
+                <button
+                  onClick={() => setFilters({ ...filters, inStock: !filters.inStock })}
+                  className={`text-sm px-3 py-1.5 rounded-lg border-2 transition-all ${
+                    filters.inStock
+                      ? 'border-green-500 bg-green-50 text-green-700 font-semibold'
+                      : 'border-gray-200 text-gray-600'
+                  }`}
+                >
+                  In Stock Only
+                </button>
+
+                {/* Price range */}
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    value={filters.minPrice}
+                    onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
+                    placeholder="Min $"
+                    className="w-20 text-sm border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span className="text-gray-400 text-sm">–</span>
+                  <input
+                    type="number"
+                    value={filters.maxPrice}
+                    onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+                    placeholder="Max $"
+                    className="w-20 text-sm border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Clear filters */}
+                {(filters.petType || filters.inStock || filters.minPrice || filters.maxPrice || filters.sort !== 'newest') && (
                   <button
-                    key={index}
-                    onClick={() => handleAutocompleteSelect(item)}
-                    className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 text-left"
+                    onClick={() => setFilters({ sort: 'newest', inStock: false, petType: '', brand: '', minPrice: '', maxPrice: '' })}
+                    className="text-sm text-red-500 hover:text-red-600 px-2 py-1.5"
                   >
-                    {item.image && (
-                      <img src={item.image} alt={item.name} className="w-12 h-12 object-cover rounded" />
-                    )}
-                    <div>
-                      <p className="font-semibold">{item.name}</p>
-                      <p className="text-sm text-gray-500 capitalize">{item.type}</p>
-                    </div>
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Body ── */}
+        <div className="max-w-3xl mx-auto px-4 pt-4">
+
+          {/* Empty state — no query yet */}
+          {!inputValue && (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search size={28} className="text-blue-600" />
+              </div>
+              <p className="text-lg font-semibold text-gray-800">Search for anything</p>
+              <p className="text-sm text-gray-500 mt-1">Dog food, cat toys, leashes, beds...</p>
+
+              {/* Quick searches */}
+              <div className="flex flex-wrap justify-center gap-2 mt-6">
+                {['Dog food', 'Cat litter', 'Dog toys', 'Cat treats', 'Bird food', 'Fish tank'].map((term) => (
+                  <button
+                    key={term}
+                    onClick={() => setInputValue(term)}
+                    className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-700 hover:border-blue-400 hover:text-blue-600 transition-all shadow-sm"
+                  >
+                    {term}
                   </button>
                 ))}
               </div>
-            )}
-          </div>
-          <button
-            type="submit"
-            className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700"
-          >
-            Search
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowFilters(!showFilters)}
-            className="bg-gray-200 text-gray-800 px-4 py-3 rounded-lg hover:bg-gray-300"
-          >
-            <SlidersHorizontal size={20} />
-          </button>
-        </form>
-      </div>
+            </div>
+          )}
 
-      {/* Filters */}
-      {showFilters && (
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Filters</h2>
-            <button
-              onClick={clearFilters}
-              className="text-sm text-primary-600 hover:text-primary-700"
-            >
-              Clear All
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Min Price</label>
-              <input
-                type="number"
-                value={filters.minPrice}
-                onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                placeholder="0"
-              />
+          {/* Searching indicator */}
+          {inputValue && isSearching && (
+            <div className="flex items-center justify-center gap-2 py-8 text-gray-500">
+              <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              <span className="text-sm">Searching...</span>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Max Price</label>
-              <input
-                type="number"
-                value={filters.maxPrice}
-                onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                placeholder="1000"
-              />
+          )}
+
+          {/* Results */}
+          {!isSearching && debouncedQuery && products.length > 0 && (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm text-gray-600">
+                  <span className="font-semibold text-gray-900">{total.toLocaleString()}</span> results for
+                  {' '}<span className="font-semibold text-blue-600">"{debouncedQuery}"</span>
+                </p>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {products.map((product: any) => (
+                  <ProductCard key={product._id} product={product} searchTerm={debouncedQuery} />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* No results */}
+          {!isSearching && debouncedQuery && products.length === 0 && (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Package size={28} className="text-gray-400" />
+              </div>
+              <p className="text-lg font-semibold text-gray-800">No results for "{debouncedQuery}"</p>
+              <p className="text-sm text-gray-500 mt-1 mb-6">Try a shorter or different search term</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {['Dog food', 'Cat litter', 'Pet toys', 'Treats'].map((term) => (
+                  <button
+                    key={term}
+                    onClick={() => setInputValue(term)}
+                    className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-700 hover:border-blue-400 hover:text-blue-600 transition-all"
+                  >
+                    {term}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Min Rating</label>
-              <select
-                value={filters.minRating}
-                onChange={(e) => setFilters({ ...filters, minRating: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2"
-              >
-                <option value="">Any</option>
-                <option value="4">4+ Stars</option>
-                <option value="3">3+ Stars</option>
-                <option value="2">2+ Stars</option>
-                <option value="1">1+ Star</option>
-              </select>
+          )}
+
+          {/* Autocomplete suggestions (while typing, before debounce fires) */}
+          {inputValue.length >= 2 && !debouncedQuery && suggestionProducts.length > 0 && (
+            <div className="space-y-1">
+              {suggestionProducts.map((p: any) => (
+                <Link
+                  key={p._id || p.slug}
+                  to={`/products/${p.slug}`}
+                  className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 hover:border-blue-300 hover:shadow-sm transition-all"
+                >
+                  <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                    {p.images?.[0] ? (
+                      <img src={normalizeImageUrl(p.images[0])} alt={p.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package size={18} className="text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{p.name}</p>
+                    {p.basePrice && (
+                      <p className="text-sm font-bold text-blue-600">${p.basePrice.toFixed(2)}</p>
+                    )}
+                  </div>
+                  <Search size={15} className="text-gray-400 flex-shrink-0" />
+                </Link>
+              ))}
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Sort By</label>
-              <select
-                value={filters.sort}
-                onChange={(e) => setFilters({ ...filters, sort: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2"
-              >
-                <option value="newest">Newest</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="rating">Highest Rated</option>
-              </select>
-            </div>
-            <div>
-              <label className="flex items-center gap-2 mt-6">
-                <input
-                  type="checkbox"
-                  checked={filters.inStock}
-                  onChange={(e) => setFilters({ ...filters, inStock: e.target.checked })}
-                  className="w-4 h-4"
-                />
-                <span className="text-sm">In Stock Only</span>
-              </label>
-            </div>
-          </div>
+          )}
+
         </div>
-      )}
-
-      {/* Results */}
-      {isLoading ? (
-        <LoadingSpinner size="lg" />
-      ) : searchResults && searchResults.data && searchResults.data.length > 0 ? (
-        <>
-          <div className="mb-4 text-gray-600">
-            Found {searchResults.pagination?.total || searchResults.data.length} results
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {searchResults.data.map((product) => (
-              <ProductCard key={product._id} product={product} searchTerm={query} />
-            ))}
-          </div>
-        </>
-      ) : query ? (
-        <EmptyState
-          icon={Search}
-          title="No Results Found"
-          description="Try adjusting your search terms or filters."
-        />
-      ) : null}
-
-      {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
-    </div>
+      </div>
     </>
   );
 };
 
 export default AdvancedSearch;
-
