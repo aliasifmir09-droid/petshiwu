@@ -617,7 +617,7 @@ const ProductDetail = () => {
         product={product}
         selectedVariant={selectedVariantData}
       />
-      <div className="container mx-auto px-4 lg:px-8 py-8 pb-36 lg:pb-8">
+      <div className="container mx-auto px-4 lg:px-8 py-8 pb-44 lg:pb-8">
       {/* Breadcrumb */}
       <nav className="mb-6" aria-label="Breadcrumb">
         <ol className="flex items-center space-x-2 text-sm text-gray-600">
@@ -1020,29 +1020,33 @@ const ProductDetail = () => {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-4 mb-8">
+          <div className="mb-8">
+            {/* Primary — full-width Add to Cart */}
             <button
               onClick={handleAddToCart}
               disabled={!selectedVariantData || (selectedVariantData ? selectedVariantData.stock === 0 : true)}
-              className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors ${
+              className={`w-full flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-bold text-lg transition-all active:scale-[0.98] ${
                 selectedVariantData && selectedVariantData.stock > 0
-                  ? 'bg-primary-600 text-white hover:bg-primary-700'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
-              <ShoppingCart size={20} />
+              <ShoppingCart size={22} />
               {selectedVariantData && selectedVariantData.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
-            <button
-              onClick={handleWishlistToggle}
-              className={`px-6 py-3 border-2 rounded-lg font-semibold transition-colors ${
-                inWishlist
-                  ? 'border-red-500 text-red-500 bg-red-50'
-                  : 'border-gray-300 hover:border-gray-400'
-              }`}
-            >
-              <Heart size={20} fill={inWishlist ? 'currentColor' : 'none'} />
-            </button>
+            {/* Secondary row — wishlist + share */}
+            <div className="flex gap-3 mt-3">
+              <button
+                onClick={handleWishlistToggle}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 font-semibold text-sm transition-all ${
+                  inWishlist
+                    ? 'border-red-400 text-red-500 bg-red-50'
+                    : 'border-gray-300 text-gray-600 hover:border-blue-400 hover:text-blue-600'
+                }`}
+              >
+                <Heart size={17} fill={inWishlist ? 'currentColor' : 'none'} />
+                {inWishlist ? 'Saved' : 'Save'}
+              </button>
             <div className="relative">
               <button
                 onClick={() => {
@@ -1051,9 +1055,10 @@ const ProductDetail = () => {
                     setShouldLoadSocialLinks(true);
                   }
                 }}
-                className="px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold text-gray-700 hover:border-primary-600 hover:text-primary-600 transition-colors"
+                className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-gray-300 text-gray-600 hover:border-blue-400 hover:text-blue-600 font-semibold text-sm transition-all"
               >
-                <Share2 size={20} />
+                <Share2 size={17} />
+                Share
               </button>
               {showShareMenu && socialLinks && (
                 <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 p-2 z-10 min-w-[200px]">
@@ -1088,12 +1093,7 @@ const ProductDetail = () => {
                 </div>
               )}
             </div>
-            <button
-              onClick={handleCompare}
-              className="px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold text-gray-700 hover:border-primary-600 hover:text-primary-600 transition-colors"
-            >
-              Compare
-            </button>
+            </div>{/* end secondary row */}
           </div>
 
           {/* Product Details */}
@@ -1495,43 +1495,33 @@ const ProductDetail = () => {
 
       {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
 
-      {/* ── Sticky mobile Add to Cart bar (Chewy-style) ── */}
+      {/* ── Sticky mobile Add to Cart bar ── */}
       {product && (
-        <div className="lg:hidden fixed bottom-16 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 z-30 flex items-center gap-3"
-          style={{ boxShadow: '0 -2px 12px rgba(0,0,0,0.10)' }}>
-          {/* Price */}
-          <div className="flex-shrink-0">
-            {product.salePrice != null && product.price != null && product.salePrice < product.price ? (
-              <div>
-                <span className="text-lg font-black text-red-600">${Number(product.salePrice).toFixed(2)}</span>
-                <span className="text-xs text-gray-400 line-through ml-1">${Number(product.price).toFixed(2)}</span>
-              </div>
-            ) : (
-              <span className="text-lg font-black text-gray-900">${Number(product.price ?? 0).toFixed(2)}</span>
-            )}
+        <div className="lg:hidden fixed bottom-16 left-0 right-0 bg-white border-t border-gray-100 px-4 py-3 z-30"
+          style={{ boxShadow: '0 -4px 16px rgba(0,0,0,0.08)' }}>
+          {/* Price row */}
+          <div className="flex items-baseline gap-2 mb-2">
+            {product.salePrice != null && price > 0 && product.salePrice < price ? (
+              <>
+                <span className="text-xl font-black text-blue-600">${Number(product.salePrice).toFixed(2)}</span>
+                <span className="text-sm text-gray-400 line-through">${Number(price).toFixed(2)}</span>
+              </>
+            ) : price > 0 ? (
+              <span className="text-xl font-black text-gray-900">${Number(price).toFixed(2)}</span>
+            ) : null}
           </div>
-          {/* Add to Cart button */}
+          {/* Full-width Add to Cart */}
           <button
             onClick={handleAddToCart}
             disabled={!selectedVariantData || (selectedVariantData ? selectedVariantData.stock === 0 : true)}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-base transition-all active:scale-95 ${
+            className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-base transition-all active:scale-[0.98] ${
               selectedVariantData && selectedVariantData.stock > 0
-                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
+                ? 'bg-blue-600 text-white shadow-md'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >
             <ShoppingCart size={20} />
             {selectedVariantData && selectedVariantData.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-          </button>
-          {/* Wishlist */}
-          <button
-            onClick={handleWishlistToggle}
-            className={`flex-shrink-0 p-3 rounded-xl border-2 transition-all ${
-              inWishlist ? 'border-red-400 text-red-500 bg-red-50' : 'border-gray-300 text-gray-500'
-            }`}
-            aria-label="Add to favorites"
-          >
-            <Heart size={20} fill={inWishlist ? 'currentColor' : 'none'} />
           </button>
         </div>
       )}
