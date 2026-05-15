@@ -14,9 +14,10 @@ interface Slide {
   imageUrl: string;
   leftImage?: string;
   link: string;
-  type?: 'default' | 'birthdayBanner'; // Add a type property
+  type?: 'default' | 'birthdayBanner';
 }
 
+// ─── Dog SVG ──────────────────────────────────────────────────────
 const DogSVG = () => (
   <svg width="150" height="190" viewBox="0 0 150 190" xmlns="http://www.w3.org/2000/svg"
     style={{ animation: 'dogBob 2.2s ease-in-out infinite alternate', filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))' }}>
@@ -48,6 +49,7 @@ const DogSVG = () => (
   </svg>
 );
 
+// ─── Cat SVG ──────────────────────────────────────────────────────
 const CatSVG = () => (
   <svg width="145" height="190" viewBox="0 0 145 190" xmlns="http://www.w3.org/2000/svg"
     style={{ animation: 'catBob 2.6s ease-in-out infinite alternate', filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.4))' }}>
@@ -87,10 +89,14 @@ const CatSVG = () => (
   </svg>
 );
 
-function openChat() {
+// ─── Open AI chat ─────────────────────────────────────────────────
+function openChat(e: React.MouseEvent) {
+  e.preventDefault();
+  e.stopPropagation();
   window.dispatchEvent(new CustomEvent('openPetAdvisor'));
 }
 
+// ─── Main Component ───────────────────────────────────────────────
 const HeroSlideshow = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -101,117 +107,84 @@ const HeroSlideshow = () => {
     setShowBirthdayBanner(!key);
   }, []);
 
-  // Fetch slides from API - Optimized for LCP
-  const { data: fetchedSlides = [], isLoading } = useQuery<Slide[]> ({
+  const { data: fetchedSlides = [], isLoading } = useQuery<Slide[]>({
     queryKey: ['slideshow', 'active'],
     queryFn: slideshowService.getActiveSlides,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     retry: 1,
-    retryDelay: 100
+    retryDelay: 100,
   });
 
-  // Combine slides
-  const slides = showBirthdayBanner 
-    ? [{ _id: 'birthday-banner', type: 'birthdayBanner', title: 'Celebrate Your Pet\'s Birthday!', link: '/pet-birthday-rewards', imageUrl: '' }, ...fetchedSlides]
+  // Birthday banner as first slide for new customers
+  const slides: Slide[] = showBirthdayBanner
+    ? [{ _id: 'birthday-banner', type: 'birthdayBanner', title: "Celebrate Your Pet's Birthday!", link: '#', imageUrl: '' }, ...fetchedSlides]
     : fetchedSlides;
 
-  // Preload hero images for better LCP
+  // Preload hero images
   useEffect(() => {
     if (slides.length === 0) return;
-    
-    // Filter out the birthday banner slide for image preloading as it's a component
-    const imagesToPreload = slides.filter(slide => slide.type !== 'birthdayBanner').slice(0, 2).map(slide => 
-      normalizeImageUrl(slide.leftImage || slide.imageUrl, { 
-        width: 1920, 
-        height: 720, 
-        format: 'auto'
-      })
-    );
-    
+    const imagesToPreload = slides
+      .filter(s => s.type !== 'birthdayBanner')
+      .slice(0, 2)
+      .map(s => normalizeImageUrl(s.leftImage || s.imageUrl, { width: 1920, height: 720, format: 'auto' }));
     imagesToPreload.forEach(src => {
       const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'image';
-      link.href = src;
+      link.rel = 'preload'; link.as = 'image'; link.href = src;
       document.head.appendChild(link);
+      new Image().src = src;
     });
-    
-    imagesToPreload.forEach(src => {
-      const img = new Image();
-      img.src = src;
-    });
-  }, [slides]);
+  }, [slides.length]);
 
-  // Preload the first slide image (LCP image)
   const firstSlideImage = slides.length > 0 && slides[0].type !== 'birthdayBanner'
-    ? normalizeImageUrl(slides[0].leftImage || slides[0].imageUrl, { 
-        width: 1920, 
-        height: 720, 
-        format: 'auto'
-      })
+    ? normalizeImageUrl(slides[0].leftImage || slides[0].imageUrl, { width: 1920, height: 720, format: 'auto' })
     : null;
 
-  // Auto-advance slides every 5 seconds
+  // Auto-advance
   useEffect(() => {
     if (slides.length === 0) return;
-    
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
+      setCurrentSlide(prev => (prev + 1) % slides.length);
     }, 5000);
-
     return () => clearInterval(timer);
   }, [slides.length]);
 
-  // Canvas animation for birthday banner
+  // Confetti canvas for birthday banner
   useEffect(() => {
-    if (!showBirthdayBanner || currentSlide !== 0) return;
-    
+    const isBirthdaySlide = slides[currentSlide]?.type === 'birthdayBanner';
+    if (!isBirthdaySlide) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
     const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
     resize();
     window.addEventListener('resize', resize);
-    
     const COLS = ['#FFD700','#FF6B9D','#A78BFA','#34D399','#60A5FA','#F97316','#fff','#FCA5A5'];
     const P: any[] = [];
     for (let i = 0; i < 120; i++) P.push({ x: Math.random()*900, y: Math.random()*300-300, r: Math.random()*5+3, d: Math.random()*80+20, c: COLS[Math.floor(Math.random()*COLS.length)], t: 0, ti: Math.random()*.07+.05 });
-    
     let ang = 0, raf: number;
     const draw = () => {
       canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
       ang += .01;
       P.forEach(p => {
-        p.t += p.ti; p.y += (Math.cos(ang+p.d)+2)*.55; p.x += Math.sin(ang)*.4;
-        if (p.y > canvas.height) { p.y = -10; p.x = Math.random()*canvas.width; }
+        p.t += p.ti; p.y += (Math.cos(ang + p.d) + 2) * .55; p.x += Math.sin(ang) * .4;
+        if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
         ctx.beginPath(); ctx.lineWidth = p.r; ctx.strokeStyle = p.c;
-        const tilt = Math.sin(p.t)*11;
-        ctx.moveTo(p.x+tilt+p.r/4, p.y); ctx.lineTo(p.x+tilt, p.y+tilt+p.r/4); ctx.stroke();
+        const tilt = Math.sin(p.t) * 11;
+        ctx.moveTo(p.x + tilt + p.r / 4, p.y); ctx.lineTo(p.x + tilt, p.y + tilt + p.r / 4); ctx.stroke();
       });
       raf = requestAnimationFrame(draw);
     };
     draw();
-    
     return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
-  }, [showBirthdayBanner, currentSlide]);
+  }, [currentSlide, slides]);
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
+  const nextSlide = () => setCurrentSlide(prev => (prev + 1) % slides.length);
+  const prevSlide = () => setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
+  const goToSlide = (i: number) => setCurrentSlide(i);
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  };
-
-  const goToSlide = (index: number) => {
-    setCurrentSlide(index);
-  };
-
-  // Show loading spinner while fetching
   if (isLoading) {
     return (
       <div className="w-full mt-4">
@@ -224,212 +197,173 @@ const HeroSlideshow = () => {
     );
   }
 
-  // Don't render if no slides
-  if (slides.length === 0) {
-    return null;
-  }
+  if (slides.length === 0) return null;
 
   const F = "'Nunito',sans-serif";
 
   return (
     <>
-      {/* Preload LCP image for first slide */}
       {firstSlideImage && (
         <Helmet>
           <link rel="preload" as="image" href={firstSlideImage} fetchPriority="high" />
         </Helmet>
       )}
+
       <div className="w-full mt-4">
         <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-4">
           <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
-            {/* Slides Container - Full-width banner images with consistent 16:6 ratio for all devices */}
-            <div 
-              className="relative w-full aspect-[16/6]"
-              style={{ contain: 'layout style paint' }}
-            >
+            <div className="relative w-full aspect-[16/6]" style={{ contain: 'layout style paint' }}>
+
               {slides.map((slide, index) => {
+                // ── Birthday Banner Slide ──────────────────────────
+                if (slide.type === 'birthdayBanner') {
                   return (
-                    <Link
+                    <div
                       key={slide._id}
-                      to={slide.link}
-                      className={`absolute inset-0 transition-all duration-1000 ${
-                        index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                      }`}
+                      className={`absolute inset-0 transition-all duration-1000 ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                      style={{ position: 'relative', width: '100%', height: '100%', background: 'linear-gradient(135deg,#3b0764 0%,#4c1d95 35%,#1e3a8a 70%,#1e40af 100%)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: F }}
                     >
-                      <div style={{ position:'relative', width:'100%', height:'100%', background:'linear-gradient(135deg,#3b0764 0%,#4c1d95 35%,#1e3a8a 70%,#1e40af 100%)', overflow:'hidden', padding:'44px 28px', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:F }}>
-                        <style>{`
-                          @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap');
-                          @keyframes dogBob{from{transform:translateY(0) rotate(-2deg)}to{transform:translateY(-14px) rotate(2deg)}}
-                          @keyframes catBob{from{transform:translateY(0) rotate(2deg)}to{transform:translateY(-12px) rotate(-2deg)}}
-                        `}</style>
-                        <canvas ref={canvasRef} style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none', opacity:.65 }} />
-                        <div style={{ position:'absolute', top:-60, left:-60, width:280, height:280, background:'radial-gradient(circle,rgba(167,139,250,0.28) 0%,transparent 70%)', borderRadius:'50%' }} />
-                        <div style={{ position:'absolute', bottom:-40, right:'8%', width:220, height:220, background:'radial-gradient(circle,rgba(96,165,250,0.22) 0%,transparent 70%)', borderRadius:'50%' }} />
+                      <style>{`
+                        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap');
+                        @keyframes dogBob{from{transform:translateY(0) rotate(-2deg)}to{transform:translateY(-14px) rotate(2deg)}}
+                        @keyframes catBob{from{transform:translateY(0) rotate(2deg)}to{transform:translateY(-12px) rotate(-2deg)}}
+                      `}</style>
 
-                        <div style={{ position:'relative', zIndex:2, maxWidth:1100, width:'100%', display:'flex', alignItems:'center', flexWrap:'wrap', justifyContent:'center' }}>
-                          <div style={{ flexShrink:0, marginRight:-10, zIndex:3 }}><DogSVG /></div>
+                      {/* Confetti canvas — only rendered for this slide */}
+                      <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', opacity: .65 }} />
+                      <div style={{ position: 'absolute', top: -60, left: -60, width: 280, height: 280, background: 'radial-gradient(circle,rgba(167,139,250,0.28) 0%,transparent 70%)', borderRadius: '50%' }} />
+                      <div style={{ position: 'absolute', bottom: -40, right: '8%', width: 220, height: 220, background: 'radial-gradient(circle,rgba(96,165,250,0.22) 0%,transparent 70%)', borderRadius: '50%' }} />
 
-                          <div style={{ flex:'1 1 0', minWidth:0, display:'flex', alignItems:'center', gap:36, flexWrap:'wrap', justifyContent:'center', padding:'0 8px' }}>
-                            <div style={{ flex:'1 1 300px', minWidth:260 }}>
-                              <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(255,255,255,0.13)', border:'1px solid rgba(255,255,255,0.22)', borderRadius:100, padding:'6px 16px', fontSize:13, fontWeight:700, color:'#FDE68A', marginBottom:18 }}>🎂 Pet Birthday Rewards</div>
-                              <h2 style={{ margin:'0 0 14px', fontSize:'clamp(24px,3.5vw,42px)', fontWeight:900, lineHeight:1.1, color:'#fff' }}>
-                                Celebrate Your<br />
-                                <span style={{ background:'linear-gradient(90deg,#FDE68A,#FCA5A5)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>Pet's Birthday!</span>
-                              </h2>
-                              <p style={{ margin:'0 0 22px', fontSize:14.5, lineHeight:1.7, color:'rgba(255,255,255,.82)', maxWidth:360 }}>
-                                Tell our AI your pet's birthday and receive an exclusive <strong style={{ color:'#FDE68A' }}>20% OFF coupon</strong> + a <strong style={{ color:'#FDE68A' }}>FREE birthday gift</strong> delivered right on their special day!
-                              </p>
-                              <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:26 }}>
-                                  {[["🎁","Free birthday gift with your order"],["💸","20% OFF — code BDAYGIFT auto-unlocked"],["🚚","Free shipping on birthday orders"]].map(([icon,text]) => (
-                                  <div key={text} style={{ display:'flex', alignItems:'center', gap:10, fontSize:13, color:'rgba(255,255,255,.88)', fontWeight:600 }}>
-                                    <span style={{ fontSize:17, width:24, textAlign:'center' }}>{icon}</span>{text}
-                                  </div>
-                                  ))}
-                              </div>
-                              <button onClick={openChat} style={{ display:'inline-flex', alignItems:'center', gap:9, background:'#16a34a', color:'#fff', border:'none', borderRadius:100, padding:'15px 28px', fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:F, boxShadow:'0 4px 20px rgba(22,163,74,.45)' }}>
-                                🐾 Tell AI Your Pet's Birthday
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                              </button>
-                              <p style={{ marginTop:11, fontSize:11.5, color:'rgba(255,255,255,.45)' }}>✓ Takes 10 seconds &nbsp;·&nbsp; ✓ Discount unlocked automatically</p>
-                            </div>
+                      <div style={{ position: 'relative', zIndex: 2, maxWidth: 1100, width: '100%', display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center', padding: '0 28px' }}>
+                        <div style={{ flexShrink: 0, marginRight: -10, zIndex: 3 }}><DogSVG /></div>
 
-                            <div style={{ flexShrink:0, width:276 }}>
-                              <div style={{ background:'rgba(255,255,255,.08)', border:'1px solid rgba(255,255,255,.16)', borderRadius:20, overflow:'hidden', boxShadow:'0 20px 50px rgba(0,0,0,.38)' }}>
-                                <div style={{ background:'linear-gradient(135deg,#1e3a8a,#1d4ed8)', padding:'12px 14px', display:'flex', alignItems:'center', gap:9 }}>
-                                  <div style={{ width:32, height:32, borderRadius:'50%', background:'#F97316', display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, flexShrink:0 }}>🐾</div>
-                                  <div>
-                                    <div style={{ color:'#fff', fontWeight:800, fontSize:13, fontFamily:F }}>AI Pet Advisor</div>
-                                    <div style={{ color:'rgba(255,255,255,.6)', fontSize:10.5, display:'flex', alignItems:'center', gap:4, fontFamily:F }}>
-                                      <span style={{ width:6, height:6, background:'#34d399', borderRadius:'50%', display:'inline-block' }} /> Online now
-                                    </div>
-                                  </div>
+                        <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', alignItems: 'center', gap: 36, flexWrap: 'wrap', justifyContent: 'center', padding: '0 8px' }}>
+                          {/* Text */}
+                          <div style={{ flex: '1 1 300px', minWidth: 260 }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.13)', border: '1px solid rgba(255,255,255,0.22)', borderRadius: 100, padding: '6px 16px', fontSize: 13, fontWeight: 700, color: '#FDE68A', marginBottom: 18 }}>🎂 Pet Birthday Rewards</div>
+                            <h2 style={{ margin: '0 0 14px', fontSize: 'clamp(20px,3vw,38px)', fontWeight: 900, lineHeight: 1.1, color: '#fff' }}>
+                              Celebrate Your<br />
+                              <span style={{ background: 'linear-gradient(90deg,#FDE68A,#FCA5A5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Pet's Birthday!</span>
+                            </h2>
+                            <p style={{ margin: '0 0 18px', fontSize: 13.5, lineHeight: 1.7, color: 'rgba(255,255,255,.82)', maxWidth: 340 }}>
+                              Tell our AI your pet's birthday and receive an exclusive <strong style={{ color: '#FDE68A' }}>20% OFF coupon</strong> + a <strong style={{ color: '#FDE68A' }}>FREE birthday gift</strong> on their special day!
+                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 22 }}>
+                              {[['🎁', 'Free birthday gift with your order'], ['💸', '20% OFF — code BDAYGIFT auto-unlocked'], ['🚚', 'Free shipping on birthday orders']].map(([icon, text]) => (
+                                <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12.5, color: 'rgba(255,255,255,.88)', fontWeight: 600 }}>
+                                  <span style={{ fontSize: 16, width: 22, textAlign: 'center' }}>{icon}</span>{text}
                                 </div>
-                                <div style={{ padding:12, display:'flex', flexDirection:'column', gap:9, background:'#f8f9fc' }}>
-                                  {[
-                                    { side:'bot', text:"What is your pet's birthday? 🎂" },
-                                    { side:'usr', text:'📅 June 15' },
-                                    { side:'cel', text:"🎉 We'll send a birthday gift & 20% OFF coupon on June 15th!" },
-                                  ].map((m,i) => (
-                                    <div key={i} style={{ display:'flex', gap:7, alignItems:'flex-end', flexDirection: m.side==='usr' ? 'row-reverse' : 'row' }}>
-                                      {m.side!=='usr' && <div style={{ width:23, height:23, borderRadius:'50%', background:'#1e3a8a', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, flexShrink:0 }}>🐾</div>}
-                                      <div style={{ maxWidth:178, padding:'8px 11px', borderRadius:13, fontSize:12, lineHeight:1.5, fontWeight:600, fontFamily:F, ...(m.side==='bot'?{background:'#fff',border:'1px solid #e5e7eb',color:'#111827',borderBottomLeftRadius:4}:m.side==='usr'?{background:'linear-gradient(135deg,#7c3aed,#4f46e5)',color:'#fff',borderBottomRightRadius:4}:{background:'linear-gradient(135deg,#fef3c7,#fde68a)',border:'1px solid #fbbf24',color:'#92400e',borderBottomLeftRadius:4}) }}>{m.text}</div>
-                                    </div>
-                                  ))}
-                                  <div style={{ background:'linear-gradient(135deg,#16a34a,#15803d)', padding:'8px 12px', display:'flex', alignItems:'center', gap:7, borderRadius:9, marginTop:2 }}>
-                                    <span style={{ fontSize:17 }}>🎁</span>
-                                    <div><div style={{ color:'#fff', fontWeight:800, fontSize:11, fontFamily:F }}>Special birthday discount</div><div style={{ color:'rgba(255,255,255,.8)', fontSize:10, fontWeight:600, fontFamily:F }}>unlocked automatically on the day!</div></div>
-                                  </div>
-                                </div>
-                                <div style={{ background:'#1e3a8a', padding:'8px 14px', display:'flex', alignItems:'center', justifyContent:'center', gap:5, fontSize:11, color:'rgba(255,255,255,.9)', fontWeight:700, fontFamily:F }}>🚚 Free Shipping on Birthday Orders ❤️</div>
-                              </div>
+                              ))}
                             </div>
+                            {/* ✅ onClick fires custom event → opens AI chat */}
+                            <button
+                              onClick={openChat}
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: 9, background: '#16a34a', color: '#fff', border: 'none', borderRadius: 100, padding: '13px 24px', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: F, boxShadow: '0 4px 20px rgba(22,163,74,.45)' }}
+                            >
+                              🐾 Tell AI Your Pet's Birthday
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                            </button>
+                            <p style={{ marginTop: 10, fontSize: 11, color: 'rgba(255,255,255,.4)' }}>✓ Takes 10 seconds &nbsp;·&nbsp; ✓ Discount unlocked automatically</p>
                           </div>
 
-                          <div style={{ flexShrink:0, marginLeft:-10, zIndex:3 }}><CatSVG /></div>
+                          {/* Chat mockup */}
+                          <div style={{ flexShrink: 0, width: 260 }}>
+                            <div style={{ background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.16)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,.38)' }}>
+                              <div style={{ background: 'linear-gradient(135deg,#1e3a8a,#1d4ed8)', padding: '11px 14px', display: 'flex', alignItems: 'center', gap: 9 }}>
+                                <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#F97316', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>🐾</div>
+                                <div>
+                                  <div style={{ color: '#fff', fontWeight: 800, fontSize: 12.5, fontFamily: F }}>AI Pet Advisor</div>
+                                  <div style={{ color: 'rgba(255,255,255,.6)', fontSize: 10, display: 'flex', alignItems: 'center', gap: 4, fontFamily: F }}>
+                                    <span style={{ width: 5, height: 5, background: '#34d399', borderRadius: '50%', display: 'inline-block' }} /> Online now
+                                  </div>
+                                </div>
+                              </div>
+                              <div style={{ padding: 11, display: 'flex', flexDirection: 'column', gap: 8, background: '#f8f9fc' }}>
+                                {[
+                                  { side: 'bot', text: "What is your pet's birthday? 🎂" },
+                                  { side: 'usr', text: '📅 June 15' },
+                                  { side: 'cel', text: "🎉 Birthday gift & 20% OFF coupon on June 15th!" },
+                                ].map((m, i) => (
+                                  <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'flex-end', flexDirection: m.side === 'usr' ? 'row-reverse' : 'row' }}>
+                                    {m.side !== 'usr' && <div style={{ width: 21, height: 21, borderRadius: '50%', background: '#1e3a8a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, flexShrink: 0 }}>🐾</div>}
+                                    <div style={{ maxWidth: 165, padding: '7px 10px', borderRadius: 12, fontSize: 11.5, lineHeight: 1.5, fontWeight: 600, fontFamily: F, ...(m.side === 'bot' ? { background: '#fff', border: '1px solid #e5e7eb', color: '#111827', borderBottomLeftRadius: 3 } : m.side === 'usr' ? { background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', color: '#fff', borderBottomRightRadius: 3 } : { background: 'linear-gradient(135deg,#fef3c7,#fde68a)', border: '1px solid #fbbf24', color: '#92400e', borderBottomLeftRadius: 3 }) }}>{m.text}</div>
+                                  </div>
+                                ))}
+                                <div style={{ background: 'linear-gradient(135deg,#16a34a,#15803d)', padding: '7px 11px', display: 'flex', alignItems: 'center', gap: 6, borderRadius: 8, marginTop: 1 }}>
+                                  <span style={{ fontSize: 15 }}>🎁</span>
+                                  <div>
+                                    <div style={{ color: '#fff', fontSize: 10.5, fontWeight: 800, fontFamily: F }}>Special birthday discount</div>
+                                    <div style={{ color: 'rgba(255,255,255,.8)', fontSize: 9.5, fontWeight: 600, fontFamily: F }}>unlocked automatically on the day!</div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div style={{ background: '#1e3a8a', padding: '7px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, fontSize: 10.5, color: 'rgba(255,255,255,.9)', fontWeight: 700, fontFamily: F }}>🚚 Free Shipping on Birthday Orders ❤️</div>
+                            </div>
+                          </div>
                         </div>
+
+                        <div style={{ flexShrink: 0, marginLeft: -10, zIndex: 3 }}><CatSVG /></div>
                       </div>
-                    </Link>
-                  );
-                }
-                return (
-                  <Link
-                    key={slide._id}
-                    to={slide.link}
-                    className={`absolute inset-0 transition-all duration-1000 ${
-                      index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                    }`}
-                  >
-                    <img
-                      src={normalizeImageUrl(slide.imageUrl, { width: 1920, height: 720, format: 'auto' })}
-                      srcSet={generateSrcSet(slide.imageUrl, [
-                        { width: 640, height: 240 },
-                        { width: 1024, height: 384 },
-                        { width: 1440, height: 540 },
-                        { width: 1920, height: 720 },
-                      ])}
-                      sizes="100vw"
-                      alt={slide.title}
-                      className="w-full h-full object-cover"
-                      loading={index === 0 ? 'eager' : 'lazy'}
-                    />
-                  </Link>
-                );
                     </div>
                   );
                 }
 
+                // ── Regular Image Slide ────────────────────────────
                 const imageUrl = slide.leftImage || slide.imageUrl;
-                const slideContent = (
-                  <div
-                    key={slide._id || slide.id}
-                    className={`absolute inset-0 transition-all duration-1000 ${
-                      index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                    }`}
-                  >
-                    <img
-                      src={normalizeImageUrl(imageUrl, { 
-                        width: 1920, 
-                        height: 720, 
-                        format: 'auto'
-                      })}
-                      srcSet={generateSrcSet(imageUrl, [640, 768, 1024, 1280, 1920], { format: 'auto' })}
-                      sizes="100vw"
-                      alt={slide.title || 'Banner'}
-                      width={1920}
-                      height={720}
-                      loading={index === 0 ? "eager" : "lazy"}
-                      fetchPriority={index === 0 ? "high" : "auto"}
-                      decoding={index === 0 ? "sync" : "async"}
-                      className="w-full h-full object-cover"
-                      style={{ 
-                        objectFit: 'cover',
-                        willChange: index === 0 ? 'contents' : undefined
-                      }}
-                      onError={(e) => {
-                        // Fallback handling
-                        const target = e.target as HTMLImageElement;
-                        if (target.src !== imageUrl) {
-                          target.src = imageUrl;
-                        }
-                      }}
-                    />
-                  </div>
+                const imgEl = (
+                  <img
+                    src={normalizeImageUrl(imageUrl, { width: 1920, height: 720, format: 'auto' })}
+                    srcSet={generateSrcSet(imageUrl, [640, 768, 1024, 1280, 1920], { format: 'auto' })}
+                    sizes="100vw"
+                    alt={slide.title || 'Banner'}
+                    width={1920}
+                    height={720}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    fetchPriority={index === 0 ? 'high' : 'auto'}
+                    decoding={index === 0 ? 'sync' : 'async'}
+                    className="w-full h-full object-cover"
+                    style={{ objectFit: 'cover', willChange: index === 0 ? 'contents' : undefined }}
+                    onError={(e) => {
+                      const t = e.target as HTMLImageElement;
+                      if (t.src !== imageUrl) t.src = imageUrl;
+                    }}
+                  />
                 );
 
-                // Make banner clickable if buttonLink is provided
                 if (slide.link) {
                   return (
                     <Link
                       key={slide._id || slide.id}
                       to={slide.link}
-                      className="block"
+                      className={`absolute inset-0 transition-all duration-1000 block ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
                     >
-                      {slideContent}
+                      {imgEl}
                     </Link>
                   );
                 }
 
-                return slideContent;
+                return (
+                  <div
+                    key={slide._id || slide.id}
+                    className={`absolute inset-0 transition-all duration-1000 ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                  >
+                    {imgEl}
+                  </div>
+                );
               })}
             </div>
 
             {/* Navigation Arrows */}
             {slides.length > 1 && (
               <>
-                <button
-                  onClick={prevSlide}
+                <button onClick={prevSlide}
                   className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 hover:text-blue-600 p-2 md:p-3 rounded-full transition-all shadow-lg hover:shadow-xl z-20 transform hover:scale-110 duration-300"
-                  aria-label="Previous slide"
-                  style={{ minWidth: '44px', minHeight: '44px' }}
-                >
+                  aria-label="Previous slide" style={{ minWidth: '44px', minHeight: '44px' }}>
                   <ChevronLeft size={20} className="md:w-6 md:h-6" />
                 </button>
-                <button
-                  onClick={nextSlide}
+                <button onClick={nextSlide}
                   className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 hover:text-blue-600 p-2 md:p-3 rounded-full transition-all shadow-lg hover:shadow-xl z-20 transform hover:scale-110 duration-300"
-                  aria-label="Next slide"
-                  style={{ minWidth: '44px', minHeight: '44px' }}
-                >
+                  aria-label="Next slide" style={{ minWidth: '44px', minHeight: '44px' }}>
                   <ChevronRight size={20} className="md:w-6 md:h-6" />
                 </button>
               </>
@@ -438,17 +372,10 @@ const HeroSlideshow = () => {
             {/* Slide Indicators */}
             {slides.length > 1 && (
               <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-20 bg-white/70 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md">
-                {slides.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => goToSlide(index)}
-                    className={`rounded-full transition-all duration-300 ${
-                      index === currentSlide
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 w-8 h-2'
-                        : 'bg-gray-400 hover:bg-gray-600 w-2 h-2'
-                    }`}
-                    aria-label={`Go to slide ${index + 1}`}
-                  />
+                {slides.map((_, i) => (
+                  <button key={i} onClick={() => goToSlide(i)}
+                    className={`rounded-full transition-all duration-300 ${i === currentSlide ? 'bg-gradient-to-r from-blue-600 to-purple-600 w-8 h-2' : 'bg-gray-400 hover:bg-gray-600 w-2 h-2'}`}
+                    aria-label={`Go to slide ${i + 1}`} />
                 ))}
               </div>
             )}
