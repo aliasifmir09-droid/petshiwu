@@ -617,7 +617,7 @@ const ProductDetail = () => {
         product={product}
         selectedVariant={selectedVariantData}
       />
-      <div className="container mx-auto px-4 lg:px-8 py-8">
+      <div className="container mx-auto px-4 lg:px-8 py-8 pb-36 lg:pb-8">
       {/* Breadcrumb */}
       <nav className="mb-6" aria-label="Breadcrumb">
         <ol className="flex items-center space-x-2 text-sm text-gray-600">
@@ -1494,6 +1494,47 @@ const ProductDetail = () => {
       </div>
 
       {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
+
+      {/* ── Sticky mobile Add to Cart bar (Chewy-style) ── */}
+      {product && (
+        <div className="lg:hidden fixed bottom-16 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 z-30 flex items-center gap-3"
+          style={{ boxShadow: '0 -2px 12px rgba(0,0,0,0.10)' }}>
+          {/* Price */}
+          <div className="flex-shrink-0">
+            {product.salePrice && product.salePrice < product.price ? (
+              <div>
+                <span className="text-lg font-black text-red-600">${product.salePrice.toFixed(2)}</span>
+                <span className="text-xs text-gray-400 line-through ml-1">${product.price.toFixed(2)}</span>
+              </div>
+            ) : (
+              <span className="text-lg font-black text-gray-900">${product.price.toFixed(2)}</span>
+            )}
+          </div>
+          {/* Add to Cart button */}
+          <button
+            onClick={handleAddToCart}
+            disabled={!selectedVariantData || (selectedVariantData ? selectedVariantData.stock === 0 : true)}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-base transition-all active:scale-95 ${
+              selectedVariantData && selectedVariantData.stock > 0
+                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            <ShoppingCart size={20} />
+            {selectedVariantData && selectedVariantData.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+          </button>
+          {/* Wishlist */}
+          <button
+            onClick={handleWishlistToggle}
+            className={`flex-shrink-0 p-3 rounded-xl border-2 transition-all ${
+              inWishlist ? 'border-red-400 text-red-500 bg-red-50' : 'border-gray-300 text-gray-500'
+            }`}
+            aria-label="Add to favorites"
+          >
+            <Heart size={20} fill={inWishlist ? 'currentColor' : 'none'} />
+          </button>
+        </div>
+      )}
     </div>
     </>
   );

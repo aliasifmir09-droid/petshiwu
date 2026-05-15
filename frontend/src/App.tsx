@@ -10,6 +10,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundaryWithReporting from './components/ErrorBoundaryWithReporting';
 import { initAnalytics, trackPageView } from './utils/analytics';
 import AnnouncementBar from './components/AnnouncementBar';
+import BottomNav from './components/BottomNav';
 import AIPetAdvisor from './components/AIPetAdvisor'; // Gemini AI powered — v2
 import './index.css';
 
@@ -192,7 +193,7 @@ function App() {
         <div className="flex flex-col min-h-screen">
           <AnnouncementBar />
           <Header />
-          <main className="flex-1">
+          <main className="flex-1 pb-16 lg:pb-0">
             <ErrorBoundaryWithReporting>
               <Suspense fallback={
                 <div className="container mx-auto px-4 py-12">
@@ -256,6 +257,7 @@ function App() {
             </ErrorBoundaryWithReporting>
           </main>
           <Footer />
+          <BottomNav />
         </div>
         <AIPetAdvisor />
       </BrowserRouter>
