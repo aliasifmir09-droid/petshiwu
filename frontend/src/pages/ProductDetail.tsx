@@ -868,12 +868,32 @@ const ProductDetail = () => {
                   values.add(variant.weight);
                 }
               });
-              return Array.from(values).sort();
+              // Numeric-aware sort: "5Lb" < "15Lb" < "35Lb" (not string "15" < "5")
+              return Array.from(values).sort((a, b) => {
+                const numA = parseFloat(a.replace(/[^0-9.]/g, ''));
+                const numB = parseFloat(b.replace(/[^0-9.]/g, ''));
+                if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+                return a.localeCompare(b);
+              });
             };
 
-            // Capitalize first letter of attribute key for display
+            // Format attribute key for display:
+            // Keys like "flavor: Chicken & Rice" → "Flavor" (strip the colon part)
+            // Keys like "Size" or "Weight" stay as-is capitalized
             const formatAttributeKey = (key: string): string => {
-              return key.charAt(0).toUpperCase() + key.slice(1);
+              const colonIdx = key.indexOf(':');
+              const displayKey = colonIdx > 0 ? key.slice(0, colonIdx) : key;
+              return displayKey.charAt(0).toUpperCase() + displayKey.slice(1);
+            };
+
+            // Decode HTML entities in variant values (&amp; → &, etc.)
+            const decodeEntities = (str: string): string => {
+              return str
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'");
             };
 
             return (
@@ -885,7 +905,7 @@ const ProductDetail = () => {
                   return (
                     <div key={attributeKey}>
                       <label className="block text-sm font-medium mb-2 text-gray-900">
-                        {formatAttributeKey(attributeKey)}: {selectedValue}
+                        {formatAttributeKey(attributeKey)}: {decodeEntities(selectedValue)}
                       </label>
                       <div className="flex flex-wrap gap-2">
                         {uniqueValues.map((value) => {
@@ -918,7 +938,7 @@ const ProductDetail = () => {
                                   : 'border-gray-300 text-gray-900 bg-white hover:border-gray-400'
                               }`}
                             >
-                              {value}
+                              {decodeEntities(value)}
                             </button>
                           );
                         })}
