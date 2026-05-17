@@ -35,7 +35,8 @@ import {
 const router = express.Router();
 
 // Public route for order tracking (no authentication required)
-router.get('/track/:id', validateObjectId(), trackOrder);
+// No validateObjectId() here — controller accepts both MongoDB _id and ORD-XXXXX order numbers
+router.get('/track/:id', trackOrder);
 
 // Order routes
 router.post('/payment-intent', protect, createPaymentIntentValidation, createOrderPaymentIntent);
