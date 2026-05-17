@@ -394,13 +394,28 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       }
       
       // Normalize order ID before sending response
-      const normalizedOrder = normalizeOrderId(order[0]);
+      let normalizedOrder = normalizeOrderId(order[0]);
       
-      // Check if normalizedOrder is null before using it
+      // Fallback: if normalization fails, build response directly from the document
+      if (!normalizedOrder && order[0]) {
+        logger.warn(`normalizeOrderId returned null for order ${order[0]._id} — using direct fallback`);
+        try {
+          const raw = order[0].toObject ? order[0].toObject() : order[0];
+          normalizedOrder = {
+            ...raw,
+            _id: String(order[0]._id),
+            orderNumber: order[0].orderNumber,
+          } as any;
+        } catch (fallbackErr) {
+          logger.error(`Fallback normalization also failed: ${fallbackErr}`);
+        }
+      }
+
       if (!normalizedOrder) {
+        logger.error(`Order created (id=${order[0]?._id}) but normalization failed completely`);
         return res.status(500).json({
           success: false,
-          message: 'Failed to create order'
+          message: 'Order was placed but we had a technical issue fetching the details. Please check your email and order history.'
         });
       }
       
@@ -588,8 +603,7 @@ const normalizeOrderId = (order: unknown): NormalizedOrder | null => {
     
     return normalized as NormalizedOrder;
   } catch (error) {
-    // Error normalizing order
-    // Return null if normalization fails
+    logger.error(`normalizeOrderId internal error: ${error instanceof Error ? error.message : String(error)}`);
     return null;
   }
 };
