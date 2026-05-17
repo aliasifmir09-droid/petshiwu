@@ -457,6 +457,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
           const fullOrder = await Order.findById(normalizedOrder._id).lean();
           
           if (fullOrder && fullOrder.orderNumber) {
+            const orderIdStr = String(fullOrder._id);
             await addEmailJob(
               'order-confirmation',
               {
@@ -464,6 +465,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
                 firstName: user.firstName || 'Customer',
                 orderNumber: fullOrder.orderNumber,
                 orderData: {
+                  orderId: orderIdStr,
                   items: fullOrder.items.map((item) => ({
                     name: item.name,
                     quantity: item.quantity,
@@ -488,6 +490,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
                   user.firstName || 'Customer',
                   fullOrder.orderNumber,
                   {
+                    orderId: orderIdStr,
                     items: fullOrder.items.map((item) => ({
                       name: item.name,
                       quantity: item.quantity,

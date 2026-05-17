@@ -197,6 +197,7 @@ export const sendOrderConfirmationEmail = async (
   firstName: string,
   orderNumber: string,
   orderData: {
+    orderId?: string;
     items: Array<{ name: string; quantity: number; price: number; image?: string }>;
     totalPrice: number;
     itemsPrice: number;
@@ -219,7 +220,8 @@ export const sendOrderConfirmationEmail = async (
 ) => {
   try {
     const frontendUrl = getFrontendBaseUrl();
-    const orderUrl = `${frontendUrl}/orders/${orderNumber}`;
+    // Use MongoDB _id for the URL — orderNumber format is rejected by the order detail page
+    const orderUrl = `${frontendUrl}/orders/${orderData.orderId || orderNumber}`;
     const isCOD = orderData.paymentMethod === 'cod';
     const paymentLabel = isCOD ? 'Cash on Delivery (COD)' : orderData.paymentMethod.replace(/_/g, ' ');
 
