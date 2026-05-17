@@ -77,7 +77,9 @@ export const careGuideService = {
     const response = await api.get<ApiResponse<CareGuidesResponse>>(
       `/care-guides?${queryParams.toString()}`
     );
-    return response.data.data;
+    // API returns { success, data: [...], pagination: {...} }
+    // Frontend needs { data: [...], pagination: {...} }
+    return response.data as unknown as CareGuidesResponse;
   },
 
   getCareGuideBySlug: async (slug: string): Promise<CareGuide> => {
