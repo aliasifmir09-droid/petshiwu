@@ -79,9 +79,17 @@ const normalizeProductId = (product: ProductWithVariants | null | unknown): Norm
   // Recalculate stock from variants to ensure accuracy
   const stockData = recalculateStock(plainProduct);
   
+  // If a Cloudinary image exists for this product, put it first in the images array
+  // (cloudinaryImage is set by the migration script; falls back to original wsrv.nl images)
+  const cloudinaryImage = (plainProduct as { cloudinaryImage?: string }).cloudinaryImage;
+  const resolvedImages = cloudinaryImage
+    ? [cloudinaryImage, ...((plainProduct.images as string[]) || [])]
+    : (plainProduct.images as string[]);
+
   // Normalize product _id
   const normalized: NormalizedProduct = {
     ...plainProduct,
+    images: resolvedImages,
     _id: plainProduct._id ? String(plainProduct._id) : '',
     totalStock: stockData.totalStock,
     inStock: stockData.inStock

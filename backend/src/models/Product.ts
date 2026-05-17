@@ -24,6 +24,7 @@ export interface IProduct extends Document {
   brand: string;
   category: mongoose.Types.ObjectId;
   images: string[];
+  cloudinaryImage?: string; // Migrated image hosted on Cloudinary — takes priority when present
   video?: string; // Optional product video URL (Cloudinary supports video uploads)
   variants: IProductVariant[];
   basePrice: number;
@@ -116,6 +117,10 @@ const productSchema = new Schema<IProduct>(
       type: String,
       required: true
     }],
+    cloudinaryImage: {
+      type: String,
+      default: undefined // Set during Cloudinary migration; takes priority over images[0] when present
+    },
     video: {
       type: String,
       default: undefined // Optional product video URL (Cloudinary supports video uploads)
