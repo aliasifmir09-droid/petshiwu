@@ -418,6 +418,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
             taxPrice: doc.taxPrice,
             totalPrice: doc.totalPrice,
             createdAt: doc.createdAt ? doc.createdAt.toISOString() : new Date().toISOString(),
+            updatedAt: (doc as any).updatedAt ? (doc as any).updatedAt.toISOString() : new Date().toISOString(),
           } as NormalizedOrder;
         } catch (fallbackErr) {
           logger.error(`Fallback normalization also failed: ${fallbackErr}`);
