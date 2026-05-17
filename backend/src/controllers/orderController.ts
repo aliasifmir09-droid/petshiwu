@@ -368,8 +368,9 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         isPaymentVerified = true;
       }
 
-      // Step 4: Create order within transaction
-      const order = await Order.create([{
+      // Step 4: Create order — use new Order().save() so pre-save hooks always fire
+      // (Order.create([...], session) can call insertMany which bypasses hooks in some Mongoose versions)
+      const newOrder = new Order({
         user: req.user._id,
         items: normalizedItems,
         shippingAddress,
@@ -386,7 +387,9 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         donationAmount: donationAmount || 0,
         totalPrice,
         notes: notes || undefined
-      }], session ? { session } : {});
+      });
+      const savedOrder = await newOrder.save(session ? { session } : {});
+      const order = [savedOrder];
 
       // Step 5: Commit transaction if using one
       if (session) {
