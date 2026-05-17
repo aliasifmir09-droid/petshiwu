@@ -409,7 +409,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
               ...item,
               product: String(item.product),
             })) as NormalizedOrderItem[],
-            shippingAddress: doc.shippingAddress as Record<string, unknown>,
+            shippingAddress: doc.shippingAddress as unknown as Record<string, unknown>,
             paymentMethod: doc.paymentMethod,
             paymentStatus: doc.paymentStatus,
             orderStatus: doc.orderStatus,
