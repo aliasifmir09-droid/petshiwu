@@ -1901,14 +1901,14 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     if (isAdminRequest) {
       // Admin needs essential fields for management, exclude description and other heavy fields
       // IMPORTANT: Always include isActive for admin to see product status
-      selectFields = 'name slug images basePrice compareAtPrice averageRating totalReviews brand category petType isActive isFeatured inStock totalStock variants createdAt updatedAt tags';
+      selectFields = 'name slug images cloudinaryImage basePrice compareAtPrice averageRating totalReviews brand category petType isActive isFeatured inStock totalStock variants createdAt updatedAt tags';
     } else if (isFeaturedQuery) {
       // Featured products for home page - minimal fields
-      selectFields = 'name slug images basePrice compareAtPrice averageRating totalReviews brand category petType isFeatured inStock totalStock variants';
+      selectFields = 'name slug images cloudinaryImage basePrice compareAtPrice averageRating totalReviews brand category petType isFeatured inStock totalStock variants';
     } else {
       // Frontend regular queries: exclude heavy fields like full description, ingredients, features
       // These are only needed on product detail page
-      selectFields = 'name slug shortDescription images basePrice compareAtPrice averageRating totalReviews brand category petType isFeatured inStock totalStock variants tags createdAt';
+      selectFields = 'name slug shortDescription images cloudinaryImage basePrice compareAtPrice averageRating totalReviews brand category petType isFeatured inStock totalStock variants tags createdAt';
     }
 
     // Get products with pagination
@@ -2241,7 +2241,7 @@ export const getProductsCursor = async (req: Request, res: Response, next: NextF
     // Fetch one extra to check if more exists
     const products = await Product.find(baseQuery)
       .maxTimeMS(5000) // 5 second timeout
-      .select('name slug images basePrice averageRating totalReviews brand category petType inStock totalStock')
+      .select('name slug images cloudinaryImage basePrice averageRating totalReviews brand category petType inStock totalStock')
       .populate('category', 'name slug')
       .sort(sortOption)
       .limit(limitNum + 1)
@@ -2417,7 +2417,7 @@ export const getRelatedProducts = async (req: Request, res: Response, next: Next
       ]
     })
       .maxTimeMS(5000)
-      .select('name slug images basePrice compareAtPrice averageRating totalReviews brand category petType isFeatured inStock totalStock variants')
+      .select('name slug images cloudinaryImage basePrice compareAtPrice averageRating totalReviews brand category petType isFeatured inStock totalStock variants')
       .populate({
         path: 'category',
         select: 'name slug petType'
@@ -3218,7 +3218,7 @@ export const getTrendingProducts = async (req: Request, res: Response, next: Nex
     // Get products sorted by viewCount (trending based on views)
     // In a production system, you'd also factor in sales data from orders
     const trendingProducts = await Product.find(query)
-      .select('name slug images basePrice compareAtPrice averageRating totalReviews viewCount brand category petType')
+      .select('name slug images cloudinaryImage basePrice compareAtPrice averageRating totalReviews viewCount brand category petType')
       .populate({
         path: 'category',
         select: 'name slug'
