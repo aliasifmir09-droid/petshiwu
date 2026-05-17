@@ -732,8 +732,9 @@ const ProductDetail = () => {
                   height={150}
                   loading="lazy"
                   onError={(e) => {
-                    handleImageError(e, `${product.name} ${index + 1}`);
-                    // Suppress console errors for failed image loads (403, 404, etc.)
+                    // Hide the entire thumbnail button if the image fails to load
+                    const btn = e.currentTarget.closest('button') as HTMLElement;
+                    if (btn) btn.style.display = 'none';
                     e.stopPropagation();
                   }}
                   className="w-full h-full object-cover" 
