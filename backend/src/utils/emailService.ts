@@ -977,6 +977,165 @@ export const sendPasswordResetEmail = async (email: string, token: string, first
 /**
  * Send cart abandonment recovery email
  */
+// ── Admin new-order notification ─────────────────────────────────────────────
+export const sendAdminNewOrderEmail = async (orderData: {
+  orderNumber: string;
+  orderId: string;
+  customerFirstName: string;
+  customerLastName: string;
+  customerEmail: string;
+  items: Array<{ name: string; quantity: number; price: number }>;
+  totalPrice: number;
+  itemsPrice: number;
+  shippingPrice: number;
+  taxPrice: number;
+  paymentMethod: string;
+  shippingAddress: {
+    firstName: string;
+    lastName: string;
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
+}): Promise<void> => {
+  const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'admin@petshiwu.com';
+  try {
+    if (!resendClient) {
+      logger.warn('⚠️  Resend not configured — skipping admin order notification');
+      return;
+    }
+
+    const frontendUrl = getFrontendBaseUrl();
+    const adminOrderUrl = `${frontendUrl.replace('www.petshiwu.com', 'admin.petshiwu.com')}/orders`;
+    const isCOD = orderData.paymentMethod === 'cod';
+    const paymentLabel = isCOD ? 'Cash on Delivery (COD)' : orderData.paymentMethod.replace(/_/g, ' ');
+
+    const itemRows = orderData.items.map(item => `
+      <tr>
+        <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#1a1a2e;">${item.name}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;font-size:14px;color:#555;text-align:center;">×${item.quantity}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:700;color:#1a1a2e;text-align:right;">$${(item.price * item.quantity).toFixed(2)}</td>
+      </tr>`).join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>New Order Alert</title></head>
+<body style="margin:0;padding:0;background:#f4f6fb;font-family:'Helvetica Neue',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6fb;padding:24px 0;">
+  <tr><td align="center">
+    <table width="580" cellpadding="0" cellspacing="0" style="max-width:580px;width:100%;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.07);">
+
+      <!-- Header -->
+      <tr>
+        <td style="background:linear-gradient(135deg,#1a56db 0%,#0e3fa5 100%);padding:28px 36px;text-align:center;">
+          <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🐾 Petshiwu — Admin Alert</div>
+          <h1 style="margin:0 0 6px;color:#fff;font-size:26px;font-weight:900;">🛍️ New Order Received!</h1>
+          <div style="color:rgba(255,255,255,0.85);font-size:15px;">Order <strong>#${orderData.orderNumber}</strong></div>
+        </td>
+      </tr>
+
+      <!-- Customer + Payment row -->
+      <tr>
+        <td style="padding:24px 36px 0;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td width="48%" valign="top" style="background:#f8f9ff;border:1px solid #e8edf5;border-radius:12px;padding:16px;">
+                <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">👤 Customer</div>
+                <div style="font-size:15px;font-weight:700;color:#1a1a2e;">${orderData.customerFirstName} ${orderData.customerLastName}</div>
+                <div style="font-size:13px;color:#1a56db;margin-top:4px;">${orderData.customerEmail}</div>
+              </td>
+              <td width="4%"></td>
+              <td width="48%" valign="top" style="background:#f8f9ff;border:1px solid #e8edf5;border-radius:12px;padding:16px;">
+                <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">💳 Payment</div>
+                <div style="font-size:15px;font-weight:700;color:#1a1a2e;text-transform:capitalize;">${paymentLabel}</div>
+                ${isCOD ? '<div style="font-size:12px;color:#b45309;margin-top:4px;font-weight:600;">⚠️ Collect cash on delivery</div>' : '<div style="font-size:12px;color:#15803d;margin-top:4px;font-weight:600;">✅ Payment received</div>'}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Items -->
+      <tr>
+        <td style="padding:20px 36px 0;">
+          <h3 style="margin:0 0 12px;font-size:15px;font-weight:800;color:#1a1a2e;">Order Items</h3>
+          <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #f0f0f0;border-radius:10px;overflow:hidden;">
+            <thead>
+              <tr style="background:#f8f9ff;">
+                <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#888;text-transform:uppercase;">Product</th>
+                <th style="padding:10px 12px;text-align:center;font-size:11px;font-weight:700;color:#888;text-transform:uppercase;">Qty</th>
+                <th style="padding:10px 12px;text-align:right;font-size:11px;font-weight:700;color:#888;text-transform:uppercase;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>${itemRows}</tbody>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Totals -->
+      <tr>
+        <td style="padding:12px 36px 0;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9ff;border:1px solid #e8edf5;border-radius:10px;overflow:hidden;">
+            <tr><td style="padding:10px 16px;font-size:13px;color:#555;">Subtotal</td><td style="padding:10px 16px;font-size:13px;font-weight:600;color:#1a1a2e;text-align:right;">$${orderData.itemsPrice.toFixed(2)}</td></tr>
+            <tr><td style="padding:10px 16px;font-size:13px;color:#555;">Shipping</td><td style="padding:10px 16px;font-size:13px;font-weight:600;text-align:right;">${orderData.shippingPrice === 0 ? '<span style="color:#22c55e;">FREE</span>' : `$${orderData.shippingPrice.toFixed(2)}`}</td></tr>
+            <tr><td style="padding:10px 16px;font-size:13px;color:#555;">Tax</td><td style="padding:10px 16px;font-size:13px;font-weight:600;color:#1a1a2e;text-align:right;">$${orderData.taxPrice.toFixed(2)}</td></tr>
+            <tr style="border-top:2px solid #e8edf5;"><td style="padding:14px 16px;font-size:17px;font-weight:800;color:#1a1a2e;">Total</td><td style="padding:14px 16px;font-size:20px;font-weight:900;color:#1a56db;text-align:right;">$${orderData.totalPrice.toFixed(2)}</td></tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Ship to -->
+      <tr>
+        <td style="padding:12px 36px 0;">
+          <div style="background:#f8f9ff;border:1px solid #e8edf5;border-radius:10px;padding:16px;">
+            <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">📦 Ship To</div>
+            <div style="font-size:14px;color:#1a1a2e;line-height:1.7;">
+              ${orderData.shippingAddress.firstName} ${orderData.shippingAddress.lastName}<br>
+              ${orderData.shippingAddress.street}<br>
+              ${orderData.shippingAddress.city}, ${orderData.shippingAddress.state} ${orderData.shippingAddress.zipCode}, ${orderData.shippingAddress.country}
+            </div>
+          </div>
+        </td>
+      </tr>
+
+      <!-- CTA -->
+      <tr>
+        <td style="padding:24px 36px 32px;text-align:center;">
+          <a href="${adminOrderUrl}" style="display:inline-block;background:linear-gradient(135deg,#1a56db 0%,#0e3fa5 100%);color:#fff;font-size:15px;font-weight:800;padding:14px 36px;border-radius:50px;text-decoration:none;letter-spacing:0.3px;">
+            View in Admin Dashboard →
+          </a>
+        </td>
+      </tr>
+
+      <!-- Footer -->
+      <tr>
+        <td style="background:#f8f9ff;padding:16px 36px;text-align:center;border-top:1px solid #e8edf5;">
+          <p style="margin:0;font-size:12px;color:#aaa;">Petshiwu Admin Notification · support@petshiwu.com</p>
+        </td>
+      </tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`;
+
+    await resendClient.emails.send({
+      from: 'Petshiwu Orders <orders@petshiwu.com>',
+      to: adminEmail,
+      subject: `🛍️ New Order #${orderData.orderNumber} — $${orderData.totalPrice.toFixed(2)} (${orderData.customerFirstName} ${orderData.customerLastName})`,
+      html
+    });
+
+    logger.info(`✅ Admin order notification sent for ${orderData.orderNumber}`);
+  } catch (error: any) {
+    // Never throw — admin email failure must not affect order creation
+    logger.error(`❌ Failed to send admin order notification for ${orderData.orderNumber}:`, error.message);
+  }
+};
+
 export const sendCartAbandonmentEmail = async (
   email: string,
   firstName: string,

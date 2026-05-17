@@ -6,7 +6,7 @@ import User from '../models/User';
 import { AuthRequest } from '../middleware/auth';
 import { safeToString, extractObjectId } from '../utils/types';
 import { asyncHandler, NotFoundError, UnauthorizedError, ValidationError } from '../utils/errors';
-import { sendOrderConfirmationEmail, sendOrderCancellationEmail, sendOrderDeliveredEmail } from '../utils/emailService';
+import { sendOrderConfirmationEmail, sendOrderCancellationEmail, sendOrderDeliveredEmail, sendAdminNewOrderEmail } from '../utils/emailService';
 import logger from '../utils/logger';
 import { executeCachedAggregation } from '../utils/aggregationCache';
 import { addEmailJob } from '../utils/jobQueue';
@@ -519,7 +519,35 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         // Log error but don't fail the order creation
         logger.error('Error queuing order confirmation email:', emailError);
       }
-      
+
+      // Send admin notification email (fire-and-forget — never blocks the response)
+      try {
+        const user = await User.findById(req.user._id).select('email firstName lastName').lean();
+        const fullOrderForAdmin = await Order.findById(normalizedOrder._id).lean();
+        if (user && fullOrderForAdmin) {
+          sendAdminNewOrderEmail({
+            orderNumber: fullOrderForAdmin.orderNumber,
+            orderId: String(fullOrderForAdmin._id),
+            customerFirstName: user.firstName || 'Customer',
+            customerLastName: user.lastName || '',
+            customerEmail: user.email,
+            items: fullOrderForAdmin.items.map((item) => ({
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price
+            })),
+            totalPrice: fullOrderForAdmin.totalPrice,
+            itemsPrice: fullOrderForAdmin.itemsPrice,
+            shippingPrice: fullOrderForAdmin.shippingPrice,
+            taxPrice: fullOrderForAdmin.taxPrice,
+            paymentMethod: fullOrderForAdmin.paymentMethod,
+            shippingAddress: fullOrderForAdmin.shippingAddress
+          }).catch((err) => logger.error('Admin notification email failed silently:', err));
+        }
+      } catch (adminEmailError) {
+        logger.error('Error sending admin order notification:', adminEmailError);
+      }
+
       // normalizedOrder is guaranteed non-null here due to fallback above
       res.status(201).json({
         success: true,
@@ -2022,23 +2050,24 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
 export const trackOrder = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    
-    // Validate ObjectId format
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid order ID format'
-      });
-    }
 
-    const order = await Order.findById(id)
-      .populate('user', 'firstName lastName email')
-      .select('-billingAddress'); // Don't expose billing address
+    // Accept either a 24-char MongoDB ObjectId OR an order number (e.g. ORD-00001)
+    let order;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      order = await Order.findById(id)
+        .populate('user', 'firstName lastName email')
+        .select('-billingAddress');
+    } else {
+      // Try matching by orderNumber (case-insensitive for flexibility)
+      order = await Order.findOne({ orderNumber: id.toUpperCase() })
+        .populate('user', 'firstName lastName email')
+        .select('-billingAddress');
+    }
 
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: 'Order not found'
+        message: 'Order not found. Please check your order number and try again.'
       });
     }
 
