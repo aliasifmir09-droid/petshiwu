@@ -400,12 +400,22 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       if (!normalizedOrder && order[0]) {
         logger.warn(`normalizeOrderId returned null for order ${order[0]._id} — using direct fallback`);
         try {
-          const raw = order[0].toObject ? order[0].toObject() : order[0];
+          const doc = order[0];
           normalizedOrder = {
-            ...raw,
-            _id: String(order[0]._id),
-            orderNumber: order[0].orderNumber,
-          } as any;
+            _id: String(doc._id),
+            orderNumber: doc.orderNumber || '',
+            user: String(doc.user),
+            items: (doc.items || []).map((item: NormalizedOrderItem) => item),
+            shippingAddress: doc.shippingAddress as Record<string, unknown>,
+            paymentMethod: doc.paymentMethod,
+            paymentStatus: doc.paymentStatus,
+            orderStatus: doc.orderStatus,
+            itemsPrice: doc.itemsPrice,
+            shippingPrice: doc.shippingPrice,
+            taxPrice: doc.taxPrice,
+            totalPrice: doc.totalPrice,
+            createdAt: doc.createdAt ? doc.createdAt.toISOString() : new Date().toISOString(),
+          } as NormalizedOrder;
         } catch (fallbackErr) {
           logger.error(`Fallback normalization also failed: ${fallbackErr}`);
         }
