@@ -64,7 +64,8 @@ const orderItemSchema = new Schema<IOrderItem>({
   },
   image: {
     type: String,
-    required: true
+    required: false,
+    default: ''
   },
   price: {
     type: Number,

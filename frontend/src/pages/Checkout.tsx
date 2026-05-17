@@ -547,7 +547,7 @@ const Checkout = () => {
         return {
           product: productId,
           name: item.product.name,
-          image: normalizeImageUrl(item.product.images?.[0]),
+          image: normalizeImageUrl(item.product.images?.[0]) || '',
           price: item.variant?.price || item.product.basePrice,
           quantity: item.quantity,
           variant: item.variant ? {

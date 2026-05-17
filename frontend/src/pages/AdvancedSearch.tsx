@@ -14,6 +14,8 @@ const AdvancedSearch = () => {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const [showPhotoMenu, setShowPhotoMenu] = useState(false);
 
   const [inputValue, setInputValue] = useState(searchParams.get('q') || '');
   const [showFilters, setShowFilters] = useState(false);
@@ -64,6 +66,14 @@ const AdvancedSearch = () => {
     setVisualResults(null);
     visualSearchMutation.reset();
   };
+
+  // Close photo menu when clicking outside
+  useEffect(() => {
+    if (!showPhotoMenu) return;
+    const close = () => setShowPhotoMenu(false);
+    document.addEventListener('click', close, { capture: true, once: true });
+    return () => document.removeEventListener('click', close, { capture: true });
+  }, [showPhotoMenu]);
   const [filters, setFilters] = useState({
     sort: searchParams.get('sort') || 'newest',
     inStock: searchParams.get('inStock') === 'true',
@@ -178,26 +188,77 @@ const AdvancedSearch = () => {
               )}
             </div>
 
-            {/* Camera / photo search button */}
-            <button
-              onClick={() => cameraInputRef.current?.click()}
-              className={`flex-shrink-0 p-2.5 rounded-xl border-2 transition-all ${
-                photoPreview ? 'border-blue-500 bg-blue-50 text-blue-600' : 'border-gray-200 text-gray-600 hover:border-blue-400'
-              }`}
-              aria-label="Search by photo"
-              title="Search by photo"
-            >
-              <Camera size={18} />
-            </button>
-            {/* Hidden file input — accept images, open camera on mobile */}
-            <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={handlePhotoSelect}
-            />
+            {/* Camera / photo search button with source menu */}
+            <div className="relative flex-shrink-0">
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowPhotoMenu(prev => !prev); }}
+                className={`p-2.5 rounded-xl border-2 transition-all ${
+                  photoPreview || showPhotoMenu
+                    ? 'border-blue-500 bg-blue-50 text-blue-600'
+                    : 'border-gray-200 text-gray-600 hover:border-blue-400'
+                }`}
+                aria-label="Search by photo"
+                title="Search by photo"
+              >
+                <Camera size={18} />
+              </button>
+
+              {/* Dropdown — take photo or choose from library */}
+              {showPhotoMenu && (
+                <div
+                  className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 pt-3 pb-1">
+                    Search by photo
+                  </p>
+                  {/* Take Photo — opens camera */}
+                  <button
+                    onClick={() => { setShowPhotoMenu(false); cameraInputRef.current?.click(); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-50 text-left transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <Camera size={16} className="text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">Take a Photo</p>
+                      <p className="text-xs text-gray-400">Open camera</p>
+                    </div>
+                  </button>
+                  {/* Choose from Library */}
+                  <button
+                    onClick={() => { setShowPhotoMenu(false); galleryInputRef.current?.click(); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-50 text-left transition-colors border-t border-gray-50"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                      <ImageIcon size={16} className="text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">Photo Library</p>
+                      <p className="text-xs text-gray-400">Choose from gallery</p>
+                    </div>
+                  </button>
+                </div>
+              )}
+
+              {/* Camera input — opens rear camera directly */}
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handlePhotoSelect}
+              />
+              {/* Gallery input — opens photo library */}
+              <input
+                ref={galleryInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handlePhotoSelect}
+              />
+            </div>
 
             {/* Filter toggle */}
             <button
@@ -366,13 +427,22 @@ const AdvancedSearch = () => {
               </div>
               <p className="text-lg font-semibold text-gray-800">Search for anything</p>
               <p className="text-sm text-gray-500 mt-1">Dog food, cat toys, leashes, beds...</p>
-              <button
-                onClick={() => cameraInputRef.current?.click()}
-                className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-sm text-blue-700 font-medium hover:bg-blue-100 transition-all"
-              >
-                <Camera size={15} />
-                Or search by photo
-              </button>
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <button
+                  onClick={() => cameraInputRef.current?.click()}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-sm text-blue-700 font-medium hover:bg-blue-100 transition-all"
+                >
+                  <Camera size={15} />
+                  Take Photo
+                </button>
+                <button
+                  onClick={() => galleryInputRef.current?.click()}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 border border-purple-200 rounded-full text-sm text-purple-700 font-medium hover:bg-purple-100 transition-all"
+                >
+                  <ImageIcon size={15} />
+                  From Gallery
+                </button>
+              </div>
 
               {/* Quick searches */}
               <div className="flex flex-wrap justify-center gap-2 mt-6">
