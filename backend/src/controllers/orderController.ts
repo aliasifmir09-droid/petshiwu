@@ -405,7 +405,10 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
             _id: String(doc._id),
             orderNumber: doc.orderNumber || '',
             user: String(doc.user),
-            items: (doc.items || []).map((item: NormalizedOrderItem) => item),
+            items: (doc.items || []).map((item) => ({
+              ...item,
+              product: String(item.product),
+            })) as NormalizedOrderItem[],
             shippingAddress: doc.shippingAddress as Record<string, unknown>,
             paymentMethod: doc.paymentMethod,
             paymentStatus: doc.paymentStatus,
