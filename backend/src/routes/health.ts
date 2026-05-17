@@ -16,6 +16,7 @@ router.get('/ping', (req, res) => {
   res.status(200).json({
     status: 'ok',
     message: 'Server is running',
+    version: 'v5386666',
     timestamp: new Date().toISOString(),
   });
 });
