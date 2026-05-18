@@ -6,6 +6,7 @@ import { Search, Clock, Eye, BookOpen, TrendingUp, TrendingDown, Minus } from 'l
 import Dropdown from '@/components/Dropdown';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { normalizeImageUrl } from '@/utils/imageUtils';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const CareGuides = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -202,15 +203,15 @@ const CareGuides = () => {
                         <span className="ml-1 capitalize">{guide.difficulty || 'General'}</span>
                       </span>
                       <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {guide.category}
+                        {decodeHtmlEntities(guide.category)}
                       </span>
                     </div>
                     <h3 className="text-xl font-bold mb-2 group-hover:text-primary-600 transition-colors">
-                      {guide.title}
+                      {decodeHtmlEntities(guide.title)}
                     </h3>
                     {guide.excerpt && (
                       <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                        {guide.excerpt}
+                        {decodeHtmlEntities(guide.excerpt)}
                       </p>
                     )}
                     <div className="flex items-center gap-4 text-sm text-gray-500">

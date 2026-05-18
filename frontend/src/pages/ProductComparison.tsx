@@ -150,7 +150,7 @@ const ProductComparison = () => {
               <div className="flex gap-4">
                 <img
                   src={currentProduct.images?.[0] || '/placeholder.png'}
-                  alt={currentProduct.name}
+                  alt={decodeHtmlEntities(currentProduct.name)}
                   className="w-24 h-24 object-cover rounded"
                 />
                 <div>
@@ -158,7 +158,7 @@ const ProductComparison = () => {
                     to={`/products/${currentProduct.slug}`}
                     className="font-semibold text-primary-600 hover:text-primary-700"
                   >
-                    {currentProduct.name}
+                    {decodeHtmlEntities(currentProduct.name)}
                   </Link>
                   <p className="text-lg font-bold mt-1">${currentProduct.basePrice.toFixed(2)}</p>
                 </div>
@@ -222,7 +222,7 @@ const ProductComparison = () => {
                           </button>
                         </div>
                         <h3 className="font-semibold text-sm mb-1 line-clamp-2 text-gray-800">
-                          {product.name}
+                          {decodeHtmlEntities(product.name)}
                         </h3>
                         <p className="text-lg font-bold text-primary-600">
                           ${product.basePrice.toFixed(2)}
@@ -273,7 +273,7 @@ const ProductComparison = () => {
                           </button>
                         </div>
                         <h3 className="font-semibold text-sm mb-1 line-clamp-2 text-gray-800">
-                          {product.name}
+                          {decodeHtmlEntities(product.name)}
                         </h3>
                         <p className="text-lg font-bold text-primary-600">
                           ${product.basePrice.toFixed(2)}
@@ -425,7 +425,7 @@ const ProductComparison = () => {
                       to={`/products/${product.slug}`}
                       className="font-semibold text-primary-600 hover:text-primary-700"
                     >
-                      {product.name}
+                      {decodeHtmlEntities(product.name)}
                     </Link>
                   </div>
                 </th>

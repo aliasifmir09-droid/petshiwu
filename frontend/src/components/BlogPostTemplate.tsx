@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import SEO from './SEO';
 import StructuredData from './StructuredData';
 import { Calendar, User, Clock, Tag, ChevronRight, Home } from 'lucide-react';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 interface BlogPostTemplateProps {
   title: string;
@@ -170,10 +171,10 @@ const BlogPostTemplate = ({
                     className="block p-6 bg-white border border-gray-200 rounded-lg hover:shadow-lg transition-shadow"
                   >
                     <h3 className="text-xl font-semibold mb-2 text-gray-900">
-                      {post.title}
+                      {decodeHtmlEntities(post.title)}
                     </h3>
                     {post.excerpt && (
-                      <p className="text-gray-600">{post.excerpt}</p>
+                      <p className="text-gray-600">{decodeHtmlEntities(post.excerpt)}</p>
                     )}
                     <span className="inline-flex items-center gap-1 text-primary-600 mt-3 font-medium">
                       Read more
