@@ -206,6 +206,8 @@ function App() {
                   <Route path="/products/:slug" element={<ProductDetail />} />
                   <Route path="/:petType/:categorySlug" element={<Category />} />
                   <Route path="/category/:slug" element={<Category />} />
+                  <Route path="/blog" element={<Navigate to="/learning" replace />} />
+                  <Route path="/blog/:slug" element={<Navigate to="/learning" replace />} />
                   <Route path="/learning" element={<Learning />} />
                   <Route path="/learning/:slug" element={<BlogDetail />} />
                   <Route path="/care-guides" element={<CareGuides />} />
