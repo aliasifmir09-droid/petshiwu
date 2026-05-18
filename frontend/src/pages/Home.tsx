@@ -76,7 +76,10 @@ const Home = () => {
 
   return (
     <div className="relative">
-      <SEO description="Shop premium pet food, dog food, cat food, toys, and supplies." />
+      <SEO
+        title="PetShiwu — Premium Pet Food, Toys & Supplies Delivered to NYC"
+        description="10,000+ pet products delivered to Queens, Brooklyn & all of NYC. Top brands — Purina, Blue Buffalo, Royal Canin. Free shipping over $49. Dog food, cat food, toys & more."
+      />
       <StructuredData type="localBusiness" data={{
         name: 'PetShiwu',
         url: 'https://www.petshiwu.com',
