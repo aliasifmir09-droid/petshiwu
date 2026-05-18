@@ -119,6 +119,11 @@ const matchRoute = (pathname: string): PageType => {
   if (segments[0] === 'products' && segments.length === 2)
     return { type: 'product', slug: segments[1] };
 
+  // /:petType/:categorySlug — category under petType (e.g. /dog/dog-food)
+  const PET_TYPES = new Set(['dog','cat','bird','fish','reptile','small-pet','products']);
+  if (segments.length === 2 && PET_TYPES.has(segments[0]))
+    return { type: 'category', slug: segments[1], petType: segments[0] } as any;
+
   // /:petType/:categorySlug+/:productSlug — product URL (3+ segments)
   if (segments.length >= 3) {
     const productSlug = segments[segments.length - 1];
@@ -372,21 +377,40 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
   return html;
 };
 
-const buildCategoryHtml = (template: string, category: any): string => {
-  const title = `${category.name} | PetShiwu`;
+const buildCategoryHtml = (template: string, category: any, petType?: string): string => {
+  const catName = category.name ?? '';
+  const petLabel = petType === 'dog' ? 'Dog' : petType === 'cat' ? 'Cat' : petType === 'bird' ? 'Bird' : petType === 'fish' ? 'Fish' : petType === 'reptile' ? 'Reptile' : petType === 'small-pet' ? 'Small Pet' : '';
+  const title = petLabel
+    ? `${catName} — ${petLabel} Supplies | PetShiwu`
+    : `${catName} | PetShiwu`;
   const description = truncate(
-    category.description ?? `Shop ${category.name} products for your pet at PetShiwu. Premium quality, fast shipping.`,
+    category.description ?? `Shop ${catName} for your ${petLabel || 'pet'} at PetShiwu. Premium quality, free shipping over $49, delivered to Queens, Brooklyn, and all of NYC.`,
     160
   );
-  const url = `${BASE}/category/${category.slug}`;
+
+  // Use correct canonical: /:petType/:slug or /category/:slug
+  const url = petType && petType !== 'all'
+    ? `${BASE}/${petType}/${category.slug}`
+    : `${BASE}/category/${category.slug}`;
+
+  const breadcrumbItems: unknown[] = [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
+    ...(petLabel && petType ? [{ '@type': 'ListItem', position: 2, name: `${petLabel}s`, item: `${BASE}/${petType}` }] : []),
+    { '@type': 'ListItem', position: petType ? 3 : 2, name: catName, item: url },
+  ];
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
-      { '@type': 'ListItem', position: 2, name: category.name, item: url },
-    ],
+    itemListElement: breadcrumbItems,
+  };
+
+  const collectionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: title,
+    description,
+    url,
   };
 
   const injectedTags = `
@@ -394,8 +418,10 @@ const buildCategoryHtml = (template: string, category: any): string => {
   <meta property="og:title" content="${esc(title)}" />
   <meta property="og:description" content="${esc(description)}" />
   <meta property="og:url" content="${esc(url)}" />
+  <meta property="og:type" content="website" />
   <link rel="canonical" href="${esc(url)}" />
-  <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>`;
+  <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
+  <script type="application/ld+json">${JSON.stringify(collectionSchema)}</script>`;
 
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
@@ -437,7 +463,7 @@ export const createBotRenderer = (distPath: string) => {
         if (guide) html = buildCareGuideHtml(template, guide);
       } else if (page.type === 'category') {
         const category = await fetchCategory(page.slug);
-        if (category) html = buildCategoryHtml(template, category);
+        if (category) html = buildCategoryHtml(template, category, (page as any).petType);
       }
 
       if (html) {
