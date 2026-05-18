@@ -243,7 +243,7 @@ const SEOLandingPage = ({
                 <div key={index} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
                   <h3 className="text-xl font-semibold mb-2 text-gray-900">
                     {decodeHtmlEntities(faq.question)}
-                  </p>
+                  </h3>
                   <p className="text-gray-700 leading-relaxed">{decodeHtmlEntities(faq.answer)}</p>
                 </div>
               ))}
