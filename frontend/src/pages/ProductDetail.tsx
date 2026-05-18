@@ -409,7 +409,9 @@ const ProductDetail = () => {
         setProductDescription(product.description.substring(0, 150).trim() + (product.description.length > 150 ? '...' : ''));
       });
     } else {
-      setProductDescription(`Buy ${product?.name || 'product'} for ${product?.petType || 'pets'} at petshiwu. Quality products, fast shipping, great prices.`);
+      const brand = product?.brand ? `${product.brand} ` : '';
+      const petType = product?.petType && product.petType !== 'other-animals' ? product.petType : 'pet';
+      setProductDescription(`Buy ${brand}${product?.name || 'product'} for your ${petType} at PetShiwu. Delivered to Queens, Brooklyn & all NYC. Free shipping over $49.`);
     }
   }, [product?.description, product?.name, product?.petType]);
 
@@ -568,10 +570,13 @@ const ProductDetail = () => {
 
   const breadcrumbs = buildBreadcrumbs();
 
-  // Build SEO data
-  const productTitle = product.name.length > 50 
-    ? `${product.name.substring(0, 47)}... | petshiwu`
-    : `${product.name} | petshiwu`;
+  // Build SEO data — include brand in title for brand keyword targeting
+  const brandPrefix = product.brand && !product.name.toLowerCase().includes(product.brand.toLowerCase())
+    ? `${product.brand} ` : '';
+  const fullProductName = `${brandPrefix}${product.name}`;
+  const productTitle = fullProductName.length > 55
+    ? `${fullProductName.substring(0, 52)}... | PetShiwu`
+    : `${fullProductName} | PetShiwu`;
   
   // Build keywords
   const categoryName = typeof product.category === 'object' && product.category?.name 
