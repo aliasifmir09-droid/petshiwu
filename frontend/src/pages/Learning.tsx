@@ -5,6 +5,7 @@ import { blogService, Blog } from '@/services/blogs';
 import { Search, Calendar, Eye, ChevronRight, BookOpen } from 'lucide-react';
 import Dropdown from '@/components/Dropdown';
 import SEO from '@/components/SEO';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const Learning = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -180,11 +181,11 @@ const Learning = () => {
                       )}
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
-                      {blog.title}
+                      {decodeHtmlEntities(blog.title)}
                     </h3>
                     {blog.excerpt && (
                       <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                        {truncateText(blog.excerpt, 120)}
+                        {truncateText(decodeHtmlEntities(blog.excerpt), 120)}
                       </p>
                     )}
                     <div className="flex items-center justify-between text-xs text-gray-500 pt-4 border-t border-gray-200">

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { blogService } from '@/services/blogs';
 import { Calendar, User, Eye, ArrowLeft, Tag } from 'lucide-react';
 import DOMPurify from 'dompurify';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { normalizeBlogContent } from '@/utils/htmlUtils';
 import { useMemo } from 'react';
 import SEO from '@/components/SEO';
@@ -128,7 +129,7 @@ const BlogDetail = () => {
             {/* Header */}
             <header className="mb-10">
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-                {blog.title}
+                {decodeHtmlEntities(blog.title)}
               </h1>
               
               {/* Meta Information */}
@@ -173,7 +174,7 @@ const BlogDetail = () => {
             {/* Excerpt */}
             {blog.excerpt && (
               <div className="mb-10">
-                <p className="text-lg text-gray-700 leading-relaxed">{blog.excerpt}</p>
+                <p className="text-lg text-gray-700 leading-relaxed">{decodeHtmlEntities(blog.excerpt)}</p>
               </div>
             )}
 
