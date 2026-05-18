@@ -902,49 +902,108 @@ const ProductDetail = () => {
                 .replace(/&#39;/g, "'");
             };
 
+            // --- Helper: get price for a specific attribute value given current selection ---
+            const getPriceForValue = (attrKey: string, val: string): number | null => {
+              const testAttrs = { ...selectedAttributes, [attrKey]: val };
+              const idx = findVariantByAttributes(testAttrs);
+              if (idx >= 0 && product.variants[idx].price) return product.variants[idx].price!;
+              // Fall back: any variant with this value
+              const any = product.variants.find((v) => {
+                const a: Record<string, string> = { ...(v.attributes as Record<string, string> || {}) };
+                if (v.size) a.size = v.size;
+                if (v.weight) a.weight = v.weight;
+                return a[attrKey] === val && (v.price ?? 0) > 0;
+              });
+              return any?.price ?? null;
+            };
+
+            // --- Helper: parse weight in lbs from strings like "30-lb bag", "5Lb", "12 oz" ---
+            const parseWeightLbs = (str: string): number | null => {
+              const lb = str.match(/(\d+(?:\.\d+)?)\s*-?\s*(?:lb|lbs|LB|Lb)/i);
+              if (lb) return parseFloat(lb[1]);
+              const oz = str.match(/(\d+(?:\.\d+)?)\s*(?:oz|OZ|Oz)/i);
+              if (oz) return parseFloat(oz[1]) / 16;
+              const kg = str.match(/(\d+(?:\.\d+)?)\s*(?:kg|KG|Kg)/i);
+              if (kg) return parseFloat(kg[1]) * 2.205;
+              return null;
+            };
+
+            // --- Helper: is this a size/weight attribute (vs flavor/scent)? ---
+            const isSizeAttr = (key: string): boolean =>
+              /size|weight|lb|oz|kg|count|pack|bag|can/i.test(key);
+
             return (
-              <div className="mb-6 space-y-4">
+              <div className="mb-6 space-y-5">
                 {Array.from(attributeKeys).map((attributeKey) => {
                   const uniqueValues = getUniqueValues(attributeKey);
                   const selectedValue = selectedAttributes[attributeKey] || '';
-                  
+                  const isSize = isSizeAttr(attributeKey);
+
                   return (
                     <div key={attributeKey}>
-                      <label className="block text-sm font-medium mb-2 text-gray-900">
-                        {formatAttributeKey(attributeKey)}: {decodeEntities(selectedValue)}
-                      </label>
-                      <div className="flex flex-wrap gap-2">
+                      {/* Label: "Flavor: Salmon & Rice" */}
+                      <p className="text-sm text-gray-600 font-medium mb-2">
+                        {formatAttributeKey(attributeKey)}:{' '}
+                        <span className="font-bold text-gray-900">{decodeEntities(selectedValue)}</span>
+                      </p>
+
+                      {/* Scrollable row of cards */}
+                      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                         {uniqueValues.map((value) => {
                           const isSelected = selectedValue === value;
-                          // Check if this value is available (has at least one variant with stock)
                           const hasStock = product.variants.some((variant) => {
-                            const variantAttrs: { [key: string]: string } = {};
-                            if (variant.attributes) {
-                              Object.entries(variant.attributes).forEach(([k, v]) => {
-                                variantAttrs[k] = v as string;
-                              });
-                            }
-                            if (variant.size) variantAttrs.size = variant.size;
-                            if (variant.weight) variantAttrs.weight = variant.weight;
-                            
-                            const matches = variantAttrs[attributeKey] === value;
-                            return matches && variant.stock > 0;
+                            const va: Record<string, string> = { ...(variant.attributes as Record<string, string> || {}) };
+                            if (variant.size) va.size = variant.size;
+                            if (variant.weight) va.weight = variant.weight;
+                            return va[attributeKey] === value && variant.stock > 0;
                           });
+                          const variantPrice = getPriceForValue(attributeKey, value);
+                          const weightLbs = isSize ? parseWeightLbs(value) : null;
+                          const pricePerLb = variantPrice && weightLbs ? variantPrice / weightLbs : null;
 
                           return (
                             <button
                               key={value}
                               onClick={() => handleAttributeSelect(attributeKey, value)}
                               disabled={!hasStock}
-                              className={`px-4 py-2 border-2 rounded-lg font-medium transition-all ${
+                              className={`flex-shrink-0 text-left border-2 rounded-xl transition-all duration-150 ${
+                                isSize ? 'min-w-[100px] px-3 py-2.5' : 'min-w-[130px] px-3 py-2.5'
+                              } ${
                                 isSelected
-                                  ? 'border-blue-600 text-blue-600 bg-white'
+                                  ? 'border-blue-600 bg-blue-50 shadow-sm'
                                   : !hasStock
-                                  ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
-                                  : 'border-gray-300 text-gray-900 bg-white hover:border-gray-400'
+                                  ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50'
+                                  : 'border-gray-200 bg-white hover:border-blue-400 hover:shadow-sm'
                               }`}
                             >
-                              {decodeEntities(value)}
+                              {/* Main label */}
+                              <span className={`block font-bold text-sm leading-tight ${
+                                isSelected ? 'text-blue-700' : !hasStock ? 'text-gray-400' : 'text-gray-900'
+                              }`}>
+                                {decodeEntities(value)}
+                              </span>
+
+                              {/* Price or "See available options" */}
+                              {isSize ? (
+                                variantPrice ? (
+                                  <>
+                                    <span className="block text-sm font-semibold text-gray-800 mt-1">
+                                      ${variantPrice.toFixed(2)}
+                                    </span>
+                                    {pricePerLb && (
+                                      <span className="block text-xs text-gray-500">
+                                        ${pricePerLb.toFixed(2)}/lb
+                                      </span>
+                                    )}
+                                  </>
+                                ) : (
+                                  <span className="block text-xs text-gray-400 mt-1">See options</span>
+                                )
+                              ) : (
+                                <span className="block text-xs text-gray-500 mt-1">
+                                  {variantPrice ? `$${variantPrice.toFixed(2)}` : 'See available options'}
+                                </span>
+                              )}
                             </button>
                           );
                         })}
