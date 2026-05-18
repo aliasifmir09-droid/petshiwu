@@ -113,11 +113,17 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "LocalBusiness",
+      "@type": ["PetStore", "LocalBusiness"],
       "name": "PetShiwu",
+      "description": "Premium pet food, toys, and accessories for dogs, cats, birds, reptiles, and small animals. Serving Jackson Heights, Queens, and all of NYC with fast shipping and expert pet care advice.",
       "image": "https://www.petshiwu.com/logo.png",
+      "logo": "https://www.petshiwu.com/logo.png",
       "url": "https://www.petshiwu.com",
       "telephone": "+1-626-342-0419",
+      "email": "support@petshiwu.com",
+      "priceRange": "$$",
+      "currenciesAccepted": "USD",
+      "paymentAccepted": "Credit Card, Debit Card",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "37-68 74th St",
@@ -131,20 +137,33 @@
         "latitude": 40.7489,
         "longitude": -73.8897
       },
-      "openingHoursSpecification": {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-          "Sunday"
-        ],
-        "opens": "00:00",
-        "closes": "23:59"
-      }
+      "areaServed": [
+        {"@type": "City", "name": "Jackson Heights"},
+        {"@type": "City", "name": "Queens"},
+        {"@type": "City", "name": "New York City"},
+        {"@type": "State", "name": "New York"}
+      ],
+      "hasMap": "https://maps.google.com/?q=37-68+74th+St,+Jackson+Heights,+NY+11372",
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+          "opens": "09:00",
+          "closes": "20:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Saturday","Sunday"],
+          "opens": "09:00",
+          "closes": "18:00"
+        }
+      ],
+      "servesCuisine": "Pet Supplies",
+      "sameAs": [
+        "https://www.facebook.com/petshiwu",
+        "https://www.instagram.com/petshiwu",
+        "https://twitter.com/petshiwu"
+      ]
     }
     </script>
   </head>
