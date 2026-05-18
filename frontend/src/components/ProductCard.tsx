@@ -11,6 +11,7 @@ import { usePrefetch } from '@/hooks/usePrefetch';
 import { preloadProductImages } from '@/utils/imagePreloader';
 import { highlightSearchTerm } from '@/utils/searchHighlight';
 import QuickViewModal from './QuickViewModal';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 interface ProductCardProps {
   product: Product;
@@ -195,12 +196,12 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
         <div className="space-y-3 flex-grow">
           {/* Brand */}
           <p className="text-xs text-blue-600 font-extrabold uppercase tracking-widest mb-1 group-hover:text-blue-700 transition-colors">
-            {product.brand}
+            {decodeHtmlEntities(product.brand)}
           </p>
 
           {/* Name */}
           <h3 className="font-bold text-gray-900 mb-2 line-clamp-3 min-h-[4rem] text-sm group-hover:text-blue-700 transition-colors leading-snug">
-            {searchTerm ? highlightSearchTerm(product.name, searchTerm) : product.name}
+            {searchTerm ? highlightSearchTerm(decodeHtmlEntities(product.name), searchTerm) : decodeHtmlEntities(product.name)}
           </h3>
 
           {/* Rating - Only render if there are reviews */}

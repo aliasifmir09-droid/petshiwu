@@ -7,6 +7,7 @@ import { normalizeImageUrl } from '@/utils/imageUtils';
 import DOMPurify from 'dompurify';
 import SEO from '@/components/SEO';
 import ProductCard from '@/components/ProductCard';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const CareGuideDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -145,7 +146,7 @@ const CareGuideDetail = () => {
                   <span className="capitalize">{guide.difficulty || 'General'}</span>
                 </span>
                 <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-300">
-                  {guide.category}
+                  {decodeHtmlEntities(guide.category)}
                 </span>
                 {guide.petType && guide.petType !== 'all' && (
                   <span className="px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 border border-purple-300 capitalize">

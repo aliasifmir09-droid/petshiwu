@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/products';
 import ProductCard from '@/components/ProductCard';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
@@ -241,9 +242,9 @@ const SEOLandingPage = ({
               {faqItems.map((faq, index) => (
                 <div key={index} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
                   <h3 className="text-xl font-semibold mb-2 text-gray-900">
-                    {faq.question}
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed">{faq.answer}</p>
+                    {decodeHtmlEntities(faq.question)}
+                  </p>
+                  <p className="text-gray-700 leading-relaxed">{decodeHtmlEntities(faq.answer)}</p>
                 </div>
               ))}
             </div>

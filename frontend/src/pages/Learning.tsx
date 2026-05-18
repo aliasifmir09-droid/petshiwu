@@ -172,7 +172,7 @@ const Learning = () => {
                   <div className="p-6">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-xs font-semibold text-blue-600 uppercase">
-                        {blog.category}
+                        {decodeHtmlEntities(blog.category)}
                       </span>
                       {blog.petType && blog.petType !== 'all' && (
                         <span className="text-xs text-gray-500 capitalize">
