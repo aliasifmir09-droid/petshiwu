@@ -80,9 +80,30 @@ const Home = () => {
         title="PetShiwu — Premium Pet Food, Toys & Supplies Delivered to NYC"
         description="10,000+ pet products delivered to Queens, Brooklyn & all of NYC. Top brands — Purina, Blue Buffalo, Royal Canin. Free shipping over $49. Dog food, cat food, toys & more."
       />
+      {/* WebSite schema — enables Google Sitelinks search box */}
+      <StructuredData type="website" data={{}} />
+      {/* Organization schema — tells Google our logo, name, and identity */}
+      <StructuredData type="organization" data={{
+        name: 'PetShiwu',
+        url: 'https://www.petshiwu.com',
+        logo: 'https://www.petshiwu.com/logo-square-512.png',
+        description: 'PetShiwu — premium pet food, toys, and supplies delivered to Queens, Brooklyn, Manhattan, and all of NYC. 10,000+ products, free shipping over $49.',
+        contactPoint: {
+          telephone: '+1-626-342-0419',
+          contactType: 'customer service',
+        },
+        address: {
+          streetAddress: '37-68 74th St',
+          addressLocality: 'Jackson Heights',
+          addressRegion: 'NY',
+          postalCode: '11372',
+          addressCountry: 'US',
+        },
+      }} />
       <StructuredData type="localBusiness" data={{
         name: 'PetShiwu',
         url: 'https://www.petshiwu.com',
+        logo: 'https://www.petshiwu.com/logo-square-512.png',
         telephone: '+1-626-342-0419',
         address: {
           streetAddress: '37-68 74th St',

@@ -129,7 +129,12 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
         '@type': 'Organization',
         name: org.name,
         url: org.url,
-        logo: org.logo,
+        logo: {
+          '@type': 'ImageObject',
+          url: org.logo,
+          width: 512,
+          height: 512,
+        },
         description: org.description,
         contactPoint: org.contactPoint ? {
           '@type': 'ContactPoint',
@@ -158,9 +163,9 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
       schema = {
         '@context': 'https://schema.org/',
         '@type': 'WebSite',
-        name: 'petshiwu',
+        name: 'PetShiwu',
         url: 'https://www.petshiwu.com',
-        description: 'Everything Your Pet Needs - Quality Pet Supplies Online',
+        description: 'Premium pet food, toys and supplies delivered to Queens, Brooklyn and all of NYC. 10,000+ products, free shipping over $49.',
         potentialAction: {
           '@type': 'SearchAction',
           target: 'https://www.petshiwu.com/products?search={search_term_string}',
