@@ -1,11 +1,12 @@
 services:
   - type: web
-    name: pet-shop-api
+    name: petshiwu
     env: node
-    rootDir: backend
-    plan: free
-    buildCommand: npm install --include=dev && npm run build
-    startCommand: npm start
+    plan: starter
+    region: oregon
+    buildCommand: cd frontend && npm install --include=dev && npm run build && cd ../backend && npm install && npm run build
+    startCommand: cd backend && node dist/server.js
+    autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
@@ -14,32 +15,8 @@ services:
       - key: JWT_SECRET
         sync: false
       - key: CORS_ORIGIN
-        # Must include your production frontend URLs for CORS to work
-        value: https://www.petshiwu.com,https://petshiwu.com,https://pet-shop-frontend.onrender.com,https://pet-shop-admin.onrender.com
+        value: https://www.petshiwu.com,https://petshiwu.com
       - key: FRONTEND_URL
-        # Canonical site URL for sitemap and SEO ping. Use production URL when deployed.
         value: https://www.petshiwu.com
-
-  - type: web
-    name: pet-shop-frontend
-    env: static
-    rootDir: frontend
-    plan: free
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    # Render automatically handles SPA routing for static sites
-    # All routes will serve index.html, allowing React Router to handle routing
-    envVars:
       - key: VITE_API_URL
-        value: https://pet-shop-backend-totp.onrender.com/api
-
-  - type: web
-    name: pet-shop-admin
-    env: static
-    rootDir: admin
-    plan: free
-    buildCommand: npm ci && npm run build
-    staticPublishPath: dist
-    envVars:
-      - key: VITE_API_URL
-        value: https://pet-shop-backend-totp.onrender.com/api
+        value: https://www.petshiwu.com/api
