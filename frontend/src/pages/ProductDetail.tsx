@@ -797,32 +797,9 @@ const ProductDetail = () => {
             });
 
             // If no attributes, show simple variant selector
+            // No meaningful attributes — hide selector entirely (nothing useful to show)
             if (attributeKeys.size === 0) {
-              return (
-                <div className="mb-6">
-                  <div className="flex flex-wrap gap-2">
-                    {product.variants.map((variant, index) => (
-                      <button
-                        key={index}
-                        onClick={() => {
-                          setSelectedVariant(index);
-                          setSelectedImage(0);
-                        }}
-                        disabled={variant.stock === 0}
-                        className={`px-4 py-2 border-2 rounded-lg font-medium transition-all ${
-                          selectedVariant === index
-                            ? 'border-blue-600 text-blue-600 bg-white'
-                            : variant.stock === 0
-                            ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'border-gray-300 text-gray-900 bg-white hover:border-gray-400'
-                        }`}
-                      >
-                        Variant {index + 1}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              );
+              return null;
             }
 
             // Get selected attributes from current variant
