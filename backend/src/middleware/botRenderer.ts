@@ -80,6 +80,19 @@ const injectDescription = (html: string, description: string): string =>
   );
 
 /**
+ * Replace or inject the canonical link tag
+ */
+const injectCanonical = (html: string, canonicalUrl: string): string => {
+  const tag = `<link rel="canonical" href="${esc(canonicalUrl)}" />`;
+  // Replace existing canonical if present
+  if (/<link\s+rel=["']canonical["'][^>]*>/i.test(html)) {
+    return html.replace(/<link\s+rel=["']canonical["'][^>]*>/i, tag);
+  }
+  // Otherwise inject before </head>
+  return html.replace('</head>', `${tag}\n</head>`);
+};
+
+/**
  * Inject a block of meta/script tags immediately before </head>
  */
 const injectBeforeHeadClose = (html: string, tags: string): string =>
@@ -263,12 +276,12 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   <meta name="twitter:title" content="${esc(title)}" />
   <meta name="twitter:description" content="${esc(description)}" />
   <meta name="twitter:image" content="${esc(image)}" />
-  <link rel="canonical" href="${esc(productUrl)}" />
   <script type="application/ld+json">${JSON.stringify(productSchema)}</script>
   <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>`;
 
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
+  html = injectCanonical(html, productUrl);
   html = injectBeforeHeadClose(html, injectedTags);
   return html;
 };
@@ -319,12 +332,12 @@ const buildBlogHtml = (template: string, blog: any): string => {
   <meta name="twitter:title" content="${esc(title)}" />
   <meta name="twitter:description" content="${esc(description)}" />
   <meta name="twitter:image" content="${esc(image)}" />
-  <link rel="canonical" href="${esc(url)}" />
   <script type="application/ld+json">${JSON.stringify(articleSchema)}</script>
   <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>`;
 
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
+  html = injectCanonical(html, url);
   html = injectBeforeHeadClose(html, injectedTags);
   return html;
 };
@@ -367,12 +380,12 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
   <meta property="og:description" content="${esc(description)}" />
   <meta property="og:image" content="${esc(image)}" />
   <meta property="og:url" content="${esc(url)}" />
-  <link rel="canonical" href="${esc(url)}" />
   <script type="application/ld+json">${JSON.stringify(schema)}</script>
   <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>`;
 
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
+  html = injectCanonical(html, url);
   html = injectBeforeHeadClose(html, injectedTags);
   return html;
 };
@@ -419,12 +432,12 @@ const buildCategoryHtml = (template: string, category: any, petType?: string): s
   <meta property="og:description" content="${esc(description)}" />
   <meta property="og:url" content="${esc(url)}" />
   <meta property="og:type" content="website" />
-  <link rel="canonical" href="${esc(url)}" />
   <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
   <script type="application/ld+json">${JSON.stringify(collectionSchema)}</script>`;
 
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
+  html = injectCanonical(html, url);
   html = injectBeforeHeadClose(html, injectedTags);
   return html;
 };
