@@ -1,156 +1,184 @@
 import { Helmet } from 'react-helmet-async';
+import { ProductVariant } from '@/types';
+import { normalizeImageUrl } from '@/utils/imageUtils';
+import { generateProductUrl } from '@/utils/productUrl';
 
-interface SEOProps {
-  title?: string;
+interface ProductSchemaProduct {
+  _id: string;
+  name: string;
+  slug: string;
   description?: string;
-  keywords?: string;
-  image?: string;
-  url?: string;
-  type?: 'website' | 'product' | 'article';
-  price?: number;
-  currency?: string;
-  availability?: 'instock' | 'outofstock';
-  noindex?: boolean;
-  author?: string;
-  publishedTime?: string;
-  modifiedTime?: string;
-  category?: string;
   brand?: string;
-  sku?: string;
-  rating?: number;
-  ratingCount?: number;
+  images?: string[];
+  basePrice?: number;
+  compareAtPrice?: number;
+  averageRating?: number;
+  totalReviews?: number;
+  reviewCount?: number;
+  inStock?: boolean;
+  totalStock?: number;
+  variants?: ProductVariant[];
+  category?: { name?: string; slug?: string } | string;
+  petType?: string;
+  tags?: string[];
+}
+
+interface ProductSchemaProps {
+  product: ProductSchemaProduct;
+  selectedVariant?: ProductVariant;
 }
 
 /**
- * PETSHIWU ULTIMATE SEO COMPONENT
- * Optimized for: High-ranking pet industry keywords
- * Competitor Strategy: Targets Petco, Chewy, and PetSmart audience
+ * Injects JSON-LD Product schema (schema.org/Product).
+ * This is what unlocks Google rich snippets: price, availability, and
+ * star ratings shown directly in search results — significant CTR boost.
  */
-const SEO = ({
-  title = 'PetShiwu | Premium Pet Food, Toys & Accessories in USA',
-  description = 'Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, birds, fish, reptiles, and small pets. Quality products, fast shipping, great prices. Free shipping on orders over $49.',
-  keywords = 'premium pet food, dog food online, cat food delivery, reptile supplies USA, bird food, pet toys, pet accessories, online pet store, PetShiwu, best dog treats, organic cat food, grain-free pet food',
-  image = 'https://www.petshiwu.com/logo.png',
-  url = 'https://www.petshiwu.com',
-  type = 'website',
-  price,
-  currency = 'USD',
-  availability = 'instock',
-  noindex = false,
-  author,
-  publishedTime,
-  modifiedTime,
-  category,
-  brand,
-  sku,
-  rating,
-  ratingCount
-}: SEOProps) => {
-  // Ensure URL uses www subdomain for consistency
-  const canonicalUrl = url.startsWith('https://') ? url : `https://www.petshiwu.com${url.startsWith('/') ? url : '/' + url}`;
-  const ogImage = image.startsWith('http') ? image : `https://www.petshiwu.com${image.startsWith('/') ? image : '/' + image}`;
-  
-  // Smart Title Logic: Ensures brand name is always present but keywords come first
-  const fullTitle = title.toLowerCase().includes('petshiwu') 
-    ? title 
-    : `${title} | PetShiwu`;
+const ProductSchema = ({ product, selectedVariant }: ProductSchemaProps) => {
+  if (!product) return null;
+
+  const price = selectedVariant?.price ?? product.basePrice ?? 0;
+  const stock = selectedVariant?.stock ?? product.totalStock ?? 0;
+  const inStock = stock > 0 && (product.inStock !== false);
+  const sku = selectedVariant?.sku ?? product._id;
+
+  // Collect all product images, normalised
+  const rawImages = product.images ?? [];
+  const images = rawImages
+    .map((img) => {
+      try { return normalizeImageUrl(img); } catch { return img; }
+    })
+    .filter(Boolean)
+    .slice(0, 10); // Google accepts up to 10
+
+  const productUrl = `https://www.petshiwu.com${generateProductUrl(product as Parameters<typeof generateProductUrl>[0])}`;
+
+  const description = product.description
+    ? product.description.replace(/<[^>]*>/g, '').substring(0, 500)
+    : `${product.name} - premium pet supplies at PetShiwu`;
+
+  const brandName = product.brand?.trim() || 'PetShiwu';
+
+  // Build the Product JSON-LD
+  const schema: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description,
+    image: images.length > 0 ? (images.length === 1 ? images[0] : images) : 'https://www.petshiwu.com/logo.png',
+    brand: {
+      '@type': 'Brand',
+      name: brandName,
+    },
+    sku,
+    offers: {
+      '@type': 'Offer',
+      url: productUrl,
+      priceCurrency: 'USD',
+      price: price.toFixed(2),
+      availability: inStock
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+      seller: {
+        '@type': 'Organization',
+        name: 'PetShiwu',
+        url: 'https://www.petshiwu.com',
+      },
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: price >= 49 ? '0' : '6',
+          currency: 'USD',
+        },
+        shippingDestination: {
+          '@type': 'DefinedRegion',
+          addressCountry: 'US',
+        },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 0,
+            maxValue: 1,
+            unitCode: 'DAY',
+          },
+          transitTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 2,
+            maxValue: 5,
+            unitCode: 'DAY',
+          },
+        },
+      },
+    },
+  };
+
+  // Add compareAtPrice as highPrice if present
+  const comparePrice = selectedVariant?.compareAtPrice ?? product.compareAtPrice;
+  if (comparePrice && comparePrice > price) {
+    (schema.offers as Record<string, unknown>)['@type'] = 'AggregateOffer';
+    (schema.offers as Record<string, unknown>).lowPrice = price.toFixed(2);
+    (schema.offers as Record<string, unknown>).highPrice = comparePrice.toFixed(2);
+    delete (schema.offers as Record<string, unknown>).price;
+  }
+
+  // Aggregate rating — only include if we have real data
+  const ratingValue = product.averageRating ?? 0;
+  const reviewCount = product.totalReviews ?? product.reviewCount ?? 0;
+  if (ratingValue > 0 && reviewCount > 0) {
+    schema.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: ratingValue.toFixed(1),
+      reviewCount,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
+
+  // BreadcrumbList schema
+  const petTypeLabel = product.petType === 'cat' ? 'Cat' : product.petType === 'dog' ? 'Dog' : 'Other Animals';
+  const petTypePath = product.petType === 'other-animals' ? 'other-animals' : product.petType;
+  const categoryName = typeof product.category === 'object' ? product.category?.name : product.category;
+  const categorySlug = typeof product.category === 'object' ? product.category?.slug : undefined;
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://www.petshiwu.com',
+      },
+      ...(petTypePath ? [{
+        '@type': 'ListItem',
+        position: 2,
+        name: petTypeLabel,
+        item: `https://www.petshiwu.com/${petTypePath}`,
+      }] : []),
+      ...(categoryName && categorySlug ? [{
+        '@type': 'ListItem',
+        position: 3,
+        name: categoryName,
+        item: `https://www.petshiwu.com/${petTypePath}/${categorySlug}`,
+      }] : []),
+      {
+        '@type': 'ListItem',
+        position: petTypePath && categoryName ? 4 : petTypePath ? 3 : 2,
+        name: product.name,
+        item: productUrl,
+      },
+    ],
+  };
 
   return (
     <Helmet>
-      {/* Primary Meta Tags */}
-      <title>{fullTitle}</title>
-      <meta name="title" content={fullTitle} />
-      <meta name="description" content={description} />
-      <meta name="keywords" content={keywords} />
-      <meta name="author" content={author || 'PetShiwu'} />
-      <meta name="language" content="English" />
-      <meta name="revisit-after" content="3 days" /> {/* Faster revisit for updates */}
-      <meta name="distribution" content="global" />
-      <meta name="rating" content="general" />
-
-      {/* Geographic targeting - Jackson Heights, NY */}
-      <meta name="geo.region" content="US-NY" />
-      <meta name="geo.placename" content="Jackson Heights" />
-      <meta name="geo.position" content="40.7489;-73.8850" />
-      <meta name="ICBM" content="40.7489, -73.8850" />
-
-      {/* Open Graph / Facebook */}
-      <meta property="og:type" content={type} />
-      <meta property="og:url" content={canonicalUrl} />
-      <meta property="og:title" content={fullTitle} />
-      <meta property="og:description" content={description} />
-      <meta property="og:image" content={ogImage} />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content={title} />
-      <meta property="og:site_name" content="PetShiwu" />
-      <meta property="og:locale" content="en_US" />
-      
-      {publishedTime && <meta property="article:published_time" content={publishedTime} />}
-      {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
-      {author && <meta property="article:author" content={author} />}
-      {category && <meta property="article:section" content={category} />}
-
-      {/* Twitter Card - Enhanced for E-commerce */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:url" content={canonicalUrl} />
-      <meta name="twitter:title" content={fullTitle} />
-      <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={ogImage} />
-      <meta name="twitter:image:alt" content={title} />
-      <meta name="twitter:site" content="@petshiwu" />
-      <meta name="twitter:creator" content="@petshiwu" />
-
-      {/* Product-specific meta tags for Rich Snippets */}
-      {type === 'product' && (
-        <>
-          {price && (
-            <>
-              <meta property="product:price:amount" content={price.toString()} />
-              <meta property="product:price:currency" content={currency} />
-            </>
-          )}
-          <meta property="product:availability" content={availability === 'instock' ? 'in stock' : 'out of stock'} />
-          {brand && <meta property="product:brand" content={brand} />}
-          {category && <meta property="product:category" content={category} />}
-          {sku && <meta property="product:retailer_item_id" content={sku} />}
-          {rating && <meta property="product:rating" content={rating.toString()} />}
-          {ratingCount && <meta property="product:rating_count" content={ratingCount.toString()} />}
-          <meta property="product:condition" content="new" />
-        </>
-      )}
-
-      {/* Business/Contact Information */}
-      <meta name="contact" content="support@petshiwu.com" />
-      <meta name="phone" content="+1-626-342-0419" />
-
-      {/* Canonical URL - Critical for preventing duplicate content */}
-      <link rel="canonical" href={canonicalUrl} />
-
-      {/* Alternate URLs */}
-      <link rel="alternate" hrefLang="en" href={canonicalUrl} />
-      <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
-
-      {/* Robots meta tag - Optimized for crawling */}
-      {noindex ? (
-        <meta name="robots" content="noindex, nofollow" />
-      ) : (
-        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-      )}
-
-      {/* Mobile & App Tags */}
-      <meta name="theme-color" content="#1E3A8A" />
-      <meta name="apple-mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-      <meta name="format-detection" content="telephone=no" />
-      <meta name="mobile-web-app-capable" content="yes" />
-      <meta name="application-name" content="PetShiwu" />
-      
-      {/* DNS Prefetch for faster loading */}
-      <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-      <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+      <script type="application/ld+json">{JSON.stringify(schema)}</script>
+      <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
     </Helmet>
   );
 };
 
-export default SEO;
+export default ProductSchema;

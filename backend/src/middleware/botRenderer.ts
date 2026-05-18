@@ -1,0 +1,457 @@
+/**
+ * botRenderer.ts — Dynamic Rendering for Search Engine Bots
+ *
+ * When a known bot (Googlebot, Bingbot, social crawlers, etc.) requests
+ * a product, blog, or care guide page, this middleware intercepts the
+ * catch-all SPA handler and serves pre-populated HTML instead of the
+ * generic React loading shell.
+ *
+ * Why this matters:
+ *   - React Helmet sets meta tags via JS — bots may see generic defaults
+ *   - This gives every product page a unique title, description, and
+ *     JSON-LD Product schema before any JS runs
+ *   - Google shows rich snippets (price, rating, availability) in results
+ *   - CTR improvement is typically 20–40% for pages with rich snippets
+ *
+ * Google explicitly endorses this pattern ("dynamic rendering"):
+ * https://developers.google.com/search/docs/crawling-indexing/javascript/dynamic-rendering
+ */
+
+import { Request, Response, NextFunction } from 'express';
+import fs from 'fs';
+import path from 'path';
+import Product from '../models/Product';
+import Blog from '../models/Blog';
+import CareGuide from '../models/CareGuide';
+import Category from '../models/Category';
+import logger from '../utils/logger';
+
+// ---------------------------------------------------------------------------
+// Bot detection
+// ---------------------------------------------------------------------------
+
+const BOT_UA_RE =
+  /googlebot|bingbot|duckduckbot|baiduspider|yandexbot|sogou|slurp|ia_archiver|facebookexternalhit|twitterbot|linkedinbot|discordbot|slackbot-linkexpanding|whatsapp|telegrambot|applebot|pinterestbot|rogerbot|embedly|quora\s+link\s+preview|showyoubot|outbrain|developers\.google\.com/i;
+
+const isBot = (ua: string): boolean => BOT_UA_RE.test(ua);
+
+// ---------------------------------------------------------------------------
+// HTML template cache (read once at startup, reuse)
+// ---------------------------------------------------------------------------
+
+let _indexHtml: string | null = null;
+
+const getIndexHtml = (distPath: string): string => {
+  if (!_indexHtml) {
+    try {
+      _indexHtml = fs.readFileSync(path.join(distPath, 'index.html'), 'utf-8');
+    } catch {
+      _indexHtml = '';
+    }
+  }
+  return _indexHtml;
+};
+
+// ---------------------------------------------------------------------------
+// HTML injection helpers
+// ---------------------------------------------------------------------------
+
+const esc = (s: string): string =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+const stripTags = (html: string): string => html.replace(/<[^>]*>/g, '');
+
+const truncate = (s: string, n: number): string =>
+  s.length > n ? s.substring(0, n).trimEnd() + '…' : s;
+
+/**
+ * Replace <title> tag in the HTML template
+ */
+const injectTitle = (html: string, title: string): string =>
+  html.replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`);
+
+/**
+ * Replace meta description content
+ */
+const injectDescription = (html: string, description: string): string =>
+  html.replace(
+    /(<meta\s+name="description"\s+content=")[^"]*(")/,
+    `$1${esc(description)}$2`
+  );
+
+/**
+ * Inject a block of meta/script tags immediately before </head>
+ */
+const injectBeforeHeadClose = (html: string, tags: string): string =>
+  html.replace('</head>', `${tags}\n</head>`);
+
+// ---------------------------------------------------------------------------
+// Route pattern matching
+// ---------------------------------------------------------------------------
+
+type PageType =
+  | { type: 'product'; slug: string }
+  | { type: 'blog'; slug: string }
+  | { type: 'care-guide'; slug: string }
+  | { type: 'category'; slug: string }
+  | null;
+
+const matchRoute = (pathname: string): PageType => {
+  // Strip leading slash
+  const p = pathname.replace(/^\//, '');
+  const segments = p.split('/').filter(Boolean);
+
+  if (segments.length === 0) return null;
+
+  // /learning/:slug
+  if (segments[0] === 'learning' && segments.length === 2)
+    return { type: 'blog', slug: segments[1] };
+
+  // /care-guides/:slug
+  if (segments[0] === 'care-guides' && segments.length === 2)
+    return { type: 'care-guide', slug: segments[1] };
+
+  // /category/:slug
+  if (segments[0] === 'category' && segments.length === 2)
+    return { type: 'category', slug: segments[1] };
+
+  // /products/:slug
+  if (segments[0] === 'products' && segments.length === 2)
+    return { type: 'product', slug: segments[1] };
+
+  // /:petType/:categorySlug+/:productSlug — product URL (3+ segments)
+  if (segments.length >= 3) {
+    const productSlug = segments[segments.length - 1];
+    return { type: 'product', slug: productSlug };
+  }
+
+  return null;
+};
+
+// ---------------------------------------------------------------------------
+// Data fetchers
+// ---------------------------------------------------------------------------
+
+const fetchProduct = async (slug: string) => {
+  return Product.findOne({ slug, isActive: true })
+    .select('name slug description brand images basePrice compareAtPrice averageRating totalReviews inStock totalStock petType category createdAt updatedAt')
+    .populate({ path: 'category', select: 'name slug' })
+    .lean()
+    .exec();
+};
+
+const fetchBlog = async (slug: string) => {
+  return Blog.findOne({ slug, isPublished: true })
+    .select('title slug excerpt content coverImage author publishedAt updatedAt')
+    .lean()
+    .exec();
+};
+
+const fetchCareGuide = async (slug: string) => {
+  return CareGuide.findOne({ slug, isPublished: true })
+    .select('title slug excerpt coverImage petType updatedAt')
+    .lean()
+    .exec();
+};
+
+const fetchCategory = async (slug: string) => {
+  return Category.findOne({ slug, isActive: true })
+    .select('name slug description petType')
+    .lean()
+    .exec();
+};
+
+// ---------------------------------------------------------------------------
+// HTML builders
+// ---------------------------------------------------------------------------
+
+const BASE = 'https://www.petshiwu.com';
+
+const buildProductHtml = (template: string, product: any, slug: string): string => {
+  const price: number = product.basePrice ?? 0;
+  const inStock: boolean = (product.totalStock ?? 0) > 0 && product.inStock !== false;
+  const image: string = (product.images?.[0]) ?? `${BASE}/logo.png`;
+  const images: string[] = (product.images ?? []).slice(0, 10);
+  const brandName: string = product.brand?.trim() || 'PetShiwu';
+  const rawDesc: string = product.description
+    ? stripTags(product.description)
+    : `${product.name} — premium pet supplies at PetShiwu.`;
+  const description = truncate(rawDesc, 160);
+
+  const categoryName = typeof product.category === 'object' ? product.category?.name : product.category;
+  const categorySlug = typeof product.category === 'object' ? product.category?.slug : undefined;
+  const petType: string = product.petType ?? '';
+  const petLabel = petType === 'cat' ? 'Cat' : petType === 'dog' ? 'Dog' : 'Other Animals';
+
+  const productUrl = `${BASE}/${petType}${categorySlug ? `/${categorySlug}` : ''}/${slug}`;
+
+  const title = `${product.name} | PetShiwu`;
+
+  // JSON-LD Product schema
+  const productSchema: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: rawDesc.substring(0, 500),
+    image: images.length > 1 ? images : (images[0] ?? `${BASE}/logo.png`),
+    brand: { '@type': 'Brand', name: brandName },
+    sku: String(product._id),
+    offers: {
+      '@type': 'Offer',
+      url: productUrl,
+      priceCurrency: 'USD',
+      price: price.toFixed(2),
+      availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+      seller: { '@type': 'Organization', name: 'PetShiwu', url: BASE },
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: price >= 49 ? '0' : '6',
+          currency: 'USD',
+        },
+        shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'US' },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' },
+          transitTime: { '@type': 'QuantitativeValue', minValue: 2, maxValue: 5, unitCode: 'DAY' },
+        },
+      },
+    },
+  };
+
+  if ((product.averageRating ?? 0) > 0 && (product.totalReviews ?? 0) > 0) {
+    productSchema.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: product.averageRating.toFixed(1),
+      reviewCount: product.totalReviews,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
+
+  // BreadcrumbList
+  const breadcrumbItems: unknown[] = [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
+    ...(petType ? [{ '@type': 'ListItem', position: 2, name: petLabel, item: `${BASE}/${petType}` }] : []),
+    ...(categoryName && categorySlug ? [{ '@type': 'ListItem', position: 3, name: categoryName, item: `${BASE}/${petType}/${categorySlug}` }] : []),
+    { '@type': 'ListItem', position: petType && categorySlug ? 4 : petType ? 3 : 2, name: product.name, item: productUrl },
+  ];
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: breadcrumbItems,
+  };
+
+  const injectedTags = `
+  <!-- Bot renderer: product-specific meta -->
+  <meta property="og:title" content="${esc(title)}" />
+  <meta property="og:description" content="${esc(description)}" />
+  <meta property="og:image" content="${esc(image)}" />
+  <meta property="og:url" content="${esc(productUrl)}" />
+  <meta property="og:type" content="product" />
+  <meta property="product:price:amount" content="${price.toFixed(2)}" />
+  <meta property="product:price:currency" content="USD" />
+  <meta property="product:availability" content="${inStock ? 'in stock' : 'out of stock'}" />
+  <meta name="twitter:title" content="${esc(title)}" />
+  <meta name="twitter:description" content="${esc(description)}" />
+  <meta name="twitter:image" content="${esc(image)}" />
+  <link rel="canonical" href="${esc(productUrl)}" />
+  <script type="application/ld+json">${JSON.stringify(productSchema)}</script>
+  <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>`;
+
+  let html = injectTitle(template, title);
+  html = injectDescription(html, description);
+  html = injectBeforeHeadClose(html, injectedTags);
+  return html;
+};
+
+const buildBlogHtml = (template: string, blog: any): string => {
+  const title = `${blog.title} | PetShiwu Learning`;
+  const description = truncate(
+    blog.excerpt ?? stripTags(blog.content ?? '').substring(0, 160),
+    160
+  );
+  const image = blog.coverImage ?? `${BASE}/logo.png`;
+  const url = `${BASE}/learning/${blog.slug}`;
+
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: blog.title,
+    description,
+    image,
+    url,
+    author: { '@type': 'Organization', name: blog.author ?? 'PetShiwu' },
+    publisher: {
+      '@type': 'Organization',
+      name: 'PetShiwu',
+      logo: { '@type': 'ImageObject', url: `${BASE}/logo.png` },
+    },
+    datePublished: blog.publishedAt ?? blog.createdAt,
+    dateModified: blog.updatedAt,
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
+      { '@type': 'ListItem', position: 2, name: 'Learning', item: `${BASE}/learning` },
+      { '@type': 'ListItem', position: 3, name: blog.title, item: url },
+    ],
+  };
+
+  const injectedTags = `
+  <!-- Bot renderer: blog-specific meta -->
+  <meta property="og:title" content="${esc(title)}" />
+  <meta property="og:description" content="${esc(description)}" />
+  <meta property="og:image" content="${esc(image)}" />
+  <meta property="og:url" content="${esc(url)}" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:title" content="${esc(title)}" />
+  <meta name="twitter:description" content="${esc(description)}" />
+  <meta name="twitter:image" content="${esc(image)}" />
+  <link rel="canonical" href="${esc(url)}" />
+  <script type="application/ld+json">${JSON.stringify(articleSchema)}</script>
+  <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>`;
+
+  let html = injectTitle(template, title);
+  html = injectDescription(html, description);
+  html = injectBeforeHeadClose(html, injectedTags);
+  return html;
+};
+
+const buildCareGuideHtml = (template: string, guide: any): string => {
+  const title = `${guide.title} | PetShiwu Care Guides`;
+  const description = truncate(guide.excerpt ?? `Care guide for ${guide.title} at PetShiwu.`, 160);
+  const image = guide.coverImage ?? `${BASE}/logo.png`;
+  const url = `${BASE}/care-guides/${guide.slug}`;
+
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: guide.title,
+    description,
+    image,
+    url,
+    author: { '@type': 'Organization', name: 'PetShiwu' },
+    publisher: {
+      '@type': 'Organization',
+      name: 'PetShiwu',
+      logo: { '@type': 'ImageObject', url: `${BASE}/logo.png` },
+    },
+    dateModified: guide.updatedAt,
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
+      { '@type': 'ListItem', position: 2, name: 'Care Guides', item: `${BASE}/care-guides` },
+      { '@type': 'ListItem', position: 3, name: guide.title, item: url },
+    ],
+  };
+
+  const injectedTags = `
+  <!-- Bot renderer: care-guide-specific meta -->
+  <meta property="og:title" content="${esc(title)}" />
+  <meta property="og:description" content="${esc(description)}" />
+  <meta property="og:image" content="${esc(image)}" />
+  <meta property="og:url" content="${esc(url)}" />
+  <link rel="canonical" href="${esc(url)}" />
+  <script type="application/ld+json">${JSON.stringify(schema)}</script>
+  <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>`;
+
+  let html = injectTitle(template, title);
+  html = injectDescription(html, description);
+  html = injectBeforeHeadClose(html, injectedTags);
+  return html;
+};
+
+const buildCategoryHtml = (template: string, category: any): string => {
+  const title = `${category.name} | PetShiwu`;
+  const description = truncate(
+    category.description ?? `Shop ${category.name} products for your pet at PetShiwu. Premium quality, fast shipping.`,
+    160
+  );
+  const url = `${BASE}/category/${category.slug}`;
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
+      { '@type': 'ListItem', position: 2, name: category.name, item: url },
+    ],
+  };
+
+  const injectedTags = `
+  <!-- Bot renderer: category-specific meta -->
+  <meta property="og:title" content="${esc(title)}" />
+  <meta property="og:description" content="${esc(description)}" />
+  <meta property="og:url" content="${esc(url)}" />
+  <link rel="canonical" href="${esc(url)}" />
+  <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>`;
+
+  let html = injectTitle(template, title);
+  html = injectDescription(html, description);
+  html = injectBeforeHeadClose(html, injectedTags);
+  return html;
+};
+
+// ---------------------------------------------------------------------------
+// Main middleware factory
+// ---------------------------------------------------------------------------
+
+export const createBotRenderer = (distPath: string) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    // Only intercept GET requests for HTML pages
+    if (req.method !== 'GET') return next();
+    if (req.path.startsWith('/api')) return next();
+
+    // Only process bots
+    const ua = req.headers['user-agent'] ?? '';
+    if (!isBot(ua)) return next();
+
+    const page = matchRoute(req.path);
+    if (!page) return next();
+
+    const template = getIndexHtml(distPath);
+    if (!template) return next();
+
+    try {
+      let html: string | null = null;
+
+      if (page.type === 'product') {
+        const product = await fetchProduct(page.slug);
+        if (product) html = buildProductHtml(template, product, page.slug);
+      } else if (page.type === 'blog') {
+        const blog = await fetchBlog(page.slug);
+        if (blog) html = buildBlogHtml(template, blog);
+      } else if (page.type === 'care-guide') {
+        const guide = await fetchCareGuide(page.slug);
+        if (guide) html = buildCareGuideHtml(template, guide);
+      } else if (page.type === 'category') {
+        const category = await fetchCategory(page.slug);
+        if (category) html = buildCategoryHtml(template, category);
+      }
+
+      if (html) {
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour bot cache
+        res.setHeader('X-Bot-Rendered', '1');
+        res.send(html);
+        return;
+      }
+    } catch (err: any) {
+      // Non-fatal — fall through to normal SPA serving
+      logger.warn(`[botRenderer] Error rendering ${req.path}:`, err?.message);
+    }
+
+    return next();
+  };
+};

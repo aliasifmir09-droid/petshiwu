@@ -108,6 +108,7 @@ import searchAnalyticsRoutes from './routes/searchAnalytics';
 import cartRoutes from './routes/cart';
 import aiAdvisorRoutes from './routes/aiAdvisor';
 import { generateSitemap } from './controllers/sitemapController';
+import { createBotRenderer } from './middleware/botRenderer';
 
 connectDatabase().catch((error: unknown) => {
   const errorMessage = error instanceof Error ? error.message : String(error);
@@ -491,6 +492,11 @@ app.use(express.static(frontendDistPath, {
     }
   }
 }));
+
+// Bot renderer: intercept search engine crawlers before the SPA catch-all.
+// Serves pre-populated HTML with product/blog/category meta + JSON-LD schema.
+// Falls through to next() on any failure so real users are never affected.
+app.use(createBotRenderer(frontendDistPath));
 
 app.get('*', (req: Request, res: Response, next: NextFunction) => {
   if (req.path.startsWith('/api')) return next();
