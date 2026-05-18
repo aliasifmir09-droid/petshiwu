@@ -6,6 +6,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { HelpCircle, Search, ThumbsUp, ThumbsDown, ChevronDown, ChevronUp, Mail, Clock } from 'lucide-react';
 import SEO from '@/components/SEO';
 import { Link } from 'react-router-dom';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const FAQ = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -239,7 +240,7 @@ const FAQ = () => {
               {Object.entries(faqsByCategory).map(([category, categoryFAQs]) => (
                 <article key={category} className="bg-white rounded-lg shadow-md overflow-hidden">
                   <div className="bg-primary-600 text-white px-6 py-4">
-                    <h2 className="text-2xl font-bold">{category}</h2>
+                    <h2 className="text-2xl font-bold">{decodeHtmlEntities(category)}</h2>
                     <p className="text-primary-100 text-sm mt-1">
                       {categoryFAQs.length} question{categoryFAQs.length !== 1 ? 's' : ''}
                     </p>
@@ -256,7 +257,7 @@ const FAQ = () => {
                             aria-controls={`faq-answer-${faq._id}`}
                           >
                             <h3 className="text-lg font-semibold text-gray-900 pr-4 group-hover:text-primary-600 transition-colors" itemProp="name">
-                              {faq.question}
+                              {decodeHtmlEntities(faq.question)}
                             </h3>
                             {isExpanded ? (
                               <ChevronUp size={24} className="text-gray-400 flex-shrink-0" />
@@ -267,7 +268,7 @@ const FAQ = () => {
                           {isExpanded && (
                             <div id={`faq-answer-${faq._id}`} className="mt-4 space-y-4" itemScope itemType="https://schema.org/Answer">
                               <div className="prose max-w-none text-gray-700">
-                                <p className="whitespace-pre-line" itemProp="text">{faq.answer}</p>
+                                <p className="whitespace-pre-line" itemProp="text">{decodeHtmlEntities(faq.answer)}</p>
                               </div>
                               <div className="flex items-center gap-4 pt-4 border-t border-gray-200">
                                 <span className="text-sm text-gray-500">
