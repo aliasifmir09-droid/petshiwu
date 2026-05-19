@@ -1,45 +1,60 @@
 # ============================================
-# PETSHIWU MASTER ROBOTS.TXT - SEO OPTIMIZED
-# Combined User Preferences + SEO Best Practices
+# PETSHIWU ROBOTS.TXT — SEO Optimized
+# https://www.petshiwu.com
 # ============================================
 
 User-agent: *
 Allow: /
 
-# Disallow private/user pages (Security & Duplicate Content Prevention)
+# Private / user account pages — no SEO value, prevent indexing
 Disallow: /checkout
+Disallow: /cart
 Disallow: /profile
 Disallow: /orders
-Disallow: /wishlist
-Disallow: /cart
+Disallow: /addresses
+Disallow: /stock-alerts
+Disallow: /favorites
+Disallow: /compare
+Disallow: /returns
 Disallow: /admin
 Disallow: /dashboard
 Disallow: /login
 Disallow: /register
 Disallow: /verify-email
+Disallow: /resend-verification
 Disallow: /reset-password
 Disallow: /forgot-password
-Disallow: /resend-verification
+Disallow: /track-order
+
+# Error pages
 Disallow: /403
 Disallow: /404
 
-# Block search-specific query parameters to prevent duplicate indexing
+# Prevent indexing of paginated/filtered query strings
+# (canonical pages without params are still indexed)
+Disallow: /products?page=
+Disallow: /products?sort=
 Disallow: /search?
-Disallow: /filter?
 
-# Allow high-value content for search engines
+# Allow all high-value content explicitly
 Allow: /products
-Allow: /category
+Allow: /products$
+Allow: /dog
+Allow: /cat
+Allow: /bird
+Allow: /reptile
+Allow: /fish
+Allow: /small-pet
 Allow: /learning
 Allow: /care-guides
 Allow: /faq
-Allow: /search
-Allow: /returns
-Allow: /donate
 Allow: /about
 Allow: /contact
+Allow: /return-policy
+Allow: /donate
+Allow: /best-dog-food-sensitive-stomach-diarrhea
+Allow: /high-protein-dog-food-picky-eaters
+Allow: /durable-dog-toys-aggressive-chewers
 
-# Host and Sitemap information
-Host: https://www.petshiwu.com
+# Sitemap location — single canonical www version
 Sitemap: https://www.petshiwu.com/sitemap.xml
-Sitemap: https://petshiwu.com/sitemap.xml
