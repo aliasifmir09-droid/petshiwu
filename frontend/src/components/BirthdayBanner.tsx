@@ -75,6 +75,13 @@ const CatSVG = () => (
 export default function BirthdayBanner() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [visible, setVisible] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 640)
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 640)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
 
   useEffect(() => {
     const key = Object.keys(localStorage).find(k => k.startsWith('petshiwu_profile_'))
@@ -120,7 +127,7 @@ export default function BirthdayBanner() {
   const F = "'Nunito',sans-serif"
 
   return (
-    <div style={{ position:'relative', width:'100%', background:'linear-gradient(135deg,#3b0764 0%,#4c1d95 35%,#1e3a8a 70%,#1e40af 100%)', overflow:'hidden', padding:'44px 28px', display:'flex', alignItems:'center', justifyContent:'center', minHeight:'320px', fontFamily:F }}>
+    <div style={{ position:'relative', width:'100%', background:'linear-gradient(135deg,#3b0764 0%,#4c1d95 35%,#1e3a8a 70%,#1e40af 100%)', overflow:'hidden', padding: isMobile ? '24px 18px' : '44px 28px', display:'flex', alignItems:'center', justifyContent:'center', minHeight: isMobile ? 'auto' : '320px', fontFamily:F }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap');
         @keyframes dogBob{from{transform:translateY(0) rotate(-2deg)}to{transform:translateY(-14px) rotate(2deg)}}
@@ -131,33 +138,33 @@ export default function BirthdayBanner() {
       <div style={{ position:'absolute', bottom:-40, right:'8%', width:220, height:220, background:'radial-gradient(circle,rgba(96,165,250,0.22) 0%,transparent 70%)', borderRadius:'50%' }} />
 
       <div style={{ position:'relative', zIndex:2, maxWidth:1100, width:'100%', display:'flex', alignItems:'center', flexWrap:'wrap', justifyContent:'center' }}>
-        <div style={{ flexShrink:0, marginRight:-10, zIndex:3 }}><DogSVG /></div>
+        {!isMobile && <div style={{ flexShrink:0, marginRight:-10, zIndex:3 }}><DogSVG /></div>}
 
-        <div style={{ flex:'1 1 0', minWidth:0, display:'flex', alignItems:'center', gap:36, flexWrap:'wrap', justifyContent:'center', padding:'0 8px' }}>
-          <div style={{ flex:'1 1 300px', minWidth:260 }}>
-            <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(255,255,255,0.13)', border:'1px solid rgba(255,255,255,0.22)', borderRadius:100, padding:'6px 16px', fontSize:13, fontWeight:700, color:'#FDE68A', marginBottom:18 }}>🎂 Pet Birthday Rewards</div>
-            <h2 style={{ margin:'0 0 14px', fontSize:'clamp(24px,3.5vw,42px)', fontWeight:900, lineHeight:1.1, color:'#fff' }}>
-              Celebrate Your<br />
+        <div style={{ flex:'1 1 0', minWidth:0, display:'flex', alignItems:'center', gap: isMobile ? 0 : 36, flexWrap:'wrap', justifyContent:'center', padding:'0 8px' }}>
+          <div style={{ flex:'1 1 300px', minWidth: isMobile ? 0 : 260, width: isMobile ? '100%' : undefined }}>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(255,255,255,0.13)', border:'1px solid rgba(255,255,255,0.22)', borderRadius:100, padding: isMobile ? '4px 12px' : '6px 16px', fontSize: isMobile ? 11 : 13, fontWeight:700, color:'#FDE68A', marginBottom: isMobile ? 10 : 18 }}>🎂 Pet Birthday Rewards</div>
+            <h2 style={{ margin: isMobile ? '0 0 8px' : '0 0 14px', fontSize: isMobile ? 22 : 'clamp(24px,3.5vw,42px)', fontWeight:900, lineHeight:1.15, color:'#fff' }}>
+              Celebrate Your{' '}
               <span style={{ background:'linear-gradient(90deg,#FDE68A,#FCA5A5)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>Pet's Birthday!</span>
             </h2>
-            <p style={{ margin:'0 0 22px', fontSize:14.5, lineHeight:1.7, color:'rgba(255,255,255,.82)', maxWidth:360 }}>
+            <p style={{ margin: isMobile ? '0 0 12px' : '0 0 22px', fontSize: isMobile ? 13 : 14.5, lineHeight:1.6, color:'rgba(255,255,255,.82)', maxWidth:360 }}>
               Tell our AI your pet's birthday and receive an exclusive <strong style={{ color:'#FDE68A' }}>20% OFF coupon</strong> + a <strong style={{ color:'#FDE68A' }}>FREE birthday gift</strong> delivered right on their special day!
             </p>
-            <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:26 }}>
+            <div style={{ display:'flex', flexDirection:'column', gap: isMobile ? 5 : 8, marginBottom: isMobile ? 16 : 26 }}>
               {[['🎁','Free birthday gift with your order'],['💸','20% OFF — code BDAYGIFT auto-unlocked'],['🚚','Free shipping on birthday orders']].map(([icon,text]) => (
-                <div key={text} style={{ display:'flex', alignItems:'center', gap:10, fontSize:13, color:'rgba(255,255,255,.88)', fontWeight:600 }}>
-                  <span style={{ fontSize:17, width:24, textAlign:'center' }}>{icon}</span>{text}
+                <div key={text} style={{ display:'flex', alignItems:'center', gap:10, fontSize: isMobile ? 12 : 13, color:'rgba(255,255,255,.88)', fontWeight:600 }}>
+                  <span style={{ fontSize: isMobile ? 14 : 17, width:24, textAlign:'center' }}>{icon}</span>{text}
                 </div>
               ))}
             </div>
-            <button onClick={openChat} style={{ display:'inline-flex', alignItems:'center', gap:9, background:'#16a34a', color:'#fff', border:'none', borderRadius:100, padding:'15px 28px', fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:F, boxShadow:'0 4px 20px rgba(22,163,74,.45)' }}>
+            <button onClick={openChat} style={{ display:'inline-flex', alignItems:'center', gap:9, background:'#16a34a', color:'#fff', border:'none', borderRadius:100, padding: isMobile ? '12px 22px' : '15px 28px', fontSize: isMobile ? 14 : 15, fontWeight:800, cursor:'pointer', fontFamily:F, boxShadow:'0 4px 20px rgba(22,163,74,.45)', width: isMobile ? '100%' : undefined, justifyContent: isMobile ? 'center' : undefined }}>
               🐾 Tell AI Your Pet's Birthday
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </button>
-            <p style={{ marginTop:11, fontSize:11.5, color:'rgba(255,255,255,.45)' }}>✓ Takes 10 seconds &nbsp;·&nbsp; ✓ Discount unlocked automatically</p>
+            <p style={{ marginTop: isMobile ? 8 : 11, fontSize:11, color:'rgba(255,255,255,.45)' }}>✓ Takes 10 seconds &nbsp;·&nbsp; ✓ Discount unlocked automatically</p>
           </div>
 
-          <div style={{ flexShrink:0, width:276 }}>
+          {!isMobile && <div style={{ flexShrink:0, width:276 }}>
             <div style={{ background:'rgba(255,255,255,.08)', border:'1px solid rgba(255,255,255,.16)', borderRadius:20, overflow:'hidden', boxShadow:'0 20px 50px rgba(0,0,0,.38)' }}>
               <div style={{ background:'linear-gradient(135deg,#1e3a8a,#1d4ed8)', padding:'12px 14px', display:'flex', alignItems:'center', gap:9 }}>
                 <div style={{ width:32, height:32, borderRadius:'50%', background:'#F97316', display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, flexShrink:0 }}>🐾</div>
@@ -186,10 +193,10 @@ export default function BirthdayBanner() {
               </div>
               <div style={{ background:'#1e3a8a', padding:'8px 14px', display:'flex', alignItems:'center', justifyContent:'center', gap:5, fontSize:11, color:'rgba(255,255,255,.9)', fontWeight:700, fontFamily:F }}>🚚 Free Shipping on Birthday Orders ❤️</div>
             </div>
-          </div>
+          </div>}
         </div>
 
-        <div style={{ flexShrink:0, marginLeft:-10, zIndex:3 }}><CatSVG /></div>
+        {!isMobile && <div style={{ flexShrink:0, marginLeft:-10, zIndex:3 }}><CatSVG /></div>}
       </div>
     </div>
   )
