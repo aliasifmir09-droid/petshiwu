@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { v2 as cloudinary } from 'cloudinary';
 import User from '../models/User';
 
 // Helper: derive birthdayMMDD from a full date string "YYYY-MM-DD"
@@ -90,6 +91,35 @@ export const updatePet = async (req: Request, res: Response): Promise<void> => {
     res.json({ success: true, data: pet, message: 'Pet updated!' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+/** PATCH /api/v1/users/me/pets/:petId/photo — upload pet photo to Cloudinary */
+export const uploadPetPhoto = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const user = await User.findById((req as any).user._id);
+    if (!user) { res.status(404).json({ success: false, message: 'User not found' }); return; }
+
+    const pet = user.pets.find(p => p._id?.toString() === req.params.petId);
+    if (!pet) { res.status(404).json({ success: false, message: 'Pet not found' }); return; }
+
+    const { imageBase64 } = req.body;
+    if (!imageBase64 || typeof imageBase64 !== 'string') {
+      res.status(400).json({ success: false, message: 'No image provided' }); return;
+    }
+
+    const result = await cloudinary.uploader.upload(imageBase64, {
+      folder: 'petshiwu/pets',
+      transformation: [{ width: 400, height: 520, crop: 'fill', gravity: 'face' }],
+      resource_type: 'image',
+    });
+
+    pet.photo = result.secure_url;
+    await user.save();
+
+    res.json({ success: true, data: { photo: result.secure_url }, message: 'Photo updated!' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: 'Failed to upload photo: ' + (err?.message || 'Server error') });
   }
 };
 

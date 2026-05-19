@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/authStore';
 import { authService } from '@/services/auth';
@@ -370,7 +370,419 @@ function PetForm({ initial = EMPTY_FORM, onSubmit, onCancel, isPending, isEdit }
   );
 }
 
-// ─── Hero Pet Card ───────────────────────────────────────────────────────────
+// ─── Birthday check ──────────────────────────────────────────────────────────
+function isBirthdayToday(birthday?: string): boolean {
+  if (!birthday) return false;
+  const today = new Date();
+  const b = new Date(birthday);
+  return b.getMonth() === today.getMonth() && b.getDate() === today.getDate();
+}
+
+// ─── NYC Skyline SVG ─────────────────────────────────────────────────────────
+function NycSkyline({ glowColor }: { glowColor: string }) {
+  return (
+    <svg viewBox="0 0 120 80" preserveAspectRatio="xMidYMax meet"
+      style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', zIndex: 2, pointerEvents: 'none' }}>
+      <circle cx="15" cy="8" r=".7" fill="rgba(255,255,255,.55)" />
+      <circle cx="35" cy="5" r=".5" fill="rgba(255,255,255,.45)" />
+      <circle cx="75" cy="4" r=".7" fill="rgba(255,255,255,.55)" />
+      <circle cx="95" cy="9" r=".5" fill="rgba(255,255,255,.4)" />
+      <circle cx="22" cy="14" r=".4" fill="rgba(255,255,255,.35)" />
+      <circle cx="60" cy="7" r=".6" fill="rgba(255,255,255,.45)" />
+      <rect x="0" y="52" width="7" height="28" fill="rgba(255,255,255,.17)" />
+      <rect x="1" y="55" width="1.5" height="2" fill="rgba(255,200,100,.5)" />
+      <rect x="9" y="44" width="9" height="36" fill="rgba(255,255,255,.2)" />
+      <rect x="10" y="47" width="2" height="2" fill="rgba(255,200,100,.6)" />
+      <rect x="14" y="50" width="2" height="2" fill="rgba(255,200,100,.4)" />
+      <rect x="20" y="36" width="7" height="44" fill="rgba(255,255,255,.22)" />
+      <rect x="21" y="39" width="2" height="2" fill="rgba(255,200,100,.55)" />
+      <rect x="24" y="43" width="2" height="2" fill="rgba(255,200,100,.45)" />
+      {/* Empire State Building */}
+      <rect x="43" y="27" width="12" height="53" fill="rgba(255,255,255,.3)" />
+      <rect x="45" y="19" width="8" height="10" fill="rgba(255,255,255,.3)" />
+      <rect x="47" y="13" width="4" height="8" fill="rgba(255,255,255,.28)" />
+      <line x1="49" y1="13" x2="49" y2="3" stroke="rgba(255,255,255,.5)" strokeWidth="1.3" />
+      <circle cx="49" cy="3" r="1.1" fill={glowColor} opacity="0.9" />
+      <rect x="44" y="29" width="2" height="2" fill="rgba(255,220,100,.7)" />
+      <rect x="48" y="29" width="2" height="2" fill="rgba(255,220,100,.6)" />
+      <rect x="52" y="29" width="2" height="2" fill="rgba(255,220,100,.5)" />
+      <rect x="44" y="34" width="2" height="2" fill="rgba(255,220,100,.55)" />
+      <rect x="52" y="34" width="2" height="2" fill="rgba(255,220,100,.6)" />
+      <rect x="44" y="40" width="2" height="2" fill="rgba(255,220,100,.5)" />
+      <rect x="48" y="40" width="2" height="2" fill="rgba(255,220,100,.65)" />
+      <rect x="52" y="40" width="2" height="2" fill="rgba(255,220,100,.5)" />
+      {/* Chrysler style */}
+      <rect x="58" y="37" width="9" height="43" fill="rgba(255,255,255,.2)" />
+      <rect x="68" y="29" width="9" height="51" fill="rgba(255,255,255,.22)" />
+      <polygon points="68,29 77,29 72.5,21" fill="rgba(255,255,255,.25)" />
+      <rect x="69" y="32" width="2" height="2" fill="rgba(255,200,100,.55)" />
+      <rect x="73" y="35" width="2" height="2" fill="rgba(255,200,100,.45)" />
+      <rect x="80" y="43" width="8" height="37" fill="rgba(255,255,255,.18)" />
+      <rect x="90" y="47" width="9" height="33" fill="rgba(255,255,255,.15)" />
+      <rect x="101" y="51" width="10" height="29" fill="rgba(255,255,255,.14)" />
+      <rect x="0" y="79" width="120" height="1" fill="rgba(255,255,255,.07)" />
+    </svg>
+  );
+}
+
+// ─── Confetti ────────────────────────────────────────────────────────────────
+const CONFETTI_COLORS = ['#f97316','#ec4899','#a855f7','#3b82f6','#22c55e','#eab308'];
+function Confetti() {
+  const pieces = Array.from({ length: 12 }, (_, i) => ({
+    left: `${6 + i * 7.5}%`,
+    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+    dur: `${1.8 + (i * 0.17)}s`,
+    delay: `${(i * 0.22) % 1.5}s`,
+    isCircle: i % 3 === 2,
+    isTall: i % 3 === 1,
+  }));
+  return (
+    <div style={{ position: 'absolute', inset: 0, zIndex: 5, pointerEvents: 'none', overflow: 'hidden' }}>
+      {pieces.map((p, i) => (
+        <div key={i} style={{
+          position: 'absolute', left: p.left,
+          width: p.isTall ? 4 : 5, height: p.isTall ? 7 : (p.isCircle ? 5 : 5),
+          borderRadius: p.isCircle ? '50%' : 1,
+          background: p.color, opacity: 0.9,
+          animation: `confettiFall ${p.dur} linear ${p.delay} infinite`,
+        }} />
+      ))}
+    </div>
+  );
+}
+
+// ─── Balloons ────────────────────────────────────────────────────────────────
+function Balloons() {
+  return (
+    <div style={{ position: 'absolute', inset: 0, zIndex: 6, pointerEvents: 'none' }}>
+      {[
+        { left: 4, delay: '0s', size: 18, dur: '3.8s' },
+        { left: undefined, right: 4, delay: '1.1s', size: 14, dur: '4.2s' },
+        { left: 36, delay: '2.2s', size: 13, dur: '3.5s' },
+      ].map((b, i) => (
+        <span key={i} style={{
+          position: 'absolute', bottom: 0,
+          ...(b.left !== undefined ? { left: b.left } : { right: (b as any).right }),
+          fontSize: b.size, lineHeight: 1,
+          animation: `balloonFloat ${b.dur} ease-in-out ${b.delay} infinite`,
+          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,.2))',
+        }}>🎈</span>
+      ))}
+    </div>
+  );
+}
+
+// ─── Passport Pet Card ────────────────────────────────────────────────────────
+function PassportPetCard({
+  pet, isPrimary, onEdit, onDelete, onPhotoUpdate,
+}: {
+  pet: Pet;
+  isPrimary?: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+  onPhotoUpdate: (petId: string, url: string) => void;
+}) {
+  const [expanded, setExpanded]     = useState(false);
+  const [uploading, setUploading]   = useState(false);
+  const [localPhoto, setLocalPhoto] = useState<string | undefined>(pet.photo);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const sp     = getSP(pet.species);
+  const age    = petAge(pet.birthday);
+  const bday   = isBirthdayToday(pet.birthday);
+
+  // Sync if parent updates
+  useEffect(() => { setLocalPhoto(pet.photo); }, [pet.photo]);
+
+  const handlePhotoChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      // Compress to ≤800px, 0.82 quality
+      const bitmap = await createImageBitmap(file);
+      const canvas = document.createElement('canvas');
+      const maxSide = 800;
+      const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+      canvas.width  = Math.round(bitmap.width  * scale);
+      canvas.height = Math.round(bitmap.height * scale);
+      canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      const base64 = canvas.toDataURL('image/jpeg', 0.82);
+
+      const res = await fetch(`/api/v1/users/me/pets/${pet._id}/photo`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({ imageBase64: base64 }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setLocalPhoto(json.data.photo);
+        onPhotoUpdate(pet._id, json.data.photo);
+      }
+    } catch { /* silent */ } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  }, [pet._id, onPhotoUpdate]);
+
+  // Species-based colors
+  const speciesBg   = {
+    dog: 'linear-gradient(180deg,#0a1628 0%,#1a1208 55%,#7c2d12 100%)',
+    cat: 'linear-gradient(180deg,#0c0820 0%,#1a0a2e 55%,#4a1272 100%)',
+    bird: 'linear-gradient(180deg,#071520 0%,#0c1e32 55%,#1a4a72 100%)',
+    fish: 'linear-gradient(180deg,#071a18 0%,#0c2e28 55%,#0d5a4a 100%)',
+    reptile: 'linear-gradient(180deg,#071a07 0%,#0c2e0c 55%,#1a5a1a 100%)',
+    'small-animal': 'linear-gradient(180deg,#200820 0%,#3a0a3a 55%,#7a1472 100%)',
+  }[pet.species] || 'linear-gradient(180deg,#080f20 0%,#0d1a3a 55%,#1e3a8a 100%)';
+
+  const speciesOv = {
+    dog: 'linear-gradient(180deg,transparent 30%,rgba(234,88,12,.45) 100%)',
+    cat: 'linear-gradient(180deg,transparent 30%,rgba(147,51,234,.4) 100%)',
+    bird: 'linear-gradient(180deg,transparent 30%,rgba(14,165,233,.4) 100%)',
+    fish: 'linear-gradient(180deg,transparent 30%,rgba(13,148,136,.4) 100%)',
+    reptile: 'linear-gradient(180deg,transparent 30%,rgba(34,197,94,.4) 100%)',
+    'small-animal': 'linear-gradient(180deg,transparent 30%,rgba(236,72,153,.4) 100%)',
+  }[pet.species] || 'linear-gradient(180deg,transparent 30%,rgba(79,70,229,.35) 100%)';
+
+  const neonGlow = sp.neon;
+  const borderColor = {
+    dog: 'rgba(234,88,12,.25)', cat: 'rgba(147,51,234,.25)', bird: 'rgba(14,165,233,.25)',
+    fish: 'rgba(13,148,136,.25)', reptile: 'rgba(34,197,94,.25)', 'small-animal': 'rgba(236,72,153,.25)',
+  }[pet.species] || 'rgba(99,102,241,.25)';
+
+  return (
+    <div style={{
+      borderRadius: 16, overflow: 'visible',
+      ...(bday ? {
+        padding: 2,
+        background: 'linear-gradient(45deg,#f97316,#ec4899,#a855f7,#3b82f6,#22c55e,#eab308,#f97316)',
+        backgroundSize: '300% 300%',
+        animation: 'bdayBorder 2.5s ease infinite',
+        boxShadow: '0 6px 28px rgba(249,115,22,.3)',
+      } : {
+        border: `1.5px solid ${borderColor}`,
+        boxShadow: '0 3px 14px rgba(0,0,0,.08)',
+      }),
+    }}>
+      {/* inner wrapper keeps border-radius when birthday border is active */}
+      <div style={{ display: 'flex', flexDirection: 'column', borderRadius: bday ? 14 : 16, overflow: 'hidden', background: '#fff' }}>
+
+        {/* ── Main row ── */}
+        <div style={{ display: 'flex', cursor: 'pointer', minHeight: 140 }} onClick={() => setExpanded(x => !x)}>
+
+          {/* ── LEFT: Photo / Skyline panel ── */}
+          <div style={{ width: 130, flexShrink: 0, position: 'relative', overflow: 'visible', minHeight: 140 }}>
+
+            {/* Clipped photo area */}
+            <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: 0 }}>
+              {localPhoto ? (
+                <img src={localPhoto} alt={pet.petName}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 15%', display: 'block' }} />
+              ) : (
+                <>
+                  <div style={{ position: 'absolute', inset: 0, background: speciesBg }} />
+                  <div style={{ position: 'absolute', inset: 0, background: speciesOv }} />
+                  <NycSkyline glowColor={neonGlow} />
+                  <div style={{ position: 'absolute', bottom: 30, left: 0, right: 0, zIndex: 3, textAlign: 'center', fontSize: 34, lineHeight: 1, filter: `drop-shadow(0 2px 8px ${neonGlow}88)` }}>
+                    {sp.emoji}
+                  </div>
+                  <div style={{ position: 'absolute', bottom: 10, left: 0, right: 0, zIndex: 3, textAlign: 'center', fontSize: 9, fontWeight: 800, letterSpacing: '.8px', textTransform: 'uppercase', color: 'rgba(255,255,255,.7)' }}>
+                    {sp.label}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* ── Birthday decorations (on top of photo) ── */}
+            {bday && (
+              <>
+                <Confetti />
+                <Balloons />
+                {/* Sparkles */}
+                <div style={{ position: 'absolute', inset: 0, zIndex: 7, pointerEvents: 'none' }}>
+                  {[{t:'60%',l:'5%',d:'0s'},{t:'75%',r:'6%',d:'.5s'},{t:'50%',l:'9%',d:'1s'},{t:'68%',r:'5%',d:'.8s'}].map((s,i)=>(
+                    <span key={i} style={{ position:'absolute', top:s.t, left:(s as any).l, right:(s as any).r, fontSize:11, animation:`sparkle 1.6s ease-in-out ${s.d} infinite` }}>✨</span>
+                  ))}
+                </div>
+                {/* Party hat — above the head */}
+                <div style={{
+                  position: 'absolute', top: -18, left: '50%',
+                  transform: 'translateX(-52%) rotate(-13deg)',
+                  fontSize: 52, zIndex: 30, lineHeight: 1,
+                  filter: 'drop-shadow(0 3px 6px rgba(0,0,0,.5))',
+                  animation: 'capBob 2.2s ease-in-out infinite',
+                  pointerEvents: 'none',
+                }}>🎉</div>
+                {/* Happy Birthday neck ribbon */}
+                <div style={{
+                  position: 'absolute', left: 0, right: 0, bottom: 28, zIndex: 9,
+                  padding: '5px 4px',
+                  background: 'linear-gradient(90deg,#f97316,#ec4899,#a855f7,#3b82f6,#ec4899,#f97316)',
+                  backgroundSize: '200% 100%',
+                  animation: 'ribbonSlide 2s linear infinite',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+                  boxShadow: '0 2px 10px rgba(0,0,0,.4)',
+                }}>
+                  <span style={{ fontSize: 11 }}>🎀</span>
+                  <span style={{ fontSize: 9, fontWeight: 900, color: '#fff', letterSpacing: '1.2px', textTransform: 'uppercase', textShadow: '0 1px 3px rgba(0,0,0,.5)', whiteSpace: 'nowrap' }}>
+                    Happy Birthday!
+                  </span>
+                  <span style={{ fontSize: 11 }}>🎀</span>
+                </div>
+              </>
+            )}
+
+            {/* Camera badge (no photo, not birthday) */}
+            {!localPhoto && !bday && (
+              <div style={{ position: 'absolute', bottom: 7, right: 7, zIndex: 15, width: 22, height: 22, borderRadius: '50%', background: '#1e3a8a', border: '2px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, boxShadow: '0 1px 4px rgba(0,0,0,.3)', cursor: 'pointer' }}
+                onClick={e => { e.stopPropagation(); fileRef.current?.click(); }}>
+                📷
+              </div>
+            )}
+
+            {/* Hover overlay — change/add photo */}
+            <div className="photo-hover-overlay" style={{
+              position: 'absolute', inset: 0, zIndex: 20, background: 'rgba(0,0,0,.55)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5,
+              opacity: 0, transition: 'opacity .2s', cursor: 'pointer',
+            }} onClick={e => { e.stopPropagation(); fileRef.current?.click(); }}>
+              <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,.2)', border: '1.5px solid rgba(255,255,255,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>
+                {uploading ? '⏳' : '📷'}
+              </div>
+              <span style={{ fontSize: 9, fontWeight: 700, color: '#fff', textTransform: 'uppercase', letterSpacing: '.4px' }}>
+                {uploading ? 'Uploading...' : localPhoto ? 'Change Photo' : 'Add Photo'}
+              </span>
+            </div>
+
+            {/* Hidden file input */}
+            <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoChange} />
+          </div>
+
+          {/* ── RIGHT: Content ── */}
+          <div style={{
+            flex: 1, padding: '13px 14px',
+            background: bday ? 'linear-gradient(160deg,#fff9f5,#fdf4ff,#f0f9ff)' : '#fff',
+            display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4,
+          }}>
+            {/* Name row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap', marginBottom: 1 }}>
+              <span style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', letterSpacing: '-.3px' }}>{pet.petName}</span>
+              {isPrimary && (
+                <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', padding: '2px 7px', borderRadius: 5, color: '#fff', background: sp.neon }}>
+                  Primary
+                </span>
+              )}
+              {bday && (
+                <span style={{ fontSize: 10, fontWeight: 800, color: '#fff', background: 'linear-gradient(90deg,#f97316,#ec4899)', padding: '3px 10px', borderRadius: 20, animation: 'chipPulse 1.5s ease-in-out infinite' }}>
+                  🎂 Today!
+                </span>
+              )}
+            </div>
+
+            {/* Meta */}
+            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500, marginBottom: 4 }}>
+              {sp.label}{pet.breed ? ` · ${pet.breed}` : ''}{age ? ` · ${age}` : ''}{pet.sex && pet.sex !== 'unknown' ? ` · ${pet.sex === 'male' ? '♂' : '♀'}` : ''}
+            </div>
+
+            {/* Birthday message */}
+            {bday && (
+              <div style={{ fontSize: 12, color: '#9a3412', background: 'linear-gradient(135deg,#fff7ed,#fdf2f8)', border: '1px solid #fed7aa', borderRadius: 9, padding: '7px 10px', lineHeight: 1.5, fontWeight: 500, marginBottom: 4 }}>
+                🎉 Happy Birthday {pet.petName}! We picked allergy-safe treats just for them.
+              </div>
+            )}
+
+            {/* Allergen pills */}
+            {pet.allergies && pet.allergies.length > 0 && (
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                {pet.allergies.slice(0, 3).map(a => (
+                  <span key={a} style={{ display: 'inline-flex', alignItems: 'center', gap: 2, background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: 5, fontSize: 10, fontWeight: 700, padding: '2px 6px' }}>
+                    ⚠ {a}
+                  </span>
+                ))}
+                {pet.allergies.length > 3 && (
+                  <span style={{ fontSize: 10, fontWeight: 700, color: '#dc2626', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 5, padding: '2px 6px' }}>
+                    +{pet.allergies.length - 3}
+                  </span>
+                )}
+              </div>
+            )}
+            {(!pet.allergies || pet.allergies.length === 0) && (
+              <span style={{ fontSize: 10, fontWeight: 600, color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 5, padding: '2px 8px', alignSelf: 'flex-start' }}>
+                No allergens
+              </span>
+            )}
+
+            {/* Expand chevron */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginTop: 2, color: '#94a3b8', fontSize: 11, gap: 4 }}>
+              <span style={{ fontSize: 11, color: '#cbd5e1' }}>{expanded ? '▲ less' : '▼ details'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Expanded panel ── */}
+        {expanded && (
+          <div style={{ padding: '14px 16px 16px', background: '#fafbfc', borderTop: '1px solid #f1f5f9' }}>
+            {/* Stats grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginBottom: 12 }}>
+              {[
+                { label: 'Birthday', val: pet.birthday ? new Date(pet.birthday).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—' },
+                { label: 'Weight', val: pet.weight ? `${pet.weight} lbs` : '—' },
+                { label: 'Size', val: pet.size || '—' },
+                { label: 'Sex', val: pet.sex && pet.sex !== 'unknown' ? (pet.sex === 'male' ? 'Male ♂' : 'Female ♀') : '—' },
+                { label: 'Fixed', val: pet.isFixed === true ? 'Yes ✓' : pet.isFixed === false ? 'No' : '—' },
+                { label: 'Allergies', val: pet.allergies?.length ? `${pet.allergies.length} item${pet.allergies.length > 1 ? 's' : ''}` : 'None' },
+              ].map(({ label, val }) => (
+                <div key={label} style={{ background: '#fff', border: '1px solid #f1f5f9', borderRadius: 9, padding: '8px 10px' }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', color: '#94a3b8', marginBottom: 3 }}>{label}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{val}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Full allergen list */}
+            {pet.allergies && pet.allergies.length > 0 && (
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', color: '#94a3b8', marginBottom: 7 }}>⚠ Allergen Alerts</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                  {pet.allergies.map(a => (
+                    <div key={a} style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #fee2e2', borderRadius: 8, padding: '7px 10px' }}>
+                      <span style={{ fontSize: 15 }}>{ALLERGENS.find(al => al.label === a)?.emoji || '⚠'}</span>
+                      <div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: '#dc2626' }}>{a}</div>
+                        <div style={{ fontSize: 10, color: '#94a3b8' }}>{ALLERGENS.find(al => al.label === a)?.tip || 'Check product labels carefully'}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Notes */}
+            {pet.notes && (
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', color: '#94a3b8', marginBottom: 6 }}>📝 Notes</div>
+                <div style={{ background: '#fff', border: '1px solid #f1f5f9', borderRadius: 9, padding: '10px 12px', fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>{pet.notes}</div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={e => { e.stopPropagation(); onEdit(); }}
+                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, background: '#1e3a8a', color: '#fff', border: 'none', borderRadius: 9, padding: 10, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                ✏️ Edit {pet.petName}'s Profile
+              </button>
+              <button onClick={e => { e.stopPropagation(); onDelete(); }}
+                style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: 9, padding: '10px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                🗑 Remove
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Hero Pet Card (legacy shell — replaced by PassportPetCard) ───────────────
 function HeroPetCard({ pet, onEdit, onDelete }: { pet: Pet; onEdit: () => void; onDelete: () => void }) {
   const sp = getSP(pet.species);
   const age = petAge(pet.birthday);
@@ -682,146 +1094,152 @@ const Profile = () => {
               )}
             </div>
 
-            {/* ── BENTO PET FAMILY ─────────────────────────────────────── */}
-            <div className="relative overflow-hidden" style={{ borderRadius: 24, background: 'linear-gradient(160deg,#0c0818 0%,#0e1020 50%,#180c08 100%)', boxShadow: '0 32px 80px rgba(0,0,0,0.4)' }}>
-              {/* Ambient glow orbs */}
-              <div style={{ position: 'absolute', top: -60, left: -60, width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle,rgba(99,102,241,0.12),transparent)', pointerEvents: 'none' }} />
-              <div style={{ position: 'absolute', bottom: -40, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle,rgba(249,115,22,0.08),transparent)', pointerEvents: 'none' }} />
+            {/* ── PET FAMILY ─────────────────────────────────────────────── */}
+            <>
+              {/* Birthday animation keyframes + photo hover */}
+              <style>{`
+                @keyframes confettiFall {
+                  0%   { transform: translateY(-10px) rotate(0deg);   opacity: 1; }
+                  100% { transform: translateY(165px) rotate(720deg); opacity: 0; }
+                }
+                @keyframes balloonFloat {
+                  0%, 100% { transform: translateY(0); }
+                  50%      { transform: translateY(-20px); }
+                }
+                @keyframes sparkle {
+                  0%, 100% { opacity: 0; transform: scale(.7); }
+                  50%      { opacity: 1; transform: scale(1.2); }
+                }
+                @keyframes bdayBorder {
+                  0%, 100% { background-position: 0% 50%; }
+                  50%      { background-position: 100% 50%; }
+                }
+                @keyframes ribbonSlide {
+                  0%   { background-position: 0% center; }
+                  100% { background-position: 200% center; }
+                }
+                @keyframes capBob {
+                  0%, 100% { transform: translateX(-52%) rotate(-13deg) translateY(0); }
+                  50%      { transform: translateX(-52%) rotate(-13deg) translateY(-5px); }
+                }
+                @keyframes chipPulse {
+                  0%, 100% { opacity: 1; transform: scale(1); }
+                  50%      { opacity: .85; transform: scale(1.04); }
+                }
+                .photo-hover-overlay:hover { opacity: 1 !important; }
+              `}</style>
 
-              {/* Section header */}
-              <div className="relative flex items-center justify-between px-6 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <div>
-                  <div className="flex items-center gap-2.5 mb-0.5">
-                    <PawPrint size={16} style={{ color: 'rgba(255,255,255,0.4)' }} />
-                    <h3 className="text-lg font-black text-white" style={{ letterSpacing: '-0.02em' }}>My Pet Family</h3>
+              {/* Pet wizard overlays — outside card so fixed positioning works on iOS */}
+              {editingPetId && (
+                <PetForm
+                  initial={petToForm(pets.find(p => p._id === editingPetId)!)}
+                  onSubmit={f => updatePetMutation.mutate({ id: editingPetId, data: toData(f) })}
+                  onCancel={() => setEditingPetId(null)}
+                  isPending={updatePetMutation.isPending}
+                  isEdit
+                />
+              )}
+              {showAddForm && !editingPetId && (
+                <PetForm
+                  onSubmit={f => addPetMutation.mutate(toData(f) as any)}
+                  onCancel={() => setShowAddForm(false)}
+                  isPending={addPetMutation.isPending}
+                />
+              )}
+
+              {/* Light card */}
+              <div style={{ borderRadius: 20, background: '#fff', boxShadow: '0 2px 16px rgba(15,23,42,.07)', border: '1.5px solid #f1f5f9' }}>
+
+                {/* Header */}
+                <div style={{ padding: '18px 20px 14px', borderBottom: '1.5px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <PawPrint size={17} style={{ color: '#1e3a8a' }} />
+                    <span style={{ fontSize: 16, fontWeight: 900, color: '#0f172a', letterSpacing: '-.3px' }}>My Pet Family</span>
                     {pets.length > 0 && (
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                      <span style={{ fontSize: 10, fontWeight: 800, color: '#64748b', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 20, padding: '2px 9px' }}>
                         {pets.length}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.28)' }}>
+                  {pets.length > 0 && pets.length < 10 && (
+                    <button onClick={() => { setShowAddForm(true); setEditingPetId(null); }}
+                      style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#1e3a8a', color: '#fff', border: 'none', borderRadius: 10, padding: '8px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>
+                      <Plus size={12} /> Add Pet
+                    </button>
+                  )}
+                </div>
+
+                {/* Subheader */}
+                <div style={{ padding: '8px 20px', borderBottom: '1px solid #f8fafc', background: '#fafbfc' }}>
+                  <p style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500, margin: 0 }}>
                     Personalized picks, birthday alerts &amp; allergen warnings — for every pet.
                   </p>
                 </div>
-                {pets.length > 0 && pets.length < 10 && (
-                  <button onClick={() => { setShowAddForm(true); setEditingPetId(null); }}
-                    className="flex items-center gap-1.5 text-xs font-black px-4 py-2 rounded-xl transition-all hover:scale-105"
-                    style={glassBtn}>
-                    <Plus size={12} /> Add Pet
-                  </button>
-                )}
-              </div>
-
-              {/* Content */}
-              <div className="relative p-5">
-                {/* Wizard overlay */}
-                {editingPetId && (
-                  <PetForm
-                    initial={petToForm(pets.find(p => p._id === editingPetId)!)}
-                    onSubmit={f => updatePetMutation.mutate({ id: editingPetId, data: toData(f) })}
-                    onCancel={() => setEditingPetId(null)}
-                    isPending={updatePetMutation.isPending}
-                    isEdit
-                  />
-                )}
-                {showAddForm && !editingPetId && (
-                  <PetForm
-                    onSubmit={f => addPetMutation.mutate(toData(f) as any)}
-                    onCancel={() => setShowAddForm(false)}
-                    isPending={addPetMutation.isPending}
-                  />
-                )}
 
                 {/* Empty state */}
-                {pets.length === 0 ? (
+                {pets.length === 0 && (
                   <EmptyState onAdd={() => setShowAddForm(true)} />
-                ) : pets.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {/* Hero card - always col-span-2 */}
-                    {deletingPetId === pets[0]._id ? (
-                      <div className="col-span-2" style={{ borderRadius: 24, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', padding: '24px', textAlign: 'center', minHeight: 220, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ fontSize: 40, marginBottom: 12 }}>{getSP(pets[0].species).emoji}</span>
-                        <p className="text-sm font-bold text-white mb-1">Remove <span style={{ color: '#fca5a5' }}>{pets[0].petName}</span>?</p>
-                        <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>This can't be undone.</p>
-                        <div className="flex gap-2 justify-center">
-                          <button onClick={() => deletePetMutation.mutate(pets[0]._id)} disabled={deletePetMutation.isPending}
-                            className="px-5 py-2 rounded-xl text-sm font-black disabled:opacity-50"
-                            style={{ background: 'rgba(239,68,68,0.25)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.3)' }}>
-                            {deletePetMutation.isPending ? 'Removing...' : 'Remove'}
-                          </button>
-                          <button onClick={() => setDeletingPetId(null)}
-                            className="px-5 py-2 rounded-xl text-sm font-bold"
-                            style={{ ...glassBtn }}>Keep</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="col-span-2">
-                        <HeroPetCard pet={pets[0]}
-                          onEdit={() => { setEditingPetId(pets[0]._id); setShowAddForm(false); }}
-                          onDelete={() => setDeletingPetId(pets[0]._id)} />
-                      </div>
-                    )}
+                )}
 
-                    {/* Slot: 2nd pet or Add CTA */}
-                    {pets.length > 1 ? (
-                      deletingPetId === pets[1]._id ? (
-                        <div style={{ borderRadius: 20, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', padding: '16px', textAlign: 'center', minHeight: 140, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                          <span style={{ fontSize: 28, marginBottom: 8 }}>{getSP(pets[1].species).emoji}</span>
-                          <p className="text-xs font-bold text-white mb-3">Remove <span style={{ color: '#fca5a5' }}>{pets[1].petName}</span>?</p>
-                          <div className="flex gap-1.5">
-                            <button onClick={() => deletePetMutation.mutate(pets[1]._id)} disabled={deletePetMutation.isPending}
-                              className="flex-1 py-1.5 rounded-xl text-xs font-black disabled:opacity-50"
-                              style={{ background: 'rgba(239,68,68,0.25)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.3)' }}>
-                              {deletePetMutation.isPending ? '...' : 'Remove'}
-                            </button>
-                            <button onClick={() => setDeletingPetId(null)} className="flex-1 py-1.5 rounded-xl text-xs font-bold" style={glassBtn}>Keep</button>
-                          </div>
-                        </div>
-                      ) : (
-                        <CompactPetCard pet={pets[1]}
-                          onEdit={() => { setEditingPetId(pets[1]._id); setShowAddForm(false); }}
-                          onDelete={() => setDeletingPetId(pets[1]._id)} />
-                      )
-                    ) : (
-                      <AddCTATile onClick={() => setShowAddForm(true)} />
-                    )}
-
-                    {/* Remaining pets (index 2+) */}
-                    {pets.slice(2).map(pet => (
+                {/* Pet list */}
+                {pets.length > 0 && (
+                  <div style={{ padding: '14px 14px 6px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {pets.map((pet, idx) => (
                       deletingPetId === pet._id ? (
-                        <div key={pet._id} style={{ borderRadius: 20, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', padding: '16px', textAlign: 'center', minHeight: 140, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                          <span style={{ fontSize: 28, marginBottom: 8 }}>{getSP(pet.species).emoji}</span>
-                          <p className="text-xs font-bold text-white mb-3">Remove <span style={{ color: '#fca5a5' }}>{pet.petName}</span>?</p>
-                          <div className="flex gap-1.5">
+                        <div key={pet._id} style={{ borderRadius: 14, background: '#fef2f2', border: '1.5px solid #fecaca', padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                          <span style={{ fontSize: 28 }}>{getSP(pet.species).emoji}</span>
+                          <div style={{ flex: 1 }}>
+                            <p style={{ fontWeight: 700, fontSize: 14, color: '#0f172a', margin: '0 0 3px' }}>Remove <span style={{ color: '#dc2626' }}>{pet.petName}</span>?</p>
+                            <p style={{ fontSize: 11, color: '#94a3b8', margin: 0 }}>This can't be undone.</p>
+                          </div>
+                          <div style={{ display: 'flex', gap: 8 }}>
                             <button onClick={() => deletePetMutation.mutate(pet._id)} disabled={deletePetMutation.isPending}
-                              className="flex-1 py-1.5 rounded-xl text-xs font-black disabled:opacity-50"
-                              style={{ background: 'rgba(239,68,68,0.25)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.3)' }}>
+                              style={{ background: '#dc2626', color: '#fff', border: 'none', borderRadius: 9, padding: '8px 16px', fontSize: 12, fontWeight: 800, cursor: 'pointer', opacity: deletePetMutation.isPending ? .5 : 1 }}>
                               {deletePetMutation.isPending ? '...' : 'Remove'}
                             </button>
-                            <button onClick={() => setDeletingPetId(null)} className="flex-1 py-1.5 rounded-xl text-xs font-bold" style={glassBtn}>Keep</button>
+                            <button onClick={() => setDeletingPetId(null)}
+                              style={{ background: '#fff', color: '#64748b', border: '1.5px solid #e2e8f0', borderRadius: 9, padding: '8px 16px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                              Keep
+                            </button>
                           </div>
                         </div>
                       ) : (
-                        <CompactPetCard key={pet._id} pet={pet}
+                        <PassportPetCard key={pet._id} pet={pet} isPrimary={idx === 0}
                           onEdit={() => { setEditingPetId(pet._id); setShowAddForm(false); }}
-                          onDelete={() => setDeletingPetId(pet._id)} />
+                          onDelete={() => setDeletingPetId(pet._id)}
+                          onPhotoUpdate={() => queryClient.invalidateQueries({ queryKey: ['myPets'] })}
+                        />
                       )
                     ))}
 
-                    {/* Stats tile */}
-                    {pets.length >= 2 && <StatsTile pets={pets} />}
-
-                    {/* Add tile when 2+ pets — span full row if it would sit alone (4 or 7 pets) */}
-                    {pets.length >= 2 && (
-                      <div className={pets.length % 3 === 1 ? 'col-span-3' : ''}>
-                        <AddCTATile onClick={() => setShowAddForm(true)} />
-                      </div>
+                    {/* Add another row */}
+                    {pets.length < 10 && (
+                      <button onClick={() => { setShowAddForm(true); setEditingPetId(null); }}
+                        style={{ width: '100%', padding: '13px', borderRadius: 14, border: '2px dashed #e2e8f0', background: 'transparent', color: '#94a3b8', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 2, boxSizing: 'border-box' }}>
+                        <Plus size={15} style={{ color: '#cbd5e1' }} /> Add another pet
+                      </button>
                     )}
                   </div>
-                ) : null}
+                )}
+
+                {/* Footer stat */}
+                {pets.length > 0 && (
+                  <div style={{ padding: '10px 20px 14px', marginTop: 8, borderTop: '1px solid #f8fafc', display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>
+                      🐾 {pets.length} pet{pets.length !== 1 ? 's' : ''} registered
+                    </span>
+                    {[...new Set(pets.flatMap(p => p.allergies || []))].length > 0 && (
+                      <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>
+                        ⚠ {[...new Set(pets.flatMap(p => p.allergies || []))].length} allergen{[...new Set(pets.flatMap(p => p.allergies || []))].length !== 1 ? 's' : ''} tracked
+                      </span>
+                    )}
+                    {pets.some(p => isBirthdayToday(p.birthday)) && (
+                      <span style={{ fontSize: 11, color: '#9a3412', fontWeight: 700 }}>🎂 Birthday today!</span>
+                    )}
+                  </div>
+                )}
               </div>
-            </div>
+            </>
 
             {/* Password */}
             <div className="bg-white rounded-2xl shadow-md p-6">

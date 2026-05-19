@@ -29,6 +29,7 @@ import {
   getMyPets,
   addPet,
   updatePet,
+  uploadPetPhoto,
   deletePet
 } from '../controllers/petController';
 import { protect } from '../middleware/auth';
@@ -87,6 +88,7 @@ router.delete('/stock-alerts/:productId', protect, validateObjectId('productId')
 router.get('/me/pets', protect, getMyPets);
 router.post('/me/pets', protect, addPet);
 router.put('/me/pets/:petId', protect, validateObjectId('petId'), updatePet);
+router.patch('/me/pets/:petId/photo', protect, validateObjectId('petId'), uploadPetPhoto);
 router.delete('/me/pets/:petId', protect, validateObjectId('petId'), deletePet);
 
 export default router;
