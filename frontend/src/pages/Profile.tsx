@@ -106,184 +106,267 @@ const glassBtn = {
   cursor: 'pointer',
 } as React.CSSProperties;
 
-// ─── Species picker (dark) ───────────────────────────────────────────────────
-function SpeciesPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  return (
-    <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
-      {Object.entries(SP).map(([key, sp]) => {
-        const sel = value === key;
-        return (
-          <button key={key} type="button" onClick={() => onChange(sel ? '' : key)}
-            className="relative flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl transition-all duration-200 focus:outline-none"
-            style={{
-              background:  sel ? sp.deepGrad : 'rgba(255,255,255,0.05)',
-              border:     `1.5px solid ${sel ? sp.neon + '88' : 'rgba(255,255,255,0.08)'}`,
-              boxShadow:   sel ? `0 0 20px ${sp.neon}33` : 'none',
-              transform:   sel ? 'scale(1.06) translateY(-2px)' : 'scale(1)',
-            }}>
-            <span className="text-xl leading-none">{sp.emoji}</span>
-            <span className="text-[9px] font-bold leading-tight text-center"
-              style={{ color: sel ? sp.neon : 'rgba(255,255,255,0.35)' }}>
-              {sp.shortLabel || sp.label}
-            </span>
-            {sel && (
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black"
-                style={{ background: sp.neon, color: '#000' }}>✓</span>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+// ─── Pet Form Wizard ─────────────────────────────────────────────────────────
 
-// ─── Pet Form ────────────────────────────────────────────────────────────────
 interface PetFormProps {
   initial?: typeof EMPTY_FORM;
   onSubmit: (d: typeof EMPTY_FORM) => void;
   onCancel: () => void;
-  isPending: boolean;
+  isPending?: boolean;
   isEdit?: boolean;
 }
 
 function PetForm({ initial = EMPTY_FORM, onSubmit, onCancel, isPending, isEdit }: PetFormProps) {
-  const [form, setForm] = useState(initial);
-  const [showMore, setShowMore] = useState(!!(initial.sex || initial.isFixed || initial.weight || initial.size || initial.notes));
-  const set = (k: keyof typeof EMPTY_FORM, v: any) => setForm(f => ({ ...f, [k]: v }));
-  const sp = form.species ? getSP(form.species) : null;
+  const [step, setStep]       = useState(1);
+  const [dir, setDir]         = useState<'fwd'|'back'>('fwd');
+  const [form, setForm]       = useState<typeof EMPTY_FORM>({ ...EMPTY_FORM, ...initial });
+  const [nameErr, setNameErr] = useState('');
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 640);
 
-  const inputCls = "w-full rounded-xl px-4 py-2.5 text-sm text-white/90 border focus:outline-none transition-colors placeholder-white/20";
-  const inputStyle = { background: 'rgba(0,0,0,0.3)', borderColor: 'rgba(255,255,255,0.1)' } as React.CSSProperties;
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', h);
+    // lock body scroll while wizard is open
+    document.body.style.overflow = 'hidden';
+    return () => { window.removeEventListener('resize', h); document.body.style.overflow = ''; };
+  }, []);
 
-  return (
-    <form onSubmit={e => { e.preventDefault(); if (!form.petName.trim() || !form.species) return; onSubmit(form); }} className="space-y-5">
-      <div>
-        <label className="block text-xs font-black uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          Species <span className="text-red-400">*</span>
-        </label>
-        <SpeciesPicker value={form.species} onChange={v => set('species', v)} />
-      </div>
+  const sp   = form.species ? getSP(form.species) : null;
+  const neon = sp?.neon ?? 'rgba(255,255,255,0.35)';
 
-      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 transition-opacity ${form.species ? 'opacity-100' : 'opacity-30 pointer-events-none'}`}>
-        <div>
-          <label className="block text-xs font-black uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>Name *</label>
-          <input type="text" value={form.petName} onChange={e => set('petName', e.target.value)}
-            placeholder="Luna, Max, Noodle..." className={inputCls} style={inputStyle} />
-        </div>
-        <div>
-          <label className="block text-xs font-black uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>Breed</label>
-          <input type="text" value={form.breed} onChange={e => set('breed', e.target.value)}
-            placeholder="Golden Retriever, Siamese..." className={inputCls} style={inputStyle} />
-        </div>
-      </div>
+  function set<K extends keyof typeof EMPTY_FORM>(k: K, v: typeof EMPTY_FORM[K]) {
+    setForm(f => ({ ...f, [k]: v }));
+  }
+  function next() { setDir('fwd');  setStep(s => s + 1); }
+  function back() { setDir('back'); setStep(s => s - 1); }
 
-      <div className={`transition-opacity ${form.species ? 'opacity-100' : 'opacity-30 pointer-events-none'}`}>
-        <label className="block text-xs font-black uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>🎂 Birthday</label>
-        <input type="date" value={form.birthday} onChange={e => set('birthday', e.target.value)}
-          max={new Date().toISOString().split('T')[0]}
-          className={`${inputCls} w-full sm:w-52`} style={{ ...inputStyle, colorScheme: 'dark' }} />
-      </div>
+  function pickSpecies(key: string) {
+    set('species', key);
+    setDir('fwd');
+    setTimeout(() => setStep(2), 180);
+  }
 
-      <div className={`transition-opacity ${form.species ? 'opacity-100' : 'opacity-30 pointer-events-none'}`}>
-        <label className="block text-xs font-black uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>🚫 Avoid These Ingredients</label>
-        <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.25)' }}>We'll flag any product containing these.</p>
-        <div className="flex flex-wrap gap-2">
-          {ALLERGENS.map(({ label, emoji }) => {
-            const active = form.allergies.includes(label.toLowerCase());
+  function handleSubmit() {
+    if (!form.petName.trim()) { setNameErr('Name is required'); return; }
+    onSubmit(form);
+  }
+
+  // ── Shared input style ──────────────────────────────────────────────────────
+  const INP = (active?: boolean): React.CSSProperties => ({
+    width: '100%', background: 'rgba(255,255,255,0.05)',
+    border: `1.5px solid ${active ? neon + '66' : 'rgba(255,255,255,0.08)'}`,
+    borderRadius: 12, padding: '13px 16px', color: 'white', fontSize: 15,
+    outline: 'none', transition: 'border 0.15s, box-shadow 0.15s',
+    boxSizing: 'border-box' as const,
+    boxShadow: active ? `0 0 0 3px ${neon}18` : 'none',
+  });
+  const LBL: React.CSSProperties = {
+    display: 'block', fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,0.3)',
+    textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8,
+  };
+  const CHIP = (on: boolean, color?: string): React.CSSProperties => ({
+    flex: 1, padding: '11px 4px', borderRadius: 12, cursor: 'pointer',
+    border: `1.5px solid ${on ? (color ?? neon) + '88' : 'rgba(255,255,255,0.08)'}`,
+    background: on ? (color ?? neon) + '18' : 'rgba(255,255,255,0.03)',
+    color: on ? (color ?? neon) : 'rgba(255,255,255,0.45)',
+    fontWeight: 800, fontSize: 12, transition: 'all 0.12s ease',
+  });
+
+  // ── Step content ────────────────────────────────────────────────────────────
+  const steps: Record<number, React.ReactNode> = {
+    1: (
+      <>
+        <p style={{ fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', marginBottom: 6 }}>What kind of pet?</p>
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.32)', marginBottom: 22 }}>Tap one to continue</p>
+        <div className="grid grid-cols-2 gap-3">
+          {Object.entries(SP).map(([key, s]) => {
+            const sel = form.species === key;
             return (
-              <button key={label} type="button"
-                onClick={() => set('allergies', active
-                  ? form.allergies.filter(x => x !== label.toLowerCase())
-                  : [...form.allergies, label.toLowerCase()])}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
-                style={active
-                  ? { background: 'rgba(239,68,68,0.2)', borderColor: 'rgba(239,68,68,0.5)', color: '#fca5a5' }
-                  : { background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.35)' }}
-              >{emoji} {label}{active && ' ✕'}</button>
+              <button key={key} type="button" onClick={() => pickSpecies(key)}
+                style={{ background: sel ? s.deepGrad : 'rgba(255,255,255,0.04)',
+                  border: `1.5px solid ${sel ? s.neon + 'bb' : 'rgba(255,255,255,0.08)'}`,
+                  borderRadius: 16, padding: '15px 14px', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  boxShadow: sel ? `0 0 28px ${s.neon}33` : 'none',
+                  transform: sel ? 'scale(1.03)' : 'scale(1)',
+                  transition: 'all 0.15s ease' }}>
+                <span style={{ fontSize: 28, lineHeight: 1, filter: sel ? `drop-shadow(0 0 10px ${s.neon}99)` : 'none' }}>{s.emoji}</span>
+                <span style={{ color: sel ? '#fff' : 'rgba(255,255,255,0.5)', fontWeight: 800, fontSize: 14, flex: 1, textAlign: 'left' }}>{s.label}</span>
+                {sel && <span style={{ width: 18, height: 18, borderRadius: '50%', background: s.neon, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#000', fontWeight: 900, flexShrink: 0 }}>✓</span>}
+              </button>
             );
           })}
         </div>
-      </div>
+      </>
+    ),
+    2: (
+      <>
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <span style={{ fontSize: 62, display: 'block', marginBottom: 10, filter: `drop-shadow(0 4px 24px ${neon}55)`, animation: 'pfw_pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both' }}>{sp?.emoji ?? '🐾'}</span>
+          <p style={{ fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>What's their name?</p>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.32)' }}>You can always edit this later</p>
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <input type="text" placeholder="Luna, Max, Noodle..." value={form.petName}
+            onChange={e => { set('petName', e.target.value); setNameErr(''); }}
+            autoFocus
+            style={{ ...INP(!!form.petName), textAlign: 'center', fontSize: 18, fontWeight: 700, padding: '16px',
+              borderColor: nameErr ? '#ef4444' : form.petName ? neon + '66' : 'rgba(255,255,255,0.08)' }} />
+          {nameErr && <p style={{ color: '#ef4444', fontSize: 11, textAlign: 'center', marginTop: 6 }}>{nameErr}</p>}
+        </div>
+        <div>
+          <label style={LBL}>Breed <span style={{ opacity: 0.45 }}>(optional)</span></label>
+          <input type="text" placeholder="Golden Retriever, Siamese..." value={form.breed}
+            onChange={e => set('breed', e.target.value)} style={INP(!!form.breed)} />
+        </div>
+      </>
+    ),
+    3: (
+      <>
+        <p style={{ fontSize: 20, fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>
+          A bit more about <span style={{ color: neon }}>{form.petName || 'them'}</span>
+        </p>
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.28)', marginBottom: 22 }}>All optional — skip anything you're not sure about</p>
 
-      <button type="button" onClick={() => setShowMore(v => !v)}
-        className="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest transition-colors"
-        style={{ color: 'rgba(255,255,255,0.3)' }}>
-        {showMore ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-        {showMore ? 'Fewer' : 'More'} details
-      </button>
+        <div style={{ marginBottom: 16 }}>
+          <label style={LBL}>🎂 Birthday</label>
+          <input type="date" value={form.birthday} onChange={e => set('birthday', e.target.value)}
+            style={{ ...INP(!!form.birthday), colorScheme: 'dark' }} />
+        </div>
 
-      {showMore && (
-        <div className="space-y-4 rounded-2xl p-4" style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <div className="flex flex-wrap gap-4 items-center">
-            <div>
-              <label className="block text-xs font-black uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>Sex</label>
-              <div className="flex gap-2">
-                {[{ v: 'male', l: '♂ Male' }, { v: 'female', l: '♀ Female' }].map(({ v, l }) => (
-                  <button key={v} type="button" onClick={() => set('sex', form.sex === v ? '' : v)}
-                    className="px-4 py-1.5 rounded-full text-xs font-bold border transition-all"
-                    style={form.sex === v
-                      ? { background: sp ? sp.neon + '22' : 'rgba(255,255,255,0.1)', borderColor: sp?.neon || 'rgba(255,255,255,0.3)', color: sp?.neon || 'white' }
-                      : { background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.35)' }}
-                  >{l}</button>
-                ))}
-              </div>
-            </div>
-            <div className="flex items-center gap-2 sm:mt-5">
-              <input type="checkbox" id="isFixed" checked={form.isFixed} onChange={e => set('isFixed', e.target.checked)} className="w-4 h-4" />
-              <label htmlFor="isFixed" className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>Spayed / Neutered</label>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-black uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Weight (lbs)</label>
-              <input type="number" value={form.weight} onChange={e => set('weight', e.target.value)} min="0" max="300" placeholder="e.g. 45"
-                className={inputCls} style={inputStyle} />
-            </div>
-            {(form.species === 'dog' || form.species === 'cat') && (
-              <div>
-                <label className="block text-xs font-black uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Size</label>
-                <div className="flex gap-2">
-                  {SIZES.map(sz => (
-                    <button key={sz.value} type="button" onClick={() => set('size', form.size === sz.value ? '' : sz.value)}
-                      className="flex-1 flex flex-col items-center py-2 rounded-xl border text-xs transition-all"
-                      style={form.size === sz.value
-                        ? { background: sp ? sp.neon + '22' : 'rgba(255,255,255,0.1)', borderColor: sp?.neon || 'rgba(255,255,255,0.3)', color: sp?.neon || 'white' }
-                        : { background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.35)' }}
-                    ><span className="font-black">{sz.label}</span><span style={{ fontSize: 9, opacity: 0.6 }}>{sz.sub}</span></button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          <div>
-            <label className="block text-xs font-black uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Notes</label>
-            <textarea value={form.notes} onChange={e => set('notes', e.target.value)}
-              placeholder="Health conditions, favourite things..." rows={2} maxLength={500}
-              className={`${inputCls} resize-none`} style={inputStyle} />
+        <div style={{ marginBottom: 16 }}>
+          <label style={LBL}>Sex</label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {[['male','♂ Male'],['female','♀ Female'],['unknown','Unknown']] .map(([v,l]) => (
+              <button key={v} type="button" onClick={() => set('sex', form.sex === v ? '' : v as any)} style={CHIP(form.sex === v)}>{l}</button>
+            ))}
           </div>
         </div>
-      )}
 
-      <div className="flex gap-3 pt-1">
-        <button type="submit" disabled={isPending || !form.petName.trim() || !form.species}
-          className="flex items-center gap-2 px-7 py-2.5 rounded-xl font-black text-sm disabled:opacity-40 transition-all hover:scale-105"
-          style={sp ? {
-            background: sp.deepGrad, color: sp.neon,
-            border: `1.5px solid ${sp.neon}55`,
-            boxShadow: `0 0 20px ${sp.neon}33`,
-          } : {
-            background: 'rgba(255,255,255,0.1)', color: 'white',
-            border: '1.5px solid rgba(255,255,255,0.2)',
-          }}>
-          {isPending ? 'Saving...' : isEdit ? '✓ Save Changes' : `＋ Add ${form.petName || 'Pet'}`}
-        </button>
-        <button type="button" onClick={onCancel}
-          className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:bg-white/5"
-          style={{ color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)' }}>
-          Cancel
-        </button>
+        <div style={{ marginBottom: 16 }}>
+          <label style={LBL}>Size</label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {SIZES.map(sz => (
+              <button key={sz.value} type="button" onClick={() => set('size', form.size === sz.value ? '' : sz.value as any)}
+                style={{ ...CHIP(form.size === sz.value), display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 3, padding: '10px 4px' }}>
+                <span style={{ fontWeight: 900, fontSize: 13 }}>{sz.label}</span>
+                <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 9 }}>{sz.sub}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label style={LBL}>Weight (lbs)</label>
+          <input type="number" placeholder="e.g. 25" value={form.weight}
+            onChange={e => set('weight', e.target.value)} style={INP(!!form.weight)} />
+        </div>
+      </>
+    ),
+    4: (
+      <>
+        <p style={{ fontSize: 20, fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>Ingredients to avoid?</p>
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.28)', marginBottom: 20 }}>
+          We'll flag matching products for <span style={{ color: neon }}>{form.petName || 'your pet'}</span>
+        </p>
+        <div className="grid grid-cols-3 gap-2.5">
+          {ALLERGENS.map(({ label, emoji }) => {
+            const k = label.toLowerCase();
+            const on = form.allergies.includes(k);
+            return (
+              <button key={label} type="button"
+                onClick={() => set('allergies', on ? form.allergies.filter(x => x!==k) : [...form.allergies, k])}
+                style={{ padding: '14px 8px', borderRadius: 14, cursor: 'pointer',
+                  border: `1.5px solid ${on ? 'rgba(239,68,68,0.6)' : 'rgba(255,255,255,0.07)'}`,
+                  background: on ? 'linear-gradient(135deg,rgba(127,29,29,0.65),rgba(185,28,28,0.35))' : 'rgba(255,255,255,0.03)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
+                  boxShadow: on ? '0 0 18px rgba(239,68,68,0.25)' : 'none',
+                  transform: on ? 'scale(1.04)' : 'scale(1)', transition: 'all 0.15s ease' }}>
+                <span style={{ fontSize: 26, filter: on ? 'drop-shadow(0 0 8px rgba(239,68,68,0.5))' : 'none' }}>{emoji}</span>
+                <span style={{ fontSize: 10, fontWeight: 800, color: on ? '#fca5a5' : 'rgba(255,255,255,0.38)' }}>{label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </>
+    ),
+  };
+
+  // ── Layout helpers ──────────────────────────────────────────────────────────
+  const isLastStep = step === 4;
+  const canAdvance = !(step === 2 && !form.petName.trim());
+
+  return (
+    <>
+      <style>{`
+        @keyframes pfw_in   { from { transform:translateX(28px);  opacity:0 } to { transform:translateX(0); opacity:1 } }
+        @keyframes pfw_back { from { transform:translateX(-28px); opacity:0 } to { transform:translateX(0); opacity:1 } }
+        @keyframes pfw_bd   { from { opacity:0 } to { opacity:1 } }
+        @keyframes pfw_up   { from { transform:translateY(52px); opacity:0 } to { transform:translateY(0); opacity:1 } }
+        @keyframes pfw_pop  { from { transform:scale(0.4) rotate(-8deg); opacity:0 } to { transform:scale(1) rotate(0); opacity:1 } }
+      `}</style>
+
+      {/* Backdrop */}
+      <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.72)', backdropFilter:'blur(8px)', WebkitBackdropFilter:'blur(8px)', zIndex:300, animation:'pfw_bd 0.25s ease' }} onClick={onCancel} />
+
+      {/* Centering wrapper (desktop) / bottom anchor (mobile) */}
+      <div style={{ position:'fixed', inset:0, zIndex:301, display:'flex', alignItems: isMobile ? 'flex-end' : 'center', justifyContent:'center', padding: isMobile ? 0 : 16 }} onClick={e => e.stopPropagation()}>
+
+        {/* Sheet */}
+        <div style={{ width: isMobile ? '100%' : 460, maxHeight: isMobile ? '92svh' : '88vh',
+          background: 'rgba(10,6,20,0.98)', display: 'flex', flexDirection: 'column', overflow: 'hidden',
+          borderRadius: isMobile ? '24px 24px 0 0' : 24,
+          borderTop: `2px solid ${neon}44`,
+          boxShadow: '0 -8px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04)',
+          animation: 'pfw_up 0.32s cubic-bezier(0.16,1,0.3,1)' }}>
+
+          {/* Progress bar */}
+          <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', flexShrink: 0 }}>
+            <div style={{ height: '100%', background: neon, width: `${(step/4)*100}%`, transition: 'width 0.35s ease, background 0.5s ease', borderRadius: '0 2px 2px 0' }} />
+          </div>
+
+          {/* Header */}
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 20px 6px', flexShrink:0 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+              {step > 1 && (
+                <button onClick={back} style={{ width:32, height:32, borderRadius:'50%', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.55)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, lineHeight:1, paddingBottom:2 }}>‹</button>
+              )}
+              <span style={{ fontSize:10, fontWeight:800, color:'rgba(255,255,255,0.2)', textTransform:'uppercase', letterSpacing:'0.12em' }}>
+                {isEdit ? 'Edit Pet' : 'New Pet'} &nbsp;·&nbsp; {step} / 4
+              </span>
+            </div>
+            <button onClick={onCancel} style={{ width:32, height:32, borderRadius:'50%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.35)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>×</button>
+          </div>
+
+          {/* Step content — key forces re-mount → re-animation */}
+          <div key={step} style={{ flex:1, overflowY:'auto', padding:'10px 20px 8px', minHeight:0,
+            animation: dir==='fwd' ? 'pfw_in 0.22s cubic-bezier(0.16,1,0.3,1) both' : 'pfw_back 0.22s cubic-bezier(0.16,1,0.3,1) both' }}>
+            {steps[step]}
+          </div>
+
+          {/* Footer buttons */}
+          {step > 1 && (
+            <div style={{ padding:'12px 20px', paddingBottom: isMobile ? 'calc(12px + env(safe-area-inset-bottom, 0px))' : '12px', flexShrink:0, display:'flex', gap:10, borderTop:'1px solid rgba(255,255,255,0.05)' }}>
+              {(step === 3 || step === 4) && (
+                <button type="button" onClick={isLastStep ? handleSubmit : next}
+                  style={{ flex:1, padding:'13px 0', background:'transparent', border:'1px solid rgba(255,255,255,0.08)', borderRadius:12, color:'rgba(255,255,255,0.28)', fontSize:12, fontWeight:800, cursor:'pointer', letterSpacing:'0.05em' }}>
+                  Skip
+                </button>
+              )}
+              <button type="button" onClick={isLastStep ? handleSubmit : next}
+                disabled={!canAdvance || !!isPending}
+                style={{ flex: (step===3||step===4) ? 3 : 1, padding:'14px 0', borderRadius:12, border:'none',
+                  cursor: !canAdvance ? 'not-allowed' : 'pointer', fontWeight:900, fontSize:15,
+                  background: !canAdvance ? 'rgba(255,255,255,0.07)' : (sp ? sp.neon : 'rgba(255,255,255,0.5)'),
+                  color: !canAdvance ? 'rgba(255,255,255,0.2)' : '#000',
+                  opacity: isPending ? 0.65 : 1, transition: 'all 0.15s ease' }}>
+                {isPending ? 'Saving…' : isLastStep ? (isEdit ? '✓ Save Changes' : `Add ${form.petName || 'Pet'} 🐾`) : 'Continue →'}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-    </form>
+    </>
   );
 }
 
@@ -621,7 +704,7 @@ const Profile = () => {
                     Personalized picks, birthday alerts &amp; allergen warnings — for every pet.
                   </p>
                 </div>
-                {!showAddForm && pets.length > 0 && (
+                {pets.length > 0 && pets.length < 10 && (
                   <button onClick={() => { setShowAddForm(true); setEditingPetId(null); }}
                     className="flex items-center gap-1.5 text-xs font-black px-4 py-2 rounded-xl transition-all hover:scale-105"
                     style={glassBtn}>
@@ -632,37 +715,26 @@ const Profile = () => {
 
               {/* Content */}
               <div className="relative p-5">
-                {/* Add / Edit form */}
-                {(showAddForm || editingPetId) && (
-                  <div className="mb-5 rounded-2xl p-5" style={{ ...glass, border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <div className="flex items-center justify-between mb-5">
-                      <span className="text-sm font-black text-white">{editingPetId ? 'Edit Pet' : 'New Pet Profile'}</span>
-                      <button onClick={() => { setShowAddForm(false); setEditingPetId(null); }}
-                        className="w-7 h-7 rounded-full flex items-center justify-center transition-all hover:bg-white/10"
-                        style={{ color: 'rgba(255,255,255,0.4)' }}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                    {editingPetId ? (
-                      <PetForm
-                        initial={petToForm(pets.find(p => p._id === editingPetId)!)}
-                        onSubmit={f => updatePetMutation.mutate({ id: editingPetId, data: toData(f) })}
-                        onCancel={() => setEditingPetId(null)}
-                        isPending={updatePetMutation.isPending}
-                        isEdit
-                      />
-                    ) : (
-                      <PetForm
-                        onSubmit={f => addPetMutation.mutate(toData(f) as any)}
-                        onCancel={() => setShowAddForm(false)}
-                        isPending={addPetMutation.isPending}
-                      />
-                    )}
-                  </div>
+                {/* Wizard overlay */}
+                {editingPetId && (
+                  <PetForm
+                    initial={petToForm(pets.find(p => p._id === editingPetId)!)}
+                    onSubmit={f => updatePetMutation.mutate({ id: editingPetId, data: toData(f) })}
+                    onCancel={() => setEditingPetId(null)}
+                    isPending={updatePetMutation.isPending}
+                    isEdit
+                  />
+                )}
+                {showAddForm && !editingPetId && (
+                  <PetForm
+                    onSubmit={f => addPetMutation.mutate(toData(f) as any)}
+                    onCancel={() => setShowAddForm(false)}
+                    isPending={addPetMutation.isPending}
+                  />
                 )}
 
                 {/* Empty state */}
-                {pets.length === 0 && !showAddForm ? (
+                {pets.length === 0 ? (
                   <EmptyState onAdd={() => setShowAddForm(true)} />
                 ) : pets.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -712,7 +784,7 @@ const Profile = () => {
                           onDelete={() => setDeletingPetId(pets[1]._id)} />
                       )
                     ) : (
-                      !showAddForm && <AddCTATile onClick={() => setShowAddForm(true)} />
+                      <AddCTATile onClick={() => setShowAddForm(true)} />
                     )}
 
                     {/* Remaining pets (index 2+) */}
@@ -741,7 +813,7 @@ const Profile = () => {
                     {pets.length >= 2 && <StatsTile pets={pets} />}
 
                     {/* Add tile when 2+ pets — span full row if it would sit alone (4 or 7 pets) */}
-                    {pets.length >= 2 && !showAddForm && (
+                    {pets.length >= 2 && (
                       <div className={pets.length % 3 === 1 ? 'col-span-3' : ''}>
                         <AddCTATile onClick={() => setShowAddForm(true)} />
                       </div>
