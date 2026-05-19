@@ -218,20 +218,40 @@ PETSHIWU COMPANY POLICIES:
 `;
 
 // ─── System Prompt Builder ────────────────────────────────────────
-const buildSystemPrompt = (inventorySnippet: string, profileAlreadySaved: boolean): string => `
+const buildSystemPrompt = (inventorySnippet: string, profileAlreadySaved: boolean, savedPets?: any[]): string => `
 You are PetShiwu's Super AI Advisor — the ultimate expert for petshiwu.com, a premium US pet e-commerce store.
 
-${profileAlreadySaved ? `
+${profileAlreadySaved && savedPets && savedPets.length > 0 ? `
+IMPORTANT — CUSTOMER PET PROFILES ON FILE (DO NOT ASK FOR THIS INFO):
+The customer has ${savedPets.length} pet${savedPets.length > 1 ? 's' : ''} saved in their account:
+${savedPets.map((p: any, i: number) => {
+  const age = p.birthday ? (() => {
+    const born = new Date(p.birthday);
+    const now = new Date();
+    const yrs = now.getFullYear() - born.getFullYear();
+    const adj = now < new Date(now.getFullYear(), born.getMonth(), born.getDate()) ? -1 : 0;
+    const total = yrs + adj;
+    return total < 1 ? 'under 1 year' : `${total} year${total !== 1 ? 's' : ''} old`;
+  })() : null;
+  const allergens = p.allergies?.length ? `allergic to: ${p.allergies.join(', ')}` : null;
+  const parts = [p.species, p.breed, age, p.sex, allergens].filter(Boolean).join(', ');
+  return `  ${i + 1}. ${p.petName}${parts ? ` (${parts})` : ''}`;
+}).join('\n')}
+
+RULES:
+- NEVER ask for pet name, birthday, species, or breed — you already have all of this.
+- Use their pet's name naturally in your responses.
+- Reference their pet's specific species/breed/allergies when making recommendations.
+- If they mention "my pet" or "my dog/cat", use the saved pet's name.
+` : profileAlreadySaved ? `
 IMPORTANT — CUSTOMER PROFILE ALREADY SAVED:
-The customer's pet name and birthday are already on file in their profile.
-DO NOT ask for pet name or birthday — you already have this information.
-Greet them warmly using their pet's name and go straight to helping with their request.
+The customer's pet name and birthday are already on file.
+DO NOT ask for pet name or birthday — go straight to helping with their request.
 ` : `
-MISSION #1: DATA COLLECTION (MANDATORY ON FIRST MESSAGE)
-- ALWAYS start your very first response by asking for the pet's name and birthday.
-- Example: "Hi! I'd love to help. Before we start, what's your pet's name and birthday? We want to send a special birthday gift for their big day! 🎂🐾"
-- After greeting and asking for data, briefly answer their original question.
-- Once you have pet name and birthday, thank them warmly and proceed with full expert advice.
+MISSION #1: DATA COLLECTION (FIRST MESSAGE ONLY)
+- On your very first response, ask for the pet's name and birthday once, then answer their question.
+- Example: "Hi! I'd love to help. What's your pet's name and birthday? We'd love to send them a birthday gift 🎂🐾 — but first, here's what I found for you:"
+- Once collected, never ask again.
 `}
 
 MISSION #2: EXPERT ADVICE (CATS & DOGS)
@@ -299,11 +319,14 @@ CONVERSATION STYLE:
 - Use pet emojis occasionally 🐾🐕🐈
 - All advice and knowledge is from PetShiwu's expert team — never reference competitors
 
-PRODUCT RULES:
-- Recommend real products from the inventory snapshot above when possible
-- For products not in the snapshot, end response with: [SEARCH:search term here]
-- Only ONE search tag per response
-- Do NOT make up product names or prices not in the inventory`;
+PRODUCT RULES — CRITICAL:
+- For ANY question about products, brands, food, treats, toys, or supplies → ALWAYS end with [SEARCH:query]
+- This is MANDATORY for every product-related question — even if the product is in the snapshot above
+- The [SEARCH:] tag surfaces real, buyable products from our live 10,000+ inventory for the customer
+- Only ONE [SEARCH:] tag per response, placed at the very end before any closing sentence
+- Pick the most specific query possible: e.g. [SEARCH:grain-free cat food] not just [SEARCH:cat food]
+- If the question is about health/behavior only (no product needed), skip the search tag
+- Do NOT invent product names or prices`;
 
 // ─── Types ────────────────────────────────────────────────────────
 interface ChatMessage {
@@ -454,15 +477,31 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
       return;
     }
 
-    // ✅ Merge petProfile into petContext so all downstream logic works unchanged
-    const mergedPetName = petContext?.petName || petProfile?.petName;
-    const mergedBirthday = petContext?.birthday || petProfile?.petBirthday;
+    // ── Load authenticated user's saved pets from MongoDB ─────────
+    let savedPets: any[] = [];
+    try {
+      const token = req.cookies?.frontend_token || (req.headers.authorization?.split(' ')[1]);
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+        if (decoded?.id) {
+          const user = await User.findById(decoded.id).select('pets');
+          if (user?.pets && (user.pets as any[]).length > 0) {
+            savedPets = user.pets as any[];
+          }
+        }
+      }
+    } catch { /* non-fatal — unauthenticated users just get the data-collection flow */ }
+
+    // ✅ Merge sources: MongoDB pets > frontend petProfile > petContext
+    const primaryPet = savedPets[0];
+    const mergedPetName = primaryPet?.petName || petContext?.petName || petProfile?.petName;
+    const mergedBirthday = primaryPet?.birthday || petContext?.birthday || petProfile?.petBirthday;
     const mergedEmail = petContext?.parentEmail || petProfile?.ownerEmail;
 
     const hasData = !!(mergedPetName && mergedBirthday);
 
-    // ✅ profileAlreadySaved = true means frontend already collected it → skip asking
-    const profileAlreadySaved = !!(petProfile?.petName && petProfile?.petBirthday);
+    // profileAlreadySaved = true → skip data collection prompt entirely
+    const profileAlreadySaved = savedPets.length > 0 || !!(petProfile?.petName && petProfile?.petBirthday);
 
     const birthdayCelebration = mergedBirthday ? isBirthdayToday(mergedBirthday) : false;
 
@@ -537,8 +576,8 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
       console.error('Inventory fetch error:', inventoryError);
     }
 
-    // ✅ Pass profileAlreadySaved so system prompt skips data collection
-    const systemPrompt = buildSystemPrompt(inventorySnippet, profileAlreadySaved);
+    // ✅ Pass savedPets so system prompt includes full pet profiles for logged-in users
+    const systemPrompt = buildSystemPrompt(inventorySnippet, profileAlreadySaved, savedPets);
 
     const history = (messages || []).map((m: ChatMessage) => ({
       role: m.role === 'assistant' ? 'model' : 'user',
@@ -619,14 +658,17 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
         const foundProducts = await Product.find({
           $or: [
             { name: { $regex: searchQuery, $options: 'i' } },
-            { description: { $regex: searchQuery, $options: 'i' } },
-            { tags: { $in: [new RegExp(searchQuery, 'i')] } }
+            { brand: { $regex: searchQuery, $options: 'i' } },
+            { category: { $regex: searchQuery, $options: 'i' } },
+            { tags: { $in: [new RegExp(searchQuery, 'i')] } },
+            { description: { $regex: searchQuery, $options: 'i' } }
           ],
           isActive: true,
           stock: { $gt: 0 }
         })
           .select('name price salePrice images slug brand category')
-          .limit(4)
+          .sort({ featured: -1, sold: -1 })
+          .limit(6)
           .lean() as Record<string, unknown>[];
         products = foundProducts;
       } catch (searchError) {

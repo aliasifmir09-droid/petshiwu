@@ -88,9 +88,13 @@ async function askBackend(
   petContext: PetContext,
   petProfile: PetProfile | null
 ): Promise<{ text: string; products: Product[] }> {
-  const res = await fetch('https://www.petshiwu.com/api/v1/ai-advisor/chat', {
+  const token = localStorage.getItem('token')
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const res = await fetch('/api/v1/ai-advisor/chat', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ messages, userMessage, petContext, petProfile })
   })
   if (!res.ok) throw new Error('Backend request failed')
@@ -178,10 +182,31 @@ export default function AIPetAdvisor() {
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Load profile from localStorage on mount
+  // Load profile: prefer saved pets from API (logged-in users), fall back to localStorage
   useEffect(function () {
-    const saved = loadProfile()
-    setProfile(saved ?? false)
+    const token = localStorage.getItem('token')
+    if (token) {
+      fetch('/api/v1/users/me/pets', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(r => r.json())
+        .then(data => {
+          const pets = data?.data
+          if (Array.isArray(pets) && pets.length > 0) {
+            const p = pets[0]
+            setProfile({
+              petName: p.petName,
+              petBirthday: p.birthday || '',
+              ownerEmail: ''
+            })
+          } else {
+            setProfile(loadProfile() ?? false)
+          }
+        })
+        .catch(() => setProfile(loadProfile() ?? false))
+    } else {
+      setProfile(loadProfile() ?? false)
+    }
   }, [])
 
   // ✅ Listen for banner button — opens chat directly
