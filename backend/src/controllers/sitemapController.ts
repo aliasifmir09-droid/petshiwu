@@ -83,13 +83,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
     xml += '    <priority>0.9</priority>\n';
     xml += '  </url>\n';
 
-    // Featured products
-    xml += '  <url>\n';
-    xml += `    <loc>${baseUrl}/products?featured=true</loc>\n`;
-    xml += `    <lastmod>${currentDate}</lastmod>\n`;
-    xml += '    <changefreq>daily</changefreq>\n';
-    xml += '    <priority>0.9</priority>\n';
-    xml += '  </url>\n';
+    // Note: /products?featured=true removed — query-string URLs redirect and waste crawl budget.
 
     // Pet type pages - fetch from database for dynamic pet types
     const petTypes = await PetType.find({ isActive: true })

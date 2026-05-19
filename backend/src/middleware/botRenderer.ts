@@ -102,6 +102,79 @@ const injectBeforeHeadClose = (html: string, tags: string): string =>
 // Route pattern matching
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Static page meta — title + description for pages not backed by DB data
+// ---------------------------------------------------------------------------
+
+const STATIC_PAGES: Record<string, { title: string; description: string }> = {
+  '/': {
+    title: 'Premium Pet Food & Supplies Delivered to NYC | Petshiwu',
+    description: 'Shop 10,000+ premium pet products for dogs, cats, birds, fish, and reptiles. Free delivery in Queens, Brooklyn & all NYC boroughs. Free shipping on orders over $49.',
+  },
+  '/products': {
+    title: 'All Pet Products — Dog, Cat, Bird, Fish & More | Petshiwu',
+    description: 'Browse 10,000+ pet products for dogs, cats, birds, fish, reptiles, and small animals. Top brands, fast NYC delivery. Free shipping over $49.',
+  },
+  '/dog': {
+    title: 'Dog Food, Treats, Toys & Supplies | Petshiwu',
+    description: 'Shop premium dog food, treats, toys, and accessories. Top brands — Purina, Blue Buffalo, Royal Canin. Fast NYC delivery. Free shipping over $49.',
+  },
+  '/cat': {
+    title: 'Cat Food, Litter, Toys & Accessories | Petshiwu',
+    description: 'Discover premium cat food, litter, toys, and accessories. Top brands delivered fast to Queens, Brooklyn, Manhattan & all of NYC. Free shipping over $49.',
+  },
+  '/bird': {
+    title: 'Bird Food, Cages & Accessories | Petshiwu',
+    description: 'Shop bird food, cages, perches, and accessories for all bird species. Premium brands, fast NYC delivery. Free shipping over $49.',
+  },
+  '/fish': {
+    title: 'Fish Food, Aquarium Supplies & Tanks | Petshiwu',
+    description: 'Find fish food, filters, aquarium supplies, and tanks for freshwater and saltwater fish. NYC delivery available. Free shipping over $49.',
+  },
+  '/reptile': {
+    title: 'Reptile Food, Terrariums & Supplies | Petshiwu',
+    description: 'Shop reptile food, terrariums, heating, and accessories for snakes, lizards, and turtles. Fast NYC delivery. Free shipping over $49.',
+  },
+  '/small-animal': {
+    title: 'Small Animal Food, Cages & Accessories | Petshiwu',
+    description: 'Shop food, cages, bedding, and toys for hamsters, rabbits, guinea pigs, and more. Fast NYC delivery. Free shipping over $49.',
+  },
+  '/about': {
+    title: 'About Petshiwu — NYC Pet Supply Delivery',
+    description: 'Petshiwu is your trusted NYC pet supply delivery service based in Jackson Heights, Queens. Serving all five boroughs with premium pet products.',
+  },
+  '/contact': {
+    title: 'Contact Us | Petshiwu',
+    description: 'Contact Petshiwu for questions about orders, products, or delivery. We serve Queens, Brooklyn, Manhattan, the Bronx, and Staten Island.',
+  },
+  '/learning': {
+    title: 'Pet Care Blog, Guides & Tips | Petshiwu',
+    description: 'Expert pet care guides, breed information, nutrition tips, and training advice for dogs, cats, birds, fish, and reptiles from the Petshiwu team.',
+  },
+  '/care-guides': {
+    title: 'Pet Care Guides | Petshiwu',
+    description: 'Comprehensive pet care guides for dogs, cats, birds, fish, reptiles, and small animals. Expert advice from the Petshiwu team.',
+  },
+};
+
+/**
+ * Build HTML for pages not backed by DB data — injects correct canonical,
+ * title, and description so bots don't see the hardcoded homepage values.
+ */
+const buildGenericPageHtml = (template: string, reqPath: string): string => {
+  const cleanPath = reqPath.split('?')[0]; // strip query string from canonical
+  const canonicalUrl = cleanPath === '/' ? BASE : `${BASE}${cleanPath}`;
+  const meta = STATIC_PAGES[cleanPath] ?? {
+    title: 'Premium Pet Food & Supplies | Petshiwu',
+    description: 'Shop premium pet food, toys, and supplies for all pets at Petshiwu. Fast delivery across NYC. Free shipping on orders over $49.',
+  };
+  let html = template;
+  html = injectTitle(html, meta.title);
+  html = injectDescription(html, meta.description);
+  html = injectCanonical(html, canonicalUrl);
+  return html;
+};
+
 type PageType =
   | { type: 'product'; slug: string }
   | { type: 'blog'; slug: string }
@@ -456,41 +529,51 @@ export const createBotRenderer = (distPath: string) => {
     const ua = req.headers['user-agent'] ?? '';
     if (!isBot(ua)) return next();
 
-    const page = matchRoute(req.path);
-    if (!page) return next();
-
     const template = getIndexHtml(distPath);
     if (!template) return next();
+
+    const page = matchRoute(req.path);
 
     try {
       let html: string | null = null;
 
-      if (page.type === 'product') {
+      if (page?.type === 'product') {
         const product = await fetchProduct(page.slug);
         if (product) html = buildProductHtml(template, product, page.slug);
-      } else if (page.type === 'blog') {
+      } else if (page?.type === 'blog') {
         const blog = await fetchBlog(page.slug);
         if (blog) html = buildBlogHtml(template, blog);
-      } else if (page.type === 'care-guide') {
+      } else if (page?.type === 'care-guide') {
         const guide = await fetchCareGuide(page.slug);
         if (guide) html = buildCareGuideHtml(template, guide);
-      } else if (page.type === 'category') {
+      } else if (page?.type === 'category') {
         const category = await fetchCategory(page.slug);
         if (category) html = buildCategoryHtml(template, category, (page as any).petType);
       }
 
-      if (html) {
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour bot cache
-        res.setHeader('X-Bot-Rendered', '1');
-        res.send(html);
-        return;
+      // Always serve bots proper HTML — generic fallback ensures every page
+      // gets its own canonical + title, never the hardcoded homepage values.
+      if (!html) {
+        html = buildGenericPageHtml(template, req.path);
       }
-    } catch (err: any) {
-      // Non-fatal — fall through to normal SPA serving
-      logger.warn(`[botRenderer] Error rendering ${req.path}:`, err?.message);
-    }
 
-    return next();
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      res.setHeader('X-Bot-Rendered', '1');
+      res.send(html);
+      return;
+    } catch (err: any) {
+      logger.warn(`[botRenderer] Error rendering ${req.path}:`, err?.message);
+      // Even on error, try to serve correct canonical rather than raw index.html
+      try {
+        const fallback = buildGenericPageHtml(template, req.path);
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('X-Bot-Rendered', 'fallback');
+        res.send(fallback);
+        return;
+      } catch {
+        return next();
+      }
+    }
   };
 };
