@@ -23,6 +23,7 @@ const AdvancedSearch = () => {
   // Visual search state
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [visualResults, setVisualResults] = useState<any>(null);
+  const [visualSearchError, setVisualSearchError] = useState<string | null>(null);
 
   const visualSearchMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -36,8 +37,12 @@ const AdvancedSearch = () => {
               mimeType: file.type,
             });
             resolve(res.data);
-          } catch (err) {
-            reject(err);
+          } catch (err: any) {
+            if (err?.response?.status === 413) {
+              reject(new Error('Photo is still too large after compression. Please try a different photo.'));
+            } else {
+              reject(err);
+            }
           }
         };
         reader.onerror = () => reject(new Error('Failed to read file'));
@@ -46,36 +51,66 @@ const AdvancedSearch = () => {
     },
     onSuccess: (data) => {
       setVisualResults(data);
+      setVisualSearchError(null);
       setInputValue('');
+    },
+    onError: (err: any) => {
+      setVisualSearchError(err?.message || 'Something went wrong. Please try again.');
     },
   });
 
-  // Compress image to max 800px wide, 70% JPEG quality before sending
-  // Phone photos can be 4-8MB; this brings them under 200KB for reliable upload
+  // Compress image to max 500px wide, 60% JPEG quality before sending.
+  // Phone photos can be 4-12MB; this targets ~80-150KB for reliable mobile upload.
+  // Rejects (rather than falls back) if canvas.toBlob fails — prevents sending a
+  // raw multi-MB file that would exceed Express's 10MB JSON limit.
   const compressImage = (file: File): Promise<File> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
+      // Hard-bail if file is absurdly large before we even try
+      if (file.size > 20 * 1024 * 1024) {
+        reject(new Error('Image is too large. Please try a different photo.'));
+        return;
+      }
+
+      const timeoutId = setTimeout(() => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Image compression timed out. Please try a smaller photo.'));
+      }, 10_000);
+
       const img = new Image();
       const url = URL.createObjectURL(file);
       img.onload = () => {
-        const MAX = 800;
+        const MAX = 500;
         const scale = img.width > MAX ? MAX / img.width : 1;
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(img.width * scale);
         canvas.height = Math.round(img.height * scale);
         const ctx = canvas.getContext('2d');
-        if (!ctx) { resolve(file); return; }
+        if (!ctx) {
+          clearTimeout(timeoutId);
+          URL.revokeObjectURL(url);
+          reject(new Error('Could not initialize canvas. Please try again.'));
+          return;
+        }
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         canvas.toBlob(
           (blob) => {
+            clearTimeout(timeoutId);
             URL.revokeObjectURL(url);
-            if (!blob) { resolve(file); return; }
+            if (!blob) {
+              reject(new Error('Image compression failed. Please try a different photo.'));
+              return;
+            }
             resolve(new File([blob], file.name, { type: 'image/jpeg' }));
           },
           'image/jpeg',
-          0.72
+          0.6
         );
       };
-      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+      img.onerror = () => {
+        clearTimeout(timeoutId);
+        URL.revokeObjectURL(url);
+        reject(new Error('Could not read image. Please try a different photo.'));
+      };
       img.src = url;
     });
   };
@@ -86,16 +121,21 @@ const AdvancedSearch = () => {
     const previewUrl = URL.createObjectURL(file);
     setPhotoPreview(previewUrl);
     setVisualResults(null);
-    // Compress before sending to avoid payload size errors on mobile
-    const compressed = await compressImage(file);
-    visualSearchMutation.mutate(compressed);
+    setVisualSearchError(null);
     // Reset input so same file can be re-selected
     e.target.value = '';
+    try {
+      const compressed = await compressImage(file);
+      visualSearchMutation.mutate(compressed);
+    } catch (err: any) {
+      setVisualSearchError(err?.message || 'Could not process image. Please try a different photo.');
+    }
   };
 
   const clearPhoto = () => {
     setPhotoPreview(null);
     setVisualResults(null);
+    setVisualSearchError(null);
     visualSearchMutation.reset();
   };
 
@@ -408,9 +448,9 @@ const AdvancedSearch = () => {
                       <span className="text-sm font-medium">Analyzing your photo with AI...</span>
                     </div>
                   )}
-                  {visualSearchMutation.isError && (
+                  {(visualSearchMutation.isError || visualSearchError) && (
                     <p className="text-sm text-red-500">
-                      Something went wrong. Please try again.
+                      {visualSearchError || 'Something went wrong. Please try again.'}
                     </p>
                   )}
                   {visualResults?.identified && (

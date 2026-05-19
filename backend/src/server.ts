@@ -315,8 +315,8 @@ app.use((req, res, next) => {
     const map: { [key: string]: string } = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
     return text.replace(/[&<>"']/g, (m) => map[m]);
   };
-  const htmlContentFields = ['content', 'body', 'description'];
-  const isHtmlContentRoute = req.path.includes('/blogs') || req.path.includes('/care-guides');
+  const htmlContentFields = ['content', 'body', 'description', 'shortdescription'];
+  const isHtmlContentRoute = req.path.includes('/blogs') || req.path.includes('/care-guides') || req.path.includes('/products');
   if (req.body && typeof req.body === 'object') {
     const sanitizeObject = (obj: unknown, isInHtmlField: boolean = false): SanitizedObject => {
       if (typeof obj === 'string') { if (isInHtmlField && isHtmlContentRoute) { return obj; } return escapeHtml(obj); }
