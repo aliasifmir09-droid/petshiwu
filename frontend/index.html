@@ -11,11 +11,49 @@
     <link rel="icon" href="/favicon-48.png" type="image/png" />
     <meta name="theme-color" content="#1E3A8A" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
+
     <style>
-      *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Fira Sans','Droid Sans','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background:linear-gradient(to bottom,#fff 0%,#f9fafb 100%);font-display:optional}header{background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.1)}.loading-spinner{display:flex;align-items:center;justify-content:center;min-height:200px}img{max-width:100%;height:auto}button{cursor:pointer;border:none;background:none}
+      *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Fira Sans','Droid Sans','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background:#f9fafb}
+      /* Static shell styles — scoped so they don't leak into React app */
+      #static-shell{display:block}
+      #static-shell *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+      #static-shell a{color:inherit;text-decoration:none}
+      .ps-bar{background:#1E3A8A;color:#fff;text-align:center;font-size:13px;padding:8px 16px;font-weight:500}
+      .ps-header{background:#fff;border-bottom:1px solid #e5e7eb;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+      .ps-logo{font-size:22px;font-weight:800;color:#1E3A8A;letter-spacing:-0.5px}
+      .ps-logo span{color:#f59e0b}
+      .ps-nav{display:flex;gap:20px;list-style:none}
+      .ps-nav a{font-size:14px;color:#374151;font-weight:500}
+      .ps-nav a:hover{color:#1E3A8A}
+      @media(max-width:640px){.ps-nav{display:none}}
+      .ps-hero{background:linear-gradient(135deg,#1E3A8A 0%,#1d4ed8 100%);color:#fff;padding:48px 20px 40px;text-align:center}
+      .ps-hero h1{font-size:clamp(24px,5vw,42px);font-weight:800;margin-bottom:12px;line-height:1.2}
+      .ps-hero p{font-size:clamp(14px,2vw,18px);opacity:.9;margin-bottom:24px;max-width:560px;margin-left:auto;margin-right:auto}
+      .ps-btn{display:inline-block;background:#f59e0b;color:#1E3A8A;padding:12px 28px;border-radius:8px;font-weight:700;font-size:15px;text-decoration:none}
+      .ps-section{max-width:1200px;margin:0 auto;padding:40px 20px}
+      .ps-section h2{font-size:22px;font-weight:700;color:#111827;margin-bottom:24px;text-align:center}
+      .ps-pets{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+      .ps-pet{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px 12px;text-align:center;text-decoration:none;color:#1E3A8A;font-weight:600;font-size:14px;transition:border-color .2s}
+      .ps-pet:hover{border-color:#1E3A8A}
+      .ps-pet-icon{font-size:36px;margin-bottom:8px}
+      .ps-cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+      .ps-cat{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;display:flex;align-items:center;gap:10px;text-decoration:none;color:#374151;font-size:14px;font-weight:500}
+      .ps-cat-dot{width:10px;height:10px;border-radius:50%;background:#1E3A8A;flex-shrink:0}
+      .ps-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;background:#fff;border-radius:12px;border:1px solid #e5e7eb;padding:24px}
+      .ps-feat{text-align:center;padding:8px}
+      .ps-feat-icon{font-size:28px;margin-bottom:8px}
+      .ps-feat-title{font-size:14px;font-weight:700;color:#111827;margin-bottom:4px}
+      .ps-feat-desc{font-size:12px;color:#6b7280;line-height:1.4}
+      .ps-footer{background:#1E3A8A;color:#fff;padding:40px 20px 24px}
+      .ps-footer-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:32px;margin-bottom:32px}
+      .ps-footer h3{font-size:14px;font-weight:700;margin-bottom:12px;opacity:.7;text-transform:uppercase;letter-spacing:.05em}
+      .ps-footer ul{list-style:none}
+      .ps-footer ul li{margin-bottom:8px}
+      .ps-footer ul a{font-size:13px;color:rgba(255,255,255,.8);text-decoration:none}
+      .ps-footer ul a:hover{color:#fff}
+      .ps-footer-bottom{max-width:1200px;margin:0 auto;border-top:1px solid rgba(255,255,255,.15);padding-top:20px;font-size:12px;color:rgba(255,255,255,.6);text-align:center}
     </style>
-    
+
     <link rel="preload" as="image" href="/logo.png" type="image/png" fetchpriority="high" />
     <link rel="dns-prefetch" href="https://petshiwu.onrender.com">
     <link rel="preconnect" href="https://petshiwu.onrender.com" crossorigin>
@@ -24,15 +62,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all';this.onload=null">
-    
     <noscript>
       <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     </noscript>
-    
     <link rel="manifest" href="/manifest.json" />
 
     <!-- ============================================
-         PRIMARY SEO OPTIMIZATIONS
+         PRIMARY SEO
          ============================================ -->
     <title>Premium Pet Food & Supplies for Dogs, Cats, Reptiles | PetShiwu</title>
     <meta name="description" content="Shop premium pet food, toys, and supplies for dogs, cats, birds, reptiles, and more. Carefully curated brands, fast shipping, and expert pet care advice at PetShiwu. Free shipping on orders over $49.">
@@ -43,7 +79,7 @@
     <link rel="canonical" href="https://www.petshiwu.com/">
 
     <!-- ============================================
-         SOCIAL MEDIA OPTIMIZATION (OG & TWITTER)
+         OPEN GRAPH & TWITTER
          ============================================ -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.petshiwu.com">
@@ -51,7 +87,6 @@
     <meta property="og:description" content="Discover premium pet food, toys, and supplies for all pet types. Fast shipping, expert guidance, and carefully curated brands. Shop PetShiwu today!">
     <meta property="og:image" content="https://www.petshiwu.com/logo.png">
     <meta property="og:site_name" content="PetShiwu">
-    
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Premium Pet Food & Supplies for Dogs, Cats, Reptiles | PetShiwu">
     <meta name="twitter:description" content="Shop premium pet food, dog food, cat food, and supplies at PetShiwu. Fast shipping, great prices, and expert pet care.">
@@ -59,7 +94,7 @@
     <meta name="twitter:site" content="@petshiwu">
 
     <!-- ============================================
-         STRUCTURED DATA (JSON-LD)
+         STRUCTURED DATA (JSON-LD) — unchanged, already excellent
          ============================================ -->
     <script type="application/ld+json">
     {
@@ -149,7 +184,6 @@
           "closes": "18:00"
         }
       ],
-      "servesCuisine": "Pet Supplies",
       "sameAs": [
         "https://www.facebook.com/petshiwu",
         "https://www.instagram.com/petshiwu",
@@ -160,23 +194,197 @@
     </script>
   </head>
   <body>
-    <noscript>
-      <div style="padding: 20px; text-align: center; font-family: Arial, sans-serif;">
-        <h1>PetShiwu - Premium Pet Food, Toys & Accessories</h1>
-        <p>Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, reptiles, and more.</p>
-        <p>Please enable JavaScript to experience the full website.</p>
-        <p><a href="https://www.petshiwu.com/products" style="color: #1E3A8A; text-decoration: underline;">Browse Products</a></p>
+
+    <!-- ============================================================
+         STATIC SHELL — visible to crawlers & no-JS users immediately.
+         React mounts into #root and replaces #static-shell via JS.
+         DO NOT remove — this is intentional progressive enhancement.
+         ============================================================ -->
+    <div id="static-shell" aria-hidden="false">
+
+      <!-- Announcement bar -->
+      <div class="ps-bar">
+        🐾 Free shipping on orders over $49 &nbsp;|&nbsp; Fast delivery across NYC &nbsp;|&nbsp; Premium pet brands
       </div>
-    </noscript>
-    <div id="root">
-      <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(to bottom, #fff 0%, #f9fafb 100%);">
-        <div style="text-align: center; padding: 20px;">
-          <h1 style="font-size: 2rem; font-weight: 700; color: #1E3A8A; margin-bottom: 1rem;">PetShiwu</h1>
-          <p style="font-size: 1.125rem; color: #4B5563; margin-bottom: 0.5rem;">Premium Pet Food, Toys & Accessories</p>
-          <p style="font-size: 0.875rem; color: #6B7280;">Loading your premium pet shopping experience...</p>
+
+      <!-- Header -->
+      <header class="ps-header">
+        <a href="/" class="ps-logo">Pet<span>Shiwu</span></a>
+        <nav aria-label="Main navigation">
+          <ul class="ps-nav">
+            <li><a href="/dogs">Dogs</a></li>
+            <li><a href="/cats">Cats</a></li>
+            <li><a href="/birds">Birds</a></li>
+            <li><a href="/reptiles">Reptiles</a></li>
+            <li><a href="/products">All Products</a></li>
+            <li><a href="/learning">Pet Care</a></li>
+            <li><a href="/about">About</a></li>
+          </ul>
+        </nav>
+        <a href="/products" class="ps-btn" style="padding:8px 18px;font-size:13px;">Shop Now</a>
+      </header>
+
+      <!-- Hero -->
+      <section class="ps-hero">
+        <h1>Premium Pet Food &amp; Supplies<br>Delivered to Your Door</h1>
+        <p>Carefully curated brands for dogs, cats, birds, reptiles &amp; more. Serving NYC &amp; nationwide with fast, reliable shipping.</p>
+        <a href="/products" class="ps-btn">Shop All Products</a>
+      </section>
+
+      <!-- Shop by pet type -->
+      <section class="ps-section">
+        <h2>Shop by Pet Type</h2>
+        <div class="ps-pets">
+          <a href="/dogs" class="ps-pet">
+            <div class="ps-pet-icon">🐕</div>Dogs
+          </a>
+          <a href="/cats" class="ps-pet">
+            <div class="ps-pet-icon">🐈</div>Cats
+          </a>
+          <a href="/birds" class="ps-pet">
+            <div class="ps-pet-icon">🦜</div>Birds
+          </a>
+          <a href="/reptiles" class="ps-pet">
+            <div class="ps-pet-icon">🦎</div>Reptiles
+          </a>
+          <a href="/small-animals" class="ps-pet">
+            <div class="ps-pet-icon">🐹</div>Small Animals
+          </a>
+          <a href="/fish" class="ps-pet">
+            <div class="ps-pet-icon">🐠</div>Fish
+          </a>
         </div>
-      </div>
+      </section>
+
+      <!-- Popular categories -->
+      <section class="ps-section" style="padding-top:0">
+        <h2>Popular Categories</h2>
+        <div class="ps-cats">
+          <a href="/dogs/food" class="ps-cat"><span class="ps-cat-dot"></span>Dog Food</a>
+          <a href="/dogs/treats" class="ps-cat"><span class="ps-cat-dot"></span>Dog Treats</a>
+          <a href="/dogs/toys" class="ps-cat"><span class="ps-cat-dot"></span>Dog Toys</a>
+          <a href="/cats/food" class="ps-cat"><span class="ps-cat-dot"></span>Cat Food</a>
+          <a href="/cats/litter" class="ps-cat"><span class="ps-cat-dot"></span>Cat Litter</a>
+          <a href="/cats/toys" class="ps-cat"><span class="ps-cat-dot"></span>Cat Toys</a>
+          <a href="/reptiles/food" class="ps-cat"><span class="ps-cat-dot"></span>Reptile Food</a>
+          <a href="/birds/food" class="ps-cat"><span class="ps-cat-dot"></span>Bird Food</a>
+          <a href="/products?tag=vitamins" class="ps-cat"><span class="ps-cat-dot"></span>Pet Vitamins</a>
+          <a href="/products?tag=grooming" class="ps-cat"><span class="ps-cat-dot"></span>Grooming</a>
+          <a href="/products?tag=accessories" class="ps-cat"><span class="ps-cat-dot"></span>Accessories</a>
+          <a href="/products?tag=grain-free" class="ps-cat"><span class="ps-cat-dot"></span>Grain-Free Food</a>
+        </div>
+      </section>
+
+      <!-- Trust features -->
+      <section class="ps-section" style="padding-top:0">
+        <div class="ps-features">
+          <div class="ps-feat">
+            <div class="ps-feat-icon">🚚</div>
+            <div class="ps-feat-title">Free Shipping Over $49</div>
+            <div class="ps-feat-desc">Fast delivery across NYC and nationwide</div>
+          </div>
+          <div class="ps-feat">
+            <div class="ps-feat-icon">⭐</div>
+            <div class="ps-feat-title">Premium Brands Only</div>
+            <div class="ps-feat-desc">Carefully curated, vet-approved products</div>
+          </div>
+          <div class="ps-feat">
+            <div class="ps-feat-icon">💬</div>
+            <div class="ps-feat-title">Expert Pet Advice</div>
+            <div class="ps-feat-desc">Care guides and AI pet advisor on site</div>
+          </div>
+          <div class="ps-feat">
+            <div class="ps-feat-icon">🔒</div>
+            <div class="ps-feat-title">Secure Checkout</div>
+            <div class="ps-feat-desc">Stripe &amp; PayPal accepted, SSL secured</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEO landing pages — helps Google discover these high-value pages -->
+      <section class="ps-section" style="padding-top:0">
+        <h2>Pet Care Guides &amp; Resources</h2>
+        <div class="ps-cats">
+          <a href="/best-dog-food-sensitive-stomach-diarrhea" class="ps-cat"><span class="ps-cat-dot"></span>Best Food for Sensitive Stomach Dogs</a>
+          <a href="/high-protein-dog-food-picky-eaters" class="ps-cat"><span class="ps-cat-dot"></span>High-Protein Food for Picky Eaters</a>
+          <a href="/durable-dog-toys-aggressive-chewers" class="ps-cat"><span class="ps-cat-dot"></span>Durable Toys for Aggressive Chewers</a>
+          <a href="/learning" class="ps-cat"><span class="ps-cat-dot"></span>Pet Care Learning Center</a>
+          <a href="/care-guides" class="ps-cat"><span class="ps-cat-dot"></span>Care Guides by Pet Type</a>
+          <a href="/faq" class="ps-cat"><span class="ps-cat-dot"></span>Frequently Asked Questions</a>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="ps-footer">
+        <div class="ps-footer-grid">
+          <div>
+            <h3>Shop</h3>
+            <ul>
+              <li><a href="/dogs">Dog Supplies</a></li>
+              <li><a href="/cats">Cat Supplies</a></li>
+              <li><a href="/birds">Bird Supplies</a></li>
+              <li><a href="/reptiles">Reptile Supplies</a></li>
+              <li><a href="/products">All Products</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3>Account</h3>
+            <ul>
+              <li><a href="/login">Sign In</a></li>
+              <li><a href="/register">Create Account</a></li>
+              <li><a href="/orders">My Orders</a></li>
+              <li><a href="/track-order">Track Order</a></li>
+              <li><a href="/favorites">Favorites</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3>Help</h3>
+            <ul>
+              <li><a href="/faq">FAQ</a></li>
+              <li><a href="/contact">Contact Us</a></li>
+              <li><a href="/return-policy">Return Policy</a></li>
+              <li><a href="/returns">Start a Return</a></li>
+              <li><a href="/about">About PetShiwu</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3>Resources</h3>
+            <ul>
+              <li><a href="/learning">Pet Care Blog</a></li>
+              <li><a href="/care-guides">Care Guides</a></li>
+              <li><a href="/donate">Donate to Shelters</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="ps-footer-bottom">
+          &copy; 2025 PetShiwu. Premium Pet Food &amp; Supplies. Jackson Heights, NY 11372 &nbsp;|&nbsp;
+          <a href="/return-policy" style="color:rgba(255,255,255,.6)">Return Policy</a> &nbsp;|&nbsp;
+          <a href="/contact" style="color:rgba(255,255,255,.6)">Contact</a>
+        </div>
+      </footer>
     </div>
+    <!-- END STATIC SHELL -->
+
+    <!-- React mounts here and hides #static-shell once loaded -->
+    <div id="root"></div>
+
+    <!-- Hide static shell once React has mounted -->
+    <script>
+      (function() {
+        var observer = new MutationObserver(function(mutations) {
+          var root = document.getElementById('root');
+          if (root && root.children.length > 0) {
+            var shell = document.getElementById('static-shell');
+            if (shell) shell.style.display = 'none';
+            observer.disconnect();
+          }
+        });
+        observer.observe(document.getElementById('root') || document.body, {
+          childList: true, subtree: true
+        });
+      })();
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
