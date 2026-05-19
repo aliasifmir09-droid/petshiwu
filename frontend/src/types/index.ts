@@ -1,3 +1,19 @@
+export interface Pet {
+  _id: string;
+  petName: string;
+  species: string;       // 'dog' | 'cat' | 'bird' | 'fish' | 'reptile' | 'small-animal' | 'other'
+  breed?: string;
+  birthday?: string;     // "YYYY-MM-DD"
+  birthdayMMDD?: string; // "MM-DD"
+  sex?: 'male' | 'female' | 'unknown';
+  isFixed?: boolean;
+  weight?: number;
+  size?: 'small' | 'medium' | 'large' | 'xlarge';
+  allergies?: string[];
+  notes?: string;
+  photo?: string;
+}
+
 export interface User {
   _id: string;
   firstName: string;
@@ -7,6 +23,7 @@ export interface User {
   role: 'customer' | 'admin';
   addresses: Address[];
   wishlist: string[];
+  pets?: Pet[];
   createdAt: string;
   updatedAt: string;
 }

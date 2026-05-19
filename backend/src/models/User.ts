@@ -21,10 +21,19 @@ export interface IPermissions {
 }
 
 export interface IPet {
+  _id?: mongoose.Types.ObjectId;
   petName: string;
-  birthday: string;       // full date e.g. "2020-05-14"
-  birthdayMMDD: string;   // "MM-DD" e.g. "05-14" — used for daily birthday queries
-  species?: string;
+  species: string;          // 'dog' | 'cat' | 'bird' | 'fish' | 'reptile' | 'small-animal' | 'other'
+  breed?: string;
+  birthday?: string;        // full date e.g. "2020-05-14" (optional — not everyone knows it)
+  birthdayMMDD?: string;    // "MM-DD" e.g. "05-14" — used for daily birthday queries
+  sex?: string;             // 'male' | 'female' | 'unknown'
+  isFixed?: boolean;        // spayed / neutered
+  weight?: number;          // in lbs
+  size?: string;            // 'small' | 'medium' | 'large' | 'xlarge'
+  allergies?: string[];     // e.g. ['chicken', 'grain', 'corn']
+  notes?: string;
+  photo?: string;           // Cloudinary URL
   birthdayEmailSentYear?: number; // last year we sent birthday email (avoid duplicates)
 }
 
@@ -62,10 +71,18 @@ export interface IUser extends Document {
 }
 
 const petSchema = new Schema<IPet>({
-  petName: { type: String, required: true, trim: true },
-  birthday: { type: String, required: true },       // full date string "YYYY-MM-DD"
-  birthdayMMDD: { type: String, required: true },   // "MM-DD" for daily query
-  species: { type: String, trim: true },
+  petName:    { type: String, required: true, trim: true },
+  species:    { type: String, required: true, trim: true, default: 'other' },
+  breed:      { type: String, trim: true },
+  birthday:   { type: String },          // full date string "YYYY-MM-DD" (optional)
+  birthdayMMDD: { type: String },        // "MM-DD" for daily query (optional)
+  sex:        { type: String, enum: ['male', 'female', 'unknown'] },
+  isFixed:    { type: Boolean },
+  weight:     { type: Number, min: 0 },
+  size:       { type: String, enum: ['small', 'medium', 'large', 'xlarge'] },
+  allergies:  [{ type: String, trim: true }],
+  notes:      { type: String, trim: true, maxlength: 500 },
+  photo:      { type: String },
   birthdayEmailSentYear: { type: Number }
 });
 

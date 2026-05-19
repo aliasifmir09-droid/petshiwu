@@ -25,6 +25,12 @@ import {
   getMyStockAlerts,
   removeStockAlert
 } from '../controllers/stockAlertController';
+import {
+  getMyPets,
+  addPet,
+  updatePet,
+  deletePet
+} from '../controllers/petController';
 import { protect } from '../middleware/auth';
 import { isAdmin, hasPermission } from '../middleware/permissions';
 import {
@@ -76,6 +82,12 @@ router.delete('/addresses/:addressId', protect, validateObjectId('addressId'), d
 router.post('/stock-alerts', protect, createStockAlertValidation, createStockAlert);
 router.get('/stock-alerts', protect, getMyStockAlerts);
 router.delete('/stock-alerts/:productId', protect, validateObjectId('productId'), removeStockAlert);
+
+// Pet profile routes
+router.get('/me/pets', protect, getMyPets);
+router.post('/me/pets', protect, addPet);
+router.put('/me/pets/:petId', protect, validateObjectId('petId'), updatePet);
+router.delete('/me/pets/:petId', protect, validateObjectId('petId'), deletePet);
 
 export default router;
 
