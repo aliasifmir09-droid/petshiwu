@@ -21,12 +21,15 @@ interface SEOProps {
   ratingCount?: number;
 }
 
+const SITE_URL = 'https://www.petshiwu.com';
+const SITE_NAME = 'PetShiwu';
+
 const SEO = ({
   title = 'PetShiwu | Premium Pet Food, Toys & Accessories in USA',
   description = 'Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, birds, fish, reptiles, and small pets. Quality products, fast shipping, great prices. Free shipping on orders over $49.',
   keywords = 'pet supplies, dog food, cat food, pet toys, pet accessories, pet care, online pet store, premium pet food, dog treats, cat treats, pet bedding, pet grooming, pet health, pet nutrition, pet shop online, buy pet food online, pet supplies near me',
-  image = 'https://www.petshiwu.com/logo.png',
-  url = 'https://www.petshiwu.com',
+  image = `${SITE_URL}/logo.png`,
+  url,
   type = 'website',
   price,
   currency = 'USD',
@@ -39,13 +42,29 @@ const SEO = ({
   brand,
   sku,
   rating,
-  ratingCount
+  ratingCount,
 }: SEOProps) => {
-  // Ensure URL uses www subdomain for consistency
-  const canonicalUrl = url.startsWith('https://') ? url : `https://www.petshiwu.com${url}`;
-  const ogImage = image.startsWith('http') ? image : `https://www.petshiwu.com${image}`;
-  
-  const fullTitle = title.includes('petshiwu') ? title : `${title} | petshiwu`;
+  // FIX 1: Auto-detect current page URL when url prop is not provided.
+  // Every page gets its own correct canonical automatically,
+  // even if the page component forgot to pass the url prop.
+  const resolvedUrl = (() => {
+    if (url) {
+      if (url.startsWith('https://')) return url;
+      return `${SITE_URL}${url.startsWith('/') ? url : `/${url}`}`;
+    }
+    if (typeof window !== 'undefined') {
+      return `${SITE_URL}${window.location.pathname}`;
+    }
+    return SITE_URL;
+  })();
+
+  const ogImage = image.startsWith('http') ? image : `${SITE_URL}${image}`;
+
+  // FIX 2: Case-insensitive check prevents double-branding like
+  // "PetShiwu — Premium Pet Food | petshiwu"
+  const fullTitle = title.toLowerCase().includes('petshiwu')
+    ? title
+    : `${title} | ${SITE_NAME}`;
 
   return (
     <Helmet>
@@ -54,7 +73,7 @@ const SEO = ({
       <meta name="title" content={fullTitle} />
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
-      <meta name="author" content={author || 'petshiwu'} />
+      <meta name="author" content={author || SITE_NAME} />
       <meta name="language" content="English" />
       <meta name="revisit-after" content="7 days" />
       <meta name="distribution" content="global" />
@@ -68,16 +87,16 @@ const SEO = ({
 
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={type} />
-      <meta property="og:url" content={canonicalUrl} />
+      <meta property="og:url" content={resolvedUrl} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={ogImage} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:alt" content={title} />
-      <meta property="og:site_name" content="petshiwu" />
+      <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:locale" content="en_US" />
-      
+
       {publishedTime && <meta property="article:published_time" content={publishedTime} />}
       {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
       {author && <meta property="article:author" content={author} />}
@@ -85,7 +104,7 @@ const SEO = ({
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:url" content={canonicalUrl} />
+      <meta name="twitter:url" content={resolvedUrl} />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
@@ -115,32 +134,29 @@ const SEO = ({
       <meta name="contact" content="support@petshiwu.com" />
       <meta name="phone" content="+1-626-342-0419" />
 
-      {/* Canonical URL */}
-      <link rel="canonical" href={canonicalUrl} />
+      {/* FIX 3: Canonical now uses resolvedUrl — unique per page, never hardcoded homepage */}
+      <link rel="canonical" href={resolvedUrl} />
 
-      {/* Alternate URLs (www and non-www) */}
-      <link rel="alternate" hrefLang="en" href={canonicalUrl} />
-      <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
+      {/* Alternate URLs */}
+      <link rel="alternate" hrefLang="en" href={resolvedUrl} />
+      <link rel="alternate" hrefLang="x-default" href={resolvedUrl} />
 
-      {/* Robots meta tag */}
+      {/* Robots */}
       {noindex ? (
         <meta name="robots" content="noindex, nofollow" />
       ) : (
         <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
       )}
 
-      {/* Additional SEO tags */}
+      {/* App meta */}
       <meta name="theme-color" content="#1E3A8A" />
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-      
-      {/* Additional meta tags for better SEO */}
       <meta name="format-detection" content="telephone=no" />
       <meta name="mobile-web-app-capable" content="yes" />
-      <meta name="application-name" content="petshiwu" />
+      <meta name="application-name" content={SITE_NAME} />
     </Helmet>
   );
 };
 
 export default SEO;
-
