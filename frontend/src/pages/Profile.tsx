@@ -20,11 +20,16 @@ const SP: Record<string, { label: string; shortLabel?: string; emoji: string; de
 };
 
 const ALLERGENS = [
-  { label: 'Chicken', emoji: '🍗' }, { label: 'Beef',  emoji: '🥩' },
-  { label: 'Fish',    emoji: '🐟' }, { label: 'Lamb',  emoji: '🐑' },
-  { label: 'Grain',   emoji: '🌾' }, { label: 'Wheat', emoji: '🌾' },
-  { label: 'Corn',    emoji: '🌽' }, { label: 'Soy',   emoji: '🫘' },
-  { label: 'Dairy',   emoji: '🥛' }, { label: 'Eggs',  emoji: '🥚' },
+  { label: 'Chicken', emoji: '🍗', tip: 'One of the most common pet allergens. Causes itchy skin, ear infections & GI upset in sensitive dogs and cats.' },
+  { label: 'Beef',    emoji: '🥩', tip: 'Frequent trigger for food sensitivities. Beef-free food helps reduce chronic inflammation and skin reactions.' },
+  { label: 'Fish',    emoji: '🐟', tip: 'Some pets react to fish proteins with itching or digestive issues despite fish being commonly recommended.' },
+  { label: 'Lamb',    emoji: '🐑', tip: 'Less common but possible. Useful to avoid when narrowing down a novel protein elimination diet.' },
+  { label: 'Grain',   emoji: '🌾', tip: 'Grain-free avoids wheat, corn, rice & oats. Helpful for pets with digestive sensitivities or itchy skin flare-ups.' },
+  { label: 'Wheat',   emoji: '🌾', tip: 'Wheat gluten can cause itching, rashes, or loose stools in sensitive pets. Look for "wheat-free" on labels.' },
+  { label: 'Corn',    emoji: '🌽', tip: 'Used as filler in many pet foods. Can trigger itching or GI issues. Corn-free reduces filler-related reactions.' },
+  { label: 'Soy',     emoji: '🫘', tip: 'Soy proteins can cause hormonal disruption and digestive issues. Better avoided in reactive or sensitive pets.' },
+  { label: 'Dairy',   emoji: '🥛', tip: 'Most adult pets lack the enzymes to digest lactose — dairy causes gas, bloating, and loose stools.' },
+  { label: 'Eggs',    emoji: '🥚', tip: 'Egg whites can trigger food allergies in some pets, causing skin irritation or digestive upset.' },
 ];
 
 const SIZES = [
@@ -51,6 +56,38 @@ const EMPTY_FORM = {
   sex: '', isFixed: false, weight: '', size: '',
   allergies: [] as string[], notes: '',
 };
+
+// ─── Allergen pill with tooltip ──────────────────────────────────────────────
+function AllergenPill({ label, size = 'sm' }: { label: string; size?: 'sm' | 'xs' }) {
+  const [show, setShow] = useState(false);
+  const found = ALLERGENS.find(a => a.label.toLowerCase() === label.toLowerCase());
+  if (!found) return null;
+  const isSm = size === 'sm';
+  return (
+    <span className="relative inline-flex"
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+      onClick={e => { e.stopPropagation(); setShow(s => !s); }}>
+      <span
+        className={`${isSm ? 'text-[11px] px-2 py-0.5' : 'text-[10px] px-1.5 py-0.5'} rounded-full font-bold cursor-help select-none`}
+        style={{ background: 'rgba(239,68,68,0.2)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.25)', whiteSpace: 'nowrap' }}>
+        {found.emoji} {found.label}
+      </span>
+      {show && (
+        <span className="absolute z-50 bottom-full left-1/2 pointer-events-none"
+          style={{ transform: 'translateX(-50%)', marginBottom: 8, width: 210 }}>
+          <span className="block rounded-xl px-3 py-2.5"
+            style={{ background: 'rgba(12,8,24,0.97)', border: '1px solid rgba(255,255,255,0.13)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
+            <span className="block text-[11px] font-black text-white mb-1">{found.emoji} {found.label}-Free</span>
+            <span className="block text-[10px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{found.tip}</span>
+            {/* Arrow */}
+            <span className="absolute left-1/2 -bottom-1.5" style={{ transform: 'translateX(-50%)', width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '6px solid rgba(255,255,255,0.13)' }} />
+          </span>
+        </span>
+      )}
+    </span>
+  );
+}
 
 // ─── Glass style helpers ─────────────────────────────────────────────────────
 const glass = {
@@ -301,9 +338,14 @@ function HeroPetCard({ pet, onEdit, onDelete }: { pet: Pet; onEdit: () => void; 
         {pet.sex && pet.sex !== 'unknown' && <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{pet.sex === 'male' ? '♂' : '♀'}</span>}
         {pet.weight && <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{pet.weight} lbs</span>}
         {pet.allergies && pet.allergies.length > 0 && (
-          <span className="flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full"
-            style={{ background: 'rgba(239,68,68,0.2)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.3)' }}>
-            ⚠ {pet.allergies.length} allergen{pet.allergies.length > 1 ? 's' : ''}
+          <span className="flex items-center gap-1.5 flex-wrap">
+            {pet.allergies.slice(0, 3).map(a => <AllergenPill key={a} label={a} size="sm" />)}
+            {pet.allergies.length > 3 && (
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+                style={{ background: 'rgba(239,68,68,0.2)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.25)' }}>
+                +{pet.allergies.length - 3}
+              </span>
+            )}
           </span>
         )}
       </div>
@@ -348,7 +390,12 @@ function CompactPetCard({ pet, onEdit, onDelete }: { pet: Pet; onEdit: () => voi
         {age && <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)' }}>🎂 {age}</span>}
         {pet.breed && <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold truncate max-w-[80px]" style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.4)' }}>{pet.breed}</span>}
         {pet.allergies && pet.allergies.length > 0 && (
-          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: 'rgba(239,68,68,0.15)', color: '#fca5a5' }}>⚠ {pet.allergies.length}</span>
+          <>
+            {pet.allergies.slice(0, 2).map(a => <AllergenPill key={a} label={a} size="xs" />)}
+            {pet.allergies.length > 2 && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: 'rgba(239,68,68,0.15)', color: '#fca5a5' }}>+{pet.allergies.length - 2}</span>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -693,8 +740,12 @@ const Profile = () => {
                     {/* Stats tile */}
                     {pets.length >= 2 && <StatsTile pets={pets} />}
 
-                    {/* Add tile when 2+ pets */}
-                    {pets.length >= 2 && !showAddForm && <AddCTATile onClick={() => setShowAddForm(true)} />}
+                    {/* Add tile when 2+ pets — span full row if it would sit alone (4 or 7 pets) */}
+                    {pets.length >= 2 && !showAddForm && (
+                      <div className={pets.length % 3 === 1 ? 'col-span-3' : ''}>
+                        <AddCTATile onClick={() => setShowAddForm(true)} />
+                      </div>
+                    )}
                   </div>
                 ) : null}
               </div>
