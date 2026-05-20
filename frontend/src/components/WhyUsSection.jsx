@@ -2,8 +2,8 @@ import React from 'react';
 
 const features = [
   {
-    title: "AI Pet Advisor",
-    desc: "24/7 expert guidance tailored to your pet's unique needs.",
+    title: "AI Pet Assistant",
+    desc: "Personalized product recommendations based on your pet's type and needs.",
     icon: "🤖"
   },
   {
@@ -18,7 +18,7 @@ const features = [
   },
   {
     title: "Premium Only",
-    desc: "Only verified, vet-approved brands make it to our store.",
+    desc: "Only carefully selected, quality-verified brands make it to our store.",
     icon: "⭐"
   }
 ];

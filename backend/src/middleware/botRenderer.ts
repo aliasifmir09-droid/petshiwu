@@ -147,6 +147,62 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     title: 'Contact Us | Petshiwu',
     description: 'Contact Petshiwu for questions about orders, products, or delivery. We serve Queens, Brooklyn, Manhattan, the Bronx, and Staten Island.',
   },
+  '/faq': {
+    title: 'Frequently Asked Questions | Petshiwu',
+    description: 'Answers to common questions about ordering, shipping, returns, and products at Petshiwu. Fast NYC delivery on premium pet food and supplies.',
+  },
+  '/return-policy': {
+    title: 'Return Policy | Petshiwu',
+    description: 'Learn about Petshiwu\'s hassle-free return policy for pet food, toys, and supplies. Easy returns within 30 days on most items.',
+  },
+  '/returns': {
+    title: 'Start a Return | Petshiwu',
+    description: 'Start a return or exchange for your Petshiwu order. Our simple process makes it easy to return pet food, toys, and supplies.',
+  },
+  '/privacy': {
+    title: 'Privacy Policy | Petshiwu',
+    description: 'Read Petshiwu\'s privacy policy to understand how we collect, use, and protect your personal information.',
+  },
+  '/terms': {
+    title: 'Terms of Service | Petshiwu',
+    description: 'Review the terms and conditions for using Petshiwu\'s website and purchasing pet food, toys, and supplies.',
+  },
+  '/shipping': {
+    title: 'Shipping Policy | Petshiwu',
+    description: 'Petshiwu ships nationwide with free shipping on orders over $49. Same-day delivery available in select NYC neighborhoods.',
+  },
+  '/dogs': {
+    title: 'Dog Food, Treats, Toys & Supplies | Petshiwu',
+    description: 'Shop premium dog food, treats, toys, and accessories. Top brands — Purina, Blue Buffalo, Royal Canin. Fast NYC delivery. Free shipping over $49.',
+  },
+  '/cats': {
+    title: 'Cat Food, Litter, Toys & Accessories | Petshiwu',
+    description: 'Discover premium cat food, litter, toys, and accessories. Top brands delivered fast to Queens, Brooklyn, Manhattan & all of NYC. Free shipping over $49.',
+  },
+  '/birds': {
+    title: 'Bird Food, Cages & Accessories | Petshiwu',
+    description: 'Shop bird food, cages, perches, and accessories for all bird species. Premium brands, fast NYC delivery. Free shipping over $49.',
+  },
+  '/reptiles': {
+    title: 'Reptile Food, Terrariums & Supplies | Petshiwu',
+    description: 'Shop reptile food, terrariums, heating, and accessories for snakes, lizards, and turtles. Fast NYC delivery. Free shipping over $49.',
+  },
+  '/small-animals': {
+    title: 'Small Animal Food, Cages & Accessories | Petshiwu',
+    description: 'Shop food, cages, bedding, and toys for hamsters, rabbits, guinea pigs, and more. Fast NYC delivery. Free shipping over $49.',
+  },
+  '/fish-tanks': {
+    title: 'Aquarium Supplies & Fish Tanks | Petshiwu',
+    description: 'Shop aquariums, filters, and accessories for freshwater and saltwater fish. Fast NYC delivery. Free shipping on orders over $49.',
+  },
+  '/search': {
+    title: 'Search Products | Petshiwu',
+    description: 'Search 10,000+ pet products for dogs, cats, birds, fish, reptiles, and small animals at Petshiwu. Fast NYC delivery, free shipping over $49.',
+  },
+  '/donate': {
+    title: 'Donate to Pet Shelters | Petshiwu',
+    description: 'Help pets in need — donate pet food and supplies to NYC shelters through Petshiwu. Every donation helps animals find loving homes.',
+  },
   '/learning': {
     title: 'Pet Care Blog, Guides & Tips | Petshiwu',
     description: 'Expert pet care guides, breed information, nutrition tips, and training advice for dogs, cats, birds, fish, and reptiles from the Petshiwu team.',
@@ -573,9 +629,8 @@ export const createBotRenderer = (distPath: string) => {
     if (req.method !== 'GET') return next();
     if (req.path.startsWith('/api')) return next();
 
-    // Only process bots
     const ua = req.headers['user-agent'] ?? '';
-    if (!isBot(ua)) return next();
+    const bot = isBot(ua);
 
     const template = getIndexHtml(distPath);
     if (!template) return next();
@@ -585,32 +640,42 @@ export const createBotRenderer = (distPath: string) => {
     try {
       let html: string | null = null;
 
-      if (page?.type === 'product') {
-        const product = await fetchProduct(page.slug);
-        if (product) html = buildProductHtml(template, product, page.slug);
-      } else if (page?.type === 'blog') {
-        const blog = await fetchBlog(page.slug);
-        if (blog) html = buildBlogHtml(template, blog);
-      } else if (page?.type === 'care-guide') {
-        const guide = await fetchCareGuide(page.slug);
-        if (guide) html = buildCareGuideHtml(template, guide);
-      } else if (page?.type === 'category') {
-        const category = await fetchCategory(page.slug);
-        if (category) html = buildCategoryHtml(template, category, (page as any).petType);
-      } else if (req.path === '/products' || req.path === '/products/') {
-        // SSR product listing for Google — inject real product links
-        html = await buildProductListHtml(template);
+      // DB-backed page enrichment — bots only (keeps non-bot requests fast with no DB queries)
+      if (bot) {
+        if (page?.type === 'product') {
+          const product = await fetchProduct(page.slug);
+          if (product) html = buildProductHtml(template, product, page.slug);
+        } else if (page?.type === 'blog') {
+          const blog = await fetchBlog(page.slug);
+          if (blog) html = buildBlogHtml(template, blog);
+        } else if (page?.type === 'care-guide') {
+          const guide = await fetchCareGuide(page.slug);
+          if (guide) html = buildCareGuideHtml(template, guide);
+        } else if (page?.type === 'category') {
+          const category = await fetchCategory(page.slug);
+          if (category) html = buildCategoryHtml(template, category, (page as any).petType);
+        } else if (req.path === '/products' || req.path === '/products/') {
+          // SSR product listing for Google — inject real product links
+          html = await buildProductListHtml(template);
+        }
       }
 
-      // Always serve bots proper HTML — generic fallback ensures every page
-      // gets its own canonical + title, never the hardcoded homepage values.
+      // Serve ALL requests (bot or not) with page-specific canonical + title + description.
+      // This fixes "all pages same canonical / same title / same meta description" for
+      // non-bot auditing tools and regular browsers alike.
       if (!html) {
         html = buildGenericPageHtml(template, req.path);
       }
 
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.setHeader('Cache-Control', 'public, max-age=3600');
-      res.setHeader('X-Bot-Rendered', '1');
+      if (bot) {
+        res.setHeader('Cache-Control', 'public, max-age=3600');
+        res.setHeader('X-Bot-Rendered', '1');
+      } else {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+      }
       res.send(html);
       return;
     } catch (err: any) {
@@ -619,7 +684,8 @@ export const createBotRenderer = (distPath: string) => {
       try {
         const fallback = buildGenericPageHtml(template, req.path);
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('X-Bot-Rendered', 'fallback');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        if (bot) res.setHeader('X-Bot-Rendered', 'fallback');
         res.send(fallback);
         return;
       } catch {

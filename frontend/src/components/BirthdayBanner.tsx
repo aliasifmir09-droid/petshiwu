@@ -169,7 +169,7 @@ export default function BirthdayBanner() {
               <div style={{ background:'linear-gradient(135deg,#1e3a8a,#1d4ed8)', padding:'12px 14px', display:'flex', alignItems:'center', gap:9 }}>
                 <div style={{ width:32, height:32, borderRadius:'50%', background:'#F97316', display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, flexShrink:0 }}>🐾</div>
                 <div>
-                  <div style={{ color:'#fff', fontWeight:800, fontSize:13, fontFamily:F }}>AI Pet Advisor</div>
+                  <div style={{ color:'#fff', fontWeight:800, fontSize:13, fontFamily:F }}>Pet Assistant</div>
                   <div style={{ color:'rgba(255,255,255,.6)', fontSize:10.5, display:'flex', alignItems:'center', gap:4, fontFamily:F }}>
                     <span style={{ width:6, height:6, background:'#34d399', borderRadius:'50%', display:'inline-block' }} /> Online now
                   </div>
