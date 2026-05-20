@@ -59,28 +59,25 @@ const AdvancedSearch = () => {
     },
   });
 
-  // Compress image to max 500px wide, 60% JPEG quality before sending.
-  // Phone photos can be 4-12MB; this targets ~80-150KB for reliable mobile upload.
-  // Rejects (rather than falls back) if canvas.toBlob fails — prevents sending a
-  // raw multi-MB file that would exceed Express's 10MB JSON limit.
+  // Compress ANY phone photo to max 800px wide, 75% JPEG quality before sending.
+  // Works on any file size — no pre-rejection. Phone RAW/HEIC/large JPEGs all
+  // get scaled down to ~100-250KB for reliable upload regardless of original size.
   const compressImage = (file: File): Promise<File> => {
     return new Promise((resolve, reject) => {
-      // Hard-bail if file is absurdly large before we even try
-      if (file.size > 20 * 1024 * 1024) {
-        reject(new Error('Image is too large. Please try a different photo.'));
-        return;
-      }
-
+      // Extended timeout for very large RAW/HEIC files on slow devices
       const timeoutId = setTimeout(() => {
         URL.revokeObjectURL(url);
-        reject(new Error('Image compression timed out. Please try a smaller photo.'));
-      }, 10_000);
+        reject(new Error('Image took too long to process. Please try again.'));
+      }, 30_000);
 
       const img = new Image();
       const url = URL.createObjectURL(file);
       img.onload = () => {
-        const MAX = 500;
-        const scale = img.width > MAX ? MAX / img.width : 1;
+        // Scale to max 800px on longest side — wide enough for good product recognition
+        const MAX = 800;
+        const scale = Math.max(img.width, img.height) > MAX
+          ? MAX / Math.max(img.width, img.height)
+          : 1;
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(img.width * scale);
         canvas.height = Math.round(img.height * scale);
@@ -88,7 +85,7 @@ const AdvancedSearch = () => {
         if (!ctx) {
           clearTimeout(timeoutId);
           URL.revokeObjectURL(url);
-          reject(new Error('Could not initialize canvas. Please try again.'));
+          reject(new Error('Could not process image. Please try again.'));
           return;
         }
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -100,10 +97,10 @@ const AdvancedSearch = () => {
               reject(new Error('Image compression failed. Please try a different photo.'));
               return;
             }
-            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+            resolve(new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
           },
           'image/jpeg',
-          0.6
+          0.75
         );
       };
       img.onerror = () => {
