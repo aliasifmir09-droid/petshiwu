@@ -49,25 +49,39 @@ function saveProfile(profile: PetProfile) {
   } catch {}
 }
 
-// Rotated starter prompts: mix of pet care + platform questions
-// so every chat opening feels fresh and covers both domains
-const STARTER_PROMPTS = [
-  'My dog has itchy skin — what food should I try?',
-  'How does free shipping work?',
-  'What do I need for a new kitten?',
-  'How do I track my order?',
+// 4 rotating prompt sets — cycles every 6 hours
+// Mix of: pet health, platform/orders, species (birds/fish/reptiles), new pet, seasonal, training
+const PROMPT_SETS = [
+  [
+    'My dog has itchy skin — what food should I try?',
+    'How does free shipping work?',
+    'What do I need for a new kitten?',
+    'How do I track my order?',
+  ],
+  [
+    'Best food for a senior dog?',
+    'How do I return something?',
+    'What do parakeets need to stay healthy?',
+    'How do I get the 10% off discount?',
+  ],
+  [
+    'What supplements help with joint pain in dogs?',
+    'How do I set up my first aquarium?',
+    'What do I need to bring a new puppy home?',
+    'How do I use a discount code?',
+  ],
+  [
+    'How do I keep my dog safe in summer heat?',
+    'What does a bearded dragon need?',
+    'How do I crate train my puppy?',
+    'Can I cancel or change my order?',
+  ],
 ]
 
-const STARTER_PROMPTS_ALT = [
-  'Best food for a senior dog?',
-  'How do I return something?',
-  'What supplements help with joint pain?',
-  'How do I get the 10% off discount?',
-]
-
-// Pick set based on hour so returning users see variety
+// Rotate by 6-hour block so returning users see variety
 const getStarterPrompts = () => {
-  return new Date().getHours() % 2 === 0 ? STARTER_PROMPTS : STARTER_PROMPTS_ALT
+  const block = Math.floor(new Date().getHours() / 6) % PROMPT_SETS.length
+  return PROMPT_SETS[block]
 }
 
 function buildSystemPrompt(profile: PetProfile | null): string {

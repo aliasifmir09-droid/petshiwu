@@ -206,6 +206,223 @@ BIRTHDAY LOYALTY PROGRAM:
 - Discount code: BDAYGIFT
 `;
 
+// ─── Other Pet Species Knowledge ────────────────────────────────
+const OTHER_SPECIES_QA = `
+PETSHIWU EXPERT GUIDE — BIRDS, FISH, REPTILES & SMALL ANIMALS:
+
+=== BIRDS ===
+
+Q: What do parakeets (budgies) need to be healthy and happy?
+A: Parakeets need a roomy cage (minimum 18"x18"x18" for one bird), a balanced diet of pellets as the main food plus fresh vegetables, limited seeds as treats, and at least 2–4 hours of supervised out-of-cage time daily. They are highly social — keeping two parakeets together dramatically improves their wellbeing. Fresh water daily, cuttlebone for calcium, and foraging toys are essential. Parakeets can live 7–15 years with proper care.
+
+Q: What should I feed my parrot?
+A: A high-quality pellet diet should make up about 70–80% of a parrot's food intake. Supplement with fresh vegetables (leafy greens, carrots, bell peppers), a small amount of fruit, and cooked grains. Never feed parrots: avocado, chocolate, caffeine, onions, garlic, or alcohol — all are toxic. Seeds alone as a primary diet lead to nutritional deficiencies, fatty liver disease, and shortened lifespan.
+
+Q: How large should a bird cage be?
+A: The cage must be large enough for your bird to fully spread its wings without touching the bars. Wider is more important than height — birds fly horizontally. For small birds like parakeets, minimum 18"x18". Cockatiels need 24"x24" minimum. Large parrots need 36"x24" or larger. Bar spacing matters too — it must be narrow enough that the bird cannot get its head stuck.
+
+Q: What are signs my bird is sick?
+A: Healthy birds are alert, vocal, and have smooth feathers. Seek a vet immediately if you notice: fluffed-up feathers while sitting still, loss of appetite, discharge from eyes or nostrils, labored breathing, tail-bobbing while breathing, loose or discolored droppings, or unusual lethargy. Birds instinctively hide illness — by the time symptoms are obvious, the bird is often seriously ill.
+
+Q: What accessories do birds need?
+A: Multiple perches of varying diameter and texture (natural wood is best), foraging toys and puzzle toys, shredding toys for mental stimulation, cuttlebone and mineral blocks, food and water bowls that are easy to clean, and a cage cover for nighttime. Rotate toys regularly — birds get bored with familiar items.
+
+=== FISH & AQUARIUMS ===
+
+Q: I am setting up my first aquarium. What do I need?
+A: You need: a tank (bigger is more stable — minimum 10 gallons for beginners), a filter, heater (for tropical fish), thermometer, gravel or substrate, live or artificial plants for hiding spots, water conditioner to neutralize tap water chlorine, a test kit for ammonia/nitrite/nitrate/pH, and appropriate fish food. CRITICAL: cycle the tank for 2–4 weeks before adding fish to establish the beneficial bacteria that process fish waste. Skipping the cycle is the #1 cause of new fish dying.
+
+Q: What is aquarium cycling and why does it matter?
+A: The nitrogen cycle is the process where beneficial bacteria colonize your filter and convert toxic ammonia (from fish waste) into nitrites, then into less-harmful nitrates. Without it, ammonia spikes kill fish. Cycle by adding a small amount of fish food or pure ammonia daily for 2–4 weeks, testing water daily, until ammonia and nitrite both read zero and nitrates appear. Then do a large water change before adding fish.
+
+Q: How often should I clean my fish tank?
+A: Perform a 25–30% water change weekly for most tanks, vacuuming the gravel to remove waste. Clean the glass of algae every 1–2 weeks. Rinse filter media monthly in removed tank water — never under tap water, as chlorine kills the beneficial bacteria. Test water parameters weekly, especially in new tanks.
+
+Q: What fish are best for beginners?
+A: Hardy beginner-friendly fish include: bettas (solo only in most cases), guppies, platys, mollies, zebra danios, neon tetras (need groups of 6+), corydoras catfish (groups of 4+), and goldfish (in cold water). Avoid: oscars, plecos over 4", and cichlids until you have experience. Always research the adult size of fish — many "cute" small fish grow large.
+
+Q: What water temperature do tropical fish need?
+A: Most tropical fish thrive between 75–80°F (24–27°C). Cold-water fish like goldfish do best at 65–72°F. Use an aquarium thermometer daily. Sudden temperature swings of more than 2°F are dangerous and can cause ich (white spot disease).
+
+=== REPTILES ===
+
+Q: What does a bearded dragon need to thrive?
+A: Bearded dragons need a 40-gallon tank minimum for juveniles, 120 gallons for adults. They require a thermal gradient: a basking spot of 100–110°F on one side and a cool side of 80–85°F. UVB lighting is absolutely critical — without it they develop metabolic bone disease (MBD) and die prematurely. UVB bulbs must be replaced every 6 months even if they still glow. Juveniles eat 70% live insects (dubia roaches, crickets) and 30% greens; adults reverse to 70% greens. Calcium dusting of insects is essential.
+
+Q: What do leopard geckos need?
+A: Leopard geckos need a 20-gallon tank minimum for one adult. They are nocturnal so do NOT need UVB lighting (unlike bearded dragons), but they do need an under-tank heating pad on one side to create a thermal gradient: warm side 88–92°F, cool side 75–80°F. They eat live insects only (crickets, mealworms, dubia roaches) — no vegetables. Dust insects with calcium supplement 3–4 times a week and a vitamin supplement once a week. They live 15–20+ years with proper care.
+
+Q: What are the most common signs a reptile is sick?
+A: Warning signs requiring a vet visit: closed eyes or sunken eyes, refusing food for more than 2 weeks, wheezing or crackling breathing sounds, swollen jaw or limbs, soft jaw (sign of metabolic bone disease from calcium deficiency), abnormal stool or no stool for weeks, discolored or mottled skin that is not a shed. Reptiles hide illness well — any sudden behavioral change warrants attention.
+
+Q: What reptiles are good for beginners?
+A: Best beginner reptiles: leopard geckos (calm, hardy, 20-gallon setup), bearded dragons (friendly, interactive but need larger setup and more care), corn snakes (docile, easy to feed, 40-gallon), and blue-tongued skinks. Avoid: iguanas (grow very large and can be aggressive), chameleons (extremely sensitive), and wild-caught animals (stressed, often parasitized).
+
+=== SMALL ANIMALS ===
+
+Q: What do guinea pigs need?
+A: Guinea pigs are social animals and should be kept in pairs — a solo guinea pig will be chronically stressed. They need a spacious enclosure (minimum 7.5 sq ft per pair), unlimited timothy hay (80% of their diet), fresh leafy greens daily, and a small amount of guinea pig pellets. CRITICAL: guinea pigs cannot produce their own vitamin C and will develop scurvy without it — provide bell peppers, parsley, or a vitamin C supplement daily. Clean the cage at least twice a week. They live 5–7 years.
+
+Q: What do hamsters need?
+A: Hamsters need more space than most people think — minimum 40 gallon tank or 775 sq in floor space. Syrian hamsters are solitary and must be housed alone. They need a large solid-surface wheel (11"+ for Syrians, 8"+ for dwarfs — mesh or wire wheels injure feet), deep bedding (6"+ minimum) for burrowing, a hide, and a sand bath. Feed a mix of quality hamster pellets, occasional fresh vegetables, and high-protein treats. They are crepuscular/nocturnal — peak activity is at dusk and night.
+
+Q: What do rabbits eat?
+A: The foundation of a rabbit's diet is unlimited grass hay (timothy or orchard grass) — it should make up 80–85% of their food and is essential for gut motility. Without hay, rabbits develop GI stasis which can be fatal within 24–48 hours. Add a small amount of high-fiber pellets and 1–2 cups of leafy greens daily per 5 lbs body weight. Never feed: iceberg lettuce (near-zero nutrition), carrots (high sugar — only as occasional treats), starchy vegetables, or seeds.
+
+Q: Do rabbits need vaccinations?
+A: In the United States, rabbits do not currently have licensed vaccines available for the most common rabbit diseases. However, regular vet exams are important for catching dental disease (very common in rabbits), GI issues, and external parasites. Find an exotic vet who sees rabbits — not all standard vets have rabbit expertise.
+
+Q: What cage size do small animals need?
+A: Minimum guidelines: guinea pig pair — 7.5 sq ft floor space; Syrian hamster — 775 sq in floor space; dwarf hamster — 600 sq in; rabbit — 12 sq ft minimum with exercise time outside daily; chinchilla — multi-level cage minimum 3 sq ft per level. Bigger is always better. Wire bottom cages are dangerous for all small animals — solid bottom only to protect feet.
+`;
+
+// ─── New Pet Owner Complete Guides ───────────────────────────────
+const NEW_PET_OWNER_QA = `
+PETSHIWU NEW PET OWNER COMPLETE GUIDES:
+
+Q: I am getting a puppy for the first time. What do I need?
+A: Congratulations! Here is your full puppy starter checklist:
+FOOD: Age-appropriate puppy food (look for AAFCO "complete and balanced for puppies" — large breed puppies need large-breed formulas)
+FEEDING: Food and water bowls, slow-feeder bowl if fast eater
+SHELTER: Crate (wire crates with a divider let you size-up as puppy grows), puppy playpen for safe containment
+SLEEP: Puppy bed or crate mat, blanket
+TRAINING: Soft puppy collar, 4–6 ft leash, puppy training treats (small, soft, high-value)
+PLAY: Teething toys (rubber chew toys, rope toys, Kongs), squeaky toys, puzzle feeders
+HEALTH: ID tag with your phone number, scheduled vet appointment for first exam and vaccines
+GROOMING: Puppy shampoo, brush (match to coat type), nail clippers
+SAFETY: Baby gates, cabinet locks, cord covers — puppy-proof your home before they arrive
+
+Q: I am getting a kitten for the first time. What do I need?
+A: Your complete kitten starter checklist:
+FOOD: Kitten-formula wet and dry food (kittens need higher protein, fat, and calories than adults — never feed adult food as primary diet)
+LITTER: Litter box (one per cat plus one extra is the rule), unscented clumping litter, litter scoop, litter mat
+SCRATCHING: At least 2 scratching posts/pads (sisal posts are most popular) — place them next to furniture to redirect
+PLAY: Wand/feather toys, crinkle balls, catnip toys, ball track toy, small stuffed mice
+SHELTER: Cat bed, cat tree or perch by a window (cats love height)
+FEEDING: Food and water bowls — consider a cat water fountain (cats prefer moving water and drinking from fountains greatly increases hydration)
+GROOMING: Slicker brush, nail clippers, cat-safe toothbrush and toothpaste
+HEALTH: Carrier for vet visits (leave it out at home so cat gets comfortable with it), ID collar and tag, vet appointment scheduled
+
+Q: What supplies do I need for a new rabbit?
+A: Rabbit starter essentials:
+HOUSING: Large exercise pen or bunny-proofed room area — rabbits need space to run and binky daily
+FOOD: Timothy hay (unlimited), small amount of pellets, leafy greens
+LITTER: Corner litter box (rabbits naturally go in corners), paper-based litter — never clay cat litter
+ENRICHMENT: Tunnels, cardboard boxes to chew, toss toys (rabbits love to throw things), hideaways
+GROOMING: Slicker brush (long-haired breeds need daily brushing), nail clippers
+HEALTH: Find an exotic vet before you need one — regular vets often lack rabbit expertise
+
+Q: What do I need to set up for a pet bird?
+A: Bird setup checklist:
+HOUSING: Appropriately sized cage with bar spacing suited to the species
+FOOD: Quality pellets (primary food), fresh vegetables, clean water changed daily
+ACCESSORIES: Multiple natural wood perches of varying thickness, foraging/puzzle toys, cuttlebone, mineral block
+CLEANING: Cage liner, bird-safe cage cleaner
+HEALTH: Avian vet appointment — find one before an emergency arises, as avian vets are specialized
+
+Q: How do I puppy-proof my home?
+A: Room-by-room puppy safety:
+LIVING ROOM: Secure power cords, remove plants toxic to dogs (poinsettia, lilies), pick up loose items at floor level that could be swallowed
+KITCHEN: Lock cabinets containing cleaning products, secure trash cans, keep counter items out of reach
+BATHROOM: Close toilet lids, lock medication cabinets, pick up hair ties and small items
+BEDROOM: Secure electrical cords, keep shoes put away (very tempting chew targets)
+OUTDOORS: Check fence for gaps, ensure pool has a cover or fence, remove toxic plants from yard. A puppy can squeeze through surprisingly small gaps — do a ground-level inspection before letting them outside unsupervised.
+`;
+
+// ─── Product Selection Guide ─────────────────────────────────────
+const PRODUCT_SELECTION_QA = `
+PETSHIWU PRODUCT SELECTION EXPERT GUIDE:
+
+Q: How do I choose the right size collar for my dog?
+A: Measure your dog's neck with a soft tape measure, then add 2 inches for proper fit — you should be able to slide two fingers comfortably between the collar and neck. Too tight restricts breathing; too loose means the dog can slip out. For puppies, check the fit weekly as they grow fast. Flat buckle collars for everyday wear; harnesses are better for pullers and short-nosed breeds like bulldogs and pugs.
+
+Q: What type of dog harness is best?
+A: For most dogs: a front-clip harness (D-ring on the chest) reduces pulling by redirecting the dog toward you — best for training. Y-shaped step-in harnesses are easiest to put on. For small dogs and toy breeds: a harness is strongly preferred over a collar to protect their delicate trachea. For sighthounds (greyhounds, whippets): a specially designed martingale collar or sighthound harness is needed due to their narrow heads.
+
+Q: How do I choose the right dog bed size?
+A: Measure your dog from nose to tail base, then add 8–12 inches. For dogs who curl up, a round donut/bolster bed works well. For dogs who stretch out, an orthopedic flat mat is best. For senior or arthritic dogs: a thick memory foam orthopedic bed is a significant quality-of-life improvement. Waterproof lining matters if your dog has accidents.
+
+Q: What kind of cat litter is best?
+A: Most cats strongly prefer unscented fine-grain clumping clay litter — it feels most like natural soil. Clumping makes scooping easy and controls odor effectively. Avoid heavily scented litters — cats have sensitive noses and the perfume is a top reason cats reject litter boxes. Crystal litter has excellent odor control but some cats dislike the texture. Plant-based litters (corn, wheat, wood) are eco-friendly and often dust-free — good for cats with respiratory issues.
+
+Q: How many litter boxes do I need?
+A: The rule is one box per cat plus one extra. For a one-cat home, that means two boxes. Multiple boxes matter because many cats will not use a box that already has waste in it from another cat, or will not use the same box for both urinating and defecating. Place boxes in multiple locations — never all in one room. Never place the litter box near the food bowl — cats instinctively avoid this.
+
+Q: What size carrier do I need for my cat?
+A: Your cat should be able to stand up, turn around, and lie down comfortably in the carrier. Too large can cause anxiety from too much movement inside; a snug but comfortable size feels more den-like and secure. For car travel: carriers that can be seat-belted in place are significantly safer. Leave the carrier out at home with a familiar blanket inside so your cat associates it with safety rather than only vet visits.
+
+Q: What is the best toy for my dog's personality?
+A: Match toys to your dog's drive:
+- HIGH ENERGY/FETCH dogs: Rubber balls, frisbees, rope toys for tug
+- CHEWERS: Durable rubber Kongs (stuffable with food), Nylabone-style chews, bully sticks — always supervise and discard when pieces become small enough to swallow
+- SCENT-DRIVEN dogs: Snuffle mats, lick mats, scatter feeding — mental work tires dogs more efficiently than physical exercise alone
+- ANXIOUS dogs: Comfort plush toys, calming chews, puzzle feeders
+- BORED/DESTRUCTIVE dogs: Treat-dispensing toys, Kongs frozen with peanut butter (xylitol-free)
+
+Q: How do I choose the right pet food bag size?
+A: Once opened, dry kibble should be used within 4–6 weeks to maintain freshness and prevent fat rancidity — buy accordingly. Store in an airtight container, not in the original bag. For a single small dog under 15 lbs, a 5–10 lb bag typically covers 4–6 weeks. For large dogs over 50 lbs, a 30 lb bag may be appropriate. Never buy more than you can use within 6 weeks even if the price per lb is better for larger sizes.
+`;
+
+// ─── Seasonal & Travel with Pets ─────────────────────────────────
+const SEASONAL_TRAVEL_QA = `
+PETSHIWU SEASONAL SAFETY & TRAVEL EXPERT Q&A:
+
+Q: How do I keep my dog safe in summer heat?
+A: Dogs regulate temperature only through panting and paw pads — they overheat much faster than humans. NEVER leave a dog in a parked car, even with windows cracked — temperatures can reach 120°F within minutes. On hot days, walk in the early morning or after sunset when pavement is cooler. Test the pavement with your hand: if you cannot hold it there comfortably for 7 seconds, it will burn your dog's paws. Signs of heatstroke: heavy panting, drooling, vomiting, stumbling, collapse — this is an emergency requiring immediate vet care.
+
+Q: What summer products does my pet need?
+A: Essential summer pet supplies: paw protection wax or booties for hot pavement, a pet-safe sunscreen for short-haired dogs and pink-nosed cats, cooling mats and elevated mesh beds that allow airflow, collapsible travel water bottles, a kiddie pool for water-loving breeds, and cooling bandanas. PetShiwu carries a full summer safety collection.
+
+Q: How do I keep my cat safe in summer?
+A: Keep cats indoors during peak heat hours. Always provide fresh, cool water — cats dramatically increase hydration when offered cold water or a fountain. If your home gets hot, provide ceramic tiles for cats to lie on (they naturally cool against the surface). Never shave a double-coated cat — the coat actually insulates against heat. Watch for excessive panting — cats rarely pant; heavy panting is a heatstroke emergency.
+
+Q: How do I protect my pet in winter?
+A: Short-coated breeds, small dogs, puppies, seniors, and cats kept outdoors are vulnerable to cold. Signs of hypothermia: shivering, lethargy, stiff muscles — warm the pet gradually and call a vet. Winter essentials: a dog coat or sweater for thin-coated breeds, paw wax or booties to protect against salt and ice-melt chemicals (licking salted paws causes gastric upset), and a raised orthopedic bed away from cold floors for senior dogs. Cats left outdoors can shelter inside car engines — honk the horn before starting.
+
+Q: What do I need for road trips or travel with my dog?
+A: Travel with dogs safely:
+- Crash-tested carrier or vehicle harness (an unrestrained dog becomes a dangerous projectile in a crash)
+- Collapsible food and water bowls
+- Enough food packed for the trip (travel stress can cause digestive upset with food changes)
+- Familiar blanket or toy for comfort
+- Updated ID tags and microchip registration with current phone number
+- Vet records and vaccination documents (required at some boarding facilities and in some states)
+- First aid kit for pets
+- Never let your dog ride with their head out of the window — debris and wind can cause serious eye injuries
+
+Q: Can I take my cat on a road trip?
+A: Yes — with preparation. Keep your cat in a secure, ventilated carrier attached with a seatbelt. Cover the carrier with a light blanket to reduce visual stimulation and anxiety. Offer water at rest stops but do not leave a food bowl inside during driving (motion sickness). Bring portable litter. For cats with severe travel anxiety, ask your vet about anti-nausea medication or a calming supplement for the trip.
+
+Q: What are holiday hazards for pets?
+A: CHRISTMAS: Poinsettias, holly, mistletoe, and lilies are toxic to cats and dogs. Tinsel ingestion can cause life-threatening intestinal obstruction in cats. Christmas lights and electrical cords are chewing hazards.
+HALLOWEEN: Chocolate and xylitol-containing candy are toxic. Keep candy completely out of reach.
+THANKSGIVING: Turkey bones are dangerous. Onions, garlic, grapes, raisins, and alcohol are toxic.
+NEW YEAR: Fireworks cause extreme anxiety in most pets — keep them indoors, close windows, turn on TV/music to muffle sounds. More pets go missing on July 4th and New Year's than any other days — ensure ID tags and microchip are current.
+`;
+
+// ─── Training & Enrichment Guide ─────────────────────────────────
+const TRAINING_QA = `
+PETSHIWU TRAINING & ENRICHMENT EXPERT Q&A:
+
+Q: How do I crate train a puppy?
+A: Crate training done right makes the crate your puppy's safe happy den — not a punishment. Start with short positive sessions: toss treats inside, feed meals in the crate, gradually close the door for a few minutes while you are present. Never use the crate as punishment. A puppy can typically hold their bladder one hour per month of age, so a 2-month-old puppy needs a potty break every 2 hours. A properly crate-trained dog happily enters voluntarily and sleeps calmly through the night within 1–2 weeks.
+
+Q: How do I potty train my puppy?
+A: Take your puppy outside immediately after: waking up, eating, playing, and every 2 hours minimum. Always go to the same spot — the familiar smell triggers them. The moment they finish, immediately praise and give a treat. Never punish accidents inside — they happened because you were not watching closely enough. Puppies are typically reliably house-trained by 4–6 months. Accidents late in training often mean the schedule needs to be tighter, not that the puppy is misbehaving.
+
+Q: How do I stop my puppy biting?
+A: When your puppy bites during play, immediately make a sharp yelp sound and stop all play for 20–30 seconds. If biting continues, end the play session entirely by leaving the room. This teaches bite inhibition — the same way litter mates communicate. Always redirect to an appropriate chew toy before the biting starts. Frozen rubber toys are especially soothing during the teething phase (3–6 months). Never play wrestle with puppies using your bare hands — it teaches them hands are toys.
+
+Q: What mental enrichment does my dog need?
+A: Mental exercise tires dogs more effectively than physical exercise alone, and it reduces destructive behavior dramatically. Include daily: 5 minutes of training (sit, stay, down, leave it), scatter feeding in grass or snuffle mat instead of a regular bowl, a Kong stuffed and frozen with food, nose work games (hide treats and let the dog find them), and at least one new experience per week (new walking route, new smell, new object). A mentally challenged dog is a calm dog.
+
+Q: How do I teach my cat to use a scratching post?
+A: Place the post right next to the furniture they currently scratch — not in a corner. The post must be tall enough for a full stretch (at least 28–32" for adults). Sisal fabric is the most attractive texture. Sprinkle catnip on the post, dangle a toy near the top, and use positive reinforcement (praise, treats) whenever they use it. Apply double-sided tape to the furniture surface they target — they will redirect to the post on their own within days.
+
+Q: How do I train my dog to walk politely on a leash?
+A: The key rule: the moment the leash goes tight, you stop walking — completely. No forward movement with a tight leash, ever. When the leash is loose, immediately mark with "yes" and continue forward. Front-clip harnesses and head halters make this process much faster. 15 minutes of focused loose-leash practice every day produces dramatic improvement within 2–3 weeks. Reward your dog lavishly for check-ins (when they look up at you voluntarily during a walk).
+`;
+
 // ─── Platform & Customer Service Knowledge ───────────────────────
 const COMPANY_POLICIES = `
 PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
@@ -413,6 +630,21 @@ ${GROOMING_QA}
 
 PETSHIWU EXPERT TOYS & ACCESSORIES Q&A:
 ${TOYS_QA}
+
+PETSHIWU EXPERT GUIDE — BIRDS, FISH, REPTILES & SMALL ANIMALS:
+${OTHER_SPECIES_QA}
+
+PETSHIWU NEW PET OWNER COMPLETE GUIDES:
+${NEW_PET_OWNER_QA}
+
+PETSHIWU PRODUCT SELECTION EXPERT GUIDE:
+${PRODUCT_SELECTION_QA}
+
+PETSHIWU SEASONAL SAFETY & TRAVEL GUIDE:
+${SEASONAL_TRAVEL_QA}
+
+PETSHIWU TRAINING & ENRICHMENT GUIDE:
+${TRAINING_QA}
 
 BIRTHDAY PROGRAM:
 ${BIRTHDAY_PROGRAM_INFO}
