@@ -117,6 +117,16 @@ const PageViewTracker = () => {
   return null;
 };
 
+// Scroll to top on every page navigation — fixes SPA behaviour where
+// clicking a link keeps the previous page's scroll position
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+  return null;
+};
+
 function App() {
   const { setUser, setLoading } = useAuthStore();
   const { syncWithBackend } = useWishlistStore();
@@ -195,6 +205,7 @@ function App() {
         }}
       >
         <PageViewTracker />
+        <ScrollToTop />
         <div className="flex flex-col min-h-screen">
           <AnnouncementBar />
           <Header />
