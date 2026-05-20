@@ -49,12 +49,26 @@ function saveProfile(profile: PetProfile) {
   } catch {}
 }
 
+// Rotated starter prompts: mix of pet care + platform questions
+// so every chat opening feels fresh and covers both domains
 const STARTER_PROMPTS = [
   'My dog has itchy skin — what food should I try?',
+  'How does free shipping work?',
   'What do I need for a new kitten?',
-  'Best toys for a senior dog?',
-  'What supplements help with joint pain?'
+  'How do I track my order?',
 ]
+
+const STARTER_PROMPTS_ALT = [
+  'Best food for a senior dog?',
+  'How do I return something?',
+  'What supplements help with joint pain?',
+  'How do I get the 10% off discount?',
+]
+
+// Pick set based on hour so returning users see variety
+const getStarterPrompts = () => {
+  return new Date().getHours() % 2 === 0 ? STARTER_PROMPTS : STARTER_PROMPTS_ALT
+}
 
 function buildSystemPrompt(profile: PetProfile | null): string {
   const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
@@ -362,7 +376,7 @@ export default function AIPetAdvisor() {
                 {messages.length === 1 && (
                   <div className="flex flex-col gap-2 mt-2">
                     <p className="text-xs text-gray-400 text-center">Try asking:</p>
-                    {STARTER_PROMPTS.map(function (p) {
+                    {getStarterPrompts().map(function (p) {
                       return (
                         <button key={p} onClick={function () { send(p) }}
                           className="text-xs text-left bg-blue-50 text-blue-700 border border-blue-100 px-3 py-2 rounded-xl hover:bg-blue-100 transition-colors">

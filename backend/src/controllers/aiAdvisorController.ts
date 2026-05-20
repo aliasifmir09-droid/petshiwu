@@ -206,15 +206,143 @@ BIRTHDAY LOYALTY PROGRAM:
 - Discount code: BDAYGIFT
 `;
 
-// ─── Company Policies ─────────────────────────────────────────────
+// ─── Platform & Customer Service Knowledge ───────────────────────
 const COMPANY_POLICIES = `
-PETSHIWU COMPANY POLICIES:
-- Free shipping on all orders over $49
-- 30-day hassle-free returns
-- US-based expert customer support: +1 (626) 342-0419 | support@petshiwu.com
-- Ships within the USA only
-- Over 10,000 products for dogs, cats, birds, reptiles, fish, and small animals
-- Website: petshiwu.com
+PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
+
+=== COMPANY ===
+- Name: PetShiwu | Website: petshiwu.com
+- Address: 37-68 74th Street, Jackson Heights, Queens, NY 11372
+- Phone: +1 (626) 342-0419 | Email: support@petshiwu.com
+- Support hours: 7 days a week, 9 AM – 8 PM EST
+- 10,000+ products for dogs, cats, birds, fish, reptiles, and small animals
+- Top brands: Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Orijen, Acana, Taste of the Wild
+
+=== SHIPPING ===
+- FREE shipping automatically applied on all orders over $49 — no code needed
+- NYC (Queens, Brooklyn, Manhattan, Bronx, Staten Island): 1–2 business day delivery
+- Same-day delivery: Select Queens neighborhoods (Jackson Heights, Elmhurst, Flushing, Astoria) — order by 12 PM EST
+- Nationwide standard shipping: 3–7 business days
+- Tracking number emailed immediately after shipment
+- USA only — no international shipping
+
+=== PRICING & PAYMENTS ===
+- All prices in USD
+- Accepted: Visa, Mastercard, American Express, Discover, PayPal, Apple Pay, Google Pay
+- All transactions SSL-encrypted and secure
+
+=== ORDERS ===
+- Guest checkout available — no account required to order
+- Order confirmation email sent immediately
+- Changes or cancellations: Within 1 hour of placing order — call/email support immediately
+- Track orders: petshiwu.com/track-order or My Orders in account
+- Order history: Available under My Orders when logged in
+
+=== RETURNS & REFUNDS ===
+- 30-day return window from delivery date
+- Pet food guarantee: Return refused food, no questions asked
+- How to return: petshiwu.com/returns — enter order number, select items
+- Refund: Back to original payment method within 5–7 business days
+- Return shipping: FREE for damaged, defective, or wrong items; customer pays for change-of-mind returns
+- Exchanges: Available — note preferred exchange item when starting a return
+
+=== ACCOUNTS & PET PROFILES ===
+- Free account: Sign up in 30 seconds at petshiwu.com — enables order tracking, wishlist, pet profiles, faster checkout
+- Pet Passport: Save pet name, birthday, species, breed, allergies — unlocks personalized recs and birthday gifts
+- Multiple pets: Yes, unlimited pet profiles per account
+- Forgot password: Use Forgot Password link on login page — reset link sent to email
+
+=== DISCOUNTS & PROMOS ===
+- First-order 10% off: Sign up for newsletter at petshiwu.com homepage — code emailed instantly
+- Birthday discount: Code BDAYGIFT — 15% off entire order on pet's birthday (auto-notified when birthday saved in profile)
+- How to apply a code: Enter in Coupon Code box at checkout before payment, click Apply
+- Deals section: petshiwu.com/products?featured=true
+
+=== WISHLIST, COMPARISON & ALERTS ===
+- Wishlist: Heart icon on any product → saved at petshiwu.com/favorites; shareable link available
+- Product comparison: Compare up to 4 products at petshiwu.com/compare
+- Stock alerts: "Notify Me" on any out-of-stock product → email when back in stock (manage at petshiwu.com/stock-alerts)
+
+=== DONATIONS ===
+- Donate pet food & supplies to NYC animal shelters: petshiwu.com/donate
+- All donations go directly to NYC shelter animals
+`;
+
+// ─── Customer Service Q&A ─────────────────────────────────────────
+const CUSTOMER_SERVICE_QA = `
+PETSHIWU CUSTOMER SERVICE EXPERT Q&A:
+
+Q: How do I place an order?
+A: Browse our 10,000+ products, add items to your cart, and check out as a guest or with a free account. We accept all major credit cards, PayPal, Apple Pay, and Google Pay. You'll receive a confirmation email the moment your order is placed.
+
+Q: Do I need an account to order?
+A: No — guest checkout is available. But a free account at petshiwu.com gives you order tracking, saved pet profiles, wishlist access, personalized recommendations, and member deals. It takes 30 seconds to create.
+
+Q: How do I track my order?
+A: Check petshiwu.com/track-order or log in and go to My Orders. Your tracking number is emailed as soon as your order ships. NYC orders arrive in 1–2 business days; nationwide takes 3–7 business days.
+
+Q: Do you offer free shipping?
+A: Yes — all orders over $49 ship free automatically, no code needed. NYC customers get fast 1–2 day delivery. Same-day delivery is available in select Queens neighborhoods (Jackson Heights, Elmhurst, Flushing, Astoria) for orders before 12 PM.
+
+Q: How do I return something?
+A: Go to petshiwu.com/returns within 30 days of delivery, enter your order number, and select the items to return. Refunds go back to your original payment method in 5–7 business days. If your pet simply refuses to eat a food — return it, no questions asked.
+
+Q: My pet refuses to eat the food I ordered. Can I return it?
+A: Absolutely yes. Our pet food satisfaction guarantee covers refused food. Go to petshiwu.com/returns, pick "My pet won't eat it" as the reason, and we'll refund you in full. We stand completely behind our products.
+
+Q: How do I cancel or change my order?
+A: Contact us within 1 hour of placing your order — call +1 (626) 342-0419 or email support@petshiwu.com. After 1 hour the order may already be in processing, but you can always return it for free after delivery.
+
+Q: What payment methods do you accept?
+A: Visa, Mastercard, American Express, Discover, PayPal, Apple Pay, and Google Pay. All transactions are SSL-encrypted.
+
+Q: How do I use a discount code?
+A: Enter your code in the Coupon Code box at checkout, before the payment step. Click Apply — the discount shows in your total before you pay. Newsletter signup gives 10% off your first order; code BDAYGIFT gives 15% off on your pet's birthday.
+
+Q: How do I get the 10% first-order discount?
+A: Sign up for our newsletter at the bottom of petshiwu.com. Your 10% off code is emailed to you immediately and applies to your first order.
+
+Q: What is the birthday gift program?
+A: Save your pet's birthday in their profile under My Account → Pet Passport. On their birthday we'll notify you with code BDAYGIFT for 15% off your entire order — and we may even send a small gift for your pet. We celebrate every pet's birthday 🎂🐾
+
+Q: How do I save my pet's profile?
+A: Log in → go to My Account → Pet Passport. Save your pet's name, birthday, species, breed, and allergies. You can save multiple pets. This powers personalized product recommendations and birthday gifts.
+
+Q: An item I want is out of stock. What should I do?
+A: Click "Notify Me" on the product page. We'll email you the moment it's back in stock. You can manage all your stock alerts at petshiwu.com/stock-alerts.
+
+Q: Can I compare products before buying?
+A: Yes — click the Compare icon on any product and compare up to 4 products side by side at petshiwu.com/compare. Especially useful for choosing between pet food formulas or different brands.
+
+Q: How does the wishlist work?
+A: Click the heart icon on any product to save it. Your wishlist lives at petshiwu.com/favorites. You can generate a shareable link — great for family or friends buying your pet a gift.
+
+Q: How do I contact customer support?
+A: Phone: +1 (626) 342-0419 (7 days/week, 9 AM–8 PM EST). Email: support@petshiwu.com (response within 2 business hours). Or use the Contact form at petshiwu.com/contact. We're real people who love pets and are happy to help.
+
+Q: Where is PetShiwu located?
+A: Jackson Heights, Queens, New York — 37-68 74th Street, NY 11372. We're proud to be a Queens-based pet store serving all of NYC and shipping nationwide.
+
+Q: Do you ship outside the USA?
+A: Not at this time. We ship within the USA only — all 50 states.
+
+Q: Can I leave a product review?
+A: Yes — after your order is delivered you'll get an email inviting you to review your products. You can also visit any product page while logged in to leave a rating and review. Your reviews help other pet parents make better choices.
+
+Q: Do you offer subscriptions or auto-ship?
+A: Not currently. You can quickly reorder from your order history in My Orders, or keep your pet's food saved in your wishlist for one-click reordering.
+
+Q: How do I donate to animal shelters?
+A: Visit petshiwu.com/donate to donate pet food and supplies to our NYC shelter partners. Every item donated goes directly to animals at NYC shelters who need food and care.
+
+Q: What if my order arrives damaged?
+A: Contact us within 48 hours with a photo of the damage — phone +1 (626) 342-0419 or email support@petshiwu.com. We'll send a free replacement or issue a full refund immediately, no questions asked.
+
+Q: What if I received the wrong item?
+A: Contact us right away at +1 (626) 342-0419 or support@petshiwu.com. We'll ship the correct item with free expedited shipping and arrange free pickup of the wrong item at no inconvenience to you.
+
+Q: Is my personal information secure?
+A: Yes. We use SSL encryption on all transactions, never sell your personal data to third parties, and follow strict privacy practices. Full details at petshiwu.com/privacy.
 `;
 
 // ─── System Prompt Builder ────────────────────────────────────────
@@ -288,6 +416,9 @@ ${TOYS_QA}
 
 BIRTHDAY PROGRAM:
 ${BIRTHDAY_PROGRAM_INFO}
+
+PETSHIWU CUSTOMER SERVICE & PLATFORM Q&A:
+${CUSTOMER_SERVICE_QA}
 
 HEALTH TO PRODUCT MAPPING:
 - Itchy skin / allergies -> Sensitive skin food, omega supplements, hypoallergenic treats
