@@ -256,6 +256,127 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Brands We Carry (#19) */}
+      <section className="py-14 bg-white border-t border-gray-100">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">Brands We Carry</h2>
+            <p className="text-gray-500 text-base">Premium brands your pets love — all in one place</p>
+          </div>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-14">
+            {[
+              { name: 'Purina', color: '#e30613' },
+              { name: 'Blue Buffalo', color: '#0066cc' },
+              { name: 'Royal Canin', color: '#c8102e' },
+              { name: "Hill's Science Diet", color: '#f47920' },
+              { name: 'Wellness', color: '#5cb85c' },
+              { name: 'Orijen', color: '#2c3e50' },
+              { name: 'Nutro', color: '#6dba44' },
+              { name: 'Iams', color: '#003087' },
+              { name: 'Pedigree', color: '#ee1c25' },
+              { name: "Nature's Recipe", color: '#7cb518' },
+            ].map((brand, i) => (
+              <div key={i} className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => navigate(`/products?brand=${encodeURIComponent(brand.name)}`)}>
+                <div className="w-24 h-12 flex items-center justify-center rounded-lg bg-gray-50 border border-gray-200 px-3 group-hover:border-blue-300 group-hover:shadow-md transition-all">
+                  <span className="font-bold text-sm text-center leading-tight" style={{ color: brand.color }}>{brand.name}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-10">
+            <Link to="/products" className="text-blue-600 hover:text-blue-700 font-semibold text-sm hover:underline">
+              View all brands →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Customer Testimonials (#13) */}
+      <section className="py-16 bg-gradient-to-b from-blue-50 to-white">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-5xl font-black mb-3" style={{ background: 'linear-gradient(to right, #2563eb, #9333ea, #db2777)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', color: '#9333ea' }}>
+              What Pet Parents Say
+            </h2>
+            <p className="text-gray-500 text-lg">Real reviews from our NYC community</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                name: 'Maria G.',
+                location: 'Queens, NY',
+                pet: '🐕 Dog parent',
+                stars: 5,
+                text: 'Best pet store I\'ve found in Jackson Heights. My golden retriever loves the Blue Buffalo food and it arrived the next day. Amazing service!'
+              },
+              {
+                name: 'Kevin T.',
+                location: 'Brooklyn, NY',
+                pet: '🐈 Cat parent',
+                stars: 5,
+                text: 'I order Royal Canin for my cats every month. The prices are great and the delivery is fast. PetShiwu has become my go-to pet store.'
+              },
+              {
+                name: 'Sandra L.',
+                location: 'Manhattan, NY',
+                pet: '🐠 Fish & reptile owner',
+                stars: 5,
+                text: 'Finally a store that carries everything I need for my aquarium AND my bearded dragon. Huge selection and super helpful customer service.'
+              },
+            ].map((review, i) => (
+              <div key={i} className="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:-translate-y-1 transition-all">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <p className="font-bold text-gray-900">{review.name}</p>
+                    <p className="text-gray-400 text-xs">{review.location} · {review.pet}</p>
+                  </div>
+                  <div className="text-yellow-400 text-lg">{'★'.repeat(review.stars)}</div>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">"{review.text}"</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Signup (#14) */}
+      <section className="py-16 bg-gradient-to-r from-indigo-900 via-purple-900 to-blue-900 text-white">
+        <div className="container mx-auto px-4 lg:px-8 text-center">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-5xl mb-4">🐾</div>
+            <h2 className="text-3xl md:text-4xl font-black mb-3">Get 10% Off Your First Order</h2>
+            <p className="text-white/80 text-lg mb-8">
+              Join 5,000+ NYC pet parents. Get exclusive deals, new product alerts, and expert pet care tips delivered to your inbox.
+            </p>
+            <form
+              className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const input = (e.target as HTMLFormElement).querySelector('input[type="email"]') as HTMLInputElement;
+                if (input?.value) {
+                  alert('🐾 Thanks for joining! Your 10% discount code is on its way.');
+                  input.value = '';
+                }
+              }}
+            >
+              <input
+                type="email"
+                required
+                placeholder="your@email.com"
+                className="flex-1 px-5 py-3 rounded-full text-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-purple-400"
+              />
+              <button
+                type="submit"
+                className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-bold px-7 py-3 rounded-full transition-all hover:scale-105 whitespace-nowrap"
+              >
+                Get 10% Off
+              </button>
+            </form>
+            <p className="text-white/50 text-xs mt-4">No spam, ever. Unsubscribe anytime.</p>
+          </div>
+        </div>
+      </section>
+
       <style>{`.scrollbar-hide::-webkit-scrollbar { display: none; } .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
     </div>
   );

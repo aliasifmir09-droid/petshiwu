@@ -21,6 +21,8 @@ const Products = () => {
   const location = useLocation();
   const [showFilters, setShowFilters] = useState(false);
   const hasScrolledRef = useRef(false);
+  // Show a "backend waking up" message if loading takes > 8 seconds
+  const [slowLoading, setSlowLoading] = useState(false);
 
   const page = parseInt(searchParams.get('page') || '1');
   const petType = searchParams.get('petType') || '';
@@ -133,8 +135,17 @@ const Products = () => {
       }),
     enabled: !category, // Don't fetch if category param exists (will redirect)
     staleTime: 30 * 1000, // Consider fresh for 30 seconds
-    gcTime: 5 * 60 * 1000 // Cache for 5 minutes
+    gcTime: 5 * 60 * 1000, // Cache for 5 minutes
+    retry: 2, // Only retry twice then show error (avoids 60s+ wait on cold backend)
+    retryDelay: (attempt) => Math.min(3000 * (attempt + 1), 8000), // 3s, 6s max
   });
+
+  // Show "waking up" message if products are still loading after 8 seconds
+  useEffect(() => {
+    if (!isLoading) { setSlowLoading(false); return; }
+    const t = setTimeout(() => setSlowLoading(true), 8000);
+    return () => clearTimeout(t);
+  }, [isLoading]);
 
   const { data: categories } = useQuery({
     queryKey: ['categories', petType],
@@ -528,8 +539,14 @@ const Products = () => {
 
           {/* Products */}
           {isLoading ? (
-            <div className="py-12">
+            <div className="py-12 text-center">
               <LoadingSpinner size="lg" />
+              {slowLoading && (
+                <div className="mt-6 text-gray-500 text-sm max-w-sm mx-auto">
+                  <p className="font-semibold text-gray-700 mb-1">⏳ The server is waking up…</p>
+                  <p>Our backend spins down when idle. First load can take up to 60 seconds. Hang tight!</p>
+                </div>
+              )}
             </div>
           ) : filteredProducts.length > 0 ? (
             <>

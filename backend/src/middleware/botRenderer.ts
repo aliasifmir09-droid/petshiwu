@@ -519,6 +519,54 @@ const buildCategoryHtml = (template: string, category: any, petType?: string): s
 // Main middleware factory
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// SSR: /products listing page — injects real product links so Google
+// can discover individual product pages from the listing page.
+// ---------------------------------------------------------------------------
+const buildProductListHtml = async (template: string): Promise<string> => {
+  const BASE_URL = 'https://www.petshiwu.com';
+  const canonicalUrl = `${BASE_URL}/products`;
+
+  // Fetch up to 60 active products for Google to crawl
+  const products = await Product.find({ isActive: true })
+    .select('name slug price brand petType description')
+    .sort({ createdAt: -1 })
+    .limit(60)
+    .lean();
+
+  const productLinks = products
+    .filter((p: any) => p.slug)
+    .map((p: any) => {
+      const url = `${BASE_URL}/products/${esc(p.slug)}`;
+      const price = p.price ? ` — $${p.price.toFixed(2)}` : '';
+      const brand = p.brand ? ` by ${esc(String(p.brand))}` : '';
+      const desc = p.description ? ` — ${esc(truncate(stripTags(String(p.description)), 80))}` : '';
+      return `<li><a href="${url}">${esc(p.name)}${brand}${price}</a>${desc}</li>`;
+    })
+    .join('\n');
+
+  const bodyContent = `
+<div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
+  <h1>All Pet Products — PetShiwu</h1>
+  <p>Browse 10,000+ premium pet products for dogs, cats, birds, fish, reptiles, and small animals.
+     Free shipping on orders over $49. Based in Jackson Heights, NY.</p>
+  <ul style="list-style:none;padding:0;columns:2">
+    ${productLinks}
+  </ul>
+  <p><a href="${BASE_URL}">← Back to PetShiwu</a></p>
+</div>`;
+
+  const meta = STATIC_PAGES['/products'];
+  let html = template;
+  html = injectTitle(html, meta.title);
+  html = injectDescription(html, meta.description);
+  html = injectCanonical(html, canonicalUrl);
+  // Inject product list into body for Google to crawl
+  html = html.replace(/<div id="root">.*?<\/div>/s, `<div id="root">${bodyContent}</div>`) ||
+         html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+  return html;
+};
+
 export const createBotRenderer = (distPath: string) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     // Only intercept GET requests for HTML pages
@@ -549,6 +597,9 @@ export const createBotRenderer = (distPath: string) => {
       } else if (page?.type === 'category') {
         const category = await fetchCategory(page.slug);
         if (category) html = buildCategoryHtml(template, category, (page as any).petType);
+      } else if (req.path === '/products' || req.path === '/products/') {
+        // SSR product listing for Google — inject real product links
+        html = await buildProductListHtml(template);
       }
 
       // Always serve bots proper HTML — generic fallback ensures every page
