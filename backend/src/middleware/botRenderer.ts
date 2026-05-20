@@ -214,8 +214,21 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
 };
 
 /**
+ * Replace og:title, og:description, and og:url content in the HTML template
+ */
+const injectOgTags = (html: string, title: string, description: string, url: string): string => {
+  let out = html;
+  out = out.replace(/(<meta\s+property="og:title"\s+content=")[^"]*(")/i, `$1${esc(title)}$2`);
+  out = out.replace(/(<meta\s+property="og:description"\s+content=")[^"]*(")/i, `$1${esc(description)}$2`);
+  out = out.replace(/(<meta\s+property="og:url"\s+content=")[^"]*(")/i, `$1${esc(url)}$2`);
+  out = out.replace(/(<meta\s+name="twitter:title"\s+content=")[^"]*(")/i, `$1${esc(title)}$2`);
+  out = out.replace(/(<meta\s+name="twitter:description"\s+content=")[^"]*(")/i, `$1${esc(description)}$2`);
+  return out;
+};
+
+/**
  * Build HTML for pages not backed by DB data — injects correct canonical,
- * title, and description so bots don't see the hardcoded homepage values.
+ * title, description, AND og/twitter tags so every page shares correctly.
  */
 const buildGenericPageHtml = (template: string, reqPath: string): string => {
   const cleanPath = reqPath.split('?')[0]; // strip query string from canonical
@@ -228,6 +241,7 @@ const buildGenericPageHtml = (template: string, reqPath: string): string => {
   html = injectTitle(html, meta.title);
   html = injectDescription(html, meta.description);
   html = injectCanonical(html, canonicalUrl);
+  html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
   return html;
 };
 

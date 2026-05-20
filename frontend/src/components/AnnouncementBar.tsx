@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const MESSAGES = [
-  { text: '🚚 Free shipping on all orders over $49 — nationwide delivery' },
-  { text: '🎁 20% off your first order — use code WELCOME20' },
-  { text: '⭐ Over 10,000 products for dogs, cats, birds & more' },
-  { text: '💬 Support available 7 days a week — we\'re here for you' },
+  { text: '🚚 Free shipping on all orders over $49 — no code needed' },
+  { text: '🎁 10% off your first order — sign up for our newsletter' },
+  { text: '⭐ Over 10,000 products for dogs, cats, birds, reptiles & more' },
+  { text: '🎂 Save your pet\'s birthday — get 15% off on their special day!' },
+  { text: '💬 Support available 7 days a week, 9 AM – 8 PM EST' },
 ]
 
 export default function AnnouncementBar() {
