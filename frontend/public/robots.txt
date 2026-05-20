@@ -15,7 +15,6 @@ Disallow: /addresses
 Disallow: /stock-alerts
 Disallow: /favorites
 Disallow: /compare
-Disallow: /returns
 Disallow: /admin
 Disallow: /dashboard
 Disallow: /login
@@ -24,7 +23,6 @@ Disallow: /verify-email
 Disallow: /resend-verification
 Disallow: /reset-password
 Disallow: /forgot-password
-Disallow: /track-order
 
 # Error pages
 Disallow: /403
@@ -51,6 +49,12 @@ Allow: /faq
 Allow: /about
 Allow: /contact
 Allow: /return-policy
+Allow: /returns
+Allow: /track-order
+Allow: /shipping
+Allow: /privacy
+Allow: /terms
+Allow: /accessibility
 Allow: /donate
 Allow: /best-dog-food-sensitive-stomach-diarrhea
 Allow: /high-protein-dog-food-picky-eaters

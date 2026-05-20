@@ -226,9 +226,9 @@ const Home = () => {
             </h2>
             <p className="text-xl md:text-2xl opacity-95 mb-4">Quality You Can Trust</p>
           </div>
-          <Link to="/products?featured=true" className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 px-8 py-6 rounded-3xl shadow-2xl border-2 border-white/30 transform hover:scale-105 transition-all text-center">
+          <Link to="/products" className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 px-8 py-6 rounded-3xl shadow-2xl border-2 border-white/30 transform hover:scale-105 transition-all text-center">
             <p className="text-base font-bold uppercase">Shop Now</p>
-            <p className="text-2xl font-black">Featured Products</p>
+            <p className="text-2xl font-black">All Products</p>
           </Link>
         </div>
       </section>

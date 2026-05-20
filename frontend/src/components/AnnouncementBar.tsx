@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const MESSAGES = [
-  { text: '🚚 Free shipping on all orders over $49' },
+  { text: '🚚 Free shipping on all orders over $49 — nationwide delivery' },
   { text: '🎁 20% off your first order — use code WELCOME20' },
   { text: '⭐ Over 10,000 products for dogs, cats, birds & more' },
   { text: '💬 Support available 7 days a week — we\'re here for you' },

@@ -12,6 +12,7 @@ import { initAnalytics, trackPageView } from './utils/analytics';
 import AnnouncementBar from './components/AnnouncementBar';
 import BottomNav from './components/BottomNav';
 import AIPetAdvisor from './components/AIPetAdvisor'; // Gemini AI powered — v2
+import CookieConsent from './components/CookieConsent';
 import './index.css';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -52,6 +53,10 @@ const SensitiveStomachDogs = lazy(() => import('./pages/seo/SensitiveStomachDogs
 const PickyEaters = lazy(() => import('./pages/seo/PickyEaters'));
 const AggressiveChewers = lazy(() => import('./pages/seo/AggressiveChewers'));
 const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const Terms = lazy(() => import('./pages/Terms'));
+const ShippingPolicy = lazy(() => import('./pages/ShippingPolicy'));
+const Accessibility = lazy(() => import('./pages/Accessibility'));
 
 /**
  * FIXED SEO ROUTE
@@ -245,6 +250,16 @@ function App() {
                   <Route path="/learning/best-dog-food-sensitive-stomach" element={<SensitiveStomachGuide />} />
                   <Route path="/learning/best-dog-foods-sensitive-stomachs" element={<BestFoodSensitiveStomach />} />
                   
+                  {/* Legal & Policy pages */}
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/terms-of-service" element={<Terms />} />
+                  <Route path="/shipping" element={<ShippingPolicy />} />
+                  <Route path="/shipping-policy" element={<ShippingPolicy />} />
+                  <Route path="/accessibility" element={<Accessibility />} />
+                  <Route path="/cookie-policy" element={<Navigate to="/privacy#cookies" replace />} />
+
                   {/* Explicit routes that must NOT be caught by /:petType */}
                   <Route path="/shop" element={<Products />} />
                   <Route path="/deals" element={<Navigate to="/products?featured=true" replace />} />
@@ -262,6 +277,7 @@ function App() {
           <BottomNav />
         </div>
         <AIPetAdvisor />
+        <CookieConsent />
       </BrowserRouter>
     </QueryClientProvider>
   );
