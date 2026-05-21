@@ -599,7 +599,7 @@ const buildProductListHtml = async (template: string): Promise<string> => {
 
   // Fetch up to 60 active products for Google to crawl
   const products = await Product.find({ isActive: true })
-    .select('name slug price brand petType description')
+    .select('name slug basePrice brand petType description')
     .sort({ createdAt: -1 })
     .limit(60)
     .lean();
@@ -608,7 +608,7 @@ const buildProductListHtml = async (template: string): Promise<string> => {
     .filter((p: any) => p.slug)
     .map((p: any) => {
       const url = `${BASE_URL}/products/${esc(p.slug)}`;
-      const price = p.price ? ` — $${p.price.toFixed(2)}` : '';
+      const price = p.basePrice ? ` — $${p.basePrice.toFixed(2)}` : '';
       const brand = p.brand ? ` by ${esc(String(p.brand))}` : '';
       const desc = p.description ? ` — ${esc(truncate(stripTags(String(p.description)), 80))}` : '';
       return `<li><a href="${url}">${esc(p.name)}${brand}${price}</a>${desc}</li>`;
