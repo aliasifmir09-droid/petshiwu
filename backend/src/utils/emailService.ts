@@ -1430,8 +1430,8 @@ Welcome gift: Free shipping on your first order — no code needed.
 `;
 
   try {
-    if (resend) {
-      const result = await resend.emails.send({
+    if (resendClient) {
+      const result = await resendClient.emails.send({
         from: process.env.EMAIL_FROM || 'PetShiwu <noreply@petshiwu.com>',
         to: email,
         subject,
@@ -1442,7 +1442,7 @@ Welcome gift: Free shipping on your first order — no code needed.
       return result;
     }
 
-    const transporter = await getTransporter();
+    const transporter = createTransporter();
     if (!transporter) throw new Error('No email transport configured');
 
     const info = await transporter.sendMail({
