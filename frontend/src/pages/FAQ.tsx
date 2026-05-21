@@ -112,9 +112,10 @@ const FAQ = () => {
   return (
     <>
       <SEO
-        title="Frequently Asked Questions (FAQ) | PetShiwu - Pet Products Help Center"
-        description={seoDescription}
-        keywords="FAQ, frequently asked questions, pet store help, shipping questions, return policy, order tracking, pet product questions, customer support, pet care help, online pet store FAQ"
+      title="Frequently Asked Questions (FAQ) | PetShiwu - Pet Products Help Center"
+      description={seoDescription}
+      keywords="FAQ, frequently asked questions, pet store help, shipping questions, return policy, order tracking, pet product questions, customer support, pet care help, online pet store FAQ"
+      url="/faq"
       />
       
       {/* Structured Data for SEO */}

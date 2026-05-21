@@ -5,9 +5,10 @@ const About = () => {
   return (
     <>
       <SEO
-        title="About PetShiwu | Your Trusted Partner in Pet Care"
-        description="Learn about PetShiwu's 15+ years of pet care experience, our passion for pets, and our commitment to quality, community, and convenient online shopping across the USA."
-        keywords="about PetShiwu, pet care, pet store USA, pet community, premium pet products"
+      title="About PetShiwu | Your Trusted Partner in Pet Care"
+      description="Learn about PetShiwu's 15+ years of pet care experience, our passion for pets, and our commitment to quality, community, and convenient online shopping across the USA."
+      keywords="about PetShiwu, pet care, pet store USA, pet community, premium pet products"
+      url="/about"
       />
 
       <div className="bg-gray-50">
