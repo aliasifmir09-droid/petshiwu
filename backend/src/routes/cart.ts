@@ -6,15 +6,15 @@ import {
   clearCart,
   getDeliveryEstimate
 } from '../controllers/cartController';
-import { protect } from '../middleware/auth';
+import { protect, optionalAuth } from '../middleware/auth';
 
 const router = express.Router();
 
 // All routes are optional auth (work for both authenticated and guest users)
-router.post('/', protect, saveCart); // Optional auth
-router.get('/', protect, getCart); // Optional auth
+router.post('/', optionalAuth, saveCart); // Optional auth
+router.get('/', optionalAuth, getCart); // Optional auth
 router.get('/share/:shareId', getSharedCart); // Public
-router.delete('/', protect, clearCart); // Optional auth
+router.delete('/', optionalAuth, clearCart); // Optional auth
 router.get('/delivery-estimate', getDeliveryEstimate); // Public
 
 export default router;
