@@ -5,7 +5,7 @@ import { productService } from '@/services/products';
 import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Dropdown from '@/components/Dropdown';
-import { SlidersHorizontal, ArrowUpDown, ChevronRight, Home } from 'lucide-react';
+import { SlidersHorizontal, ArrowUpDown, ChevronRight, Home, Bell, Sparkles } from 'lucide-react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
@@ -326,8 +326,77 @@ const PetType = () => {
               )}
             </>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-600 text-lg">No products found for {petTypeDisplay}.</p>
+            /* Empty category — show a "Coming Soon" card instead of a bare text line.
+               This looks intentional rather than broken, and gives users a clear
+               call to action (browse other categories or check back soon). */
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+              {/* Pet emoji badge */}
+              <div className="w-24 h-24 rounded-full bg-primary-50 flex items-center justify-center mb-6 shadow-inner">
+                <span className="text-5xl select-none" role="img" aria-label={petTypeDisplay}>
+                  {petType === 'reptile' ? '🦎'
+                    : petType === 'small-pet' ? '🐹'
+                    : petType === 'fish' ? '🐟'
+                    : petType === 'bird' ? '🐦'
+                    : petType === 'cat' ? '🐱'
+                    : petType === 'dog' ? '🐕'
+                    : '🐾'}
+                </span>
+              </div>
+
+              {/* Heading */}
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles size={18} className="text-primary-500" />
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {petTypeDisplay} Products Coming Soon
+                </h2>
+                <Sparkles size={18} className="text-primary-500" />
+              </div>
+
+              <p className="text-gray-500 max-w-md mb-8 leading-relaxed">
+                We're busy curating the best {petTypeDisplay.toLowerCase()} products for your
+                furry (or scaly!) family. Check back soon — new arrivals are on their way.
+              </p>
+
+              {/* Actions */}
+              <div className="flex flex-wrap gap-3 justify-center">
+                <Link
+                  to="/products"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors"
+                >
+                  Browse All Products
+                </Link>
+                <Link
+                  to="/"
+                  className="inline-flex items-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                >
+                  <Home size={16} />
+                  Back to Home
+                </Link>
+              </div>
+
+              {/* Other categories */}
+              <div className="mt-10 w-full max-w-lg">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">
+                  Available categories
+                </p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {[
+                    { slug: 'dog', label: '🐕 Dogs' },
+                    { slug: 'cat', label: '🐱 Cats' },
+                    { slug: 'bird', label: '🐦 Birds' },
+                  ]
+                    .filter(c => c.slug !== petType)
+                    .map(c => (
+                      <Link
+                        key={c.slug}
+                        to={`/${c.slug}`}
+                        className="px-4 py-2 rounded-full bg-gray-100 text-gray-700 text-sm font-medium hover:bg-primary-50 hover:text-primary-700 transition-colors"
+                      >
+                        {c.label}
+                      </Link>
+                    ))}
+                </div>
+              </div>
             </div>
           )}
         </div>

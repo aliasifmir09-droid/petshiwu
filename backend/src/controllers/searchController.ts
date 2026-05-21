@@ -39,6 +39,19 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
       ]
     };
 
+    // ─── Pet-type keyword detection ─────────────────────────────────────────
+    // Maps common search words to their petType DB value.
+    // Used so "dog food" → filter petType:"dog" + search "food",
+    // rather than trying to match the word "dog" inside product names.
+    const PET_TYPE_KEYWORDS: Record<string, string> = {
+      dog: 'dog', dogs: 'dog', puppy: 'dog', puppies: 'dog', canine: 'dog',
+      cat: 'cat', cats: 'cat', kitten: 'cat', kittens: 'cat', feline: 'cat',
+      bird: 'bird', birds: 'bird', parrot: 'bird', parakeet: 'bird', budgie: 'bird',
+      fish: 'fish', aquarium: 'fish', aquatic: 'fish',
+      reptile: 'reptile', reptiles: 'reptile', lizard: 'reptile', snake: 'reptile', turtle: 'reptile',
+      rabbit: 'small-pet', hamster: 'small-pet', bunny: 'small-pet', guinea: 'small-pet', gerbil: 'small-pet',
+    };
+
     // Search query - Use AND logic for better relevance (all terms must be present)
     // Text index exists on: name, description, brand, tags (see Product model)
     if (q && typeof q === 'string') {
@@ -46,31 +59,50 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
       if (searchText.length >= 1) {
         // Split search text into terms
         const searchTerms = searchText.split(/\s+/).filter(term => term.length > 0);
-        
+          
         if (searchText.length >= 2) {
           if (searchTerms.length > 1) {
-            // Multiple terms: Use AND logic - all terms must be present
-            // This ensures we only show relevant products, not all products
-            const escapedTerms = searchTerms.map(term => 
+            // ── Step 1: Extract pet type from query terms ──────────────────
+            // e.g. "dog food" → detectedPetType="dog", effectiveTerms=["food"]
+            // Only auto-detect if petType filter is not already set explicitly
+            let detectedPetType: string | null = null;
+            let effectiveTerms = [...searchTerms];
+            if (!petType) {
+              for (let i = 0; i < effectiveTerms.length; i++) {
+                const mapped = PET_TYPE_KEYWORDS[effectiveTerms[i].toLowerCase()];
+                if (mapped) {
+                  detectedPetType = mapped;
+                  effectiveTerms.splice(i, 1);
+                  break;
+                }
+              }
+            }
+            // If all terms were pet-type words (e.g. query = "dog"), keep them all
+            if (effectiveTerms.length === 0) effectiveTerms = [...searchTerms];
+
+            // ── Step 2: Build AND conditions ───────────────────────────────
+            // Intentionally omit `description` — it causes false positives.
+            // E.g. "Automatic Cat Feeder" description may say "suitable for dogs"
+            // and "dispenses their food", incorrectly matching "dog food".
+            // Matching name, brand, and tags is precise enough.
+            const escapedTerms = effectiveTerms.map(term =>
               term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
             );
-            
-            // Build AND conditions - all terms must appear in name OR description
             const andConditions = escapedTerms.map(term => ({
               $or: [
                 { name: { $regex: term, $options: 'i' } },
-                { description: { $regex: term, $options: 'i' } },
                 { brand: { $regex: term, $options: 'i' } },
                 { tags: { $in: [new RegExp(term, 'i')] } }
               ]
             }));
-            
-            // Also try exact match in product name (highest priority)
+
+            // Exact phrase match in name (highest priority)
             const exactNameRegex = new RegExp(
-              searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 
+              searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
               'i'
             );
-            
+
+            // ── Step 3: Compose query ──────────────────────────────────────
             query = {
               isActive: true,
               $and: [
@@ -80,14 +112,12 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
                     { deletedAt: { $exists: false } }
                   ]
                 },
+                // Apply detected pet type as a hard filter (most relevant signal)
+                ...(detectedPetType ? [{ petType: detectedPetType }] : []),
                 {
                   $or: [
-                    // Exact name match (highest priority)
-                    { name: exactNameRegex },
-                    // All terms must be present (AND logic) - combine all AND conditions
-                    {
-                      $and: andConditions
-                    }
+                    { name: exactNameRegex },   // exact phrase in name → best match
+                    { $and: andConditions }      // all terms in name/brand/tags
                   ]
                 }
               ]
@@ -97,7 +127,7 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
             query.$text = { $search: searchText };
           }
         } else {
-          // For single character, use regex search for better matching
+          // Single character: regex on name/brand/tags only
           const searchRegex = new RegExp(searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
           query = {
             isActive: true,
@@ -111,7 +141,6 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
               {
                 $or: [
                   { name: searchRegex },
-                  { description: searchRegex },
                   { brand: searchRegex },
                   { tags: { $in: [searchRegex] } }
                 ]
