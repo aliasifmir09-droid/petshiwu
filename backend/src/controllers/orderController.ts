@@ -12,23 +12,13 @@ import { executeCachedAggregation } from '../utils/aggregationCache';
 import { addEmailJob } from '../utils/jobQueue';
 import { cache } from '../utils/cache';
 
-import type { StripeInstance, OrderItemInput, NormalizedOrderItem, NormalizedOrder } from '../types/common';
+import type { OrderItemInput, NormalizedOrderItem, NormalizedOrder } from '../types/common';
+import Stripe from 'stripe';
 
-// Initialize Stripe (optional - only if STRIPE_SECRET_KEY is set)
-let stripe: StripeInstance | null = null;
-try {
-  if (process.env.STRIPE_SECRET_KEY) {
-    // Dynamic import to avoid errors if stripe package isn't installed
-    // @ts-ignore - Stripe may not be installed, handled in try-catch
-    const Stripe = require('stripe');
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2024-11-20.acacia',
-    });
-  }
-} catch (error) {
-  // Stripe package not installed - payments will not work
-  // This is okay if payments are not being used
-}
+// Initialize Stripe — requires STRIPE_SECRET_KEY env var on Render
+const stripe: Stripe | null = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2024-11-20.acacia' as any })
+  : null;
 
 /**
  * @swagger

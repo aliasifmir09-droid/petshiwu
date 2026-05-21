@@ -48,7 +48,6 @@
     "@types/bull": "^3.15.9",
     "@types/node": "^20.10.6",
     "bcryptjs": "^2.4.3",
-    "typescript": "^5.3.3",
     "bull": "^4.16.5",
     "cloudinary": "^2.8.0",
     "compression": "^1.8.1",
@@ -71,8 +70,10 @@
     "nodemailer": "^7.0.11",
     "redis": "^5.10.0",
     "resend": "^6.5.2",
+    "stripe": "14",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "typescript": "^5.3.3",
     "winston": "^3.18.3"
   },
   "devDependencies": {
