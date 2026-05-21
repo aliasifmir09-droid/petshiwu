@@ -1235,3 +1235,227 @@ export const sendCartAbandonmentEmail = async (
     throw error;
   }
 };
+// ─────────────────────────────────────────────────────────────
+// WELCOME EMAIL
+// ─────────────────────────────────────────────────────────────
+export const sendWelcomeEmail = async (email: string, firstName: string): Promise<any> => {
+  const siteUrl = getFrontendBaseUrl();
+  const subject = `Welcome to PetShiwu, ${firstName}! 🎉`;
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${subject}</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0f1e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif}
+  .wrapper{max-width:600px;margin:0 auto;background:#0d1424;border-radius:20px;overflow:hidden;border:1px solid rgba(99,179,237,0.15)}
+  .header{position:relative;background:linear-gradient(135deg,#0d1424 0%,#0f1f3d 100%);padding:40px 40px 28px;text-align:center;overflow:hidden}
+  .header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#3b82f6,#8b5cf6,#06b6d4,transparent)}
+  .grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.04) 1px,transparent 1px);background-size:32px 32px;pointer-events:none}
+  .dot-glow{position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:300px;height:200px;background:radial-gradient(ellipse,rgba(59,130,246,0.25) 0%,transparent 70%);pointer-events:none}
+  .logo{font-size:32px;font-weight:900;letter-spacing:-1px;color:#60a5fa;position:relative;z-index:1}
+  .logo-sub{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(148,163,184,0.55);margin-top:4px;font-weight:600;position:relative;z-index:1}
+  .header-paws{margin-top:18px;font-size:18px;opacity:0.3;letter-spacing:10px;position:relative;z-index:1}
+  .hero{position:relative;background:linear-gradient(160deg,#0f1f3d 0%,#131d36 50%,#160d2e 100%);padding:44px 40px 48px;text-align:center;overflow:hidden}
+  .hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(139,92,246,0.4),rgba(59,130,246,0.4),transparent)}
+  .orb1{position:absolute;top:-40px;right:-30px;width:200px;height:200px;background:radial-gradient(circle,rgba(139,92,246,0.18) 0%,transparent 70%)}
+  .orb2{position:absolute;bottom:-40px;left:-30px;width:180px;height:180px;background:radial-gradient(circle,rgba(6,182,212,0.14) 0%,transparent 70%)}
+  .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.3);color:#60a5fa;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:5px 14px;border-radius:50px;margin-bottom:20px}
+  .badge-dot{width:6px;height:6px;border-radius:50%;background:#3b82f6;display:inline-block}
+  .hero-emoji{font-size:52px;display:block;margin-bottom:14px;position:relative;z-index:1}
+  .hero-title{font-size:28px;font-weight:900;color:#f1f5f9;line-height:1.2;margin-bottom:8px;position:relative;z-index:1}
+  .grad{color:#a78bfa}
+  .hero-sub{color:rgba(148,163,184,0.8);font-size:14px;line-height:1.7;max-width:400px;margin:12px auto 28px;position:relative;z-index:1}
+  .btn{display:inline-block;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff!important;font-weight:800;font-size:14px;padding:14px 36px;border-radius:50px;text-decoration:none;position:relative;z-index:1}
+  .greeting{padding:32px 40px 8px}
+  .greeting h2{font-size:19px;font-weight:700;color:#e2e8f0;margin-bottom:8px}
+  .greeting p{color:#64748b;font-size:14px;line-height:1.7}
+  .stats{display:table;width:calc(100% - 80px);margin:24px 40px;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);border-collapse:collapse}
+  .stat{display:table-cell;width:33.3%;padding:18px 12px;text-align:center;background:rgba(255,255,255,0.02);border-right:1px solid rgba(255,255,255,0.06)}
+  .stat:last-child{border-right:none}
+  .stat-val{font-size:20px;font-weight:900;color:#60a5fa}
+  .stat-label{font-size:10px;color:#475569;margin-top:3px;font-weight:600}
+  .section{padding:8px 40px 24px}
+  .section-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(99,179,237,0.5);margin-bottom:16px}
+  .perk-grid{display:table;width:100%;border-collapse:separate;border-spacing:10px}
+  .perk-row{display:table-row}
+  .perk{display:inline-block;width:48%;vertical-align:top;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 14px;margin:5px}
+  .perk-icon{font-size:22px;margin-bottom:8px}
+  .perk-title{font-size:13px;font-weight:700;color:#cbd5e1;margin-bottom:3px}
+  .perk-desc{font-size:11px;color:#475569;line-height:1.5}
+  .pills{display:block;padding:0 40px 28px}
+  .pills-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(99,179,237,0.5);margin-bottom:14px}
+  .pill{display:inline-block;background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.2);color:#60a5fa!important;border-radius:50px;padding:6px 14px;font-size:12px;font-weight:600;text-decoration:none;margin:3px}
+  .offer-wrap{padding:0 40px 32px}
+  .offer{background:linear-gradient(135deg,rgba(30,64,175,0.6) 0%,rgba(109,40,217,0.6) 100%);border:1px solid rgba(139,92,246,0.3);border-radius:16px;padding:28px;text-align:center}
+  .offer::before{content:'';display:block;height:1px;background:linear-gradient(90deg,transparent,rgba(167,139,250,0.6),transparent);margin-bottom:20px;margin-top:-8px}
+  .offer-badge{display:inline-block;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#c4b5fd;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 12px;border-radius:50px;margin-bottom:12px}
+  .offer-title{font-size:19px;font-weight:800;color:#f1f5f9;margin-bottom:6px}
+  .offer-desc{color:rgba(196,181,253,0.7);font-size:12px;margin-bottom:18px}
+  .btn-offer{display:inline-block;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#f1f5f9!important;font-weight:700;font-size:13px;padding:10px 26px;border-radius:50px;text-decoration:none}
+  .footer{background:rgba(255,255,255,0.02);border-top:1px solid rgba(255,255,255,0.06);padding:24px 40px;text-align:center}
+  .footer-links{margin-bottom:10px}
+  .footer-links a{color:#475569!important;font-size:11px;text-decoration:none;margin:0 8px}
+  .footer-copy{color:#2d3748;font-size:10px;line-height:1.8}
+  .footer-copy a{color:#3d4f6b!important}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="header">
+    <div class="grid-bg"></div>
+    <div class="dot-glow"></div>
+    <div class="logo">PetShiwu</div>
+    <div class="logo-sub">Premium Pet Care Platform</div>
+    <div class="header-paws">🐾 &nbsp; 🐾 &nbsp; 🐾</div>
+  </div>
+
+  <div class="hero">
+    <div class="orb1"></div>
+    <div class="orb2"></div>
+    <div class="badge"><span class="badge-dot"></span> Account Activated</div>
+    <span class="hero-emoji">🎉</span>
+    <div class="hero-title">Welcome to the<br><span class="grad">PetShiwu Family</span></div>
+    <div class="hero-sub">Your account is live. Thousands of premium pet products — delivered fast to your door across the USA.</div>
+    <a href="${siteUrl}/products" class="btn">🛍️ &nbsp;Start Shopping Now</a>
+  </div>
+
+  <div class="greeting">
+    <h2>Hey ${firstName}! 👋</h2>
+    <p>We're thrilled to have you. Whether you're here for your dog, cat, bird, reptile, or something a little more exotic — PetShiwu has you covered with premium products at great prices.</p>
+  </div>
+
+  <table class="stats">
+    <tr>
+      <td class="stat"><div class="stat-val">10K+</div><div class="stat-label">Products</div></td>
+      <td class="stat"><div class="stat-val">50+</div><div class="stat-label">Top Brands</div></td>
+      <td class="stat"><div class="stat-val">2-5d</div><div class="stat-label">Delivery</div></td>
+    </tr>
+  </table>
+
+  <div class="section">
+    <div class="section-label">Why pet parents choose us</div>
+    <table width="100%" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="50%" style="padding:5px">
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 14px">
+            <div style="font-size:22px;margin-bottom:8px">🚚</div>
+            <div style="font-size:13px;font-weight:700;color:#cbd5e1;margin-bottom:3px">Free Shipping</div>
+            <div style="font-size:11px;color:#475569;line-height:1.5">On all orders over $49. Fast delivery nationwide.</div>
+          </div>
+        </td>
+        <td width="50%" style="padding:5px">
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 14px">
+            <div style="font-size:22px;margin-bottom:8px">⭐</div>
+            <div style="font-size:13px;font-weight:700;color:#cbd5e1;margin-bottom:3px">Premium Brands</div>
+            <div style="font-size:11px;color:#475569;line-height:1.5">Royal Canin, Wellness, Hill's, Purina &amp; 50+ more.</div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td width="50%" style="padding:5px">
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 14px">
+            <div style="font-size:22px;margin-bottom:8px">🤖</div>
+            <div style="font-size:13px;font-weight:700;color:#cbd5e1;margin-bottom:3px">AI Pet Advisor</div>
+            <div style="font-size:11px;color:#475569;line-height:1.5">Smart picks tailored to your specific pet.</div>
+          </div>
+        </td>
+        <td width="50%" style="padding:5px">
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 14px">
+            <div style="font-size:22px;margin-bottom:8px">🔒</div>
+            <div style="font-size:13px;font-weight:700;color:#cbd5e1;margin-bottom:3px">Secure Checkout</div>
+            <div style="font-size:11px;color:#475569;line-height:1.5">100% safe payments. Easy hassle-free returns.</div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="pills">
+    <div class="pills-label">Shop by pet type</div>
+    <a href="${siteUrl}/dog" class="pill">🐕 Dogs</a>
+    <a href="${siteUrl}/cat" class="pill">🐱 Cats</a>
+    <a href="${siteUrl}/bird" class="pill">🐦 Birds</a>
+    <a href="${siteUrl}/fish" class="pill">🐟 Fish</a>
+    <a href="${siteUrl}/reptile" class="pill">🦎 Reptiles</a>
+    <a href="${siteUrl}/small-pet" class="pill">🐹 Small Pets</a>
+  </div>
+
+  <div class="offer-wrap">
+    <div class="offer">
+      <div class="offer-badge">🎁 Welcome Gift</div>
+      <div class="offer-title">Free shipping on your first order</div>
+      <div class="offer-desc">No minimum. No code needed. Just for you.</div>
+      <a href="${siteUrl}/products" class="btn-offer">Claim Now →</a>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-links">
+      <a href="${siteUrl}/about">About</a>
+      <a href="${siteUrl}/faq">FAQ</a>
+      <a href="${siteUrl}/contact">Contact</a>
+      <a href="${siteUrl}/privacy">Privacy</a>
+    </div>
+    <div class="footer-copy">
+      © ${new Date().getFullYear()} PetShiwu · Jackson Heights, Queens, NY · support@petshiwu.com<br>
+      You received this because you created an account at petshiwu.com.<br>
+      <a href="${siteUrl}/unsubscribe">Unsubscribe</a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>`;
+
+  const text = `Welcome to PetShiwu, ${firstName}!
+
+Your account is live. Start shopping thousands of premium pet products at ${siteUrl}/products
+
+Why pet parents love us:
+- Free shipping on orders over $49
+- 50+ premium brands (Royal Canin, Wellness, Hill's, Purina & more)
+- AI Pet Advisor for personalized picks
+- 100% secure checkout
+
+Shop by pet: Dogs · Cats · Birds · Fish · Reptiles · Small Pets
+
+Welcome gift: Free shipping on your first order — no code needed.
+
+© ${new Date().getFullYear()} PetShiwu · support@petshiwu.com
+`;
+
+  try {
+    if (resend) {
+      const result = await resend.emails.send({
+        from: process.env.EMAIL_FROM || 'PetShiwu <noreply@petshiwu.com>',
+        to: email,
+        subject,
+        html,
+        text
+      });
+      logger.info(`✅ Welcome email sent to ${email} via Resend`);
+      return result;
+    }
+
+    const transporter = await getTransporter();
+    if (!transporter) throw new Error('No email transport configured');
+
+    const info = await transporter.sendMail({
+      from: process.env.EMAIL_FROM || '"PetShiwu" <noreply@petshiwu.com>',
+      to: email,
+      subject,
+      html,
+      text
+    });
+    logger.info(`✅ Welcome email sent to ${email}: ${info.messageId}`);
+    return info;
+  } catch (error: any) {
+    logger.error(`❌ Error sending welcome email to ${email}:`, error.message);
+    throw error;
+  }
+};

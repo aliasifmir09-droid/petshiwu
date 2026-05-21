@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import User from '../models/User';
 import { sendTokenResponse } from '../utils/generateToken';
 import { AuthRequest } from '../middleware/auth';
-import { sendVerificationEmail, sendPasswordResetEmail } from '../utils/emailService';
+import { sendVerificationEmail, sendPasswordResetEmail, sendWelcomeEmail } from '../utils/emailService';
 import { addEmailJob } from '../utils/jobQueue';
 import crypto from 'crypto';
 import logger from '../utils/logger';
@@ -89,6 +89,13 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         }
       });
     }
+
+    // Fire welcome email non-blocking — never delays or breaks registration
+    addEmailJob('welcome', { email: user.email, firstName: user.firstName }, async () => {
+      await sendWelcomeEmail(user.email, user.firstName);
+    }).catch((err: unknown) => {
+      logger.warn('⚠️  Welcome email job failed (non-fatal):', err);
+    });
 
     // Generate verification token (only if email is configured)
     const verificationToken = user.generateEmailVerificationToken();
