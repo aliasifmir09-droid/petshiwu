@@ -270,7 +270,8 @@ const RecentOrdersTable = memo(({
           <tbody className="divide-y divide-gray-200">
             {paginatedOrders.map((order: RecentOrder, index: number) => {
               if (!order) return null;
-              const orderId = order._id || order.orderNumber || '';
+              // FIX: Convert _id to string to prevent [object Object] in URL
+              const orderId = String(order._id || '') || order.orderNumber || '';
               // Sanitize customer name to prevent XSS attacks
               const customerName = canViewFullData
                 ? sanitizeCustomerName(order.user?.firstName, order.user?.lastName)
@@ -373,7 +374,8 @@ const RecentOrdersTable = memo(({
         <div className="md:hidden space-y-3 p-4">
           {paginatedOrders.map((order: RecentOrder, index: number) => {
             if (!order) return null;
-            const orderId = order._id || order.orderNumber || '';
+            // FIX: Convert _id to string to prevent [object Object] in URL
+            const orderId = String(order._id || '') || order.orderNumber || '';
             const customerName = canViewFullData
               ? sanitizeCustomerName(order.user?.firstName, order.user?.lastName)
               : maskCustomerName(order.user?.firstName, order.user?.lastName);
@@ -446,4 +448,3 @@ const RecentOrdersTable = memo(({
 RecentOrdersTable.displayName = 'RecentOrdersTable';
 
 export default RecentOrdersTable;
-
