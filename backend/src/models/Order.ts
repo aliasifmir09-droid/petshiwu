@@ -7,9 +7,9 @@ export interface IOrderItem {
   price: number;
   quantity: number;
   variant?: {
-    size?: string; // Legacy field
-    weight?: string; // Legacy field
-    attributes?: { [key: string]: string }; // Flexible attributes
+    size?: string;
+    weight?: string;
+    attributes?: { [key: string]: string };
     sku: string;
   };
   isReviewed?: boolean;
@@ -28,7 +28,8 @@ export interface IShippingAddress {
 
 export interface IOrder extends Document {
   orderNumber: string;
-  user: mongoose.Types.ObjectId;
+  user?: mongoose.Types.ObjectId; // Optional — null for guest orders
+  guestEmail?: string;            // Email for guest orders
   items: IOrderItem[];
   shippingAddress: IShippingAddress;
   billingAddress?: IShippingAddress;
@@ -42,8 +43,8 @@ export interface IOrder extends Document {
   totalPrice: number;
   isPaid: boolean;
   paidAt?: Date;
-  paymentIntentId?: string; // Stripe payment intent ID for online payments
-  paypalOrderId?: string; // PayPal order ID for PayPal payments
+  paymentIntentId?: string;
+  paypalOrderId?: string;
   isDelivered: boolean;
   deliveredAt?: Date;
   trackingNumber?: string;
@@ -78,8 +79,8 @@ const orderItemSchema = new Schema<IOrderItem>({
     min: 1
   },
   variant: {
-    size: String, // Legacy field
-    weight: String, // Legacy field
+    size: String,
+    weight: String,
     attributes: {
       type: Map,
       of: String,
@@ -110,10 +111,17 @@ const orderSchema = new Schema<IOrder>(
       type: String,
       unique: true
     },
+    // GUEST CHECKOUT: user is now optional
     user: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true
+      required: false
+    },
+    // GUEST CHECKOUT: email stored for guest orders
+    guestEmail: {
+      type: String,
+      required: false,
+      trim: true
     },
     items: {
       type: [orderItemSchema],
@@ -172,8 +180,8 @@ const orderSchema = new Schema<IOrder>(
       default: false
     },
     paidAt: Date,
-    paymentIntentId: String, // Stripe payment intent ID
-    paypalOrderId: String, // PayPal order ID
+    paymentIntentId: String,
+    paypalOrderId: String,
     isDelivered: {
       type: Boolean,
       default: false
@@ -197,20 +205,17 @@ orderSchema.pre('save', async function (next) {
   next();
 });
 
-// Indexes for performance optimization (optimized for 10k+ concurrent users)
-orderSchema.index({ user: 1, createdAt: -1 }); // User's orders sorted by date
-orderSchema.index({ orderStatus: 1, createdAt: -1 }); // For filtering orders by status
-orderSchema.index({ paymentStatus: 1 }); // Payment status filtering
-orderSchema.index({ paymentIntentId: 1 }); // For payment lookups
-orderSchema.index({ user: 1, orderStatus: 1 }); // User orders by status
-orderSchema.index({ 'items.product': 1, orderStatus: 1 }); // For product recommendation aggregations
-orderSchema.index({ orderStatus: 1, 'items.product': 1 }); // For frequently bought together queries
-orderSchema.index({ createdAt: -1, orderStatus: 1 }); // For admin order listings
-orderSchema.index({ user: 1, paymentStatus: 1, orderStatus: 1 }); // Compound index for user order queries
-orderSchema.index({ isPaid: 1, isDelivered: 1, createdAt: -1 }); // For order fulfillment queries
-// Note: orderNumber index is created automatically by unique: true
+// Indexes for performance
+orderSchema.index({ user: 1, createdAt: -1 });
+orderSchema.index({ orderStatus: 1, createdAt: -1 });
+orderSchema.index({ paymentStatus: 1 });
+orderSchema.index({ paymentIntentId: 1 });
+orderSchema.index({ user: 1, orderStatus: 1 });
+orderSchema.index({ 'items.product': 1, orderStatus: 1 });
+orderSchema.index({ orderStatus: 1, 'items.product': 1 });
+orderSchema.index({ createdAt: -1, orderStatus: 1 });
+orderSchema.index({ user: 1, paymentStatus: 1, orderStatus: 1 });
+orderSchema.index({ isPaid: 1, isDelivered: 1, createdAt: -1 });
+orderSchema.index({ guestEmail: 1 }); // Index for guest order lookups
 
 export default mongoose.model<IOrder>('Order', orderSchema);
-
-
-
