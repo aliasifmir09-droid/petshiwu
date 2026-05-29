@@ -1,93 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
-import mongoose from 'mongoose';
-import Order from '../models/Order';
-import Product from '../models/Product';
-import User from '../models/User';
-import { AuthRequest } from '../middleware/auth';
-import { safeToString, extractObjectId } from '../utils/types';
-import { asyncHandler, NotFoundError, UnauthorizedError, ValidationError } from '../utils/errors';
-import { sendOrderConfirmationEmail, sendOrderCancellationEmail, sendOrderDeliveredEmail, sendAdminNewOrderEmail } from '../utils/emailService';
-import logger from '../utils/logger';
-import { executeCachedAggregation } from '../utils/aggregationCache';
-import { addEmailJob } from '../utils/jobQueue';
-import { cache } from '../utils/cache';
+// ══════════════════════════════════════════════════════════════════════════════
+// INSTRUCTIONS:
+// In orderController.ts, find the createOrder function and replace it entirely
+// with this one. Also replace createOrderPaymentIntent with the one at the bottom.
+// Everything else in the file stays the same.
+// ══════════════════════════════════════════════════════════════════════════════
 
-import type { OrderItemInput, NormalizedOrderItem, NormalizedOrder } from '../types/common';
-import Stripe from 'stripe';
-
-// Initialize Stripe — requires STRIPE_SECRET_KEY env var on Render
-const stripe: Stripe | null = process.env.STRIPE_SECRET_KEY
-  ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2024-11-20.acacia' as any })
-  : null;
-
-/**
- * @swagger
- * /api/orders:
- *   post:
- *     summary: Create a new order
- *     tags: [Orders]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - items
- *               - shippingAddress
- *               - paymentMethod
- *               - itemsPrice
- *               - shippingPrice
- *               - taxPrice
- *               - totalPrice
- *             properties:
- *               items:
- *                 type: array
- *                 items:
- *                   type: object
- *                   required:
- *                     - product
- *                     - quantity
- *                     - price
- *                     - name
- *               shippingAddress:
- *                 type: object
- *                 required:
- *                   - street
- *                   - city
- *                   - state
- *                   - zipCode
- *                   - firstName
- *                   - lastName
- *                   - phone
- *               billingAddress:
- *                 type: object
- *               paymentMethod:
- *                 type: string
- *                 enum: [credit_card, paypal, stripe]
- *               itemsPrice:
- *                 type: number
- *               shippingPrice:
- *                 type: number
- *               taxPrice:
- *                 type: number
- *               donationAmount:
- *                 type: number
- *               totalPrice:
- *                 type: number
- *               notes:
- *                 type: string
- *     responses:
- *       201:
- *         description: Order created successfully
- *       400:
- *         description: Validation error or insufficient stock
- *       401:
- *         description: Not authenticated
- */
-// Create new order
 export const createOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const {
@@ -100,23 +17,27 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       taxPrice,
       donationAmount,
       totalPrice,
-      notes
+      notes,
+      guestEmail // GUEST CHECKOUT: email from guest user
     } = req.body;
 
-    // Validate user is authenticated
-    if (!req.user?._id) {
-      return res.status(401).json({
+    // GUEST CHECKOUT: user is optional
+    const isGuest = !req.user?._id;
+    const customerEmail = isGuest
+      ? (guestEmail || shippingAddress?.email || '').trim()
+      : null;
+
+    // Guests must provide an email
+    if (isGuest && !customerEmail) {
+      return res.status(400).json({
         success: false,
-        message: 'User not authenticated'
+        message: 'Please provide an email address to receive your order confirmation'
       });
     }
 
-    // Validate items exist
+    // Validate items
     if (!items || items.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'No order items'
-      });
+      return res.status(400).json({ success: false, message: 'No order items' });
     }
 
     // Validate shipping address
@@ -142,205 +63,114 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       });
     }
 
-    // Normalize product IDs and validate items
+    // Normalize product IDs
     const normalizedItems = items.map((item: OrderItemInput): NormalizedOrderItem => {
-      // Convert product ID to string if it's an object
       let productId: string | null = null;
       const rawProductId = item.product;
-      
-      if (!rawProductId) {
-        throw new Error(`Product ID is missing for item: ${item.name || 'Unknown'}`);
-      }
-      
-      // Handle different types of product IDs
+      if (!rawProductId) throw new Error(`Product ID is missing for item: ${item.name || 'Unknown'}`);
       productId = safeToString(rawProductId);
-      
-      // Validate MongoDB ObjectId format
       if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
         throw new Error(`Invalid product ID for item: ${item.name || 'Unknown'}`);
       }
-      
-      return {
-        ...item,
-        product: productId
-      };
+      return { ...item, product: productId };
     });
 
-    // Use MongoDB transaction to ensure atomic stock updates
-    // Skip transactions in test mode (standalone MongoDB doesn't support transactions)
     const useTransactions = process.env.NODE_ENV !== 'test';
-    
     let session: mongoose.ClientSession | null = null;
     if (useTransactions) {
       try {
         session = await mongoose.startSession();
         session.startTransaction();
       } catch (error: unknown) {
-        // If transaction fails (e.g., no replica set), continue without it
         const errorMessage = error instanceof Error ? error.message : String(error);
-        if (errorMessage.includes('replica set')) {
-          session = null;
-        } else {
-          throw error;
-        }
+        if (errorMessage.includes('replica set')) { session = null; } else { throw error; }
       }
     }
 
     try {
-      // Step 1: Verify stock availability and prepare stock updates
-      const stockUpdates: Array<{
-        productId: string;
-        quantity: number;
-        variantSku?: string;
-      }> = [];
+      // Step 1: Verify stock
+      const stockUpdates: Array<{ productId: string; quantity: number; variantSku?: string }> = [];
 
       for (const item of normalizedItems) {
         const productId = item.product;
         const quantity = item.quantity || 1;
-        
-        // Find product with lock (within transaction if available)
         const product = session ? await Product.findById(productId).session(session) : await Product.findById(productId);
-        
-        if (!product) {
-          throw new Error(`Product ${item.name || productId} not found`);
-        }
-        
-        if (!product.inStock) {
-          throw new Error(`Product "${item.name}" is currently out of stock`);
-        }
+        if (!product) throw new Error(`Product ${item.name || productId} not found`);
+        if (!product.inStock) throw new Error(`Product "${item.name}" is currently out of stock`);
 
-        // Handle variant stock if item has a variant SKU
         if (item.variant && item.variant.sku) {
-          // Try exact match first, then try HTML-entity-decoded variants of the SKU
-          // (handles carts that stored SKUs before/after HTML entity normalization)
-          const decodeSku = (s: string) => s
-            .replace(/&amp;amp;/g, '&')
-            .replace(/&amp;/g, '&')
-            .replace(/&#039;/g, "'")
-            .replace(/&quot;/g, '"');
+          const decodeSku = (s: string) =>
+            s.replace(/&amp;amp;/g, '&').replace(/&amp;/g, '&').replace(/&#039;/g, "'").replace(/&quot;/g, '"');
           const normalizedCartSku = decodeSku(item.variant.sku);
-          const variant = product.variants.find((v) =>
-            v.sku === item.variant?.sku ||
-            v.sku === normalizedCartSku ||
-            decodeSku(v.sku || '') === normalizedCartSku
+          const variant = product.variants.find(
+            (v) => v.sku === item.variant?.sku || v.sku === normalizedCartSku || decodeSku(v.sku || '') === normalizedCartSku
           );
           if (!variant) {
-            // Fallback: use product-level stock check so checkout never hard-fails on SKU mismatch
-            if (product.totalStock < quantity) {
+            if (product.totalStock < quantity)
               throw new Error(`Insufficient stock for product "${item.name}". Available: ${product.totalStock}, Requested: ${quantity}`);
-            }
             stockUpdates.push({ productId, quantity });
           } else {
-          if (variant.stock < quantity) {
-            throw new Error(`Insufficient stock for variant "${item.variant.sku}" of product "${item.name}". Available: ${variant.stock}, Requested: ${quantity}`);
+            if (variant.stock < quantity)
+              throw new Error(`Insufficient stock for variant "${item.variant.sku}" of product "${item.name}". Available: ${variant.stock}, Requested: ${quantity}`);
+            stockUpdates.push({ productId, quantity, variantSku: variant.sku });
           }
-          stockUpdates.push({ productId, quantity, variantSku: variant.sku });
-          } // end else (variant found)
         } else {
-          // Check total stock for products without variants or when variant not specified
-          if (product.totalStock < quantity) {
+          if (product.totalStock < quantity)
             throw new Error(`Insufficient stock for product "${item.name}". Available: ${product.totalStock}, Requested: ${quantity}`);
-          }
           stockUpdates.push({ productId, quantity });
         }
       }
 
-      // Step 2: Atomically update stock using $inc with conditions
+      // Step 2: Update stock atomically
       for (const update of stockUpdates) {
         if (update.variantSku) {
-          // Update variant stock atomically
           const variantUpdateResult = await Product.updateOne(
-            {
-              _id: update.productId,
-              'variants.sku': update.variantSku,
-              'variants.stock': { $gte: update.quantity } // Only update if sufficient stock
-            },
-            {
-              $inc: { 
-                'variants.$.stock': -update.quantity,
-                totalStock: -update.quantity
-              }
-            },
+            { _id: update.productId, 'variants.sku': update.variantSku, 'variants.stock': { $gte: update.quantity } },
+            { $inc: { 'variants.$.stock': -update.quantity, totalStock: -update.quantity } },
             session ? { session } : {}
           );
-
-          if (variantUpdateResult.matchedCount === 0) {
+          if (variantUpdateResult.matchedCount === 0)
             throw new Error(`Insufficient stock for variant SKU "${update.variantSku}"`);
-          }
         } else {
-          // Update total stock atomically
           const productUpdateResult = await Product.updateOne(
-            {
-              _id: update.productId,
-              totalStock: { $gte: update.quantity } // Only update if sufficient stock
-            },
-            {
-              $inc: { totalStock: -update.quantity }
-            },
+            { _id: update.productId, totalStock: { $gte: update.quantity } },
+            { $inc: { totalStock: -update.quantity } },
             session ? { session } : {}
           );
-
           if (productUpdateResult.matchedCount === 0) {
-            const product = session ? await Product.findById(update.productId).session(session) : await Product.findById(update.productId);
-            throw new Error(`Insufficient stock for product. Available: ${product?.totalStock || 0}, Requested: ${update.quantity}`);
+            const p = session ? await Product.findById(update.productId).session(session) : await Product.findById(update.productId);
+            throw new Error(`Insufficient stock for product. Available: ${p?.totalStock || 0}, Requested: ${update.quantity}`);
           }
         }
-
-        // Update inStock flag based on new totalStock
         await Product.updateOne(
           { _id: update.productId },
-          [
-            {
-              $set: {
-                inStock: { $gt: ['$totalStock', 0] }
-              }
-            }
-          ],
+          [{ $set: { inStock: { $gt: ['$totalStock', 0] } } }],
           session ? { session } : {}
         );
       }
 
-      // Step 3: Verify payment for online payment methods (not COD)
+      // Step 3: Verify payment
       let paymentIntentId: string | undefined = undefined;
       let paypalOrderId: string | undefined = undefined;
       let isPaymentVerified = false;
 
       if (paymentMethod !== 'cod') {
         const { paymentIntentId: intentId, paypalOrderId: paypalId } = req.body;
-        
         if (paymentMethod === 'paypal') {
-          // PayPal payment verification
-          if (!paypalId) {
-            throw new Error('PayPal Order ID is required for PayPal payments');
-          }
-          
-          // For PayPal, we trust the frontend has already captured the payment
-          // In production, you should verify with PayPal API
-          // For now, we'll accept the PayPal order ID as proof of payment
+          if (!paypalId) throw new Error('PayPal Order ID is required for PayPal payments');
           paypalOrderId = paypalId;
           isPaymentVerified = true;
           logger.info(`PayPal payment received: Order ID ${paypalId}`);
         } else {
-          // Stripe payment verification (credit_card, apple_pay, google_pay)
-          if (!intentId) {
-            throw new Error('Payment Intent ID is required for online payment methods');
-          }
-          
-          // Verify payment with Stripe
+          if (!intentId) throw new Error('Payment Intent ID is required for online payment methods');
           if (stripe) {
             try {
               const paymentIntent = await stripe.paymentIntents.retrieve(intentId);
-              
-              if (paymentIntent.status !== 'succeeded') {
+              if (paymentIntent.status !== 'succeeded')
                 throw new Error(`Payment not completed. Status: ${paymentIntent.status}`);
-              }
-              
-              // Verify amount matches
               const expectedAmount = Math.round(totalPrice * 100);
-              if (paymentIntent.amount !== expectedAmount) {
+              if (paymentIntent.amount !== expectedAmount)
                 throw new Error(`Payment amount mismatch. Expected: $${totalPrice}, Got: $${paymentIntent.amount / 100}`);
-              }
-              
               paymentIntentId = intentId;
               isPaymentVerified = true;
             } catch (stripeError: unknown) {
@@ -349,25 +179,23 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
               throw new Error(`Payment verification failed: ${errorMessage}`);
             }
           } else {
-            // Stripe not configured but payment method requires it
             throw new Error('Payment processing not configured. Please use Cash on Delivery (COD) or configure Stripe.');
           }
         }
       } else {
-        // COD - no payment verification needed
         isPaymentVerified = true;
       }
 
-      // Step 4: Create order — use new Order().save() so pre-save hooks always fire
-      // (Order.create([...], session) can call insertMany which bypasses hooks in some Mongoose versions)
+      // Step 4: Create order — user is optional for guest checkout
       const newOrder = new Order({
-        user: req.user._id,
+        ...(req.user?._id ? { user: req.user._id } : {}),
+        ...(isGuest ? { guestEmail: customerEmail } : {}),
         items: normalizedItems,
         shippingAddress,
         billingAddress: billingAddress || shippingAddress,
         paymentMethod,
-        paymentIntentId: paymentIntentId,
-        paypalOrderId: paypalOrderId,
+        paymentIntentId,
+        paypalOrderId,
         paymentStatus: paymentMethod === 'cod' ? 'pending' : (isPaymentVerified ? 'paid' : 'pending'),
         isPaid: paymentMethod !== 'cod' && isPaymentVerified ? true : false,
         paidAt: paymentMethod !== 'cod' && isPaymentVerified ? new Date() : undefined,
@@ -378,18 +206,14 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         totalPrice,
         notes: notes || undefined
       });
+
       const savedOrder = await newOrder.save(session ? { session } : {});
       const order = [savedOrder];
 
-      // Step 5: Commit transaction if using one
-      if (session) {
-        await session.commitTransaction();
-      }
-      
-      // Normalize order ID before sending response
+      if (session) await session.commitTransaction();
+
       let normalizedOrder = normalizeOrderId(order[0]);
-      
-      // Fallback: if normalization fails, build response directly from the document
+
       if (!normalizedOrder && order[0]) {
         logger.warn(`normalizeOrderId returned null for order ${order[0]._id} — using direct fallback`);
         try {
@@ -397,11 +221,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
           normalizedOrder = {
             _id: String(doc._id),
             orderNumber: doc.orderNumber || '',
-            user: String(doc.user),
-            items: (doc.items || []).map((item) => ({
-              ...item,
-              product: String(item.product),
-            })) as NormalizedOrderItem[],
+            user: doc.user ? String(doc.user) : undefined,
+            items: (doc.items || []).map((item) => ({ ...item, product: String(item.product) })) as NormalizedOrderItem[],
             shippingAddress: doc.shippingAddress as unknown as Record<string, unknown>,
             paymentMethod: doc.paymentMethod,
             paymentStatus: doc.paymentStatus,
@@ -425,46 +246,43 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
           message: 'Order was placed but we had a technical issue fetching the details. Please check your email and order history.'
         });
       }
-      
-      // Emit real-time notification for new order (non-blocking)
+
+      // Real-time notification (non-blocking)
       try {
         const { notifyNewOrder } = await import('../utils/orderNotifications');
-        // Fetch full order with populated user for notification
-        const fullOrder = await Order.findById(normalizedOrder._id)
-          .populate('user', 'firstName lastName email')
-          .lean();
-        if (fullOrder) {
-          notifyNewOrder(fullOrder);
-        }
+        const fullOrder = await Order.findById(normalizedOrder._id).populate('user', 'firstName lastName email').lean();
+        if (fullOrder) notifyNewOrder(fullOrder);
       } catch (notificationError) {
-        // Log error but don't fail the order creation
         logger.error('Error sending order notification:', notificationError);
       }
-      
-      // Send order confirmation email via background job (non-blocking)
-      // PERFORMANCE FIX: Email sending moved to background job queue
+
+      // Send confirmation email — works for both logged-in and guest users
       try {
-        const user = await User.findById(req.user._id).select('email firstName lastName').lean();
-        if (user && user.email && normalizedOrder) {
-          // Fetch the full order with all details for email
+        let emailAddress: string | undefined;
+        let firstName: string = 'Customer';
+
+        if (isGuest) {
+          emailAddress = customerEmail || undefined;
+          firstName = shippingAddress.firstName || 'Customer';
+        } else {
+          const userDoc = await User.findById(req.user!._id).select('email firstName lastName').lean();
+          emailAddress = userDoc?.email;
+          firstName = userDoc?.firstName || 'Customer';
+        }
+
+        if (emailAddress) {
           const fullOrder = await Order.findById(normalizedOrder._id).lean();
-          
           if (fullOrder && fullOrder.orderNumber) {
             const orderIdStr = String(fullOrder._id);
             await addEmailJob(
               'order-confirmation',
               {
-                email: user.email,
-                firstName: user.firstName || 'Customer',
+                email: emailAddress,
+                firstName,
                 orderNumber: fullOrder.orderNumber,
                 orderData: {
                   orderId: orderIdStr,
-                  items: fullOrder.items.map((item) => ({
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.price,
-                    image: item.image
-                  })),
+                  items: fullOrder.items.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price, image: item.image })),
                   totalPrice: fullOrder.totalPrice,
                   itemsPrice: fullOrder.itemsPrice,
                   shippingPrice: fullOrder.shippingPrice,
@@ -477,55 +295,51 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
                 }
               },
               async () => {
-                // Fallback: execute synchronously if queue not available
-                await sendOrderConfirmationEmail(
-                  user.email,
-                  user.firstName || 'Customer',
-                  fullOrder.orderNumber,
-                  {
-                    orderId: orderIdStr,
-                    items: fullOrder.items.map((item) => ({
-                      name: item.name,
-                      quantity: item.quantity,
-                      price: item.price,
-                      image: item.image
-                    })),
-                    totalPrice: fullOrder.totalPrice,
-                    itemsPrice: fullOrder.itemsPrice,
-                    shippingPrice: fullOrder.shippingPrice,
-                    taxPrice: fullOrder.taxPrice,
-                    donationAmount: fullOrder.donationAmount,
-                    shippingAddress: fullOrder.shippingAddress,
-                    paymentMethod: fullOrder.paymentMethod,
-                    orderStatus: fullOrder.orderStatus,
-                    createdAt: fullOrder.createdAt
-                  }
-                );
+                await sendOrderConfirmationEmail(emailAddress!, firstName, fullOrder.orderNumber, {
+                  orderId: orderIdStr,
+                  items: fullOrder.items.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price, image: item.image })),
+                  totalPrice: fullOrder.totalPrice,
+                  itemsPrice: fullOrder.itemsPrice,
+                  shippingPrice: fullOrder.shippingPrice,
+                  taxPrice: fullOrder.taxPrice,
+                  donationAmount: fullOrder.donationAmount,
+                  shippingAddress: fullOrder.shippingAddress,
+                  paymentMethod: fullOrder.paymentMethod,
+                  orderStatus: fullOrder.orderStatus,
+                  createdAt: fullOrder.createdAt
+                });
               }
             );
           }
         }
       } catch (emailError) {
-        // Log error but don't fail the order creation
         logger.error('Error queuing order confirmation email:', emailError);
       }
 
-      // Send admin notification email (fire-and-forget — never blocks the response)
+      // Admin notification (fire-and-forget)
       try {
-        const user = await User.findById(req.user._id).select('email firstName lastName').lean();
         const fullOrderForAdmin = await Order.findById(normalizedOrder._id).lean();
-        if (user && fullOrderForAdmin) {
+        let adminCustomerEmail = '';
+        let adminFirstName = shippingAddress.firstName || 'Guest';
+        let adminLastName = shippingAddress.lastName || '';
+
+        if (!isGuest && req.user?._id) {
+          const userDoc = await User.findById(req.user._id).select('email firstName lastName').lean();
+          adminCustomerEmail = userDoc?.email || '';
+          adminFirstName = userDoc?.firstName || adminFirstName;
+          adminLastName = userDoc?.lastName || adminLastName;
+        } else {
+          adminCustomerEmail = customerEmail || '';
+        }
+
+        if (fullOrderForAdmin) {
           sendAdminNewOrderEmail({
             orderNumber: fullOrderForAdmin.orderNumber,
             orderId: String(fullOrderForAdmin._id),
-            customerFirstName: user.firstName || 'Customer',
-            customerLastName: user.lastName || '',
-            customerEmail: user.email,
-            items: fullOrderForAdmin.items.map((item) => ({
-              name: item.name,
-              quantity: item.quantity,
-              price: item.price
-            })),
+            customerFirstName: adminFirstName,
+            customerLastName: adminLastName,
+            customerEmail: adminCustomerEmail,
+            items: fullOrderForAdmin.items.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price })),
             totalPrice: fullOrderForAdmin.totalPrice,
             itemsPrice: fullOrderForAdmin.itemsPrice,
             shippingPrice: fullOrderForAdmin.shippingPrice,
@@ -538,1702 +352,82 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         logger.error('Error sending admin order notification:', adminEmailError);
       }
 
-      // normalizedOrder is guaranteed non-null here due to fallback above
-      res.status(201).json({
-        success: true,
-        data: normalizedOrder
-      });
+      res.status(201).json({ success: true, data: normalizedOrder });
+
     } catch (error: unknown) {
-      // Rollback transaction on error if using one
-      if (session) {
-        await session.abortTransaction();
-      }
-      
-      // Return appropriate error response
+      if (session) await session.abortTransaction();
       const errorMessage = error instanceof Error ? error.message : String(error);
       if (errorMessage.includes('not found') || errorMessage.includes('out of stock') || errorMessage.includes('Insufficient stock')) {
-        return res.status(400).json({
-          success: false,
-          message: errorMessage
-        });
+        return res.status(400).json({ success: false, message: errorMessage });
       }
-      
-      throw error; // Re-throw to be handled by outer catch
+      throw error;
     } finally {
-      // End session if using one
-      if (session) {
-        session.endSession();
-      }
+      if (session) session.endSession();
     }
   } catch (error: unknown) {
-    // Handle validation errors
     if (error instanceof Error && error.name === 'ValidationError') {
       const validationError = error as { errors?: Record<string, { message: string }> };
       const messages = Object.values(validationError.errors || {}).map((err) => err.message);
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors: messages
-      });
-    }
-    
-    next(error);
-  }
-};
-
-// Helper function to normalize order IDs to strings
-const normalizeOrderId = (order: unknown): NormalizedOrder | null => {
-  if (!order || typeof order !== 'object') return null;
-  
-  try {
-    // Convert Mongoose document to plain object
-    const orderObj = order as Record<string, unknown>;
-    let normalized: Record<string, unknown>;
-    if ('toObject' in orderObj && typeof orderObj.toObject === 'function') {
-      normalized = orderObj.toObject() as Record<string, unknown>;
-    } else if ('toJSON' in orderObj && typeof orderObj.toJSON === 'function') {
-      normalized = orderObj.toJSON() as Record<string, unknown>;
-    } else {
-      normalized = { ...orderObj };
-    }
-    
-    // Normalize _id - ensure it's a string
-    if (normalized._id) {
-      // Handle ObjectId objects properly
-      const idValue = normalized._id as { toString?: () => string } | string | number;
-      if (typeof idValue === 'object' && idValue !== null && 'toString' in idValue && typeof idValue.toString === 'function') {
-        normalized._id = idValue.toString();
-      } else {
-        normalized._id = String(normalized._id);
-      }
-    }
-    
-    // Normalize user._id if user is populated
-    if (normalized.user && typeof normalized.user === 'object' && normalized.user !== null) {
-      const userObj = normalized.user as Record<string, unknown>;
-      if (userObj._id) {
-        userObj._id = String(userObj._id);
-      }
-    }
-    
-    // Normalize product IDs in items
-    if (normalized.items && Array.isArray(normalized.items)) {
-      normalized.items = (normalized.items || []).map((item: unknown) => {
-        if (item && typeof item === 'object') {
-          const normalizedItem = { ...(item as Record<string, unknown>) };
-          if (normalizedItem.product && typeof normalizedItem.product === 'object' && normalizedItem.product !== null) {
-            const productObj = normalizedItem.product as Record<string, unknown>;
-            if (productObj._id) {
-              normalizedItem.product = String(productObj._id);
-            }
-          }
-          return normalizedItem;
-        }
-        return item;
-      });
-    }
-    
-    return normalized as NormalizedOrder;
-  } catch (error) {
-    logger.error(`normalizeOrderId internal error: ${error instanceof Error ? error.message : String(error)}`);
-    return null;
-  }
-};
-
-// Helper function to normalize array of orders
-const normalizeOrders = (orders: unknown[]): NormalizedOrder[] => {
-  if (!Array.isArray(orders)) {
-    return [];
-  }
-  return orders.map((order) => {
-    try {
-      const normalized = normalizeOrderId(order);
-      // Double-check _id is a string
-      if (normalized && normalized._id && typeof normalized._id !== 'string') {
-        const idValue = normalized._id as { toString?: () => string } | string | number;
-        if (typeof idValue === 'object' && idValue !== null && 'toString' in idValue && typeof idValue.toString === 'function') {
-          normalized._id = idValue.toString();
-        } else {
-          normalized._id = String(normalized._id);
-        }
-      }
-      return normalized;
-    } catch (error) {
-      // Error normalizing order in array
-      return order;
-    }
-  }).filter((order): order is NormalizedOrder => order !== null && order !== undefined);
-};
-
-/**
- * @swagger
- * /api/orders/myorders:
- *   get:
- *     summary: Get current user's orders
- *     tags: [Orders]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *     responses:
- *       200:
- *         description: List of user orders
- *       401:
- *         description: Not authenticated
- */
-// Get user orders
-export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const skip = (page - 1) * limit;
-
-    // Validate user is authenticated
-    if (!req.user?._id) {
-      return res.status(401).json({
-        success: false,
-        message: 'User not authenticated'
-      });
-    }
-
-    const orders = await Order.find({ user: req.user._id })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean(); // Use lean() to get plain JavaScript objects instead of Mongoose documents
-
-    const total = await Order.countDocuments({ user: req.user._id });
-
-    // Normalize order IDs to strings - ensure _id is always a string
-    const normalizedOrders = orders.map((order) => {
-      // Force _id to be a string
-      const orderObj = order as Record<string, unknown>;
-      if (orderObj._id) {
-        // Handle ObjectId with buffer or other formats
-        const idObj = orderObj._id as { toString?: () => string; buffer?: { data?: number[] } };
-        if (idObj.toString && typeof idObj.toString === 'function') {
-          orderObj._id = idObj.toString();
-        } else if (idObj.buffer && idObj.buffer.data && Array.isArray(idObj.buffer.data)) {
-          // If it has a buffer, try to extract from it
-          try {
-            orderObj._id = idObj.buffer.data
-              .map((b: number) => b.toString(16).padStart(2, '0'))
-              .join('');
-          } catch (e) {
-            orderObj._id = String(orderObj._id);
-          }
-        } else {
-          orderObj._id = String(orderObj._id);
-        }
-      }
-      return normalizeOrderId(orderObj);
-    }).filter((order): order is NormalizedOrder => order !== null && order !== undefined);
-
-    res.status(200).json({
-      success: true,
-      data: normalizedOrders,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
-      }
-    });
-  } catch (error: unknown) {
-    // Error in getMyOrders
-    next(error);
-  }
-};
-
-/**
- * @swagger
- * /api/orders/{id}:
- *   get:
- *     summary: Get order by ID
- *     tags: [Orders]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Order details
- *       401:
- *         description: Not authenticated
- *       403:
- *         description: Not authorized to view this order
- *       404:
- *         description: Order not found
- */
-// Get single order
-export const getOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    // Validate user is authenticated
-    if (!req.user?._id) {
-      return res.status(401).json({
-        success: false,
-        message: 'User not authenticated'
-      });
-    }
-
-    // Validate order ID format
-    const orderId = String(req.params.id).trim();
-    
-    if (!orderId || !/^[0-9a-fA-F]{24}$/.test(orderId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid order ID format'
-      });
-    }
-
-    // For frontend customers, always filter by user ID (same as getMyOrders)
-    // Only admins (from dashboard) can view any order
-    // Use the same approach as getMyOrders - query with user filter
-    // This ensures Mongoose handles ObjectId comparison correctly
-    let order;
-    
-    if (req.user.role === 'admin' || req.user.role === 'staff') {
-      // Admin/Staff from dashboard can view any order
-      order = await Order.findById(orderId).populate('user', 'firstName lastName email').lean();
-    } else {
-      // Frontend customers can only view their own orders - use same filter as getMyOrders
-      // This is the same query pattern that works in getMyOrders
-      order = await Order.findOne({ 
-        _id: orderId,
-        user: req.user._id  // Mongoose will handle ObjectId comparison automatically
-      }).populate('user', 'firstName lastName email').lean();
-    }
-    
-    if (!order) {
-      // Check if order exists at all (for better error message)
-      const orderExists = await Order.findById(orderId);
-      if (!orderExists) {
-        return res.status(404).json({
-          success: false,
-          message: 'Order not found'
-        });
-      } else {
-        return res.status(403).json({
-          success: false,
-          message: 'Not authorized to access this order'
-        });
-      }
-    }
-    
-    if (!order) {
-      // This shouldn't happen since we already checked, but just in case
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found'
-      });
-    }
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found'
-      });
-    }
-
-    // Normalize order ID to string
-    const normalizedOrder = normalizeOrderId(order);
-
-    res.status(200).json({
-      success: true,
-      data: normalizedOrder
-    });
-  } catch (error: unknown) {
-    next(error);
-  }
-};
-
-/**
- * @swagger
- * /api/orders/all:
- *   get:
- *     summary: Get all orders (Admin)
- *     tags: [Orders]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [pending, processing, shipped, delivered, cancelled]
- *     responses:
- *       200:
- *         description: List of all orders
- *       401:
- *         description: Not authenticated
- *       403:
- *         description: Not authorized (admin only)
- */
-// Get all orders (Admin)
-export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
-    const skip = (page - 1) * limit;
-
-    const matchQuery: Record<string, unknown> = {};
-
-    // Filter by status
-    if (req.query.status) {
-      matchQuery.orderStatus = req.query.status;
-    }
-
-    // Filter by payment status
-    if (req.query.paymentStatus) {
-      matchQuery.paymentStatus = req.query.paymentStatus;
-    }
-
-    // PERFORMANCE FIX: Use aggregation with $lookup instead of populate for better performance
-    // This is especially important for small limit queries (like limit=1)
-    const aggregationPipeline: mongoose.PipelineStage[] = [
-      {
-        $match: matchQuery
-      },
-      {
-        $sort: { createdAt: -1 }
-      },
-      {
-        $skip: skip
-      },
-      {
-        $limit: limit
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'user',
-          foreignField: '_id',
-          as: 'userData',
-          pipeline: [
-            {
-              $project: {
-                firstName: 1,
-                lastName: 1,
-                email: 1
-              }
-            }
-          ]
-        }
-      },
-      {
-        $unwind: {
-          path: '$userData',
-          preserveNullAndEmptyArrays: true
-        }
-      },
-      {
-        $project: {
-          _id: 1,
-          orderNumber: 1,
-          user: {
-            firstName: '$userData.firstName',
-            lastName: '$userData.lastName',
-            email: '$userData.email'
-          },
-          items: 1,
-          totalPrice: 1,
-          orderStatus: 1,
-          paymentStatus: 1,
-          shippingAddress: 1,
-          billingAddress: 1,
-          createdAt: 1,
-          updatedAt: 1,
-          donationAmount: 1,
-          trackingNumber: 1
-        }
-      }
-    ];
-
-    // Get total count and orders in parallel
-    // PERFORMANCE FIX: Add allowDiskUse for large datasets
-    const [orders, total] = await Promise.all([
-      Order.aggregate(aggregationPipeline as any, { allowDiskUse: true }),
-      Order.countDocuments(matchQuery).maxTimeMS(5000)
-    ]);
-
-    // Normalize order IDs to strings
-    const normalizedOrders = orders.map((order) => normalizeOrderId(order));
-
-    res.status(200).json({
-      success: true,
-      data: normalizedOrders,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @swagger
- * /api/orders/{id}/status:
- *   put:
- *     summary: Update order status (Admin)
- *     tags: [Orders]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               orderStatus:
- *                 type: string
- *                 enum: [pending, processing, shipped, delivered, cancelled]
- *               trackingNumber:
- *                 type: string
- *     responses:
- *       200:
- *         description: Order status updated
- *       400:
- *         description: Invalid status
- *       401:
- *         description: Not authenticated
- *       403:
- *         description: Not authorized (admin only)
- *       404:
- *         description: Order not found
- */
-// Update order status (Admin)
-export const updateOrderStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const { orderStatus, trackingNumber } = req.body;
-
-    // Validate orderStatus if provided
-    const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
-    if (orderStatus && !validStatuses.includes(orderStatus)) {
-      return res.status(400).json({
-        success: false,
-        message: `Invalid order status. Must be one of: ${validStatuses.join(', ')}`
-      });
-    }
-
-    // Validate order ID
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid order ID'
-      });
-    }
-
-    const order = await Order.findById(req.params.id);
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found'
-      });
-    }
-
-    // Update order status if provided
-    if (orderStatus) {
-      order.orderStatus = orderStatus;
-    }
-    
-    // Update tracking number if provided
-    if (trackingNumber !== undefined) {
-      order.trackingNumber = trackingNumber || null;
-    }
-
-    // Handle delivered status
-    const wasDelivered = order.isDelivered;
-    if (orderStatus === 'delivered') {
-      order.isDelivered = true;
-      order.deliveredAt = new Date();
-    } else if (orderStatus && orderStatus !== 'delivered') {
-      // If changing from delivered to another status, reset delivered flags
-      if (order.isDelivered) {
-        order.isDelivered = false;
-        order.deliveredAt = undefined;
-      }
-    }
-
-    await order.save();
-
-    // Send delivery email if order was just marked as delivered (via background job)
-    if (orderStatus === 'delivered' && !wasDelivered) {
-      try {
-        const user = await User.findById(order.user).select('email firstName lastName').lean();
-        if (user && user.email) {
-          const fullOrder = await Order.findById(order._id).lean();
-          if (fullOrder && fullOrder.orderNumber) {
-            await addEmailJob(
-              'order-delivered',
-              {
-                email: user.email,
-                firstName: user.firstName || 'Customer',
-                orderNumber: fullOrder.orderNumber,
-                orderData: {
-                  items: fullOrder.items.map((item) => ({
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.price,
-                    image: item.image
-                  })),
-                  totalPrice: fullOrder.totalPrice,
-                  trackingNumber: fullOrder.trackingNumber,
-                  deliveredAt: fullOrder.deliveredAt || new Date(),
-                  shippingAddress: fullOrder.shippingAddress
-                }
-              },
-              async () => {
-                await sendOrderDeliveredEmail(
-                  user.email,
-                  user.firstName || 'Customer',
-                  fullOrder.orderNumber,
-                  {
-                    items: fullOrder.items.map((item) => ({
-                      name: item.name,
-                      quantity: item.quantity,
-                      price: item.price,
-                      image: item.image
-                    })),
-                    totalPrice: fullOrder.totalPrice,
-                    trackingNumber: fullOrder.trackingNumber,
-                    deliveredAt: fullOrder.deliveredAt || new Date(),
-                    shippingAddress: fullOrder.shippingAddress
-                  }
-                );
-              }
-            );
-          }
-        }
-      } catch (emailError) {
-        logger.error('Error queuing order delivered email:', emailError);
-      }
-    }
-
-    const normalizedOrder = normalizeOrderId(order);
-    
-    // Emit order update notification (non-blocking)
-    try {
-      const { notifyOrderUpdate } = await import('../utils/orderNotifications');
-      notifyOrderUpdate(order, 'status');
-    } catch (notificationError) {
-      // Log error but don't fail the update
-      logger.error('Error sending order update notification:', notificationError);
-    }
-    
-    res.status(200).json({
-      success: true,
-      message: 'Order status updated successfully',
-      data: normalizedOrder
-    });
-  } catch (error: unknown) {
-    // Handle Mongoose validation errors
-    if (error instanceof Error && error.name === 'ValidationError') {
-      const validationError = error as { errors?: Record<string, { message: string }> };
-      return res.status(400).json({
-        success: false,
-        message: 'Validation error',
-        errors: Object.values(validationError.errors || {}).map((err) => err.message)
-      });
+      return res.status(400).json({ success: false, message: 'Validation failed', errors: messages });
     }
     next(error);
   }
 };
 
-/**
- * @swagger
- * /api/orders/{id}/payment:
- *   put:
- *     summary: Update payment status (Admin)
- *     tags: [Orders]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               paymentStatus:
- *                 type: string
- *                 enum: [pending, paid, failed, refunded]
- *     responses:
- *       200:
- *         description: Payment status updated
- *       400:
- *         description: Invalid payment status
- *       401:
- *         description: Not authenticated
- *       403:
- *         description: Not authorized (admin only)
- *       404:
- *         description: Order not found
- */
-// Update payment status (Admin)
-export const updatePaymentStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const { paymentStatus } = req.body;
+// ══════════════════════════════════════════════════════════════════════════════
+// Also replace createOrderPaymentIntent with this version (works without auth)
+// ══════════════════════════════════════════════════════════════════════════════
 
-    const order = await Order.findById(req.params.id);
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found'
-      });
-    }
-
-    order.paymentStatus = paymentStatus;
-
-    if (paymentStatus === 'paid') {
-      order.isPaid = true;
-      order.paidAt = new Date();
-    }
-
-    await order.save();
-
-    // Emit order update notification (non-blocking)
-    try {
-      const { notifyOrderUpdate } = await import('../utils/orderNotifications');
-      notifyOrderUpdate(order, 'payment');
-    } catch (notificationError) {
-      // Log error but don't fail the update
-      logger.error('Error sending order update notification:', notificationError);
-    }
-
-    res.status(200).json({
-      success: true,
-      data: order
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * Process refund for an order
- */
-export const processRefund = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const { amount, reason } = req.body;
-    const orderId = extractObjectId(req.params.id);
-
-    if (!orderId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid order ID'
-      });
-    }
-
-    if (!amount || amount <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Refund amount must be greater than 0'
-      });
-    }
-
-    const order = await Order.findById(orderId);
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found'
-      });
-    }
-
-    if (order.paymentStatus !== 'paid') {
-      return res.status(400).json({
-        success: false,
-        message: order.paymentStatus === 'refunded' 
-          ? 'Order has already been refunded'
-          : 'Only paid orders can be refunded'
-      });
-    }
-
-    if (amount > order.totalPrice) {
-      return res.status(400).json({
-        success: false,
-        message: 'Refund amount cannot exceed order total'
-      });
-    }
-
-    // Process refund through payment gateway
-    let refundId: string | null = null;
-    let refundStatus = 'pending';
-
-    // Stripe refund
-    if (order.paymentIntentId && stripe) {
-      try {
-        // Convert amount to cents for Stripe
-        const refundAmountCents = Math.round(amount * 100);
-        
-        // Create refund params
-        const refundParams: any = {
-          payment_intent: order.paymentIntentId,
-          amount: refundAmountCents,
-          reason: reason ? 'requested_by_customer' : undefined
-        };
-        
-        // Add metadata if Stripe supports it (may not be in type definition)
-        if (order._id && typeof order._id === 'object' && 'toString' in order._id) {
-          refundParams.metadata = {
-            orderId: String(order._id),
-            orderNumber: order.orderNumber || '',
-            reason: reason || 'No reason provided'
-          };
-        }
-        
-        const refund = await stripe.refunds.create(refundParams);
-
-        refundId = refund.id;
-        refundStatus = refund.status === 'succeeded' ? 'refunded' : 'pending';
-        
-        logger.info(`Stripe refund processed: ${refund.id} for order ${order.orderNumber}`);
-      } catch (stripeError: any) {
-        logger.error('Stripe refund error:', stripeError);
-        return res.status(500).json({
-          success: false,
-          message: `Failed to process refund: ${stripeError.message || 'Payment gateway error'}`
-        });
-      }
-    }
-    // PayPal refund
-    else if (order.paypalOrderId) {
-      try {
-        // TODO: When PayPal SDK is integrated, use the following structure:
-        // const paypal = require('@paypal/checkout-server-sdk');
-        // const environment = new paypal.core.SandboxEnvironment(CLIENT_ID, CLIENT_SECRET);
-        // const client = new paypal.core.PayPalHttpClient(environment);
-        // const request = new paypal.orders.OrdersRefundRequest(order.paypalOrderId);
-        // request.requestBody({ amount: { value: amount.toString(), currency_code: 'USD' } });
-        // const refund = await client.execute(request);
-        // refundId = refund.result.id;
-        // refundStatus = refund.result.status === 'COMPLETED' ? 'refunded' : 'pending';
-
-        // For now, log the refund request and mark as pending
-        // Admin can process manually through PayPal dashboard
-        logger.info(`PayPal refund requested for order ${order.orderNumber}: Amount $${amount}, PayPal Order ID: ${order.paypalOrderId}`);
-        logger.warn('PayPal SDK not integrated. Refund must be processed manually through PayPal dashboard.');
-        
-        // Store refund request in order notes for manual processing
-        refundStatus = 'pending';
-        refundId = `MANUAL-${Date.now()}`; // Temporary ID for tracking
-        
-        logger.info(`PayPal refund request logged. Please process manually: Order ${order.orderNumber}, Amount: $${amount}, PayPal Order ID: ${order.paypalOrderId}`);
-      } catch (error: any) {
-        logger.error('PayPal refund error:', error);
-        return res.status(500).json({
-          success: false,
-          message: `Failed to process PayPal refund: ${error.message || 'Please process manually through PayPal dashboard'}`
-        });
-      }
-    }
-    // Cash on Delivery - manual refund
-    else if (order.paymentMethod === 'cod') {
-      refundStatus = 'refunded';
-      logger.info(`Manual refund processed for COD order ${order.orderNumber}`);
-    }
-    else {
-      return res.status(400).json({
-        success: false,
-        message: 'Unable to process refund: No payment method information available'
-      });
-    }
-
-    // Update order status
-    if (amount === order.totalPrice) {
-      // Full refund
-      order.paymentStatus = 'refunded';
-    } else {
-      // Partial refund - keep status as paid but note the refund
-      // You might want to add a refunds array to track partial refunds
-    }
-
-    // Store refund information (you may want to add a refunds array to the Order model)
-    order.notes = order.notes 
-      ? `${order.notes}\n\nRefund: $${amount.toFixed(2)} on ${new Date().toLocaleString()}${reason ? ` - ${reason}` : ''}${refundId ? ` (Refund ID: ${refundId})` : ''}`
-      : `Refund: $${amount.toFixed(2)} on ${new Date().toLocaleString()}${reason ? ` - ${reason}` : ''}${refundId ? ` (Refund ID: ${refundId})` : ''}`;
-
-    await order.save();
-
-    // Send refund confirmation email
-    try {
-      const user = await User.findById(order.user);
-      if (user) {
-        await sendOrderCancellationEmail(
-          user.email,
-          user.firstName,
-          order.orderNumber || '',
-          {
-            items: order.items.map(item => ({
-              name: item.name,
-              quantity: item.quantity,
-              price: item.price,
-              image: item.image
-            })),
-            totalPrice: order.totalPrice,
-            refundAmount: amount,
-            createdAt: order.createdAt
-          }
-        );
-      }
-    } catch (emailError) {
-      logger.error('Failed to send refund email:', emailError);
-      // Don't fail the refund if email fails
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Refund processed successfully',
-      data: {
-        order: order,
-        refundId,
-        refundAmount: amount,
-        refundStatus
-      }
-    });
-  } catch (error: any) {
-    logger.error('Refund processing error:', error);
-    next(error);
-  }
-};
-
-/**
- * @swagger
- * /api/orders/{id}/cancel:
- *   put:
- *     summary: Cancel order (Customer)
- *     tags: [Orders]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               reason:
- *                 type: string
- *     responses:
- *       200:
- *         description: Order cancelled successfully
- *       400:
- *         description: Cannot cancel order (time window expired or invalid status)
- *       401:
- *         description: Not authenticated
- *       403:
- *         description: Not authorized to cancel this order
- *       404:
- *         description: Order not found
- */
-// Cancel order (Customer) - Enhanced with time window
-export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const { reason } = req.body;
-    
-    // Validate and extract order ID
-    const orderId = extractObjectId(req.params.id);
-    if (!orderId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid order ID format',
-        errors: [{ field: 'id', message: 'Invalid ID format' }]
-      });
-    }
-    
-    const order = await Order.findById(orderId);
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found'
-      });
-    }
-
-    // Make sure user can only cancel their own orders
-    const userId = extractObjectId(req.user?._id);
-    const orderUserId = extractObjectId(order.user);
-    
-    if (!userId || !orderUserId || !userId.equals(orderUserId)) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to cancel this order'
-      });
-    }
-
-    // Check if order can be cancelled
-    const cancellationWindowHours = 24; // Allow cancellation within 24 hours
-    const hoursSinceOrder = (Date.now() - order.createdAt.getTime()) / (1000 * 60 * 60);
-    const canCancelByTime = hoursSinceOrder <= cancellationWindowHours;
-    const canCancelByStatus = ['pending', 'processing'].includes(order.orderStatus);
-    const cannotCancelStatuses = ['shipped', 'delivered', 'cancelled'];
-
-    if (cannotCancelStatuses.includes(order.orderStatus)) {
-      return res.status(400).json({
-        success: false,
-        message: `Cannot cancel order. Order is already ${order.orderStatus}.`,
-        canCancel: false
-      });
-    }
-
-    // Check time window for both pending and processing orders
-    if (!canCancelByTime && canCancelByStatus) {
-      return res.status(400).json({
-        success: false,
-        message: `Cannot cancel order. Cancellation window (${cancellationWindowHours} hours) has expired. Please contact customer service for assistance.`,
-        canCancel: false,
-        hoursSinceOrder: Math.round(hoursSinceOrder * 10) / 10
-      });
-    }
-
-    if (!canCancelByStatus) {
-      return res.status(400).json({
-        success: false,
-        message: `Cannot cancel order. Order status is ${order.orderStatus}.`,
-        canCancel: false
-      });
-    }
-
-    // Use transaction to ensure atomicity
-    // Skip transactions in test mode (standalone MongoDB doesn't support transactions)
-    const useTransactions = process.env.NODE_ENV !== 'test';
-    let session: mongoose.ClientSession | null = null;
-    
-    if (useTransactions) {
-      try {
-        session = await mongoose.startSession();
-        session.startTransaction();
-      } catch (error) {
-        // If transaction fails (e.g., not a replica set), continue without transaction
-        session = null;
-      }
-    }
-
-    try {
-      // Update order status to cancelled
-      order.orderStatus = 'cancelled';
-      if (reason) {
-        order.notes = order.notes ? `${order.notes}\nCancellation reason: ${reason}` : `Cancellation reason: ${reason}`;
-      }
-      await order.save(session ? { session } : {});
-
-      // Restore product stock
-      for (const item of order.items) {
-        const product = session ? await Product.findById(item.product).session(session) : await Product.findById(item.product);
-        if (product) {
-          product.totalStock += item.quantity;
-          product.inStock = product.totalStock > 0;
-          await product.save(session ? { session } : {});
-        }
-      }
-
-      if (session) {
-        await session.commitTransaction();
-        session.endSession();
-      }
-
-      const normalizedOrder = normalizeOrderId(order);
-      
-      // Send cancellation email via background job (non-blocking)
-      try {
-        const user = await User.findById(order.user).select('email firstName lastName').lean();
-        if (user && user.email) {
-          const fullOrder = await Order.findById(order._id).lean();
-          if (fullOrder && fullOrder.orderNumber) {
-            await addEmailJob(
-              'order-cancellation',
-              {
-                email: user.email,
-                firstName: user.firstName || 'Customer',
-                orderNumber: fullOrder.orderNumber,
-                orderData: {
-                  items: fullOrder.items.map((item) => ({
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.price,
-                    image: item.image
-                  })),
-                  totalPrice: fullOrder.totalPrice,
-                  cancellationReason: reason || 'Customer request',
-                  refundAmount: fullOrder.totalPrice, // Full refund for cancelled orders
-                  createdAt: fullOrder.createdAt
-                }
-              },
-              async () => {
-                await sendOrderCancellationEmail(
-                  user.email,
-                  user.firstName || 'Customer',
-                  fullOrder.orderNumber,
-                  {
-                    items: fullOrder.items.map((item) => ({
-                      name: item.name,
-                      quantity: item.quantity,
-                      price: item.price,
-                      image: item.image
-                    })),
-                    totalPrice: fullOrder.totalPrice,
-                    cancellationReason: reason || 'Customer request',
-                    refundAmount: fullOrder.totalPrice,
-                    createdAt: fullOrder.createdAt
-                  }
-                );
-              }
-            );
-          }
-        }
-      } catch (emailError) {
-        logger.error('Error queuing order cancellation email:', emailError);
-      }
-
-      res.status(200).json({
-        success: true,
-        message: 'Order cancelled successfully',
-        data: normalizedOrder,
-        refundInfo: order.isPaid ? {
-          willRefund: true,
-          refundAmount: order.totalPrice,
-          refundMethod: 'original',
-          estimatedTime: '5-7 business days'
-        } : null
-      });
-    } catch (error: any) {
-      if (session) {
-        try {
-          await session.abortTransaction();
-        } catch (abortError) {
-          // Ignore abort errors
-        }
-        try {
-          session.endSession();
-        } catch (endError) {
-          // Ignore end session errors
-        }
-      }
-      throw error;
-    }
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @swagger
- * /api/orders/stats:
- *   get:
- *     summary: Get order statistics (Admin)
- *     tags: [Orders]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Order statistics
- *       401:
- *         description: Not authenticated
- *       403:
- *         description: Not authorized (admin only)
- */
-// Get order stats (Admin)
-export const getOrderStats = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    // PERFORMANCE FIX: Cache entire response for 2 minutes to avoid running 4 aggregations on every request
-    const cacheKey = 'orders:stats:all';
-    const cached = await cache.get(cacheKey);
-    if (cached) {
-      logger.debug(`Cache HIT: ${cacheKey}`);
-      return res.status(200).json(cached);
-    }
-
-    // PERFORMANCE FIX: Use a single aggregation pipeline to calculate all stats at once
-    // This replaces multiple sequential queries with one efficient aggregation
-    const statsPipeline = [
-      {
-        $facet: {
-          // Count orders by status
-          statusCounts: [
-            {
-              $group: {
-                _id: '$orderStatus',
-                count: { $sum: 1 }
-              }
-            }
-          ],
-          // Total revenue from paid orders
-          revenue: [
-            {
-              $match: { paymentStatus: 'paid' }
-            },
-            {
-              $group: {
-                _id: null,
-                totalRevenue: { $sum: '$totalPrice' }
-              }
-            }
-          ],
-          // Donation statistics
-          donations: [
-            {
-              $match: { donationAmount: { $gt: 0 } }
-            },
-            {
-              $group: {
-                _id: null,
-                totalDonations: { $sum: '$donationAmount' },
-                donationCount: { $sum: 1 },
-                averageDonation: { $avg: '$donationAmount' }
-              }
-            }
-          ],
-          // Total orders count
-          totalCount: [
-            {
-              $group: {
-                _id: null,
-                count: { $sum: 1 }
-              }
-            }
-          ]
-        }
-      }
-    ];
-
-    // PERFORMANCE FIX: Run all aggregations in parallel instead of sequentially
-    // This reduces total time from sum of all aggregations to max of all aggregations
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-    const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
-    const now = new Date();
-    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-
-    // Combined aggregation using $facet - executes both aggregations in parallel
-    const combinedStatsPipeline = [
-      {
-        $facet: {
-          // Monthly donations (last 12 months)
-          monthlyDonations: [
-            {
-              $match: {
-                donationAmount: { $gt: 0 },
-                createdAt: { $gte: oneYearAgo }
-              }
-            },
-            {
-              $group: {
-                _id: {
-                  year: { $year: '$createdAt' },
-                  month: { $month: '$createdAt' }
-                },
-                total: { $sum: '$donationAmount' },
-                count: { $sum: 1 }
-              }
-            },
-            {
-              $sort: { '_id.year': 1 as const, '_id.month': 1 as const }
-            },
-            {
-              $limit: 12
-            }
-          ],
-          // Monthly sales (last 6 months)
-          monthlySales: [
-            {
-              $match: {
-                paymentStatus: 'paid',
-                createdAt: { $gte: sixMonthsAgo }
-              }
-            },
-            {
-              $group: {
-                _id: {
-                  year: { $year: '$createdAt' },
-                  month: { $month: '$createdAt' }
-                },
-                sales: { $sum: '$totalPrice' },
-                orderCount: { $sum: 1 }
-              }
-            },
-            {
-              $sort: { '_id.year': 1 as const, '_id.month': 1 as const }
-            }
-          ]
-        }
-      }
-    ];
-
-    // PERFORMANCE FIX: Combine revenue trends and order counts into single aggregation
-    const revenueTrendPipeline = [
-      {
-        $facet: {
-          currentMonthRevenue: [
-            {
-              $match: {
-                paymentStatus: 'paid',
-                createdAt: { $gte: currentMonthStart }
-              }
-            },
-            {
-              $group: {
-                _id: null,
-                total: { $sum: '$totalPrice' }
-              }
-            }
-          ],
-          previousMonthRevenue: [
-            {
-              $match: {
-                paymentStatus: 'paid',
-                createdAt: { 
-                  $gte: previousMonthStart,
-                  $lte: previousMonthEnd
-                }
-              }
-            },
-            {
-              $group: {
-                _id: null,
-                total: { $sum: '$totalPrice' }
-              }
-            }
-          ],
-          currentMonthOrders: [
-            {
-              $match: {
-                createdAt: { $gte: currentMonthStart }
-              }
-            },
-            {
-              $group: {
-                _id: null,
-                count: { $sum: 1 }
-              }
-            }
-          ],
-          previousMonthOrders: [
-            {
-              $match: {
-                createdAt: { 
-                  $gte: previousMonthStart,
-                  $lte: previousMonthEnd
-                }
-              }
-            },
-            {
-              $group: {
-                _id: null,
-                count: { $sum: 1 }
-              }
-            }
-          ]
-        }
-      }
-    ];
-
-    // Run all aggregations in parallel
-    const [statsResult, combinedStats, revenueTrendResult] = await Promise.all([
-      executeCachedAggregation(
-        'orders',
-        statsPipeline,
-        async () => {
-          return await Order.aggregate(statsPipeline as any, { allowDiskUse: true });
-        },
-        300 // 5 minutes cache
-      ),
-      executeCachedAggregation(
-        'orders',
-        combinedStatsPipeline,
-        async () => {
-          return await Order.aggregate(combinedStatsPipeline as any, { allowDiskUse: true });
-        },
-        300 // 5 minutes cache
-      ),
-      executeCachedAggregation(
-        'orders',
-        revenueTrendPipeline,
-        async () => {
-          return await Order.aggregate(revenueTrendPipeline as any, { allowDiskUse: true });
-        },
-        120 // 2 minutes cache
-      )
-    ]);
-
-    const stats = statsResult[0] || {};
-    const statusCounts = (stats.statusCounts || []).reduce((acc: any, item: any) => {
-      acc[item._id] = item.count;
-      return acc;
-    }, {});
-
-    const totalOrders = stats.totalCount?.[0]?.count || 0;
-    const pendingOrders = statusCounts.pending || 0;
-    const processingOrders = statusCounts.processing || 0;
-    const shippedOrders = statusCounts.shipped || 0;
-    const deliveredOrders = statusCounts.delivered || 0;
-    const totalRevenue = stats.revenue?.[0]?.totalRevenue || 0;
-    const donationStats = stats.donations?.[0] || {};
-    const totalDonations = donationStats.totalDonations || 0;
-    const donationCount = donationStats.donationCount || 0;
-    const averageDonation = donationStats.averageDonation || 0;
-
-    const monthlyDonations = combinedStats[0]?.monthlyDonations || [];
-    const monthlySales = combinedStats[0]?.monthlySales || [];
-
-    // Format monthly sales data with month names
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const formattedMonthlySales = monthlySales.map((item: any) => ({
-      month: monthNames[item._id.month - 1],
-      sales: item.sales || 0,
-      orderCount: item.orderCount || 0
-    }));
-
-    const trendData = revenueTrendResult[0] || {};
-    const currentMonthTotal = trendData.currentMonthRevenue?.[0]?.total || 0;
-    const previousMonthTotal = trendData.previousMonthRevenue?.[0]?.total || 0;
-    const currentMonthOrders = trendData.currentMonthOrders?.[0]?.count || 0;
-    const previousMonthOrders = trendData.previousMonthOrders?.[0]?.count || 0;
-
-    const revenueTrend = previousMonthTotal > 0 
-      ? ((currentMonthTotal - previousMonthTotal) / previousMonthTotal) * 100 
-      : 0;
-
-    const ordersTrend = previousMonthOrders > 0
-      ? ((currentMonthOrders - previousMonthOrders) / previousMonthOrders) * 100
-      : 0;
-
-    // PERFORMANCE FIX: Run all aggregations in parallel instead of sequentially
-    // This reduces total time from sum of all aggregations to max of all aggregations
-    const [recentOrders] = await Promise.all([
-      // Get recent orders (simplified - no expensive $lookup, fetch user data separately if needed)
-      Order.find({})
-        .select('_id orderNumber totalPrice orderStatus paymentStatus createdAt user')
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .lean()
-        .maxTimeMS(3000)
-    ]);
-
-    // Fetch user data separately for recent orders (more efficient than $lookup)
-    const userIds = recentOrders
-      .map((order: any) => order.user)
-      .filter((id: any): id is mongoose.Types.ObjectId => id !== null && id !== undefined);
-    
-    const usersMap = new Map();
-    if (userIds.length > 0) {
-      const uniqueUserIds = Array.from(new Set(userIds.map(id => id.toString())))
-        .map(id => new mongoose.Types.ObjectId(id));
-      const User = (await import('../models/User')).default;
-      const users = await User.find({ _id: { $in: uniqueUserIds } })
-        .select('firstName lastName email')
-        .lean();
-      users.forEach((user: any) => {
-        usersMap.set(user._id.toString(), user);
-      });
-    }
-
-    // Attach user data to recent orders
-    const recentOrdersWithUsers = recentOrders.map((order: any) => {
-      const userData = order.user ? usersMap.get(order.user.toString()) : null;
-      return {
-        ...order,
-        user: userData ? {
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          email: userData.email
-        } : null
-      };
-    });
-
-    const response = {
-      success: true,
-      data: {
-        totalOrders,
-        pendingOrders,
-        processingOrders,
-        shippedOrders,
-        deliveredOrders,
-        totalRevenue,
-        totalDonations,
-        donationCount,
-        averageDonation,
-        monthlyDonations,
-        monthlySales: formattedMonthlySales,
-        revenueTrend,
-        ordersTrend,
-        currentMonthRevenue: currentMonthTotal,
-        previousMonthRevenue: previousMonthTotal,
-        currentMonthOrders,
-        previousMonthOrders,
-        recentOrders: recentOrdersWithUsers || []
-      }
-    };
-
-    // Cache for 5 minutes (300 seconds) - same as product stats
-    await cache.set(cacheKey, response, 300);
-
-    res.status(200).json(response);
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Track order by ID (Public - no authentication required)
-/**
- * @swagger
- * /api/orders/track/{id}:
- *   get:
- *     summary: Track order by ID (Public)
- *     tags: [Orders]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Order tracking information
- *       404:
- *         description: Order not found
- */
-export const trackOrder = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { id } = req.params;
-
-    // Accept either a 24-char MongoDB ObjectId OR an order number (e.g. ORD-00001)
-    let order;
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      order = await Order.findById(id)
-        .populate('user', 'firstName lastName email')
-        .select('-billingAddress');
-    } else {
-      // Try matching by orderNumber (case-insensitive for flexibility)
-      order = await Order.findOne({ orderNumber: id.toUpperCase() })
-        .populate('user', 'firstName lastName email')
-        .select('-billingAddress');
-    }
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found. Please check your order number and try again.'
-      });
-    }
-
-    // Return limited order info for tracking (public)
-    const trackingInfo = {
-      _id: order._id,
-      orderNumber: order.orderNumber,
-      orderStatus: order.orderStatus,
-      paymentStatus: order.paymentStatus,
-      trackingNumber: order.trackingNumber,
-      items: order.items.map(item => ({
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price
-      })),
-      shippingAddress: {
-        firstName: order.shippingAddress.firstName,
-        lastName: order.shippingAddress.lastName,
-        city: order.shippingAddress.city,
-        state: order.shippingAddress.state,
-        zipCode: order.shippingAddress.zipCode
-      },
-      itemsPrice: order.itemsPrice,
-      shippingPrice: order.shippingPrice,
-      taxPrice: order.taxPrice,
-      totalPrice: order.totalPrice,
-      createdAt: order.createdAt,
-      isDelivered: order.isDelivered,
-      deliveredAt: order.deliveredAt
-    };
-
-    res.status(200).json({
-      success: true,
-      data: trackingInfo
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Create payment intent for order
 export const createOrderPaymentIntent = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { totalPrice, paymentMethod, shippingAddress } = req.body;
+    const { totalPrice, paymentMethod } = req.body;
 
-    // Validate total price
     if (!totalPrice || totalPrice < 0.5) {
-      return res.status(400).json({
-        success: false,
-        message: 'Order total must be at least $0.50'
-      });
+      return res.status(400).json({ success: false, message: 'Order total must be at least $0.50' });
     }
 
-    // Validate payment method
     const validMethods = ['credit_card', 'paypal', 'apple_pay', 'google_pay'];
     if (!validMethods.includes(paymentMethod)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid payment method. Use credit_card, paypal, apple_pay, or google_pay'
-      });
+      return res.status(400).json({ success: false, message: 'Invalid payment method. Use credit_card, paypal, apple_pay, or google_pay' });
     }
 
-    // Check if Stripe is configured
     if (!stripe) {
-      return res.status(500).json({
-        success: false,
-        message: 'Payment processing not configured. Please set STRIPE_SECRET_KEY in environment variables.'
-      });
+      return res.status(500).json({ success: false, message: 'Payment processing not configured. Please set STRIPE_SECRET_KEY in environment variables.' });
     }
 
-    // Create Stripe Payment Intent
     const amountInCents = Math.round(totalPrice * 100);
 
     try {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amountInCents,
         currency: 'usd',
-        payment_method_types: paymentMethod === 'credit_card' 
-          ? ['card'] 
-          : paymentMethod === 'apple_pay' 
-          ? ['card', 'apple_pay'] 
+        payment_method_types: paymentMethod === 'credit_card'
+          ? ['card']
+          : paymentMethod === 'apple_pay'
+          ? ['card', 'apple_pay']
           : paymentMethod === 'google_pay'
           ? ['card', 'google_pay']
           : ['card'],
         metadata: {
           order: 'true',
-          userId: String(req.user?._id || ''),
+          // GUEST CHECKOUT: works for both guests (no user) and logged-in users
+          userId: String(req.user?._id || 'guest'),
           userEmail: req.user?.email || '',
-          userName: `${req.user?.firstName || ''} ${req.user?.lastName || ''}`.trim()
+          userName: req.user ? `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() : 'Guest'
         }
       });
 
       res.status(200).json({
         success: true,
-        data: {
-          clientSecret: paymentIntent.client_secret,
-          paymentIntentId: paymentIntent.id
-        }
+        data: { clientSecret: paymentIntent.client_secret, paymentIntentId: paymentIntent.id }
       });
     } catch (stripeError: unknown) {
       logger.error('Stripe error:', stripeError);
       const errorMessage = stripeError instanceof Error ? stripeError.message : 'Unknown error';
-      return res.status(500).json({
-        success: false,
-        message: 'Payment processing error: ' + errorMessage
-      });
+      return res.status(500).json({ success: false, message: 'Payment processing error: ' + errorMessage });
     }
   } catch (error: unknown) {
     logger.error('Payment intent error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Failed to create payment intent';
-    res.status(500).json({
-      success: false,
-      message: errorMessage
-    });
+    res.status(500).json({ success: false, message: 'Failed to create payment intent' });
   }
 };
-
-// Confirm order payment (verify payment before creating order)
-export const confirmOrderPayment = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const { paymentIntentId } = req.body;
-
-    if (!paymentIntentId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Payment Intent ID is required'
-      });
-    }
-
-    // Verify payment with Stripe
-    if (!stripe) {
-      return res.status(500).json({
-        success: false,
-        message: 'Payment processing not configured.'
-      });
-    }
-    
-    try {
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-
-      if (paymentIntent.status === 'succeeded') {
-        return res.status(200).json({
-          success: true,
-          message: 'Payment confirmed successfully',
-          data: {
-            paymentStatus: 'paid',
-            paymentIntentId: paymentIntent.id,
-            amount: paymentIntent.amount / 100 // Convert from cents
-          }
-        });
-      } else {
-        return res.status(400).json({
-          success: false,
-          message: 'Payment not completed',
-          data: {
-            paymentStatus: paymentIntent.status
-          }
-        });
-      }
-    } catch (stripeError: unknown) {
-      logger.error('Stripe verification error:', stripeError);
-      const errorMessage = stripeError instanceof Error ? stripeError.message : 'Unknown error';
-      return res.status(500).json({
-        success: false,
-        message: 'Payment verification failed: ' + errorMessage
-      });
-    }
-  } catch (error: unknown) {
-    logger.error('Payment confirmation error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Failed to confirm payment';
-    res.status(500).json({
-      success: false,
-      message: errorMessage
-    });
-  }
-};
-
-
-
