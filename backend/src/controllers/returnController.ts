@@ -7,41 +7,6 @@ import { AuthRequest } from '../middleware/auth';
 import logger from '../utils/logger';
 import { extractObjectId, safeToString } from '../utils/types';
 
-/**
- * @swagger
- * /api/orders/returns:
- *   post:
- *     summary: Create a return request
- *     tags: [Returns]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - orderId
- *               - items
- *               - reason
- *             properties:
- *               orderId:
- *                 type: string
- *               items:
- *                 type: array
- *               reason:
- *                 type: string
- *               notes:
- *                 type: string
- *     responses:
- *       201:
- *         description: Return request created
- *       400:
- *         description: Invalid request
- *       401:
- *         description: Not authenticated
- */
 // Create return request
 export const createReturn = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -49,44 +14,27 @@ export const createReturn = async (req: AuthRequest, res: Response, next: NextFu
     const userId = req.user?._id;
 
     if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: 'User not authenticated'
-      });
+      return res.status(401).json({ success: false, message: 'User not authenticated' });
     }
 
     if (!orderId || !items || items.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Order ID and return items are required'
-      });
+      return res.status(400).json({ success: false, message: 'Order ID and return items are required' });
     }
 
-    // Verify order exists and belongs to user
     const order = await Order.findById(orderId);
     if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found'
-      });
+      return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    if (order.user.toString() !== userId.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to return this order'
-      });
+    // FIX: order.user is now optional — use optional chaining and fallback
+    if (!order.user || order.user.toString() !== userId.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized to return this order' });
     }
 
-    // Check if order is eligible for return (must be delivered)
     if (order.orderStatus !== 'delivered') {
-      return res.status(400).json({
-        success: false,
-        message: 'Order must be delivered before requesting a return'
-      });
+      return res.status(400).json({ success: false, message: 'Order must be delivered before requesting a return' });
     }
 
-    // Check return window (e.g., 30 days from delivery)
     const returnWindowDays = 30;
     const deliveryDate = order.deliveredAt || order.createdAt;
     const daysSinceDelivery = (Date.now() - deliveryDate.getTime()) / (1000 * 60 * 60 * 24);
@@ -99,18 +47,15 @@ export const createReturn = async (req: AuthRequest, res: Response, next: NextFu
       });
     }
 
-    // Validate return items
     const returnItems = [];
     let totalRefundAmount = 0;
 
     for (const item of items) {
-      // Find order item - handle both _id matching and index-based matching
       let orderItem: typeof order.items[0] | null = null;
       let orderItemIndex = -1;
-      
+
       for (let i = 0; i < order.items.length; i++) {
         const oi = order.items[i];
-        // Order items don't have _id in the schema, use index
         const oiId = i.toString();
         const oiProductId = safeToString(oi.product);
         if (oiProductId === item.productId && oiId === item.orderItemId) {
@@ -121,10 +66,7 @@ export const createReturn = async (req: AuthRequest, res: Response, next: NextFu
       }
 
       if (!orderItem) {
-        return res.status(400).json({
-          success: false,
-          message: `Order item not found: ${item.orderItemId}`
-        });
+        return res.status(400).json({ success: false, message: `Order item not found: ${item.orderItemId}` });
       }
 
       if (item.quantity > orderItem.quantity) {
@@ -134,11 +76,8 @@ export const createReturn = async (req: AuthRequest, res: Response, next: NextFu
         });
       }
 
-      // Use index as order items don't have _id in schema
-      const orderItemId = orderItemIndex;
-
       returnItems.push({
-        orderItem: orderItemId,
+        orderItem: orderItemIndex,
         product: item.productId,
         quantity: item.quantity,
         reason: item.reason,
@@ -148,7 +87,6 @@ export const createReturn = async (req: AuthRequest, res: Response, next: NextFu
       totalRefundAmount += orderItem.price * item.quantity;
     }
 
-    // Create return request
     const returnRequest = await Return.create({
       order: orderId,
       user: userId,
@@ -170,30 +108,6 @@ export const createReturn = async (req: AuthRequest, res: Response, next: NextFu
   }
 };
 
-// Get user's return requests
-/**
- * @swagger
- * /api/orders/returns/my:
- *   get:
- *     summary: Get current user's return requests
- *     tags: [Returns]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: List of return requests
- *       401:
- *         description: Not authenticated
- */
 export const getMyReturns = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user?._id;
@@ -214,19 +128,13 @@ export const getMyReturns = async (req: AuthRequest, res: Response, next: NextFu
     res.status(200).json({
       success: true,
       data: returns,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
-      }
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) }
     });
   } catch (error) {
     next(error);
   }
 };
 
-// Get single return request
 export const getReturn = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
@@ -238,62 +146,20 @@ export const getReturn = async (req: AuthRequest, res: Response, next: NextFunct
       .lean();
 
     if (!returnRequest) {
-      return res.status(404).json({
-        success: false,
-        message: 'Return request not found'
-      });
+      return res.status(404).json({ success: false, message: 'Return request not found' });
     }
 
-    // Check authorization (user or admin)
     const isAdmin = req.user?.role === 'admin' || req.user?.role === 'staff';
     if (!isAdmin && returnRequest.user.toString() !== userId?.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to view this return'
-      });
+      return res.status(403).json({ success: false, message: 'Not authorized to view this return' });
     }
 
-    res.status(200).json({
-      success: true,
-      data: returnRequest
-    });
+    res.status(200).json({ success: true, data: returnRequest });
   } catch (error) {
     next(error);
   }
 };
 
-/**
- * @swagger
- * /api/orders/returns/{id}/status:
- *   put:
- *     summary: Update return status (Admin)
- *     tags: [Returns]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               status:
- *                 type: string
- *                 enum: [pending, approved, rejected, processing, completed]
- *     responses:
- *       200:
- *         description: Return status updated
- *       401:
- *         description: Not authenticated
- *       403:
- *         description: Not authorized (admin only)
- */
-// Update return status (Admin)
 export const updateReturnStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
@@ -301,39 +167,27 @@ export const updateReturnStatus = async (req: AuthRequest, res: Response, next: 
 
     const returnRequest = await Return.findById(id);
     if (!returnRequest) {
-      return res.status(404).json({
-        success: false,
-        message: 'Return request not found'
-      });
+      return res.status(404).json({ success: false, message: 'Return request not found' });
     }
 
     const validStatuses: Array<IReturn['status']> = ['pending', 'approved', 'rejected', 'processing', 'completed', 'cancelled'];
     if (status && !validStatuses.includes(status as IReturn['status'])) {
-      return res.status(400).json({
-        success: false,
-        message: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
-      });
+      return res.status(400).json({ success: false, message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
     }
 
     if (status && validStatuses.includes(status as IReturn['status'])) {
       returnRequest.status = status as IReturn['status'];
     }
 
-    if (adminNotes) {
-      returnRequest.adminNotes = adminNotes;
-    }
+    if (adminNotes) returnRequest.adminNotes = adminNotes;
 
     const validRefundMethods: Array<IReturn['refundMethod']> = ['original', 'store_credit'];
     if (refundMethod && validRefundMethods.includes(refundMethod as IReturn['refundMethod'])) {
       returnRequest.refundMethod = refundMethod as IReturn['refundMethod'];
     }
 
-    // When approved, RMA number is generated automatically via pre-save hook
-    // When completed, process refund
     if (status === 'completed') {
       returnRequest.refundStatus = 'processing';
-      // In production, integrate with payment processor for actual refund
-      // For now, mark as refunded after a delay
       setTimeout(() => {
         Return.findByIdAndUpdate(id, { refundStatus: 'refunded' }).catch(err => {
           logger.error('Error updating refund status:', err);
@@ -353,32 +207,6 @@ export const updateReturnStatus = async (req: AuthRequest, res: Response, next: 
   }
 };
 
-/**
- * @swagger
- * /api/orders/returns/all:
- *   get:
- *     summary: Get all return requests (Admin)
- *     tags: [Returns]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: List of all return requests
- *       401:
- *         description: Not authenticated
- *       403:
- *         description: Not authorized (admin only)
- */
-// Get all returns (Admin)
 export const getAllReturns = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -387,9 +215,7 @@ export const getAllReturns = async (req: AuthRequest, res: Response, next: NextF
     const { status } = req.query;
 
     const query: any = {};
-    if (status) {
-      query.status = status;
-    }
+    if (status) query.status = status;
 
     const returns = await Return.find(query)
       .populate('order', 'orderNumber createdAt')
@@ -405,15 +231,9 @@ export const getAllReturns = async (req: AuthRequest, res: Response, next: NextF
     res.status(200).json({
       success: true,
       data: returns,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
-      }
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) }
     });
   } catch (error) {
     next(error);
   }
 };
-
