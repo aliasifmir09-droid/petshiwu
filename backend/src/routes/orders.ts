@@ -35,13 +35,15 @@ import {
 const router = express.Router();
 
 // Public route for order tracking (no authentication required)
-// No validateObjectId() here — controller accepts both MongoDB _id and ORD-XXXXX order numbers
 router.get('/track/:id', trackOrder);
 
-// Order routes
-router.post('/payment-intent', protect, createPaymentIntentValidation, createOrderPaymentIntent);
-router.post('/confirm-payment', protect, confirmPaymentValidation, confirmOrderPayment);
-router.post('/', protect, createOrderValidation, createOrder);
+// GUEST CHECKOUT: These routes no longer require auth middleware
+// The controller handles both guests and logged-in users
+router.post('/payment-intent', createPaymentIntentValidation, createOrderPaymentIntent);
+router.post('/confirm-payment', confirmPaymentValidation, confirmOrderPayment);
+router.post('/', createOrderValidation, createOrder);
+
+// Authenticated routes
 router.get('/myorders', protect, paginationValidation, getMyOrders);
 router.get('/stats', protect, checkPermission('canViewAnalytics'), getOrderStats);
 router.get('/all', protect, checkPermission('canManageOrders'), adminPaginationValidation, getAllOrders);
@@ -59,6 +61,3 @@ router.get('/returns/:id', protect, validateObjectId(), getReturn);
 router.put('/returns/:id/status', protect, checkPermission('canManageOrders'), validateObjectId(), updateReturnStatus);
 
 export default router;
-
-
-
