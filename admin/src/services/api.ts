@@ -9,7 +9,7 @@ declare module 'axios' {
 
 // Use relative URL to leverage Vite proxy in development
 // Normalize the URL: remove trailing slashes and ensure /api is included
-let API_URL = import.meta.env.VITE_API_URL || '/api';
+let API_URL = import.meta.env.VITE_API_URL || 'https://www.petshiwu.com/api';
 // Remove trailing slash if present
 API_URL = API_URL.replace(/\/+$/, '');
 // If it's a full URL and doesn't end with /api, add it
