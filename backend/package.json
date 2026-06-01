@@ -70,7 +70,7 @@
     "nodemailer": "^7.0.11",
     "redis": "^5.10.0",
     "resend": "^6.5.2",
-    "stripe": "14",
+    "stripe": "^14.0.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "typescript": "^5.3.3",

@@ -102,14 +102,16 @@ export const googleMerchantFeed = async (req: Request, res: Response): Promise<v
       if (variants.length > 1) {
         let isFirst = true;
         for (const v of variants) {
-          const vPrice = (v.salePrice && v.salePrice > 0 && v.salePrice < v.price)
-            ? v.salePrice
+          const vAny = v as any;
+          const vPrice = (vAny.compareAtPrice && vAny.compareAtPrice > 0 && vAny.compareAtPrice > v.price)
+            ? v.price
             : v.price;
           if (!vPrice) continue;
 
-          const variantId = `petshiwu-${product._id}-${v.sku || v.label?.replace(/\s+/g, '-')}`;
-          const variantTitle = v.label ? `${product.name} - ${v.label}` : product.name;
-          const variantImg = (v as any).image || imageUrl;
+          const vLabel: string = vAny.label || vAny.size || vAny.flavor || vAny.weight || '';
+          const variantId = `petshiwu-${product._id}-${v.sku || vLabel.replace(/\s+/g, '-') || 'v'}`;
+          const variantTitle = vLabel ? `${product.name} - ${vLabel}` : product.name;
+          const variantImg = vAny.image || imageUrl;
 
           xml += `    <item>
       <g:id>${x(variantId.slice(0, 50))}</g:id>
@@ -129,7 +131,7 @@ export const googleMerchantFeed = async (req: Request, res: Response): Promise<v
         <g:service>Standard</g:service>
         <g:price>${vPrice >= 49 ? '0.00' : '6.00'} USD</g:price>
       </g:shipping>
-      ${v.label ? `<g:size>${x(v.label)}</g:size>` : ''}
+      ${vLabel ? `<g:size>${x(vLabel)}</g:size>` : ''}
       ${isFirst ? '<g:is_bundle>no</g:is_bundle>' : ''}
     </item>\n`;
           isFirst = false;
@@ -137,9 +139,8 @@ export const googleMerchantFeed = async (req: Request, res: Response): Promise<v
       } else {
         // Single-variant product
         const v = variants[0];
-        const price = v?.salePrice && v.salePrice > 0 && v.salePrice < v.price
-          ? v.salePrice
-          : (v?.price || product.basePrice);
+        const vAny0 = v as any;
+        const price = v?.price || product.basePrice;
         if (!price) continue;
 
         const id = `petshiwu-${product._id}`;

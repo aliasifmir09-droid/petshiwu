@@ -1,0 +1,28 @@
+
+Logging in...
+OK
+
+[page 5/101] fixed=0 clean=500 errors=0 | 6.9/s
+[page 10/101] fixed=0 clean=1000 errors=0 | 6.9/s
+[page 15/101] fixed=0 clean=1400 errors=1 | 7.4/s
+[page 20/101] fixed=0 clean=1748 errors=54 | 8.0/s
+[page 25/101] fixed=0 clean=2173 errors=129 | 7.9/s
+[page 30/101] fixed=0 clean=2517 errors=186 | 8.1/s
+[page 35/101] fixed=0 clean=2940 errors=263 | 8.0/s
+[page 40/101] fixed=0 clean=3371 errors=332 | 8.0/s
+[page 45/101] fixed=0 clean=3754 errors=350 | 8.0/s
+[page 50/101] fixed=0 clean=3754 errors=454 | 8.9/s
+[page 55/101] fixed=0 clean=3754 errors=459 | 9.8/s
+[page 60/101] fixed=0 clean=3754 errors=464 | 10.7/s
+[page 65/101] fixed=0 clean=3754 errors=469 | 11.5/s
+[page 70/101] fixed=0 clean=3754 errors=474 | 12.4/s
+[page 75/101] fixed=0 clean=3754 errors=479 | 13.3/s
+[page 80/101] fixed=0 clean=3754 errors=484 | 14.2/s
+[page 85/101] fixed=0 clean=3754 errors=489 | 15.1/s
+[page 90/101] fixed=0 clean=3754 errors=494 | 16.0/s
+[page 95/101] fixed=0 clean=3754 errors=499 | 16.9/s
+[page 100/101] fixed=0 clean=3754 errors=504 | 17.8/s
+[page 101/101] fixed=0 clean=3754 errors=505 | 17.9/s
+
+Done in 9.4 minutes.
+Fixed: 0 | Clean: 3754 | Errors: 505
