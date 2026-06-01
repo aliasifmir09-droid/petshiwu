@@ -108,6 +108,7 @@ import reorderSuggestionsRoutes from './routes/reorderSuggestions';
 import searchAnalyticsRoutes from './routes/searchAnalytics';
 import cartRoutes from './routes/cart';
 import aiAdvisorRoutes from './routes/aiAdvisor';
+import feedRoutes from './routes/feed';
 import { generateSitemap } from './controllers/sitemapController';
 import { createBotRenderer } from './middleware/botRenderer';
 
@@ -439,6 +440,7 @@ app.use(`${API_PREFIX}/notifications`, notificationRoutes);
 app.use(`${API_PREFIX}/recommendations`, recommendationAnalyticsRoutes);
 app.use(`${API_PREFIX}/reorder-suggestions`, reorderSuggestionsRoutes);
 app.use(`${API_PREFIX}/ai-advisor`, aiAdvisorRoutes);
+app.use(`${API_PREFIX}/feed`, feedRoutes);
 
 const legacyRouteDeprecation = (req: Request, res: Response, next: NextFunction) => { next(); };
 
