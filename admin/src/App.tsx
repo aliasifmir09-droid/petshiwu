@@ -201,7 +201,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter basename="/dashboard">
         {!user ? (
           <Suspense fallback={<LoadingFallback />}>
             <Routes>

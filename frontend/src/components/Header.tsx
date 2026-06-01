@@ -484,6 +484,9 @@ const Header = () => {
                     </button>
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all text-gray-900 z-[100]">
                       <Link to="/profile" className="block px-4 py-2.5 hover:bg-gray-100 font-medium">My Profile</Link>
+                      {user?.role === 'admin' && (
+                        <a href="https://dashboard.petshiwu.com" className="block px-4 py-2.5 hover:bg-blue-50 text-[#1E3A8A] font-semibold border-b border-gray-100">📦 Orders Dashboard</a>
+                      )}
                       <Link to="/favorites" className="block px-4 py-2.5 hover:bg-pink-50 hover:text-pink-600 font-medium">
                         <div className="flex items-center gap-2">
                           <Heart size={18} className="text-pink-500" fill="currentColor" />
@@ -694,6 +697,9 @@ const Header = () => {
                 {isAuthenticated ? (
                   <>
                     <li><Link to="/profile" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><User size={20} /><span>My Profile</span></Link></li>
+                    {user?.role === 'admin' && (
+                      <li><a href="https://dashboard.petshiwu.com" className="flex items-center gap-3 py-3 px-3 font-semibold bg-blue-50 text-[#1E3A8A] rounded-lg"><span>📦</span><span>Orders Dashboard</span></a></li>
+                    )}
                     <li><Link to="/favorites" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><Heart size={20} className="text-pink-500" fill="currentColor" /><span>My Favorites</span></Link></li>
                     <li><Link to="/orders" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><ShoppingCart size={20} /><span>My Orders</span></Link></li>
                     <li><button onClick={() => { setShowLogoutModal(true); setMobileMenuOpen(false); }} className="flex items-center gap-3 w-full text-left py-3 px-3 font-semibold hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"><span className="text-xl">🚪</span><span>Logout</span></button></li>

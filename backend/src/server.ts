@@ -482,6 +482,16 @@ app.get('/api', (req, res) => {
   res.status(200).json({ success: true, message: 'PetShiwu API', version: API_VERSION, docs: '/api-docs', health: '/api/health', timestamp: new Date().toISOString() });
 });
 
+// Admin dashboard — served at /dashboard (subdomain routes here via Cloudflare)
+const adminDistPath = path.join(process.cwd(), '../admin/dist');
+if (require('fs').existsSync(adminDistPath)) {
+  app.use('/dashboard', require('express').static(adminDistPath, { maxAge: '1d', etag: true }));
+  app.get('/dashboard/*', (_req: Request, res: Response) => {
+    res.sendFile(path.join(adminDistPath, 'index.html'));
+  });
+  console.log(`📁 Serving admin dashboard from: ${adminDistPath}`);
+}
+
 const frontendDistPath = path.join(process.cwd(), '../frontend/dist');
 console.log(`📁 Serving frontend from: ${frontendDistPath}`);
 
