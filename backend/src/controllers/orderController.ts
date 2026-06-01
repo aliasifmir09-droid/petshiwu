@@ -1033,7 +1033,11 @@ export const getOrderStats = async (req: AuthRequest, res: Response, next: NextF
 
     const recentOrdersWithUsers = recentOrders.map((order: any) => {
       const userData = order.user ? usersMap.get(order.user.toString()) : null;
-      return { ...order, user: userData ? { firstName: userData.firstName, lastName: userData.lastName, email: userData.email } : null };
+      return {
+        ...order,
+        _id: order._id ? order._id.toString() : order._id,
+        user: userData ? { firstName: userData.firstName, lastName: userData.lastName, email: userData.email } : null
+      };
     });
 
     const response = {
