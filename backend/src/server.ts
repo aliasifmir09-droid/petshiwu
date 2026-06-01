@@ -483,13 +483,18 @@ app.get('/api', (req, res) => {
 });
 
 // Admin dashboard — served at /dashboard (subdomain routes here via Cloudflare)
-const adminDistPath = path.join(process.cwd(), '../admin/dist');
+// Use __dirname (backend/dist/) and resolve relative to repo root
+const adminDistPath = path.resolve(__dirname, '../../admin/dist');
+console.log(`📁 Admin dist path: ${adminDistPath} | exists: ${require('fs').existsSync(adminDistPath)}`);
 if (require('fs').existsSync(adminDistPath)) {
   app.use('/dashboard', require('express').static(adminDistPath, { maxAge: '1d', etag: true }));
+  app.get('/dashboard', (_req: Request, res: Response) => {
+    res.sendFile(path.join(adminDistPath, 'index.html'));
+  });
   app.get('/dashboard/*', (_req: Request, res: Response) => {
     res.sendFile(path.join(adminDistPath, 'index.html'));
   });
-  console.log(`📁 Serving admin dashboard from: ${adminDistPath}`);
+  console.log(`✅ Admin dashboard registered at /dashboard`);
 }
 
 const frontendDistPath = path.join(process.cwd(), '../frontend/dist');
