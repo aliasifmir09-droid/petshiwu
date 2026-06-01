@@ -18,6 +18,11 @@ if (API_URL.startsWith('http') && !API_URL.endsWith('/api')) {
 }
 
 
+const TOKEN_KEY = 'petshiwu_admin_token';
+export const saveAdminToken = (token: string) => { if (token) localStorage.setItem(TOKEN_KEY, token); };
+export const getAdminToken = () => localStorage.getItem(TOKEN_KEY);
+export const removeAdminToken = () => localStorage.removeItem(TOKEN_KEY);
+
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -26,23 +31,27 @@ const api = axios.create({
   withCredentials: true
 });
 
-// Phase 2: Cookie-Only - Rely solely on httpOnly cookies
-// Cookies are sent automatically via withCredentials: true
-// No Authorization header needed - backend only accepts cookies
+// Send token from localStorage as Authorization header (fallback for cross-subdomain cookie issues)
 api.interceptors.request.use(
   (config) => {
-    // Phase 2: No Authorization header - httpOnly cookies sent automatically
-    // Backend only accepts tokens from httpOnly cookies (more secure)
-    // withCredentials: true ensures cookies are sent with all requests
+    const token = getAdminToken();
+    if (token && !(config as any).skipAuth) {
+      config.headers = config.headers || {};
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Capture token from login/register responses
+    if (response.data?.token) {
+      saveAdminToken(response.data.token);
+    }
+    return response;
+  },
   (error) => {
     // Only logout on 401 (Unauthorized - invalid/expired cookie)
     // Do NOT logout on 403 (Forbidden - valid cookie but insufficient permissions)
