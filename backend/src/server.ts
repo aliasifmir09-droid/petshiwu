@@ -482,19 +482,38 @@ app.get('/api', (req, res) => {
   res.status(200).json({ success: true, message: 'PetShiwu API', version: API_VERSION, docs: '/api-docs', health: '/api/health', timestamp: new Date().toISOString() });
 });
 
-// Admin dashboard — served at /dashboard (subdomain routes here via Cloudflare)
+// Admin dashboard — served at /dashboard AND at root of dashboard.petshiwu.com
 // Use __dirname (backend/dist/) and resolve relative to repo root
 const adminDistPath = path.resolve(__dirname, '../../admin/dist');
 console.log(`📁 Admin dist path: ${adminDistPath} | exists: ${require('fs').existsSync(adminDistPath)}`);
 if (require('fs').existsSync(adminDistPath)) {
-  app.use('/dashboard', require('express').static(adminDistPath, { maxAge: '1d', etag: true }));
-  app.get('/dashboard', (_req: Request, res: Response) => {
+  const adminStatic = require('express').static(adminDistPath, { maxAge: '1d', etag: true });
+  const serveAdminIndex = (_req: Request, res: Response) => {
     res.sendFile(path.join(adminDistPath, 'index.html'));
+  };
+
+  // Route 1: /dashboard/* on any host (e.g. www.petshiwu.com/dashboard)
+  app.use('/dashboard', adminStatic);
+  app.get('/dashboard', serveAdminIndex);
+  app.get('/dashboard/*', serveAdminIndex);
+
+  // Route 2: dashboard.petshiwu.com/* — root path maps to admin
+  app.use((req: Request, res: Response, next: Function) => {
+    if (req.hostname === 'dashboard.petshiwu.com') {
+      adminStatic(req, res, next);
+    } else {
+      next();
+    }
   });
-  app.get('/dashboard/*', (_req: Request, res: Response) => {
-    res.sendFile(path.join(adminDistPath, 'index.html'));
+  app.get('*', (req: Request, res: Response, next: Function) => {
+    if (req.hostname === 'dashboard.petshiwu.com') {
+      serveAdminIndex(req, res);
+    } else {
+      next();
+    }
   });
-  console.log(`✅ Admin dashboard registered at /dashboard`);
+
+  console.log(`✅ Admin dashboard registered at /dashboard and dashboard.petshiwu.com`);
 }
 
 const frontendDistPath = path.join(process.cwd(), '../frontend/dist');
