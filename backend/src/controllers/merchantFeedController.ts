@@ -39,20 +39,49 @@ function x(str: string): string {
     .replace(/'/g, '&apos;');
 }
 
-// Strip HTML tags and decode common entities
+// Strip HTML tags and fully decode entities (handles double-encoded too)
 function stripHtml(str: string): string {
   if (!str) return '';
-  return str
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#039;/g, "'")
-    .replace(/&nbsp;/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 5000);
+  let s = str;
+  // Decode up to 3 levels of encoding
+  for (let i = 0; i < 3; i++) {
+    s = s
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#039;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&#(\d+);/g, (_m, n) => String.fromCharCode(parseInt(n)));
+  }
+  // Strip HTML tags
+  s = s.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  return s.slice(0, 5000);
+}
+
+// Clean text for XML — decode first, then re-escape only what XML needs
+function cleanText(str: string): string {
+  if (!str) return '';
+  // Fully decode any existing HTML entities first
+  let s = str;
+  for (let i = 0; i < 3; i++) {
+    s = s
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#039;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&#(\d+);/g, (_m, n) => String.fromCharCode(parseInt(n)));
+  }
+  // Now XML-escape cleanly (single pass)
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 /**
@@ -91,25 +120,25 @@ export const googleMerchantFeed = async (req: Request, res: Response): Promise<v
       if (!imageUrl) continue; // Google requires an image
 
       const productUrl = `${BASE_URL}/products/${product.slug}`;
-      const title = x(product.name.slice(0, 150));
-      const description = x(stripHtml(product.shortDescription || product.description || product.name).slice(0, 5000));
-      const brand = x(product.brand || STORE_NAME);
-      const productType = x(buildProductType(product.petType, catName));
-      const label = x(petTypeLabel(product.petType));
+      const title = cleanText(product.name.slice(0, 150));
+      const description = cleanText(stripHtml(product.shortDescription || product.description || product.name).slice(0, 5000));
+      const brand = cleanText(product.brand || STORE_NAME);
+      const productType = cleanText(buildProductType(product.petType, catName));
+      const label = cleanText(petTypeLabel(product.petType));
 
       // If product has variants, emit one item per variant
       const variants = product.variants || [];
       if (variants.length > 1) {
         let isFirst = true;
-        for (const v of variants) {
+        for (let vi = 0; vi < variants.length; vi++) {
+          const v = variants[vi];
           const vAny = v as any;
-          const vPrice = (vAny.compareAtPrice && vAny.compareAtPrice > 0 && vAny.compareAtPrice > v.price)
-            ? v.price
-            : v.price;
+          const vPrice = v.price;
           if (!vPrice) continue;
 
           const vLabel: string = vAny.label || vAny.size || vAny.flavor || vAny.weight || '';
-          const variantId = `petshiwu-${product._id}-${v.sku || vLabel.replace(/\s+/g, '-') || 'v'}`;
+          // Use index-based ID to guarantee uniqueness across all variants
+          const variantId = `ps-${String(product._id).slice(-12)}-${vi}`;
           const variantTitle = vLabel ? `${product.name} - ${vLabel}` : product.name;
           const variantImg = vAny.image || imageUrl;
 
@@ -143,7 +172,7 @@ export const googleMerchantFeed = async (req: Request, res: Response): Promise<v
         const price = v?.price || product.basePrice;
         if (!price) continue;
 
-        const id = `petshiwu-${product._id}`;
+        const id = `ps-${String(product._id).slice(-12)}`;
 
         xml += `    <item>
       <g:id>${x(id)}</g:id>
