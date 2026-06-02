@@ -4,7 +4,7 @@ import { Heart, Star, ShoppingCart, TrendingUp, Clock, Eye } from 'lucide-react'
 import { Product } from '@/types';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useCartStore } from '@/stores/cartStore';
-import { memo, useCallback, useMemo, useState, useRef } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { normalizeImageUrl, handleImageError, generateSrcSet, getOptimalImageSize } from '@/utils/imageUtils';
 import { useImageLoadTracker } from '@/hooks/useImageLoadTracker';
 import { usePrefetch } from '@/hooks/usePrefetch';
@@ -28,7 +28,6 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
   const { addToCart } = useCartStore();
   const [cartAdded, setCartAdded] = useState(false);
-  const cartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { markImageFailed } = useImageLoadTracker();
   const { prefetchProduct } = usePrefetch();
   
@@ -92,8 +91,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
     e.preventDefault();
     addToCart(product, product.variants[0]);
     setCartAdded(true);
-    if (cartTimerRef.current) clearTimeout(cartTimerRef.current);
-    cartTimerRef.current = setTimeout(() => setCartAdded(false), 2500);
+    setTimeout(() => setCartAdded(false), 2500);
   }, [product, addToCart]);
 
   const discountPercent = useMemo(() => product.compareAtPrice
