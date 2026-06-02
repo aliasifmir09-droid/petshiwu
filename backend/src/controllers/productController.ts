@@ -127,8 +127,15 @@ const normalizeProductId = (product: ProductWithVariants | null | unknown): Norm
         // Ensure attributes exists (even if empty) to match NormalizedProduct type
         finalAttributes = {};
       }
+      // Fix: convert Buffer _id to hex string
+      const rawId = variantCopy._id as any;
+      const variantId = rawId && typeof rawId === 'object' && rawId.buffer
+        ? Buffer.from(Object.values(rawId.buffer) as number[]).toString('hex')
+        : rawId ? String(rawId) : undefined;
+
       return {
         ...variantCopy,
+        _id: variantId,
         attributes: finalAttributes
       } as { attributes: { [key: string]: string }; [key: string]: unknown };
     });
