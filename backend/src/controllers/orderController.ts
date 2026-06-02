@@ -462,11 +462,38 @@ const normalizeOrderId = (order: unknown): NormalizedOrder | null => {
       normalized.items = (normalized.items || []).map((item: unknown) => {
         if (item && typeof item === 'object') {
           const normalizedItem = { ...(item as Record<string, unknown>) };
+          // Fix item _id (Buffer object → hex string)
+          if (normalizedItem._id) {
+            const itemId = normalizedItem._id as any;
+            if (itemId && typeof itemId === 'object' && itemId.buffer) {
+              // Raw buffer: convert bytes to hex
+              const bytes = Object.values(itemId.buffer) as number[];
+              normalizedItem._id = bytes.map(b => b.toString(16).padStart(2, '0')).join('');
+            } else {
+              normalizedItem._id = String(itemId);
+            }
+          }
+          // Fix product reference
           if (normalizedItem.product && typeof normalizedItem.product === 'object' && normalizedItem.product !== null) {
             const productObj = normalizedItem.product as Record<string, unknown>;
             if (productObj._id) {
               normalizedItem.product = String(productObj._id);
             }
+          }
+          // Decode HTML entities in image URLs (&amp; → &)
+          if (typeof normalizedItem.image === 'string') {
+            normalizedItem.image = normalizedItem.image.replace(/&amp;/g, '&');
+          }
+          // Decode HTML entities in name
+          if (typeof normalizedItem.name === 'string') {
+            normalizedItem.name = normalizedItem.name
+              .replace(/&amp;/g, '&')
+              .replace(/&#174;/g, '®')
+              .replace(/&reg;/g, '®')
+              .replace(/&trade;/g, '™')
+              .replace(/&amp;amp;amp;amp;/g, '&')
+              .replace(/&amp;amp;amp;/g, '&')
+              .replace(/&amp;amp;/g, '&');
           }
           return normalizedItem;
         }
