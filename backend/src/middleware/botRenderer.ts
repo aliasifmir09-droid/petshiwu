@@ -64,6 +64,8 @@ const stripTags = (html: string): string => html.replace(/<[^>]*>/g, '');
 const truncate = (s: string, n: number): string =>
   s.length > n ? s.substring(0, n).trimEnd() + '…' : s;
 
+const escRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
  * Replace <title> tag in the HTML template
  */
@@ -97,6 +99,15 @@ const injectCanonical = (html: string, canonicalUrl: string): string => {
  */
 const injectBeforeHeadClose = (html: string, tags: string): string =>
   html.replace('</head>', `${tags}\n</head>`);
+
+/**
+ * Inject an <h1> tag as the first child of <body> so crawlers that
+ * don't execute JS still see the correct page heading.
+ */
+const injectH1 = (html: string, h1Text: string): string => {
+  const tag = `<h1>${esc(h1Text)}</h1>`;
+  return html.replace('<div id="root">', `<div id="root">\n${tag}`);
+};
 
 // ---------------------------------------------------------------------------
 // Route pattern matching
@@ -334,9 +345,21 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   const image: string = (product.images?.[0]) ?? `${BASE}/logo.png`;
   const images: string[] = (product.images ?? []).slice(0, 10);
   const brandName: string = product.brand?.trim() || 'PetShiwu';
+  
+  // Deduplicate brand from product name if it's repeated at the start
+  // e.g. "Purina ONE Purina® ONE® Adult Dog Dry Food" → "Purina® ONE® Adult Dog Dry Food"
+  let productName = product.name ?? '';
+  // Strip plain brand prefix (e.g. "Purina ONE" before "Purina® ONE®")
+  const plainBrand = brandName.replace(/[®™]/g, '').trim();
+  const brandRegex = new RegExp(`^(${escRegex(plainBrand)}\\s+)+`, 'i');
+  if (brandRegex.test(productName)) {
+    const afterBrand = productName.replace(brandRegex, '').trim();
+    if (afterBrand) productName = afterBrand;
+  }
+  
   const rawDesc: string = product.description
     ? stripTags(product.description)
-    : `${product.name} — premium pet supplies at PetShiwu.`;
+    : `${productName} — premium pet supplies at PetShiwu.`;
   const description = truncate(rawDesc, 160);
 
   const categoryName = typeof product.category === 'object' ? product.category?.name : product.category;
@@ -346,13 +369,13 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
 
   const productUrl = `${BASE}/${petType}${categorySlug ? `/${categorySlug}` : ''}/${slug}`;
 
-  const title = `${product.name} | PetShiwu`;
+  const title = `${productName} | PetShiwu`;
 
   // JSON-LD Product schema
   const productSchema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: product.name,
+    name: productName,
     description: rawDesc.substring(0, 500),
     image: images.length > 1 ? images : (images[0] ?? `${BASE}/logo.png`),
     brand: { '@type': 'Brand', name: brandName },
@@ -426,6 +449,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   html = injectDescription(html, description);
   html = injectCanonical(html, productUrl);
   html = injectBeforeHeadClose(html, injectedTags);
+  html = injectH1(html, productName);
   return html;
 };
 
@@ -482,6 +506,7 @@ const buildBlogHtml = (template: string, blog: any): string => {
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
   html = injectBeforeHeadClose(html, injectedTags);
+  html = injectH1(html, blog.title);
   return html;
 };
 
@@ -530,6 +555,7 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
   html = injectBeforeHeadClose(html, injectedTags);
+  html = injectH1(html, guide.title);
   return html;
 };
 
@@ -582,6 +608,7 @@ const buildCategoryHtml = (template: string, category: any, petType?: string): s
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
   html = injectBeforeHeadClose(html, injectedTags);
+  html = injectH1(html, catName);
   return html;
 };
 
