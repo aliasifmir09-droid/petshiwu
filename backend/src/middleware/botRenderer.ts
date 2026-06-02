@@ -349,12 +349,17 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   // Deduplicate brand from product name if it's repeated at the start
   // e.g. "Purina ONE Purina® ONE® Adult Dog Dry Food" → "Purina® ONE® Adult Dog Dry Food"
   let productName = product.name ?? '';
-  // Strip plain brand prefix (e.g. "Purina ONE" before "Purina® ONE®")
-  const plainBrand = brandName.replace(/[®™]/g, '').trim();
-  const brandRegex = new RegExp(`^(${escRegex(plainBrand)}\\s+)+`, 'i');
-  if (brandRegex.test(productName)) {
-    const afterBrand = productName.replace(brandRegex, '').trim();
-    if (afterBrand) productName = afterBrand;
+  if (brandName && productName.length > brandName.length) {
+    // Check if name starts with brand (case-insensitive, allowing for special chars)
+    const nameStart = productName.substring(0, brandName.length + 5).toLowerCase();
+    const brandLower = brandName.toLowerCase();
+    // Simple check: if the plain brand appears at start, try to strip it
+    if (nameStart.includes(brandLower)) {
+      const afterBrand = productName.substring(brandName.length).trim();
+      if (afterBrand && !afterBrand.toLowerCase().startsWith(brandLower)) {
+        productName = afterBrand;
+      }
+    }
   }
   
   const rawDesc: string = product.description
