@@ -468,6 +468,7 @@ app.use('/api/health', healthRoutes);
 app.use('/api/search-history', searchHistoryRoutes);
 app.use('/api/search-analytics', searchAnalyticsRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/v1/cart', cartRoutes);
 app.use('/api/payment-methods', legacyRouteDeprecation, paymentMethodRoutes);
 app.use('/api/recommendations', legacyRouteDeprecation, recommendationAnalyticsRoutes);
 app.use('/api/reorder-suggestions', legacyRouteDeprecation, reorderSuggestionsRoutes);
