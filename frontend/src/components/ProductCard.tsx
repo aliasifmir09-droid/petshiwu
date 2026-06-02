@@ -4,7 +4,7 @@ import { Heart, Star, ShoppingCart, TrendingUp, Clock, Eye } from 'lucide-react'
 import { Product } from '@/types';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useCartStore } from '@/stores/cartStore';
-import { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
+import { memo, useCallback, useMemo, useState, useRef } from 'react';
 import { normalizeImageUrl, handleImageError, generateSrcSet, getOptimalImageSize } from '@/utils/imageUtils';
 import { useImageLoadTracker } from '@/hooks/useImageLoadTracker';
 import { usePrefetch } from '@/hooks/usePrefetch';
