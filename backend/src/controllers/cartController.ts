@@ -5,6 +5,29 @@ import { AppError } from '../utils/errors';
 import logger from '../utils/logger';
 import mongoose from 'mongoose';
 
+const toStr = (val: any): string | undefined => {
+  if (!val) return undefined;
+  if (typeof val === 'string') return val;
+  if (val.buffer && typeof val.buffer === 'object') {
+    return Buffer.from(Object.values(val.buffer) as number[]).toString('hex');
+  }
+  return String(val);
+};
+
+const normalizeCartItem = (item: any) => {
+  if (!item) return item;
+  const doc = item._doc || item;
+  return {
+    _id: toStr(doc._id),
+    product: toStr(doc.product),
+    variant: doc.variant || undefined,
+    quantity: doc.quantity,
+    price: doc.price,
+    name: doc.name,
+    image: doc.image,
+  };
+};
+
 interface AuthRequest extends Request {
   user?: {
     _id: mongoose.Types.ObjectId;
@@ -110,9 +133,9 @@ export const saveCart = async (req: AuthRequest, res: Response, next: NextFuncti
     res.status(200).json({
       success: true,
       data: {
-        cartId: cart._id,
+        cartId: toStr(cart._id),
         shareId: cart.shareId,
-        items: cart.items,
+        items: cart.items.map(normalizeCartItem),
         lastUpdated: cart.lastUpdated
       }
     });
@@ -152,9 +175,9 @@ export const getCart = async (req: AuthRequest, res: Response, next: NextFunctio
     res.status(200).json({
       success: true,
       data: {
-        cartId: cart._id,
+        cartId: toStr(cart._id),
         shareId: cart.shareId,
-        items: cart.items,
+        items: cart.items.map(normalizeCartItem),
         lastUpdated: cart.lastUpdated
       }
     });
@@ -183,7 +206,7 @@ export const getSharedCart = async (req: Request, res: Response, next: NextFunct
     res.status(200).json({
       success: true,
       data: {
-        items: cart.items,
+        items: cart.items.map(normalizeCartItem),
         shareId: cart.shareId
       }
     });
