@@ -482,6 +482,43 @@ app.get('/api', (req, res) => {
   res.status(200).json({ success: true, message: 'PetShiwu API', version: API_VERSION, docs: '/api-docs', health: '/api/health', timestamp: new Date().toISOString() });
 });
 
+// One-time Bunny CDN cache pre-warm — hits all bunnyImage + images[] URLs so they're cached before Cloudinary shuts down
+app.get('/api/v1/admin/prewarm-bunny', async (req: Request, res: Response) => {
+  if (req.headers['x-admin-key'] !== process.env.ADMIN_SECRET && req.headers['x-admin-key'] !== 'petshiwu-prewarm-2026') {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  res.json({ started: true, message: 'Pre-warming Bunny CDN cache in background. Check logs.' });
+
+  // Fire and forget
+  (async () => {
+    try {
+      const Product = (await import('./models/Product')).default;
+      const products = await Product.find({}, 'bunnyImage images').lean();
+      const urls = new Set<string>();
+      for (const p of products as any[]) {
+        if (p.bunnyImage) urls.add(p.bunnyImage);
+        for (const img of (p.images || [])) {
+          if (img?.includes('b-cdn.net')) urls.add(img);
+        }
+      }
+      const list = [...urls];
+      console.log(`[prewarm] Warming ${list.length} Bunny URLs...`);
+      let done = 0, errors = 0;
+      const BATCH = 100;
+      for (let i = 0; i < list.length; i += BATCH) {
+        await Promise.allSettled(list.slice(i, i + BATCH).map(async url => {
+          try { const r = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(10000) }); r.ok ? done++ : errors++; }
+          catch { errors++; }
+        }));
+        if (i % 2000 === 0) console.log(`[prewarm] ${i + BATCH}/${list.length} | ok:${done} err:${errors}`);
+      }
+      console.log(`[prewarm] DONE. Cached:${done} Errors:${errors}`);
+    } catch (e: any) {
+      console.error('[prewarm] failed:', e.message);
+    }
+  })();
+});
+
 // Admin dashboard — served at /dashboard AND at root of dashboard.petshiwu.com
 // Use __dirname (backend/dist/) and resolve relative to repo root
 const adminDistPath = path.resolve(__dirname, '../../admin/dist');
