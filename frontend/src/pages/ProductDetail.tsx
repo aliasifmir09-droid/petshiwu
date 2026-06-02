@@ -479,7 +479,7 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     addToCart(product, selectedVariantData || undefined, quantity);
-    // Show success message or redirect to cart
+    showToast(`✓ ${product.name.substring(0, 40)}${product.name.length > 40 ? '...' : ''} added to cart`, 'success');
   };
 
   const handleWishlistToggle = async () => {

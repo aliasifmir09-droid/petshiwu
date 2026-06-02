@@ -4,7 +4,7 @@ import { Heart, Star, ShoppingCart, TrendingUp, Clock, Eye } from 'lucide-react'
 import { Product } from '@/types';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useCartStore } from '@/stores/cartStore';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { normalizeImageUrl, handleImageError, generateSrcSet, getOptimalImageSize } from '@/utils/imageUtils';
 import { useImageLoadTracker } from '@/hooks/useImageLoadTracker';
 import { usePrefetch } from '@/hooks/usePrefetch';
@@ -27,6 +27,8 @@ interface ProductCardProps {
 const ProductCard = memo(({ product, hideCartButton = false, index, priority = false, searchTerm, recommendationType, sourceProductId, onRecommendationClick }: ProductCardProps) => {
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
   const { addToCart } = useCartStore();
+  const [cartAdded, setCartAdded] = useState(false);
+  const cartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { markImageFailed } = useImageLoadTracker();
   const { prefetchProduct } = usePrefetch();
   
@@ -89,6 +91,9 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
   const handleAddToCart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     addToCart(product, product.variants[0]);
+    setCartAdded(true);
+    if (cartTimerRef.current) clearTimeout(cartTimerRef.current);
+    cartTimerRef.current = setTimeout(() => setCartAdded(false), 2500);
   }, [product, addToCart]);
 
   const discountPercent = useMemo(() => product.compareAtPrice
@@ -307,17 +312,28 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
               disabled={!product.inStock}
               aria-label={product.inStock ? `Add ${product.name} to cart` : `${product.name} is out of stock`}
               className={`w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm transition-all transform active:scale-95 btn-ripple relative overflow-hidden ${
-                product.inStock
+                cartAdded
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg scale-105'
+                  : product.inStock
                   ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-2xl hover:scale-105'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
-              <ShoppingCart size={20} strokeWidth={2.5} />
-              <span className="relative z-10">
-                {product.inStock ? 'Add to Cart' : 'Out of Stock'}
-              </span>
-              {product.inStock && (
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              {cartAdded ? (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span className="relative z-10">Added to Cart!</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingCart size={20} strokeWidth={2.5} />
+                  <span className="relative z-10">
+                    {product.inStock ? 'Add to Cart' : 'Out of Stock'}
+                  </span>
+                  {product.inStock && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                  )}
+                </>
               )}
             </button>
           </div>
