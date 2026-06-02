@@ -453,8 +453,8 @@ const Header = () => {
                         <div>
                           <p className="text-sm font-bold mb-1">We're Here to Help</p>
                           <p className="text-xs text-gray-600 mb-2">Mon-Fri: 9AM - 8PM EST | Sat-Sun: 9AM - 6PM EST</p>
-                          <a href="tel:+16263420419" className="text-xl font-bold hover:underline block">Call Us</a>
-                          <a href="tel:+16263420419" className="text-2xl font-black text-[#1E3A8A] hover:text-blue-700 block">+1 (626) 342-0419</a>
+                          <a href="tel:+18002592605" className="text-xl font-bold hover:underline block">Call Us</a>
+                          <a href="tel:+18002592605" className="text-2xl font-black text-[#1E3A8A] hover:text-blue-700 block">+1 (800) 259-2605</a>
                         </div>
                       </div>
                     </div>

@@ -57,7 +57,7 @@ const Accessibility = () => {
           </p>
           <div className="mt-3 bg-gray-50 rounded-xl p-5 space-y-1">
             <p>Email: <a href="mailto:support@petshiwu.com" className="text-blue-600 hover:underline">support@petshiwu.com</a></p>
-            <p>Phone: <a href="tel:+16263420419" className="text-blue-600 hover:underline">+1 (626) 342-0419</a></p>
+            <p>Phone: <a href="tel:+18002592605" className="text-blue-600 hover:underline">+1 (800) 259-2605</a></p>
           </div>
           <p className="mt-3 text-sm text-gray-500">
             We aim to respond to accessibility feedback within 2 business days.

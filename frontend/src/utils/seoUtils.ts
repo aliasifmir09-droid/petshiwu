@@ -310,7 +310,7 @@ export const generateOrganizationSchema = (): object => {
       'Everything Your Pet Needs - Quality Pet Supplies Online',
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: '+1-626-342-0419',
+      telephone: '+1-800-259-2605',
       contactType: 'Customer Service',
       areaServed: 'US',
       availableLanguage: 'English'

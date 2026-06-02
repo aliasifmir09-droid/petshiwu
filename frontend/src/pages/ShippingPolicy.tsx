@@ -101,7 +101,7 @@ const ShippingPolicy = () => {
             <a href="mailto:support@petshiwu.com" className="text-blue-600 hover:underline">
               support@petshiwu.com
             </a>{' '}
-            or <a href="tel:+16263420419" className="text-blue-600 hover:underline">+1 (626) 342-0419</a>.
+            or <a href="tel:+18002592605" className="text-blue-600 hover:underline">+1 (800) 259-2605</a>.
           </p>
         </section>
 

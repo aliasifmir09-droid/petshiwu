@@ -430,7 +430,7 @@ PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
 === COMPANY ===
 - Name: PetShiwu | Website: petshiwu.com
 - Address: 37-68 74th Street, Jackson Heights, Queens, NY 11372
-- Phone: +1 (626) 342-0419 | Email: support@petshiwu.com
+- Phone: +1 (800) 259-2605 | Email: support@petshiwu.com
 - Support hours: 7 days a week, 9 AM – 8 PM EST
 - 10,000+ products for dogs, cats, birds, fish, reptiles, and small animals
 - Top brands: Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Orijen, Acana, Taste of the Wild
@@ -508,7 +508,7 @@ Q: My pet refuses to eat the food I ordered. Can I return it?
 A: Absolutely yes. Our pet food satisfaction guarantee covers refused food. Go to petshiwu.com/returns, pick "My pet won't eat it" as the reason, and we'll refund you in full. We stand completely behind our products.
 
 Q: How do I cancel or change my order?
-A: Contact us within 1 hour of placing your order — call +1 (626) 342-0419 or email support@petshiwu.com. After 1 hour the order may already be in processing, but you can always return it for free after delivery.
+A: Contact us within 1 hour of placing your order — call +1 (800) 259-2605 or email support@petshiwu.com. After 1 hour the order may already be in processing, but you can always return it for free after delivery.
 
 Q: What payment methods do you accept?
 A: Visa, Mastercard, American Express, Discover, PayPal, Apple Pay, and Google Pay. All transactions are SSL-encrypted.
@@ -535,7 +535,7 @@ Q: How does the wishlist work?
 A: Click the heart icon on any product to save it. Your wishlist lives at petshiwu.com/favorites. You can generate a shareable link — great for family or friends buying your pet a gift.
 
 Q: How do I contact customer support?
-A: Phone: +1 (626) 342-0419 (7 days/week, 9 AM–8 PM EST). Email: support@petshiwu.com (response within 2 business hours). Or use the Contact form at petshiwu.com/contact. We're real people who love pets and are happy to help.
+A: Phone: +1 (800) 259-2605 (7 days/week, 9 AM–8 PM EST). Email: support@petshiwu.com (response within 2 business hours). Or use the Contact form at petshiwu.com/contact. We're real people who love pets and are happy to help.
 
 Q: Where is PetShiwu located?
 A: Jackson Heights, Queens, New York — 37-68 74th Street, NY 11372. We're proud to be a Queens-based pet store serving all of NYC and shipping nationwide.
@@ -553,10 +553,10 @@ Q: How do I donate to animal shelters?
 A: Visit petshiwu.com/donate to donate pet food and supplies to our NYC shelter partners. Every item donated goes directly to animals at NYC shelters who need food and care.
 
 Q: What if my order arrives damaged?
-A: Contact us within 48 hours with a photo of the damage — phone +1 (626) 342-0419 or email support@petshiwu.com. We'll send a free replacement or issue a full refund immediately, no questions asked.
+A: Contact us within 48 hours with a photo of the damage — phone +1 (800) 259-2605 or email support@petshiwu.com. We'll send a free replacement or issue a full refund immediately, no questions asked.
 
 Q: What if I received the wrong item?
-A: Contact us right away at +1 (626) 342-0419 or support@petshiwu.com. We'll ship the correct item with free expedited shipping and arrange free pickup of the wrong item at no inconvenience to you.
+A: Contact us right away at +1 (800) 259-2605 or support@petshiwu.com. We'll ship the correct item with free expedited shipping and arrange free pickup of the wrong item at no inconvenience to you.
 
 Q: Is my personal information secure?
 A: Yes. We use SSL encryption on all transactions, never sell your personal data to third parties, and follow strict privacy practices. Full details at petshiwu.com/privacy.

@@ -112,8 +112,8 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-2 text-sm text-gray-400">
               <li>
-                <a href="tel:+16263420419" className="hover:text-white transition-colors">
-                  📞 +1 (626) 342-0419
+                <a href="tel:+18002592605" className="hover:text-white transition-colors">
+                  📞 +1 (800) 259-2605
                 </a>
               </li>
               <li>

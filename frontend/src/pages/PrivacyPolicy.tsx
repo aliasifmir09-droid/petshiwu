@@ -26,7 +26,7 @@ const PrivacyPolicy = () => {
             <a href="mailto:support@petshiwu.com" className="text-blue-600 hover:underline">
               support@petshiwu.com
             </a>{' '}
-            or call <a href="tel:+16263420419" className="text-blue-600 hover:underline">+1 (626) 342-0419</a>.
+            or call <a href="tel:+18002592605" className="text-blue-600 hover:underline">+1 (800) 259-2605</a>.
           </p>
         </section>
 
@@ -139,7 +139,7 @@ const PrivacyPolicy = () => {
             <p><strong>PetShiwu</strong></p>
             <p>37-68 74th St, Jackson Heights, NY 11372</p>
             <p>Email: <a href="mailto:support@petshiwu.com" className="text-blue-600 hover:underline">support@petshiwu.com</a></p>
-            <p>Phone: <a href="tel:+16263420419" className="text-blue-600 hover:underline">+1 (626) 342-0419</a></p>
+            <p>Phone: <a href="tel:+18002592605" className="text-blue-600 hover:underline">+1 (800) 259-2605</a></p>
           </div>
         </section>
 

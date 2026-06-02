@@ -1,0 +1,12 @@
+import { MongoClient } from 'mongodb';
+const uri = process.env.MONGO_URI;
+const client = new MongoClient(uri, { serverSelectionTimeoutMS: 15000 });
+await client.connect();
+const db = client.db('petshop');
+const total = await db.collection('products').countDocuments({});
+const done = await db.collection('products').countDocuments({ bunnyImage: { $exists: true } });
+const sample = await db.collection('products').findOne({ images: { $exists: true, $ne: [] } }, { projection: { cloudinaryImage: 1, images: 1 } });
+console.log('total:', total, '| bunny done:', done);
+console.log('cloudinaryImage:', sample?.cloudinaryImage?.substring(0,80));
+console.log('images[0]:', sample?.images?.[0]?.substring(0,80));
+await client.close();

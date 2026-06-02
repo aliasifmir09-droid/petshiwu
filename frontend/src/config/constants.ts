@@ -42,8 +42,8 @@ export const API_RETRY_ATTEMPTS = 3;
 export const TOAST_DURATION = 3000; // 3 seconds
 export const DEBOUNCE_DELAY = 300; // 300ms
 // Contact information
-export const CONTACT_PHONE = '+1 (626) 342-0419';
-export const CONTACT_PHONE_TEL = '+16263420419'; // For tel: links
+export const CONTACT_PHONE = '+1 (800) 259-2605';
+export const CONTACT_PHONE_TEL = '+18002592605'; // For tel: links
 export const CONTACT_EMAIL = 'support@petshiwu.com';
 export const CONTACT_ADDRESS = {
   street: '37-68 74th St',

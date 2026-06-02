@@ -23,7 +23,7 @@ const Orders = () => {
   const [pendingStatusChange, setPendingStatusChange] = useState<{ orderId: string; status: string } | null>(null);
 
   // CRITICAL: Set staleTime to 0 and refetchOnMount to ensure immediate updates after mutations
-  const { data: ordersData, isLoading } = useQuery({
+  const { data: ordersData, isLoading, error: ordersError } = useQuery({
     queryKey: ['orders', page, statusFilter],
     queryFn: () => adminService.getAllOrders({ 
       page, 
@@ -35,6 +35,7 @@ const Orders = () => {
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes for garbage collection
     refetchInterval: 15000, // Poll every 15 seconds for new orders (fallback if SSE fails)
     refetchOnWindowFocus: true, // Refetch when user returns to tab
+    retry: 1, // Retry once on failure
   });
 
   // Auto-refresh hook - automatically refreshes queries after mutations
@@ -260,6 +261,34 @@ const Orders = () => {
           />
         </div>
       </div>
+
+      {/* Error Display */}
+      {ordersError && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-6 flex items-start gap-4">
+          <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
+          <div>
+            <h3 className="font-semibold text-red-800 mb-1">Unable to Load Orders</h3>
+            <p className="text-red-700 text-sm">
+              {ordersError instanceof Error 
+                ? ordersError.message 
+                : typeof ordersError === 'object' && ordersError && 'message' in ordersError
+                ? (ordersError as any).message
+                : 'An unexpected error occurred. Please try refreshing the page.'}
+            </p>
+            {ordersError instanceof Error && ordersError.message.includes('403') && (
+              <p className="text-red-700 text-sm mt-2">
+                You don't have permission to view orders. Please contact an administrator to enable the "Manage Orders" permission for your account.
+              </p>
+            )}
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="flex-shrink-0 text-red-600 hover:text-red-800"
+          >
+            <X size={20} />
+          </button>
+        </div>
+      )}
 
       {/* Orders Table */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden animate-fade-in-up">

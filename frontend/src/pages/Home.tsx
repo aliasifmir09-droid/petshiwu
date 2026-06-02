@@ -112,7 +112,7 @@ const Home = () => {
           logo: 'https://www.petshiwu.com/logo-square-512.png',
           description:
             'PetShiwu — premium pet food, toys, and supplies delivered to Queens, Brooklyn, Manhattan, and all of NYC. 10,000+ products, free shipping over $49.',
-          contactPoint: { telephone: '+1-626-342-0419', contactType: 'customer service' },
+          contactPoint: { telephone: '+1-800-259-2605', contactType: 'customer service' },
           address: {
             streetAddress: '37-68 74th St',
             addressLocality: 'Jackson Heights',
@@ -128,7 +128,7 @@ const Home = () => {
           name: 'PetShiwu',
           url: 'https://www.petshiwu.com',
           logo: 'https://www.petshiwu.com/logo-square-512.png',
-          telephone: '+1-626-342-0419',
+          telephone: '+1-800-259-2605',
           address: {
             streetAddress: '37-68 74th St',
             addressLocality: 'Jackson Heights',
