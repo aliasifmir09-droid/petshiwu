@@ -17,9 +17,19 @@ const toStr = (val: any): string | undefined => {
 const normalizeCartItem = (item: any) => {
   if (!item) return item;
   const doc = item._doc || item;
+  // product may be a populated object or a raw ObjectId/Buffer
+  const productField = doc.product;
+  let productId: string | undefined;
+  if (productField && typeof productField === 'object' && !Buffer.isBuffer(productField)) {
+    // Populated Mongoose document — extract _id
+    const pid = productField._id || productField.id;
+    productId = pid ? (typeof pid === 'string' ? pid : pid.toString()) : undefined;
+  } else {
+    productId = toStr(productField);
+  }
   return {
     _id: toStr(doc._id),
-    product: toStr(doc.product),
+    product: productId,
     variant: doc.variant || undefined,
     quantity: doc.quantity,
     price: doc.price,
