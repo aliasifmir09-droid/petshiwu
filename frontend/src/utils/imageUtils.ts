@@ -75,6 +75,24 @@ const optimizeCloudinaryUrl = (url: string, width?: number, height?: number, for
 };
 
 /**
+ * Optimizes Bunny CDN image URLs using Bunny's Image Optimizer.
+ * Appends ?width=X&quality=82 — Bunny auto-converts to WebP for supporting browsers.
+ * A 300KB JPEG becomes ~40KB WebP at the same perceived quality.
+ */
+const optimizeBunnyUrl = (url: string, width?: number, height?: number): string => {
+  if (!url.includes('b-cdn.net')) return url;
+  try {
+    const urlObj = new URL(url);
+    if (width) urlObj.searchParams.set('width', String(width));
+    if (height) urlObj.searchParams.set('height', String(height));
+    urlObj.searchParams.set('quality', '82');
+    return urlObj.toString();
+  } catch {
+    return url;
+  }
+};
+
+/**
  * Proxies Adobe Scene7 (PetSmart CDN) images through wsrv.nl.
  * This decouples us from PetSmart's CDN, adds caching, and serves WebP.
  * wsrv.nl is a free, open-source image proxy/CDN (images.weserv.nl).
@@ -188,6 +206,9 @@ export const normalizeImageUrl = (
     // Optimize based on image provider
     if (imageUrl.includes('res.cloudinary.com')) {
       return optimizeCloudinaryUrl(imageUrl, finalWidth, finalHeight, format);
+    }
+    if (imageUrl.includes('b-cdn.net')) {
+      return optimizeBunnyUrl(imageUrl, finalWidth, finalHeight);
     }
     if (imageUrl.includes('scene7.com')) {
       return optimizeScene7Url(imageUrl, finalWidth, finalHeight);
