@@ -124,8 +124,15 @@ const AdvancedSearch = () => {
     try {
       const compressed = await compressImage(file);
       visualSearchMutation.mutate(compressed);
-    } catch (err: any) {
-      setVisualSearchError(err?.message || 'Could not process image. Please try a different photo.');
+    } catch {
+      // Compression fails for HEIC/HEIF (iPhone default format) because the browser
+      // canvas can't decode them. Gemini Vision supports HEIC natively, so send as-is.
+      // Also fall back for any other format the canvas rejects.
+      if (file.size <= 10 * 1024 * 1024) {
+        visualSearchMutation.mutate(file);
+      } else {
+        setVisualSearchError('Photo is too large. Please try a smaller image or take a new photo.');
+      }
     }
   };
 
@@ -422,12 +429,23 @@ const AdvancedSearch = () => {
           <div className="max-w-3xl mx-auto px-4 pt-4">
             <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
               <div className="flex items-start gap-4">
-                {/* Preview image */}
+                {/* Preview image — use onerror fallback for HEIC/unsupported formats */}
                 <div className="relative flex-shrink-0">
                   <img
                     src={photoPreview}
                     alt="Your photo"
                     className="w-20 h-20 rounded-xl object-cover border border-gray-200"
+                    onError={e => {
+                      // HEIC or unsupported format — show camera icon placeholder
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      const parent = (e.target as HTMLImageElement).parentElement;
+                      if (parent && !parent.querySelector('.heic-placeholder')) {
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'heic-placeholder w-20 h-20 rounded-xl border border-gray-200 bg-blue-50 flex items-center justify-center text-3xl';
+                        placeholder.textContent = '📷';
+                        parent.insertBefore(placeholder, e.target as HTMLImageElement);
+                      }
+                    }}
                   />
                   <button
                     onClick={clearPhoto}
