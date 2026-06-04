@@ -225,29 +225,49 @@ export const sendOrderConfirmationEmail = async (
     const isCOD = orderData.paymentMethod === 'cod';
     const paymentLabel = isCOD ? 'Cash on Delivery (COD)' : orderData.paymentMethod.replace(/_/g, ' ');
 
-    // ── Item rows ────────────────────────────────────────────
+    // ── Item rows (dark premium style) ───────────────────────
     const itemRows = orderData.items.map(item => `
       <tr>
-        <td style="padding:14px 10px;border-bottom:1px solid #f0f0f0;vertical-align:middle;">
-          ${item.image
-            ? `<img src="${item.image}" alt="${item.name}" width="56" height="56"
-                 style="width:56px;height:56px;border-radius:10px;object-fit:cover;
-                        border:1px solid #e8e8e8;display:inline-block;vertical-align:middle;margin-right:12px;">`
-            : `<span style="display:inline-block;width:56px;height:56px;background:#f0f5ff;
-                            border-radius:10px;vertical-align:middle;margin-right:12px;
-                            text-align:center;line-height:56px;font-size:22px;">🐾</span>`}
-          <span style="vertical-align:middle;font-size:14px;font-weight:600;color:#1a1a2e;
-                       max-width:260px;display:inline-block;line-height:1.3;">${item.name}</span>
-        </td>
-        <td style="padding:14px 10px;border-bottom:1px solid #f0f0f0;text-align:center;
-                   font-size:14px;color:#555;vertical-align:middle;">×${item.quantity}</td>
-        <td style="padding:14px 10px;border-bottom:1px solid #f0f0f0;text-align:right;
-                   font-size:14px;font-weight:700;color:#1a1a2e;vertical-align:middle;">
-          $${(item.price * item.quantity).toFixed(2)}
+        <td style="padding:14px 16px;border-bottom:1px solid #1e3a5c;vertical-align:top;">
+          <table cellpadding="0" cellspacing="0" width="100%">
+            <tr>
+              <td width="72" valign="top" style="padding-right:14px;">
+                ${item.image
+                  ? `<img src="${item.image}" alt="${item.name}" width="64" height="64"
+                       style="width:64px;height:64px;border-radius:12px;object-fit:cover;
+                              border:1px solid #1e3a5c;display:block;">`
+                  : `<div style="width:64px;height:64px;background:#1a2e45;border-radius:12px;
+                                 text-align:center;line-height:64px;font-size:26px;border:1px solid #1e3a5c;">🐾</div>`}
+              </td>
+              <td valign="middle">
+                <div style="font-size:14px;font-weight:700;color:#ffffff;line-height:1.4;margin-bottom:10px;">${item.name}</div>
+                <table cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding-right:16px;">
+                      <div style="display:inline-flex;align-items:center;background:#1a2e45;border:1px solid #1e3a5c;
+                                  border-radius:8px;padding:5px 10px;">
+                        <span style="font-size:12px;color:#7aa3c8;font-weight:600;text-transform:uppercase;
+                                     letter-spacing:0.5px;margin-right:6px;">📦 QTY:</span>
+                        <span style="font-size:13px;font-weight:800;color:#ffffff;">${item.quantity}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div style="display:inline-flex;align-items:center;background:#1a2e45;border:1px solid #1e3a5c;
+                                  border-radius:8px;padding:5px 10px;">
+                        <span style="font-size:12px;color:#7aa3c8;font-weight:600;text-transform:uppercase;
+                                     letter-spacing:0.5px;margin-right:6px;">💵 AMOUNT:</span>
+                        <span style="font-size:13px;font-weight:800;color:#60d394;">$${(item.price * item.quantity).toFixed(2)}</span>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
         </td>
       </tr>`).join('');
 
-    // ── Full HTML email ───────────────────────────────────────
+    // ── Full HTML email (dark premium) ────────────────────────
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -255,99 +275,76 @@ export const sendOrderConfirmationEmail = async (
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Order Confirmed – Petshiwu</title>
 </head>
-<body style="margin:0;padding:0;background:#f4f6fb;font-family:'Helvetica Neue',Arial,sans-serif;">
+<body style="margin:0;padding:0;background:#071828;font-family:'Helvetica Neue',Arial,sans-serif;">
 
   <!-- Wrapper -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6fb;padding:30px 0;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#071828;padding:32px 0;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0"
-             style="max-width:600px;width:100%;background:#ffffff;
-                    border-radius:20px;overflow:hidden;
-                    box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+      <table width="580" cellpadding="0" cellspacing="0"
+             style="max-width:580px;width:100%;background:#0d2137;
+                    border-radius:24px;overflow:hidden;
+                    border:1px solid #1a3550;">
 
         <!-- ── HEADER ── -->
         <tr>
-          <td style="background:linear-gradient(135deg,#1a56db 0%,#0e3fa5 100%);
-                     padding:40px 40px 32px;text-align:center;">
-            <!-- Logo wordmark -->
-            <div style="font-size:28px;font-weight:900;color:#ffffff;
-                        letter-spacing:-0.5px;margin-bottom:24px;">
+          <td style="padding:44px 40px 36px;text-align:center;background:#0d2137;">
+
+            <!-- Logo -->
+            <div style="font-size:26px;font-weight:900;color:#ffffff;letter-spacing:-0.5px;margin-bottom:4px;">
               🐾 Petshiwu
             </div>
+            <div style="font-size:12px;color:#7aa3c8;letter-spacing:1px;margin-bottom:28px;">
+              — For the love of pets —
+            </div>
 
-            <!-- Success badge -->
-            <div style="display:inline-block;background:rgba(255,255,255,0.15);
-                        border-radius:50px;padding:8px 20px;margin-bottom:20px;">
-              <span style="color:#a8f0c6;font-size:13px;font-weight:700;
-                           text-transform:uppercase;letter-spacing:1px;">
+            <!-- ORDER CONFIRMED badge -->
+            <div style="display:inline-block;background:#0f4c2a;border:1px solid #1a7a44;
+                        border-radius:50px;padding:8px 22px;margin-bottom:24px;">
+              <span style="color:#60d394;font-size:13px;font-weight:700;
+                           text-transform:uppercase;letter-spacing:1.2px;">
                 ✓ &nbsp;Order Confirmed
               </span>
             </div>
 
-            <h1 style="margin:0 0 8px;color:#ffffff;font-size:30px;
-                       font-weight:800;line-height:1.2;">
+            <h1 style="margin:0 0 10px;color:#ffffff;font-size:32px;font-weight:900;line-height:1.2;">
               Thank You, ${firstName}! 🎉
             </h1>
-            <p style="margin:0;color:rgba(255,255,255,0.85);font-size:16px;line-height:1.5;">
+            <p style="margin:0 0 28px;color:#7aa3c8;font-size:15px;line-height:1.5;">
               Your furry friend is going to love this order.
             </p>
 
-            <!-- Order number pill -->
-            <div style="margin-top:24px;display:inline-block;
-                        background:rgba(255,255,255,0.12);
-                        border:1px solid rgba(255,255,255,0.25);
-                        border-radius:12px;padding:10px 24px;">
-              <span style="color:rgba(255,255,255,0.7);font-size:12px;
-                           font-weight:600;text-transform:uppercase;letter-spacing:1px;">
-                Order Number
-              </span>
-              <div style="color:#ffffff;font-size:20px;font-weight:800;
-                          letter-spacing:1px;margin-top:4px;">
+            <!-- Order number card -->
+            <div style="background:#112840;border:1px solid #1a3550;border-radius:14px;
+                        padding:16px 28px;display:inline-block;">
+              <div style="font-size:11px;color:#7aa3c8;font-weight:700;text-transform:uppercase;
+                          letter-spacing:1px;margin-bottom:6px;">📋 Order Number</div>
+              <div style="color:#ffffff;font-size:20px;font-weight:900;letter-spacing:1px;">
                 #${orderNumber}
               </div>
             </div>
           </td>
         </tr>
 
-        <!-- ── SLOGAN BANNER ── -->
+        <!-- ── TAGLINE ── -->
         <tr>
-          <td style="background:#f0f5ff;padding:18px 40px;text-align:center;
-                     border-bottom:1px solid #e8edf5;">
-            <p style="margin:0;font-size:15px;color:#1a56db;font-weight:600;
-                      font-style:italic;">
-              "Premium care for every paw, wing, fin &amp; claw — delivered to your door." 🐶🐱🐦🐠
+          <td style="padding:20px 40px;text-align:center;background:#0a1e30;
+                     border-top:1px solid #1a3550;border-bottom:1px solid #1a3550;">
+            <div style="font-size:22px;margin-bottom:8px;">🐕 🐈 🐦 🐠</div>
+            <p style="margin:0;font-size:14px;color:#7aa3c8;font-style:italic;line-height:1.6;">
+              Premium care for every paw, wing, fin &amp; claw —<br>delivered to your door.
             </p>
           </td>
         </tr>
 
-        <!-- ── ORDER ITEMS ── -->
+        <!-- ── YOUR ITEMS ── -->
         <tr>
-          <td style="padding:32px 40px 0;">
-            <h2 style="margin:0 0 16px;font-size:18px;font-weight:800;color:#1a1a2e;">
-              Your Items
-            </h2>
+          <td style="padding:28px 28px 8px;">
+            <div style="font-size:16px;font-weight:800;color:#ffffff;margin-bottom:14px;">
+              🛍 Your Items
+            </div>
             <table width="100%" cellpadding="0" cellspacing="0"
-                   style="border-collapse:collapse;border-radius:12px;overflow:hidden;
-                          border:1px solid #f0f0f0;">
-              <thead>
-                <tr style="background:#f8f9ff;">
-                  <th style="padding:12px 10px;text-align:left;font-size:12px;
-                             font-weight:700;color:#888;text-transform:uppercase;
-                             letter-spacing:0.5px;border-bottom:1px solid #f0f0f0;">
-                    Product
-                  </th>
-                  <th style="padding:12px 10px;text-align:center;font-size:12px;
-                             font-weight:700;color:#888;text-transform:uppercase;
-                             letter-spacing:0.5px;border-bottom:1px solid #f0f0f0;">
-                    Qty
-                  </th>
-                  <th style="padding:12px 10px;text-align:right;font-size:12px;
-                             font-weight:700;color:#888;text-transform:uppercase;
-                             letter-spacing:0.5px;border-bottom:1px solid #f0f0f0;">
-                    Amount
-                  </th>
-                </tr>
-              </thead>
+                   style="border-collapse:collapse;background:#112840;
+                          border-radius:14px;overflow:hidden;border:1px solid #1a3550;">
               <tbody>
                 ${itemRows}
               </tbody>
@@ -357,48 +354,44 @@ export const sendOrderConfirmationEmail = async (
 
         <!-- ── ORDER TOTAL ── -->
         <tr>
-          <td style="padding:0 40px 32px;">
+          <td style="padding:16px 28px 8px;">
             <table width="100%" cellpadding="0" cellspacing="0"
-                   style="margin-top:16px;border-radius:12px;overflow:hidden;
-                          background:#f8f9ff;border:1px solid #e8edf5;">
+                   style="background:#112840;border:1px solid #1a3550;border-radius:14px;overflow:hidden;">
               <tr>
-                <td style="padding:12px 20px;font-size:14px;color:#555;">Subtotal</td>
-                <td style="padding:12px 20px;font-size:14px;color:#1a1a2e;
-                           font-weight:600;text-align:right;">
+                <td style="padding:12px 20px;font-size:14px;color:#7aa3c8;border-bottom:1px solid #1a3550;">Subtotal</td>
+                <td style="padding:12px 20px;font-size:14px;color:#ffffff;font-weight:600;
+                           text-align:right;border-bottom:1px solid #1a3550;">
                   $${orderData.itemsPrice.toFixed(2)}
                 </td>
               </tr>
               <tr>
-                <td style="padding:12px 20px;font-size:14px;color:#555;">Shipping</td>
-                <td style="padding:12px 20px;font-size:14px;text-align:right;font-weight:600;">
+                <td style="padding:12px 20px;font-size:14px;color:#7aa3c8;border-bottom:1px solid #1a3550;">Shipping</td>
+                <td style="padding:12px 20px;font-size:14px;text-align:right;font-weight:700;border-bottom:1px solid #1a3550;">
                   ${orderData.shippingPrice === 0
-                    ? '<span style="color:#22c55e;font-weight:700;">FREE</span>'
-                    : `<span style="color:#1a1a2e;">$${orderData.shippingPrice.toFixed(2)}</span>`}
+                    ? '<span style="color:#60d394;">FREE</span>'
+                    : `<span style="color:#ffffff;">$${orderData.shippingPrice.toFixed(2)}</span>`}
                 </td>
               </tr>
               <tr>
-                <td style="padding:12px 20px;font-size:14px;color:#555;">Tax</td>
-                <td style="padding:12px 20px;font-size:14px;color:#1a1a2e;
-                           font-weight:600;text-align:right;">
+                <td style="padding:12px 20px;font-size:14px;color:#7aa3c8;border-bottom:1px solid #1a3550;">Tax</td>
+                <td style="padding:12px 20px;font-size:14px;color:#ffffff;font-weight:600;
+                           text-align:right;border-bottom:1px solid #1a3550;">
                   $${orderData.taxPrice.toFixed(2)}
                 </td>
               </tr>
               ${orderData.donationAmount && orderData.donationAmount > 0 ? `
               <tr>
-                <td style="padding:12px 20px;font-size:14px;color:#22c55e;">
+                <td style="padding:12px 20px;font-size:14px;color:#60d394;border-bottom:1px solid #1a3550;">
                   ❤️ Pet Welfare Donation
                 </td>
-                <td style="padding:12px 20px;font-size:14px;color:#22c55e;
-                           font-weight:700;text-align:right;">
+                <td style="padding:12px 20px;font-size:14px;color:#60d394;font-weight:700;
+                           text-align:right;border-bottom:1px solid #1a3550;">
                   +$${orderData.donationAmount.toFixed(2)}
                 </td>
               </tr>` : ''}
-              <tr style="border-top:2px solid #e8edf5;">
-                <td style="padding:16px 20px;font-size:18px;font-weight:800;color:#1a1a2e;">
-                  Total Paid
-                </td>
-                <td style="padding:16px 20px;font-size:22px;font-weight:900;
-                           color:#1a56db;text-align:right;">
+              <tr>
+                <td style="padding:16px 20px;font-size:16px;font-weight:800;color:#ffffff;">Total Paid</td>
+                <td style="padding:16px 20px;font-size:22px;font-weight:900;color:#60d394;text-align:right;">
                   $${orderData.totalPrice.toFixed(2)}
                 </td>
               </tr>
@@ -406,49 +399,45 @@ export const sendOrderConfirmationEmail = async (
           </td>
         </tr>
 
-        <!-- ── 2-COLUMN: SHIPPING + PAYMENT ── -->
+        <!-- ── SHIPPING + PAYMENT ── -->
         <tr>
-          <td style="padding:0 40px 32px;">
+          <td style="padding:16px 28px 8px;">
             <table width="100%" cellpadding="0" cellspacing="0">
               <tr>
-                <!-- Shipping Address -->
                 <td width="48%" valign="top"
-                    style="background:#f8f9ff;border:1px solid #e8edf5;
-                           border-radius:14px;padding:20px;">
-                  <div style="font-size:12px;font-weight:700;color:#888;
-                              text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">
+                    style="background:#112840;border:1px solid #1a3550;border-radius:14px;padding:18px;">
+                  <div style="font-size:11px;font-weight:700;color:#7aa3c8;
+                              text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">
                     📦 Delivering To
                   </div>
-                  <div style="font-size:15px;font-weight:700;color:#1a1a2e;margin-bottom:6px;">
+                  <div style="font-size:14px;font-weight:700;color:#ffffff;margin-bottom:6px;">
                     ${orderData.shippingAddress.firstName} ${orderData.shippingAddress.lastName}
                   </div>
-                  <div style="font-size:14px;color:#555;line-height:1.6;">
+                  <div style="font-size:13px;color:#7aa3c8;line-height:1.7;">
                     ${orderData.shippingAddress.street}<br>
                     ${orderData.shippingAddress.city}, ${orderData.shippingAddress.state} ${orderData.shippingAddress.zipCode}<br>
                     ${orderData.shippingAddress.country}
                   </div>
                 </td>
                 <td width="4%"></td>
-                <!-- Payment -->
                 <td width="48%" valign="top"
-                    style="background:#f8f9ff;border:1px solid #e8edf5;
-                           border-radius:14px;padding:20px;">
-                  <div style="font-size:12px;font-weight:700;color:#888;
-                              text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">
+                    style="background:#112840;border:1px solid #1a3550;border-radius:14px;padding:18px;">
+                  <div style="font-size:11px;font-weight:700;color:#7aa3c8;
+                              text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">
                     💳 Payment
                   </div>
-                  <div style="font-size:15px;font-weight:700;color:#1a1a2e;
+                  <div style="font-size:14px;font-weight:700;color:#ffffff;
                               text-transform:capitalize;margin-bottom:6px;">
                     ${paymentLabel}
                   </div>
-                  <div style="font-size:13px;color:#555;line-height:1.6;">
+                  <div style="font-size:13px;color:#7aa3c8;line-height:1.7;">
                     ${isCOD
-                      ? 'Our driver will collect payment at your door. No card needed!'
-                      : 'Payment successfully processed. Thank you!'}
+                      ? 'Our driver will collect payment at your door.'
+                      : 'Payment successfully processed.'}
                   </div>
                   ${isCOD
-                    ? `<div style="margin-top:10px;background:#fef9e7;border-radius:8px;
-                                  padding:8px 12px;font-size:12px;color:#b45309;font-weight:600;">
+                    ? `<div style="margin-top:10px;background:#2a1f0a;border:1px solid #7a5c1a;
+                                  border-radius:8px;padding:7px 12px;font-size:12px;color:#f0b429;font-weight:600;">
                          💡 Please keep exact change ready
                        </div>`
                     : ''}
@@ -458,72 +447,39 @@ export const sendOrderConfirmationEmail = async (
           </td>
         </tr>
 
-        <!-- ── CTA BUTTON ── -->
+        <!-- ── CTA ── -->
         <tr>
-          <td style="padding:0 40px 36px;text-align:center;">
+          <td style="padding:24px 28px;text-align:center;">
             <a href="${orderUrl}"
                style="display:inline-block;background:linear-gradient(135deg,#1a56db,#0e3fa5);
-                      color:#ffffff;font-size:16px;font-weight:800;padding:16px 48px;
+                      color:#ffffff;font-size:15px;font-weight:800;padding:15px 44px;
                       text-decoration:none;border-radius:50px;
-                      box-shadow:0 4px 14px rgba(26,86,219,0.4);
-                      letter-spacing:0.3px;">
+                      box-shadow:0 4px 20px rgba(26,86,219,0.5);letter-spacing:0.3px;">
               Track My Order →
             </a>
-            <p style="margin:14px 0 0;font-size:13px;color:#888;">
+            <p style="margin:12px 0 0;font-size:12px;color:#4a7090;">
               We'll email you when your order ships.
             </p>
           </td>
         </tr>
 
-        <!-- ── TRUST BADGES ── -->
-        <tr>
-          <td style="padding:0 40px 36px;">
-            <table width="100%" cellpadding="0" cellspacing="0"
-                   style="background:linear-gradient(135deg,#f0f5ff,#f8f9ff);
-                          border-radius:16px;border:1px solid #e8edf5;overflow:hidden;">
-              <tr>
-                <td style="padding:20px 16px;text-align:center;border-right:1px solid #e8edf5;">
-                  <div style="font-size:24px;margin-bottom:6px;">🚚</div>
-                  <div style="font-size:13px;font-weight:700;color:#1a1a2e;">Free Shipping</div>
-                  <div style="font-size:11px;color:#888;margin-top:2px;">Orders over $49</div>
-                </td>
-                <td style="padding:20px 16px;text-align:center;border-right:1px solid #e8edf5;">
-                  <div style="font-size:24px;margin-bottom:6px;">↩️</div>
-                  <div style="font-size:13px;font-weight:700;color:#1a1a2e;">Easy Returns</div>
-                  <div style="font-size:11px;color:#888;margin-top:2px;">30-day policy</div>
-                </td>
-                <td style="padding:20px 16px;text-align:center;border-right:1px solid #e8edf5;">
-                  <div style="font-size:24px;margin-bottom:6px;">🔒</div>
-                  <div style="font-size:13px;font-weight:700;color:#1a1a2e;">Secure &amp; Safe</div>
-                  <div style="font-size:11px;color:#888;margin-top:2px;">100% protected</div>
-                </td>
-                <td style="padding:20px 16px;text-align:center;">
-                  <div style="font-size:24px;margin-bottom:6px;">⭐</div>
-                  <div style="font-size:13px;font-weight:700;color:#1a1a2e;">Premium Quality</div>
-                  <div style="font-size:11px;color:#888;margin-top:2px;">Top pet brands</div>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-
         <!-- ── FOOTER ── -->
         <tr>
-          <td style="background:#1a1a2e;padding:28px 40px;border-radius:0 0 20px 20px;
-                     text-align:center;">
-            <div style="font-size:20px;font-weight:900;color:#ffffff;margin-bottom:8px;">
-              🐾 Petshiwu
-            </div>
-            <p style="margin:0 0 12px;font-size:13px;color:rgba(255,255,255,0.6);">
-              NYC's premier pet supply store — because your pet deserves the best.
+          <td style="padding:24px 40px 28px;text-align:center;
+                     border-top:1px solid #1a3550;">
+            <div style="font-size:22px;margin-bottom:10px;">🐾 &nbsp; 🐾 &nbsp; 🐾</div>
+            <p style="margin:0 0 6px;font-size:14px;color:#7aa3c8;font-style:italic;">
+              We're happy to be a part of your pet's journey.
+            </p>
+            <p style="margin:0 0 14px;font-size:13px;color:#4a7090;font-weight:600;">
+              — The Petshiwu.Team 🐾
             </p>
             <a href="https://www.petshiwu.com"
-               style="color:#60a5fa;font-size:13px;text-decoration:none;font-weight:600;">
+               style="color:#3b82f6;font-size:13px;text-decoration:none;font-weight:600;">
               www.petshiwu.com
             </a>
-            <p style="margin:16px 0 0;font-size:11px;color:rgba(255,255,255,0.3);">
-              © ${new Date().getFullYear()} Petshiwu. All rights reserved. &nbsp;·&nbsp;
-              Jackson Heights, Queens, New York
+            <p style="margin:14px 0 0;font-size:11px;color:#2a4a60;">
+              © ${new Date().getFullYear()} Petshiwu &nbsp;·&nbsp; Jackson Heights, Queens, New York
             </p>
           </td>
         </tr>
