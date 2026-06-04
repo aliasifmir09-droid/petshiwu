@@ -144,35 +144,6 @@ const Investors = () => {
           </div>
         </section>
 
-        {/* Traction */}
-        <section className="bg-white border-y border-gray-100 py-14">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="max-w-3xl mx-auto">
-              <p className="text-sm font-semibold text-blue-700 uppercase tracking-wide mb-2 text-center">Current Traction</p>
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 text-center">Built and Operating</h2>
-              <div className="space-y-3">
-                {[
-                  '10,000+ live products across all pet categories — dogs, cats, birds, fish, reptiles, small pets',
-                  'Full e-commerce platform: cart, checkout, order tracking, customer accounts',
-                  'AI-powered product advisor using Google Gemini — personalized per registered user',
-                  'Delivery operations covering all 5 NYC boroughs with free shipping over $49',
-                  'Bunny CDN global image delivery — 10,039 product images cached worldwide',
-                  'Google Search Console indexed — 10,000+ URLs submitted, SEO content live',
-                  '226 published SEO blog posts targeting NYC pet owner searches',
-                  'Admin dashboard: orders, fulfillment, refunds, tracking — fully operational',
-                  'Resend transactional email: order confirmations, birthday promos, customer comms',
-                  'Toll-free support line: +1 (800) 259-2605 with IVR and call routing',
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
-                    <p className="text-gray-700 text-sm">{item}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Contact Form */}
         <section id="contact" className="py-16 lg:py-20">
           <div className="container mx-auto px-4 lg:px-8">
