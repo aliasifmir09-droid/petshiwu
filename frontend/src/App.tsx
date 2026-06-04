@@ -53,6 +53,14 @@ const Forbidden = lazy(() => import('./pages/Forbidden'));
 const SensitiveStomachDogs = lazy(() => import('./pages/seo/SensitiveStomachDogs'));
 const PickyEaters = lazy(() => import('./pages/seo/PickyEaters'));
 const AggressiveChewers = lazy(() => import('./pages/seo/AggressiveChewers'));
+const PetSuppliesDeliveryNYC = lazy(() => import('./pages/seo/PetSuppliesDeliveryNYC'));
+const DogFoodDeliveryNYC = lazy(() => import('./pages/seo/DogFoodDeliveryNYC'));
+const CatFoodDeliveryNYC = lazy(() => import('./pages/seo/CatFoodDeliveryNYC'));
+const PetStoreQueensNY = lazy(() => import('./pages/seo/PetStoreQueensNY'));
+const OnlinePetStoreNYC = lazy(() => import('./pages/seo/OnlinePetStoreNYC'));
+const PetSuppliesNearMeNYC = lazy(() => import('./pages/seo/PetSuppliesNearMeNYC'));
+const AffordablePetFoodNYC = lazy(() => import('./pages/seo/AffordablePetFoodNYC'));
+const PetFoodSubscriptionNYC = lazy(() => import('./pages/seo/PetFoodSubscriptionNYC'));
 const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Terms = lazy(() => import('./pages/Terms'));
@@ -297,6 +305,15 @@ function App() {
                   <Route path="/best-dog-food-sensitive-stomach-diarrhea" element={<SensitiveStomachDogs />} />
                   <Route path="/high-protein-dog-food-picky-eaters" element={<PickyEaters />} />
                   <Route path="/durable-dog-toys-aggressive-chewers" element={<AggressiveChewers />} />
+                  {/* NYC local SEO pages — targets delivery + near me + competitor intent searches */}
+                  <Route path="/pet-supplies-delivery-nyc" element={<PetSuppliesDeliveryNYC />} />
+                  <Route path="/dog-food-delivery-nyc" element={<DogFoodDeliveryNYC />} />
+                  <Route path="/cat-food-delivery-nyc" element={<CatFoodDeliveryNYC />} />
+                  <Route path="/pet-store-queens-ny" element={<PetStoreQueensNY />} />
+                  <Route path="/online-pet-store-nyc" element={<OnlinePetStoreNYC />} />
+                  <Route path="/pet-supplies-near-me-nyc" element={<PetSuppliesNearMeNYC />} />
+                  <Route path="/affordable-pet-food-nyc" element={<AffordablePetFoodNYC />} />
+                  <Route path="/pet-food-delivery-nyc" element={<PetFoodSubscriptionNYC />} />
                   
                   {/* NEW LEARNING CENTER GUIDES */}
                   <Route path="/learning/best-dog-food-sensitive-stomach" element={<SensitiveStomachGuide />} />
