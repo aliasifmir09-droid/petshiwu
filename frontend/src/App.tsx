@@ -13,6 +13,7 @@ import AnnouncementBar from './components/AnnouncementBar';
 import BottomNav from './components/BottomNav';
 import AIPetAdvisor from './components/AIPetAdvisor'; // Gemini AI powered — v2
 import CookieConsent from './components/CookieConsent';
+import StructuredData from './components/StructuredData';
 import './index.css';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -206,6 +207,46 @@ function App() {
       >
         <PageViewTracker />
         <ScrollToTop />
+        {/* Global PetStore schema — appears on every page for maximum local SEO signal */}
+        <StructuredData
+          type="localBusiness"
+          data={{
+            businessType: ['PetStore', 'LocalBusiness'],
+            name: 'PetShiwu',
+            url: 'https://www.petshiwu.com',
+            logo: 'https://www.petshiwu.com/logo-square-512.png',
+            image: 'https://www.petshiwu.com/logo-square-512.png',
+            description:
+              'Premium pet food, toys and supplies delivered to Queens, Brooklyn, Manhattan, Bronx and all of New York City. 10,000+ products from top brands. Free delivery on orders over $49.',
+            telephone: '+1-800-259-2605',
+            email: 'support@petshiwu.com',
+            address: {
+              streetAddress: '37-68 74th St',
+              addressLocality: 'Jackson Heights',
+              addressRegion: 'NY',
+              postalCode: '11372',
+              addressCountry: 'US',
+            },
+            geo: { latitude: 40.7489, longitude: -73.885 },
+            openingHoursSpecification: [
+              {
+                dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                opens: '09:00',
+                closes: '20:00',
+              },
+            ],
+            priceRange: '$$',
+            areaServed: ['Queens', 'Brooklyn', 'Manhattan', 'Bronx', 'Staten Island', 'New York City'],
+            hasMap: 'https://maps.google.com/?q=PetShiwu+Jackson+Heights+NY+11372',
+            paymentAccepted: 'Cash, Credit Card, Debit Card',
+            currenciesAccepted: 'USD',
+            sameAs: [
+              'https://www.facebook.com/petshiwu',
+              'https://www.instagram.com/petshiwu',
+              'https://twitter.com/petshiwu',
+            ],
+          }}
+        />
         <div className="flex flex-col min-h-screen">
           <AnnouncementBar />
           <Header />

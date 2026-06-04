@@ -125,10 +125,15 @@ const Home = () => {
       <StructuredData
         type="localBusiness"
         data={{
+          businessType: ['PetStore', 'LocalBusiness'],
           name: 'PetShiwu',
           url: 'https://www.petshiwu.com',
           logo: 'https://www.petshiwu.com/logo-square-512.png',
+          image: 'https://www.petshiwu.com/logo-square-512.png',
+          description:
+            'Premium pet food, toys and supplies delivered to Queens, Brooklyn, Manhattan, Bronx and all of New York City. 10,000+ products from top brands — Purina, Blue Buffalo, Royal Canin and more. Free delivery on orders over $49.',
           telephone: '+1-800-259-2605',
+          email: 'support@petshiwu.com',
           address: {
             streetAddress: '37-68 74th St',
             addressLocality: 'Jackson Heights',
@@ -136,6 +141,24 @@ const Home = () => {
             postalCode: '11372',
             addressCountry: 'US',
           },
+          geo: { latitude: 40.7489, longitude: -73.885 },
+          openingHoursSpecification: [
+            {
+              dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+              opens: '09:00',
+              closes: '20:00',
+            },
+          ],
+          priceRange: '$$',
+          areaServed: ['Queens', 'Brooklyn', 'Manhattan', 'Bronx', 'Staten Island', 'New York City'],
+          hasMap: 'https://maps.google.com/?q=PetShiwu+Jackson+Heights+NY+11372',
+          paymentAccepted: 'Cash, Credit Card, Debit Card',
+          currenciesAccepted: 'USD',
+          sameAs: [
+            'https://www.facebook.com/petshiwu',
+            'https://www.instagram.com/petshiwu',
+            'https://twitter.com/petshiwu',
+          ],
         }}
       />
 

@@ -37,8 +37,10 @@ interface LocalBusinessSchema {
   name: string;
   url: string;
   logo?: string;
+  image?: string;
   description?: string;
   telephone: string;
+  email?: string;
   address: {
     streetAddress: string;
     addressLocality: string;
@@ -58,6 +60,11 @@ interface LocalBusinessSchema {
   priceRange?: string;
   servesCuisine?: string;
   areaServed?: string | string[];
+  businessType?: string | string[];
+  hasMap?: string;
+  paymentAccepted?: string;
+  currenciesAccepted?: string;
+  sameAs?: string[];
 }
 
 interface ArticleSchema {
@@ -246,10 +253,10 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
       const business = data as LocalBusinessSchema;
       schema = {
         '@context': 'https://schema.org/',
-        '@type': 'LocalBusiness',
+        '@type': business.businessType || 'PetStore',
         name: business.name,
         url: business.url,
-        description: business.description || 'Premium Pet Food, Toys & Accessories',
+        description: business.description || 'Premium Pet Food, Toys & Accessories delivered in NYC',
         telephone: business.telephone,
         address: {
           '@type': 'PostalAddress',
@@ -261,9 +268,12 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
         }
       };
 
-      if (business.logo) {
-        (schema as any).logo = business.logo;
-      }
+      if (business.logo) (schema as any).logo = business.logo;
+      if (business.image) (schema as any).image = business.image;
+      if (business.email) (schema as any).email = business.email;
+      if (business.hasMap) (schema as any).hasMap = business.hasMap;
+      if (business.paymentAccepted) (schema as any).paymentAccepted = business.paymentAccepted;
+      if (business.currenciesAccepted) (schema as any).currenciesAccepted = business.currenciesAccepted;
 
       if (business.geo) {
         (schema as any).geo = {
@@ -282,16 +292,10 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
         }));
       }
 
-      if (business.priceRange) {
-        (schema as any).priceRange = business.priceRange;
-      }
+      if (business.priceRange) (schema as any).priceRange = business.priceRange;
+      if (business.areaServed) (schema as any).areaServed = business.areaServed;
 
-      if (business.areaServed) {
-        (schema as any).areaServed = business.areaServed;
-      }
-
-      // Add sameAs for social media
-      (schema as any).sameAs = [
+      (schema as any).sameAs = business.sameAs || [
         'https://www.facebook.com/petshiwu',
         'https://www.instagram.com/petshiwu',
         'https://twitter.com/petshiwu'
