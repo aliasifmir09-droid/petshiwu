@@ -128,10 +128,12 @@ const AdvancedSearch = () => {
       // Compression fails for HEIC/HEIF (iPhone default format) because the browser
       // canvas can't decode them. Gemini Vision supports HEIC natively, so send as-is.
       // Also fall back for any other format the canvas rejects.
-      if (file.size <= 10 * 1024 * 1024) {
+      // Allow up to 20MB raw — Gemini's inline data limit. iPhone HEIC photos
+      // are typically 8-15MB so 10MB was too tight.
+      if (file.size <= 20 * 1024 * 1024) {
         visualSearchMutation.mutate(file);
       } else {
-        setVisualSearchError('Photo is too large. Please try a smaller image or take a new photo.');
+        setVisualSearchError('Photo is too large. Please take a screenshot of the product and try that instead.');
       }
     }
   };
