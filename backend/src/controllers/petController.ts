@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { v2 as cloudinary } from 'cloudinary';
 import User from '../models/User';
+import { uploadToBunny } from '../utils/bunnyStorage';
 
 // Helper: derive birthdayMMDD from a full date string "YYYY-MM-DD"
 function toMMDD(dateStr: string): string | undefined {
@@ -94,7 +94,7 @@ export const updatePet = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-/** PATCH /api/v1/users/me/pets/:petId/photo — upload pet photo to Cloudinary */
+/** PATCH /api/v1/users/me/pets/:petId/photo — upload pet photo to Bunny Storage */
 export const uploadPetPhoto = async (req: Request, res: Response): Promise<void> => {
   try {
     const user = await User.findById((req as any).user._id);
@@ -108,16 +108,13 @@ export const uploadPetPhoto = async (req: Request, res: Response): Promise<void>
       res.status(400).json({ success: false, message: 'No image provided' }); return;
     }
 
-    const result = await cloudinary.uploader.upload(imageBase64, {
-      folder: 'petshiwu/pets',
-      transformation: [{ width: 400, height: 520, crop: 'fill', gravity: 'face' }],
-      resource_type: 'image',
-    });
+    const filename = `${req.params.petId}_${Date.now()}`;
+    const cdnUrl = await uploadToBunny(imageBase64, 'petshiwu/pets', filename);
 
-    pet.photo = result.secure_url;
+    pet.photo = cdnUrl;
     await user.save();
 
-    res.json({ success: true, data: { photo: result.secure_url }, message: 'Photo updated!' });
+    res.json({ success: true, data: { photo: cdnUrl }, message: 'Photo updated!' });
   } catch (err: any) {
     res.status(500).json({ success: false, message: 'Failed to upload photo: ' + (err?.message || 'Server error') });
   }

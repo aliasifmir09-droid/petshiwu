@@ -31,9 +31,9 @@ const BRANDS = [
 const PET_CATEGORIES = [
   { name: 'Dog',       slug: 'dog',       image: 'https://images.unsplash.com/photo-1534361960057-19889db9621e?w=500&h=500&fit=crop&q=90' },
   { name: 'Cat',       slug: 'cat',       image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&h=500&fit=crop&q=90' },
-  { name: 'Fish',      slug: 'fish',      image: 'https://res.cloudinary.com/dtmes0dha/image/upload/v1764591467/493202359_yqxjl5.jpg' },
+  { name: 'Fish',      slug: 'fish',      image: 'https://petshiwu-cdn.b-cdn.net/dtmes0dha/image/upload/v1764591467/493202359_yqxjl5.jpg' },
   { name: 'Bird',      slug: 'bird',      image: 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=500&h=500&fit=crop&q=90' },
-  { name: 'Reptile',   slug: 'reptile',   image: 'https://res.cloudinary.com/dtmes0dha/image/upload/v1764591422/OIP_d5mo8l.webp' },
+  { name: 'Reptile',   slug: 'reptile',   image: 'https://petshiwu-cdn.b-cdn.net/dtmes0dha/image/upload/v1764591422/OIP_d5mo8l.webp' },
   { name: 'Small Pet', slug: 'small-pet', image: 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=500&h=500&fit=crop&q=90' },
 ];
 
