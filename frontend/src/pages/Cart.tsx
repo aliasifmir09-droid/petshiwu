@@ -292,12 +292,15 @@ const Cart = () => {
                   return (
                     <div key={itemKey} className="flex gap-4 p-6 border-b last:border-b-0">
                       <Link to={item?.product ? generateProductUrl(item.product) : '/products'} className="flex-shrink-0">
-                        <img
-                          src={normalizeImageUrl(image)}
-                          alt={name}
-                          onError={(e) => handleImageError(e, name)}
-                          className="w-24 h-24 object-cover rounded-lg"
-                        />
+                        <div className="w-24 h-24 rounded-lg bg-gray-100 overflow-hidden">
+                          <img
+                            src={normalizeImageUrl(image, { width: 192 })}
+                            alt={name}
+                            onError={(e) => handleImageError(e, name)}
+                            className="w-24 h-24 object-cover rounded-lg"
+                            loading="lazy"
+                          />
+                        </div>
                       </Link>
                       <div className="flex-1">
                         <Link to={item?.product ? generateProductUrl(item.product) : '/products'} className="hover:text-primary-600">

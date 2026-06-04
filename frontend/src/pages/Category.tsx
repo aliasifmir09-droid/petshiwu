@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { productService } from '@/services/products';
 import { categoryService } from '@/services/categories';
 import ProductCard from '@/components/ProductCard';
@@ -15,6 +15,7 @@ import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { generateCategoryUrl } from '@/utils/productUrl';
 
 const Category = () => {
+  const queryClient = useQueryClient();
   const { slug, categorySlug, petType: petTypeParam } = useParams<{ 
     slug?: string; 
     categorySlug?: string;
@@ -46,7 +47,10 @@ const Category = () => {
     queryKey: ['category', categorySlugFromUrl, petType],
     queryFn: () => categoryService.getCategory(categorySlugFromUrl, petType || undefined),
     enabled: !!categorySlugFromUrl,
-    retry: 1
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
+    refetchOnMount: true,
+    staleTime: 0,
   });
 
   // Fetch products for this category - always show products, filtered by category and petType
@@ -220,17 +224,34 @@ const Category = () => {
 
   // Handle error or category not found
   if (categoryError || (!category && !isLoadingCategory)) {
-    const errorMessage = (categoryError as any)?.response?.data?.message || 
-      `The category "${categorySlugFromUrl?.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}" doesn't exist.`;
+    const status = (categoryError as any)?.response?.status;
+    // If it's a real 404 (category doesn't exist), show not found
+    // If it's any other error (500, 429, network), show a retry option
+    const isNotFound = status === 404 || (!categoryError && !category);
+    const errorMessage = isNotFound
+      ? `The category "${categorySlugFromUrl?.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}" doesn't exist.`
+      : 'Unable to load this category. Please try again.';
+
+    const handleRetry = () => {
+      queryClient.invalidateQueries({ queryKey: ['category', categorySlugFromUrl, petType] });
+    };
     
     return (
       <div className="container mx-auto px-4 lg:px-8 py-12">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Category Not Found</h1>
+          <h1 className="text-2xl font-bold mb-4">{isNotFound ? 'Category Not Found' : 'Something Went Wrong'}</h1>
           <p className="text-gray-600 mb-6">
             {errorMessage}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            {!isNotFound && (
+              <button
+                onClick={handleRetry}
+                className="inline-block px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+              >
+                Try Again
+              </button>
+            )}
             <Link
               to="/products"
               className="inline-block px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
