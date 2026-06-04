@@ -61,6 +61,8 @@ const OnlinePetStoreNYC = lazy(() => import('./pages/seo/OnlinePetStoreNYC'));
 const PetSuppliesNearMeNYC = lazy(() => import('./pages/seo/PetSuppliesNearMeNYC'));
 const AffordablePetFoodNYC = lazy(() => import('./pages/seo/AffordablePetFoodNYC'));
 const PetFoodSubscriptionNYC = lazy(() => import('./pages/seo/PetFoodSubscriptionNYC'));
+const Investors = lazy(() => import('./pages/Investors'));
+const SellWithUs = lazy(() => import('./pages/SellWithUs'));
 const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Terms = lazy(() => import('./pages/Terms'));
@@ -314,6 +316,11 @@ function App() {
                   <Route path="/pet-supplies-near-me-nyc" element={<PetSuppliesNearMeNYC />} />
                   <Route path="/affordable-pet-food-nyc" element={<AffordablePetFoodNYC />} />
                   <Route path="/pet-food-delivery-nyc" element={<PetFoodSubscriptionNYC />} />
+                  {/* Business pages */}
+                  <Route path="/investors" element={<Investors />} />
+                  <Route path="/sell-with-us" element={<SellWithUs />} />
+                  <Route path="/vendors" element={<SellWithUs />} />
+                  <Route path="/partners" element={<SellWithUs />} />
                   
                   {/* NEW LEARNING CENTER GUIDES */}
                   <Route path="/learning/best-dog-food-sensitive-stomach" element={<SensitiveStomachGuide />} />

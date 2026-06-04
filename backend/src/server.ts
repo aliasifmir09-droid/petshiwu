@@ -109,6 +109,7 @@ import searchAnalyticsRoutes from './routes/searchAnalytics';
 import cartRoutes from './routes/cart';
 import aiAdvisorRoutes from './routes/aiAdvisor';
 import feedRoutes from './routes/feed';
+import contactFormsRoutes from './routes/contactForms';
 import { generateSitemap } from './controllers/sitemapController';
 import { createBotRenderer } from './middleware/botRenderer';
 
@@ -473,6 +474,7 @@ app.use('/api/payment-methods', legacyRouteDeprecation, paymentMethodRoutes);
 app.use('/api/recommendations', legacyRouteDeprecation, recommendationAnalyticsRoutes);
 app.use('/api/reorder-suggestions', legacyRouteDeprecation, reorderSuggestionsRoutes);
 app.use('/api/ai-advisor', legacyRouteDeprecation, aiAdvisorRoutes);
+app.use('/api/v1/contact', contactFormsRoutes);
 
 app.get('/sitemap.xml', (req, res) => {
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
