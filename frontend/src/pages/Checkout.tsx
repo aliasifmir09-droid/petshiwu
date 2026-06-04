@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useCartStore } from '@/stores/cartStore';
@@ -184,6 +184,8 @@ const Checkout = () => {
   const [showPayPalButton, setShowPayPalButton] = useState(false);
   const [donationAmount, setDonationAmount] = useState<number>(0);
   const [showDonationModal, setShowDonationModal] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const emailInputRef = useRef<HTMLInputElement>(null);
   const [pendingOrderData, setPendingOrderData] = useState<CreateOrderData | null>(null);
   const [orderNotes, setOrderNotes] = useState('');
   const [selectedSavedPaymentMethod, setSelectedSavedPaymentMethod] = useState<string | null>(null);
@@ -389,6 +391,9 @@ const Checkout = () => {
 
     // Guest must provide email
     if (!isAuthenticated && !shippingInfo.email?.trim()) {
+      setEmailError(true);
+      emailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      emailInputRef.current?.focus();
       showToast('Please enter your email address to receive order confirmation', 'error');
       return;
     }
@@ -397,10 +402,14 @@ const Checkout = () => {
     if (!isAuthenticated && shippingInfo.email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(shippingInfo.email)) {
+        setEmailError(true);
+        emailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        emailInputRef.current?.focus();
         showToast('Please enter a valid email address', 'error');
         return;
       }
     }
+    setEmailError(false);
 
     if (paymentMethod !== 'cod' && paymentMethod !== 'paypal' && !paymentIntentId) {
       showToast('Please complete the payment first.', 'error');
@@ -635,13 +644,15 @@ const Checkout = () => {
                     <div>
                       <label className="block text-sm font-medium mb-2">Email Address * <span className="text-xs text-gray-500">(for order confirmation)</span></label>
                       <input
+                        ref={emailInputRef}
                         type="email"
                         required
                         value={shippingInfo.email}
-                        onChange={(e) => setShippingInfo({ ...shippingInfo, email: e.target.value })}
+                        onChange={(e) => { setShippingInfo({ ...shippingInfo, email: e.target.value }); setEmailError(false); }}
                         placeholder="you@example.com"
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className={`w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 ${emailError ? 'border-red-500 ring-2 ring-red-300 bg-red-50' : 'border-gray-300'}`}
                       />
+                      {emailError && <p className="text-red-500 text-xs mt-1">Required — we'll send your order confirmation here</p>}
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">Phone *</label>
