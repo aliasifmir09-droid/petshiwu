@@ -229,6 +229,54 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     title: 'Pet Care Guides | Petshiwu',
     description: 'Comprehensive pet care guides for dogs, cats, birds, fish, reptiles, and small animals. Expert advice from the Petshiwu team.',
   },
+
+  // ── High-value SEO landing pages ──────────────────────────────────────────
+  // Titles are keyword-exact matches to top GSC queries with 0 clicks
+
+  '/high-protein-dog-food-picky-eaters': {
+    title: 'Best Dog Food for Picky Eaters — High Protein Picks | Petshiwu',
+    description: 'Find the best dog food for picky eaters. High-protein formulas dogs actually love — Blue Buffalo, Royal Canin, Purina Pro Plan. Free delivery NYC. Free shipping over $49.',
+  },
+  '/best-dog-food-sensitive-stomach-diarrhea': {
+    title: 'Best Dog Food for Sensitive Stomach & Diarrhea | Petshiwu',
+    description: 'Vet-recommended dog food for sensitive stomachs. Easy-to-digest formulas that soothe digestive issues. Hill\'s Science Diet, Royal Canin, Purina EN. Free shipping over $49.',
+  },
+  '/durable-dog-toys-aggressive-chewers': {
+    title: 'Best Dog Toys for Aggressive Chewers — Extra Durable | Petshiwu',
+    description: 'Heavy-duty dog toys built for aggressive chewers. KONG, Benebone, Nylabone, and more. Free delivery in NYC, free shipping on orders over $49.',
+  },
+  '/dog-food-delivery-nyc': {
+    title: 'Dog Food Delivery NYC — Same-Day & Next-Day | Petshiwu',
+    description: 'Get dog food delivered anywhere in NYC. 1,000+ dog food options from top brands. Serving Queens, Brooklyn, Manhattan, Bronx & Staten Island. Free shipping over $49.',
+  },
+  '/pet-supplies-nyc': {
+    title: 'Pet Supplies Delivered in NYC | Petshiwu',
+    description: 'Shop 10,000+ pet supplies delivered to your NYC door. Dogs, cats, birds, fish & more. Queens, Brooklyn, Manhattan, Bronx, Staten Island. Free shipping over $49.',
+  },
+  '/cat-food-delivery-nyc': {
+    title: 'Cat Food Delivery NYC — Premium Brands | Petshiwu',
+    description: 'Get premium cat food delivered anywhere in NYC. Wet food, dry food, prescription diets. Royal Canin, Blue Buffalo, Hill\'s Science Diet. Free shipping over $49.',
+  },
+  '/online-pet-store-nyc': {
+    title: 'Online Pet Store for NYC — 10,000+ Products | Petshiwu',
+    description: 'NYC\'s online pet store with 10,000+ products for dogs, cats, birds, fish & more. Fast delivery across all 5 boroughs. Free shipping on orders over $49.',
+  },
+  '/affordable-pet-supplies-nyc': {
+    title: 'Affordable Pet Supplies in NYC — Free Shipping | Petshiwu',
+    description: 'Quality pet supplies at affordable prices, delivered to your NYC door. 10,000+ products with free shipping on orders over $49.',
+  },
+  '/pet-food-subscription-nyc': {
+    title: 'Pet Food Subscription Delivery NYC | Petshiwu',
+    description: 'Never run out of pet food again. Set up recurring pet food delivery to your NYC home. Dogs, cats, birds & more. Free shipping on orders over $49.',
+  },
+  '/investors': {
+    title: 'Invest in Petshiwu — NYC Pet Delivery Startup',
+    description: 'Petshiwu is building the premier pet supply delivery brand for NYC and beyond. Learn about our growth strategy, market opportunity, and how to invest.',
+  },
+  '/sell-with-us': {
+    title: 'Sell With Us — Partner with Petshiwu',
+    description: 'List your pet products on Petshiwu and reach thousands of NYC pet owners. Join our growing marketplace of premium pet brands.',
+  },
 };
 
 /**
