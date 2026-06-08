@@ -101,11 +101,18 @@ const injectBeforeHeadClose = (html: string, tags: string): string =>
   html.replace('</head>', `${tags}\n</head>`);
 
 /**
- * Inject an <h1> tag as the first child of <body> so crawlers that
- * don't execute JS still see the correct page heading.
+ * Inject an <h1> tag for crawlers.
+ * Replaces the existing <h1> in the static template (if any) so there is
+ * never more than one H1 — Google reads the first one it encounters,
+ * which was previously the generic homepage tagline for every page.
  */
 const injectH1 = (html: string, h1Text: string): string => {
   const tag = `<h1>${esc(h1Text)}</h1>`;
+  // Replace the first existing H1 found in the document (avoids duplicate H1s)
+  if (/<h1[^>]*>[\s\S]*?<\/h1>/i.test(html)) {
+    return html.replace(/<h1[^>]*>[\s\S]*?<\/h1>/i, tag);
+  }
+  // Fallback: inject inside root div if no H1 found
   return html.replace('<div id="root">', `<div id="root">\n${tag}`);
 };
 
@@ -346,19 +353,15 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   const images: string[] = (product.images ?? []).slice(0, 10);
   const brandName: string = product.brand?.trim() || 'PetShiwu';
   
-  // Deduplicate brand from product name if it's repeated at the start
+  // Deduplicate brand from product name ONLY if the brand is literally repeated twice
   // e.g. "Purina ONE Purina® ONE® Adult Dog Dry Food" → "Purina® ONE® Adult Dog Dry Food"
+  // Do NOT strip "Whisker City® Black Mesh..." → brand appears once, keep it in the title
   let productName = product.name ?? '';
-  if (brandName && productName.length > brandName.length) {
-    // Check if name starts with brand (case-insensitive, allowing for special chars)
-    const nameStart = productName.substring(0, brandName.length + 5).toLowerCase();
-    const brandLower = brandName.toLowerCase();
-    // Simple check: if the plain brand appears at start, try to strip it
-    if (nameStart.includes(brandLower)) {
-      const afterBrand = productName.substring(brandName.length).trim();
-      if (afterBrand && !afterBrand.toLowerCase().startsWith(brandLower)) {
-        productName = afterBrand;
-      }
+  if (brandName && productName.length > brandName.length * 2) {
+    // Only strip when the brand name appears at the very start AND also again right after
+    const dupPattern = new RegExp(`^${escRegex(brandName)}\\s+${escRegex(brandName)}`, 'i');
+    if (dupPattern.test(productName)) {
+      productName = productName.substring(brandName.length).trim();
     }
   }
   
