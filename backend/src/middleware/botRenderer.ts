@@ -567,21 +567,24 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
   return html;
 };
 
-const buildCategoryHtml = (template: string, category: any, petType?: string): string => {
+const buildCategoryHtml = (template: string, category: any, petType?: string, canonicalPath?: string): string => {
   const catName = category.name ?? '';
   const petLabel = petType === 'dog' ? 'Dog' : petType === 'cat' ? 'Cat' : petType === 'bird' ? 'Bird' : petType === 'fish' ? 'Fish' : petType === 'reptile' ? 'Reptile' : petType === 'small-pet' ? 'Small Pet' : '';
   const title = petLabel
-    ? `${catName} — ${petLabel} Supplies | PetShiwu`
+    ? `${catName} — ${petLabel} Supplies Delivered NYC | PetShiwu`
     : `${catName} | PetShiwu`;
   const description = truncate(
-    category.description ?? `Shop ${catName} for your ${petLabel || 'pet'} at PetShiwu. Premium quality, free shipping over $49, delivered to Queens, Brooklyn, and all of NYC.`,
+    category.description ?? `Shop ${catName} for your ${petLabel || 'pet'} at PetShiwu. 340+ products, top brands, free delivery on orders over $49. Serving Queens, Brooklyn, Manhattan & all NYC.`,
     160
   );
 
-  // Use correct canonical: /:petType/:slug or /category/:slug
-  const url = petType && petType !== 'all'
-    ? `${BASE}/${petType}/${category.slug}`
-    : `${BASE}/category/${category.slug}`;
+  // Use the actual request path as canonical when available (avoids mismatch
+  // between nested URLs like /dog/food--treats/puppy-food and slug-only form)
+  const url = canonicalPath
+    ? `${BASE}${canonicalPath}`
+    : petType && petType !== 'all'
+      ? `${BASE}/${petType}/${category.slug}`
+      : `${BASE}/category/${category.slug}`;
 
   const breadcrumbItems: unknown[] = [
     { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
@@ -693,7 +696,18 @@ export const createBotRenderer = (distPath: string) => {
       if (bot) {
         if (page?.type === 'product') {
           const product = await fetchProduct(page.slug);
-          if (product) html = buildProductHtml(template, product, page.slug);
+          if (product) {
+            html = buildProductHtml(template, product, page.slug);
+          } else {
+            // URL had 3+ segments but no product matched — likely a nested category URL
+            // e.g. /dog/food--treats/puppy-food where "puppy-food" is a category slug
+            const category = await fetchCategory(page.slug);
+            if (category) {
+              // Derive petType from first URL segment, pass actual path as canonical
+              const petTypeFromPath = req.path.split('/').filter(Boolean)[0] ?? '';
+              html = buildCategoryHtml(template, category, petTypeFromPath, req.path);
+            }
+          }
         } else if (page?.type === 'blog') {
           const blog = await fetchBlog(page.slug);
           if (blog) html = buildBlogHtml(template, blog);
