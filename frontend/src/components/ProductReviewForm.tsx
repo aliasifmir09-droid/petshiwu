@@ -9,7 +9,7 @@ import { trackReviewSubmit } from '@/utils/analytics';
 interface ProductReviewFormProps {
   productId: string;
   productName: string;
-  orderId: string;
+  orderId?: string; // optional — reviews no longer require a purchase
   onSuccess?: () => void;
 }
 

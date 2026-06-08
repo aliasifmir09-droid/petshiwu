@@ -183,66 +183,60 @@ export const voteReview = async (req: AuthRequest, res: Response, next: NextFunc
 };
 
 // Create review
+// orderId is optional — any logged-in user can review.
+// verifiedPurchase is set to true only when an orderId is supplied and the order is delivered.
 export const createReview = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { product, orderId, rating, title, comment, images, videos } = req.body;
 
-    // Check if order exists and is delivered
-    const order = await Order.findOne({
-      _id: orderId,
-      user: req.user?._id,
-      orderStatus: 'delivered'
-    });
+    let verifiedPurchase = false;
 
-    if (!order) {
-      return res.status(400).json({
-        success: false,
-        message: 'Order not found or not delivered yet'
+    if (orderId) {
+      // Optional verified-purchase path: check order exists and is delivered
+      const order = await Order.findOne({
+        _id: orderId,
+        user: req.user?._id,
+        orderStatus: 'delivered'
       });
+
+      if (order) {
+        const orderItem = order.items.find((item: any) => item.product.toString() === product);
+        if (orderItem) {
+          verifiedPurchase = true;
+          // Mark order item as reviewed
+          const itemIndex = order.items.findIndex((item: any) => item.product.toString() === product);
+          if (itemIndex !== -1) {
+            (order.items[itemIndex] as any).isReviewed = true;
+            await order.save();
+          }
+        }
+      }
     }
 
-    // Check if product is in the order
-    const orderItem = order.items.find((item: any) => item.product.toString() === product);
-    
-    if (!orderItem) {
-      return res.status(400).json({
-        success: false,
-        message: 'Product not found in this order'
-      });
-    }
-
-    // Check if already reviewed for this order
+    // Check if user already reviewed this product (order-agnostic duplicate check)
     const existingReview = await Review.findOne({
       product,
       user: req.user?._id,
-      order: orderId
     });
 
     if (existingReview) {
       return res.status(400).json({
         success: false,
-        message: 'You have already reviewed this product for this order'
+        message: 'You have already reviewed this product'
       });
     }
 
     const review = await Review.create({
       product,
       user: req.user?._id,
-      order: orderId,
+      order: orderId || undefined,
       rating,
       title: title || undefined,
       comment: comment || undefined,
       images: images || undefined,
       videos: videos || undefined,
-      verifiedPurchase: true  // Always true for order-based reviews
+      verifiedPurchase
     });
-
-    // Mark order item as reviewed
-    const itemIndex = order.items.findIndex((item: any) => item.product.toString() === product);
-    if (itemIndex !== -1) {
-      (order.items[itemIndex] as any).isReviewed = true;
-      await order.save();
-    }
 
     res.status(201).json({
       success: true,

@@ -5,6 +5,8 @@ import { productService } from '@/services/products';
 import { reviewService } from '@/services/reviews';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
+import { useAuthStore } from '@/stores/authStore';
+import ProductReviewForm from '@/components/ProductReviewForm';
 import { usePrefetch } from '@/hooks/usePrefetch';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ProductCard from '@/components/ProductCard';
@@ -88,6 +90,7 @@ const ProductDetail = () => {
   
   const { addToCart } = useCartStore();
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
+  const { isAuthenticated } = useAuthStore();
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState(0);
@@ -1264,7 +1267,23 @@ const ProductDetail = () => {
       {/* Reviews Section */}
       <div id="reviews" className="mt-12 bg-gray-50 rounded-xl p-8">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold">Customer Reviews</h2>
+          <div>
+            <h2 className="text-3xl font-bold">Customer Reviews</h2>
+            {isAuthenticated && product && (
+              <div className="mt-3">
+                <ProductReviewForm
+                  productId={product._id}
+                  productName={product.name}
+                  onSuccess={() => queryClient.invalidateQueries({ queryKey: ['reviews', product._id] })}
+                />
+              </div>
+            )}
+            {!isAuthenticated && (
+              <p className="mt-2 text-sm text-gray-500">
+                <Link to="/login" className="text-primary-600 hover:underline font-medium">Sign in</Link> to leave a review
+              </p>
+            )}
+          </div>
           {reviews && reviews.data.length > 0 && (
             <div className="text-right">
               <div className="flex items-center gap-2 mb-1">
