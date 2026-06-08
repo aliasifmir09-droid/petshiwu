@@ -35,8 +35,8 @@ export const generateSitemap = async (req: Request, res: Response) => {
     // Note: Products are fetched later with category info for SEO-friendly URLs
 
     // Fetch all active categories
-    const categories = await Category.find({ 
-      isActive: true 
+    const categories = await Category.find({
+      isActive: true
     })
       .select('slug petType updatedAt')
       .lean();
@@ -103,9 +103,11 @@ export const generateSitemap = async (req: Request, res: Response) => {
       xml += '  </url>\n';
     });
 
-    // Individual product pages - need category info for SEO-friendly URLs
-    // Populate parentCategory to get full hierarchy (avoid undefined in URLs)
-    const productsWithCategory = await Product.find({ 
+    // Individual product pages
+    // URL format must exactly match the canonical URLs served by botRenderer:
+    //   /{petType}/{category.slug}/{productSlug}
+    // Using only the immediate category slug (not full hierarchy) to stay consistent.
+    const productsWithCategory = await Product.find({
       isActive: true,
       $or: [
         { deletedAt: null },
@@ -113,15 +115,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
       ]
     })
       .select('slug updatedAt petType category images name')
-      .populate({
-        path: 'category',
-        select: 'slug parentCategory',
-        populate: {
-          path: 'parentCategory',
-          select: 'slug parentCategory',
-          populate: { path: 'parentCategory', select: 'slug' }
-        }
-      })
+      .populate({ path: 'category', select: 'slug' })
       .sort({ updatedAt: -1 })
       .limit(10000)
       .lean();
@@ -134,31 +128,19 @@ export const generateSitemap = async (req: Request, res: Response) => {
       return lower !== 'undefined' && lower !== 'null';
     };
 
-    const buildCategoryPathSegments = (cat: any): string[] => {
-      if (!cat || typeof cat !== 'object') return [];
-      const segments: string[] = [];
-      if (cat.parentCategory && typeof cat.parentCategory === 'object') {
-        segments.push(...buildCategoryPathSegments(cat.parentCategory));
-      }
-      if (isValidSlug(cat.slug)) {
-        segments.push(String(cat.slug).trim());
-      }
-      return segments;
-    };
-
     productsWithCategory.forEach(product => {
-      const lastmod = product.updatedAt 
+      const lastmod = product.updatedAt
         ? new Date(product.updatedAt).toISOString().split('T')[0]
         : currentDate;
-      
+
+      // Mirror botRenderer canonical exactly: /{petType}/{categorySlug}/{productSlug}
+      const categorySlug = (product.category && typeof product.category === 'object')
+        ? (product.category as any).slug
+        : undefined;
+
       let productUrl = `${baseUrl}/products/${product.slug}`;
-      
-      if (product.petType && product.category && typeof product.category === 'object' && isValidSlug(product.slug)) {
-        const rawPath = buildCategoryPathSegments(product.category as any);
-        const categoryPath = rawPath.filter(seg => isValidSlug(seg));
-        if (categoryPath.length > 0 && isValidSlug(product.petType)) {
-          productUrl = `${baseUrl}/${product.petType}/${categoryPath.join('/')}/${product.slug}`;
-        }
+      if (isValidSlug(product.petType) && isValidSlug(categorySlug) && isValidSlug(product.slug)) {
+        productUrl = `${baseUrl}/${product.petType}/${categorySlug}/${product.slug}`;
       }
       
       xml += '  <url>\n';
