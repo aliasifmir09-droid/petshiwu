@@ -79,12 +79,18 @@ const normalizeProductId = (product: ProductWithVariants | null | unknown): Norm
   // Recalculate stock from variants to ensure accuracy
   const stockData = recalculateStock(plainProduct);
   
-  // Image priority: bunnyImage (Bunny CDN) > images[0] (wsrv.nl fallback)
-  // cloudinaryImage is deprecated — Cloudinary account being deactivated June 8 2026
-  const bunnyImage = (plainProduct as { bunnyImage?: string }).bunnyImage;
+  // Image priority: direct Bunny storage URL (by product _id) > legacy bunnyImage field > wsrv.nl fallback
+  // Cloudinary expired June 8 2026. All images now served from Bunny storage directly.
+  const productId = plainProduct._id ? String(plainProduct._id) : '';
+  const directBunnyUrl = productId
+    ? `https://petshiwu-cdn.b-cdn.net/products/${productId}.jpg`
+    : null;
+  const legacyBunnyImage = (plainProduct as { bunnyImage?: string }).bunnyImage;
   const originalImages = (plainProduct.images as string[]) || [];
-  const resolvedImages = bunnyImage
-    ? [bunnyImage, ...originalImages]
+  const resolvedImages = directBunnyUrl
+    ? [directBunnyUrl]
+    : legacyBunnyImage
+    ? [legacyBunnyImage, ...originalImages]
     : originalImages;
 
   // Normalize product _id
