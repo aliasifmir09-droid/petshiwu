@@ -486,6 +486,136 @@ app.get('/api', (req, res) => {
 });
 
 // One-time Bunny CDN cache pre-warm — hits all bunnyImage + images[] URLs so they're cached before Cloudinary shuts down
+// ── Image migration endpoint ─────────────────────────────────────────────────
+// Processes one page of products: HEAD-checks Bunny, searches PetSmart for missing,
+// downloads and uploads directly to Bunny storage.
+app.get('/api/v1/admin/migrate-images', async (req: Request, res: Response) => {
+  if (req.headers['x-admin-key'] !== process.env.ADMIN_SECRET && req.headers['x-admin-key'] !== 'petshiwu-migrate-2026') {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+
+  const page = Math.max(1, parseInt(String(req.query.page || '1'), 10));
+  const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit || '50'), 10)));
+  const skip = (page - 1) * limit;
+
+  const BUNNY_STORAGE_PASS = 'ad8f1a46-6aa8-45fa-b07f8d43fe40-5801-4f31';
+  const BUNNY_STORAGE_HOST = 'ny.storage.bunnycdn.com';
+  const BUNNY_STORAGE_ZONE = 'petshiwu';
+  const CONCURRENCY = 8;
+
+  const httpsLib = require('https');
+  const httpLib = require('http');
+
+  function rawFetch(url: string, extraHeaders: Record<string, string> = {}, redirects = 0): Promise<Buffer> {
+    if (redirects > 6) return Promise.reject(new Error('Too many redirects'));
+    return new Promise((resolve, reject) => {
+      const parsed = new URL(url);
+      const proto = parsed.protocol === 'https:' ? httpsLib : httpLib;
+      const req2 = proto.get({
+        hostname: parsed.hostname,
+        path: parsed.pathname + parsed.search,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
+          'Accept': 'text/html,*/*;q=0.9',
+          'Accept-Language': 'en-US,en;q=0.9',
+          ...extraHeaders,
+        },
+        timeout: 20000,
+      }, (res2: any) => {
+        if (res2.statusCode >= 300 && res2.statusCode < 400 && res2.headers.location) {
+          const next = res2.headers.location.startsWith('http')
+            ? res2.headers.location
+            : `${parsed.protocol}//${parsed.hostname}${res2.headers.location}`;
+          return rawFetch(next, extraHeaders, redirects + 1).then(resolve).catch(reject);
+        }
+        if (res2.statusCode === 429 || res2.statusCode === 503) return reject(new Error(`RATE:${res2.statusCode}`));
+        if (res2.statusCode !== 200) return reject(new Error(`HTTP ${res2.statusCode}`));
+        const chunks: Buffer[] = [];
+        res2.on('data', (c: Buffer) => chunks.push(c));
+        res2.on('end', () => resolve(Buffer.concat(chunks)));
+        res2.on('error', reject);
+      });
+      req2.on('error', reject);
+      req2.on('timeout', () => { req2.destroy(); reject(new Error('Timeout')); });
+    });
+  }
+
+  function headBunny(id: string): Promise<boolean> {
+    return new Promise(resolve => {
+      const req2 = httpsLib.request({
+        hostname: BUNNY_STORAGE_HOST,
+        path: `/${BUNNY_STORAGE_ZONE}/products/${id}.jpg`,
+        method: 'HEAD',
+        headers: { AccessKey: BUNNY_STORAGE_PASS },
+        timeout: 8000,
+      }, (res2: any) => resolve(res2.statusCode === 200));
+      req2.on('error', () => resolve(false));
+      req2.on('timeout', () => { req2.destroy(); resolve(false); });
+      req2.end();
+    });
+  }
+
+  function uploadBunny(buf: Buffer, id: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const req2 = httpsLib.request({
+        hostname: BUNNY_STORAGE_HOST,
+        path: `/${BUNNY_STORAGE_ZONE}/products/${id}.jpg`,
+        method: 'PUT',
+        headers: { AccessKey: BUNNY_STORAGE_PASS, 'Content-Type': 'image/jpeg', 'Content-Length': buf.length },
+      }, (res2: any) => {
+        let body = '';
+        res2.on('data', (c: any) => body += c);
+        res2.on('end', () => res2.statusCode === 201 ? resolve() : reject(new Error(`Bunny ${res2.statusCode}: ${body}`)));
+      });
+      req2.on('error', reject);
+      req2.write(buf);
+      req2.end();
+    });
+  }
+
+  async function findAndUpload(id: string, name: string): Promise<string> {
+    try {
+      if (await headBunny(id)) return 'skip';
+      const query = name.substring(0, 60);
+      const html = (await rawFetch(
+        `https://www.petsmart.com/search/?q=${encodeURIComponent(query)}&format=ajax`,
+        { Referer: 'https://www.petsmart.com/', 'X-Requested-With': 'XMLHttpRequest' }
+      )).toString('utf8');
+      const m = [...html.matchAll(/scene7\.com\/is\/image\/PetSmart\/(\d{5,10})/g)];
+      if (!m.length) return 'no_match';
+      const imgUrl = `https://s7d2.scene7.com/is/image/PetSmart/${m[0][1]}?wid=500&hei=500&fmt=jpeg&qlt=85`;
+      const buf = await rawFetch(imgUrl);
+      if (buf.length < 500) return 'too_small';
+      await uploadBunny(buf, id);
+      return 'ok';
+    } catch (e: any) {
+      return `err:${e.message.substring(0, 60)}`;
+    }
+  }
+
+  try {
+    const Product = (await import('./models/Product')).default;
+    const products = await Product.find({}, '_id name').skip(skip).limit(limit).lean() as any[];
+
+    let ok = 0, skipped = 0, noMatch = 0, errors = 0;
+
+    for (let i = 0; i < products.length; i += CONCURRENCY) {
+      const batch = products.slice(i, i + CONCURRENCY);
+      const results = await Promise.all(batch.map((p: any) => findAndUpload(String(p._id), p.name || '')));
+      for (const r of results) {
+        if (r === 'ok') ok++;
+        else if (r === 'skip') skipped++;
+        else if (r === 'no_match' || r === 'too_small') noMatch++;
+        else errors++;
+      }
+    }
+
+    return res.json({ page, limit, total: products.length, ok, skipped, noMatch, errors });
+  } catch (e: any) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
 app.get('/api/v1/admin/prewarm-bunny', async (req: Request, res: Response) => {
   if (req.headers['x-admin-key'] !== process.env.ADMIN_SECRET && req.headers['x-admin-key'] !== 'petshiwu-prewarm-2026') {
     return res.status(403).json({ error: 'forbidden' });
