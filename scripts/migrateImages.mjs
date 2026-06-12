@@ -47,14 +47,25 @@ function get(url, headers = {}, redirects = 0) {
   });
 }
 
-function headBunny(id) {
-  return new Promise(resolve => {
+// Fetches all existing product IDs from Bunny storage in one call
+async function loadDoneIds() {
+  return new Promise((resolve, reject) => {
     const req = https.request({
-      hostname: BUNNY_HOST, path: `/${BUNNY_ZONE}/products/${id}.jpg`,
-      method: 'HEAD', headers: { AccessKey: BUNNY_PASS }, timeout: 8000,
-    }, res => resolve(res.statusCode === 200));
-    req.on('error', () => resolve(false));
-    req.on('timeout', () => { req.destroy(); resolve(false); });
+      hostname: BUNNY_HOST, path: `/${BUNNY_ZONE}/products/`,
+      method: 'GET', headers: { AccessKey: BUNNY_PASS }, timeout: 30000,
+    }, res => {
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => {
+        try {
+          const list = JSON.parse(Buffer.concat(chunks).toString());
+          const ids = new Set(list.map(f => f.ObjectName.replace('.jpg', '')));
+          resolve(ids);
+        } catch (e) { reject(e); }
+      });
+    });
+    req.on('error', reject);
+    req.on('timeout', () => { req.destroy(); reject(new Error('Timeout loading Bunny list')); });
     req.end();
   });
 }
@@ -74,8 +85,10 @@ function upload(buf, id) {
   });
 }
 
+let doneIds = new Set();
+
 async function processOne(id, name) {
-  if (await headBunny(id)) return 'skip';
+  if (doneIds.has(id)) return 'skip';
   try {
     await sleep(300 + Math.random() * 300);
     const q = encodeURIComponent(name.substring(0, 60));
@@ -102,6 +115,10 @@ async function processOne(id, name) {
 
 async function main() {
   if (!MONGO_URI) { console.error('MONGODB_URI not set'); process.exit(1); }
+
+  console.log('Loading existing Bunny images...');
+  doneIds = await loadDoneIds();
+  console.log(`Already in Bunny: ${doneIds.size}`);
 
   console.log('Connecting to MongoDB...');
   const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 30000 });
