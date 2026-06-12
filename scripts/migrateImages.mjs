@@ -11,8 +11,8 @@ const BUNNY_PASS = process.env.BUNNY_STORAGE_PASSWORD || 'ad8f1a46-6aa8-45fa-b07
 const BUNNY_HOST = 'ny.storage.bunnycdn.com';
 const BUNNY_ZONE = 'petshiwu';
 const MONGO_URI = process.env.MONGODB_URI;
-const PAGE_SIZE = 50;
-const CONCURRENCY = 6;
+const PAGE_SIZE = 100;
+const CONCURRENCY = 15;
 
 const UAS = [
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
