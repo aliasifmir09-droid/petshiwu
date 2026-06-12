@@ -19,6 +19,7 @@ export interface IProductVariant {
 export interface IProduct extends Document {
   name: string;
   slug: string;
+  legacySlugs?: string[];
   description: string;
   shortDescription?: string;
   brand: string;
