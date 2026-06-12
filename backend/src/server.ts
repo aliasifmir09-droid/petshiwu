@@ -110,7 +110,7 @@ import cartRoutes from './routes/cart';
 import aiAdvisorRoutes from './routes/aiAdvisor';
 import feedRoutes from './routes/feed';
 import contactFormsRoutes from './routes/contactForms';
-import migrationRoutes from './routes/migrations';
+
 import { generateSitemap } from './controllers/sitemapController';
 import { createBotRenderer } from './middleware/botRenderer';
 import { slugRedirectMiddleware } from './middleware/slugRedirect';
@@ -477,7 +477,7 @@ app.use('/api/recommendations', legacyRouteDeprecation, recommendationAnalyticsR
 app.use('/api/reorder-suggestions', legacyRouteDeprecation, reorderSuggestionsRoutes);
 app.use('/api/ai-advisor', legacyRouteDeprecation, aiAdvisorRoutes);
 app.use('/api/v1/contact', contactFormsRoutes);
-app.use('/api/migrations', migrationRoutes); // One-time migrations — remove after use
+
 
 app.get('/sitemap.xml', (req, res) => {
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
