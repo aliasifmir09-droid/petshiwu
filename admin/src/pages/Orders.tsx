@@ -166,7 +166,7 @@ const Orders = () => {
       return;
     }
 
-    if (amount > selectedOrder.totalPrice) {
+    if (amount > (selectedOrder.totalPrice ?? 0)) {
       showToast('Refund amount cannot exceed order total', 'error');
       return;
     }
@@ -475,8 +475,8 @@ const Orders = () => {
                         <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
-                        <p className="text-sm text-gray-600">${item.price.toFixed(2)} each</p>
+                        <p className="font-semibold">${((item.price ?? 0) * (item.quantity ?? 1)).toFixed(2)}</p>
+                        <p className="text-sm text-gray-600">${(item.price ?? 0).toFixed(2)} each</p>
                       </div>
                     </div>
                   ))}
@@ -489,12 +489,12 @@ const Orders = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">${selectedOrder.itemsPrice.toFixed(2)}</span>
+                    <span className="font-medium">${(selectedOrder.itemsPrice ?? 0).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Shipping</span>
                     <span className="font-medium">
-                      {selectedOrder.shippingPrice === 0 ? (
+                      {(selectedOrder.shippingPrice ?? 0) === 0 ? (
                         <span className="text-green-600">FREE</span>
                       ) : (
                         `$${selectedOrder.shippingPrice.toFixed(2)}`
@@ -503,7 +503,7 @@ const Orders = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Tax</span>
-                    <span className="font-medium">${selectedOrder.taxPrice.toFixed(2)}</span>
+                    <span className="font-medium">${(selectedOrder.taxPrice ?? 0).toFixed(2)}</span>
                   </div>
                   {selectedOrder.donationAmount && selectedOrder.donationAmount > 0 && (
                     <div className="flex justify-between text-pink-600">
