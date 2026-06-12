@@ -140,13 +140,16 @@ async function main() {
 
     for (let i = 0; i < products.length; i += CONCURRENCY) {
       const batch = products.slice(i, i + CONCURRENCY);
-      const results = await Promise.all(batch.map(p => processOne(String(p._id), p.name || '')));
-      for (const r of results) {
-        if (r === 'ok') ok++;
-        else if (r === 'skip') skip++;
-        else if (r === 'nomatch') nomatch++;
-        else errors++;
-      }
+      const results = await Promise.all(batch.map(p => processOne(String(p._id), p.name || '').then(r => ({ r, id: p._id }))));
+        for (const { r, id } of results) {
+          if (r === 'ok') ok++;
+          else if (r === 'skip') skip++;
+          else if (r === 'nomatch') {
+            nomatch++;
+            await db.collection('products').deleteOne({ _id: id });
+          }
+          else errors++;
+        }
     }
 
     const mins = ((Date.now() - start) / 60000).toFixed(1);
