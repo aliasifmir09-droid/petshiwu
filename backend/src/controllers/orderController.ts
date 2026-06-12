@@ -638,6 +638,9 @@ export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFu
           _id: 1, orderNumber: 1,
           user: { firstName: '$userData.firstName', lastName: '$userData.lastName', email: '$userData.email' },
           items: 1, totalPrice: 1, orderStatus: 1, paymentStatus: 1,
+          paymentMethod: 1, itemsPrice: 1, shippingPrice: 1, taxPrice: 1,
+          paidAt: 1, paymentIntentId: 1, paypalOrderId: 1,
+          isDelivered: 1, deliveredAt: 1,
           shippingAddress: 1, billingAddress: 1, createdAt: 1, updatedAt: 1,
           donationAmount: 1, trackingNumber: 1
         }
