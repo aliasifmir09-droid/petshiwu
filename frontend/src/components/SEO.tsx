@@ -132,7 +132,7 @@ const SEO = ({
 
       {/* Business/Contact Information */}
       <meta name="contact" content="support@petshiwu.com" />
-      <meta name="phone" content="+1-626-342-0419" />
+      <meta name="phone" content="+1-800-259-2605" />
 
       {/* FIX 3: Canonical now uses resolvedUrl — unique per page, never hardcoded homepage */}
       <link rel="canonical" href={resolvedUrl} />
