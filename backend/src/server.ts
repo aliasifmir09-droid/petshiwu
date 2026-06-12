@@ -583,7 +583,7 @@ app.get('/api/v1/admin/migrate-images', async (req: Request, res: Response) => {
       )).toString('utf8');
       const m = [...html.matchAll(/scene7\.com\/is\/image\/PetSmart\/(\d{5,10})/g)];
       if (!m.length) return 'no_match';
-      const imgUrl = `https://s7d2.scene7.com/is/image/PetSmart/${m[0][1]}?wid=500&hei=500&fmt=jpeg&qlt=85`;
+      const imgUrl = `https://s7d2.scene7.com/is/image/PetSmart/${m[0][1]}?wid=800&hei=800&fmt=jpeg&qlt=90`;
       const buf = await rawFetch(imgUrl);
       if (buf.length < 500) return 'too_small';
       await uploadBunny(buf, id);
