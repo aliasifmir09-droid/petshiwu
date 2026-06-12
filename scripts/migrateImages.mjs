@@ -115,7 +115,7 @@ async function processOne(id, name) {
       try {
         const imgUrl = `https://s7d2.scene7.com/is/image/PetSmart/${match[1]}?wid=800&hei=800&fmt=jpeg&qlt=90`;
         const buf = await fetchRaw(imgUrl);
-        if (buf.length < 500) continue;
+        if (buf.length < 20000) continue; // PetSmart "no image" placeholder is ~5-9KB
         await uploadBunny(buf, id);
         return 'ok';
       } catch { continue; }
