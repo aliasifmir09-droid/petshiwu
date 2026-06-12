@@ -57,8 +57,7 @@
     <link rel="preload" as="image" href="/logo.png" type="image/png" fetchpriority="high" />
     <link rel="dns-prefetch" href="https://petshiwu.onrender.com">
     <link rel="preconnect" href="https://petshiwu.onrender.com" crossorigin>
-    <link rel="dns-prefetch" href="https://res.cloudinary.com">
-    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+    <!-- Cloudinary removed — Bunny CDN is now the image host -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all';this.onload=null">
@@ -70,8 +69,8 @@
     <!-- ============================================
          PRIMARY SEO
          ============================================ -->
-    <title>Premium Pet Food & Supplies for Dogs, Cats, Reptiles | PetShiwu</title>
-    <meta name="description" content="Shop premium pet food, toys, and supplies for dogs, cats, birds, reptiles, and more. Carefully curated brands, fast shipping, and expert pet care advice at PetShiwu. Free shipping on orders over $49.">
+    <title>Premium Pet Food & Supplies | PetShiwu NYC</title>
+    <meta name="description" content="Premium pet food, toys & supplies for dogs, cats, birds, reptiles & more. Trusted brands, fast NYC delivery. Free shipping on orders over $49.">
     <meta name="keywords" content="premium pet food, dog food, cat food, reptile supplies, bird food, pet toys, pet accessories, online pet store USA, grain free dog food, raw cat food, pet vitamins, PetShiwu">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="googlebot" content="index, follow">
@@ -85,14 +84,16 @@
          ============================================ -->
     <meta property="og:type" content="website">
     <!-- og:url is set dynamically per-page by the React SEO component via react-helmet-async -->
-    <meta property="og:title" content="Premium Pet Food & Supplies for Dogs, Cats, Reptiles | PetShiwu">
-    <meta property="og:description" content="Discover premium pet food, toys, and supplies for all pet types. Fast shipping, expert guidance, and carefully curated brands. Shop PetShiwu today!">
-    <meta property="og:image" content="https://www.petshiwu.com/logo.png">
+    <meta property="og:title" content="Premium Pet Food & Supplies | PetShiwu NYC">
+    <meta property="og:description" content="Premium pet food, toys & supplies for dogs, cats, birds, reptiles & more. Trusted brands, fast NYC delivery. Free shipping over $49.">
+    <meta property="og:image" content="https://www.petshiwu.com/banner-one-stop.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="450">
     <meta property="og:site_name" content="PetShiwu">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Premium Pet Food & Supplies for Dogs, Cats, Reptiles | PetShiwu">
-    <meta name="twitter:description" content="Shop premium pet food, dog food, cat food, and supplies at PetShiwu. Fast shipping, great prices, and expert pet care.">
-    <meta name="twitter:image" content="https://www.petshiwu.com/logo.png">
+    <meta name="twitter:title" content="Premium Pet Food & Supplies | PetShiwu NYC">
+    <meta name="twitter:description" content="Premium pet food, toys & supplies for dogs, cats, birds, reptiles & more. Trusted brands, fast NYC delivery. Free shipping over $49.">
+    <meta name="twitter:image" content="https://www.petshiwu.com/banner-one-stop.jpg">
     <meta name="twitter:site" content="@petshiwu">
 
     <!-- ============================================
@@ -381,6 +382,36 @@
     </div>
     <!-- END STATIC SHELL -->
 
+    <!-- SEO: On non-homepage routes, hide the generic hero H1 so crawlers
+         don't see it competing with the page-specific H1 rendered by React -->
+    <script>
+      (function() {
+        var path = window.location.pathname;
+        if (path !== '/' && path !== '') {
+          // Immediately hide the static hero section on product/blog/category pages.
+          // React will render the correct page-specific H1 after hydration.
+          var style = document.createElement('style');
+          style.textContent = '#static-shell .ps-hero { display: none !important; }';
+          document.head.appendChild(style);
+          // Also update the document title from the URL slug for initial crawl signal
+          try {
+            var parts = path.replace(/\/$/, '').split('/').filter(Boolean);
+            var slug = parts[parts.length - 1] || '';
+            var decoded = slug
+              .replace(/039/g, "'")
+              .replace(/ampampamp/g, '&')
+              .replace(/ampamp/g, '&')
+              .replace(/amp/g, '&')
+              .replace(/-{2,}/g, ' - ')
+              .replace(/-/g, ' ')
+              .replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+            if (decoded.length > 10) {
+              document.title = decoded + ' | PetShiwu';
+            }
+          } catch(e) {}
+        }
+      })();
+    </script>
     <!-- React mounts here and hides #static-shell once loaded -->
     <div id="root"></div>
 

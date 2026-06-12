@@ -7,24 +7,28 @@ const SLIDES = [
   {
     id: 'slide-1',
     src: '/banner-one-stop.jpg',
+    webp: '/banner-one-stop.webp',
     alt: 'Your One-Stop Shop for Every Pet\'s Joy',
     link: '/products',
   },
   {
     id: 'slide-2',
     src: '/banner-birthday.png',
+    webp: '/banner-birthday.webp',
     alt: 'Celebrate Your Pet\'s Birthday – 20% OFF + Free Gift',
     link: '/products',
   },
   {
     id: 'slide-3',
     src: '/banner-premium-care.jpg',
+    webp: '/banner-premium-care.webp',
     alt: 'Petshiwu: Premium Care for Your Best Friends',
     link: '/products',
   },
   {
     id: 'slide-4',
     src: '/banner-nyc-delivery.jpg',
+    webp: '/banner-nyc-delivery.webp',
     alt: 'NYC\'s Fastest Pet Delivery',
     link: '/products',
   },
@@ -60,16 +64,19 @@ const HeroSlideshow = () => {
                   index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
                 }`}
               >
-                <img
-                  src={slide.src}
-                  alt={slide.alt}
-                  width={1920}
-                  height={720}
-                  loading={index === 0 ? 'eager' : 'lazy'}
-                  fetchPriority={index === 0 ? 'high' : 'auto'}
-                  decoding={index === 0 ? 'sync' : 'async'}
-                  className="w-full h-full object-cover"
-                />
+                <picture>
+                  <source srcSet={slide.webp} type="image/webp" />
+                  <img
+                    src={slide.src}
+                    alt={slide.alt}
+                    width={1920}
+                    height={720}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    fetchPriority={index === 0 ? 'high' : 'auto'}
+                    decoding={index === 0 ? 'sync' : 'async'}
+                    className="w-full h-full object-cover"
+                  />
+                </picture>
               </Link>
             ))}
           </div>
