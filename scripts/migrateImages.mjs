@@ -1,16 +1,18 @@
 /**
  * scripts/migrateImages.mjs — Render Job
- * Uses the petshiwu public API (no MongoDB needed), uploads to Bunny directly.
+ * Connects to MongoDB directly, searches PetSmart, uploads to Bunny.
+ * Resume-safe via Bunny HEAD check.
  */
 
 import https from 'https';
+import { MongoClient } from 'mongodb';
 
 const BUNNY_PASS = process.env.BUNNY_STORAGE_PASSWORD || 'ad8f1a46-6aa8-45fa-b07f8d43fe40-5801-4f31';
 const BUNNY_HOST = 'ny.storage.bunnycdn.com';
 const BUNNY_ZONE = 'petshiwu';
-const API_BASE = 'https://www.petshiwu.com/api';
-const PAGE_SIZE = 20;
-const CONCURRENCY = 8;
+const MONGO_URI = process.env.MONGODB_URI;
+const PAGE_SIZE = 50;
+const CONCURRENCY = 6;
 
 const UAS = [
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
@@ -33,6 +35,7 @@ function get(url, headers = {}, redirects = 0) {
         return get(next, headers, redirects + 1).then(resolve).catch(reject);
       }
       if (res.statusCode === 404) return reject(new Error('HTTP404'));
+      if (res.statusCode === 429) return reject(new Error('RATE429'));
       if (res.statusCode !== 200) return reject(new Error(`HTTP${res.statusCode}`));
       const chunks = [];
       res.on('data', c => chunks.push(c));
@@ -98,18 +101,29 @@ async function processOne(id, name) {
 }
 
 async function main() {
+  if (!MONGO_URI) { console.error('MONGODB_URI not set'); process.exit(1); }
+
+  console.log('Connecting to MongoDB...');
+  const client = new MongoClient(MONGO_URI, { serverSelectionTimeoutMS: 30000 });
+  await client.connect();
+  console.log('Connected.');
+
+  const db = client.db('petshop');
+  const total = await db.collection('products').countDocuments();
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  console.log(`Total products: ${total} | Pages: ${totalPages}\n`);
+
   let ok = 0, skip = 0, nomatch = 0, errors = 0;
   const start = Date.now();
-  let page = 1, totalPages = 1;
 
-  while (page <= totalPages) {
-    const data = JSON.parse((await get(`${API_BASE}/products?limit=${PAGE_SIZE}&page=${page}&fields=_id,name`)).toString());
-    const products = (data.data || []).map(p => ({ id: String(p._id), name: p.name }));
-    totalPages = data.pagination?.pages || 1;
+  for (let page = 1; page <= totalPages; page++) {
+    const products = await db.collection('products')
+      .find({}, { projection: { _id: 1, name: 1 } })
+      .skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toArray();
 
     for (let i = 0; i < products.length; i += CONCURRENCY) {
       const batch = products.slice(i, i + CONCURRENCY);
-      const results = await Promise.all(batch.map(p => processOne(p.id, p.name)));
+      const results = await Promise.all(batch.map(p => processOne(String(p._id), p.name || '')));
       for (const r of results) {
         if (r === 'ok') ok++;
         else if (r === 'skip') skip++;
@@ -119,13 +133,13 @@ async function main() {
     }
 
     const mins = ((Date.now() - start) / 60000).toFixed(1);
-    const done = ok + skip + nomatch + errors;
+    const done = (page * PAGE_SIZE);
     const rate = done / Math.max((Date.now() - start) / 1000, 1);
-    const eta = Math.round((totalPages * PAGE_SIZE - done) / Math.max(rate, 0.01) / 60);
-    console.log(`p${page}/${totalPages} | ✅${ok} ⏭${skip} ⚠️${nomatch} ❌${errors} | ${mins}min | ETA~${eta}min`);
-    page++;
+    const eta = Math.round((total - done) / Math.max(rate, 0.01) / 60);
+    console.log(`p${page}/${totalPages} | ✅${ok} ⏭${skip} ⚠️${nomatch} ❌${errors} | ${mins}min elapsed | ETA~${eta}min`);
   }
 
+  await client.close();
   console.log(`\nDONE — ✅${ok} uploaded | ⏭${skip} skipped | ⚠️${nomatch} no match | ❌${errors} errors`);
 }
 
