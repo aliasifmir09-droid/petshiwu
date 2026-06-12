@@ -95,6 +95,11 @@ const productSchema = new Schema<IProduct>(
       unique: true,
       lowercase: true
     },
+    legacySlugs: {
+      type: [String],
+      default: [],
+      index: true
+    },
     description: {
       type: String,
       required: [true, 'Product description is required']

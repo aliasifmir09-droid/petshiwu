@@ -112,6 +112,7 @@ import feedRoutes from './routes/feed';
 import contactFormsRoutes from './routes/contactForms';
 import { generateSitemap } from './controllers/sitemapController';
 import { createBotRenderer } from './middleware/botRenderer';
+import { slugRedirectMiddleware } from './middleware/slugRedirect';
 
 connectDatabase().catch((error: unknown) => {
   const errorMessage = error instanceof Error ? error.message : String(error);
@@ -714,6 +715,11 @@ app.use(express.static(frontendDistPath, {
     }
   }
 }));
+
+// Slug redirect: 301 any legacy artifact URL (hill039s, chicken-amp-rice) to clean canonical.
+// Uses legacySlugs[] array populated by the fixProductSlugs migration script.
+// Fast in-process cache — only hits DB on first encounter of each old slug.
+app.use(slugRedirectMiddleware);
 
 // Bot renderer: intercept search engine crawlers before the SPA catch-all.
 // Serves pre-populated HTML with product/blog/category meta + JSON-LD schema.
