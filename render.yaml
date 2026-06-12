@@ -1,3 +1,17 @@
+jobs:
+  - name: petshiwu-migrate-images
+    type: job
+    env: node
+    plan: starter
+    region: oregon
+    buildCommand: cd backend && npm install
+    startCommand: node scripts/migrateImages.mjs
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: BUNNY_STORAGE_PASSWORD
+        value: ad8f1a46-6aa8-45fa-b07f8d43fe40-5801-4f31
+
 services:
   - type: web
     name: petshiwu
