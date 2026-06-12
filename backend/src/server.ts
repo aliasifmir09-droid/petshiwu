@@ -573,35 +573,49 @@ app.get('/api/v1/admin/migrate-images', async (req: Request, res: Response) => {
     });
   }
 
-  async function findAndUpload(id: string, originalImages: string[]): Promise<string> {
+  const UAS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/123.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36',
+  ];
+  const ua = () => UAS[Math.floor(Math.random() * UAS.length)];
+
+  async function findAndUpload(id: string, name: string): Promise<string> {
     try {
       if (await headBunny(id)) return 'skip';
-
-      // Try original image URLs stored in MongoDB (wsrv.nl proxies, scene7, etc.)
-      for (const imgUrl of originalImages) {
-        if (!imgUrl || imgUrl.includes('b-cdn.net')) continue; // skip already-Bunny URLs
+      await new Promise(r => setTimeout(r, 300 + Math.random() * 400));
+      const query = encodeURIComponent(name.substring(0, 60));
+      const html = (await rawFetch(
+        `https://www.petsmart.com/search/?q=${query}&format=ajax`,
+        { 'User-Agent': ua(), Referer: 'https://www.petsmart.com/', 'X-Requested-With': 'XMLHttpRequest' }
+      )).toString('utf8');
+      const m = [...html.matchAll(/scene7\.com\/is\/image\/PetSmart\/(\d{5,10})/g)];
+      if (!m.length) return 'no_match';
+      for (const match of m) {
         try {
+          const imgUrl = `https://s7d2.scene7.com/is/image/PetSmart/${match[1]}?wid=800&hei=800&fmt=jpeg&qlt=90`;
           const buf = await rawFetch(imgUrl);
-          if (buf.length < 500) continue;
+          if (buf.length < 20000) continue;
           await uploadBunny(buf, id);
           return 'ok';
         } catch { continue; }
       }
       return 'no_match';
     } catch (e: any) {
+      if (e.message?.includes('404') || e.message?.includes('HTTP0')) return 'no_match';
       return `err:${e.message.substring(0, 60)}`;
     }
   }
 
   try {
     const Product = (await import('./models/Product')).default;
-    const products = await Product.find({}, '_id images').skip(skip).limit(limit).lean() as any[];
+    const products = await Product.find({}, '_id name').skip(skip).limit(limit).lean() as any[];
 
     let ok = 0, skipped = 0, noMatch = 0, errors = 0;
 
     for (let i = 0; i < products.length; i += CONCURRENCY) {
       const batch = products.slice(i, i + CONCURRENCY);
-      const results = await Promise.all(batch.map((p: any) => findAndUpload(String(p._id), (p.images as string[]) || [])));
+      const results = await Promise.all(batch.map((p: any) => findAndUpload(String(p._id), p.name || '')));
       for (const r of results) {
         if (r === 'ok') ok++;
         else if (r === 'skip') skipped++;
