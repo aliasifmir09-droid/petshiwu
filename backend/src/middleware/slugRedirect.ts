@@ -10,6 +10,7 @@
  */
 import { Request, Response, NextFunction } from 'express';
 import Product from '../models/Product';
+import Category from '../models/Category';
 import logger from '../utils/logger';
 
 // Fast in-process cache: old slug → new path (populated on first hit, TTL 1hr)
@@ -52,10 +53,23 @@ export const slugRedirectMiddleware = async (
 
     if (!product) return next(); // Not a legacy slug, serve normally
 
-    // Build new canonical path
-    const petType = product.petType || 'products';
-    const categorySlug =
-      typeof product.category === 'object' ? product.category?.slug : null;
+    // Build new canonical path — populate category slug if needed
+    const petType = product.petType || 'dog';
+    let categorySlug: string | null =
+      typeof product.category === 'object' && (product.category as any)?.slug
+        ? (product.category as any).slug
+        : null;
+
+    // If category is just an ObjectId (not populated), look it up
+    if (!categorySlug && product.category) {
+      try {
+        const cat = await (Category as any).findById(product.category, { slug: 1 }).lean();
+        categorySlug = cat?.slug || null;
+      } catch (_) {
+        // Non-fatal — fall back to path without category
+      }
+    }
+
     const newPath = categorySlug
       ? `/${petType}/${categorySlug}/${product.slug}`
       : `/${petType}/${product.slug}`;
