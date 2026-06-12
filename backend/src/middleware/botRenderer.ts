@@ -61,6 +61,19 @@ const esc = (s: string): string =>
 
 const stripTags = (html: string): string => html.replace(/<[^>]*>/g, '');
 
+/** Decode HTML entities so DB-stored descriptions don't get double-encoded by esc() */
+const decodeEntities = (s: string): string =>
+  s
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)));
+
+const clean = (s: string): string => decodeEntities(stripTags(s));
+
 const truncate = (s: string, n: number): string =>
   s.length > n ? s.substring(0, n).trimEnd() + '…' : s;
 
@@ -404,7 +417,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   // Deduplicate brand from product name ONLY if the brand is literally repeated twice
   // e.g. "Purina ONE Purina® ONE® Adult Dog Dry Food" → "Purina® ONE® Adult Dog Dry Food"
   // Do NOT strip "Whisker City® Black Mesh..." → brand appears once, keep it in the title
-  let productName = product.name ?? '';
+  let productName = decodeEntities(product.name ?? '');
   if (brandName && productName.length > brandName.length * 2) {
     // Only strip when the brand name appears at the very start AND also again right after
     const dupPattern = new RegExp(`^${escRegex(brandName)}\\s+${escRegex(brandName)}`, 'i');
@@ -414,7 +427,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   }
   
   const rawDesc: string = product.description
-    ? stripTags(product.description)
+    ? clean(product.description)
     : `${productName} — premium pet supplies at PetShiwu.`;
   const description = truncate(rawDesc, 160);
 

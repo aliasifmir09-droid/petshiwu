@@ -394,12 +394,17 @@ const Header = () => {
               {/* ✅ FIXED LOGO - Same size on mobile and desktop */}
               <Link to="/" className="flex items-center flex-shrink-0 group">
                 <div className="relative">
-                  <img
-                    src="/logo.png"
-                    alt="Petshiwu Logo"
-                    className="h-20 w-auto object-contain transform group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl relative z-10 max-h-20"
-                    loading="eager"
-                  />
+                  <picture>
+                    <source srcSet="/logo.webp" type="image/webp" />
+                    <img
+                      src="/logo.png"
+                      alt="Petshiwu Logo"
+                      className="h-20 w-auto object-contain transform group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl relative z-10 max-h-20"
+                      loading="eager"
+                      width={160}
+                      height={80}
+                    />
+                  </picture>
                   <div className="absolute inset-0 bg-white/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>
               </Link>
@@ -665,7 +670,10 @@ const Header = () => {
           <div className="fixed top-0 right-0 h-full w-[85vw] max-w-sm bg-white shadow-2xl z-[50] lg:hidden overflow-y-auto">
             <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between z-10">
               {/* ✅ FIXED - Same logo in mobile menu */}
-              <img src="/logo.png" alt="Petshiwu" className="h-20 w-auto object-contain" />
+              <picture>
+                <source srcSet="/logo.webp" type="image/webp" />
+                <img src="/logo.png" alt="Petshiwu" className="h-20 w-auto object-contain" width={160} height={80} />
+              </picture>
               <button onClick={() => { setMobileMenuOpen(false); setIsLearningExpanded(false); }} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Close Menu">
                 <X size={24} className="text-gray-700" />
               </button>
