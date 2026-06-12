@@ -79,15 +79,19 @@ const normalizeProductId = (product: ProductWithVariants | null | unknown): Norm
   // Recalculate stock from variants to ensure accuracy
   const stockData = recalculateStock(plainProduct);
   
-  // Image priority: direct Bunny storage URL (by product _id) > legacy bunnyImage field > wsrv.nl fallback
-  // Cloudinary expired June 8 2026. All images now served from Bunny storage directly.
+  // Image priority: MongoDB images (Bunny CDN, multi-image) > direct Bunny URL from _id > legacy
+  // Cloudinary expired June 8 2026. Multi-image migration: images[] stores all Bunny CDN URLs.
   const productId = plainProduct._id ? String(plainProduct._id) : '';
   const directBunnyUrl = productId
     ? `https://petshiwu-cdn.b-cdn.net/products/${productId}.jpg`
     : null;
   const legacyBunnyImage = (plainProduct as { bunnyImage?: string }).bunnyImage;
   const originalImages = (plainProduct.images as string[]) || [];
-  const resolvedImages = directBunnyUrl
+  // If MongoDB images already contains Bunny CDN URLs (multi-image migrated), use them directly
+  const hasBunnyImages = originalImages.length > 0 && originalImages[0]?.includes('b-cdn.net');
+  const resolvedImages = hasBunnyImages
+    ? originalImages
+    : directBunnyUrl
     ? [directBunnyUrl]
     : legacyBunnyImage
     ? [legacyBunnyImage, ...originalImages]
