@@ -114,6 +114,7 @@ import contactFormsRoutes from './routes/contactForms';
 import { generateSitemap } from './controllers/sitemapController';
 import { createBotRenderer } from './middleware/botRenderer';
 import { slugRedirectMiddleware } from './middleware/slugRedirect';
+import { blogRedirectMiddleware } from './middleware/blogRedirect';
 
 connectDatabase().catch((error: unknown) => {
   const errorMessage = error instanceof Error ? error.message : String(error);
@@ -717,6 +718,9 @@ app.use(express.static(frontendDistPath, {
     }
   }
 }));
+
+// Blog redirect: 301 old thin neighborhood pages to 5 rich borough hub pages.
+app.use(blogRedirectMiddleware);
 
 // Slug redirect: 301 any legacy artifact URL (hill039s, chicken-amp-rice) to clean canonical.
 // Uses legacySlugs[] array populated by the fixProductSlugs migration script.
