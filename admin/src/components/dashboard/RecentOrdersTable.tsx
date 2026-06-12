@@ -270,8 +270,14 @@ const RecentOrdersTable = memo(({
           <tbody className="divide-y divide-gray-200">
             {paginatedOrders.map((order: RecentOrder, index: number) => {
               if (!order) return null;
-              // FIX: Convert _id to string to prevent [object Object] in URL
-              const orderId = String(order._id || '') || order.orderNumber || '';
+              // Robustly extract _id as string — handles ObjectId, {$oid:...}, plain string
+              const rawId1 = order._id as any;
+              const orderId = (
+                typeof rawId1 === 'string' ? rawId1 :
+                rawId1?.$oid ||
+                (rawId1?.toString && rawId1.toString() !== '[object Object]' ? rawId1.toString() : '') ||
+                ''
+              ) || order.orderNumber || '';
               // Sanitize customer name to prevent XSS attacks
               const customerName = canViewFullData
                 ? sanitizeCustomerName(order.user?.firstName, order.user?.lastName)
@@ -374,8 +380,14 @@ const RecentOrdersTable = memo(({
         <div className="md:hidden space-y-3 p-4">
           {paginatedOrders.map((order: RecentOrder, index: number) => {
             if (!order) return null;
-            // FIX: Convert _id to string to prevent [object Object] in URL
-            const orderId = String(order._id || '') || order.orderNumber || '';
+            // Robustly extract _id as string — handles ObjectId, {$oid:...}, plain string
+            const rawId2 = order._id as any;
+            const orderId = (
+              typeof rawId2 === 'string' ? rawId2 :
+              rawId2?.$oid ||
+              (rawId2?.toString && rawId2.toString() !== '[object Object]' ? rawId2.toString() : '') ||
+              ''
+            ) || order.orderNumber || '';
             const customerName = canViewFullData
               ? sanitizeCustomerName(order.user?.firstName, order.user?.lastName)
               : maskCustomerName(order.user?.firstName, order.user?.lastName);

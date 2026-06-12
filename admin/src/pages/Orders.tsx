@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { adminService } from '@/services/adminService';
 import { Eye, Search, MapPin, X, AlertCircle, CheckCircle, Filter as FilterIcon, Download, RotateCcw } from 'lucide-react';
 import Toast from '@/components/Toast';
@@ -10,6 +11,7 @@ import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 const Orders = () => {
   const { toast, showToast, hideToast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
@@ -43,6 +45,23 @@ const Orders = () => {
     ['orders', 'orderStats'],
     { showToast }
   );
+
+  // Auto-open order modal when orderId param is in the URL (e.g. from dashboard click)
+  useEffect(() => {
+    const urlOrderId = searchParams.get('orderId');
+    if (!urlOrderId || urlOrderId === '[object Object]' || urlOrderId === 'undefined') {
+      // Clear bad params silently
+      if (urlOrderId) setSearchParams({}, { replace: true });
+      return;
+    }
+    if (!ordersData?.data) return;
+    const found = ordersData.data.find((o: any) => String(o._id || o.id || '') === urlOrderId || o.orderNumber === urlOrderId);
+    if (found) {
+      setSelectedOrder(found);
+      setShowDetailsModal(true);
+      setSearchParams({}, { replace: true }); // clean URL after opening
+    }
+  }, [searchParams, ordersData]);
 
   const getPaymentMethodLabel = (method: string) => {
     const labels: any = {
@@ -180,7 +199,7 @@ const Orders = () => {
 
   const handleOpenRefundModal = () => {
     if (selectedOrder) {
-      setRefundAmount(selectedOrder.totalPrice.toFixed(2));
+      setRefundAmount((selectedOrder.totalPrice ?? 0).toFixed(2));
       setRefundReason('');
       setShowRefundModal(true);
     }
@@ -326,13 +345,13 @@ const Orders = () => {
                       {order.orderNumber}
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      {order.shippingAddress.firstName} {order.shippingAddress.lastName}
+                      {order.shippingAddress?.firstName} {order.shippingAddress?.lastName}
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      {order.items.length} item(s)
+                      {order.items?.length ?? 0} item(s)
                     </td>
                     <td className="px-6 py-4 text-sm font-medium">
-                      ${order.totalPrice.toFixed(2)}
+                      ${(order.totalPrice ?? 0).toFixed(2)}
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <select
@@ -435,22 +454,22 @@ const Orders = () => {
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Customer Name</p>
                     <p className="font-semibold">
-                      {selectedOrder.shippingAddress.firstName} {selectedOrder.shippingAddress.lastName}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Phone</p>
-                    <p className="font-semibold">{selectedOrder.shippingAddress.phone}</p>
-                  </div>
-                  <div className="col-span-2">
-                    <p className="text-sm text-gray-600 mb-1">Address</p>
-                    <p className="font-semibold">{selectedOrder.shippingAddress.street}</p>
-                    <p className="font-semibold">
-                      {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state}{' '}
-                      {selectedOrder.shippingAddress.zipCode}
-                    </p>
-                    <p className="font-semibold">{selectedOrder.shippingAddress.country}</p>
-                  </div>
+                        {selectedOrder.shippingAddress?.firstName} {selectedOrder.shippingAddress?.lastName}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Phone</p>
+                      <p className="font-semibold">{selectedOrder.shippingAddress?.phone}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-sm text-gray-600 mb-1">Address</p>
+                      <p className="font-semibold">{selectedOrder.shippingAddress?.street}</p>
+                      <p className="font-semibold">
+                        {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.state}{' '}
+                        {selectedOrder.shippingAddress?.zipCode}
+                      </p>
+                      <p className="font-semibold">{selectedOrder.shippingAddress?.country}</p>
+                    </div>
                 </div>
               </div>
 
@@ -515,7 +534,7 @@ const Orders = () => {
                   )}
                   <div className="border-t pt-2 flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span className="text-primary-600">${selectedOrder.totalPrice.toFixed(2)}</span>
+                    <span className="text-primary-600">${(selectedOrder.totalPrice ?? 0).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -537,7 +556,7 @@ const Orders = () => {
                         selectedOrder.paymentStatus === 'failed' ? 'bg-red-100 text-red-800' :
                         'bg-yellow-100 text-yellow-800'
                       }`}>
-                        {selectedOrder.paymentStatus.charAt(0).toUpperCase() + selectedOrder.paymentStatus.slice(1)}
+                        {(selectedOrder.paymentStatus || '').charAt(0).toUpperCase() + (selectedOrder.paymentStatus || '').slice(1)}
                       </span>
                     </div>
                     {selectedOrder.paymentIntentId && (
@@ -574,7 +593,7 @@ const Orders = () => {
                         selectedOrder.orderStatus === 'cancelled' ? 'bg-red-100 text-red-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>
-                        {selectedOrder.orderStatus.charAt(0).toUpperCase() + selectedOrder.orderStatus.slice(1)}
+                        {(selectedOrder.orderStatus || '').charAt(0).toUpperCase() + (selectedOrder.orderStatus || '').slice(1)}
                       </span>
                     </div>
                     <div>
@@ -696,7 +715,7 @@ const Orders = () => {
                   />
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  Maximum: ${selectedOrder.totalPrice.toFixed(2)}
+                  Maximum: ${(selectedOrder.totalPrice ?? 0).toFixed(2)}
                 </p>
               </div>
 
