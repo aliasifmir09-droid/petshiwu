@@ -1,54 +1,37 @@
 /**
- * scripts/migrateImages.mjs — Render Cron Job
- *
- * Run as a Render one-off job or cron.
- * Searches PetSmart for each product, uploads image directly to Bunny storage.
- * Resume-safe: HEAD-checks Bunny before each product.
- *
- * Usage: node scripts/migrateImages.mjs
- * Env: MONGODB_URI, BUNNY_STORAGE_PASSWORD (optional, hardcoded fallback)
+ * scripts/migrateImages.mjs — Render Job
+ * Uses the petshiwu public API (no MongoDB needed), uploads to Bunny directly.
  */
 
 import https from 'https';
-import http from 'http';
-import { MongoClient } from 'mongodb';
 
-const BUNNY_STORAGE_PASS = process.env.BUNNY_STORAGE_PASSWORD || 'ad8f1a46-6aa8-45fa-b07f8d43fe40-5801-4f31';
-const BUNNY_STORAGE_ZONE = 'petshiwu';
-const BUNNY_STORAGE_HOST = 'ny.storage.bunnycdn.com';
-const BUNNY_CDN_BASE = 'https://petshiwu-cdn.b-cdn.net';
-const CONCURRENCY = 10;
-const PAGE_SIZE = 100;
+const BUNNY_PASS = process.env.BUNNY_STORAGE_PASSWORD || 'ad8f1a46-6aa8-45fa-b07f8d43fe40-5801-4f31';
+const BUNNY_HOST = 'ny.storage.bunnycdn.com';
+const BUNNY_ZONE = 'petshiwu';
+const API_BASE = 'https://www.petshiwu.com/api';
+const PAGE_SIZE = 20;
+const CONCURRENCY = 8;
 
 const UAS = [
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/123.0.0.0 Safari/537.36',
   'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0',
 ];
 const ua = () => UAS[Math.floor(Math.random() * UAS.length)];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-function fetchRaw(url, headers = {}, redirects = 0) {
-  if (redirects > 6) return Promise.reject(new Error('Too many redirects'));
+function get(url, headers = {}, redirects = 0) {
+  if (redirects > 6) return Promise.reject(new Error('too many redirects'));
   return new Promise((resolve, reject) => {
     const p = new URL(url);
-    const proto = p.protocol === 'https:' ? https : http;
-    const req = proto.get({
-      hostname: p.hostname, path: p.pathname + p.search, timeout: 20000,
-      headers: {
-        'User-Agent': ua(), Accept: 'text/html,*/*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        ...headers,
-      },
+    const req = https.get({
+      hostname: p.hostname, path: p.pathname + p.search, timeout: 25000,
+      headers: { 'User-Agent': ua(), Accept: '*/*', ...headers },
     }, res => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        const next = res.headers.location.startsWith('http')
-          ? res.headers.location
-          : `${p.protocol}//${p.hostname}${res.headers.location}`;
-        return fetchRaw(next, headers, redirects + 1).then(resolve).catch(reject);
+        const next = res.headers.location.startsWith('http') ? res.headers.location : `https://${p.hostname}${res.headers.location}`;
+        return get(next, headers, redirects + 1).then(resolve).catch(reject);
       }
-      if (res.statusCode === 429) return reject(new Error('RATE429'));
       if (res.statusCode === 404) return reject(new Error('HTTP404'));
       if (res.statusCode !== 200) return reject(new Error(`HTTP${res.statusCode}`));
       const chunks = [];
@@ -64,11 +47,8 @@ function fetchRaw(url, headers = {}, redirects = 0) {
 function headBunny(id) {
   return new Promise(resolve => {
     const req = https.request({
-      hostname: BUNNY_STORAGE_HOST,
-      path: `/${BUNNY_STORAGE_ZONE}/products/${id}.jpg`,
-      method: 'HEAD',
-      headers: { AccessKey: BUNNY_STORAGE_PASS },
-      timeout: 8000,
+      hostname: BUNNY_HOST, path: `/${BUNNY_ZONE}/products/${id}.jpg`,
+      method: 'HEAD', headers: { AccessKey: BUNNY_PASS }, timeout: 8000,
     }, res => resolve(res.statusCode === 200));
     req.on('error', () => resolve(false));
     req.on('timeout', () => { req.destroy(); resolve(false); });
@@ -76,84 +56,60 @@ function headBunny(id) {
   });
 }
 
-function uploadBunny(buf, id) {
+function upload(buf, id) {
   return new Promise((resolve, reject) => {
     const req = https.request({
-      hostname: BUNNY_STORAGE_HOST,
-      path: `/${BUNNY_STORAGE_ZONE}/products/${id}.jpg`,
+      hostname: BUNNY_HOST, path: `/${BUNNY_ZONE}/products/${id}.jpg`,
       method: 'PUT',
-      headers: {
-        AccessKey: BUNNY_STORAGE_PASS,
-        'Content-Type': 'image/jpeg',
-        'Content-Length': buf.length,
-      },
+      headers: { AccessKey: BUNNY_PASS, 'Content-Type': 'image/jpeg', 'Content-Length': buf.length },
     }, res => {
-      let b = '';
-      res.on('data', c => b += c);
+      let b = ''; res.on('data', c => b += c);
       res.on('end', () => res.statusCode === 201 ? resolve() : reject(new Error(`Bunny${res.statusCode}`)));
     });
     req.on('error', reject);
-    req.write(buf);
-    req.end();
+    req.write(buf); req.end();
   });
 }
 
 async function processOne(id, name) {
   if (await headBunny(id)) return 'skip';
   try {
-    await sleep(300 + Math.random() * 400);
-    const query = encodeURIComponent(name.substring(0, 60));
-    const html = (await fetchRaw(
-      `https://www.petsmart.com/search/?q=${query}&format=ajax`,
+    await sleep(300 + Math.random() * 300);
+    const q = encodeURIComponent(name.substring(0, 60));
+    const html = (await get(`https://www.petsmart.com/search/?q=${q}&format=ajax`,
       { Referer: 'https://www.petsmart.com/', 'X-Requested-With': 'XMLHttpRequest' }
     )).toString('utf8');
-    const m = [...html.matchAll(/scene7\.com\/is\/image\/PetSmart\/(\d{5,10})/g)];
-    if (!m.length) return 'nomatch';
-
-    // Try each scene7 ID — first matches are often banner ads (will 404)
-    for (const match of m) {
+    const matches = [...html.matchAll(/scene7\.com\/is\/image\/PetSmart\/(\d{5,10})/g)];
+    if (!matches.length) return 'nomatch';
+    for (const m of matches) {
       try {
-        const imgUrl = `https://s7d2.scene7.com/is/image/PetSmart/${match[1]}?wid=800&hei=800&fmt=jpeg&qlt=90`;
-        const buf = await fetchRaw(imgUrl);
-        if (buf.length < 20000) continue; // PetSmart "no image" placeholder is ~5-9KB
-        await uploadBunny(buf, id);
+        const buf = await get(`https://s7d2.scene7.com/is/image/PetSmart/${m[1]}?wid=800&hei=800&fmt=jpeg&qlt=90`);
+        if (buf.length < 20000) continue;
+        await upload(buf, id);
         return 'ok';
       } catch { continue; }
     }
     return 'nomatch';
   } catch (e) {
-    if (e.message === 'RATE429') await sleep(12000);
-    if (e.message === 'HTTP404' || e.message === 'HTTP0') return 'nomatch';
-    return `err:${e.message.substring(0, 50)}`;
+    if (e.message === 'HTTP404') return 'nomatch';
+    if (e.message === 'RATE429') await sleep(15000);
+    return `err:${e.message.substring(0, 40)}`;
   }
 }
 
 async function main() {
-  const uri = process.env.MONGODB_URI;
-  if (!uri) { console.error('MONGODB_URI not set'); process.exit(1); }
-
-  const client = new MongoClient(uri, { serverSelectionTimeoutMS: 15000 });
-  await client.connect();
-  const db = client.db('petshop');
-
   let ok = 0, skip = 0, nomatch = 0, errors = 0;
   const start = Date.now();
   let page = 1, totalPages = 1;
 
   while (page <= totalPages) {
-    const skip_n = (page - 1) * PAGE_SIZE;
-    const products = await db.collection('products')
-      .find({}, { projection: { _id: 1, name: 1 } })
-      .skip(skip_n).limit(PAGE_SIZE).toArray();
-
-    if (page === 1) {
-      const total = await db.collection('products').countDocuments();
-      totalPages = Math.ceil(total / PAGE_SIZE);
-    }
+    const data = JSON.parse((await get(`${API_BASE}/products?limit=${PAGE_SIZE}&page=${page}&fields=_id,name`)).toString());
+    const products = (data.data || []).map(p => ({ id: String(p._id), name: p.name }));
+    totalPages = data.pagination?.pages || 1;
 
     for (let i = 0; i < products.length; i += CONCURRENCY) {
       const batch = products.slice(i, i + CONCURRENCY);
-      const results = await Promise.all(batch.map(p => processOne(String(p._id), p.name || '')));
+      const results = await Promise.all(batch.map(p => processOne(p.id, p.name)));
       for (const r of results) {
         if (r === 'ok') ok++;
         else if (r === 'skip') skip++;
@@ -162,18 +118,15 @@ async function main() {
       }
     }
 
-    const elapsed = ((Date.now() - start) / 1000).toFixed(0);
+    const mins = ((Date.now() - start) / 60000).toFixed(1);
     const done = ok + skip + nomatch + errors;
-    const total = totalPages * PAGE_SIZE;
-    const rate = done / Math.max(elapsed, 1);
-    const eta = Math.round((total - done) / Math.max(rate, 0.01) / 60);
-    console.log(`p${page}/${totalPages} | ✅${ok} ⏭${skip} ⚠️${nomatch} ❌${errors} | ETA~${eta}min`);
+    const rate = done / Math.max((Date.now() - start) / 1000, 1);
+    const eta = Math.round((totalPages * PAGE_SIZE - done) / Math.max(rate, 0.01) / 60);
+    console.log(`p${page}/${totalPages} | ✅${ok} ⏭${skip} ⚠️${nomatch} ❌${errors} | ${mins}min | ETA~${eta}min`);
     page++;
   }
 
-  const mins = ((Date.now() - start) / 60000).toFixed(1);
-  console.log(`\nDONE in ${mins}min — ✅${ok} | ⏭${skip} | ⚠️${nomatch} | ❌${errors}`);
-  await client.close();
+  console.log(`\nDONE — ✅${ok} uploaded | ⏭${skip} skipped | ⚠️${nomatch} no match | ❌${errors} errors`);
 }
 
 main().catch(e => { console.error('Fatal:', e.message); process.exit(1); });
