@@ -573,21 +573,21 @@ app.get('/api/v1/admin/migrate-images', async (req: Request, res: Response) => {
     });
   }
 
-  async function findAndUpload(id: string, name: string): Promise<string> {
+  async function findAndUpload(id: string, originalImages: string[]): Promise<string> {
     try {
       if (await headBunny(id)) return 'skip';
-      const query = name.substring(0, 60);
-      const html = (await rawFetch(
-        `https://www.petsmart.com/search/?q=${encodeURIComponent(query)}&format=ajax`,
-        { Referer: 'https://www.petsmart.com/', 'X-Requested-With': 'XMLHttpRequest' }
-      )).toString('utf8');
-      const m = [...html.matchAll(/scene7\.com\/is\/image\/PetSmart\/(\d{5,10})/g)];
-      if (!m.length) return 'no_match';
-      const imgUrl = `https://s7d2.scene7.com/is/image/PetSmart/${m[0][1]}?wid=800&hei=800&fmt=jpeg&qlt=90`;
-      const buf = await rawFetch(imgUrl);
-      if (buf.length < 500) return 'too_small';
-      await uploadBunny(buf, id);
-      return 'ok';
+
+      // Try original image URLs stored in MongoDB (wsrv.nl proxies, scene7, etc.)
+      for (const imgUrl of originalImages) {
+        if (!imgUrl || imgUrl.includes('b-cdn.net')) continue; // skip already-Bunny URLs
+        try {
+          const buf = await rawFetch(imgUrl);
+          if (buf.length < 500) continue;
+          await uploadBunny(buf, id);
+          return 'ok';
+        } catch { continue; }
+      }
+      return 'no_match';
     } catch (e: any) {
       return `err:${e.message.substring(0, 60)}`;
     }
@@ -595,13 +595,13 @@ app.get('/api/v1/admin/migrate-images', async (req: Request, res: Response) => {
 
   try {
     const Product = (await import('./models/Product')).default;
-    const products = await Product.find({}, '_id name').skip(skip).limit(limit).lean() as any[];
+    const products = await Product.find({}, '_id images').skip(skip).limit(limit).lean() as any[];
 
     let ok = 0, skipped = 0, noMatch = 0, errors = 0;
 
     for (let i = 0; i < products.length; i += CONCURRENCY) {
       const batch = products.slice(i, i + CONCURRENCY);
-      const results = await Promise.all(batch.map((p: any) => findAndUpload(String(p._id), p.name || '')));
+      const results = await Promise.all(batch.map((p: any) => findAndUpload(String(p._id), (p.images as string[]) || [])));
       for (const r of results) {
         if (r === 'ok') ok++;
         else if (r === 'skip') skipped++;
