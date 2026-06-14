@@ -477,18 +477,23 @@ const Orders = () => {
               <div>
                 <h3 className="text-lg font-bold mb-4">Order Items</h3>
                 <div className="space-y-3">
-                  {selectedOrder.items.map((item: any, index: number) => (
+                  {(selectedOrder.items || []).map((item: any, index: number) => {
+                    const bunnyImg = item.product
+                      ? `https://petshiwu-cdn.b-cdn.net/products/${item.product}.jpg`
+                      : item.image || '/placeholder.png';
+                    return (
                     <div key={index} className="flex items-center gap-4 p-3 border rounded-lg">
                       <img
-                        src={item.image}
+                        src={bunnyImg}
                         alt={item.name}
-                        className="w-16 h-16 object-cover rounded"
+                        className="w-16 h-16 object-cover rounded bg-gray-100"
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
                       />
                       <div className="flex-1">
                         <p className="font-semibold">{item.name}</p>
                         {item.variant && (
                           <p className="text-sm text-gray-600">
-                            {item.variant.size || item.variant.weight}
+                            {item.variant.size || item.variant.weight || item.variant.sku}
                           </p>
                         )}
                         <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
@@ -498,7 +503,8 @@ const Orders = () => {
                         <p className="text-sm text-gray-600">${(item.price ?? 0).toFixed(2)} each</p>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 

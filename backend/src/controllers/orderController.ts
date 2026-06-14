@@ -652,7 +652,21 @@ export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFu
       Order.countDocuments(matchQuery).maxTimeMS(5000)
     ]);
 
-    const normalizedOrders = orders.map((order) => normalizeOrderId(order));
+    const normalizedOrders = orders
+      .map((order) => normalizeOrderId(order))
+      .filter(Boolean)
+      .map((order: any) => {
+        // Rewrite dead Cloudinary image URLs to Bunny CDN using stored product ID
+        if (order.items && Array.isArray(order.items)) {
+          order.items = order.items.map((item: any) => {
+            if (item && item.product) {
+              item.image = `https://petshiwu-cdn.b-cdn.net/products/${item.product}.jpg`;
+            }
+            return item;
+          });
+        }
+        return order;
+      });
     res.status(200).json({
       success: true,
       data: normalizedOrders,
