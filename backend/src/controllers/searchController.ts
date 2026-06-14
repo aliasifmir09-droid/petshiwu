@@ -229,7 +229,7 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
 
     // Execute query
     // When using $text search, sort by textScore for relevance, then by sortOption
-    let productsQuery = Product.find(query);
+    let productsQuery = Product.find(query) as any;
     
     if (query.$text) {
       // Add text score for relevance ranking

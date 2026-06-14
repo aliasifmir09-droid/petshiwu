@@ -1,8 +1,8 @@
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { IUser } from '../models/User';
 
 export interface IBlogDocument extends Document {
-  _id: string;
+  _id: Types.ObjectId;
   title: string;
   slug: string;
   content: string;
