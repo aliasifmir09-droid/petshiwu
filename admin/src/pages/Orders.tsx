@@ -522,7 +522,7 @@ const Orders = () => {
                       {(selectedOrder.shippingPrice ?? 0) === 0 ? (
                         <span className="text-green-600">FREE</span>
                       ) : (
-                        `$${selectedOrder.shippingPrice.toFixed(2)}`
+                        `$${Number(selectedOrder.shippingPrice || 0).toFixed(2)}`
                       )}
                     </span>
                   </div>
@@ -530,12 +530,12 @@ const Orders = () => {
                     <span className="text-gray-600">Tax</span>
                     <span className="font-medium">${(selectedOrder.taxPrice ?? 0).toFixed(2)}</span>
                   </div>
-                  {selectedOrder.donationAmount && selectedOrder.donationAmount > 0 && (
+                  {!!selectedOrder.donationAmount && selectedOrder.donationAmount > 0 && (
                     <div className="flex justify-between text-pink-600">
                       <span className="flex items-center gap-1">
                         <span>💝 Donation</span>
                       </span>
-                      <span className="font-medium">${selectedOrder.donationAmount.toFixed(2)}</span>
+                      <span className="font-medium">${Number(selectedOrder.donationAmount || 0).toFixed(2)}</span>
                     </div>
                   )}
                   <div className="border-t pt-2 flex justify-between text-lg font-bold">

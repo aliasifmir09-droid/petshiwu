@@ -5,6 +5,7 @@ import { adminService } from './services/adminService';
 import Sidebar from './components/Sidebar';
 import PasswordExpiryWarning from './components/PasswordExpiryWarning';
 import OrderNotificationManager from './components/OrderNotificationManager';
+import ErrorBoundary from './components/ErrorBoundary';
 import './index.css';
 
 // Lazy load pages for code splitting and better performance
@@ -241,7 +242,7 @@ function App() {
                     path="/orders" 
                     element={
                       user?.role === 'admin' || user?.permissions?.canManageOrders 
-                        ? <Orders /> 
+                        ? <ErrorBoundary><Orders /></ErrorBoundary> 
                         : <Navigate to={getDefaultPage()} replace />
                     } 
                   />
