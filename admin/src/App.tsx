@@ -5,7 +5,7 @@ import { adminService } from './services/adminService';
 import Sidebar from './components/Sidebar';
 import PasswordExpiryWarning from './components/PasswordExpiryWarning';
 import OrderNotificationManager from './components/OrderNotificationManager';
-import ErrorBoundary from './components/ErrorBoundary';
+import ErrorBoundary from './components/ErrorBoundary'; // build: 20260614-b
 import './index.css';
 
 // Lazy load pages for code splitting and better performance
