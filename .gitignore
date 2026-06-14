@@ -1,23 +1,21 @@
-﻿# Node
-node_modules/
-**/node_modules/
 
 # Builds
-/dist/
-**/dist/
-*.log
-*.js.map
-
 # Env & secrets
-.env
-**/.env
-.env.*.local
-
 # Local tooling
-.vscode/
-.DS_Store
-
 # Runtime uploads/media
+**/.env
+**/dist/
+**/node_modules/
+*.js.map
+*.log
+.DS_Store
+.bun/
+.env
+.env.*.local
+.vscode/
+/dist/
 backend/uploads/
 bun.lock
-.bun/
+node_modules/
+package-lock.json
+﻿# Node
