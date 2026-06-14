@@ -74,7 +74,6 @@
     "stripe": "^14.0.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "typescript": "^5.3.3",
     "winston": "^3.18.3"
   },
   "devDependencies": {
@@ -101,6 +100,6 @@
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "~5.8.3"
   }
 }

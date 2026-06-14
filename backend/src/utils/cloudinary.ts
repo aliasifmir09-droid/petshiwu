@@ -1,8 +1,6 @@
 /**
- * Cloudinary has been replaced with Bunny CDN for all image storage.
- * This file stubs the original cloudinary API so existing imports continue
- * to compile and run — isCloudinaryConfigured() always returns false,
- * routing all upload paths to local/Bunny storage instead.
+ * Cloudinary replaced with Bunny CDN. This stub keeps existing imports
+ * compiling — isCloudinaryConfigured() always returns false.
  */
 import multer from 'multer';
 import path from 'path';
@@ -13,16 +11,18 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
+const localStorage = multer.diskStorage({
+  destination: (_req: any, _file: any, cb: any) => cb(null, uploadsDir),
+  filename: (_req: any, file: any, cb: any) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
 export const isCloudinaryConfigured = (): boolean => false;
 
 export const cloudinaryUpload = multer({
-  storage: multer.diskStorage({
-    destination: (_req, _file, cb) => cb(null, uploadsDir),
-    filename: (_req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    },
-  }),
+  storage: localStorage,
   limits: { fileSize: 100 * 1024 * 1024 },
 });
 
