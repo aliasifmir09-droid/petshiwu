@@ -17,5 +17,5 @@
 backend/uploads/
 bun.lock
 node_modules/
-package-lock.json
 ﻿# Node
+package-lock.json
