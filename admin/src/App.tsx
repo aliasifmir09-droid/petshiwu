@@ -55,7 +55,7 @@ function App() {
 
   useEffect(() => {
     let mounted = true;
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const loadUser = async () => {
       // Phase 2: Cookie-Only - Try to get user from backend using httpOnly cookie
