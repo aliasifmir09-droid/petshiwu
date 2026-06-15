@@ -61,6 +61,11 @@ const OnlinePetStoreNYC = lazy(() => import('./pages/seo/OnlinePetStoreNYC'));
 const PetSuppliesNearMeNYC = lazy(() => import('./pages/seo/PetSuppliesNearMeNYC'));
 const AffordablePetFoodNYC = lazy(() => import('./pages/seo/AffordablePetFoodNYC'));
 const PetFoodSubscriptionNYC = lazy(() => import('./pages/seo/PetFoodSubscriptionNYC'));
+const PetSuppliesBrooklynNY = lazy(() => import('./pages/seo/PetSuppliesBrooklynNY'));
+const PetSuppliesManhattanNY = lazy(() => import('./pages/seo/PetSuppliesManhattanNY'));
+const PetSuppliesBronxNY = lazy(() => import('./pages/seo/PetSuppliesBronxNY'));
+const PetSuppliesStatenIslandNY = lazy(() => import('./pages/seo/PetSuppliesStatenIslandNY'));
+const PetSuppliesJacksonHeightsNY = lazy(() => import('./pages/seo/PetSuppliesJacksonHeightsNY'));
 const Investors = lazy(() => import('./pages/Investors'));
 const SellWithUs = lazy(() => import('./pages/SellWithUs'));
 const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
@@ -316,6 +321,11 @@ function App() {
                   <Route path="/pet-supplies-near-me-nyc" element={<PetSuppliesNearMeNYC />} />
                   <Route path="/affordable-pet-food-nyc" element={<AffordablePetFoodNYC />} />
                   <Route path="/pet-food-delivery-nyc" element={<PetFoodSubscriptionNYC />} />
+                  <Route path="/pet-supplies-brooklyn-ny" element={<PetSuppliesBrooklynNY />} />
+                  <Route path="/pet-supplies-manhattan-ny" element={<PetSuppliesManhattanNY />} />
+                  <Route path="/pet-supplies-bronx-ny" element={<PetSuppliesBronxNY />} />
+                  <Route path="/pet-supplies-staten-island-ny" element={<PetSuppliesStatenIslandNY />} />
+                  <Route path="/pet-supplies-jackson-heights-ny" element={<PetSuppliesJacksonHeightsNY />} />
                   {/* Business pages */}
                   <Route path="/investors" element={<Investors />} />
                   <Route path="/sell-with-us" element={<SellWithUs />} />

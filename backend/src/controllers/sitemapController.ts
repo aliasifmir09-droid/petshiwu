@@ -260,6 +260,12 @@ export const generateSitemap = async (req: Request, res: Response) => {
       { path: '/pet-supplies-near-me-nyc', priority: '0.9', changefreq: 'weekly' },
       { path: '/affordable-pet-food-nyc', priority: '0.8', changefreq: 'weekly' },
       { path: '/pet-food-delivery-nyc', priority: '0.9', changefreq: 'weekly' },
+      // NYC borough pages
+      { path: '/pet-supplies-brooklyn-ny', priority: '0.9', changefreq: 'weekly' },
+      { path: '/pet-supplies-manhattan-ny', priority: '0.9', changefreq: 'weekly' },
+      { path: '/pet-supplies-bronx-ny', priority: '0.9', changefreq: 'weekly' },
+      { path: '/pet-supplies-staten-island-ny', priority: '0.9', changefreq: 'weekly' },
+      { path: '/pet-supplies-jackson-heights-ny', priority: '1.0', changefreq: 'weekly' },
       // Business pages
       { path: '/investors', priority: '0.7', changefreq: 'monthly' },
       { path: '/sell-with-us', priority: '0.8', changefreq: 'monthly' },

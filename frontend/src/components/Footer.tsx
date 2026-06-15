@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
 
           {/* Brand */}
           <div className="lg:col-span-1">
@@ -109,6 +109,21 @@ const Footer = () => {
               <li><Link to="/sell-with-us" className="hover:text-white transition-colors">Sell With Us</Link></li>
               <li><Link to="/investors" className="hover:text-white transition-colors">Investors</Link></li>
               <li><Link to="/donate" className="hover:text-white transition-colors">Donate to Shelters</Link></li>
+            </ul>
+          </div>
+
+          {/* NYC Delivery */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">NYC Delivery</h3>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li><Link to="/pet-supplies-jackson-heights-ny" className="hover:text-white transition-colors">Jackson Heights</Link></li>
+              <li><Link to="/pet-store-queens-ny" className="hover:text-white transition-colors">Queens</Link></li>
+              <li><Link to="/pet-supplies-brooklyn-ny" className="hover:text-white transition-colors">Brooklyn</Link></li>
+              <li><Link to="/pet-supplies-manhattan-ny" className="hover:text-white transition-colors">Manhattan</Link></li>
+              <li><Link to="/pet-supplies-bronx-ny" className="hover:text-white transition-colors">The Bronx</Link></li>
+              <li><Link to="/pet-supplies-staten-island-ny" className="hover:text-white transition-colors">Staten Island</Link></li>
+              <li><Link to="/dog-food-delivery-nyc" className="hover:text-white transition-colors">Dog Food Delivery NYC</Link></li>
+              <li><Link to="/cat-food-delivery-nyc" className="hover:text-white transition-colors">Cat Food Delivery NYC</Link></li>
             </ul>
           </div>
 

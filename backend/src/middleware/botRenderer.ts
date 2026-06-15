@@ -291,6 +291,28 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     title: 'Sell With Us — Partner with Petshiwu',
     description: 'List your pet products on Petshiwu and reach thousands of NYC pet owners. Join our growing marketplace of premium pet brands.',
   },
+
+  // ── NYC Borough Landing Pages ─────────────────────────────────────────────
+  '/pet-supplies-brooklyn-ny': {
+    title: 'Pet Supplies Brooklyn NY — Delivery to Williamsburg, Park Slope & All of Brooklyn | Petshiwu',
+    description: "Brooklyn's online pet store. Fast delivery to Williamsburg, Park Slope, Bushwick, Flatbush, Bay Ridge & every Brooklyn neighborhood. 10,000+ products, free shipping over $49.",
+  },
+  '/pet-supplies-manhattan-ny': {
+    title: 'Pet Supplies Manhattan NYC — Delivery to Upper West Side, Harlem & All of Manhattan | Petshiwu',
+    description: "Manhattan pet supply delivery. Upper West Side, Upper East Side, Harlem, Hell's Kitchen, Chelsea, Tribeca & more. 10,000+ products, free shipping over $49.",
+  },
+  '/pet-supplies-bronx-ny': {
+    title: 'Pet Supplies Bronx NY — Delivery to Fordham, Riverdale, Hunts Point & All of the Bronx | Petshiwu',
+    description: 'Bronx pet supply delivery. Fordham, Riverdale, Hunts Point, Mott Haven, Pelham Bay & more. 10,000+ products from top brands. Free shipping on orders over $49.',
+  },
+  '/pet-supplies-staten-island-ny': {
+    title: 'Pet Supplies Staten Island NY — Delivery to St. George, Tottenville & All of Staten Island | Petshiwu',
+    description: 'Staten Island pet supply delivery. St. George, Tottenville, New Dorp, Stapleton & all neighborhoods. 10,000+ products from top brands. Free shipping on orders over $49.',
+  },
+  '/pet-supplies-jackson-heights-ny': {
+    title: "Pet Supplies Jackson Heights NY — Local Delivery from Your Neighborhood Pet Store | Petshiwu",
+    description: "Petshiwu is based in Jackson Heights, Queens. Local pet supply delivery to Jackson Heights, Elmhurst, Woodside & surrounding neighborhoods. 10,000+ products. Free shipping over $49.",
+  },
 };
 
 /**
