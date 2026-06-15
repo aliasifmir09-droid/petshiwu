@@ -16,16 +16,16 @@ import { normalizeImageUrl, generateSrcSet, getOptimizedImageUrl } from '@/utils
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const BRANDS = [
-  { name: 'Purina',              logo: 'https://logo.clearbit.com/purina.com' },
-  { name: 'Blue Buffalo',        logo: 'https://logo.clearbit.com/bluebuffalo.com' },
-  { name: 'Royal Canin',         logo: 'https://logo.clearbit.com/royalcanin.com' },
-  { name: "Hill's Science Diet", logo: 'https://logo.clearbit.com/hillspet.com' },
-  { name: 'Wellness',            logo: 'https://logo.clearbit.com/wellnesspetfood.com' },
-  { name: 'Orijen',              logo: 'https://logo.clearbit.com/orijen.ca' },
-  { name: 'Nutro',               logo: 'https://logo.clearbit.com/nutro.com' },
-  { name: 'Iams',                logo: 'https://logo.clearbit.com/iams.com' },
-  { name: 'Pedigree',            logo: 'https://logo.clearbit.com/pedigree.com' },
-  { name: "Nature's Recipe",     logo: 'https://logo.clearbit.com/naturesrecipe.com' },
+  { name: 'Purina',              logo: 'https://petshiwu-cdn.b-cdn.net/brands/purina.svg' },
+  { name: 'Blue Buffalo',        logo: 'https://petshiwu-cdn.b-cdn.net/brands/bluebuffalo.svg' },
+  { name: 'Royal Canin',         logo: 'https://petshiwu-cdn.b-cdn.net/brands/royalcanin.svg' },
+  { name: "Hill's Science Diet", logo: 'https://petshiwu-cdn.b-cdn.net/brands/hills.svg' },
+  { name: 'Wellness',            logo: 'https://petshiwu-cdn.b-cdn.net/brands/wellness.svg' },
+  { name: 'Orijen',              logo: 'https://petshiwu-cdn.b-cdn.net/brands/orijen.svg' },
+  { name: 'Nutro',               logo: 'https://petshiwu-cdn.b-cdn.net/brands/nutro.svg' },
+  { name: 'Iams',                logo: 'https://petshiwu-cdn.b-cdn.net/brands/iams.png' },
+  { name: 'Pedigree',            logo: 'https://petshiwu-cdn.b-cdn.net/brands/pedigree.png' },
+  { name: "Nature's Recipe",     logo: 'https://petshiwu-cdn.b-cdn.net/brands/natures.svg' },
 ];
 
 const PET_CATEGORIES = [
@@ -337,44 +337,56 @@ const Home = () => {
       </section>
 
       {/* Brands We Carry */}
-      <section className="py-14 bg-white border-t border-gray-100">
+      <section className="py-14 bg-gray-50 border-t border-gray-100">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">Brands We Carry</h2>
-            <p className="text-gray-500 text-base">Premium brands your pets love — all in one place</p>
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-black text-gray-900">Shop by Brand</h2>
+              <p className="text-gray-500 text-sm mt-1">Click a brand to browse their products</p>
+            </div>
+            <Link
+              to="/products"
+              className="hidden md:flex items-center gap-1 text-blue-600 hover:text-blue-700 font-semibold text-sm border border-blue-200 rounded-full px-4 py-1.5 hover:bg-blue-50 transition-colors"
+            >
+              All brands →
+            </Link>
           </div>
-          <div className="flex flex-wrap justify-center items-center gap-6 md:gap-10">
+
+          {/* Scrollable brand strip */}
+          <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide snap-x snap-mandatory">
             {BRANDS.map((brand, i) => (
-              <div
+              <button
                 key={i}
-                className="group cursor-pointer"
                 onClick={() => navigate(`/products?brand=${encodeURIComponent(brand.name)}`)}
-                title={brand.name}
+                className="group flex-none snap-start focus:outline-none"
+                aria-label={`Shop ${brand.name} products`}
               >
-                <div className="w-32 h-20 flex items-center justify-center rounded-2xl bg-white border border-gray-200 px-4 py-3 group-hover:border-blue-400 group-hover:shadow-xl transition-all duration-200">
+                <div className="w-36 h-24 flex items-center justify-center rounded-2xl bg-white border-2 border-transparent shadow-sm group-hover:border-blue-400 group-hover:shadow-lg transition-all duration-200 overflow-hidden">
                   <img
                     src={brand.logo}
                     alt={brand.name}
-                    className="max-w-full max-h-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300 group-hover:scale-110"
+                    className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                     onError={(e) => {
                       const target = e.currentTarget;
                       target.style.display = 'none';
                       const parent = target.parentElement;
                       if (parent) {
-                        parent.innerHTML = `<span style="font-weight:700;font-size:12px;text-align:center;color:#374151;line-height:1.3">${brand.name}</span>`;
+                        parent.style.background = '#f3f4f6';
+                        parent.innerHTML = `<span style="font-weight:800;font-size:13px;text-align:center;color:#374151;padding:8px;line-height:1.3">${brand.name}</span>`;
                       }
                     }}
                   />
                 </div>
-                <p className="text-center text-xs text-gray-400 mt-1.5 group-hover:text-blue-500 transition-colors font-medium">
+                <p className="text-center text-xs text-gray-500 mt-2 font-semibold group-hover:text-blue-600 transition-colors truncate w-36">
                   {brand.name}
                 </p>
-              </div>
+              </button>
             ))}
           </div>
-          <div className="text-center mt-10">
-            <Link to="/products" className="text-blue-600 hover:text-blue-700 font-semibold text-sm hover:underline">
+
+          <div className="text-center mt-6 md:hidden">
+            <Link to="/products" className="text-blue-600 font-semibold text-sm">
               View all brands →
             </Link>
           </div>
