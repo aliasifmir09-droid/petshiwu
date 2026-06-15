@@ -123,13 +123,12 @@ const AdvancedSearch = () => {
     e.target.value = '';
     try {
       const compressed = await compressImage(file);
+      // Update preview to compressed JPEG — always displayable, fixes HEIC on iOS
+      setPhotoPreview(URL.createObjectURL(compressed));
       visualSearchMutation.mutate(compressed);
     } catch {
       // Compression fails for HEIC/HEIF (iPhone default format) because the browser
       // canvas can't decode them. Gemini Vision supports HEIC natively, so send as-is.
-      // Also fall back for any other format the canvas rejects.
-      // Allow up to 20MB raw — Gemini's inline data limit. iPhone HEIC photos
-      // are typically 8-15MB so 10MB was too tight.
       if (file.size <= 20 * 1024 * 1024) {
         visualSearchMutation.mutate(file);
       } else {

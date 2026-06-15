@@ -7,7 +7,7 @@ import logger from '../utils/logger';
 import { executeCachedAggregation } from '../utils/aggregationCache';
 import { cache, cacheKeys } from '../utils/cache';
 
-const GEMINI_VISION_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
+const GEMINI_VISION_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 // Advanced search with filters
 export const advancedSearch = async (req: Request, res: Response, next: NextFunction) => {
@@ -503,16 +503,17 @@ export const visualSearch = async (req: Request, res: Response, next: NextFuncti
     const imageMime = mimeType || 'image/jpeg';
 
     // Ask Gemini to identify the pet product in the photo
-    const prompt = `Look at this image and identify the pet product shown.
+    const prompt = `You are a pet store product identifier. Look at this image carefully.
+Identify any pet product, animal, or pet-related item visible. Be generous — if you see an animal, identify what type of product it might need. If you see a product package, read the label.
 Return ONLY a JSON object in this exact format (no markdown, no extra text):
 {
-  "productType": "<main product type, e.g. 'dog food', 'cat collar', 'pet toy', 'dog leash', 'cat litter', 'bird cage', 'fish tank', 'pet bed'>",
+  "productType": "<product type, e.g. 'dog food', 'cat collar', 'pet toy', 'dog leash', 'cat litter', 'bird cage', 'fish tank', 'pet bed', 'dog treats', 'cat food'>",
   "keywords": ["keyword1", "keyword2", "keyword3"],
   "petType": "<'dog', 'cat', 'bird', 'fish', 'small-animal', or 'unknown'>",
   "brand": "<brand name if visible, or null>",
-  "description": "<1 sentence describing the product>"
+  "description": "<1 sentence describing what you see>"
 }
-If no pet product is visible, set productType to "unknown".`;
+Only set productType to "unknown" if the image is completely unrelated to pets (e.g. a landscape, car, or human face with no animals/pet products).`;
 
     const geminiPayload = {
       contents: [{
