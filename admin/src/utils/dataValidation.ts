@@ -56,8 +56,8 @@ export const validateRecentOrder = (order: any): boolean => {
   // At minimum, should have an ID or orderNumber
   if (!order._id && !order.orderNumber) return false;
   
-  // If user exists, should be an object
-  if (order.user !== undefined && (typeof order.user !== 'object' || order.user === null)) {
+  // If user exists and is not null, should be an object (null = guest order, that's OK)
+  if (order.user !== undefined && order.user !== null && typeof order.user !== 'object') {
     return false;
   }
   
