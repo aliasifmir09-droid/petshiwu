@@ -29,12 +29,12 @@ const BRANDS = [
 ];
 
 const PET_CATEGORIES = [
-  { name: 'Dog',       slug: 'dog',       image: 'https://images.unsplash.com/photo-1534361960057-19889db9621e?w=500&h=500&fit=crop&q=90' },
-  { name: 'Cat',       slug: 'cat',       image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&h=500&fit=crop&q=90' },
-  { name: 'Fish',      slug: 'fish',      image: 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=500&h=500&fit=crop&q=90' },
-  { name: 'Bird',      slug: 'bird',      image: 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=500&h=500&fit=crop&q=90' },
-  { name: 'Reptile',   slug: 'reptile',   image: 'https://images.unsplash.com/photo-1596131431486-e2f5b6d17e0f?w=500&h=500&fit=crop&q=90' },
-  { name: 'Small Pet', slug: 'small-pet', image: 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=500&h=500&fit=crop&q=90' },
+  { name: 'Dog',       slug: 'dog',       image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&h=600&fit=crop&q=95' },
+  { name: 'Cat',       slug: 'cat',       image: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=600&h=600&fit=crop&q=95' },
+  { name: 'Fish',      slug: 'fish',      image: 'https://images.unsplash.com/photo-1544552866-d3ed42536cfd?w=600&h=600&fit=crop&q=95' },
+  { name: 'Bird',      slug: 'bird',      image: 'https://images.unsplash.com/photo-1444464666168-49d633b86797?w=600&h=600&fit=crop&q=95' },
+  { name: 'Reptile',   slug: 'reptile',   image: 'https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=600&h=600&fit=crop&q=95' },
+  { name: 'Small Pet', slug: 'small-pet', image: 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?w=600&h=600&fit=crop&q=95' },
 ];
 
 const Home = () => {
