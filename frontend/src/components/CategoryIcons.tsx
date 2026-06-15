@@ -51,7 +51,7 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
                     alt=""
                     width={170}
                     height={170}
-                    className={`w-full h-full object-contain object-center p-2 sm:p-3 ${imageError ? 'opacity-0 absolute' : 'opacity-100 relative'} transition-transform duration-300`}
+                    className={`w-full h-full object-cover object-center ${imageError ? 'opacity-0 absolute' : 'opacity-100 relative'} transition-transform duration-300`}
                     onError={() => {
                       setImageError(true);
                     }}
@@ -140,48 +140,42 @@ const CategoryIcons = () => {
       title: 'Dog food',
       link: '/dog/food',
       color: 'from-blue-500 to-blue-600',
-      // Image: Blue bag with paw print + blue bowl with kibble
-      image: '/category-dog-food.avif'
+      image: 'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&h=400&fit=crop&q=95'
     },
     {
       icon: HeartPulse,
       title: 'Vitamins & supplements',
       link: '/products?vitaminsFilter=true&supplementsFilter=true',
       color: 'from-green-500 to-emerald-600',
-      // Image: Blue pill bottle with paw print label + white bone
-      image: '/category-vitamins-supplements.png'
+      image: 'https://images.unsplash.com/photo-1550572017-edd951b55104?w=400&h=400&fit=crop&q=95'
     },
     {
       icon: Cookie,
       title: 'Dog treats',
       link: '/products?petType=dog&search=treats',
       color: 'from-pink-500 to-rose-600',
-      // Image: Blue jar with white flower-shaped treats + white bone
-      image: '/category-dog-treats.avif'
+      image: 'https://images.unsplash.com/photo-1623387641168-d9803ddd3f35?w=400&h=400&fit=crop&q=95'
     },
     {
       icon: Fish,
       title: 'Cat food',
       link: '/cat/food',
       color: 'from-purple-500 to-purple-600',
-      // Image: Stack of three blue cat food cans
-      image: '/category-cat-food.avif'
+      image: 'https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=400&h=400&fit=crop&q=95'
     },
     {
       icon: Box,
       title: 'Cat litter',
       link: '/products?petType=cat&search=litter',
       color: 'from-teal-500 to-cyan-600',
-      // Image: Blue litter box with white hood
-      image: '/category-cat-litter.avif'
+      image: 'https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=400&h=400&fit=crop&q=95'
     },
     {
       icon: Tag,
       title: 'Deals',
       link: '/products?featured=true',
       color: 'from-orange-500 to-red-600',
-      // Image: Blue gift box + blue price tag with $ sign
-      image: '/category-deals.avif'
+      image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&h=400&fit=crop&q=95'
     }
   ];
 
