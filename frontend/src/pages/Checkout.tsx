@@ -389,6 +389,19 @@ const Checkout = () => {
       return;
     }
 
+    // NYC-only delivery check
+    const _zip = shippingInfo.zipCode.trim().replace(/[^0-9]/g, '').substring(0, 5);
+    const _isNY = shippingInfo.state.trim().toUpperCase() === 'NY';
+    const _isNYC =
+      (_zip >= '10001' && _zip <= '10282') ||
+      (_zip >= '10301' && _zip <= '10314') ||
+      (_zip >= '10451' && _zip <= '10475') ||
+      (_zip >= '11201' && _zip <= '11697');
+    if (!_isNY || !_isNYC) {
+      showToast('Sorry, we currently deliver only within New York City (all 5 boroughs).', 'error');
+      return;
+    }
+
     // Guest must provide email
     if (!isAuthenticated && !shippingInfo.email?.trim()) {
       setEmailError(true);

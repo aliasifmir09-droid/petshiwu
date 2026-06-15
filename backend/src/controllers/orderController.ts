@@ -76,6 +76,24 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       });
     }
 
+    // NYC-only delivery restriction — 5 boroughs only
+    // Manhattan: 10001-10282 | Staten Island: 10301-10314 | Bronx: 10451-10475 | Brooklyn+Queens: 11201-11697
+    const zip = (shippingAddress.zipCode || '').trim().replace(/[^0-9]/g, '').substring(0, 5);
+    const isNYState = (shippingAddress.state || '').trim().toUpperCase() === 'NY';
+    const isNYCZip =
+      (zip >= '10001' && zip <= '10282') || // Manhattan
+      (zip >= '10301' && zip <= '10314') || // Staten Island
+      (zip >= '10451' && zip <= '10475') || // Bronx
+      (zip >= '11201' && zip <= '11697');   // Brooklyn & Queens
+
+    if (!isNYState || !isNYCZip) {
+      return res.status(400).json({
+        success: false,
+        message: 'We currently deliver only within New York City (all 5 boroughs). Please enter a valid NYC address.',
+        errors: ['Delivery is only available within the 5 boroughs of New York City.']
+      });
+    }
+
     const normalizedItems = items.map((item: OrderItemInput): NormalizedOrderItem => {
       let productId: string | null = null;
       const rawProductId = item.product;
