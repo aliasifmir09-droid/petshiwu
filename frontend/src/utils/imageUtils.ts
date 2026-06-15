@@ -85,7 +85,7 @@ const optimizeBunnyUrl = (url: string, width?: number, height?: number): string 
     const urlObj = new URL(url);
     if (width) urlObj.searchParams.set('width', String(width));
     if (height) urlObj.searchParams.set('height', String(height));
-    urlObj.searchParams.set('quality', '82');
+    urlObj.searchParams.set('quality', '95');
     return urlObj.toString();
   } catch {
     return url;
