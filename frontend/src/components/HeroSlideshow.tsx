@@ -32,6 +32,27 @@ const SLIDES = [
     alt: 'NYC\'s Fastest Pet Delivery',
     link: '/products',
   },
+  {
+    id: 'slide-wc1',
+    src: '/banner-worldcup-1.jpg',
+    webp: '/banner-worldcup-1.jpg',
+    alt: 'Victory in Every Bowl – Celebrating the World Cup with NYC\'s Pet Parents',
+    link: '/products',
+  },
+  {
+    id: 'slide-wc2',
+    src: '/banner-worldcup-2.jpg',
+    webp: '/banner-worldcup-2.jpg',
+    alt: 'Go USA! Championship Quality for Every Pet – NYC\'s Home for World-Class Pet Supplies',
+    link: '/products',
+  },
+  {
+    id: 'slide-wc3',
+    src: '/banner-worldcup-3.jpg',
+    webp: '/banner-worldcup-3.jpg',
+    alt: 'Proud Supporters of Team USA – Fueling America\'s Champions with Premium Care',
+    link: '/products',
+  },
 ];
 
 const HeroSlideshow = () => {
