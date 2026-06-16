@@ -37,6 +37,107 @@ const PET_CATEGORIES = [
   { name: 'Small Pet', slug: 'small-pet', image: 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?w=600&h=600&fit=crop&q=95' },
 ];
 
+// ─── Today's Deals — Hill's Science Diet 5% Off ──────────────────────────────
+const DEAL_DISCOUNT = 0.05; // 5% extra off all Hill's products
+
+const TodaysDeals = () => {
+  const { data, isLoading } = useQuery({
+    queryKey: ['products', 'hills-deals'],
+    queryFn: () => productService.getProducts({ brand: "Hill's Science Diet", limit: 6, inStock: true }),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Countdown to end of day (midnight ET)
+  const [timeLeft, setTimeLeft] = useState({ h: 0, m: 0, s: 0 });
+  useEffect(() => {
+    const tick = () => {
+      const now = new Date();
+      const midnight = new Date();
+      midnight.setHours(24, 0, 0, 0);
+      const diff = Math.max(0, Math.floor((midnight.getTime() - now.getTime()) / 1000));
+      setTimeLeft({ h: Math.floor(diff / 3600), m: Math.floor((diff % 3600) / 60), s: diff % 60 });
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  const products = data?.data || [];
+  if (!isLoading && products.length === 0) return null;
+
+  return (
+    <section className="py-14 bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50 border-t border-orange-100">
+      <div className="container mx-auto px-4 lg:px-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">🔥</span>
+            <div>
+              <h2 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight">
+                Today's Deals
+              </h2>
+              <p className="text-sm text-orange-600 font-semibold mt-0.5">
+                Extra 5% off all Hill's Science Diet — today only
+              </p>
+            </div>
+          </div>
+          {/* Countdown */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500 font-medium">Ends in:</span>
+            {[pad(timeLeft.h), pad(timeLeft.m), pad(timeLeft.s)].map((val, i) => (
+              <span key={i} className="flex items-center gap-1">
+                <span className="bg-gray-900 text-white font-mono font-bold text-lg px-2.5 py-1 rounded-lg min-w-[2.5rem] text-center">
+                  {val}
+                </span>
+                {i < 2 && <span className="text-gray-700 font-bold text-lg">:</span>}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Products */}
+        {isLoading ? (
+          <LoadingSpinner size="lg" />
+        ) : (
+          <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide">
+            {products.map((product, index) => {
+              // Inject deal pricing — show original, discount 5%
+              const dealPrice = parseFloat((product.basePrice * (1 - DEAL_DISCOUNT)).toFixed(2));
+              const dealProduct = {
+                ...product,
+                basePrice: dealPrice,
+                compareAtPrice: product.basePrice,
+              };
+              return (
+                <div key={product._id} className="flex-shrink-0 w-56 md:w-64 relative">
+                  {/* 5% OFF badge */}
+                  <div className="absolute top-2 left-2 z-10 bg-red-500 text-white text-xs font-black px-2 py-1 rounded-full shadow-md">
+                    5% OFF TODAY
+                  </div>
+                  <ProductCard product={dealProduct} hideCartButton={false} index={index} />
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <div className="mt-6 flex items-center justify-between">
+          <p className="text-xs text-gray-400">Discount applied automatically at checkout. Limited time offer.</p>
+          <Link
+            to="/products?brand=Hill%27s+Science+Diet"
+            className="text-sm font-semibold text-orange-600 hover:text-orange-700 flex items-center gap-1"
+          >
+            Shop all Hill's → 
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+};
+// ─────────────────────────────────────────────────────────────────────────────
+
 const Home = () => {
   const navigate = useNavigate();
   const { data: featuredProducts, isLoading } = useQuery({
@@ -253,6 +354,8 @@ const Home = () => {
       </section>
 
       <CategoryIcons />
+
+      <TodaysDeals />
 
       {/* Trending Products */}
       <section className="py-16 bg-gradient-to-b from-white via-blue-50 to-white text-center">
