@@ -325,6 +325,34 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     title: "Pet Supplies Jackson Heights NY — Local Delivery from Your Neighborhood Pet Store | Petshiwu",
     description: "Petshiwu is based in Jackson Heights, Queens. Local pet supply delivery to Jackson Heights, Elmhurst, Woodside & surrounding neighborhoods. 10,000+ products. Free shipping over $49.",
   },
+  '/pet-supplies-williamsburg-brooklyn-ny': {
+    title: "Pet Supplies Williamsburg Brooklyn NY — Same-Day Delivery | Petshiwu",
+    description: "Pet supply delivery to Williamsburg, Brooklyn. Dog food, cat food, pet accessories delivered to North Side, South Side, East Williamsburg & Greenpoint. 10,000+ products, free shipping over $49.",
+  },
+  '/pet-supplies-park-slope-brooklyn-ny': {
+    title: "Pet Supplies Park Slope Brooklyn NY — Delivery to Your Door | Petshiwu",
+    description: "Pet supply delivery to Park Slope, Brooklyn. Premium dog food, cat food, organic and natural pet products delivered to your Park Slope home. 10,000+ products, free shipping over $49.",
+  },
+  '/pet-supplies-upper-west-side-nyc': {
+    title: "Pet Supplies Upper West Side NYC — Delivery to Your Manhattan Apartment | Petshiwu",
+    description: "Pet supply delivery to the Upper West Side, Manhattan. Premium dog food, cat food, and pet accessories delivered to your UWS apartment. 10,000+ products, free shipping over $49.",
+  },
+  '/pet-supplies-dumbo-brooklyn-ny': {
+    title: "Pet Supplies DUMBO Brooklyn NY — Delivery to Your Apartment | Petshiwu",
+    description: "Pet supply delivery to DUMBO, Brooklyn Heights, and Vinegar Hill. Premium dog food, cat food, and pet accessories delivered fast. 10,000+ products, free shipping over $49.",
+  },
+  '/pet-supplies-long-island-city-queens-ny': {
+    title: "Pet Supplies Long Island City Queens NY — Fast Delivery | Petshiwu",
+    description: "Pet supply delivery to Long Island City, Queens. Dog food, cat food, and pet supplies delivered to LIC, Hunters Point, Sunnyside & Woodside. 10,000+ products, free shipping over $49.",
+  },
+  '/pet-supplies-soho-nyc': {
+    title: "Pet Supplies SoHo NYC — Premium Delivery to Your Manhattan Loft | Petshiwu",
+    description: "Pet supply delivery to SoHo, Tribeca, NoHo, and Lower Manhattan. Luxury and premium dog food, cat food, and pet accessories delivered to your SoHo loft. 10,000+ products, free shipping over $49.",
+  },
+  '/pet-supplies-astoria-queens-ny': {
+    title: "Pet Supplies Astoria Queens NY — Local Delivery | Petshiwu",
+    description: "Pet supply delivery to Astoria, Queens. Dog food, cat food, and pet accessories delivered to Astoria, Long Island City, Ditmars, and Steinway. Queens-based service. 10,000+ products, free shipping over $49.",
+  },
 };
 
 /**

@@ -67,6 +67,13 @@ const PetSuppliesManhattanNY = lazy(() => import('./pages/seo/PetSuppliesManhatt
 const PetSuppliesBronxNY = lazy(() => import('./pages/seo/PetSuppliesBronxNY'));
 const PetSuppliesStatenIslandNY = lazy(() => import('./pages/seo/PetSuppliesStatenIslandNY'));
 const PetSuppliesJacksonHeightsNY = lazy(() => import('./pages/seo/PetSuppliesJacksonHeightsNY'));
+const PetSuppliesWilliamsburgNY = lazy(() => import('./pages/seo/PetSuppliesWilliamsburgNY'));
+const PetSuppliesParkSlopeNY = lazy(() => import('./pages/seo/PetSuppliesParkSlopeNY'));
+const PetSuppliesUpperWestSideNYC = lazy(() => import('./pages/seo/PetSuppliesUpperWestSideNYC'));
+const PetSuppliesDUMBONY = lazy(() => import('./pages/seo/PetSuppliesDUMBONY'));
+const PetSuppliesLongIslandCityNY = lazy(() => import('./pages/seo/PetSuppliesLongIslandCityNY'));
+const PetSuppliesSoHoNYC = lazy(() => import('./pages/seo/PetSuppliesSoHoNYC'));
+const PetSuppliesAstoriaNY = lazy(() => import('./pages/seo/PetSuppliesAstoriaNY'));
 const Investors = lazy(() => import('./pages/Investors'));
 const SellWithUs = lazy(() => import('./pages/SellWithUs'));
 const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
@@ -328,6 +335,13 @@ function App() {
                   <Route path="/pet-supplies-bronx-ny" element={<PetSuppliesBronxNY />} />
                   <Route path="/pet-supplies-staten-island-ny" element={<PetSuppliesStatenIslandNY />} />
                   <Route path="/pet-supplies-jackson-heights-ny" element={<PetSuppliesJacksonHeightsNY />} />
+                  <Route path="/pet-supplies-williamsburg-brooklyn-ny" element={<PetSuppliesWilliamsburgNY />} />
+                  <Route path="/pet-supplies-park-slope-brooklyn-ny" element={<PetSuppliesParkSlopeNY />} />
+                  <Route path="/pet-supplies-upper-west-side-nyc" element={<PetSuppliesUpperWestSideNYC />} />
+                  <Route path="/pet-supplies-dumbo-brooklyn-ny" element={<PetSuppliesDUMBONY />} />
+                  <Route path="/pet-supplies-long-island-city-queens-ny" element={<PetSuppliesLongIslandCityNY />} />
+                  <Route path="/pet-supplies-soho-nyc" element={<PetSuppliesSoHoNYC />} />
+                  <Route path="/pet-supplies-astoria-queens-ny" element={<PetSuppliesAstoriaNY />} />
                   {/* Business pages */}
                   <Route path="/investors" element={<Investors />} />
                   <Route path="/sell-with-us" element={<SellWithUs />} />
