@@ -267,6 +267,18 @@ export const generateSitemap = async (req: Request, res: Response) => {
       { path: '/pet-supplies-bronx-ny', priority: '0.9', changefreq: 'weekly' },
       { path: '/pet-supplies-staten-island-ny', priority: '0.9', changefreq: 'weekly' },
       { path: '/pet-supplies-jackson-heights-ny', priority: '1.0', changefreq: 'weekly' },
+      // NYC neighborhood pages
+      { path: '/pet-supplies-williamsburg-brooklyn-ny', priority: '0.9', changefreq: 'weekly' },
+      { path: '/pet-supplies-park-slope-brooklyn-ny', priority: '0.9', changefreq: 'weekly' },
+      { path: '/pet-supplies-upper-west-side-nyc', priority: '0.9', changefreq: 'weekly' },
+      { path: '/pet-supplies-dumbo-brooklyn-ny', priority: '0.9', changefreq: 'weekly' },
+      { path: '/pet-supplies-long-island-city-queens-ny', priority: '0.9', changefreq: 'weekly' },
+      { path: '/pet-supplies-soho-nyc', priority: '0.9', changefreq: 'weekly' },
+      { path: '/pet-supplies-astoria-queens-ny', priority: '0.9', changefreq: 'weekly' },
+      // Niche keyword pages
+      { path: '/raw-dog-food-nyc', priority: '0.9', changefreq: 'weekly' },
+      { path: '/organic-cat-food-nyc', priority: '0.9', changefreq: 'weekly' },
+      { path: '/luxury-pet-accessories-nyc', priority: '0.9', changefreq: 'weekly' },
       // Business pages
       { path: '/investors', priority: '0.7', changefreq: 'monthly' },
       { path: '/sell-with-us', priority: '0.8', changefreq: 'monthly' },
