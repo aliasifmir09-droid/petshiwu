@@ -750,6 +750,22 @@ const ProductDetail = () => {
               </button>
             ))}
           </div>
+
+          {/* Image representative note — shown when product has size/weight variants but only shared images */}
+          {hasVariants && product.variants.length > 1 && !selectedVariantData?.image && !selectedVariantData?.images?.length && (() => {
+            // Check if any variant attribute contains size/weight keywords
+            const hasSizeVariants = product.variants.some(v =>
+              v.attributes && Object.values(v.attributes as Record<string, string>).some(val =>
+                /\d+\s*(lb|kg|oz|g|ml|l|liter|oz|fl)/i.test(String(val))
+              )
+            );
+            if (!hasSizeVariants) return null;
+            return (
+              <p className="mt-2 text-xs text-gray-400 text-center">
+                📷 Image is representative — actual size may vary by selection
+              </p>
+            );
+          })()}
         </div>
 
         {/* Product Info */}
