@@ -453,45 +453,95 @@ const Home = () => {
       </section>
 
       {/* Newsletter Signup */}
-      <section className="py-16 bg-gradient-to-r from-indigo-900 via-purple-900 to-blue-900 text-white">
-        <div className="container mx-auto px-4 lg:px-8 text-center">
-          <div className="max-w-2xl mx-auto">
-            <div className="text-5xl mb-4">🐾</div>
-            <h2 className="text-3xl md:text-4xl font-black mb-3">Get 10% Off Your First Order</h2>
-            <p className="text-white/80 text-lg mb-8">
-              Join 5,000+ NYC pet parents. Get exclusive deals, new product alerts, and expert pet care tips delivered to your inbox.
-            </p>
-            <form
-              className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const input = (e.target as HTMLFormElement).querySelector('input[type="email"]') as HTMLInputElement;
-                if (input?.value) {
-                  alert('🐾 Thanks for joining! Your 10% discount code is on its way.');
-                  input.value = '';
-                }
-              }}
-            >
-              <input
-                type="email"
-                required
-                placeholder="your@email.com"
-                className="flex-1 px-5 py-3 rounded-full text-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-purple-400"
-              />
-              <button
-                type="submit"
-                className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-bold px-7 py-3 rounded-full transition-all hover:scale-105 whitespace-nowrap"
-              >
-                Get 10% Off
-              </button>
-            </form>
-            <p className="text-white/50 text-xs mt-4">No spam, ever. Unsubscribe anytime.</p>
-          </div>
-        </div>
-      </section>
+      <NewsletterSection />
 
       <style>{`.scrollbar-hide::-webkit-scrollbar{display:none}.scrollbar-hide{-ms-overflow-style:none;scrollbar-width:none}`}</style>
     </div>
+  );
+};
+
+const API_URL = (import.meta as any).env?.VITE_API_URL || 'https://www.petshiwu.com/api';
+
+const NewsletterSection = () => {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [code, setCode] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch(`${API_URL}/v1/newsletter/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), source: 'homepage' }),
+      });
+      const data = await res.json();
+      if (data.success || data.alreadySubscribed) {
+        setSubmitted(true);
+        setCode(data.code || 'WELCOME10');
+      } else {
+        setError(data.message || 'Something went wrong.');
+      }
+    } catch {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <section className="py-16 bg-gradient-to-r from-indigo-900 via-purple-900 to-blue-900 text-white">
+      <div className="container mx-auto px-4 lg:px-8 text-center">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-5xl mb-4">🐾</div>
+          {!submitted ? (
+            <>
+              <h2 className="text-3xl md:text-4xl font-black mb-3">Get 10% Off Your First Order</h2>
+              <p className="text-white/80 text-lg mb-8">
+                Join NYC pet parents. Get exclusive deals, new product alerts, and expert pet care tips delivered to your inbox.
+              </p>
+              <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={handleSubmit}>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="flex-1 px-5 py-3 rounded-full text-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-purple-400"
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-bold px-7 py-3 rounded-full transition-all hover:scale-105 whitespace-nowrap disabled:opacity-60"
+                >
+                  {loading ? 'Sending...' : 'Get 10% Off'}
+                </button>
+              </form>
+              {error && <p className="text-red-300 text-sm mt-2">{error}</p>}
+              <p className="text-white/50 text-xs mt-4">No spam, ever. Unsubscribe anytime.</p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-3xl md:text-4xl font-black mb-3">You're in! 🎉</h2>
+              <p className="text-white/80 text-lg mb-4">Check your inbox. Your discount code:</p>
+              <div className="inline-block bg-white/10 border-2 border-dashed border-white/40 rounded-2xl px-10 py-4 mb-6">
+                <span className="text-4xl font-black tracking-widest text-yellow-300">{code}</span>
+                <p className="text-white/70 text-sm mt-1">10% off your entire order</p>
+              </div>
+              <br />
+              <a href="/products" className="inline-block bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold px-10 py-3 rounded-full hover:scale-105 transition-transform">
+                Shop Now →
+              </a>
+            </>
+          )}
+        </div>
+      </div>
+    </section>
   );
 };
 

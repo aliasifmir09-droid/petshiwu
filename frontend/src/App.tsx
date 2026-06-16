@@ -13,6 +13,7 @@ import AnnouncementBar from './components/AnnouncementBar';
 import BottomNav from './components/BottomNav';
 import AIPetAdvisor from './components/AIPetAdvisor'; // Gemini AI powered — v2
 import CookieConsent from './components/CookieConsent';
+import EmailPopup from './components/EmailPopup';
 import StructuredData from './components/StructuredData';
 import './index.css';
 
@@ -380,6 +381,7 @@ function App() {
         </div>
         <AIPetAdvisor />
         <CookieConsent />
+        <EmailPopup />
       </BrowserRouter>
     </QueryClientProvider>
   );
