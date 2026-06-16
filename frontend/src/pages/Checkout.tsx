@@ -189,6 +189,12 @@ const Checkout = () => {
   const [pendingOrderData, setPendingOrderData] = useState<CreateOrderData | null>(null);
   const [orderNotes, setOrderNotes] = useState('');
   const [selectedSavedPaymentMethod, setSelectedSavedPaymentMethod] = useState<string | null>(null);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponInput, setCouponInput] = useState('');
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponMessage, setCouponMessage] = useState('');
+  const [couponValid, setCouponValid] = useState<boolean | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
   const [savePaymentMethod, setSavePaymentMethod] = useState(false);
 
   const { data: savedPaymentMethods = [] } = useQuery({
@@ -299,7 +305,46 @@ const Checkout = () => {
   const subtotal = getTotalPrice();
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
   const tax = subtotal * TAX_RATE;
-  const total = subtotal + shipping + tax + donationAmount;
+  const total = Math.max(0, subtotal + shipping + tax + donationAmount - couponDiscount);
+
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    setCouponLoading(true);
+    setCouponMessage('');
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || '/api';
+      const res = await fetch(`${API_URL}/v1/coupons/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponInput.trim(), subtotal }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setCouponCode(couponInput.trim().toUpperCase());
+        setCouponDiscount(data.discountAmount);
+        setCouponValid(true);
+        setCouponMessage(data.message);
+      } else {
+        setCouponValid(false);
+        setCouponMessage(data.message);
+        setCouponDiscount(0);
+        setCouponCode('');
+      }
+    } catch {
+      setCouponValid(false);
+      setCouponMessage('Could not apply coupon. Please try again.');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setCouponCode('');
+    setCouponInput('');
+    setCouponDiscount(0);
+    setCouponMessage('');
+    setCouponValid(null);
+  };
 
   const createOrderMutation = useMutation({
     mutationFn: orderService.createOrder,
@@ -1010,9 +1055,46 @@ const Checkout = () => {
                       <span className="font-medium text-pink-600">${donationAmount.toFixed(2)}</span>
                     </div>
                   )}
+                  {couponDiscount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span className="flex items-center gap-1">🏷️ Coupon ({couponCode})</span>
+                      <span className="font-medium">-${couponDiscount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="border-t pt-3 flex justify-between text-lg font-bold">
                     <span>Total</span>
                     <span>${total.toFixed(2)}</span>
+                  </div>
+                  {/* Coupon Code Input */}
+                  <div className="pt-2">
+                    {!couponCode ? (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={couponInput}
+                          onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleApplyCoupon(); } }}
+                          placeholder="Coupon code"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleApplyCoupon}
+                          disabled={couponLoading || !couponInput.trim()}
+                          className="px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+                        >
+                          {couponLoading ? '...' : 'Apply'}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                        <span className="text-green-700 text-sm font-medium">🏷️ {couponCode} applied</span>
+                        <button type="button" onClick={handleRemoveCoupon} className="text-gray-400 hover:text-gray-600 text-xs ml-2">Remove</button>
+                      </div>
+                    )}
+                    {couponMessage && (
+                      <p className={`text-xs mt-1 ${couponValid ? 'text-green-600' : 'text-red-500'}`}>{couponMessage}</p>
+                    )}
                   </div>
                 </div>
                 <button type="submit"
