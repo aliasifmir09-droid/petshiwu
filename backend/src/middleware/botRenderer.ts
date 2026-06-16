@@ -384,18 +384,51 @@ const injectOgTags = (html: string, title: string, description: string, url: str
  * Build HTML for pages not backed by DB data — injects correct canonical,
  * title, description, AND og/twitter tags so every page shares correctly.
  */
+/**
+ * Converts a URL slug into a human-readable product name.
+ * "hills-science-diet-adult-dog-food" → "Hills Science Diet Adult Dog Food"
+ */
+const slugToTitle = (slug: string): string =>
+  slug
+    .split('-')
+    .map(w => w.length > 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w)
+    .join(' ');
+
 const buildGenericPageHtml = (template: string, reqPath: string): string => {
   const cleanPath = reqPath.split('?')[0]; // strip query string from canonical
   const canonicalUrl = cleanPath === '/' ? BASE : `${BASE}${cleanPath}`;
-  const meta = STATIC_PAGES[cleanPath] ?? {
+
+  // For product URLs (3+ segments like /:petType/:category/:product-slug),
+  // generate a unique title from the slug rather than the generic site title.
+  // This means even if MongoDB is unreachable, every product page gets a distinct
+  // title that Google can use for indexing.
+  const segments = cleanPath.replace(/^\//, '').split('/').filter(Boolean);
+  const PET_TYPES = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet']);
+  const isProductPath = segments.length >= 3 && PET_TYPES.has(segments[0]);
+
+  let meta = STATIC_PAGES[cleanPath];
+
+  if (!meta && isProductPath) {
+    const productSlug = segments[segments.length - 1];
+    const productName = slugToTitle(productSlug);
+    const petType = segments[0];
+    const petLabel = petType === 'cat' ? 'cat' : petType === 'dog' ? 'dog' : 'pet';
+    meta = {
+      title: `${productName} | Petshiwu`,
+      description: `Shop ${productName} — premium ${petLabel} supplies delivered across NYC. Free shipping on orders over $49 at Petshiwu.`,
+    };
+  }
+
+  const finalMeta = meta ?? {
     title: 'Premium Pet Food & Supplies | Petshiwu',
     description: 'Shop premium pet food, toys, and supplies for all pets at Petshiwu. Fast delivery across NYC. Free shipping on orders over $49.',
   };
+
   let html = template;
-  html = injectTitle(html, meta.title);
-  html = injectDescription(html, meta.description);
+  html = injectTitle(html, finalMeta.title);
+  html = injectDescription(html, finalMeta.description);
   html = injectCanonical(html, canonicalUrl);
-  html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
+  html = injectOgTags(html, finalMeta.title, finalMeta.description, canonicalUrl);
   return html;
 };
 
@@ -447,33 +480,49 @@ const matchRoute = (pathname: string): PageType => {
 // Data fetchers
 // ---------------------------------------------------------------------------
 
+/** Races a DB query against a timeout so bots fail fast if MongoDB is unreachable */
+const withTimeout = <T>(promise: Promise<T>, ms = 3000): Promise<T> => {
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error(`DB timeout after ${ms}ms`)), ms)
+  );
+  return Promise.race([promise, timeout]);
+};
+
 const fetchProduct = async (slug: string) => {
-  return Product.findOne({ slug, isActive: true })
-    .select('name slug description brand images basePrice compareAtPrice averageRating totalReviews inStock totalStock petType category createdAt updatedAt')
-    .populate({ path: 'category', select: 'name slug' })
-    .lean()
-    .exec();
+  return withTimeout(
+    Product.findOne({ slug, isActive: true })
+      .select('name slug description brand images basePrice compareAtPrice averageRating totalReviews inStock totalStock petType category createdAt updatedAt')
+      .populate({ path: 'category', select: 'name slug' })
+      .lean()
+      .exec()
+  );
 };
 
 const fetchBlog = async (slug: string) => {
-  return Blog.findOne({ slug, isPublished: true })
-    .select('title slug excerpt content coverImage author publishedAt updatedAt')
-    .lean()
-    .exec();
+  return withTimeout(
+    Blog.findOne({ slug, isPublished: true })
+      .select('title slug excerpt content coverImage author publishedAt updatedAt')
+      .lean()
+      .exec()
+  );
 };
 
 const fetchCareGuide = async (slug: string) => {
-  return CareGuide.findOne({ slug, isPublished: true })
-    .select('title slug excerpt coverImage petType updatedAt')
-    .lean()
-    .exec();
+  return withTimeout(
+    CareGuide.findOne({ slug, isPublished: true })
+      .select('title slug excerpt coverImage petType updatedAt')
+      .lean()
+      .exec()
+  );
 };
 
 const fetchCategory = async (slug: string) => {
-  return Category.findOne({ slug, isActive: true })
-    .select('name slug description petType')
-    .lean()
-    .exec();
+  return withTimeout(
+    Category.findOne({ slug, isActive: true })
+      .select('name slug description petType')
+      .lean()
+      .exec()
+  );
 };
 
 // ---------------------------------------------------------------------------
