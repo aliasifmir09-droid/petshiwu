@@ -309,6 +309,11 @@ const Checkout = () => {
 
   const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return;
+    if (!shippingInfo.email?.trim()) {
+      setCouponValid(false);
+      setCouponMessage('Please enter your email address above before applying a coupon.');
+      return;
+    }
     setCouponLoading(true);
     setCouponMessage('');
     try {
