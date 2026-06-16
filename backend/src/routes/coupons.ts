@@ -45,7 +45,10 @@ router.post('/validate', async (req: Request, res: Response) => {
     const numericSubtotal = Number(subtotal) || 0;
     let discountAmount = 0;
     if (coupon.type === 'percent') {
-      discountAmount = parseFloat(((numericSubtotal * coupon.value) / 100).toFixed(2));
+      const raw = (numericSubtotal * coupon.value) / 100;
+      // Cap: 10% off can never save more than $10, 20% off never more than $20, etc.
+      const maxDiscount = coupon.value;
+      discountAmount = parseFloat(Math.min(raw, maxDiscount).toFixed(2));
     } else {
       discountAmount = Math.min(coupon.value, numericSubtotal);
     }
