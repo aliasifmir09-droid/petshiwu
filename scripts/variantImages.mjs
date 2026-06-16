@@ -11,7 +11,8 @@ import { MongoClient, ObjectId } from 'mongodb';
 import https from 'https';
 import http from 'http';
 
-const MONGO_URI = 'mongodb+srv://admin:admin123@cluster0.xejhsy6.mongodb.net/petshop?retryWrites=true&w=majority';
+const MONGO_URI = process.env.MONGO_URI;
+if (!MONGO_URI) { console.error('MONGO_URI env var required'); process.exit(1); }
 const BUNNY_STORAGE_HOST = 'storage.bunnycdn.com';
 const BUNNY_STORAGE_ZONE = 'petshiwu-cdn';
 const BUNNY_STORAGE_PASSWORD = 'ad8f1a46-6aa8-45fa-b07f8d43fe40-5801-4f31';
