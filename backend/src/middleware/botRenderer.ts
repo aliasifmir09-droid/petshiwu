@@ -279,6 +279,18 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     title: 'Affordable Pet Food & Supplies NYC — Free Delivery Over $49 | Petshiwu',
     description: 'Get quality pet food at great prices delivered in NYC. Premium brands without the premium markup. Free delivery on orders over $49. Queens, Brooklyn, Manhattan, Bronx, Staten Island.',
   },
+  '/raw-dog-food-nyc': {
+    title: 'Raw Dog Food NYC — Freeze-Dried & Air-Dried Raw Delivery | Petshiwu',
+    description: 'Raw dog food delivered to all NYC boroughs. Freeze-dried raw, air-dried raw, and raw-inspired formulas. No frozen storage required. Free delivery on orders over $49.',
+  },
+  '/organic-cat-food-nyc': {
+    title: 'Organic Cat Food NYC — Natural & Non-GMO Delivery | Petshiwu',
+    description: 'Organic and natural cat food delivered to all NYC boroughs. No artificial preservatives, no by-products. Wellness, Blue Buffalo, Orijen and more. Free delivery over $49.',
+  },
+  '/luxury-pet-accessories-nyc': {
+    title: 'Luxury Pet Accessories NYC — Premium Supplies Delivered | Petshiwu',
+    description: 'Premium and luxury pet accessories delivered to NYC. Orthopedic beds, gourmet treats, designer collars, high-end grooming tools. Free delivery over $49 to all 5 boroughs.',
+  },
   '/pet-food-delivery-nyc': {
     title: 'Pet Food Delivery NYC — Never Run Out of Your Pet\'s Favorites | Petshiwu',
     description: 'Keep your pet stocked with their favorite food delivered in NYC. Easy reordering, no subscription traps. Free delivery over $49. Queens, Brooklyn, Manhattan, Bronx, Staten Island.',
