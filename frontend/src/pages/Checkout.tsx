@@ -316,7 +316,7 @@ const Checkout = () => {
       const res = await fetch(`${API_URL}/v1/coupons/validate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: couponInput.trim(), subtotal }),
+        body: JSON.stringify({ code: couponInput.trim(), subtotal, email: shippingInfo.email }),
       });
       const data = await res.json();
       if (data.valid) {
@@ -351,6 +351,19 @@ const Checkout = () => {
     onSuccess: async (order) => {
       clearCart();
       const orderId = String(order._id || '');
+      // Record coupon usage so it can't be reused
+      if (couponCode && shippingInfo.email) {
+        try {
+          const API_URL = import.meta.env.VITE_API_URL || '/api';
+          await fetch(`${API_URL}/v1/coupons/use`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: couponCode, email: shippingInfo.email, orderId }),
+          });
+        } catch {
+          // Non-critical — don't block order success flow
+        }
+      }
       const purchaseItems = items.map((item: any) => ({
         item_id: normalizeId(item.product._id) || String(item.product._id),
         item_name: item.product.name,
