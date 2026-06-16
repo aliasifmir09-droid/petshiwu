@@ -577,11 +577,55 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   <script type="application/ld+json">${JSON.stringify(productSchema)}</script>
   <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>`;
 
+  const stockLabel = inStock ? '✓ In Stock' : 'Out of Stock';
+  const stockColor = inStock ? '#2e7d32' : '#c62828';
+  const priceDisplay = price > 0 ? `$${price.toFixed(2)}` : '';
+  const compareDisplay = (product.compareAtPrice ?? 0) > price && price > 0
+    ? `<s style="color:#888;font-size:0.9em">$${Number(product.compareAtPrice).toFixed(2)}</s> ` : '';
+  const ratingDisplay = (product.averageRating ?? 0) > 0
+    ? `<p style="margin:8px 0;color:#f5a623">★ ${Number(product.averageRating).toFixed(1)} / 5 (${product.totalReviews ?? 0} reviews)</p>`
+    : '';
+
+  const breadcrumbHtml = [
+    `<a href="${BASE}" style="color:#1976d2;text-decoration:none">Home</a>`,
+    petType ? `<a href="${BASE}/${petType}" style="color:#1976d2;text-decoration:none">${petLabel}</a>` : '',
+    categoryName && categorySlug ? `<a href="${BASE}/${petType}/${categorySlug}" style="color:#1976d2;text-decoration:none">${esc(categoryName)}</a>` : '',
+    `<span style="color:#555">${esc(productName)}</span>`,
+  ].filter(Boolean).join(' &rsaquo; ');
+
+  const bodyContent = `
+<div style="font-family:sans-serif;max-width:960px;margin:0 auto;padding:20px">
+  <nav style="font-size:0.85em;margin-bottom:16px;color:#555">${breadcrumbHtml}</nav>
+  <div style="display:flex;gap:32px;flex-wrap:wrap">
+    ${image ? `<img src="${esc(image)}" alt="${esc(productName)}" style="max-width:320px;max-height:320px;object-fit:contain;border-radius:8px;border:1px solid #eee" loading="lazy" />` : ''}
+    <div style="flex:1;min-width:240px">
+      <h1 style="font-size:1.4em;margin:0 0 8px">${esc(productName)}</h1>
+      ${brandName ? `<p style="margin:4px 0;color:#555">Brand: <strong>${esc(brandName)}</strong></p>` : ''}
+      ${priceDisplay ? `<p style="margin:8px 0;font-size:1.5em;font-weight:700">${compareDisplay}${esc(priceDisplay)}</p>` : ''}
+      <p style="margin:4px 0;color:${stockColor};font-weight:600">${stockLabel}</p>
+      ${ratingDisplay}
+      <p style="margin:12px 0;line-height:1.6;color:#333">${esc(rawDesc.substring(0, 500))}</p>
+      <a href="${esc(productUrl)}" style="display:inline-block;margin-top:12px;padding:10px 24px;background:#1976d2;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">View Product</a>
+    </div>
+  </div>
+  <hr style="margin:24px 0;border:none;border-top:1px solid #eee" />
+  <p style="color:#555;font-size:0.9em">
+    Delivered to your door anywhere in NYC. Free shipping on orders over $49.
+    ${petType ? `<a href="${BASE}/${petType}" style="color:#1976d2">Browse more ${petLabel} products</a> &bull;` : ''}
+    ${categoryName && categorySlug ? `<a href="${BASE}/${petType}/${categorySlug}" style="color:#1976d2">${esc(categoryName)}</a>` : ''}
+    <a href="${BASE}" style="color:#1976d2">Petshiwu — NYC&rsquo;s Local Pet Store</a>
+  </p>
+</div>`;
+
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
   html = injectCanonical(html, productUrl);
   html = injectBeforeHeadClose(html, injectedTags);
-  html = injectH1(html, productName);
+  // Replace entire root div with full crawlable body content (includes H1)
+  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${bodyContent}</div>`);
+  if (!html.includes(bodyContent)) {
+    html = html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+  }
   return html;
 };
 
@@ -634,11 +678,31 @@ const buildBlogHtml = (template: string, blog: any): string => {
   <script type="application/ld+json">${JSON.stringify(articleSchema)}</script>
   <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>`;
 
+  const blogExcerpt = blog.excerpt ?? stripTags(blog.content ?? '').substring(0, 400);
+  const blogBodyContent = `
+<div style="font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px">
+  <nav style="font-size:0.85em;margin-bottom:16px;color:#555">
+    <a href="${BASE}" style="color:#1976d2;text-decoration:none">Home</a> &rsaquo;
+    <a href="${BASE}/learning" style="color:#1976d2;text-decoration:none">Learning</a> &rsaquo;
+    <span style="color:#555">${esc(blog.title)}</span>
+  </nav>
+  ${image !== `${BASE}/logo.png` ? `<img src="${esc(image)}" alt="${esc(blog.title)}" style="max-width:100%;height:auto;border-radius:8px;margin-bottom:16px" loading="lazy" />` : ''}
+  <h1 style="font-size:1.6em;margin:0 0 12px">${esc(blog.title)}</h1>
+  <p style="color:#555;font-size:0.9em;margin-bottom:16px">${blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}</p>
+  <p style="line-height:1.7;color:#333;font-size:1.05em">${esc(blogExcerpt)}</p>
+  <a href="${esc(url)}" style="display:inline-block;margin-top:16px;padding:10px 24px;background:#1976d2;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Read Full Article</a>
+  <hr style="margin:24px 0;border:none;border-top:1px solid #eee" />
+  <p style="color:#555;font-size:0.9em"><a href="${BASE}/learning" style="color:#1976d2">More Pet Care Articles</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — NYC&rsquo;s Local Pet Store</a></p>
+</div>`;
+
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
   html = injectBeforeHeadClose(html, injectedTags);
-  html = injectH1(html, blog.title);
+  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${blogBodyContent}</div>`);
+  if (!html.includes(blogBodyContent)) {
+    html = html.replace('<div id="root"></div>', `<div id="root">${blogBodyContent}</div>`);
+  }
   return html;
 };
 
@@ -683,11 +747,30 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
   <script type="application/ld+json">${JSON.stringify(schema)}</script>
   <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>`;
 
+  const guideExcerpt = guide.excerpt ?? `Complete care guide for ${guide.title} — tips, advice, and expert information for pet owners.`;
+  const guideBodyContent = `
+<div style="font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px">
+  <nav style="font-size:0.85em;margin-bottom:16px;color:#555">
+    <a href="${BASE}" style="color:#1976d2;text-decoration:none">Home</a> &rsaquo;
+    <a href="${BASE}/care-guides" style="color:#1976d2;text-decoration:none">Care Guides</a> &rsaquo;
+    <span style="color:#555">${esc(guide.title)}</span>
+  </nav>
+  ${image !== `${BASE}/logo.png` ? `<img src="${esc(image)}" alt="${esc(guide.title)}" style="max-width:100%;height:auto;border-radius:8px;margin-bottom:16px" loading="lazy" />` : ''}
+  <h1 style="font-size:1.6em;margin:0 0 12px">${esc(guide.title)}</h1>
+  <p style="line-height:1.7;color:#333;font-size:1.05em">${esc(guideExcerpt)}</p>
+  <a href="${esc(url)}" style="display:inline-block;margin-top:16px;padding:10px 24px;background:#1976d2;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Read Full Guide</a>
+  <hr style="margin:24px 0;border:none;border-top:1px solid #eee" />
+  <p style="color:#555;font-size:0.9em"><a href="${BASE}/care-guides" style="color:#1976d2">All Care Guides</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — NYC&rsquo;s Local Pet Store</a></p>
+</div>`;
+
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
   html = injectBeforeHeadClose(html, injectedTags);
-  html = injectH1(html, guide.title);
+  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${guideBodyContent}</div>`);
+  if (!html.includes(guideBodyContent)) {
+    html = html.replace('<div id="root"></div>', `<div id="root">${guideBodyContent}</div>`);
+  }
   return html;
 };
 
