@@ -261,6 +261,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
       { path: '/affordable-pet-food-nyc', priority: '0.8', changefreq: 'weekly' },
       { path: '/pet-food-delivery-nyc', priority: '0.9', changefreq: 'weekly' },
       // NYC borough pages
+      { path: '/pet-supplies-queens-ny', priority: '1.0', changefreq: 'weekly' },
       { path: '/pet-supplies-brooklyn-ny', priority: '0.9', changefreq: 'weekly' },
       { path: '/pet-supplies-manhattan-ny', priority: '0.9', changefreq: 'weekly' },
       { path: '/pet-supplies-bronx-ny', priority: '0.9', changefreq: 'weekly' },

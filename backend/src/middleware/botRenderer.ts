@@ -263,9 +263,9 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     title: 'Dog Food Delivery NYC — Same-Day & Next-Day | Petshiwu',
     description: 'Get dog food delivered anywhere in NYC. 1,000+ dog food options from top brands. Serving Queens, Brooklyn, Manhattan, Bronx & Staten Island. Free shipping over $49.',
   },
-  '/pet-supplies-nyc': {
-    title: 'Pet Supplies Delivered in NYC | Petshiwu',
-    description: 'Shop 10,000+ pet supplies delivered to your NYC door. Dogs, cats, birds, fish & more. Queens, Brooklyn, Manhattan, Bronx, Staten Island. Free shipping over $49.',
+  '/pet-supplies-delivery-nyc': {
+    title: 'Pet Supplies Delivery NYC — Free Shipping Over $49 | Petshiwu',
+    description: 'Get pet supplies delivered anywhere in NYC. Dogs, cats, birds, fish, reptiles — 10,000+ products from top brands. Free delivery on orders over $49. Queens, Brooklyn, Manhattan, Bronx, Staten Island.',
   },
   '/cat-food-delivery-nyc': {
     title: 'Cat Food Delivery NYC — Premium Brands | Petshiwu',
@@ -275,13 +275,21 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     title: 'Online Pet Store for NYC — 10,000+ Products | Petshiwu',
     description: 'NYC\'s online pet store with 10,000+ products for dogs, cats, birds, fish & more. Fast delivery across all 5 boroughs. Free shipping on orders over $49.',
   },
-  '/affordable-pet-supplies-nyc': {
-    title: 'Affordable Pet Supplies in NYC — Free Shipping | Petshiwu',
-    description: 'Quality pet supplies at affordable prices, delivered to your NYC door. 10,000+ products with free shipping on orders over $49.',
+  '/affordable-pet-food-nyc': {
+    title: 'Affordable Pet Food & Supplies NYC — Free Delivery Over $49 | Petshiwu',
+    description: 'Get quality pet food at great prices delivered in NYC. Premium brands without the premium markup. Free delivery on orders over $49. Queens, Brooklyn, Manhattan, Bronx, Staten Island.',
   },
-  '/pet-food-subscription-nyc': {
-    title: 'Pet Food Subscription Delivery NYC | Petshiwu',
-    description: 'Never run out of pet food again. Set up recurring pet food delivery to your NYC home. Dogs, cats, birds & more. Free shipping on orders over $49.',
+  '/pet-food-delivery-nyc': {
+    title: 'Pet Food Delivery NYC — Never Run Out of Your Pet\'s Favorites | Petshiwu',
+    description: 'Keep your pet stocked with their favorite food delivered in NYC. Easy reordering, no subscription traps. Free delivery over $49. Queens, Brooklyn, Manhattan, Bronx, Staten Island.',
+  },
+  '/pet-store-queens-ny': {
+    title: 'Pet Store Queens NY — Delivery to Jackson Heights, Flushing & All of Queens | Petshiwu',
+    description: 'Queens\' premier online pet store. Free delivery throughout Queens — Jackson Heights, Flushing, Astoria, Forest Hills, Jamaica and more. 10,000+ products for dogs, cats, birds, fish and more.',
+  },
+  '/pet-supplies-near-me-nyc': {
+    title: 'Pet Supplies Near Me — NYC Delivery to Your Door | Petshiwu',
+    description: 'Looking for pet supplies near you in NYC? Petshiwu delivers to your door — Queens, Brooklyn, Manhattan, Bronx, Staten Island. 10,000+ products, free delivery over $49.',
   },
   '/investors': {
     title: 'Invest in Petshiwu — NYC Pet Delivery Startup',
@@ -293,6 +301,10 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
 
   // ── NYC Borough Landing Pages ─────────────────────────────────────────────
+  '/pet-supplies-queens-ny': {
+    title: 'Pet Supplies Queens NY — Delivery to Flushing, Astoria, Jackson Heights & All of Queens | Petshiwu',
+    description: "Queens' online pet store, based in Jackson Heights. Fast delivery to Flushing, Astoria, Forest Hills, Jamaica, Bayside & every Queens neighborhood. 10,000+ products, free shipping over $49.",
+  },
   '/pet-supplies-brooklyn-ny': {
     title: 'Pet Supplies Brooklyn NY — Delivery to Williamsburg, Park Slope & All of Brooklyn | Petshiwu',
     description: "Brooklyn's online pet store. Fast delivery to Williamsburg, Park Slope, Bushwick, Flatbush, Bay Ridge & every Brooklyn neighborhood. 10,000+ products, free shipping over $49.",

@@ -61,6 +61,7 @@ const OnlinePetStoreNYC = lazy(() => import('./pages/seo/OnlinePetStoreNYC'));
 const PetSuppliesNearMeNYC = lazy(() => import('./pages/seo/PetSuppliesNearMeNYC'));
 const AffordablePetFoodNYC = lazy(() => import('./pages/seo/AffordablePetFoodNYC'));
 const PetFoodSubscriptionNYC = lazy(() => import('./pages/seo/PetFoodSubscriptionNYC'));
+const PetSuppliesQueensNY = lazy(() => import('./pages/seo/PetSuppliesQueensNY'));
 const PetSuppliesBrooklynNY = lazy(() => import('./pages/seo/PetSuppliesBrooklynNY'));
 const PetSuppliesManhattanNY = lazy(() => import('./pages/seo/PetSuppliesManhattanNY'));
 const PetSuppliesBronxNY = lazy(() => import('./pages/seo/PetSuppliesBronxNY'));
@@ -321,6 +322,7 @@ function App() {
                   <Route path="/pet-supplies-near-me-nyc" element={<PetSuppliesNearMeNYC />} />
                   <Route path="/affordable-pet-food-nyc" element={<AffordablePetFoodNYC />} />
                   <Route path="/pet-food-delivery-nyc" element={<PetFoodSubscriptionNYC />} />
+                  <Route path="/pet-supplies-queens-ny" element={<PetSuppliesQueensNY />} />
                   <Route path="/pet-supplies-brooklyn-ny" element={<PetSuppliesBrooklynNY />} />
                   <Route path="/pet-supplies-manhattan-ny" element={<PetSuppliesManhattanNY />} />
                   <Route path="/pet-supplies-bronx-ny" element={<PetSuppliesBronxNY />} />
