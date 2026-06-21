@@ -5,6 +5,7 @@ import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { X, Heart, ShoppingCart, Star } from 'lucide-react';
 import { normalizeImageUrl } from '@/utils/imageUtils';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { generateProductUrl } from '@/utils/productUrl';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/useToast';
@@ -144,7 +145,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
               {/* Right: Product Info */}
               <div className="space-y-4">
                 <div>
-                  <p className="text-sm text-primary-600 font-semibold uppercase mb-1">{product.brand}</p>
+                  <p className="text-sm text-primary-600 font-semibold uppercase mb-1">{decodeHtmlEntities(product.brand)}</p>
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h2>
                   
                   {/* Rating */}

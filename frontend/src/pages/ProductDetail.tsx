@@ -770,7 +770,7 @@ const ProductDetail = () => {
 
         {/* Product Info */}
         <div>
-          <p className="text-sm text-gray-600 mb-2">{product.brand}</p>
+          <p className="text-sm text-gray-600 mb-2">{decodeHtmlEntities(product.brand)}</p>
           <h1 className="text-3xl font-bold mb-4">{decodeHtmlEntities(product.name)}</h1>
 
           {/* Rating */}
