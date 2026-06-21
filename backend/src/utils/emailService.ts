@@ -701,8 +701,8 @@ export const sendOrderDeliveredEmail = async (
           <div style="background-color: #e8f5e9; padding: 20px; border-radius: 5px; margin: 20px 0; text-align: center;">
             <h3 style="margin-top: 0; color: #2e7d32;">We'd Love Your Feedback!</h3>
             <p>Your opinion matters to us. Please take a moment to review your products and help other customers make informed decisions.</p>
-            <a href="{{frontendUrl}}/orders/{{orderId}}" style="background-color: #4CAF50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin-top: 10px;">
-              Leave a Review
+            <a href="https://www.google.com/maps?cid=7967426977090267497&action=write-review" style="background-color: #4CAF50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin-top: 10px;">
+              ⭐ Leave Us a Google Review
             </a>
           </div>
           <p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px;">
