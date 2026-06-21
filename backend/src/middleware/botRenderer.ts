@@ -1069,13 +1069,11 @@ const buildNeighborhoodHtml = (
   <p style="color:#555;font-size:0.9em"><a href="${BASE}/learning" style="color:#1976d2">Pet Care Blog</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — NYC&rsquo;s Local Pet Store</a></p>`;
 
   let html = template;
-  html = injectOrReplaceCanonical(html, pageUrl);
-  html = injectOrReplaceTitle(html, title);
-  html = injectOrReplaceMeta(html, description);
-  if (html.includes('</head>')) {
-    html = html.replace('</head>', `${injectedTags}\n</head>`);
-  }
-  html = injectOrReplaceH1(html, `<h1 style="font-size:1.7em;font-weight:700;margin:0 0 12px">${esc(h1)}</h1>`);
+  html = injectCanonical(html, pageUrl);
+  html = injectTitle(html, title);
+  html = injectDescription(html, description);
+  html = injectBeforeHeadClose(html, injectedTags);
+  html = injectH1(html, h1);
   html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${bodyContent}</div>`);
   if (!html.includes(bodyContent)) {
     html = html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
