@@ -785,6 +785,32 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   return html;
 };
 
+/**
+ * Extract FAQ Q&A pairs from blog HTML content.
+ * Pulls H2/H3 headings as questions and their following paragraph(s) as answers.
+ * Returns up to 8 pairs — enough for a solid FAQPage schema.
+ */
+const extractFaqPairs = (htmlContent: string): Array<{ question: string; answer: string }> => {
+  const pairs: Array<{ question: string; answer: string }> = [];
+  // Match each H2/H3 heading + content until the next heading or end
+  const sections = htmlContent.split(/<h[23][^>]*>/i);
+  for (const section of sections.slice(1)) {
+    const headingEnd = section.indexOf('</h');
+    if (headingEnd < 0) continue;
+    const question = stripTags(section.substring(0, headingEnd)).trim();
+    if (!question || question.length < 5 || question.length > 120) continue;
+    // Grab text from paragraphs immediately following
+    const afterHeading = section.substring(headingEnd);
+    const paraMatches = afterHeading.match(/<p[^>]*>([\s\S]*?)<\/p>/gi);
+    if (!paraMatches || paraMatches.length === 0) continue;
+    const answer = stripTags(paraMatches.slice(0, 2).join(' ')).trim().replace(/\s+/g, ' ');
+    if (answer.length < 20) continue;
+    pairs.push({ question, answer: answer.substring(0, 500) });
+    if (pairs.length >= 8) break;
+  }
+  return pairs;
+};
+
 const buildBlogHtml = (template: string, blog: any): string => {
   const title = `${blog.title} | PetShiwu Learning`;
   const description = truncate(
@@ -793,6 +819,18 @@ const buildBlogHtml = (template: string, blog: any): string => {
   );
   const image = blog.coverImage ?? `${BASE}/logo.png`;
   const url = `${BASE}/learning/${blog.slug}`;
+
+  // Extract FAQ pairs from headings + paragraphs for FAQPage schema
+  const faqPairs = extractFaqPairs(blog.content ?? '');
+  const faqSchema = faqPairs.length >= 2 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqPairs.map(({ question, answer }) => ({
+      '@type': 'Question',
+      name: question,
+      acceptedAnswer: { '@type': 'Answer', text: answer },
+    })),
+  } : null;
 
   const articleSchema = {
     '@context': 'https://schema.org',
@@ -832,7 +870,8 @@ const buildBlogHtml = (template: string, blog: any): string => {
   <meta name="twitter:description" content="${esc(description)}" />
   <meta name="twitter:image" content="${esc(image)}" />
   <script type="application/ld+json">${JSON.stringify(articleSchema)}</script>
-  <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>`;
+  <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
+  ${faqSchema ? `<script type="application/ld+json">${JSON.stringify(faqSchema)}</script>` : ''}`;
 
   const blogExcerpt = blog.excerpt ?? stripTags(blog.content ?? '').substring(0, 400);
   const blogBodyContent = `
