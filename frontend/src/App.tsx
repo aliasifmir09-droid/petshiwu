@@ -1,5 +1,7 @@
 import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { ALL_NEIGHBORHOOD_PAGES } from './data/neighborhoodPages';
+import NeighborhoodCategoryPage from './pages/seo/NeighborhoodCategoryPage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
 import { useWishlistStore } from './stores/wishlistStore';
@@ -82,6 +84,8 @@ const Investors = lazy(() => import('./pages/Investors'));
 const SellWithUs = lazy(() => import('./pages/SellWithUs'));
 const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+
+// Neighborhood × Category programmatic pages (200 pages) — see top of file for imports
 const Terms = lazy(() => import('./pages/Terms'));
 const ShippingPolicy = lazy(() => import('./pages/ShippingPolicy'));
 const Accessibility = lazy(() => import('./pages/Accessibility'));
@@ -375,6 +379,18 @@ function App() {
 
                   <Route path="/403" element={<Forbidden />} />
                   <Route path="/404" element={<NotFound />} />
+
+                  {/* Neighborhood × Category programmatic pages — 200 routes
+                      Must be before /:petType to prevent slug collision
+                      e.g. /dog-food-delivery-flushing-queens, /cat-food-delivery-williamsburg-brooklyn */}
+                  {ALL_NEIGHBORHOOD_PAGES.map((config) => (
+                    <Route
+                      key={config.slug}
+                      path={`/${config.slug}`}
+                      element={<NeighborhoodCategoryPage config={config} />}
+                    />
+                  ))}
+
                   <Route path="/:petType" element={<PetType />} />
                   <Route path="/:petType/*" element={<ProductDetail />} />
                   <Route path="*" element={<NotFound />} />

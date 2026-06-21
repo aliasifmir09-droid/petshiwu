@@ -437,7 +437,78 @@ type PageType =
   | { type: 'blog'; slug: string }
   | { type: 'care-guide'; slug: string }
   | { type: 'category'; slug: string }
+  | { type: 'neighborhood'; slug: string; categorySlug: string; neighborhoodName: string; borough: string; nearbyAreas: string }
   | null;
+
+// Neighborhood × Category page slug lookup (50 neighborhoods × 4 categories = 200 pages)
+// Maps full page slug → { categorySlug, neighborhoodName, borough, nearbyAreas }
+const NEIGHBORHOOD_PAGE_REGISTRY = (() => {
+  const CATEGORIES: Record<string, string> = {
+    'dog-food-delivery': 'Dog Food Delivery',
+    'cat-food-delivery': 'Cat Food Delivery',
+    'pet-supplies-delivery': 'Pet Supplies Delivery',
+    'dog-treats-delivery': 'Dog Treats & Accessories Delivery',
+  };
+  const NEIGHBORHOODS: Array<{ slug: string; name: string; borough: string; nearbyAreas: string }> = [
+    { slug: 'flushing-queens', name: 'Flushing', borough: 'Queens', nearbyAreas: 'Whitestone, College Point, and Murray Hill' },
+    { slug: 'jackson-heights-queens', name: 'Jackson Heights', borough: 'Queens', nearbyAreas: 'Elmhurst, Woodside, and Corona' },
+    { slug: 'astoria-queens', name: 'Astoria', borough: 'Queens', nearbyAreas: 'Long Island City, Ditmars, and Steinway' },
+    { slug: 'forest-hills-queens', name: 'Forest Hills', borough: 'Queens', nearbyAreas: 'Rego Park, Kew Gardens, and Austin Street' },
+    { slug: 'long-island-city-queens', name: 'Long Island City', borough: 'Queens', nearbyAreas: 'Astoria, Sunnyside, and Hunter\'s Point' },
+    { slug: 'jamaica-queens', name: 'Jamaica', borough: 'Queens', nearbyAreas: 'Hollis, St. Albans, and Springfield Gardens' },
+    { slug: 'bayside-queens', name: 'Bayside', borough: 'Queens', nearbyAreas: 'Whitestone, Oakland Gardens, and Fresh Meadows' },
+    { slug: 'woodside-queens', name: 'Woodside', borough: 'Queens', nearbyAreas: 'Sunnyside, Jackson Heights, and Maspeth' },
+    { slug: 'sunnyside-queens', name: 'Sunnyside', borough: 'Queens', nearbyAreas: 'Woodside, LIC, and Maspeth' },
+    { slug: 'elmhurst-queens', name: 'Elmhurst', borough: 'Queens', nearbyAreas: 'Jackson Heights, Corona, and Rego Park' },
+    { slug: 'corona-queens', name: 'Corona', borough: 'Queens', nearbyAreas: 'Elmhurst, Jackson Heights, and Flushing' },
+    { slug: 'rego-park-queens', name: 'Rego Park', borough: 'Queens', nearbyAreas: 'Forest Hills, Elmhurst, and Woodhaven' },
+    { slug: 'ridgewood-queens', name: 'Ridgewood', borough: 'Queens', nearbyAreas: 'Bushwick, Glendale, and Middle Village' },
+    { slug: 'fresh-meadows-queens', name: 'Fresh Meadows', borough: 'Queens', nearbyAreas: 'Bayside, Flushing, and Jamaica' },
+    { slug: 'howard-beach-queens', name: 'Howard Beach', borough: 'Queens', nearbyAreas: 'Ozone Park, Richmond Hill, and Broad Channel' },
+    { slug: 'williamsburg-brooklyn', name: 'Williamsburg', borough: 'Brooklyn', nearbyAreas: 'Greenpoint, Bushwick, and Bedford-Stuyvesant' },
+    { slug: 'park-slope-brooklyn', name: 'Park Slope', borough: 'Brooklyn', nearbyAreas: 'Prospect Heights, Carroll Gardens, and Gowanus' },
+    { slug: 'sunset-park-brooklyn', name: 'Sunset Park', borough: 'Brooklyn', nearbyAreas: 'Bay Ridge, Greenwood Heights, and Borough Park' },
+    { slug: 'crown-heights-brooklyn', name: 'Crown Heights', borough: 'Brooklyn', nearbyAreas: 'Prospect Heights, Flatbush, and Brownsville' },
+    { slug: 'flatbush-brooklyn', name: 'Flatbush', borough: 'Brooklyn', nearbyAreas: 'Crown Heights, Midwood, and East Flatbush' },
+    { slug: 'bay-ridge-brooklyn', name: 'Bay Ridge', borough: 'Brooklyn', nearbyAreas: 'Fort Hamilton, Dyker Heights, and Bensonhurst' },
+    { slug: 'bushwick-brooklyn', name: 'Bushwick', borough: 'Brooklyn', nearbyAreas: 'Ridgewood, East Williamsburg, and Bed-Stuy' },
+    { slug: 'greenpoint-brooklyn', name: 'Greenpoint', borough: 'Brooklyn', nearbyAreas: 'Williamsburg, Long Island City, and Astoria' },
+    { slug: 'bed-stuy-brooklyn', name: 'Bed-Stuy', borough: 'Brooklyn', nearbyAreas: 'Crown Heights, Bushwick, and Fort Greene' },
+    { slug: 'fort-greene-brooklyn', name: 'Fort Greene', borough: 'Brooklyn', nearbyAreas: 'Clinton Hill, Boerum Hill, and Downtown Brooklyn' },
+    { slug: 'carroll-gardens-brooklyn', name: 'Carroll Gardens', borough: 'Brooklyn', nearbyAreas: 'Cobble Hill, Red Hook, and Gowanus' },
+    { slug: 'cobble-hill-brooklyn', name: 'Cobble Hill', borough: 'Brooklyn', nearbyAreas: 'Carroll Gardens, Boerum Hill, and Red Hook' },
+    { slug: 'red-hook-brooklyn', name: 'Red Hook', borough: 'Brooklyn', nearbyAreas: 'Carroll Gardens, Gowanus, and Sunset Park' },
+    { slug: 'brighton-beach-brooklyn', name: 'Brighton Beach', borough: 'Brooklyn', nearbyAreas: 'Coney Island, Manhattan Beach, and Sheepshead Bay' },
+    { slug: 'bensonhurst-brooklyn', name: 'Bensonhurst', borough: 'Brooklyn', nearbyAreas: 'Bay Ridge, Dyker Heights, and Sunset Park' },
+    { slug: 'upper-west-side-manhattan', name: 'Upper West Side', borough: 'Manhattan', nearbyAreas: 'Morningside Heights, Lincoln Square, and Riverside Drive' },
+    { slug: 'upper-east-side-manhattan', name: 'Upper East Side', borough: 'Manhattan', nearbyAreas: 'Carnegie Hill, Yorkville, and East Harlem' },
+    { slug: 'chelsea-manhattan', name: 'Chelsea', borough: 'Manhattan', nearbyAreas: 'Hell\'s Kitchen, Flatiron, and West Village' },
+    { slug: 'tribeca-manhattan', name: 'Tribeca', borough: 'Manhattan', nearbyAreas: 'SoHo, Financial District, and Hudson Square' },
+    { slug: 'hells-kitchen-manhattan', name: 'Hell\'s Kitchen', borough: 'Manhattan', nearbyAreas: 'Midtown, Chelsea, and Lincoln Center' },
+    { slug: 'harlem-manhattan', name: 'Harlem', borough: 'Manhattan', nearbyAreas: 'East Harlem, Washington Heights, and Morningside Heights' },
+    { slug: 'washington-heights-manhattan', name: 'Washington Heights', borough: 'Manhattan', nearbyAreas: 'Inwood, Harlem, and Fort George' },
+    { slug: 'midtown-manhattan', name: 'Midtown', borough: 'Manhattan', nearbyAreas: 'Hell\'s Kitchen, Murray Hill, and Gramercy' },
+    { slug: 'east-village-manhattan', name: 'East Village', borough: 'Manhattan', nearbyAreas: 'Lower East Side, NoHo, and Gramercy' },
+    { slug: 'inwood-manhattan', name: 'Inwood', borough: 'Manhattan', nearbyAreas: 'Washington Heights, Fort George, and Hudson Heights' },
+    { slug: 'riverdale-bronx', name: 'Riverdale', borough: 'Bronx', nearbyAreas: 'Fieldston, Kingsbridge, and Spuyten Duyvil' },
+    { slug: 'fordham-bronx', name: 'Fordham', borough: 'Bronx', nearbyAreas: 'Belmont, Kingsbridge, and University Heights' },
+    { slug: 'pelham-bay-bronx', name: 'Pelham Bay', borough: 'Bronx', nearbyAreas: 'Throggs Neck, Co-op City, and City Island' },
+    { slug: 'mott-haven-bronx', name: 'Mott Haven', borough: 'Bronx', nearbyAreas: 'Hunts Point, Port Morris, and Melrose' },
+    { slug: 'concourse-bronx', name: 'Concourse', borough: 'Bronx', nearbyAreas: 'Highbridge, Mount Eden, and Fordham' },
+    { slug: 'throgs-neck-bronx', name: 'Throgs Neck', borough: 'Bronx', nearbyAreas: 'Pelham Bay, Edgewater Park, and Country Club' },
+    { slug: 'st-george-staten-island', name: 'St. George', borough: 'Staten Island', nearbyAreas: 'Tompkinsville, New Brighton, and Stapleton' },
+    { slug: 'tottenville-staten-island', name: 'Tottenville', borough: 'Staten Island', nearbyAreas: 'Charleston, Woodrow, and Great Kills' },
+    { slug: 'great-kills-staten-island', name: 'Great Kills', borough: 'Staten Island', nearbyAreas: 'Eltingville, Bay Terrace, and Annadale' },
+    { slug: 'stapleton-staten-island', name: 'Stapleton', borough: 'Staten Island', nearbyAreas: 'St. George, Clifton, and Tompkinsville' },
+  ];
+  const map = new Map<string, { categorySlug: string; categoryName: string; neighborhoodName: string; borough: string; nearbyAreas: string }>();
+  for (const [catSlug, catName] of Object.entries(CATEGORIES)) {
+    for (const n of NEIGHBORHOODS) {
+      map.set(`${catSlug}-${n.slug}`, { categorySlug: catSlug, categoryName: catName, neighborhoodName: n.name, borough: n.borough, nearbyAreas: n.nearbyAreas });
+    }
+  }
+  return map;
+})();
 
 const matchRoute = (pathname: string): PageType => {
   // Strip leading slash
@@ -466,6 +537,22 @@ const matchRoute = (pathname: string): PageType => {
   const PET_TYPES = new Set(['dog','cat','bird','fish','reptile','small-pet','products']);
   if (segments.length === 2 && PET_TYPES.has(segments[0]))
     return { type: 'category', slug: segments[1], petType: segments[0] } as any;
+
+  // Neighborhood × Category pages — /[category]-[neighborhood]-[borough]
+  // Must check before /:petType catch-all
+  if (segments.length === 1) {
+    const neighborhoodEntry = NEIGHBORHOOD_PAGE_REGISTRY.get(segments[0]);
+    if (neighborhoodEntry) {
+      return {
+        type: 'neighborhood',
+        slug: segments[0],
+        categorySlug: neighborhoodEntry.categorySlug,
+        neighborhoodName: neighborhoodEntry.neighborhoodName,
+        borough: neighborhoodEntry.borough,
+        nearbyAreas: neighborhoodEntry.nearbyAreas,
+      };
+    }
+  }
 
   // /:petType/:categorySlug+/:productSlug — product URL (3+ segments)
   if (segments.length >= 3) {
@@ -581,6 +668,14 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
       availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',
       seller: { '@type': 'Organization', name: 'PetShiwu', url: BASE },
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+        merchantReturnDays: 30,
+        returnMethod: 'https://schema.org/ReturnByMail',
+        returnFees: 'https://schema.org/FreeReturn',
+        applicableCountry: 'US',
+      },
       shippingDetails: {
         '@type': 'OfferShippingDetails',
         shippingRate: {
@@ -892,6 +987,103 @@ const buildCategoryHtml = (template: string, category: any, petType?: string, ca
 };
 
 // ---------------------------------------------------------------------------
+// Neighborhood × Category page HTML builder (200 programmatic local SEO pages)
+// ---------------------------------------------------------------------------
+const buildNeighborhoodHtml = (
+  template: string,
+  slug: string,
+  categorySlug: string,
+  neighborhoodName: string,
+  borough: string,
+  nearbyAreas: string
+): string => {
+  const CATEGORY_LABELS: Record<string, { label: string; petLabel: string }> = {
+    'dog-food-delivery': { label: 'Dog Food Delivery', petLabel: 'dog food' },
+    'cat-food-delivery': { label: 'Cat Food Delivery', petLabel: 'cat food' },
+    'pet-supplies-delivery': { label: 'Pet Supplies Delivery', petLabel: 'pet supplies' },
+    'dog-treats-delivery': { label: 'Dog Treats & Accessories Delivery', petLabel: 'dog treats' },
+  };
+  const cat = CATEGORY_LABELS[categorySlug] ?? { label: 'Pet Supplies Delivery', petLabel: 'pet supplies' };
+  const title = `${cat.label} in ${neighborhoodName}, ${borough} | Petshiwu`;
+  const description = `Shop premium ${cat.petLabel} and get delivered to ${neighborhoodName}, ${borough}. Free shipping on orders over $49. Queens-based NYC delivery. 10,000+ products.`;
+  const pageUrl = `${BASE}/${slug}`;
+  const h1 = `${cat.label} in ${neighborhoodName}, ${borough}`;
+
+  const pageSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: title,
+    description,
+    url: pageUrl,
+    breadcrumb: {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
+        { '@type': 'ListItem', position: 2, name: `${cat.label} NYC`, item: `${BASE}/${categorySlug}-nyc` },
+        { '@type': 'ListItem', position: 3, name: `${neighborhoodName}, ${borough}`, item: pageUrl },
+      ],
+    },
+  };
+
+  const localBusinessSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: 'Petshiwu',
+    description: `Pet supply store delivering ${cat.petLabel} to ${neighborhoodName}, ${borough} and nearby ${nearbyAreas}.`,
+    url: BASE,
+    telephone: '+18002592605',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Jackson Heights',
+      addressRegion: 'NY',
+      postalCode: '11372',
+      addressCountry: 'US',
+    },
+    areaServed: [
+      { '@type': 'City', name: 'New York City' },
+      { '@type': 'Neighborhood', name: neighborhoodName },
+    ],
+    priceRange: '$',
+    openingHours: 'Mo-Su 09:00-20:00',
+  };
+
+  const injectedTags = `
+  <!-- Bot renderer: neighborhood-category page meta -->
+  <meta name="description" content="${esc(description)}" />
+  <meta property="og:title" content="${esc(title)}" />
+  <meta property="og:description" content="${esc(description)}" />
+  <meta property="og:url" content="${esc(pageUrl)}" />
+  <meta property="og:type" content="website" />
+  <script type="application/ld+json">${JSON.stringify(pageSchema)}</script>
+  <script type="application/ld+json">${JSON.stringify(localBusinessSchema)}</script>`;
+
+  const bodyContent = `
+  <nav style="font-size:0.85em;color:#777;margin-bottom:12px">
+    <a href="${BASE}" style="color:#1976d2">Home</a> &rsaquo;
+    <span>${esc(cat.label)} NYC</span> &rsaquo;
+    <span>${esc(neighborhoodName)}, ${esc(borough)}</span>
+  </nav>
+  <h1 style="font-size:1.7em;font-weight:700;margin:0 0 12px">${esc(h1)}</h1>
+  <p style="color:#444;line-height:1.7;margin-bottom:16px">Petshiwu delivers premium ${cat.petLabel} to every address in ${esc(neighborhoodName)}, ${esc(borough)} — including nearby ${esc(nearbyAreas)}. We're Queens-based with 10,000+ products and free shipping on orders over $49.</p>
+  <a href="${BASE}/products" style="display:inline-block;padding:10px 24px;background:#1976d2;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-bottom:20px">Shop ${esc(cat.petLabel)} →</a>
+  <p style="color:#555;font-size:0.9em"><a href="${BASE}/learning" style="color:#1976d2">Pet Care Blog</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — NYC&rsquo;s Local Pet Store</a></p>`;
+
+  let html = template;
+  html = injectOrReplaceCanonical(html, pageUrl);
+  html = injectOrReplaceTitle(html, title);
+  html = injectOrReplaceMeta(html, description);
+  if (html.includes('</head>')) {
+    html = html.replace('</head>', `${injectedTags}\n</head>`);
+  }
+  html = injectOrReplaceH1(html, `<h1 style="font-size:1.7em;font-weight:700;margin:0 0 12px">${esc(h1)}</h1>`);
+  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${bodyContent}</div>`);
+  if (!html.includes(bodyContent)) {
+    html = html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+  }
+  return html;
+};
+
+// ---------------------------------------------------------------------------
 // Main middleware factory
 // ---------------------------------------------------------------------------
 
@@ -985,6 +1177,15 @@ export const createBotRenderer = (distPath: string) => {
         } else if (page?.type === 'category') {
           const category = await fetchCategory(page.slug);
           if (category) html = buildCategoryHtml(template, category, (page as any).petType);
+        } else if (page?.type === 'neighborhood') {
+          html = buildNeighborhoodHtml(
+            template,
+            page.slug,
+            page.categorySlug,
+            page.neighborhoodName,
+            page.borough,
+            page.nearbyAreas,
+          );
         } else if (req.path === '/products' || req.path === '/products/') {
           // SSR product listing for Google — inject real product links
           html = await buildProductListHtml(template);
