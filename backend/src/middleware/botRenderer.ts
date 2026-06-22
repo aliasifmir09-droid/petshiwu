@@ -1152,6 +1152,173 @@ const buildNeighborhoodHtml = (
 // SSR: /products listing page — injects real product links so Google
 // can discover individual product pages from the listing page.
 // ---------------------------------------------------------------------------
+const buildHomepageHtml = (template: string): string => {
+  const meta = STATIC_PAGES['/'];
+  const pageUrl = BASE;
+
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': `${BASE}/#organization`,
+    name: 'Petshiwu',
+    url: BASE,
+    logo: {
+      '@type': 'ImageObject',
+      url: `${BASE}/logo-square-512.png`,
+      width: 512,
+      height: 512,
+    },
+    description: 'Premium pet food, toys, and supplies delivered to Queens, Brooklyn, Manhattan, Bronx, and all of New York City. 10,000+ products from top brands.',
+    telephone: '+18002592605',
+    email: 'support@petshiwu.com',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: '37-68 74th St',
+      addressLocality: 'Jackson Heights',
+      addressRegion: 'NY',
+      postalCode: '11372',
+      addressCountry: 'US',
+    },
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: '+18002592605',
+      contactType: 'customer service',
+      areaServed: 'US',
+      availableLanguage: ['English', 'Spanish'],
+    },
+    sameAs: [
+      'https://www.facebook.com/petshiwu',
+      'https://www.instagram.com/petshiwu',
+      'https://twitter.com/petshiwu',
+    ],
+    foundingDate: '2024',
+    foundingLocation: {
+      '@type': 'Place',
+      name: 'Jackson Heights, Queens, New York City',
+    },
+  };
+
+  const localBusinessSchema = {
+    '@context': 'https://schema.org',
+    '@type': ['LocalBusiness', 'PetStore'],
+    '@id': `${BASE}/#localbusiness`,
+    name: 'Petshiwu',
+    url: BASE,
+    image: `${BASE}/logo-square-512.png`,
+    logo: `${BASE}/logo-square-512.png`,
+    description: 'Queens-based pet supply delivery serving all five NYC boroughs. 10,000+ products, free shipping over $49, same-day delivery available.',
+    telephone: '+18002592605',
+    email: 'support@petshiwu.com',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: '37-68 74th St',
+      addressLocality: 'Jackson Heights',
+      addressRegion: 'NY',
+      postalCode: '11372',
+      addressCountry: 'US',
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: 40.7489,
+      longitude: -73.885,
+    },
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        opens: '09:00',
+        closes: '20:00',
+      },
+    ],
+    priceRange: '$$',
+    currenciesAccepted: 'USD',
+    paymentAccepted: 'Cash, Credit Card, Debit Card',
+    areaServed: [
+      { '@type': 'City', name: 'New York City' },
+      { '@type': 'Borough', name: 'Queens' },
+      { '@type': 'Borough', name: 'Brooklyn' },
+      { '@type': 'Borough', name: 'Manhattan' },
+      { '@type': 'Borough', name: 'Bronx' },
+      { '@type': 'Borough', name: 'Staten Island' },
+    ],
+    hasMap: `https://www.google.com/maps?cid=7967426977090267497`,
+    servesCuisine: undefined,
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.8',
+      reviewCount: '47',
+      bestRating: '5',
+    },
+    sameAs: [
+      'https://www.facebook.com/petshiwu',
+      'https://www.instagram.com/petshiwu',
+    ],
+  };
+
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${BASE}/#website`,
+    url: BASE,
+    name: 'Petshiwu',
+    description: meta.description,
+    publisher: { '@id': `${BASE}/#organization` },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${BASE}/products?search={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
+  const siteNavigationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'SiteNavigationElement',
+    name: [
+      'Home',
+      'Dog Supplies',
+      'Cat Supplies',
+      'Bird Supplies',
+      'Fish Supplies',
+      'All Products',
+      'Pet Care Blog',
+      'Dog Food Delivery NYC',
+      'Cat Food Delivery NYC',
+    ],
+    url: [
+      `${BASE}/`,
+      `${BASE}/dog`,
+      `${BASE}/cat`,
+      `${BASE}/bird`,
+      `${BASE}/fish`,
+      `${BASE}/products`,
+      `${BASE}/learning`,
+      `${BASE}/dog-food-delivery-nyc`,
+      `${BASE}/cat-food-delivery-nyc`,
+    ],
+  };
+
+  // Clean up undefined fields
+  delete (localBusinessSchema as any).servesCuisine;
+
+  const injectedTags = `
+  <!-- Bot renderer: homepage schema -->
+  <script type="application/ld+json">${JSON.stringify(organizationSchema)}</script>
+  <script type="application/ld+json">${JSON.stringify(localBusinessSchema)}</script>
+  <script type="application/ld+json">${JSON.stringify(websiteSchema)}</script>
+  <script type="application/ld+json">${JSON.stringify(siteNavigationSchema)}</script>`;
+
+  let html = template;
+  html = injectTitle(html, meta.title);
+  html = injectDescription(html, meta.description);
+  html = injectCanonical(html, pageUrl);
+  html = injectOgTags(html, meta.title, meta.description, pageUrl);
+  html = injectBeforeHeadClose(html, injectedTags);
+  return html;
+};
+
 const buildProductListHtml = async (template: string): Promise<string> => {
   const BASE_URL = 'https://www.petshiwu.com';
   const canonicalUrl = `${BASE_URL}/products`;
@@ -1247,6 +1414,8 @@ export const createBotRenderer = (distPath: string) => {
             page.borough,
             page.nearbyAreas,
           );
+        } else if (req.path === '/' || req.path === '') {
+          html = buildHomepageHtml(template);
         } else if (req.path === '/products' || req.path === '/products/') {
           // SSR product listing for Google — inject real product links
           html = await buildProductListHtml(template);
