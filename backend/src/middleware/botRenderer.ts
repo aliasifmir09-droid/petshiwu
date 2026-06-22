@@ -271,6 +271,22 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     title: 'Cat Food Delivery NYC — Premium Brands | Petshiwu',
     description: 'Get premium cat food delivered anywhere in NYC. Wet food, dry food, prescription diets. Royal Canin, Blue Buffalo, Hill\'s Science Diet. Free shipping over $49.',
   },
+  '/cat-litter-delivery-nyc': {
+    title: 'Cat Litter Delivery NYC — Clumping, Crystal & Natural | Petshiwu',
+    description: 'Get cat litter delivered anywhere in NYC. Clumping clay, silica crystal, pine, and natural litters from top brands. Free delivery on orders over $49. Queens, Brooklyn, Manhattan & all boroughs.',
+  },
+  '/cat-treats-delivery-nyc': {
+    title: 'Cat Treats Delivery NYC — Freeze-Dried, Crunchy & Soft | Petshiwu',
+    description: 'Get premium cat treats delivered anywhere in NYC. Freeze-dried, soft chews, crunchy, and dental treats. Top brands, fast delivery. Free shipping over $49.',
+  },
+  '/small-pet-supplies-delivery-nyc': {
+    title: 'Small Pet Supplies Delivery NYC — Rabbits, Hamsters, Guinea Pigs | Petshiwu',
+    description: 'Small pet supplies delivered to all NYC boroughs — food, bedding, cages, toys, and accessories for rabbits, hamsters, guinea pigs, and ferrets. Free shipping over $49.',
+  },
+  '/bird-food-delivery-nyc': {
+    title: 'Bird Food & Supplies Delivery NYC — All Bird Species | Petshiwu',
+    description: 'Bird food and supplies delivered anywhere in NYC. Seed mixes, pellets, treats, and accessories for parakeets, cockatiels, parrots, and wild birds. Free shipping over $49.',
+  },
   '/online-pet-store-nyc': {
     title: 'Online Pet Store for NYC — 10,000+ Products | Petshiwu',
     description: 'NYC\'s online pet store with 10,000+ products for dogs, cats, birds, fish & more. Fast delivery across all 5 boroughs. Free shipping on orders over $49.',
@@ -448,6 +464,10 @@ const NEIGHBORHOOD_PAGE_REGISTRY = (() => {
     'cat-food-delivery': 'Cat Food Delivery',
     'pet-supplies-delivery': 'Pet Supplies Delivery',
     'dog-treats-delivery': 'Dog Treats & Accessories Delivery',
+    'cat-litter-delivery': 'Cat Litter Delivery',
+    'cat-treats-delivery': 'Cat Treats Delivery',
+    'small-pet-supplies-delivery': 'Small Pet Supplies Delivery',
+    'bird-food-delivery': 'Bird Food & Supplies Delivery',
   };
   const NEIGHBORHOODS: Array<{ slug: string; name: string; borough: string; nearbyAreas: string }> = [
     { slug: 'flushing-queens', name: 'Flushing', borough: 'Queens', nearbyAreas: 'Whitestone, College Point, and Murray Hill' },
@@ -1041,6 +1061,10 @@ const buildNeighborhoodHtml = (
     'cat-food-delivery': { label: 'Cat Food Delivery', petLabel: 'cat food' },
     'pet-supplies-delivery': { label: 'Pet Supplies Delivery', petLabel: 'pet supplies' },
     'dog-treats-delivery': { label: 'Dog Treats & Accessories Delivery', petLabel: 'dog treats' },
+    'cat-litter-delivery': { label: 'Cat Litter Delivery', petLabel: 'cat litter' },
+    'cat-treats-delivery': { label: 'Cat Treats Delivery', petLabel: 'cat treats' },
+    'small-pet-supplies-delivery': { label: 'Small Pet Supplies Delivery', petLabel: 'small pet supplies' },
+    'bird-food-delivery': { label: 'Bird Food & Supplies Delivery', petLabel: 'bird food and supplies' },
   };
   const cat = CATEGORY_LABELS[categorySlug] ?? { label: 'Pet Supplies Delivery', petLabel: 'pet supplies' };
   const title = `${cat.label} in ${neighborhoodName}, ${borough} | Petshiwu`;
