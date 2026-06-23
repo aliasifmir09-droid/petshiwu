@@ -242,7 +242,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
     xml += '  </url>\n';
 
     // Static pages
-    const staticPages = [
+    let staticPages = [
       { path: '/about', priority: '0.7', changefreq: 'monthly' },
       { path: '/faq', priority: '0.6', changefreq: 'monthly' },
       { path: '/returns', priority: '0.5', changefreq: 'monthly' },
@@ -702,6 +702,51 @@ export const generateSitemap = async (req: Request, res: Response) => {
       { path: '/bird-food-delivery-great-kills-staten-island', priority: '0.8', changefreq: 'weekly' },
       { path: '/bird-food-delivery-stapleton-staten-island', priority: '0.8', changefreq: 'weekly' },
     ];
+
+    // Programmatic generator: 20 NEW neighborhood×category entries added 2026-06-23
+    // 20 new delivery categories × 50 NYC neighborhoods = 1,000 new programmatic SEO pages
+    // Combined with existing 400 hardcoded entries = 1,400 total neighborhood×category pages
+    const NEW_DELIVERY_CATEGORIES = [
+      'puppy-food-delivery', 'senior-dog-food-delivery', 'wet-dog-food-delivery',
+      'dry-dog-food-delivery', 'grain-free-dog-food-delivery', 'raw-dog-food-delivery',
+      'dog-toys-delivery', 'dog-beds-delivery', 'dog-crates-delivery',
+      'dog-grooming-delivery', 'kitten-food-delivery', 'senior-cat-food-delivery',
+      'wet-cat-food-delivery', 'cat-litter-boxes-delivery', 'cat-scratcher-delivery',
+      'cat-toys-delivery', 'cat-beds-delivery', 'cat-grooming-delivery',
+      'fish-supplies-delivery', 'reptile-supplies-delivery', 'bird-supplies-delivery',
+      'small-pet-supplies-delivery', 'vet-diet-delivery', 'pet-medication-delivery',
+    ];
+
+    // 50 NYC neighborhoods (must match frontend/src/data/neighborhoodPages.ts)
+    const NEIGHBORHOOD_SLUGS = [
+      // Queens (15)
+      'flushing-queens', 'jackson-heights-queens', 'astoria-queens', 'forest-hills-queens',
+      'long-island-city-queens', 'jamaica-queens', 'bayside-queens', 'woodside-queens',
+      'sunnyside-queens', 'elmhurst-queens', 'corona-queens', 'rego-park-queens',
+      'ridgewood-queens', 'fresh-meadows-queens', 'howard-beach-queens',
+      // Brooklyn (15)
+      'williamsburg-brooklyn', 'park-slope-brooklyn', 'dumbo-brooklyn', 'cobble-hill-brooklyn',
+      'carroll-gardens-brooklyn', 'bushwick-brooklyn', 'greenpoint-brooklyn', 'bay-ridge-brooklyn',
+      'flatbush-brooklyn', 'crown-heights-brooklyn', 'bed-stuy-brooklyn', 'bensonhurst-brooklyn',
+      'fort-greene-brooklyn', 'brighton-beach-brooklyn', 'red-hook-brooklyn',
+      // Manhattan (10)
+      'upper-east-side-manhattan', 'upper-west-side-manhattan', 'chelsea-manhattan',
+      'east-village-manhattan', 'west-village-manhattan', 'soho-manhattan',
+      'harlem-manhattan', 'hells-kitchen-manhattan', 'midtown-manhattan', 'inwood-manhattan',
+      // Bronx (5)
+      'fordham-bronx', 'riverdale-bronx', 'pelham-bay-bronx', 'concourse-bronx',
+      'mott-haven-bronx',
+      // Staten Island (5)
+      'st-george-staten-island', 'stapleton-staten-island', 'great-kills-staten-island',
+      'tompkinsville-staten-island', 'dongan-hills-staten-island',
+    ];
+
+    // Generate 1,000 new entries (20 categories × 50 neighborhoods)
+    for (const cat of NEW_DELIVERY_CATEGORIES) {
+      for (const hood of NEIGHBORHOOD_SLUGS) {
+        staticPages.push({ path: `/${cat}-${hood}`, priority: '0.8', changefreq: 'weekly' });
+      }
+    }
 
     staticPages.forEach(page => {
       xml += '  <url>\n';
