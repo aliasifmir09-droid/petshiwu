@@ -248,6 +248,9 @@ const Products = () => {
     }))
   });
 
+  // Noindex any URL with filter/search/pagination params to eliminate 9K duplicate-content entries in GSC.
+  const hasFilters = Boolean(petType || category || brand || minRating || inStock || search) || page > 1 || featured || (sort && sort !== 'newest');
+
   return (
     <>
       <SEO
@@ -256,6 +259,7 @@ const Products = () => {
         keywords={seoData.keywords}
         url={seoData.canonicalUrl}
         type="website"
+        noindex={hasFilters}
       />
       {seoData.collectionPageSchema && (
         <StructuredData type="collectionPage" data={seoData.collectionPageSchema} />
