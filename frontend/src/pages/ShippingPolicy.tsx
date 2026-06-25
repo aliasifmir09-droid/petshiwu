@@ -31,7 +31,7 @@ const ShippingPolicy = () => {
         {[
           { icon: '⚡', title: 'Same-Day NYC', desc: 'Order before 3 PM → delivered by 11 PM' },
           { icon: '🚚', title: 'Free Shipping', desc: 'On all orders over $49' },
-          { icon: '📦', title: 'Standard Delivery', desc: '3-7 business days nationwide' },
+          { icon: '📦', title: 'Standard Delivery', desc: '2 business days nationwide' },
         ].map((item, i) => (
           <div key={i} className="bg-blue-50 rounded-xl p-5 text-center border border-blue-100">
             <div className="text-3xl mb-2">{item.icon}</div>
@@ -94,7 +94,7 @@ const ShippingPolicy = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-3">Delivery Times</h2>
           <ul className="list-disc pl-6 space-y-2">
             <li><strong>Same-Day NYC:</strong> Order before 3 PM EST → delivered before 11 PM same day. Order before 1 PM EST on weekends/holidays.</li>
-            <li><strong>Standard Shipping:</strong> 3-7 business days nationwide after order confirmation.</li>
+            <li><strong>Standard Shipping:</strong> 2 business days nationwide after order confirmation (improved from 5 days).</li>
             <li><strong>Express Shipping:</strong> 1-2 business days nationwide after order confirmation.</li>
             <li>All orders placed before 2 PM EST on business days are processed the same day.</li>
             <li>Orders placed after 2 PM EST, on weekends, or holidays are processed the next business day.</li>
