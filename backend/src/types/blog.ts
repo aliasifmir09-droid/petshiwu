@@ -43,6 +43,9 @@ export interface IBlogResponse {
   views: number;
   metaTitle?: string;
   metaDescription?: string;
+  speakable?: boolean;
+  authorByline?: string;
+  authorProfileUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
