@@ -50,6 +50,7 @@ const CareGuides = lazy(() => import('./pages/CareGuides'));
 const CareGuideDetail = lazy(() => import('./pages/CareGuideDetail'));
 const FAQ = lazy(() => import('./pages/FAQ'));
 const About = lazy(() => import('./pages/About'));
+const Press = lazy(() => import('./pages/Press'));
 const Contact = lazy(() => import('./pages/Contact'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const Forbidden = lazy(() => import('./pages/Forbidden'));
@@ -302,6 +303,7 @@ function App() {
                   <Route path="/care-guides/:slug" element={<CareGuideDetail />} />
                   <Route path="/faq" element={<FAQ />} />
                   <Route path="/about" element={<About />} />
+                  <Route path="/press" element={<Press />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/checkout" element={<Checkout />} />
