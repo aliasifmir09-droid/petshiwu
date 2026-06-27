@@ -64,7 +64,8 @@ const BlogPostTemplate = ({
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': canonicalUrl
-    }
+    },
+    speakable: !!blog.speakable
   };
 
   return (

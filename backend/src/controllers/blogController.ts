@@ -377,7 +377,7 @@ export const createBlog = async (req: AuthRequest, res: Response, next: NextFunc
 export const updateBlog = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const { title, content, excerpt, featuredImage, petType, category, tags, isPublished, metaTitle, metaDescription } = req.body;
+    const { title, content, excerpt, featuredImage, petType, category, tags, isPublished, metaTitle, metaDescription, speakable, authorByline, authorProfileUrl } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
@@ -411,6 +411,9 @@ export const updateBlog = async (req: AuthRequest, res: Response, next: NextFunc
     }
     if (metaTitle !== undefined) blog.metaTitle = metaTitle;
     if (metaDescription !== undefined) blog.metaDescription = metaDescription;
+    if (speakable !== undefined) blog.speakable = speakable;
+    if (authorByline !== undefined) blog.authorByline = authorByline;
+    if (authorProfileUrl !== undefined) blog.authorProfileUrl = authorProfileUrl;
 
     await blog.save();
     await blog.populate('author', 'name email');

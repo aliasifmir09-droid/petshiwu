@@ -15,6 +15,9 @@ export interface IBlog extends Document {
   views: number;
   metaTitle?: string;
   metaDescription?: string;
+  speakable?: boolean;
+  authorByline?: string;
+  authorProfileUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -81,6 +84,18 @@ const blogSchema = new Schema<IBlog>(
       trim: true
     },
     metaDescription: {
+      type: String,
+      trim: true
+    },
+    speakable: {
+      type: Boolean,
+      default: false
+    },
+    authorByline: {
+      type: String,
+      trim: true
+    },
+    authorProfileUrl: {
       type: String,
       trim: true
     }

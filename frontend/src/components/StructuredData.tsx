@@ -76,6 +76,7 @@ interface ArticleSchema {
   dateModified?: string;
   url: string;
   publisher?: { name: string; logo?: string };
+  speakable?: boolean;
 }
 
 interface StructuredDataProps {
@@ -246,6 +247,17 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
       };
       if (article.image) {
         schema.image = Array.isArray(article.image) ? article.image : [article.image];
+      }
+      // Speakable schema — enables AI Overview / voice assistant citation
+      if (article.speakable) {
+        (schema as any).speakable = {
+          '@type': 'SpeakableSpecification',
+          xpath: [
+            '/html/head/title',
+            '/html/body//h1',
+            '/html/body//article//p[1]'
+          ]
+        };
       }
       break;
 
