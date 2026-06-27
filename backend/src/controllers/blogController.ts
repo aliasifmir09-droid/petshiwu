@@ -83,6 +83,9 @@ const normalizeBlogId = (blog: IBlogDocument | IBlog | IBlogResponse | Record<st
     views: typeof plainBlog.views === 'number' ? plainBlog.views : 0,
     metaTitle: plainBlog.metaTitle,
     metaDescription: plainBlog.metaDescription,
+    speakable: !!plainBlog.speakable,
+    authorByline: plainBlog.authorByline,
+    authorProfileUrl: plainBlog.authorProfileUrl,
     createdAt,
     updatedAt
   };
