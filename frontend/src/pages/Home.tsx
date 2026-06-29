@@ -206,6 +206,77 @@ const Home = () => {
       />
       <StructuredData type="website" data={{}} />
       <StructuredData
+        type="faq"
+        data={{
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'Does Petshiwu deliver same-day pet supplies in NYC?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Yes. Petshiwu offers same-day pet supply delivery across all five NYC boroughs — Manhattan, Brooklyn, Queens, Bronx, and Staten Island. Order by 10 AM EST for same-day delivery; order by 2 PM EST for next-day delivery. We are based in Jackson Heights, Queens and ship from our warehouse at 37-68 74th Street.'
+              }
+            },
+            {
+              '@type': 'Question',
+              name: 'What brands does Petshiwu carry?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Petshiwu carries 10,000+ products from 200+ premium brands including Hill\'s Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Orijen, Acana, Fromm, Stella & Chewy\'s, Taste of the Wild, and many more. We carry both regular and veterinary-prescription diets.'
+              }
+            },
+            {
+              '@type': 'Question',
+              name: 'Does Petshiwu require an autoship subscription?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'No. Petshiwu never requires autoship or any subscription. Order once for one-time delivery, or opt into autoship for 5% off recurring orders — your choice. Use FREEDOM20 for 20% off your first order (max $10 off, no subscription commitment).'
+              }
+            },
+            {
+              '@type': 'Question',
+              name: 'Can I get prescription veterinary diets from Petshiwu?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Yes. We carry Hill\'s Prescription Diet, Royal Canin Veterinary Diet, and Purina Pro Plan Veterinary Diets. Your vet can upload or fax the prescription at checkout, and we ship same-day for most prescription orders.'
+              }
+            },
+            {
+              '@type': 'Question',
+              name: 'How much does Petshiwu delivery cost?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Delivery is free on orders over $49 across all five NYC boroughs. Orders under $49 have a flat $6 shipping fee. Same-day delivery is available for orders placed before 10 AM EST.'
+              }
+            },
+            {
+              '@type': 'Question',
+              name: 'Where is Petshiwu located?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Our warehouse and headquarters are at 37-68 74th Street, Jackson Heights, NY 11372, Queens. We deliver from this single facility to all five NYC boroughs.'
+              }
+            },
+            {
+              '@type': 'Question',
+              name: 'Does Petshiwu deliver cat supplies too?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Yes. We carry full cat supply lines — food (Hill\'s, Royal Canin, Purina, Orijen), litter, toys, scratching posts, and prescription diets. Same delivery speeds as dog supplies.'
+              }
+            },
+            {
+              '@type': 'Question',
+              name: 'How do I contact Petshiwu customer service?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Call +1 (800) 259-2605, email support@petshiwu.com, or use the contact form on our /contact page. We respond within one business day. Our Jackson Heights warehouse is open 9 AM to 8 PM, seven days a week.'
+              }
+            }
+          ]
+        }}
+      />
+      <StructuredData
         type="organization"
         data={{
           name: 'Petshiwu',
