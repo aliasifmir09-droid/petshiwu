@@ -156,6 +156,40 @@ const SEO = ({
       <meta name="format-detection" content="telephone=no" />
       <meta name="mobile-web-app-capable" content="yes" />
       <meta name="application-name" content={SITE_NAME} />
+
+      {/* Product JSON-LD schema (Google rich snippets: price, availability, star ratings) */}
+      {type === 'product' && price && (
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: title,
+            description,
+            image: ogImage,
+            brand: brand ? { '@type': 'Brand', name: brand } : { '@type': 'Brand', name: SITE_NAME },
+            sku: sku || '',
+            category: category || '',
+            offers: {
+              '@type': 'Offer',
+              url: resolvedUrl,
+              priceCurrency: currency || 'USD',
+              price: price.toFixed(2),
+              availability: availability === 'instock' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+              itemCondition: 'https://schema.org/NewCondition',
+              seller: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+            },
+            ...(rating && ratingCount ? {
+              aggregateRating: {
+                '@type': 'AggregateRating',
+                ratingValue: rating.toFixed(1),
+                reviewCount: ratingCount,
+                bestRating: 5,
+                worstRating: 1,
+              }
+            } : {}),
+          })}
+        </script>
+      )}
     </Helmet>
   );
 };
