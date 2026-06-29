@@ -97,7 +97,7 @@ const MyOrders = () => {
 
   return (
     <div className="container mx-auto px-4 lg:px-8 py-8">
-      <SEO title="My Orders | PetShiwu" description="View and track your PetShiwu orders" noindex={true} />
+      <SEO title="My Orders | Petshiwu" description="View and track your Petshiwu orders" noindex={true} />
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">My Orders</h1>
 

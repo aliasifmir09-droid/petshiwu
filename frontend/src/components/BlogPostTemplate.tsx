@@ -27,7 +27,7 @@ const BlogPostTemplate = ({
   title,
   description,
   content,
-  author = 'PetShiwu Team',
+  author = 'Petshiwu Team',
   publishDate,
   readTime = 5,
   tags = [],
@@ -53,7 +53,7 @@ const BlogPostTemplate = ({
     },
     publisher: {
       '@type': 'Organization',
-      name: 'PetShiwu',
+      name: 'Petshiwu',
       logo: {
         '@type': 'ImageObject',
         url: 'https://www.petshiwu.com/logo.png'
@@ -71,7 +71,7 @@ const BlogPostTemplate = ({
   return (
     <>
       <SEO
-        title={`${title} | PetShiwu`}
+        title={`${title} | Petshiwu`}
         description={description}
         keywords={keywords.join(', ')}
         url={canonicalUrl}

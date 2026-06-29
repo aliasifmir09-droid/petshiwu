@@ -93,7 +93,7 @@ const FAQ = () => {
   const seoDescription = useMemo(() => {
     const totalFAQs = faqs?.length || 0;
     const categories = Object.keys(faqsByCategory).length;
-    return `Get answers to ${totalFAQs}+ frequently asked questions about pet products, shipping, returns, orders, payment, and more. Browse ${categories} categories of FAQs to find what you need at PetShiwu.`;
+    return `Get answers to ${totalFAQs}+ frequently asked questions about pet products, shipping, returns, orders, payment, and more. Browse ${categories} categories of FAQs to find what you need at Petshiwu.`;
   }, [faqs, faqsByCategory]);
 
   const allCategories = categories || [];
@@ -112,7 +112,7 @@ const FAQ = () => {
   return (
     <>
       <SEO
-      title="Frequently Asked Questions (FAQ) | PetShiwu - Pet Products Help Center"
+      title="Frequently Asked Questions (FAQ) | Petshiwu - Pet Products Help Center"
       description={seoDescription}
       keywords="FAQ, frequently asked questions, pet store help, shipping questions, return policy, order tracking, pet product questions, customer support, pet care help, online pet store FAQ"
       url="/faq"

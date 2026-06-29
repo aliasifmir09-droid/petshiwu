@@ -75,7 +75,7 @@ body{background:#0a0f1e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
   <div class="header">
     <div class="grid-bg"></div>
     <div class="glow"></div>
-    <div class="logo">PetShiwu</div>
+    <div class="logo">Petshiwu</div>
     <div class="header-sub">Special Offer &middot; Today Only</div>
     <div class="paws">🐾 &nbsp; 🐾 &nbsp; 🐾</div>
   </div>
@@ -118,8 +118,8 @@ body{background:#0a0f1e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
     <a href="${siteUrl}/privacy">Privacy</a>
     <a href="${siteUrl}/unsubscribe">Unsubscribe</a>
     <div class="footer-copy">
-      © ${new Date().getFullYear()} PetShiwu &middot; Jackson Heights, Queens, NY &middot; support@petshiwu.com<br>
-      You're receiving this as a PetShiwu customer.
+      © ${new Date().getFullYear()} Petshiwu &middot; Jackson Heights, Queens, NY &middot; support@petshiwu.com<br>
+      You're receiving this as a Petshiwu customer.
     </div>
   </div>
 </div>
@@ -137,7 +137,7 @@ router.post(
       const {
         promoCode = 'PETDAY10',
         discountText = '10%',
-        subject = '🐾 10% Off Today Only — PetShiwu Flash Sale!',
+        subject = '🐾 10% Off Today Only — Petshiwu Flash Sale!',
         headline = '10% Off Today',
         subtext = 'Order today and save 10% on everything — premium food, toys, accessories & more.',
       } = req.body;
@@ -174,7 +174,7 @@ router.post(
           if (resendKey) {
             const client = new Resend(resendKey);
             await client.emails.send({
-              from: process.env.EMAIL_FROM || 'PetShiwu <noreply@petshiwu.com>',
+              from: process.env.EMAIL_FROM || 'Petshiwu <noreply@petshiwu.com>',
               to: email,
               subject,
               html,
@@ -190,7 +190,7 @@ router.post(
               auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
             });
             await transporter.sendMail({
-              from: process.env.EMAIL_FROM || '"PetShiwu" <noreply@petshiwu.com>',
+              from: process.env.EMAIL_FROM || '"Petshiwu" <noreply@petshiwu.com>',
               to: email,
               subject,
               html,

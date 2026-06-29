@@ -22,10 +22,10 @@ interface SEOProps {
 }
 
 const SITE_URL = 'https://www.petshiwu.com';
-const SITE_NAME = 'PetShiwu';
+const SITE_NAME = 'Petshiwu';
 
 const SEO = ({
-  title = 'PetShiwu | Premium Pet Food, Toys & Accessories in USA',
+  title = 'Petshiwu | Premium Pet Food, Toys & Accessories in USA',
   description = 'Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, birds, fish, reptiles, and small pets. Quality products, fast shipping, great prices. Free shipping on orders over $49.',
   keywords = 'pet supplies, dog food, cat food, pet toys, pet accessories, pet care, online pet store, premium pet food, dog treats, cat treats, pet bedding, pet grooming, pet health, pet nutrition, pet shop online, buy pet food online, pet supplies near me',
   image = `${SITE_URL}/logo.png`,
@@ -61,7 +61,7 @@ const SEO = ({
   const ogImage = image.startsWith('http') ? image : `${SITE_URL}${image}`;
 
   // FIX 2: Case-insensitive check prevents double-branding like
-  // "PetShiwu — Premium Pet Food | petshiwu"
+  // "Petshiwu — Premium Pet Food | petshiwu"
   const fullTitle = title.toLowerCase().includes('petshiwu')
     ? title
     : `${title} | ${SITE_NAME}`;

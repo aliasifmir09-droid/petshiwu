@@ -490,7 +490,7 @@ app.get('/sitemap.xml', (req, res) => {
 });
 
 app.get('/api', (req, res) => {
-  res.status(200).json({ success: true, message: 'PetShiwu API', version: API_VERSION, docs: '/api-docs', health: '/api/health', timestamp: new Date().toISOString() });
+  res.status(200).json({ success: true, message: 'Petshiwu API', version: API_VERSION, docs: '/api-docs', health: '/api/health', timestamp: new Date().toISOString() });
 });
 
 // One-time Bunny CDN cache pre-warm — hits all bunnyImage + images[] URLs so they're cached before Cloudinary shuts down

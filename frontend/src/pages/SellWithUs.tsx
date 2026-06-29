@@ -27,7 +27,7 @@ const BENEFITS = [
   {
     icon: TrendingUp,
     title: 'Growing Platform',
-    desc: 'PetShiwu is scaling fast with 10,000+ products, active SEO, Google Shopping integration, and a customer base of NYC pet parents actively searching and buying.',
+    desc: 'Petshiwu is scaling fast with 10,000+ products, active SEO, Google Shopping integration, and a customer base of NYC pet parents actively searching and buying.',
   },
   {
     icon: Users,
@@ -54,7 +54,7 @@ const BENEFITS = [
 const HOW = [
   { step: '1', title: 'Apply', desc: 'Fill out the form below with your brand, product category, and what you\'re looking to sell. No commitment required.' },
   { step: '2', title: 'Review', desc: 'Our team reviews your application within 2–3 business days and reaches out to discuss fit, terms, and next steps.' },
-  { step: '3', title: 'List', desc: 'Once approved, we onboard your products — catalog upload, images, descriptions, pricing. You\'re live on PetShiwu.' },
+  { step: '3', title: 'List', desc: 'Once approved, we onboard your products — catalog upload, images, descriptions, pricing. You\'re live on Petshiwu.' },
   { step: '4', title: 'Sell', desc: 'Your products reach NYC pet owners searching daily. We handle the storefront, orders, and customer service.' },
 ];
 
@@ -81,8 +81,8 @@ const SellWithUs = () => {
   return (
     <>
       <SEO
-        title="Sell Your Pet Products on PetShiwu | Vendor & Brand Partnerships"
-        description="Sell your pet products on PetShiwu and reach 1.1 million NYC pet households. We welcome brands, manufacturers, and suppliers across all pet categories. Apply today."
+        title="Sell Your Pet Products on Petshiwu | Vendor & Brand Partnerships"
+        description="Sell your pet products on Petshiwu and reach 1.1 million NYC pet households. We welcome brands, manufacturers, and suppliers across all pet categories. Apply today."
         keywords="sell pet products online, pet supplier partnership, pet brand marketplace, NYC pet store vendor, sell on petshiwu"
         url="/sell-with-us"
       />
@@ -98,7 +98,7 @@ const SellWithUs = () => {
                   Vendor &amp; Brand Partnerships
                 </p>
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-5">
-                  Sell Your Products on PetShiwu
+                  Sell Your Products on Petshiwu
                 </h1>
                 <p className="text-lg text-blue-100 max-w-lg mb-6">
                   Get your pet products in front of millions of NYC pet owners.
@@ -152,7 +152,7 @@ const SellWithUs = () => {
               <p className="text-sm font-semibold text-blue-700 uppercase tracking-wide mb-2">Why Partner With Us</p>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">What You Get</h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                PetShiwu gives your brand direct access to one of the most concentrated pet owner markets in North America.
+                Petshiwu gives your brand direct access to one of the most concentrated pet owner markets in North America.
               </p>
             </div>
 
@@ -209,7 +209,7 @@ const SellWithUs = () => {
                   <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Application Received!</h3>
                   <p className="text-gray-600">
-                    Thank you for your interest in partnering with PetShiwu. Our team will review your application
+                    Thank you for your interest in partnering with Petshiwu. Our team will review your application
                     and be in touch within 2–3 business days.
                   </p>
                 </div>

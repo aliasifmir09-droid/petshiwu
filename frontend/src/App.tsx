@@ -245,7 +245,7 @@ function App() {
           type="localBusiness"
           data={{
             businessType: ['PetStore', 'LocalBusiness'],
-            name: 'PetShiwu',
+            name: 'Petshiwu',
             url: 'https://www.petshiwu.com',
             logo: 'https://www.petshiwu.com/logo-square-512.png',
             image: 'https://www.petshiwu.com/logo-square-512.png',
@@ -270,7 +270,7 @@ function App() {
             ],
             priceRange: '$$',
             areaServed: ['Queens', 'Brooklyn', 'Manhattan', 'Bronx', 'Staten Island', 'New York City'],
-            hasMap: 'https://maps.google.com/?q=PetShiwu+Jackson+Heights+NY+11372',
+            hasMap: 'https://maps.google.com/?q=Petshiwu+Jackson+Heights+NY+11372',
             paymentAccepted: 'Cash, Credit Card, Debit Card',
             currenciesAccepted: 'USD',
             sameAs: [

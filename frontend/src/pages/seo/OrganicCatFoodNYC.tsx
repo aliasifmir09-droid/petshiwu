@@ -8,10 +8,10 @@ const OrganicCatFoodNYC = () => {
   return (
     <SEOLandingPage
       keyword="organic-cat-food-nyc"
-      title="Organic Cat Food NYC — Natural & Non-GMO Delivery | PetShiwu"
+      title="Organic Cat Food NYC — Natural & Non-GMO Delivery | Petshiwu"
       description="Organic and natural cat food delivered to all NYC boroughs. No artificial preservatives, no by-products, no fillers. Shop Wellness, Blue Buffalo, Orijen and more. Free delivery over $49."
       h1="Organic & Natural Cat Food Delivered in New York City"
-      introContent="More NYC cat owners are reading ingredient labels — and not liking what they find in conventional cat food. Artificial colors, vague 'meat meal' sources, carrageenan, synthetic preservatives. If you want cleaner food for your cat, PetShiwu stocks natural and organic-certified cat food brands and delivers them to every NYC neighborhood. Free shipping on orders over $49."
+      introContent="More NYC cat owners are reading ingredient labels — and not liking what they find in conventional cat food. Artificial colors, vague 'meat meal' sources, carrageenan, synthetic preservatives. If you want cleaner food for your cat, Petshiwu stocks natural and organic-certified cat food brands and delivers them to every NYC neighborhood. Free shipping on orders over $49."
       problemPoints={[
         "Most cat foods at local NYC stores contain artificial preservatives and fillers",
         "Difficult to find certified organic or non-GMO cat food without going to specialty stores",
@@ -46,7 +46,7 @@ const OrganicCatFoodNYC = () => {
         },
         {
           question: "Do you deliver organic cat food to Brooklyn, Manhattan, and Queens?",
-          answer: "Yes — PetShiwu delivers to all five NYC boroughs. Jackson Heights, Astoria, Williamsburg, Park Slope, the Upper West Side, Harlem, and every neighborhood in between. Free shipping on orders over $49."
+          answer: "Yes — Petshiwu delivers to all five NYC boroughs. Jackson Heights, Astoria, Williamsburg, Park Slope, the Upper West Side, Harlem, and every neighborhood in between. Free shipping on orders over $49."
         }
       ]}
       searchTerms={['organic cat food', 'natural cat food NYC', 'non-GMO cat food', 'grain free cat food', 'clean ingredient cat food', 'no artificial cat food']}

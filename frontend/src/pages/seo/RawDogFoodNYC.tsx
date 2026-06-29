@@ -8,10 +8,10 @@ const RawDogFoodNYC = () => {
   return (
     <SEOLandingPage
       keyword="raw-dog-food-nyc"
-      title="Raw Dog Food NYC — Delivery to All 5 Boroughs | PetShiwu"
+      title="Raw Dog Food NYC — Delivery to All 5 Boroughs | Petshiwu"
       description="Raw dog food delivered to NYC — Manhattan, Brooklyn, Queens, Bronx, Staten Island. Shop freeze-dried raw, air-dried raw, and raw-inspired formulas from top brands. Free delivery over $49."
       h1="Raw Dog Food Delivered in New York City"
-      introContent="Raw feeding is one of the fastest-growing trends in pet nutrition — and for good reason. Dogs on raw and raw-inspired diets often show shinier coats, better digestion, healthier teeth, and higher energy levels. PetShiwu delivers freeze-dried raw, air-dried raw, and raw-inspired dog food to all five NYC boroughs with free shipping on orders over $49."
+      introContent="Raw feeding is one of the fastest-growing trends in pet nutrition — and for good reason. Dogs on raw and raw-inspired diets often show shinier coats, better digestion, healthier teeth, and higher energy levels. Petshiwu delivers freeze-dried raw, air-dried raw, and raw-inspired dog food to all five NYC boroughs with free shipping on orders over $49."
       problemPoints={[
         "Finding raw dog food in NYC requires trips to specialty stores far from home",
         "Carrying heavy frozen raw food packages on the subway or in an Uber",
@@ -46,7 +46,7 @@ const RawDogFoodNYC = () => {
         },
         {
           question: "Can you deliver raw dog food to Brooklyn, Manhattan, and the Bronx?",
-          answer: "Yes — PetShiwu delivers to all five NYC boroughs including Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. Orders over $49 ship free. Most orders arrive next day."
+          answer: "Yes — Petshiwu delivers to all five NYC boroughs including Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. Orders over $49 ship free. Most orders arrive next day."
         }
       ]}
       searchTerms={['raw dog food', 'freeze dried raw dog food', 'BARF diet', 'raw pet food delivery', 'high protein dog food', 'grain free raw dog food']}

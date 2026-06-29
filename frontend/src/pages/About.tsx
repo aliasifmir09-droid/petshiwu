@@ -6,16 +6,16 @@ const About = () => {
   return (
     <>
       <SEO
-      title="About PetShiwu | Your Trusted Partner in Pet Care"
-      description="Learn about PetShiwu's 15+ years of pet care experience, our passion for pets, and our commitment to quality, community, and convenient online shopping across the USA."
-      keywords="about PetShiwu, pet care, pet store USA, pet community, premium pet products"
+      title="About Petshiwu | Your Trusted Partner in Pet Care"
+      description="Learn about Petshiwu's 15+ years of pet care experience, our passion for pets, and our commitment to quality, community, and convenient online shopping across the USA."
+      keywords="about Petshiwu, pet care, pet store USA, pet community, premium pet products"
       url="/about"
       />
       <StructuredData
         type="localBusiness"
         data={{
           businessType: ['PetStore', 'LocalBusiness'],
-          name: 'PetShiwu',
+          name: 'Petshiwu',
           url: 'https://www.petshiwu.com',
           logo: 'https://www.petshiwu.com/logo-square-512.png',
           telephone: '+1-800-259-2605',
@@ -32,7 +32,7 @@ const About = () => {
           priceRange: '$$',
           description: 'NYC-based pet supply delivery service delivering premium brands to all 5 boroughs, Long Island, Westchester, and all 21 New Jersey counties.',
           areaServed: ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island', 'Long Island', 'Westchester', 'New Jersey'],
-          hasMap: 'https://maps.google.com/?q=PetShiwu+Jackson+Heights+NY+11372',
+          hasMap: 'https://maps.google.com/?q=Petshiwu+Jackson+Heights+NY+11372',
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
           sameAs: [
@@ -50,7 +50,7 @@ const About = () => {
             <div className="grid lg:grid-cols-2 gap-10 items-center">
               <div>
                 <p className="inline-flex items-center px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-semibold tracking-wide mb-4 uppercase">
-                  About PetShiwu
+                  About Petshiwu
                 </p>
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4">
                   Your Trusted Partner in Pet Care
@@ -104,7 +104,7 @@ const About = () => {
                 Quality, Care, and Community
               </h2>
               <p className="text-gray-600 text-sm sm:text-base">
-                At PetShiwu, we believe every pet deserves the best. We carefully curate every product,
+                At Petshiwu, we believe every pet deserves the best. We carefully curate every product,
                 partner with trusted brands, and build a community where pet lovers feel supported,
                 informed, and inspired.
               </p>
@@ -159,7 +159,7 @@ const About = () => {
             <div className="grid lg:grid-cols-[1.1fr,0.9fr] gap-10 lg:gap-14 items-start">
               <div>
                 <p className="text-sm font-semibold text-primary-600 uppercase tracking-wide mb-2">
-                  Why Choose PetShiwu?
+                  Why Choose Petshiwu?
                 </p>
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
                   Thoughtfully Designed for Modern Pet Parents
@@ -254,7 +254,7 @@ const About = () => {
                   from playful beginnings to golden years.
                 </p>
                 <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Thank you for choosing PetShiwu.</span>{' '}
+                  <span className="font-semibold">Thank you for choosing Petshiwu.</span>{' '}
                   We look forward to being your partner in pet care for years to come.
                 </p>
               </div>

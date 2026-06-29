@@ -607,7 +607,7 @@ const Profile = () => {
 
   return (
     <div className="container mx-auto px-4 lg:px-8 py-8">
-      <SEO title="My Profile | PetShiwu" description="Manage your PetShiwu account settings and pets" noindex={true} />
+      <SEO title="My Profile | Petshiwu" description="Manage your Petshiwu account settings and pets" noindex={true} />
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">My Profile</h1>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -8,10 +8,10 @@ const LuxuryPetAccessoriesNYC = () => {
   return (
     <SEOLandingPage
       keyword="luxury-pet-accessories-nyc"
-      title="Luxury Pet Accessories NYC — Premium Supplies Delivered | PetShiwu"
+      title="Luxury Pet Accessories NYC — Premium Supplies Delivered | Petshiwu"
       description="Premium and luxury pet accessories delivered to NYC. Designer collars, orthopedic beds, gourmet treats, high-end grooming tools and more. Free delivery over $49 to all 5 boroughs."
       h1="Luxury Pet Accessories Delivered in New York City"
-      introContent="NYC pets deserve the best — and their owners know it. Whether you're shopping for a premium orthopedic dog bed, a designer collar for a Yorkie on the Upper East Side, or gourmet treats for a Siamese in Brooklyn, PetShiwu has the premium pet accessories that match NYC standards. Free delivery to all 5 boroughs on orders over $49."
+      introContent="NYC pets deserve the best — and their owners know it. Whether you're shopping for a premium orthopedic dog bed, a designer collar for a Yorkie on the Upper East Side, or gourmet treats for a Siamese in Brooklyn, Petshiwu has the premium pet accessories that match NYC standards. Free delivery to all 5 boroughs on orders over $49."
       problemPoints={[
         "Premium pet accessories in NYC boutique stores carry massive markups",
         "Carrying bulky dog beds or crates on the subway is impractical",

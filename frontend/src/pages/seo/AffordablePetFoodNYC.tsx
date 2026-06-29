@@ -8,10 +8,10 @@ const AffordablePetFoodNYC = () => {
   return (
     <SEOLandingPage
       keyword="affordable-pet-food-nyc"
-      title="Affordable Pet Food & Supplies NYC — Free Delivery Over $49 | PetShiwu"
+      title="Affordable Pet Food & Supplies NYC — Free Delivery Over $49 | Petshiwu"
       description="Get quality pet food at great prices delivered in NYC. Premium brands without the premium markup. Free delivery on orders over $49. Queens, Brooklyn, Manhattan, Bronx, Staten Island."
       h1="Affordable Pet Food Delivered in New York City"
-      introContent="Quality pet food doesn't have to break the bank in NYC. PetShiwu offers competitive prices on 10,000+ products from top brands — Purina, Blue Buffalo, Pedigree, Iams, and more — delivered free to your door on orders over $49. Great prices, trusted brands, NYC delivery."
+      introContent="Quality pet food doesn't have to break the bank in NYC. Petshiwu offers competitive prices on 10,000+ products from top brands — Purina, Blue Buffalo, Pedigree, Iams, and more — delivered free to your door on orders over $49. Great prices, trusted brands, NYC delivery."
       problemPoints={[
         "Pet food prices at local NYC stores are marked up heavily",
         "Paying delivery fees on top of already high prices",

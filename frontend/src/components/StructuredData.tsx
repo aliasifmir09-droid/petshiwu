@@ -171,7 +171,7 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
       schema = {
         '@context': 'https://schema.org/',
         '@type': 'WebSite',
-        name: 'PetShiwu',
+        name: 'Petshiwu',
         url: 'https://www.petshiwu.com',
         description: 'Premium pet food, toys and supplies delivered to Queens, Brooklyn and all of NYC. 10,000+ products, free shipping over $49.',
         potentialAction: {
@@ -256,7 +256,7 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
           } : undefined
         } : {
           '@type': 'Organization',
-          name: 'PetShiwu',
+          name: 'Petshiwu',
           logo: { '@type': 'ImageObject', url: 'https://www.petshiwu.com/logo.png' }
         }
       };

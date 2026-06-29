@@ -8,10 +8,10 @@ const PetStoreQueensNY = () => {
   return (
     <SEOLandingPage
       keyword="pet-store-queens-ny"
-      title="Pet Store Queens NY — Delivery to Jackson Heights, Flushing & All of Queens | PetShiwu"
+      title="Pet Store Queens NY — Delivery to Jackson Heights, Flushing & All of Queens | Petshiwu"
       description="Queens' premier online pet store. Free delivery throughout Queens — Jackson Heights, Flushing, Astoria, Forest Hills, Jamaica and more. 10,000+ products for dogs, cats, birds, fish and more."
       h1="Pet Store Serving All of Queens, NY"
-      introContent="PetShiwu is Queens' own online pet store, based right in Jackson Heights. We deliver premium pet food, toys, and supplies throughout Queens — Jackson Heights, Flushing, Astoria, Forest Hills, Rego Park, Jamaica, Bayside, and every neighborhood in between. Shop 10,000+ products and get free delivery on orders over $49."
+      introContent="Petshiwu is Queens' own online pet store, based right in Jackson Heights. We deliver premium pet food, toys, and supplies throughout Queens — Jackson Heights, Flushing, Astoria, Forest Hills, Rego Park, Jamaica, Bayside, and every neighborhood in between. Shop 10,000+ products and get free delivery on orders over $49."
       problemPoints={[
         "Limited pet store options in many Queens neighborhoods",
         "Having to travel to a big-box store for specialty items",

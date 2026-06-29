@@ -86,7 +86,7 @@ const getStarterPrompts = () => {
 
 function buildSystemPrompt(profile: PetProfile | null): string {
   const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
-  const base = `You are PetShiwu's expert AI Pet Advisor. You work for petshiwu.com, a premium US pet e-commerce store selling food, toys, and supplies. Be warm, concise (2-4 sentences), and helpful. Today: ${today}.`
+  const base = `You are Petshiwu's expert AI Pet Advisor. You work for petshiwu.com, a premium US pet e-commerce store selling food, toys, and supplies. Be warm, concise (2-4 sentences), and helpful. Today: ${today}.`
 
   if (!profile) return base + `\n\nNo customer profile on file yet.`
 

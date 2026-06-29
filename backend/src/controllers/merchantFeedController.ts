@@ -5,7 +5,7 @@ import logger from '../utils/logger';
 
 const BASE_URL = 'https://www.petshiwu.com';
 const MERCHANT_ID = '5791232179';
-const STORE_NAME = 'PetShiwu';
+const STORE_NAME = 'Petshiwu';
 
 // Map petType + category to Google product_type string
 function buildProductType(petType: string, categoryName: string): string {

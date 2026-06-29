@@ -667,7 +667,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   const inStock: boolean = (product.totalStock ?? 0) > 0 && product.inStock !== false;
   const image: string = (product.images?.[0]) ?? `${BASE}/logo.png`;
   const images: string[] = (product.images ?? []).slice(0, 10);
-  const brandName: string = product.brand?.trim() || 'PetShiwu';
+  const brandName: string = product.brand?.trim() || 'Petshiwu';
   
   // Deduplicate brand from product name ONLY if the brand is literally repeated twice
   // e.g. "Purina ONE Purina® ONE® Adult Dog Dry Food" → "Purina® ONE® Adult Dog Dry Food"
@@ -683,7 +683,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   
   const rawDesc: string = product.description
     ? clean(product.description)
-    : `${productName} — premium pet supplies at PetShiwu.`;
+    : `${productName} — premium pet supplies at Petshiwu.`;
   const description = truncate(rawDesc, 160);
 
   const categoryName = typeof product.category === 'object' ? product.category?.name : product.category;
@@ -693,7 +693,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
 
   const productUrl = `${BASE}/${petType}${categorySlug ? `/${categorySlug}` : ''}/${slug}`;
 
-  const title = `${productName} | PetShiwu`;
+  const title = `${productName} | Petshiwu`;
 
   // JSON-LD Product schema
   const productSchema: Record<string, unknown> = {
@@ -711,7 +711,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
       price: price.toFixed(2),
       availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',
-      seller: { '@type': 'Organization', name: 'PetShiwu', url: BASE },
+      seller: { '@type': 'Organization', name: 'Petshiwu', url: BASE },
       hasMerchantReturnPolicy: {
         '@type': 'MerchantReturnPolicy',
         returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
@@ -856,7 +856,7 @@ const extractFaqPairs = (htmlContent: string): Array<{ question: string; answer:
 };
 
 const buildBlogHtml = (template: string, blog: any): string => {
-  const title = `${blog.title} | PetShiwu Learning`;
+  const title = `${blog.title} | Petshiwu Learning`;
   const description = truncate(
     blog.excerpt ?? stripTags(blog.content ?? '').substring(0, 160),
     160
@@ -883,10 +883,10 @@ const buildBlogHtml = (template: string, blog: any): string => {
     description,
     image,
     url,
-    author: { '@type': 'Organization', name: blog.author ?? 'PetShiwu' },
+    author: { '@type': 'Organization', name: blog.author ?? 'Petshiwu' },
     publisher: {
       '@type': 'Organization',
-      name: 'PetShiwu',
+      name: 'Petshiwu',
       logo: { '@type': 'ImageObject', url: `${BASE}/logo.png` },
     },
     datePublished: blog.publishedAt ?? blog.createdAt,
@@ -946,8 +946,8 @@ const buildBlogHtml = (template: string, blog: any): string => {
 };
 
 const buildCareGuideHtml = (template: string, guide: any): string => {
-  const title = `${guide.title} | PetShiwu Care Guides`;
-  const description = truncate(guide.excerpt ?? `Care guide for ${guide.title} at PetShiwu.`, 160);
+  const title = `${guide.title} | Petshiwu Care Guides`;
+  const description = truncate(guide.excerpt ?? `Care guide for ${guide.title} at Petshiwu.`, 160);
   const image = guide.coverImage ?? `${BASE}/logo.png`;
   const url = `${BASE}/care-guides/${guide.slug}`;
 
@@ -958,10 +958,10 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
     description,
     image,
     url,
-    author: { '@type': 'Organization', name: 'PetShiwu' },
+    author: { '@type': 'Organization', name: 'Petshiwu' },
     publisher: {
       '@type': 'Organization',
-      name: 'PetShiwu',
+      name: 'Petshiwu',
       logo: { '@type': 'ImageObject', url: `${BASE}/logo.png` },
     },
     dateModified: guide.updatedAt,
@@ -1017,10 +1017,10 @@ const buildCategoryHtml = (template: string, category: any, petType?: string, ca
   const catName = category.name ?? '';
   const petLabel = petType === 'dog' ? 'Dog' : petType === 'cat' ? 'Cat' : petType === 'bird' ? 'Bird' : petType === 'fish' ? 'Fish' : petType === 'reptile' ? 'Reptile' : petType === 'small-pet' ? 'Small Pet' : '';
   const title = petLabel
-    ? `${catName} — ${petLabel} Supplies Delivered NYC | PetShiwu`
-    : `${catName} | PetShiwu`;
+    ? `${catName} — ${petLabel} Supplies Delivered NYC | Petshiwu`
+    : `${catName} | Petshiwu`;
   const description = truncate(
-    category.description ?? `Shop ${catName} for your ${petLabel || 'pet'} at PetShiwu. 340+ products, top brands, free delivery on orders over $49. Serving Queens, Brooklyn, Manhattan & all NYC.`,
+    category.description ?? `Shop ${catName} for your ${petLabel || 'pet'} at Petshiwu. 340+ products, top brands, free delivery on orders over $49. Serving Queens, Brooklyn, Manhattan & all NYC.`,
     160
   );
 
@@ -1391,13 +1391,13 @@ const buildProductListHtml = async (template: string): Promise<string> => {
 
   const bodyContent = `
 <div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
-  <h1>All Pet Products — PetShiwu</h1>
+  <h1>All Pet Products — Petshiwu</h1>
   <p>Browse 10,000+ premium pet products for dogs, cats, birds, fish, reptiles, and small animals.
      Free shipping on orders over $49. Based in Jackson Heights, NY.</p>
   <ul style="list-style:none;padding:0;columns:2">
     ${productLinks}
   </ul>
-  <p><a href="${BASE_URL}">← Back to PetShiwu</a></p>
+  <p><a href="${BASE_URL}">← Back to Petshiwu</a></p>
 </div>`;
 
   const meta = STATIC_PAGES['/products'];

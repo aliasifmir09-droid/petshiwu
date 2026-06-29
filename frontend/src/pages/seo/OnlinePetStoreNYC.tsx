@@ -8,10 +8,10 @@ const OnlinePetStoreNYC = () => {
   return (
     <SEOLandingPage
       keyword="online-pet-store-nyc"
-      title="Online Pet Store NYC — 10,000+ Products, Free Delivery Over $49 | PetShiwu"
+      title="Online Pet Store NYC — 10,000+ Products, Free Delivery Over $49 | Petshiwu"
       description="New York City's premier online pet store. Shop 10,000+ products for dogs, cats, birds, fish, reptiles and more. Free delivery on orders over $49. Proudly serving all 5 NYC boroughs."
       h1="New York City's Online Pet Store"
-      introContent="PetShiwu is the online pet store built for New York City. We know NYC — the apartments, the no-car lifestyle, the tight schedules. That's why we deliver 10,000+ premium pet products straight to your door anywhere in the five boroughs. Top brands, competitive prices, free delivery over $49. No warehouse somewhere in the Midwest — we're NYC, serving NYC."
+      introContent="Petshiwu is the online pet store built for New York City. We know NYC — the apartments, the no-car lifestyle, the tight schedules. That's why we deliver 10,000+ premium pet products straight to your door anywhere in the five boroughs. Top brands, competitive prices, free delivery over $49. No warehouse somewhere in the Midwest — we're NYC, serving NYC."
       problemPoints={[
         "National online retailers that take days to ship to NYC",
         "No car to load up on heavy pet food and litter",
@@ -29,8 +29,8 @@ const OnlinePetStoreNYC = () => {
       ]}
       faqItems={[
         {
-          question: "Why shop at PetShiwu instead of a national online pet retailer?",
-          answer: "PetShiwu is built specifically for NYC. We focus on fast local delivery, understand the needs of city pet owners, and are a local business reinvesting in the NYC community. You get the same top brands and competitive prices — with a local-first experience."
+          question: "Why shop at Petshiwu instead of a national online pet retailer?",
+          answer: "Petshiwu is built specifically for NYC. We focus on fast local delivery, understand the needs of city pet owners, and are a local business reinvesting in the NYC community. You get the same top brands and competitive prices — with a local-first experience."
         },
         {
           question: "Do you have the same brands as large national pet stores?",
@@ -45,7 +45,7 @@ const OnlinePetStoreNYC = () => {
           answer: "All of them — dogs, cats, birds, fish, reptiles, hamsters, rabbits, guinea pigs, ferrets, and more. NYC pet owners have all kinds of pets and we stock supplies for every one of them."
         },
         {
-          question: "Is PetShiwu a local NYC business?",
+          question: "Is Petshiwu a local NYC business?",
           answer: "Yes — we're based in Jackson Heights, Queens, NYC. We're a local business serving local pet owners. Your order supports a New York City company, not a national chain."
         }
       ]}

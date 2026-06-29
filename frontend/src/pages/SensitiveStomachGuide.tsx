@@ -13,7 +13,7 @@ const SensitiveStomachGuide = () => {
       {/* SEO COMPONENT - USING EXISTING SEO.tsx */}
       <SEO 
         title="Best Dog Food for Sensitive Stomachs: A 2026 Expert Guide"
-        description="Is your dog struggling with digestive issues? Discover the best dog food for sensitive stomachs, including top-rated grain-free and limited ingredient diets at PetShiwu."
+        description="Is your dog struggling with digestive issues? Discover the best dog food for sensitive stomachs, including top-rated grain-free and limited ingredient diets at Petshiwu."
         type="article"
         image="https://www.petshiwu.com/logo.png"
         category="Dog Health & Nutrition"
@@ -25,7 +25,7 @@ const SensitiveStomachGuide = () => {
         </h1>
         
         <p className="text-lg text-gray-700 mb-8">
-          Digestive issues can be frustrating for both you and your furry friend. Whether it's frequent gas, loose stools, or occasional vomiting, finding the <strong>best dog food for a sensitive stomach</strong> is the first step toward a happier, healthier pet. At PetShiwu, we've analyzed the top formulas to help you make the right choice.
+          Digestive issues can be frustrating for both you and your furry friend. Whether it's frequent gas, loose stools, or occasional vomiting, finding the <strong>best dog food for a sensitive stomach</strong> is the first step toward a happier, healthier pet. At Petshiwu, we've analyzed the top formulas to help you make the right choice.
         </p>
 
         <h2 className="text-2xl font-semibold text-blue-800 mt-8 mb-4">Signs Your Dog Has a Sensitive Stomach</h2>
@@ -49,7 +49,7 @@ const SensitiveStomachGuide = () => {
           <h3 className="text-xl font-bold mb-2">1. Hill's Science Diet Sensitive Stomach & Skin</h3>
           <p className="mb-4">This is the "gold standard" for digestive health. It uses prebiotic fiber to fuel beneficial gut bacteria and is highly digestible for optimal nutrient absorption.</p>
           <Link to="/products/hills-science-diet-sensitive-stomach-skin-adult-dry-dog-food-chicken-barley" className="text-blue-600 font-bold hover:underline">
-            Shop Hill's Science Diet at PetShiwu →
+            Shop Hill's Science Diet at Petshiwu →
           </Link>
         </div>
 

@@ -4,8 +4,8 @@ const Terms = () => {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <SEO
-        title="Terms of Service | PetShiwu"
-        description="Read PetShiwu's Terms of Service covering purchases, returns, payments, and your rights as a customer."
+        title="Terms of Service | Petshiwu"
+        description="Read Petshiwu's Terms of Service covering purchases, returns, payments, and your rights as a customer."
         url="/terms"
       />
 
@@ -22,7 +22,7 @@ const Terms = () => {
             visitors, customers, and anyone who accesses or uses our services.
           </p>
           <p className="mt-2">
-            PetShiwu is operated by PetShiwu, located at 37-68 74th St, Jackson Heights, NY 11372. Contact us
+            Petshiwu is operated by Petshiwu, located at 37-68 74th St, Jackson Heights, NY 11372. Contact us
             at{' '}
             <a href="mailto:support@petshiwu.com" className="text-blue-600 hover:underline">
               support@petshiwu.com
@@ -112,7 +112,7 @@ const Terms = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-3">8. Intellectual Property</h2>
           <p>
             All content on the Site — including text, images, logos, product descriptions, and design —
-            is the property of PetShiwu or our content suppliers and is protected by copyright and other
+            is the property of Petshiwu or our content suppliers and is protected by copyright and other
             intellectual property laws. You may not reproduce, distribute, or create derivative works without
             our written permission.
           </p>
@@ -159,7 +159,7 @@ const Terms = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-3">13. Contact Us</h2>
           <p>If you have any questions about these Terms, please contact us:</p>
           <div className="mt-3 bg-gray-50 rounded-xl p-5 space-y-1">
-            <p><strong>PetShiwu</strong></p>
+            <p><strong>Petshiwu</strong></p>
             <p>37-68 74th St, Jackson Heights, NY 11372</p>
             <p>Email: <a href="mailto:support@petshiwu.com" className="text-blue-600 hover:underline">support@petshiwu.com</a></p>
             <p>Phone: <a href="tel:+18002592605" className="text-blue-600 hover:underline">+1 (800) 259-2605</a></p>

@@ -33,7 +33,7 @@ const WHY = [
   {
     icon: Users,
     title: 'Underserved Local Market',
-    desc: 'NYC pet owners have long been underserved by national retailers not optimized for city living. PetShiwu is purpose-built for the no-car, apartment-dwelling, delivery-dependent New Yorker.',
+    desc: 'NYC pet owners have long been underserved by national retailers not optimized for city living. Petshiwu is purpose-built for the no-car, apartment-dwelling, delivery-dependent New Yorker.',
   },
   {
     icon: Package,
@@ -75,8 +75,8 @@ const Investors = () => {
   return (
     <>
       <SEO
-        title="Investor Relations | PetShiwu"
-        description="Invest in PetShiwu — NYC's fastest-growing online pet supply platform. Targeting a $150B+ industry with a delivery-first, technology-driven model serving all five NYC boroughs."
+        title="Investor Relations | Petshiwu"
+        description="Invest in Petshiwu — NYC's fastest-growing online pet supply platform. Targeting a $150B+ industry with a delivery-first, technology-driven model serving all five NYC boroughs."
         keywords="petshiwu investor, pet supply startup investment, NYC pet store investment, pet industry investor relations"
         url="/investors"
       />
@@ -95,7 +95,7 @@ const Investors = () => {
                   Invest in the Future of Pet Commerce
                 </h1>
                 <p className="text-lg text-blue-100 max-w-lg mb-6">
-                  PetShiwu is building the premier online pet supply platform for New York City —
+                  Petshiwu is building the premier online pet supply platform for New York City —
                   and beyond. We're targeting a $150B+ industry with a delivery-first, technology-driven model.
                 </p>
                 <a
@@ -124,7 +124,7 @@ const Investors = () => {
           <div className="container mx-auto px-4 lg:px-8">
             <div className="text-center mb-12">
               <p className="text-sm font-semibold text-blue-700 uppercase tracking-wide mb-2">The Opportunity</p>
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Why PetShiwu</h2>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Why Petshiwu</h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
                 A rare combination of large market, underserved customer base, live operational platform, and a clear path to national scale.
               </p>
@@ -222,7 +222,7 @@ const Investors = () => {
                         rows={5}
                         value={form.message}
                         onChange={e => setForm({ ...form, message: e.target.value })}
-                        placeholder="Tell us about your investment focus and what you'd like to know about PetShiwu..."
+                        placeholder="Tell us about your investment focus and what you'd like to know about Petshiwu..."
                         className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                       />
                     </div>

@@ -4,8 +4,8 @@ const PrivacyPolicy = () => {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <SEO
-        title="Privacy Policy | PetShiwu"
-        description="PetShiwu's Privacy Policy explains how we collect, use, and protect your personal information when you shop with us."
+        title="Privacy Policy | Petshiwu"
+        description="Petshiwu's Privacy Policy explains how we collect, use, and protect your personal information when you shop with us."
         url="/privacy"
       />
 
@@ -17,7 +17,7 @@ const PrivacyPolicy = () => {
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-3">1. Who We Are</h2>
           <p>
-            PetShiwu ("we," "our," or "us") is an online pet supply store located at 37-68 74th St,
+            Petshiwu ("we," "our," or "us") is an online pet supply store located at 37-68 74th St,
             Jackson Heights, NY 11372. We operate the website <strong>petshiwu.com</strong> and are
             committed to protecting the privacy of every customer and visitor.
           </p>
@@ -136,7 +136,7 @@ const PrivacyPolicy = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-3">11. Contact Us</h2>
           <p>If you have any questions about this Privacy Policy, please contact us:</p>
           <div className="mt-3 bg-gray-50 rounded-xl p-5 space-y-1">
-            <p><strong>PetShiwu</strong></p>
+            <p><strong>Petshiwu</strong></p>
             <p>37-68 74th St, Jackson Heights, NY 11372</p>
             <p>Email: <a href="mailto:support@petshiwu.com" className="text-blue-600 hover:underline">support@petshiwu.com</a></p>
             <p>Phone: <a href="tel:+18002592605" className="text-blue-600 hover:underline">+1 (800) 259-2605</a></p>

@@ -54,9 +54,9 @@ const ProductSchema = ({ product, selectedVariant }: ProductSchemaProps) => {
 
   const description = product.description
     ? product.description.replace(/<[^>]*>/g, '').substring(0, 500)
-    : `${product.name} - premium pet supplies at PetShiwu`;
+    : `${product.name} - premium pet supplies at Petshiwu`;
 
-  const brandName = product.brand?.trim() || 'PetShiwu';
+  const brandName = product.brand?.trim() || 'Petshiwu';
 
   // Build the Product JSON-LD
   const schema: Record<string, unknown> = {
@@ -81,7 +81,7 @@ const ProductSchema = ({ product, selectedVariant }: ProductSchemaProps) => {
       itemCondition: 'https://schema.org/NewCondition',
       seller: {
         '@type': 'Organization',
-        name: 'PetShiwu',
+        name: 'Petshiwu',
         url: 'https://www.petshiwu.com',
       },
       shippingDetails: {

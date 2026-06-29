@@ -5,8 +5,8 @@ const ReturnPolicy = () => {
   return (
     <>
       <SEO
-        title="Return & Exchange Policy | PetShiwu"
-        description="PetShiwu's 30-day return and exchange policy. Learn about eligible returns, non-returnable items, refunds, and how to process returns or exchanges for your pet products."
+        title="Return & Exchange Policy | Petshiwu"
+        description="Petshiwu's 30-day return and exchange policy. Learn about eligible returns, non-returnable items, refunds, and how to process returns or exchanges for your pet products."
         keywords="return policy, exchange policy, refund policy, pet product returns, 30-day guarantee"
       />
 
@@ -22,7 +22,7 @@ const ReturnPolicy = () => {
                 Return & Exchange Policy
               </h1>
               <p className="text-base sm:text-lg text-blue-100 max-w-2xl mx-auto">
-                At PetShiwu, your pet&apos;s happiness and your satisfaction come first. We proudly stand behind the quality of our products and strive to make every purchase worry-free.
+                At Petshiwu, your pet&apos;s happiness and your satisfaction come first. We proudly stand behind the quality of our products and strive to make every purchase worry-free.
               </p>
             </div>
           </div>
@@ -287,7 +287,7 @@ const ReturnPolicy = () => {
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-gray-600 mt-0.5 flex-shrink-0" />
                   <p className="text-sm text-gray-700">
-                    <strong>⚠️ Policy Updates:</strong> PetShiwu reserves the right to update this policy at any time. Changes will be posted on this page.
+                    <strong>⚠️ Policy Updates:</strong> Petshiwu reserves the right to update this policy at any time. Changes will be posted on this page.
                   </p>
                 </div>
               </div>

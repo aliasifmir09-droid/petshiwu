@@ -119,7 +119,7 @@ const BlogDetail = () => {
           datePublished: blog.publishedAt,
           dateModified: blog.updatedAt,
           url: blogUrl,
-          publisher: { name: 'PetShiwu', logo: 'https://www.petshiwu.com/logo.png' },
+          publisher: { name: 'Petshiwu', logo: 'https://www.petshiwu.com/logo.png' },
           speakable: !!blog.speakable
         }}
       />

@@ -28,7 +28,7 @@ const Contact = () => {
         type="localBusiness"
         data={{
           businessType: ['PetStore', 'LocalBusiness'],
-          name: 'PetShiwu',
+          name: 'Petshiwu',
           url: 'https://www.petshiwu.com',
           logo: 'https://www.petshiwu.com/logo-square-512.png',
           telephone: '+1-800-259-2605',
@@ -45,7 +45,7 @@ const Contact = () => {
           priceRange: '$$',
           description: 'NYC-based pet supply delivery service. Contact us for orders, questions, or partnership inquiries.',
           areaServed: ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island', 'Long Island', 'Westchester', 'New Jersey'],
-          hasMap: 'https://maps.google.com/?q=PetShiwu+Jackson+Heights+NY+11372',
+          hasMap: 'https://maps.google.com/?q=Petshiwu+Jackson+Heights+NY+11372',
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
           sameAs: [

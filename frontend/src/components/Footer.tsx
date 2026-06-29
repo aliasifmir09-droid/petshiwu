@@ -37,7 +37,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
-                aria-label="PetShiwu on Facebook"
+                aria-label="Petshiwu on Facebook"
               >
                 <Facebook size={20} />
               </a>
@@ -46,7 +46,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
-                aria-label="PetShiwu on Twitter / X"
+                aria-label="Petshiwu on Twitter / X"
               >
                 <Twitter size={20} />
               </a>
@@ -55,7 +55,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
-                aria-label="PetShiwu on Instagram"
+                aria-label="Petshiwu on Instagram"
               >
                 <Instagram size={20} />
               </a>
@@ -64,7 +64,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
-                aria-label="PetShiwu on YouTube"
+                aria-label="Petshiwu on YouTube"
               >
                 <Youtube size={20} />
               </a>
@@ -171,7 +171,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-10 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <p className="text-sm text-gray-400">
-              &copy; {new Date().getFullYear()} PetShiwu. All rights reserved. All prices in USD.
+              &copy; {new Date().getFullYear()} Petshiwu. All rights reserved. All prices in USD.
             </p>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-400">
               <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>

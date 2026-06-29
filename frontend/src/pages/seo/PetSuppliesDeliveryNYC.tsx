@@ -8,10 +8,10 @@ const PetSuppliesDeliveryNYC = () => {
   return (
     <SEOLandingPage
       keyword="pet-supplies-delivery-nyc"
-      title="Pet Supplies Delivery NYC — Free Shipping Over $49 | PetShiwu"
+      title="Pet Supplies Delivery NYC — Free Shipping Over $49 | Petshiwu"
       description="Get pet supplies delivered anywhere in NYC. Dogs, cats, birds, fish, reptiles — 10,000+ products from top brands. Free delivery on orders over $49. Queens, Brooklyn, Manhattan, Bronx, Staten Island."
       h1="Pet Supplies Delivery in New York City"
-      introContent="Need pet food, toys, or supplies delivered fast in NYC? PetShiwu delivers premium pet products to every borough — Queens, Brooklyn, Manhattan, Bronx, and Staten Island. Shop 10,000+ products from trusted brands like Purina, Blue Buffalo, and Royal Canin, and get free delivery on orders over $49."
+      introContent="Need pet food, toys, or supplies delivered fast in NYC? Petshiwu delivers premium pet products to every borough — Queens, Brooklyn, Manhattan, Bronx, and Staten Island. Shop 10,000+ products from trusted brands like Purina, Blue Buffalo, and Royal Canin, and get free delivery on orders over $49."
       problemPoints={[
         "Lugging heavy bags of pet food from a store",
         "Pet stores with limited selection or out-of-stock items",
@@ -30,7 +30,7 @@ const PetSuppliesDeliveryNYC = () => {
       faqItems={[
         {
           question: "Do you deliver pet supplies to all NYC boroughs?",
-          answer: "Yes! PetShiwu delivers to all five New York City boroughs — Queens, Brooklyn, Manhattan, the Bronx, and Staten Island. We're based in Jackson Heights, Queens, and built specifically to serve NYC pet owners."
+          answer: "Yes! Petshiwu delivers to all five New York City boroughs — Queens, Brooklyn, Manhattan, the Bronx, and Staten Island. We're based in Jackson Heights, Queens, and built specifically to serve NYC pet owners."
         },
         {
           question: "How much does pet supply delivery cost in NYC?",
@@ -42,7 +42,7 @@ const PetSuppliesDeliveryNYC = () => {
         },
         {
           question: "Do you carry supplies for pets other than dogs and cats?",
-          answer: "Absolutely. PetShiwu stocks food and supplies for dogs, cats, birds, fish, reptiles, and small pets like hamsters, rabbits, and guinea pigs. NYC pet owners have diverse pets — we cover them all."
+          answer: "Absolutely. Petshiwu stocks food and supplies for dogs, cats, birds, fish, reptiles, and small pets like hamsters, rabbits, and guinea pigs. NYC pet owners have diverse pets — we cover them all."
         },
         {
           question: "Are the products the same brands I'd find at major pet stores?",

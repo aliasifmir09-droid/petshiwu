@@ -7,10 +7,10 @@ const CatFoodDeliveryNYC = () => {
   return (
     <SEOLandingPage
       keyword="cat-food-delivery-nyc"
-      title="Cat Food Delivery NYC — Dry, Wet & Specialty Diets | PetShiwu"
+      title="Cat Food Delivery NYC — Dry, Wet & Specialty Diets | Petshiwu"
       description="Get cat food delivered anywhere in NYC. Dry, wet, grain-free, indoor, senior formulas from top brands. Free delivery over $49. Queens, Brooklyn, Manhattan, Bronx, Staten Island."
       h1="Cat Food Delivery in New York City"
-      introContent="Get your cat's favorite food delivered to any NYC address — no more hauling bags home from the store. PetShiwu stocks thousands of cat food options: dry kibble, wet food, pate, shreds, grain-free, indoor cat formulas, kitten food, and senior recipes from all the top brands. Free delivery on orders over $49."
+      introContent="Get your cat's favorite food delivered to any NYC address — no more hauling bags home from the store. Petshiwu stocks thousands of cat food options: dry kibble, wet food, pate, shreds, grain-free, indoor cat formulas, kitten food, and senior recipes from all the top brands. Free delivery on orders over $49."
       problemPoints={[
         "Carrying heavy litter and cat food up multiple flights of stairs",
         "Your cat is picky and the local store doesn't have their preferred food",

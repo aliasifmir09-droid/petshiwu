@@ -1196,7 +1196,7 @@ export const sendCartAbandonmentEmail = async (
 // ─────────────────────────────────────────────────────────────
 export const sendWelcomeEmail = async (email: string, firstName: string): Promise<any> => {
   const siteUrl = getFrontendBaseUrl();
-  const subject = `Welcome to PetShiwu, ${firstName}! 🎉`;
+  const subject = `Welcome to Petshiwu, ${firstName}! 🎉`;
 
   const html = `<!DOCTYPE html>
 <html>
@@ -1265,7 +1265,7 @@ export const sendWelcomeEmail = async (email: string, firstName: string): Promis
   <div class="header">
     <div class="grid-bg"></div>
     <div class="dot-glow"></div>
-    <div class="logo">PetShiwu</div>
+    <div class="logo">Petshiwu</div>
     <div class="logo-sub">Premium Pet Care Platform</div>
     <div class="header-paws">🐾 &nbsp; 🐾 &nbsp; 🐾</div>
   </div>
@@ -1275,14 +1275,14 @@ export const sendWelcomeEmail = async (email: string, firstName: string): Promis
     <div class="orb2"></div>
     <div class="badge"><span class="badge-dot"></span> Account Activated</div>
     <span class="hero-emoji">🎉</span>
-    <div class="hero-title">Welcome to the<br><span class="grad">PetShiwu Family</span></div>
+    <div class="hero-title">Welcome to the<br><span class="grad">Petshiwu Family</span></div>
     <div class="hero-sub">Your account is live. Thousands of premium pet products — delivered fast to your door across the USA.</div>
     <a href="${siteUrl}/products" class="btn">🛍️ &nbsp;Start Shopping Now</a>
   </div>
 
   <div class="greeting">
     <h2>Hey ${firstName}! 👋</h2>
-    <p>We're thrilled to have you. Whether you're here for your dog, cat, bird, reptile, or something a little more exotic — PetShiwu has you covered with premium products at great prices.</p>
+    <p>We're thrilled to have you. Whether you're here for your dog, cat, bird, reptile, or something a little more exotic — Petshiwu has you covered with premium products at great prices.</p>
   </div>
 
   <table class="stats">
@@ -1358,7 +1358,7 @@ export const sendWelcomeEmail = async (email: string, firstName: string): Promis
       <a href="${siteUrl}/privacy">Privacy</a>
     </div>
     <div class="footer-copy">
-      © ${new Date().getFullYear()} PetShiwu · Jackson Heights, Queens, NY · support@petshiwu.com<br>
+      © ${new Date().getFullYear()} Petshiwu · Jackson Heights, Queens, NY · support@petshiwu.com<br>
       You received this because you created an account at petshiwu.com.<br>
       <a href="${siteUrl}/unsubscribe">Unsubscribe</a>
     </div>
@@ -1368,7 +1368,7 @@ export const sendWelcomeEmail = async (email: string, firstName: string): Promis
 </body>
 </html>`;
 
-  const text = `Welcome to PetShiwu, ${firstName}!
+  const text = `Welcome to Petshiwu, ${firstName}!
 
 Your account is live. Start shopping thousands of premium pet products at ${siteUrl}/products
 
@@ -1382,13 +1382,13 @@ Shop by pet: Dogs · Cats · Birds · Fish · Reptiles · Small Pets
 
 Welcome gift: Free shipping on your first order — no code needed.
 
-© ${new Date().getFullYear()} PetShiwu · support@petshiwu.com
+© ${new Date().getFullYear()} Petshiwu · support@petshiwu.com
 `;
 
   try {
     if (resendClient) {
       const result = await resendClient.emails.send({
-        from: process.env.EMAIL_FROM || 'PetShiwu <noreply@petshiwu.com>',
+        from: process.env.EMAIL_FROM || 'Petshiwu <noreply@petshiwu.com>',
         to: email,
         subject,
         html,
@@ -1402,7 +1402,7 @@ Welcome gift: Free shipping on your first order — no code needed.
     if (!transporter) throw new Error('No email transport configured');
 
     const info = await transporter.sendMail({
-      from: process.env.EMAIL_FROM || '"PetShiwu" <noreply@petshiwu.com>',
+      from: process.env.EMAIL_FROM || '"Petshiwu" <noreply@petshiwu.com>',
       to: email,
       subject,
       html,

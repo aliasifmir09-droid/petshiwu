@@ -8,10 +8,10 @@ const PetSuppliesNearMeNYC = () => {
   return (
     <SEOLandingPage
       keyword="pet-supplies-near-me-nyc"
-      title="Pet Supplies Near Me — NYC Delivery to Your Door | PetShiwu"
-      description="Looking for pet supplies near you in NYC? PetShiwu delivers to your door — Queens, Brooklyn, Manhattan, Bronx, Staten Island. 10,000+ products, free delivery over $49."
+      title="Pet Supplies Near Me — NYC Delivery to Your Door | Petshiwu"
+      description="Looking for pet supplies near you in NYC? Petshiwu delivers to your door — Queens, Brooklyn, Manhattan, Bronx, Staten Island. 10,000+ products, free delivery over $49."
       h1="Pet Supplies Delivered Near You in NYC"
-      introContent="Searching for pet supplies near you in New York City? PetShiwu brings the store to your door. Instead of finding a pet store nearby, we deliver 10,000+ products directly to your NYC address — whether you're in Queens, Brooklyn, Manhattan, the Bronx, or Staten Island. Free delivery on orders over $49."
+      introContent="Searching for pet supplies near you in New York City? Petshiwu brings the store to your door. Instead of finding a pet store nearby, we deliver 10,000+ products directly to your NYC address — whether you're in Queens, Brooklyn, Manhattan, the Bronx, or Staten Island. Free delivery on orders over $49."
       problemPoints={[
         "The nearest pet store is inconvenient or closed",
         "Limited selection at nearby stores",
@@ -30,7 +30,7 @@ const PetSuppliesNearMeNYC = () => {
       faqItems={[
         {
           question: "Is there a pet supply delivery service near me in NYC?",
-          answer: "Yes — PetShiwu delivers pet supplies to all five NYC boroughs: Queens, Brooklyn, Manhattan, the Bronx, and Staten Island. We're based in Jackson Heights, Queens, and serve all of New York City."
+          answer: "Yes — Petshiwu delivers pet supplies to all five NYC boroughs: Queens, Brooklyn, Manhattan, the Bronx, and Staten Island. We're based in Jackson Heights, Queens, and serve all of New York City."
         },
         {
           question: "Can I get same-day pet supply delivery in NYC?",

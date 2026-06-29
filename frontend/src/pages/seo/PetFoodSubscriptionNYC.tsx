@@ -8,10 +8,10 @@ const PetFoodSubscriptionNYC = () => {
   return (
     <SEOLandingPage
       keyword="pet-food-subscription-nyc"
-      title="Pet Food Delivery NYC — Never Run Out of Your Pet's Favorites | PetShiwu"
+      title="Pet Food Delivery NYC — Never Run Out of Your Pet's Favorites | Petshiwu"
       description="Keep your pet stocked with their favorite food delivered in NYC. Easy reordering, no subscription traps. Free delivery over $49. Queens, Brooklyn, Manhattan, Bronx, Staten Island."
       h1="Regular Pet Food Delivery in New York City"
-      introContent="Never run out of your pet's food again. PetShiwu makes it easy to reorder your pet's favorites with a few clicks — no subscription required, no commitment, no membership fees. Just great pet food delivered to your NYC door whenever you need it. Free delivery on orders over $49."
+      introContent="Never run out of your pet's food again. Petshiwu makes it easy to reorder your pet's favorites with a few clicks — no subscription required, no commitment, no membership fees. Just great pet food delivered to your NYC door whenever you need it. Free delivery on orders over $49."
       problemPoints={[
         "Forgetting to reorder and running out of pet food at the worst time",
         "Subscriptions that lock you in or are hard to cancel",
@@ -34,11 +34,11 @@ const PetFoodSubscriptionNYC = () => {
         },
         {
           question: "How do I make sure I never run out of pet food?",
-          answer: "Create an account at PetShiwu.com, and your order history is always saved. When you're running low, log in and reorder your pet's food in seconds. You can also set a reminder in your calendar for when to reorder based on how fast your pet goes through food."
+          answer: "Create an account at Petshiwu.com, and your order history is always saved. When you're running low, log in and reorder your pet's food in seconds. You can also set a reminder in your calendar for when to reorder based on how fast your pet goes through food."
         },
         {
           question: "Are auto-delivery services worth it for NYC pet owners?",
-          answer: "The appeal is never running out — but many subscription services lock you in or charge fees. At PetShiwu you get the convenience of easy reordering without the commitment. Order when you want, as much as you want."
+          answer: "The appeal is never running out — but many subscription services lock you in or charge fees. At Petshiwu you get the convenience of easy reordering without the commitment. Order when you want, as much as you want."
         },
         {
           question: "What if my pet's diet changes?",

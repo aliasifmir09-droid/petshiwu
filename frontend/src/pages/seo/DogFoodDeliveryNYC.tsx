@@ -7,10 +7,10 @@ const DogFoodDeliveryNYC = () => {
   return (
     <SEOLandingPage
       keyword="dog-food-delivery-nyc"
-      title="Dog Food Delivery NYC — All Breeds & Diets | PetShiwu"
+      title="Dog Food Delivery NYC — All Breeds & Diets | Petshiwu"
       description="Order dog food online and get it delivered anywhere in NYC. Dry food, wet food, grain-free, raw, puppy, senior — all top brands. Free delivery over $49. Queens, Brooklyn, Manhattan, Bronx."
       h1="Dog Food Delivery in New York City"
-      introContent="Stop carrying heavy bags of dog food on the subway. PetShiwu delivers dog food directly to your NYC door — dry kibble, wet food, grain-free, raw diets, puppy formulas, and senior recipes. Shop Purina, Blue Buffalo, Royal Canin, Hill's Science Diet, Orijen, and more. Free delivery on orders over $49."
+      introContent="Stop carrying heavy bags of dog food on the subway. Petshiwu delivers dog food directly to your NYC door — dry kibble, wet food, grain-free, raw diets, puppy formulas, and senior recipes. Shop Purina, Blue Buffalo, Royal Canin, Hill's Science Diet, Orijen, and more. Free delivery on orders over $49."
       problemPoints={[
         "Carrying 30-pound bags of dog food on the subway or in a cab",
         "Running out of food and making last-minute trips",

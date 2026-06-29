@@ -81,7 +81,7 @@ const NUTRITION_QA = `
 PETSHIWU NUTRITION EXPERT Q&A:
 
 Q: How do I choose quality pet food?
-A: Look for AAFCO-approved food with real meat listed as the first ingredient. Dogs require 40 essential nutrients in their diet while cats require 42 — a complete, balanced formula covers all of these. At PetShiwu we recommend foods free of artificial preservatives, unnecessary fillers, and artificial dyes. Our expert-curated brands like Hill's Science Diet, Royal Canin, Purina, and Blue Buffalo meet these standards.
+A: Look for AAFCO-approved food with real meat listed as the first ingredient. Dogs require 40 essential nutrients in their diet while cats require 42 — a complete, balanced formula covers all of these. At Petshiwu we recommend foods free of artificial preservatives, unnecessary fillers, and artificial dyes. Our expert-curated brands like Hill's Science Diet, Royal Canin, Purina, and Blue Buffalo meet these standards.
 
 Q: How do I switch my pet to a new food?
 A: Transition dogs over 7–10 days by gradually mixing increasing amounts of new food with the old. Cats need a longer transition of 2–4 weeks because sudden changes can cause them to refuse food entirely — which can quickly become a medical emergency. Start with 25% new food and increase slowly. If digestive upset occurs, slow the transition down further.
@@ -93,7 +93,7 @@ Q: How often should I feed my cat?
 A: Adult cats do well with 2 measured meals per day. Kittens need 3–4 smaller meals daily due to their high energy demands for growth. Avoid free-feeding (leaving food out all day) for most adult cats as it significantly contributes to obesity — over 60% of cats in the USA are currently overweight. Your vet can calculate precise daily calorie targets for your cat.
 
 Q: Are pet vitamins and supplements necessary?
-A: If your pet eats a complete and balanced commercial diet, additional vitamin and mineral supplements are generally not necessary and could even cause imbalances. However targeted supplements do help in specific situations: omega-3 fish oil improves skin and coat health, probiotics aid digestive health, glucosamine and chondroitin support aging joints, and L-carnitine assists with weight management. Always consult your vet before adding any supplement. PetShiwu carries a full range of vet-trusted supplements.
+A: If your pet eats a complete and balanced commercial diet, additional vitamin and mineral supplements are generally not necessary and could even cause imbalances. However targeted supplements do help in specific situations: omega-3 fish oil improves skin and coat health, probiotics aid digestive health, glucosamine and chondroitin support aging joints, and L-carnitine assists with weight management. Always consult your vet before adding any supplement. Petshiwu carries a full range of vet-trusted supplements.
 
 Q: What everyday foods are toxic to dogs?
 A: Several common foods are toxic to dogs: chocolate, grapes and raisins, xylitol (an artificial sweetener found in gum and peanut butter), onions, garlic, avocado, macadamia nuts, alcohol, caffeine, and cooked bones. Even small amounts of xylitol or grapes can cause kidney failure or death. If your dog ingests any of these, contact a vet or the ASPCA Poison Control Hotline immediately.
@@ -130,7 +130,7 @@ Q: My dog has itchy skin. What could be causing it and what helps?
 A: Itchy skin in dogs is most commonly caused by food allergies, environmental allergens, flea allergy dermatitis, dry skin, or bacterial and yeast skin infections. A limited-ingredient diet or a food rich in omega-3 fatty acids can significantly help with allergy-related itching. If the itching persists beyond 2 weeks or is severe, a vet visit is needed.
 
 Q: Do indoor-only pets need flea, tick, and heartworm prevention?
-A: Yes. Fleas can survive and reproduce entirely indoors year-round. Heartworm-carrying mosquitoes can enter homes. PetShiwu's pet care experts recommend year-round parasite prevention for all dogs and cats regardless of whether they go outside.
+A: Yes. Fleas can survive and reproduce entirely indoors year-round. Heartworm-carrying mosquitoes can enter homes. Petshiwu's pet care experts recommend year-round parasite prevention for all dogs and cats regardless of whether they go outside.
 
 Q: When is a situation a true pet emergency?
 A: Seek emergency veterinary care immediately for: difficulty breathing, collapse, seizures, suspected poisoning, uncontrolled bleeding, a cat straining but unable to urinate, or a dog with a visibly bloated abdomen. Also treat as urgent: vomiting or diarrhea lasting more than 24 hours.
@@ -371,7 +371,7 @@ Q: How do I keep my dog safe in summer heat?
 A: Dogs regulate temperature only through panting and paw pads — they overheat much faster than humans. NEVER leave a dog in a parked car, even with windows cracked — temperatures can reach 120°F within minutes. On hot days, walk in the early morning or after sunset when pavement is cooler. Test the pavement with your hand: if you cannot hold it there comfortably for 7 seconds, it will burn your dog's paws. Signs of heatstroke: heavy panting, drooling, vomiting, stumbling, collapse — this is an emergency requiring immediate vet care.
 
 Q: What summer products does my pet need?
-A: Essential summer pet supplies: paw protection wax or booties for hot pavement, a pet-safe sunscreen for short-haired dogs and pink-nosed cats, cooling mats and elevated mesh beds that allow airflow, collapsible travel water bottles, a kiddie pool for water-loving breeds, and cooling bandanas. PetShiwu carries a full summer safety collection.
+A: Essential summer pet supplies: paw protection wax or booties for hot pavement, a pet-safe sunscreen for short-haired dogs and pink-nosed cats, cooling mats and elevated mesh beds that allow airflow, collapsible travel water bottles, a kiddie pool for water-loving breeds, and cooling bandanas. Petshiwu carries a full summer safety collection.
 
 Q: How do I keep my cat safe in summer?
 A: Keep cats indoors during peak heat hours. Always provide fresh, cool water — cats dramatically increase hydration when offered cold water or a fountain. If your home gets hot, provide ceramic tiles for cats to lie on (they naturally cool against the surface). Never shave a double-coated cat — the coat actually insulates against heat. Watch for excessive panting — cats rarely pant; heavy panting is a heatstroke emergency.
@@ -428,7 +428,7 @@ const COMPANY_POLICIES = `
 PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
 
 === COMPANY ===
-- Name: PetShiwu | Website: petshiwu.com
+- Name: Petshiwu | Website: petshiwu.com
 - Address: 37-68 74th Street, Jackson Heights, Queens, NY 11372
 - Phone: +1 (800) 259-2605 | Email: support@petshiwu.com
 - Support hours: 7 days a week, 9 AM – 8 PM EST
@@ -537,7 +537,7 @@ A: Click the heart icon on any product to save it. Your wishlist lives at petshi
 Q: How do I contact customer support?
 A: Phone: +1 (800) 259-2605 (7 days/week, 9 AM–8 PM EST). Email: support@petshiwu.com (response within 2 business hours). Or use the Contact form at petshiwu.com/contact. We're real people who love pets and are happy to help.
 
-Q: Where is PetShiwu located?
+Q: Where is Petshiwu located?
 A: Jackson Heights, Queens, New York — 37-68 74th Street, NY 11372. We're proud to be a Queens-based pet store serving all of NYC and shipping nationwide.
 
 Q: Do you ship outside the USA?
@@ -564,7 +564,7 @@ A: Yes. We use SSL encryption on all transactions, never sell your personal data
 
 // ─── System Prompt Builder ────────────────────────────────────────
 const buildSystemPrompt = (inventorySnippet: string, profileAlreadySaved: boolean, savedPets?: any[]): string => `
-You are PetShiwu's Super AI Advisor — the ultimate expert for petshiwu.com, a premium US pet e-commerce store.
+You are Petshiwu's Super AI Advisor — the ultimate expert for petshiwu.com, a premium US pet e-commerce store.
 
 ${profileAlreadySaved && savedPets && savedPets.length > 0 ? `
 IMPORTANT — CUSTOMER PET PROFILES ON FILE (DO NOT ASK FOR THIS INFO):
@@ -680,7 +680,7 @@ CONVERSATION STYLE:
 - If weight and activity level given, calculate and share daily calorie needs
 - Keep responses concise (4-6 sentences max)
 - Use pet emojis occasionally 🐾🐕🐈
-- All advice and knowledge is from PetShiwu's expert team — never reference competitors
+- All advice and knowledge is from Petshiwu's expert team — never reference competitors
 
 PRODUCT RULES — CRITICAL:
 - For ANY question about products, brands, food, treats, toys, or supplies → ALWAYS end with [SEARCH:query]
@@ -785,13 +785,13 @@ const buildBirthdayEmailHtml = (petName: string, parentName: string): string => 
               </table>
               <p style="margin:0;color:#374151;font-size:16px;line-height:1.7;">
                 Wishing you and <strong>${petName}</strong> a day filled with cuddles, belly rubs, and treats! 🐾<br><br>
-                Warmly,<br><strong>The PetShiwu Team</strong>
+                Warmly,<br><strong>The Petshiwu Team</strong>
               </p>
             </td>
           </tr>
           <tr>
             <td style="background:#f3f4f6;padding:24px 40px;text-align:center;">
-              <p style="margin:0;color:#9ca3af;font-size:13px;">© ${new Date().getFullYear()} PetShiwu · <a href="https://www.petshiwu.com" style="color:#6b7280;">petshiwu.com</a></p>
+              <p style="margin:0;color:#9ca3af;font-size:13px;">© ${new Date().getFullYear()} Petshiwu · <a href="https://www.petshiwu.com" style="color:#6b7280;">petshiwu.com</a></p>
             </td>
           </tr>
         </table>
@@ -807,7 +807,7 @@ const sendBirthdayEmail = async (petName: string, parentName: string, parentEmai
     if (!resendApiKey) { console.warn('RESEND_API_KEY not set — birthday email skipped'); return; }
     const resend = new Resend(resendApiKey);
     await resend.emails.send({
-      from: process.env.RESEND_FROM || 'PetShiwu <hello@petshiwu.com>',
+      from: process.env.RESEND_FROM || 'Petshiwu <hello@petshiwu.com>',
       to: parentEmail,
       subject: `Happy Birthday, ${petName}! 🎂 A special gift is waiting!`,
       html: buildBirthdayEmailHtml(petName, parentName)

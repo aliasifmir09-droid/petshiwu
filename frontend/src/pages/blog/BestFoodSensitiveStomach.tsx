@@ -17,7 +17,7 @@ const BestFoodSensitiveStomach = () => {
         'dog food digestive issues',
         'probiotic dog food'
       ]}
-      author="PetShiwu Team"
+      author="Petshiwu Team"
       publishDate="2024-01-15"
       readTime={12}
       tags={['Dog Food', 'Digestive Health', 'Sensitive Stomach', 'Nutrition']}

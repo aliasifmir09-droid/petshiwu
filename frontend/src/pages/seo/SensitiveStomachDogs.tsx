@@ -7,7 +7,7 @@ const SensitiveStomachDogs = () => {
   return (
     <SEOLandingPage
       keyword="best-dog-food-sensitive-stomach-diarrhea"
-      title="Best Dog Food for Sensitive Stomach & Diarrhea | PetShiwu"
+      title="Best Dog Food for Sensitive Stomach & Diarrhea | Petshiwu"
       description="Find the best dog food for sensitive stomach and diarrhea. Premium, easily digestible formulas with natural ingredients. Free shipping over $49. Expert recommendations."
       h1="Best Dog Food for Sensitive Stomach and Diarrhea"
       introContent="If your dog suffers from digestive issues like diarrhea, vomiting, or frequent stomach upset, finding the right food is crucial. Our carefully selected premium dog foods are specifically formulated with easily digestible ingredients to support your dog's digestive health."

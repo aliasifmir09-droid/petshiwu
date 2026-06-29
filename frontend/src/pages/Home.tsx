@@ -9,7 +9,7 @@ import StructuredData from '@/components/StructuredData';
 import TrustBadges from '@/components/TrustBadges';
 import CategoryIcons from '@/components/CategoryIcons';
 import BirthdayBanner from '@/components/BirthdayBanner';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ArrowRight } from 'lucide-react';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import { normalizeImageUrl, generateSrcSet, getOptimizedImageUrl } from '@/utils/imageUtils';
@@ -201,18 +201,18 @@ const Home = () => {
   return (
     <div className="relative">
       <SEO
-        title="PetShiwu — Premium Pet Food, Toys & Supplies Delivered to NYC"
+        title="Petshiwu — Premium Pet Food, Toys & Supplies Delivered to NYC"
         description="10,000+ pet products delivered to Queens, Brooklyn & all of NYC. Top brands — Purina, Blue Buffalo, Royal Canin. Free shipping over $49. Dog food, cat food, toys & more."
       />
       <StructuredData type="website" data={{}} />
       <StructuredData
         type="organization"
         data={{
-          name: 'PetShiwu',
+          name: 'Petshiwu',
           url: 'https://www.petshiwu.com',
           logo: 'https://www.petshiwu.com/logo-square-512.png',
           description:
-            'PetShiwu — premium pet food, toys, and supplies delivered to Queens, Brooklyn, Manhattan, and all of NYC. 10,000+ products, free shipping over $49.',
+            'Petshiwu — premium pet food, toys, and supplies delivered to Queens, Brooklyn, Manhattan, and all of NYC. 10,000+ products, free shipping over $49.',
           contactPoint: { telephone: '+1-800-259-2605', contactType: 'customer service' },
           address: {
             streetAddress: '37-68 74th St',
@@ -227,7 +227,7 @@ const Home = () => {
         type="localBusiness"
         data={{
           businessType: ['PetStore', 'LocalBusiness'],
-          name: 'PetShiwu',
+          name: 'Petshiwu',
           url: 'https://www.petshiwu.com',
           logo: 'https://www.petshiwu.com/logo-square-512.png',
           image: 'https://www.petshiwu.com/logo-square-512.png',
@@ -252,7 +252,7 @@ const Home = () => {
           ],
           priceRange: '$$',
           areaServed: ['Queens', 'Brooklyn', 'Manhattan', 'Bronx', 'Staten Island', 'New York City'],
-          hasMap: 'https://maps.google.com/?q=PetShiwu+Jackson+Heights+NY+11372',
+          hasMap: 'https://maps.google.com/?q=Petshiwu+Jackson+Heights+NY+11372',
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
           sameAs: [
@@ -284,6 +284,30 @@ const Home = () => {
       <div className="container mx-auto px-4 lg:px-8 mt-4">
         <HeroSlideshow />
       </div>
+
+      {/* FREEDOM20 Banner — anti-Chewy differentiator */}
+      <section className="container mx-auto px-4 lg:px-8 mt-6">
+        <div className="relative overflow-hidden rounded-2xl shadow-lg bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#9333EA]">
+          <div className="absolute -top-8 -right-8 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+          <div className="absolute -bottom-8 -left-8 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
+          <div className="relative px-6 py-6 sm:px-10 sm:py-8 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+            <div className="flex-shrink-0 bg-white/15 backdrop-blur-sm border border-white/30 rounded-full px-5 py-2 text-center">
+              <div className="text-white font-black text-3xl sm:text-4xl tracking-tight">FREEDOM<span className="text-[#FCD34D]">20</span></div>
+              <div className="text-white/90 text-[10px] sm:text-xs uppercase tracking-widest font-semibold mt-0.5">20% off · no autoship</div>
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <h2 className="text-white font-extrabold text-xl sm:text-2xl leading-tight">Chewy forces Autoship. We give you freedom.</h2>
+              <p className="text-white/90 text-sm sm:text-base mt-1">Same vet-quality brands. Same price. No subscription lock-in. Max $10 off your first order.</p>
+            </div>
+            <Link
+              to="/products"
+              className="flex-shrink-0 inline-flex items-center gap-2 bg-[#FCD34D] hover:bg-[#FBBF24] text-[#1E3A8A] font-bold text-sm sm:text-base px-6 py-3 rounded-full shadow-md transition-colors"
+            >
+              Shop now <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* Birthday Banner */}
       <BirthdayBanner />
@@ -545,7 +569,7 @@ const Home = () => {
                 location: 'Brooklyn, NY',
                 pet: '🐈 Cat parent',
                 stars: 5,
-                text: 'I order Royal Canin for my cats every month. The prices are great and the delivery is fast. PetShiwu has become my go-to pet store.',
+                text: 'I order Royal Canin for my cats every month. The prices are great and the delivery is fast. Petshiwu has become my go-to pet store.',
               },
               {
                 name: 'Sandra L.',

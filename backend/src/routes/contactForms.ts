@@ -49,7 +49,7 @@ router.post('/investor', async (req: Request, res: Response) => {
     if (resendClient) {
       try {
         await resendClient.emails.send({
-          from: 'PetShiwu Investor Inquiries <noreply@petshiwu.com>',
+          from: 'Petshiwu Investor Inquiries <noreply@petshiwu.com>',
           to: ADMIN_EMAIL,
           replyTo: email,
           subject: `New Investor Inquiry — ${name}${company ? ` (${company})` : ''}`,
@@ -57,7 +57,7 @@ router.post('/investor', async (req: Request, res: Response) => {
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <div style="background: linear-gradient(135deg, #1E3A8A, #2563EB); padding: 24px; border-radius: 12px 12px 0 0;">
                 <h1 style="color: white; margin: 0; font-size: 20px;">New Investor Inquiry</h1>
-                <p style="color: #bfdbfe; margin: 4px 0 0; font-size: 14px;">PetShiwu Investor Relations</p>
+                <p style="color: #bfdbfe; margin: 4px 0 0; font-size: 14px;">Petshiwu Investor Relations</p>
               </div>
               <div style="background: #f8fafc; padding: 24px; border: 1px solid #e2e8f0; border-radius: 0 0 12px 12px;">
                 <table style="width: 100%; border-collapse: collapse;">
@@ -131,7 +131,7 @@ router.post('/vendor', async (req: Request, res: Response) => {
     if (resendClient) {
       try {
         await resendClient.emails.send({
-          from: 'PetShiwu Vendor Partnerships <noreply@petshiwu.com>',
+          from: 'Petshiwu Vendor Partnerships <noreply@petshiwu.com>',
           to: ADMIN_EMAIL,
           replyTo: email,
           subject: `New Vendor Application — ${company}`,
@@ -139,7 +139,7 @@ router.post('/vendor', async (req: Request, res: Response) => {
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <div style="background: linear-gradient(135deg, #1E3A8A, #2563EB); padding: 24px; border-radius: 12px 12px 0 0;">
                 <h1 style="color: white; margin: 0; font-size: 20px;">New Vendor / Brand Application</h1>
-                <p style="color: #bfdbfe; margin: 4px 0 0; font-size: 14px;">PetShiwu Vendor Partnerships</p>
+                <p style="color: #bfdbfe; margin: 4px 0 0; font-size: 14px;">Petshiwu Vendor Partnerships</p>
               </div>
               <div style="background: #f8fafc; padding: 24px; border: 1px solid #e2e8f0; border-radius: 0 0 12px 12px;">
                 <table style="width: 100%; border-collapse: collapse;">

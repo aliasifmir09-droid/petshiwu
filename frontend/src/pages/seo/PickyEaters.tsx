@@ -7,7 +7,7 @@ const PickyEaters = () => {
   return (
     <SEOLandingPage
       keyword="high-protein-dog-food-picky-eaters"
-      title="High Protein Dog Food for Picky Eaters | PetShiwu"
+      title="High Protein Dog Food for Picky Eaters | Petshiwu"
       description="Premium high protein dog food for picky eaters. Delicious flavors, premium ingredients, and irresistible formulas that even the fussiest dogs love. Free shipping over $49."
       h1="High Protein Dog Food for Picky Eaters"
       introContent="Dealing with a picky eater can be frustrating. Your dog turns their nose up at meal after meal, leaving you worried about their nutrition. Our premium high-protein dog foods are specially formulated with irresistible flavors and premium ingredients that even the most finicky dogs can't resist."

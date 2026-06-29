@@ -249,7 +249,7 @@ export default function AIChatWidget() {
 
   const [messages, setMessages] = useState<Message[]>([{
     role: 'assistant',
-    text: "Woof! Hi there! I'm Pawsy, PetShiwu's AI advisor! 🐾 I can help with nutrition, health, behavior, and finding the perfect products. What kind of pet do you have?",
+    text: "Woof! Hi there! I'm Pawsy, Petshiwu's AI advisor! 🐾 I can help with nutrition, health, behavior, and finding the perfect products. What kind of pet do you have?",
   }]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -380,7 +380,7 @@ export default function AIChatWidget() {
               </p>
               <p style={{ margin: 0, color: 'rgba(255,255,255,0.85)', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80', display: 'inline-block' }} />
-                PetShiwu AI Advisor
+                Petshiwu AI Advisor
               </p>
             </div>
             <div style={{ display: 'flex', gap: '6px' }}>
@@ -474,7 +474,7 @@ export default function AIChatWidget() {
                 {suggestedProducts.length > 0 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <p style={{ margin: '0 0 4px', fontSize: '11px', color: '#9a7a5a', fontWeight: 600 }}>
-                      🛍️ Recommended from PetShiwu:
+                      🛍️ Recommended from Petshiwu:
                     </p>
                     {suggestedProducts.map(p => <ProductCard key={p._id} product={p} />)}
                   </div>

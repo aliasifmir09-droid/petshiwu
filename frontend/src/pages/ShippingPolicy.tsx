@@ -5,7 +5,7 @@ const ShippingPolicy = () => {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <SEO
-        title="Shipping Information | PetShiwu — Same-Day NYC Delivery"
+        title="Shipping Information | Petshiwu — Same-Day NYC Delivery"
         description="Petshiwu ships pet supplies across all 50 US states. Same-day delivery available across NYC: order before 3 PM EST, delivered before 11 PM. Free shipping over $49. Store launches July 15, 2026."
         url="/shipping"
       />

@@ -4,8 +4,8 @@ const Accessibility = () => {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <SEO
-        title="Accessibility Statement | PetShiwu"
-        description="PetShiwu is committed to making our website accessible to everyone. Learn about our accessibility features and how to get help."
+        title="Accessibility Statement | Petshiwu"
+        description="Petshiwu is committed to making our website accessible to everyone. Learn about our accessibility features and how to get help."
         url="/accessibility"
       />
 
@@ -17,7 +17,7 @@ const Accessibility = () => {
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-3">Our Commitment</h2>
           <p>
-            PetShiwu is committed to ensuring digital accessibility for people with disabilities. We
+            Petshiwu is committed to ensuring digital accessibility for people with disabilities. We
             continually improve the user experience for everyone and apply relevant accessibility standards.
           </p>
         </section>
