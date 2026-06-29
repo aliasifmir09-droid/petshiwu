@@ -137,8 +137,9 @@ const SEO = ({
       {/* FIX 3: Canonical now uses resolvedUrl — unique per page, never hardcoded homepage */}
       <link rel="canonical" href={resolvedUrl} />
 
-      {/* Alternate URLs */}
-      <link rel="alternate" hrefLang="en" href={resolvedUrl} />
+      {/* Alternate URLs — site is US-only, so en-US is the only declared locale.
+          x-default mirrors en-US so Google doesn't infer a global default we don't serve. */}
+      <link rel="alternate" hrefLang="en-US" href={resolvedUrl} />
       <link rel="alternate" hrefLang="x-default" href={resolvedUrl} />
 
       {/* Robots */}

@@ -71,7 +71,7 @@ interface ArticleSchema {
   headline: string;
   description?: string;
   image?: string | string[];
-  author?: { name: string };
+  author?: { name: string; byline?: string; profileUrl?: string; jobTitle?: string; knowsAbout?: string[] };
   datePublished?: string;
   dateModified?: string;
   url: string;
@@ -228,7 +228,22 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
         url: article.url,
         author: article.author ? {
           '@type': 'Person',
-          name: article.author.name
+          name: article.author.byline || article.author.name,
+          ...(article.author.byline ? { alternateName: article.author.name } : {}),
+          ...(article.author.jobTitle ? { jobTitle: article.author.jobTitle } : { jobTitle: 'Pet Care Specialist' }),
+          ...(article.author.profileUrl ? { url: article.author.profileUrl } : { url: 'https://www.petshiwu.com/about' }),
+          worksFor: {
+            '@type': 'Organization',
+            name: 'Petshiwu',
+            url: 'https://www.petshiwu.com'
+          },
+          knowsAbout: article.author.knowsAbout || [
+            'Dog nutrition',
+            'Cat nutrition',
+            'Pet health',
+            'Veterinary diets',
+            'NYC pet care'
+          ]
         } : undefined,
         datePublished: article.datePublished,
         dateModified: article.dateModified || article.datePublished,

@@ -103,7 +103,19 @@ const BlogDetail = () => {
           headline: blog.title,
           description: blog.metaDescription || blog.excerpt || blog.title,
           image: blog.featuredImage,
-          author: blog.author?.name ? { name: blog.author.name } : undefined,
+          author: blog.author?.name ? {
+            name: blog.author.name,
+            byline: blog.authorByline,
+            profileUrl: blog.authorProfileUrl,
+            jobTitle: 'Pet Care Specialist',
+            knowsAbout: [
+              'Dog nutrition',
+              'Cat nutrition',
+              'Pet health',
+              'Veterinary diets',
+              'NYC pet care'
+            ]
+          } : undefined,
           datePublished: blog.publishedAt,
           dateModified: blog.updatedAt,
           url: blogUrl,
