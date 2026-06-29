@@ -267,6 +267,23 @@ const Products = () => {
       {seoData.breadcrumbSchema && (
         <StructuredData type="breadcrumb" data={seoData.breadcrumbSchema} />
       )}
+      {filteredProducts && filteredProducts.length > 0 && (
+        <StructuredData
+          type="itemList"
+          data={{
+            name: featured ? 'Featured Pet Products' : petType ? `${petType.charAt(0).toUpperCase() + petType.slice(1)} Products` : 'All Pet Products',
+            description: 'Premium pet supplies delivered to NYC and nationwide.',
+            numberOfItems: filteredProducts.length,
+            itemListElement: filteredProducts.slice(0, 20).map((p, idx) => ({
+              '@type': 'ListItem',
+              position: idx + 1,
+              url: `https://www.petshiwu.com/products/${p.slug}`,
+              name: p.name,
+              ...(p.basePrice ? { offers: { '@type': 'Offer', priceCurrency: 'USD', price: p.basePrice, availability: p.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' } } : {})
+            }))
+          }}
+        />
+      )}
       <div className="container mx-auto px-4 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8">

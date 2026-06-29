@@ -262,6 +262,23 @@ const Home = () => {
           ],
         }}
       />
+      {filteredFeaturedProducts && filteredFeaturedProducts.length > 0 && (
+        <StructuredData
+          type="itemList"
+          data={{
+            name: 'Featured Pet Products',
+            description: 'Hand-picked premium pet supplies featured on Petshiwu.',
+            numberOfItems: filteredFeaturedProducts.length,
+            itemListElement: filteredFeaturedProducts.slice(0, 8).map((p, idx) => ({
+              '@type': 'ListItem',
+              position: idx + 1,
+              url: `https://www.petshiwu.com/products/${p.slug}`,
+              name: p.name,
+              ...(p.basePrice ? { offers: { '@type': 'Offer', priceCurrency: 'USD', price: p.basePrice, availability: p.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' } } : {})
+            }))
+          }}
+        />
+      )}
 
       {/* Hero Slideshow */}
       <div className="container mx-auto px-4 lg:px-8 mt-4">
