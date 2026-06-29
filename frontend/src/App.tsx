@@ -49,6 +49,7 @@ const BlogDetail = lazy(() => import('./pages/BlogDetail'));
 const CareGuides = lazy(() => import('./pages/CareGuides'));
 const CareGuideDetail = lazy(() => import('./pages/CareGuideDetail'));
 const FAQ = lazy(() => import('./pages/FAQ'));
+const SymptomChecker = lazy(() => import('./pages/SymptomChecker'));
 const About = lazy(() => import('./pages/About'));
 const Press = lazy(() => import('./pages/Press'));
 const Contact = lazy(() => import('./pages/Contact'));
@@ -302,6 +303,7 @@ function App() {
                   <Route path="/care-guides" element={<CareGuides />} />
                   <Route path="/care-guides/:slug" element={<CareGuideDetail />} />
                   <Route path="/faq" element={<FAQ />} />
+                  <Route path="/symptom-checker" element={<SymptomChecker />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/press" element={<Press />} />
                   <Route path="/contact" element={<Contact />} />

@@ -92,6 +92,7 @@ const Footer = () => {
               <li><Link to="/shipping" className="hover:text-white transition-colors">Shipping Information</Link></li>
               <li><Link to="/return-policy" className="hover:text-white transition-colors">Return & Exchange Policy</Link></li>
               <li><Link to="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
+              <li><Link to="/symptom-checker" className="hover:text-white transition-colors">Pet Symptom Checker</Link></li>
               <li><Link to="/track-order" className="hover:text-white transition-colors">Track Your Order</Link></li>
               <li><Link to="/returns" className="hover:text-white transition-colors">Start a Return</Link></li>
             </ul>
