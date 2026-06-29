@@ -1,5 +1,6 @@
 import { HeartHandshake, Globe2, ShieldCheck, Truck, Users } from 'lucide-react';
 import SEO from '@/components/SEO';
+import StructuredData from '@/components/StructuredData';
 
 const About = () => {
   return (
@@ -9,6 +10,37 @@ const About = () => {
       description="Learn about PetShiwu's 15+ years of pet care experience, our passion for pets, and our commitment to quality, community, and convenient online shopping across the USA."
       keywords="about PetShiwu, pet care, pet store USA, pet community, premium pet products"
       url="/about"
+      />
+      <StructuredData
+        type="localBusiness"
+        data={{
+          businessType: ['PetStore', 'LocalBusiness'],
+          name: 'PetShiwu',
+          url: 'https://www.petshiwu.com',
+          logo: 'https://www.petshiwu.com/logo-square-512.png',
+          telephone: '+1-800-259-2605',
+          email: 'support@petshiwu.com',
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: '37-68 74th St',
+            addressLocality: 'Jackson Heights',
+            addressRegion: 'NY',
+            postalCode: '11372',
+            addressCountry: 'US'
+          },
+          openingHours: 'Mo-Su 08:00-20:00',
+          priceRange: '$$',
+          description: 'NYC-based pet supply delivery service delivering premium brands to all 5 boroughs, Long Island, Westchester, and all 21 New Jersey counties.',
+          areaServed: ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island', 'Long Island', 'Westchester', 'New Jersey'],
+          hasMap: 'https://maps.google.com/?q=PetShiwu+Jackson+Heights+NY+11372',
+          paymentAccepted: 'Cash, Credit Card, Debit Card',
+          currenciesAccepted: 'USD',
+          sameAs: [
+            'https://www.facebook.com/petshiwu',
+            'https://www.instagram.com/petshiwu',
+            'https://twitter.com/petshiwu'
+          ]
+        }}
       />
 
       <div className="bg-gray-50">

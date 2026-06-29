@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from 'lucide-react';
 import SEO from '@/components/SEO';
+import StructuredData from '@/components/StructuredData';
 
 const Contact = () => {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
@@ -22,6 +23,37 @@ const Contact = () => {
         title="Contact Us | Petshiwu"
         description="Get in touch with Petshiwu. We're here to help with your pet care questions, orders, and anything else you need. Located in Jackson Heights, NY."
         keywords="contact petshiwu, pet store contact, jackson heights pet store, pet care support"
+      />
+      <StructuredData
+        type="localBusiness"
+        data={{
+          businessType: ['PetStore', 'LocalBusiness'],
+          name: 'PetShiwu',
+          url: 'https://www.petshiwu.com',
+          logo: 'https://www.petshiwu.com/logo-square-512.png',
+          telephone: '+1-800-259-2605',
+          email: 'support@petshiwu.com',
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: '37-68 74th St',
+            addressLocality: 'Jackson Heights',
+            addressRegion: 'NY',
+            postalCode: '11372',
+            addressCountry: 'US'
+          },
+          openingHours: 'Mo-Su 08:00-20:00',
+          priceRange: '$$',
+          description: 'NYC-based pet supply delivery service. Contact us for orders, questions, or partnership inquiries.',
+          areaServed: ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island', 'Long Island', 'Westchester', 'New Jersey'],
+          hasMap: 'https://maps.google.com/?q=PetShiwu+Jackson+Heights+NY+11372',
+          paymentAccepted: 'Cash, Credit Card, Debit Card',
+          currenciesAccepted: 'USD',
+          sameAs: [
+            'https://www.facebook.com/petshiwu',
+            'https://www.instagram.com/petshiwu',
+            'https://twitter.com/petshiwu'
+          ]
+        }}
       />
 
       <div className="bg-gray-50 min-h-screen">
