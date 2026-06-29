@@ -6,7 +6,7 @@ const Press = () => {
     <>
       <SEO
         title="Petshiwu Press & Newsroom | NYC Pet Supplier Coverage"
-        description="Press releases, news coverage, and media resources for Petshiwu — Jackson Heights, Queens-based pet supply delivery service competing with Chewy via no-autoship FREEDOM20 model."
+        description="Press releases, news coverage, and media resources for Petshiwu — Jackson Heights, Queens-based pet supply delivery service with no-autoship FREEDOM20 pricing model."
         keywords="Petshiwu press, Petshiwu newsroom, NYC pet supplier press release, FREEDOM20, Jackson Heights pet store news"
         url="/press"
       />
@@ -23,7 +23,7 @@ const Press = () => {
             </h1>
             <p className="text-base sm:text-lg text-blue-100 max-w-3xl">
               Petshiwu is NYC&apos;s only all-5-borough same-day pet supply service, based in Jackson Heights, Queens.
-              Founded in 2025, Petshiwu competes with Chewy via a no-autoship-lock-in business model.
+              Founded in 2025, Petshiwu operates on a no-autoship-lock-in business model — same great prices whether you order once or set up recurring delivery.
               Press inquiries: <a href="mailto:press@petshiwu.com" className="underline">press@petshiwu.com</a>
             </p>
           </div>
@@ -82,18 +82,18 @@ const Press = () => {
               <span>July 1, 2026</span>
             </div>
             <h3 className="text-xl sm:text-2xl font-bold mb-3">
-              NYC Pet Supplier Petshiwu Takes Anti-Chewy Stance with FREEDOM20
+              NYC Pet Supplier Petshiwu Launches FREEDOM20 — Same Great Price, No Subscription Lock
             </h3>
             <p className="text-sm text-gray-600 italic mb-4">
-              While Chewy forces customers into recurring subscriptions for the best prices, Petshiwu offers the same 20% discount on every order.
+              While most online pet retailers tie their best prices to mandatory recurring subscriptions, Petshiwu offers the same 20% discount on every order.
             </p>
 
             <div className="prose prose-sm max-w-none text-gray-700 space-y-4">
               <p><strong>NEW YORK, NY — July 1, 2026 —</strong> Petshiwu, NYC&apos;s only all-5-borough same-day pet supply service, today launched FREEDOM20 — a 20% discount (capped at $10) that works on every order, with no Autoship subscription required.</p>
 
-              <p>The launch comes as a direct counter-position to Chewy, the $11B+ national pet retailer that ties its best pricing to recurring Autoship subscriptions. Petshiwu&apos;s approach: the same 20% off works whether it&apos;s your first order, your tenth order, or one-time vs subscription.</p>
+              <p>The launch positions Petshiwu as the freedom-first alternative in NYC pet supply — same vet-quality brands, same-day delivery, with pricing that doesn't punish customers who want to order once.</p>
 
-              <p>&ldquo;Petshiwu exists because NYC pet parents shouldn&apos;t have to choose between vet-quality products and same-day convenience,&rdquo; said Pet, founder. &ldquo;And they shouldn&apos;t have to choose between discounts and freedom. Chewy forces Autoship for the best prices. We give you the same price every time — your choice, your schedule.&rdquo;</p>
+              <p>&ldquo;Petshiwu exists because NYC pet parents shouldn&apos;t have to choose between vet-quality products and same-day convenience,&rdquo; said Pet, founder. &ldquo;And they shouldn't have to choose between discounts and freedom. We give you the same great price every time — your choice, your schedule.&rdquo;</p>
 
               <h4 className="text-base font-bold mt-6">FREEDOM20 details:</h4>
               <ul className="list-disc pl-6 space-y-1">
@@ -106,7 +106,7 @@ const Press = () => {
               </ul>
 
               <h4 className="text-base font-bold mt-6">About Petshiwu</h4>
-              <p>Petshiwu is a Jackson Heights, Queens-based pet supply delivery service founded in 2025 by Pet Chiwu, a NYC native. The company delivers premium pet food, supplies, and prescription veterinary diets same-day across all five NYC boroughs from a warehouse at 37-68 74th Street. Petshiwu carries 10,000+ products from brands including Hill&apos;s, Royal Canin, Purina, Orijen, Acana, and Stella &amp; Chewy&apos;s.</p>
+              <p>Petshiwu is a Jackson Heights, Queens-based pet supply delivery service founded in 2025 by Pet Chiwu, a NYC native. The company delivers premium pet food, supplies, and prescription veterinary diets same-day across all five NYC boroughs from a warehouse at 37-68 74th Street. Petshiwu carries 10,000+ products from brands including Hill's, Royal Canin, Purina, Orijen, Acana, Stella & Chewy's, and many more.</p>
 
               <h4 className="text-base font-bold mt-6">Media inquiries</h4>
               <p>Press contact: <a href="mailto:press@petshiwu.com" className="text-[#1E3A8A] underline">press@petshiwu.com</a> | <a href="tel:+18002592605" className="text-[#1E3A8A] underline">+1 (800) 259-2605</a></p>

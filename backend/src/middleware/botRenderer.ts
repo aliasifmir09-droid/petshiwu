@@ -329,7 +329,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/press': {
     title: 'Petshiwu Press & Newsroom | NYC Pet Supplier Coverage',
-    description: 'Press releases, news coverage, and media resources for Petshiwu — Jackson Heights, Queens-based pet supply delivery service competing with Chewy via no-autoship FREEDOM20 model.',
+    description: "Press releases, news coverage, and media resources for Petshiwu — Jackson Heights, Queens-based pet supply delivery service with no-autoship FREEDOM20 pricing model.",
   },
   '/symptom-checker': {
     title: 'Pet Symptom Checker | Is It an Emergency? NYC Vet Triage Tool',

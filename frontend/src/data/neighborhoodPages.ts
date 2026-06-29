@@ -1,7 +1,7 @@
 /**
  * Neighborhood × Category page data
  * 50 NYC neighborhoods × 28 delivery categories = 1,400 programmatic SEO pages
- * Targets: "[category] delivery [neighborhood] [borough]" — zero Chewy competition
+ * Targets: "[category] delivery [neighborhood] [borough]" — low-competition niche
  */
 
 export interface NeighborhoodData {

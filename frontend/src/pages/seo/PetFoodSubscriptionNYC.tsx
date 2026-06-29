@@ -2,7 +2,7 @@ import SEOLandingPage from '../SEOLandingPage';
 
 /**
  * Targets: "pet food subscription NYC", "auto-ship pet food New York", "recurring pet food delivery NYC"
- * Captures people looking for Chewy/Petco auto-ship alternatives
+ * Captures people looking for auto-ship alternatives
  */
 const PetFoodSubscriptionNYC = () => {
   return (

@@ -285,7 +285,7 @@ const Home = () => {
         <HeroSlideshow />
       </div>
 
-      {/* FREEDOM20 Banner — anti-Chewy differentiator */}
+      {/* FREEDOM20 Banner — anti-autoship positioning */}
       <section className="container mx-auto px-4 lg:px-8 mt-6">
         <div className="relative overflow-hidden rounded-2xl shadow-lg bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#9333EA]">
           <div className="absolute -top-8 -right-8 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
@@ -296,8 +296,8 @@ const Home = () => {
               <div className="text-white/90 text-[10px] sm:text-xs uppercase tracking-widest font-semibold mt-0.5">20% off · no autoship</div>
             </div>
             <div className="flex-1 text-center sm:text-left">
-              <h2 className="text-white font-extrabold text-xl sm:text-2xl leading-tight">Chewy forces Autoship. We give you freedom.</h2>
-              <p className="text-white/90 text-sm sm:text-base mt-1">Same vet-quality brands. Same price. No subscription lock-in. Max $10 off your first order.</p>
+              <h2 className="text-white font-extrabold text-xl sm:text-2xl leading-tight">Most online pet stores force a subscription for their best prices. We don't.</h2>
+              <p className="text-white/90 text-sm sm:text-base mt-1">Same vet-quality brands. Same great price on every order — first, tenth, or one-time. No subscription lock-in. Max $10 off your first order.</p>
             </div>
             <Link
               to="/products"

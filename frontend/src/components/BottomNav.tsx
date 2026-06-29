@@ -4,7 +4,7 @@ import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 
 // Mobile bottom navigation bar — hidden on lg+ screens
-// Matches Chewy/Petco mobile UX pattern
+// Matches major retailer mobile UX pattern
 
 const HIDE_ON = ['/cart', '/checkout', '/login', '/register', '/checkout'];
 
