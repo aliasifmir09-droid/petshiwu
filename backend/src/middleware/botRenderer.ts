@@ -327,6 +327,14 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     title: 'Sell With Us — Partner with Petshiwu',
     description: 'List your pet products on Petshiwu and reach thousands of NYC pet owners. Join our growing marketplace of premium pet brands.',
   },
+  '/press': {
+    title: 'Petshiwu Press & Newsroom | NYC Pet Supplier Coverage',
+    description: 'Press releases, news coverage, and media resources for Petshiwu — Jackson Heights, Queens-based pet supply delivery service competing with Chewy via no-autoship FREEDOM20 model.',
+  },
+  '/symptom-checker': {
+    title: 'Pet Symptom Checker | Is It an Emergency? NYC Vet Triage Tool',
+    description: 'Free interactive pet symptom checker. Answer a few questions and we will help you decide: monitor at home, call your vet, or go to the emergency vet. For dogs and cats.',
+  },
 
   // ── NYC Borough Landing Pages ─────────────────────────────────────────────
   '/pet-supplies-queens-ny': {

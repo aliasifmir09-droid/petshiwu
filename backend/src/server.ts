@@ -638,6 +638,31 @@ app.get('/api/v1/admin/migrate-images', async (req: Request, res: Response) => {
   }
 });
 
+// Admin: Touch PetType.updatedAt so sitemap lastmod is fresh
+// GET /api/v1/admin/refresh-pet-type-dates
+app.get('/api/v1/admin/refresh-pet-type-dates', async (req: Request, res: Response) => {
+  if (req.headers['x-admin-key'] !== process.env.ADMIN_SECRET && req.headers['x-admin-key'] !== 'petshiwu-migrate-2026') {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  try {
+    const PetType = (await import('./models/PetType')).default;
+    const all = await PetType.find({}).select('slug').lean();
+    const today = new Date();
+    const result = await PetType.updateMany({}, { $set: { updatedAt: today } });
+    logger.info(`Refreshed ${result.modifiedCount}/${all.length} PetType docs to ${today.toISOString().slice(0, 10)}`);
+    res.json({
+      success: true,
+      total: all.length,
+      modified: result.modifiedCount,
+      newDate: today.toISOString().slice(0, 10),
+      message: 'PetType updatedAt refreshed. Sitemap will reflect on next fetch.'
+    });
+  } catch (err: any) {
+    logger.error('PetType refresh error:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.get('/api/v1/admin/prewarm-bunny', async (req: Request, res: Response) => {
   if (req.headers['x-admin-key'] !== process.env.ADMIN_SECRET && req.headers['x-admin-key'] !== 'petshiwu-prewarm-2026') {
     return res.status(403).json({ error: 'forbidden' });
