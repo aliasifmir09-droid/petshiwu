@@ -80,7 +80,7 @@ const Footer = () => {
               <li><Link to="/bird" className="hover:text-white transition-colors">🐦 Birds</Link></li>
               <li><Link to="/reptile" className="hover:text-white transition-colors">🦎 Reptiles</Link></li>
               <li><Link to="/fish" className="hover:text-white transition-colors">🐟 Fish</Link></li>
-              <li><Link to="/small-pet" className="hover:text-white transition-colors">🐹 Small Pets</Link></li>
+              <li><Link to="/small-animal" className="hover:text-white transition-colors">🐹 Small Pets</Link></li>
             </ul>
           </div>
 
