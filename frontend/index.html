@@ -57,7 +57,7 @@
     <link rel="preload" as="image" href="/logo.png" type="image/png" fetchpriority="high" />
     <link rel="dns-prefetch" href="https://petshiwu.onrender.com">
     <link rel="preconnect" href="https://petshiwu.onrender.com" crossorigin>
-    <!-- Cloudinary removed — Bunny CDN is now the image host -->
+    <!-- Bunny CDN is the image host -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all';this.onload=null">
@@ -71,7 +71,6 @@
          ============================================ -->
     <title>Premium Pet Food & Supplies | Petshiwu NYC</title>
     <meta name="description" content="Premium pet food, toys & supplies for dogs, cats, birds, reptiles & more. Trusted brands, fast NYC delivery. Free shipping on orders over $49.">
-    <meta name="keywords" content="premium pet food, dog food, cat food, reptile supplies, bird food, pet toys, pet accessories, online pet store USA, grain free dog food, raw cat food, pet vitamins, Petshiwu">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="googlebot" content="index, follow">
     <meta name="author" content="Petshiwu">
@@ -86,7 +85,8 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.petshiwu.com/" />
     <link rel="alternate" hreflang="en-US" href="https://www.petshiwu.com/" />
-    <!-- og:url is set dynamically per-page by the React SEO component via react-helmet-async -->
+    <link rel="alternate" hreflang="x-default" href="https://www.petshiwu.com/" />
+    <!-- hreflang and canonical are set dynamically per-page by the bot renderer and React SEO component -->
     <meta property="og:title" content="Premium Pet Food & Supplies | Petshiwu NYC">
     <meta property="og:description" content="Premium pet food, toys & supplies for dogs, cats, birds, reptiles & more. Trusted brands, fast NYC delivery. Free shipping over $49.">
     <meta property="og:image" content="https://www.petshiwu.com/banner-one-stop.jpg">
@@ -218,10 +218,10 @@
         <a href="/" class="ps-logo">Pet<span>Shiwu</span></a>
         <nav aria-label="Main navigation">
           <ul class="ps-nav">
-            <li><a href="/dogs">Dogs</a></li>
-            <li><a href="/cats">Cats</a></li>
-            <li><a href="/birds">Birds</a></li>
-            <li><a href="/reptiles">Reptiles</a></li>
+            <li><a href="/dog">Dogs</a></li>
+            <li><a href="/cat">Cats</a></li>
+            <li><a href="/bird">Birds</a></li>
+            <li><a href="/reptile">Reptiles</a></li>
             <li><a href="/products">All Products</a></li>
             <li><a href="/learning">Pet Care</a></li>
             <li><a href="/about">About</a></li>
@@ -242,19 +242,19 @@
       <section class="ps-section">
         <h2>Shop by Pet Type</h2>
         <div class="ps-pets">
-          <a href="/dogs" class="ps-pet">
+          <a href="/dog" class="ps-pet">
             <div class="ps-pet-icon">🐕</div>Dogs
           </a>
-          <a href="/cats" class="ps-pet">
+          <a href="/cat" class="ps-pet">
             <div class="ps-pet-icon">🐈</div>Cats
           </a>
-          <a href="/birds" class="ps-pet">
+          <a href="/bird" class="ps-pet">
             <div class="ps-pet-icon">🦜</div>Birds
           </a>
-          <a href="/reptiles" class="ps-pet">
+          <a href="/reptile" class="ps-pet">
             <div class="ps-pet-icon">🦎</div>Reptiles
           </a>
-          <a href="/small-animals" class="ps-pet">
+          <a href="/small-animal" class="ps-pet">
             <div class="ps-pet-icon">🐹</div>Small Animals
           </a>
           <a href="/fish" class="ps-pet">
@@ -267,14 +267,14 @@
       <section class="ps-section" style="padding-top:0">
         <h2>Popular Categories</h2>
         <div class="ps-cats">
-          <a href="/dogs/food" class="ps-cat"><span class="ps-cat-dot"></span>Dog Food</a>
-          <a href="/dogs/treats" class="ps-cat"><span class="ps-cat-dot"></span>Dog Treats</a>
-          <a href="/dogs/toys" class="ps-cat"><span class="ps-cat-dot"></span>Dog Toys</a>
-          <a href="/cats/food" class="ps-cat"><span class="ps-cat-dot"></span>Cat Food</a>
-          <a href="/cats/litter" class="ps-cat"><span class="ps-cat-dot"></span>Cat Litter</a>
-          <a href="/cats/toys" class="ps-cat"><span class="ps-cat-dot"></span>Cat Toys</a>
-          <a href="/reptiles/food" class="ps-cat"><span class="ps-cat-dot"></span>Reptile Food</a>
-          <a href="/birds/food" class="ps-cat"><span class="ps-cat-dot"></span>Bird Food</a>
+          <a href="/dog/food" class="ps-cat"><span class="ps-cat-dot"></span>Dog Food</a>
+          <a href="/dog/treats" class="ps-cat"><span class="ps-cat-dot"></span>Dog Treats</a>
+          <a href="/dog/toys" class="ps-cat"><span class="ps-cat-dot"></span>Dog Toys</a>
+          <a href="/cat/food" class="ps-cat"><span class="ps-cat-dot"></span>Cat Food</a>
+          <a href="/cat/litter" class="ps-cat"><span class="ps-cat-dot"></span>Cat Litter</a>
+          <a href="/cat/toys" class="ps-cat"><span class="ps-cat-dot"></span>Cat Toys</a>
+          <a href="/reptile/food" class="ps-cat"><span class="ps-cat-dot"></span>Reptile Food</a>
+          <a href="/bird/food" class="ps-cat"><span class="ps-cat-dot"></span>Bird Food</a>
           <a href="/products?tag=vitamins" class="ps-cat"><span class="ps-cat-dot"></span>Pet Vitamins</a>
           <a href="/products?tag=grooming" class="ps-cat"><span class="ps-cat-dot"></span>Grooming</a>
           <a href="/products?tag=accessories" class="ps-cat"><span class="ps-cat-dot"></span>Accessories</a>
@@ -332,7 +332,7 @@
               <li><a href="/bird">Bird Supplies</a></li>
               <li><a href="/reptile">Reptile Supplies</a></li>
               <li><a href="/fish">Fish Supplies</a></li>
-              <li><a href="/small-pet">Small Pet Supplies</a></li>
+              <li><a href="/small-animal">Small Pet Supplies</a></li>
               <li><a href="/products">All Products</a></li>
             </ul>
           </div>
@@ -403,10 +403,7 @@
             var parts = path.replace(/\/$/, '').split('/').filter(Boolean);
             var slug = parts[parts.length - 1] || '';
             var decoded = slug
-              .replace(/039/g, "'")
-              .replace(/ampampamp/g, '&')
-              .replace(/ampamp/g, '&')
-              .replace(/amp/g, '&')
+              .replace(/&amp;/g, '&')
               .replace(/-{2,}/g, ' - ')
               .replace(/-/g, ' ')
               .replace(/\b\w/g, function(c){ return c.toUpperCase(); });

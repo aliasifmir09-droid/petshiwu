@@ -171,6 +171,10 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     title: 'Small Animal Food, Cages & Accessories | Petshiwu',
     description: 'Shop food, cages, bedding, and toys for hamsters, rabbits, guinea pigs, and more. Fast NYC delivery. Free shipping over $49.',
   },
+  '/small-pet': {
+    title: 'Small Animal Food, Cages & Accessories | Petshiwu',
+    description: 'Shop food, cages, bedding, and toys for hamsters, rabbits, guinea pigs, and more. Fast NYC delivery. Free shipping over $49.',
+  },
   '/about': {
     title: 'About Petshiwu — NYC Pet Supply Delivery',
     description: 'Petshiwu is your trusted NYC pet supply delivery service based in Jackson Heights, Queens. Serving all five boroughs with premium pet products.',
@@ -405,6 +409,46 @@ const injectOgTags = (html: string, title: string, description: string, url: str
 };
 
 /**
+ * Replace hreflang tags to point to the current page URL (self-referential).
+ * The static template has hreflang pointing to the homepage — this fixes it
+ * so every page declares itself as the en-US and x-default alternate.
+ */
+const injectHreflang = (html: string, pageUrl: string): string => {
+  let out = html;
+  out = out.replace(
+    /(<link\s+rel=["']alternate["']\s+hrefLang=["']en-US["']\s+href=["'])[^"']*(")/i,
+    `$1${esc(pageUrl)}$2`
+  );
+  out = out.replace(
+    /(<link\s+rel=["']alternate["']\s+hrefLang=["']x-default["']\s+href=["'])[^"']*(")/i,
+    `$1${esc(pageUrl)}$2`
+  );
+  return out;
+};
+
+/**
+ * Update og:type and og:image for product pages.
+ * Product pages should use og:type=product and the product's image.
+ */
+const injectProductOgType = (html: string, imageUrl?: string): string => {
+  let out = html.replace(
+    /(<meta\s+property="og:type"\s+content=")[^"]*(")/i,
+    `$1product$2`
+  );
+  if (imageUrl) {
+    out = out.replace(
+      /(<meta\s+property="og:image"\s+content=")[^"]*(")/i,
+      `$1${esc(imageUrl)}$2`
+    );
+    out = out.replace(
+      /(<meta\s+name="twitter:image"\s+content=")[^"]*(")/i,
+      `$1${esc(imageUrl)}$2`
+    );
+  }
+  return out;
+};
+
+/**
  * Build HTML for pages not backed by DB data — injects correct canonical,
  * title, description, AND og/twitter tags so every page shares correctly.
  */
@@ -427,7 +471,7 @@ const buildGenericPageHtml = (template: string, reqPath: string): string => {
   // This means even if MongoDB is unreachable, every product page gets a distinct
   // title that Google can use for indexing.
   const segments = cleanPath.replace(/^\//, '').split('/').filter(Boolean);
-  const PET_TYPES = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet']);
+  const PET_TYPES = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet', 'small-animal']);
   const isProductPath = segments.length >= 3 && PET_TYPES.has(segments[0]);
 
   let meta = STATIC_PAGES[cleanPath];
@@ -453,6 +497,60 @@ const buildGenericPageHtml = (template: string, reqPath: string): string => {
   html = injectDescription(html, finalMeta.description);
   html = injectCanonical(html, canonicalUrl);
   html = injectOgTags(html, finalMeta.title, finalMeta.description, canonicalUrl);
+  html = injectHreflang(html, canonicalUrl);
+
+  // Build breadcrumb schema for this page
+  const breadcrumbSegments: Array<{ name: string; url: string }> = [
+    { name: 'Home', url: BASE },
+  ];
+  if (segments.length > 0) {
+    // Add intermediate breadcrumbs for multi-segment paths
+    if (isProductPath) {
+      const petType = segments[0];
+      const petLabel = petType === 'cat' ? 'Cat' : petType === 'dog' ? 'Dog' : petType === 'bird' ? 'Bird' : petType === 'reptile' ? 'Reptile' : petType === 'fish' ? 'Fish' : 'Pet';
+      breadcrumbSegments.push({ name: `${petLabel}s`, url: `${BASE}/${petType}` });
+      if (segments.length >= 3) {
+        const categorySlug = segments[1];
+        breadcrumbSegments.push({ name: slugToTitle(categorySlug), url: `${BASE}/${petType}/${categorySlug}` });
+      }
+      breadcrumbSegments.push({ name: finalMeta.title.replace(/\s*\|\s*Petshiwu\s*$/i, ''), url: canonicalUrl });
+    } else if (segments.length === 1) {
+      // Top-level page like /about, /learning, /dog, /cat
+      breadcrumbSegments.push({ name: finalMeta.title.replace(/\s*\|\s*Petshiwu\s*$/i, '').replace(/\s*—\s*.*$/, ''), url: canonicalUrl });
+    } else {
+      // Other multi-segment paths
+      breadcrumbSegments.push({ name: finalMeta.title.replace(/\s*\|\s*Petshiwu\s*$/i, '').replace(/\s*—\s*.*$/, ''), url: canonicalUrl });
+    }
+  }
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: breadcrumbSegments.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      ...(index < breadcrumbSegments.length - 1 ? { item: item.url } : {}),
+    })),
+  };
+
+  // Inject breadcrumb schema before </head>
+  html = injectBeforeHeadClose(html, `\n  <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>`);
+
+  // Inject page-specific H1 (replaces hardcoded homepage H1 in static shell).
+  // On the homepage, keep the existing hero H1. On all other pages, replace it
+  // with a page-specific H1 derived from the title so crawlers see correct content.
+  if (cleanPath !== '/' && cleanPath !== '') {
+    // Strip " | Petshiwu" suffix for the H1 to keep it clean
+    const h1Text = finalMeta.title.replace(/\s*\|\s*Petshiwu\s*$/i, '').replace(/\s*—\s*.*$/, '');
+    html = injectH1(html, h1Text);
+  }
+
+  // For product paths, update og:type to "product" so social sharing works correctly
+  if (isProductPath) {
+    html = injectProductOgType(html);
+  }
+
   return html;
 };
 
@@ -828,6 +926,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
   html = injectCanonical(html, productUrl);
+  html = injectHreflang(html, productUrl);
   html = injectBeforeHeadClose(html, injectedTags);
   // Replace entire root div with full crawlable body content (includes H1)
   html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${bodyContent}</div>`);
@@ -945,6 +1044,7 @@ const buildBlogHtml = (template: string, blog: any): string => {
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
+  html = injectHreflang(html, url);
   html = injectBeforeHeadClose(html, injectedTags);
   html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${blogBodyContent}</div>`);
   if (!html.includes(blogBodyContent)) {
@@ -1013,6 +1113,7 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
+  html = injectHreflang(html, url);
   html = injectBeforeHeadClose(html, injectedTags);
   html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${guideBodyContent}</div>`);
   if (!html.includes(guideBodyContent)) {
@@ -1072,6 +1173,7 @@ const buildCategoryHtml = (template: string, category: any, petType?: string, ca
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
+  html = injectHreflang(html, url);
   html = injectBeforeHeadClose(html, injectedTags);
   html = injectH1(html, catName);
   return html;
@@ -1189,6 +1291,7 @@ const buildNeighborhoodHtml = (
 
   let html = template;
   html = injectCanonical(html, pageUrl);
+  html = injectHreflang(html, pageUrl);
   html = injectTitle(html, title);
   html = injectDescription(html, description);
   html = injectBeforeHeadClose(html, injectedTags);
@@ -1371,6 +1474,7 @@ const buildHomepageHtml = (template: string): string => {
   html = injectDescription(html, meta.description);
   html = injectCanonical(html, pageUrl);
   html = injectOgTags(html, meta.title, meta.description, pageUrl);
+  html = injectHreflang(html, pageUrl);
   html = injectBeforeHeadClose(html, injectedTags);
   return html;
 };
@@ -1413,6 +1517,8 @@ const buildProductListHtml = async (template: string): Promise<string> => {
   html = injectTitle(html, meta.title);
   html = injectDescription(html, meta.description);
   html = injectCanonical(html, canonicalUrl);
+  html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
+  html = injectHreflang(html, canonicalUrl);
   // Inject product list into body for Google to crawl
   html = html.replace(/<div id="root">.*?<\/div>/s, `<div id="root">${bodyContent}</div>`) ||
          html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);

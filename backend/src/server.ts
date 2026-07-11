@@ -117,6 +117,7 @@ import { generateSitemap } from './controllers/sitemapController';
 import { createBotRenderer } from './middleware/botRenderer';
 import { slugRedirectMiddleware } from './middleware/slugRedirect';
 import { blogRedirectMiddleware } from './middleware/blogRedirect';
+import { pluralRedirectMiddleware } from './middleware/pluralRedirect';
 
 connectDatabase().catch((error: unknown) => {
   const errorMessage = error instanceof Error ? error.message : String(error);
@@ -755,6 +756,10 @@ app.use(blogRedirectMiddleware);
 // Uses legacySlugs[] array populated by the fixProductSlugs migration script.
 // Fast in-process cache — only hits DB on first encounter of each old slug.
 app.use(slugRedirectMiddleware);
+
+// Plural → singular 301 redirects: /dogs → /dog, /cats → /cat, etc.
+// Eliminates duplicate content from inconsistent URL structures.
+app.use(pluralRedirectMiddleware);
 
 // Bot renderer: intercept search engine crawlers before the SPA catch-all.
 // Serves pre-populated HTML with product/blog/category meta + JSON-LD schema.
