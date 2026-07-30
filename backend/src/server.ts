@@ -645,6 +645,22 @@ app.get('/api/v1/admin/migrate-slugs', async (req: Request, res: Response) => {
   if (req.headers['x-admin-key'] !== process.env.ADMIN_SECRET && req.headers['x-admin-key'] !== 'petshiwu-migrate-2026') {
     return res.status(403).json({ error: 'forbidden' });
   }
+  // Quick debug endpoint to count bad slugs (fast)
+  if (req.query.mode === 'count') {
+    try {
+      const db = (await import('mongoose')).default.connection.db!;
+      const [pCount, cCount, bCount] = await Promise.all([
+        db.collection('products').countDocuments({ slug: { $regex: '039|ampamp|ampquot|^amp-|amp-|amp$|--' } }),
+        db.collection('categories').countDocuments({ slug: { $regex: '039|ampamp|ampquot|^amp-|amp-|amp$|--' } }),
+        db.collection('blogs').countDocuments({ slug: { $regex: '039|ampamp|ampquot|^amp-|amp-|amp$|--' } })
+      ]);
+      res.json({ products: pCount, categories: cCount, blogs: bCount });
+    } catch (err: any) {
+      logger.error('[migrate-slugs count] failed:', err);
+      res.status(500).json({ error: err.message });
+    }
+    return;
+  }
   try {
     const { migrateAllSlugs } = await import('./controllers/migrationController');
     await migrateAllSlugs(req as any, res as any);
