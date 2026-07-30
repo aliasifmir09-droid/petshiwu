@@ -58,7 +58,7 @@ export const migrateAllSlugs = async (req: Request, res: Response): Promise<void
 
       await products.updateOne(
         { _id: p._id },
-        { $set: { slug: newSlug, legacySlugs }, $addToSet: { legacySlugs: { $each: legacySlugs } } }
+        { $set: { slug: newSlug, legacySlugs } }
       );
       pUpdated++;
     }
@@ -87,7 +87,7 @@ export const migrateAllSlugs = async (req: Request, res: Response): Promise<void
 
       await categories.updateOne(
         { _id: c._id },
-        { $set: { slug: newSlug }, $addToSet: { legacySlugs: { $each: legacySlugs } } }
+        { $set: { slug: newSlug, legacySlugs } }
       );
       cUpdated++;
     }
@@ -116,7 +116,7 @@ export const migrateAllSlugs = async (req: Request, res: Response): Promise<void
         if (!legacySlugs.includes(blog.slug)) legacySlugs.push(blog.slug);
         await blogs.updateOne(
           { _id: blog._id },
-          { $set: { slug: cleaned, legacySlugs }, $addToSet: { legacySlugs: { $each: legacySlugs } } }
+          { $set: { slug: cleaned, legacySlugs } }
         );
         bUpdated++;
       } else {
@@ -128,7 +128,7 @@ export const migrateAllSlugs = async (req: Request, res: Response): Promise<void
           if (!legacySlugs.includes(canonical.slug)) legacySlugs.push(canonical.slug);
           await blogs.updateOne(
             { _id: canonical._id },
-            { $set: { slug: cleaned, legacySlugs }, $addToSet: { legacySlugs: { $each: legacySlugs } } }
+            { $set: { slug: cleaned, legacySlugs } }
           );
           bUpdated++;
         }
