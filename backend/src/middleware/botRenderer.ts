@@ -1432,6 +1432,74 @@ const buildProductListHtml = async (template: string): Promise<string> => {
   return html;
 };
 
+/**
+ * List of URL paths that are valid SPA routes — used to detect unknown URLs
+ * (soft 404 candidates) and return real 404 status instead of generic shell.
+ * Keep in sync with frontend/src/App.tsx routes.
+ */
+const VALID_SPA_PATHS = new Set([
+  '/', '/products', '/cart', '/checkout', '/login', '/register',
+  '/verify-email', '/resend-verification', '/forgot-password', '/reset-password',
+  '/profile', '/orders', '/track-order', '/donate', '/favorites', '/compare',
+  '/returns', '/return-policy', '/addresses', '/stock-alerts', '/search',
+  '/learning', '/care-guides', '/faq', '/symptom-checker', '/about', '/press',
+  '/contact', '/403', '/404', '/privacy', '/privacy-policy', '/terms',
+  '/terms-of-service', '/shipping', '/shipping-policy', '/accessibility',
+  '/shop', '/deals', '/sell-with-us', '/vendors', '/partners', '/investors',
+]);
+
+/**
+ * Returns true if the URL path matches a known SPA route pattern OR a static page
+ * in STATIC_PAGES. Used by the botRenderer to decide whether to return real 404
+ * for unknown URLs (soft 404 fix — GSC reported 843 URLs as soft 404).
+ */
+const isKnownRoute = (pathname: string): boolean => {
+  const cleanPath = pathname.split('?')[0].replace(/\/$/, '') || '/';
+  if (VALID_SPA_PATHS.has(cleanPath)) return true;
+  if (STATIC_PAGES[cleanPath]) return true;
+  // Known patterns: /learning/:slug, /care-guides/:slug, /category/:slug,
+  // /products/:slug, /blog/:slug (legacy redirect target), /:petType (with valid pet type)
+  const segments = cleanPath.replace(/^\//, '').split('/').filter(Boolean);
+  if (segments.length === 0) return true; // homepage
+  if (segments.length === 1) {
+    // single segment routes like /dog, /cat (pet types)
+    const petTypes = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet']);
+    if (petTypes.has(segments[0])) return true;
+    // neighborhood×category page registry
+    if (NEIGHBORHOOD_PAGE_REGISTRY.has(segments[0])) return true;
+    return false;
+  }
+  if (segments.length === 2) {
+    // /learning/:slug, /care-guides/:slug, /category/:slug, /products/:slug
+    const validPrefixes = ['learning', 'care-guides', 'category', 'products', 'blog'];
+    if (validPrefixes.includes(segments[0])) return true;
+    // /:petType/:category — e.g. /dog/food
+    const petTypes = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet']);
+    if (petTypes.has(segments[0])) return true;
+    return false;
+  }
+  // 3+ segments — assume /:petType/:category/:slug (product URL)
+  return true;
+};
+
+/**
+ * Build a real 404 HTML response with noindex. Used for unknown URLs so Google
+ * can properly remove them from the index (instead of treating them as soft 404).
+ */
+const build404Html = (template: string): string => {
+  const title = 'Page Not Found | Petshiwu';
+  const description = 'The page you are looking for could not be found. Browse our pet supplies or use the search above.';
+  let html = template;
+  html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`);
+  html = html.replace(
+    /<meta\s+name="description"\s+content="[^"]*"/,
+    `<meta name="description" content="${esc(description)}"`
+  );
+  html = html.replace(/<meta\s+name="robots"\s+content="[^"]*"/, '<meta name="robots" content="noindex, nofollow, noarchive"');
+  html = html.replace('</head>', '<link rel="canonical" href="https://www.petshiwu.com/" />\n</head>');
+  return html;
+};
+
 export const createBotRenderer = (distPath: string) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     // Only intercept GET requests for HTML pages
@@ -1448,6 +1516,21 @@ export const createBotRenderer = (distPath: string) => {
 
     try {
       let html: string | null = null;
+
+      // SOFT 404 FIX: Return real 404 for unknown URLs (bot or not). Previously, the
+      // botRenderer served generic shell HTML with 200 OK for any path, which Google
+      // interpreted as soft 404 (843 URLs flagged in GSC). Now we return proper 404
+      // status + noindex for unknown paths so Google can remove them cleanly.
+      if (!isKnownRoute(req.path)) {
+        const notFoundHtml = build404Html(template);
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.status(404);
+        res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+        if (bot) res.setHeader('X-Bot-Rendered', '404');
+        res.setHeader('Cache-Control', 'public, max-age=3600');
+        res.send(notFoundHtml);
+        return;
+      }
 
       // DB-backed page enrichment — bots only (keeps non-bot requests fast with no DB queries)
       if (bot) {
