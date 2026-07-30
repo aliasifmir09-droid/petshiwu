@@ -35,6 +35,11 @@ const BOT_UA_RE =
 
 const isBot = (ua: string): boolean => BOT_UA_RE.test(ua);
 
+const hasQueryString = (req: Request): boolean =>
+  !!(req.originalUrl && req.originalUrl.includes('?')) ||
+  !!(req.url && req.url.includes('?')) ||
+  (typeof req.query === 'object' && Object.keys(req.query).length > 0);
+
 // ---------------------------------------------------------------------------
 // HTML template cache (read once at startup, reuse)
 // ---------------------------------------------------------------------------
@@ -403,9 +408,11 @@ const slugToTitle = (slug: string): string =>
     .map(w => w.length > 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w)
     .join(' ');
 
-const buildGenericPageHtml = (template: string, reqPath: string): string => {
+const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl?: string): string => {
   const cleanPath = reqPath.split('?')[0]; // strip query string from canonical
-  const hasQueryString = reqPath !== cleanPath;
+  // FIX: Use req.originalUrl (or req.url) for query detection — req.path strips query
+  // in Express, so the previous `hasQueryString = reqPath !== cleanPath` was always false.
+  const hasQueryString = !!(reqOriginalUrl && reqOriginalUrl.includes('?'));
   const canonicalUrl = cleanPath === '/' ? BASE : `${BASE}${cleanPath}`;
 
   // For product URLs (3+ segments like /:petType/:category/:product-slug),
@@ -1488,7 +1495,7 @@ export const createBotRenderer = (distPath: string) => {
       // This fixes "all pages same canonical / same title / same meta description" for
       // non-bot auditing tools and regular browsers alike.
       if (!html) {
-        html = buildGenericPageHtml(template, req.path);
+        html = buildGenericPageHtml(template, req.path, req.originalUrl);
       }
 
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -1500,13 +1507,20 @@ export const createBotRenderer = (distPath: string) => {
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
       }
+      // FIX: Set X-Robots-Tag in the response right before send() so it's preserved
+      // even if Cloudflare caches the response at the edge. The middleware in
+      // server.ts also sets this, but moving it here ensures it's set per-route
+      // at the point of response, not relying on middleware chain ordering.
+      if (hasQueryString(req)) {
+        res.setHeader('X-Robots-Tag', 'noindex, follow, max-image-preview:large');
+      }
       res.send(html);
       return;
     } catch (err: any) {
       logger.warn(`[botRenderer] Error rendering ${req.path}:`, err?.message);
       // Even on error, try to serve correct canonical rather than raw index.html
       try {
-        const fallback = buildGenericPageHtml(template, req.path);
+        const fallback = buildGenericPageHtml(template, req.path, req.originalUrl);
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         if (bot) res.setHeader('X-Bot-Rendered', 'fallback');
