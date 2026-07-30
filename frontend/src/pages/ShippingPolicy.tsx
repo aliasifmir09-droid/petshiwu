@@ -6,7 +6,7 @@ const ShippingPolicy = () => {
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <SEO
         title="Shipping Information | Petshiwu — Same-Day NYC Delivery"
-        description="Petshiwu ships pet supplies across all 50 US states. Same-day delivery available across NYC: order before 3 PM EST, delivered before 11 PM. Free shipping over $49. Store launches July 15, 2026."
+        description="Petshiwu ships pet supplies across all 50 US states. Same-day delivery available across NYC: order before 3 PM EST, delivered before 11 PM. Free shipping over $49. Store launches August 28, 2026."
         url="/shipping"
       />
 
@@ -22,7 +22,7 @@ const ShippingPolicy = () => {
 
       {/* Launch countdown banner */}
       <div className="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-5 mb-10 text-center">
-        <div className="text-xl font-black text-yellow-900 mb-1">🚀 Petshiwu Launches July 15, 2026</div>
+        <div className="text-xl font-black text-yellow-900 mb-1">🚀 Petshiwu Launches August 28, 2026</div>
         <p className="text-yellow-800">Be the first to order. Sign up for early access + launch-day discounts.</p>
       </div>
 
@@ -151,8 +151,8 @@ const ShippingPolicy = () => {
         </section>
 
         <section className="bg-gradient-to-r from-blue-50 to-green-50 border-2 border-blue-200 rounded-2xl p-6 text-center">
-          <h2 className="text-2xl font-black text-gray-900 mb-2">🚀 Launching July 15, 2026</h2>
-          <p className="text-gray-700 mb-3">Petshiwu officially opens to the public on July 15, 2026.</p>
+          <h2 className="text-2xl font-black text-gray-900 mb-2">🚀 Launching August 28, 2026</h2>
+          <p className="text-gray-700 mb-3">Petshiwu officially opens to the public on August 28, 2026.</p>
           <p className="text-gray-700">Be the first to order and lock in launch-day pricing + exclusive early-access discounts.</p>
           <Link to="/products" className="inline-block mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-full transition-colors">
             Shop Pet Supplies

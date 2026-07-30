@@ -57,7 +57,7 @@
 > 
 > Hi [Name],
 > 
-> Just bumping this. We've grown from 0 to 900+ blog articles targeting NYC pet parents and shipped 1,000+ same-day deliveries in our first quarter. Happy to provide founder interview, photos, or exclusive launch-day access (July 15).
+> Just bumping this. We've grown from 0 to 900+ blog articles targeting NYC pet parents and shipped 1,000+ same-day deliveries in our first quarter. Happy to provide founder interview, photos, or exclusive launch-day access (August 28).
 > 
 > Let me know if interested.
 > 
