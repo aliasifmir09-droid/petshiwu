@@ -203,26 +203,11 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     title: 'Shipping Policy | Petshiwu',
     description: 'Petshiwu ships nationwide with free shipping on orders over $49. Same-day delivery available in select NYC neighborhoods.',
   },
-  '/dogs': {
-    title: 'Dog Food, Treats, Toys & Supplies | Petshiwu',
-    description: 'Shop premium dog food, treats, toys, and accessories. Top brands — Purina, Blue Buffalo, Royal Canin. Fast NYC delivery. Free shipping over $49.',
-  },
-  '/cats': {
-    title: 'Cat Food, Litter, Toys & Accessories | Petshiwu',
-    description: 'Discover premium cat food, litter, toys, and accessories. Top brands delivered fast to Queens, Brooklyn, Manhattan & all of NYC. Free shipping over $49.',
-  },
-  '/birds': {
-    title: 'Bird Food, Cages & Accessories | Petshiwu',
-    description: 'Shop bird food, cages, perches, and accessories for all bird species. Premium brands, fast NYC delivery. Free shipping over $49.',
-  },
-  '/reptiles': {
-    title: 'Reptile Food, Terrariums & Supplies | Petshiwu',
-    description: 'Shop reptile food, terrariums, heating, and accessories for snakes, lizards, and turtles. Fast NYC delivery. Free shipping over $49.',
-  },
-  '/small-animals': {
-    title: 'Small Animal Food, Cages & Accessories | Petshiwu',
-    description: 'Shop food, cages, bedding, and toys for hamsters, rabbits, guinea pigs, and more. Fast NYC delivery. Free shipping over $49.',
-  },
+  // FIX: Plural pet-type entries REMOVED. These (/dogs, /cats, /birds, /reptiles,
+  // /small-animals) used to self-canonicalize with duplicate content vs. the real
+  // singular routes (/dog, /cat, /bird, /reptile, /small-pet). They are now handled
+  // by a 301 redirect middleware in server.ts that sends them to the canonical
+  // singular URLs before the botRenderer runs.
   '/fish-tanks': {
     title: 'Aquarium Supplies & Fish Tanks | Petshiwu',
     description: 'Shop aquariums, filters, and accessories for freshwater and saltwater fish. Fast NYC delivery. Free shipping on orders over $49.',
@@ -420,6 +405,7 @@ const slugToTitle = (slug: string): string =>
 
 const buildGenericPageHtml = (template: string, reqPath: string): string => {
   const cleanPath = reqPath.split('?')[0]; // strip query string from canonical
+  const hasQueryString = reqPath !== cleanPath;
   const canonicalUrl = cleanPath === '/' ? BASE : `${BASE}${cleanPath}`;
 
   // For product URLs (3+ segments like /:petType/:category/:product-slug),
@@ -453,6 +439,26 @@ const buildGenericPageHtml = (template: string, reqPath: string): string => {
   html = injectDescription(html, finalMeta.description);
   html = injectCanonical(html, canonicalUrl);
   html = injectOgTags(html, finalMeta.title, finalMeta.description, canonicalUrl);
+  // FIX: Inject X-Robots-Tag noindex for any URL with query string. Filter/pagination/sort
+  // variants are duplicates of the base URL — by stripping them from canonical we
+  // consolidate, but Google also needs to know NOT to index them. The frontend
+  // React components (PetType, Learning, Products) already add noindex via React
+  // Helmet — but that's post-hydration, and Google may pick up the first-wave HTML
+  // canonical. X-Robots-Tag is the canonical noindex signal in HTTP headers, and
+  // works even if the client-side JS hasn't run.
+  if (hasQueryString) {
+    html = html.replace(
+      /<meta name="robots" content="[^"]*"\s*\/?>/,
+      '<meta name="robots" content="noindex, follow, max-image-preview:large" />'
+    );
+    // If the template has no robots meta, inject one before </head>
+    if (!/<meta\s+name=["']robots["']/i.test(html)) {
+      html = html.replace(
+        '</head>',
+        '<meta name="robots" content="noindex, follow, max-image-preview:large" />\n</head>'
+      );
+    }
+  }
   return html;
 };
 

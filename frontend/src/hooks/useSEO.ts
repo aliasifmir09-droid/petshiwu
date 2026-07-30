@@ -49,9 +49,14 @@ export const useSEO = (options: UseSEOOptions = {}) => {
     additionalMeta = {}
   } = options;
 
+  // FIX 4: Strip query string from canonical. Filtered/paginated/sorted/search URLs
+  // (e.g. /dog?page=2&brand=Purina) MUST canonicalize to the base URL (/dog) so
+  // Google consolidates all variants under one master URL. Otherwise each filter
+  // combination becomes a self-canonicalized "duplicate without user-selected canonical"
+  // — see GSC Page Indexing report (4,810+ duplicates).
   const canonicalUrl = useMemo(
-    () => generateCanonicalUrl(location.pathname + location.search),
-    [location.pathname, location.search]
+    () => generateCanonicalUrl(location.pathname),
+    [location.pathname]
   );
 
   const seoTitle = useMemo(

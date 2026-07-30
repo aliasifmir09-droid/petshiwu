@@ -102,6 +102,13 @@ const PetType = () => {
     })) || []
   });
 
+  // Noindex any /petType URL with filter/pagination/sort params.
+  // Resolves GSC "Duplicate without user-selected canonical" — each filter combination
+  // (page=2, brand=Purina, sort=price-asc, inStock=true) was self-canonicalizing.
+  // The canonical now points to the base URL (no query) and these variants are noindexed
+  // so Google doesn't index them at all.
+  const hasFilteredParams = Boolean(brand || minRating || inStock) || page > 1 || (sort && sort !== 'newest');
+
   if (isError) {
     return (
       <div className="container mx-auto px-4 lg:px-8 py-12 text-center">
@@ -124,6 +131,7 @@ const PetType = () => {
         keywords={seoData.keywords}
         url={seoData.canonicalUrl}
         type="website"
+        noindex={hasFilteredParams}
       />
       {seoData.collectionPageSchema && (
         <StructuredData type="collectionPage" data={seoData.collectionPageSchema} />

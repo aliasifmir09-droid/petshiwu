@@ -75,7 +75,13 @@ const Learning = () => {
   if (petType) params.set('petType', petType);
   if (category) params.set('category', category);
   const queryString = params.toString();
-  const seoUrl = `https://www.petshiwu.com/learning${queryString ? `?${queryString}` : ''}`;
+  // FIX: Strip query string from canonical — same logic as useSEO.ts. Filter variants
+  // (/learning?petType=dog, /learning?category=nutrition) MUST canonicalize to /learning
+  // so Google consolidates them. Otherwise each filter combo becomes a self-canonical
+  // duplicate (GSC "Duplicate without user-selected canonical" — 4,810 URLs).
+  const seoUrl = 'https://www.petshiwu.com/learning';
+  // Track if any filter is active — used for noindex on the rendered page.
+  const hasFilteredParams = Boolean(petType || category || searchQuery);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
@@ -83,6 +89,7 @@ const Learning = () => {
         title={`Learning Center${petTypeLabel}${categoryLabel} | Pet Care Tips & Guides`}
         description="Expert pet care advice, tips, and guides for dogs, cats, fish, and more. Learn how to care for your pets with our comprehensive articles."
         url={seoUrl}
+        noindex={hasFilteredParams}
       />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}

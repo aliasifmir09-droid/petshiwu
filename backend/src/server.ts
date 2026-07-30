@@ -804,6 +804,47 @@ app.use(blogRedirectMiddleware);
 // Fast in-process cache — only hits DB on first encounter of each old slug.
 app.use(slugRedirectMiddleware);
 
+// Plural pet-type redirect → singular. The botRenderer's STATIC_PAGES used to include
+// /dogs, /cats, /birds, /reptiles, /small-animals alongside the real /dog, /cat, etc.
+// routes — every plural URL was self-canonicalizing to itself with duplicate content
+// vs. its singular counterpart, contributing to GSC "Alternative page with proper
+// canonical tag" (333) and "Duplicate without user-selected canonical" (4,810).
+// 301 to the canonical singular form so Google consolidates them.
+const PLURAL_TO_SINGULAR: Record<string, string> = {
+  '/dogs': '/dog',
+  '/cats': '/cat',
+  '/birds': '/bird',
+  '/reptiles': '/reptile',
+  '/small-animals': '/small-pet',
+  '/dogs/': '/dog',
+  '/cats/': '/cat',
+  '/birds/': '/bird',
+  '/reptiles/': '/reptile',
+  '/small-animals/': '/small-pet',
+};
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const target = PLURAL_TO_SINGULAR[req.path];
+  if (target) {
+    return res.redirect(301, target);
+  }
+  next();
+});
+
+// Noindex any GET HTML page request with a query string. Sets X-Robots-Tag on the
+// response so Google sees noindex in the HTTP header even before reading body HTML.
+// Filter/pagination/sort/search variants (?page=2&brand=Purina&sort=price-asc) are
+// duplicates of their base URL — we want them consolidated via canonical (botRenderer
+// already strips query from canonical) AND excluded from indexing via this header.
+// Frontend React components also add noindex via Helmet, but X-Robots-Tag is the
+// reliable first-wave signal Google uses when it doesn't render JS.
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.method === 'GET' && !req.path.startsWith('/api') && req.query && Object.keys(req.query).length > 0) {
+    // Only set X-Robots-Tag — don't override other headers botRenderer might set.
+    res.setHeader('X-Robots-Tag', 'noindex, follow, max-image-preview:large');
+  }
+  next();
+});
+
 // Bot renderer: intercept search engine crawlers before the SPA catch-all.
 // Serves pre-populated HTML with product/blog/category meta + JSON-LD schema.
 // Falls through to next() on any failure so real users are never affected.

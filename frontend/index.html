@@ -75,8 +75,12 @@
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="googlebot" content="index, follow">
     <meta name="author" content="Petshiwu">
-    <link rel="canonical" href="https://www.petshiwu.com/" />
-    <!-- canonical tag is set dynamically per-page by the React SEO component via react-helmet-async -->
+    <!-- FIX: Static canonical REMOVED from index.html.
+         Previously this hardcoded https://www.petshiwu.com/ — every page Googlebot fetched
+         (when botRenderer was bypassed, e.g. DB timeout fallback) was self-canonicalizing
+         to the homepage as a duplicate of /, contributing to the 333 "Alternative page
+         with proper canonical tag" count in GSC. Canonical is now injected by botRenderer
+         per route (see backend/src/middleware/botRenderer.ts). -->
     <!-- Google Merchant Center site claim verification -->
     <meta name="google-site-verification" content="merchant-center-5791232179" />
 
@@ -275,10 +279,10 @@
           <a href="/cats/toys" class="ps-cat"><span class="ps-cat-dot"></span>Cat Toys</a>
           <a href="/reptiles/food" class="ps-cat"><span class="ps-cat-dot"></span>Reptile Food</a>
           <a href="/birds/food" class="ps-cat"><span class="ps-cat-dot"></span>Bird Food</a>
-          <a href="/products?tag=vitamins" class="ps-cat"><span class="ps-cat-dot"></span>Pet Vitamins</a>
-          <a href="/products?tag=grooming" class="ps-cat"><span class="ps-cat-dot"></span>Grooming</a>
-          <a href="/products?tag=accessories" class="ps-cat"><span class="ps-cat-dot"></span>Accessories</a>
-          <a href="/products?tag=grain-free" class="ps-cat"><span class="ps-cat-dot"></span>Grain-Free Food</a>
+          <a href="/products" class="ps-cat"><span class="ps-cat-dot"></span>Pet Vitamins</a>
+          <a href="/products" class="ps-cat"><span class="ps-cat-dot"></span>Grooming</a>
+          <a href="/products" class="ps-cat"><span class="ps-cat-dot"></span>Accessories</a>
+          <a href="/products" class="ps-cat"><span class="ps-cat-dot"></span>Grain-Free Food</a>
         </div>
       </section>
 

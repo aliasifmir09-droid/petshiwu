@@ -249,6 +249,7 @@ const Products = () => {
   });
 
   // Noindex any URL with filter/search/pagination params to eliminate 9K duplicate-content entries in GSC.
+  // Includes sort != default (any non-default sort), pagination beyond first page, all filters, and search query.
   const hasFilters = Boolean(petType || category || brand || minRating || inStock || search) || page > 1 || featured || (sort && sort !== 'newest');
 
   return (
