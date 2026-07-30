@@ -46,7 +46,10 @@ export const migrateAllSlugs = async (req: Request, res: Response): Promise<void
       .toArray();
 
     let pUpdated = 0, pCollisions = 0;
+    let pIdx = 0;
+    const pStart = Date.now();
     for (const p of badProducts) {
+      pIdx++;
       const newSlug = cleanSlug(p.slug as string);
       if (newSlug === p.slug) continue;
 
@@ -61,7 +64,11 @@ export const migrateAllSlugs = async (req: Request, res: Response): Promise<void
         { $set: { slug: newSlug, legacySlugs } }
       );
       pUpdated++;
+      if (pIdx % 50 === 0) {
+        logger.info(`[migrate] products progress: ${pIdx}/${badProducts.length}`);
+      }
     }
+    logger.info(`[migrate] products done: ${pUpdated}/${badProducts.length} (${pCollisions} collisions) in ${Date.now() - pStart}ms`);
     summary.products = { found: badProducts.length, updated: pUpdated, collisions: pCollisions };
 
     // ── Categories ─────────────────────────────────────────────────────────

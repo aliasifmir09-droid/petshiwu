@@ -641,11 +641,12 @@ app.get('/api/v1/admin/migrate-images', async (req: Request, res: Response) => {
 // Admin: One-time slug migration — fixes 370+ broken URLs that caused 11k de-indexing on July 15-16.
 // GET /api/v1/admin/migrate-slugs?key=<ADMIN_SECRET>
 // Cleans products + categories + blogs, dedupes 28 duplicate blog records, saves old slugs to legacySlugs[].
+// Runs ASYNC in background — responds immediately to avoid Render request timeout.
 app.get('/api/v1/admin/migrate-slugs', async (req: Request, res: Response) => {
   if (req.headers['x-admin-key'] !== process.env.ADMIN_SECRET && req.headers['x-admin-key'] !== 'petshiwu-migrate-2026') {
     return res.status(403).json({ error: 'forbidden' });
   }
-  // Quick debug endpoint to count bad slugs (fast)
+  // Quick debug: count bad slugs (fast)
   if (req.query.mode === 'count') {
     try {
       const db = (await import('mongoose')).default.connection.db!;
@@ -661,6 +662,21 @@ app.get('/api/v1/admin/migrate-slugs', async (req: Request, res: Response) => {
     }
     return;
   }
+  // Background mode — kick off migration, return immediately
+  if (req.query.mode === 'background') {
+    res.json({ success: true, mode: 'background', status: 'started' });
+    setImmediate(async () => {
+      try {
+        const { migrateAllSlugs } = await import('./controllers/migrationController');
+        await migrateAllSlugs({} as any, {} as any);
+        logger.info('[migrate-slugs] background migration complete');
+      } catch (err: any) {
+        logger.error('[migrate-slugs] background failed:', err);
+      }
+    });
+    return;
+  }
+  // Default: synchronous (may hit Render request timeout for large DBs)
   try {
     const { migrateAllSlugs } = await import('./controllers/migrationController');
     await migrateAllSlugs(req as any, res as any);
