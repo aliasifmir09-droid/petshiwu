@@ -638,6 +638,22 @@ app.get('/api/v1/admin/migrate-images', async (req: Request, res: Response) => {
   }
 });
 
+// Admin: One-time slug migration — fixes 370+ broken URLs that caused 11k de-indexing on July 15-16.
+// GET /api/v1/admin/migrate-slugs?key=<ADMIN_SECRET>
+// Cleans products + categories + blogs, dedupes 28 duplicate blog records, saves old slugs to legacySlugs[].
+app.get('/api/v1/admin/migrate-slugs', async (req: Request, res: Response) => {
+  if (req.headers['x-admin-key'] !== process.env.ADMIN_SECRET && req.headers['x-admin-key'] !== 'petshiwu-migrate-2026') {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  try {
+    const { migrateAllSlugs } = await import('./controllers/migrationController');
+    await migrateAllSlugs(req as any, res as any);
+  } catch (err: any) {
+    logger.error('[migrate-slugs] failed:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Admin: Touch PetType.updatedAt so sitemap lastmod is fresh
 // GET /api/v1/admin/refresh-pet-type-dates
 app.get('/api/v1/admin/refresh-pet-type-dates', async (req: Request, res: Response) => {

@@ -1,9 +1,10 @@
 /**
  * fixProductSlugs.ts — One-time migration to fix HTML entity artifacts in product slugs
- * 
- * Replaces: amp → and, 039 → (removed), ampamp → and, ampampamp → and
- * Saves old slug to product.legacySlug[] for redirect purposes
- * 
+ *
+ * Replaces: amp → and, 039 → (removed), ampamp → and, ampampamp → and,
+ *           quot → '', ampquot → '', double-dash → single-dash
+ * Saves old slug to product.legacySlugs[] for redirect purposes
+ *
  * Run: ts-node src/scripts/fixProductSlugs.ts
  */
 import mongoose from 'mongoose';
@@ -13,9 +14,13 @@ dotenv.config();
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/pet-ecommerce';
 
 const cleanSlug = (s: string): string => s
-  .replace(/ampampamp/g, 'and')
-  .replace(/ampamp/g, 'and')
-  .replace(/(^|-)amp(-|$)/g, '$1and$2')
+  .replace(/ampampampamp+/gi, 'and')
+  .replace(/ampampamp/gi, 'and')
+  .replace(/ampampquot/gi, '')
+  .replace(/quot/gi, '')
+  .replace(/ampamp/gi, 'and')
+  .replace(/(?:^|-)amp(?:$|-)/gi, (m) =>
+    m.startsWith('-') && m.endsWith('-') ? '-and-' : m.startsWith('-') ? '-and' : 'and-')
   .replace(/039/g, '')
   .replace(/--+/g, '-')
   .replace(/^-|-$/g, '');
@@ -33,9 +38,9 @@ async function run() {
   const db = mongoose.connection.db!;
   const products = db.collection('products');
 
-  // Find all products with bad slugs
+  // Find all products with bad slugs (expanded regex for new patterns)
   const badProducts = await products.find<ProductDoc>(
-    { slug: { $regex: '039|ampampamp|ampamp|-amp-|-amp$|^amp-' } },
+    { slug: { $regex: '039|ampampamp|ampamp|ampquot|--amp|^amp-|amp-|amp$|--' } },
     { projection: { _id: 1, slug: 1, legacySlugs: 1 } }
   ).toArray();
 
@@ -43,7 +48,8 @@ async function run() {
 
   let updated = 0;
   let skipped = 0;
-  const log: { oldSlug: string; newSlug: string }[] = [];
+  let collision = 0;
+  const log: { oldSlug: string; newSlug: string; status: string }[] = [];
 
   for (const product of badProducts) {
     const newSlug = cleanSlug(product.slug);
@@ -52,8 +58,8 @@ async function run() {
     // Check no collision with existing slug
     const existing = await products.findOne({ slug: newSlug, _id: { $ne: product._id } });
     if (existing) {
-      console.warn(`⚠️  Collision: ${newSlug} already exists, skipping ${product.slug}`);
-      skipped++;
+      log.push({ oldSlug: product.slug, newSlug, status: '⚠️ collision' });
+      collision++;
       continue;
     }
 
@@ -63,17 +69,20 @@ async function run() {
 
     await products.updateOne(
       { _id: product._id },
-      { $set: { slug: newSlug, legacySlugs } }
+      {
+        $set: { slug: newSlug, legacySlugs },
+        $addToSet: { legacySlugs: { $each: legacySlugs } }
+      }
     );
 
-    log.push({ oldSlug: product.slug, newSlug });
+    log.push({ oldSlug: product.slug, newSlug, status: 'updated' });
     updated++;
-    if (updated % 10 === 0) console.log(`  ${updated}/${badProducts.length} updated...`);
+    if (updated % 50 === 0) console.log(`  ${updated}/${badProducts.length} updated...`);
   }
 
-  console.log(`\n✅ Done: ${updated} updated, ${skipped} skipped`);
+  console.log(`\n✅ Done: ${updated} updated, ${collision} collisions, ${skipped} skipped`);
   console.log('\nSample changes:');
-  log.slice(0, 5).forEach(l => console.log(`  ${l.oldSlug} → ${l.newSlug}`));
+  log.slice(0, 10).forEach(l => console.log(`  ${l.status}: ${l.oldSlug} → ${l.newSlug}`));
 
   await mongoose.disconnect();
 }

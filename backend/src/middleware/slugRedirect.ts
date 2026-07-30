@@ -1,24 +1,93 @@
 /**
- * slugRedirect.ts — 301 redirect middleware for legacy product URL slugs
+ * slugRedirect.ts — 301 redirect middleware for legacy artifact URLs
  *
- * When a product slug was cleaned (HTML entities removed), old indexed URLs
- * like /dog/dry-food/hill039s-science-diet-... automatically 301 to the clean
- * canonical URL /dog/dry-food/hills-science-diet-...
+ * When slugs were cleaned (HTML entities removed), old indexed URLs like:
+ *   /learning/nyc-pet-parent039s-complete-guide-...
+ *   /dog/tunnels-amp-hideouts/full-cheeks-small-pet...
+ *   /dog/bones-bully-sticks--chews/roam-exotic-ossy...
+ * automatically 301 to the clean canonical URL.
  *
- * Uses the product's legacySlugs[] array (populated by fixProductSlugs migration).
+ * Uses legacySlugs[] array on Product, Blog, and Category models (populated by
+ * fixProductSlugs, fixBlogSlugs, fixCategorySlugs migrations).
+ *
  * Falls through to next() instantly for all clean URLs — zero overhead.
  */
 import { Request, Response, NextFunction } from 'express';
 import Product from '../models/Product';
+import Blog from '../models/Blog';
 import Category from '../models/Category';
 import logger from '../utils/logger';
 
-// Fast in-process cache: old slug → new path (populated on first hit, TTL 1hr)
+// Fast in-process cache: old slug → new path (TTL 1hr)
 const redirectCache = new Map<string, { to: string; expires: number }>();
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const CACHE_TTL_MS = 60 * 60 * 1000;
 
-// Quick pre-filter: only enter DB lookup if path looks like it has an artifact
-const BAD_SLUG_RE = /039|-amp-|-amp$|^amp-|ampamp/;
+// Quick pre-filter: only enter DB lookups if path looks like it has an artifact
+const BAD_SLUG_RE = /039|--amp|--amp$|^amp-|amp-|-amp-|ampamp|ampquot|--+/;
+
+interface RedirectTarget {
+  newPath: string;
+  source: 'product' | 'blog' | 'category';
+}
+
+/**
+ * Try to resolve a single legacy slug against all three models.
+ * Returns the canonical path (relative to host) or null.
+ */
+async function resolveLegacySlug(oldSlug: string): Promise<RedirectTarget | null> {
+  // 1. Product legacy slug
+  const product = await (Product as any).findOne(
+    { legacySlugs: oldSlug },
+    { slug: 1, petType: 1, category: 1 }
+  ).lean();
+
+  if (product) {
+    const petType = product.petType || 'dog';
+    let categorySlug: string | null =
+      typeof product.category === 'object' && (product.category as any)?.slug
+        ? (product.category as any).slug
+        : null;
+
+    if (!categorySlug && product.category) {
+      try {
+        const cat = await (Category as any).findById(product.category, { slug: 1 }).lean();
+        categorySlug = cat?.slug || null;
+      } catch (_) {
+        // Non-fatal — fall back to /products/{slug}
+      }
+    }
+
+    const newPath = categorySlug
+      ? `/${petType}/${categorySlug}/${product.slug}`
+      : `/products/${product.slug}`;
+    return { newPath, source: 'product' };
+  }
+
+  // 2. Blog legacy slug
+  const blog = await (Blog as any).findOne(
+    { legacySlugs: oldSlug },
+    { slug: 1 }
+  ).lean();
+
+  if (blog) {
+    return { newPath: `/learning/${blog.slug}`, source: 'blog' };
+  }
+
+  // 3. Category legacy slug — return /category/{newSlug}
+  const category = await (Category as any).findOne(
+    { legacySlugs: oldSlug },
+    { slug: 1, petType: 1 }
+  ).lean();
+
+  if (category) {
+    const petTypeParam = category.petType && category.petType !== 'all'
+      ? `?petType=${category.petType}`
+      : '';
+    return { newPath: `/category/${category.slug}${petTypeParam}`, source: 'category' };
+  }
+
+  return null;
+}
 
 export const slugRedirectMiddleware = async (
   req: Request,
@@ -30,53 +99,47 @@ export const slugRedirectMiddleware = async (
   if (!BAD_SLUG_RE.test(req.path)) return next();
 
   const segments = req.path.split('/').filter(Boolean);
-  if (segments.length < 2) return next();
+  if (segments.length < 1) return next();
 
-  const oldSlug = segments[segments.length - 1];
+  // Try each segment from right to left (last segment is most likely the broken one)
+  // For paths like /dog/tunnels-amp-hideouts/full-cheeks-small-pet...
+  // the middle segment "tunnels-amp-hideouts" is the broken category slug.
 
-  // Check in-process cache first
-  const cached = redirectCache.get(oldSlug);
+  // First: try last segment (existing product/blog behavior)
+  const lastSlug = segments[segments.length - 1];
+
+  const cacheKey = `${req.path}|${lastSlug}`;
+  const cached = redirectCache.get(cacheKey);
   if (cached) {
     if (Date.now() < cached.expires) {
       res.redirect(301, cached.to);
       return;
     }
-    redirectCache.delete(oldSlug);
+    redirectCache.delete(cacheKey);
   }
 
   try {
-    // Look up product by old slug in legacySlugs array
-    const product = await (Product as any).findOne(
-      { legacySlugs: oldSlug },
-      { slug: 1, petType: 1, category: 1 }
-    ).lean();
+    // Try last segment first
+    let resolved = await resolveLegacySlug(lastSlug);
 
-    if (!product) return next(); // Not a legacy slug, serve normally
-
-    // Build new canonical path — populate category slug if needed
-    const petType = product.petType || 'dog';
-    let categorySlug: string | null =
-      typeof product.category === 'object' && (product.category as any)?.slug
-        ? (product.category as any).slug
-        : null;
-
-    // If category is just an ObjectId (not populated), look it up
-    if (!categorySlug && product.category) {
-      try {
-        const cat = await (Category as any).findById(product.category, { slug: 1 }).lean();
-        categorySlug = cat?.slug || null;
-      } catch (_) {
-        // Non-fatal — fall back to path without category
+    // If not found, try middle segments (category fix)
+    if (!resolved && segments.length >= 3) {
+      // Try segment[1] as category
+      const middleSlug = segments[1];
+      const catResolved = await resolveLegacySlug(middleSlug);
+      if (catResolved && catResolved.source === 'category') {
+        // Rebuild path with cleaned category slug
+        const newCatSegment = catResolved.newPath.split('/').pop()!.split('?')[0];
+        const newSegments = [...segments];
+        newSegments[1] = newCatSegment;
+        resolved = { newPath: '/' + newSegments.join('/'), source: 'category' };
       }
     }
 
-    const newPath = categorySlug
-      ? `/${petType}/${categorySlug}/${product.slug}`
-      : `/${petType}/${product.slug}`;
+    if (!resolved) return next();
 
-    // Cache and redirect
-    redirectCache.set(oldSlug, { to: newPath, expires: Date.now() + CACHE_TTL_MS });
-    res.redirect(301, newPath);
+    redirectCache.set(cacheKey, { to: resolved.newPath, expires: Date.now() + CACHE_TTL_MS });
+    res.redirect(301, resolved.newPath);
     return;
   } catch (err: any) {
     logger.warn(`[slugRedirect] Error for ${req.path}:`, err?.message);

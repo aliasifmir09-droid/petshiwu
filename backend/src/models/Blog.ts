@@ -106,9 +106,19 @@ const blogSchema = new Schema<IBlog>(
 );
 
 // Generate slug from title before saving
+// Pre-clean: strip HTML entities FIRST (so &039; → ' and &amp; → and become part of input),
+// then apply standard slug regex. This prevents entity artifacts like "ampamp" or "039" from
+// leaking into the slug when titles arrive pre-encoded from upstream tools.
 blogSchema.pre('save', function (next) {
   if (this.isModified('title') || !this.slug || this.slug.trim() === '') {
-    this.slug = this.title
+    const cleanedTitle = String(this.title || '')
+      .replace(/&amp;/g, 'and')
+      .replace(/&quot;/g, '')
+      .replace(/&#039;/g, "'")
+      .replace(/&#\d+;/g, '')   // strip any remaining numeric HTML entities
+      .replace(/&[a-z]+;/gi, ''); // strip any remaining named entities
+
+    this.slug = cleanedTitle
       .toLowerCase()
       .replace(/[^\w\s-]/g, '') // Remove special characters
       .replace(/\s+/g, '-') // Replace spaces with hyphens

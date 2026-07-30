@@ -66,11 +66,19 @@ const categorySchema = new Schema<ICategory>(
 );
 
 // Create slug from name and calculate level before saving
+// Pre-clean: strip HTML entities BEFORE slug regex (prevents &amp; → amp artifacts in slug)
 categorySchema.pre('save', async function (next) {
   const invalidSlug = !this.slug || this.slug.trim() === '' ||
     this.slug.toLowerCase() === 'undefined' || this.slug.toLowerCase() === 'null';
   if (this.isModified('name') || invalidSlug) {
-    this.slug = this.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+    const cleanedName = String(this.name || '')
+      .replace(/&amp;/g, 'and')
+      .replace(/&quot;/g, '')
+      .replace(/&#039;/g, "'")
+      .replace(/&#\d+;/g, '')
+      .replace(/&[a-z]+;/gi, '');
+
+    this.slug = cleanedName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
   }
 
   // Normalize petType to slug format (replace spaces with hyphens) for consistency

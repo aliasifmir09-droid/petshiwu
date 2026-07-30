@@ -118,91 +118,101 @@ export const generateSitemap = async (req: Request, res: Response) => {
       .populate({ path: 'category', select: 'slug' })
       .sort({ updatedAt: -1 })
       .limit(10000)
-      .lean();
+              .lean();
 
-    const isValidSlug = (slug: unknown): slug is string => {
-      if (slug == null || typeof slug !== 'string') return false;
-      const s = String(slug).trim();
-      if (s === '') return false;
-      const lower = s.toLowerCase();
-      return lower !== 'undefined' && lower !== 'null';
-    };
+            const isValidSlug = (slug: unknown): slug is string => {
+              if (slug == null || typeof slug !== 'string') return false;
+              const s = String(slug).trim();
+              if (s === '') return false;
+              const lower = s.toLowerCase();
+              return lower !== 'undefined' && lower !== 'null';
+            };
 
-    productsWithCategory.forEach(product => {
-      const lastmod = product.updatedAt
-        ? new Date(product.updatedAt).toISOString().split('T')[0]
-        : currentDate;
+            // Reject slugs with HTML-entity artifacts or repeated-dash artifacts.
+            // Prevents 370+ broken URLs (soft-404s for Google) from being in sitemap.
+            const BROKEN_SLUG_RE = /039|ampamp|ampquot|--amp|^amp-|amp-|-amp-|--+/;
+            const isCleanSlug = (slug: unknown): boolean => {
+              if (!isValidSlug(slug)) return false;
+              return !BROKEN_SLUG_RE.test(String(slug));
+            };
 
-      // Mirror botRenderer canonical exactly: /{petType}/{categorySlug}/{productSlug}
-      const categorySlug = (product.category && typeof product.category === 'object')
-        ? (product.category as any).slug
-        : undefined;
+            productsWithCategory.forEach(product => {
+              // Skip products with broken slugs entirely — they 404 in Google
+              if (!isCleanSlug(product.slug)) return;
 
-      let productUrl = `${baseUrl}/products/${product.slug}`;
-      if (isValidSlug(product.petType) && isValidSlug(categorySlug) && isValidSlug(product.slug)) {
-        productUrl = `${baseUrl}/${product.petType}/${categorySlug}/${product.slug}`;
-      }
-      
-      xml += '  <url>\n';
-      xml += `    <loc>${productUrl}</loc>\n`;
-      xml += `    <lastmod>${lastmod}</lastmod>\n`;
-      xml += '    <changefreq>weekly</changefreq>\n';
-      xml += '    <priority>0.8</priority>\n';
-      
-      // Add product images to sitemap for better SEO
-      if (product.images && Array.isArray(product.images) && product.images.length > 0) {
-        // Include up to 5 images per product (Google's limit)
-        const imagesToInclude = product.images.slice(0, 5);
-        imagesToInclude.forEach((image: any) => {
-          if (image) {
-            const imageUrl = typeof image === 'string' ? image : (image.url || image);
-            if (imageUrl && imageUrl.trim() !== '') {
-              xml += '    <image:image>\n';
-              xml += `      <image:loc>${imageUrl}</image:loc>\n`;
-              if (product.name) {
-                xml += `      <image:title>${escapeXml(product.name)}</image:title>\n`;
+              const lastmod = product.updatedAt
+                ? new Date(product.updatedAt).toISOString().split('T')[0]
+                : currentDate;
+
+              // Mirror botRenderer canonical exactly: /{petType}/{categorySlug}/{productSlug}
+              const categorySlug = (product.category && typeof product.category === 'object')
+                ? (product.category as any).slug
+                : undefined;
+
+              let productUrl = `${baseUrl}/products/${product.slug}`;
+              if (isValidSlug(product.petType) && isValidSlug(categorySlug) && isCleanSlug(categorySlug)) {
+                productUrl = `${baseUrl}/${product.petType}/${categorySlug}/${product.slug}`;
               }
-              xml += '    </image:image>\n';
-            }
-          }
-        });
-      }
-      
-      xml += '  </url>\n';
-    });
 
-    // Category pages
-    categories.forEach(category => {
-      const lastmod = category.updatedAt 
-        ? new Date(category.updatedAt).toISOString().split('T')[0]
-        : currentDate;
-      
-      const petTypeParam = category.petType && category.petType !== 'all' 
-        ? `?petType=${category.petType}` 
-        : '';
-      
-      xml += '  <url>\n';
-      xml += `    <loc>${baseUrl}/category/${category.slug}${petTypeParam}</loc>\n`;
-      xml += `    <lastmod>${lastmod}</lastmod>\n`;
-      xml += '    <changefreq>weekly</changefreq>\n';
-      xml += '    <priority>0.7</priority>\n';
-      xml += '  </url>\n';
-    });
+              xml += '  <url>\n';
+              xml += `    <loc>${productUrl}</loc>\n`;
+              xml += `    <lastmod>${lastmod}</lastmod>\n`;
+              xml += '    <changefreq>weekly</changefreq>\n';
+              xml += '    <priority>0.8</priority>\n';
 
-    // Blog/Learning pages
-    blogs.forEach(blog => {
-      const lastmod = blog.updatedAt 
-        ? new Date(blog.updatedAt).toISOString().split('T')[0]
-        : currentDate;
-      
-      // SEO-friendly URL: /learning/slug
-      xml += '  <url>\n';
-      xml += `    <loc>${baseUrl}/learning/${blog.slug}</loc>\n`;
-      xml += `    <lastmod>${lastmod}</lastmod>\n`;
-      xml += '    <changefreq>monthly</changefreq>\n';
-      xml += '    <priority>0.6</priority>\n';
-      xml += '  </url>\n';
-    });
+              // Add product images to sitemap for better SEO
+              if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+                // Include up to 5 images per product (Google's limit)
+                const imagesToInclude = product.images.slice(0, 5);
+                imagesToInclude.forEach((image: any) => {
+                  if (image) {
+                    const imageUrl = typeof image === 'string' ? image : (image.url || image);
+                    if (imageUrl && imageUrl.trim() !== '') {
+                      xml += '    <image:image>\n';
+                      xml += `      <image:loc>${imageUrl}</image:loc>\n`;
+                      if (product.name) {
+                        xml += `      <image:title>${escapeXml(product.name)}</image:title>\n`;
+                      }
+                      xml += '    </image:image>\n';
+                    }
+                  }
+                });
+              }
+
+              xml += '  </url>\n';
+            });
+
+            // Category pages — skip broken slugs (soft-404 trap) + only clean canonical URLs (no query params)
+                  // Filtered URLs (?petType=dog) canonicalize to clean URL — sitemap should NOT list them.
+                  categories.forEach(category => {
+                    if (!isCleanSlug(category.slug)) return;
+                    const lastmod = category.updatedAt
+                      ? new Date(category.updatedAt).toISOString().split('T')[0]
+                      : currentDate;
+
+                    xml += '  <url>\n';
+                    xml += `    <loc>${baseUrl}/category/${category.slug}</loc>\n`;
+                    xml += `    <lastmod>${lastmod}</lastmod>\n`;
+                    xml += '    <changefreq>weekly</changefreq>\n';
+                    xml += '    <priority>0.7</priority>\n';
+                    xml += '  </url>\n';
+                  });
+
+            // Blog/Learning pages — skip broken slugs (soft-404 trap)
+            blogs.forEach(blog => {
+              if (!isCleanSlug(blog.slug)) return;
+              const lastmod = blog.updatedAt
+                ? new Date(blog.updatedAt).toISOString().split('T')[0]
+                : currentDate;
+
+              // SEO-friendly URL: /learning/slug
+              xml += '  <url>\n';
+              xml += `    <loc>${baseUrl}/learning/${blog.slug}</loc>\n`;
+              xml += `    <lastmod>${lastmod}</lastmod>\n`;
+              xml += '    <changefreq>monthly</changefreq>\n';
+              xml += '    <priority>0.6</priority>\n';
+              xml += '  </url>\n';
+            });
 
     // Care guide pages
     careGuides.forEach(guide => {
