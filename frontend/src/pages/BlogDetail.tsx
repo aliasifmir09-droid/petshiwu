@@ -8,6 +8,7 @@ import { normalizeBlogContent } from '@/utils/htmlUtils';
 import { useMemo } from 'react';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
+import AdSense from '@/components/AdSense';
 
 const BlogDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -185,11 +186,14 @@ const BlogDetail = () => {
             )}
 
             {/* Excerpt */}
-            {blog.excerpt && (
-              <div className="mb-10">
-                <p className="text-lg text-gray-700 leading-relaxed">{decodeHtmlEntities(blog.excerpt)}</p>
-              </div>
-            )}
+                          {blog.excerpt && (
+                            <div className="mb-10">
+                              <p className="text-lg text-gray-700 leading-relaxed">{decodeHtmlEntities(blog.excerpt)}</p>
+                            </div>
+                          )}
+
+                          {/* In-content ad after excerpt */}
+                          <AdSense slot="9876543210" format="auto" responsive={true} />
 
             {/* Content */}
             <div className="blog-content-wrapper mb-10">
@@ -223,15 +227,18 @@ const BlogDetail = () => {
             )}
 
             {/* Navigation */}
-            <div className="pt-8 border-t border-gray-200">
-              <Link
-                to="/learning"
-                className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors text-sm"
-              >
-                <ArrowLeft size={16} />
-                <span>Back to Learning Center</span>
-              </Link>
-            </div>
+                          <div className="pt-8 border-t border-gray-200">
+                            <Link
+                              to="/learning"
+                              className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors text-sm"
+                            >
+                              <ArrowLeft size={16} />
+                              <span>Back to Learning Center</span>
+                            </Link>
+                          </div>
+
+                          {/* End-of-article ad */}
+                          <AdSense slot="9876543211" format="auto" responsive={true} className="mt-8" />
           </article>
 
           {/* Sidebar - Table of Contents */}
