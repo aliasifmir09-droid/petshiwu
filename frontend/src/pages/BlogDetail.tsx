@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import AdSense from '@/components/AdSense';
+import StickySidebarAd from '@/components/StickySidebarAd';
 
 const BlogDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -271,8 +272,12 @@ const BlogDetail = () => {
               </div>
             )}
           </aside>
-        </div>
-      </div>
+
+                        {/* Sticky sidebar ad — high CTR always visible */}
+                        <StickySidebarAd slot="9876543225" />
+                      </aside>
+                    </div>
+                  </div>
 
       {/* Red border at bottom */}
       <div className="h-1 bg-red-600 mt-12"></div>

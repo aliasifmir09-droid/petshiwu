@@ -8,6 +8,7 @@ import DOMPurify from 'dompurify';
 import SEO from '@/components/SEO';
 import ProductCard from '@/components/ProductCard';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
+import AdSense from '@/components/AdSense';
 
 const CareGuideDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -171,11 +172,14 @@ const CareGuideDetail = () => {
               )}
 
               {/* Excerpt */}
-              {guide.excerpt && (
-                <div className="bg-blue-50 border-l-4 border-primary-600 p-4 mb-8">
-                  <p className="text-gray-700 italic">{guide.excerpt}</p>
-                </div>
-              )}
+                              {guide.excerpt && (
+                                <div className="bg-blue-50 border-l-4 border-primary-600 p-4 mb-8">
+                                  <p className="text-gray-700 italic">{guide.excerpt}</p>
+                                </div>
+                              )}
+
+                              {/* In-content ad after excerpt */}
+                              <AdSense slot="9876543216" format="auto" responsive={true} className="my-6" />
 
               {/* Content */}
               <div className="prose max-w-none mb-8">

@@ -7,6 +7,7 @@ import Dropdown from '@/components/Dropdown';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
+import AdSense from '@/components/AdSense';
 
 const CareGuides = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -228,10 +229,13 @@ const CareGuides = () => {
                     </div>
                   </div>
                 </Link>
-              ))}
-            </div>
+                                ))}
+                              </div>
 
-            {/* Pagination */}
+                              {/* In-content ad after grid */}
+                              <AdSense slot="9876543215" format="auto" responsive={true} className="my-8" />
+
+                              {/* Pagination */}
             {guidesData.pagination.pages > 1 && (
               <div className="flex justify-center gap-2">
                 <button

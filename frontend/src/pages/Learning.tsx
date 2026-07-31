@@ -6,6 +6,7 @@ import { Search, Calendar, Eye, ChevronRight, BookOpen } from 'lucide-react';
 import Dropdown from '@/components/Dropdown';
 import SEO from '@/components/SEO';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
+import AdSense from '@/components/AdSense';
 
 const Learning = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -210,10 +211,13 @@ const Learning = () => {
                     </div>
                   </div>
                 </Link>
-              ))}
-            </div>
+                                ))}
+                              </div>
 
-            {/* Pagination */}
+                              {/* In-content ad after blog grid */}
+                              <AdSense slot="9876543218" format="auto" responsive={true} className="my-8" />
+
+                              {/* Pagination */}
             {blogsData.pagination && blogsData.pagination.pages > 1 && (
               <div className="flex justify-center items-center gap-2">
                 <button

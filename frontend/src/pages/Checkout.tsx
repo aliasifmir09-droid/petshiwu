@@ -17,6 +17,7 @@ const getStripe = () => import('@/utils/stripe').then(m => m.getStripe());
 import { normalizeId } from '@/utils/idNormalizer';
 import { trackPurchase } from '@/utils/analytics';
 import SEO from '@/components/SEO';
+import AdSense from '@/components/AdSense';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { MapPin, Plus, Check, User, UserCheck } from 'lucide-react';
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
@@ -655,9 +656,12 @@ const Checkout = () => {
     <>
       <SEO title="Checkout | petshiwu" description="Complete your purchase at petshiwu" noindex={true} />
       <div className="container mx-auto px-4 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+                {/* High-intent ad (checkout = $$$) */}
+                <AdSense slot="9876543224" format="auto" responsive={true} className="mb-6" />
 
-        {/* GUEST CHECKOUT BANNER — show only when not logged in */}
+                <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+
+                {/* GUEST CHECKOUT BANNER — show only when not logged in */}
         {!isAuthenticated && (
           <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
             <User className="text-blue-600 mt-0.5 flex-shrink-0" size={20} />

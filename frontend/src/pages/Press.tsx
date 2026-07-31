@@ -1,5 +1,6 @@
 import { Mail, ExternalLink, Building2 } from 'lucide-react';
 import SEO from '@/components/SEO';
+import AdSense from '@/components/AdSense';
 
 const Press = () => {
   return (
@@ -53,6 +54,9 @@ const Press = () => {
 
         {/* Company Facts */}
         <section className="container mx-auto px-4 lg:px-8 pb-12">
+          {/* In-content ad */}
+          <AdSense slot="9876543220" format="auto" responsive={true} className="mb-8" />
+
           <div className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8">
             <div className="flex items-start gap-4 mb-4">
               <Building2 className="w-8 h-8 text-[#1E3A8A] flex-shrink-0 mt-1" />

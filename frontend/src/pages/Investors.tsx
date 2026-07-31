@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { TrendingUp, Users, Globe2, ShieldCheck, Package, DollarSign, CheckCircle, ArrowRight, Mail, Building2 } from 'lucide-react';
 import SEO from '@/components/SEO';
 import api from '@/services/api';
+import AdSense from '@/components/AdSense';
 
 const INVESTMENT_RANGES = [
   'Under $50,000',
@@ -122,6 +123,9 @@ const Investors = () => {
         {/* Why Invest */}
         <section className="py-16 lg:py-20">
           <div className="container mx-auto px-4 lg:px-8">
+
+            {/* In-content ad */}
+            <AdSense slot="9876543222" format="auto" responsive={true} className="my-8" />
             <div className="text-center mb-12">
               <p className="text-sm font-semibold text-blue-700 uppercase tracking-wide mb-2">The Opportunity</p>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Why Petshiwu</h2>

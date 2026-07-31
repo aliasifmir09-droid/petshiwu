@@ -7,6 +7,7 @@ import { HelpCircle, Search, ThumbsUp, ThumbsDown, ChevronDown, ChevronUp, Mail,
 import SEO from '@/components/SEO';
 import { Link } from 'react-router-dom';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
+import AdSense from '@/components/AdSense';
 
 const FAQ = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -194,20 +195,23 @@ const FAQ = () => {
 
               {/* Category Filter */}
               <div className="md:w-64">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                >
-                  <option value="">All Categories</option>
-                  {allCategories.map((cat) => (
-                    <option key={cat.name} value={cat.name}>
-                      {cat.name} ({cat.count})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+                                <select
+                                  value={selectedCategory}
+                                  onChange={(e) => setSelectedCategory(e.target.value)}
+                                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                >
+                                  <option value="">All Categories</option>
+                                  {allCategories.map((cat) => (
+                                    <option key={cat.name} value={cat.name}>
+                                      {cat.name} ({cat.count})
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+
+                            {/* In-content ad after search */}
+                            <AdSense slot="9876543217" format="auto" responsive={true} className="mb-8" />
           </div>
 
           {/* FAQs by Category */}

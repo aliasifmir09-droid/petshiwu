@@ -8,6 +8,7 @@ import { donationService } from '@/services/donations';
 import { getStripe } from '@/utils/stripe';
 import PaymentForm from '@/components/PaymentForm';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import AdSense from '@/components/AdSense';
 
 type PaymentMethod = 'credit_card' | 'paypal' | 'apple_pay' | 'google_pay';
 
@@ -242,8 +243,11 @@ const Donate = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50 py-8 px-4">
-      <div className="container mx-auto max-w-4xl">
-        {/* Header */}
+            <div className="container mx-auto max-w-4xl">
+              {/* In-content ad at top */}
+              <AdSense slot="9876543221" format="auto" responsive={true} className="mb-6" />
+
+              {/* Header */}
         <div className="mb-8">
           <button
             onClick={() => navigate(-1)}

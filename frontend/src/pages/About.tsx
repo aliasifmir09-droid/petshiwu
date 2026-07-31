@@ -1,6 +1,7 @@
 import { HeartHandshake, Globe2, ShieldCheck, Truck, Users } from 'lucide-react';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
+import AdSense from '@/components/AdSense';
 
 const About = () => {
   return (
@@ -96,6 +97,9 @@ const About = () => {
         {/* Commitment Section */}
         <section className="py-12 lg:py-16">
           <div className="container mx-auto px-4 lg:px-8">
+
+            {/* In-content ad */}
+            <AdSense slot="9876543219" format="auto" responsive={true} className="my-8" />
             <div className="max-w-4xl mx-auto text-center mb-10 lg:mb-14">
               <p className="text-sm font-semibold text-primary-600 uppercase tracking-wide mb-2">
                 Our Commitment
