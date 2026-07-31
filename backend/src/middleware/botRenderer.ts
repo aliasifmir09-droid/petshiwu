@@ -442,10 +442,32 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl?
   };
 
   let html = template;
-  html = injectTitle(html, finalMeta.title);
-  html = injectDescription(html, finalMeta.description);
-  html = injectCanonical(html, canonicalUrl);
-  html = injectOgTags(html, finalMeta.title, finalMeta.description, canonicalUrl);
+    html = injectTitle(html, finalMeta.title);
+    html = injectDescription(html, finalMeta.description);
+    html = injectCanonical(html, canonicalUrl);
+    html = injectOgTags(html, finalMeta.title, finalMeta.description, canonicalUrl);
+    // FIX: Inject a unique H1 for non-homepage routes so Google doesn't see the
+    // generic homepage H1 ("Petshiwu — Premium Pet Food & Supplies...") on every
+    // page. This was causing /dog, /cat, etc. to be flagged as Soft 404 because the
+    // H1 didn't match the title/description. Derive H1 from STATIC_PAGES title
+    // (stripped of "| Petshiwu") or from URL segments for product paths.
+    let h1Text: string;
+    if (finalMeta.title && finalMeta.title !== 'Premium Pet Food & Supplies | Petshiwu') {
+      h1Text = finalMeta.title.replace(/\s*\|\s*Petshiwu\s*$/i, '').trim();
+    } else if (segments.length === 1) {
+      // Single segment — capitalize first letter, replace dashes with spaces
+      const seg = segments[0];
+      h1Text = seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, ' ');
+    } else if (isProductPath) {
+      const productSlug = segments[segments.length - 1];
+      h1Text = slugToTitle(productSlug);
+    } else {
+      h1Text = 'Petshiwu — Premium Pet Food & Supplies Delivered to NYC';
+    }
+    // For homepage, keep the branded H1 — don't replace it
+    if (cleanPath !== '/') {
+      html = injectH1(html, h1Text);
+    }
   // FIX: Inject X-Robots-Tag noindex for any URL with query string. Filter/pagination/sort
   // variants are duplicates of the base URL — by stripping them from canonical we
   // consolidate, but Google also needs to know NOT to index them. The frontend
