@@ -20,6 +20,7 @@ import { trackProductView, trackAddToWishlist, trackProductComparison, trackShar
 import { addToRecentlyViewed } from '@/utils/recentlyViewed';
 import SEO from '@/components/SEO';
 import ProductSchema from '@/components/ProductSchema';
+import AdSense from '@/components/AdSense';
 import { safeError } from '@/utils/safeLogger';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
@@ -1278,9 +1279,12 @@ const ProductDetail = () => {
           )}
 
         </div>
-      </div>
+                </div>
 
-      {/* Reviews Section */}
+                {/* In-content ad before reviews */}
+                <AdSense slot="9876543212" format="auto" responsive={true} className="my-8" />
+
+                {/* Reviews Section */}
       <div id="reviews" className="mt-12 bg-gray-50 rounded-xl p-8">
         <div className="flex items-center justify-between mb-8">
           <div>

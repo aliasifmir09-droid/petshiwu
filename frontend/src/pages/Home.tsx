@@ -9,6 +9,7 @@ import StructuredData from '@/components/StructuredData';
 import TrustBadges from '@/components/TrustBadges';
 import CategoryIcons from '@/components/CategoryIcons';
 import BirthdayBanner from '@/components/BirthdayBanner';
+import AdSense from '@/components/AdSense';
 import { ChevronRight, ChevronLeft, ArrowRight } from 'lucide-react';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
@@ -383,7 +384,12 @@ const Home = () => {
       {/* Birthday Banner */}
       <BirthdayBanner />
 
-      {/* Shop by Pet Type */}
+              {/* In-content ad before shop by pet */}
+              <section className="container mx-auto px-4 lg:px-8 mt-6 mb-2">
+                <AdSense slot="9876543214" format="auto" responsive={true} />
+              </section>
+
+              {/* Shop by Pet Type */}
       <section className="py-16 bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-12 relative z-30">
