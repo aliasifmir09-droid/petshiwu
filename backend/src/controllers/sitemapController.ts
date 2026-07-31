@@ -92,8 +92,10 @@ export const generateSitemap = async (req: Request, res: Response) => {
     
     petTypes.forEach(petType => {
       // SEO-friendly canonical URL: /petType
+      // Map small-pet → small-animal to match frontend route
+      const petSlug = petType.slug === 'small-pet' ? 'small-animal' : petType.slug;
       xml += '  <url>\n';
-      xml += `    <loc>${baseUrl}/${petType.slug}</loc>\n`;
+      xml += `    <loc>${baseUrl}/${petSlug}</loc>\n`;
       const lastmod = petType.updatedAt 
         ? new Date(petType.updatedAt).toISOString().split('T')[0]
         : currentDate;

@@ -815,12 +815,18 @@ const PLURAL_TO_SINGULAR: Record<string, string> = {
   '/cats': '/cat',
   '/birds': '/bird',
   '/reptiles': '/reptile',
-  '/small-animals': '/small-pet',
+  '/small-animals': '/small-animal',
+  '/small-pet': '/small-animal',
   '/dogs/': '/dog',
   '/cats/': '/cat',
   '/birds/': '/bird',
   '/reptiles/': '/reptile',
-  '/small-animals/': '/small-pet',
+  '/small-animals/': '/small-animal',
+  '/small-pet/': '/small-animal',
+  // Legacy /blog → /learning 301 redirect (frontend does client-side redirect,
+  // but server-side 301 is needed for bots and SEO consolidation)
+  '/blog': '/learning',
+  '/blog/': '/learning',
 };
 app.use((req: Request, res: Response, next: NextFunction) => {
   const target = PLURAL_TO_SINGULAR[req.path];

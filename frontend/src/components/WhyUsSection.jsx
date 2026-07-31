@@ -27,7 +27,7 @@ const WhyUsSection = () => {
   return (
     <section className="py-16 bg-white px-4">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-12">What Makes PetShiwu Different</h2>
+        <h2 className="text-3xl font-bold text-center mb-12">What Makes Petshiwu Different</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((f, i) => (
             <div key={i} className="text-center p-6 border border-gray-100 rounded-xl hover:shadow-lg transition">

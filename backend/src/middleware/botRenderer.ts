@@ -135,6 +135,13 @@ const injectH1 = (html: string, h1Text: string): string => {
   return html.replace('<div id="root">', `<div id="root">\n${tag}`);
 };
 
+// Remove the static hero section (which contains the homepage H1) from the
+// template when building DB-backed pages (blogs, products, care guides).
+// This prevents duplicate H1 tags — those pages inject their own H1 inside #root.
+const removeStaticHero = (html: string): string => {
+  return html.replace(/<section[^>]*id="static-hero"[\s\S]*?<\/section>/i, '');
+};
+
 // ---------------------------------------------------------------------------
 // Route pattern matching
 // ---------------------------------------------------------------------------
@@ -220,6 +227,10 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   '/search': {
     title: 'Search Products | Petshiwu',
     description: 'Search 10,000+ pet products for dogs, cats, birds, fish, reptiles, and small animals at Petshiwu. Fast NYC delivery, free shipping over $49.',
+  },
+  '/deals': {
+    title: "Today's Deals & Pet Supply Discounts | Petshiwu",
+    description: 'Save on premium pet food, treats, toys, and supplies. Daily deals and discounts on top brands for dogs, cats, birds, fish, and more. Fast NYC delivery.',
   },
   '/donate': {
     title: 'Donate to Pet Shelters | Petshiwu',
@@ -420,7 +431,7 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl?
   // This means even if MongoDB is unreachable, every product page gets a distinct
   // title that Google can use for indexing.
   const segments = cleanPath.replace(/^\//, '').split('/').filter(Boolean);
-  const PET_TYPES = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet']);
+  const PET_TYPES = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet', 'small-animal']);
   const isProductPath = segments.length >= 3 && PET_TYPES.has(segments[0]);
 
   let meta = STATIC_PAGES[cleanPath];
@@ -621,7 +632,7 @@ const matchRoute = (pathname: string): PageType => {
     return { type: 'product', slug: segments[1] };
 
   // /:petType/:categorySlug — category under petType (e.g. /dog/dog-food)
-  const PET_TYPES = new Set(['dog','cat','bird','fish','reptile','small-pet','products']);
+  const PET_TYPES = new Set(['dog','cat','bird','fish','reptile','small-pet','small-animal','products']);
   if (segments.length === 2 && PET_TYPES.has(segments[0]))
     return { type: 'category', slug: segments[1], petType: segments[0] } as any;
 
@@ -865,6 +876,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   html = injectCanonical(html, productUrl);
   html = injectBeforeHeadClose(html, injectedTags);
   // Replace entire root div with full crawlable body content (includes H1)
+  html = removeStaticHero(html);
   html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${bodyContent}</div>`);
   if (!html.includes(bodyContent)) {
     html = html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
@@ -904,7 +916,7 @@ const buildBlogHtml = (template: string, blog: any): string => {
     blog.excerpt ?? stripTags(blog.content ?? '').substring(0, 160),
     160
   );
-  const image = blog.coverImage ?? `${BASE}/logo.png`;
+  const image = blog.featuredImage ?? blog.coverImage ?? `${BASE}/logo.png`;
   const url = `${BASE}/learning/${blog.slug}`;
 
   // Extract FAQ pairs from headings + paragraphs for FAQPage schema
@@ -946,6 +958,11 @@ const buildBlogHtml = (template: string, blog: any): string => {
     ],
   };
 
+  // Extract speakable schema from blog.schema array if present
+  const speakableSchema = Array.isArray(blog.schema)
+    ? blog.schema.find((s: any) => s['@type'] === 'SpeakableSpecification')
+    : null;
+
   const injectedTags = `
   <!-- Bot renderer: blog-specific meta -->
   <meta property="og:title" content="${esc(title)}" />
@@ -958,7 +975,8 @@ const buildBlogHtml = (template: string, blog: any): string => {
   <meta name="twitter:image" content="${esc(image)}" />
   <script type="application/ld+json">${JSON.stringify(articleSchema)}</script>
   <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
-  ${faqSchema ? `<script type="application/ld+json">${JSON.stringify(faqSchema)}</script>` : ''}`;
+  ${faqSchema ? `<script type="application/ld+json">${JSON.stringify(faqSchema)}</script>` : ''}
+  ${speakableSchema ? `<script type="application/ld+json">${JSON.stringify(speakableSchema)}</script>` : ''}`;
 
   const blogExcerpt = blog.excerpt ?? stripTags(blog.content ?? '').substring(0, 400);
   const blogBodyContent = `
@@ -981,6 +999,7 @@ const buildBlogHtml = (template: string, blog: any): string => {
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
   html = injectBeforeHeadClose(html, injectedTags);
+  html = removeStaticHero(html);
   html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${blogBodyContent}</div>`);
   if (!html.includes(blogBodyContent)) {
     html = html.replace('<div id="root"></div>', `<div id="root">${blogBodyContent}</div>`);
@@ -991,7 +1010,7 @@ const buildBlogHtml = (template: string, blog: any): string => {
 const buildCareGuideHtml = (template: string, guide: any): string => {
   const title = `${guide.title} | Petshiwu Care Guides`;
   const description = truncate(guide.excerpt ?? `Care guide for ${guide.title} at Petshiwu.`, 160);
-  const image = guide.coverImage ?? `${BASE}/logo.png`;
+  const image = guide.featuredImage ?? guide.coverImage ?? `${BASE}/logo.png`;
   const url = `${BASE}/care-guides/${guide.slug}`;
 
   const schema = {
@@ -1049,6 +1068,7 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
   html = injectBeforeHeadClose(html, injectedTags);
+  html = removeStaticHero(html);
   html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${guideBodyContent}</div>`);
   if (!html.includes(guideBodyContent)) {
     html = html.replace('<div id="root"></div>', `<div id="root">${guideBodyContent}</div>`);
@@ -1485,7 +1505,7 @@ const isKnownRoute = (pathname: string): boolean => {
   if (segments.length === 0) return true; // homepage
   if (segments.length === 1) {
     // single segment routes like /dog, /cat (pet types)
-    const petTypes = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet']);
+    const petTypes = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet', 'small-animal']);
     if (petTypes.has(segments[0])) return true;
     // neighborhood×category page registry
     if (NEIGHBORHOOD_PAGE_REGISTRY.has(segments[0])) return true;
@@ -1496,7 +1516,7 @@ const isKnownRoute = (pathname: string): boolean => {
     const validPrefixes = ['learning', 'care-guides', 'category', 'products', 'blog'];
     if (validPrefixes.includes(segments[0])) return true;
     // /:petType/:category — e.g. /dog/food
-    const petTypes = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet']);
+    const petTypes = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet', 'small-animal']);
     if (petTypes.has(segments[0])) return true;
     return false;
   }
@@ -1555,6 +1575,7 @@ export const createBotRenderer = (distPath: string) => {
       }
 
       // DB-backed page enrichment — bots only (keeps non-bot requests fast with no DB queries)
+      let notFound = false;
       if (bot) {
         if (page?.type === 'product') {
           const product = await fetchProduct(page.slug);
@@ -1568,14 +1589,24 @@ export const createBotRenderer = (distPath: string) => {
               // Derive petType from first URL segment, pass actual path as canonical
               const petTypeFromPath = req.path.split('/').filter(Boolean)[0] ?? '';
               html = buildCategoryHtml(template, category, petTypeFromPath, req.path);
+            } else {
+              notFound = true;
             }
           }
         } else if (page?.type === 'blog') {
           const blog = await fetchBlog(page.slug);
-          if (blog) html = buildBlogHtml(template, blog);
+          if (blog) {
+            html = buildBlogHtml(template, blog);
+          } else {
+            notFound = true;
+          }
         } else if (page?.type === 'care-guide') {
           const guide = await fetchCareGuide(page.slug);
-          if (guide) html = buildCareGuideHtml(template, guide);
+          if (guide) {
+            html = buildCareGuideHtml(template, guide);
+          } else {
+            notFound = true;
+          }
         } else if (page?.type === 'category') {
           const category = await fetchCategory(page.slug);
           if (category) html = buildCategoryHtml(template, category, (page as any).petType);
@@ -1601,6 +1632,12 @@ export const createBotRenderer = (distPath: string) => {
       // non-bot auditing tools and regular browsers alike.
       if (!html) {
         html = buildGenericPageHtml(template, req.path, req.originalUrl);
+      }
+
+      // Soft 404 fix: return actual 404 status when a DB-backed page (blog/product/care-guide)
+      // was expected but not found. Prevents Google from indexing non-existent pages.
+      if (notFound) {
+        res.status(404);
       }
 
       res.setHeader('Content-Type', 'text/html; charset=utf-8');

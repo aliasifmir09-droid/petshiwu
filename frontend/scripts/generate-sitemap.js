@@ -43,7 +43,7 @@ const STATIC_SITEMAP = `<?xml version="1.0" encoding="UTF-8"?>
   <url><loc>${SITE_URL}/bird</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>${SITE_URL}/reptile</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>${SITE_URL}/fish</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>${SITE_URL}/small-pet</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>${SITE_URL}/small-animal</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
 
   <!-- Shop Pages -->
   <url><loc>${SITE_URL}/products</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>
