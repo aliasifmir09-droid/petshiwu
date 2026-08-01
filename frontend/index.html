@@ -65,6 +65,10 @@
       @media (prefers-reduced-motion: reduce){
         .ps-loader-spinner{animation-duration:1.6s}
       }
+
+      /* Screen-reader-only content for SEO + a11y. In the HTML for indexing,
+         visually hidden so the loader remains the only visible element. */
+      .ps-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     </style>
 
     <link rel="preload" as="image" href="/logo.png" type="image/png" fetchpriority="high" />
@@ -236,16 +240,90 @@
           <div id="static-shell" aria-hidden="false">
 
             <!-- Branded loader — visible immediately, hides when React mounts -->
-            <div class="ps-loader" role="status" aria-live="polite">
-              <div class="ps-loader-brand" aria-label="Petshiwu">
-                <span class="ps-loader-brand-a">Pet</span><span class="ps-loader-brand-b">shiwu</span>
-              </div>
-              <div class="ps-loader-spinner" aria-hidden="true"></div>
-              <p class="ps-loader-text">Loading Petshiwu</p>
-              <p class="ps-loader-tagline">Premium Pet Food &amp; Supplies — Delivered to NYC &amp; Nationwide</p>
-            </div>
+                    <div class="ps-loader" role="status" aria-live="polite">
+                      <div class="ps-loader-brand" aria-label="Petshiwu">
+                        <span class="ps-loader-brand-a">Pet</span><span class="ps-loader-brand-b">shiwu</span>
+                      </div>
+                      <div class="ps-loader-spinner" aria-hidden="true"></div>
+                      <p class="ps-loader-text">Loading Petshiwu</p>
+                      <p class="ps-loader-tagline">Premium Pet Food &amp; Supplies — Delivered to NYC &amp; Nationwide</p>
+                    </div>
 
-            <!-- Noscript fallback — only renders when JS is OFF -->
+                    <!-- SEO content — visually hidden (sr-only), but in the HTML for crawlers.
+                         Mirrors the React homepage's content so Wave 1 indexing still has rich
+                         text for the homepage. The MutationObserver hides the entire shell
+                         (including this content) when React mounts. -->
+                    <div class="ps-sr-only">
+                      <h1>Premium Pet Food &amp; Supplies Delivered to NYC | Petshiwu</h1>
+                      <p>Petshiwu is a premium pet food and supplies store serving New York City and nationwide with fast, reliable shipping. Based in Jackson Heights, Queens, we deliver carefully curated brands for dogs, cats, birds, reptiles, fish, and small pets. Free shipping on orders over $49. Same-day delivery available across all five NYC boroughs.</p>
+
+                      <h2>Shop by Pet Type</h2>
+                      <nav aria-label="Pet categories">
+                        <ul>
+                          <li><a href="/dogs">Dog Supplies</a></li>
+                          <li><a href="/cats">Cat Supplies</a></li>
+                          <li><a href="/birds">Bird Supplies</a></li>
+                          <li><a href="/reptiles">Reptile Supplies</a></li>
+                          <li><a href="/fish">Fish Supplies</a></li>
+                          <li><a href="/small-pet">Small Pet Supplies</a></li>
+                          <li><a href="/products">All Products</a></li>
+                        </ul>
+                      </nav>
+
+                      <h2>Popular Categories</h2>
+                      <ul>
+                        <li><a href="/dogs/food">Dog Food</a></li>
+                        <li><a href="/dogs/treats">Dog Treats</a></li>
+                        <li><a href="/dogs/toys">Dog Toys</a></li>
+                        <li><a href="/cats/food">Cat Food</a></li>
+                        <li><a href="/cats/litter">Cat Litter</a></li>
+                        <li><a href="/cats/toys">Cat Toys</a></li>
+                        <li><a href="/reptiles/food">Reptile Food</a></li>
+                        <li><a href="/birds/food">Bird Food</a></li>
+                        <li><a href="/products">Pet Vitamins</a></li>
+                        <li><a href="/products">Grooming</a></li>
+                        <li><a href="/products">Pet Accessories</a></li>
+                        <li><a href="/products">Grain-Free Food</a></li>
+                      </ul>
+
+                      <h2>Why Choose Petshiwu</h2>
+                      <ul>
+                        <li>Free shipping on orders over $49 — fast delivery across NYC and nationwide</li>
+                        <li>Premium brands only — Purina, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Orijen, Nutro, Iams, Pedigree, Nature's Recipe</li>
+                        <li>10,000+ products across all pet types — dogs, cats, birds, reptiles, fish, small pets</li>
+                        <li>Expert pet care advice — free care guides, breed-specific content, and nutrition resources</li>
+                        <li>Based in Jackson Heights, Queens, NY — local NYC pet supply delivery covering all five boroughs</li>
+                        <li>Secure checkout launching August 28, 2026 — your trusted online pet store in NYC</li>
+                      </ul>
+
+                      <h2>Pet Care Resources</h2>
+                      <nav aria-label="Resources">
+                        <ul>
+                          <li><a href="/learning">Pet Care Blog — articles on dog food, cat nutrition, reptile care, bird health, and more</a></li>
+                          <li><a href="/care-guides">Care Guides by Pet Type — dog care, cat care, bird care, reptile care, fish care, small pet care</a></li>
+                          <li><a href="/faq">Frequently Asked Questions</a></li>
+                          <li><a href="/about">About Petshiwu</a></li>
+                          <li><a href="/contact">Contact Us</a></li>
+                          <li><a href="/press">Press &amp; Newsroom</a></li>
+                          <li><a href="/donate">Donate to Shelters</a></li>
+                        </ul>
+                      </nav>
+
+                      <h2>Featured Pet Care Guides</h2>
+                      <ul>
+                        <li><a href="/best-dog-food-sensitive-stomach-diarrhea">Best Dog Food for Sensitive Stomach and Diarrhea</a></li>
+                        <li><a href="/high-protein-dog-food-picky-eaters">High-Protein Dog Food for Picky Eaters</a></li>
+                        <li><a href="/durable-dog-toys-aggressive-chewers">Durable Dog Toys for Aggressive Chewers</a></li>
+                      </ul>
+
+                      <h2>NYC Neighborhood Delivery</h2>
+                      <p>We deliver across all five NYC boroughs including Queens, Brooklyn, Manhattan, the Bronx, and Staten Island. Same-day delivery available in Jackson Heights, Astoria, Long Island City, Forest Hills, Flushing, Williamsburg, Park Slope, Brooklyn Heights, DUMBO, Bushwick, the Upper East Side, the Upper West Side, the West Village, Chelsea, and Harlem.</p>
+
+                      <h2>About Petshiwu</h2>
+                      <p>Petshiwu is a US pet supplies e-commerce store based in Jackson Heights, NY 11372. We curate premium pet brands and deliver to pet parents across New York City and nationwide. Phone: +1 (800) 259-2605. Email: support@petshiwu.com. Hours: Mon-Fri 9am-8pm, Sat-Sun 9am-6pm.</p>
+                    </div>
+
+                    <!-- Noscript fallback — only renders when JS is OFF -->
             <noscript>
               <div class="ps-ns-wrap">
 
