@@ -271,13 +271,11 @@ const BlogDetail = () => {
                 </nav>
               </div>
             )}
+          {/* Sticky sidebar ad — high CTR always visible */}
+            <StickySidebarAd slot="9876543225" />
           </aside>
-
-                        {/* Sticky sidebar ad — high CTR always visible */}
-                        <StickySidebarAd slot="9876543225" />
-                      </aside>
-                    </div>
-                  </div>
+        </div>
+      </div>
 
       {/* Red border at bottom */}
       <div className="h-1 bg-red-600 mt-12"></div>
