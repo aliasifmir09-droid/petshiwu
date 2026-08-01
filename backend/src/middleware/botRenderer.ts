@@ -853,7 +853,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   <div style="display:flex;gap:32px;flex-wrap:wrap">
     ${image ? `<img src="${esc(image)}" alt="${esc(productName)}" style="max-width:320px;max-height:320px;object-fit:contain;border-radius:8px;border:1px solid #eee" loading="lazy" />` : ''}
     <div style="flex:1;min-width:240px">
-      <h1 style="font-size:1.4em;margin:0 0 8px">${esc(productName)}</h1>
+      <h2 style="font-size:1.4em;margin:0 0 8px">${esc(productName)}</h2>
       ${brandName ? `<p style="margin:4px 0;color:#555">Brand: <strong>${esc(brandName)}</strong></p>` : ''}
       ${priceDisplay ? `<p style="margin:8px 0;font-size:1.5em;font-weight:700">${compareDisplay}${esc(priceDisplay)}</p>` : ''}
       <p style="margin:4px 0;color:${stockColor};font-weight:600">${stockLabel}</p>
@@ -875,7 +875,8 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   html = injectDescription(html, description);
   html = injectCanonical(html, productUrl);
   html = injectBeforeHeadClose(html, injectedTags);
-  // Replace entire root div with full crawlable body content (includes H1)
+  html = injectH1(html, productName);
+  // Replace entire root div with full crawlable body content (H2 — H1 already replaced in noscript)
   html = removeStaticHero(html);
   html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${bodyContent}</div>`);
   if (!html.includes(bodyContent)) {
@@ -987,7 +988,7 @@ const buildBlogHtml = (template: string, blog: any): string => {
     <span style="color:#555">${esc(blog.title)}</span>
   </nav>
   ${image !== `${BASE}/logo.png` ? `<img src="${esc(image)}" alt="${esc(blog.title)}" style="max-width:100%;height:auto;border-radius:8px;margin-bottom:16px" loading="lazy" />` : ''}
-  <h1 style="font-size:1.6em;margin:0 0 12px">${esc(blog.title)}</h1>
+  <h2 style="font-size:1.6em;margin:0 0 12px">${esc(blog.title)}</h2>
   <p style="color:#555;font-size:0.9em;margin-bottom:16px">${blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}</p>
   <p style="line-height:1.7;color:#333;font-size:1.05em">${esc(blogExcerpt)}</p>
   <a href="${esc(url)}" style="display:inline-block;margin-top:16px;padding:10px 24px;background:#1976d2;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Read Full Article</a>
@@ -999,6 +1000,7 @@ const buildBlogHtml = (template: string, blog: any): string => {
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
   html = injectBeforeHeadClose(html, injectedTags);
+  html = injectH1(html, blog.title);
   html = removeStaticHero(html);
   html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${blogBodyContent}</div>`);
   if (!html.includes(blogBodyContent)) {
@@ -1057,7 +1059,7 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
     <span style="color:#555">${esc(guide.title)}</span>
   </nav>
   ${image !== `${BASE}/logo.png` ? `<img src="${esc(image)}" alt="${esc(guide.title)}" style="max-width:100%;height:auto;border-radius:8px;margin-bottom:16px" loading="lazy" />` : ''}
-  <h1 style="font-size:1.6em;margin:0 0 12px">${esc(guide.title)}</h1>
+  <h2 style="font-size:1.6em;margin:0 0 12px">${esc(guide.title)}</h2>
   <p style="line-height:1.7;color:#333;font-size:1.05em">${esc(guideExcerpt)}</p>
   <a href="${esc(url)}" style="display:inline-block;margin-top:16px;padding:10px 24px;background:#1976d2;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Read Full Guide</a>
   <hr style="margin:24px 0;border:none;border-top:1px solid #eee" />
@@ -1068,6 +1070,7 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
   html = injectBeforeHeadClose(html, injectedTags);
+  html = injectH1(html, guide.title);
   html = removeStaticHero(html);
   html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${guideBodyContent}</div>`);
   if (!html.includes(guideBodyContent)) {
@@ -1237,7 +1240,7 @@ const buildNeighborhoodHtml = (
     <span>${esc(cat.label)} NYC</span> &rsaquo;
     <span>${esc(neighborhoodName)}, ${esc(borough)}</span>
   </nav>
-  <h1 style="font-size:1.7em;font-weight:700;margin:0 0 12px">${esc(h1)}</h1>
+  <h2 style="font-size:1.7em;font-weight:700;margin:0 0 12px">${esc(h1)}</h2>
   <p style="color:#444;line-height:1.7;margin-bottom:16px">Petshiwu delivers premium ${cat.petLabel} to every address in ${esc(neighborhoodName)}, ${esc(borough)} — including nearby ${esc(nearbyAreas)}. We're Queens-based with 10,000+ products and free shipping on orders over $49.</p>
   <a href="${BASE}/products" style="display:inline-block;padding:10px 24px;background:#1976d2;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-bottom:20px">Shop ${esc(cat.petLabel)} →</a>
   <p style="color:#555;font-size:0.9em"><a href="${BASE}/learning" style="color:#1976d2">Pet Care Blog</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — NYC&rsquo;s Local Pet Store</a></p>`;
@@ -1454,7 +1457,7 @@ const buildProductListHtml = async (template: string): Promise<string> => {
 
   const bodyContent = `
 <div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
-  <h1>All Pet Products — Petshiwu</h1>
+  <h2>All Pet Products — Petshiwu</h2>
   <p>Browse 10,000+ premium pet products for dogs, cats, birds, fish, reptiles, and small animals.
      Free shipping on orders over $49. Based in Jackson Heights, NY.</p>
   <ul style="list-style:none;padding:0;columns:2">
@@ -1468,7 +1471,8 @@ const buildProductListHtml = async (template: string): Promise<string> => {
   html = injectTitle(html, meta.title);
   html = injectDescription(html, meta.description);
   html = injectCanonical(html, canonicalUrl);
-  // Inject product list into body for Google to crawl
+  html = injectH1(html, 'All Pet Products — Petshiwu');
+  // Inject product list into body for Google to crawl (H2 — H1 already replaced in noscript)
   html = html.replace(/<div id="root">.*?<\/div>/s, `<div id="root">${bodyContent}</div>`) ||
          html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
   return html;
