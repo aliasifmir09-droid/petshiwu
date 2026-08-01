@@ -250,12 +250,16 @@
                     </div>
 
                     <!-- SEO content — visually hidden (sr-only), but in the HTML for crawlers.
-                         Mirrors the React homepage's content so Wave 1 indexing still has rich
-                         text for the homepage. The MutationObserver hides the entire shell
-                         (including this content) when React mounts. -->
-                    <div class="ps-sr-only">
-                      <h1>Premium Pet Food &amp; Supplies Delivered to NYC | Petshiwu</h1>
-                      <p>Petshiwu is a premium pet food and supplies store serving New York City and nationwide with fast, reliable shipping. Based in Jackson Heights, Queens, we deliver carefully curated brands for dogs, cats, birds, reptiles, fish, and small pets. Free shipping on orders over $49. Same-day delivery available across all five NYC boroughs.</p>
+                                 Mirrors the React homepage's content so Wave 1 indexing still has rich
+                                 text for the homepage. The MutationObserver hides the entire shell
+                                 (including this content) when React mounts.
+
+                                 NOTE: No H1 here. The noscript H1 below is the single H1 in the shell
+                                 (botRenderer's injectH1 replaces it with the page-specific H1 for
+                                 blogs/products/categories). Adding a second H1 here triggers the
+                                 "multiple H1s" quality flag Google uses to deindex pages. -->
+                            <div class="ps-sr-only">
+                              <p>Petshiwu is a premium pet food and supplies store serving New York City and nationwide with fast, reliable shipping. Based in Jackson Heights, Queens, we deliver carefully curated brands for dogs, cats, birds, reptiles, fish, and small pets. Free shipping on orders over $49. Same-day delivery available across all five NYC boroughs.</p>
 
                       <h2>Shop by Pet Type</h2>
                       <nav aria-label="Pet categories">
