@@ -1580,6 +1580,21 @@ export const createBotRenderer = (distPath: string) => {
 
       // DB-backed page enrichment — bots only (keeps non-bot requests fast with no DB queries)
       let notFound = false;
+
+      // Lightweight existence check for ALL requests — fixes cloaking pattern where
+      // non-existent blog/care-guide/product URLs return 200 + index,follow to users
+      // but 404 to bots. .exists() is a fast boolean query, not a full document fetch.
+      if (page?.type === 'blog') {
+        const exists = await Blog.exists({ slug: page.slug, isPublished: true });
+        if (!exists) notFound = true;
+      } else if (page?.type === 'care-guide') {
+        const exists = await CareGuide.exists({ slug: page.slug, isPublished: true });
+        if (!exists) notFound = true;
+      } else if (page?.type === 'product') {
+        const exists = await Product.exists({ slug: page.slug, isActive: true });
+        if (!exists) notFound = true;
+      }
+
       if (bot) {
         if (page?.type === 'product') {
           const product = await fetchProduct(page.slug);
