@@ -959,10 +959,16 @@ const buildBlogHtml = (template: string, blog: any): string => {
     ],
   };
 
-  // Extract speakable schema from blog.schema array if present
-  const speakableSchema = Array.isArray(blog.schema)
-    ? blog.schema.find((s: any) => s['@type'] === 'SpeakableSpecification')
-    : null;
+  // Build Speakable schema from blog.speakable boolean.
+  // The Blog model stores `speakable: Boolean` — when true, build the JSON-LD inline.
+  const speakableSchema = blog.speakable === true ? {
+    '@context': 'https://schema.org',
+    '@type': 'SpeakableSpecification',
+    xpath: [
+      '/html/head/title',
+      '/html/head/meta[@name="description"]/@content'
+    ]
+  } : null;
 
   const injectedTags = `
   <!-- Bot renderer: blog-specific meta -->
