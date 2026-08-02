@@ -507,9 +507,12 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl?
   // thin/doorway. Adding noindex prevents the penalty while keeping the URL 200
   // for users (so existing links don't 404).
   const isSingleSegment = segments.length === 1;
-  const isLegitimateSingle = meta !== undefined
-    || ['products', 'learning', 'care-guides', 'about', 'faq', 'returns',
-        'donate', 'search', 'symptom-checker', 'press'].includes(segments[0] || '')
+  // Legitimate single-segment URLs: explicit known paths + valid pet types.
+  // STATIC_PAGES entries with keyword-stuffed titles (e.g. /best-dog-food-...)
+  // are NOT legitimate — they're thin doorway pages with generic content.
+  const isLegitimateSingle = ['products', 'learning', 'care-guides', 'about',
+      'faq', 'returns', 'donate', 'search', 'symptom-checker', 'press',
+      'privacy', 'terms', 'shipping', 'contact'].includes(segments[0] || '')
     || PET_TYPES.has(segments[0] || '');
   const isDoorway = isSingleSegment && !isLegitimateSingle && !isProductPath;
 
