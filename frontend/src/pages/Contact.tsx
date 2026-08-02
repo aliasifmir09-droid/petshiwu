@@ -8,6 +8,15 @@ const Contact = () => {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Detect NY timezone abbreviation (EDT during DST, EST otherwise)
+  const nyTzAbbr = (() => {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      timeZoneName: 'short',
+    }).formatToParts(new Date());
+    return parts.find(p => p.type === 'timeZoneName')?.value || 'ET';
+  })();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -135,25 +144,34 @@ const Contact = () => {
                         <span>Saturday - Sunday</span>
                         <span className="font-medium text-gray-800">9:00 AM - 6:00 PM</span>
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">All times Eastern (EST)</p>
+                      <p className="text-xs text-gray-400 mt-1">All times Eastern ({nyTzAbbr})</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Map embed */}
-              <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm h-56">
-                <iframe
-                  title="Petshiwu Location"
-                  src="https://maps.google.com/maps?q=37-68+74th+Street,+Jackson+Heights,+NY+11372&output=embed"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
-              </div>
+                {/* Address / Map card — replaces unreliable Google Maps iframe */}
+                <div className="rounded-2xl border border-gray-200 shadow-sm bg-gradient-to-br from-blue-50 to-white p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+                      <MapPin className="w-6 h-6 text-blue-700" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 text-sm mb-1">Visit Our Office</p>
+                      <p className="text-gray-600 text-sm">37-68 74th Street</p>
+                      <p className="text-gray-600 text-sm">Jackson Heights, NY 11372</p>
+                      <a
+                        href="https://maps.google.com/?q=37-68+74th+Street,+Jackson+Heights,+NY+11372"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 mt-3 text-blue-700 hover:text-blue-800 text-sm font-semibold"
+                      >
+                        Open in Google Maps
+                        <span aria-hidden="true">↗</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
             </div>
 
             {/* Contact Form */}
