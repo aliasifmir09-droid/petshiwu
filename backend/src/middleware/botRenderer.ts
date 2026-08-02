@@ -419,7 +419,7 @@ const slugToTitle = (slug: string): string =>
     .map(w => w.length > 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w)
     .join(' ');
 
-const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl?: string): string => {
+const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl?: string, res?: Response): string => {
   const cleanPath = reqPath.split('?')[0]; // strip query string from canonical
   // FIX: Use req.originalUrl (or req.url) for query detection — req.path strips query
   // in Express, so the previous `hasQueryString = reqPath !== cleanPath` was always false.
@@ -498,6 +498,33 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl?
         '<meta name="robots" content="noindex, follow, max-image-preview:large" />\n</head>'
       );
     }
+  }
+
+  // Doorway-page noindex: single-segment URL that isn't in STATIC_PAGES, isn't
+  // a valid pet type, and isn't /products /learning /care-guides is a thin
+  // landing page (e.g. /best-dog-food-sensitive-stomach-diarrhea, /pet-supplies-
+  // delivery-nyc, etc.). These are SEO landmines — Google may deindex for being
+  // thin/doorway. Adding noindex prevents the penalty while keeping the URL 200
+  // for users (so existing links don't 404).
+  const isSingleSegment = segments.length === 1;
+  const isLegitimateSingle = meta !== undefined
+    || ['products', 'learning', 'care-guides', 'about', 'faq', 'returns',
+        'donate', 'search', 'symptom-checker', 'press'].includes(segments[0] || '')
+    || PET_TYPES.has(segments[0] || '');
+  const isDoorway = isSingleSegment && !isLegitimateSingle && !isProductPath;
+
+  if (isDoorway) {
+    html = html.replace(
+      /<meta name="robots" content="[^"]*"\s*\/?>/,
+      '<meta name="robots" content="noindex, follow" />'
+    );
+    if (!/<meta\s+name=["']robots["']/i.test(html)) {
+      html = html.replace(
+        '</head>',
+        '<meta name="robots" content="noindex, follow" />\n</head>'
+      );
+    }
+    res.setHeader('X-Robots-Tag', 'noindex');
   }
   return html;
 };
@@ -1656,7 +1683,7 @@ export const createBotRenderer = (distPath: string) => {
       // This fixes "all pages same canonical / same title / same meta description" for
       // non-bot auditing tools and regular browsers alike.
       if (!html) {
-        html = buildGenericPageHtml(template, req.path, req.originalUrl);
+        html = buildGenericPageHtml(template, req.path, req.originalUrl, res);
       }
 
       // Soft 404 fix: return actual 404 status when a DB-backed page (blog/product/care-guide)
@@ -1687,7 +1714,7 @@ export const createBotRenderer = (distPath: string) => {
       logger.warn(`[botRenderer] Error rendering ${req.path}:`, err?.message);
       // Even on error, try to serve correct canonical rather than raw index.html
       try {
-        const fallback = buildGenericPageHtml(template, req.path, req.originalUrl);
+        const fallback = buildGenericPageHtml(template, req.path, req.originalUrl, res);
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         if (bot) res.setHeader('X-Bot-Rendered', 'fallback');
