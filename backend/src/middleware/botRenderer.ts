@@ -96,8 +96,8 @@ const injectTitle = (html: string, title: string): string =>
  */
 const injectDescription = (html: string, description: string): string =>
   html.replace(
-    /(<meta\s+name="description"\s+content=")[^"]*(")/,
-    `$1${esc(description)}$2`
+    /(<meta[\s\S]*?name="description"[\s\S]*?content=")[^"]*("[\s\S]*?>)/,
+      `$1${esc(description)}$2`
   );
 
 /**
@@ -397,11 +397,11 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
  */
 const injectOgTags = (html: string, title: string, description: string, url: string): string => {
   let out = html;
-  out = out.replace(/(<meta\s+property="og:title"\s+content=")[^"]*(")/i, `$1${esc(title)}$2`);
-  out = out.replace(/(<meta\s+property="og:description"\s+content=")[^"]*(")/i, `$1${esc(description)}$2`);
-  out = out.replace(/(<meta\s+property="og:url"\s+content=")[^"]*(")/i, `$1${esc(url)}$2`);
-  out = out.replace(/(<meta\s+name="twitter:title"\s+content=")[^"]*(")/i, `$1${esc(title)}$2`);
-  out = out.replace(/(<meta\s+name="twitter:description"\s+content=")[^"]*(")/i, `$1${esc(description)}$2`);
+  out = out.replace(/(<meta[\s\S]*?property="og:title"[\s\S]*?content=")[^"]*("[\s\S]*?>)/i, `$1${esc(title)}$2`);
+  out = out.replace(/(<meta[\s\S]*?property="og:description"[\s\S]*?content=")[^"]*("[\s\S]*?>)/i, `$1${esc(description)}$2`);
+  out = out.replace(/(<meta[\s\S]*?property="og:url"[\s\S]*?content=")[^"]*("[\s\S]*?>)/i, `$1${esc(url)}$2`);
+  out = out.replace(/(<meta[\s\S]*?name="twitter:title"[\s\S]*?content=")[^"]*("[\s\S]*?>)/i, `$1${esc(title)}$2`);
+  out = out.replace(/(<meta[\s\S]*?name="twitter:description"[\s\S]*?content=")[^"]*("[\s\S]*?>)/i, `$1${esc(description)}$2`);
   return out;
 };
 
@@ -716,7 +716,7 @@ const fetchProduct = async (slug: string) => {
 const fetchBlog = async (slug: string) => {
   return withTimeout(
     Blog.findOne({ slug, isPublished: true })
-      .select('title slug excerpt content coverImage author publishedAt updatedAt')
+      .select('title slug excerpt content coverImage metaDescription speakable author publishedAt updatedAt')
       .lean()
       .exec()
   );
@@ -944,7 +944,7 @@ const extractFaqPairs = (htmlContent: string): Array<{ question: string; answer:
 const buildBlogHtml = (template: string, blog: any): string => {
   const title = `${blog.title} | Petshiwu Learning`;
   const description = truncate(
-    blog.excerpt ?? stripTags(blog.content ?? '').substring(0, 160),
+    blog.metaDescription ?? blog.excerpt ?? stripTags(blog.content ?? '').substring(0, 160),
     160
   );
   const image = blog.featuredImage ?? blog.coverImage ?? `${BASE}/logo.png`;
@@ -1574,10 +1574,10 @@ const build404Html = (template: string): string => {
   let html = template;
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`);
   html = html.replace(
-    /<meta\s+name="description"\s+content="[^"]*"/,
+    /<meta[\s\S]*?name="description"[\s\S]*?content="[^"]*"/,
     `<meta name="description" content="${esc(description)}"`
   );
-  html = html.replace(/<meta\s+name="robots"\s+content="[^"]*"/, '<meta name="robots" content="noindex, nofollow, noarchive"');
+  html = html.replace(/<meta[\s\S]*?name="robots"[\s\S]*?content="[^"]*"/, '<meta name="robots" content="noindex, nofollow, noarchive"');
   html = html.replace('</head>', '<link rel="canonical" href="https://www.petshiwu.com/" />\n</head>');
   return html;
 };
