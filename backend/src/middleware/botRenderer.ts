@@ -419,7 +419,7 @@ const slugToTitle = (slug: string): string =>
     .map(w => w.length > 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w)
     .join(' ');
 
-const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl?: string, res?: Response): string => {
+const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl: string | undefined, res: Response): string => {
   const cleanPath = reqPath.split('?')[0]; // strip query string from canonical
   // FIX: Use req.originalUrl (or req.url) for query detection — req.path strips query
   // in Express, so the previous `hasQueryString = reqPath !== cleanPath` was always false.
