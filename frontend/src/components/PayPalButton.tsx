@@ -1,69 +1,93 @@
 import { useState } from 'react';
 import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import { orderService } from '@/services/orders';
+
+interface PayPalItemInput {
+  product: string;
+  quantity: number;
+  variant?: { sku: string };
+}
 
 interface PayPalButtonProps {
-  amount: number;
+  items: PayPalItemInput[];
+  couponCode?: string;
+  donationAmount?: number;
   onSuccess: (orderId: string, payerId?: string) => void;
   onError: (error: string) => void;
   onCancel?: () => void;
   currency?: string;
 }
 
-const PayPalButtonContent = ({ amount, onSuccess, onError, onCancel, currency = 'USD' }: PayPalButtonProps) => {
+const PayPalButtonContent = ({ items, couponCode, donationAmount = 0, onSuccess, onError, onCancel, currency = 'USD' }: PayPalButtonProps) => {
   const [{ isPending }] = usePayPalScriptReducer();
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const createOrder = (_data: any, actions: any) => {
-    return actions.order.create({
-      purchase_units: [
-        {
-          amount: {
-            value: amount.toFixed(2),
-            currency_code: currency,
-          },
-        },
-      ],
-    });
-  };
-
-  const onApprove = async (_data: any, actions: any) => {
+  const createOrder = async () => {
+    setError(null);
     try {
-      // Capture the payment
-      const details = await actions.order.capture();
-      
-      if (details.status === 'COMPLETED') {
-        // Payment successful
-        onSuccess(details.id, details.payer?.payer_id);
-      } else {
-        const errorMsg = 'Payment was not completed. Please try again.';
-        setError(errorMsg);
-        onError(errorMsg);
+      const response = await orderService.createPayPalOrder({ items, couponCode, donationAmount });
+      const paypalOrderId = response.data?.paypalOrderId;
+      if (!response.success || !paypalOrderId) {
+        throw new Error('PayPal could not initialize this payment.');
       }
+      return paypalOrderId;
     } catch (err: any) {
-      const errorMsg = err.message || 'Payment processing failed. Please try again.';
+      const errorMsg = err.response?.data?.message || err.message || 'PayPal could not initialize this payment.';
       setError(errorMsg);
       onError(errorMsg);
+      throw err;
+    }
+  };
+
+  const onApprove = async (data: { orderID?: string }) => {
+    const paypalOrderId = data.orderID;
+    if (!paypalOrderId) {
+      const errorMsg = 'PayPal returned no order ID. Please try again.';
+      setError(errorMsg);
+      onError(errorMsg);
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+    try {
+      const response = await orderService.capturePayPalOrder({
+        paypalOrderId,
+        items,
+        couponCode,
+        donationAmount
+      });
+      const capturedOrderId = response.data?.paypalOrderId;
+      if (!response.success || response.data?.paymentStatus !== 'paid' || !capturedOrderId) {
+        throw new Error('PayPal payment was not completed. Please try again.');
+      }
+      onSuccess(capturedOrderId);
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.message || err.message || 'PayPal payment processing failed. Please try again.';
+      setError(errorMsg);
+      onError(errorMsg);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const onErrorHandler = (err: any) => {
-    const errorMsg = err.message || 'An error occurred with PayPal. Please try again.';
+    const errorMsg = err?.message || 'An error occurred with PayPal. Please try again.';
     setError(errorMsg);
     onError(errorMsg);
   };
 
   const onCancelHandler = () => {
-    if (onCancel) {
-      onCancel();
-    }
+    if (onCancel) onCancel();
   };
 
-  if (isPending) {
+  if (isPending || isProcessing) {
     return (
       <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg border border-gray-200">
         <Loader2 className="animate-spin text-primary-600 mr-3" size={24} />
-        <span className="text-gray-700">Loading PayPal...</span>
+        <span className="text-gray-700">{isProcessing ? 'Confirming PayPal payment...' : 'Loading PayPal...'}</span>
       </div>
     );
   }
@@ -123,4 +147,3 @@ const PayPalButton = (props: PayPalButtonProps) => {
 };
 
 export default PayPalButton;
-

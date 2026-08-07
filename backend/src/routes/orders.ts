@@ -1,6 +1,8 @@
 import express from 'express';
 import {
   createOrder,
+  createPayPalCheckoutOrder,
+  capturePayPalCheckoutOrder,
   getMyOrders,
   getOrder,
   getAllOrders,
@@ -29,6 +31,8 @@ import {
   adminPaginationValidation,
   createReturnValidation,
   createPaymentIntentValidation,
+  createPayPalOrderValidation,
+  capturePayPalOrderValidation,
   confirmPaymentValidation
 } from '../middleware/validation';
 
@@ -40,6 +44,8 @@ router.get('/track/:id', trackOrder);
 // GUEST CHECKOUT: These routes no longer require auth middleware
 // The controller handles both guests and logged-in users
 router.post('/payment-intent', createPaymentIntentValidation, createOrderPaymentIntent);
+router.post('/paypal/create-order', createPayPalOrderValidation, createPayPalCheckoutOrder);
+router.post('/paypal/capture-order', capturePayPalOrderValidation, capturePayPalCheckoutOrder);
 router.post('/confirm-payment', confirmPaymentValidation, confirmOrderPayment);
 router.post('/', createOrderValidation, createOrder);
 

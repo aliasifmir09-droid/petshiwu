@@ -13,6 +13,7 @@ interface CreateOrderData {
   taxPrice: number;
   donationAmount?: number;
   totalPrice: number;
+  couponCode?: string;
   notes?: string;
 }
 
@@ -87,6 +88,25 @@ export const orderService = {
 
   createPaymentIntent: async (data: { totalPrice: number; paymentMethod: string }) => {
     const response = await api.post<ApiResponse<{ clientSecret: string; paymentIntentId: string }>>('/orders/payment-intent', data);
+    return response.data;
+  },
+
+  createPayPalOrder: async (data: {
+    items: Array<{ product: string; quantity: number; variant?: { sku: string } }>;
+    couponCode?: string;
+    donationAmount?: number;
+  }) => {
+    const response = await api.post<ApiResponse<{ paypalOrderId: string; status: string; amount: number; currency: string }>>('/orders/paypal/create-order', data);
+    return response.data;
+  },
+
+  capturePayPalOrder: async (data: {
+    paypalOrderId: string;
+    items: Array<{ product: string; quantity: number; variant?: { sku: string } }>;
+    couponCode?: string;
+    donationAmount?: number;
+  }) => {
+    const response = await api.post<ApiResponse<{ paypalOrderId: string; paymentStatus: string; amount: number; currency: string }>>('/orders/paypal/capture-order', data);
     return response.data;
   },
 

@@ -592,12 +592,53 @@ export const wishlistEmailValidation = [
 
 // Order payment validations
 export const createPaymentIntentValidation = [
-  body('orderId')
+  body('totalPrice')
+    .isFloat({ min: 0.50 })
+    .withMessage('Order total must be at least $0.50'),
+  body('paymentMethod')
+    .isIn(['credit_card', 'paypal', 'apple_pay', 'google_pay'])
+    .withMessage('Invalid payment method'),
+  validate
+];
+
+const paypalItemsValidation = [
+  body('items')
+    .isArray({ min: 1 })
+    .withMessage('At least one PayPal order item is required'),
+  body('items.*.product')
     .custom((value) => mongoose.Types.ObjectId.isValid(value))
-    .withMessage('Invalid order ID'),
-  body('amount')
-    .isFloat({ min: 0.01 })
-    .withMessage('Amount must be greater than 0'),
+    .withMessage('Invalid product ID'),
+  body('items.*.quantity')
+    .isInt({ min: 1, max: 99 })
+    .withMessage('Invalid item quantity'),
+  body('items.*.variant.sku')
+    .optional({ nullable: true })
+    .trim()
+    .isLength({ min: 1, max: 200 })
+    .withMessage('Invalid variant SKU'),
+  body('couponCode')
+    .optional({ nullable: true })
+    .trim()
+    .isLength({ min: 1, max: 50 })
+    .withMessage('Invalid coupon code'),
+  body('donationAmount')
+    .optional({ nullable: true })
+    .isFloat({ min: 0, max: 10000 })
+    .withMessage('Invalid donation amount')
+];
+
+export const createPayPalOrderValidation = [
+  ...paypalItemsValidation,
+  validate
+];
+
+export const capturePayPalOrderValidation = [
+  body('paypalOrderId')
+    .trim()
+    .matches(/^[A-Z0-9-]+$/i)
+    .isLength({ min: 5, max: 200 })
+    .withMessage('Invalid PayPal order ID'),
+  ...paypalItemsValidation,
   validate
 ];
 

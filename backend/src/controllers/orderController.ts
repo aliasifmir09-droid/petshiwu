@@ -14,6 +14,14 @@ import { cache } from '../utils/cache';
 
 import type { OrderItemInput, NormalizedOrderItem, NormalizedOrder } from '../types/common';
 import Stripe from 'stripe';
+import {
+  capturePayPalOrder,
+  createPayPalOrder,
+  getPayPalCapturedAmount,
+  getPayPalCurrency,
+  getPayPalOrder
+} from '../services/paypalService';
+import { calculateTrustedOrderPricing } from '../services/orderPricingService';
 
 const stripe: Stripe | null = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2024-11-20.acacia' as any })
@@ -32,6 +40,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       taxPrice,
       donationAmount,
       totalPrice,
+      couponCode,
       notes,
       guestEmail // GUEST CHECKOUT: email from guest user
     } = req.body;
@@ -94,7 +103,21 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       });
     }
 
-    const normalizedItems = items.map((item: OrderItemInput): NormalizedOrderItem => {
+    // PayPal can retry callbacks. Return the existing order instead of
+    // decrementing inventory or creating a duplicate order.
+    if (paymentMethod === 'paypal' && req.body.paypalOrderId) {
+      const existingPayPalOrder = await Order.findOne({ paypalOrderId: req.body.paypalOrderId });
+      if (existingPayPalOrder) {
+        const normalizedExistingOrder = normalizeOrderId(existingPayPalOrder);
+        return res.status(200).json({
+          success: true,
+          message: 'Order already created for this PayPal payment',
+          data: normalizedExistingOrder || existingPayPalOrder
+        });
+      }
+    }
+
+    const normalizedItemInputs = items.map((item: OrderItemInput): OrderItemInput => {
       let productId: string | null = null;
       const rawProductId = item.product;
       if (!rawProductId) {
@@ -124,6 +147,18 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
     }
 
     try {
+      const trustedPricing = await calculateTrustedOrderPricing(
+        normalizedItemInputs,
+        typeof couponCode === 'string' ? couponCode : undefined,
+        Number(donationAmount) || 0,
+        session
+      );
+      const normalizedItems = trustedPricing.items;
+
+      if (Math.abs(Number(totalPrice) - trustedPricing.totalPrice) > 0.01) {
+        throw new Error(`Order total mismatch. Expected $${trustedPricing.totalPrice.toFixed(2)}, received $${Number(totalPrice).toFixed(2)}`);
+      }
+
       const stockUpdates: Array<{ productId: string; quantity: number; variantSku?: string }> = [];
 
       for (const item of normalizedItems) {
@@ -200,9 +235,25 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         const { paymentIntentId: intentId, paypalOrderId: paypalId } = req.body;
         if (paymentMethod === 'paypal') {
           if (!paypalId) throw new Error('PayPal Order ID is required for PayPal payments');
+
+          const paypalOrder = await getPayPalOrder(paypalId);
+          const capturedAmount = getPayPalCapturedAmount(paypalOrder);
+          const paypalCurrency = getPayPalCurrency(paypalOrder);
+          const expectedAmount = Math.round(trustedPricing.totalPrice * 100) / 100;
+
+          if (paypalOrder.status !== 'COMPLETED') {
+            throw new Error(`PayPal payment not completed. Status: ${paypalOrder.status}`);
+          }
+          if (paypalCurrency !== 'USD') {
+            throw new Error(`PayPal payment currency mismatch. Expected USD, received ${paypalCurrency ?? 'unknown'}`);
+          }
+          if (capturedAmount === null || Math.abs(capturedAmount - expectedAmount) > 0.01) {
+            throw new Error(`PayPal payment amount mismatch. Expected: $${expectedAmount.toFixed(2)}, received: $${capturedAmount ?? 'unknown'}`);
+          }
+
           paypalOrderId = paypalId;
           isPaymentVerified = true;
-          logger.info(`PayPal payment received: Order ID ${paypalId}`);
+          logger.info(`PayPal payment verified: Order ID ${paypalId}, amount $${capturedAmount.toFixed(2)}`);
         } else {
           if (!intentId) throw new Error('Payment Intent ID is required for online payment methods');
           if (stripe) {
@@ -211,7 +262,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
               if (paymentIntent.status !== 'succeeded') {
                 throw new Error(`Payment not completed. Status: ${paymentIntent.status}`);
               }
-              const expectedAmount = Math.round(totalPrice * 100);
+              const expectedAmount = Math.round(trustedPricing.totalPrice * 100);
               if (paymentIntent.amount !== expectedAmount) {
                 throw new Error(`Payment amount mismatch. Expected: $${totalPrice}, Got: $${paymentIntent.amount / 100}`);
               }
@@ -243,11 +294,11 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         paymentStatus: paymentMethod === 'cod' ? 'pending' : (isPaymentVerified ? 'paid' : 'pending'),
         isPaid: paymentMethod !== 'cod' && isPaymentVerified ? true : false,
         paidAt: paymentMethod !== 'cod' && isPaymentVerified ? new Date() : undefined,
-        itemsPrice,
-        shippingPrice,
-        taxPrice,
-        donationAmount: donationAmount || 0,
-        totalPrice,
+        itemsPrice: trustedPricing.itemsPrice,
+        shippingPrice: trustedPricing.shippingPrice,
+        taxPrice: trustedPricing.taxPrice,
+        donationAmount: trustedPricing.donationAmount,
+        totalPrice: trustedPricing.totalPrice,
         notes: notes || undefined
       });
       const savedOrder = await newOrder.save(session ? { session } : {});
@@ -1158,6 +1209,93 @@ export const trackOrder = async (req: Request, res: Response, next: NextFunction
 };
 
 // GUEST CHECKOUT: works without authentication
+export const createPayPalCheckoutOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+      const { items, couponCode, donationAmount = 0 } = req.body;
+      const pricing = await calculateTrustedOrderPricing(
+        Array.isArray(items) ? items : [],
+        typeof couponCode === 'string' ? couponCode : undefined,
+        Number(donationAmount) || 0
+      );
+
+      if (pricing.totalPrice < 0.5) {
+        return res.status(400).json({ success: false, message: 'Order total must be at least $0.50' });
+      }
+
+      const paypalOrder = await createPayPalOrder(pricing.totalPrice, 'USD');
+      return res.status(200).json({
+        success: true,
+        data: {
+          paypalOrderId: paypalOrder.id,
+          status: paypalOrder.status,
+          amount: pricing.totalPrice,
+          currency: 'USD'
+        }
+      });
+    } catch (error: unknown) {
+      logger.error('PayPal order creation error:', error);
+      const message = error instanceof Error ? error.message : 'Failed to create PayPal order';
+      return res.status(502).json({ success: false, message });
+    }
+  };
+
+export const capturePayPalCheckoutOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { paypalOrderId, items, couponCode, donationAmount = 0 } = req.body;
+
+    if (!paypalOrderId) {
+      return res.status(400).json({ success: false, message: 'PayPal order ID is required' });
+    }
+
+    const pricing = await calculateTrustedOrderPricing(
+      Array.isArray(items) ? items : [],
+      typeof couponCode === 'string' ? couponCode : undefined,
+      Number(donationAmount) || 0
+    );
+    const expectedAmount = Math.round(pricing.totalPrice * 100) / 100;
+    if (expectedAmount < 0.5) {
+      return res.status(400).json({ success: false, message: 'Order total must be at least $0.50' });
+    }
+
+    const existingPayPalOrder = await getPayPalOrder(paypalOrderId);
+    const existingCapturedAmount = getPayPalCapturedAmount(existingPayPalOrder);
+    let paypalOrder = existingPayPalOrder;
+    if (existingPayPalOrder.status === 'APPROVED') {
+      paypalOrder = await capturePayPalOrder(paypalOrderId);
+    }
+
+    const capturedAmount = getPayPalCapturedAmount(paypalOrder);
+    const paypalCurrency = getPayPalCurrency(paypalOrder);
+    if (paypalOrder.status !== 'COMPLETED') {
+      return res.status(400).json({ success: false, message: `PayPal payment was not completed. Status: ${paypalOrder.status}` });
+    }
+    if (paypalCurrency !== 'USD') {
+      return res.status(400).json({ success: false, message: `PayPal payment currency mismatch. Expected USD, received ${paypalCurrency ?? 'unknown'}` });
+    }
+    if (capturedAmount === null || Math.abs(capturedAmount - expectedAmount) > 0.01) {
+      return res.status(400).json({
+        success: false,
+        message: `PayPal payment amount mismatch. Expected: $${expectedAmount.toFixed(2)}, received: $${capturedAmount ?? existingCapturedAmount ?? 'unknown'}`
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'PayPal payment captured successfully',
+      data: {
+        paypalOrderId: paypalOrder.id,
+        paymentStatus: 'paid',
+        amount: capturedAmount,
+        currency: 'USD'
+      }
+    });
+  } catch (error: unknown) {
+    logger.error('PayPal capture error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to capture PayPal payment';
+    return res.status(502).json({ success: false, message });
+  }
+};
+
 export const createOrderPaymentIntent = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { totalPrice, paymentMethod } = req.body;

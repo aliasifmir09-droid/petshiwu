@@ -1,16 +1,9 @@
 import express, { Request, Response } from 'express';
 import CouponUsage from '../models/CouponUsage';
 import logger from '../utils/logger';
+import { COUPONS, getCouponDiscount } from '../services/couponService';
 
 const router = express.Router();
-
-// Hard-coded coupon definitions — extend this as needed
-const COUPONS: Record<string, { type: 'percent' | 'fixed'; value: number; description: string }> = {
-  'WELCOME10': { type: 'percent', value: 10, description: '10% off your first order' },
-  'NYC10':     { type: 'percent', value: 10, description: '10% off for NYC pet parents' },
-  'PETDAY10':  { type: 'percent', value: 10, description: '10% off — National Pet Day' },
-  'WORLDCUP':  { type: 'percent', value: 10, description: '10% off — World Cup 2026 🇺🇸⚽' },
-};
 
 // POST /api/v1/coupons/validate
 // Body: { code, subtotal, email }
@@ -43,15 +36,7 @@ router.post('/validate', async (req: Request, res: Response) => {
     }
 
     const numericSubtotal = Number(subtotal) || 0;
-    let discountAmount = 0;
-    if (coupon.type === 'percent') {
-      const raw = (numericSubtotal * coupon.value) / 100;
-      // Cap: 10% off can never save more than $10, 20% off never more than $20, etc.
-      const maxDiscount = coupon.value;
-      discountAmount = parseFloat(Math.min(raw, maxDiscount).toFixed(2));
-    } else {
-      discountAmount = Math.min(coupon.value, numericSubtotal);
-    }
+    const discountAmount = getCouponDiscount(normalized, numericSubtotal);
 
     logger.info(`[coupons] Code ${normalized} validated for ${email || 'unknown'} — discount: $${discountAmount}`);
 

@@ -62,6 +62,7 @@ interface CreateOrderData {
   taxPrice: number;
   donationAmount?: number;
   totalPrice: number;
+  couponCode?: string;
   notes?: string;
   guestEmail?: string;
 }
@@ -306,7 +307,8 @@ const Checkout = () => {
   const subtotal = getTotalPrice();
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
   const tax = subtotal * TAX_RATE;
-  const total = Math.max(0, subtotal + shipping + tax + donationAmount - couponDiscount);
+  const onlineTotal = Math.max(0, subtotal + shipping + tax - couponDiscount);
+  const total = Math.max(0, onlineTotal + donationAmount);
 
   const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return;
@@ -410,7 +412,7 @@ const Checkout = () => {
         setIsProcessingPayment(true);
         try {
           const paymentIntentResponse = await orderService.createPaymentIntent({
-            totalPrice: total,
+            totalPrice: onlineTotal,
             paymentMethod: paymentMethod
           });
           if (paymentIntentResponse.success && paymentIntentResponse.data?.clientSecret) {
@@ -616,11 +618,24 @@ const Checkout = () => {
       shippingPrice: shipping,
       taxPrice: tax,
       donationAmount: donationAmount > 0 ? donationAmount : undefined,
-      totalPrice: subtotal + shipping + tax + donationAmount,
+      totalPrice: total,
+      couponCode: couponCode || undefined,
       notes: orderNotes.trim() || undefined,
       // GUEST CHECKOUT: include guest email
       ...(!isAuthenticated && shippingInfo.email ? { guestEmail: shippingInfo.email } : {})
     };
+
+    // Online payments are already captured for the exact checkout total.
+    // Do not open the optional donation step afterward, because changing the
+    // amount would make the verified PayPal/Stripe payment and store order differ.
+    if (paymentMethod !== 'cod') {
+      createOrderMutation.mutate({
+        ...orderData,
+        donationAmount: undefined,
+        totalPrice: onlineTotal
+      });
+      return;
+    }
 
     setPendingOrderData(orderData);
     setShowDonationModal(true);
@@ -633,7 +648,7 @@ const Checkout = () => {
       createOrderMutation.mutate({
         ...pendingOrderData,
         donationAmount: amount > 0 ? amount : undefined,
-        totalPrice: subtotal + shipping + tax + amount
+        totalPrice: subtotal + shipping + tax - couponDiscount + amount
       });
       setPendingOrderData(null);
     }
@@ -1017,8 +1032,18 @@ const Checkout = () => {
                       <span className="ml-3 text-gray-600">Loading PayPal...</span>
                     </div>
                   }>
-                    <PayPalButton amount={total} onSuccess={handlePayPalSuccess}
-                      onError={handlePayPalError} onCancel={handlePayPalCancel} />
+                    <PayPalButton
+                      items={items.map((item: any) => ({
+                        product: normalizeId(item.product._id) || String(item.product._id),
+                        quantity: item.quantity,
+                        ...(item.variant?.sku ? { variant: { sku: item.variant.sku } } : {})
+                      }))}
+                      couponCode={couponCode || undefined}
+                      donationAmount={0}
+                      onSuccess={handlePayPalSuccess}
+                      onError={handlePayPalError}
+                      onCancel={handlePayPalCancel}
+                    />
                   </Suspense>
                 </div>
               )}

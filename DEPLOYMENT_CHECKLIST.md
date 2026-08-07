@@ -23,8 +23,10 @@
   - [ ] `EMAIL_FROM` - Email sender address
   - [ ] `RESEND_API_KEY` (if using Resend) - Email service API key
   - [ ] `STRIPE_SECRET_KEY` (if using Stripe) - Payment gateway secret
+  - [ ] `PAYPAL_ENV=sandbox` for testing, then `PAYPAL_ENV=live` for production
   - [ ] `PAYPAL_CLIENT_ID` (if using PayPal) - PayPal client ID
   - [ ] `PAYPAL_CLIENT_SECRET` (if using PayPal) - PayPal client secret
+  - [ ] `VITE_PAYPAL_CLIENT_ID` - frontend PayPal client ID, configured before the Vite production build
 
 - [ ] **Security Headers**
   - [ ] Helmet.js configured (✅ Already implemented)
