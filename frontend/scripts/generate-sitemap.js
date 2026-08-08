@@ -24,6 +24,65 @@ const SITEMAP_SOURCES = [
 
 const XML_NAME = '[A-Za-z_][A-Za-z0-9_.:-]*';
 const XML_ENTITY = '&(?:amp|lt|gt|quot|apos|#[0-9]+|#x[0-9A-Fa-f]+);';
+const INDEXABLE_ROOTS = new Set([
+  '', 'products', 'learning', 'care-guides', 'about', 'faq', 'returns',
+  'return-policy', 'donate', 'contact', 'shipping', 'shipping-policy',
+  'other-animals', 'privacy', 'privacy-policy', 'terms', 'terms-of-service',
+  'accessibility', 'shop', 'fish-tanks', 'press', 'investors', 'sell-with-us',
+  'vendors', 'partners', 'dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet',
+  'small-animal',
+]);
+
+function decodeXml(value) {
+  return value
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
+function sanitizeLegacySitemapEntries(xml) {
+  const seenPaths = new Set();
+  let removed = 0;
+  const sanitized = xml.replace(/<url>[\s\S]*?<\/url>/g, (block) => {
+    const match = block.match(/<loc>([^<]+)<\/loc>/);
+    if (!match) {
+      removed += 1;
+      return '';
+    }
+
+    const rawLoc = decodeXml(match[1].trim());
+    let parsed;
+    try {
+      parsed = new URL(rawLoc);
+    } catch {
+      removed += 1;
+      return '';
+    }
+
+    const pathname = parsed.pathname.replace(/\/+$/, '') || '/';
+    const segments = pathname.split('/').filter(Boolean);
+    const isLegacyProduct = segments[0] === 'products' && segments.length === 2;
+    const isSingleUnknownRoot = segments.length === 1 && !INDEXABLE_ROOTS.has(segments[0]);
+    const invalid = !/^https?:$/i.test(parsed.protocol)
+      || /\s/.test(rawLoc)
+      || parsed.search
+      || parsed.hash
+      || isLegacyProduct
+      || isSingleUnknownRoot
+      || seenPaths.has(pathname);
+
+    if (invalid) {
+      removed += 1;
+      return '';
+    }
+    seenPaths.add(pathname);
+    return block;
+  });
+
+  return { xml: sanitized, removed };
+}
 
 function assertXmlText(value, context) {
   if (value.includes('&') && new RegExp(`&(?!${XML_ENTITY.slice(1, -1)})`).test(value)) {
@@ -222,15 +281,14 @@ function fetchSitemap(url) {
       res.setEncoding('utf8');
       res.on('data', (chunk) => { data += chunk; });
       res.on('end', () => {
-        try {
-          resolve(validateSitemapXml(data));
-        } catch (error) {
-          reject(error);
-        }
+        // Validate after the compatibility sanitizer runs. The first backend
+        // deploy must be able to consume the legacy sitemap long enough to
+        // ship the backend's authoritative final filter.
+        resolve(data);
       });
     });
     req.on('error', reject);
-    req.setTimeout(8000, () => {
+    req.setTimeout(30000, () => {
       req.destroy();
       reject(new Error('Request timeout'));
     });
@@ -253,10 +311,12 @@ async function generateSitemap() {
 
   for (const source of SITEMAP_SOURCES) {
     try {
-      const xml = await fetchSitemap(source);
+      const rawXml = await fetchSitemap(source);
+      const { xml: sanitizedXml, removed } = sanitizeLegacySitemapEntries(rawXml);
+      const xml = validateSitemapXml(sanitizedXml);
       writeAtomically(OUTPUT_PATH, xml);
-      console.log(`✅ Sitemap fetched and validated from backend: ${source}`);
-      console.log(`📊 Size: ${(xml.length / 1024).toFixed(2)} KB`);
+      console.log(`✅ Sitemap fetched, sanitized, and validated from backend: ${source}`);
+      console.log(`📊 Size: ${(xml.length / 1024).toFixed(2)} KB; removed ${removed} invalid/noncanonical entries`);
       return;
     } catch (error) {
       failures.push(`${source}: ${error.message}`);
