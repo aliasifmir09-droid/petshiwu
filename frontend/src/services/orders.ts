@@ -5,7 +5,7 @@ interface CreateOrderData {
   items: OrderItem[];
   shippingAddress: ShippingAddress;
   billingAddress?: ShippingAddress;
-  paymentMethod: 'credit_card' | 'paypal' | 'apple_pay' | 'google_pay' | 'cod';
+  paymentMethod: 'credit_card' | 'paypal' | 'apple_pay' | 'google_pay';
   paymentIntentId?: string;
   paypalOrderId?: string;
   itemsPrice: number;
@@ -93,20 +93,29 @@ export const orderService = {
 
   createPayPalOrder: async (data: {
     items: Array<{ product: string; quantity: number; variant?: { sku: string } }>;
+    shippingAddress: ShippingAddress & { firstName: string; lastName: string; phone: string };
+    billingAddress?: ShippingAddress & { firstName: string; lastName: string; phone: string };
+    guestEmail?: string;
+    notes?: string;
     couponCode?: string;
     donationAmount?: number;
+    checkoutToken?: string;
   }) => {
-    const response = await api.post<ApiResponse<{ paypalOrderId: string; status: string; amount: number; currency: string }>>('/orders/paypal/create-order', data);
+    const response = await api.post<ApiResponse<{ paypalOrderId: string; checkoutToken: string; status: string; amount: number; currency: string }>>('/orders/paypal/create-order', data);
     return response.data;
   },
 
   capturePayPalOrder: async (data: {
     paypalOrderId: string;
-    items: Array<{ product: string; quantity: number; variant?: { sku: string } }>;
-    couponCode?: string;
-    donationAmount?: number;
+    checkoutToken: string;
   }) => {
-    const response = await api.post<ApiResponse<{ paypalOrderId: string; paymentStatus: string; amount: number; currency: string }>>('/orders/paypal/capture-order', data);
+    const response = await api.post<ApiResponse<{
+      paypalOrderId: string;
+      paymentStatus: string;
+      amount: number;
+      currency: string;
+      order?: Order;
+    }>>('/orders/paypal/capture-order', data);
     return response.data;
   },
 

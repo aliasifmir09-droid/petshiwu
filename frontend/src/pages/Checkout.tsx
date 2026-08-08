@@ -7,7 +7,7 @@ import { orderService } from '@/services/orders';
 import { productService } from '@/services/products';
 import { addressService } from '@/services/addresses';
 import paymentMethodService from '@/services/paymentMethods';
-import { Address } from '@/types';
+import { Address, Order } from '@/types';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
@@ -24,6 +24,7 @@ import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/con
 
 const PaymentForm = lazy(() => import('@/components/PaymentForm'));
 const PayPalButton = lazy(() => import('@/components/PayPalButton'));
+const PayPalCardFields = lazy(() => import('@/components/PayPalCardFields'));
 
 interface CreateOrderData {
   items: Array<{
@@ -54,9 +55,8 @@ interface CreateOrderData {
     country: string;
     phone: string;
   };
-  paymentMethod: 'credit_card' | 'paypal' | 'apple_pay' | 'google_pay' | 'cod';
+  paymentMethod: 'credit_card' | 'paypal' | 'apple_pay' | 'google_pay';
   paymentIntentId?: string;
-  paypalOrderId?: string;
   itemsPrice: number;
   shippingPrice: number;
   taxPrice: number;
@@ -177,17 +177,18 @@ const Checkout = () => {
     retry: 1
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'paypal' | 'apple_pay' | 'google_pay' | 'cod'>('cod');
+  const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'paypal' | 'apple_pay' | 'google_pay'>('paypal');
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
-  const [paypalOrderId, setPaypalOrderId] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showPayPalButton, setShowPayPalButton] = useState(false);
+  const [paypalPaymentMode, setPaypalPaymentMode] = useState<'wallet' | 'card'>('wallet');
   const [donationAmount, setDonationAmount] = useState<number>(0);
   const [showDonationModal, setShowDonationModal] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
+  const paypalSuccessHandledRef = useRef(false);
   const [pendingOrderData, setPendingOrderData] = useState<CreateOrderData | null>(null);
   const [orderNotes, setOrderNotes] = useState('');
   const [selectedSavedPaymentMethod, setSelectedSavedPaymentMethod] = useState<string | null>(null);
@@ -214,7 +215,7 @@ const Checkout = () => {
     if (params.get('quick') === 'true') {
       if (savedPaymentMethods.length > 0) {
         const defaultMethod = savedPaymentMethods.find((pm: any) => pm.isDefault) || savedPaymentMethods[0];
-        if (defaultMethod) {
+        if (defaultMethod && defaultMethod.type !== 'cod') {
           setSelectedSavedPaymentMethod(defaultMethod._id);
           setPaymentMethod(defaultMethod.type);
         }
@@ -408,7 +409,8 @@ const Checkout = () => {
         setPaymentIntentId(null);
         return;
       }
-      if (paymentMethod !== 'cod' && !clientSecret && !isProcessingPayment) {
+
+      if (!clientSecret && !isProcessingPayment) {
         setIsProcessingPayment(true);
         try {
           const paymentIntentResponse = await orderService.createPaymentIntent({
@@ -421,23 +423,18 @@ const Checkout = () => {
             setShowPaymentForm(true);
             setShowPayPalButton(false);
           } else {
-            showToast('Failed to initialize payment. Please try again or use Cash on Delivery.', 'error');
-            setPaymentMethod('cod');
+            showToast('Failed to initialize payment. Please try PayPal again.', 'error');
+            setPaymentMethod('paypal');
           }
         } catch (error: any) {
-          showToast(error.response?.data?.message || 'Payment initialization failed. Please use Cash on Delivery.', 'error');
-          setPaymentMethod('cod');
+          showToast(error.response?.data?.message || 'Payment initialization failed. Please try PayPal again.', 'error');
+          setPaymentMethod('paypal');
         } finally {
           setIsProcessingPayment(false);
         }
-      } else if (paymentMethod === 'cod') {
-        setShowPaymentForm(false);
-        setShowPayPalButton(false);
-        setClientSecret(null);
-        setPaymentIntentId(null);
-        setPaypalOrderId(null);
       }
     };
+
     createPaymentIntent();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentMethod]);
@@ -490,28 +487,19 @@ const Checkout = () => {
     }
     setEmailError(false);
 
-    if (paymentMethod !== 'cod' && paymentMethod !== 'paypal' && !paymentIntentId) {
+    if (paymentMethod !== 'paypal' && !paymentIntentId) {
       showToast('Please complete the payment first.', 'error');
       return;
     }
-    if (paymentMethod === 'paypal' && !paypalOrderId) {
-      showToast('Please complete the PayPal payment first.', 'error');
-      return;
-    }
+    if (paymentMethod === 'paypal') return;
 
-    if (paymentMethod === 'cod') {
-      await prepareAndSubmitOrder();
-    } else if (paymentMethod === 'paypal') {
-      if (paypalOrderId) await prepareAndSubmitOrder(undefined, paypalOrderId);
+    if (paymentIntentId) {
+      await prepareAndSubmitOrder(paymentIntentId);
     } else {
-      if (paymentIntentId) {
-        await prepareAndSubmitOrder(paymentIntentId);
-      } else {
-        if (!showPaymentForm && clientSecret) {
-          setShowPaymentForm(true);
-        } else if (!clientSecret) {
-          showToast('Please wait for payment initialization...', 'info');
-        }
+      if (!showPaymentForm && clientSecret) {
+        setShowPaymentForm(true);
+      } else if (!clientSecret) {
+        showToast('Please wait for payment initialization...', 'info');
       }
     }
   };
@@ -536,13 +524,30 @@ const Checkout = () => {
     setShowPaymentForm(false);
     setClientSecret(null);
     setPaymentIntentId(null);
-    setPaymentMethod('cod');
+    setPaymentMethod('paypal');
+    setPaypalPaymentMode('wallet');
   };
 
-  const handlePayPalSuccess = async (orderId: string, _payerId?: string) => {
-    setPaypalOrderId(orderId);
-    setShowPayPalButton(false);
-    await prepareAndSubmitOrder(undefined, orderId);
+  const handlePayPalSuccess = async (order: Order) => {
+    if (paypalSuccessHandledRef.current) return;
+    paypalSuccessHandledRef.current = true;
+
+    clearCart();
+    const orderId = String(order._id || '');
+    const purchaseItems = items.map((item: any) => ({
+      item_id: normalizeId(item.product._id) || String(item.product._id),
+      item_name: item.product.name,
+      price: item.variant?.price || item.product.basePrice,
+      quantity: item.quantity
+    }));
+    trackPurchase(orderId, order.totalPrice, purchaseItems);
+    await queryClient.invalidateQueries({ queryKey: ['orders'] });
+    await queryClient.invalidateQueries({ queryKey: ['order'] });
+    if (!isAuthenticated) {
+      navigate(`/track-order?order=${order.orderNumber || orderId}`);
+    } else {
+      navigate(`/orders/${orderId}?newOrder=true`);
+    }
   };
 
   const handlePayPalError = (error: string) => {
@@ -551,12 +556,11 @@ const Checkout = () => {
   };
 
   const handlePayPalCancel = () => {
-    setShowPayPalButton(false);
-    setPaypalOrderId(null);
-    setPaymentMethod('cod');
+    setShowPayPalButton(true);
+    setPaymentMethod('paypal');
   };
 
-  const prepareAndSubmitOrder = async (confirmedPaymentIntentId?: string, paypalOrderIdParam?: string) => {
+  const prepareAndSubmitOrder = async (confirmedPaymentIntentId?: string) => {
     await saveAddressIfNeeded();
     let currentItems = items;
 
@@ -613,7 +617,6 @@ const Checkout = () => {
       },
       paymentMethod,
       paymentIntentId: confirmedPaymentIntentId || paymentIntentId || undefined,
-      paypalOrderId: paypalOrderIdParam || paypalOrderId || undefined,
       itemsPrice: subtotal,
       shippingPrice: shipping,
       taxPrice: tax,
@@ -628,7 +631,7 @@ const Checkout = () => {
     // Online payments are already captured for the exact checkout total.
     // Do not open the optional donation step afterward, because changing the
     // amount would make the verified PayPal/Stripe payment and store order differ.
-    if (paymentMethod !== 'cod') {
+    {
       createOrderMutation.mutate({
         ...orderData,
         donationAmount: undefined,
@@ -636,9 +639,6 @@ const Checkout = () => {
       });
       return;
     }
-
-    setPendingOrderData(orderData);
-    setShowDonationModal(true);
   };
 
   const handleDonationConfirm = (amount: number) => {
@@ -892,7 +892,7 @@ const Checkout = () => {
                   <div className="mb-6">
                     <label className="block text-sm font-medium mb-3">Saved Payment Methods</label>
                     <div className="space-y-3">
-                      {savedPaymentMethods.map((pm: any) => (
+                      {savedPaymentMethods.filter((pm: any) => pm.type !== 'cod').map((pm: any) => (
                         <button key={pm._id} type="button"
                           onClick={() => { setSelectedSavedPaymentMethod(pm._id); setPaymentMethod(pm.type); }}
                           className={`w-full text-left p-4 border-2 rounded-lg transition-all ${selectedSavedPaymentMethod === pm._id ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
@@ -923,49 +923,29 @@ const Checkout = () => {
                 )}
 
                 <div className="space-y-3">
-                  {/* Cash on Delivery */}
-                  <button type="button" onClick={() => setPaymentMethod('cod')}
-                    className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'cod' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'cod' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
-                      {paymentMethod === 'cod' && <div className="w-2 h-2 bg-white rounded-full"></div>}
-                    </div>
-                    <div className="flex-1 text-left">
-                      <span className="font-semibold text-gray-900">Cash on Delivery (COD)</span>
-                      <p className="text-sm text-gray-600 mt-1">Pay with cash when your order is delivered</p>
-                    </div>
-                  </button>
-
-                  {/* Credit Card */}
-                  {import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ? (
-                    <button type="button" onClick={() => setPaymentMethod('credit_card')}
-                      className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'credit_card' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
-                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'credit_card' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
-                        {paymentMethod === 'credit_card' && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                  {/* PayPal-powered Credit/Debit Card */}
+                  {import.meta.env.VITE_PAYPAL_CLIENT_ID ? (
+                    <button type="button" onClick={() => { setPaymentMethod('paypal'); setPaypalPaymentMode('card'); }}
+                      className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'paypal' && paypalPaymentMode === 'card' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'paypal' && paypalPaymentMode === 'card' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
+                        {paymentMethod === 'paypal' && paypalPaymentMode === 'card' && <div className="w-2 h-2 bg-white rounded-full"></div>}
                       </div>
                       <div className="flex-1 text-left">
                         <span className="font-semibold text-gray-900">Credit/Debit Card</span>
-                        <p className="text-sm text-gray-600 mt-1">Pay securely with your card</p>
+                        <p className="text-sm text-gray-600 mt-1">Pay securely by card through PayPal</p>
                       </div>
                     </button>
-                  ) : (
-                    <div className="w-full flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg bg-gray-50 opacity-60 cursor-not-allowed">
-                      <div className="w-4 h-4 rounded-full border-2 border-gray-300"></div>
-                      <div className="flex-1 text-left">
-                        <span className="font-semibold text-gray-500">Credit/Debit Card</span>
-                        <p className="text-sm text-gray-400 mt-1">Coming soon — use Cash on Delivery for now</p>
-                      </div>
-                    </div>
-                  )}
+                  ) : null}
 
-                  {/* PayPal */}
+                  {/* PayPal Wallet */}
                   {import.meta.env.VITE_PAYPAL_CLIENT_ID ? (
-                    <button type="button" onClick={() => setPaymentMethod('paypal')}
-                      className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'paypal' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
-                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'paypal' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
-                        {paymentMethod === 'paypal' && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                    <button type="button" onClick={() => { setPaymentMethod('paypal'); setPaypalPaymentMode('wallet'); }}
+                      className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'paypal' && paypalPaymentMode === 'wallet' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'paypal' && paypalPaymentMode === 'wallet' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
+                        {paymentMethod === 'paypal' && paypalPaymentMode === 'wallet' && <div className="w-2 h-2 bg-white rounded-full"></div>}
                       </div>
                       <div className="flex-1 text-left">
-                        <span className="font-semibold text-gray-900">PayPal</span>
+                        <span className="font-semibold text-gray-900">PayPal Wallet</span>
                         <p className="text-sm text-gray-600 mt-1">Pay with your PayPal account</p>
                       </div>
                     </button>
@@ -974,13 +954,13 @@ const Checkout = () => {
                       <div className="w-4 h-4 rounded-full border-2 border-gray-300"></div>
                       <div className="flex-1 text-left">
                         <span className="font-semibold text-gray-500">PayPal</span>
-                        <p className="text-sm text-gray-400 mt-1">Coming soon — use Cash on Delivery for now</p>
+                        <p className="text-sm text-gray-400 mt-1">PayPal is temporarily unavailable</p>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {isAuthenticated && !selectedSavedPaymentMethod && paymentMethod !== 'cod' && (
+                {isAuthenticated && !selectedSavedPaymentMethod && (
                   <div className="mt-4 flex items-center gap-2">
                     <input type="checkbox" id="savePaymentMethod" checked={savePaymentMethod}
                       onChange={(e) => setSavePaymentMethod(e.target.checked)}
@@ -991,15 +971,8 @@ const Checkout = () => {
                   </div>
                 )}
 
-                {paymentMethod === 'cod' && (
-                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      <span className="font-semibold">💵 Cash on Delivery:</span> Please keep exact change ready. Our delivery partner will collect payment when your order arrives.
-                    </p>
-                  </div>
-                )}
+                {isProcessingPayment && !clientSecret && paymentMethod !== 'paypal' && (
 
-                {paymentMethod !== 'cod' && isProcessingPayment && !clientSecret && (
                   <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <p className="text-sm text-yellow-800">
                       <span className="font-semibold">⏳ Initializing payment...</span> Please wait while we set up your secure payment.
@@ -1009,12 +982,12 @@ const Checkout = () => {
               </div>
 
               {/* Stripe Payment Form */}
-              {showPaymentForm && clientSecret && paymentMethod !== 'cod' && paymentMethod !== 'paypal' && (
+              {showPaymentForm && clientSecret && paymentMethod !== 'paypal' && (
                 <StripePaymentWrapper clientSecret={clientSecret} total={total}
                   onSuccess={handlePaymentSuccess} onError={handlePaymentError} onCancel={handlePaymentCancel} />
               )}
 
-              {/* PayPal Button */}
+              {/* PayPal Wallet or PayPal-powered Card Fields */}
               {showPayPalButton && paymentMethod === 'paypal' && (
                 <div className="bg-white rounded-lg shadow p-6">
                   <div className="flex items-center gap-3 mb-6">
@@ -1022,28 +995,72 @@ const Checkout = () => {
                       <span className="text-blue-600 font-bold text-lg">PP</span>
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900">PayPal Payment</h3>
-                      <p className="text-sm text-gray-600">Pay securely with your PayPal account</p>
+                      <h3 className="text-xl font-bold text-gray-900">
+                        {paypalPaymentMode === 'card' ? 'Credit/Debit Card Payment' : 'PayPal Wallet Payment'}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {paypalPaymentMode === 'card' ? 'Pay securely by card through PayPal' : 'Pay securely with your PayPal account'}
+                      </p>
                     </div>
                   </div>
                   <Suspense fallback={
                     <div className="flex items-center justify-center py-8">
                       <LoadingSpinner size="md" />
-                      <span className="ml-3 text-gray-600">Loading PayPal...</span>
+                      <span className="ml-3 text-gray-600">Loading secure payment...</span>
                     </div>
                   }>
-                    <PayPalButton
-                      items={items.map((item: any) => ({
-                        product: normalizeId(item.product._id) || String(item.product._id),
-                        quantity: item.quantity,
-                        ...(item.variant?.sku ? { variant: { sku: item.variant.sku } } : {})
-                      }))}
-                      couponCode={couponCode || undefined}
-                      donationAmount={0}
-                      onSuccess={handlePayPalSuccess}
-                      onError={handlePayPalError}
-                      onCancel={handlePayPalCancel}
-                    />
+                    {paypalPaymentMode === 'card' ? (
+                      <PayPalCardFields
+                        items={items.map((item: any) => ({
+                          product: normalizeId(item.product._id) || String(item.product._id),
+                          quantity: item.quantity,
+                          ...(item.variant?.sku ? { variant: { sku: item.variant.sku } } : {})
+                        }))}
+                        shippingAddress={{
+                          firstName: shippingInfo.firstName,
+                          lastName: shippingInfo.lastName,
+                          street: shippingInfo.street,
+                          city: shippingInfo.city,
+                          state: shippingInfo.state,
+                          zipCode: shippingInfo.zipCode,
+                          country: shippingInfo.country,
+                          phone: shippingInfo.phone
+                        }}
+                        guestEmail={!isAuthenticated ? shippingInfo.email : undefined}
+                        notes={orderNotes.trim() || undefined}
+                        couponCode={couponCode || undefined}
+                        donationAmount={0}
+                        onSuccess={handlePayPalSuccess}
+                        onError={handlePayPalError}
+                        onCancel={handlePayPalCancel}
+                        onSwitchToWallet={() => setPaypalPaymentMode('wallet')}
+                      />
+                    ) : (
+                      <PayPalButton
+                        items={items.map((item: any) => ({
+                          product: normalizeId(item.product._id) || String(item.product._id),
+                          quantity: item.quantity,
+                          ...(item.variant?.sku ? { variant: { sku: item.variant.sku } } : {})
+                        }))}
+                        shippingAddress={{
+                          firstName: shippingInfo.firstName,
+                          lastName: shippingInfo.lastName,
+                          street: shippingInfo.street,
+                          city: shippingInfo.city,
+                          state: shippingInfo.state,
+                          zipCode: shippingInfo.zipCode,
+                          country: shippingInfo.country,
+                          phone: shippingInfo.phone
+                        }}
+                        guestEmail={!isAuthenticated ? shippingInfo.email : undefined}
+                        notes={orderNotes.trim() || undefined}
+                        couponCode={couponCode || undefined}
+                        donationAmount={0}
+                        onSuccess={handlePayPalSuccess}
+                        onError={handlePayPalError}
+                        onCancel={handlePayPalCancel}
+                      />
+                    )}
                   </Suspense>
                 </div>
               )}

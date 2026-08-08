@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
-import Order from '../models/Order';
+import { randomUUID } from 'crypto';
+import Order, { IShippingAddress } from '../models/Order';
+import PendingPayPalCheckout, { IPendingPayPalCheckout } from '../models/PendingPayPalCheckout';
+import CouponUsage from '../models/CouponUsage';
 import Product from '../models/Product';
 import User from '../models/User';
 import { AuthRequest } from '../middleware/auth';
@@ -19,6 +22,7 @@ import {
   createPayPalOrder,
   getPayPalCapturedAmount,
   getPayPalCurrency,
+  getPayPalCheckoutToken,
   getPayPalOrder
 } from '../services/paypalService';
 import { calculateTrustedOrderPricing } from '../services/orderPricingService';
@@ -44,6 +48,13 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       notes,
       guestEmail // GUEST CHECKOUT: email from guest user
     } = req.body;
+
+    if (paymentMethod === 'cod') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cash on Delivery is no longer available. Please choose PayPal or card payment.'
+      });
+    }
 
     // GUEST CHECKOUT: user is optional
     const isGuest = !req.user?._id;
@@ -115,6 +126,10 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
           data: normalizedExistingOrder || existingPayPalOrder
         });
       }
+      return res.status(400).json({
+        success: false,
+        message: 'PayPal orders must be finalized through the PayPal checkout capture endpoint.'
+      });
     }
 
     const normalizedItemInputs = items.map((item: OrderItemInput): OrderItemInput => {
@@ -274,7 +289,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
               throw new Error(`Payment verification failed: ${errorMessage}`);
             }
           } else {
-            throw new Error('Payment processing not configured. Please use Cash on Delivery (COD) or configure Stripe.');
+            throw new Error('Payment processing is not configured. Please configure Stripe or choose PayPal.');
           }
         }
       } else {
@@ -1208,43 +1223,271 @@ export const trackOrder = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-// GUEST CHECKOUT: works without authentication
+const isCompleteShippingAddress = (value: unknown): value is IShippingAddress => {
+  if (!value || typeof value !== 'object') return false;
+  const address = value as Record<string, unknown>;
+  return ['firstName', 'lastName', 'street', 'city', 'state', 'zipCode', 'country', 'phone']
+    .every((field) => typeof address[field] === 'string' && address[field].trim().length > 0);
+};
+
+const isValidPayPalCheckoutToken = (value: unknown): value is string =>
+  typeof value === 'string' && /^[a-zA-Z0-9_-]{20,100}$/.test(value);
+
+const decrementPendingCheckoutStock = async (
+  pending: { items: NormalizedOrderItem[] },
+  session: mongoose.ClientSession | null
+) => {
+  const decodeSku = (value: string) => value
+    .replace(/&amp;amp;/g, '&')
+    .replace(/&amp;/g, '&')
+    .replace(/&#039;/g, "'")
+    .replace(/&quot;/g, '"');
+
+  for (const item of pending.items) {
+    const quantity = item.quantity || 1;
+    const product = session
+      ? await Product.findById(item.product).session(session)
+      : await Product.findById(item.product);
+    if (!product) throw new Error(`Product ${item.name || item.product} not found`);
+    if (!product.inStock) throw new Error(`Product "${item.name}" is currently out of stock`);
+
+    if (item.variant?.sku) {
+      const normalizedSku = decodeSku(item.variant.sku);
+      const variant = product.variants.find((candidate) => (
+        candidate.sku === item.variant?.sku ||
+        candidate.sku === normalizedSku ||
+        decodeSku(candidate.sku || '') === normalizedSku
+      ));
+      if (variant) {
+        const result = await Product.updateOne(
+          { _id: item.product, 'variants.sku': variant.sku, 'variants.stock': { $gte: quantity } },
+          { $inc: { 'variants.$.stock': -quantity, totalStock: -quantity } },
+          session ? { session } : {}
+        );
+        if (result.matchedCount === 0) throw new Error(`Insufficient stock for variant SKU "${variant.sku}"`);
+      } else {
+        const result = await Product.updateOne(
+          { _id: item.product, totalStock: { $gte: quantity } },
+          { $inc: { totalStock: -quantity } },
+          session ? { session } : {}
+        );
+        if (result.matchedCount === 0) throw new Error(`Insufficient stock for product "${item.name}"`);
+      }
+    } else {
+      const result = await Product.updateOne(
+        { _id: item.product, totalStock: { $gte: quantity } },
+        { $inc: { totalStock: -quantity } },
+        session ? { session } : {}
+      );
+      if (result.matchedCount === 0) throw new Error(`Insufficient stock for product "${item.name}"`);
+    }
+
+    await Product.updateOne(
+      { _id: item.product },
+      [{ $set: { inStock: { $gt: ['$totalStock', 0] } } }],
+      session ? { session } : {}
+    );
+  }
+};
+
+const finalizePendingPayPalCheckout = async (pending: IPendingPayPalCheckout | null) => {
+  if (!pending) throw new Error('Pending PayPal checkout not found');
+  if (!pending.shippingAddress) throw new Error('Pending PayPal checkout has no shipping address');
+
+  const existingOrder = pending.paypalOrderId
+    ? await Order.findOne({ paypalOrderId: pending.paypalOrderId })
+    : null;
+  if (existingOrder) {
+    await PendingPayPalCheckout.updateOne(
+      { _id: pending._id },
+      { $set: { status: 'finalized', finalizedOrder: existingOrder._id } }
+    );
+    return existingOrder;
+  }
+
+  let session: mongoose.ClientSession | null = null;
+  try {
+    if (process.env.NODE_ENV !== 'test') {
+      session = await mongoose.startSession();
+      session.startTransaction();
+    }
+
+    await decrementPendingCheckoutStock(pending, session);
+
+    if (pending.couponCode) {
+      const couponEmail = pending.guestEmail || (pending.user
+        ? (await User.findById(pending.user).select('email').session(session || null).lean())?.email
+        : undefined);
+      if (couponEmail) {
+        const normalizedCoupon = pending.couponCode.trim().toUpperCase();
+        const existingCouponUsage = await CouponUsage.findOne({
+          email: couponEmail.trim().toLowerCase(),
+          code: normalizedCoupon
+        }).session(session || null);
+        if (existingCouponUsage && existingCouponUsage.orderId && existingCouponUsage.orderId !== String(pending.finalizedOrder || '')) {
+          throw new Error('This coupon has already been used on this account.');
+        }
+        if (!existingCouponUsage) {
+          await CouponUsage.create([{
+            email: couponEmail.trim().toLowerCase(),
+            code: normalizedCoupon,
+            orderId: pending.paypalOrderId || '',
+            usedAt: new Date()
+          }], session ? { session } : undefined);
+        }
+      }
+    }
+
+    const order = new Order({
+      ...(pending.user ? { user: pending.user } : {}),
+      ...(pending.guestEmail ? { guestEmail: pending.guestEmail } : {}),
+      items: pending.items,
+      shippingAddress: pending.shippingAddress,
+      billingAddress: pending.billingAddress || pending.shippingAddress,
+      paymentMethod: 'paypal',
+      paymentStatus: 'paid',
+      isPaid: true,
+      paidAt: pending.capturedAt || new Date(),
+      paypalOrderId: pending.paypalOrderId,
+      paypalCheckoutToken: pending.checkoutToken,
+      itemsPrice: pending.itemsPrice,
+      shippingPrice: pending.shippingPrice,
+      taxPrice: pending.taxPrice,
+      donationAmount: pending.donationAmount,
+      totalPrice: pending.totalPrice,
+      notes: pending.notes
+    });
+    const savedOrder = await order.save(session ? { session } : {});
+
+    if (session) {
+      await PendingPayPalCheckout.updateOne(
+        { _id: pending._id, status: 'finalizing' },
+        { $set: { status: 'finalized', finalizedOrder: savedOrder._id } },
+        { session }
+      );
+      await session.commitTransaction();
+    }
+    return savedOrder;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error && (error as { code?: number }).code === 11000 && pending.paypalOrderId) {
+      const duplicate = await Order.findOne({ paypalOrderId: pending.paypalOrderId });
+      if (duplicate) {
+        await PendingPayPalCheckout.updateOne(
+          { _id: pending._id },
+          { $set: { status: 'finalized', finalizedOrder: duplicate._id } }
+        );
+        return duplicate;
+      }
+    }
+    if (session?.inTransaction()) await session.abortTransaction();
+    throw error;
+  } finally {
+    if (session) await session.endSession();
+  }
+};
+
+const sendPayPalOrderSideEffects = async (order: Awaited<ReturnType<typeof finalizePendingPayPalCheckout>>, pending: IPendingPayPalCheckout) => {
+  const normalizedOrder = normalizeOrderId(order);
+  if (!normalizedOrder) return;
+
+  try {
+    const { notifyNewOrder } = await import('../utils/orderNotifications');
+    const fullOrder = await Order.findById(normalizedOrder._id).populate('user', 'firstName lastName email').lean();
+    if (fullOrder) notifyNewOrder(fullOrder);
+  } catch (error) {
+    logger.error('PayPal order notification failed:', error);
+  }
+
+  try {
+    const fullOrder = await Order.findById(normalizedOrder._id).lean();
+    if (!fullOrder) return;
+    const emailAddress = pending.guestEmail || (pending.user
+      ? (await User.findById(pending.user).select('email firstName').lean())?.email
+      : undefined);
+    const userDoc = pending.user ? await User.findById(pending.user).select('email firstName lastName').lean() : null;
+    const firstName = userDoc?.firstName || pending.shippingAddress.firstName || 'Customer';
+
+    if (emailAddress && fullOrder.orderNumber) {
+      const orderIdStr = String(fullOrder._id);
+      await addEmailJob(
+        'order-confirmation',
+        {
+          email: emailAddress,
+          firstName,
+          orderNumber: fullOrder.orderNumber,
+          orderData: {
+            orderId: orderIdStr,
+            items: fullOrder.items.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price, image: item.image })),
+            totalPrice: fullOrder.totalPrice,
+            itemsPrice: fullOrder.itemsPrice,
+            shippingPrice: fullOrder.shippingPrice,
+            taxPrice: fullOrder.taxPrice,
+            donationAmount: fullOrder.donationAmount,
+            shippingAddress: fullOrder.shippingAddress,
+            paymentMethod: fullOrder.paymentMethod,
+            orderStatus: fullOrder.orderStatus,
+            createdAt: fullOrder.createdAt
+          }
+        },
+        async () => {
+          await sendOrderConfirmationEmail(emailAddress, firstName, fullOrder.orderNumber, {
+            orderId: orderIdStr,
+            items: fullOrder.items.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price, image: item.image })),
+            totalPrice: fullOrder.totalPrice,
+            itemsPrice: fullOrder.itemsPrice,
+            shippingPrice: fullOrder.shippingPrice,
+            taxPrice: fullOrder.taxPrice,
+            donationAmount: fullOrder.donationAmount,
+            shippingAddress: fullOrder.shippingAddress,
+            paymentMethod: fullOrder.paymentMethod,
+            orderStatus: fullOrder.orderStatus,
+            createdAt: fullOrder.createdAt
+          });
+        }
+      );
+    }
+
+    sendAdminNewOrderEmail({
+      orderNumber: fullOrder.orderNumber,
+      orderId: String(fullOrder._id),
+      customerFirstName: userDoc?.firstName || pending.shippingAddress.firstName || 'Guest',
+      customerLastName: userDoc?.lastName || pending.shippingAddress.lastName || '',
+      customerEmail: emailAddress || '',
+      items: fullOrder.items.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price })),
+      totalPrice: fullOrder.totalPrice,
+      itemsPrice: fullOrder.itemsPrice,
+      shippingPrice: fullOrder.shippingPrice,
+      taxPrice: fullOrder.taxPrice,
+      paymentMethod: fullOrder.paymentMethod,
+      shippingAddress: fullOrder.shippingAddress
+    }).catch((error) => logger.error('PayPal admin notification failed:', error));
+  } catch (error) {
+    logger.error('PayPal confirmation email failed:', error);
+  }
+};
+
+// GUEST CHECKOUT: works without authentication. The complete checkout snapshot is
+// persisted before PayPal is called; capture never trusts a fresh browser cart.
 export const createPayPalCheckoutOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-      const { items, couponCode, donationAmount = 0 } = req.body;
-      const pricing = await calculateTrustedOrderPricing(
-        Array.isArray(items) ? items : [],
-        typeof couponCode === 'string' ? couponCode : undefined,
-        Number(donationAmount) || 0
-      );
-
-      if (pricing.totalPrice < 0.5) {
-        return res.status(400).json({ success: false, message: 'Order total must be at least $0.50' });
-      }
-
-      const paypalOrder = await createPayPalOrder(pricing.totalPrice, 'USD');
-      return res.status(200).json({
-        success: true,
-        data: {
-          paypalOrderId: paypalOrder.id,
-          status: paypalOrder.status,
-          amount: pricing.totalPrice,
-          currency: 'USD'
-        }
-      });
-    } catch (error: unknown) {
-      logger.error('PayPal order creation error:', error);
-      const message = error instanceof Error ? error.message : 'Failed to create PayPal order';
-      return res.status(502).json({ success: false, message });
+    const { items, shippingAddress, billingAddress, couponCode, donationAmount = 0, notes, guestEmail, checkoutToken: requestedCheckoutToken } = req.body;
+    if (!isCompleteShippingAddress(shippingAddress)) {
+      return res.status(400).json({ success: false, message: 'A complete shipping address is required before starting PayPal checkout.' });
     }
-  };
-
-export const capturePayPalCheckoutOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const { paypalOrderId, items, couponCode, donationAmount = 0 } = req.body;
-
-    if (!paypalOrderId) {
-      return res.status(400).json({ success: false, message: 'PayPal order ID is required' });
+    const zip = shippingAddress.zipCode.trim().replace(/[^0-9]/g, '').substring(0, 5);
+    const isNYC = shippingAddress.state.trim().toUpperCase() === 'NY' && (
+      (zip >= '10001' && zip <= '10282') ||
+      (zip >= '10301' && zip <= '10314') ||
+      (zip >= '10451' && zip <= '10475') ||
+      (zip >= '11201' && zip <= '11697')
+    );
+    if (!isNYC) {
+      return res.status(400).json({ success: false, message: 'We currently deliver only within New York City (all 5 boroughs). Please enter a valid NYC address.' });
+    }
+    const isGuest = !req.user?._id;
+    const customerEmail = isGuest ? (guestEmail || '').trim() : undefined;
+    if (isGuest && !customerEmail) {
+      return res.status(400).json({ success: false, message: 'Please provide an email address for PayPal order confirmation.' });
     }
 
     const pricing = await calculateTrustedOrderPricing(
@@ -1252,16 +1495,194 @@ export const capturePayPalCheckoutOrder = async (req: AuthRequest, res: Response
       typeof couponCode === 'string' ? couponCode : undefined,
       Number(donationAmount) || 0
     );
-    const expectedAmount = Math.round(pricing.totalPrice * 100) / 100;
-    if (expectedAmount < 0.5) {
+    if (pricing.totalPrice < 0.5) {
       return res.status(400).json({ success: false, message: 'Order total must be at least $0.50' });
     }
 
-    const existingPayPalOrder = await getPayPalOrder(paypalOrderId);
-    const existingCapturedAmount = getPayPalCapturedAmount(existingPayPalOrder);
-    let paypalOrder = existingPayPalOrder;
-    if (existingPayPalOrder.status === 'APPROVED') {
-      paypalOrder = await capturePayPalOrder(paypalOrderId);
+    const checkoutToken = isValidPayPalCheckoutToken(requestedCheckoutToken)
+      ? requestedCheckoutToken
+      : randomUUID();
+    const pendingData = {
+      checkoutToken,
+      ...(req.user?._id ? { user: req.user._id } : {}),
+      ...(customerEmail ? { guestEmail: customerEmail } : {}),
+      items: pricing.items,
+      shippingAddress,
+      billingAddress: isCompleteShippingAddress(billingAddress) ? billingAddress : shippingAddress,
+      couponCode: typeof couponCode === 'string' ? couponCode : undefined,
+      donationAmount: pricing.donationAmount,
+      itemsPrice: pricing.itemsPrice,
+      shippingPrice: pricing.shippingPrice,
+      taxPrice: pricing.taxPrice,
+      totalPrice: pricing.totalPrice,
+      currency: 'USD',
+      notes: typeof notes === 'string' ? notes : undefined,
+      status: 'created' as const,
+      expiresAt: new Date(Date.now() + 30 * 60 * 1000)
+    };
+
+    let pending: IPendingPayPalCheckout | null = await PendingPayPalCheckout.findOneAndUpdate(
+      { checkoutToken },
+      { $setOnInsert: pendingData },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+    if (!pending) throw new Error('Unable to create PayPal checkout snapshot.');
+
+    if (pending.paypalOrderId && pending.status !== 'failed') {
+      return res.status(200).json({
+        success: true,
+        data: {
+          paypalOrderId: pending.paypalOrderId,
+          checkoutToken,
+          status: pending.status,
+          amount: pending.totalPrice,
+          currency: pending.currency
+        }
+      });
+    }
+
+    if (pending.status === 'failed' && !pending.paypalOrderId) {
+      await PendingPayPalCheckout.updateOne(
+        { _id: pending._id, status: 'failed', paypalOrderId: { $exists: false } },
+        { $set: { status: 'created', expiresAt: new Date(Date.now() + 30 * 60 * 1000) } }
+      );
+      pending = await PendingPayPalCheckout.findById(pending._id);
+      if (!pending) throw new Error('Unable to reopen PayPal checkout snapshot.');
+    }
+
+    const staleCreatingAt = new Date(Date.now() - 2 * 60 * 1000);
+    const claim = await PendingPayPalCheckout.findOneAndUpdate(
+      {
+        _id: pending._id,
+        paypalOrderId: { $exists: false },
+        $or: [
+          { status: 'created' },
+          { status: 'creating', createStartedAt: { $lt: staleCreatingAt } },
+          { status: 'creating', createStartedAt: { $exists: false } }
+        ]
+      },
+      {
+        $set: {
+          status: 'creating',
+          createStartedAt: new Date(),
+          expiresAt: new Date(Date.now() + 30 * 60 * 1000)
+        }
+      },
+      { new: true }
+    );
+
+    if (!claim) {
+      for (let attempt = 0; attempt < 20; attempt += 1) {
+        const latest = await PendingPayPalCheckout.findById(pending._id);
+        if (latest?.paypalOrderId) {
+          return res.status(200).json({
+            success: true,
+            data: {
+              paypalOrderId: latest.paypalOrderId,
+              checkoutToken,
+              status: latest.status,
+              amount: latest.totalPrice,
+              currency: latest.currency
+            }
+          });
+        }
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+      return res.status(409).json({ success: false, message: 'PayPal checkout is being initialized. Please try again shortly.' });
+    }
+
+    try {
+      const paypalOrder = await createPayPalOrder(claim.totalPrice, 'USD', claim.checkoutToken);
+      await PendingPayPalCheckout.updateOne(
+        { _id: claim._id, status: 'creating', paypalOrderId: { $exists: false } },
+        { $set: { paypalOrderId: paypalOrder.id, status: 'created' } }
+      );
+      return res.status(200).json({
+        success: true,
+        data: {
+          paypalOrderId: paypalOrder.id,
+          checkoutToken: claim.checkoutToken,
+          status: paypalOrder.status,
+          amount: claim.totalPrice,
+          currency: 'USD'
+        }
+      });
+    } catch (error) {
+      await PendingPayPalCheckout.updateOne(
+        { _id: claim._id, status: 'creating', paypalOrderId: { $exists: false } },
+        { $set: { status: 'failed' } }
+      );
+      throw error;
+    }
+  } catch (error: unknown) {
+    logger.error('PayPal order creation error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to create PayPal order';
+    return res.status(502).json({ success: false, message });
+  }
+};
+
+export const capturePayPalCheckoutOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { paypalOrderId, checkoutToken: suppliedCheckoutToken } = req.body;
+    if (!paypalOrderId || !suppliedCheckoutToken) {
+      return res.status(400).json({ success: false, message: 'PayPal order ID and checkout token are required' });
+    }
+
+    // Bind and validate the persisted checkout before calling PayPal capture.
+    const preCapturePayPalOrder = await getPayPalOrder(paypalOrderId);
+    const checkoutToken = getPayPalCheckoutToken(preCapturePayPalOrder);
+    if (!checkoutToken || suppliedCheckoutToken !== checkoutToken) {
+      return res.status(400).json({ success: false, message: 'PayPal checkout token does not match the payment.' });
+    }
+
+    const pending = await PendingPayPalCheckout.findOne({ checkoutToken, paypalOrderId });
+    if (!pending) {
+      const historicalOrder = await Order.findOne({ paypalOrderId, paypalCheckoutToken: checkoutToken });
+      if (historicalOrder) {
+        return res.status(200).json({
+          success: true,
+          message: 'PayPal payment was already finalized',
+          data: { paypalOrderId, paymentStatus: 'paid', amount: historicalOrder.totalPrice, currency: 'USD', order: normalizeOrderId(historicalOrder) }
+        });
+      }
+      return res.status(400).json({ success: false, message: 'PayPal checkout snapshot not found or does not match this payment.' });
+    }
+
+    if (pending.user && String(pending.user) !== String(req.user?._id || '')) {
+      return res.status(403).json({ success: false, message: 'This PayPal checkout belongs to a different account.' });
+    }
+    if (pending.expiresAt.getTime() < Date.now() && ['created', 'creating', 'failed'].includes(pending.status)) {
+      return res.status(400).json({ success: false, message: 'This PayPal checkout has expired. Please start checkout again.' });
+    }
+
+    const alreadyFinalized = await Order.findOne({ paypalOrderId, paypalCheckoutToken: checkoutToken });
+    if (alreadyFinalized) {
+      await PendingPayPalCheckout.updateOne(
+        { _id: pending._id },
+        { $set: { status: 'finalized', finalizedOrder: alreadyFinalized._id } }
+      );
+      return res.status(200).json({
+        success: true,
+        message: 'PayPal payment was already finalized',
+        data: { paypalOrderId, paymentStatus: 'paid', amount: alreadyFinalized.totalPrice, currency: pending.currency, order: normalizeOrderId(alreadyFinalized) }
+      });
+    }
+
+    const preCaptureAmount = getPayPalCapturedAmount(preCapturePayPalOrder);
+    const preCaptureCurrency = getPayPalCurrency(preCapturePayPalOrder);
+    if (preCaptureCurrency !== pending.currency || preCaptureAmount === null || Math.abs(preCaptureAmount - pending.totalPrice) > 0.01) {
+      return res.status(400).json({ success: false, message: 'PayPal payment amount or currency does not match this checkout.' });
+    }
+
+    let paypalOrder = preCapturePayPalOrder;
+    if (paypalOrder.status === 'APPROVED') {
+      try {
+        paypalOrder = await capturePayPalOrder(paypalOrderId);
+      } catch (captureError) {
+        // A concurrent retry may have captured it. Re-read PayPal before failing.
+        paypalOrder = await getPayPalOrder(paypalOrderId);
+        if (paypalOrder.status !== 'COMPLETED') throw captureError;
+      }
     }
 
     const capturedAmount = getPayPalCapturedAmount(paypalOrder);
@@ -1269,25 +1690,65 @@ export const capturePayPalCheckoutOrder = async (req: AuthRequest, res: Response
     if (paypalOrder.status !== 'COMPLETED') {
       return res.status(400).json({ success: false, message: `PayPal payment was not completed. Status: ${paypalOrder.status}` });
     }
-    if (paypalCurrency !== 'USD') {
-      return res.status(400).json({ success: false, message: `PayPal payment currency mismatch. Expected USD, received ${paypalCurrency ?? 'unknown'}` });
+    if (paypalCurrency !== pending.currency) {
+      return res.status(400).json({ success: false, message: `PayPal payment currency mismatch. Expected ${pending.currency}, received ${paypalCurrency ?? 'unknown'}` });
     }
-    if (capturedAmount === null || Math.abs(capturedAmount - expectedAmount) > 0.01) {
-      return res.status(400).json({
-        success: false,
-        message: `PayPal payment amount mismatch. Expected: $${expectedAmount.toFixed(2)}, received: $${capturedAmount ?? existingCapturedAmount ?? 'unknown'}`
-      });
+    if (capturedAmount === null || Math.abs(capturedAmount - pending.totalPrice) > 0.01) {
+      return res.status(400).json({ success: false, message: `PayPal payment amount mismatch. Expected: $${pending.totalPrice.toFixed(2)}, received: $${capturedAmount ?? 'unknown'}` });
     }
+
+    if (pending.status === 'finalized' && pending.finalizedOrder) {
+      const finalized = await Order.findById(pending.finalizedOrder);
+      if (finalized) {
+        return res.status(200).json({
+          success: true,
+          message: 'PayPal payment was already finalized',
+          data: { paypalOrderId, paymentStatus: 'paid', amount: capturedAmount, currency: pending.currency, order: normalizeOrderId(finalized) }
+        });
+      }
+    }
+
+    await PendingPayPalCheckout.updateOne(
+      { _id: pending._id, status: { $in: ['created', 'captured'] } },
+      { $set: { status: 'captured', capturedAt: pending.capturedAt || new Date() } }
+    );
+    const claim = await PendingPayPalCheckout.findOneAndUpdate(
+      { _id: pending._id, status: 'captured' },
+      { $set: { status: 'finalizing', capturedAt: pending.capturedAt || new Date() } },
+      { new: true }
+    );
+    if (!claim) {
+      const latest = await PendingPayPalCheckout.findById(pending._id);
+      if (latest?.status === 'finalized' && latest.finalizedOrder) {
+        const finalized = await Order.findById(latest.finalizedOrder);
+        if (finalized) {
+          return res.status(200).json({
+            success: true,
+            message: 'PayPal payment was already finalized',
+            data: { paypalOrderId, paymentStatus: 'paid', amount: capturedAmount, currency: pending.currency, order: normalizeOrderId(finalized) }
+          });
+        }
+      }
+      return res.status(409).json({ success: false, message: 'PayPal order finalization is already in progress. Please retry shortly.' });
+    }
+
+    let finalizedOrder: Awaited<ReturnType<typeof finalizePendingPayPalCheckout>>;
+    try {
+      finalizedOrder = await finalizePendingPayPalCheckout(claim);
+    } catch (error) {
+      await PendingPayPalCheckout.updateOne(
+        { _id: claim._id, status: 'finalizing' },
+        { $set: { status: 'captured' } }
+      );
+      throw error;
+    }
+
+    await sendPayPalOrderSideEffects(finalizedOrder, claim);
 
     return res.status(200).json({
       success: true,
-      message: 'PayPal payment captured successfully',
-      data: {
-        paypalOrderId: paypalOrder.id,
-        paymentStatus: 'paid',
-        amount: capturedAmount,
-        currency: 'USD'
-      }
+      message: 'PayPal payment captured and order finalized successfully',
+      data: { paypalOrderId, paymentStatus: 'paid', amount: capturedAmount, currency: pending.currency, order: normalizeOrderId(finalizedOrder) }
     });
   } catch (error: unknown) {
     logger.error('PayPal capture error:', error);

@@ -45,6 +45,7 @@ export interface IOrder extends Document {
   paidAt?: Date;
   paymentIntentId?: string;
   paypalOrderId?: string;
+  paypalCheckoutToken?: string;
   isDelivered: boolean;
   deliveredAt?: Date;
   trackingNumber?: string;
@@ -182,6 +183,7 @@ const orderSchema = new Schema<IOrder>(
     paidAt: Date,
     paymentIntentId: String,
     paypalOrderId: String,
+    paypalCheckoutToken: String,
     isDelivered: {
       type: Boolean,
       default: false
@@ -210,6 +212,8 @@ orderSchema.index({ user: 1, createdAt: -1 });
 orderSchema.index({ orderStatus: 1, createdAt: -1 });
 orderSchema.index({ paymentStatus: 1 });
 orderSchema.index({ paymentIntentId: 1 });
+orderSchema.index({ paypalOrderId: 1 }, { unique: true, sparse: true });
+orderSchema.index({ paypalCheckoutToken: 1 }, { unique: true, sparse: true });
 orderSchema.index({ user: 1, orderStatus: 1 });
 orderSchema.index({ 'items.product': 1, orderStatus: 1 });
 orderSchema.index({ orderStatus: 1, 'items.product': 1 });

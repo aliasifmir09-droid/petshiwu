@@ -212,7 +212,7 @@ export const createOrderValidation = [
     .matches(/^\+?[1-9]\d{1,14}$/)
     .withMessage('Invalid phone number format'),
   body('paymentMethod')
-    .isIn(['credit_card', 'paypal', 'apple_pay', 'google_pay', 'cod'])
+    .isIn(['credit_card', 'paypal', 'apple_pay', 'google_pay'])
     .withMessage('Invalid payment method'),
   body('itemsPrice')
     .isFloat({ min: 0 })
@@ -629,16 +629,23 @@ const paypalItemsValidation = [
 
 export const createPayPalOrderValidation = [
   ...paypalItemsValidation,
+  body('shippingAddress').isObject().withMessage('Shipping address is required'),
+  body('guestEmail').optional({ nullable: true }).trim().isEmail().withMessage('Invalid guest email'),
+  body('checkoutToken').optional().trim().matches(/^[a-zA-Z0-9_-]{20,100}$/).withMessage('Invalid checkout token'),
   validate
 ];
 
 export const capturePayPalOrderValidation = [
+  body('checkoutToken')
+    .optional()
+    .trim()
+    .matches(/^[a-zA-Z0-9_-]{20,100}$/)
+    .withMessage('Invalid checkout token'),
   body('paypalOrderId')
     .trim()
     .matches(/^[A-Z0-9-]+$/i)
     .isLength({ min: 5, max: 200 })
     .withMessage('Invalid PayPal order ID'),
-  ...paypalItemsValidation,
   validate
 ];
 

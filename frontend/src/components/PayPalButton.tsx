@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { orderService } from '@/services/orders';
@@ -11,27 +11,43 @@ interface PayPalItemInput {
 
 interface PayPalButtonProps {
   items: PayPalItemInput[];
+  shippingAddress: import('@/types').ShippingAddress;
+  guestEmail?: string;
+  notes?: string;
   couponCode?: string;
   donationAmount?: number;
-  onSuccess: (orderId: string, payerId?: string) => void;
+  onSuccess: (order: import('@/types').Order) => void;
   onError: (error: string) => void;
   onCancel?: () => void;
   currency?: string;
 }
 
-const PayPalButtonContent = ({ items, couponCode, donationAmount = 0, onSuccess, onError, onCancel, currency = 'USD' }: PayPalButtonProps) => {
+const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, couponCode, donationAmount = 0, onSuccess, onError, onCancel, currency = 'USD' }: PayPalButtonProps) => {
   const [{ isPending }] = usePayPalScriptReducer();
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [checkoutToken, setCheckoutToken] = useState<string | null>(null);
+  const checkoutTokenRef = useRef<string>(crypto.randomUUID());
+  const captureInFlightRef = useRef<string | null>(null);
 
   const createOrder = async () => {
     setError(null);
     try {
-      const response = await orderService.createPayPalOrder({ items, couponCode, donationAmount });
+      const response = await orderService.createPayPalOrder({
+        items,
+        shippingAddress,
+        guestEmail,
+        notes,
+        couponCode,
+        donationAmount,
+        checkoutToken: checkoutTokenRef.current
+      });
       const paypalOrderId = response.data?.paypalOrderId;
-      if (!response.success || !paypalOrderId) {
+      const createdCheckoutToken = response.data?.checkoutToken;
+      if (!response.success || !paypalOrderId || !createdCheckoutToken) {
         throw new Error('PayPal could not initialize this payment.');
       }
+      setCheckoutToken(createdCheckoutToken);
       return paypalOrderId;
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || err.message || 'PayPal could not initialize this payment.';
@@ -49,27 +65,33 @@ const PayPalButtonContent = ({ items, couponCode, donationAmount = 0, onSuccess,
       onError(errorMsg);
       return;
     }
+    if (captureInFlightRef.current === paypalOrderId) return;
+    captureInFlightRef.current = paypalOrderId;
+
+    if (!checkoutToken) {
+      captureInFlightRef.current = null;
+      const errorMsg = 'PayPal checkout session expired. Please try again.';
+      setError(errorMsg);
+      onError(errorMsg);
+      return;
+    }
 
     setIsProcessing(true);
     setError(null);
     try {
-      const response = await orderService.capturePayPalOrder({
-        paypalOrderId,
-        items,
-        couponCode,
-        donationAmount
-      });
-      const capturedOrderId = response.data?.paypalOrderId;
-      if (!response.success || response.data?.paymentStatus !== 'paid' || !capturedOrderId) {
+      const response = await orderService.capturePayPalOrder({ paypalOrderId, checkoutToken });
+      const order = response.data?.order;
+      if (!response.success || response.data?.paymentStatus !== 'paid' || !order?._id) {
         throw new Error('PayPal payment was not completed. Please try again.');
       }
-      onSuccess(capturedOrderId);
+      onSuccess(order);
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || err.message || 'PayPal payment processing failed. Please try again.';
       setError(errorMsg);
       onError(errorMsg);
     } finally {
       setIsProcessing(false);
+      if (captureInFlightRef.current === paypalOrderId) captureInFlightRef.current = null;
     }
   };
 
@@ -103,18 +125,12 @@ const PayPalButtonContent = ({ items, couponCode, donationAmount = 0, onSuccess,
           </div>
         </div>
       )}
-
       <PayPalButtons
         createOrder={createOrder}
         onApprove={onApprove}
         onError={onErrorHandler}
         onCancel={onCancelHandler}
-        style={{
-          layout: 'vertical',
-          color: 'blue',
-          shape: 'rect',
-          label: 'paypal',
-        }}
+        style={{ layout: 'vertical', color: 'blue', shape: 'rect', label: 'paypal' }}
       />
     </div>
   );

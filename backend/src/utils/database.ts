@@ -2,6 +2,8 @@ import mongoose from 'mongoose';
 import { optimizeMongooseSettings, enableQueryLogging, logConnectionPoolStatus } from './databaseOptimization';
 import { enableQueryProfiling } from './queryProfiler';
 import logger from './logger';
+import Order from '../models/Order';
+import PendingPayPalCheckout from '../models/PendingPayPalCheckout';
 
 // Track reconnection attempts
 let reconnectAttempts = 0;
@@ -90,6 +92,8 @@ export const connectDatabase = async () => {
     
     logger.info(`✅ MongoDB Connected Successfully: ${conn.connection.host}`);
     logger.info(`📊 Connection Pool: max=${maxPoolSize}, min=${minPoolSize}`);
+    await Promise.all([Order.createIndexes(), PendingPayPalCheckout.createIndexes()]);
+    logger.info('✅ Payment idempotency indexes verified');
     
     // Optimize Mongoose settings for high concurrency
     optimizeMongooseSettings();
