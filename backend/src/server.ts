@@ -240,18 +240,20 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: process.env.NODE_ENV === 'production'
-        ? ["'self'", "data:", "https:", "https://res.cloudinary.com", "https://wsrv.nl", "https://maps.gstatic.com", "https://maps.googleapis.com"]
-        : ["'self'", "data:", "https:", "http:", "https://res.cloudinary.com", "https://wsrv.nl", "https://maps.gstatic.com", "https://maps.googleapis.com"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://maps.googleapis.com", "https://maps.gstatic.com"],
+        ? ["'self'", "data:", "https:", "https://res.cloudinary.com", "https://wsrv.nl", "https://maps.gstatic.com", "https://maps.googleapis.com", "https://www.paypalobjects.com", "https://*.paypalobjects.com"]
+        : ["'self'", "data:", "https:", "http:", "https://res.cloudinary.com", "https://wsrv.nl", "https://maps.gstatic.com", "https://maps.googleapis.com", "https://www.paypalobjects.com", "https://*.paypalobjects.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://maps.googleapis.com", "https://maps.gstatic.com", "https://www.paypal.com", "https://*.paypal.com"],
       workerSrc: ["'self'"],
       connectSrc: [
         "'self'",
         "https://generativelanguage.googleapis.com",
         "https://maps.googleapis.com",
         "https://maps.gstatic.com",
-        "https://places.googleapis.com"
+        "https://places.googleapis.com",
+        "https://www.paypal.com",
+        "https://*.paypal.com"
       ],
-      frameSrc: ["'self'"],
+      frameSrc: ["'self'", "https://www.paypal.com", "https://*.paypal.com"],
       frameAncestors: ["'self'"],
       upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
     }
