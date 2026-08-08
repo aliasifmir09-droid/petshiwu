@@ -887,21 +887,26 @@ export const updatePaymentStatus = async (req: AuthRequest, res: Response, next:
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
-    order.paymentStatus = paymentStatus;
+    const paymentUpdate: Record<string, unknown> = { paymentStatus };
     if (paymentStatus === 'paid') {
-      order.isPaid = true;
-      order.paidAt = new Date();
+      paymentUpdate.isPaid = true;
+      paymentUpdate.paidAt = new Date();
     }
-    await order.save();
+    const updatedOrder = await Order.findByIdAndUpdate(
+      order._id,
+      { $set: paymentUpdate },
+      { new: true, runValidators: true, context: 'query' }
+    );
+    if (!updatedOrder) return res.status(404).json({ success: false, message: 'Order not found' });
 
     try {
       const { notifyOrderUpdate } = await import('../utils/orderNotifications');
-      notifyOrderUpdate(order, 'payment');
+      notifyOrderUpdate(updatedOrder, 'payment');
     } catch (notificationError) {
       logger.error('Error sending order update notification:', notificationError);
     }
 
-    res.status(200).json({ success: true, data: order });
+    res.status(200).json({ success: true, data: updatedOrder });
   } catch (error) {
     next(error);
   }

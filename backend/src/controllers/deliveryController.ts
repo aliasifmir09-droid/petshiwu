@@ -57,25 +57,45 @@ const ensureDelivery = async (order: any, suppliedPoint?: any) => {
     throw new Error('Resolved delivery coordinates are outside geographic bounds');
   }
   const route = await calculateDirectRoute(DELIVERY_ORIGIN, point);
-  order.delivery = {
-    ...(order.delivery || {}),
-    origin: DELIVERY_ORIGIN,
-    destination: {
-      address: destinationAddress,
-      formattedAddress: point.formattedAddress || destinationAddress,
-      latitude: point.latitude,
-      longitude: point.longitude,
-      placeId: point.placeId,
-      provider: point.provider
-    },
-    distanceMeters: route.distanceMeters,
-    durationSeconds: route.durationSeconds,
-    calculatedAt: new Date(),
-    routingProvider: point.provider === 'borough-estimate' ? 'local-estimate' : (process.env.GOOGLE_MAPS_SERVER_API_KEY || process.env.GOOGLE_MAPS_API_KEY ? 'google-routes' : 'local-estimate'),
-    navigationUrl: mapsNavigationUrl(DELIVERY_ORIGIN.address, [destinationAddress]),
-    status: order.delivery?.status || 'ready'
+  if (!order.delivery) order.delivery = {} as any;
+  order.delivery.origin = DELIVERY_ORIGIN;
+  order.delivery.destination = {
+    address: destinationAddress,
+    formattedAddress: point.formattedAddress || destinationAddress,
+    latitude: point.latitude,
+    longitude: point.longitude,
+    placeId: point.placeId,
+    provider: point.provider
   };
+  order.delivery.distanceMeters = route.distanceMeters;
+  order.delivery.durationSeconds = route.durationSeconds;
+  order.delivery.calculatedAt = new Date();
+  order.delivery.routingProvider = point.provider === 'borough-estimate' ? 'local-estimate' : (process.env.GOOGLE_MAPS_SERVER_API_KEY || process.env.GOOGLE_MAPS_API_KEY ? 'google-routes' : 'local-estimate');
+  order.delivery.navigationUrl = mapsNavigationUrl(DELIVERY_ORIGIN.address, [destinationAddress]);
+  order.delivery.status = order.delivery.status || 'ready';
   return order;
+};
+
+const deliveryUpdateFields = (delivery: any): Record<string, unknown> => ({
+  'delivery.origin': delivery.origin,
+  'delivery.destination': delivery.destination,
+  'delivery.distanceMeters': delivery.distanceMeters,
+  'delivery.durationSeconds': delivery.durationSeconds,
+  'delivery.calculatedAt': delivery.calculatedAt,
+  'delivery.routingProvider': delivery.routingProvider,
+  'delivery.navigationUrl': delivery.navigationUrl,
+  'delivery.status': delivery.status,
+  ...(delivery.runId !== undefined ? { 'delivery.runId': delivery.runId } : {}),
+  ...(delivery.stopOrder !== undefined ? { 'delivery.stopOrder': delivery.stopOrder } : {}),
+  ...(delivery.notes !== undefined ? { 'delivery.notes': delivery.notes } : {})
+});
+
+const persistDeliveryFields = async (orderId: mongoose.Types.ObjectId | string, delivery: any) => {
+  return Order.findByIdAndUpdate(
+    orderId,
+    { $set: deliveryUpdateFields(delivery) },
+    { new: true, runValidators: true, context: 'query' }
+  );
 };
 
 export const prepareOrderDelivery = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -84,8 +104,9 @@ export const prepareOrderDelivery = async (req: AuthRequest, res: Response, next
     const order = await Order.findById(orderId(req));
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
     await ensureDelivery(order, req.body?.destination);
-    await order.save();
-    res.json({ success: true, data: order.delivery });
+    const updatedOrder = await persistDeliveryFields(order._id, order.delivery);
+    if (!updatedOrder) return res.status(404).json({ success: false, message: 'Order not found' });
+    res.json({ success: true, data: updatedOrder.delivery });
   } catch (error) { next(error); }
 };
 
@@ -126,8 +147,9 @@ export const updateDelivery = async (req: AuthRequest, res: Response, next: Next
     if (req.body?.notes !== undefined) order.delivery!.notes = String(req.body.notes || '').trim();
     if (requestedRunId) order.delivery!.runId = requestedRunId as any;
     if (req.body?.stopOrder !== undefined) order.delivery!.stopOrder = Number(req.body.stopOrder);
-    await order.save();
-    res.json({ success: true, data: order.delivery });
+    const updatedOrder = await persistDeliveryFields(order._id, order.delivery);
+    if (!updatedOrder) return res.status(404).json({ success: false, message: 'Order not found' });
+    res.json({ success: true, data: updatedOrder.delivery });
   } catch (error) { next(error); }
 };
 
@@ -157,8 +179,9 @@ export const createDeliveryRun = async (req: AuthRequest, res: Response, next: N
     const stops: any[] = [];
     for (const order of orders) {
       await ensureDelivery(order);
-      await order.save();
-      const point = toPoint(order.delivery);
+      const updatedOrder = await persistDeliveryFields(order._id, order.delivery);
+      if (!updatedOrder) return res.status(404).json({ success: false, message: `Order not found: ${order.orderNumber}` });
+      const point = toPoint(updatedOrder.delivery);
       if (!point || !isValidCoordinate(point.latitude, point.longitude)) {
         return res.status(400).json({ success: false, message: `Order ${order.orderNumber} has invalid delivery coordinates` });
       }
