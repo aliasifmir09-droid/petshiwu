@@ -18,11 +18,12 @@ interface PayPalButtonProps {
   donationAmount?: number;
   onSuccess: (order: import('@/types').Order) => void;
   onError: (error: string) => void;
+  onGuestEmailInvalid?: () => void;
   onCancel?: () => void;
   currency?: string;
 }
 
-const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, couponCode, donationAmount = 0, onSuccess, onError, onCancel, currency = 'USD' }: PayPalButtonProps) => {
+const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, couponCode, donationAmount = 0, onSuccess, onError, onGuestEmailInvalid, onCancel, currency = 'USD' }: PayPalButtonProps) => {
   const [{ isPending }] = usePayPalScriptReducer();
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -32,11 +33,19 @@ const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, coupon
 
   const createOrder = async () => {
     setError(null);
-    try {
-      const response = await orderService.createPayPalOrder({
+      const normalizedGuestEmail = guestEmail?.trim();
+      if (guestEmail !== undefined && (!normalizedGuestEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedGuestEmail))) {
+        const errorMsg = 'Please enter a valid email address to continue with PayPal.';
+        setError(errorMsg);
+        onGuestEmailInvalid?.();
+        onError(errorMsg);
+        throw new Error(errorMsg);
+      }
+      try {
+        const response = await orderService.createPayPalOrder({
         items,
         shippingAddress,
-        guestEmail,
+        guestEmail: normalizedGuestEmail,
         notes,
         couponCode,
         donationAmount,

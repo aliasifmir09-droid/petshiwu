@@ -25,6 +25,7 @@ interface PayPalCardFieldsProps {
   donationAmount?: number;
   onSuccess: (order: import('@/types').Order) => void;
   onError: (error: string) => void;
+  onGuestEmailInvalid?: () => void;
   onCancel?: () => void;
   onSwitchToWallet?: () => void;
   currency?: string;
@@ -200,11 +201,19 @@ const PayPalCardFields = (props: PayPalCardFieldsProps) => {
 
   const createOrder = async () => {
     setError(null);
+    const normalizedGuestEmail = props.guestEmail?.trim();
+    if (props.guestEmail !== undefined && (!normalizedGuestEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedGuestEmail))) {
+      const errorMsg = 'Please enter a valid email address to continue with PayPal.';
+      setError(errorMsg);
+      props.onGuestEmailInvalid?.();
+      props.onError(errorMsg);
+      throw new Error(errorMsg);
+    }
     try {
       const response = await orderService.createPayPalOrder({
         items: props.items,
         shippingAddress: props.shippingAddress,
-        guestEmail: props.guestEmail,
+        guestEmail: normalizedGuestEmail,
         notes: props.notes,
         couponCode: props.couponCode,
         donationAmount: props.donationAmount,

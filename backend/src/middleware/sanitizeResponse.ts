@@ -18,6 +18,7 @@ export const sanitizeResponse = (req: Request, res: Response, next: NextFunction
   const isAuthEndpoint = req.path.includes('/auth/login') || 
                          req.path.includes('/auth/register') ||
                          req.path.includes('/auth/updatepassword');
+  const isPayPalCreateOrderEndpoint = req.originalUrl.split('?')[0].endsWith('/orders/paypal/create-order');
   
   const originalJson = res.json;
   
@@ -30,7 +31,7 @@ export const sanitizeResponse = (req: Request, res: Response, next: NextFunction
     try {
       if (data && typeof data === 'object') {
         // For auth endpoints, allow token field but still sanitize other sensitive data
-        data = sanitizeObject(data, new WeakSet(), 0, isAuthEndpoint);
+        data = sanitizeObject(data, new WeakSet(), 0, isAuthEndpoint, isPayPalCreateOrderEndpoint);
       }
     } catch (error) {
       // If sanitization fails, log and return original data (don't crash)
@@ -50,9 +51,10 @@ export const sanitizeResponse = (req: Request, res: Response, next: NextFunction
 /**
  * Recursively sanitize object to prevent data leakage
  * Includes depth limit and circular reference protection
- * @param allowToken - If true, allows 'token' field (for auth endpoints)
+ * @param allowToken - If true, allows auth token fields
+ * @param allowCheckoutToken - If true, allows checkoutToken only for PayPal create-order responses
  */
-function sanitizeObject(obj: any, visited = new WeakSet(), depth = 0, allowToken = false): any {
+function sanitizeObject(obj: any, visited = new WeakSet(), depth = 0, allowToken = false, allowCheckoutToken = false): any {
   // Prevent infinite recursion
   if (depth > 10) {
     return '[Max Depth Reached]';
@@ -72,7 +74,7 @@ function sanitizeObject(obj: any, visited = new WeakSet(), depth = 0, allowToken
   
   // Handle arrays
   if (Array.isArray(obj)) {
-    return obj.map(item => sanitizeObject(item, visited, depth + 1, allowToken));
+    return obj.map(item => sanitizeObject(item, visited, depth + 1, allowToken, allowCheckoutToken));
   }
   
   // Handle Date, RegExp, and other special objects
@@ -125,8 +127,15 @@ function sanitizeObject(obj: any, visited = new WeakSet(), depth = 0, allowToken
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
       const lowerKey = key.toLowerCase();
       
-      // Skip sensitive fields
-      if (fieldsToSanitize.some(field => lowerKey.includes(field.toLowerCase()))) {
+      // checkoutToken is a short-lived server-bound payment-session handle,
+      // not an authentication token. It must reach the PayPal client so the
+      // capture request can bind to the persisted checkout snapshot.
+      const isCheckoutToken = lowerKey === 'checkouttoken';
+
+      // Only the PayPal create-order response may expose its short-lived
+      // checkout-session handle. Never expose attacker-controlled nested
+      // checkoutToken fields from unrelated API responses.
+      if ((!isCheckoutToken || !allowCheckoutToken) && fieldsToSanitize.some(field => lowerKey.includes(field.toLowerCase()))) {
         continue;
       }
       
@@ -141,7 +150,7 @@ function sanitizeObject(obj: any, visited = new WeakSet(), depth = 0, allowToken
       
       // Recursively sanitize nested objects
       try {
-        sanitized[key] = sanitizeObject(obj[key], visited, depth + 1, allowToken);
+        sanitized[key] = sanitizeObject(obj[key], visited, depth + 1, allowToken, allowCheckoutToken);
       } catch (e) {
         // If recursion fails, skip this property
         continue;
