@@ -155,6 +155,7 @@ const PayPalButton = (props: PayPalButtonProps) => {
         clientId: paypalClientId,
         currency: props.currency || 'USD',
         intent: 'capture',
+        enableFunding: ['venmo', 'card'],
       }}
     >
       <PayPalButtonContent {...props} />
