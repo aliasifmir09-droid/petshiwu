@@ -638,6 +638,79 @@ export const sendOrderCancellationEmail = async (
   }
 };
 
+export const sendDeliveryProofEmail = async (
+  email: string,
+  firstName: string,
+  orderNumber: string,
+  deliveryData: {
+    deliveredAt: Date;
+    handoffMethod: string;
+    recipientName?: string;
+    notes?: string;
+    photoData: Buffer;
+    mimeType: string;
+  }
+): Promise<{ messageId: string }> => {
+  const escapeHtml = (value: string): string => value.replace(/[&<>\"']/g, (character) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '\"': '&quot;',
+    "'": '&#39;'
+  }[character] || character));
+
+  const safeFirstName = escapeHtml(firstName || 'Customer');
+  const safeOrderNumber = escapeHtml(orderNumber);
+  const safeHandoff = escapeHtml(deliveryData.handoffMethod.replace(/_/g, ' '));
+  const safeRecipient = deliveryData.recipientName ? escapeHtml(deliveryData.recipientName) : '';
+  const safeNotes = deliveryData.notes ? escapeHtml(deliveryData.notes) : '';
+  const attachmentExtension = deliveryData.mimeType === 'image/png' ? 'png' : deliveryData.mimeType === 'image/webp' ? 'webp' : 'jpg';
+  const html = `
+    <!DOCTYPE html>
+    <html><body style="font-family:Arial,sans-serif;line-height:1.6;color:#243b53;max-width:600px;margin:0 auto;padding:24px;">
+      <div style="background:#166534;color:white;padding:24px;border-radius:12px 12px 0 0;text-align:center;">
+        <h1 style="margin:0 0 8px;">Your Petshiwu order was delivered</h1>
+        <p style="margin:0;font-size:18px;">Order #${safeOrderNumber}</p>
+      </div>
+      <div style="background:#f8fafc;padding:28px;border-radius:0 0 12px 12px;">
+        <p>Hi ${safeFirstName},</p>
+        <p>Your order has been delivered. We attached the delivery photo so you can confirm where it was left or who received it.</p>
+        <div style="background:white;border:1px solid #dbeafe;border-radius:10px;padding:18px;margin:20px 0;">
+          <p style="margin:0 0 8px;"><strong>Delivered:</strong> ${new Date(deliveryData.deliveredAt).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })}</p>
+          <p style="margin:0 0 8px;"><strong>Handoff:</strong> ${safeHandoff}</p>
+          ${safeRecipient ? `<p style="margin:0 0 8px;"><strong>Received by:</strong> ${safeRecipient}</p>` : ''}
+          ${safeNotes ? `<p style="margin:0;"><strong>Driver note:</strong> ${safeNotes}</p>` : ''}
+        </div>
+        <p>If anything looks wrong, reply to this email or contact Petshiwu support.</p>
+        <p style="color:#64748b;font-size:13px;margin-top:28px;">The Petshiwu Team · Jackson Heights, Queens</p>
+      </div>
+    </body></html>`;
+  const text = `Hi ${firstName || 'Customer'},\n\nYour Petshiwu order #${orderNumber} was delivered. The delivery photo is attached.\n\nHandoff: ${deliveryData.handoffMethod.replace(/_/g, ' ')}${deliveryData.recipientName ? `\nReceived by: ${deliveryData.recipientName}` : ''}${deliveryData.notes ? `\nDriver note: ${deliveryData.notes}` : ''}\n\nThe Petshiwu Team`;
+  const attachment = {
+    filename: `petshiwu-delivery-proof-${orderNumber}.${attachmentExtension}`,
+    content: deliveryData.photoData,
+    contentType: deliveryData.mimeType
+  };
+  const from = process.env.SMTP_FROM || process.env.RESEND_FROM || 'Petshiwu Orders <noreply@petshiwu.com>';
+
+  if (resendClient) {
+    const result = await resendClient.emails.send(
+      { from, to: email, subject: `Your Petshiwu order was delivered – #${orderNumber}`, html, text, attachments: [attachment] },
+      { idempotencyKey: `delivery-proof-${orderNumber}` }
+    );
+    if (result.error || !result.data?.id) throw new Error(result.error?.message || 'Delivery email provider returned no message ID');
+    logger.info(`Delivery proof email sent for order #${orderNumber}: ${result.data.id}`);
+    return { messageId: result.data.id };
+  }
+
+  if (!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS)) {
+    throw new Error('No email provider configured');
+  }
+  const info = await createTransporter().sendMail({ from, to: email, subject: `Your Petshiwu order was delivered – #${orderNumber}`, html, text, attachments: [attachment] });
+  logger.info(`Delivery proof email sent for order #${orderNumber}: ${info.messageId}`);
+  return { messageId: info.messageId || 'smtp-sent' };
+};
+
 // Send order delivered email
 export const sendOrderDeliveredEmail = async (
   email: string,
@@ -657,6 +730,12 @@ export const sendOrderDeliveredEmail = async (
       zipCode: string;
       country: string;
     };
+    attachment?: {
+      filename: string;
+      content: Buffer;
+      contentType: string;
+    };
+    idempotencyKey?: string;
   }
 ) => {
   try {

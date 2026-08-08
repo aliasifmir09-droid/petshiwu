@@ -13,6 +13,15 @@ export interface IDeliveryProof {
   mimeType?: string;
 }
 
+export interface IDeliveryProofNotification {
+  status: 'queued' | 'sent' | 'failed' | 'skipped_no_email';
+  attempts: number;
+  queuedAt?: Date;
+  sentAt?: Date;
+  messageId?: string;
+  lastError?: string;
+}
+
 export interface IDeliveryLocation {
   address: string;
   formattedAddress?: string;
@@ -40,6 +49,7 @@ export interface IDelivery {
   stopOrder?: number;
   notes?: string;
   proof?: IDeliveryProof;
+  proofNotification?: IDeliveryProofNotification;
 }
 
 export interface IOrderItem {
@@ -276,6 +286,14 @@ const orderSchema = new Schema<IOrder>(
         storageKey: { type: String, select: false },
         storageProvider: { type: String, enum: ['bunny', 'local', 'mongodb'], select: false },
         mimeType: { type: String, select: false }
+      },
+      proofNotification: {
+        status: { type: String, enum: ['queued', 'sent', 'failed', 'skipped_no_email'] },
+        attempts: { type: Number, default: 0 },
+        queuedAt: Date,
+        sentAt: Date,
+        messageId: String,
+        lastError: String
       }
     },
     isDelivered: {

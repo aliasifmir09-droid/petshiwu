@@ -3,9 +3,12 @@ import path from 'path';
 import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import Order from '../models/Order';
+import User from '../models/User';
 import DeliveryRun from '../models/DeliveryRun';
 import { AuthRequest } from '../middleware/auth';
 import { downloadFromBunny } from '../utils/bunnyStorage';
+import { sendDeliveryProofEmail } from '../utils/emailService';
+import logger from '../utils/logger';
 import { addressText, approximatePointForAddress, calculateDirectRoute, DELIVERY_ORIGIN, geocodeAddress, mapsNavigationUrl, optimizeRoute } from '../services/deliveryService';
 
 const orderId = (req: Request) => String(req.params.id || '').trim();
@@ -226,20 +229,24 @@ export const optimizeDeliveryRun = async (req: AuthRequest, res: Response, next:
 
 export const uploadDeliveryProof = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(orderId(req))) return res.status(400).json({ success: false, message: 'Invalid order ID' });
-    const order = await Order.findById(orderId(req));
+    const id = orderId(req);
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ success: false, message: 'Invalid order ID' });
+    const order = await Order.findById(id);
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
     const file = req.file as Express.Multer.File | undefined;
     if (!file) return res.status(400).json({ success: false, message: 'Please upload a delivery photo' });
-    if (!hasImageSignature(file.buffer, file.mimetype.toLowerCase())) return res.status(400).json({ success: false, message: 'Delivery proof image content could not be verified' });
-    const buffer = file.buffer;
+
     const detectedMime = file.mimetype.toLowerCase();
-    const originalStem = path.basename(file.originalname, path.extname(file.originalname));
-    const safeFilename = `${Date.now()}_${originalStem.replace(/[^a-z0-9_-]/gi, '_')}`;
+    if (!hasImageSignature(file.buffer, detectedMime)) {
+      return res.status(400).json({ success: false, message: 'Delivery proof image content could not be verified' });
+    }
+
+    const existingDelivery = order.delivery || { origin: DELIVERY_ORIGIN };
     order.delivery = {
-      ...(order.delivery || { origin: DELIVERY_ORIGIN }),
+      ...existingDelivery,
       proof: {
-        photoData: buffer,
+        photoData: file.buffer,
         storageKey: String(order._id),
         storageProvider: 'mongodb',
         mimeType: detectedMime,
@@ -255,7 +262,88 @@ export const uploadDeliveryProof = async (req: AuthRequest, res: Response, next:
     order.deliveredAt = new Date();
     order.orderStatus = 'delivered';
     await order.save();
+
     const proof = order.delivery?.proof;
+    const notification = order.delivery?.proofNotification;
+    const staleQueued = notification?.status === 'queued'
+      && notification.queuedAt
+      && Date.now() - new Date(notification.queuedAt).getTime() > 15 * 60 * 1000;
+    const reservation = await Order.findOneAndUpdate(
+      {
+        _id: order._id,
+        $or: [
+          { 'delivery.proofNotification.status': { $exists: false } },
+          { 'delivery.proofNotification.status': 'failed' },
+          ...(staleQueued ? [{ 'delivery.proofNotification.status': 'queued' }] : [])
+        ]
+      },
+      {
+        $set: {
+          'delivery.proofNotification.status': 'queued',
+          'delivery.proofNotification.queuedAt': new Date(),
+          'delivery.proofNotification.lastError': undefined
+        },
+        $inc: { 'delivery.proofNotification.attempts': 1 }
+      },
+      { new: true }
+    );
+
+    if (reservation && proof?.photoData && Buffer.isBuffer(proof.photoData)) {
+      try {
+        const account = order.user ? await User.findById(order.user).select('email firstName').lean() : null;
+        const customerEmail = String(account?.email || order.guestEmail || '').trim();
+        const firstName = String(account?.firstName || order.shippingAddress?.firstName || 'Customer').trim();
+
+        if (!customerEmail) {
+          await Order.updateOne(
+            { _id: order._id },
+            {
+              $set: {
+                'delivery.proofNotification.status': 'skipped_no_email',
+                'delivery.proofNotification.lastError': 'No customer email was available'
+              }
+            }
+          );
+        } else {
+          const emailResult = await sendDeliveryProofEmail(
+            customerEmail,
+            firstName,
+            order.orderNumber,
+            {
+              deliveredAt: order.deliveredAt || new Date(),
+              handoffMethod: proof.handoffMethod,
+              recipientName: proof.recipientName,
+              notes: proof.notes,
+              photoData: proof.photoData,
+              mimeType: proof.mimeType || detectedMime
+            }
+          );
+          await Order.updateOne(
+            { _id: order._id },
+            {
+              $set: {
+                'delivery.proofNotification.status': 'sent',
+                'delivery.proofNotification.sentAt': new Date(),
+                'delivery.proofNotification.messageId': emailResult.messageId,
+                'delivery.proofNotification.lastError': undefined
+              }
+            }
+          );
+        }
+      } catch (notificationError: any) {
+        logger.error(`Delivery proof email failed for order #${order.orderNumber}:`, notificationError?.message || notificationError);
+        await Order.updateOne(
+          { _id: order._id },
+          {
+            $set: {
+              'delivery.proofNotification.status': 'failed',
+              'delivery.proofNotification.lastError': String(notificationError?.message || notificationError).slice(0, 500)
+            }
+          }
+        );
+      }
+    }
+
     res.json({ success: true, data: proof ? {
       uploadedAt: proof.uploadedAt,
       uploadedBy: proof.uploadedBy,
@@ -266,9 +354,10 @@ export const uploadDeliveryProof = async (req: AuthRequest, res: Response, next:
   } catch (error) { next(error); }
 };
 
+
 export const getDeliveryProof = async (req: AuthRequest, res: Response, next: NextFunction) => {
-try {
-  const id = orderId(req);
+  try {
+    const id = orderId(req);
   if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ success: false, message: 'Invalid order ID' });
   const order = await Order.findById(id).select('+delivery.proof.photoUrl +delivery.proof.photoData +delivery.proof.storageKey +delivery.proof.storageProvider +delivery.proof.mimeType');
   const proof = order?.delivery?.proof;
