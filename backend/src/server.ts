@@ -84,6 +84,7 @@ import authRoutes from './routes/auth';
 import productRoutes from './routes/products';
 import categoryRoutes from './routes/categories';
 import orderRoutes from './routes/orders';
+import deliveryRoutes from './routes/delivery';
 import reviewRoutes from './routes/reviews';
 import uploadRoutes from './routes/upload';
 import userRoutes from './routes/users';
@@ -421,9 +422,13 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-if (!isCloudinaryConfigured()) {
-  app.use('/uploads', express.static(path.join(__dirname, '../uploads'), { maxAge: '1d', etag: true, lastModified: true }));
-}
+// Legacy product uploads remain available. Delivery proof files are never public.
+app.use('/uploads', (req, res, next) => {
+  if (path.basename(req.path).startsWith('delivery-')) {
+    return res.status(404).json({ success: false, message: 'File not found' });
+  }
+  return next();
+}, express.static(path.join(__dirname, '../uploads'), { maxAge: '1d', etag: true, lastModified: true, index: false }));
 
 app.use(['/api', '/api/v1'], setCacheHeaders);
 
@@ -437,6 +442,7 @@ app.use(`${API_PREFIX}/auth`, authRoutes);
 app.use(`${API_PREFIX}/products`, productRoutes);
 app.use(`${API_PREFIX}/categories`, categoryRoutes);
 app.use(`${API_PREFIX}/orders`, orderRoutes);
+app.use(`${API_PREFIX}/delivery`, deliveryRoutes);
 app.use(`${API_PREFIX}/reviews`, reviewRoutes);
 app.use(`${API_PREFIX}/upload`, uploadRoutes);
 app.use(`${API_PREFIX}/users`, userRoutes);
@@ -460,6 +466,7 @@ app.use('/api/auth', legacyRouteDeprecation, authRoutes);
 app.use('/api/products', legacyRouteDeprecation, productRoutes);
 app.use('/api/categories', legacyRouteDeprecation, categoryRoutes);
 app.use('/api/orders', legacyRouteDeprecation, orderRoutes);
+app.use('/api/delivery', legacyRouteDeprecation, deliveryRoutes);
 app.use('/api/reviews', legacyRouteDeprecation, reviewRoutes);
 app.use('/api/upload', legacyRouteDeprecation, uploadRoutes);
 app.use('/api/users', legacyRouteDeprecation, userRoutes);

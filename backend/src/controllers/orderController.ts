@@ -663,6 +663,9 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
     if (!req.user?._id) {
       return res.status(401).json({ success: false, message: 'User not authenticated' });
     }
+    if (req.user.role === 'staff' && !req.user.permissions?.canManageOrders) {
+      return res.status(403).json({ success: false, message: 'Order management permission required' });
+    }
 
     const orderId = String(req.params.id).trim();
     if (!orderId || !/^[0-9a-fA-F]{24}$/.test(orderId)) {
@@ -670,7 +673,7 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
     }
 
     let order;
-    if (req.user.role === 'admin' || req.user.role === 'staff') {
+    if (req.user.role === 'admin' || req.user.permissions?.canManageOrders) {
       order = await Order.findById(orderId).populate('user', 'firstName lastName email').lean();
     } else {
       order = await Order.findOne({ _id: orderId, user: req.user._id }).populate('user', 'firstName lastName email').lean();
@@ -726,7 +729,7 @@ export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFu
           paidAt: 1, paymentIntentId: 1, paypalOrderId: 1,
           isDelivered: 1, deliveredAt: 1,
           shippingAddress: 1, billingAddress: 1, createdAt: 1, updatedAt: 1,
-          donationAmount: 1, trackingNumber: 1
+          donationAmount: 1, trackingNumber: 1, delivery: 1
         }
       }
     ];
@@ -740,7 +743,7 @@ export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFu
       .map((order) => normalizeOrderId(order))
       .filter(Boolean)
       .map((order: any) => {
-        // Rewrite dead Cloudinary image URLs to Bunny CDN using stored product ID
+        // Rewrite dead Cloudinary image URLs to Bunny CDN using stored product ID.
         if (order.items && Array.isArray(order.items)) {
           order.items = order.items.map((item: any) => {
             if (item && item.product) {
@@ -751,6 +754,23 @@ export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFu
         }
         return order;
       });
+
+    // Older orders do not contain the product description snapshot. Enrich the
+    // admin response from the current catalog without changing historical totals.
+    const productIds = Array.from(new Set(normalizedOrders.flatMap((order: any) =>
+      (order.items || []).map((item: any) => String(item.product)).filter((id: string) => mongoose.Types.ObjectId.isValid(id))
+    )));
+    if (productIds.length) {
+      const products = await Product.find({ _id: { $in: productIds } }).select('_id description shortDescription').lean();
+      const productMap = new Map(products.map((product: any) => [String(product._id), product]));
+      normalizedOrders.forEach((order: any) => {
+        order.items = (order.items || []).map((item: any) => {
+          const product = productMap.get(String(item.product));
+          if (!item.description && product) item.description = product.shortDescription || product.description || '';
+          return item;
+        });
+      });
+    }
     res.status(200).json({
       success: true,
       data: normalizedOrders,
@@ -1206,7 +1226,7 @@ export const trackOrder = async (req: Request, res: Response, next: NextFunction
       orderStatus: order.orderStatus,
       paymentStatus: order.paymentStatus,
       trackingNumber: order.trackingNumber,
-      items: order.items.map(item => ({ name: item.name, quantity: item.quantity, price: item.price })),
+      items: order.items.map(item => ({ name: item.name, description: item.description, image: item.image, quantity: item.quantity, price: item.price })),
       shippingAddress: { firstName: order.shippingAddress.firstName, lastName: order.shippingAddress.lastName, city: order.shippingAddress.city, state: order.shippingAddress.state, zipCode: order.shippingAddress.zipCode },
       itemsPrice: order.itemsPrice,
       shippingPrice: order.shippingPrice,
@@ -1214,7 +1234,13 @@ export const trackOrder = async (req: Request, res: Response, next: NextFunction
       totalPrice: order.totalPrice,
       createdAt: order.createdAt,
       isDelivered: order.isDelivered,
-      deliveredAt: order.deliveredAt
+      deliveredAt: order.deliveredAt,
+      // Public tracking intentionally excludes private delivery proof fields (photo, recipient, handoff notes).
+      delivery: order.delivery ? {
+        status: order.delivery.status,
+        distanceMeters: order.delivery.distanceMeters,
+        durationSeconds: order.delivery.durationSeconds
+      } : undefined
     };
 
     res.status(200).json({ success: true, data: trackingInfo });

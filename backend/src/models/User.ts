@@ -18,6 +18,7 @@ export interface IPermissions {
   canViewAnalytics: boolean;
   canManageUsers: boolean;
   canManageSettings: boolean;
+  canManageDelivery: boolean;
 }
 
 export interface IPet {
@@ -133,6 +134,7 @@ const userSchema = new Schema<IUser>(
     permissions: {
       canManageProducts: { type: Boolean, default: false },
       canManageOrders: { type: Boolean, default: false },
+      canManageDelivery: { type: Boolean, default: false },
       canManageCustomers: { type: Boolean, default: false },
       canManageCategories: { type: Boolean, default: false },
       canViewAnalytics: { type: Boolean, default: false },

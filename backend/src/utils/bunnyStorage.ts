@@ -78,9 +78,34 @@ export const uploadToBunny = (
 };
 
 /**
- * Delete a file from Bunny Storage by its CDN URL.
- * Silently ignores errors (non-blocking cleanup).
+ * Download a private Bunny file using the storage API key.
+ *
+ * @param storagePath Storage path relative to the storage zone.
  */
+export const downloadFromBunny = (storagePath: string): Promise<{ buffer: Buffer; contentType: string }> => {
+  return new Promise((resolve, reject) => {
+    if (!STORAGE_PASSWORD) return reject(new Error('BUNNY_STORAGE_PASSWORD env var not set'));
+    const remotePath = `/${STORAGE_ZONE}/${storagePath.replace(/^\/+/, '')}`;
+    const req = https.request({
+      hostname: STORAGE_HOST,
+      path: remotePath,
+      method: 'GET',
+      headers: { AccessKey: STORAGE_PASSWORD }
+    }, (res) => {
+      const chunks: Buffer[] = [];
+      res.on('data', (chunk) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+      res.on('end', () => {
+        if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
+          return reject(new Error(`Bunny download failed: HTTP ${res.statusCode}`));
+        }
+        resolve({ buffer: Buffer.concat(chunks), contentType: String(res.headers['content-type'] || 'application/octet-stream') });
+      });
+    });
+    req.on('error', reject);
+    req.end();
+  });
+};
+
 export const deleteFromBunny = async (cdnUrl: string): Promise<void> => {
   if (!STORAGE_PASSWORD || !cdnUrl.includes(CDN_HOST)) return;
   try {

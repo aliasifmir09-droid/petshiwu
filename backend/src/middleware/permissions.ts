@@ -51,6 +51,7 @@ export const checkPermission = hasPermission;
 // Permission helpers for common actions
 export const canManageProducts = hasPermission('canManageProducts');
 export const canManageOrders = hasPermission('canManageOrders');
+export const canManageDelivery = hasPermission('canManageDelivery');
 export const canManageCustomers = hasPermission('canManageCustomers');
 export const canManageCategories = hasPermission('canManageCategories');
 export const canViewAnalytics = hasPermission('canViewAnalytics');

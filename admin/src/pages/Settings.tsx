@@ -18,6 +18,7 @@ interface StaffUser {
   permissions: {
     canManageProducts: boolean;
     canManageOrders: boolean;
+    canManageDelivery: boolean;
     canManageCustomers: boolean;
     canManageCategories: boolean;
     canViewAnalytics: boolean;
@@ -70,6 +71,7 @@ const Settings = () => {
     permissions: {
       canManageProducts: false,
       canManageOrders: false,
+      canManageDelivery: false,
       canManageCustomers: false,
       canManageCategories: false,
       canViewAnalytics: false,
@@ -154,6 +156,7 @@ const Settings = () => {
       permissions: {
         canManageProducts: false,
         canManageOrders: false,
+        canManageDelivery: false,
         canManageCustomers: false,
         canManageCategories: false,
         canViewAnalytics: false,
@@ -172,7 +175,7 @@ const Settings = () => {
         email: user.email,
         password: '',
         phone: user.phone || '',
-        permissions: user.permissions
+        permissions: { ...user.permissions }
       });
     } else {
       setEditingUser(null);
@@ -625,6 +628,11 @@ const Settings = () => {
                             Orders
                           </span>
                         )}
+                        {user.permissions.canManageDelivery && (
+                          <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-full">
+                            Delivery
+                          </span>
+                        )}
                         {user.permissions.canManageCustomers && (
                           <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
                             Customers
@@ -797,6 +805,16 @@ const Settings = () => {
                         className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
                       />
                       <span className="text-sm">Manage Orders</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.permissions.canManageDelivery}
+                        onChange={() => handlePermissionChange('canManageDelivery')}
+                        className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
+                      />
+                      <span className="text-sm">Manage Delivery</span>
                     </label>
 
                     <label className="flex items-center gap-2 cursor-pointer">

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { adminService } from '@/services/adminService';
-import { Eye, Search, MapPin, X, AlertCircle, CheckCircle, Filter as FilterIcon, Download, RotateCcw } from 'lucide-react';
+import { Eye, Search, MapPin, X, AlertCircle, CheckCircle, Filter as FilterIcon, Download, RotateCcw, Route, Upload, Navigation, PackageCheck } from 'lucide-react';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import ConfirmationModal from '@/components/ConfirmationModal';
@@ -23,6 +23,12 @@ const Orders = () => {
   const [refundAmount, setRefundAmount] = useState<string>('');
   const [refundReason, setRefundReason] = useState<string>('');
   const [pendingStatusChange, setPendingStatusChange] = useState<{ orderId: string; status: string } | null>(null);
+  const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
+  const [deliveryRun, setDeliveryRun] = useState<any>(null);
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [recipientName, setRecipientName] = useState('');
+  const [handoffMethod, setHandoffMethod] = useState('handed_to_customer');
+  const [proofNotes, setProofNotes] = useState('');
 
   // CRITICAL: Set staleTime to 0 and refetchOnMount to ensure immediate updates after mutations
   const { data: ordersData, isLoading, error: ordersError } = useQuery({
@@ -210,6 +216,51 @@ const Orders = () => {
     setShowDetailsModal(true);
   };
 
+  const toggleOrderSelection = (order: any) => {
+    const id = String(order._id || order.id || '');
+    if (!id) return;
+    setSelectedOrderIds((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id]);
+  };
+
+  const prepareDeliveryMutation = useMutation({
+    mutationFn: (id: string) => adminService.prepareOrderDelivery(id),
+    onSuccess: (delivery) => {
+      setSelectedOrder((current: any) => current ? { ...current, delivery } : current);
+      showToast('Delivery distance and travel time calculated', 'success');
+    },
+    onError: (error: any) => showToast(error?.response?.data?.message || 'Unable to calculate delivery route', 'error')
+  });
+
+  const createRunMutation = useMutation({
+    mutationFn: async () => {
+      const created = await adminService.createDeliveryRun({ orderIds: selectedOrderIds });
+      return adminService.optimizeDeliveryRun(String(created._id));
+    },
+    onSuccess: (run) => {
+      setDeliveryRun(run);
+      setSelectedOrderIds([]);
+      showToast(`Delivery run ready with ${run.stops?.length || 0} stops`, 'success');
+    },
+    onError: (error: any) => showToast(error?.response?.data?.message || 'Unable to create delivery run', 'error')
+  });
+
+  const proofMutation = useMutation({
+    mutationFn: () => adminService.uploadDeliveryProof(String(selectedOrder._id || selectedOrder.id), {
+      file: proofFile!, recipientName: recipientName.trim(), handoffMethod, notes: proofNotes.trim()
+    }),
+    onSuccess: (proof) => {
+      setSelectedOrder((current: any) => current ? { ...current, delivery: { ...(current.delivery || {}), status: 'delivered', proof }, orderStatus: 'delivered', isDelivered: true } : current);
+      setProofFile(null);
+      setRecipientName('');
+      setProofNotes('');
+      showToast('Delivery proof saved and order marked delivered', 'success');
+    },
+    onError: (error: any) => showToast(error?.response?.data?.message || 'Unable to save delivery proof', 'error')
+  });
+
+  const formatDistance = (meters?: number) => meters == null ? 'Not calculated' : `${(Number(meters) / 1609.34).toFixed(1)} mi`;
+  const formatDuration = (seconds?: number) => seconds == null ? 'Route time unavailable' : `${Math.max(1, Math.round(Number(seconds) / 60))} min drive`;
+
   const exportOrdersMutation = useMutation({
     mutationFn: () => adminService.exportOrders({ status: statusFilter || undefined }),
     onSuccess: (blob) => {
@@ -310,11 +361,49 @@ const Orders = () => {
       )}
 
       {/* Orders Table */}
+      {selectedOrderIds.length > 0 && (
+        <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="font-bold text-indigo-900">{selectedOrderIds.length} order(s) selected</p>
+            <p className="text-sm text-indigo-700">Group them into one delivery run and optimize the stop order.</p>
+          </div>
+          <button
+            onClick={() => createRunMutation.mutate()}
+            disabled={createRunMutation.isPending}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+          >
+            <Route size={17} />
+            {createRunMutation.isPending ? 'Building run...' : 'Create & optimize run'}
+          </button>
+        </div>
+      )}
+
+      {deliveryRun && (
+        <div className="bg-white rounded-xl shadow-lg border border-green-200 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <h3 className="font-bold text-lg flex items-center gap-2"><Navigation className="text-green-600" size={20} /> {deliveryRun.name}</h3>
+              <p className="text-sm text-gray-600">{deliveryRun.stops?.length || 0} stops · {formatDistance(deliveryRun.totalDistanceMeters)} · {formatDuration(deliveryRun.totalDurationSeconds)} · {deliveryRun.optimizedBy}</p>
+            </div>
+            {deliveryRun.navigationUrl && <a href={deliveryRun.navigationUrl} target="_blank" rel="noreferrer" className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"><Navigation size={16} /> Open Google Maps</a>}
+          </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            {(deliveryRun.stops || []).map((stop: any) => (
+              <div key={`${stop.order}-${stop.stopOrder}`} className="flex items-start gap-3 border rounded-lg p-3">
+                <span className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center">{stop.stopOrder}</span>
+                <div className="min-w-0"><p className="font-semibold">{stop.orderNumber}</p><p className="text-sm text-gray-600 truncate">{stop.address}, {stop.city}, {stop.state} {stop.zipCode}</p></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden animate-fade-in-up">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"><input type="checkbox" aria-label="Select all orders on this page" checked={Boolean(ordersData?.data?.length) && ordersData.data.every((order: any) => selectedOrderIds.includes(String(order._id || order.id || '')))} onChange={(event) => setSelectedOrderIds(event.target.checked ? (ordersData?.data || []).map((order: any) => String(order._id || order.id || '')) : [])} /></th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
@@ -328,19 +417,20 @@ const Orders = () => {
             <tbody className="divide-y divide-gray-200">
               {isLoading ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
                     Loading orders...
                   </td>
                 </tr>
               ) : ordersData?.data.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
                     No orders found
                   </td>
                 </tr>
               ) : (
                 ordersData?.data.map((order: any) => (
                   <tr key={order._id} className="hover:bg-gray-50">
+                    <td className="px-4 py-4"><input type="checkbox" aria-label={`Select ${order.orderNumber}`} checked={selectedOrderIds.includes(String(order._id || order.id || ''))} onChange={() => toggleOrderSelection(order)} /></td>
                     <td className="px-6 py-4 text-sm font-medium">
                       {order.orderNumber}
                     </td>
@@ -348,7 +438,8 @@ const Orders = () => {
                       {order.shippingAddress?.firstName} {order.shippingAddress?.lastName}
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      {order.items?.length ?? 0} item(s)
+                      <div>{order.items?.length ?? 0} item(s)</div>
+                      <div className="text-xs text-gray-500 mt-1">{formatDistance(order.delivery?.distanceMeters)} · {formatDuration(order.delivery?.durationSeconds)}</div>
                     </td>
                     <td className="px-6 py-4 text-sm font-medium">
                       ${(order.totalPrice ?? 0).toFixed(2)}
@@ -491,6 +582,7 @@ const Orders = () => {
                       />
                       <div className="flex-1">
                         <p className="font-semibold">{item.name}</p>
+                        {item.description && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{item.description}</p>}
                         {item.variant && (
                           <p className="text-sm text-gray-600">
                             {item.variant.size || item.variant.weight || item.variant.sku}
@@ -505,6 +597,52 @@ const Orders = () => {
                     </div>
                     );
                   })}
+                </div>
+              </div>
+
+              {/* Delivery Operations */}
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-5">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-bold flex items-center gap-2"><PackageCheck className="text-emerald-600" size={20} /> Delivery Operations</h3>
+                    <p className="text-sm text-gray-600 mt-1">Jackson Heights base: 37-68 74th St</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => prepareDeliveryMutation.mutate(String(selectedOrder._id || selectedOrder.id || ''))}
+                      disabled={prepareDeliveryMutation.isPending}
+                      className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-2"
+                    ><Route size={16} /> {prepareDeliveryMutation.isPending ? 'Calculating...' : 'Calculate delivery'}</button>
+                    {selectedOrder.delivery?.navigationUrl && <a href={selectedOrder.delivery.navigationUrl} target="_blank" rel="noreferrer" className="px-3 py-2 border border-emerald-300 text-emerald-800 rounded-lg hover:bg-emerald-100 flex items-center gap-2"><Navigation size={16} /> Navigate</a>}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 text-sm">
+                  <div><p className="text-gray-500">Distance</p><p className="font-bold">{formatDistance(selectedOrder.delivery?.distanceMeters)}</p></div>
+                  <div><p className="text-gray-500">Travel time</p><p className="font-bold">{formatDuration(selectedOrder.delivery?.durationSeconds)}</p></div>
+                  <div><p className="text-gray-500">Route source</p><p className="font-bold">{selectedOrder.delivery?.routingProvider || 'Not prepared'}</p></div>
+                  <div><p className="text-gray-500">Delivery status</p><p className="font-bold capitalize">{selectedOrder.delivery?.status || 'Not prepared'}</p></div>
+                </div>
+                {selectedOrder.delivery?.proof?.photoUrl && (
+                  <div className="mt-4 border-t border-emerald-200 pt-4 flex items-start gap-4">
+                    <div className="w-24 h-24 rounded-lg border bg-emerald-50 flex items-center justify-center text-emerald-700 text-xs text-center px-2">Private proof photo</div>
+                    <div className="text-sm"><p className="font-bold">Proof saved</p><p>Recipient: {selectedOrder.delivery.proof.recipientName || 'Not recorded'}</p><p>Handoff: {String(selectedOrder.delivery.proof.handoffMethod || '').split('_').join(' ')}</p><p className="text-gray-500">{selectedOrder.delivery.proof.uploadedAt ? new Date(selectedOrder.delivery.proof.uploadedAt).toLocaleString() : ''}</p></div>
+                  </div>
+                )}
+                <div className="mt-4 border-t border-emerald-200 pt-4">
+                  <p className="font-semibold mb-3">Upload proof of delivery</p>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <input type="file" accept="image/*" onChange={(event) => setProofFile(event.target.files?.[0] || null)} className="block w-full text-sm" />
+                    <input value={recipientName} onChange={(event) => setRecipientName(event.target.value)} placeholder="Recipient name" className="border rounded-lg px-3 py-2 text-sm" />
+                    <select value={handoffMethod} onChange={(event) => setHandoffMethod(event.target.value)} className="border rounded-lg px-3 py-2 text-sm">
+                      <option value="handed_to_customer">Handed to customer</option>
+                      <option value="handed_to_household_member">Handed to household member</option>
+                      <option value="left_at_door">Left at door</option>
+                      <option value="left_with_doorman">Left with doorman</option>
+                      <option value="other">Other</option>
+                    </select>
+                    <input value={proofNotes} onChange={(event) => setProofNotes(event.target.value)} placeholder="Delivery notes" className="border rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                  <button onClick={() => proofMutation.mutate()} disabled={!proofFile || proofMutation.isPending} className="mt-3 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-2"><Upload size={16} /> {proofMutation.isPending ? 'Saving proof...' : 'Save proof & mark delivered'}</button>
                 </div>
               </div>
 

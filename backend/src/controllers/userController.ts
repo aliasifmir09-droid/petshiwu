@@ -66,7 +66,8 @@ export const createStaffUser = async (req: AuthRequest, res: Response, next: Nex
         canManageCategories: false,
         canViewAnalytics: false,
         canManageUsers: false,
-        canManageSettings: false
+        canManageSettings: false,
+        canManageDelivery: false
       },
       isActive: true
     });
@@ -113,7 +114,19 @@ export const updateStaffUser = async (req: AuthRequest, res: Response, next: Nex
     if (lastName) staffUser.lastName = lastName;
     if (email) staffUser.email = email;
     if (phone !== undefined) staffUser.phone = phone;
-    if (permissions) staffUser.permissions = permissions;
+    if (permissions) {
+      staffUser.permissions = {
+        canManageProducts: false,
+        canManageOrders: false,
+        canManageDelivery: false,
+        canManageCustomers: false,
+        canManageCategories: false,
+        canViewAnalytics: false,
+        canManageUsers: false,
+        canManageSettings: false,
+        ...permissions
+      };
+    }
     if (isActive !== undefined) staffUser.isActive = isActive;
     if (password) staffUser.password = password; // Will be hashed by pre-save hook
 
@@ -192,6 +205,7 @@ export const getMyPermissions = async (req: AuthRequest, res: Response, next: Ne
     const permissions = user.role === 'admin' ? {
       canManageProducts: true,
       canManageOrders: true,
+      canManageDelivery: true,
       canManageCustomers: true,
       canManageCategories: true,
       canViewAnalytics: true,

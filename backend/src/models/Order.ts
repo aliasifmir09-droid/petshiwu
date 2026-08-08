@@ -1,8 +1,51 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
+export interface IDeliveryProof {
+  photoUrl?: string;
+  photoData?: Buffer;
+  uploadedAt: Date;
+  uploadedBy?: mongoose.Types.ObjectId;
+  recipientName?: string;
+  handoffMethod: 'handed_to_customer' | 'handed_to_household_member' | 'left_at_door' | 'left_with_doorman' | 'other';
+  notes?: string;
+  storageKey?: string;
+  storageProvider?: 'bunny' | 'local' | 'mongodb';
+  mimeType?: string;
+}
+
+export interface IDeliveryLocation {
+  address: string;
+  formattedAddress?: string;
+  latitude?: number;
+  longitude?: number;
+  placeId?: string;
+  provider?: string;
+}
+
+export interface IDelivery {
+  origin?: {
+    label: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+  };
+  destination?: IDeliveryLocation;
+  distanceMeters?: number;
+  durationSeconds?: number;
+  calculatedAt?: Date;
+  routingProvider?: string;
+  navigationUrl?: string;
+  status?: 'ready' | 'assigned' | 'out_for_delivery' | 'delivered' | 'failed' | 'cancelled';
+  runId?: mongoose.Types.ObjectId;
+  stopOrder?: number;
+  notes?: string;
+  proof?: IDeliveryProof;
+}
+
 export interface IOrderItem {
   product: mongoose.Types.ObjectId;
   name: string;
+  description?: string;
   image: string;
   price: number;
   quantity: number;
@@ -46,6 +89,7 @@ export interface IOrder extends Document {
   paymentIntentId?: string;
   paypalOrderId?: string;
   paypalCheckoutToken?: string;
+  delivery?: IDelivery;
   isDelivered: boolean;
   deliveredAt?: Date;
   trackingNumber?: string;
@@ -63,6 +107,11 @@ const orderItemSchema = new Schema<IOrderItem>({
   name: {
     type: String,
     required: true
+  },
+  description: {
+    type: String,
+    required: false,
+    default: ''
   },
   image: {
     type: String,
@@ -184,6 +233,51 @@ const orderSchema = new Schema<IOrder>(
     paymentIntentId: String,
     paypalOrderId: String,
     paypalCheckoutToken: String,
+    delivery: {
+      origin: {
+        label: String,
+        address: String,
+        latitude: Number,
+        longitude: Number
+      },
+      destination: {
+        address: String,
+        formattedAddress: String,
+        latitude: Number,
+        longitude: Number,
+        placeId: String,
+        provider: String
+      },
+      distanceMeters: Number,
+      durationSeconds: Number,
+      calculatedAt: Date,
+      routingProvider: String,
+      navigationUrl: String,
+      status: {
+        type: String,
+        enum: ['ready', 'assigned', 'out_for_delivery', 'delivered', 'failed', 'cancelled'],
+        default: 'ready'
+      },
+      runId: { type: Schema.Types.ObjectId, ref: 'DeliveryRun' },
+      stopOrder: Number,
+      notes: String,
+      proof: {
+        photoUrl: { type: String, required: false, select: false },
+        photoData: { type: Buffer, required: false, select: false },
+        uploadedAt: { type: Date, required: false },
+        uploadedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+        recipientName: String,
+        handoffMethod: {
+          type: String,
+          enum: ['handed_to_customer', 'handed_to_household_member', 'left_at_door', 'left_with_doorman', 'other'],
+          required: true
+        },
+        notes: String,
+        storageKey: { type: String, select: false },
+        storageProvider: { type: String, enum: ['bunny', 'local', 'mongodb'], select: false },
+        mimeType: { type: String, select: false }
+      }
+    },
     isDelivered: {
       type: Boolean,
       default: false

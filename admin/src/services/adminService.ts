@@ -313,6 +313,38 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
     return response.data.data;
   },
 
+  prepareOrderDelivery: async (id: string, destination?: { latitude: number; longitude: number }) => {
+    const response = await api.post(`/delivery/orders/${encodeURIComponent(id)}/prepare`, destination ? { destination } : {});
+    return response.data.data;
+  },
+
+  updateDelivery: async (id: string, data: { status?: string; notes?: string; runId?: string; stopOrder?: number }) => {
+    const response = await api.put(`/delivery/orders/${encodeURIComponent(id)}`, data);
+    return response.data.data;
+  },
+
+  createDeliveryRun: async (data: { orderIds: string[]; name?: string; serviceDate?: string }) => {
+    const response = await api.post('/delivery/runs', data);
+    return response.data.data;
+  },
+
+  optimizeDeliveryRun: async (runId: string) => {
+    const response = await api.post(`/delivery/runs/${encodeURIComponent(runId)}/optimize`);
+    return response.data.data;
+  },
+
+  uploadDeliveryProof: async (id: string, data: { file: File; recipientName?: string; handoffMethod: string; notes?: string }) => {
+    const formData = new FormData();
+    formData.append('image', data.file);
+    if (data.recipientName) formData.append('recipientName', data.recipientName);
+    formData.append('handoffMethod', data.handoffMethod);
+    if (data.notes) formData.append('notes', data.notes);
+    const response = await api.post(`/delivery/orders/${encodeURIComponent(id)}/proof`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data.data;
+  },
+
   updateOrderStatus: async (id: string, data: any) => {
     // Ensure ID is a string and valid
     const orderId = String(id).trim();
