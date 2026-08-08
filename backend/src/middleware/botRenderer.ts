@@ -1637,11 +1637,10 @@ export const createBotRenderer = (distPath: string) => {
         }
       }
 
-      // SOFT 404 FIX: Return real 404 for unknown URLs (bot or not). Previously, the
-      // botRenderer served generic shell HTML with 200 OK for any path, which Google
-      // interpreted as soft 404 (843 URLs flagged in GSC). Now we return proper 404
-      // status + noindex for unknown paths so Google can remove them cleanly.
-      if (!isKnownRoute(req.path)) {
+      // Hard route-classifier failures must win over the permissive SPA pattern
+      // fallback below. This prevents malformed encoded product paths from becoming
+      // 200 noindex shells merely because they have three URL segments.
+      if (routeClassification.status === 'notFound' || !isKnownRoute(req.path)) {
         const notFoundHtml = build404Html(template);
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.status(404);
