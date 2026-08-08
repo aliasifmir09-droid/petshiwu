@@ -85,6 +85,7 @@ import productRoutes from './routes/products';
 import categoryRoutes from './routes/categories';
 import orderRoutes from './routes/orders';
 import deliveryRoutes from './routes/delivery';
+import driverRoutes from './routes/driver';
 import reviewRoutes from './routes/reviews';
 import uploadRoutes from './routes/upload';
 import userRoutes from './routes/users';
@@ -445,6 +446,7 @@ app.use(`${API_PREFIX}/products`, productRoutes);
 app.use(`${API_PREFIX}/categories`, categoryRoutes);
 app.use(`${API_PREFIX}/orders`, orderRoutes);
 app.use(`${API_PREFIX}/delivery`, deliveryRoutes);
+app.use(`${API_PREFIX}/driver`, driverRoutes);
 app.use(`${API_PREFIX}/reviews`, reviewRoutes);
 app.use(`${API_PREFIX}/upload`, uploadRoutes);
 app.use(`${API_PREFIX}/users`, userRoutes);
@@ -809,6 +811,18 @@ app.use(express.static(frontendDistPath, {
   }
 }));
 
+// Serve driver PWA static files (priority before general frontend catch-all)
+const driverDistPath = path.join(process.cwd(), '../driver/dist');
+app.use('/driver', express.static(driverDistPath, {
+  maxAge: '1d',
+  etag: true,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html') || filePath.endsWith('manifest.webmanifest')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+  }
+}));
+
 // Blog redirect: 301 old thin neighborhood pages to 5 rich borough hub pages.
 app.use(blogRedirectMiddleware);
 
@@ -868,6 +882,18 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // Serves pre-populated HTML with product/blog/category meta + JSON-LD schema.
 // Falls through to next() on any failure so real users are never affected.
 app.use(createBotRenderer(frontendDistPath));
+
+// Driver PWA SPA fallback for deep links under /driver/
+app.get('/driver/*', (req: Request, res: Response, next: NextFunction) => {
+  if (req.path.startsWith('/api')) return next();
+  if (req.path.match(/\.\w+$/)) return next(); // has file extension, let static serve it
+  res.sendFile(path.join(driverDistPath, 'index.html'), (err) => {
+    if (err) {
+      console.error(`❌ Failed to serve driver index.html:`, err.message);
+      next();
+    }
+  });
+});
 
 app.get('*', (req: Request, res: Response, next: NextFunction) => {
   if (req.path.startsWith('/api')) return next();

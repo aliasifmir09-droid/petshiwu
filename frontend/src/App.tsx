@@ -197,12 +197,16 @@ function App() {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         for (const registration of registrations) {
-          registration.unregister();
+          if (!registration.scope.includes('/driver/')) {
+            registration.unregister();
+          }
         }
       });
       caches.keys().then((cacheNames) => {
         cacheNames.forEach((cacheName) => {
-          caches.delete(cacheName);
+          if (!cacheName.startsWith('petshiwu-driver-')) {
+            caches.delete(cacheName);
+          }
         });
       });
     }

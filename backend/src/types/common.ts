@@ -74,6 +74,7 @@ export interface OrderItemInput {
     [key: string]: unknown;
   };
   name: string;
+  description?: string;
   price: number;
   quantity: number;
   image?: string;
@@ -86,6 +87,7 @@ export interface NormalizedOrderItem {
     size?: string;
   };
   name: string;
+  description?: string;
   price: number;
   quantity: number;
   image?: string;

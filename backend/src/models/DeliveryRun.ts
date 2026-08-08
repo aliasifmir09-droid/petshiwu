@@ -33,6 +33,9 @@ export interface IDeliveryRun extends Document {
   optimizedBy?: string;
   navigationUrl?: string;
   notes?: string;
+  assignedDriver?: mongoose.Types.ObjectId;
+  assignedAt?: Date;
+  assignedBy?: mongoose.Types.ObjectId;
   createdBy?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -69,6 +72,9 @@ const deliveryRunSchema = new Schema<IDeliveryRun>({
   optimizedBy: String,
   navigationUrl: String,
   notes: String,
+  assignedDriver: { type: Schema.Types.ObjectId, ref: 'User', index: true },
+  assignedAt: Date,
+  assignedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 

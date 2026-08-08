@@ -44,7 +44,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   phone?: string;
-  role: 'customer' | 'admin' | 'staff';
+  role: 'customer' | 'admin' | 'staff' | 'driver';
   permissions?: IPermissions;
   isActive: boolean;
   emailVerified: boolean;
@@ -128,7 +128,7 @@ const userSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ['customer', 'admin', 'staff'],
+      enum: ['customer', 'admin', 'staff', 'driver'],
       default: 'customer'
     },
     permissions: {
@@ -199,7 +199,7 @@ userSchema.pre('save', async function (next) {
   this.password = await bcrypt.hash(this.password, salt);
   
   // Only set password change date for admin and staff users
-  if (this.role === 'admin' || this.role === 'staff') {
+  if (this.role === 'admin' || this.role === 'staff' || this.role === 'driver') {
     this.passwordChangedAt = new Date();
     // Set expiration to 30 days from now
     const expirationDate = new Date();
@@ -217,9 +217,9 @@ userSchema.methods.comparePassword = async function (candidatePassword: string):
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Check if password is expired (only for admin and staff)
+// Check if password is expired (only for admin, staff, and driver)
 userSchema.methods.isPasswordExpired = function (): boolean {
-  if (this.role !== 'admin' && this.role !== 'staff') {
+  if (this.role !== 'admin' && this.role !== 'staff' && this.role !== 'driver') {
     return false; // Customers don't have password expiry
   }
   
@@ -232,7 +232,7 @@ userSchema.methods.isPasswordExpired = function (): boolean {
 
 // Get days until password expires
 userSchema.methods.getDaysUntilPasswordExpires = function (): number {
-  if (this.role !== 'admin' && this.role !== 'staff') {
+  if (this.role !== 'admin' && this.role !== 'staff' && this.role !== 'driver') {
     return Infinity; // Customers don't have password expiry
   }
   

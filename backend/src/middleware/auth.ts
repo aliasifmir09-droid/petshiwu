@@ -19,6 +19,26 @@ export type AuthRequest = Request & {
   user?: IUser;
 };
 
+// Driver tokens are valid only for the assignment-scoped driver API.
+// This gate also covers optional-auth routes so a driver token cannot
+// accidentally inherit customer self-service access.
+const isDriverApiRoute = (req: Request): boolean => {
+  const path = req.originalUrl.split('?')[0];
+  return path.startsWith('/api/v1/driver/') || path === '/api/v1/driver' ||
+    path.startsWith('/api/driver/') || path === '/api/driver';
+};
+
+const denyDriverOutsideApi = (req: Request, res: Response, user: IUser): boolean => {
+  if (user.role === 'driver' && !isDriverApiRoute(req)) {
+    res.status(403).json({
+      success: false,
+      message: 'Driver accounts may only access assigned delivery routes'
+    });
+    return true;
+  }
+  return false;
+};
+
 // Helper function to detect if request is from admin dashboard
 const isAdminRequest = (req: Request): boolean => {
   const origin = req.headers?.origin || req.headers?.referer || '';
@@ -109,6 +129,8 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
         });
       }
 
+      if (denyDriverOutsideApi(req, res, user)) return;
+
       req.user = user;
       next();
     } catch (error: unknown) {
@@ -149,6 +171,8 @@ export const optionalAuth = async (req: AuthRequest, res: Response, next: NextFu
         req.user = undefined;
         return next();
       }
+
+      if (denyDriverOutsideApi(req, res, user)) return;
 
       req.user = user;
       next();
