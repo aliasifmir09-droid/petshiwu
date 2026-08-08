@@ -25,6 +25,8 @@ import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/con
 const PaymentForm = lazy(() => import('@/components/PaymentForm'));
 const PayPalButton = lazy(() => import('@/components/PayPalButton'));
 const PayPalCardFields = lazy(() => import('@/components/PayPalCardFields'));
+const PayPalApplePay = lazy(() => import('@/components/PayPalApplePay'));
+const PayPalGooglePay = lazy(() => import('@/components/PayPalGooglePay'));
 
 interface CreateOrderData {
   items: Array<{
@@ -402,7 +404,7 @@ const Checkout = () => {
 
   useEffect(() => {
     const createPaymentIntent = async () => {
-      if (paymentMethod === 'paypal') {
+      if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay') {
         setShowPayPalButton(true);
         setShowPaymentForm(false);
         setClientSecret(null);
@@ -487,11 +489,11 @@ const Checkout = () => {
     }
     setEmailError(false);
 
-    if (paymentMethod !== 'paypal' && !paymentIntentId) {
+    if (paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && !paymentIntentId) {
       showToast('Please complete the payment first.', 'error');
       return;
     }
-    if (paymentMethod === 'paypal') return;
+    if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay') return;
 
     if (paymentIntentId) {
       await prepareAndSubmitOrder(paymentIntentId);
@@ -937,6 +939,34 @@ const Checkout = () => {
                     </button>
                   ) : null}
 
+                  {/* Apple Pay through PayPal */}
+                  {import.meta.env.VITE_PAYPAL_CLIENT_ID ? (
+                    <button type="button" onClick={() => { setPaymentMethod('apple_pay'); setPaypalPaymentMode('wallet'); }}
+                      className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'apple_pay' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'apple_pay' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
+                        {paymentMethod === 'apple_pay' && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                      </div>
+                      <div className="flex-1 text-left">
+                        <span className="font-semibold text-gray-900">Apple Pay</span>
+                        <p className="text-sm text-gray-600 mt-1">Pay with Apple Pay through PayPal</p>
+                      </div>
+                    </button>
+                  ) : null}
+
+                  {/* Google Pay through PayPal */}
+                  {import.meta.env.VITE_PAYPAL_CLIENT_ID ? (
+                    <button type="button" onClick={() => { setPaymentMethod('google_pay'); setPaypalPaymentMode('wallet'); }}
+                      className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'google_pay' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'google_pay' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
+                        {paymentMethod === 'google_pay' && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                      </div>
+                      <div className="flex-1 text-left">
+                        <span className="font-semibold text-gray-900">Google Pay</span>
+                        <p className="text-sm text-gray-600 mt-1">Pay with Google Pay through PayPal</p>
+                      </div>
+                    </button>
+                  ) : null}
+
                   {/* PayPal Wallet */}
                   {import.meta.env.VITE_PAYPAL_CLIENT_ID ? (
                     <button type="button" onClick={() => { setPaymentMethod('paypal'); setPaypalPaymentMode('wallet'); }}
@@ -971,7 +1001,7 @@ const Checkout = () => {
                   </div>
                 )}
 
-                {isProcessingPayment && !clientSecret && paymentMethod !== 'paypal' && (
+                {isProcessingPayment && !clientSecret && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && (
 
                   <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <p className="text-sm text-yellow-800">
@@ -982,9 +1012,111 @@ const Checkout = () => {
               </div>
 
               {/* Stripe Payment Form */}
-              {showPaymentForm && clientSecret && paymentMethod !== 'paypal' && (
+              {showPaymentForm && clientSecret && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && (
                 <StripePaymentWrapper clientSecret={clientSecret} total={total}
                   onSuccess={handlePaymentSuccess} onError={handlePaymentError} onCancel={handlePaymentCancel} />
+              )}
+
+              {/* Google Pay through PayPal */}
+              {showPayPalButton && paymentMethod === 'google_pay' && (
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center">
+                      <span className="text-gray-900 font-bold text-sm">G Pay</span>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">Google Pay</h3>
+                      <p className="text-sm text-gray-600">Pay securely with Google Pay through PayPal</p>
+                    </div>
+                  </div>
+                  <Suspense fallback={
+                    <div className="flex items-center justify-center py-8">
+                      <LoadingSpinner size="md" />
+                      <span className="ml-3 text-gray-600">Loading Google Pay...</span>
+                    </div>
+                  }>
+                    <PayPalGooglePay
+                      items={items.map((item: any) => ({
+                        product: normalizeId(item.product._id) || String(item.product._id),
+                        quantity: item.quantity,
+                        ...(item.variant?.sku ? { variant: { sku: item.variant.sku } } : {})
+                      }))}
+                      total={total}
+                      shippingAddress={{
+                        firstName: shippingInfo.firstName,
+                        lastName: shippingInfo.lastName,
+                        street: shippingInfo.street,
+                        city: shippingInfo.city,
+                        state: shippingInfo.state,
+                        zipCode: shippingInfo.zipCode,
+                        country: shippingInfo.country,
+                        phone: shippingInfo.phone
+                      }}
+                      guestEmail={!isAuthenticated ? shippingInfo.email.trim() : undefined}
+                      onGuestEmailInvalid={() => {
+                        setEmailError(true);
+                        emailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        emailInputRef.current?.focus();
+                      }}
+                      notes={orderNotes.trim() || undefined}
+                      couponCode={couponCode || undefined}
+                      donationAmount={donationAmount}
+                      onSuccess={handlePayPalSuccess}
+                      onError={handlePayPalError}
+                    />
+                  </Suspense>
+                </div>
+              )}
+
+              {/* Apple Pay through PayPal */}
+              {showPayPalButton && paymentMethod === 'apple_pay' && (
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-lg"></span>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">Apple Pay</h3>
+                      <p className="text-sm text-gray-600">Pay securely with Apple Pay through PayPal</p>
+                    </div>
+                  </div>
+                  <Suspense fallback={
+                    <div className="flex items-center justify-center py-8">
+                      <LoadingSpinner size="md" />
+                      <span className="ml-3 text-gray-600">Loading Apple Pay...</span>
+                    </div>
+                  }>
+                    <PayPalApplePay
+                      items={items.map((item: any) => ({
+                        product: normalizeId(item.product._id) || String(item.product._id),
+                        quantity: item.quantity,
+                        ...(item.variant?.sku ? { variant: { sku: item.variant.sku } } : {})
+                      }))}
+                      total={total}
+                      shippingAddress={{
+                        firstName: shippingInfo.firstName,
+                        lastName: shippingInfo.lastName,
+                        street: shippingInfo.street,
+                        city: shippingInfo.city,
+                        state: shippingInfo.state,
+                        zipCode: shippingInfo.zipCode,
+                        country: shippingInfo.country,
+                        phone: shippingInfo.phone
+                      }}
+                      guestEmail={!isAuthenticated ? shippingInfo.email.trim() : undefined}
+                      onGuestEmailInvalid={() => {
+                        setEmailError(true);
+                        emailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        emailInputRef.current?.focus();
+                      }}
+                      notes={orderNotes.trim() || undefined}
+                      couponCode={couponCode || undefined}
+                      donationAmount={donationAmount}
+                      onSuccess={handlePayPalSuccess}
+                      onError={handlePayPalError}
+                    />
+                  </Suspense>
+                </div>
               )}
 
               {/* PayPal Wallet or PayPal-powered Card Fields */}
@@ -1026,7 +1158,12 @@ const Checkout = () => {
                           country: shippingInfo.country,
                           phone: shippingInfo.phone
                         }}
-                        guestEmail={!isAuthenticated ? shippingInfo.email : undefined}
+                        guestEmail={!isAuthenticated ? shippingInfo.email.trim() : undefined}
+                        onGuestEmailInvalid={() => {
+                          setEmailError(true);
+                          emailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          emailInputRef.current?.focus();
+                        }}
                         notes={orderNotes.trim() || undefined}
                         couponCode={couponCode || undefined}
                         donationAmount={0}
@@ -1052,7 +1189,12 @@ const Checkout = () => {
                           country: shippingInfo.country,
                           phone: shippingInfo.phone
                         }}
-                        guestEmail={!isAuthenticated ? shippingInfo.email : undefined}
+                        guestEmail={!isAuthenticated ? shippingInfo.email.trim() : undefined}
+                        onGuestEmailInvalid={() => {
+                          setEmailError(true);
+                          emailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          emailInputRef.current?.focus();
+                        }}
                         notes={orderNotes.trim() || undefined}
                         couponCode={couponCode || undefined}
                         donationAmount={0}
