@@ -62,7 +62,10 @@ const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, coupon
       const errorMsg = err.response?.data?.message || err.message || 'PayPal could not initialize this payment.';
       setError(errorMsg);
       onError(errorMsg);
-      throw err;
+      // PayPal invokes onError after createOrder rejects. Re-throw the
+      // normalized message so the SDK does not replace the useful backend
+      // error with Axios's generic "Request failed with status code 400".
+      throw new Error(errorMsg);
     }
   };
 

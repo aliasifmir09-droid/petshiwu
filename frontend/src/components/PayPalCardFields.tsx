@@ -230,7 +230,9 @@ const PayPalCardFields = (props: PayPalCardFieldsProps) => {
       const errorMsg = err.response?.data?.message || err.message || 'PayPal could not initialize this card payment.';
       setError(errorMsg);
       props.onError(errorMsg);
-      throw err;
+      // Keep PayPal's follow-up onError callback from replacing the useful
+      // backend message with Axios's generic HTTP status error.
+      throw new Error(errorMsg);
     }
   };
 
