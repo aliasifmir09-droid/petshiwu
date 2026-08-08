@@ -254,7 +254,9 @@ app.use(helmet({
         "https://www.paypal.com",
         "https://*.paypal.com",
         "https://pay.google.com",
-        "https://applepay.cdn-apple.com"
+        "https://applepay.cdn-apple.com",
+        "https://www.petshiwu.com",
+        "https://petshiwu.com"
       ],
       frameSrc: ["'self'", "https://www.paypal.com", "https://*.paypal.com", "https://pay.google.com"],
       frameAncestors: ["'self'"],
