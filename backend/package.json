@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "set NODE_PATH=../node_modules&&nodemon src/server.ts",
     "dev:unix": "NODE_PATH=../node_modules nodemon src/server.ts",
-    "prebuild": "cd ../driver && npm install && npm run build",
+    "prebuild": "cd ../driver && npm install --include=dev && npm run build",
     "build": "tsc",
+    "build:frontend": "cd ../frontend && npm install --include=dev && npm run build",
     "start": "node dist/server.js",
     "seed": "ts-node src/utils/seed.ts",
     "seed-products": "ts-node src/utils/seedProductsFixed.ts",

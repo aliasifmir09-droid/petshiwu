@@ -6,6 +6,7 @@ import CareGuide from '../models/CareGuide';
 import FAQ from '../models/FAQ';
 import PetType from '../models/PetType';
 import logger from '../utils/logger';
+import { classifyRoute } from '../seo/routeClassifier';
 
 /**
  * Escape XML special characters
@@ -25,6 +26,25 @@ const escapeXml = (unsafe: string): string => {
  */
 const getBaseUrl = (): string => {
   return process.env.FRONTEND_URL || process.env.SITE_URL || process.env.CORS_ORIGIN?.split(',')[0]?.trim() || 'https://www.petshiwu.com';
+};
+
+const filterSitemapXml = (xml: string): string => {
+  const seen = new Set<string>();
+  return xml.replace(/  <url>\n[\s\S]*?  <\/url>\n/g, (block) => {
+    const match = block.match(/<loc>([^<]+)<\/loc>/);
+    if (!match) return '';
+    const raw = match[1].replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&apos;/g, "'");
+    if (/\s/.test(raw) || raw.includes('?') || raw.includes('#')) return '';
+    let parsed: URL;
+    try { parsed = new URL(raw); } catch { return ''; }
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return '';
+    const pathname = parsed.pathname;
+    const classification = classifyRoute(pathname);
+    const normalized = classification.canonicalPath;
+    if (!classification.indexable || classification.status !== 'indexable' || classification.canonicalPath !== pathname || seen.has(normalized) || /\s/.test(raw)) return '';
+    seen.add(normalized);
+    return block;
+  });
 };
 
 export const generateSitemap = async (req: Request, res: Response) => {
@@ -192,8 +212,12 @@ export const generateSitemap = async (req: Request, res: Response) => {
                       ? new Date(category.updatedAt).toISOString().split('T')[0]
                       : currentDate;
 
+                    const categoryPetType = typeof category.petType === 'string' ? category.petType : '';
+                    const categoryPath = categoryPetType && categoryPetType !== 'all' && categoryPetType !== 'other-animals'
+                      ? `/${categoryPetType}/${category.slug}`
+                      : `/category/${category.slug}`;
                     xml += '  <url>\n';
-                    xml += `    <loc>${baseUrl}/category/${category.slug}</loc>\n`;
+                    xml += `    <loc>${baseUrl}${categoryPath}</loc>\n`;
                     xml += `    <lastmod>${lastmod}</lastmod>\n`;
                     xml += '    <changefreq>weekly</changefreq>\n';
                     xml += '    <priority>0.7</priority>\n';
@@ -770,6 +794,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
     });
 
     xml += '</urlset>';
+    xml = filterSitemapXml(xml);
 
     // Set proper content type with charset for XML
     res.setHeader('Content-Type', 'application/xml; charset=utf-8');

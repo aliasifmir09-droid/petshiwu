@@ -25,6 +25,7 @@ import Blog from '../models/Blog';
 import CareGuide from '../models/CareGuide';
 import Category from '../models/Category';
 import logger from '../utils/logger';
+import { classifyRoute } from '../seo/routeClassifier';
 
 // ---------------------------------------------------------------------------
 // Bot detection
@@ -178,6 +179,10 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   '/reptile': {
     title: 'Reptile Food, Terrariums & Supplies | Petshiwu',
     description: 'Shop reptile food, terrariums, heating, and accessories for snakes, lizards, and turtles. Fast NYC delivery. Free shipping over $49.',
+  },
+  '/other-animals': {
+    title: 'Other Animal Supplies Delivered to NYC | Petshiwu',
+    description: 'Shop supplies for rabbits, guinea pigs, hamsters, reptiles, birds, fish, and other companion animals. Fast NYC delivery from Petshiwu.',
   },
   '/small-animal': {
     title: 'Small Animal Food, Cages & Accessories | Petshiwu',
@@ -431,7 +436,7 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
   // This means even if MongoDB is unreachable, every product page gets a distinct
   // title that Google can use for indexing.
   const segments = cleanPath.replace(/^\//, '').split('/').filter(Boolean);
-  const PET_TYPES = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet', 'small-animal']);
+  const PET_TYPES = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet', 'small-animal', 'other-animals']);
   const isProductPath = segments.length >= 3 && PET_TYPES.has(segments[0]);
 
   let meta = STATIC_PAGES[cleanPath];
@@ -511,8 +516,9 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
   // STATIC_PAGES entries with keyword-stuffed titles (e.g. /best-dog-food-...)
   // are NOT legitimate — they're thin doorway pages with generic content.
   const isLegitimateSingle = ['products', 'learning', 'care-guides', 'about',
-      'faq', 'returns', 'donate', 'search', 'symptom-checker', 'press',
-      'privacy', 'terms', 'shipping', 'contact'].includes(segments[0] || '')
+      'faq', 'returns', 'return-policy', 'donate', 'search', 'symptom-checker', 'press',
+      'investors', 'sell-with-us', 'vendors', 'partners', 'other-animals', 'shop',
+      'privacy', 'privacy-policy', 'terms', 'terms-of-service', 'shipping', 'shipping-policy', 'contact'].includes(segments[0] || '')
     || PET_TYPES.has(segments[0] || '');
   const isDoorway = isSingleSegment && !isLegitimateSingle && !isProductPath;
 
@@ -662,7 +668,7 @@ const matchRoute = (pathname: string): PageType => {
     return { type: 'product', slug: segments[1] };
 
   // /:petType/:categorySlug — category under petType (e.g. /dog/dog-food)
-  const PET_TYPES = new Set(['dog','cat','bird','fish','reptile','small-pet','small-animal','products']);
+  const PET_TYPES = new Set(['dog','cat','bird','fish','reptile','small-pet','small-animal','other-animals','products']);
   if (segments.length === 2 && PET_TYPES.has(segments[0]))
     return { type: 'category', slug: segments[1], petType: segments[0] } as any;
 
@@ -1520,7 +1526,7 @@ const buildProductListHtml = async (template: string): Promise<string> => {
  * Keep in sync with frontend/src/App.tsx routes.
  */
 const VALID_SPA_PATHS = new Set([
-  '/', '/products', '/cart', '/checkout', '/login', '/register',
+  '/', '/products', '/other-animals', '/cart', '/checkout', '/login', '/register',
   '/verify-email', '/resend-verification', '/forgot-password', '/reset-password',
   '/profile', '/orders', '/track-order', '/donate', '/favorites', '/compare',
   '/returns', '/return-policy', '/addresses', '/stock-alerts', '/search',
@@ -1545,7 +1551,7 @@ const isKnownRoute = (pathname: string): boolean => {
   if (segments.length === 0) return true; // homepage
   if (segments.length === 1) {
     // single segment routes like /dog, /cat (pet types)
-    const petTypes = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet', 'small-animal']);
+    const petTypes = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet', 'small-animal', 'other-animals']);
     if (petTypes.has(segments[0])) return true;
     // neighborhood×category page registry
     if (NEIGHBORHOOD_PAGE_REGISTRY.has(segments[0])) return true;
@@ -1556,7 +1562,7 @@ const isKnownRoute = (pathname: string): boolean => {
     const validPrefixes = ['learning', 'care-guides', 'category', 'products', 'blog'];
     if (validPrefixes.includes(segments[0])) return true;
     // /:petType/:category — e.g. /dog/food
-    const petTypes = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet', 'small-animal']);
+    const petTypes = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet', 'small-animal', 'other-animals']);
     if (petTypes.has(segments[0])) return true;
     return false;
   }
@@ -1578,7 +1584,7 @@ const build404Html = (template: string): string => {
     `<meta name="description" content="${esc(description)}"`
   );
   html = html.replace(/<meta[\s\S]*?name="robots"[\s\S]*?content="[^"]*"/, '<meta name="robots" content="noindex, nofollow, noarchive"');
-  html = html.replace('</head>', '<link rel="canonical" href="https://www.petshiwu.com/" />\n</head>');
+  html = html.replace(/<link[^>]+rel=["']canonical["'][^>]*>\s*/gi, '');
   return html;
 };
 
@@ -1595,9 +1601,41 @@ export const createBotRenderer = (distPath: string) => {
     if (!template) return next();
 
     const page = matchRoute(req.path);
+    const routeClassification = classifyRoute(req.path);
 
     try {
       let html: string | null = null;
+
+      // Consolidate legacy product URLs for every user agent before bot rendering.
+      // The frontend uses the same immediate-category canonical path.
+      if (page?.type === 'product' && req.path.startsWith('/products/')) {
+        const legacyProduct = await fetchProduct(page.slug);
+        if (legacyProduct) {
+          const legacyCategory = typeof (legacyProduct as any).category === 'object'
+            ? (legacyProduct as any).category?.slug
+            : undefined;
+          const legacyPetType = typeof legacyProduct.petType === 'string' ? legacyProduct.petType : '';
+          if (legacyCategory && legacyPetType) {
+            res.redirect(301, `/${legacyPetType}/${legacyCategory}/${page.slug}`);
+            return;
+          }
+        } else {
+          res.status(404);
+          res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+          res.setHeader('Content-Type', 'text/html; charset=utf-8');
+          res.send(build404Html(template));
+          return;
+        }
+      }
+
+      // Consolidate category query variants such as /category/food?petType=dog.
+      if (page?.type === 'category' && req.path.startsWith('/category/') && typeof req.query.petType === 'string') {
+        const requestedPetType = req.query.petType.trim();
+        if (/^(dog|cat|bird|fish|reptile|small-pet|small-animal)$/.test(requestedPetType)) {
+          res.redirect(301, `/${requestedPetType}/${page.slug}`);
+          return;
+        }
+      }
 
       // SOFT 404 FIX: Return real 404 for unknown URLs (bot or not). Previously, the
       // botRenderer served generic shell HTML with 200 OK for any path, which Google
@@ -1631,7 +1669,7 @@ export const createBotRenderer = (distPath: string) => {
         if (!exists) notFound = true;
       }
 
-      if (bot) {
+      if (bot && routeClassification.indexable) {
         if (page?.type === 'product') {
           const product = await fetchProduct(page.slug);
           if (product) {
@@ -1688,11 +1726,24 @@ export const createBotRenderer = (distPath: string) => {
       if (!html) {
         html = buildGenericPageHtml(template, req.path, req.originalUrl, res);
       }
+      if (!routeClassification.indexable) {
+        html = html.replace(/<meta name="robots" content="[^"]*"\s*\/?>/i, '<meta name="robots" content="noindex, nofollow, noarchive" />');
+        if (!/<meta\s+name=["']robots["']/i.test(html)) {
+          html = html.replace('</head>', '<meta name="robots" content="noindex, nofollow, noarchive" />\n</head>');
+        }
+        res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+      }
 
-      // Soft 404 fix: return actual 404 status when a DB-backed page (blog/product/care-guide)
-      // was expected but not found. Prevents Google from indexing non-existent pages.
+      // Soft 404 fix: return a clean 404 document when a DB-backed page was
+      // expected but not found. Do not send the generic shell with a self-canonical.
       if (notFound) {
         res.status(404);
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+        res.setHeader('Cache-Control', 'public, max-age=3600');
+        if (bot) res.setHeader('X-Bot-Rendered', '404');
+        res.send(build404Html(template));
+        return;
       }
 
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -1715,17 +1766,18 @@ export const createBotRenderer = (distPath: string) => {
       return;
     } catch (err: any) {
       logger.warn(`[botRenderer] Error rendering ${req.path}:`, err?.message);
-      // Even on error, try to serve correct canonical rather than raw index.html
-      try {
-        const fallback = buildGenericPageHtml(template, req.path, req.originalUrl, res);
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-        if (bot) res.setHeader('X-Bot-Rendered', 'fallback');
-        res.send(fallback);
-        return;
-      } catch {
-        return next();
-      }
+      if (res.headersSent) return next();
+      res.status(503);
+      res.setHeader('Retry-After', '30');
+      res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+      if (bot) res.setHeader('X-Bot-Rendered', 'error');
+      let errorHtml = build404Html(template);
+      errorHtml = errorHtml.replace(/<script[^>]+type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>\s*/gi, '');
+      errorHtml = errorHtml.replace(/<title>[^<]*<\/title>/i, '<title>Temporarily Unavailable | Petshiwu</title>');
+      res.send(errorHtml);
+      return;
     }
   };
 };

@@ -7,7 +7,7 @@
     "dev": "vite --port 5173",
     "generate-sitemap": "node scripts/generate-sitemap.js",
     "optimize-images": "node scripts/optimize-images.js",
-    "prebuild": "npm run generate-sitemap || echo 'Warning: Could not generate sitemap. Continuing build...'",
+    "prebuild": "npm run generate-sitemap",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",

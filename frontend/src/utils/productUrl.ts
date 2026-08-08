@@ -13,7 +13,7 @@ const isValidSlug = (val: unknown): val is string => {
  * Generates SEO-friendly product URL with category hierarchy
  * Format: /{petType}/{categoryPath}/{productSlug}
  * Example: /cat/dry-food/reveal-all-life-stages-wet-cat-food
- * 
+ *
  * Never outputs "undefined" in URLs - invalid category slugs are skipped.
  */
 export const generateProductUrl = (product: Product): string => {
@@ -27,7 +27,7 @@ export const generateProductUrl = (product: Product): string => {
 
   const category = product.category;
   const petType = product.petType || 'products';
-  
+
   // Build category path from hierarchy - only include valid slugs
   const buildCategoryPath = (cat: typeof category): string[] => {
     const path: string[] = [];
@@ -36,11 +36,11 @@ export const generateProductUrl = (product: Product): string => {
       const catId = current._id ? String(current._id) : '';
       if (catId && visited.has(catId)) return;
       if (catId) visited.add(catId);
-      
+
       if (current.parentCategory && typeof current.parentCategory === 'object') {
         buildPathRecursive(current.parentCategory, visited);
       }
-      
+
       if (isValidSlug(current.slug)) {
         path.push(String(current.slug).trim());
       }
@@ -50,11 +50,14 @@ export const generateProductUrl = (product: Product): string => {
   };
 
   const categoryPath = buildCategoryPath(category).filter(isValidSlug);
-  
-  if (categoryPath.length > 0 && isValidSlug(petType)) {
-    return `/${petType}/${categoryPath.join('/')}/${productSlug}`;
+  const canonicalCategorySlug = categoryPath[categoryPath.length - 1];
+
+  // Keep one canonical product path across browser routing, botRenderer, and
+  // sitemap: use the immediate category slug, not parent/child variants.
+  if (canonicalCategorySlug && isValidSlug(petType)) {
+    return `/${petType}/${canonicalCategorySlug}/${productSlug}`;
   }
-  
+
   return `/products/${productSlug}`;
 };
 
@@ -65,12 +68,12 @@ export const generateProductUrl = (product: Product): string => {
 export const extractProductSlugFromUrl = (urlPath: string): string => {
   // Remove leading slash and split
   const parts = urlPath.replace(/^\/+/, '').split('/');
-  
+
   // If it starts with "products", the slug is the second part
   if (parts[0] === 'products' && parts.length >= 2) {
     return parts[1];
   }
-  
+
   // Otherwise, the slug is the last part (for new format: /petType/categoryPath/slug)
   return parts[parts.length - 1] || '';
 };
@@ -83,7 +86,7 @@ export const extractProductSlugFromUrl = (urlPath: string): string => {
 export const generateCategoryUrl = (categorySlug: string | undefined, petType?: string): string => {
   if (!isValidSlug(categorySlug)) return '/products';
   const slug = String(categorySlug).trim();
-  
+
   if (isValidSlug(petType) && petType !== 'all' && petType !== 'other-animals') {
     return `/${petType}/${slug}`;
   }
