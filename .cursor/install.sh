@@ -43,6 +43,23 @@ else
   echo "backend/.env already exists; leaving it untouched."
 fi
 
+# The admin dashboard (and some frontend widgets) default their API base URL to
+# the production host when VITE_API_URL is unset. Point them at the local Vite
+# proxy so the apps talk to the local backend during development.
+echo "== Ensuring frontend/.env and admin/.env point at the local backend =="
+if [ ! -f frontend/.env ]; then
+  echo "VITE_API_URL=/api" > frontend/.env
+  echo "Created frontend/.env"
+else
+  echo "frontend/.env already exists; leaving it untouched."
+fi
+if [ ! -f admin/.env ]; then
+  echo "VITE_API_URL=/api" > admin/.env
+  echo "Created admin/.env"
+else
+  echo "admin/.env already exists; leaving it untouched."
+fi
+
 echo "== Seeding MongoDB with demo data =="
 mongo_start "$MONGO_LOG_DIR/mongod-install.log"
 ( cd backend && npx ts-node src/scripts/seed.ts )
