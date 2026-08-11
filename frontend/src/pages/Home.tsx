@@ -201,6 +201,10 @@ const Home = () => {
 
   return (
     <div className="relative">
+      {/* Single semantic H1 for the homepage (visually hidden — the hero is a
+          designed image slideshow). Gives browsers a real H1 that matches the
+          page title/description without altering the visual layout. */}
+      <h1 className="sr-only">Petshiwu — Premium Pet Food, Toys & Supplies Delivered to NYC & Nationwide</h1>
       <SEO
         title="Petshiwu — Premium Pet Food, Toys & Supplies Delivered to NYC"
         description="10,000+ pet products delivered to Queens, Brooklyn & all of NYC. Top brands — Purina, Blue Buffalo, Royal Canin. Free shipping over $49. Dog food, cat food, toys & more."

@@ -226,6 +226,9 @@ const AdvancedSearch = () => {
       />
 
       <div className="min-h-screen bg-gray-50 pb-24 lg:pb-8">
+        {/* Semantic H1 for the search page (visually hidden to preserve the
+            search-first layout). */}
+        <h1 className="sr-only">Search Petshiwu — Pet Food, Toys & Supplies</h1>
 
         {/* ── Sticky Search Header ── */}
         <div className="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3"
