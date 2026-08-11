@@ -26,6 +26,10 @@ import CareGuide from '../models/CareGuide';
 import Category from '../models/Category';
 import logger from '../utils/logger';
 import { classifyRoute } from '../seo/routeClassifier';
+import {
+  NEIGHBORHOOD_PAGE_REGISTRY,
+  getNeighborhoodRoute,
+} from '../seo/neighborhoodRegistry';
 
 // ---------------------------------------------------------------------------
 // Bot detection
@@ -546,103 +550,9 @@ type PageType =
   | { type: 'neighborhood'; slug: string; categorySlug: string; neighborhoodName: string; borough: string; nearbyAreas: string }
   | null;
 
-// Neighborhood × Category page slug lookup (50 neighborhoods × 4 categories = 200 pages)
-// Maps full page slug → { categorySlug, neighborhoodName, borough, nearbyAreas }
-const NEIGHBORHOOD_PAGE_REGISTRY = (() => {
-  const CATEGORIES: Record<string, string> = {
-    'dog-food-delivery': 'Dog Food Delivery',
-    'cat-food-delivery': 'Cat Food Delivery',
-    'pet-supplies-delivery': 'Pet Supplies Delivery',
-    'dog-treats-delivery': 'Dog Treats & Accessories Delivery',
-    'cat-litter-delivery': 'Cat Litter Delivery',
-    'cat-treats-delivery': 'Cat Treats Delivery',
-    'small-pet-supplies-delivery': 'Small Pet Supplies Delivery',
-    'bird-food-delivery': 'Bird Food & Supplies Delivery',
-    // 24 new categories added 2026-06-23
-    'bird-supplies-delivery': 'Bird Food & Supplies Delivery',
-    'puppy-food-delivery': 'Puppy Food Delivery',
-    'senior-dog-food-delivery': 'Senior Dog Food Delivery',
-    'wet-dog-food-delivery': 'Wet Dog Food Delivery',
-    'dry-dog-food-delivery': 'Dry Dog Food Delivery',
-    'grain-free-dog-food-delivery': 'Grain-Free Dog Food Delivery',
-    'raw-dog-food-delivery': 'Raw Dog Food Delivery',
-    'dog-toys-delivery': 'Dog Toys Delivery',
-    'dog-beds-delivery': 'Dog Beds Delivery',
-    'dog-crates-delivery': 'Dog Crates Delivery',
-    'dog-grooming-delivery': 'Dog Grooming Delivery',
-    'kitten-food-delivery': 'Kitten Food Delivery',
-    'senior-cat-food-delivery': 'Senior Cat Food Delivery',
-    'wet-cat-food-delivery': 'Wet Cat Food Delivery',
-    'cat-litter-boxes-delivery': 'Cat Litter Boxes Delivery',
-    'cat-scratcher-delivery': 'Cat Scratcher Delivery',
-    'cat-toys-delivery': 'Cat Toys Delivery',
-    'cat-beds-delivery': 'Cat Beds Delivery',
-    'cat-grooming-delivery': 'Cat Grooming Delivery',
-    'fish-supplies-delivery': 'Fish Supplies Delivery',
-    'reptile-supplies-delivery': 'Reptile Supplies Delivery',
-    'vet-diet-delivery': 'Vet-Authorized Diet Delivery',
-    'pet-medication-delivery': 'Pet Medication Delivery',
-  };
-  const NEIGHBORHOODS: Array<{ slug: string; name: string; borough: string; nearbyAreas: string }> = [
-    { slug: 'flushing-queens', name: 'Flushing', borough: 'Queens', nearbyAreas: 'Whitestone, College Point, and Murray Hill' },
-    { slug: 'jackson-heights-queens', name: 'Jackson Heights', borough: 'Queens', nearbyAreas: 'Elmhurst, Woodside, and Corona' },
-    { slug: 'astoria-queens', name: 'Astoria', borough: 'Queens', nearbyAreas: 'Long Island City, Ditmars, and Steinway' },
-    { slug: 'forest-hills-queens', name: 'Forest Hills', borough: 'Queens', nearbyAreas: 'Rego Park, Kew Gardens, and Austin Street' },
-    { slug: 'long-island-city-queens', name: 'Long Island City', borough: 'Queens', nearbyAreas: 'Astoria, Sunnyside, and Hunter\'s Point' },
-    { slug: 'jamaica-queens', name: 'Jamaica', borough: 'Queens', nearbyAreas: 'Hollis, St. Albans, and Springfield Gardens' },
-    { slug: 'bayside-queens', name: 'Bayside', borough: 'Queens', nearbyAreas: 'Whitestone, Oakland Gardens, and Fresh Meadows' },
-    { slug: 'woodside-queens', name: 'Woodside', borough: 'Queens', nearbyAreas: 'Sunnyside, Jackson Heights, and Maspeth' },
-    { slug: 'sunnyside-queens', name: 'Sunnyside', borough: 'Queens', nearbyAreas: 'Woodside, LIC, and Maspeth' },
-    { slug: 'elmhurst-queens', name: 'Elmhurst', borough: 'Queens', nearbyAreas: 'Jackson Heights, Corona, and Rego Park' },
-    { slug: 'corona-queens', name: 'Corona', borough: 'Queens', nearbyAreas: 'Elmhurst, Jackson Heights, and Flushing' },
-    { slug: 'rego-park-queens', name: 'Rego Park', borough: 'Queens', nearbyAreas: 'Forest Hills, Elmhurst, and Woodhaven' },
-    { slug: 'ridgewood-queens', name: 'Ridgewood', borough: 'Queens', nearbyAreas: 'Bushwick, Glendale, and Middle Village' },
-    { slug: 'fresh-meadows-queens', name: 'Fresh Meadows', borough: 'Queens', nearbyAreas: 'Bayside, Flushing, and Jamaica' },
-    { slug: 'howard-beach-queens', name: 'Howard Beach', borough: 'Queens', nearbyAreas: 'Ozone Park, Richmond Hill, and Broad Channel' },
-    { slug: 'williamsburg-brooklyn', name: 'Williamsburg', borough: 'Brooklyn', nearbyAreas: 'Greenpoint, Bushwick, and Bedford-Stuyvesant' },
-    { slug: 'park-slope-brooklyn', name: 'Park Slope', borough: 'Brooklyn', nearbyAreas: 'Prospect Heights, Carroll Gardens, and Gowanus' },
-    { slug: 'sunset-park-brooklyn', name: 'Sunset Park', borough: 'Brooklyn', nearbyAreas: 'Bay Ridge, Greenwood Heights, and Borough Park' },
-    { slug: 'crown-heights-brooklyn', name: 'Crown Heights', borough: 'Brooklyn', nearbyAreas: 'Prospect Heights, Flatbush, and Brownsville' },
-    { slug: 'flatbush-brooklyn', name: 'Flatbush', borough: 'Brooklyn', nearbyAreas: 'Crown Heights, Midwood, and East Flatbush' },
-    { slug: 'bay-ridge-brooklyn', name: 'Bay Ridge', borough: 'Brooklyn', nearbyAreas: 'Fort Hamilton, Dyker Heights, and Bensonhurst' },
-    { slug: 'bushwick-brooklyn', name: 'Bushwick', borough: 'Brooklyn', nearbyAreas: 'Ridgewood, East Williamsburg, and Bed-Stuy' },
-    { slug: 'greenpoint-brooklyn', name: 'Greenpoint', borough: 'Brooklyn', nearbyAreas: 'Williamsburg, Long Island City, and Astoria' },
-    { slug: 'bed-stuy-brooklyn', name: 'Bed-Stuy', borough: 'Brooklyn', nearbyAreas: 'Crown Heights, Bushwick, and Fort Greene' },
-    { slug: 'fort-greene-brooklyn', name: 'Fort Greene', borough: 'Brooklyn', nearbyAreas: 'Clinton Hill, Boerum Hill, and Downtown Brooklyn' },
-    { slug: 'carroll-gardens-brooklyn', name: 'Carroll Gardens', borough: 'Brooklyn', nearbyAreas: 'Cobble Hill, Red Hook, and Gowanus' },
-    { slug: 'cobble-hill-brooklyn', name: 'Cobble Hill', borough: 'Brooklyn', nearbyAreas: 'Carroll Gardens, Boerum Hill, and Red Hook' },
-    { slug: 'red-hook-brooklyn', name: 'Red Hook', borough: 'Brooklyn', nearbyAreas: 'Carroll Gardens, Gowanus, and Sunset Park' },
-    { slug: 'brighton-beach-brooklyn', name: 'Brighton Beach', borough: 'Brooklyn', nearbyAreas: 'Coney Island, Manhattan Beach, and Sheepshead Bay' },
-    { slug: 'bensonhurst-brooklyn', name: 'Bensonhurst', borough: 'Brooklyn', nearbyAreas: 'Bay Ridge, Dyker Heights, and Sunset Park' },
-    { slug: 'upper-west-side-manhattan', name: 'Upper West Side', borough: 'Manhattan', nearbyAreas: 'Morningside Heights, Lincoln Square, and Riverside Drive' },
-    { slug: 'upper-east-side-manhattan', name: 'Upper East Side', borough: 'Manhattan', nearbyAreas: 'Carnegie Hill, Yorkville, and East Harlem' },
-    { slug: 'chelsea-manhattan', name: 'Chelsea', borough: 'Manhattan', nearbyAreas: 'Hell\'s Kitchen, Flatiron, and West Village' },
-    { slug: 'tribeca-manhattan', name: 'Tribeca', borough: 'Manhattan', nearbyAreas: 'SoHo, Financial District, and Hudson Square' },
-    { slug: 'hells-kitchen-manhattan', name: 'Hell\'s Kitchen', borough: 'Manhattan', nearbyAreas: 'Midtown, Chelsea, and Lincoln Center' },
-    { slug: 'harlem-manhattan', name: 'Harlem', borough: 'Manhattan', nearbyAreas: 'East Harlem, Washington Heights, and Morningside Heights' },
-    { slug: 'washington-heights-manhattan', name: 'Washington Heights', borough: 'Manhattan', nearbyAreas: 'Inwood, Harlem, and Fort George' },
-    { slug: 'midtown-manhattan', name: 'Midtown', borough: 'Manhattan', nearbyAreas: 'Hell\'s Kitchen, Murray Hill, and Gramercy' },
-    { slug: 'east-village-manhattan', name: 'East Village', borough: 'Manhattan', nearbyAreas: 'Lower East Side, NoHo, and Gramercy' },
-    { slug: 'inwood-manhattan', name: 'Inwood', borough: 'Manhattan', nearbyAreas: 'Washington Heights, Fort George, and Hudson Heights' },
-    { slug: 'riverdale-bronx', name: 'Riverdale', borough: 'Bronx', nearbyAreas: 'Fieldston, Kingsbridge, and Spuyten Duyvil' },
-    { slug: 'fordham-bronx', name: 'Fordham', borough: 'Bronx', nearbyAreas: 'Belmont, Kingsbridge, and University Heights' },
-    { slug: 'pelham-bay-bronx', name: 'Pelham Bay', borough: 'Bronx', nearbyAreas: 'Throggs Neck, Co-op City, and City Island' },
-    { slug: 'mott-haven-bronx', name: 'Mott Haven', borough: 'Bronx', nearbyAreas: 'Hunts Point, Port Morris, and Melrose' },
-    { slug: 'concourse-bronx', name: 'Concourse', borough: 'Bronx', nearbyAreas: 'Highbridge, Mount Eden, and Fordham' },
-    { slug: 'throgs-neck-bronx', name: 'Throgs Neck', borough: 'Bronx', nearbyAreas: 'Pelham Bay, Edgewater Park, and Country Club' },
-    { slug: 'st-george-staten-island', name: 'St. George', borough: 'Staten Island', nearbyAreas: 'Tompkinsville, New Brighton, and Stapleton' },
-    { slug: 'tottenville-staten-island', name: 'Tottenville', borough: 'Staten Island', nearbyAreas: 'Charleston, Woodrow, and Great Kills' },
-    { slug: 'great-kills-staten-island', name: 'Great Kills', borough: 'Staten Island', nearbyAreas: 'Eltingville, Bay Terrace, and Annadale' },
-    { slug: 'stapleton-staten-island', name: 'Stapleton', borough: 'Staten Island', nearbyAreas: 'St. George, Clifton, and Tompkinsville' },
-  ];
-  const map = new Map<string, { categorySlug: string; categoryName: string; neighborhoodName: string; borough: string; nearbyAreas: string }>();
-  for (const [catSlug, catName] of Object.entries(CATEGORIES)) {
-    for (const n of NEIGHBORHOODS) {
-      map.set(`${catSlug}-${n.slug}`, { categorySlug: catSlug, categoryName: catName, neighborhoodName: n.name, borough: n.borough, nearbyAreas: n.nearbyAreas });
-    }
-  }
-  return map;
-})();
+// Canonical neighborhood × category lookup shared with the classifier and sitemap.
+// Historical bot-only families are intentionally not recognized here, so they
+// resolve as real 404/noindex routes instead of generic 200 pages.
 
 const matchRoute = (pathname: string): PageType => {
   // Strip leading slash
@@ -675,11 +585,11 @@ const matchRoute = (pathname: string): PageType => {
   // Neighborhood × Category pages — /[category]-[neighborhood]-[borough]
   // Must check before /:petType catch-all
   if (segments.length === 1) {
-    const neighborhoodEntry = NEIGHBORHOOD_PAGE_REGISTRY.get(segments[0]);
+    const neighborhoodEntry = getNeighborhoodRoute(pathname);
     if (neighborhoodEntry) {
       return {
         type: 'neighborhood',
-        slug: segments[0],
+        slug: neighborhoodEntry.slug,
         categorySlug: neighborhoodEntry.categorySlug,
         neighborhoodName: neighborhoodEntry.neighborhoodName,
         borough: neighborhoodEntry.borough,
@@ -1553,7 +1463,8 @@ const isKnownRoute = (pathname: string): boolean => {
     // single segment routes like /dog, /cat (pet types)
     const petTypes = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet', 'small-animal', 'other-animals']);
     if (petTypes.has(segments[0])) return true;
-    // neighborhood×category page registry
+    // Canonical neighborhood×category pages use the shared registry.
+    // Historical bot-only paths are intentionally unknown and return 404/noindex.
     if (NEIGHBORHOOD_PAGE_REGISTRY.has(segments[0])) return true;
     return false;
   }

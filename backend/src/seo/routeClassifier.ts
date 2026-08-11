@@ -1,3 +1,5 @@
+import { getNeighborhoodRoute } from './neighborhoodRegistry';
+
 export type RouteIndexingStatus = 'indexable' | 'noindex' | 'notFound' | 'redirect';
 
 export type RouteClassification = {
@@ -67,6 +69,11 @@ export const classifyRoute = (rawPath: string): RouteClassification => {
 
   if (NOINDEX_ROOT_PATHS.has(canonicalPath)) {
     return { status: 'noindex', indexable: false, canonicalPath, routeType: 'utility' };
+  }
+
+  // Allowlist canonical neighborhood routes before the doorway heuristic.
+  if (getNeighborhoodRoute(canonicalPath)) {
+    return { status: 'indexable', indexable: true, canonicalPath, routeType: 'neighborhood' };
   }
 
   if (isDoorwayRoot(canonicalPath)) {
