@@ -14,6 +14,7 @@ import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import { useSEO } from '@/hooks/useSEO';
 import HealthBehavioralFilters from '@/components/HealthBehavioralFilters';
+import { generateProductUrl } from '@/utils/productUrl';
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -278,7 +279,10 @@ const Products = () => {
             itemListElement: filteredProducts.slice(0, 20).map((p, idx) => ({
               '@type': 'ListItem',
               position: idx + 1,
-              url: `https://www.petshiwu.com/products/${p.slug}`,
+              // Use the canonical product URL (/{petType}/{category}/{slug}) so the
+              // ItemList schema matches the canonical served by botRenderer + sitemap,
+              // instead of the legacy /products/{slug} form.
+              url: `https://www.petshiwu.com${generateProductUrl(p as any)}`,
               name: p.name,
               ...(p.basePrice ? { offers: { '@type': 'Offer', priceCurrency: 'USD', price: p.basePrice, availability: p.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' } } : {})
             }))
