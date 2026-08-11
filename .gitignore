@@ -22,3 +22,4 @@ package-lock.json
 
 # Product content audit output
 product-content-audit.csv
+blog-content-audit.csv

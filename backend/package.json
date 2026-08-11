@@ -29,6 +29,7 @@
     "list-products": "ts-node src/scripts/listAllProducts.ts",
     "check-db": "ts-node src/scripts/checkDatabase.ts",
     "audit-product-content": "ts-node src/scripts/auditProductContent.ts",
+    "audit-blog-content": "ts-node src/scripts/auditBlogContent.ts",
     "format-product-descriptions": "ts-node src/utils/formatAllProductDescriptions.ts",
     "delete-all-products": "ts-node src/scripts/deleteAllProducts.ts",
     "delete-recent-products": "ts-node src/scripts/deleteRecentProducts.ts",
