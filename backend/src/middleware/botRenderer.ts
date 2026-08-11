@@ -1593,7 +1593,7 @@ export const createBotRenderer = (distPath: string) => {
         if (!exists) notFound = true;
       }
 
-      if (bot && routeClassification.indexable) {
+      if ((bot || page?.type === 'neighborhood') && routeClassification.indexable && !hasQueryString(req)) {
         if (page?.type === 'product') {
           const product = await fetchProduct(page.slug);
           if (product) {
