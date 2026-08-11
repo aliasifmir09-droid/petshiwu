@@ -1570,6 +1570,20 @@ const isKnownRoute = (pathname: string): boolean => {
   return true;
 };
 
+const applyRobotsMeta = (html: string, content: string): string => {
+  const ensureMeta = (source: string, name: string): string => {
+    const tag = `<meta name="${name}" content="${content}" />`;
+    const pattern = new RegExp(`<meta\\b[^>]*\\bname=["']${name}["'][^>]*>`, 'gi');
+    if (pattern.test(source)) {
+      pattern.lastIndex = 0;
+      return source.replace(pattern, tag);
+    }
+    return source.replace(/<\/head>/i, `${tag}\n</head>`);
+  };
+
+  return ensureMeta(ensureMeta(html, 'robots'), 'googlebot');
+};
+
 /**
  * Build a real 404 HTML response with noindex. Used for unknown URLs so Google
  * can properly remove them from the index (instead of treating them as soft 404).
@@ -1583,7 +1597,7 @@ const build404Html = (template: string): string => {
     /<meta[\s\S]*?name="description"[\s\S]*?content="[^"]*"/,
     `<meta name="description" content="${esc(description)}"`
   );
-  html = html.replace(/<meta[\s\S]*?name="robots"[\s\S]*?content="[^"]*"/, '<meta name="robots" content="noindex, nofollow, noarchive"');
+  html = applyRobotsMeta(html, 'noindex, nofollow, noarchive');
   html = html.replace(/<link[^>]+rel=["']canonical["'][^>]*>\s*/gi, '');
   return html;
 };
@@ -1726,10 +1740,7 @@ export const createBotRenderer = (distPath: string) => {
         html = buildGenericPageHtml(template, req.path, req.originalUrl, res);
       }
       if (!routeClassification.indexable) {
-        html = html.replace(/<meta name="robots" content="[^"]*"\s*\/?>/i, '<meta name="robots" content="noindex, nofollow, noarchive" />');
-        if (!/<meta\s+name=["']robots["']/i.test(html)) {
-          html = html.replace('</head>', '<meta name="robots" content="noindex, nofollow, noarchive" />\n</head>');
-        }
+        html = applyRobotsMeta(html, 'noindex, nofollow, noarchive');
         res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
       }
 
