@@ -630,6 +630,41 @@ const withTimeout = <T>(promise: Promise<T>, ms = 3000): Promise<T> => {
   return Promise.race([promise, timeout]);
 };
 
+/**
+ * Build the single canonical product path: /{petType}/{immediateCategorySlug}/{slug}.
+ * Returns null when petType or category slug is missing (so we never redirect to an
+ * ambiguous 2-segment path that would collide with a category route).
+ */
+export const buildCanonicalProductPath = (product: any): string | null => {
+  const slug = typeof product?.slug === 'string' ? product.slug.trim() : '';
+  const petType = typeof product?.petType === 'string' ? product.petType.trim() : '';
+  const categorySlug = product?.category && typeof product.category === 'object'
+    ? (typeof product.category.slug === 'string' ? product.category.slug.trim() : '')
+    : '';
+  if (!slug || !petType || !categorySlug) return null;
+  return `/${petType}/${categorySlug}/${slug}`;
+};
+
+/** Normalize a request path for canonical comparison (decode, drop query + trailing slash). */
+export const normalizeReqPath = (p: string): string => {
+  let path = (p || '/').split('?')[0] || '/';
+  try { path = decodeURIComponent(path); } catch { /* keep raw if malformed */ }
+  if (path.length > 1) path = path.replace(/\/+$/, '');
+  return path || '/';
+};
+
+/**
+ * Given a request path and the resolved product, return the canonical path to
+ * 301-redirect to, or null when the request is already canonical (no redirect).
+ * Loop-free by construction: the canonical path resolves to the same product,
+ * whose canonical equals itself.
+ */
+export const productRedirectTarget = (reqPath: string, product: any): string | null => {
+  const canonical = buildCanonicalProductPath(product);
+  if (!canonical) return null;
+  return normalizeReqPath(reqPath) !== canonical ? canonical : null;
+};
+
 const fetchProduct = async (slug: string) => {
   return withTimeout(
     Product.findOne({ slug, isActive: true })
@@ -1542,20 +1577,23 @@ export const createBotRenderer = (distPath: string) => {
     try {
       let html: string | null = null;
 
-      // Consolidate legacy product URLs for every user agent before bot rendering.
-      // The frontend uses the same immediate-category canonical path.
-      if (page?.type === 'product' && req.path.startsWith('/products/')) {
-        const legacyProduct = await fetchProduct(page.slug);
-        if (legacyProduct) {
-          const legacyCategory = typeof (legacyProduct as any).category === 'object'
-            ? (legacyProduct as any).category?.slug
-            : undefined;
-          const legacyPetType = typeof legacyProduct.petType === 'string' ? legacyProduct.petType : '';
-          if (legacyCategory && legacyPetType) {
-            res.redirect(301, `/${legacyPetType}/${legacyCategory}/${page.slug}`);
+      // Consolidate ALL product URL variants to the single canonical path
+      // /{petType}/{immediateCategory}/{slug}. This covers the legacy /products/{slug}
+      // form and nested full-hierarchy paths like /cat/food--treats/wet-food/{slug} or
+      // /fish/fish-shops/marine-amp-freshwater/starter-kits/{slug}, which otherwise get
+      // crawled as duplicate URLs with no agreed canonical. Runs for bots on any product
+      // path, and for all user agents on the legacy /products/ form (preserves prior
+      // behavior). Loop-free: the canonical path resolves to the same product.
+      const isLegacyProductPath = req.path.startsWith('/products/');
+      if (page?.type === 'product' && (bot || isLegacyProductPath)) {
+        const resolvedProduct = await fetchProduct(page.slug);
+        if (resolvedProduct) {
+          const redirectTo = productRedirectTarget(req.path, resolvedProduct);
+          if (redirectTo) {
+            res.redirect(301, redirectTo);
             return;
           }
-        } else {
+        } else if (isLegacyProductPath) {
           res.status(404);
           res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
           res.setHeader('Content-Type', 'text/html; charset=utf-8');
