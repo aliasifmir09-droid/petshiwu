@@ -1681,6 +1681,7 @@ export const createBotRenderer = (distPath: string) => {
       // server.ts also sets this, but moving it here ensures it's set per-route
       // at the point of response, not relying on middleware chain ordering.
       if (hasQueryString(req)) {
+        html = applyRobotsMeta(html, 'noindex, follow, max-image-preview:large');
         res.setHeader('X-Robots-Tag', 'noindex, follow, max-image-preview:large');
       }
       res.send(html);
