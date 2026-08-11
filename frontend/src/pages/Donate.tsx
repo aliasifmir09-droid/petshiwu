@@ -6,6 +6,7 @@ import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { donationService } from '@/services/donations';
 import { getStripe } from '@/utils/stripe';
+import SEO from '@/components/SEO';
 import PaymentForm from '@/components/PaymentForm';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import AdSense from '@/components/AdSense';
@@ -243,6 +244,10 @@ const Donate = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50 py-8 px-4">
+      <SEO
+        title="Donate to Animal Shelters | Petshiwu"
+        description="Support animal welfare — make a donation through Petshiwu to help shelters and rescues care for pets in need."
+      />
             <div className="container mx-auto max-w-4xl">
               {/* In-content ad at top */}
               <AdSense slot="9876543221" format="auto" responsive={true} className="mb-6" />
