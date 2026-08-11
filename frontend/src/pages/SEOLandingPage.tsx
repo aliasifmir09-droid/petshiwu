@@ -45,6 +45,10 @@ const SEOLandingPage = ({
   const page = parseInt(searchParams.get('page') || '1');
   const sort = searchParams.get('sort') || 'rating';
 
+  // Paginated/sorted/filtered variants (e.g. ?page=2, ?sort=price) must not be
+  // indexed as separate pages — they canonicalize to the clean landing URL.
+  const hasQueryVariant = searchParams.toString().length > 0;
+
   // Build search query from all search terms
   const searchQuery = searchTerms.join(' ');
 
@@ -106,6 +110,7 @@ const SEOLandingPage = ({
         keywords={searchTerms.join(', ')}
         url={`https://www.petshiwu.com/${keyword.replace(/\s+/g, '-').toLowerCase()}`}
         type="website"
+        noindex={hasQueryVariant}
       />
       {faqSchema && <StructuredData type="faq" data={faqSchema} />}
       
