@@ -1,0 +1,37 @@
+{
+  "name": "petshiwu",
+  "user": "ubuntu",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "install": "./.cursor/install.sh",
+  "start": "./.cursor/start.sh",
+  "terminals": [
+    {
+      "name": "backend",
+      "command": "cd backend && npm run dev:unix",
+      "description": "Express + MongoDB API server on http://localhost:5000"
+    },
+    {
+      "name": "frontend",
+      "command": "cd frontend && npm run dev",
+      "description": "Customer storefront (Vite/React) on http://localhost:5173"
+    },
+    {
+      "name": "admin",
+      "command": "cd admin && npm run dev",
+      "description": "Admin dashboard (Vite/React) on http://localhost:5174"
+    },
+    {
+      "name": "driver",
+      "command": "cd driver && npm run dev",
+      "description": "Driver PWA (Vite/React) on http://localhost:5175"
+    }
+  ],
+  "ports": [
+    { "name": "backend api", "port": 5000 },
+    { "name": "frontend", "port": 5173 },
+    { "name": "admin", "port": 5174 },
+    { "name": "driver", "port": 5175 }
+  ]
+}
