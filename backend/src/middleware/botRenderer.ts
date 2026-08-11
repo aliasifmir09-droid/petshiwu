@@ -496,15 +496,26 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
   // canonical. X-Robots-Tag is the canonical noindex signal in HTTP headers, and
   // works even if the client-side JS hasn't run.
   if (hasQueryString) {
+    const queryRobots = 'noindex, follow, max-image-preview:large';
     html = html.replace(
-      /<meta name="robots" content="[^"]*"\s*\/?>/,
-      '<meta name="robots" content="noindex, follow, max-image-preview:large" />'
+      /<meta\b[^>]*\bname=["']robots["'][^>]*>/gi,
+      `<meta name="robots" content="${queryRobots}" />`
     );
-    // If the template has no robots meta, inject one before </head>
+    html = html.replace(
+      /<meta\b[^>]*\bname=["']googlebot["'][^>]*>/gi,
+      `<meta name="googlebot" content="${queryRobots}" />`
+    );
+    // If the template has no robots metadata, inject synchronized directives before </head>.
     if (!/<meta\s+name=["']robots["']/i.test(html)) {
       html = html.replace(
         '</head>',
-        '<meta name="robots" content="noindex, follow, max-image-preview:large" />\n</head>'
+        `<meta name="robots" content="${queryRobots}" />\n</head>`
+      );
+    }
+    if (!/<meta\s+name=["']googlebot["']/i.test(html)) {
+      html = html.replace(
+        '</head>',
+        `<meta name="googlebot" content="${queryRobots}" />\n</head>`
       );
     }
   }
