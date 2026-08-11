@@ -17,8 +17,9 @@ export const generateCanonicalUrl = (path: string): string => {
  * Generate SEO-friendly title
  */
 export const generateTitle = (title: string, includeBrand = true): string => {
-  const brandSuffix = includeBrand ? ' | petshiwu' : '';
-  if (title.includes('petshiwu')) {
+  const brandSuffix = includeBrand ? ' | Petshiwu' : '';
+  // Case-insensitive so titles that already contain "Petshiwu" aren't double-branded.
+  if (title.toLowerCase().includes('petshiwu')) {
     return title;
   }
   return `${title}${brandSuffix}`;
