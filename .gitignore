@@ -19,3 +19,6 @@ bun.lock
 node_modules/
 ﻿# Node
 package-lock.json
+
+# Product content audit output
+product-content-audit.csv
