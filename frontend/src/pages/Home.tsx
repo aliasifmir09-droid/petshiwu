@@ -14,6 +14,7 @@ import { ChevronRight, ChevronLeft, ArrowRight } from 'lucide-react';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import { normalizeImageUrl, generateSrcSet, getOptimizedImageUrl } from '@/utils/imageUtils';
+import { generateProductUrl } from '@/utils/productUrl';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const BRANDS = [
@@ -348,7 +349,7 @@ const Home = () => {
             itemListElement: filteredFeaturedProducts.slice(0, 8).map((p, idx) => ({
               '@type': 'ListItem',
               position: idx + 1,
-              url: `https://www.petshiwu.com/products/${p.slug}`,
+              url: `https://www.petshiwu.com${generateProductUrl(p as any)}`,
               name: p.name,
               ...(p.basePrice ? { offers: { '@type': 'Offer', priceCurrency: 'USD', price: p.basePrice, availability: p.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' } } : {})
             }))

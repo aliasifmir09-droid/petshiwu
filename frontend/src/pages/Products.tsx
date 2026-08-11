@@ -244,7 +244,7 @@ const Products = () => {
     ],
     items: filteredProducts.slice(0, 20).map((product) => ({
       name: product.name,
-      url: `/products/${product.slug}`,
+      url: generateProductUrl(product),
       image: product.images[0]
     }))
   });

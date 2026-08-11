@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { productService } from '@/services/products';
 import { Search, Package, FolderTree } from 'lucide-react';
+import { generateProductUrl } from '@/utils/productUrl';
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import { generateCategoryUrl } from '@/utils/productUrl';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
@@ -93,7 +94,7 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
                 {products.map((product: any) => (
                   <li key={product._id || product.slug}>
                     <Link
-                      to={`/products/${product.slug}`}
+                      to={generateProductUrl(product)}
                       onClick={() => onSelect(product.name)}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors group"
                     >

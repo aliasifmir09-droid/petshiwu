@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { comparisonService } from '@/services/comparison';
 import { productService } from '@/services/products';
 import { Product } from '@/types';
+import { generateProductUrl } from '@/utils/productUrl';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { X, Plus, CheckCircle, Star, DollarSign, Package, Award, Search } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
@@ -155,7 +156,7 @@ const ProductComparison = () => {
                 />
                 <div>
                   <Link
-                    to={`/products/${currentProduct.slug}`}
+                    to={generateProductUrl(currentProduct)}
                     className="font-semibold text-primary-600 hover:text-primary-700"
                   >
                     {decodeHtmlEntities(currentProduct.name)}
@@ -422,7 +423,7 @@ const ProductComparison = () => {
                       className="w-24 h-24 object-cover rounded mb-2"
                     />
                     <Link
-                      to={`/products/${product.slug}`}
+                      to={generateProductUrl(product)}
                       className="font-semibold text-primary-600 hover:text-primary-700"
                     >
                       {decodeHtmlEntities(product.name)}

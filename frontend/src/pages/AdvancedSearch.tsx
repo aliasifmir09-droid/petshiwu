@@ -7,6 +7,7 @@ import { Search, X, SlidersHorizontal, ArrowLeft, Package, Camera, Loader2, Imag
 import { useDebounce } from '@/hooks/useDebounce';
 import SEO from '@/components/SEO';
 import { normalizeImageUrl } from '@/utils/imageUtils';
+import { generateProductUrl } from '@/utils/productUrl';
 import api from '@/services/api';
 
 const AdvancedSearch = () => {
@@ -603,7 +604,7 @@ const AdvancedSearch = () => {
               {suggestionProducts.map((p: any) => (
                 <Link
                   key={p._id || p.slug}
-                  to={`/products/${p.slug}`}
+                  to={generateProductUrl(p as any)}
                   className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 hover:border-blue-300 hover:shadow-sm transition-all"
                 >
                   <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
