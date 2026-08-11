@@ -174,6 +174,7 @@ const SEO = ({
               url: resolvedUrl,
               priceCurrency: currency || 'USD',
               price: price.toFixed(2),
+              priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
               availability: availability === 'instock' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
               itemCondition: 'https://schema.org/NewCondition',
               seller: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },

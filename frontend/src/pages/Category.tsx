@@ -13,7 +13,7 @@ import StructuredData from '@/components/StructuredData';
 import AdSense from '@/components/AdSense';
 import { useSEO } from '@/hooks/useSEO';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
-import { generateCategoryUrl } from '@/utils/productUrl';
+import { generateCategoryUrl, generateProductUrl } from '@/utils/productUrl';
 
 const Category = () => {
   const queryClient = useQueryClient();
@@ -205,7 +205,7 @@ const Category = () => {
     })),
     items: filteredProducts.slice(0, 20).map((product) => ({
       name: product.name,
-      url: `/products/${product.slug}`,
+      url: generateProductUrl(product),
       image: product.images[0]
     }))
   });

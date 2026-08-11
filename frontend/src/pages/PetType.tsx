@@ -10,6 +10,7 @@ import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import { useSEO } from '@/hooks/useSEO';
+import { generateProductUrl } from '@/utils/productUrl';
 
 const PetType = () => {
   const { petType: petTypeParam } = useParams<{ petType: string }>();
@@ -97,7 +98,7 @@ const PetType = () => {
     ],
     items: products?.data.slice(0, 20).map((product) => ({
       name: product.name,
-      url: `/products/${product.slug}`,
+      url: generateProductUrl(product),
       image: product.images[0]
     })) || []
   });

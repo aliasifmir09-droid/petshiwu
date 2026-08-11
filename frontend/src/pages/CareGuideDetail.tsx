@@ -6,8 +6,10 @@ import { Clock, Eye, BookOpen, Calendar, User, Tag, TrendingUp, TrendingDown, Mi
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import DOMPurify from 'dompurify';
 import SEO from '@/components/SEO';
+import StructuredData from '@/components/StructuredData';
 import ProductCard from '@/components/ProductCard';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
+import { generateBreadcrumbSchema } from '@/utils/seoUtils';
 import AdSense from '@/components/AdSense';
 
 const CareGuideDetail = () => {
@@ -74,6 +76,29 @@ const CareGuideDetail = () => {
       <SEO
         title={guide.metaTitle || guide.title}
         description={guide.metaDescription || guide.excerpt || guide.title}
+      />
+      {/* Client-side structured data so browsers match the Article + BreadcrumbList
+          schema the backend botRenderer already serves to crawlers. */}
+      <StructuredData
+        type="article"
+        data={{
+          headline: guide.title,
+          description: guide.metaDescription || guide.excerpt || guide.title,
+          image: guide.featuredImage ? normalizeImageUrl(guide.featuredImage) : undefined,
+          datePublished: guide.publishedAt,
+          dateModified: guide.publishedAt,
+          url: `https://www.petshiwu.com/care-guides/${slug}`,
+          author: guide.author ? { name: guide.author.name || 'Petshiwu' } : undefined,
+          publisher: { name: 'Petshiwu', logo: 'https://www.petshiwu.com/logo.png' },
+        }}
+      />
+      <StructuredData
+        type="breadcrumb"
+        data={generateBreadcrumbSchema([
+          { name: 'Home', url: '/' },
+          { name: 'Care Guides', url: '/care-guides' },
+          { name: guide.title, url: `/care-guides/${slug}` },
+        ])}
       />
       <div className="min-h-screen bg-gray-50">
         {/* Header */}

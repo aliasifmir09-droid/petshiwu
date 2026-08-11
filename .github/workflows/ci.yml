@@ -105,6 +105,9 @@ jobs:
       working-directory: admin
       run: bun install --frozen-lockfile
 
+    - name: Check SEO route registries (frontend vs backend)
+      run: bun scripts/check-seo-registries.ts
+
     - name: Check TypeScript (Backend)
       working-directory: backend
       run: bun run build

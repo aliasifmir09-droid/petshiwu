@@ -6,6 +6,7 @@ import { Search, Clock, Eye, BookOpen, TrendingUp, TrendingDown, Minus } from 'l
 import Dropdown from '@/components/Dropdown';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { normalizeImageUrl } from '@/utils/imageUtils';
+import SEO from '@/components/SEO';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import AdSense from '@/components/AdSense';
 
@@ -100,6 +101,10 @@ const CareGuides = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEO
+        title="Pet Care Guides | Petshiwu"
+        description="Expert pet care guides for dogs, cats, birds, reptiles and more — nutrition, grooming, health and training tips from Petshiwu."
+      />
       {/* Header */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 lg:px-8 py-8">

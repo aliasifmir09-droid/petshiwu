@@ -105,6 +105,7 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
           url: product.url,
           priceCurrency: product.currency || 'USD',
           price: product.price,
+          priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           availability: product.availability === 'InStock' 
             ? 'https://schema.org/InStock'
             : 'https://schema.org/OutOfStock'

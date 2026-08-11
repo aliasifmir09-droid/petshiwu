@@ -14,6 +14,7 @@ import { ChevronRight, ChevronLeft, ArrowRight } from 'lucide-react';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import { normalizeImageUrl, generateSrcSet, getOptimizedImageUrl } from '@/utils/imageUtils';
+import { generateProductUrl } from '@/utils/productUrl';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const BRANDS = [
@@ -201,6 +202,10 @@ const Home = () => {
 
   return (
     <div className="relative">
+      {/* Single semantic H1 for the homepage (visually hidden — the hero is a
+          designed image slideshow). Gives browsers a real H1 that matches the
+          page title/description without altering the visual layout. */}
+      <h1 className="sr-only">Petshiwu — Premium Pet Food, Toys & Supplies Delivered to NYC & Nationwide</h1>
       <SEO
         title="Petshiwu — Premium Pet Food, Toys & Supplies Delivered to NYC"
         description="10,000+ pet products delivered to Queens, Brooklyn & all of NYC. Top brands — Purina, Blue Buffalo, Royal Canin. Free shipping over $49. Dog food, cat food, toys & more."
@@ -344,7 +349,7 @@ const Home = () => {
             itemListElement: filteredFeaturedProducts.slice(0, 8).map((p, idx) => ({
               '@type': 'ListItem',
               position: idx + 1,
-              url: `https://www.petshiwu.com/products/${p.slug}`,
+              url: `https://www.petshiwu.com${generateProductUrl(p as any)}`,
               name: p.name,
               ...(p.basePrice ? { offers: { '@type': 'Offer', priceCurrency: 'USD', price: p.basePrice, availability: p.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' } } : {})
             }))
