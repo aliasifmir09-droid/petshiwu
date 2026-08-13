@@ -29,7 +29,7 @@ const INDEXABLE_ROOTS = new Set([
   'return-policy', 'donate', 'contact', 'shipping', 'shipping-policy',
   'other-animals', 'privacy', 'privacy-policy', 'terms', 'terms-of-service',
   'accessibility', 'shop', 'fish-tanks', 'press', 'investors', 'sell-with-us',
-  'vendors', 'partners', 'innovation', 'tech', 'symptom-checker',
+  'vendors', 'partners', 'innovation', 'tech', 'symptom-checker', 'neural', 'scan',
   'dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet',
   'small-animal',
 ]);

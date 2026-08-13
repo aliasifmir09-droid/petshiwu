@@ -10,6 +10,7 @@ import TrustBadges from '@/components/TrustBadges';
 import CategoryIcons from '@/components/CategoryIcons';
 import BirthdayBanner from '@/components/BirthdayBanner';
 import SmartTechShowcase from '@/components/SmartTechShowcase';
+import NeuralPortal from '@/components/NeuralPortal';
 import AdSense from '@/components/AdSense';
 import { ChevronRight, ChevronLeft, ArrowRight } from 'lucide-react';
 import { useRef, useState, useEffect, useMemo } from 'react';
@@ -362,6 +363,8 @@ const Home = () => {
       <div className="container mx-auto px-4 lg:px-8 mt-4">
         <HeroSlideshow />
       </div>
+
+      <NeuralPortal />
 
       {/* FREEDOM20 Banner — anti-autoship positioning */}
       <section className="container mx-auto px-4 lg:px-8 mt-6">

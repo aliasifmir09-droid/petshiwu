@@ -1,8 +1,15 @@
 import { Link } from 'react-router-dom';
-import { Bot, Camera, Mic, Stethoscope, Zap, Sparkles } from 'lucide-react';
+import { Bot, Camera, Stethoscope, Zap, Sparkles, ScanLine } from 'lucide-react';
 import SameDayChecker from './SameDayChecker';
 
 const FEATURES = [
+  {
+    icon: ScanLine,
+    title: 'Neural Twin Scan',
+    desc: 'Photograph your pet. We generate a biometric twin and a live product kit.',
+    to: '/neural',
+    action: 'Launch Neural',
+  },
   {
     icon: Bot,
     title: 'AI Pet Advisor',
@@ -16,13 +23,6 @@ const FEATURES = [
     desc: 'Snap a bag, toy, or label. We match it to our catalog.',
     to: '/search',
     action: 'Search with a photo',
-  },
-  {
-    icon: Mic,
-    title: 'Voice Search',
-    desc: 'Tap the mic in the search bar and shop hands-free.',
-    action: 'Try it in search',
-    to: '/search',
   },
   {
     icon: Stethoscope,

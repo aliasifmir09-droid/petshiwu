@@ -17,7 +17,7 @@ import {
 } from '../controllers/productController';
 import { getProductRecommendations, getFrequentlyBoughtTogether } from '../controllers/recommendationController';
 import { compareProducts, getComparisonSuggestions } from '../controllers/comparisonController';
-import { advancedSearch, searchAutocomplete, visualSearch } from '../controllers/searchController';
+import { advancedSearch, searchAutocomplete, visualSearch, neuralScan } from '../controllers/searchController';
 import { getProductShareLinks } from '../controllers/socialController';
 import { protect, authorize } from '../middleware/auth';
 import { checkPermission } from '../middleware/permissions';
@@ -39,6 +39,7 @@ router.get('/', paginationValidation, getProducts);
 router.get('/cursor', getProductsCursor); // Cursor-based pagination (optimized for large datasets)
 router.get('/search', searchValidation, advancedSearch); // Advanced search with filters
 router.post('/visual-search', visualSearch); // AI photo/visual search
+router.post('/neural-scan', neuralScan); // Pet Twin biometric scan
 router.get('/search/autocomplete', searchValidation, searchAutocomplete); // Search autocomplete
 router.get('/brands', getUniqueBrands); // Public endpoint for unique brands
 router.get('/trending', getTrendingProducts); // Get trending products based on views and sales
