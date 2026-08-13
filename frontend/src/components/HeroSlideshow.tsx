@@ -68,6 +68,8 @@ const HeroSlideshow = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // Preload only the next slide so we don't download all banners at once.
+  // Hidden opacity-0 slides still count as "in viewport" and bypass lazy-load.
   useEffect(() => {
     const img = new Image();
     img.src = slideDisplaySrc(nextSlideData);
