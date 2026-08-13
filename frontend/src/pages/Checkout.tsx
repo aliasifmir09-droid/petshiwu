@@ -21,6 +21,7 @@ import AdSense from '@/components/AdSense';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { MapPin, Plus, Check, User, UserCheck } from 'lucide-react';
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
+import { isNycDeliveryZip } from '@/utils/deliveryZip';
 
 const PaymentForm = lazy(() => import('@/components/PaymentForm'));
 const PayPalButton = lazy(() => import('@/components/PayPalButton'));
@@ -454,15 +455,9 @@ const Checkout = () => {
       return;
     }
 
-    // NYC-only delivery check
-    const _zip = shippingInfo.zipCode.trim().replace(/[^0-9]/g, '').substring(0, 5);
+    // NYC-only delivery check (includes Queens 111xx Astoria/LIC, which the old range skipped)
     const _isNY = shippingInfo.state.trim().toUpperCase() === 'NY';
-    const _isNYC =
-      (_zip >= '10001' && _zip <= '10282') ||
-      (_zip >= '10301' && _zip <= '10314') ||
-      (_zip >= '10451' && _zip <= '10475') ||
-      (_zip >= '11201' && _zip <= '11697');
-    if (!_isNY || !_isNYC) {
+    if (!_isNY || !isNycDeliveryZip(shippingInfo.zipCode)) {
       showToast('Sorry, we currently deliver only within New York City (all 5 boroughs).', 'error');
       return;
     }

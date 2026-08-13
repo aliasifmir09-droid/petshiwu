@@ -318,6 +318,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
       { path: '/luxury-pet-accessories-nyc', priority: '0.9', changefreq: 'weekly' },
       // Business pages
       { path: '/investors', priority: '0.7', changefreq: 'monthly' },
+      { path: '/innovation', priority: '0.8', changefreq: 'weekly' },
       { path: '/sell-with-us', priority: '0.8', changefreq: 'monthly' },
       // Canonical neighborhood × category pages: exactly the shared 28 × 50 registry.
       ...CANONICAL_NEIGHBORHOOD_ROUTES.map(({ path }) => ({

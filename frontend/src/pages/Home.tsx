@@ -9,6 +9,7 @@ import StructuredData from '@/components/StructuredData';
 import TrustBadges from '@/components/TrustBadges';
 import CategoryIcons from '@/components/CategoryIcons';
 import BirthdayBanner from '@/components/BirthdayBanner';
+import SmartTechShowcase from '@/components/SmartTechShowcase';
 import AdSense from '@/components/AdSense';
 import { ChevronRight, ChevronLeft, ArrowRight } from 'lucide-react';
 import { useRef, useState, useEffect, useMemo } from 'react';
@@ -220,7 +221,7 @@ const Home = () => {
               name: 'Does Petshiwu deliver same-day pet supplies in NYC?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Yes. Petshiwu offers same-day pet supply delivery across all five NYC boroughs — Manhattan, Brooklyn, Queens, Bronx, and Staten Island. Order by 10 AM EST for same-day delivery; order by 2 PM EST for next-day delivery. We are based in Jackson Heights, Queens and ship from our warehouse at 37-68 74th Street.'
+                text: 'Yes. Petshiwu offers same-day pet supply delivery across all five NYC boroughs — Manhattan, Brooklyn, Queens, Bronx, and Staten Island. Order by 3 PM EST on weekdays (1 PM EST on weekends) for same-day delivery before 11 PM. We are based in Jackson Heights, Queens and ship from our warehouse at 37-68 74th Street.'
               }
             },
             {
@@ -252,7 +253,7 @@ const Home = () => {
               name: 'How much does Petshiwu delivery cost?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Delivery is free on orders over $49 across all five NYC boroughs. Orders under $49 have a flat $6 shipping fee. Same-day delivery is available for orders placed before 10 AM EST.'
+                text: 'Delivery is free on orders over $49 across all five NYC boroughs. Orders under $49 have a flat $6 shipping fee. Same-day delivery is available for orders placed before 3 PM EST on weekdays (1 PM EST on weekends).'
               }
             },
             {
@@ -385,6 +386,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      <SmartTechShowcase />
 
       {/* Birthday Banner */}
       <BirthdayBanner />

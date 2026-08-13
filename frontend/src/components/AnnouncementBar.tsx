@@ -3,6 +3,7 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const MESSAGES = [
   { text: '⚡ Same-Day Delivery NYC — Order before 3 PM, get it before 11 PM' },
+  { text: '🎙️ Search by voice or photo — AI finds the right food in seconds' },
   { text: '🚀 Petshiwu launching August 28 — be the first to order' },
   { text: '🚚 Free shipping on all orders over $49 — no code needed' },
   { text: '🎁 10% off your first order — sign up for our newsletter' },

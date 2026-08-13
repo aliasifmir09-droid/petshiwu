@@ -333,6 +333,14 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     title: 'Invest in Petshiwu — NYC Pet Delivery Startup',
     description: 'Petshiwu is building the premier pet supply delivery brand for NYC and beyond. Learn about our growth strategy, market opportunity, and how to invest.',
   },
+  '/innovation': {
+    title: 'Smart Shopping Technology | Petshiwu',
+    description: 'See how Petshiwu uses AI, voice search, visual search, and live same-day ZIP checks to get vet-quality pet supplies to NYC doors faster.',
+  },
+  '/tech': {
+    title: 'Smart Shopping Technology | Petshiwu',
+    description: 'See how Petshiwu uses AI, voice search, visual search, and live same-day ZIP checks to get vet-quality pet supplies to NYC doors faster.',
+  },
   '/sell-with-us': {
     title: 'Sell With Us — Partner with Petshiwu',
     description: 'List your pet products on Petshiwu and reach thousands of NYC pet owners. Join our growing marketplace of premium pet brands.',
@@ -1491,6 +1499,7 @@ const VALID_SPA_PATHS = new Set([
   '/contact', '/403', '/404', '/privacy', '/privacy-policy', '/terms',
   '/terms-of-service', '/shipping', '/shipping-policy', '/accessibility',
   '/shop', '/deals', '/sell-with-us', '/vendors', '/partners', '/investors',
+  '/innovation', '/tech',
 ]);
 
 /**

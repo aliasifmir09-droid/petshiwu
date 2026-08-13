@@ -84,6 +84,7 @@ const PetSuppliesLongIslandCityNY = lazy(() => import('./pages/seo/PetSuppliesLo
 const PetSuppliesSoHoNYC = lazy(() => import('./pages/seo/PetSuppliesSoHoNYC'));
 const PetSuppliesAstoriaNY = lazy(() => import('./pages/seo/PetSuppliesAstoriaNY'));
 const Investors = lazy(() => import('./pages/Investors'));
+const Innovation = lazy(() => import('./pages/Innovation'));
 const SellWithUs = lazy(() => import('./pages/SellWithUs'));
 const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
@@ -365,6 +366,8 @@ function App() {
                   <Route path="/pet-supplies-astoria-queens-ny" element={<PetSuppliesAstoriaNY />} />
                   {/* Business pages */}
                   <Route path="/investors" element={<Investors />} />
+                  <Route path="/innovation" element={<Innovation />} />
+                  <Route path="/tech" element={<Navigate to="/innovation" replace />} />
                   <Route path="/sell-with-us" element={<SellWithUs />} />
                   <Route path="/vendors" element={<SellWithUs />} />
                   <Route path="/partners" element={<SellWithUs />} />
