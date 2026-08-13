@@ -337,6 +337,14 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     title: 'Smart Shopping Technology | Petshiwu',
     description: 'See how Petshiwu uses AI, voice search, visual search, and live same-day ZIP checks to get vet-quality pet supplies to NYC doors faster.',
   },
+  '/neural': {
+    title: 'Neural Twin Scan | Petshiwu',
+    description: 'Scan your pet’s photo. Petshiwu Neural builds a live biometric twin and matches a same-day product kit from 10,000+ SKUs.',
+  },
+  '/scan': {
+    title: 'Neural Twin Scan | Petshiwu',
+    description: 'Scan your pet’s photo. Petshiwu Neural builds a live biometric twin and matches a same-day product kit from 10,000+ SKUs.',
+  },
   '/tech': {
     title: 'Smart Shopping Technology | Petshiwu',
     description: 'See how Petshiwu uses AI, voice search, visual search, and live same-day ZIP checks to get vet-quality pet supplies to NYC doors faster.',
@@ -1499,7 +1507,7 @@ const VALID_SPA_PATHS = new Set([
   '/contact', '/403', '/404', '/privacy', '/privacy-policy', '/terms',
   '/terms-of-service', '/shipping', '/shipping-policy', '/accessibility',
   '/shop', '/deals', '/sell-with-us', '/vendors', '/partners', '/investors',
-  '/innovation', '/tech',
+  '/innovation', '/tech', '/neural', '/scan',
 ]);
 
 /**

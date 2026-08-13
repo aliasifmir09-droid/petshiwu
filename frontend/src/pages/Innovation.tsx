@@ -9,12 +9,20 @@ import {
   Package,
   Sparkles,
   ArrowRight,
+  ScanLine,
 } from 'lucide-react';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import SameDayChecker from '@/components/SameDayChecker';
 
 const TOOLS = [
+  {
+    icon: ScanLine,
+    title: 'Neural Twin Scan',
+    desc: 'Photograph your pet. Computer vision builds a live biometric twin — breed constellation, life stage, calorie protocol — and matches a kit from our catalog. This is the demo that makes jaws drop.',
+    cta: 'Launch Neural Scan',
+    to: '/neural',
+  },
   {
     icon: Bot,
     title: 'AI Pet Advisor',

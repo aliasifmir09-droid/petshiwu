@@ -20,12 +20,12 @@ const INDEXABLE_ROOT_PATHS = new Set([
   '/return-policy', '/donate', '/contact', '/shipping', '/shipping-policy', '/other-animals',
   '/privacy', '/privacy-policy', '/terms', '/terms-of-service', '/accessibility',
   '/shop', '/fish-tanks', '/press', '/investors', '/sell-with-us', '/vendors', '/partners',
-  '/innovation',
+  '/innovation', '/neural',
 ]);
 
 const NOINDEX_ROOT_PATHS = new Set([
   '/search', '/checkout', '/cart', '/login', '/register', '/forgot-password',
-  '/dashboard', '/driver', '/symptom-checker', '/deals', '/tech',
+  '/dashboard', '/driver', '/symptom-checker', '/deals', '/tech', '/scan',
 ]);
 
 const normalizePath = (rawPath: string): string => {

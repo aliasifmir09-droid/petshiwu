@@ -85,6 +85,7 @@ const PetSuppliesSoHoNYC = lazy(() => import('./pages/seo/PetSuppliesSoHoNYC'));
 const PetSuppliesAstoriaNY = lazy(() => import('./pages/seo/PetSuppliesAstoriaNY'));
 const Investors = lazy(() => import('./pages/Investors'));
 const Innovation = lazy(() => import('./pages/Innovation'));
+const NeuralScan = lazy(() => import('./pages/NeuralScan'));
 const SellWithUs = lazy(() => import('./pages/SellWithUs'));
 const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
@@ -367,6 +368,8 @@ function App() {
                   {/* Business pages */}
                   <Route path="/investors" element={<Investors />} />
                   <Route path="/innovation" element={<Innovation />} />
+                  <Route path="/neural" element={<NeuralScan />} />
+                  <Route path="/scan" element={<Navigate to="/neural" replace />} />
                   <Route path="/tech" element={<Navigate to="/innovation" replace />} />
                   <Route path="/sell-with-us" element={<SellWithUs />} />
                   <Route path="/vendors" element={<SellWithUs />} />

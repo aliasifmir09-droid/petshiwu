@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import logger from '../utils/logger';
 import { executeCachedAggregation } from '../utils/aggregationCache';
 import { cache, cacheKeys } from '../utils/cache';
+import { extractJsonObject, parseNeuralTwin } from '../utils/neuralScan';
 
 const GEMINI_VISION_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
 
@@ -633,6 +634,138 @@ Only set productType to "unknown" if the image is completely unrelated to pets (
 
   } catch (error: any) {
     logger.error('Error in visualSearch:', error);
+    next(error);
+  }
+};
+
+const NEURAL_PROMPT = `You are Petshiwu Neural, a veterinary-informed computer vision system for a premium pet store.
+Look at this image. If a pet is visible, identify it. If only a pet product is visible, say so.
+Return ONLY a JSON object (no markdown) in this exact shape:
+{
+  "subject": "pet" | "product" | "unknown",
+  "species": "dog" | "cat" | "bird" | "fish" | "reptile" | "small-pet" | "unknown",
+  "breed": "<best breed or mix guess>",
+  "breedConfidence": <0-100 integer>,
+  "lifeStage": "puppy" | "kitten" | "adult" | "senior" | "unknown",
+  "sizeClass": "toy" | "small" | "medium" | "large" | "giant" | "n/a",
+  "coat": "short" | "medium" | "long" | "hairless" | "scales" | "feathers" | "unknown",
+  "estimatedWeightLbs": <number or null>,
+  "traits": ["up to 4 visual traits"],
+  "healthWatch": ["up to 4 breed-typical watch-outs, not a diagnosis"],
+  "careFocus": ["up to 4 shopping/care priorities"],
+  "shopQueries": ["3-4 product search queries for this pet"],
+  "summary": "<one sentence, warm and specific>"
+}`;
+
+async function findKitProducts(petType: string | null, queries: string[]) {
+  const seen = new Set<string>();
+  const products: any[] = [];
+  const baseQuery: any = { isActive: true, deletedAt: null };
+  if (petType) baseQuery.petType = petType;
+
+  for (const query of queries.slice(0, 4)) {
+    if (products.length >= 8) break;
+    let found: any[] = [];
+    try {
+      found = await Product.find(
+        { ...baseQuery, $text: { $search: query } },
+        { score: { $meta: 'textScore' } }
+      )
+        .sort({ score: { $meta: 'textScore' } })
+        .limit(4)
+        .select('name slug brand images basePrice compareAtPrice petType inStock averageRating totalReviews isFeatured totalStock category')
+        .populate('category', 'name slug petType')
+        .lean();
+    } catch {
+      found = await Product.find({
+        ...baseQuery,
+        name: new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
+      })
+        .limit(4)
+        .select('name slug brand images basePrice compareAtPrice petType inStock averageRating totalReviews isFeatured totalStock category')
+        .populate('category', 'name slug petType')
+        .lean();
+    }
+
+    for (const product of found) {
+      const id = String(product._id);
+      if (!seen.has(id)) {
+        seen.add(id);
+        products.push(product);
+      }
+    }
+  }
+
+  return products.slice(0, 8);
+}
+
+// POST /api/products/neural-scan
+// Body: { image, mimeType }
+// Builds a Pet Twin dossier from Gemini Vision and a matched product kit.
+export const neuralScan = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { image, mimeType } = req.body as { image: string; mimeType: string };
+    if (!image) {
+      return res.status(400).json({ success: false, message: 'No image provided' });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.status(503).json({ success: false, message: 'Neural scan is not configured' });
+    }
+
+    const base64Data = image.includes(',') ? image.split(',')[1] : image;
+    const imageMime = mimeType || 'image/jpeg';
+
+    let twin = null;
+    try {
+      const geminiRes = await fetch(`${GEMINI_VISION_URL}?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: NEURAL_PROMPT },
+              { inline_data: { mime_type: imageMime, data: base64Data } },
+            ],
+          }],
+          generationConfig: { temperature: 0.2, maxOutputTokens: 512 },
+        }),
+        signal: AbortSignal.timeout(18000),
+      });
+
+      if (!geminiRes.ok) {
+        const errText = await geminiRes.text();
+        logger.error('Neural scan Gemini error:', errText);
+        throw new Error(`Gemini error ${geminiRes.status}`);
+      }
+
+      const geminiData: any = await geminiRes.json();
+      const rawText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      twin = parseNeuralTwin(extractJsonObject(rawText));
+    } catch (err: any) {
+      logger.error('Neural scan vision call failed:', err.message);
+    }
+
+    if (!twin || twin.subject === 'unknown') {
+      return res.status(200).json({
+        success: true,
+        twin: null,
+        message: 'Could not lock onto a pet in this photo. Try a clearer face-on shot in good light.',
+        data: [],
+      });
+    }
+
+    const kit = await findKitProducts(twin.petType, twin.shopQueries);
+    logger.info(`Neural scan: ${twin.species} ${twin.breed} (${twin.breedConfidence}%), ${kit.length} kit items`);
+
+    return res.status(200).json({
+      success: true,
+      twin,
+      data: kit,
+    });
+  } catch (error: any) {
+    logger.error('Error in neuralScan:', error);
     next(error);
   }
 };
