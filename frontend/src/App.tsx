@@ -17,9 +17,9 @@ import AIPetAdvisor from './components/AIPetAdvisor'; // Gemini AI powered — v
 import CookieConsent from './components/CookieConsent';
 import EmailPopup from './components/EmailPopup';
 import StructuredData from './components/StructuredData';
+import Home from './pages/Home';
 import './index.css';
 
-const Home = lazy(() => import('./pages/Home'));
 const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const Category = lazy(() => import('./pages/Category'));
