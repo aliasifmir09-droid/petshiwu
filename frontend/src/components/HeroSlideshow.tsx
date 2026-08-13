@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { slideDisplaySrc } from '@/utils/slideImage';
 
-// ── Static banner slides (images served from /public) ────────────
 const SLIDES = [
   {
     id: 'slide-1',
@@ -57,14 +57,23 @@ const SLIDES = [
 
 const HeroSlideshow = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const slide = SLIDES[currentSlide];
+  const nextSlideData = SLIDES[(currentSlide + 1) % SLIDES.length];
+  const displaySrc = slideDisplaySrc(slide);
 
-  // Auto-advance every 5 seconds
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
     }, 5000);
     return () => clearInterval(timer);
   }, []);
+
+  // Preload only the next slide so we don't download all 7 banners at once.
+  // Hidden opacity-0 slides still count as "in viewport" and bypass lazy-load.
+  useEffect(() => {
+    const img = new Image();
+    img.src = slideDisplaySrc(nextSlideData);
+  }, [nextSlideData]);
 
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + SLIDES.length) % SLIDES.length);
@@ -74,35 +83,26 @@ const HeroSlideshow = () => {
     <div className="w-full mt-4">
       <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-4">
         <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
-
-          {/* Slides */}
           <div className="relative w-full aspect-[16/6]">
-            {SLIDES.map((slide, index) => (
-              <Link
-                key={slide.id}
-                to={slide.link}
-                className={`absolute inset-0 transition-all duration-1000 ${
-                  index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                }`}
-              >
-                <picture>
+            <Link key={slide.id} to={slide.link} className="absolute inset-0 z-10">
+              <picture>
+                {slide.webp.endsWith('.webp') && (
                   <source srcSet={slide.webp} type="image/webp" />
-                  <img
-                    src={slide.src}
-                    alt={slide.alt}
-                    width={1920}
-                    height={720}
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                    fetchPriority={index === 0 ? 'high' : 'auto'}
-                    decoding={index === 0 ? 'sync' : 'async'}
-                    className="w-full h-full object-cover"
-                  />
-                </picture>
-              </Link>
-            ))}
+                )}
+                <img
+                  src={displaySrc}
+                  alt={slide.alt}
+                  width={1920}
+                  height={720}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                />
+              </picture>
+            </Link>
           </div>
 
-          {/* Arrows */}
           <button
             onClick={prevSlide}
             className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 hover:text-blue-600 p-2 md:p-3 rounded-full transition-all shadow-lg hover:shadow-xl z-20 transform hover:scale-110 duration-300"
@@ -120,7 +120,6 @@ const HeroSlideshow = () => {
             <ChevronRight size={20} className="md:w-6 md:h-6" />
           </button>
 
-          {/* Dot indicators */}
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-20 bg-white/70 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md">
             {SLIDES.map((_, index) => (
               <button
@@ -135,7 +134,6 @@ const HeroSlideshow = () => {
               />
             ))}
           </div>
-
         </div>
       </div>
     </div>
