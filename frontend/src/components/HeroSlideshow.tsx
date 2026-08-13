@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { slideDisplaySrc } from '@/utils/slideImage';
 
-// ── Static banner slides (images served from /public) ────────────
 const SLIDES = [
   {
     id: 'slide-1',
@@ -12,10 +12,31 @@ const SLIDES = [
     link: '/products',
   },
   {
+    id: 'slide-nyc-tonight',
+    src: '/banner-nyc-tonight.jpg',
+    webp: '/banner-nyc-tonight.webp',
+    alt: 'Same-day NYC pet delivery — order by 3 PM, delivered tonight',
+    link: '/products',
+  },
+  {
+    id: 'slide-neural',
+    src: '/banner-neural-twin.jpg',
+    webp: '/banner-neural-twin.webp',
+    alt: 'Scan your pet. Generate their Twin — Petshiwu Neural',
+    link: '/neural',
+  },
+  {
     id: 'slide-2',
     src: '/banner-birthday.png',
     webp: '/banner-birthday.webp',
     alt: 'Celebrate Your Pet\'s Birthday – 20% OFF + Free Gift',
+    link: '/products',
+  },
+  {
+    id: 'slide-fall',
+    src: '/banner-fall-bowl.jpg',
+    webp: '/banner-fall-bowl.webp',
+    alt: 'Fall starts in the bowl — seasonal food, joints and coats',
     link: '/products',
   },
   {
@@ -32,39 +53,25 @@ const SLIDES = [
     alt: 'NYC\'s Fastest Pet Delivery',
     link: '/products',
   },
-  {
-    id: 'slide-wc1',
-    src: '/banner-worldcup-1.jpg',
-    webp: '/banner-worldcup-1.jpg',
-    alt: 'Victory in Every Bowl – Celebrating the World Cup with NYC\'s Pet Parents',
-    link: '/products',
-  },
-  {
-    id: 'slide-wc2',
-    src: '/banner-worldcup-2.jpg',
-    webp: '/banner-worldcup-2.jpg',
-    alt: 'Go USA! Championship Quality for Every Pet – NYC\'s Home for World-Class Pet Supplies',
-    link: '/products',
-  },
-  {
-    id: 'slide-wc3',
-    src: '/banner-worldcup-3.jpg',
-    webp: '/banner-worldcup-3.jpg',
-    alt: 'Proud Supporters of Team USA – Fueling America\'s Champions with Premium Care',
-    link: '/products',
-  },
 ];
 
 const HeroSlideshow = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const slide = SLIDES[currentSlide];
+  const nextSlideData = SLIDES[(currentSlide + 1) % SLIDES.length];
+  const displaySrc = slideDisplaySrc(slide);
 
-  // Auto-advance every 5 seconds
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
     }, 5000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = slideDisplaySrc(nextSlideData);
+  }, [nextSlideData]);
 
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + SLIDES.length) % SLIDES.length);
@@ -74,35 +81,26 @@ const HeroSlideshow = () => {
     <div className="w-full mt-4">
       <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-4">
         <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
-
-          {/* Slides */}
           <div className="relative w-full aspect-[16/6]">
-            {SLIDES.map((slide, index) => (
-              <Link
-                key={slide.id}
-                to={slide.link}
-                className={`absolute inset-0 transition-all duration-1000 ${
-                  index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                }`}
-              >
-                <picture>
+            <Link key={slide.id} to={slide.link} className="absolute inset-0 z-10">
+              <picture>
+                {slide.webp.endsWith('.webp') && (
                   <source srcSet={slide.webp} type="image/webp" />
-                  <img
-                    src={slide.src}
-                    alt={slide.alt}
-                    width={1920}
-                    height={720}
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                    fetchPriority={index === 0 ? 'high' : 'auto'}
-                    decoding={index === 0 ? 'sync' : 'async'}
-                    className="w-full h-full object-cover"
-                  />
-                </picture>
-              </Link>
-            ))}
+                )}
+                <img
+                  src={displaySrc}
+                  alt={slide.alt}
+                  width={1920}
+                  height={720}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                />
+              </picture>
+            </Link>
           </div>
 
-          {/* Arrows */}
           <button
             onClick={prevSlide}
             className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 hover:text-blue-600 p-2 md:p-3 rounded-full transition-all shadow-lg hover:shadow-xl z-20 transform hover:scale-110 duration-300"
@@ -120,7 +118,6 @@ const HeroSlideshow = () => {
             <ChevronRight size={20} className="md:w-6 md:h-6" />
           </button>
 
-          {/* Dot indicators */}
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-20 bg-white/70 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md">
             {SLIDES.map((_, index) => (
               <button
@@ -135,7 +132,6 @@ const HeroSlideshow = () => {
               />
             ))}
           </div>
-
         </div>
       </div>
     </div>
