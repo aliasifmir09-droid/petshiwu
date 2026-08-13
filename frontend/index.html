@@ -71,7 +71,7 @@
       .ps-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     </style>
 
-    <link rel="preload" as="image" href="/logo.png" type="image/png" fetchpriority="high" />
+    <link rel="preload" as="image" href="/logo.webp" type="image/webp" fetchpriority="high" />
     <link rel="dns-prefetch" href="https://petshiwu.onrender.com">
     <link rel="preconnect" href="https://petshiwu.onrender.com" crossorigin>
     <!-- Cloudinary removed — Bunny CDN is now the image host -->
@@ -101,9 +101,9 @@
     <!-- Google Merchant Center site claim verification -->
           <meta name="google-site-verification" content="merchant-center-5791232179" />
 
-          <!-- Google AdSense verification (publisher ID: ca-pub-8262868175443135) -->
+          <!-- Google AdSense verification (publisher ID: ca-pub-8262868175443135).
+               Script is deferred until window load so it does not compete with the app JS. -->
           <meta name="google-adsense-account" content="ca-pub-8262868175443135">
-          <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8262868175443135" crossorigin="anonymous"></script>
 
     <!-- ============================================
          OPEN GRAPH & TWITTER
@@ -459,7 +459,28 @@
               observer.observe(document.getElementById('root') || document.body, {
                 childList: true, subtree: true
               });
+              setTimeout(function() {
+                var root = document.getElementById('root');
+                if (root && root.children.length === 0) {
+                  var text = document.querySelector('.ps-loader-text');
+                  if (text) {
+                    text.textContent = 'Still loading — tap to retry';
+                    text.setAttribute('role', 'button');
+                    text.style.cursor = 'pointer';
+                    text.addEventListener('click', function() { location.reload(); });
+                  }
+                }
+              }, 10000);
             })();
+          </script>
+          <script>
+            window.addEventListener('load', function() {
+              var s = document.createElement('script');
+              s.async = true;
+              s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8262868175443135';
+              s.crossOrigin = 'anonymous';
+              document.body.appendChild(s);
+            });
           </script>
 
     <script type="module" src="/src/main.tsx"></script>
