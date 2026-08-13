@@ -339,7 +339,15 @@ app.use((req, res, next) => {
       if (Array.isArray(obj)) { return obj.map(item => sanitizeObject(item, isInHtmlField)); }
       if (obj && typeof obj === 'object' && obj.constructor === Object) {
         const sanitized: { [key: string]: SanitizedObject } = {};
-        for (const key in obj) { const isHtmlField = htmlContentFields.includes(key.toLowerCase()); sanitized[key] = sanitizeObject((obj as Record<string, unknown>)[key], isHtmlField); }
+        const skipHtmlEscape = new Set(['image', 'mimetype', 'password', 'token', 'currentpassword', 'newpassword']);
+        for (const key in obj) {
+          if (skipHtmlEscape.has(key.toLowerCase())) {
+            sanitized[key] = (obj as Record<string, unknown>)[key] as SanitizedObject;
+            continue;
+          }
+          const isHtmlField = htmlContentFields.includes(key.toLowerCase());
+          sanitized[key] = sanitizeObject((obj as Record<string, unknown>)[key], isHtmlField);
+        }
         return sanitized;
       }
       return obj as SanitizedObject;

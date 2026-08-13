@@ -9,6 +9,7 @@ import SEO from '@/components/SEO';
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
 import api from '@/services/api';
+import { compressImageFile, fileToDataUrl, photoSearchErrorMessage } from '@/utils/compressImage';
 
 const AdvancedSearch = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,90 +29,23 @@ const AdvancedSearch = () => {
 
   const visualSearchMutation = useMutation({
     mutationFn: async (file: File) => {
-      return new Promise<any>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          try {
-            const dataUrl = e.target?.result as string;
-            const res = await api.post('/products/visual-search', {
-              image: dataUrl,
-              mimeType: file.type,
-            });
-            resolve(res.data);
-          } catch (err: any) {
-            if (err?.response?.status === 413) {
-              reject(new Error('Photo is still too large after compression. Please try a different photo.'));
-            } else {
-              reject(err);
-            }
-          }
-        };
-        reader.onerror = () => reject(new Error('Failed to read file'));
-        reader.readAsDataURL(file);
-      });
+      const dataUrl = await fileToDataUrl(file);
+      const res = await api.post(
+        '/products/visual-search',
+        { image: dataUrl, mimeType: 'image/jpeg' },
+        { timeout: 25000 }
+      );
+      return res.data;
     },
     onSuccess: (data) => {
       setVisualResults(data);
       setVisualSearchError(null);
       setInputValue('');
     },
-    onError: (err: any) => {
-      setVisualSearchError(err?.message || 'Something went wrong. Please try again.');
+    onError: (err: unknown) => {
+      setVisualSearchError(photoSearchErrorMessage(err));
     },
   });
-
-  // Compress ANY phone photo to max 800px wide, 75% JPEG quality before sending.
-  // Works on any file size — no pre-rejection. Phone RAW/HEIC/large JPEGs all
-  // get scaled down to ~100-250KB for reliable upload regardless of original size.
-  const compressImage = (file: File): Promise<File> => {
-    return new Promise((resolve, reject) => {
-      // Extended timeout for very large RAW/HEIC files on slow devices
-      const timeoutId = setTimeout(() => {
-        URL.revokeObjectURL(url);
-        reject(new Error('Image took too long to process. Please try again.'));
-      }, 30_000);
-
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onload = () => {
-        // Scale to max 800px on longest side — wide enough for good product recognition
-        const MAX = 800;
-        const scale = Math.max(img.width, img.height) > MAX
-          ? MAX / Math.max(img.width, img.height)
-          : 1;
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          clearTimeout(timeoutId);
-          URL.revokeObjectURL(url);
-          reject(new Error('Could not process image. Please try again.'));
-          return;
-        }
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        canvas.toBlob(
-          (blob) => {
-            clearTimeout(timeoutId);
-            URL.revokeObjectURL(url);
-            if (!blob) {
-              reject(new Error('Image compression failed. Please try a different photo.'));
-              return;
-            }
-            resolve(new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
-          },
-          'image/jpeg',
-          0.75
-        );
-      };
-      img.onerror = () => {
-        clearTimeout(timeoutId);
-        URL.revokeObjectURL(url);
-        reject(new Error('Could not read image. Please try a different photo.'));
-      };
-      img.src = url;
-    });
-  };
 
   const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -120,21 +54,15 @@ const AdvancedSearch = () => {
     setPhotoPreview(previewUrl);
     setVisualResults(null);
     setVisualSearchError(null);
-    // Reset input so same file can be re-selected
     e.target.value = '';
     try {
-      const compressed = await compressImage(file);
-      // Update preview to compressed JPEG — always displayable, fixes HEIC on iOS
+      const compressed = await compressImageFile(file, 1200, 0.82);
       setPhotoPreview(URL.createObjectURL(compressed));
+      URL.revokeObjectURL(previewUrl);
       visualSearchMutation.mutate(compressed);
-    } catch {
-      // Compression fails for HEIC/HEIF (iPhone default format) because the browser
-      // canvas can't decode them. Gemini Vision supports HEIC natively, so send as-is.
-      if (file.size <= 20 * 1024 * 1024) {
-        visualSearchMutation.mutate(file);
-      } else {
-        setVisualSearchError('Photo is too large. Please take a screenshot of the product and try that instead.');
-      }
+    } catch (err: unknown) {
+      URL.revokeObjectURL(previewUrl);
+      setVisualSearchError(photoSearchErrorMessage(err));
     }
   };
 
@@ -326,7 +254,7 @@ const AdvancedSearch = () => {
               <input
                 ref={cameraInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*"
                 capture="environment"
                 className="hidden"
                 onChange={handlePhotoSelect}
@@ -335,7 +263,7 @@ const AdvancedSearch = () => {
               <input
                 ref={galleryInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*"
                 className="hidden"
                 onChange={handlePhotoSelect}
               />
@@ -505,7 +433,7 @@ const AdvancedSearch = () => {
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {visualResults.data.map((product: any) => (
-                  <ProductCard key={product._id} product={product} />
+                  <ProductCard key={product._id} product={product} hideCartButton={true} />
                 ))}
               </div>
             </div>

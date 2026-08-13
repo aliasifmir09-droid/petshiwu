@@ -7,6 +7,7 @@ import logger from '../utils/logger';
 import { executeCachedAggregation } from '../utils/aggregationCache';
 import { cache, cacheKeys } from '../utils/cache';
 import { extractJsonObject, parseNeuralTwin } from '../utils/neuralScan';
+import { mimeFromDataUrl, parseVisualIdentification, visualSearchTerms } from '../utils/visualSearch';
 
 const GEMINI_VISION_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
 
@@ -480,161 +481,175 @@ export const searchAutocomplete = async (req: Request, res: Response, next: Next
   }
 };
 
+const VISUAL_PRODUCT_FIELDS =
+  'name slug brand images variants basePrice compareAtPrice petType inStock averageRating totalReviews isFeatured totalStock category';
+
+async function findVisualProducts(petType: string | null, terms: string[]) {
+  const active: any = {
+    isActive: true,
+    $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+  };
+  const withPet = petType ? { ...active, petType } : active;
+  const seen = new Set<string>();
+  const products: any[] = [];
+
+  const pushUnique = (rows: any[]) => {
+    for (const row of rows) {
+      const id = String(row._id);
+      if (!seen.has(id)) {
+        seen.add(id);
+        products.push(row);
+      }
+    }
+  };
+
+  const searchText = terms.join(' ').trim();
+  if (searchText) {
+    try {
+      const textHits = await Product.find(
+        { ...withPet, $text: { $search: searchText } },
+        { score: { $meta: 'textScore' } }
+      )
+        .select(VISUAL_PRODUCT_FIELDS)
+        .populate('category', 'name slug petType parentCategory')
+        .sort({ score: { $meta: 'textScore' } })
+        .limit(20)
+        .lean();
+      pushUnique(textHits);
+    } catch {
+      // No text index — fall through to regex.
+    }
+  }
+
+  if (products.length < 5 && terms.length > 0) {
+    const orName = terms.map((term) => ({
+      name: new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
+    }));
+    const extras = await Product.find({
+      ...withPet,
+      $or: orName,
+      ...(products.length ? { _id: { $nin: products.map((p) => p._id) } } : {}),
+    })
+      .select(VISUAL_PRODUCT_FIELDS)
+      .populate('category', 'name slug petType parentCategory')
+      .limit(20 - products.length)
+      .lean();
+    pushUnique(extras);
+  }
+
+  if (products.length === 0 && petType && terms.length > 0) {
+    return findVisualProducts(null, terms);
+  }
+
+  return products.slice(0, 20);
+}
+
 // ─── Visual / Photo Search ────────────────────────────────────────────────────
 // POST /api/products/visual-search
 // Body: { image: "<base64 string>", mimeType: "image/jpeg" }
-// 1. Sends image to Gemini Vision to identify what product is shown
-// 2. Uses the AI description to search the product database
-// 3. Returns matching products + the AI-identified label
-export const visualSearch = async (req: Request, res: Response, next: NextFunction) => {
+export const visualSearch = async (req: Request, res: Response, _next: NextFunction) => {
   try {
-    const { image, mimeType } = req.body as { image: string; mimeType: string };
+    const { image, mimeType } = req.body as { image?: string; mimeType?: string };
 
-    if (!image) {
+    if (!image || typeof image !== 'string') {
       return res.status(400).json({ success: false, message: 'No image provided' });
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return res.status(503).json({ success: false, message: 'Visual search is not configured' });
+      return res.status(503).json({
+        success: false,
+        message: 'Photo search is warming up. Please try again in a moment.',
+      });
     }
 
-    // Strip data URL prefix if present (data:image/jpeg;base64,...)
     const base64Data = image.includes(',') ? image.split(',')[1] : image;
-    const imageMime = mimeType || 'image/jpeg';
+    if (!base64Data || base64Data.length < 100) {
+      return res.status(400).json({ success: false, message: 'That photo could not be read. Please try another.' });
+    }
+    const imageMime = mimeFromDataUrl(image, mimeType || 'image/jpeg');
 
-    // Ask Gemini to identify the pet product in the photo
     const prompt = `You are a pet store product identifier. Look at this image carefully.
-Identify any pet product, animal, or pet-related item visible. Be generous — if you see an animal, identify what type of product it might need. If you see a product package, read the label.
-Return ONLY a JSON object in this exact format (no markdown, no extra text):
+If you see a product package, READ the label (brand + product name). If you see an animal, say what supplies it likely needs.
+Return ONLY a JSON object (no markdown):
 {
-  "productType": "<product type, e.g. 'dog food', 'cat collar', 'pet toy', 'dog leash', 'cat litter', 'bird cage', 'fish tank', 'pet bed', 'dog treats', 'cat food'>",
+  "productType": "<e.g. 'dog food', 'cat litter', 'dog toy', 'bird seed'>",
   "keywords": ["keyword1", "keyword2", "keyword3"],
-  "petType": "<'dog', 'cat', 'bird', 'fish', 'small-animal', or 'unknown'>",
-  "brand": "<brand name if visible, or null>",
-  "description": "<1 sentence describing what you see>"
+  "petType": "dog" | "cat" | "bird" | "fish" | "reptile" | "small-pet" | "unknown",
+  "brand": "<brand if readable, else null>",
+  "description": "<1 sentence>"
 }
-Only set productType to "unknown" if the image is completely unrelated to pets (e.g. a landscape, car, or human face with no animals/pet products).`;
+Set productType to "unknown" only if the photo has nothing pet-related.`;
 
-    const geminiPayload = {
-      contents: [{
-        parts: [
-          { text: prompt },
-          { inline_data: { mime_type: imageMime, data: base64Data } }
-        ]
-      }],
-      generationConfig: { temperature: 0.1, maxOutputTokens: 256 }
-    };
-
-    let aiResult: any = null;
+    let identified = null;
     try {
       const geminiRes = await fetch(`${GEMINI_VISION_URL}?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(geminiPayload),
-        signal: AbortSignal.timeout(15000)
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: prompt },
+              { inline_data: { mime_type: imageMime, data: base64Data } },
+            ],
+          }],
+          generationConfig: { temperature: 0.1, maxOutputTokens: 256 },
+        }),
+        signal: AbortSignal.timeout(18000),
       });
 
       if (!geminiRes.ok) {
         const errText = await geminiRes.text();
-        logger.error('Gemini vision error:', errText);
+        logger.error('Gemini vision error:', errText.slice(0, 500));
         throw new Error(`Gemini error ${geminiRes.status}`);
       }
 
       const geminiData: any = await geminiRes.json();
       const rawText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-      // Extract JSON from response (handle markdown code blocks)
-      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        aiResult = JSON.parse(jsonMatch[0]);
-      }
+      identified = parseVisualIdentification(extractJsonObject(rawText));
     } catch (err: any) {
       logger.error('Gemini vision call failed:', err.message);
-      // Fall through — we'll return empty results with a helpful message
     }
 
-    if (!aiResult || aiResult.productType === 'unknown') {
+    if (!identified) {
       return res.status(200).json({
         success: true,
         identified: null,
-        message: 'Could not identify a pet product in the photo. Please try a clearer image.',
+        message: 'Could not identify a pet product in that photo. Try a brighter shot of the front of the package.',
         data: [],
-        pagination: { total: 0 }
+        pagination: { total: 0 },
       });
     }
 
-    // Build search terms from AI response
-    const searchTerms = [
-      aiResult.productType,
-      ...(aiResult.keywords || [])
-    ].filter(Boolean).join(' ');
-
-    // Build MongoDB query
-    const baseQuery: any = {
-      isActive: true,
-      deletedAt: null,
-    };
-
-    if (aiResult.petType && aiResult.petType !== 'unknown') {
-      baseQuery.petType = aiResult.petType;
-    }
-    if (aiResult.brand) {
-      // Optional brand match — use regex for fuzzy
-      baseQuery.brand = { $regex: new RegExp(aiResult.brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') };
-    }
-
-    // Text search for the identified product type
     let products: any[] = [];
     try {
-      // Try full-text search first (uses text index)
-      products = await Product.find(
-        { ...baseQuery, $text: { $search: searchTerms } },
-        { score: { $meta: 'textScore' } }
-      )
-        .sort({ score: { $meta: 'textScore' } })
-        .limit(20)
-        .lean();
-    } catch {
-      // Fallback: regex search on name
+      products = await findVisualProducts(identified.petType, visualSearchTerms(identified));
+    } catch (err: any) {
+      logger.error('Visual search catalog query failed:', err.message);
     }
 
-    // If text search returns too few results, supplement with regex on name
-    if (products.length < 5) {
-      const regexTerms = aiResult.productType
-        .split(' ')
-        .filter((t: string) => t.length > 2)
-        .map((t: string) => new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
-
-      if (regexTerms.length > 0) {
-        const extras = await Product.find({
-          ...baseQuery,
-          name: { $in: regexTerms },
-          _id: { $nin: products.map((p: any) => p._id) }
-        })
-          .limit(20 - products.length)
-          .lean();
-        products = [...products, ...extras];
-      }
-    }
-
-    logger.info(`Visual search: identified "${aiResult.productType}" (${aiResult.petType}), found ${products.length} products`);
+    logger.info(`Visual search: identified "${identified.productType}" (${identified.petType}), found ${products.length} products`);
 
     return res.status(200).json({
       success: true,
       identified: {
-        productType: aiResult.productType,
-        petType: aiResult.petType,
-        brand: aiResult.brand,
-        description: aiResult.description,
+        productType: identified.productType,
+        petType: identified.petType,
+        brand: identified.brand,
+        description: identified.description,
       },
       data: products,
-      pagination: { total: products.length, page: 1, limit: 20 }
+      pagination: { total: products.length, page: 1, limit: 20 },
     });
-
   } catch (error: any) {
     logger.error('Error in visualSearch:', error);
-    next(error);
+    return res.status(200).json({
+      success: true,
+      identified: null,
+      message: 'Photo search hit a snag. Please try another photo.',
+      data: [],
+      pagination: { total: 0 },
+    });
   }
 };
 

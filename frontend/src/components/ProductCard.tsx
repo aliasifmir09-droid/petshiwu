@@ -225,7 +225,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
                       />
                     ))}
                   </div>
-                  <span className="text-sm font-bold text-gray-800">{product.averageRating.toFixed(1)}</span>
+                  <span className="text-sm font-bold text-gray-800">{Number(product.averageRating || 0).toFixed(1)}</span>
                 </div>
                 <span className="text-xs text-gray-500">({product.totalReviews} reviews)</span>
               </div>
@@ -238,7 +238,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-lg border border-blue-100">
             <div className="flex items-baseline gap-2 mb-1">
               <span className="text-2xl font-black text-gray-900 tracking-tight">
-                ${product.basePrice.toFixed(2)}
+                ${(Number(product.basePrice) || 0).toFixed(2)}
               </span>
               {product.compareAtPrice && (
                 <div className="flex flex-col">

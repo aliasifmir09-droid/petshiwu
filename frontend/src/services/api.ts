@@ -124,7 +124,9 @@ api.interceptors.response.use(
     } else if (error.response?.status === 403) {
       const isAuthLogin = url.includes('/auth/login');
       const requiresVerification = error.response?.data?.requiresVerification;
-      if (!isOrderEndpoint && !(isAuthLogin && requiresVerification)) {
+      const isProductOrSearch =
+        url.includes('/products') || url.includes('/search') || url.includes('/neural');
+      if (!isOrderEndpoint && !isProductOrSearch && !(isAuthLogin && requiresVerification)) {
         window.location.href = '/403';
       }
     } else if (error.response?.status === 404) {
