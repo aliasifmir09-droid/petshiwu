@@ -12,10 +12,31 @@ const SLIDES = [
     link: '/products',
   },
   {
+    id: 'slide-nyc-tonight',
+    src: '/banner-nyc-tonight.jpg',
+    webp: '/banner-nyc-tonight.webp',
+    alt: 'Same-day NYC pet delivery — order by 3 PM, delivered tonight',
+    link: '/products',
+  },
+  {
+    id: 'slide-neural',
+    src: '/banner-neural-twin.jpg',
+    webp: '/banner-neural-twin.webp',
+    alt: 'Scan your pet. Generate their Twin — Petshiwu Neural',
+    link: '/neural',
+  },
+  {
     id: 'slide-2',
     src: '/banner-birthday.png',
     webp: '/banner-birthday.webp',
     alt: 'Celebrate Your Pet\'s Birthday – 20% OFF + Free Gift',
+    link: '/products',
+  },
+  {
+    id: 'slide-fall',
+    src: '/banner-fall-bowl.jpg',
+    webp: '/banner-fall-bowl.webp',
+    alt: 'Fall starts in the bowl — seasonal food, joints and coats',
     link: '/products',
   },
   {
@@ -30,27 +51,6 @@ const SLIDES = [
     src: '/banner-nyc-delivery.jpg',
     webp: '/banner-nyc-delivery.webp',
     alt: 'NYC\'s Fastest Pet Delivery',
-    link: '/products',
-  },
-  {
-    id: 'slide-wc1',
-    src: '/banner-worldcup-1.jpg',
-    webp: '/banner-worldcup-1.jpg',
-    alt: 'Victory in Every Bowl – Celebrating the World Cup with NYC\'s Pet Parents',
-    link: '/products',
-  },
-  {
-    id: 'slide-wc2',
-    src: '/banner-worldcup-2.jpg',
-    webp: '/banner-worldcup-2.jpg',
-    alt: 'Go USA! Championship Quality for Every Pet – NYC\'s Home for World-Class Pet Supplies',
-    link: '/products',
-  },
-  {
-    id: 'slide-wc3',
-    src: '/banner-worldcup-3.jpg',
-    webp: '/banner-worldcup-3.jpg',
-    alt: 'Proud Supporters of Team USA – Fueling America\'s Champions with Premium Care',
     link: '/products',
   },
 ];
@@ -68,7 +68,7 @@ const HeroSlideshow = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Preload only the next slide so we don't download all 7 banners at once.
+  // Preload only the next slide so we don't download all banners at once.
   // Hidden opacity-0 slides still count as "in viewport" and bypass lazy-load.
   useEffect(() => {
     const img = new Image();

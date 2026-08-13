@@ -10,7 +10,7 @@ describe('hero slideshow assets', () => {
 
   test('keeps jpg when no real webp exists', () => {
     expect(
-      slideDisplaySrc({ src: '/banner-worldcup-1.jpg', webp: '/banner-worldcup-1.jpg' })
-    ).toBe('/banner-worldcup-1.jpg');
+      slideDisplaySrc({ src: '/banner-legacy.jpg', webp: '/banner-legacy.jpg' })
+    ).toBe('/banner-legacy.jpg');
   });
 });
