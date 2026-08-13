@@ -194,6 +194,17 @@ export function isCoordinateInNyc(lat: number, lng: number): boolean {
   );
 }
 
+export const LAST_ZIP_STORAGE_KEY = 'petshiwu_last_zip';
+
 export function padTime(value: number): string {
   return String(value).padStart(2, '0');
+}
+
+/** Compact remaining-time label for the sticky tonight bar. */
+export function formatCountdownShort(countdown: CutoffCountdown): string {
+  if (countdown.passed) return 'cutoff passed';
+  if (countdown.hours > 0) {
+    return `${countdown.hours}h ${padTime(countdown.minutes)}m left`;
+  }
+  return `${countdown.minutes}m ${padTime(countdown.seconds)}s left`;
 }

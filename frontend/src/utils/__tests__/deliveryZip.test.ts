@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import {
+  formatCountdownShort,
   getCutoffCountdown,
   getNyDateParts,
   getSameDayCutoffHour,
@@ -85,5 +86,14 @@ describe('deliveryZip', () => {
   test('padTime zero-pads', () => {
     expect(padTime(4)).toBe('04');
     expect(padTime(12)).toBe('12');
+  });
+
+  test('formatCountdownShort shows hours when remaining, then minutes', () => {
+    const morning = getCutoffCountdown(new Date('2026-08-13T14:00:00Z')); // 10 AM EDT, 5h to 3 PM
+    expect(morning.passed).toBe(false);
+    expect(formatCountdownShort(morning)).toMatch(/^\d+h \d{2}m left$/);
+
+    const afterCutoff = getCutoffCountdown(new Date('2026-08-13T20:30:00Z'));
+    expect(formatCountdownShort(afterCutoff)).toBe('cutoff passed');
   });
 });

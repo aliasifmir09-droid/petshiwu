@@ -12,8 +12,9 @@ import BirthdayBanner from '@/components/BirthdayBanner';
 import SmartTechShowcase from '@/components/SmartTechShowcase';
 import NeuralPortal from '@/components/NeuralPortal';
 import AdSense from '@/components/AdSense';
-import { ChevronRight, ChevronLeft, ArrowRight } from 'lucide-react';
-import { useRef, useState, useEffect, useMemo } from 'react';
+import ShopByPet from '@/components/ShopByPet';
+import { ChevronRight, ArrowRight } from 'lucide-react';
+import { useMemo, useState, useEffect } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import { normalizeImageUrl, generateSrcSet, getOptimizedImageUrl } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
@@ -30,15 +31,6 @@ const BRANDS = [
   { name: 'Iams',                logo: 'https://petshiwu-cdn.b-cdn.net/brands/iams.png' },
   { name: 'Pedigree',            logo: 'https://petshiwu-cdn.b-cdn.net/brands/pedigree.png' },
   { name: "Nature's Recipe",     logo: 'https://petshiwu-cdn.b-cdn.net/brands/natures.svg' },
-];
-
-const PET_CATEGORIES = [
-  { name: 'Dog',       slug: 'dog',       image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&h=600&fit=crop&q=95' },
-  { name: 'Cat',       slug: 'cat',       image: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=600&h=600&fit=crop&q=95' },
-  { name: 'Fish',      slug: 'fish',      image: 'https://images.unsplash.com/photo-1544552866-d3ed42536cfd?w=600&h=600&fit=crop&q=95' },
-  { name: 'Bird',      slug: 'bird',      image: 'https://images.unsplash.com/photo-1444464666168-49d633b86797?w=600&h=600&fit=crop&q=95' },
-  { name: 'Reptile',   slug: 'reptile',   image: 'https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=600&h=600&fit=crop&q=95' },
-  { name: 'Small Pet', slug: 'small-pet', image: 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?w=600&h=600&fit=crop&q=95' },
 ];
 
 // ─── Today's Deals — Hill's Science Diet 5% Off ──────────────────────────────
@@ -153,10 +145,6 @@ const Home = () => {
     refetchOnMount: false,
   });
 
-  const petTypesScrollRef = useRef<HTMLDivElement>(null);
-  const [showLeftArrow, setShowLeftArrow] = useState(false);
-  const [showRightArrow, setShowRightArrow] = useState(false);
-
   const filteredFeaturedProducts = useMemo(() => {
     if (!featuredProducts?.data) return [];
     return featuredProducts.data.filter((product) => {
@@ -164,43 +152,6 @@ const Home = () => {
       return productId && !hasImageFailed(productId);
     });
   }, [featuredProducts?.data]);
-
-  useEffect(() => {
-    const scrollContainer = petTypesScrollRef.current;
-    let rafId: number | null = null;
-    const checkScrollPosition = () => {
-      rafId = requestAnimationFrame(() => {
-        if (petTypesScrollRef.current) {
-          const { scrollLeft, scrollWidth, clientWidth } = petTypesScrollRef.current;
-          setShowLeftArrow(scrollLeft > 0);
-          setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
-        }
-      });
-    };
-    rafId = requestAnimationFrame(checkScrollPosition);
-    if (scrollContainer) {
-      scrollContainer.addEventListener('scroll', checkScrollPosition, { passive: true });
-      window.addEventListener('resize', checkScrollPosition, { passive: true });
-    }
-    return () => {
-      if (rafId !== null) cancelAnimationFrame(rafId);
-      if (scrollContainer) {
-        scrollContainer.removeEventListener('scroll', checkScrollPosition);
-        window.removeEventListener('resize', checkScrollPosition);
-      }
-    };
-  }, []);
-
-  const scrollPetTypes = (direction: 'left' | 'right') => {
-    if (petTypesScrollRef.current) {
-      const scrollAmount = 300;
-      const newScrollPosition =
-        direction === 'left'
-          ? petTypesScrollRef.current.scrollLeft - scrollAmount
-          : petTypesScrollRef.current.scrollLeft + scrollAmount;
-      petTypesScrollRef.current.scrollTo({ left: newScrollPosition, behavior: 'smooth' });
-    }
-  };
 
   return (
     <div className="relative">
@@ -359,6 +310,8 @@ const Home = () => {
         />
       )}
 
+      <ShopByPet />
+
       {/* Hero Slideshow */}
       <div className="container mx-auto px-4 lg:px-8 mt-4">
         <HeroSlideshow />
@@ -395,92 +348,10 @@ const Home = () => {
       {/* Birthday Banner */}
       <BirthdayBanner />
 
-              {/* In-content ad before shop by pet */}
+              {/* In-content ad before category icons */}
               <section className="container mx-auto px-4 lg:px-8 mt-6 mb-2">
                 <AdSense slot="9876543214" format="auto" responsive={true} />
               </section>
-
-              {/* Shop by Pet Type */}
-      <section className="py-16 bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-12 relative z-30">
-            <h2
-              className="text-3xl md:text-5xl font-black mb-3"
-              style={{
-                background: 'linear-gradient(to right, #2563eb, #9333ea, #db2777)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                color: '#9333ea',
-              }}
-            >
-              Shop by Pet Type
-            </h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">Find everything your furry friend needs</p>
-          </div>
-
-          <div className="relative overflow-visible">
-            {/* Desktop */}
-            <div className="hidden md:block relative">
-              {showLeftArrow && (
-                <button
-                  onClick={() => scrollPetTypes('left')}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 rounded-full shadow-lg"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-              )}
-              {showRightArrow && (
-                <button
-                  onClick={() => scrollPetTypes('right')}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 rounded-full shadow-lg"
-                >
-                  <ChevronRight size={20} />
-                </button>
-              )}
-              <div
-                ref={petTypesScrollRef}
-                className="flex justify-center items-center gap-8 overflow-x-auto pb-6 pt-6 scrollbar-hide snap-x px-8"
-              >
-                {PET_CATEGORIES.map((category, index) => (
-                  <div
-                    key={index}
-                    className="flex-shrink-0 snap-center group cursor-pointer"
-                    onClick={() => navigate(`/products?petType=${category.slug}`)}
-                  >
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[3px] group-hover:scale-110 transition-all shadow-lg">
-                        <div className="w-full h-full rounded-full overflow-hidden bg-white">
-                          <img src={category.image} alt={category.name} className="w-full h-full object-cover" loading="lazy" />
-                        </div>
-                      </div>
-                      <p className="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{category.name}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Mobile */}
-            <div className="md:hidden flex overflow-x-auto gap-3 px-2 pb-2 scrollbar-hide">
-              {PET_CATEGORIES.map((category, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col items-center gap-1.5 flex-shrink-0 w-[90px]"
-                  onClick={() => navigate(`/products?petType=${category.slug}`)}
-                >
-                  <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[2px] active:scale-105 transition-all">
-                    <div className="w-full h-full rounded-full overflow-hidden bg-white">
-                      <img src={category.image} alt={category.name} className="w-full h-full object-cover" loading="lazy" />
-                    </div>
-                  </div>
-                  <p className="text-[10px] font-bold text-gray-800 text-center">{category.name}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
       <CategoryIcons />
 

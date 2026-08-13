@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Loader2, Sparkles, Navigation } from 'lucide-react';
 import {
+  LAST_ZIP_STORAGE_KEY,
   getCutoffCountdown,
   isCoordinateInNyc,
   lookupZip,
@@ -9,8 +10,6 @@ import {
   padTime,
   type ZipLookupResult,
 } from '@/utils/deliveryZip';
-
-const STORAGE_KEY = 'petshiwu_last_zip';
 
 const SameDayChecker = () => {
   const [zip, setZip] = useState('');
@@ -20,7 +19,7 @@ const SameDayChecker = () => {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(LAST_ZIP_STORAGE_KEY);
       if (saved && /^\d{5}$/.test(saved)) {
         setZip(saved);
         setResult(lookupZip(saved));
@@ -40,7 +39,7 @@ const SameDayChecker = () => {
       const next = lookupZip(zip);
       setResult(next);
       try {
-        if (next) localStorage.setItem(STORAGE_KEY, zip);
+        if (next) localStorage.setItem(LAST_ZIP_STORAGE_KEY, zip);
       } catch {
         // Ignore
       }
