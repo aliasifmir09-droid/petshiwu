@@ -26,6 +26,7 @@ import {
   getPayPalOrder
 } from '../services/paypalService';
 import { calculateTrustedOrderPricing } from '../services/orderPricingService';
+import { isNycShippingAddress } from '../utils/nycDelivery';
 
 const stripe: Stripe | null = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2024-11-20.acacia' as any })
@@ -96,17 +97,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       });
     }
 
-    // NYC-only delivery restriction — 5 boroughs only
-    // Manhattan: 10001-10282 | Staten Island: 10301-10314 | Bronx: 10451-10475 | Brooklyn+Queens: 11201-11697
-    const zip = (shippingAddress.zipCode || '').trim().replace(/[^0-9]/g, '').substring(0, 5);
-    const isNYState = (shippingAddress.state || '').trim().toUpperCase() === 'NY';
-    const isNYCZip =
-      (zip >= '10001' && zip <= '10282') || // Manhattan
-      (zip >= '10301' && zip <= '10314') || // Staten Island
-      (zip >= '10451' && zip <= '10475') || // Bronx
-      (zip >= '11201' && zip <= '11697');   // Brooklyn & Queens
-
-    if (!isNYState || !isNYCZip) {
+    // NYC-only delivery restriction — all 5 boroughs, including Queens 111xx
+    if (!isNycShippingAddress(shippingAddress.state, shippingAddress.zipCode)) {
       return res.status(400).json({
         success: false,
         message: 'We currently deliver only within New York City (all 5 boroughs). Please enter a valid NYC address.',
@@ -1505,14 +1497,7 @@ export const createPayPalCheckoutOrder = async (req: AuthRequest, res: Response,
     if (!isCompleteShippingAddress(shippingAddress)) {
       return res.status(400).json({ success: false, message: 'A complete shipping address is required before starting PayPal checkout.' });
     }
-    const zip = shippingAddress.zipCode.trim().replace(/[^0-9]/g, '').substring(0, 5);
-    const isNYC = shippingAddress.state.trim().toUpperCase() === 'NY' && (
-      (zip >= '10001' && zip <= '10282') ||
-      (zip >= '10301' && zip <= '10314') ||
-      (zip >= '10451' && zip <= '10475') ||
-      (zip >= '11201' && zip <= '11697')
-    );
-    if (!isNYC) {
+    if (!isNycShippingAddress(shippingAddress.state, shippingAddress.zipCode)) {
       return res.status(400).json({ success: false, message: 'We currently deliver only within New York City (all 5 boroughs). Please enter a valid NYC address.' });
     }
     const isGuest = !req.user?._id;

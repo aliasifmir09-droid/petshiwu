@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, ChevronDown, ChevronRight, Search, Menu, X, LogOut, Phone, Heart } from 'lucide-react';
+import VoiceSearchButton from './VoiceSearchButton';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
@@ -225,6 +226,13 @@ const Header = () => {
     }
   };
 
+  const handleVoiceResult = (transcript: string) => {
+    setSearchQuery(transcript);
+    setShowSuggestions(false);
+    setMobileMenuOpen(false);
+    navigate(`/products?search=${encodeURIComponent(transcript)}`);
+  };
+
   const handleLogout = () => {
     logout();
     setMobileMenuOpen(false);
@@ -419,7 +427,11 @@ const Header = () => {
                     onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
                     onFocus={() => { if (searchQuery.length >= 1) { setShowSuggestions(true); } }}
                     style={{ minHeight: '48px' }}
-                    className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-white/20 bg-white/95 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:border-yellow-300 shadow-lg hover:shadow-xl transition-all placeholder:text-gray-500 font-medium"
+                    className="w-full px-4 py-3 pr-[5.5rem] rounded-xl border-2 border-white/20 bg-white/95 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:border-yellow-300 shadow-lg hover:shadow-xl transition-all placeholder:text-gray-500 font-medium"
+                  />
+                  <VoiceSearchButton
+                    onResult={handleVoiceResult}
+                    className="absolute right-12 top-1/2 -translate-y-1/2"
                   />
                   <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg transform hover:scale-110" aria-label="Search">
                     <Search size={18} />
@@ -687,7 +699,12 @@ const Header = () => {
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
                     onFocus={() => { if (searchQuery.length >= 2) { setShowSuggestions(true); } }}
-                    className="w-full px-4 py-2.5 pr-12 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                    className="w-full px-4 py-2.5 pr-[5.5rem] rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                  />
+                  <VoiceSearchButton
+                    onResult={handleVoiceResult}
+                    variant="dark"
+                    className="absolute right-11 top-1/2 -translate-y-1/2"
                   />
                   <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-900 transition-colors" aria-label="Search">
                     <Search size={20} />
