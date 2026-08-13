@@ -1,4 +1,4 @@
-import { Home, Search, ShoppingCart, User } from 'lucide-react';
+import { Home, Search, ShoppingCart, User, ScanLine } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -20,6 +20,7 @@ const BottomNav = () => {
   const tabs = [
     { icon: Home,         label: 'Home',    path: '/' },
     { icon: Search,       label: 'Search',  path: '/search' },
+    { icon: ScanLine,     label: 'Scan',    path: '/neural' },
     { icon: ShoppingCart, label: 'Cart',    path: '/cart',    badge: cartCount },
     { icon: User,         label: 'Account', path: isAuthenticated ? '/profile' : '/login' },
   ];
@@ -32,18 +33,23 @@ const BottomNav = () => {
       <div className="flex items-center justify-around">
         {tabs.map(({ icon: Icon, label, path, badge }) => {
           const active = location.pathname === path ||
-            (path === '/' && location.pathname === '/');
+            (path === '/' && location.pathname === '/') ||
+            (path === '/neural' && location.pathname.startsWith('/neural'));
           return (
             <Link
               key={label}
               to={path}
-              className={`flex flex-col items-center gap-0.5 py-2 px-5 min-w-[64px] transition-colors ${
+              className={`flex flex-col items-center gap-0.5 py-2 px-3 min-w-[56px] transition-colors ${
                 active ? 'text-blue-600' : 'text-gray-500 active:text-blue-400'
               }`}
               aria-label={label}
             >
               <div className="relative">
-                <Icon size={23} strokeWidth={active ? 2.5 : 2} />
+                <Icon
+                  size={label === 'Scan' ? 26 : 23}
+                  strokeWidth={active || label === 'Scan' ? 2.5 : 2}
+                  className={label === 'Scan' ? 'text-cyan-600' : undefined}
+                />
                 {badge != null && badge > 0 && (
                   <span className="absolute -top-2 -right-2.5 bg-red-500 text-white text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center font-bold px-0.5 leading-none">
                     {badge > 99 ? '99+' : badge}

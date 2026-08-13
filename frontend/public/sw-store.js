@@ -1,0 +1,18 @@
+self.addEventListener('install', (event) => {
+  event.waitUntil(self.skipWaiting());
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(
+      keys
+        .filter((key) => !key.startsWith('petshiwu-driver-'))
+        .map((key) => caches.delete(key))
+    );
+    await self.clients.claim();
+  })());
+});
+
+// Network-only. Exists so Chrome will offer "Install app" without stale caches.
+self.addEventListener('fetch', () => {});

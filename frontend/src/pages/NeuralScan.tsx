@@ -9,11 +9,13 @@ import {
   ShieldAlert,
   Cpu,
   ScanLine,
+  Share2,
 } from 'lucide-react';
 import SEO from '@/components/SEO';
 import ProductCard from '@/components/ProductCard';
 import api from '@/services/api';
 import { compressImageFile, fileToDataUrl } from '@/utils/compressImage';
+import { savePassport } from '@/utils/petPassport';
 import { Product } from '@/types';
 
 interface NeuralTwin {
@@ -52,6 +54,7 @@ const NeuralScan = () => {
   const [kit, setKit] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(8);
+  const [shared, setShared] = useState(false);
 
   useEffect(() => {
     if (!scanning) return;
@@ -94,6 +97,14 @@ const NeuralScan = () => {
       }
       setTwin(res.data.twin);
       setKit(res.data.data || []);
+      if (res.data.twin?.species && res.data.twin.species !== 'unknown') {
+        savePassport({
+          name: res.data.twin.breed?.split(' ')[0] || 'My pet',
+          species: res.data.twin.petType || res.data.twin.species,
+          breed: res.data.twin.breed,
+          createdAt: new Date().toISOString(),
+        });
+      }
     } catch (err: any) {
       if (err?.response?.status === 503) {
         setError('Neural Scan is warming up on this server. Try again in a moment, or use Visual Search in the meantime.');
@@ -301,12 +312,29 @@ const NeuralScan = () => {
                 )}
 
                 {twin.petType && (
-                  <Link
-                    to={`/products?petType=${encodeURIComponent(twin.petType)}`}
-                    className="mt-6 inline-flex rounded-full bg-white px-5 py-2.5 text-sm font-black text-slate-950 hover:bg-cyan-200"
-                  >
-                    Shop this Twin’s aisle →
-                  </Link>
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    <Link
+                      to={`/products?petType=${encodeURIComponent(twin.petType)}`}
+                      className="inline-flex rounded-full bg-white px-5 py-2.5 text-sm font-black text-slate-950 hover:bg-cyan-200"
+                    >
+                      Shop this Twin’s aisle →
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const text = `My pet’s Neural Twin: ${twin.breed} (${twin.breedConfidence}% match). ${twin.summary} Scan yours at https://www.petshiwu.com/neural`;
+                        if (navigator.share) {
+                          await navigator.share({ title: 'Petshiwu Neural Twin', text, url: 'https://www.petshiwu.com/neural' });
+                        } else {
+                          await navigator.clipboard.writeText(text);
+                          setShared(true);
+                        }
+                      }}
+                      className="inline-flex items-center gap-2 rounded-full border border-white/30 px-5 py-2.5 text-sm font-bold text-white hover:bg-white/10"
+                    >
+                      <Share2 size={14} /> {shared ? 'Copied' : 'Share Twin'}
+                    </button>
+                  </div>
                 )}
               </div>
             )}
