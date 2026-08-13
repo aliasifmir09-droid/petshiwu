@@ -69,7 +69,6 @@ const HeroSlideshow = () => {
   }, []);
 
   // Preload only the next slide so we don't download all banners at once.
-  // Hidden opacity-0 slides still count as "in viewport" and bypass lazy-load.
   useEffect(() => {
     const img = new Image();
     img.src = slideDisplaySrc(nextSlideData);
@@ -82,10 +81,11 @@ const HeroSlideshow = () => {
   return (
     <div className="w-full mt-4">
       <div className="container mx-auto px-4 md:px-6 lg:px-8 mt-4">
-        <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
-          <div className="relative w-full aspect-[16/6]">
-            <Link key={slide.id} to={slide.link} className="absolute inset-0 z-10">
-              <picture>
+        <div className="relative w-full overflow-hidden rounded-xl shadow-lg bg-slate-950">
+          {/* 16:9 frame + object-contain: the full banner stays visible. object-cover was clipping sides. */}
+          <div className="relative w-full aspect-[16/9]">
+            <Link key={slide.id} to={slide.link} className="absolute inset-0 z-10 block">
+              <picture className="absolute inset-0 block h-full w-full">
                 {slide.webp.endsWith('.webp') && (
                   <source srcSet={slide.webp} type="image/webp" />
                 )}
@@ -93,11 +93,11 @@ const HeroSlideshow = () => {
                   src={displaySrc}
                   alt={slide.alt}
                   width={1920}
-                  height={720}
+                  height={1080}
                   loading="eager"
                   fetchPriority="high"
                   decoding="async"
-                  className="w-full h-full object-cover"
+                  className="h-full w-full object-contain object-center"
                 />
               </picture>
             </Link>

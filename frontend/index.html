@@ -33,11 +33,11 @@
       #static-shell.ps-fadeout{opacity:0;pointer-events:none;transition:opacity 180ms ease-out}
 
       /* ── Branded loader (visible immediately, hidden when React mounts) ── */
-      .ps-loader{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center;background:#f9fafb}
+      .ps-loader{min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:28px 24px 20px;text-align:center;background:#f9fafb}
       .ps-loader-brand{display:flex;align-items:baseline;gap:0;font-weight:900;letter-spacing:-0.02em;line-height:1;font-size:clamp(28px,6vw,40px)}
       .ps-loader-brand-a{color:#1E3A8A}
       .ps-loader-brand-b{color:#f59e0b}
-      .ps-loader-spinner{width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#1E3A8A;border-radius:50%;animation:ps-spin 0.85s linear infinite}
+      .ps-loader-spinner{width:22px;height:22px;border:3px solid #e5e7eb;border-top-color:#1E3A8A;border-radius:50%;animation:ps-spin 0.85s linear infinite}
       .ps-loader-text{font-size:13px;color:#6b7280;font-weight:600;letter-spacing:0.04em;text-transform:uppercase}
       .ps-loader-tagline{font-size:13px;color:#9ca3af;max-width:280px;line-height:1.5}
 
@@ -72,6 +72,7 @@
     </style>
 
     <link rel="preload" as="image" href="/logo.webp" type="image/webp" fetchpriority="high" />
+    <link rel="preload" as="image" href="/banner-one-stop.webp" type="image/webp" fetchpriority="high" />
     <link rel="dns-prefetch" href="https://petshiwu.onrender.com">
     <link rel="preconnect" href="https://petshiwu.onrender.com" crossorigin>
     <!-- Cloudinary removed — Bunny CDN is now the image host -->
