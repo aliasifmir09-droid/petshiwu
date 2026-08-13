@@ -16,7 +16,6 @@ import BottomNav from './components/BottomNav';
 import AIPetAdvisor from './components/AIPetAdvisor'; // Gemini AI powered — v2
 import CookieConsent from './components/CookieConsent';
 import EmailPopup from './components/EmailPopup';
-import { DigitalCatRunner } from './components/DigitalCat';
 import StructuredData from './components/StructuredData';
 import Home from './pages/Home';
 import './index.css';
@@ -419,7 +418,6 @@ function App() {
           <BottomNav />
         </div>
         <AIPetAdvisor />
-        <DigitalCatRunner />
         <CookieConsent />
         <EmailPopup />
       </BrowserRouter>

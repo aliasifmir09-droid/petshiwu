@@ -11,7 +11,6 @@ import CategoryIcons from '@/components/CategoryIcons';
 import BirthdayBanner from '@/components/BirthdayBanner';
 import SmartTechShowcase from '@/components/SmartTechShowcase';
 import NeuralPortal from '@/components/NeuralPortal';
-import { DigitalCatStage } from '@/components/DigitalCat';
 import AdSense from '@/components/AdSense';
 import { ChevronRight, ChevronLeft, ArrowRight } from 'lucide-react';
 import { useRef, useState, useEffect, useMemo } from 'react';
@@ -366,7 +365,6 @@ const Home = () => {
       </div>
 
       <NeuralPortal />
-      <DigitalCatStage />
 
       {/* FREEDOM20 Banner — anti-autoship positioning */}
       <section className="container mx-auto px-4 lg:px-8 mt-6">
