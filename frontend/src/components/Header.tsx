@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, ChevronDown, ChevronRight, Search, Menu, X, LogOut, Phone, Heart } from 'lucide-react';
+import { ShoppingCart, User, ChevronDown, ChevronRight, Search, Menu, X, LogOut, Phone, Heart, Camera } from 'lucide-react';
 import VoiceSearchButton from './VoiceSearchButton';
+import TonightBar from './TonightBar';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
@@ -217,20 +218,24 @@ const Header = () => {
     });
   };
 
+  const goToSearch = (query: string) => {
+    const q = query.trim();
+    if (!q) return;
+    setShowSuggestions(false);
+    navigate(`/search?q=${encodeURIComponent(q)}`);
+    setSearchQuery('');
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      setShowSuggestions(false);
-      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
-      setSearchQuery('');
-    }
+    goToSearch(searchQuery);
   };
 
   const handleVoiceResult = (transcript: string) => {
     setSearchQuery(transcript);
     setShowSuggestions(false);
     setMobileMenuOpen(false);
-    navigate(`/products?search=${encodeURIComponent(transcript)}`);
+    goToSearch(transcript);
   };
 
   const handleLogout = () => {
@@ -387,9 +392,10 @@ const Header = () => {
 
   return (
     <>
-      <header className="bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] sticky top-0 z-40 shadow-xl w-full">
-        <div className="w-full">
-          <div className="container mx-auto px-3 lg:px-4 py-2 lg:py-3">
+      <header className="sticky top-0 z-50 shadow-xl w-full">
+        <TonightBar />
+        <div className="bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] w-full">
+          <div className="container mx-auto px-3 lg:px-4 py-1.5 lg:py-3">
             <div className="flex items-center justify-between gap-2 lg:gap-4">
 
               {/* Hamburger - Desktop Only, Visible When Scrolled */}
@@ -399,7 +405,6 @@ const Header = () => {
                 </button>
               )}
 
-              {/* ✅ FIXED LOGO - Same size on mobile and desktop */}
               <Link to="/" className="flex items-center flex-shrink-0 group">
                 <div className="relative">
                   <picture>
@@ -407,7 +412,7 @@ const Header = () => {
                     <img
                       src="/logo.png"
                       alt="Petshiwu Logo"
-                      className="h-20 w-auto object-contain transform group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl relative z-10 max-h-20"
+                      className="h-10 lg:h-20 w-auto object-contain transform group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl relative z-10 max-h-10 lg:max-h-20"
                       loading="eager"
                       width={160}
                       height={80}
@@ -440,13 +445,13 @@ const Header = () => {
                     query={searchQuery}
                     isOpen={showSuggestions}
                     onClose={() => setShowSuggestions(false)}
-                    onSelect={(query) => { setSearchQuery(query); setShowSuggestions(false); navigate(`/products?search=${encodeURIComponent(query)}`); }}
+                    onSelect={(query) => { setSearchQuery(query); goToSearch(query); }}
                   />
                 </div>
               </form>
 
               {/* Right Side Actions */}
-              <div className="flex items-center gap-2 lg:gap-3 text-white flex-shrink-0">
+              <div className="flex items-center gap-1.5 lg:gap-3 text-white flex-shrink-0">
 
                 {/* USA Flag - Desktop */}
                 <div className="hidden lg:flex items-center gap-2 px-2 lg:px-3 py-1.5 rounded-md hover:bg-white/10 transition-colors cursor-pointer">
@@ -478,8 +483,8 @@ const Header = () => {
                   </div>
                 </div>
 
-                {/* Favorites */}
-                <Link to="/favorites" className="relative flex items-center gap-1 lg:gap-1.5 hover:opacity-80 px-1.5 lg:px-2.5 py-1.5 rounded-md hover:bg-white/10 transition-colors">
+                {/* Favorites — desktop; Account tab covers this on mobile */}
+                <Link to="/favorites" className="hidden lg:flex items-center gap-1 lg:gap-1.5 hover:opacity-80 px-1.5 lg:px-2.5 py-1.5 rounded-md hover:bg-white/10 transition-colors">
                   <div className="relative">
                     <Heart size={18} className="lg:w-5 lg:h-5" fill={wishlistItems.length > 0 ? 'currentColor' : 'none'} />
                     {wishlistItems.length > 0 && (
@@ -491,9 +496,18 @@ const Header = () => {
                   <span className="hidden xl:block text-xs lg:text-sm font-semibold">Favorites</span>
                 </Link>
 
-                {/* Sign In / User Dropdown */}
+                {/* Mobile Sign In / Account — tap, not hover */}
+                <Link
+                  to={isAuthenticated ? '/profile' : '/login'}
+                  className="lg:hidden flex items-center p-1.5 rounded-md hover:bg-white/10 transition-colors"
+                  aria-label={isAuthenticated ? 'My account' : 'Sign in'}
+                >
+                  <User size={18} />
+                </Link>
+
+                {/* Sign In / User Dropdown — desktop hover menu */}
                 {isAuthenticated ? (
-                  <div className="relative group z-[100]">
+                  <div className="hidden lg:block relative group z-[100]">
                     <button className="flex items-center gap-1 lg:gap-1.5 hover:opacity-80 px-1.5 lg:px-2.5 py-1.5 rounded-md hover:bg-white/10 transition-colors">
                       <User size={18} className="lg:w-5 lg:h-5" />
                       <span className="hidden xl:block text-xs lg:text-sm font-semibold">{user?.firstName}</span>
@@ -515,7 +529,7 @@ const Header = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="relative group z-[100]">
+                  <div className="hidden lg:block relative group z-[100]">
                     <button className="flex items-center gap-1 lg:gap-1.5 hover:opacity-80 px-1.5 lg:px-2.5 py-1.5 rounded-md hover:bg-white/10 transition-colors">
                       <User size={18} className="lg:w-5 lg:h-5" />
                       <span className="hidden xl:block text-xs lg:text-sm font-semibold">Sign In</span>
@@ -549,11 +563,47 @@ const Header = () => {
                 </div>
 
                 {/* Mobile Menu Toggle */}
-                <button className="lg:hidden p-1.5 rounded-md hover:bg-white/10 transition-colors ml-1" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                <button className="lg:hidden p-1.5 rounded-md hover:bg-white/10 transition-colors" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Open menu">
                   {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
                 </button>
               </div>
             </div>
+
+            {/* Mobile search — always on the first screen, Chewy-style */}
+            <form onSubmit={handleSearch} className="lg:hidden mt-2 pb-0.5">
+              <div className="relative">
+                <input
+                  type="search"
+                  placeholder="Search food, toys, or brands..."
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
+                  onFocus={() => { if (searchQuery.length >= 1) { setShowSuggestions(true); } }}
+                  className="w-full h-10 pl-3 pr-[6.5rem] rounded-lg border-2 border-white/20 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300 placeholder:text-gray-500"
+                  aria-label="Search products"
+                />
+                <Link
+                  to="/search"
+                  className="absolute right-[4.25rem] top-1/2 -translate-y-1/2 p-1.5 text-gray-500 hover:text-[#1E3A8A]"
+                  aria-label="Search by photo"
+                >
+                  <Camera size={18} />
+                </Link>
+                <VoiceSearchButton
+                  onResult={handleVoiceResult}
+                  variant="dark"
+                  className="absolute right-10 top-1/2 -translate-y-1/2"
+                />
+                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md bg-[#1E3A8A] text-white" aria-label="Search">
+                  <Search size={16} />
+                </button>
+                <SearchSuggestions
+                  query={searchQuery}
+                  isOpen={showSuggestions}
+                  onClose={() => setShowSuggestions(false)}
+                  onSelect={(query) => { setSearchQuery(query); goToSearch(query); }}
+                />
+              </div>
+            </form>
           </div>
         </div>
       </header>
@@ -684,7 +734,7 @@ const Header = () => {
               {/* ✅ FIXED - Same logo in mobile menu */}
               <picture>
                 <source srcSet="/logo.webp" type="image/webp" />
-                <img src="/logo.png" alt="Petshiwu" className="h-20 w-auto object-contain" width={160} height={80} />
+                <img src="/logo.png" alt="Petshiwu" className="h-10 w-auto object-contain" width={160} height={80} />
               </picture>
               <button onClick={() => { setMobileMenuOpen(false); setIsLearningExpanded(false); }} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Close Menu">
                 <X size={24} className="text-gray-700" />
@@ -713,7 +763,7 @@ const Header = () => {
                     query={searchQuery}
                     isOpen={showSuggestions}
                     onClose={() => setShowSuggestions(false)}
-                    onSelect={(query) => { setSearchQuery(query); setShowSuggestions(false); navigate(`/products?search=${encodeURIComponent(query)}`); }}
+                    onSelect={(query) => { setSearchQuery(query); goToSearch(query); }}
                   />
                 </div>
               </form>
