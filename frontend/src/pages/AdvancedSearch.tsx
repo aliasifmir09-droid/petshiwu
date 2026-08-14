@@ -3,13 +3,18 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { productService } from '@/services/products';
 import ProductCard from '@/components/ProductCard';
-import { Search, X, SlidersHorizontal, ArrowLeft, Package, Camera, Loader2, ImageIcon } from 'lucide-react';
+import { Search, X, SlidersHorizontal, ArrowLeft, Package, Camera, Loader2, ImageIcon, ShoppingCart } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import SEO from '@/components/SEO';
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
 import api from '@/services/api';
 import { compressImageFile, fileToDataUrl, photoSearchErrorMessage } from '@/utils/compressImage';
+import { useCartStore } from '@/stores/cartStore';
+import {
+  LAST_ZIP_STORAGE_KEY,
+  tonightStatusLine,
+} from '@/utils/deliveryZip';
 
 const AdvancedSearch = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -26,6 +31,15 @@ const AdvancedSearch = () => {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [visualResults, setVisualResults] = useState<any>(null);
   const [visualSearchError, setVisualSearchError] = useState<string | null>(null);
+  const [addedTopMatch, setAddedTopMatch] = useState(false);
+  const addToCart = useCartStore((s) => s.addToCart);
+  const [tonightLine] = useState(() => {
+    try {
+      return tonightStatusLine(localStorage.getItem(LAST_ZIP_STORAGE_KEY));
+    } catch {
+      return tonightStatusLine(null);
+    }
+  });
 
   const visualSearchMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -41,6 +55,7 @@ const AdvancedSearch = () => {
       setVisualResults(data);
       setVisualSearchError(null);
       setInputValue('');
+      setAddedTopMatch(false);
     },
     onError: (err: unknown) => {
       setVisualSearchError(photoSearchErrorMessage(err));
@@ -92,12 +107,23 @@ const AdvancedSearch = () => {
   // Debounce the search query — search fires 350ms after user stops typing
   const debouncedQuery = useDebounce(inputValue.trim(), 350);
 
-  // Auto-focus on mount (mobile keyboard opens immediately)
+  // Auto-focus on mount unless we are opening the camera (snap the bag)
   useEffect(() => {
+    if (searchParams.get('snap') === '1') return;
     inputRef.current?.focus();
   }, []);
 
-  // Sync URL when debounced query changes
+  // Camera icon in the header lands here with ?snap=1
+  useEffect(() => {
+    if (searchParams.get('snap') !== '1') return;
+    const timer = window.setTimeout(() => cameraInputRef.current?.click(), 150);
+    const next = new URLSearchParams(searchParams);
+    next.delete('snap');
+    setSearchParams(next, { replace: true });
+    return () => window.clearTimeout(timer);
+  }, [searchParams, setSearchParams]);
+
+  // Sync URL when debounced query changes — do not wipe ?snap=
   useEffect(() => {
     if (debouncedQuery) {
       const params = new URLSearchParams();
@@ -108,9 +134,13 @@ const AdvancedSearch = () => {
       if (filters.brand) params.set('brand', filters.brand);
       if (filters.minPrice) params.set('minPrice', filters.minPrice);
       if (filters.maxPrice) params.set('maxPrice', filters.maxPrice);
-      setSearchParams(params);
-    } else {
-      setSearchParams({});
+      setSearchParams(params, { replace: true });
+      return;
+    }
+    if (searchParams.get('q')) {
+      const params = new URLSearchParams(searchParams);
+      params.delete('q');
+      setSearchParams(params, { replace: true });
     }
   }, [debouncedQuery, filters]);
 
@@ -144,6 +174,16 @@ const AdvancedSearch = () => {
     staleTime: 30 * 1000,
   });
   const suggestionProducts = suggestions?.data?.products || [];
+  const topPhotoMatch = visualResults?.data?.[0];
+
+  const handleAddTopMatch = () => {
+    if (!topPhotoMatch) return;
+    const variant =
+      topPhotoMatch.variants?.find((v: { stock?: number }) => (v.stock || 0) > 0) ||
+      topPhotoMatch.variants?.[0];
+    addToCart(topPhotoMatch, variant);
+    setAddedTopMatch(true);
+  };
 
   return (
     <>
@@ -428,12 +468,40 @@ const AdvancedSearch = () => {
           {/* Visual search results */}
           {visualResults?.data?.length > 0 && (
             <div className="mb-6">
+              <p className="text-sm text-teal-800 bg-teal-50 border border-teal-100 rounded-xl px-3 py-2 mb-3">
+                {tonightLine}
+              </p>
+              {topPhotoMatch && (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
+                  <p className="text-sm text-gray-600 flex-1">
+                    Best match: <span className="font-semibold text-gray-900">{topPhotoMatch.name}</span>
+                  </p>
+                  {addedTopMatch ? (
+                    <Link
+                      to="/cart"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-bold"
+                    >
+                      Added · go to cart
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleAddTopMatch}
+                      disabled={!topPhotoMatch.inStock}
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#1E3A8A] text-white text-sm font-bold disabled:bg-gray-300"
+                    >
+                      <ShoppingCart size={16} />
+                      Add to cart
+                    </button>
+                  )}
+                </div>
+              )}
               <p className="text-sm text-gray-600 mb-3">
                 <span className="font-semibold text-gray-900">{visualResults.data.length}</span> products matching your photo
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {visualResults.data.map((product: any) => (
-                  <ProductCard key={product._id} product={product} hideCartButton={true} />
+                {visualResults.data.map((product: any, index: number) => (
+                  <ProductCard key={product._id} product={product} index={index} />
                 ))}
               </div>
             </div>

@@ -435,7 +435,7 @@ const Header = () => {
                     className="w-full px-4 py-3 pr-[7.5rem] rounded-xl border-2 border-white/20 bg-white/95 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:border-yellow-300 shadow-lg hover:shadow-xl transition-all placeholder:text-gray-500 font-medium"
                   />
                   <Link
-                    to="/search"
+                    to="/search?snap=1"
                     className="absolute right-[5.75rem] top-1/2 -translate-y-1/2 p-2 text-gray-500 hover:text-[#1E3A8A]"
                     aria-label="Snap a photo of the bag"
                     title="Snap a photo of the bag"
@@ -590,7 +590,7 @@ const Header = () => {
                   aria-label="Search products"
                 />
                 <Link
-                  to="/search"
+                  to="/search?snap=1"
                   className="absolute right-[4.25rem] top-1/2 -translate-y-1/2 p-1.5 text-gray-500 hover:text-[#1E3A8A]"
                   aria-label="Snap a photo of the bag"
                 >
