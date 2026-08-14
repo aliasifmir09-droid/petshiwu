@@ -118,6 +118,7 @@ const NeuralScan = () => {
         title="Neural Twin Scan | Petshiwu"
         description="Scan your pet’s photo. Petshiwu Neural builds a live biometric twin — breed, life stage, calorie protocol — and matches a same-day product kit from 10,000+ SKUs."
         url="/neural"
+        noindex={true}
       />
       <style>{`
         @keyframes neural-scan {

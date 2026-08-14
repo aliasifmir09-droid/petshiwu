@@ -42,7 +42,7 @@ Allow: /cat
 Allow: /bird
 Allow: /reptile
 Allow: /fish
-Allow: /small-pet
+Allow: /small-animal
 Allow: /learning
 Allow: /care-guides
 Allow: /faq

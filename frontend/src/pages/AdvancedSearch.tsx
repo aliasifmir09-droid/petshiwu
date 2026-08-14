@@ -205,6 +205,7 @@ const AdvancedSearch = () => {
         description="Search for pet food, toys, accessories and supplies."
         keywords={['pet products', 'search', debouncedQuery].filter(Boolean)}
         url={`https://www.petshiwu.com/search`}
+        noindex={true}
       />
 
       <div className="min-h-screen bg-gray-50 pb-24 lg:pb-8">
