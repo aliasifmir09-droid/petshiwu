@@ -427,13 +427,21 @@ const Header = () => {
                 <div className="relative w-full group">
                   <input
                     type="text"
-                    placeholder="Search for products, brands, or pet types..."
+                    placeholder="Search or snap a photo of the bag..."
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
                     onFocus={() => { if (searchQuery.length >= 1) { setShowSuggestions(true); } }}
                     style={{ minHeight: '48px' }}
-                    className="w-full px-4 py-3 pr-[5.5rem] rounded-xl border-2 border-white/20 bg-white/95 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:border-yellow-300 shadow-lg hover:shadow-xl transition-all placeholder:text-gray-500 font-medium"
+                    className="w-full px-4 py-3 pr-[7.5rem] rounded-xl border-2 border-white/20 bg-white/95 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:border-yellow-300 shadow-lg hover:shadow-xl transition-all placeholder:text-gray-500 font-medium"
                   />
+                  <Link
+                    to="/search"
+                    className="absolute right-[5.75rem] top-1/2 -translate-y-1/2 p-2 text-gray-500 hover:text-[#1E3A8A]"
+                    aria-label="Snap a photo of the bag"
+                    title="Snap a photo of the bag"
+                  >
+                    <Camera size={18} />
+                  </Link>
                   <VoiceSearchButton
                     onResult={handleVoiceResult}
                     className="absolute right-12 top-1/2 -translate-y-1/2"
@@ -574,7 +582,7 @@ const Header = () => {
               <div className="relative">
                 <input
                   type="search"
-                  placeholder="Search food, toys, or brands..."
+                  placeholder="Search or snap a photo of the bag..."
                   value={searchQuery}
                   onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
                   onFocus={() => { if (searchQuery.length >= 1) { setShowSuggestions(true); } }}
@@ -584,7 +592,7 @@ const Header = () => {
                 <Link
                   to="/search"
                   className="absolute right-[4.25rem] top-1/2 -translate-y-1/2 p-1.5 text-gray-500 hover:text-[#1E3A8A]"
-                  aria-label="Search by photo"
+                  aria-label="Snap a photo of the bag"
                 >
                   <Camera size={18} />
                 </Link>

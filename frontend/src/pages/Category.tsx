@@ -10,7 +10,6 @@ import { SlidersHorizontal, ArrowUpDown, ChevronRight, Home } from 'lucide-react
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
-import AdSense from '@/components/AdSense';
 import { useSEO } from '@/hooks/useSEO';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { generateCategoryUrl, generateProductUrl } from '@/utils/productUrl';
@@ -435,9 +434,6 @@ const Category = () => {
                                         </div>
                                       ))}
                                     </div>
-
-                                    {/* In-content ad after product grid */}
-                                    <AdSense slot="9876543213" format="auto" responsive={true} className="my-8" />
 
                   {/* Pagination */}
                   {products && products.pagination.pages > 1 && (

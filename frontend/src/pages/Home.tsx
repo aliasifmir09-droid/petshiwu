@@ -8,12 +8,8 @@ import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import TrustBadges from '@/components/TrustBadges';
 import CategoryIcons from '@/components/CategoryIcons';
-import BirthdayBanner from '@/components/BirthdayBanner';
-import SmartTechShowcase from '@/components/SmartTechShowcase';
-import NeuralPortal from '@/components/NeuralPortal';
-import AdSense from '@/components/AdSense';
 import ShopByPet from '@/components/ShopByPet';
-import { ChevronRight, ArrowRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import { normalizeImageUrl, generateSrcSet, getOptimizedImageUrl } from '@/utils/imageUtils';
@@ -317,42 +313,6 @@ const Home = () => {
         <HeroSlideshow />
       </div>
 
-      <NeuralPortal />
-
-      {/* FREEDOM20 Banner — anti-autoship positioning */}
-      <section className="container mx-auto px-4 lg:px-8 mt-6">
-        <div className="relative overflow-hidden rounded-2xl shadow-lg bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#9333EA]">
-          <div className="absolute -top-8 -right-8 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
-          <div className="absolute -bottom-8 -left-8 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
-          <div className="relative px-6 py-6 sm:px-10 sm:py-8 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-            <div className="flex-shrink-0 bg-white/15 backdrop-blur-sm border border-white/30 rounded-full px-5 py-2 text-center">
-              <div className="text-white font-black text-3xl sm:text-4xl tracking-tight">FREEDOM<span className="text-[#FCD34D]">20</span></div>
-              <div className="text-white/90 text-[10px] sm:text-xs uppercase tracking-widest font-semibold mt-0.5">20% off · no autoship</div>
-            </div>
-            <div className="flex-1 text-center sm:text-left">
-              <h2 className="text-white font-extrabold text-xl sm:text-2xl leading-tight">Most online pet stores force a subscription for their best prices. We don't.</h2>
-              <p className="text-white/90 text-sm sm:text-base mt-1">Same vet-quality brands. Same great price on every order — first, tenth, or one-time. No subscription lock-in. Max $10 off your first order.</p>
-            </div>
-            <Link
-              to="/products"
-              className="flex-shrink-0 inline-flex items-center gap-2 bg-[#FCD34D] hover:bg-[#FBBF24] text-[#1E3A8A] font-bold text-sm sm:text-base px-6 py-3 rounded-full shadow-md transition-colors"
-            >
-              Shop now <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <SmartTechShowcase />
-
-      {/* Birthday Banner */}
-      <BirthdayBanner />
-
-              {/* In-content ad before category icons */}
-              <section className="container mx-auto px-4 lg:px-8 mt-6 mb-2">
-                <AdSense slot="9876543214" format="auto" responsive={true} />
-              </section>
-
       <CategoryIcons />
 
       <TodaysDeals />
@@ -604,9 +564,9 @@ const NewsletterSection = () => {
           <div className="text-5xl mb-4">🐾</div>
           {!submitted ? (
             <>
-              <h2 className="text-3xl md:text-4xl font-black mb-3">Get 10% Off Your First Order</h2>
+              <h2 className="text-3xl md:text-4xl font-black mb-3">Get delivery updates</h2>
               <p className="text-white/80 text-lg mb-8">
-                Join NYC pet parents. Get exclusive deals, new product alerts, and expert pet care tips delivered to your inbox.
+                NYC same-day tips and restock notes. First order: use FREEDOM20 at checkout (20% off, max $10, no autoship).
               </p>
               <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={handleSubmit}>
                 <input
@@ -622,7 +582,7 @@ const NewsletterSection = () => {
                   disabled={loading}
                   className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-bold px-7 py-3 rounded-full transition-all hover:scale-105 whitespace-nowrap disabled:opacity-60"
                 >
-                  {loading ? 'Sending...' : 'Get 10% Off'}
+                  {loading ? 'Sending...' : 'Subscribe'}
                 </button>
               </form>
               {error && <p className="text-red-300 text-sm mt-2">{error}</p>}

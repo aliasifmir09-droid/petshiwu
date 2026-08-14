@@ -14,7 +14,6 @@ import cartService from '@/services/cart';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { useQuery } from '@tanstack/react-query';
-import AdSense from '@/components/AdSense';
 
 const safePrice = (item: any): number => {
   try {
@@ -259,9 +258,6 @@ const Cart = () => {
     <>
             <SEO title="Shopping Cart | petshiwu" description="Your shopping cart at petshiwu" noindex={true} />
             <div className="container mx-auto px-4 lg:px-8 py-8">
-
-              {/* High-intent ad (cart abandoners are buyers!) */}
-              <AdSense slot="9876543223" format="auto" responsive={true} className="mb-6" />
 
               <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">Shopping Cart</h1>

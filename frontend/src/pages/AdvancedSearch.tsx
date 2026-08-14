@@ -180,7 +180,7 @@ const AdvancedSearch = () => {
                 type="search"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Search products, brands..."
+                placeholder="Type a name, or snap a photo of the bag"
                 className="w-full pl-10 pr-10 py-2.5 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
                 autoComplete="off"
                 autoCorrect="off"
@@ -206,8 +206,8 @@ const AdvancedSearch = () => {
                     ? 'border-blue-500 bg-blue-50 text-blue-600'
                     : 'border-gray-200 text-gray-600 hover:border-blue-400'
                 }`}
-                aria-label="Search by photo"
-                title="Search by photo"
+                aria-label="Snap a photo of the bag"
+                title="Snap a photo of the bag"
               >
                 <Camera size={18} />
               </button>
@@ -230,8 +230,8 @@ const AdvancedSearch = () => {
                       <Camera size={16} className="text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-gray-900">Take a Photo</p>
-                      <p className="text-xs text-gray-400">Open camera</p>
+                      <p className="text-sm font-semibold text-gray-900">Snap the bag</p>
+                      <p className="text-xs text-gray-400">Use your camera</p>
                     </div>
                   </button>
                   {/* Choose from Library */}
@@ -393,7 +393,7 @@ const AdvancedSearch = () => {
                   {visualSearchMutation.isPending && (
                     <div className="flex items-center gap-2 text-blue-600">
                       <Loader2 size={18} className="animate-spin" />
-                      <span className="text-sm font-medium">Analyzing your photo with AI...</span>
+                      <span className="text-sm font-medium">Looking for this bag...</span>
                     </div>
                   )}
                   {(visualSearchMutation.isError || visualSearchError) && (
@@ -405,7 +405,7 @@ const AdvancedSearch = () => {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <ImageIcon size={15} className="text-blue-600" />
-                        <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">AI identified</span>
+                        <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Matched from your photo</span>
                       </div>
                       <p className="text-sm font-bold text-gray-900 capitalize">{visualResults.identified.productType}</p>
                       {visualResults.identified.description && (
@@ -445,15 +445,15 @@ const AdvancedSearch = () => {
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search size={28} className="text-blue-600" />
               </div>
-              <p className="text-lg font-semibold text-gray-800">Search for anything</p>
-              <p className="text-sm text-gray-500 mt-1">Dog food, cat toys, leashes, beds...</p>
+              <p className="text-lg font-semibold text-gray-800">Find the bag</p>
+              <p className="text-sm text-gray-500 mt-1">Type the name, or snap a photo of the package</p>
               <div className="flex items-center justify-center gap-2 mt-4">
                 <button
                   onClick={() => cameraInputRef.current?.click()}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-sm text-blue-700 font-medium hover:bg-blue-100 transition-all"
                 >
                   <Camera size={15} />
-                  Take Photo
+                  Snap the bag
                 </button>
                 <button
                   onClick={() => galleryInputRef.current?.click()}
