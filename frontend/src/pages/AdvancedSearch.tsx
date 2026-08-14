@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { useInfiniteQuery, useQuery, useMutation, keepPreviousData } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useMutation } from '@tanstack/react-query';
 import { productService } from '@/services/products';
 import ProductCard from '@/components/ProductCard';
 import { Search, X, SlidersHorizontal, ArrowLeft, Package, Camera, Loader2, ImageIcon, ShoppingCart } from 'lucide-react';
@@ -172,7 +172,6 @@ const AdvancedSearch = () => {
       return page < pages ? page + 1 : undefined;
     },
     enabled: !photoPreview,
-    placeholderData: keepPreviousData,
     staleTime: 30 * 1000,
   });
 
