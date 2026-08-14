@@ -46,7 +46,7 @@ const OnlinePetStoreNYC = () => {
         },
         {
           question: "Is Petshiwu a local NYC business?",
-          answer: "Yes — we're based in Jackson Heights, Queens, NYC. We're a local business serving local pet owners. Your order supports a New York City company, not a national chain."
+          answer: "Yes — our office and warehouse are in Jackson Heights, Queens. We are delivery only, not a walk-in store. Your order supports a New York City company, not a national chain."
         }
       ]}
       searchTerms={['dog food', 'cat food', 'pet food', 'pet supplies', 'pet toys', 'pet accessories', 'bird food', 'fish food']}

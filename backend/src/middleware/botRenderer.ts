@@ -202,11 +202,11 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/about': {
     title: 'About Petshiwu — NYC Pet Supply Delivery',
-    description: 'Petshiwu is your trusted NYC pet supply delivery service based in Jackson Heights, Queens. Serving all five boroughs with premium pet products.',
+    description: 'Petshiwu is NYC same-day pet supply delivery. Jackson Heights is office and warehouse only — not a walk-in store. We deliver to all five boroughs.',
   },
   '/contact': {
     title: 'Contact Us | Petshiwu',
-    description: 'Contact Petshiwu for questions about orders, products, or delivery. We serve Queens, Brooklyn, Manhattan, the Bronx, and Staten Island.',
+    description: 'Contact Petshiwu for NYC pet delivery orders and questions. Jackson Heights is office and warehouse only — not a walk-in store.',
   },
   '/faq': {
     title: 'Frequently Asked Questions | Petshiwu',
@@ -1296,7 +1296,7 @@ const buildNeighborhoodHtml = (
 // SSR: /products listing page — injects real product links so Google
 // can discover individual product pages from the listing page.
 // ---------------------------------------------------------------------------
-const buildHomepageHtml = (template: string): string => {
+export const buildHomepageHtml = (template: string): string => {
   const meta = STATIC_PAGES['/'];
   const pageUrl = BASE;
 
@@ -1344,13 +1344,13 @@ const buildHomepageHtml = (template: string): string => {
 
   const localBusinessSchema = {
     '@context': 'https://schema.org',
-    '@type': ['LocalBusiness', 'PetStore'],
+    '@type': ['OnlineStore', 'LocalBusiness'],
     '@id': `${BASE}/#localbusiness`,
     name: 'Petshiwu',
     url: BASE,
     image: `${BASE}/logo-square-512.png`,
     logo: `${BASE}/logo-square-512.png`,
-    description: 'Queens-based pet supply delivery serving all five NYC boroughs. 10,000+ products, free shipping over $49, same-day delivery available.',
+    description: 'Same-day pet food and supplies delivery in New York City. Jackson Heights is office and warehouse only — not a walk-in store. 10,000+ products, free shipping over $49.',
     telephone: '+18002592605',
     email: 'support@petshiwu.com',
     address: {
@@ -1385,8 +1385,6 @@ const buildHomepageHtml = (template: string): string => {
       { '@type': 'Borough', name: 'Bronx' },
       { '@type': 'Borough', name: 'Staten Island' },
     ],
-    hasMap: `https://www.google.com/maps?cid=7967426977090267497`,
-    servesCuisine: undefined,
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: '4.8',
@@ -1443,9 +1441,6 @@ const buildHomepageHtml = (template: string): string => {
       `${BASE}/cat-food-delivery-nyc`,
     ],
   };
-
-  // Clean up undefined fields
-  delete (localBusinessSchema as any).servesCuisine;
 
   const injectedTags = `
   <!-- Bot renderer: homepage schema -->

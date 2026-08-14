@@ -209,7 +209,15 @@ const Home = () => {
               name: 'Where is Petshiwu located?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Our warehouse and headquarters are at 37-68 74th Street, Jackson Heights, NY 11372, Queens. We deliver from this single facility to all five NYC boroughs.'
+                text: 'Our office and warehouse are at 37-68 74th Street, Jackson Heights, NY 11372. This is not a walk-in store — we do not have a retail shop for visits. Order online and we deliver to your door across all five NYC boroughs.'
+              }
+            },
+            {
+              '@type': 'Question',
+              name: 'Can I visit the Petshiwu store in Jackson Heights?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'No. Petshiwu is delivery only. The Jackson Heights address is office and warehouse for packing orders. Shop at petshiwu.com and we deliver same-day across NYC when you order before the cutoff.'
               }
             },
             {
@@ -225,7 +233,7 @@ const Home = () => {
               name: 'How do I contact Petshiwu customer service?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Call +1 (800) 259-2605, email support@petshiwu.com, or use the contact form on our /contact page. We respond within one business day. Our Jackson Heights warehouse is open 9 AM to 8 PM, seven days a week.'
+                text: 'Call +1 (800) 259-2605, email support@petshiwu.com, or use the contact form on our /contact page. We respond within one business day. Customer service hours are 9 AM to 8 PM, seven days a week. The Jackson Heights address is office and warehouse only — not open for walk-in shopping.'
               }
             }
           ]
@@ -252,13 +260,13 @@ const Home = () => {
       <StructuredData
         type="localBusiness"
         data={{
-          businessType: ['PetStore', 'LocalBusiness'],
+          businessType: ['OnlineStore', 'LocalBusiness'],
           name: 'Petshiwu',
           url: 'https://www.petshiwu.com',
           logo: 'https://www.petshiwu.com/logo-square-512.png',
           image: 'https://www.petshiwu.com/logo-square-512.png',
           description:
-            'Premium pet food, toys and supplies delivered to Queens, Brooklyn, Manhattan, Bronx and all of New York City. 10,000+ products from top brands — Purina, Blue Buffalo, Royal Canin and more. Free delivery on orders over $49.',
+            'Same-day pet food and supplies delivery in New York City. Jackson Heights is office and warehouse only — not a walk-in store. 10,000+ products from top brands. Free delivery on orders over $49.',
           telephone: '+1-800-259-2605',
           email: 'support@petshiwu.com',
           address: {
@@ -278,7 +286,6 @@ const Home = () => {
           ],
           priceRange: '$$',
           areaServed: ['Queens', 'Brooklyn', 'Manhattan', 'Bronx', 'Staten Island', 'New York City'],
-          hasMap: 'https://maps.google.com/?q=Petshiwu+Jackson+Heights+NY+11372',
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
           sameAs: [
@@ -481,7 +488,7 @@ const Home = () => {
                 location: 'Queens, NY',
                 pet: '🐕 Dog parent',
                 stars: 5,
-                text: "Best pet store I've found in Jackson Heights. My golden retriever loves the Blue Buffalo food and it arrived the next day. Amazing service!",
+                text: "Best pet delivery I've used in Queens. My golden retriever loves the Blue Buffalo food and it arrived the next day. Amazing service!",
               },
               {
                 name: 'Kevin T.',

@@ -9,13 +9,13 @@ const About = () => {
       <SEO
       title="About Petshiwu | Your Trusted Partner in Pet Care"
       description="Learn about Petshiwu's 15+ years of pet care experience, our passion for pets, and our commitment to quality, community, and convenient online shopping across the USA."
-      keywords="about Petshiwu, pet care, pet store USA, pet community, premium pet products"
+      keywords="about Petshiwu, pet delivery NYC, Jackson Heights warehouse, premium pet products"
       url="/about"
       />
       <StructuredData
         type="localBusiness"
         data={{
-          businessType: ['PetStore', 'LocalBusiness'],
+          businessType: ['OnlineStore', 'LocalBusiness'],
           name: 'Petshiwu',
           url: 'https://www.petshiwu.com',
           logo: 'https://www.petshiwu.com/logo-square-512.png',
@@ -31,9 +31,8 @@ const About = () => {
           },
           openingHours: 'Mo-Su 08:00-20:00',
           priceRange: '$$',
-          description: 'NYC-based pet supply delivery service delivering premium brands to all 5 boroughs, Long Island, Westchester, and all 21 New Jersey counties.',
-          areaServed: ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island', 'Long Island', 'Westchester', 'New Jersey'],
-          hasMap: 'https://maps.google.com/?q=Petshiwu+Jackson+Heights+NY+11372',
+          description: 'NYC same-day pet supply delivery. Jackson Heights is office and warehouse only — not a walk-in store. We deliver premium brands to all 5 boroughs.',
+          areaServed: ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'],
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
           sameAs: [
@@ -80,8 +79,9 @@ const About = () => {
                   </div>
                   <p className="text-sm sm:text-base text-blue-50 mb-4">
                     Petshiwu was born from a deep love for animals and a passion for helping pets thrive.
-                    Based in Jackson Heights, NY, we serve pet parents across the USA with premium food,
-                    toys, and accessories through a seamless online experience.
+                    Based in Jackson Heights, NY, we deliver premium food, toys, and accessories to
+                    pet parents across New York City. Our Jackson Heights location is office and
+                    warehouse only — not a walk-in store.
                   </p>
                   <p className="text-xs sm:text-sm text-blue-100/90">
                     We continuously listen to American pet owners to better understand their unique needs

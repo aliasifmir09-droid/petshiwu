@@ -2,25 +2,25 @@ import SEOLandingPage from '../SEOLandingPage';
 
 /**
  * Targets: "pet store Queens NY", "pet supplies Queens New York", "pet shop Jackson Heights"
- * High local intent, captures "near me" searches in Queens
+ * Answer those searches with delivery — we are not a walk-in shop.
  */
 const PetStoreQueensNY = () => {
   return (
     <SEOLandingPage
       keyword="pet-store-queens-ny"
-      title="Pet Store Queens NY — Delivery to Jackson Heights, Flushing & All of Queens | Petshiwu"
-      description="Queens' premier online pet store. Free delivery throughout Queens — Jackson Heights, Flushing, Astoria, Forest Hills, Jamaica and more. 10,000+ products for dogs, cats, birds, fish and more."
-      h1="Pet Store Serving All of Queens, NY"
-      introContent="Petshiwu is Queens' own online pet store, based right in Jackson Heights. We deliver premium pet food, toys, and supplies throughout Queens — Jackson Heights, Flushing, Astoria, Forest Hills, Rego Park, Jamaica, Bayside, and every neighborhood in between. Shop 10,000+ products and get free delivery on orders over $49."
+      title="Pet Store Queens NY — Same-Day Delivery, Not a Walk-In Shop | Petshiwu"
+      description="Queens pet food delivery from Jackson Heights. We are not a walk-in store — order online and we deliver to Flushing, Astoria, Forest Hills, Jamaica and all of Queens. 10,000+ products."
+      h1="Queens Pet Store Delivery — We Bring It to Your Door"
+      introContent="Petshiwu is Queens' online pet store, based in Jackson Heights. We are not a walk-in shop. Our Jackson Heights address is office and warehouse only. We deliver premium pet food, toys, and supplies throughout Queens — Jackson Heights, Flushing, Astoria, Forest Hills, Rego Park, Jamaica, Bayside, and every neighborhood in between. Shop 10,000+ products and get free delivery on orders over $49."
       problemPoints={[
-        "Limited pet store options in many Queens neighborhoods",
+        "No time to visit a pet store in Queens",
         "Having to travel to a big-box store for specialty items",
         "Out-of-stock on your pet's preferred brand or formula",
         "No local store carrying supplies for birds, reptiles, or exotic pets",
         "Carrying heavy supplies on the subway or bus"
       ]}
       solutionPoints={[
-        "Based in Jackson Heights — a true Queens pet store",
+        "Delivery from our Jackson Heights warehouse — not a walk-in store",
         "Delivery throughout all Queens neighborhoods",
         "10,000+ products for every type of pet",
         "All the top national brands at competitive prices",
@@ -29,8 +29,12 @@ const PetStoreQueensNY = () => {
       ]}
       faqItems={[
         {
+          question: "Can I visit your pet store in Jackson Heights?",
+          answer: "No. Petshiwu is delivery only. Our Jackson Heights location is office and warehouse — not a retail shop. Order online and we deliver to your door."
+        },
+        {
           question: "Do you deliver pet supplies to Jackson Heights, Queens?",
-          answer: "Yes — we're based in Jackson Heights and deliver throughout the neighborhood and all of Queens. Order before the daily cutoff for fast local delivery."
+          answer: "Yes — we warehouse in Jackson Heights and deliver throughout the neighborhood and all of Queens. Order before the daily cutoff for fast local delivery."
         },
         {
           question: "What Queens neighborhoods do you deliver to?",

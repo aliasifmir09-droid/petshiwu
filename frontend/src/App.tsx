@@ -243,17 +243,17 @@ function App() {
       >
         <PageViewTracker />
         <ScrollToTop />
-        {/* Global PetStore schema — appears on every page for maximum local SEO signal */}
+        {/* Delivery business schema — OnlineStore, not a walk-in PetStore */}
         <StructuredData
           type="localBusiness"
           data={{
-            businessType: ['PetStore', 'LocalBusiness'],
+            businessType: ['OnlineStore', 'LocalBusiness'],
             name: 'Petshiwu',
             url: 'https://www.petshiwu.com',
             logo: 'https://www.petshiwu.com/logo-square-512.png',
             image: 'https://www.petshiwu.com/logo-square-512.png',
             description:
-              'Premium pet food, toys and supplies delivered to Queens, Brooklyn, Manhattan, Bronx and all of New York City. 10,000+ products from top brands. Free delivery on orders over $49.',
+              'Same-day pet food and supplies delivery in New York City. Jackson Heights is office and warehouse only — not a walk-in store. 10,000+ products. Free delivery on orders over $49.',
             telephone: '+1-800-259-2605',
             email: 'support@petshiwu.com',
             address: {
@@ -273,7 +273,6 @@ function App() {
             ],
             priceRange: '$$',
             areaServed: ['Queens', 'Brooklyn', 'Manhattan', 'Bronx', 'Staten Island', 'New York City'],
-            hasMap: 'https://maps.google.com/?q=Petshiwu+Jackson+Heights+NY+11372',
             paymentAccepted: 'Cash, Credit Card, Debit Card',
             currenciesAccepted: 'USD',
             sameAs: [

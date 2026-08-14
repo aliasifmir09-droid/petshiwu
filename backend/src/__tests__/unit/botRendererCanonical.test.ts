@@ -1,5 +1,6 @@
 import {
   buildCanonicalProductPath,
+  buildHomepageHtml,
   normalizeReqPath,
   productRedirectTarget,
 } from '../../middleware/botRenderer';
@@ -59,5 +60,40 @@ describe('botRenderer product canonical helpers', () => {
     it('does NOT redirect when canonical cannot be built', () => {
       expect(productRedirectTarget('/anything', { slug: 'x', petType: 'cat' })).toBeNull();
     });
+  });
+});
+
+describe('buildHomepageHtml delivery-only schema', () => {
+  const template = `<!DOCTYPE html><html><head>
+<title>Petshiwu</title>
+<meta name="description" content="old" />
+</head><body><div id="root"></div></body></html>`;
+
+  const html = buildHomepageHtml(template);
+  const scripts = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(
+    (m) => JSON.parse(m[1])
+  );
+  const localBusiness = scripts.find((s) => s['@id'] === 'https://www.petshiwu.com/#localbusiness');
+
+  it('uses OnlineStore + LocalBusiness, not PetStore', () => {
+    expect(localBusiness).toBeDefined();
+    expect(localBusiness['@type']).toEqual(['OnlineStore', 'LocalBusiness']);
+    expect(JSON.stringify(localBusiness)).not.toContain('PetStore');
+  });
+
+  it('does not publish a storefront map pin', () => {
+    expect(localBusiness.hasMap).toBeUndefined();
+    expect(html).not.toContain('hasMap');
+  });
+
+  it('tells crawlers the Jackson Heights site is office/warehouse only', () => {
+    expect(localBusiness.description).toMatch(/office and warehouse only/i);
+    expect(localBusiness.description).toMatch(/not a walk-in store/i);
+    expect(localBusiness.areaServed).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'New York City' }),
+        expect.objectContaining({ name: 'Queens' }),
+      ])
+    );
   });
 });

@@ -30,7 +30,7 @@ const PetSuppliesNearMeNYC = () => {
       faqItems={[
         {
           question: "Is there a pet supply delivery service near me in NYC?",
-          answer: "Yes — Petshiwu delivers pet supplies to all five NYC boroughs: Queens, Brooklyn, Manhattan, the Bronx, and Staten Island. We're based in Jackson Heights, Queens, and serve all of New York City."
+          answer: "Yes — Petshiwu delivers pet supplies to all five NYC boroughs: Queens, Brooklyn, Manhattan, the Bronx, and Staten Island. We warehouse in Jackson Heights, Queens. We are not a walk-in store."
         },
         {
           question: "Can I get same-day pet supply delivery in NYC?",

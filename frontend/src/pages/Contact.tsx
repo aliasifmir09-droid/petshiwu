@@ -30,13 +30,13 @@ const Contact = () => {
     <>
       <SEO
         title="Contact Us | Petshiwu"
-        description="Get in touch with Petshiwu. We're here to help with your pet care questions, orders, and anything else you need. Located in Jackson Heights, NY."
-        keywords="contact petshiwu, pet store contact, jackson heights pet store, pet care support"
+        description="Contact Petshiwu for NYC pet delivery orders and questions. Jackson Heights is office and warehouse only — not a walk-in store."
+        keywords="contact petshiwu, pet delivery nyc contact, jackson heights pet delivery, pet care support"
       />
       <StructuredData
         type="localBusiness"
         data={{
-          businessType: ['PetStore', 'LocalBusiness'],
+          businessType: ['OnlineStore', 'LocalBusiness'],
           name: 'Petshiwu',
           url: 'https://www.petshiwu.com',
           logo: 'https://www.petshiwu.com/logo-square-512.png',
@@ -52,9 +52,8 @@ const Contact = () => {
           },
           openingHours: 'Mo-Su 08:00-20:00',
           priceRange: '$$',
-          description: 'NYC-based pet supply delivery service. Contact us for orders, questions, or partnership inquiries.',
-          areaServed: ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island', 'Long Island', 'Westchester', 'New Jersey'],
-          hasMap: 'https://maps.google.com/?q=Petshiwu+Jackson+Heights+NY+11372',
+          description: 'NYC same-day pet supply delivery. Jackson Heights is office and warehouse only — not a walk-in store. Contact us for orders, questions, or partnership inquiries.',
+          areaServed: ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'],
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
           sameAs: [
@@ -99,9 +98,10 @@ const Contact = () => {
                     <MapPin className="w-5 h-5 text-blue-700" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900 text-sm mb-0.5">Our Store</p>
+                    <p className="font-semibold text-gray-900 text-sm mb-0.5">Office & warehouse</p>
                     <p className="text-gray-600 text-sm">37-68 74th Street</p>
                     <p className="text-gray-600 text-sm">Jackson Heights, NY 11372</p>
+                    <p className="text-gray-500 text-xs mt-1">Not a walk-in store. Delivery only — shop online.</p>
                   </div>
                 </div>
 
@@ -134,7 +134,7 @@ const Contact = () => {
                     <Clock className="w-5 h-5 text-blue-700" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900 text-sm mb-1">Hours</p>
+                    <p className="font-semibold text-gray-900 text-sm mb-1">Customer service hours</p>
                     <div className="space-y-0.5 text-sm text-gray-600">
                       <div className="flex justify-between gap-6">
                         <span>Monday - Friday</span>
@@ -157,9 +157,10 @@ const Contact = () => {
                       <MapPin className="w-6 h-6 text-blue-700" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 text-sm mb-1">Visit Our Office</p>
+                      <p className="font-semibold text-gray-900 text-sm mb-1">Office & warehouse — not open to the public</p>
                       <p className="text-gray-600 text-sm">37-68 74th Street</p>
                       <p className="text-gray-600 text-sm">Jackson Heights, NY 11372</p>
+                      <p className="text-gray-500 text-xs mt-1">We deliver. We do not have a retail shop for visits.</p>
                       <a
                         href="https://maps.google.com/?q=37-68+74th+Street,+Jackson+Heights,+NY+11372"
                         target="_blank"
