@@ -12,20 +12,50 @@ export type RouteClassification = {
 
 const PET_TYPES = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet', 'small-animal', 'other-animals']);
 
-// These are the only root-level informational pages currently approved for
-// indexing. SEO landing/matrix pages remain retained but noindex until each has
-// independently verified content and browser/bot parity.
+// Real storefront pages with unique copy in App.tsx. These were previously
+// noindexed by the doorway heuristic because the slug contains "food" / "nyc".
+export const INDEXABLE_LANDING_PATHS = new Set([
+  '/best-dog-food-sensitive-stomach-diarrhea',
+  '/high-protein-dog-food-picky-eaters',
+  '/durable-dog-toys-aggressive-chewers',
+  '/pet-supplies-delivery-nyc',
+  '/dog-food-delivery-nyc',
+  '/cat-food-delivery-nyc',
+  '/pet-store-queens-ny',
+  '/online-pet-store-nyc',
+  '/pet-supplies-near-me-nyc',
+  '/affordable-pet-food-nyc',
+  '/pet-food-delivery-nyc',
+  '/raw-dog-food-nyc',
+  '/organic-cat-food-nyc',
+  '/luxury-pet-accessories-nyc',
+  '/pet-supplies-queens-ny',
+  '/pet-supplies-brooklyn-ny',
+  '/pet-supplies-manhattan-ny',
+  '/pet-supplies-bronx-ny',
+  '/pet-supplies-staten-island-ny',
+  '/pet-supplies-jackson-heights-ny',
+  '/pet-supplies-williamsburg-brooklyn-ny',
+  '/pet-supplies-park-slope-brooklyn-ny',
+  '/pet-supplies-upper-west-side-nyc',
+  '/pet-supplies-dumbo-brooklyn-ny',
+  '/pet-supplies-long-island-city-queens-ny',
+  '/pet-supplies-soho-nyc',
+  '/pet-supplies-astoria-queens-ny',
+]);
+
 const INDEXABLE_ROOT_PATHS = new Set([
   '/', '/products', '/learning', '/care-guides', '/about', '/faq', '/returns',
   '/return-policy', '/donate', '/contact', '/shipping', '/shipping-policy', '/other-animals',
   '/privacy', '/privacy-policy', '/terms', '/terms-of-service', '/accessibility',
   '/shop', '/fish-tanks', '/press', '/investors', '/sell-with-us', '/vendors', '/partners',
-  '/innovation', '/neural',
+  '/innovation',
+  ...INDEXABLE_LANDING_PATHS,
 ]);
 
 const NOINDEX_ROOT_PATHS = new Set([
   '/search', '/checkout', '/cart', '/login', '/register', '/forgot-password',
-  '/dashboard', '/driver', '/symptom-checker', '/deals', '/tech', '/scan',
+  '/dashboard', '/driver', '/symptom-checker', '/deals', '/tech', '/scan', '/neural',
 ]);
 
 const normalizePath = (rawPath: string): string => {
@@ -62,6 +92,10 @@ export const classifyRoute = (rawPath: string): RouteClassification => {
 
   if (hasQuery) {
     return { status: 'noindex', indexable: false, canonicalPath, routeType: 'query-variant' };
+  }
+
+  if (INDEXABLE_LANDING_PATHS.has(canonicalPath)) {
+    return { status: 'indexable', indexable: true, canonicalPath, routeType: 'landing' };
   }
 
   if (INDEXABLE_ROOT_PATHS.has(canonicalPath)) {

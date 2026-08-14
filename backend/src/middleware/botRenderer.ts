@@ -25,7 +25,7 @@ import Blog from '../models/Blog';
 import CareGuide from '../models/CareGuide';
 import Category from '../models/Category';
 import logger from '../utils/logger';
-import { classifyRoute } from '../seo/routeClassifier';
+import { classifyRoute, INDEXABLE_LANDING_PATHS } from '../seo/routeClassifier';
 import {
   NEIGHBORHOOD_PAGE_REGISTRY,
   getNeighborhoodRoute,
@@ -116,6 +116,14 @@ const injectCanonical = (html: string, canonicalUrl: string): string => {
   }
   // Otherwise inject before </head>
   return html.replace('</head>', `${tag}\n</head>`);
+};
+
+const injectHreflang = (html: string, pageUrl: string): string => {
+  const tags =
+    `<link rel="alternate" hreflang="en-US" href="${esc(pageUrl)}" />\n` +
+    `<link rel="alternate" hreflang="x-default" href="${esc(pageUrl)}" />`;
+  let out = html.replace(/<link\s+rel=["']alternate["'][^>]*hreflang[^>]*>\s*/gi, '');
+  return out.replace('</head>', `${tags}\n</head>`);
 };
 
 /**
@@ -420,13 +428,15 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
 /**
  * Replace og:title, og:description, and og:url content in the HTML template
  */
-const injectOgTags = (html: string, title: string, description: string, url: string): string => {
+const injectOgTags = (html: string, title: string, description: string, url: string, ogType = 'website'): string => {
   let out = html;
-  out = out.replace(/(<meta[\s\S]*?property="og:title"[\s\S]*?content=")[^"]*("[\s\S]*?>)/i, `$1${esc(title)}$2`);
-  out = out.replace(/(<meta[\s\S]*?property="og:description"[\s\S]*?content=")[^"]*("[\s\S]*?>)/i, `$1${esc(description)}$2`);
-  out = out.replace(/(<meta[\s\S]*?property="og:url"[\s\S]*?content=")[^"]*("[\s\S]*?>)/i, `$1${esc(url)}$2`);
-  out = out.replace(/(<meta[\s\S]*?name="twitter:title"[\s\S]*?content=")[^"]*("[\s\S]*?>)/i, `$1${esc(title)}$2`);
-  out = out.replace(/(<meta[\s\S]*?name="twitter:description"[\s\S]*?content=")[^"]*("[\s\S]*?>)/i, `$1${esc(description)}$2`);
+  out = out.replace(/(<meta[\s\S]*?property="og:title"[\s\S]*?content=")[^"]*("[\s\S]*?>)/gi, `$1${esc(title)}$2`);
+  out = out.replace(/(<meta[\s\S]*?property="og:description"[\s\S]*?content=")[^"]*("[\s\S]*?>)/gi, `$1${esc(description)}$2`);
+  out = out.replace(/(<meta[\s\S]*?property="og:url"[\s\S]*?content=")[^"]*("[\s\S]*?>)/gi, `$1${esc(url)}$2`);
+  out = out.replace(/(<meta[\s\S]*?property="og:type"[\s\S]*?content=")[^"]*("[\s\S]*?>)/gi, `$1${esc(ogType)}$2`);
+  out = out.replace(/(<meta[\s\S]*?name="twitter:title"[\s\S]*?content=")[^"]*("[\s\S]*?>)/gi, `$1${esc(title)}$2`);
+  out = out.replace(/(<meta[\s\S]*?name="twitter:description"[\s\S]*?content=")[^"]*("[\s\S]*?>)/gi, `$1${esc(description)}$2`);
+  out = out.replace(/(<meta[\s\S]*?name="twitter:url"[\s\S]*?content=")[^"]*("[\s\S]*?>)/gi, `$1${esc(url)}$2`);
   return out;
 };
 
@@ -481,6 +491,7 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
     html = injectTitle(html, finalMeta.title);
     html = injectDescription(html, finalMeta.description);
     html = injectCanonical(html, canonicalUrl);
+    html = injectHreflang(html, canonicalUrl);
     html = injectOgTags(html, finalMeta.title, finalMeta.description, canonicalUrl);
     // FIX: Inject a unique H1 for non-homepage routes so Google doesn't see the
     // generic homepage H1 ("Petshiwu — Premium Pet Food & Supplies...") on every
@@ -536,21 +547,16 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
     }
   }
 
-  // Doorway-page noindex: single-segment URL that isn't in STATIC_PAGES, isn't
-  // a valid pet type, and isn't /products /learning /care-guides is a thin
-  // landing page (e.g. /best-dog-food-sensitive-stomach-diarrhea, /pet-supplies-
-  // delivery-nyc, etc.). These are SEO landmines — Google may deindex for being
-  // thin/doorway. Adding noindex prevents the penalty while keeping the URL 200
-  // for users (so existing links don't 404).
+  // Doorway-page noindex: unknown single-segment URLs (thin keyword landings
+  // that are not a real App.tsx route). Real NYC landing pages in
+  // INDEXABLE_LANDING_PATHS must stay indexable.
   const isSingleSegment = segments.length === 1;
-  // Legitimate single-segment URLs: explicit known paths + valid pet types.
-  // STATIC_PAGES entries with keyword-stuffed titles (e.g. /best-dog-food-...)
-  // are NOT legitimate — they're thin doorway pages with generic content.
   const isLegitimateSingle = ['products', 'learning', 'care-guides', 'about',
       'faq', 'returns', 'return-policy', 'donate', 'search', 'symptom-checker', 'press',
       'investors', 'sell-with-us', 'vendors', 'partners', 'other-animals', 'shop',
       'privacy', 'privacy-policy', 'terms', 'terms-of-service', 'shipping', 'shipping-policy', 'contact'].includes(segments[0] || '')
-    || PET_TYPES.has(segments[0] || '');
+    || PET_TYPES.has(segments[0] || '')
+    || INDEXABLE_LANDING_PATHS.has(cleanPath);
   const isDoorway = isSingleSegment && !isLegitimateSingle && !isProductPath;
 
   if (isDoorway) {
@@ -883,6 +889,8 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
   html = injectCanonical(html, productUrl);
+  html = injectHreflang(html, productUrl);
+  html = injectOgTags(html, title, description, productUrl, 'product');
   html = injectBeforeHeadClose(html, injectedTags);
   html = injectH1(html, productName);
   // Replace entire root div with full crawlable body content (H2 — H1 already replaced in noscript)
@@ -1014,6 +1022,8 @@ const buildBlogHtml = (template: string, blog: any): string => {
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
+  html = injectHreflang(html, url);
+  html = injectOgTags(html, title, description, url);
   html = injectBeforeHeadClose(html, injectedTags);
   html = injectH1(html, blog.title);
   html = removeStaticHero(html);
@@ -1084,6 +1094,8 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
+  html = injectHreflang(html, url);
+  html = injectOgTags(html, title, description, url);
   html = injectBeforeHeadClose(html, injectedTags);
   html = injectH1(html, guide.title);
   html = removeStaticHero(html);
@@ -1145,6 +1157,8 @@ const buildCategoryHtml = (template: string, category: any, petType?: string, ca
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
+  html = injectHreflang(html, url);
+  html = injectOgTags(html, title, description, url);
   html = injectBeforeHeadClose(html, injectedTags);
   html = injectH1(html, catName);
   return html;
@@ -1262,6 +1276,7 @@ const buildNeighborhoodHtml = (
 
   let html = template;
   html = injectCanonical(html, pageUrl);
+  html = injectHreflang(html, pageUrl);
   html = injectTitle(html, title);
   html = injectDescription(html, description);
   html = injectBeforeHeadClose(html, injectedTags);
@@ -1443,6 +1458,7 @@ const buildHomepageHtml = (template: string): string => {
   html = injectTitle(html, meta.title);
   html = injectDescription(html, meta.description);
   html = injectCanonical(html, pageUrl);
+  html = injectHreflang(html, pageUrl);
   html = injectOgTags(html, meta.title, meta.description, pageUrl);
   html = injectBeforeHeadClose(html, injectedTags);
   return html;
@@ -1486,6 +1502,8 @@ const buildProductListHtml = async (template: string): Promise<string> => {
   html = injectTitle(html, meta.title);
   html = injectDescription(html, meta.description);
   html = injectCanonical(html, canonicalUrl);
+  html = injectHreflang(html, canonicalUrl);
+  html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
   html = injectH1(html, 'All Pet Products — Petshiwu');
   // Inject product list into body for Google to crawl (H2 — H1 already replaced in noscript)
   html = html.replace(/<div id="root">.*?<\/div>/s, `<div id="root">${bodyContent}</div>`) ||

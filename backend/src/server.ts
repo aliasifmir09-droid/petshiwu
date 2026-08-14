@@ -807,7 +807,12 @@ if (require('fs').existsSync(adminDistPath)) {
 const frontendDistPath = path.join(process.cwd(), '../frontend/dist');
 console.log(`📁 Serving frontend from: ${frontendDistPath}`);
 
+// index: false is required so GET / is not served as dist/index.html.
+// That file has no canonical (it was removed so every page would not
+// self-canonicalize to the homepage). Bot renderer injects the homepage
+// canonical, title, and schema for Googlebot.
 app.use(express.static(frontendDistPath, {
+  index: false,
   maxAge: '1d',
   etag: true,
   setHeaders: (res, filePath) => {
