@@ -756,7 +756,7 @@ const Header = () => {
                     placeholder="Search for products..."
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
-                    onFocus={() => { if (searchQuery.length >= 2) { setShowSuggestions(true); } }}
+                    onFocus={() => { if (searchQuery.length >= 1) { setShowSuggestions(true); } }}
                     className="w-full h-11 pl-4 pr-24 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
                   />
                   <div className="absolute inset-y-0 right-1 flex items-center gap-0.5">
