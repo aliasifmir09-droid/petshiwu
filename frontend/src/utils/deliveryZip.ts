@@ -208,3 +208,19 @@ export function formatCountdownShort(countdown: CutoffCountdown): string {
   }
   return `${countdown.minutes}m ${padTime(countdown.seconds)}s left`;
 }
+
+/** One line for photo-search results: tonight ETA from a saved ZIP. */
+export function tonightStatusLine(zip: string | null, now: Date = new Date()): string {
+  const countdown = getCutoffCountdown(now);
+  if (zip && isValidZip(zip)) {
+    const result = lookupZip(zip, now);
+    if (result?.speed === 'same-day' && !countdown.passed) {
+      return `${result.headline} · ${formatCountdownShort(countdown)}`;
+    }
+    if (result) return result.headline;
+  }
+  if (!countdown.passed) {
+    return `Same-day NYC · ${formatCountdownShort(countdown)} · enter ZIP above`;
+  }
+  return 'Same-day cutoff passed · next-day NYC';
+}

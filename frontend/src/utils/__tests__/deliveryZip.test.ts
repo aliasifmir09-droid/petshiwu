@@ -10,6 +10,7 @@ import {
   lookupZip,
   normalizeZip,
   padTime,
+  tonightStatusLine,
 } from '../deliveryZip';
 
 describe('deliveryZip', () => {
@@ -95,5 +96,12 @@ describe('deliveryZip', () => {
 
     const afterCutoff = getCutoffCountdown(new Date('2026-08-13T20:30:00Z'));
     expect(formatCountdownShort(afterCutoff)).toBe('cutoff passed');
+  });
+
+  test('tonightStatusLine uses ZIP for same-day before cutoff', () => {
+    const morning = new Date('2026-08-13T14:00:00Z');
+    expect(tonightStatusLine('11372', morning)).toMatch(/Same-day delivery in Queens/);
+    expect(tonightStatusLine(null, morning)).toMatch(/Same-day NYC/);
+    expect(tonightStatusLine('11372', new Date('2026-08-13T20:30:00Z'))).toMatch(/next-day/i);
   });
 });

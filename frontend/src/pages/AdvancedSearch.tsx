@@ -3,13 +3,18 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { productService } from '@/services/products';
 import ProductCard from '@/components/ProductCard';
-import { Search, X, SlidersHorizontal, ArrowLeft, Package, Camera, Loader2, ImageIcon } from 'lucide-react';
+import { Search, X, SlidersHorizontal, ArrowLeft, Package, Camera, Loader2, ImageIcon, ShoppingCart } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import SEO from '@/components/SEO';
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
 import api from '@/services/api';
 import { compressImageFile, fileToDataUrl, photoSearchErrorMessage } from '@/utils/compressImage';
+import { useCartStore } from '@/stores/cartStore';
+import {
+  LAST_ZIP_STORAGE_KEY,
+  tonightStatusLine,
+} from '@/utils/deliveryZip';
 
 const AdvancedSearch = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -26,6 +31,15 @@ const AdvancedSearch = () => {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [visualResults, setVisualResults] = useState<any>(null);
   const [visualSearchError, setVisualSearchError] = useState<string | null>(null);
+  const [addedTopMatch, setAddedTopMatch] = useState(false);
+  const addToCart = useCartStore((s) => s.addToCart);
+  const [tonightLine] = useState(() => {
+    try {
+      return tonightStatusLine(localStorage.getItem(LAST_ZIP_STORAGE_KEY));
+    } catch {
+      return tonightStatusLine(null);
+    }
+  });
 
   const visualSearchMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -41,6 +55,7 @@ const AdvancedSearch = () => {
       setVisualResults(data);
       setVisualSearchError(null);
       setInputValue('');
+      setAddedTopMatch(false);
     },
     onError: (err: unknown) => {
       setVisualSearchError(photoSearchErrorMessage(err));
@@ -92,12 +107,23 @@ const AdvancedSearch = () => {
   // Debounce the search query — search fires 350ms after user stops typing
   const debouncedQuery = useDebounce(inputValue.trim(), 350);
 
-  // Auto-focus on mount (mobile keyboard opens immediately)
+  // Auto-focus on mount unless we are opening the camera (snap the bag)
   useEffect(() => {
+    if (searchParams.get('snap') === '1') return;
     inputRef.current?.focus();
   }, []);
 
-  // Sync URL when debounced query changes
+  // Camera icon in the header lands here with ?snap=1
+  useEffect(() => {
+    if (searchParams.get('snap') !== '1') return;
+    const timer = window.setTimeout(() => cameraInputRef.current?.click(), 150);
+    const next = new URLSearchParams(searchParams);
+    next.delete('snap');
+    setSearchParams(next, { replace: true });
+    return () => window.clearTimeout(timer);
+  }, [searchParams, setSearchParams]);
+
+  // Sync URL when debounced query changes — do not wipe ?snap=
   useEffect(() => {
     if (debouncedQuery) {
       const params = new URLSearchParams();
@@ -108,9 +134,13 @@ const AdvancedSearch = () => {
       if (filters.brand) params.set('brand', filters.brand);
       if (filters.minPrice) params.set('minPrice', filters.minPrice);
       if (filters.maxPrice) params.set('maxPrice', filters.maxPrice);
-      setSearchParams(params);
-    } else {
-      setSearchParams({});
+      setSearchParams(params, { replace: true });
+      return;
+    }
+    if (searchParams.get('q')) {
+      const params = new URLSearchParams(searchParams);
+      params.delete('q');
+      setSearchParams(params, { replace: true });
     }
   }, [debouncedQuery, filters]);
 
@@ -144,6 +174,16 @@ const AdvancedSearch = () => {
     staleTime: 30 * 1000,
   });
   const suggestionProducts = suggestions?.data?.products || [];
+  const topPhotoMatch = visualResults?.data?.[0];
+
+  const handleAddTopMatch = () => {
+    if (!topPhotoMatch) return;
+    const variant =
+      topPhotoMatch.variants?.find((v: { stock?: number }) => (v.stock || 0) > 0) ||
+      topPhotoMatch.variants?.[0];
+    addToCart(topPhotoMatch, variant);
+    setAddedTopMatch(true);
+  };
 
   return (
     <>
@@ -180,7 +220,7 @@ const AdvancedSearch = () => {
                 type="search"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Search products, brands..."
+                placeholder="Type a name, or snap a photo of the bag"
                 className="w-full pl-10 pr-10 py-2.5 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
                 autoComplete="off"
                 autoCorrect="off"
@@ -206,8 +246,8 @@ const AdvancedSearch = () => {
                     ? 'border-blue-500 bg-blue-50 text-blue-600'
                     : 'border-gray-200 text-gray-600 hover:border-blue-400'
                 }`}
-                aria-label="Search by photo"
-                title="Search by photo"
+                aria-label="Snap a photo of the bag"
+                title="Snap a photo of the bag"
               >
                 <Camera size={18} />
               </button>
@@ -230,8 +270,8 @@ const AdvancedSearch = () => {
                       <Camera size={16} className="text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-gray-900">Take a Photo</p>
-                      <p className="text-xs text-gray-400">Open camera</p>
+                      <p className="text-sm font-semibold text-gray-900">Snap the bag</p>
+                      <p className="text-xs text-gray-400">Use your camera</p>
                     </div>
                   </button>
                   {/* Choose from Library */}
@@ -393,7 +433,7 @@ const AdvancedSearch = () => {
                   {visualSearchMutation.isPending && (
                     <div className="flex items-center gap-2 text-blue-600">
                       <Loader2 size={18} className="animate-spin" />
-                      <span className="text-sm font-medium">Analyzing your photo with AI...</span>
+                      <span className="text-sm font-medium">Looking for this bag...</span>
                     </div>
                   )}
                   {(visualSearchMutation.isError || visualSearchError) && (
@@ -405,7 +445,7 @@ const AdvancedSearch = () => {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <ImageIcon size={15} className="text-blue-600" />
-                        <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">AI identified</span>
+                        <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Matched from your photo</span>
                       </div>
                       <p className="text-sm font-bold text-gray-900 capitalize">{visualResults.identified.productType}</p>
                       {visualResults.identified.description && (
@@ -428,12 +468,40 @@ const AdvancedSearch = () => {
           {/* Visual search results */}
           {visualResults?.data?.length > 0 && (
             <div className="mb-6">
+              <p className="text-sm text-teal-800 bg-teal-50 border border-teal-100 rounded-xl px-3 py-2 mb-3">
+                {tonightLine}
+              </p>
+              {topPhotoMatch && (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
+                  <p className="text-sm text-gray-600 flex-1">
+                    Best match: <span className="font-semibold text-gray-900">{topPhotoMatch.name}</span>
+                  </p>
+                  {addedTopMatch ? (
+                    <Link
+                      to="/cart"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-bold"
+                    >
+                      Added · go to cart
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleAddTopMatch}
+                      disabled={!topPhotoMatch.inStock}
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#1E3A8A] text-white text-sm font-bold disabled:bg-gray-300"
+                    >
+                      <ShoppingCart size={16} />
+                      Add to cart
+                    </button>
+                  )}
+                </div>
+              )}
               <p className="text-sm text-gray-600 mb-3">
                 <span className="font-semibold text-gray-900">{visualResults.data.length}</span> products matching your photo
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {visualResults.data.map((product: any) => (
-                  <ProductCard key={product._id} product={product} hideCartButton={true} />
+                {visualResults.data.map((product: any, index: number) => (
+                  <ProductCard key={product._id} product={product} index={index} />
                 ))}
               </div>
             </div>
@@ -445,15 +513,15 @@ const AdvancedSearch = () => {
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search size={28} className="text-blue-600" />
               </div>
-              <p className="text-lg font-semibold text-gray-800">Search for anything</p>
-              <p className="text-sm text-gray-500 mt-1">Dog food, cat toys, leashes, beds...</p>
+              <p className="text-lg font-semibold text-gray-800">Find the bag</p>
+              <p className="text-sm text-gray-500 mt-1">Type the name, or snap a photo of the package</p>
               <div className="flex items-center justify-center gap-2 mt-4">
                 <button
                   onClick={() => cameraInputRef.current?.click()}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-sm text-blue-700 font-medium hover:bg-blue-100 transition-all"
                 >
                   <Camera size={15} />
-                  Take Photo
+                  Snap the bag
                 </button>
                 <button
                   onClick={() => galleryInputRef.current?.click()}

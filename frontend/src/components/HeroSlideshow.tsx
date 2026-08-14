@@ -3,14 +3,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { slideDisplaySrc } from '@/utils/slideImage';
 
-const SLIDES = [
-  {
-    id: 'slide-1',
-    src: '/banner-one-stop.jpg',
-    webp: '/banner-one-stop.webp',
-    alt: 'Your One-Stop Shop for Every Pet\'s Joy',
-    link: '/products',
-  },
+/** Store banners only — no Neural / birthday theater on the first screen. */
+export const HERO_SLIDES = [
   {
     id: 'slide-nyc-tonight',
     src: '/banner-nyc-tonight.jpg',
@@ -19,17 +13,10 @@ const SLIDES = [
     link: '/products',
   },
   {
-    id: 'slide-neural',
-    src: '/banner-neural-twin.jpg',
-    webp: '/banner-neural-twin.webp',
-    alt: 'Scan your pet. Generate their Twin — Petshiwu Neural',
-    link: '/neural',
-  },
-  {
-    id: 'slide-2',
-    src: '/banner-birthday.png',
-    webp: '/banner-birthday.webp',
-    alt: 'Celebrate Your Pet\'s Birthday – 20% OFF + Free Gift',
+    id: 'slide-1',
+    src: '/banner-one-stop.jpg',
+    webp: '/banner-one-stop.webp',
+    alt: 'Your One-Stop Shop for Every Pet\'s Joy',
     link: '/products',
   },
   {
@@ -57,13 +44,13 @@ const SLIDES = [
 
 const HeroSlideshow = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const slide = SLIDES[currentSlide];
-  const nextSlideData = SLIDES[(currentSlide + 1) % SLIDES.length];
+  const slide = HERO_SLIDES[currentSlide];
+  const nextSlideData = HERO_SLIDES[(currentSlide + 1) % HERO_SLIDES.length];
   const displaySrc = slideDisplaySrc(slide);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
     }, 5000);
     return () => clearInterval(timer);
   }, []);
@@ -74,8 +61,8 @@ const HeroSlideshow = () => {
     img.src = slideDisplaySrc(nextSlideData);
   }, [nextSlideData]);
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
-  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + SLIDES.length) % SLIDES.length);
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
   const goToSlide = (index: number) => setCurrentSlide(index);
 
   return (
@@ -121,7 +108,7 @@ const HeroSlideshow = () => {
           </button>
 
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-20 bg-white/70 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md">
-            {SLIDES.map((_, index) => (
+            {HERO_SLIDES.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}

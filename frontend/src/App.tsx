@@ -12,9 +12,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundaryWithReporting from './components/ErrorBoundaryWithReporting';
 import { initAnalytics, trackPageView } from './utils/analytics';
 import BottomNav from './components/BottomNav';
-import AIPetAdvisor from './components/AIPetAdvisor'; // Gemini AI powered — v2
 import CookieConsent from './components/CookieConsent';
-import EmailPopup from './components/EmailPopup';
 import StructuredData from './components/StructuredData';
 import Home from './pages/Home';
 import './index.css';
@@ -84,7 +82,6 @@ const PetSuppliesSoHoNYC = lazy(() => import('./pages/seo/PetSuppliesSoHoNYC'));
 const PetSuppliesAstoriaNY = lazy(() => import('./pages/seo/PetSuppliesAstoriaNY'));
 const Investors = lazy(() => import('./pages/Investors'));
 const Innovation = lazy(() => import('./pages/Innovation'));
-const NeuralScan = lazy(() => import('./pages/NeuralScan'));
 const SellWithUs = lazy(() => import('./pages/SellWithUs'));
 const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
@@ -366,8 +363,8 @@ function App() {
                   {/* Business pages */}
                   <Route path="/investors" element={<Investors />} />
                   <Route path="/innovation" element={<Innovation />} />
-                  <Route path="/neural" element={<NeuralScan />} />
-                  <Route path="/scan" element={<Navigate to="/neural" replace />} />
+                  <Route path="/neural" element={<Navigate to="/search" replace />} />
+                  <Route path="/scan" element={<Navigate to="/search" replace />} />
                   <Route path="/tech" element={<Navigate to="/innovation" replace />} />
                   <Route path="/sell-with-us" element={<SellWithUs />} />
                   <Route path="/vendors" element={<SellWithUs />} />
@@ -415,9 +412,7 @@ function App() {
           <Footer />
           <BottomNav />
         </div>
-        <AIPetAdvisor />
         <CookieConsent />
-        <EmailPopup />
       </BrowserRouter>
     </QueryClientProvider>
   );

@@ -92,9 +92,7 @@ const Footer = () => {
               <li><Link to="/shipping" className="hover:text-white transition-colors">Shipping Information</Link></li>
               <li><Link to="/return-policy" className="hover:text-white transition-colors">Return & Exchange Policy</Link></li>
               <li><Link to="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
-              <li><Link to="/symptom-checker" className="hover:text-white transition-colors">Pet Symptom Checker</Link></li>
-              <li><Link to="/innovation" className="hover:text-white transition-colors">AI Advisor & Voice Search</Link></li>
-              <li><Link to="/neural" className="hover:text-white transition-colors">Neural Twin Scan</Link></li>
+              <li><Link to="/search?snap=1" className="hover:text-white transition-colors">Search by photo</Link></li>
               <li><Link to="/track-order" className="hover:text-white transition-colors">Track Your Order</Link></li>
               <li><Link to="/returns" className="hover:text-white transition-colors">Start a Return</Link></li>
             </ul>
@@ -109,8 +107,6 @@ const Footer = () => {
               <li><Link to="/learning" className="hover:text-white transition-colors">Pet Care Blog</Link></li>
               <li><Link to="/care-guides" className="hover:text-white transition-colors">Care Guides</Link></li>
               <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
-              <li><Link to="/innovation" className="hover:text-white transition-colors">Smart Shopping Tech</Link></li>
-              <li><Link to="/neural" className="hover:text-white transition-colors">Neural Twin Scan</Link></li>
               <li><Link to="/sell-with-us" className="hover:text-white transition-colors">Sell With Us</Link></li>
               <li><Link to="/investors" className="hover:text-white transition-colors">Investors</Link></li>
               <li><Link to="/donate" className="hover:text-white transition-colors">Donate to Shelters</Link></li>
