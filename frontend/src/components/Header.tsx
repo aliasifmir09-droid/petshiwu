@@ -423,32 +423,34 @@ const Header = () => {
               </Link>
 
               {/* Search Bar - Desktop */}
-              <form onSubmit={handleSearch} className="hidden lg:flex flex-1 max-w-xl xl:max-w-2xl mx-2 lg:mx-4 min-w-0" style={{ minHeight: '48px' }}>
-                <div className="relative w-full group">
+              <form onSubmit={handleSearch} className="hidden lg:flex flex-1 max-w-xl xl:max-w-2xl mx-2 lg:mx-4 min-w-0">
+                <div className="relative w-full">
                   <input
                     type="text"
                     placeholder="Search or snap a photo of the bag..."
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
                     onFocus={() => { if (searchQuery.length >= 1) { setShowSuggestions(true); } }}
-                    style={{ minHeight: '48px' }}
-                    className="w-full px-4 py-3 pr-[7.5rem] rounded-xl border-2 border-white/20 bg-white/95 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:border-yellow-300 shadow-lg hover:shadow-xl transition-all placeholder:text-gray-500 font-medium"
+                    className="w-full h-12 pl-4 pr-[8.5rem] rounded-xl border-2 border-white/20 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:border-yellow-300 shadow-lg placeholder:text-gray-500 font-medium"
                   />
-                  <Link
-                    to="/search?snap=1"
-                    className="absolute right-[5.75rem] top-1/2 -translate-y-1/2 p-2 text-gray-500 hover:text-[#1E3A8A]"
-                    aria-label="Snap a photo of the bag"
-                    title="Snap a photo of the bag"
-                  >
-                    <Camera size={18} />
-                  </Link>
-                  <VoiceSearchButton
-                    onResult={handleVoiceResult}
-                    className="absolute right-12 top-1/2 -translate-y-1/2"
-                  />
-                  <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg transform hover:scale-110" aria-label="Search">
-                    <Search size={18} />
-                  </button>
+                  <div className="absolute inset-y-0 right-1.5 flex items-center gap-0.5">
+                    <Link
+                      to="/search?snap=1"
+                      className="flex items-center justify-center w-9 h-9 rounded-lg text-gray-500 hover:text-[#1E3A8A] hover:bg-blue-50"
+                      aria-label="Snap a photo of the bag"
+                      title="Snap a photo of the bag"
+                    >
+                      <Camera size={18} />
+                    </Link>
+                    <VoiceSearchButton onResult={handleVoiceResult} variant="dark" />
+                    <button
+                      type="submit"
+                      className="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
+                      aria-label="Search"
+                    >
+                      <Search size={18} />
+                    </button>
+                  </div>
                   <SearchSuggestions
                     query={searchQuery}
                     isOpen={showSuggestions}
@@ -586,24 +588,22 @@ const Header = () => {
                   value={searchQuery}
                   onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
                   onFocus={() => { if (searchQuery.length >= 1) { setShowSuggestions(true); } }}
-                  className="w-full h-10 pl-3 pr-[6.5rem] rounded-lg border-2 border-white/20 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300 placeholder:text-gray-500"
+                  className="w-full h-10 pl-3 pr-[7.5rem] rounded-lg border-2 border-white/20 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300 placeholder:text-gray-500"
                   aria-label="Search products"
                 />
-                <Link
-                  to="/search?snap=1"
-                  className="absolute right-[4.25rem] top-1/2 -translate-y-1/2 p-1.5 text-gray-500 hover:text-[#1E3A8A]"
-                  aria-label="Snap a photo of the bag"
-                >
-                  <Camera size={18} />
-                </Link>
-                <VoiceSearchButton
-                  onResult={handleVoiceResult}
-                  variant="dark"
-                  className="absolute right-10 top-1/2 -translate-y-1/2"
-                />
-                <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md bg-[#1E3A8A] text-white" aria-label="Search">
-                  <Search size={16} />
-                </button>
+                <div className="absolute inset-y-0 right-1 flex items-center gap-0.5">
+                  <Link
+                    to="/search?snap=1"
+                    className="flex items-center justify-center w-8 h-8 rounded-md text-gray-500 hover:text-[#1E3A8A]"
+                    aria-label="Snap a photo of the bag"
+                  >
+                    <Camera size={18} />
+                  </Link>
+                  <VoiceSearchButton onResult={handleVoiceResult} variant="dark" />
+                  <button type="submit" className="flex items-center justify-center w-8 h-8 rounded-md bg-[#1E3A8A] text-white" aria-label="Search">
+                    <Search size={16} />
+                  </button>
+                </div>
                 <SearchSuggestions
                   query={searchQuery}
                   isOpen={showSuggestions}
@@ -757,16 +757,14 @@ const Header = () => {
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
                     onFocus={() => { if (searchQuery.length >= 2) { setShowSuggestions(true); } }}
-                    className="w-full px-4 py-2.5 pr-[5.5rem] rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                    className="w-full h-11 pl-4 pr-24 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
                   />
-                  <VoiceSearchButton
-                    onResult={handleVoiceResult}
-                    variant="dark"
-                    className="absolute right-11 top-1/2 -translate-y-1/2"
-                  />
-                  <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-900 transition-colors" aria-label="Search">
-                    <Search size={20} />
-                  </button>
+                  <div className="absolute inset-y-0 right-1 flex items-center gap-0.5">
+                    <VoiceSearchButton onResult={handleVoiceResult} variant="dark" />
+                    <button type="submit" className="flex items-center justify-center w-9 h-9 rounded-md text-gray-600 hover:text-gray-900" aria-label="Search">
+                      <Search size={20} />
+                    </button>
+                  </div>
                   <SearchSuggestions
                     query={searchQuery}
                     isOpen={showSuggestions}
