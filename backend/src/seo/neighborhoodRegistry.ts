@@ -126,6 +126,46 @@ export const NEIGHBORHOOD_PAGE_REGISTRY = new Map<string, NeighborhoodRouteMetad
   CANONICAL_NEIGHBORHOOD_ROUTES.map((route) => [route.slug, route])
 );
 
+/** Thin 1,400 neighborhood copies 301 to these real landing pages. */
+export const NEIGHBORHOOD_CATEGORY_LANDING: Record<string, string> = {
+  'dog-food-delivery': '/dog-food-delivery-nyc',
+  'puppy-food-delivery': '/dog-food-delivery-nyc',
+  'senior-dog-food-delivery': '/dog-food-delivery-nyc',
+  'wet-dog-food-delivery': '/dog-food-delivery-nyc',
+  'dry-dog-food-delivery': '/dog-food-delivery-nyc',
+  'grain-free-dog-food-delivery': '/dog-food-delivery-nyc',
+  'raw-dog-food-delivery': '/raw-dog-food-nyc',
+  'dog-treats-delivery': '/dog',
+  'dog-toys-delivery': '/durable-dog-toys-aggressive-chewers',
+  'dog-beds-delivery': '/dog',
+  'dog-crates-delivery': '/dog',
+  'dog-grooming-delivery': '/dog',
+  'cat-food-delivery': '/cat-food-delivery-nyc',
+  'kitten-food-delivery': '/cat-food-delivery-nyc',
+  'senior-cat-food-delivery': '/cat-food-delivery-nyc',
+  'wet-cat-food-delivery': '/cat-food-delivery-nyc',
+  'cat-litter-boxes-delivery': '/cat',
+  'cat-scratcher-delivery': '/cat',
+  'cat-toys-delivery': '/cat',
+  'cat-beds-delivery': '/cat',
+  'cat-grooming-delivery': '/cat',
+  'pet-supplies-delivery': '/pet-supplies-delivery-nyc',
+  'fish-supplies-delivery': '/fish',
+  'reptile-supplies-delivery': '/reptile',
+  'bird-supplies-delivery': '/bird',
+  'small-pet-supplies-delivery': '/small-animal',
+  'vet-diet-delivery': '/dog-food-delivery-nyc',
+  'pet-medication-delivery': '/pet-supplies-delivery-nyc',
+};
+
+export function neighborhoodLandingPath(categorySlug: string): string {
+  return NEIGHBORHOOD_CATEGORY_LANDING[categorySlug] || '/pet-supplies-delivery-nyc';
+}
+
+if (CANONICAL_NEIGHBORHOOD_CATEGORIES.some((category) => !NEIGHBORHOOD_CATEGORY_LANDING[category.slug])) {
+  throw new Error('Every neighborhood category must map to a real landing page');
+}
+
 export const getNeighborhoodRoute = (rawPath: string): NeighborhoodRouteMetadata | undefined => {
   const withoutQuery = rawPath.split('?')[0] || '/';
   const normalized = withoutQuery.length > 1 ? withoutQuery.replace(/\/+$/, '') : withoutQuery;

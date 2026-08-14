@@ -1647,6 +1647,12 @@ export const createBotRenderer = (distPath: string) => {
         }
       }
 
+      // 301 neighborhood copies and other classifier redirects before rendering HTML.
+      if (routeClassification.status === 'redirect' && routeClassification.redirectTo) {
+        res.redirect(301, routeClassification.redirectTo);
+        return;
+      }
+
       // Hard route-classifier failures must win over the permissive SPA pattern
       // fallback below. This prevents malformed encoded product paths from becoming
       // 200 noindex shells merely because they have three URL segments.

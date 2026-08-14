@@ -8,8 +8,8 @@
  *
  * When these disagreed, valid neighborhood pages were classified as doorway /
  * noindex on one side while being linked/served on the other — a root cause of
- * the July indexing collapse. This script fails the build if the two route sets
- * diverge, so drift is caught in CI instead of in Google Search Console.
+ * the July indexing collapse. The 1,400 paths are now 301 redirects to city
+ * landings, but both registries must still list the same slugs.
  *
  * Runtime-agnostic: runs under `bun scripts/check-seo-registries.ts` (CI) and
  * under `ts-node` locally.
