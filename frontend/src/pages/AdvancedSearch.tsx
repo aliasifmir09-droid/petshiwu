@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useMutation } from '@tanstack/react-query';
 import { productService } from '@/services/products';
 import ProductCard from '@/components/ProductCard';
 import { Search, X, SlidersHorizontal, ArrowLeft, Package, Camera, Loader2, ImageIcon, ShoppingCart } from 'lucide-react';
@@ -144,10 +144,17 @@ const AdvancedSearch = () => {
     }
   }, [debouncedQuery, filters]);
 
-  // Fetch results — fires automatically when debouncedQuery changes
-  const { data: searchResults, isLoading, isFetching } = useQuery({
+  // Fetch results as the customer types. Empty query lists the catalog so the
+  // Search tab is not blank. Load more pages until every match is shown.
+  const {
+    data: searchResults,
+    isLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
     queryKey: ['search', debouncedQuery, filters],
-    queryFn: () =>
+    queryFn: ({ pageParam }) =>
       productService.search(debouncedQuery, {
         sort: filters.sort,
         inStock: filters.inStock || undefined,
@@ -155,16 +162,22 @@ const AdvancedSearch = () => {
         brand: filters.brand || undefined,
         minPrice: filters.minPrice ? parseFloat(filters.minPrice) : undefined,
         maxPrice: filters.maxPrice ? parseFloat(filters.maxPrice) : undefined,
-        page: 1,
+        page: pageParam,
         limit: 24,
       }),
-    enabled: debouncedQuery.length >= 1,
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const page = lastPage?.pagination?.page || 1;
+      const pages = lastPage?.pagination?.pages || 1;
+      return page < pages ? page + 1 : undefined;
+    },
+    enabled: !photoPreview,
     staleTime: 30 * 1000,
   });
 
-  const products = searchResults?.data || [];
-  const total = searchResults?.pagination?.total || 0;
-  const isSearching = isLoading || isFetching;
+  const products = searchResults?.pages.flatMap((page) => page.data || []) || [];
+  const total = searchResults?.pages[0]?.pagination?.total || 0;
+  const isSearching = isLoading && products.length === 0;
 
   // Suggestions from autocomplete (shown while typing, before results)
   const { data: suggestions } = useQuery({
@@ -509,7 +522,7 @@ const AdvancedSearch = () => {
 
           {/* Empty state — no query yet */}
           {!inputValue && !photoPreview && (
-            <div className="text-center py-16">
+            <div className="text-center py-8">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search size={28} className="text-blue-600" />
               </div>
@@ -548,20 +561,27 @@ const AdvancedSearch = () => {
           )}
 
           {/* Searching indicator */}
-          {inputValue && !photoPreview && isSearching && (
+          {!photoPreview && isSearching && (
             <div className="flex items-center justify-center gap-2 py-8 text-gray-500">
               <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm">Searching...</span>
+              <span className="text-sm">{debouncedQuery ? 'Searching...' : 'Loading products...'}</span>
             </div>
           )}
 
-          {/* Text search results */}
-          {!photoPreview && !isSearching && debouncedQuery && products.length > 0 && (
+          {/* Text search / catalog results */}
+          {!photoPreview && !isSearching && products.length > 0 && (
             <>
               <div className="flex items-center justify-between mb-4">
                 <p className="text-sm text-gray-600">
-                  <span className="font-semibold text-gray-900">{total.toLocaleString()}</span> results for
-                  {' '}<span className="font-semibold text-blue-600">"{debouncedQuery}"</span>
+                  <span className="font-semibold text-gray-900">{total.toLocaleString()}</span>
+                  {debouncedQuery ? (
+                    <>
+                      {' '}results for{' '}
+                      <span className="font-semibold text-blue-600">"{debouncedQuery}"</span>
+                    </>
+                  ) : (
+                    <> products</>
+                  )}
                 </p>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -569,6 +589,18 @@ const AdvancedSearch = () => {
                   <ProductCard key={product._id} product={product} searchTerm={debouncedQuery} />
                 ))}
               </div>
+              {hasNextPage && (
+                <div className="flex justify-center mt-6 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                    className="px-6 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-800 hover:border-blue-400 hover:text-blue-600 disabled:opacity-50"
+                  >
+                    {isFetchingNextPage ? 'Loading...' : 'Load more products'}
+                  </button>
+                </div>
+              )}
             </>
           )}
 

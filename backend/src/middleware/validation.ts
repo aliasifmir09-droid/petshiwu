@@ -346,10 +346,10 @@ export const createStockAlertValidation = [
 // Search validations
 export const searchValidation = [
   query('q')
-    .optional()
+    .optional({ values: 'falsy' })
     .trim()
-    .isLength({ min: 2, max: 100 })
-    .withMessage('Search query must be between 2 and 100 characters'),
+    .isLength({ min: 1, max: 100 })
+    .withMessage('Search query must be between 1 and 100 characters'),
   query('minPrice')
     .optional()
     .isFloat({ min: 0 })

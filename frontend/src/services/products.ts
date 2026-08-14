@@ -63,9 +63,10 @@ export const productService = {
     page?: number;
     limit?: number;
   }) => {
+    const q = query.trim();
     const response = await api.get<PaginatedResponse<Product>>('/products/search', {
       params: {
-        q: query,
+        ...(q ? { q } : {}),
         ...filters
       }
     });

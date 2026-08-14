@@ -8,6 +8,7 @@ import { executeCachedAggregation } from '../utils/aggregationCache';
 import { cache, cacheKeys } from '../utils/cache';
 import { extractJsonObject, parseNeuralTwin } from '../utils/neuralScan';
 import { mimeFromDataUrl, parseVisualIdentification, visualSearchTerms } from '../utils/visualSearch';
+import { buildProductSearchQuery, singleTermNameMatch } from '../utils/productSearchQuery';
 
 const GEMINI_VISION_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
 
@@ -41,116 +42,16 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
       ]
     };
 
-    // ─── Pet-type keyword detection ─────────────────────────────────────────
-    // Maps common search words to their petType DB value.
-    // Used so "dog food" → filter petType:"dog" + search "food",
-    // rather than trying to match the word "dog" inside product names.
-    const PET_TYPE_KEYWORDS: Record<string, string> = {
-      dog: 'dog', dogs: 'dog', puppy: 'dog', puppies: 'dog', canine: 'dog',
-      cat: 'cat', cats: 'cat', kitten: 'cat', kittens: 'cat', feline: 'cat',
-      bird: 'bird', birds: 'bird', parrot: 'bird', parakeet: 'bird', budgie: 'bird',
-      fish: 'fish', aquarium: 'fish', aquatic: 'fish',
-      reptile: 'reptile', reptiles: 'reptile', lizard: 'reptile', snake: 'reptile', turtle: 'reptile',
-      rabbit: 'small-pet', hamster: 'small-pet', bunny: 'small-pet', guinea: 'small-pet', gerbil: 'small-pet',
-    };
-
-    // Search query - Use AND logic for better relevance (all terms must be present)
-    // Text index exists on: name, description, brand, tags (see Product model)
-    if (q && typeof q === 'string') {
-      const searchText = q.trim();
-      if (searchText.length >= 1) {
-        // Split search text into terms
-        const searchTerms = searchText.split(/\s+/).filter(term => term.length > 0);
-          
-        if (searchText.length >= 2) {
-          if (searchTerms.length > 1) {
-            // ── Step 1: Extract pet type from query terms ──────────────────
-            // e.g. "dog food" → detectedPetType="dog", effectiveTerms=["food"]
-            // Only auto-detect if petType filter is not already set explicitly
-            let detectedPetType: string | null = null;
-            let effectiveTerms = [...searchTerms];
-            if (!petType) {
-              for (let i = 0; i < effectiveTerms.length; i++) {
-                const mapped = PET_TYPE_KEYWORDS[effectiveTerms[i].toLowerCase()];
-                if (mapped) {
-                  detectedPetType = mapped;
-                  effectiveTerms.splice(i, 1);
-                  break;
-                }
-              }
-            }
-            // If all terms were pet-type words (e.g. query = "dog"), keep them all
-            if (effectiveTerms.length === 0) effectiveTerms = [...searchTerms];
-
-            // ── Step 2: Build AND conditions ───────────────────────────────
-            // Intentionally omit `description` — it causes false positives.
-            // E.g. "Automatic Cat Feeder" description may say "suitable for dogs"
-            // and "dispenses their food", incorrectly matching "dog food".
-            // Matching name, brand, and tags is precise enough.
-            const escapedTerms = effectiveTerms.map(term =>
-              term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-            );
-            const andConditions = escapedTerms.map(term => ({
-              $or: [
-                { name: { $regex: term, $options: 'i' } },
-                { brand: { $regex: term, $options: 'i' } },
-                { tags: { $in: [new RegExp(term, 'i')] } }
-              ]
-            }));
-
-            // Exact phrase match in name (highest priority)
-            const exactNameRegex = new RegExp(
-              searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
-              'i'
-            );
-
-            // ── Step 3: Compose query ──────────────────────────────────────
-            query = {
-              isActive: true,
-              $and: [
-                {
-                  $or: [
-                    { deletedAt: null },
-                    { deletedAt: { $exists: false } }
-                  ]
-                },
-                // Apply detected pet type as a hard filter (most relevant signal)
-                ...(detectedPetType ? [{ petType: detectedPetType }] : []),
-                {
-                  $or: [
-                    { name: exactNameRegex },   // exact phrase in name → best match
-                    { $and: andConditions }      // all terms in name/brand/tags
-                  ]
-                }
-              ]
-            };
-          } else {
-            // Single term: use text search for better performance
-            query.$text = { $search: searchText };
-          }
-        } else {
-          // Single character: regex on name/brand/tags only
-          const searchRegex = new RegExp(searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-          query = {
-            isActive: true,
-            $and: [
-              {
-                $or: [
-                  { deletedAt: null },
-                  { deletedAt: { $exists: false } }
-                ]
-              },
-              {
-                $or: [
-                  { name: searchRegex },
-                  { brand: searchRegex },
-                  { tags: { $in: [searchRegex] } }
-                ]
-              }
-            ]
-          };
-        }
-      }
+    // Prefix/contains match (same as the shop catalog). MongoDB $text is whole-word
+    // only, so "pur" / "hill" miss Purina / Hill's on the first letters typed.
+    // Empty q lists the active catalog so the Search tab is not blank.
+    const searchText = typeof q === 'string' ? q.trim() : '';
+    const textQuery = buildProductSearchQuery(
+      searchText,
+      typeof petType === 'string' ? petType : undefined
+    );
+    if (textQuery) {
+      query = textQuery;
     }
 
     // Category filter
@@ -317,16 +218,13 @@ export const searchAutocomplete = async (req: Request, res: Response, next: Next
       });
     }
 
-    // Optimize autocomplete search - use text index if available, fallback to regex
     const searchText = q.trim();
-    const searchRegex = new RegExp(searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
     
     // Cache autocomplete results for 1-2 minutes (popular searches)
-    const autocompleteCacheKey = `autocomplete:${searchText}:${limit}`;
+    const autocompleteCacheKey = `autocomplete:v2:${searchText}:${limit}`;
     let products = await cache.get<any[]>(autocompleteCacheKey);
     
     if (!products) {
-      // Try text search first (faster if index exists)
       const baseQuery: any = {
         isActive: true,
         $or: [
@@ -334,13 +232,17 @@ export const searchAutocomplete = async (req: Request, res: Response, next: Next
           { deletedAt: { $exists: false } }
         ]
       };
+      const regexProductQuery = buildProductSearchQuery(searchText) || {
+        ...baseQuery,
+        ...singleTermNameMatch(searchText),
+      };
 
-      // Initialize products array
       products = [];
       
       try {
-        // Try $text search first (requires text index) - only for 2+ characters
-        if (searchText.length >= 2) {
+        // Short queries ("p", "pur", "hill") must use regex. $text is whole-word
+        // only and would return 0 (or a few full-word hits) and skip the fallback.
+        if (searchText.length >= 4) {
           const textSearchQuery = {
             ...baseQuery,
             $text: { $search: searchText }
@@ -352,55 +254,16 @@ export const searchAutocomplete = async (req: Request, res: Response, next: Next
             .lean();
         }
         
-        // If text search returns no results or query is too short, use regex search
-        // Regex search works better for single characters and partial matches in descriptions
         if (products.length === 0) {
-          const regexSearchQuery = {
-            isActive: true,
-            $or: [
-              { deletedAt: null },
-              { deletedAt: { $exists: false } }
-            ],
-            $and: [
-              {
-                $or: [
-                  { name: searchRegex },
-                  { description: searchRegex },
-                  { brand: searchRegex },
-                  { tags: { $in: [searchRegex] } }
-                ]
-              }
-            ]
-          };
-          
-          products = await Product.find(regexSearchQuery)
+          products = await Product.find(regexProductQuery)
             .select('name slug brand images basePrice')
             .limit(limit)
             .lean();
         }
       } catch (error: any) {
-        // If $text search fails (e.g., text index doesn't exist), use regex fallback
         logger.debug(`Text search failed, using regex fallback: ${error.message}`);
         
-        const regexSearchQuery = {
-          isActive: true,
-          $or: [
-            { deletedAt: null },
-            { deletedAt: { $exists: false } }
-          ],
-          $and: [
-            {
-              $or: [
-                { name: searchRegex },
-                { description: searchRegex },
-                { brand: searchRegex },
-                { tags: { $in: [searchRegex] } }
-              ]
-            }
-          ]
-        };
-        
-        products = await Product.find(regexSearchQuery)
+        products = await Product.find(regexProductQuery)
           .select('name slug brand images basePrice')
           .limit(limit)
           .lean();
