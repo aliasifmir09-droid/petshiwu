@@ -98,7 +98,7 @@ const Contact = () => {
                     <MapPin className="w-5 h-5 text-blue-700" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900 text-sm mb-0.5">Office & warehouse</p>
+                    <p className="font-semibold text-gray-900 text-sm mb-0.5">Office & warehouse — not open to the public</p>
                     <p className="text-gray-600 text-sm">37-68 74th Street</p>
                     <p className="text-gray-600 text-sm">Jackson Heights, NY 11372</p>
                     <p className="text-gray-500 text-xs mt-1">Not a walk-in store. Delivery only — shop online.</p>
@@ -149,30 +149,6 @@ const Contact = () => {
                   </div>
                 </div>
               </div>
-
-                {/* Address / Map card — replaces unreliable Google Maps iframe */}
-                <div className="rounded-2xl border border-gray-200 shadow-sm bg-gradient-to-br from-blue-50 to-white p-5">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
-                      <MapPin className="w-6 h-6 text-blue-700" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 text-sm mb-1">Office & warehouse — not open to the public</p>
-                      <p className="text-gray-600 text-sm">37-68 74th Street</p>
-                      <p className="text-gray-600 text-sm">Jackson Heights, NY 11372</p>
-                      <p className="text-gray-500 text-xs mt-1">We deliver. We do not have a retail shop for visits.</p>
-                      <a
-                        href="https://maps.google.com/?q=37-68+74th+Street,+Jackson+Heights,+NY+11372"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 mt-3 text-blue-700 hover:text-blue-800 text-sm font-semibold"
-                      >
-                        Open in Google Maps
-                        <span aria-hidden="true">↗</span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
             </div>
 
             {/* Contact Form */}
