@@ -11,6 +11,7 @@ import CategoryIcons from '@/components/CategoryIcons';
 import BirthdayBanner from '@/components/BirthdayBanner';
 import SmartTechShowcase from '@/components/SmartTechShowcase';
 import NeuralPortal from '@/components/NeuralPortal';
+import { hasActivePassport, loadPassport, shopPathForPassport } from '@/utils/petPassport';
 import AdSense from '@/components/AdSense';
 import ShopByPet from '@/components/ShopByPet';
 import { ChevronRight, ArrowRight } from 'lucide-react';
@@ -316,6 +317,30 @@ const Home = () => {
       <div className="container mx-auto px-4 lg:px-8 mt-4">
         <HeroSlideshow />
       </div>
+
+      {hasActivePassport(loadPassport()) && (
+        <section className="container mx-auto px-4 lg:px-8 mt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-blue-700">Shopping as</p>
+              <p className="text-xl font-black text-gray-900">
+                {loadPassport()?.name} · {loadPassport()?.species}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Link
+                to={shopPathForPassport(loadPassport())}
+                className="rounded-full bg-blue-700 px-4 py-2 text-sm font-bold text-white"
+              >
+                Open {loadPassport()?.name}&apos;s aisle
+              </Link>
+              <Link to="/neural" className="rounded-full border border-blue-200 px-4 py-2 text-sm font-bold text-blue-800">
+                Update Twin
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       <NeuralPortal />
 

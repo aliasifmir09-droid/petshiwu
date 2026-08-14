@@ -15,6 +15,8 @@ import BottomNav from './components/BottomNav';
 import AIPetAdvisor from './components/AIPetAdvisor'; // Gemini AI powered — v2
 import CookieConsent from './components/CookieConsent';
 import EmailPopup from './components/EmailPopup';
+import PetOnboarding from './components/PetOnboarding';
+import InstallAppBanner from './components/InstallAppBanner';
 import StructuredData from './components/StructuredData';
 import Home from './pages/Home';
 import './index.css';
@@ -198,11 +200,16 @@ function App() {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         for (const registration of registrations) {
-          if (!registration.scope.includes('/driver/')) {
-            registration.unregister();
-          }
+          const scriptUrl =
+            registration.active?.scriptURL ||
+            registration.waiting?.scriptURL ||
+            registration.installing?.scriptURL ||
+            '';
+          if (scriptUrl.includes('/driver/') || scriptUrl.includes('sw-store')) continue;
+          registration.unregister();
         }
       });
+      navigator.serviceWorker.register('/sw-store.js').catch(() => {});
       caches.keys().then((cacheNames) => {
         cacheNames.forEach((cacheName) => {
           if (!cacheName.startsWith('petshiwu-driver-')) {
@@ -417,6 +424,8 @@ function App() {
         </div>
         <AIPetAdvisor />
         <CookieConsent />
+        <PetOnboarding />
+        <InstallAppBanner />
         <EmailPopup />
       </BrowserRouter>
     </QueryClientProvider>

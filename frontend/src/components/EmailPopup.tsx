@@ -17,6 +17,8 @@ const EmailPopup = () => {
     // Don't show if already dismissed or submitted this session
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (dismissed) return;
+    // Let first-visit pet onboarding finish before the email popup.
+    if (!localStorage.getItem('petshiwu_passport')) return;
 
     // Show after 12 seconds on the page
     timerRef.current = setTimeout(() => {

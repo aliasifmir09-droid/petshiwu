@@ -1,10 +1,11 @@
 {
-  "name": "Petshiwu - Everything Your Pet Needs",
+  "name": "Petshiwu",
   "short_name": "Petshiwu",
-  "description": "Shop premium pet food, toys, and supplies for dogs, cats, and more",
+  "description": "Scan your pet. Same-day NYC pet supplies. No autoship required.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#030712",
   "theme_color": "#1E3A8A",
   "orientation": "portrait-primary",
   "icons": [
@@ -22,22 +23,27 @@
     }
   ],
   "categories": ["shopping", "pets"],
-  "screenshots": [],
   "shortcuts": [
     {
-      "name": "Products",
-      "short_name": "Products",
-      "description": "Browse all products",
-      "url": "/#/products",
-      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+      "name": "Neural Scan",
+      "short_name": "Scan",
+      "description": "Scan your pet and generate their Twin",
+      "url": "/neural",
+      "icons": [{ "src": "/logo-square-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Shop",
+      "short_name": "Shop",
+      "description": "Browse products",
+      "url": "/products",
+      "icons": [{ "src": "/logo-square-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Cart",
       "short_name": "Cart",
       "description": "View shopping cart",
-      "url": "/#/cart",
-      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+      "url": "/cart",
+      "icons": [{ "src": "/logo-square-192.png", "sizes": "192x192" }]
     }
   ]
 }
-
