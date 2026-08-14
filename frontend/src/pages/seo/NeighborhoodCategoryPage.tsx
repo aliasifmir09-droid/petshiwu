@@ -1,30 +1,17 @@
-import { useParams } from 'react-router-dom';
-import SEOLandingPage from '../SEOLandingPage';
+import { Navigate, useParams } from 'react-router-dom';
 import NotFound from '../NotFound';
-import { NEIGHBORHOOD_PAGE_MAP, NeighborhoodPageConfig } from '@/data/neighborhoodPages';
+import { NEIGHBORHOOD_PAGE_MAP, NeighborhoodPageConfig, neighborhoodLandingPath } from '@/data/neighborhoodPages';
 
 interface Props {
   config: NeighborhoodPageConfig;
 }
 
 /**
- * Programmatic neighborhood × category SEO page.
- * Used for 200 pages: /[category]-[neighborhood]-[borough]
- * e.g. /dog-food-delivery-flushing-queens, /cat-food-delivery-williamsburg-brooklyn
+ * Old neighborhood×category URLs were 1,400 near-duplicate pages.
+ * Send people (and Google) to the real city landing instead of serving copies.
  */
 const NeighborhoodCategoryPage = ({ config }: Props) => (
-  <SEOLandingPage
-    keyword={config.keyword}
-    title={config.title}
-    description={config.description}
-    h1={config.h1}
-    introContent={config.introContent}
-    problemPoints={config.problemPoints}
-    solutionPoints={config.solutionPoints}
-    faqItems={config.faqItems}
-    searchTerms={config.searchTerms}
-    petType={config.petType}
-  />
+  <Navigate to={neighborhoodLandingPath(config.categorySlug)} replace />
 );
 
 /**

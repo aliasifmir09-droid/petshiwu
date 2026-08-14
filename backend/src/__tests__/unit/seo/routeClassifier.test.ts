@@ -34,4 +34,16 @@ describe('classifyRoute', () => {
   test('query variants are noindex', () => {
     expect(classifyRoute('/dog?sort=price-asc').indexable).toBe(false);
   });
+
+  test('thin neighborhood copies redirect to a real landing page', () => {
+    expect(classifyRoute('/dog-food-delivery-flushing-queens')).toMatchObject({
+      indexable: false,
+      status: 'redirect',
+      redirectTo: '/dog-food-delivery-nyc',
+      routeType: 'neighborhood-redirect',
+    });
+    expect(classifyRoute('/cat-food-delivery-williamsburg-brooklyn').redirectTo).toBe(
+      '/cat-food-delivery-nyc'
+    );
+  });
 });

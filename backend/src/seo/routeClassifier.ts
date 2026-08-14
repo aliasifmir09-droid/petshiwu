@@ -1,4 +1,4 @@
-import { getNeighborhoodRoute } from './neighborhoodRegistry';
+import { getNeighborhoodRoute, neighborhoodLandingPath } from './neighborhoodRegistry';
 
 export type RouteIndexingStatus = 'indexable' | 'noindex' | 'notFound' | 'redirect';
 
@@ -106,9 +106,17 @@ export const classifyRoute = (rawPath: string): RouteClassification => {
     return { status: 'noindex', indexable: false, canonicalPath, routeType: 'utility' };
   }
 
-  // Allowlist canonical neighborhood routes before the doorway heuristic.
-  if (getNeighborhoodRoute(canonicalPath)) {
-    return { status: 'indexable', indexable: true, canonicalPath, routeType: 'neighborhood' };
+  // 1,400 thin neighborhood×category copies. 301 to the real city landing.
+  const neighborhood = getNeighborhoodRoute(canonicalPath);
+  if (neighborhood) {
+    const redirectTo = neighborhoodLandingPath(neighborhood.categorySlug);
+    return {
+      status: 'redirect',
+      indexable: false,
+      canonicalPath: redirectTo,
+      redirectTo,
+      routeType: 'neighborhood-redirect',
+    };
   }
 
   if (isDoorwayRoot(canonicalPath)) {

@@ -1435,6 +1435,42 @@ const CATEGORY_GENERATORS: { slug: string; generator: PageGenerator }[] = [
   { slug: 'pet-medication-delivery', generator: petMedicationGenerator },
 ];
 
+/** Same targets as backend neighborhoodRegistry — 1,400 copies 301 here. */
+export const NEIGHBORHOOD_CATEGORY_LANDING: Record<string, string> = {
+  'dog-food-delivery': '/dog-food-delivery-nyc',
+  'puppy-food-delivery': '/dog-food-delivery-nyc',
+  'senior-dog-food-delivery': '/dog-food-delivery-nyc',
+  'wet-dog-food-delivery': '/dog-food-delivery-nyc',
+  'dry-dog-food-delivery': '/dog-food-delivery-nyc',
+  'grain-free-dog-food-delivery': '/dog-food-delivery-nyc',
+  'raw-dog-food-delivery': '/raw-dog-food-nyc',
+  'dog-treats-delivery': '/dog',
+  'dog-toys-delivery': '/durable-dog-toys-aggressive-chewers',
+  'dog-beds-delivery': '/dog',
+  'dog-crates-delivery': '/dog',
+  'dog-grooming-delivery': '/dog',
+  'cat-food-delivery': '/cat-food-delivery-nyc',
+  'kitten-food-delivery': '/cat-food-delivery-nyc',
+  'senior-cat-food-delivery': '/cat-food-delivery-nyc',
+  'wet-cat-food-delivery': '/cat-food-delivery-nyc',
+  'cat-litter-boxes-delivery': '/cat',
+  'cat-scratcher-delivery': '/cat',
+  'cat-toys-delivery': '/cat',
+  'cat-beds-delivery': '/cat',
+  'cat-grooming-delivery': '/cat',
+  'pet-supplies-delivery': '/pet-supplies-delivery-nyc',
+  'fish-supplies-delivery': '/fish',
+  'reptile-supplies-delivery': '/reptile',
+  'bird-supplies-delivery': '/bird',
+  'small-pet-supplies-delivery': '/small-animal',
+  'vet-diet-delivery': '/dog-food-delivery-nyc',
+  'pet-medication-delivery': '/pet-supplies-delivery-nyc',
+};
+
+export function neighborhoodLandingPath(categorySlug: string): string {
+  return NEIGHBORHOOD_CATEGORY_LANDING[categorySlug] || '/pet-supplies-delivery-nyc';
+}
+
 // ─────────────────────────────────────────────
 // Generate all 1,400 page configs
 // ─────────────────────────────────────────────

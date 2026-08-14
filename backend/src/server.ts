@@ -119,6 +119,8 @@ import { generateSitemap } from './controllers/sitemapController';
 import { createBotRenderer } from './middleware/botRenderer';
 import { slugRedirectMiddleware } from './middleware/slugRedirect';
 import { blogRedirectMiddleware } from './middleware/blogRedirect';
+import { neighborhoodRedirectMiddleware } from './middleware/neighborhoodRedirect';
+import { brokenSlugRedirectMiddleware } from './middleware/brokenSlugRedirect';
 
 connectDatabase().catch((error: unknown) => {
   const errorMessage = error instanceof Error ? error.message : String(error);
@@ -838,6 +840,14 @@ app.use('/driver', express.static(driverDistPath, {
 
 // Blog redirect: 301 old thin neighborhood pages to 5 rich borough hub pages.
 app.use(blogRedirectMiddleware);
+
+// 1,400 thin neighborhood×category URLs → real city landings.
+app.use(neighborhoodRedirectMiddleware);
+
+// /cat/undefined/... product URLs that Google crawled as duplicates.
+app.use(brokenSlugRedirectMiddleware);
+
+// Slug redirect: 301 any legacy artifact URL (hill039s, chicken-amp-rice) to clean canonical.
 
 // Slug redirect: 301 any legacy artifact URL (hill039s, chicken-amp-rice) to clean canonical.
 // Uses legacySlugs[] array populated by the fixProductSlugs migration script.
