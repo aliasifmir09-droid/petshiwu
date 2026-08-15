@@ -2,15 +2,15 @@ import SEOLandingPage from '../SEOLandingPage';
 
 /**
  * Targets: "pet supplies Jackson Heights", "pet store Jackson Heights NY", "pet food Jackson Heights Queens"
- * Highest priority — our home neighborhood
+ * Home neighborhood — delivery from warehouse, not a walk-in shop.
  */
 const PetSuppliesJacksonHeightsNY = () => (
   <SEOLandingPage
     keyword="pet-supplies-jackson-heights-ny"
-    title="Pet Supplies Jackson Heights NY — Local Delivery from Your Neighborhood Pet Store | Petshiwu"
-    description="Petshiwu is based in Jackson Heights, Queens. Local pet supply delivery to Jackson Heights, Elmhurst, Woodside & surrounding neighborhoods. 10,000+ products. Free shipping over $49."
-    h1="Pet Supplies from Jackson Heights' Own Pet Store"
-    introContent="Petshiwu is your local Jackson Heights pet store — based right here at 37-68 74th Street in the heart of the neighborhood. We deliver premium pet food, toys, and supplies to Jackson Heights, Elmhurst, Woodside, Corona, and all surrounding areas. Shop local, get it delivered. 10,000+ products, free delivery on orders over $49."
+    title="Pet Supplies Jackson Heights NY — Local Delivery from Our Warehouse | Petshiwu"
+    description="Petshiwu delivers pet supplies in Jackson Heights, Queens. We are not a walk-in store — office and warehouse only. Delivery to Jackson Heights, Elmhurst, Woodside & nearby. Free shipping over $49."
+    h1="Jackson Heights Pet Supply Delivery"
+    introContent="Petshiwu delivers pet food and supplies in Jackson Heights from our office and warehouse at 37-68 74th Street. We are not a walk-in store. Order online and we bring premium pet food, toys, and supplies to Jackson Heights, Elmhurst, Woodside, Corona, and all surrounding areas. 10,000+ products, free delivery on orders over $49."
     problemPoints={[
       "Having to travel to big pet stores outside the neighborhood",
       "Local stores with limited selection and inconsistent stock",
@@ -19,9 +19,9 @@ const PetSuppliesJacksonHeightsNY = () => (
       "Heavy bags on the 7 train or the bus"
     ]}
     solutionPoints={[
-      "Based in Jackson Heights — genuinely your local pet store",
+      "Jackson Heights warehouse — delivery only, not a walk-in shop",
       "Delivery throughout Jackson Heights, Elmhurst, Woodside, Corona, and beyond",
-      "10,000+ products — the widest selection in the neighborhood",
+      "10,000+ products — the widest selection without leaving home",
       "Multilingual support reflecting Jackson Heights' diverse community",
       "Free delivery on orders over $49 — no more heavy bags",
       "Serving dogs, cats, birds, fish, reptiles, and small animals",
@@ -29,8 +29,12 @@ const PetSuppliesJacksonHeightsNY = () => (
     ]}
     faqItems={[
       {
+        question: "Can I visit Petshiwu in Jackson Heights?",
+        answer: "No. We are not a walk-in store. 37-68 74th Street is our office and warehouse only. Shop online and we deliver to your door in Jackson Heights and across NYC."
+      },
+      {
         question: "Is Petshiwu based in Jackson Heights?",
-        answer: "Yes — Petshiwu is based in Jackson Heights, Queens at 37-68 74th Street. We're a true local business serving our community first, with delivery extending across all 5 NYC boroughs."
+        answer: "Yes — our office and warehouse are in Jackson Heights, Queens at 37-68 74th Street. We deliver from here across all 5 NYC boroughs."
       },
       {
         question: "Do you deliver to Jackson Heights and Elmhurst?",
@@ -38,7 +42,7 @@ const PetSuppliesJacksonHeightsNY = () => (
       },
       {
         question: "What's the phone number for Petshiwu in Jackson Heights?",
-        answer: "You can reach us at (800) 259-2605 or by email at support@petshiwu.com. We're here Monday through Sunday, 9am–8pm ET."
+        answer: "You can reach us at (800) 259-2605 or by email at support@petshiwu.com. Customer service is here Monday through Sunday, 9am–8pm ET."
       },
       {
         question: "Do you carry food for South Asian pets and bird species in Jackson Heights?",
@@ -46,7 +50,7 @@ const PetSuppliesJacksonHeightsNY = () => (
       },
       {
         question: "How long does delivery take to Jackson Heights?",
-        answer: "We offer fast delivery within NYC. Since we're based in Jackson Heights, local orders are a priority. Free delivery on orders over $49."
+        answer: "We offer fast delivery within NYC. Since we warehouse in Jackson Heights, local orders are a priority. Free delivery on orders over $49."
       }
     ]}
     searchTerms={['dog food', 'cat food', 'bird food', 'pet food', 'pet supplies', 'parrot food', 'dog treats']}

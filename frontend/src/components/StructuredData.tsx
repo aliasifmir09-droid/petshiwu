@@ -281,7 +281,7 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
       const business = data as LocalBusinessSchema;
       schema = {
         '@context': 'https://schema.org/',
-        '@type': business.businessType || 'PetStore',
+        '@type': business.businessType || ['OnlineStore', 'LocalBusiness'],
         name: business.name,
         url: business.url,
         description: business.description || 'Premium Pet Food, Toys & Accessories delivered in NYC',

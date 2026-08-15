@@ -143,7 +143,7 @@ const Footer = () => {
                   📧 support@petshiwu.com
                 </a>
               </li>
-              <li className="mt-3 leading-relaxed">📍 37-68 74th St<br />Jackson Heights, NY 11372</li>
+              <li className="mt-3 leading-relaxed">📍 Office & warehouse<br />37-68 74th St<br />Jackson Heights, NY 11372<br /><span className="text-gray-500">Not a walk-in store — delivery only</span></li>
               <li className="mt-1">🕐 Mon-Fri: 9AM - 8PM EST</li>
               <li>🕐 Sat-Sun: 9AM - 6PM EST</li>
             </ul>
