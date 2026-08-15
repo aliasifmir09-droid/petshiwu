@@ -93,6 +93,10 @@ export const generateSitemap = async (req: Request, res: Response) => {
     xml += `    <lastmod>${currentDate}</lastmod>\n`;
     xml += '    <changefreq>daily</changefreq>\n';
     xml += '    <priority>1.0</priority>\n';
+    xml += '    <image:image>\n';
+    xml += `      <image:loc>${baseUrl}/og-image.jpg</image:loc>\n`;
+    xml += '      <image:title>Petshiwu — same-day pet delivery in NYC</image:title>\n';
+    xml += '    </image:image>\n';
     xml += '  </url>\n';
 
     // Products page
@@ -278,6 +282,13 @@ export const generateSitemap = async (req: Request, res: Response) => {
       { path: '/faq', priority: '0.6', changefreq: 'monthly' },
       { path: '/returns', priority: '0.5', changefreq: 'monthly' },
       { path: '/donate', priority: '0.4', changefreq: 'monthly' },
+      { path: '/contact', priority: '0.6', changefreq: 'monthly' },
+      { path: '/press', priority: '0.5', changefreq: 'monthly' },
+      { path: '/privacy', priority: '0.3', changefreq: 'yearly' },
+      { path: '/terms', priority: '0.3', changefreq: 'yearly' },
+      { path: '/shipping', priority: '0.5', changefreq: 'monthly' },
+      { path: '/accessibility', priority: '0.3', changefreq: 'yearly' },
+      { path: '/return-policy', priority: '0.4', changefreq: 'monthly' },
       // SEO landing pages — existing
       { path: '/best-dog-food-sensitive-stomach-diarrhea', priority: '0.8', changefreq: 'monthly' },
       { path: '/high-protein-dog-food-picky-eaters', priority: '0.8', changefreq: 'monthly' },

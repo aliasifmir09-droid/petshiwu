@@ -30,6 +30,7 @@ import {
   NEIGHBORHOOD_PAGE_REGISTRY,
   getNeighborhoodRoute,
 } from '../seo/neighborhoodRegistry';
+import { DEFAULT_OG_IMAGE, injectOgTags, resolveShareImage } from '../seo/ogTags';
 
 // ---------------------------------------------------------------------------
 // Bot detection
@@ -426,21 +427,6 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
 };
 
 /**
- * Replace og:title, og:description, and og:url content in the HTML template
- */
-const injectOgTags = (html: string, title: string, description: string, url: string, ogType = 'website'): string => {
-  let out = html;
-  out = out.replace(/(<meta[\s\S]*?property="og:title"[\s\S]*?content=")[^"]*("[\s\S]*?>)/gi, `$1${esc(title)}$2`);
-  out = out.replace(/(<meta[\s\S]*?property="og:description"[\s\S]*?content=")[^"]*("[\s\S]*?>)/gi, `$1${esc(description)}$2`);
-  out = out.replace(/(<meta[\s\S]*?property="og:url"[\s\S]*?content=")[^"]*("[\s\S]*?>)/gi, `$1${esc(url)}$2`);
-  out = out.replace(/(<meta[\s\S]*?property="og:type"[\s\S]*?content=")[^"]*("[\s\S]*?>)/gi, `$1${esc(ogType)}$2`);
-  out = out.replace(/(<meta[\s\S]*?name="twitter:title"[\s\S]*?content=")[^"]*("[\s\S]*?>)/gi, `$1${esc(title)}$2`);
-  out = out.replace(/(<meta[\s\S]*?name="twitter:description"[\s\S]*?content=")[^"]*("[\s\S]*?>)/gi, `$1${esc(description)}$2`);
-  out = out.replace(/(<meta[\s\S]*?name="twitter:url"[\s\S]*?content=")[^"]*("[\s\S]*?>)/gi, `$1${esc(url)}$2`);
-  return out;
-};
-
-/**
  * Build HTML for pages not backed by DB data — injects correct canonical,
  * title, description, AND og/twitter tags so every page shares correctly.
  */
@@ -733,8 +719,10 @@ const BASE = 'https://www.petshiwu.com';
 const buildProductHtml = (template: string, product: any, slug: string): string => {
   const price: number = product.basePrice ?? 0;
   const inStock: boolean = (product.totalStock ?? 0) > 0 && product.inStock !== false;
-  const image: string = (product.images?.[0]) ?? `${BASE}/logo.png`;
-  const images: string[] = (product.images ?? []).slice(0, 10);
+  const image: string = resolveShareImage(product.images?.[0]);
+  const images: string[] = (product.images ?? [])
+    .slice(0, 10)
+    .map((img: unknown) => resolveShareImage(img));
   const brandName: string = product.brand?.trim() || 'Petshiwu';
   
   // Deduplicate brand from product name ONLY if the brand is literally repeated twice
@@ -769,7 +757,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
     '@type': 'Product',
     name: productName,
     description: rawDesc.substring(0, 500),
-    image: images.length > 1 ? images : (images[0] ?? `${BASE}/logo.png`),
+    image: images.length > 1 ? images : (images[0] ?? DEFAULT_OG_IMAGE),
     brand: { '@type': 'Brand', name: brandName },
     sku: String(product._id),
     offers: {
@@ -890,7 +878,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   html = injectDescription(html, description);
   html = injectCanonical(html, productUrl);
   html = injectHreflang(html, productUrl);
-  html = injectOgTags(html, title, description, productUrl, 'product');
+  html = injectOgTags(html, title, description, productUrl, 'product', image);
   html = injectBeforeHeadClose(html, injectedTags);
   html = injectH1(html, productName);
   // Replace entire root div with full crawlable body content (H2 — H1 already replaced in noscript)
@@ -934,7 +922,7 @@ const buildBlogHtml = (template: string, blog: any): string => {
     blog.metaDescription ?? blog.excerpt ?? stripTags(blog.content ?? '').substring(0, 160),
     160
   );
-  const image = blog.featuredImage ?? blog.coverImage ?? `${BASE}/logo.png`;
+  const image = resolveShareImage(blog.featuredImage ?? blog.coverImage);
   const url = `${BASE}/learning/${blog.slug}`;
 
   // Extract FAQ pairs from headings + paragraphs for FAQPage schema
@@ -1010,7 +998,7 @@ const buildBlogHtml = (template: string, blog: any): string => {
     <a href="${BASE}/learning" style="color:#1976d2;text-decoration:none">Learning</a> &rsaquo;
     <span style="color:#555">${esc(blog.title)}</span>
   </nav>
-  ${image !== `${BASE}/logo.png` ? `<img src="${esc(image)}" alt="${esc(blog.title)}" style="max-width:100%;height:auto;border-radius:8px;margin-bottom:16px" loading="lazy" />` : ''}
+  ${image !== DEFAULT_OG_IMAGE ? `<img src="${esc(image)}" alt="${esc(blog.title)}" style="max-width:100%;height:auto;border-radius:8px;margin-bottom:16px" loading="lazy" />` : ''}
   <h2 style="font-size:1.6em;margin:0 0 12px">${esc(blog.title)}</h2>
   <p style="color:#555;font-size:0.9em;margin-bottom:16px">${blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}</p>
   <p style="line-height:1.7;color:#333;font-size:1.05em">${esc(blogExcerpt)}</p>
@@ -1023,7 +1011,7 @@ const buildBlogHtml = (template: string, blog: any): string => {
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
   html = injectHreflang(html, url);
-  html = injectOgTags(html, title, description, url);
+  html = injectOgTags(html, title, description, url, 'article', image);
   html = injectBeforeHeadClose(html, injectedTags);
   html = injectH1(html, blog.title);
   html = removeStaticHero(html);
@@ -1037,7 +1025,7 @@ const buildBlogHtml = (template: string, blog: any): string => {
 const buildCareGuideHtml = (template: string, guide: any): string => {
   const title = `${guide.title} | Petshiwu Care Guides`;
   const description = truncate(guide.excerpt ?? `Care guide for ${guide.title} at Petshiwu.`, 160);
-  const image = guide.featuredImage ?? guide.coverImage ?? `${BASE}/logo.png`;
+  const image = resolveShareImage(guide.featuredImage ?? guide.coverImage);
   const url = `${BASE}/care-guides/${guide.slug}`;
 
   const schema = {
@@ -1083,7 +1071,7 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
     <a href="${BASE}/care-guides" style="color:#1976d2;text-decoration:none">Care Guides</a> &rsaquo;
     <span style="color:#555">${esc(guide.title)}</span>
   </nav>
-  ${image !== `${BASE}/logo.png` ? `<img src="${esc(image)}" alt="${esc(guide.title)}" style="max-width:100%;height:auto;border-radius:8px;margin-bottom:16px" loading="lazy" />` : ''}
+  ${image !== DEFAULT_OG_IMAGE ? `<img src="${esc(image)}" alt="${esc(guide.title)}" style="max-width:100%;height:auto;border-radius:8px;margin-bottom:16px" loading="lazy" />` : ''}
   <h2 style="font-size:1.6em;margin:0 0 12px">${esc(guide.title)}</h2>
   <p style="line-height:1.7;color:#333;font-size:1.05em">${esc(guideExcerpt)}</p>
   <a href="${esc(url)}" style="display:inline-block;margin-top:16px;padding:10px 24px;background:#1976d2;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Read Full Guide</a>
@@ -1095,7 +1083,7 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
   html = injectDescription(html, description);
   html = injectCanonical(html, url);
   html = injectHreflang(html, url);
-  html = injectOgTags(html, title, description, url);
+  html = injectOgTags(html, title, description, url, 'article', image);
   html = injectBeforeHeadClose(html, injectedTags);
   html = injectH1(html, guide.title);
   html = removeStaticHero(html);
@@ -1279,6 +1267,7 @@ const buildNeighborhoodHtml = (
   html = injectHreflang(html, pageUrl);
   html = injectTitle(html, title);
   html = injectDescription(html, description);
+  html = injectOgTags(html, title, description, pageUrl);
   html = injectBeforeHeadClose(html, injectedTags);
   html = injectH1(html, h1);
   html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${bodyContent}</div>`);
@@ -1348,7 +1337,7 @@ const buildHomepageHtml = (template: string): string => {
     '@id': `${BASE}/#localbusiness`,
     name: 'Petshiwu',
     url: BASE,
-    image: `${BASE}/logo-square-512.png`,
+    image: `${BASE}/og-image.jpg`,
     logo: `${BASE}/logo-square-512.png`,
     description: 'Queens-based pet supply delivery serving all five NYC boroughs. 10,000+ products, free shipping over $49, same-day delivery available.',
     telephone: '+18002592605',

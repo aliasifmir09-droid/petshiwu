@@ -60,5 +60,9 @@ Allow: /best-dog-food-sensitive-stomach-diarrhea
 Allow: /high-protein-dog-food-picky-eaters
 Allow: /durable-dog-toys-aggressive-chewers
 
+# Google Images — crawl share photos and product images
+User-agent: Googlebot-Image
+Allow: /
+
 # Sitemap location — single canonical www version
 Sitemap: https://www.petshiwu.com/sitemap.xml
