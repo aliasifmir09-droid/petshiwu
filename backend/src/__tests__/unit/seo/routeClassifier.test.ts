@@ -1,4 +1,11 @@
-import { classifyRoute, INDEXABLE_LANDING_PATHS } from '../../../seo/routeClassifier';
+import fs from 'fs';
+import path from 'path';
+import {
+  canonicalPetSlug,
+  classifyRoute,
+  CRAWLABLE_STOREFRONT_PATHS,
+  INDEXABLE_LANDING_PATHS,
+} from '../../../seo/routeClassifier';
 
 describe('classifyRoute', () => {
   test('homepage and shop pages stay indexable', () => {
@@ -45,5 +52,34 @@ describe('classifyRoute', () => {
     expect(classifyRoute('/cat-food-delivery-williamsburg-brooklyn').redirectTo).toBe(
       '/cat-food-delivery-nyc'
     );
+  });
+});
+
+describe('full-site crawl list', () => {
+  test('every storefront path is indexable', () => {
+    for (const pagePath of CRAWLABLE_STOREFRONT_PATHS) {
+      expect(classifyRoute(pagePath)).toMatchObject({
+        indexable: true,
+        status: 'indexable',
+      });
+    }
+  });
+
+  test('robots.txt explicitly allows every NYC landing and shop page', () => {
+    const robots = fs.readFileSync(
+      path.join(__dirname, '../../../../../frontend/public/robots.txt'),
+      'utf8'
+    );
+    expect(robots).toContain('Allow: /');
+    expect(robots).toContain('Sitemap: https://www.petshiwu.com/sitemap.xml');
+    for (const pagePath of CRAWLABLE_STOREFRONT_PATHS) {
+      if (pagePath === '/') continue;
+      expect(robots).toContain(`Allow: ${pagePath}`);
+    }
+  });
+
+  test('small-pet catalog URLs canonicalize to /small-animal', () => {
+    expect(canonicalPetSlug('small-pet')).toBe('small-animal');
+    expect(canonicalPetSlug('dog')).toBe('dog');
   });
 });

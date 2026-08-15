@@ -6,7 +6,7 @@ import CareGuide from '../models/CareGuide';
 import FAQ from '../models/FAQ';
 import PetType from '../models/PetType';
 import logger from '../utils/logger';
-import { classifyRoute } from '../seo/routeClassifier';
+import { canonicalPetSlug, classifyRoute, INDEXABLE_LANDING_PATHS } from '../seo/routeClassifier';
 
 /**
  * Escape XML special characters
@@ -117,7 +117,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
     petTypes.forEach(petType => {
       // SEO-friendly canonical URL: /petType
       // Map small-pet → small-animal to match frontend route
-      const petSlug = petType.slug === 'small-pet' ? 'small-animal' : petType.slug;
+      const petSlug = canonicalPetSlug(petType.slug);
       xml += '  <url>\n';
       xml += `    <loc>${baseUrl}/${petSlug}</loc>\n`;
       const lastmod = petType.updatedAt 
@@ -177,7 +177,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
 
               let productUrl = `${baseUrl}/products/${product.slug}`;
               if (isValidSlug(product.petType) && isValidSlug(categorySlug) && isCleanSlug(categorySlug)) {
-                productUrl = `${baseUrl}/${product.petType}/${categorySlug}/${product.slug}`;
+                productUrl = `${baseUrl}/${canonicalPetSlug(product.petType)}/${categorySlug}/${product.slug}`;
               }
 
               xml += '  <url>\n';
@@ -218,7 +218,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
 
                     const categoryPetType = typeof category.petType === 'string' ? category.petType : '';
                     const categoryPath = categoryPetType && categoryPetType !== 'all' && categoryPetType !== 'other-animals'
-                      ? `/${categoryPetType}/${category.slug}`
+                      ? `/${canonicalPetSlug(categoryPetType)}/${category.slug}`
                       : `/category/${category.slug}`;
                     xml += '  <url>\n';
                     xml += `    <loc>${baseUrl}${categoryPath}</loc>\n`;
@@ -326,6 +326,13 @@ export const generateSitemap = async (req: Request, res: Response) => {
       { path: '/innovation', priority: '0.8', changefreq: 'weekly' },
       { path: '/sell-with-us', priority: '0.8', changefreq: 'monthly' },
     ];
+
+    const listedStatic = new Set(staticPages.map(page => page.path));
+    INDEXABLE_LANDING_PATHS.forEach(landing => {
+      if (!listedStatic.has(landing)) {
+        staticPages.push({ path: landing, priority: '0.9', changefreq: 'weekly' });
+      }
+    });
 
     staticPages.forEach(page => {
       xml += '  <url>\n';
