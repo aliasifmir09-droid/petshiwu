@@ -117,6 +117,7 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">NYC Delivery</h3>
             <ul className="space-y-2 text-sm text-gray-400">
+              <li><Link to="/pet-supplies-delivery-nyc" className="hover:text-white transition-colors">Pet Supplies Delivery NYC</Link></li>
               <li><Link to="/pet-supplies-jackson-heights-ny" className="hover:text-white transition-colors">Jackson Heights</Link></li>
               <li><Link to="/pet-store-queens-ny" className="hover:text-white transition-colors">Queens</Link></li>
               <li><Link to="/pet-supplies-brooklyn-ny" className="hover:text-white transition-colors">Brooklyn</Link></li>

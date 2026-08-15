@@ -64,7 +64,7 @@ const ProductSchema = ({ product, selectedVariant }: ProductSchemaProps) => {
     '@type': 'Product',
     name: product.name,
     description,
-    image: images.length > 0 ? (images.length === 1 ? images[0] : images) : 'https://www.petshiwu.com/logo.png',
+    image: images.length > 0 ? (images.length === 1 ? images[0] : images) : 'https://www.petshiwu.com/og-image.jpg',
     brand: {
       '@type': 'Brand',
       name: brandName,

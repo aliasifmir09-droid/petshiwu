@@ -16,17 +16,17 @@ import { normalizeImageUrl, generateSrcSet, getOptimizedImageUrl } from '@/utils
 import { generateProductUrl } from '@/utils/productUrl';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
-const BRANDS = [
-  { name: 'Purina',              logo: 'https://petshiwu-cdn.b-cdn.net/brands/purina.svg' },
-  { name: 'Blue Buffalo',        logo: 'https://petshiwu-cdn.b-cdn.net/brands/bluebuffalo.svg' },
-  { name: 'Royal Canin',         logo: 'https://petshiwu-cdn.b-cdn.net/brands/royalcanin.svg' },
-  { name: "Hill's Science Diet", logo: 'https://petshiwu-cdn.b-cdn.net/brands/hills.svg' },
-  { name: 'Wellness',            logo: 'https://petshiwu-cdn.b-cdn.net/brands/wellness.svg' },
-  { name: 'Orijen',              logo: 'https://petshiwu-cdn.b-cdn.net/brands/orijen.svg' },
-  { name: 'Nutro',               logo: 'https://petshiwu-cdn.b-cdn.net/brands/nutro.svg' },
-  { name: 'Iams',                logo: 'https://petshiwu-cdn.b-cdn.net/brands/iams.png' },
-  { name: 'Pedigree',            logo: 'https://petshiwu-cdn.b-cdn.net/brands/pedigree.png' },
-  { name: "Nature's Recipe",     logo: 'https://petshiwu-cdn.b-cdn.net/brands/natures.svg' },
+const BRANDS: { name: string; logo: string; dark?: boolean }[] = [
+  { name: 'Purina',              logo: '/brands/purina.svg' },
+  { name: 'Blue Buffalo',        logo: '/brands/bluebuffalo.png' },
+  { name: 'Royal Canin',         logo: '/brands/royalcanin.svg' },
+  { name: "Hill's Science Diet", logo: '/brands/hills.png' },
+  { name: 'Wellness',            logo: '/brands/wellness.png' },
+  { name: 'Orijen',              logo: '/brands/orijen.svg' },
+  { name: 'Nutro',               logo: '/brands/nutro.png' },
+  { name: 'Iams',                logo: '/brands/iams.png' },
+  { name: 'Pedigree',            logo: '/brands/pedigree.png', dark: true },
+  { name: "Nature's Recipe",     logo: '/brands/natures.svg' },
 ];
 
 // ─── Today's Deals — Hill's Science Diet 5% Off ──────────────────────────────
@@ -431,11 +431,15 @@ const Home = () => {
                 className="group flex-none snap-start focus:outline-none"
                 aria-label={`Shop ${brand.name} products`}
               >
-                <div className="w-36 h-24 flex items-center justify-center rounded-2xl bg-white border-2 border-transparent shadow-sm group-hover:border-blue-400 group-hover:shadow-lg transition-all duration-200 overflow-hidden">
+                <div
+                  className={`w-36 h-24 flex items-center justify-center rounded-2xl border-2 border-transparent shadow-sm group-hover:border-blue-400 group-hover:shadow-lg transition-all duration-200 overflow-hidden ${
+                    brand.dark ? 'bg-zinc-900' : 'bg-white'
+                  }`}
+                >
                   <img
                     src={brand.logo}
-                    alt={brand.name}
-                    className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300"
+                    alt={`${brand.name} official logo`}
+                    className="max-h-[4.5rem] max-w-[7.5rem] w-auto h-auto object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                     onError={(e) => {
                       const target = e.currentTarget;

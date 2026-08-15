@@ -53,6 +53,40 @@ const INDEXABLE_ROOT_PATHS = new Set([
   ...INDEXABLE_LANDING_PATHS,
 ]);
 
+/** Canonical shop URLs Google should fetch. Aliases (/shop, /privacy-policy) stay out. */
+export const CRAWLABLE_STOREFRONT_PATHS: string[] = [
+  '/',
+  '/products',
+  '/dog',
+  '/cat',
+  '/bird',
+  '/fish',
+  '/reptile',
+  '/small-animal',
+  '/other-animals',
+  '/learning',
+  '/care-guides',
+  '/about',
+  '/faq',
+  '/contact',
+  '/press',
+  '/returns',
+  '/return-policy',
+  '/shipping',
+  '/privacy',
+  '/terms',
+  '/accessibility',
+  '/donate',
+  '/investors',
+  '/sell-with-us',
+  '/innovation',
+  ...[...INDEXABLE_LANDING_PATHS].sort(),
+];
+
+export function canonicalPetSlug(slug: string): string {
+  return slug === 'small-pet' ? 'small-animal' : slug;
+}
+
 const NOINDEX_ROOT_PATHS = new Set([
   '/search', '/checkout', '/cart', '/login', '/register', '/forgot-password',
   '/dashboard', '/driver', '/symptom-checker', '/deals', '/tech', '/scan', '/neural',

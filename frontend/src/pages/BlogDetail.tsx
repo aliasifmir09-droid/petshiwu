@@ -97,7 +97,7 @@ const BlogDetail = () => {
         publishedTime={blog.publishedAt}
         modifiedTime={blog.updatedAt}
         category={blog.category}
-        image={blog.featuredImage || 'https://www.petshiwu.com/logo.png'}
+        image={blog.featuredImage || 'https://www.petshiwu.com/og-image.jpg'}
       />
       <StructuredData
         type="article"
