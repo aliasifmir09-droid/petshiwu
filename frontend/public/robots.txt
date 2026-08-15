@@ -34,7 +34,7 @@ Disallow: /products?page=
 Disallow: /products?sort=
 Disallow: /search?
 
-# Allow all high-value content explicitly
+# Allow all high-value shop pages explicitly (Allow: / already covers them)
 Allow: /products
 Allow: /products$
 Allow: /dog
@@ -43,11 +43,13 @@ Allow: /bird
 Allow: /reptile
 Allow: /fish
 Allow: /small-animal
+Allow: /other-animals
 Allow: /learning
 Allow: /care-guides
 Allow: /faq
 Allow: /about
 Allow: /contact
+Allow: /press
 Allow: /return-policy
 Allow: /returns
 Allow: /track-order
@@ -56,9 +58,40 @@ Allow: /privacy
 Allow: /terms
 Allow: /accessibility
 Allow: /donate
+Allow: /investors
+Allow: /sell-with-us
+Allow: /innovation
 Allow: /best-dog-food-sensitive-stomach-diarrhea
 Allow: /high-protein-dog-food-picky-eaters
 Allow: /durable-dog-toys-aggressive-chewers
+Allow: /pet-supplies-delivery-nyc
+Allow: /dog-food-delivery-nyc
+Allow: /cat-food-delivery-nyc
+Allow: /pet-store-queens-ny
+Allow: /online-pet-store-nyc
+Allow: /pet-supplies-near-me-nyc
+Allow: /affordable-pet-food-nyc
+Allow: /pet-food-delivery-nyc
+Allow: /raw-dog-food-nyc
+Allow: /organic-cat-food-nyc
+Allow: /luxury-pet-accessories-nyc
+Allow: /pet-supplies-queens-ny
+Allow: /pet-supplies-brooklyn-ny
+Allow: /pet-supplies-manhattan-ny
+Allow: /pet-supplies-bronx-ny
+Allow: /pet-supplies-staten-island-ny
+Allow: /pet-supplies-jackson-heights-ny
+Allow: /pet-supplies-williamsburg-brooklyn-ny
+Allow: /pet-supplies-park-slope-brooklyn-ny
+Allow: /pet-supplies-upper-west-side-nyc
+Allow: /pet-supplies-dumbo-brooklyn-ny
+Allow: /pet-supplies-long-island-city-queens-ny
+Allow: /pet-supplies-soho-nyc
+Allow: /pet-supplies-astoria-queens-ny
+
+# Google Images — crawl share photos and product images
+User-agent: Googlebot-Image
+Allow: /
 
 # Sitemap location — single canonical www version
 Sitemap: https://www.petshiwu.com/sitemap.xml

@@ -289,7 +289,7 @@ export const generateMetaKeywords = (
  */
 export const generateOGImage = (image?: string): string => {
   if (!image) {
-    return `${BASE_URL}/logo.png`;
+    return `${BASE_URL}/og-image.jpg`;
   }
   if (image.startsWith('http')) {
     return image;

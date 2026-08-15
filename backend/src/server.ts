@@ -117,6 +117,7 @@ import couponRoutes from './routes/coupons';
 
 import { generateSitemap } from './controllers/sitemapController';
 import { createBotRenderer } from './middleware/botRenderer';
+import { looksLikeStaticAsset } from './seo/staticAssetPath';
 import { slugRedirectMiddleware } from './middleware/slugRedirect';
 import { blogRedirectMiddleware } from './middleware/blogRedirect';
 import { neighborhoodRedirectMiddleware } from './middleware/neighborhoodRedirect';
@@ -920,6 +921,12 @@ app.get('/driver/*', (req: Request, res: Response, next: NextFunction) => {
 
 app.get('*', (req: Request, res: Response, next: NextFunction) => {
   if (req.path.startsWith('/api')) return next();
+  // Missing files (.jpg, .png, .js, …) must 404. Serving index.html here made
+  // Google Images treat /og-image.jpg as a gray HTML thumbnail.
+  if (looksLikeStaticAsset(req.path)) {
+    res.status(404).type('text/plain').send('Not found');
+    return;
+  }
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
