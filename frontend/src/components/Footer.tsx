@@ -10,19 +10,15 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-4">
-              <picture>
-                <source srcSet="/logo.webp" type="image/webp" />
-                <img
-                  src="/logo.png"
-                  alt="Petshiwu Logo"
-                  width={80}
-                  height={80}
-                  className="h-20 w-20 object-contain drop-shadow-lg"
-                  loading="lazy"
-                  decoding="async"
-                  style={{ aspectRatio: '1 / 1' }}
-                />
-              </picture>
+              <img
+                src="/logo-square-192.png"
+                alt="Petshiwu"
+                width={80}
+                height={80}
+                className="h-16 w-16 object-contain rounded-2xl"
+                loading="lazy"
+                decoding="async"
+              />
               <h3 className="text-xl font-black bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent" style={{ fontFamily: "'Nunito', sans-serif" }}>
                 Petshiwu
               </h3>
