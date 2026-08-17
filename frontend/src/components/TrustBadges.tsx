@@ -6,37 +6,37 @@ const TrustBadges = () => {
       icon: MapPin,
       title: 'Queens-Based',
       description: 'Local to Jackson Heights, NYC',
-      color: 'from-rose-500 to-pink-600',
+      color: 'bg-[#1E3A8A]',
     },
     {
       icon: Truck,
       title: 'Free Delivery',
       description: 'On all orders over $49',
-      color: 'from-blue-500 to-indigo-600',
+      color: 'bg-[#1E3A8A]',
     },
     {
       icon: Package,
       title: '10,000+ Products',
       description: 'Every pet, every brand',
-      color: 'from-violet-500 to-purple-600',
+      color: 'bg-[#1E3A8A]',
     },
     {
       icon: Shield,
       title: 'Secure Checkout',
       description: 'SSL encrypted & safe',
-      color: 'from-emerald-500 to-green-600',
+      color: 'bg-[#1E3A8A]',
     },
     {
       icon: Star,
       title: 'Top Brands',
       description: 'Purina, Royal Canin & more',
-      color: 'from-amber-500 to-orange-500',
+      color: 'bg-[#1E3A8A]',
     },
     {
       icon: HeadphonesIcon,
       title: 'NYC Support',
       description: '(800) 259-2605 · 9AM–8PM',
-      color: 'from-sky-500 to-cyan-600',
+      color: 'bg-[#1E3A8A]',
     },
   ];
 
@@ -51,7 +51,7 @@ const TrustBadges = () => {
                 key={index}
                 className="flex flex-col items-center text-center p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors duration-200"
               >
-                <div className={`w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br ${badge.color} rounded-full flex items-center justify-center mb-2`}>
+                <div className={`w-10 h-10 md:w-12 md:h-12 ${badge.color} rounded-full flex items-center justify-center mb-2`}>
                   <Icon size={20} className="text-white" />
                 </div>
                 <h3 className="font-bold text-xs md:text-sm text-gray-900 mb-0.5 leading-tight">{badge.title}</h3>

@@ -1,15 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-const PET_CATEGORIES = [
-  { name: 'Dog', slug: 'dog', image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200&h=200&fit=crop&q=80' },
-  { name: 'Cat', slug: 'cat', image: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=200&h=200&fit=crop&q=80' },
-  { name: 'Fish', slug: 'fish', image: 'https://images.unsplash.com/photo-1544552866-d3ed42536cfd?w=200&h=200&fit=crop&q=80' },
-  { name: 'Bird', slug: 'bird', image: 'https://images.unsplash.com/photo-1444464666168-49d633b86797?w=200&h=200&fit=crop&q=80' },
-  { name: 'Reptile', slug: 'reptile', image: 'https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=200&h=200&fit=crop&q=80' },
-  { name: 'Small Pet', slug: 'small-pet', image: 'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?w=200&h=200&fit=crop&q=80' },
-];
+import { PET_CATEGORIES } from '@/data/shopByPet';
 
 const ShopByPet = () => {
   const navigate = useNavigate();
@@ -63,19 +55,10 @@ const ShopByPet = () => {
           Shop by pet
         </p>
         <div className="hidden md:block text-center mb-8">
-          <h2
-            className="text-3xl md:text-5xl font-black mb-3"
-            style={{
-              background: 'linear-gradient(to right, #2563eb, #9333ea, #db2777)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              color: '#9333ea',
-            }}
-          >
-            Shop by Pet Type
+          <h2 className="text-3xl md:text-4xl font-bold text-[#1E3A8A] mb-2">
+            Shop by pet
           </h2>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">Find everything your furry friend needs</p>
+          <p className="text-gray-500 text-base max-w-2xl mx-auto">Food and supplies for every pet</p>
         </div>
 
         {/* Mobile: all six pets on the first screen */}
@@ -87,7 +70,7 @@ const ShopByPet = () => {
               onClick={() => goToPet(category.slug)}
               className="flex flex-col items-center gap-1 min-w-0"
             >
-              <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[2px]">
+              <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#1E3A8A] p-[2px]">
                 <div className="w-full h-full rounded-full overflow-hidden bg-white">
                   <img
                     src={category.image}
@@ -140,7 +123,7 @@ const ShopByPet = () => {
                 onClick={() => goToPet(category.slug)}
               >
                 <div className="flex flex-col items-center gap-3">
-                  <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-[3px] group-hover:scale-110 transition-all shadow-lg">
+                  <div className="relative w-32 h-32 rounded-full bg-[#1E3A8A] p-[3px] group-hover:scale-[1.03] transition-transform shadow-sm">
                     <div className="w-full h-full rounded-full overflow-hidden bg-white">
                       <img src={category.image} alt={category.name} className="w-full h-full object-cover" loading="lazy" />
                     </div>

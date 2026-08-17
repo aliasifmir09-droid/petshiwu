@@ -34,7 +34,6 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
   // Convert _id to string if it's an object (MongoDB ObjectId)
   const productId = product._id ? String(product._id) : null;
   const inWishlist = productId ? isInWishlist(productId) : false;
-  const [isHovered, setIsHovered] = useState(false);
   const [showQuickView, setShowQuickView] = useState(false);
 
   // Handle click on product card - track recommendation clicks if applicable
@@ -47,8 +46,6 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
   
   // Memoize mouse handlers with prefetching
   const handleMouseEnter = useCallback(() => {
-    setIsHovered(true);
-    // PERFORMANCE FIX: Prefetch product data and images on hover
     if (product.slug) {
       prefetchProduct(product.slug);
       // Preload product images
@@ -59,8 +56,6 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
       }
     }
   }, [product.slug, product.images, prefetchProduct]);
-  
-  const handleMouseLeave = useCallback(() => setIsHovered(false), []);
   
   // Memoize star indices
   const starIndices = useMemo(() => Array.from({ length: 5 }, (_, i) => i), []);
@@ -113,15 +108,14 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
       to={generateProductUrl(product)}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-blue-300 hover:-translate-y-2 relative animate-fade-in-up hover-lift flex flex-col h-full w-full"
+      className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-slate-100 hover:border-slate-200 relative flex flex-col h-full w-full"
     >
       {/* Trending Badge - Top Right Corner */}
       {product.totalReviews > 50 && (
         <div className="absolute top-0 right-0 z-10">
-          <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-xl shadow-lg flex items-center gap-1 animate-pulse-slow">
+          <div className="bg-[#1E3A8A] text-white text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg flex items-center gap-1">
             <TrendingUp size={12} />
-            <span>TRENDING</span>
+            <span>Popular</span>
           </div>
         </div>
       )}
@@ -147,22 +141,18 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
             // Suppress console errors for failed image loads (403, 404, etc.)
             e.stopPropagation();
           }}
-          className="w-full h-full object-cover aspect-square group-hover:scale-110 transition-transform duration-700"
+          className="w-full h-full object-cover aspect-square"
         />
         
-        {/* Gradient overlay on hover */}
-        <div className={`absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-
-        {/* Badges - Top Left */}
         <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
           {discountPercent > 0 && (
-            <span className="bg-gradient-to-r from-red-500 via-red-600 to-orange-500 text-white text-xs font-extrabold px-3 py-1.5 rounded-full shadow-xl animate-pulse-slow backdrop-blur-sm">
-              🔥 SAVE {discountPercent}%
+            <span className="bg-[#1E3A8A] text-white text-xs font-semibold px-2.5 py-1 rounded">
+              {discountPercent}% off
             </span>
           )}
           {product.isFeatured && (
-            <span className="bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
-              ⭐ Featured
+            <span className="bg-white text-[#1E3A8A] text-xs font-semibold px-2.5 py-1 rounded border border-slate-200">
+              Featured
             </span>
           )}
         </div>
@@ -171,8 +161,8 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
         {/* Wishlist Button */}
         <button
           onClick={handleWishlistToggle}
-          className={`absolute top-3 right-3 p-3.5 rounded-full bg-white/95 backdrop-blur-md shadow-xl hover:scale-125 transition-all duration-300 transform min-w-[44px] min-h-[44px] flex items-center justify-center z-20 ${
-            inWishlist ? 'text-red-500 ring-2 ring-red-300 animate-wiggle' : 'text-gray-400 hover:text-red-500'
+          className={`absolute top-3 right-3 p-3.5 rounded-full bg-white/95 shadow-sm min-w-[44px] min-h-[44px] flex items-center justify-center z-20 ${
+            inWishlist ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
           }`}
           aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
         >
@@ -186,7 +176,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
             e.stopPropagation();
             setShowQuickView(true);
           }}
-          className="absolute bottom-3 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-white/95 backdrop-blur-md rounded-full shadow-xl hover:scale-110 transition-all duration-300 opacity-0 group-hover:opacity-100 z-20 flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-primary-600"
+          className="absolute bottom-3 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-white/95 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity z-20 flex items-center gap-2 text-sm font-semibold text-gray-700"
           aria-label="Quick view"
         >
           <Eye size={16} />
@@ -235,7 +225,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
           )}
 
           {/* Price Section with Enhanced Design */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-lg border border-blue-100">
+          <div className="bg-slate-50 p-3 rounded-lg">
             <div className="flex items-baseline gap-2 mb-1">
               <span className="text-2xl font-black text-gray-900 tracking-tight">
                 ${(Number(product.basePrice) || 0).toFixed(2)}
@@ -257,25 +247,20 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
           {/* Urgency Indicator with Animations */}
           <div className="mb-2 min-h-[2rem]">
             {urgencyLevel === 'critical' && (
-              <div className="bg-red-50 border-2 border-red-500 rounded-lg p-2.5 animate-pulse-slow">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-2.5">
                 <div className="flex items-center gap-2">
-                  <Clock size={16} className="text-red-600 animate-wiggle" />
-                  <div className="flex-1">
-                    <p className="text-xs font-black text-red-700 uppercase">
-                      ⚡ ALMOST GONE!
-                    </p>
-                    <p className="text-xs text-red-600 font-bold">
-                      Only {product.totalStock} left in stock
-                    </p>
-                  </div>
+                  <Clock size={16} className="text-slate-600" />
+                  <p className="text-xs text-slate-600">
+                    Only {product.totalStock} left
+                  </p>
                 </div>
               </div>
             )}
             {urgencyLevel === 'high' && (
-              <div className="bg-orange-50 border border-orange-300 rounded-lg p-2 flex items-center gap-2">
-                <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
-                <span className="text-xs text-orange-700 font-bold">
-                  Hurry! Only {product.totalStock} left
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
+                <span className="text-xs text-slate-600">
+                  {product.totalStock} left
                 </span>
               </div>
             )}
@@ -289,8 +274,8 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
             )}
             {urgencyLevel === 'low' && product.inStock && (
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <span className="text-xs text-green-700 font-semibold">In Stock & Ready to Ship</span>
+                <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                <span className="text-xs text-slate-600">In stock</span>
               </div>
             )}
             {urgencyLevel === 'out' && (
@@ -309,40 +294,31 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
               onClick={handleAddToCart}
               disabled={!product.inStock}
               aria-label={product.inStock ? `Add ${product.name} to cart` : `${product.name} is out of stock`}
-              className={`w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm transition-all transform active:scale-95 btn-ripple relative overflow-hidden ${
+              className={`w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-lg font-semibold text-sm ${
                 cartAdded
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg scale-105'
+                  ? 'bg-emerald-600 text-white'
                   : product.inStock
-                  ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-2xl hover:scale-105'
+                  ? 'bg-[#1E3A8A] text-white hover:bg-[#1e40af]'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
               {cartAdded ? (
                 <>
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span className="relative z-10">Added to Cart!</span>
+                  <span>Added</span>
                 </>
               ) : (
                 <>
                   <ShoppingCart size={20} strokeWidth={2.5} />
-                  <span className="relative z-10">
+                  <span>
                     {product.inStock ? 'Add to Cart' : 'Out of Stock'}
                   </span>
-                  {product.inStock && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                  )}
                 </>
               )}
             </button>
           </div>
         )}
 
-        {/* Quick View Hint (appears on hover) */}
-        {isHovered && product.inStock && (
-          <p className="text-center text-xs text-gray-500 animate-fade-in-up font-medium">
-            Click to view details
-          </p>
-        )}
       </div>
 
       {/* Quick View Modal */}

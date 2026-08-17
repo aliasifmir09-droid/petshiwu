@@ -10,11 +10,9 @@ import TrustBadges from '@/components/TrustBadges';
 import CategoryIcons from '@/components/CategoryIcons';
 import ShopByPet from '@/components/ShopByPet';
 import { ChevronRight } from 'lucide-react';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
-import { normalizeImageUrl, generateSrcSet, getOptimizedImageUrl } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
-import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const BRANDS: { name: string; logo: string; dark?: boolean }[] = [
   { name: 'Purina',              logo: '/brands/purina.svg' },
@@ -29,8 +27,8 @@ const BRANDS: { name: string; logo: string; dark?: boolean }[] = [
   { name: "Nature's Recipe",     logo: '/brands/natures.svg' },
 ];
 
-// ─── Today's Deals — Hill's Science Diet 5% Off ──────────────────────────────
-const DEAL_DISCOUNT = 0.05; // 5% extra off all Hill's products
+// ─── Today's pick — Hill's Science Diet 5% Off (quiet, no countdown theater) ─
+const DEAL_DISCOUNT = 0.05;
 
 const TodaysDeals = () => {
   const { data, isLoading } = useQuery({
@@ -39,63 +37,34 @@ const TodaysDeals = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Countdown to end of day (midnight ET)
-  const [timeLeft, setTimeLeft] = useState({ h: 0, m: 0, s: 0 });
-  useEffect(() => {
-    const tick = () => {
-      const now = new Date();
-      const midnight = new Date();
-      midnight.setHours(24, 0, 0, 0);
-      const diff = Math.max(0, Math.floor((midnight.getTime() - now.getTime()) / 1000));
-      setTimeLeft({ h: Math.floor(diff / 3600), m: Math.floor((diff % 3600) / 60), s: diff % 60 });
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  const pad = (n: number) => String(n).padStart(2, '0');
-
   const products = data?.data || [];
   if (!isLoading && products.length === 0) return null;
 
   return (
-    <section className="py-14 bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50 border-t border-orange-100">
+    <section className="py-12 bg-white border-y border-slate-100">
       <div className="container mx-auto px-4 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div className="flex items-center gap-3">
-            <span className="text-3xl">🔥</span>
-            <div>
-              <h2 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight">
-                Today's Deals
-              </h2>
-              <p className="text-sm text-orange-600 font-semibold mt-0.5">
-                Extra 5% off all Hill's Science Diet — today only
-              </p>
-            </div>
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A] leading-tight">
+              Hill's Science Diet
+            </h2>
+            <p className="text-sm text-slate-500 mt-1">
+              Extra 5% today · applied automatically at checkout
+            </p>
           </div>
-          {/* Countdown */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500 font-medium">Ends in:</span>
-            {[pad(timeLeft.h), pad(timeLeft.m), pad(timeLeft.s)].map((val, i) => (
-              <span key={i} className="flex items-center gap-1">
-                <span className="bg-gray-900 text-white font-mono font-bold text-lg px-2.5 py-1 rounded-lg min-w-[2.5rem] text-center">
-                  {val}
-                </span>
-                {i < 2 && <span className="text-gray-700 font-bold text-lg">:</span>}
-              </span>
-            ))}
-          </div>
+          <Link
+            to="/products?brand=Hill%27s+Science+Diet"
+            className="text-sm font-semibold text-[#1E3A8A] hover:underline"
+          >
+            Shop all Hill's
+          </Link>
         </div>
 
-        {/* Products */}
         {isLoading ? (
           <LoadingSpinner size="lg" />
         ) : (
           <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide">
             {products.map((product, index) => {
-              // Inject deal pricing — show original, discount 5%
               const dealPrice = parseFloat((product.basePrice * (1 - DEAL_DISCOUNT)).toFixed(2));
               const dealProduct = {
                 ...product,
@@ -104,9 +73,8 @@ const TodaysDeals = () => {
               };
               return (
                 <div key={product._id} className="flex-shrink-0 w-56 md:w-64 relative">
-                  {/* 5% OFF badge */}
-                  <div className="absolute top-2 left-2 z-10 bg-red-500 text-white text-xs font-black px-2 py-1 rounded-full shadow-md">
-                    5% OFF TODAY
+                  <div className="absolute top-2 left-2 z-10 bg-[#1E3A8A] text-white text-[11px] font-semibold px-2 py-1 rounded">
+                    5% today
                   </div>
                   <ProductCard product={dealProduct} hideCartButton={false} index={index} />
                 </div>
@@ -114,16 +82,6 @@ const TodaysDeals = () => {
             })}
           </div>
         )}
-
-        <div className="mt-6 flex items-center justify-between">
-          <p className="text-xs text-gray-400">Discount applied automatically at checkout. Limited time offer.</p>
-          <Link
-            to="/products?brand=Hill%27s+Science+Diet"
-            className="text-sm font-semibold text-orange-600 hover:text-orange-700 flex items-center gap-1"
-          >
-            Shop all Hill's → 
-          </Link>
-        </div>
       </div>
     </section>
   );
@@ -315,8 +273,7 @@ const Home = () => {
 
       <ShopByPet />
 
-      {/* Hero Slideshow */}
-      <div className="container mx-auto px-4 lg:px-8 mt-4">
+      <div className="mt-4">
         <HeroSlideshow />
       </div>
 
@@ -324,20 +281,10 @@ const Home = () => {
 
       <TodaysDeals />
 
-      {/* Trending Products */}
-      <section className="py-16 bg-gradient-to-b from-white via-blue-50 to-white text-center">
+      <section className="py-14 bg-white text-center">
         <div className="container mx-auto px-4 lg:px-8">
-          <h2
-            className="text-4xl md:text-5xl font-black mb-3"
-            style={{
-              background: 'linear-gradient(to right, #2563eb, #9333ea, #db2777)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              color: '#9333ea',
-            }}
-          >
-            Trending Products
+          <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-8">
+            Featured this week
           </h2>
           {isLoading ? (
             <LoadingSpinner size="lg" />
@@ -353,53 +300,45 @@ const Home = () => {
           <div className="mt-8">
             <Link
               to="/products?featured=true"
-              className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition-all"
+              className="inline-flex items-center gap-2 bg-[#1E3A8A] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors"
             >
-              <span>View All Products</span>
-              <ChevronRight size={24} />
+              <span>View all products</span>
+              <ChevronRight size={20} />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Premium CTA */}
-      <section className="py-16 bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 text-white text-center md:text-left">
-        <div className="container mx-auto px-4 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="flex-1">
-            <h2 className="text-4xl md:text-6xl font-black mb-4 leading-tight">
-              <span className="bg-gradient-to-r from-pink-400 via-yellow-300 to-pink-400 bg-clip-text text-transparent">
-                Premium Pet Products
-              </span>
-            </h2>
-            <p className="text-xl md:text-2xl opacity-95 mb-4">Quality You Can Trust</p>
+      <section className="py-10 bg-[#1E3A8A] text-white">
+        <div className="container mx-auto px-4 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold mb-1">Same-day NYC delivery</h2>
+            <p className="text-white/80">Order by 3 PM weekdays (1 PM weekends). No autoship. Free over $49.</p>
           </div>
           <Link
             to="/products"
-            className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 px-8 py-6 rounded-3xl shadow-2xl border-2 border-white/30 transform hover:scale-105 transition-all text-center"
+            className="bg-white text-[#1E3A8A] px-6 py-3 rounded-lg font-semibold hover:bg-slate-100 transition-colors"
           >
-            <p className="text-base font-bold uppercase">Shop Now</p>
-            <p className="text-2xl font-black">All Products</p>
+            Shop tonight
           </Link>
         </div>
       </section>
 
       <TrustBadges />
 
-      {/* What Makes Us Different */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 via-purple-700 to-pink-600 text-white text-center">
+      <section className="py-14 bg-slate-50 text-center">
         <div className="container mx-auto px-4 lg:px-8">
-          <h2 className="text-4xl md:text-5xl font-black mb-4">What Makes Us Different</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+          <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-8">Why Petshiwu</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { icon: '🚚', title: 'Free Shipping', desc: 'Over $49' },
-              { icon: '⭐', title: 'Premium Quality', desc: 'Trusted brands' },
-              { icon: '💳', title: 'Secure Payment', desc: 'Safe & Encrypted' },
-              { icon: '🔄', title: 'Easy Returns', desc: 'Hassle-free' },
-            ].map((item, i) => (
-              <div key={i} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:-translate-y-2 transition-all">
-                <div className="text-4xl mb-4">{item.icon}</div>
-                <h3 className="text-xl font-bold mb-1">{item.title}</h3>
-                <p className="text-white/90 text-sm">{item.desc}</p>
+              { title: 'Same-day NYC', desc: 'Order by 3 PM · before 11 PM' },
+              { title: 'No autoship', desc: 'Buy once. No subscription trap.' },
+              { title: 'Free over $49', desc: 'Flat $6 under that' },
+              { title: 'NYC support', desc: '(800) 259-2605 · 9 AM–8 PM' },
+            ].map((item) => (
+              <div key={item.title} className="bg-white rounded-xl p-5 border border-slate-100">
+                <h3 className="text-base font-semibold text-[#1E3A8A] mb-1">{item.title}</h3>
+                <p className="text-slate-500 text-sm">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -411,7 +350,7 @@ const Home = () => {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-black text-gray-900">Shop by Brand</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A]">Shop by brand</h2>
               <p className="text-gray-500 text-sm mt-1">Click a brand to browse their products</p>
             </div>
             <Link
@@ -467,59 +406,51 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Customer Testimonials */}
-      <section className="py-16 bg-gradient-to-b from-blue-50 to-white">
+      <section className="py-14 bg-white">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center mb-12">
-            <h2
-              className="text-3xl md:text-5xl font-black mb-3"
-              style={{
-                background: 'linear-gradient(to right, #2563eb, #9333ea, #db2777)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                color: '#9333ea',
-              }}
-            >
-              What Pet Parents Say
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-2">
+              From NYC pet parents
             </h2>
-            <p className="text-gray-500 text-lg">Real reviews from our NYC community</p>
+            <p className="text-slate-500">Queens, Brooklyn, and Manhattan</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
               {
                 name: 'Maria G.',
+                initials: 'MG',
                 location: 'Queens, NY',
-                pet: '🐕 Dog parent',
-                stars: 5,
-                text: "Best pet delivery I've used in Queens. My golden retriever loves the Blue Buffalo food and it arrived the next day. Amazing service!",
+                pet: 'Dog parent',
+                text: "Best pet delivery I've used in Queens. My golden retriever loves the Blue Buffalo food and it arrived the next day.",
               },
               {
                 name: 'Kevin T.',
+                initials: 'KT',
                 location: 'Brooklyn, NY',
-                pet: '🐈 Cat parent',
-                stars: 5,
-                text: 'I order Royal Canin for my cats every month. The prices are great and the delivery is fast. Petshiwu has become my go-to pet store.',
+                pet: 'Cat parent',
+                text: 'I order Royal Canin for my cats every month. The prices are fair and delivery is fast. This is my go-to shop now.',
               },
               {
                 name: 'Sandra L.',
+                initials: 'SL',
                 location: 'Manhattan, NY',
-                pet: '🐠 Fish & reptile owner',
-                stars: 5,
-                text: 'Finally a store that carries everything I need for my aquarium AND my bearded dragon. Huge selection and super helpful customer service.',
+                pet: 'Fish and reptile',
+                text: 'Finally a store that carries food for my aquarium and my bearded dragon. Helpful when I called with a question.',
               },
-            ].map((review, i) => (
-              <div key={i} className="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:-translate-y-1 transition-all">
-                <div className="flex items-start justify-between mb-4">
+            ].map((review) => (
+              <div key={review.name} className="bg-slate-50 rounded-xl p-6 border border-slate-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-[#1E3A8A] text-white text-sm font-semibold flex items-center justify-center">
+                    {review.initials}
+                  </div>
                   <div>
-                    <p className="font-bold text-gray-900">{review.name}</p>
-                    <p className="text-gray-400 text-xs">
+                    <p className="font-semibold text-gray-900">{review.name}</p>
+                    <p className="text-slate-400 text-xs">
                       {review.location} · {review.pet}
                     </p>
                   </div>
-                  <div className="text-yellow-400 text-lg">{'★'.repeat(review.stars)}</div>
                 </div>
-                <p className="text-gray-700 text-sm leading-relaxed">"{review.text}"</p>
+                <p className="text-slate-700 text-sm leading-relaxed">"{review.text}"</p>
               </div>
             ))}
           </div>
@@ -569,15 +500,14 @@ const NewsletterSection = () => {
   };
 
   return (
-    <section className="py-16 bg-gradient-to-r from-indigo-900 via-purple-900 to-blue-900 text-white">
+    <section className="py-14 bg-[#1E3A8A] text-white">
       <div className="container mx-auto px-4 lg:px-8 text-center">
         <div className="max-w-2xl mx-auto">
-          <div className="text-5xl mb-4">🐾</div>
           {!submitted ? (
             <>
-              <h2 className="text-3xl md:text-4xl font-black mb-3">Get delivery updates</h2>
-              <p className="text-white/80 text-lg mb-8">
-                NYC same-day tips and restock notes. First order: use FREEDOM20 at checkout (20% off, max $10, no autoship).
+              <h2 className="text-2xl md:text-3xl font-bold mb-3">Get delivery updates</h2>
+              <p className="text-white/80 mb-8">
+                NYC same-day notes. First order: FREEDOM20 (20% off, max $10, no autoship).
               </p>
               <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={handleSubmit}>
                 <input
@@ -586,30 +516,30 @@ const NewsletterSection = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="flex-1 px-5 py-3 rounded-full text-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  className="flex-1 px-5 py-3 rounded-lg text-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-white/40"
                 />
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-bold px-7 py-3 rounded-full transition-all hover:scale-105 whitespace-nowrap disabled:opacity-60"
+                  className="bg-white text-[#1E3A8A] font-semibold px-7 py-3 rounded-lg whitespace-nowrap disabled:opacity-60"
                 >
                   {loading ? 'Sending...' : 'Subscribe'}
                 </button>
               </form>
-              {error && <p className="text-red-300 text-sm mt-2">{error}</p>}
-              <p className="text-white/50 text-xs mt-4">No spam, ever. Unsubscribe anytime.</p>
+              {error && <p className="text-red-200 text-sm mt-2">{error}</p>}
+              <p className="text-white/50 text-xs mt-4">No spam. Unsubscribe anytime.</p>
             </>
           ) : (
             <>
-              <h2 className="text-3xl md:text-4xl font-black mb-3">You're in! 🎉</h2>
-              <p className="text-white/80 text-lg mb-4">Check your inbox. Your discount code:</p>
-              <div className="inline-block bg-white/10 border-2 border-dashed border-white/40 rounded-2xl px-10 py-4 mb-6">
-                <span className="text-4xl font-black tracking-widest text-yellow-300">{code}</span>
-                <p className="text-white/70 text-sm mt-1">10% off your entire order</p>
+              <h2 className="text-2xl md:text-3xl font-bold mb-3">You're in</h2>
+              <p className="text-white/80 mb-4">Check your inbox. Your code:</p>
+              <div className="inline-block bg-white/10 border border-white/30 rounded-xl px-10 py-4 mb-6">
+                <span className="text-3xl font-bold tracking-widest">{code}</span>
+                <p className="text-white/70 text-sm mt-1">10% off your order</p>
               </div>
               <br />
-              <a href="/products" className="inline-block bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold px-10 py-3 rounded-full hover:scale-105 transition-transform">
-                Shop Now →
+              <a href="/products" className="inline-block bg-white text-[#1E3A8A] font-semibold px-8 py-3 rounded-lg">
+                Shop now
               </a>
             </>
           )}

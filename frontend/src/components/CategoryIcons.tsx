@@ -20,9 +20,8 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
       className="flex flex-col items-center text-center group cursor-pointer"
     >
       {/* Circular Icon/Image with Gradient Border - Enhanced with Home page styling */}
-      <div className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-full mb-3 overflow-hidden group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-2xl">
-        {/* Gradient Border - Blue to Purple to Pink (matching screenshot) */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-[3px] transform group-hover:from-blue-600 group-hover:via-purple-600 group-hover:to-pink-600 transition-all duration-300">
+      <div className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-full mb-3 overflow-hidden group-hover:scale-[1.03] transition-transform duration-200 shadow-sm">
+        <div className="absolute inset-0 rounded-full bg-[#1E3A8A] p-[3px]">
           <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
             {category.image ? (
               /* Image Display - Always try to show image first */
@@ -64,10 +63,7 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
                     aria-hidden="true"
                   />
                 </picture>
-                {/* Decorative overlay on hover - matching Home page style */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-t from-blue-600/20 via-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                {/* Pulse effect on hover - matching Home page style */}
-                <div className="absolute inset-0 rounded-full border-2 border-blue-400 opacity-0 group-hover:opacity-50 group-hover:animate-ping"></div>
+                <div className="absolute inset-0 rounded-full bg-[#1E3A8A]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
               </>
             ) : (
               /* Icon Display - Only if no image path */
@@ -140,65 +136,54 @@ const CategoryIcons = () => {
       title: 'Dog food',
       link: '/dog/food',
       color: 'from-blue-500 to-blue-600',
-      image: 'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&h=400&fit=crop&q=95'
+      image: '/category-dog-food.png'
     },
     {
       icon: HeartPulse,
       title: 'Vitamins & supplements',
       link: '/products?vitaminsFilter=true&supplementsFilter=true',
       color: 'from-green-500 to-emerald-600',
-      image: 'https://images.unsplash.com/photo-1550572017-edd951b55104?w=400&h=400&fit=crop&q=95'
+      image: '/category-vitamins-supplements.png'
     },
     {
       icon: Cookie,
       title: 'Dog treats',
       link: '/products?petType=dog&search=treats',
       color: 'from-pink-500 to-rose-600',
-      image: 'https://images.unsplash.com/photo-1623387641168-d9803ddd3f35?w=400&h=400&fit=crop&q=95'
+      image: '/category-dog-treats.png'
     },
     {
       icon: Fish,
       title: 'Cat food',
       link: '/cat/food',
       color: 'from-purple-500 to-purple-600',
-      image: 'https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=400&h=400&fit=crop&q=95'
+      image: '/category-cat-food.png'
     },
     {
       icon: Box,
       title: 'Cat litter',
       link: '/products?petType=cat&search=litter',
       color: 'from-teal-500 to-cyan-600',
-      image: 'https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=400&h=400&fit=crop&q=95'
+      image: '/category-cat-litter.png'
     },
     {
       icon: Tag,
       title: 'Deals',
       link: '/products?featured=true',
       color: 'from-orange-500 to-red-600',
-      image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&h=400&fit=crop&q=95'
+      image: '/category-deals.png'
     }
   ];
 
   return (
-    <section className="pt-8 sm:pt-12 md:pt-16 pb-4 sm:pb-6 md:pb-8 bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden mb-0 sm:mb-2 md:mb-4">
-      {/* Decorative background elements - matching Home page style */}
-      <div className="absolute top-0 left-0 w-48 h-48 sm:w-72 sm:h-72 bg-blue-200 rounded-full opacity-10 blur-3xl z-0"></div>
-      <div className="absolute bottom-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-purple-200 rounded-full opacity-10 blur-3xl z-0"></div>
-      
+    <section className="pt-8 sm:pt-12 md:pt-14 pb-4 sm:pb-6 md:pb-8 bg-white relative mb-0 sm:mb-2 md:mb-4">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section Header - matching Home page gradient text style */}
-        <div className="text-center mb-8 sm:mb-12 relative z-30">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-2 sm:mb-3 relative z-30" style={{ 
-            background: 'linear-gradient(to right, #2563eb, #9333ea, #db2777)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            color: '#9333ea'
-          }}>
-            Find all your pet's must-haves
+        <div className="text-center mb-8 sm:mb-10 relative z-30">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1E3A8A] mb-2">
+            Shop essentials
           </h2>
-          <p className="text-gray-600 text-sm sm:text-base md:text-lg lg:text-xl max-w-2xl mx-auto relative z-30 px-2">
-            Discover essential products for your furry, feathered, or scaly friends
+          <p className="text-slate-500 text-sm sm:text-base max-w-2xl mx-auto px-2">
+            Food, treats, litter, and more — delivered in NYC
           </p>
         </div>
         
