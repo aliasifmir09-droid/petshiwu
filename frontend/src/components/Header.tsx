@@ -354,9 +354,8 @@ const Header = () => {
         })}
 
         <li>
-          <Link to="/products?featured=true" onClick={onLinkClick} className={`flex items-center gap-3 ${py} ${px} font-bold bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors`}>
-            <span className="text-xl">🔥</span>
-            <span>Today&apos;s Deals</span>
+          <Link to="/products?featured=true" onClick={onLinkClick} className={`flex items-center gap-3 ${py} ${px} font-semibold text-[#1E3A8A] hover:bg-blue-50 rounded-lg transition-colors`}>
+            <span>Featured</span>
           </Link>
         </li>
 
@@ -705,9 +704,8 @@ const Header = () => {
                 })}
 
                 <li className="flex-shrink-0">
-                  <Link to="/products?featured=true" className="flex items-center gap-0.5 lg:gap-1 bg-red-600 text-white px-1.5 lg:px-2.5 py-1 lg:py-1.5 rounded-full hover:bg-red-700 transition-colors shadow-md hover:shadow-lg font-bold whitespace-nowrap text-[10px] lg:text-xs">
-                    <span className="text-[10px] lg:text-xs">🔥</span>
-                    <span>Today's Deals</span>
+                  <Link to="/products?featured=true" className="flex items-center gap-0.5 lg:gap-1 text-[#1E3A8A] hover:underline py-1.5 lg:py-2 px-1 lg:px-1.5 font-semibold whitespace-nowrap text-[10px] lg:text-xs">
+                    <span>Featured</span>
                   </Link>
                 </li>
 
