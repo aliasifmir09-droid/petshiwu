@@ -6,10 +6,10 @@ import SEOLandingPage from '../SEOLandingPage';
 const PetSuppliesBrooklynNY = () => (
   <SEOLandingPage
     keyword="pet-supplies-brooklyn-ny"
-    title="Pet Supplies Brooklyn NY — Delivery to Williamsburg, Park Slope & All of Brooklyn | Petshiwu"
-    description="Brooklyn's online pet store. Fast delivery to Williamsburg, Park Slope, Bushwick, Flatbush, Bay Ridge & every Brooklyn neighborhood. 10,000+ products, free shipping over $49."
-    h1="Pet Supplies Delivered Across Brooklyn, NY"
-    introContent="Petshiwu delivers premium pet food, toys, and supplies to every corner of Brooklyn. From Williamsburg to Bay Ridge, Park Slope to Flatbush — we've got your dog, cat, bird, or fish covered. 10,000+ products from top brands, free delivery on orders over $49."
+    title="Same-Day Pet Supplies Brooklyn — Order by 3 PM | Petshiwu"
+    description="Same-day pet delivery in Brooklyn. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Williamsburg, Park Slope, Bushwick, Bay Ridge. No autoship. Free over $49."
+    h1="Same-Day Pet Supplies Across Brooklyn, NY"
+    introContent="Petshiwu delivers pet food and supplies tonight across Brooklyn — Williamsburg, Park Slope, Bushwick, Flatbush, Bay Ridge. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No autoship. 10,000+ products. Free over $49."
     problemPoints={[
       "Long subway rides carrying heavy bags of pet food",
       "Local Brooklyn pet stores with limited selection",
@@ -22,8 +22,8 @@ const PetSuppliesBrooklynNY = () => (
       "10,000+ products for dogs, cats, birds, fish, reptiles, and small animals",
       "Top brands at fair prices — Purina, Blue Buffalo, Royal Canin, Hill's and more",
       "Free delivery on orders over $49 — no membership needed",
-      "Fast NYC delivery — order today, get it fast",
-      "Easy reordering — never run out of your pet's food again"
+      "Same-day: order by 3 PM weekdays (1 PM weekends), before 11 PM",
+      "No autoship — reorder when you want"
     ]}
     faqItems={[
       {
@@ -44,7 +44,7 @@ const PetSuppliesBrooklynNY = () => (
       },
       {
         question: "Do you deliver to Park Slope and Williamsburg?",
-        answer: "Yes, we deliver to Park Slope, Williamsburg, and all Brooklyn zip codes. Order before the daily cutoff for fast delivery."
+        answer: "Yes — Park Slope, Williamsburg, and all Brooklyn ZIPs. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No autoship."
       }
     ]}
     searchTerms={['dog food', 'cat food', 'pet food', 'pet supplies', 'dog treats', 'cat litter', 'bird food']}

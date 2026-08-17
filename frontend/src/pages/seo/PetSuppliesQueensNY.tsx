@@ -7,10 +7,10 @@ import SEOLandingPage from '../SEOLandingPage';
 const PetSuppliesQueensNY = () => (
   <SEOLandingPage
     keyword="pet-supplies-queens-ny"
-    title="Pet Supplies Queens NY — Delivery to Flushing, Astoria, Jackson Heights & All of Queens | Petshiwu"
-    description="Queens' online pet store, based in Jackson Heights. Fast delivery to Flushing, Astoria, Forest Hills, Jamaica, Bayside & every Queens neighborhood. 10,000+ products, free shipping over $49."
-    h1="Pet Supplies Delivered Across Queens, NY"
-    introContent="Petshiwu is Queens' own pet supply store — we're based right in Jackson Heights and deliver to every corner of the borough. From Flushing to Astoria, Forest Hills to Jamaica Bay — we've got your dog, cat, bird, or fish covered with 10,000+ products from top brands. Free delivery on orders over $49."
+    title="Same-Day Pet Supplies Queens — Order by 3 PM | Petshiwu"
+    description="Same-day pet delivery in Queens from our Jackson Heights warehouse. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Not a walk-in store. No autoship. Free over $49."
+    h1="Same-Day Pet Supplies Across Queens, NY"
+    introContent="Petshiwu packs in Jackson Heights and delivers tonight across Queens — Flushing, Astoria, Forest Hills, Jamaica. We are not a walk-in store. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No autoship. Free over $49."
     problemPoints={[
       "Lugging heavy bags of pet food on the 7 train or the Q",
       "Local Queens pet stores with limited brand selection",
@@ -23,8 +23,8 @@ const PetSuppliesQueensNY = () => (
       "10,000+ products for dogs, cats, birds, fish, reptiles, and small animals",
       "Top brands at fair prices — Purina, Blue Buffalo, Royal Canin, Hill's, Wellness, Iams, and more",
       "Free delivery on orders over $49 — no membership required",
-      "Fast NYC delivery — order today, get it fast",
-      "Based in Jackson Heights — Queens-first service, always"
+      "Same-day: order by 3 PM weekdays (1 PM weekends), before 11 PM",
+      "Jackson Heights warehouse — delivery only, not a walk-in store"
     ]}
     faqItems={[
       {
@@ -45,7 +45,7 @@ const PetSuppliesQueensNY = () => (
       },
       {
         question: "Do you deliver to Flushing and Jackson Heights?",
-        answer: "Yes — we deliver to both Flushing and Jackson Heights, and throughout Queens. Jackson Heights is our home base, so local delivery here is fast and reliable."
+        answer: "Yes. Jackson Heights is our warehouse, not a shop you visit. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM anywhere in Queens."
       }
     ]}
     searchTerms={['dog food', 'cat food', 'pet food', 'pet supplies', 'dog treats', 'cat litter', 'bird food']}

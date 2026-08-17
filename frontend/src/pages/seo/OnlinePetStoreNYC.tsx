@@ -8,10 +8,10 @@ const OnlinePetStoreNYC = () => {
   return (
     <SEOLandingPage
       keyword="online-pet-store-nyc"
-      title="Online Pet Store NYC — 10,000+ Products, Free Delivery Over $49 | Petshiwu"
-      description="New York City's premier online pet store. Shop 10,000+ products for dogs, cats, birds, fish, reptiles and more. Free delivery on orders over $49. Proudly serving all 5 NYC boroughs."
-      h1="New York City's Online Pet Store"
-      introContent="Petshiwu is the online pet store built for New York City. We know NYC — the apartments, the no-car lifestyle, the tight schedules. That's why we deliver 10,000+ premium pet products straight to your door anywhere in the five boroughs. Top brands, competitive prices, free delivery over $49. No warehouse somewhere in the Midwest — we're NYC, serving NYC."
+      title="Online Pet Store NYC — Same-Day Delivery, No Autoship | Petshiwu"
+      description="NYC online pet store with same-day delivery. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Not a walk-in store. No autoship. Free over $49. All 5 boroughs."
+      h1="NYC's Online Pet Store — Delivered Tonight"
+      introContent="Petshiwu is the online pet store built for New York City apartments and no-car life. Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM to all five boroughs. We are not a walk-in store. No autoship. 10,000+ products. Free over $49. Packed in Queens, not a warehouse in the Midwest."
       problemPoints={[
         "National online retailers that take days to ship to NYC",
         "No car to load up on heavy pet food and litter",
@@ -38,7 +38,7 @@ const OnlinePetStoreNYC = () => {
         },
         {
           question: "How fast is delivery in NYC?",
-          answer: "We offer delivery throughout all five NYC boroughs. Shipping is $6 for orders under $49 and free for orders $49 and above. Contact us at support@petshiwu.com or call +1 (800) 259-2605 for delivery time estimates."
+          answer: "Same-day if you order by 3 PM weekdays (1 PM weekends) — at the door before 11 PM. After cutoff, next day. $6 under $49, free over $49. No autoship. Call (800) 259-2605 if you need help."
         },
         {
           question: "What kinds of pets do you support?",

@@ -8,10 +8,10 @@ const PetFoodSubscriptionNYC = () => {
   return (
     <SEOLandingPage
       keyword="pet-food-subscription-nyc"
-      title="Pet Food Delivery NYC — Never Run Out of Your Pet's Favorites | Petshiwu"
-      description="Keep your pet stocked with their favorite food delivered in NYC. Easy reordering, no subscription traps. Free delivery over $49. Queens, Brooklyn, Manhattan, Bronx, Staten Island."
-      h1="Regular Pet Food Delivery in New York City"
-      introContent="Never run out of your pet's food again. Petshiwu makes it easy to reorder your pet's favorites with a few clicks — no subscription required, no commitment, no membership fees. Just great pet food delivered to your NYC door whenever you need it. Free delivery on orders over $49."
+      title="Pet Food in NYC Without Autoship — Same-Day Delivery | Petshiwu"
+      description="No pet food subscription trap in NYC. Order when you want. Same-day if you order by 3 PM weekdays (1 PM weekends). No autoship. Free over $49."
+      h1="NYC Pet Food Delivery — No Subscription Required"
+      introContent="You do not need autoship to get pet food in NYC. Order when you want. Same-day if you order by 3 PM weekdays (1 PM weekends) — at the door before 11 PM. Reorder in a few clicks. No membership fee. Free over $49."
       problemPoints={[
         "Forgetting to reorder and running out of pet food at the worst time",
         "Subscriptions that lock you in or are hard to cancel",

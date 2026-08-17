@@ -6,10 +6,10 @@ import SEOLandingPage from '../SEOLandingPage';
 const PetSuppliesLongIslandCityNY = () => (
   <SEOLandingPage
     keyword="pet-supplies-long-island-city-queens-ny"
-    title="Pet Supplies Long Island City Queens NY — Fast Delivery | Petshiwu"
-    description="Pet supply delivery to Long Island City, Queens. Dog food, cat food, and pet supplies delivered to LIC, Hunters Point, Sunnyside & Woodside. 10,000+ products, free shipping over $49."
-    h1="Pet Supplies Delivered to Long Island City, Queens"
-    introContent="Long Island City has grown into one of NYC's most vibrant neighborhoods — and its pet owners demand the same. Petshiwu is Queens-based and delivers premium pet food, supplies, and accessories throughout LIC, Hunters Point, Sunnyside, and Woodside. Fast, local, and free delivery on orders over $49."
+    title="Same-Day Pet Supplies Long Island City — Order by 3 PM | Petshiwu"
+    description="Same-day pet delivery in Long Island City. Order by 3 PM weekdays (1 PM weekends), before 11 PM. LIC, Hunters Point, Sunnyside. No autoship. Free over $49."
+    h1="Same-Day Pet Supplies in Long Island City, Queens"
+    introContent="Petshiwu delivers tonight to Long Island City high-rises — LIC, Hunters Point, Sunnyside, Woodside. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. Not a walk-in store. No autoship. Free over $49."
     problemPoints={[
       "Getting heavy pet food to high-rise apartments in LIC without a car",
       "Limited specialty pet stores in the immediate neighborhood",

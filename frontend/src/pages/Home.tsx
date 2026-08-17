@@ -9,6 +9,7 @@ import StructuredData from '@/components/StructuredData';
 import TrustBadges from '@/components/TrustBadges';
 import CategoryIcons from '@/components/CategoryIcons';
 import ShopByPet from '@/components/ShopByPet';
+import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
 import { ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
@@ -276,6 +277,8 @@ const Home = () => {
       <div className="mt-4">
         <HeroSlideshow />
       </div>
+
+      <TonightDeliveryHowItWorks />
 
       <CategoryIcons />
 

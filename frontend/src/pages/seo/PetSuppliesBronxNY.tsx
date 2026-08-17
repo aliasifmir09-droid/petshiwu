@@ -6,10 +6,10 @@ import SEOLandingPage from '../SEOLandingPage';
 const PetSuppliesBronxNY = () => (
   <SEOLandingPage
     keyword="pet-supplies-bronx-ny"
-    title="Pet Supplies Bronx NY — Delivery to Fordham, Riverdale, Hunts Point & All of the Bronx | Petshiwu"
-    description="Bronx pet supply delivery. Fordham, Riverdale, Hunts Point, Mott Haven, Pelham Bay & more. 10,000+ products from top brands. Free shipping on orders over $49."
-    h1="Pet Supplies Delivered Across the Bronx, NY"
-    introContent="Petshiwu delivers premium pet food, toys, and supplies to every neighborhood in the Bronx. From Riverdale to Hunts Point, Fordham to Pelham Bay — we carry 10,000+ products from the brands you trust. No car needed. Free delivery on orders over $49."
+    title="Same-Day Pet Supplies Bronx — Order by 3 PM | Petshiwu"
+    description="Same-day pet delivery in the Bronx. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Fordham, Riverdale, Mott Haven. No autoship. Free over $49."
+    h1="Same-Day Pet Supplies Across the Bronx, NY"
+    introContent="Petshiwu delivers pet food and supplies tonight across the Bronx — Riverdale, Fordham, Mott Haven, Hunts Point, Pelham Bay. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No autoship. No car needed. Free over $49."
     problemPoints={[
       "Limited pet store options in many Bronx neighborhoods",
       "Having to travel far for quality pet food brands",
@@ -44,7 +44,7 @@ const PetSuppliesBronxNY = () => (
       },
       {
         question: "Do you deliver to Riverdale and Fordham in the Bronx?",
-        answer: "Yes, we deliver to Riverdale, Fordham, and all Bronx zip codes. Order before the daily cutoff for fast delivery to your Bronx address."
+        answer: "Yes — Riverdale, Fordham, and all Bronx ZIPs. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No autoship."
       }
     ]}
     searchTerms={['dog food', 'cat food', 'pet food', 'pet supplies', 'cat litter', 'dog treats', 'bird food']}

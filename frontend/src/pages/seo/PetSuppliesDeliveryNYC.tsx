@@ -8,10 +8,10 @@ const PetSuppliesDeliveryNYC = () => {
   return (
     <SEOLandingPage
       keyword="pet-supplies-delivery-nyc"
-      title="Pet Supplies Delivery NYC — Free Shipping Over $49 | Petshiwu"
-      description="Get pet supplies delivered anywhere in NYC. Dogs, cats, birds, fish, reptiles — 10,000+ products from top brands. Free delivery on orders over $49. Queens, Brooklyn, Manhattan, Bronx, Staten Island."
-      h1="Pet Supplies Delivery in New York City"
-      introContent="Need pet food, toys, or supplies delivered fast in NYC? Petshiwu delivers premium pet products to every borough — Queens, Brooklyn, Manhattan, Bronx, and Staten Island. Shop 10,000+ products from trusted brands like Purina, Blue Buffalo, and Royal Canin, and get free delivery on orders over $49."
+      title="Same-Day Pet Supplies Delivery NYC — Order by 3 PM | Petshiwu"
+      description="Same-day pet supplies delivery in NYC. Order by 3 PM weekdays (1 PM weekends), before 11 PM. No autoship. Free over $49. Dogs, cats, birds, fish, reptiles. All 5 boroughs."
+      h1="Same-Day Pet Supplies Delivery in New York City"
+      introContent="Need pet food tonight in NYC? Order by 3 PM weekdays (1 PM weekends) and Petshiwu delivers before 11 PM to Queens, Brooklyn, Manhattan, the Bronx, and Staten Island. No autoship. 10,000+ products from Purina, Blue Buffalo, and Royal Canin. Free over $49."
       problemPoints={[
         "Lugging heavy bags of pet food from a store",
         "Pet stores with limited selection or out-of-stock items",
