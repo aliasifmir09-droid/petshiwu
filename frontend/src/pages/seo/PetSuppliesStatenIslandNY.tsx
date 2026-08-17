@@ -6,10 +6,10 @@ import SEOLandingPage from '../SEOLandingPage';
 const PetSuppliesStatenIslandNY = () => (
   <SEOLandingPage
     keyword="pet-supplies-staten-island-ny"
-    title="Pet Supplies Staten Island NY — Delivery to St. George, Tottenville & All of Staten Island | Petshiwu"
-    description="Staten Island pet supply delivery. St. George, Tottenville, New Dorp, Stapleton & all neighborhoods. 10,000+ products from top brands. Free shipping on orders over $49."
-    h1="Pet Supplies Delivered Across Staten Island, NY"
-    introContent="Petshiwu delivers premium pet food, toys, and accessories to every neighborhood on Staten Island. From St. George to Tottenville, New Dorp to Stapleton — shop 10,000+ products and get them delivered to your door. Free delivery on orders over $49."
+    title="Same-Day Pet Supplies Staten Island — Order by 3 PM | Petshiwu"
+    description="Same-day pet delivery on Staten Island. Order by 3 PM weekdays (1 PM weekends), before 11 PM. St. George, Tottenville, New Dorp. No autoship. Free over $49."
+    h1="Same-Day Pet Supplies Across Staten Island, NY"
+    introContent="Petshiwu delivers pet food tonight across Staten Island — St. George, Tottenville, New Dorp, Stapleton. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No autoship. Free over $49."
     problemPoints={[
       "Limited pet store variety compared to other NYC boroughs",
       "Having to drive to big-box stores for specialty items",

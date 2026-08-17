@@ -8,6 +8,8 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import { ChevronRight, Home, CheckCircle, AlertCircle } from 'lucide-react';
+import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
+import { TONIGHT, withTonightFaq } from '@/data/tonightDelivery';
 
 interface SEOLandingPageProps {
   keyword: string;
@@ -36,7 +38,7 @@ const SEOLandingPage = ({
   introContent,
   problemPoints,
   solutionPoints,
-  faqItems = [],
+  faqItems: faqItemsProp = [],
   searchTerms,
   petType,
   category
@@ -48,6 +50,7 @@ const SEOLandingPage = ({
   // Paginated/sorted/filtered variants (e.g. ?page=2, ?sort=price) must not be
   // indexed as separate pages — they canonicalize to the clean landing URL.
   const hasQueryVariant = searchParams.toString().length > 0;
+  const faqItems = useMemo(() => withTonightFaq(faqItemsProp), [faqItemsProp]);
 
   // Build search query from all search terms
   const searchQuery = searchTerms.join(' ');
@@ -146,7 +149,10 @@ const SEOLandingPage = ({
           <div className="prose prose-lg max-w-none text-gray-700 mb-6">
             <p className="text-xl leading-relaxed">{introContent}</p>
           </div>
+          <p className="text-[#1E3A8A] font-semibold">{TONIGHT.promise}</p>
         </div>
+
+        <TonightDeliveryHowItWorks compact />
 
         {/* Problem Section */}
         {problemPoints.length > 0 && (
@@ -257,19 +263,19 @@ const SEOLandingPage = ({
         )}
 
         {/* CTA Section */}
-        <div className="bg-primary-50 border border-primary-200 rounded-lg p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4 text-gray-900">
-            Still Have Questions?
+        <div className="bg-slate-50 border border-slate-200 rounded-lg p-8 text-center">
+          <h2 className="text-2xl font-bold mb-4 text-[#1E3A8A]">
+            Need it tonight?
           </h2>
           <p className="text-gray-700 mb-6">
-            Our pet care experts are here to help you find the perfect solution for your pet.
+            {TONIGHT.shortPromise}. Call {TONIGHT.phone} if you have a question.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/products"
-              className="inline-block bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-semibold"
+              className="inline-block bg-[#1E3A8A] text-white px-8 py-3 rounded-lg hover:bg-[#1e40af] transition-colors font-semibold"
             >
-              Browse All Products
+              Shop tonight
             </Link>
             <Link
               to="/faq"

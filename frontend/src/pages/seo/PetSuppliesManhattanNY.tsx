@@ -6,10 +6,10 @@ import SEOLandingPage from '../SEOLandingPage';
 const PetSuppliesManhattanNY = () => (
   <SEOLandingPage
     keyword="pet-supplies-manhattan-ny"
-    title="Pet Supplies Manhattan NYC — Delivery to Upper West Side, Harlem & All of Manhattan | Petshiwu"
-    description="Manhattan pet supply delivery. Upper West Side, Upper East Side, Harlem, Hell's Kitchen, Chelsea, Tribeca & more. 10,000+ products, free shipping over $49. Top brands delivered fast."
-    h1="Pet Supplies Delivered Across Manhattan, NYC"
-    introContent="Petshiwu delivers premium pet food, toys, and accessories throughout Manhattan — from Inwood to the Financial District. Whether you're in the Upper West Side, Harlem, Hell's Kitchen, or Tribeca, we bring 10,000+ pet products straight to your door. Free delivery on orders over $49."
+    title="Same-Day Pet Supplies Manhattan — Order by 3 PM | Petshiwu"
+    description="Same-day pet delivery in Manhattan. Order by 3 PM weekdays (1 PM weekends), before 11 PM. UWS, Harlem, Chelsea, Tribeca. No autoship. Free over $49."
+    h1="Same-Day Pet Supplies Across Manhattan, NYC"
+    introContent="Petshiwu delivers pet food and supplies tonight across Manhattan — Upper West Side, Harlem, Hell's Kitchen, Chelsea, Tribeca. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No autoship. Free over $49."
     problemPoints={[
       "Manhattan pet stores are expensive and have limited selection",
       "No car to carry heavy bags of pet food",
@@ -23,7 +23,7 @@ const PetSuppliesManhattanNY = () => (
       "Top brands — Purina, Royal Canin, Blue Buffalo, Hill's Science Diet",
       "Free delivery on orders over $49",
       "Compact packaging options for Manhattan apartments",
-      "Easy repeat ordering — set it and forget it for monthly supplies"
+      "Same-day: order by 3 PM weekdays (1 PM weekends), before 11 PM. No autoship."
     ]}
     faqItems={[
       {
@@ -44,7 +44,7 @@ const PetSuppliesManhattanNY = () => (
       },
       {
         question: "What's the delivery time for Manhattan pet orders?",
-        answer: "We offer fast NYC delivery. Place your order and we'll get it to you quickly. For exact delivery windows, check at checkout or contact our support team."
+        answer: "Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM. After cutoff, next day. No autoship. Enter your ZIP on the homepage to confirm."
       }
     ]}
     searchTerms={['dog food', 'cat food', 'pet food', 'pet supplies', 'royal canin', 'hill science diet', 'dog treats']}

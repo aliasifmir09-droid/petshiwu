@@ -1,41 +1,42 @@
-# Google Business Profile Copy — PetShiwu
+# Google Business Profile — paste this
 
-**This is the most important Google setting.** The website now says we are delivery-only. Google Business Profile must match, or Google will still rank us as a walk-in pet store.
+Use this file in Google Business Profile. The website and Google must say the same thing: **same-day NYC delivery, not a walk-in store.**
 
-## Do this in Google Business Profile (required)
+## Do this first (required)
 
-1. Set the profile as a **service-area business** (not a storefront).
-2. **Hide the street address.** Do not show 37-68 74th St on Google Maps as a place to visit.
+1. Profile type = **Service-area business** (not storefront).
+2. **Hide the street address.** Do not show 37-68 74th St as a place to visit.
 3. Service area = all 5 NYC boroughs (list below).
-4. Primary category = **Online pet store** (not Pet Store).
-5. Do **not** add “Pet Store” as a category. That tells Google people can walk in.
-
-If Google still asks to verify the address, verify it privately. Keep the address **hidden** from customers.
+4. Primary category = **Online pet store**.
+5. Do **not** add “Pet Store.” That tells Google people can walk in.
+6. If Google asks to verify the address, verify it privately. Keep it **hidden**.
 
 ---
 
-## Business Name
-PetShiwu — Pet Food Delivery NYC
+## Business name
+PetShiwu — Same-Day Pet Food Delivery NYC
 
-## Category (Primary)
+## Primary category
 Online pet store
 
-## Additional Categories
+## Extra categories (only if Google asks)
 - Delivery service
-- Pet supply store *(only if Google requires a second category — never use “Pet Store”)*
+- Pet supply store *(never “Pet Store”)*
 
-## Business Description (750 chars max — paste exactly)
+## Description (paste exactly — 750 characters max)
 
-PetShiwu is New York City same-day pet food and supplies delivery. We are not a walk-in store. Our Jackson Heights location is office and warehouse only.
+PetShiwu is same-day pet food and supplies delivery in New York City. We are not a walk-in store. Jackson Heights is office and warehouse only.
 
-We deliver premium pet food, treats, toys, and accessories to all 5 boroughs — Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. Shop 10,000+ products from Hill's Science Diet, Blue Buffalo, Wellness, Orijen, and Kong. Free delivery on orders over $49. Order by 3 PM weekdays (1 PM weekends) for same-day delivery.
+Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM to all 5 boroughs. No autoship. Free delivery over $49.
 
-Queens-based. NYC-focused. Delivery to your door — no retail shop visits.
+Shop 10,000+ products from Hill's Science Diet, Blue Buffalo, Royal Canin, Wellness, Orijen, and Kong.
+
+Queens-based. Delivery to your door.
 
 ---
 
-## Service Area
-Set as SERVICE AREA BUSINESS (hide street address):
+## Service area (hide street address)
+
 - New York, NY
 - Queens, NY
 - Brooklyn, NY
@@ -50,9 +51,11 @@ Set as SERVICE AREA BUSINESS (hide street address):
 - Flushing, NY
 - Forest Hills, NY
 
-## Hours
-These are **customer service / delivery hours**, not store hours.
+## Hours (customer service — not store hours)
+
 Monday–Sunday: 9:00 AM – 8:00 PM
+
+Same-day cutoff is **3 PM weekdays / 1 PM weekends**. We deliver before **11 PM**.
 
 ## Phone
 +1 (800) 259-2605
@@ -60,32 +63,69 @@ Monday–Sunday: 9:00 AM – 8:00 PM
 ## Website
 https://www.petshiwu.com
 
-## Attributes to Enable
+## Attributes
+
 - Delivery: **Yes**
 - In-store shopping: **No**
 - In-store pickup: **No**
 - Onsite services: **No**
 
-## Products to List
-- Dog Food
-- Cat Food
-- Bird Supplies
-- Fish & Aquatic Supplies
-- Small Pet Supplies
-- Reptile Supplies
-- Dog Treats
-- Cat Treats
-- Pet Toys
-- Pet Beds
-- Dog Leashes & Collars
-- Cat Litter
+## Products to list
 
-## First Post (publish after setup)
-**Title:** Same-day pet food delivery across NYC 🐾
-
-**Body:** We deliver to all 5 boroughs — Queens, Brooklyn, Manhattan, the Bronx, and Staten Island. We are not a walk-in store. Order online, we bring it to your door. 10,000+ products. Free shipping on orders over $49. Shop at petshiwu.com
-
-**CTA:** Order delivery → https://www.petshiwu.com
+Dog Food, Cat Food, Bird Supplies, Fish & Aquatic Supplies, Small Pet Supplies, Reptile Supplies, Dog Treats, Cat Treats, Pet Toys, Pet Beds, Dog Leashes & Collars, Cat Litter
 
 ---
-*Updated August 14, 2026 — delivery-only, office/warehouse not public*
+
+## Photos to upload (yours, not Yelp / old store photos)
+
+1. Packed boxes / bags ready to leave
+2. A delivery in NYC (door, stoop, or van — no street address sign)
+3. Real product brands you sell
+4. Your team packing (optional)
+5. Logo
+
+Delete any photo that looks like a walk-in shop or another business.
+
+---
+
+## Google Q&A (paste as answers)
+
+**Do you have a store I can visit?**  
+No. We are delivery only. Jackson Heights is office and warehouse. Order at petshiwu.com.
+
+**Do you deliver same day?**  
+Yes. Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM across all 5 boroughs.
+
+**Do I need a subscription?**  
+No. No autoship. Buy once. First order: FREEDOM20 (20% off, max $10).
+
+**How much is delivery?**  
+Free over $49. $6 under that.
+
+---
+
+## Ask every customer for a review (text / card in the box)
+
+Hi — this is Petshiwu. Your order should be there tonight. If it was easy, please leave a Google review. It helps other NYC pet parents find us. Thank you.
+
+---
+
+## First 3 posts (publish after setup)
+
+**Post 1**  
+Title: Same-day pet food across NYC  
+Body: Order by 3 PM weekdays (1 PM weekends). We deliver before 11 PM to all 5 boroughs. No walk-in store. No autoship. Free over $49. petshiwu.com  
+CTA: https://www.petshiwu.com
+
+**Post 2**  
+Title: Not a store — we come to you  
+Body: Jackson Heights is our warehouse. Shop online. We bring the bag to your door in Queens, Brooklyn, Manhattan, the Bronx, and Staten Island.  
+CTA: https://www.petshiwu.com
+
+**Post 3**  
+Title: First order: FREEDOM20  
+Body: 20% off your first order (max $10). No subscription. Snap a photo of the bag or type the name.  
+CTA: https://www.petshiwu.com
+
+---
+*Updated August 17, 2026 — same-day cutoff, hide address, no autoship*

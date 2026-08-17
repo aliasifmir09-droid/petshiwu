@@ -7,10 +7,10 @@ const DogFoodDeliveryNYC = () => {
   return (
     <SEOLandingPage
       keyword="dog-food-delivery-nyc"
-      title="Dog Food Delivery NYC — All Breeds & Diets | Petshiwu"
-      description="Order dog food online and get it delivered anywhere in NYC. Dry food, wet food, grain-free, raw, puppy, senior — all top brands. Free delivery over $49. Queens, Brooklyn, Manhattan, Bronx."
-      h1="Dog Food Delivery in New York City"
-      introContent="Stop carrying heavy bags of dog food on the subway. Petshiwu delivers dog food directly to your NYC door — dry kibble, wet food, grain-free, raw diets, puppy formulas, and senior recipes. Shop Purina, Blue Buffalo, Royal Canin, Hill's Science Diet, Orijen, and more. Free delivery on orders over $49."
+      title="Same-Day Dog Food Delivery NYC — Order by 3 PM | Petshiwu"
+      description="Same-day dog food delivery in NYC. Order by 3 PM weekdays (1 PM weekends), at your door before 11 PM. No autoship. Free over $49. All 5 boroughs."
+      h1="Same-Day Dog Food Delivery in New York City"
+      introContent="Stop carrying heavy bags of dog food on the subway. Petshiwu delivers dog food to your NYC door tonight when you order by 3 PM weekdays (1 PM weekends) — dry kibble, wet food, grain-free, raw, puppy, and senior. Purina, Blue Buffalo, Royal Canin, Hill's, Orijen. No autoship. Free delivery over $49."
       problemPoints={[
         "Carrying 30-pound bags of dog food on the subway or in a cab",
         "Running out of food and making last-minute trips",
@@ -23,8 +23,9 @@ const DogFoodDeliveryNYC = () => {
         "All diet types — standard, grain-free, limited ingredient, raw, freeze-dried",
         "All life stages — puppy, adult, senior, and all-life-stages formulas",
         "Dry kibble and wet/canned food available",
-        "Free delivery on orders over $49 — one bag usually qualifies",
-        "Delivery to all 5 NYC boroughs"
+        "Same-day NYC: order by 3 PM weekdays (1 PM weekends), before 11 PM",
+        "No autoship — buy once. Free delivery over $49 — one bag usually qualifies",
+        "Delivery to all 5 NYC boroughs from our Queens warehouse"
       ]}
       faqItems={[
         {
@@ -41,11 +42,11 @@ const DogFoodDeliveryNYC = () => {
         },
         {
           question: "Do you offer subscription or repeat delivery for dog food?",
-          answer: "You can easily reorder your dog's favorite food with just a few clicks from your order history. Set a reminder and reorder before you run out — no subscription required, no commitment."
+          answer: "No autoship. Reorder from your order history when you want. No subscription, no commitment. Same-day if you order by 3 PM weekdays (1 PM weekends)."
         },
         {
           question: "Is dog food delivery available in Brooklyn and Manhattan?",
-          answer: "Yes — we deliver to all five NYC boroughs: Queens, Brooklyn, Manhattan, the Bronx, and Staten Island. We're based in Jackson Heights and deliver throughout New York City."
+          answer: "Yes — all five boroughs. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. Jackson Heights is our warehouse, not a walk-in store."
         }
       ]}
       searchTerms={['dog food', 'kibble', 'dry dog food', 'wet dog food', 'grain free dog food', 'puppy food']}

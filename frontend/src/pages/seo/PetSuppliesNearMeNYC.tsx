@@ -8,10 +8,10 @@ const PetSuppliesNearMeNYC = () => {
   return (
     <SEOLandingPage
       keyword="pet-supplies-near-me-nyc"
-      title="Pet Supplies Near Me — NYC Delivery to Your Door | Petshiwu"
-      description="Looking for pet supplies near you in NYC? Petshiwu delivers to your door — Queens, Brooklyn, Manhattan, Bronx, Staten Island. 10,000+ products, free delivery over $49."
-      h1="Pet Supplies Delivered Near You in NYC"
-      introContent="Searching for pet supplies near you in New York City? Petshiwu brings the store to your door. Instead of finding a pet store nearby, we deliver 10,000+ products directly to your NYC address — whether you're in Queens, Brooklyn, Manhattan, the Bronx, or Staten Island. Free delivery on orders over $49."
+      title="Pet Supplies Near Me NYC — Same-Day Delivery, Not a Store | Petshiwu"
+      description="Pet supplies near you in NYC means delivery to your door. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Not a walk-in store. No autoship. Free over $49."
+      h1="Pet Supplies Near You — Delivered Tonight in NYC"
+      introContent="Searching pet supplies near me in NYC? We do not have a walk-in shop. We deliver 10,000+ products to your door tonight if you order by 3 PM weekdays (1 PM weekends). All 5 boroughs. No autoship. Free over $49."
       problemPoints={[
         "The nearest pet store is inconvenient or closed",
         "Limited selection at nearby stores",
@@ -34,7 +34,7 @@ const PetSuppliesNearMeNYC = () => {
         },
         {
           question: "Can I get same-day pet supply delivery in NYC?",
-          answer: "Contact us at support@petshiwu.com or call +1 (800) 259-2605 for current delivery times in your area. We're always working to get your pets' supplies to you as quickly as possible."
+          answer: "Yes. Order by 3 PM EST weekdays (1 PM weekends) and we deliver before 11 PM the same day. After cutoff, next day. Enter your ZIP on the homepage. No autoship."
         },
         {
           question: "What's the cheapest way to get pet supplies delivered in NYC?",
