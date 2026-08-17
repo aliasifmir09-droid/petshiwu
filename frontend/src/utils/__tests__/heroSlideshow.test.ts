@@ -29,4 +29,9 @@ describe('hero slideshow assets', () => {
     expect(ids).not.toContain('slide-2');
     expect(HERO_SLIDES[0].id).toBe('slide-nyc-tonight');
   });
+
+  test('homepage keeps one hero line so the first screen stays calm', () => {
+    expect(HERO_SLIDES).toHaveLength(1);
+    expect(HERO_SLIDES[0].alt).toMatch(/same-day nyc/i);
+  });
 });
