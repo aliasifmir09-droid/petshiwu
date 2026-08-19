@@ -69,7 +69,7 @@ const SellWithUs = () => {
     setLoading(true);
     setError('');
     try {
-      await api.post('/api/v1/contact/vendor', form);
+      await api.post('/v1/contact/vendor', form, { skipAuth: true });
       setSubmitted(true);
     } catch {
       setError('Failed to send. Please email us directly at support@petshiwu.com');

@@ -508,6 +508,7 @@ app.use('/api/recommendations', legacyRouteDeprecation, recommendationAnalyticsR
 app.use('/api/reorder-suggestions', legacyRouteDeprecation, reorderSuggestionsRoutes);
 app.use('/api/ai-advisor', legacyRouteDeprecation, aiAdvisorRoutes);
 app.use('/api/v1/contact', contactFormsRoutes);
+app.use('/api/contact', contactFormsRoutes);
 
 
 app.get('/sitemap.xml', (req, res) => {

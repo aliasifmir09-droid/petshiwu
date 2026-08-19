@@ -1,7 +1,28 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
+import api from '@/services/api';
 
 const Footer = () => {
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+
+  const handleNewsletter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) return;
+    setNewsletterStatus('loading');
+    try {
+      await api.post('/v1/newsletter/subscribe', {
+        email: newsletterEmail.trim(),
+        source: 'footer',
+      }, { skipAuth: true });
+      setNewsletterStatus('done');
+      setNewsletterEmail('');
+    } catch {
+      setNewsletterStatus('error');
+    }
+  };
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
@@ -145,20 +166,30 @@ const Footer = () => {
             </ul>
             <div className="mt-4">
               <h4 className="font-semibold text-white mb-2 text-sm">Newsletter</h4>
-              <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
+              <form className="flex gap-2" onSubmit={handleNewsletter}>
                 <input
                   type="email"
+                  required
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
                   placeholder="Your email"
                   className="flex-1 px-3 py-2 rounded text-black text-sm min-w-0"
                   aria-label="Email address for newsletter"
                 />
                 <button
                   type="submit"
-                  className="bg-blue-600 px-4 py-2 rounded text-sm text-white font-semibold hover:bg-blue-700 transition-colors shrink-0"
+                  disabled={newsletterStatus === 'loading'}
+                  className="bg-blue-600 px-4 py-2 rounded text-sm text-white font-semibold hover:bg-blue-700 transition-colors shrink-0 disabled:opacity-60"
                 >
-                  Subscribe
+                  {newsletterStatus === 'loading' ? '...' : 'Subscribe'}
                 </button>
               </form>
+              {newsletterStatus === 'done' && (
+                <p className="text-green-400 text-xs mt-2">You are in. Check your inbox.</p>
+              )}
+              {newsletterStatus === 'error' && (
+                <p className="text-red-400 text-xs mt-2">Could not subscribe. Email support@petshiwu.com</p>
+              )}
             </div>
           </div>
 

@@ -10,6 +10,7 @@ export interface IContactSubmission extends Document {
   website?: string;
   investmentRange?: string;
   productCategory?: string;
+  subject?: string;
   message: string;
   emailSent: boolean;
   emailError?: string;
@@ -30,6 +31,7 @@ const ContactSubmissionSchema = new Schema<IContactSubmission>({
   website: { type: String, trim: true },
   investmentRange: { type: String, trim: true },
   productCategory: { type: String, trim: true },
+  subject: { type: String, trim: true },
   message: { type: String, required: true, trim: true },
   emailSent: { type: Boolean, default: false },
   emailError: { type: String },
