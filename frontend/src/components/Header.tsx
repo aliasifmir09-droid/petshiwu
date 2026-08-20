@@ -411,10 +411,10 @@ const Header = () => {
                     <img
                       src="/logo.png"
                       alt="Petshiwu Logo"
-                      className="h-10 lg:h-20 w-auto object-contain transform group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl relative z-10 max-h-10 lg:max-h-20"
+                      className="h-10 lg:h-16 w-auto object-contain transform group-hover:scale-105 transition-transform duration-500 drop-shadow-lg relative z-10 max-h-10 lg:max-h-16"
                       loading="eager"
-                      width={160}
-                      height={80}
+                      width={195}
+                      height={40}
                     />
                   </picture>
                   <div className="absolute inset-0 bg-white/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -740,7 +740,7 @@ const Header = () => {
               {/* ✅ FIXED - Same logo in mobile menu */}
               <picture>
                 <source srcSet="/logo.webp" type="image/webp" />
-                <img src="/logo.png" alt="Petshiwu" className="h-10 w-auto object-contain" width={160} height={80} />
+                <img src="/logo.png" alt="Petshiwu" className="h-10 w-auto object-contain" width={195} height={40} />
               </picture>
               <button onClick={() => { setMobileMenuOpen(false); setIsLearningExpanded(false); }} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Close Menu">
                 <X size={24} className="text-gray-700" />

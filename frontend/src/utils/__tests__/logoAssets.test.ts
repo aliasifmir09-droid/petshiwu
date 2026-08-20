@@ -2,44 +2,76 @@ import { describe, expect, test } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
-import { LOGO_BLUE } from '../../../scripts/generate-logo.mjs';
 
 const publicDir = path.resolve(__dirname, '../../../public');
+const sourceFile = path.resolve(__dirname, '../../../scripts/logo-source.png');
 
-function hexToRgb(hex: string) {
-  const n = hex.replace('#', '');
-  return {
-    r: parseInt(n.slice(0, 2), 16),
-    g: parseInt(n.slice(2, 4), 16),
-    b: parseInt(n.slice(4, 6), 16),
-  };
+function pixel(data: Buffer, width: number, channels: number, x: number, y: number) {
+  const i = (y * width + x) * channels;
+  return [data[i], data[i + 1], data[i + 2], data[i + 3]];
 }
 
-function isNear(actual: number, expected: number, slack = 18) {
-  return Math.abs(actual - expected) <= slack;
+function isWhite(p: number[]) {
+  return p[0] > 230 && p[1] > 230 && p[2] > 230 && p[3] > 200;
+}
+
+async function readRgba(file: string) {
+  const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  return { data, info, get: (x: number, y: number) => pixel(data, info.width, info.channels, x, y) };
 }
 
 describe('Petshiwu logo assets', () => {
-  test('favicon is a blue badge, not a white-on-white icon', async () => {
-    const file = path.join(publicDir, 'favicon-32.png');
-    expect(fs.existsSync(file)).toBe(true);
-    const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-    const i = ((2 * info.width) + 2) * info.channels;
-    const expected = hexToRgb(LOGO_BLUE);
-    expect(isNear(data[i], expected.r)).toBe(true);
-    expect(isNear(data[i + 1], expected.g)).toBe(true);
-    expect(isNear(data[i + 2], expected.b)).toBe(true);
-    // Must not be a near-white pixel in the corner
-    expect(data[i] + data[i + 1] + data[i + 2]).toBeLessThan(500);
+  test('keeps the real cropped Petshiwü artwork as the source', () => {
+    expect(fs.existsSync(sourceFile)).toBe(true);
   });
 
-  test('wide wordmark sits on the same blue badge', async () => {
+  test('favicon is a blue tile with the real capital P, not a white icon', async () => {
+    const { info, get } = await readRgba(path.join(publicDir, 'favicon-32.png'));
+    expect(info.width).toBe(32);
+    const corner = get(2, 2);
+    expect(corner[2]).toBeGreaterThan(140);
+    expect(corner[0] + corner[1] + corner[2]).toBeLessThan(520);
+    expect(corner[2]).toBeGreaterThan(corner[0]);
+    expect(isWhite(get(16, 16))).toBe(true);
+
+    const whites: Array<[number, number]> = [];
+    for (let y = 0; y < info.height; y++) {
+      for (let x = 0; x < info.width; x++) {
+        if (isWhite(get(x, y))) whites.push([x, y]);
+      }
+    }
+    const maxX = Math.max(...whites.map(([x]) => x));
+    expect(whites.length).toBeGreaterThan(80);
+    // Isolated P — a chopped next letter would push white to the right edge.
+    expect(maxX).toBeLessThan(info.width - 8);
+  });
+
+  test('wide wordmark is the real letters on a blue-to-purple pill', async () => {
     const file = path.join(publicDir, 'logo.png');
-    const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-    const i = ((8 * info.width) + 20) * info.channels;
-    const expected = hexToRgb(LOGO_BLUE);
-    expect(isNear(data[i], expected.r)).toBe(true);
-    expect(isNear(data[i + 1], expected.g)).toBe(true);
-    expect(isNear(data[i + 2], expected.b)).toBe(true);
+    const { info, get } = await readRgba(file);
+    expect(info.width).toBe(720);
+    expect(info.height).toBe(148);
+
+    const left = get(20, Math.floor(info.height / 2));
+    const right = get(info.width - 21, Math.floor(info.height / 2));
+    const center = get(Math.floor(info.width / 2), Math.floor(info.height / 2));
+    const corner = get(0, 0);
+
+    expect(left[2]).toBeGreaterThan(180);
+    expect(left[2]).toBeGreaterThan(left[0]);
+    expect(right[0]).toBeGreaterThan(70);
+    expect(right[2]).toBeGreaterThan(180);
+    expect(isWhite(center)).toBe(true);
+    expect(corner[3]).toBe(0);
+  });
+
+  test('square icon fills the tile so Google does not show a black box', async () => {
+    const { info, get } = await readRgba(path.join(publicDir, 'logo-square-192.png'));
+    const corner = get(0, 0);
+    const center = get(96, 96);
+    expect(corner[3]).toBeGreaterThan(200);
+    expect(corner[2]).toBeGreaterThan(140);
+    expect(isWhite(center)).toBe(true);
+    expect(info.width).toBe(192);
   });
 });
