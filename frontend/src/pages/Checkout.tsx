@@ -18,6 +18,7 @@ import { normalizeId } from '@/utils/idNormalizer';
 import { trackPurchase } from '@/utils/analytics';
 import SEO from '@/components/SEO';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import OrdersOpenBanner from '@/components/OrdersOpenBanner';
 import { MapPin, Plus, Check, User, UserCheck } from 'lucide-react';
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
 import { isNycDeliveryZip } from '@/utils/deliveryZip';
@@ -668,6 +669,10 @@ const Checkout = () => {
       <SEO title="Checkout | petshiwu" description="Complete your purchase at petshiwu" noindex={true} />
       <div className="container mx-auto px-4 lg:px-8 py-8">
                 <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+
+                <div className="mb-6">
+                  <OrdersOpenBanner compact />
+                </div>
 
                 {/* GUEST CHECKOUT BANNER — show only when not logged in */}
         {!isAuthenticated && (

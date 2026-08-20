@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
 import api from '@/services/api';
+import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
 
 const Footer = () => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -200,6 +201,11 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <p className="text-sm text-gray-400">
               &copy; {new Date().getFullYear()} Petshiwu. All rights reserved. All prices in USD.
+              {!areOrdersOpen() && (
+                <span className="block mt-1 text-amber-300">
+                  We start taking orders {ORDERS_OPEN_LABEL}.
+                </span>
+              )}
             </p>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-400">
               <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
