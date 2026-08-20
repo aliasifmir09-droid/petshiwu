@@ -1306,6 +1306,7 @@ const Checkout = () => {
                 <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-500">
                   <span>🔒 Secure Checkout</span>
                   <span>✅ SSL Encrypted</span>
+                  <Link to="/return-policy" className="hover:text-gray-700">365-day returns</Link>
                 </div>
               </div>
             </div>

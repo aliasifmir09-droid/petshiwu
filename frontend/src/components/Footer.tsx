@@ -107,7 +107,7 @@ const Footer = () => {
             <ul className="space-y-2 text-sm text-gray-400">
               <li><Link to="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
               <li><Link to="/shipping" className="hover:text-white transition-colors">Shipping Information</Link></li>
-              <li><Link to="/return-policy" className="hover:text-white transition-colors">Return & Exchange Policy</Link></li>
+              <li><Link to="/return-policy" className="hover:text-white transition-colors">365-Day Return Policy</Link></li>
               <li><Link to="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
               <li><Link to="/search?snap=1" className="hover:text-white transition-colors">Search by photo</Link></li>
               <li><Link to="/track-order" className="hover:text-white transition-colors">Track Your Order</Link></li>

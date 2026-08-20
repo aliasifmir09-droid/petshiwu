@@ -1,4 +1,4 @@
-import { Shield, Truck, MapPin, HeadphonesIcon, Package, Star } from 'lucide-react';
+import { Star, Truck, MapPin, HeadphonesIcon, Package, RotateCcw } from 'lucide-react';
 
 const TrustBadges = () => {
   const badges = [
@@ -21,9 +21,9 @@ const TrustBadges = () => {
       color: 'bg-[#1E3A8A]',
     },
     {
-      icon: Shield,
-      title: 'Secure Checkout',
-      description: 'SSL encrypted & safe',
+      icon: RotateCcw,
+      title: '365-Day Returns',
+      description: 'Unused items, no hassle',
       color: 'bg-[#1E3A8A]',
     },
     {

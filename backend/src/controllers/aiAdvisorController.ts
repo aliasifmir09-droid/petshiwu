@@ -456,7 +456,7 @@ PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
 - Order history: Available under My Orders when logged in
 
 === RETURNS & REFUNDS ===
-- 30-day return window from delivery date
+- 365-day return window from delivery date
 - Pet food guarantee: Return refused food, no questions asked
 - How to return: petshiwu.com/returns — enter order number, select items
 - Refund: Back to original payment method within 5–7 business days
@@ -502,7 +502,7 @@ Q: Do you offer free shipping?
 A: Yes — all orders over $49 ship free automatically, no code needed. NYC customers get fast 1–2 day delivery. Same-day delivery is available in select Queens neighborhoods (Jackson Heights, Elmhurst, Flushing, Astoria) for orders before 12 PM.
 
 Q: How do I return something?
-A: Go to petshiwu.com/returns within 30 days of delivery, enter your order number, and select the items to return. Refunds go back to your original payment method in 5–7 business days. If your pet simply refuses to eat a food — return it, no questions asked.
+A: Go to petshiwu.com/returns within 365 days of delivery, enter your order number, and select the items to return. Refunds go back to your original payment method in 5–7 business days. If your pet simply refuses to eat a food — return it, no questions asked.
 
 Q: My pet refuses to eat the food I ordered. Can I return it?
 A: Absolutely yes. Our pet food satisfaction guarantee covers refused food. Go to petshiwu.com/returns, pick "My pet won't eat it" as the reason, and we'll refund you in full. We stand completely behind our products.

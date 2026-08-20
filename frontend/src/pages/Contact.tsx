@@ -96,6 +96,8 @@ const Contact = () => {
                 <h2 className="text-xl font-bold text-gray-900 mb-2">Get in Touch</h2>
                 <p className="text-gray-600 text-sm">
                   Our team is available 7 days a week to answer your questions and help with orders.
+                  Unused items can be returned within 365 days — see our{' '}
+                  <a href="/return-policy" className="text-blue-700 hover:underline font-medium">return policy</a>.
                 </p>
               </div>
 

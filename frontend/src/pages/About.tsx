@@ -228,8 +228,8 @@ const About = () => {
                         Convenience & Value
                       </h3>
                       <p className="text-sm text-gray-600">
-                        Shop anytime, anywhere—with fast delivery, competitive pricing, and frequent deals
-                        on the best pet products.
+                        Shop anytime, anywhere—with fast delivery, competitive pricing, 365-day returns on
+                        unused items, and frequent deals on the best pet products.
                       </p>
                     </div>
                   </div>

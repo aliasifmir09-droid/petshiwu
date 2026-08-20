@@ -94,7 +94,7 @@ const FAQ = () => {
   const seoDescription = useMemo(() => {
     const totalFAQs = faqs?.length || 0;
     const categories = Object.keys(faqsByCategory).length;
-    return `Get answers to ${totalFAQs}+ frequently asked questions about pet products, shipping, returns, orders, payment, and more. Browse ${categories} categories of FAQs to find what you need at Petshiwu.`;
+    return `Get answers to ${totalFAQs}+ frequently asked questions about pet products, shipping, 365-day returns, orders, payment, and more. Browse ${categories} categories of FAQs to find what you need at Petshiwu.`;
   }, [faqs, faqsByCategory]);
 
   const allCategories = categories || [];
@@ -115,7 +115,7 @@ const FAQ = () => {
       <SEO
       title="Frequently Asked Questions (FAQ) | Petshiwu - Pet Products Help Center"
       description={seoDescription}
-      keywords="FAQ, frequently asked questions, pet store help, shipping questions, return policy, order tracking, pet product questions, customer support, pet care help, online pet store FAQ"
+      keywords="FAQ, frequently asked questions, pet store help, shipping questions, 365-day return policy, order tracking, pet product questions, customer support, pet care help, online pet store FAQ"
       url="/faq"
       />
       
@@ -137,7 +137,7 @@ const FAQ = () => {
               </h1>
             </div>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-4">
-              Find answers to common questions about our products, shipping, returns, orders, payment, and more.
+              Find answers to common questions about our products, shipping, 365-day returns, orders, payment, and more.
             </p>
             {faqs && faqs.length > 0 && (
               <p className="text-sm text-gray-500">
@@ -155,7 +155,7 @@ const FAQ = () => {
                 className="flex items-center gap-2 p-3 rounded-lg border border-gray-200 hover:border-primary-500 hover:bg-primary-50 transition-colors"
               >
                 <HelpCircle className="w-5 h-5 text-primary-600" />
-                <span className="text-sm font-medium text-gray-700">Return Policy</span>
+                <span className="text-sm font-medium text-gray-700">365-Day Return Policy</span>
               </Link>
               <Link
                 to="/products"
@@ -236,7 +236,7 @@ const FAQ = () => {
                   to="/return-policy"
                   className="inline-flex items-center gap-2 px-6 py-3 border-2 border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50 transition-colors"
                 >
-                  View Return Policy
+                  View 365-Day Return Policy
                 </Link>
               </div>
             </div>
@@ -330,7 +330,7 @@ const FAQ = () => {
                   to="/return-policy"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50 transition-colors font-semibold"
                 >
-                  View Return Policy
+                  View 365-Day Return Policy
                 </Link>
               </div>
               <p className="text-sm text-gray-600 mt-4 flex items-center justify-center gap-2">

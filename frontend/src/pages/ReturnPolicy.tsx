@@ -6,8 +6,8 @@ const ReturnPolicy = () => {
     <>
       <SEO
         title="Return & Exchange Policy | Petshiwu"
-        description="Petshiwu's 30-day return and exchange policy. Learn about eligible returns, non-returnable items, refunds, and how to process returns or exchanges for your pet products."
-        keywords="return policy, exchange policy, refund policy, pet product returns, 30-day guarantee"
+        description="Petshiwu's 365-day return and exchange policy. Learn about eligible returns, non-returnable items, refunds, and how to process returns or exchanges for your pet products."
+        keywords="return policy, exchange policy, refund policy, pet product returns, 365-day guarantee"
       />
 
       <div className="bg-gray-50">
@@ -33,7 +33,7 @@ const ReturnPolicy = () => {
           <div className="container mx-auto px-4 lg:px-8">
             <div className="max-w-4xl mx-auto">
               
-              {/* 30-Day Guarantee */}
+              {/* 365-Day Guarantee */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:p-8 mb-8">
                 <div className="flex items-start gap-4 mb-6">
                   <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
@@ -41,13 +41,13 @@ const ReturnPolicy = () => {
                   </div>
                   <div className="flex-1">
                     <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                      🐾 30-Day Satisfaction Guarantee
+                      🐾 365-Day Satisfaction Guarantee
                     </h2>
                     <p className="text-gray-700 leading-relaxed">
-                      We offer a <strong>30-day return or exchange policy</strong> from the date you receive your order.
+                      We offer a <strong>365-day return or exchange policy</strong> from the date you receive your order.
                     </p>
                     <p className="text-gray-700 leading-relaxed mt-2">
-                      If you are not completely satisfied, you may return or exchange eligible items within 30 days, <strong>no questions asked</strong>.
+                      If you are not completely satisfied, you may return or exchange eligible items within 365 days, <strong>no questions asked</strong>.
                     </p>
                   </div>
                 </div>
@@ -133,7 +133,7 @@ const ReturnPolicy = () => {
                     <h2 className="text-2xl font-bold text-gray-900 mb-4">🔄 Exchanges</h2>
                     <p className="text-gray-700 mb-4">If you need a different size, color, or replacement:</p>
                     <ol className="space-y-3 list-decimal list-inside text-gray-700">
-                      <li>Contact us within <strong>30 days of delivery</strong></li>
+                      <li>Contact us within <strong>365 days of delivery</strong></li>
                       <li>We&apos;ll ship the replacement once the original item is received (or immediately for damaged items)</li>
                     </ol>
                   </div>

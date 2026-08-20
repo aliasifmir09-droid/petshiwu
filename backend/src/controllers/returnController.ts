@@ -35,7 +35,7 @@ export const createReturn = async (req: AuthRequest, res: Response, next: NextFu
       return res.status(400).json({ success: false, message: 'Order must be delivered before requesting a return' });
     }
 
-    const returnWindowDays = 30;
+    const returnWindowDays = 365;
     const deliveryDate = order.deliveredAt || order.createdAt;
     const daysSinceDelivery = (Date.now() - deliveryDate.getTime()) / (1000 * 60 * 60 * 24);
 

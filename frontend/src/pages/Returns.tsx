@@ -73,8 +73,13 @@ const Returns = () => {
         <EmptyState
           icon={Package}
           title="No Returns Yet"
-          description="You haven't requested any returns. Return requests will appear here once created."
+          description="You haven't requested any returns. Eligible unused items can be returned within 365 days of delivery."
         />
+        <p className="text-center mt-4">
+          <Link to="/return-policy" className="text-primary-600 hover:underline font-medium">
+            Read the 365-day return policy
+          </Link>
+        </p>
         {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
       </div>
     );
