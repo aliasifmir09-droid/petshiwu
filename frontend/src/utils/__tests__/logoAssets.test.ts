@@ -25,12 +25,14 @@ describe('Petshiwu logo assets', () => {
     expect(fs.existsSync(sourceFile)).toBe(true);
   });
 
-  test('favicon is a blue tile with the real capital P, not a white icon', async () => {
+  test('favicon is a navy tile with the real capital P, not a white icon', async () => {
     const { info, get } = await readRgba(path.join(publicDir, 'favicon-32.png'));
     expect(info.width).toBe(32);
     const corner = get(2, 2);
-    expect(corner[2]).toBeGreaterThan(140);
-    expect(corner[0] + corner[1] + corner[2]).toBeLessThan(520);
+    // Header navy #1E3A8A ≈ rgb(30, 58, 138)
+    expect(corner[0]).toBeLessThan(50);
+    expect(corner[2]).toBeGreaterThan(120);
+    expect(corner[0] + corner[1] + corner[2]).toBeLessThan(280);
     expect(corner[2]).toBeGreaterThan(corner[0]);
     expect(isWhite(get(16, 16))).toBe(true);
 
@@ -46,7 +48,7 @@ describe('Petshiwu logo assets', () => {
     expect(maxX).toBeLessThan(info.width - 8);
   });
 
-  test('wide wordmark is the real letters on a blue-to-purple pill', async () => {
+  test('wide wordmark is the real letters on the same navy as the header', async () => {
     const file = path.join(publicDir, 'logo.png');
     const { info, get } = await readRgba(file);
     expect(info.width).toBe(720);
@@ -57,10 +59,12 @@ describe('Petshiwu logo assets', () => {
     const center = get(Math.floor(info.width / 2), Math.floor(info.height / 2));
     const corner = get(0, 0);
 
-    expect(left[2]).toBeGreaterThan(180);
+    // Solid header navy — no lavender/purple right edge
+    expect(left[0]).toBeLessThan(50);
+    expect(left[2]).toBeGreaterThan(120);
     expect(left[2]).toBeGreaterThan(left[0]);
-    expect(right[0]).toBeGreaterThan(70);
-    expect(right[2]).toBeGreaterThan(180);
+    expect(Math.abs(right[0] - left[0])).toBeLessThan(8);
+    expect(Math.abs(right[2] - left[2])).toBeLessThan(8);
     expect(isWhite(center)).toBe(true);
     expect(corner[3]).toBe(0);
   });
@@ -70,7 +74,8 @@ describe('Petshiwu logo assets', () => {
     const corner = get(0, 0);
     const center = get(96, 96);
     expect(corner[3]).toBeGreaterThan(200);
-    expect(corner[2]).toBeGreaterThan(140);
+    expect(corner[0]).toBeLessThan(50);
+    expect(corner[2]).toBeGreaterThan(120);
     expect(isWhite(center)).toBe(true);
     expect(info.width).toBe(192);
   });
