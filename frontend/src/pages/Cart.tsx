@@ -9,6 +9,7 @@ import EmptyState from '@/components/EmptyState';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
 import SEO from '@/components/SEO';
+import OrdersOpenBanner from '@/components/OrdersOpenBanner';
 import { TAX_RATE, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST } from '@/config/constants';
 import cartService from '@/services/cart';
 import { useToast } from '@/hooks/useToast';
@@ -258,6 +259,10 @@ const Cart = () => {
     <>
             <SEO title="Shopping Cart | petshiwu" description="Your shopping cart at petshiwu" noindex={true} />
             <div className="container mx-auto px-4 lg:px-8 py-8">
+
+              <div className="mb-6">
+                <OrdersOpenBanner compact />
+              </div>
 
               <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">Shopping Cart</h1>

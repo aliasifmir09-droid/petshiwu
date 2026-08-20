@@ -10,6 +10,8 @@ import TrustBadges from '@/components/TrustBadges';
 import CategoryIcons from '@/components/CategoryIcons';
 import ShopByPet from '@/components/ShopByPet';
 import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
+import OrdersOpenBanner from '@/components/OrdersOpenBanner';
+import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
 import { ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
@@ -116,7 +118,11 @@ const Home = () => {
       <h1 className="sr-only">Petshiwu — Premium Pet Food, Toys & Supplies Delivered to NYC & Nationwide</h1>
       <SEO
         title="Petshiwu — Premium Pet Food, Toys & Supplies Delivered to NYC"
-        description="10,000+ pet products delivered to Queens, Brooklyn & all of NYC. Top brands — Purina, Blue Buffalo, Royal Canin. Free shipping over $49. Dog food, cat food, toys & more."
+        description={
+          areOrdersOpen()
+            ? '10,000+ pet products delivered to Queens, Brooklyn & all of NYC. Top brands — Purina, Blue Buffalo, Royal Canin. Free shipping over $49. Dog food, cat food, toys & more.'
+            : `10,000+ pet products delivered to Queens, Brooklyn & all of NYC. We start taking orders ${ORDERS_OPEN_LABEL}. Free shipping over $49.`
+        }
       />
       <StructuredData type="website" data={{}} />
       <StructuredData
@@ -274,6 +280,8 @@ const Home = () => {
 
       <ShopByPet />
 
+      <OrdersOpenBanner />
+
       <div className="mt-4">
         <HeroSlideshow />
       </div>
@@ -316,13 +324,17 @@ const Home = () => {
         <div className="container mx-auto px-4 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <h2 className="text-2xl md:text-3xl font-bold mb-1">Same-day NYC delivery</h2>
-            <p className="text-white/80">Order by 3 PM weekdays (1 PM weekends). No autoship. Free over $49.</p>
+            <p className="text-white/80">
+              {areOrdersOpen()
+                ? 'Order by 3 PM weekdays (1 PM weekends). No autoship. Free over $49.'
+                : `We start taking orders ${ORDERS_OPEN_LABEL}. Browse now — checkout opens that day.`}
+            </p>
           </div>
           <Link
             to="/products"
             className="bg-white text-[#1E3A8A] px-6 py-3 rounded-lg font-semibold hover:bg-slate-100 transition-colors"
           >
-            Shop tonight
+            {areOrdersOpen() ? 'Shop tonight' : 'Browse products'}
           </Link>
         </div>
       </section>

@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const MESSAGES = [
+  { text: '🚀 We start taking orders August 28, 2026 — browse now' },
   { text: '⚡ Same-Day Delivery NYC — Order before 3 PM, get it before 11 PM' },
-  { text: '🧬 NEW — Scan your pet. Neural Twin builds their shopping protocol.' },
-  { text: '🚀 Petshiwu launching August 28 — be the first to order' },
   { text: '🚚 Free shipping on all orders over $49 — no code needed' },
   { text: '🎁 10% off your first order — sign up for our newsletter' },
   { text: '⭐ Over 10,000 products for dogs, cats, birds, reptiles & more' },
