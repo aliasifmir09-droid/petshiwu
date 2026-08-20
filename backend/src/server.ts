@@ -472,6 +472,8 @@ app.use(`${API_PREFIX}/recommendations`, recommendationAnalyticsRoutes);
 app.use(`${API_PREFIX}/reorder-suggestions`, reorderSuggestionsRoutes);
 app.use(`${API_PREFIX}/ai-advisor`, aiAdvisorRoutes);
 app.use(`${API_PREFIX}/feed`, feedRoutes);
+app.use('/api/feed', feedRoutes);
+app.use('/feeds', feedRoutes);
 app.use(`${API_PREFIX}/newsletter`, newsletterRoutes);
 app.use(`${API_PREFIX}/coupons`, couponRoutes);
 
