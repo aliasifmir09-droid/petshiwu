@@ -34,6 +34,11 @@ export const validateEnv = () => {
     if (!process.env.STRIPE_SECRET_KEY) {
       warnings.push('STRIPE_SECRET_KEY not set - donation payments will not work');
     }
+    if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
+      warnings.push('PAYPAL_CLIENT_ID / PAYPAL_CLIENT_SECRET not set - PayPal checkout will fail');
+    } else if (process.env.PAYPAL_ENV !== 'live') {
+      warnings.push('PAYPAL_ENV is not live. Production is using PayPal Sandbox, so real customer PayPal payments will fail. Set PAYPAL_ENV=live with live REST credentials, and rebuild the frontend with VITE_PAYPAL_ENV=live and the live VITE_PAYPAL_CLIENT_ID.');
+    }
   }
 
   if (missing.length > 0) {

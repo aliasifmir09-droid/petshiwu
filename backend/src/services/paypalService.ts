@@ -25,8 +25,10 @@ export interface PayPalOrderResponse {
   }>;
 }
 
-const getPayPalBaseUrl = () => (
-  process.env.PAYPAL_ENV === 'live'
+export const isPayPalLive = () => process.env.PAYPAL_ENV === 'live';
+
+export const getPayPalBaseUrl = () => (
+  isPayPalLive()
     ? 'https://api-m.paypal.com'
     : 'https://api-m.sandbox.paypal.com'
 );

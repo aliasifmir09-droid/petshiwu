@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { isPayPalLive } from '@/config/paypal';
 import type { Order, ShippingAddress } from '@/types';
 import { orderService } from '@/services/orders';
 
@@ -85,7 +86,7 @@ declare global {
 const GOOGLE_PAY_URL = 'https://pay.google.com/gp/p/js/pay.js';
 const PAYPAL_SDK_ID = 'petshiwu-paypal-google-pay-sdk';
 const GOOGLE_PAY_SCRIPT_ID = 'petshiwu-google-pay-sdk';
-const PAYPAL_ENVIRONMENT = import.meta.env.VITE_PAYPAL_ENV === 'live' ? 'PRODUCTION' : 'TEST';
+const PAYPAL_ENVIRONMENT = isPayPalLive ? 'PRODUCTION' : 'TEST';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const scriptPromises = new Map<string, Promise<void>>();
 

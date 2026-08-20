@@ -54,5 +54,20 @@ describe('validateEnv', () => {
     expect(consoleSpy).toHaveBeenCalled();
     consoleSpy.mockRestore();
   });
+
+  it('warns when production is still on PayPal sandbox', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.MONGODB_URI = 'mongodb://localhost:27017/test';
+    process.env.JWT_SECRET = 'test-secret-key-minimum-32-characters-long-for-validation';
+    process.env.PAYPAL_CLIENT_ID = 'sandbox-client-id';
+    process.env.PAYPAL_CLIENT_SECRET = 'sandbox-secret';
+    delete process.env.PAYPAL_ENV;
+
+    const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+    validateEnv();
+    const warned = consoleSpy.mock.calls.flat().join(' ');
+    expect(warned).toContain('PAYPAL_ENV is not live');
+    consoleSpy.mockRestore();
+  });
 });
 
