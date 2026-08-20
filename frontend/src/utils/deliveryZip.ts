@@ -135,6 +135,21 @@ export function isNycDeliveryZip(input: string): boolean {
   return findNycArea(Number(zip)) !== null;
 }
 
+/** Accept NY, N.Y., New York, and New York State. */
+export function isNewYorkState(state: string): boolean {
+  const normalized = String(state || '')
+    .trim()
+    .toUpperCase()
+    .replace(/\./g, '')
+    .replace(/\s+/g, ' ');
+  return normalized === 'NY' || normalized === 'NEW YORK' || normalized === 'NEW YORK STATE';
+}
+
+export function normalizeShippingState(state: string): string {
+  const trimmed = String(state || '').trim();
+  return isNewYorkState(trimmed) ? 'NY' : trimmed;
+}
+
 export function lookupZip(input: string, now: Date = new Date()): ZipLookupResult | null {
   const zip = normalizeZip(input);
   if (!isValidZip(zip)) return null;
