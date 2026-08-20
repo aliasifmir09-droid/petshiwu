@@ -1,7 +1,9 @@
 /**
  * Build site logos from the real Petshiwü wordmark (heart on i, paw on ü).
- * Crop tight, knock out the black field, sit it on a blue badge so Google
- * does not show a white icon. Do not replace the lettering with a new font.
+ * Crop tight, knock out the black field, sit it on the same navy as the
+ * header (`#1E3A8A`) so the white letters match Support / Sign In.
+ * Google still gets a filled badge, not a white icon. Do not replace the
+ * lettering with a new font.
  */
 import fs from 'fs';
 import path from 'path';
@@ -12,9 +14,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.resolve(__dirname, '../public');
 const SOURCE = path.join(__dirname, 'logo-source.png');
 
-export const LOGO_BLUE = '#2B8DEF';
-const GRADIENT_LEFT = '#3BA0F0';
-const GRADIENT_RIGHT = '#7B7AE8';
+// Same navy as Header: bg-gradient-to-r from-[#1E3A8A] via-[#2563EB]
+export const LOGO_BLUE = '#1E3A8A';
+const GRADIENT_LEFT = '#1E3A8A';
+const GRADIENT_RIGHT = '#1E3A8A';
 
 async function wordmarkCutout() {
   const img = sharp(SOURCE).ensureAlpha();

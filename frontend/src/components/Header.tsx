@@ -411,7 +411,7 @@ const Header = () => {
                     <img
                       src="/logo.png"
                       alt="Petshiwu Logo"
-                      className="h-10 lg:h-16 w-auto object-contain transform group-hover:scale-105 transition-transform duration-500 drop-shadow-lg relative z-10 max-h-10 lg:max-h-16"
+                      className="h-10 lg:h-16 w-auto object-contain transform group-hover:scale-105 transition-transform duration-500 relative z-10 max-h-10 lg:max-h-16"
                       loading="eager"
                       width={195}
                       height={40}
