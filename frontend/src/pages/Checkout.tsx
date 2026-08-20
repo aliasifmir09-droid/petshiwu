@@ -57,7 +57,7 @@ interface CreateOrderData {
     country: string;
     phone: string;
   };
-  paymentMethod: 'credit_card' | 'paypal' | 'apple_pay' | 'google_pay';
+  paymentMethod: 'credit_card' | 'paypal' | 'apple_pay' | 'google_pay' | 'cod';
   paymentIntentId?: string;
   itemsPrice: number;
   shippingPrice: number;
@@ -179,7 +179,7 @@ const Checkout = () => {
     retry: 1
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'paypal' | 'apple_pay' | 'google_pay'>('paypal');
+  const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'paypal' | 'apple_pay' | 'google_pay' | 'cod'>('paypal');
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -404,8 +404,8 @@ const Checkout = () => {
 
   useEffect(() => {
     const createPaymentIntent = async () => {
-      if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay') {
-        setShowPayPalButton(true);
+      if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay' || paymentMethod === 'cod') {
+        setShowPayPalButton(paymentMethod !== 'cod');
         setShowPaymentForm(false);
         setClientSecret(null);
         setPaymentIntentId(null);
@@ -482,6 +482,11 @@ const Checkout = () => {
       }
     }
     setEmailError(false);
+
+    if (paymentMethod === 'cod') {
+      await prepareAndSubmitOrder();
+      return;
+    }
 
     if (paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && !paymentIntentId) {
       showToast('Please complete the payment first.', 'error');
@@ -979,9 +984,25 @@ const Checkout = () => {
                       </div>
                     </div>
                   )}
+
+                  <button type="button" onClick={() => {
+                    setPaymentMethod('cod');
+                    setPaypalPaymentMode('wallet');
+                    setSelectedSavedPaymentMethod(null);
+                    setSavePaymentMethod(false);
+                  }}
+                    className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'cod' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
+                    <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'cod' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
+                      {paymentMethod === 'cod' && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                    </div>
+                    <div className="flex-1 text-left">
+                      <span className="font-semibold text-gray-900">Cash on Delivery</span>
+                      <p className="text-sm text-gray-600 mt-1">Pay cash when your order arrives. No card needed.</p>
+                    </div>
+                  </button>
                 </div>
 
-                {isAuthenticated && !selectedSavedPaymentMethod && (
+                {isAuthenticated && !selectedSavedPaymentMethod && paymentMethod !== 'cod' && (
                   <div className="mt-4 flex items-center gap-2">
                     <input type="checkbox" id="savePaymentMethod" checked={savePaymentMethod}
                       onChange={(e) => setSavePaymentMethod(e.target.checked)}
@@ -992,7 +1013,7 @@ const Checkout = () => {
                   </div>
                 )}
 
-                {isProcessingPayment && !clientSecret && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && (
+                {isProcessingPayment && !clientSecret && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && paymentMethod !== 'cod' && (
 
                   <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <p className="text-sm text-yellow-800">
@@ -1003,7 +1024,7 @@ const Checkout = () => {
               </div>
 
               {/* Stripe Payment Form */}
-              {showPaymentForm && clientSecret && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && (
+              {showPaymentForm && clientSecret && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && paymentMethod !== 'cod' && (
                 <StripePaymentWrapper clientSecret={clientSecret} total={total}
                   onSuccess={handlePaymentSuccess} onError={handlePaymentError} onCancel={handlePaymentCancel} />
               )}
@@ -1298,9 +1319,11 @@ const Checkout = () => {
                   </div>
                 </div>
                 <button type="submit"
-                  disabled={createOrderMutation.isPending || isProcessingPayment}
+                  disabled={createOrderMutation.isPending || (isProcessingPayment && paymentMethod !== 'cod')}
                   className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50">
-                  {isProcessingPayment ? 'Initializing Payment...' : createOrderMutation.isPending ? 'Processing...' : 'Place Order'}
+                  {paymentMethod === 'cod'
+                    ? (createOrderMutation.isPending ? 'Placing order...' : 'Place cash on delivery order')
+                    : isProcessingPayment ? 'Initializing Payment...' : createOrderMutation.isPending ? 'Processing...' : 'Place Order'}
                 </button>
                 {/* Trust badges */}
                 <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-500">

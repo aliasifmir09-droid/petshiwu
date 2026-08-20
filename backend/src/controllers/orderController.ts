@@ -50,13 +50,6 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       guestEmail // GUEST CHECKOUT: email from guest user
     } = req.body;
 
-    if (paymentMethod === 'cod') {
-      return res.status(400).json({
-        success: false,
-        message: 'Cash on Delivery is no longer available. Please choose PayPal or card payment.'
-      });
-    }
-
     // GUEST CHECKOUT: user is optional
     const isGuest = !req.user?._id;
     const customerEmail = isGuest
@@ -285,7 +278,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
           }
         }
       } else {
-        isPaymentVerified = true;
+        // COD: collect cash on delivery. Leave payment pending until the driver confirms.
+        isPaymentVerified = false;
       }
 
       // GUEST CHECKOUT: user field is optional
