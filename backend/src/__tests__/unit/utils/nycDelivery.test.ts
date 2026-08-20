@@ -1,4 +1,4 @@
-import { isNycDeliveryZip, isNycShippingAddress, normalizeZip } from '../../../utils/nycDelivery';
+import { isNycDeliveryZip, isNycShippingAddress, isNewYorkState, normalizeShippingState, normalizeZip } from '../../../utils/nycDelivery';
 
 describe('nycDelivery', () => {
   test('normalizeZip keeps the first five digits', () => {
@@ -22,5 +22,16 @@ describe('nycDelivery', () => {
   test('isNycShippingAddress requires NY state', () => {
     expect(isNycShippingAddress('NY', '11101')).toBe(true);
     expect(isNycShippingAddress('NJ', '11101')).toBe(false);
+  });
+
+  test('accepts New York spelled out, which checkout users type for Queens', () => {
+    expect(isNewYorkState('new york')).toBe(true);
+    expect(isNewYorkState('New York')).toBe(true);
+    expect(isNewYorkState('N.Y.')).toBe(true);
+    expect(isNewYorkState('NY')).toBe(true);
+    expect(isNewYorkState('NJ')).toBe(false);
+    expect(normalizeShippingState('new york')).toBe('NY');
+    expect(isNycShippingAddress('new york', '11372')).toBe(true);
+    expect(isNycShippingAddress('New York', '11372')).toBe(true);
   });
 });
