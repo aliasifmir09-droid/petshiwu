@@ -776,7 +776,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
         returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
         merchantReturnDays: 30,
         returnMethod: 'https://schema.org/ReturnByMail',
-        returnFees: 'https://schema.org/FreeReturn',
+        returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility',
         merchantReturnLink: `${BASE}/return-policy`,
       },
       shippingDetails: {

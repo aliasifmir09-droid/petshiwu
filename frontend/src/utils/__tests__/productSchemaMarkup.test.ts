@@ -12,6 +12,8 @@ describe('ProductSchema Google shopping markup', () => {
     expect(schemaSrc).toContain('hasMerchantReturnPolicy');
     expect(schemaSrc).toContain('returnPolicyCountry');
     expect(schemaSrc).toContain('merchantReturnLink');
+    expect(schemaSrc).toContain('ReturnFeesCustomerResponsibility');
+    expect(schemaSrc).not.toContain('FreeReturn');
     expect(schemaSrc).toContain("addressRegion: 'NY'");
     expect(schemaSrc).toContain('https://schema.org/SalePrice');
     expect(schemaSrc).not.toContain("minValue: 2");
