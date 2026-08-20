@@ -37,7 +37,7 @@ import { DEFAULT_OG_IMAGE, injectOgTags, resolveShareImage } from '../seo/ogTags
 // ---------------------------------------------------------------------------
 
 const BOT_UA_RE =
-  /googlebot|bingbot|duckduckbot|baiduspider|yandexbot|sogou|slurp|ia_archiver|facebookexternalhit|twitterbot|linkedinbot|discordbot|slackbot-linkexpanding|whatsapp|telegrambot|applebot|pinterestbot|rogerbot|embedly|quora\s+link\s+preview|showyoubot|outbrain|developers\.google\.com/i;
+  /googlebot|adsbot-google|storebot-google|google-inspectiontool|feedfetcher-google|googleproducer|bingbot|duckduckbot|baiduspider|yandexbot|sogou|slurp|ia_archiver|facebookexternalhit|twitterbot|linkedinbot|discordbot|slackbot-linkexpanding|whatsapp|telegrambot|applebot|pinterestbot|rogerbot|embedly|quora\s+link\s+preview|showyoubot|outbrain|developers\.google\.com/i;
 
 const isBot = (ua: string): boolean => BOT_UA_RE.test(ua);
 
@@ -214,8 +214,8 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     description: 'Answers to common questions about ordering, shipping, returns, and products at Petshiwu. Fast NYC delivery on premium pet food and supplies.',
   },
   '/return-policy': {
-    title: 'Return Policy | Petshiwu',
-    description: 'Learn about Petshiwu\'s hassle-free return policy for pet food, toys, and supplies. Easy returns within 30 days on most items.',
+    title: 'Return & Exchange Policy | Petshiwu',
+    description: 'Learn about Petshiwu\'s 365-day return policy for pet food, toys, and supplies. Return unused items within 365 days of delivery.',
   },
   '/returns': {
     title: 'Start a Return | Petshiwu',
@@ -774,7 +774,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
         applicableCountry: 'US',
         returnPolicyCountry: 'US',
         returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
-        merchantReturnDays: 30,
+        merchantReturnDays: 365,
         returnMethod: 'https://schema.org/ReturnByMail',
         returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility',
         merchantReturnLink: `${BASE}/return-policy`,
@@ -1287,6 +1287,66 @@ const buildNeighborhoodHtml = (
 // SSR: /products listing page — injects real product links so Google
 // can discover individual product pages from the listing page.
 // ---------------------------------------------------------------------------
+const RETURN_POLICY_COPY = `
+<h1>Return &amp; Exchange Policy</h1>
+<p>Petshiwu offers a <strong>365-day return window</strong> from the date you receive your order. This policy applies to the United States, including buyer&apos;s remorse on unused items.</p>
+<p>Return shipping is <strong>paid by the customer</strong> for customer-initiated returns. Return shipping is <strong>free</strong> if the item arrived damaged, defective, or incorrect.</p>
+<h2>Return window</h2>
+<p>You may return or exchange eligible items within <strong>365 days</strong> of delivery.</p>
+<h2>Eligible returns</h2>
+<ul>
+  <li>Unused, unopened items in original packaging (buyer&apos;s remorse)</li>
+  <li>Items that arrived damaged or defective</li>
+  <li>Wrong items sent in error</li>
+</ul>
+<h2>Non-returnable items</h2>
+<p>Opened food, treats, or supplements; used grooming products; clearance or final-sale items; and personalized items cannot be returned unless they arrived damaged or defective.</p>
+<h2>Return cost</h2>
+<p>Return shipping cost: paid by the customer. Free return shipping for damaged, defective, or incorrect items. Original outbound shipping fees are not refunded unless the return is due to our error.</p>
+<h2>How to return</h2>
+<p>Email <a href="mailto:support@petshiwu.com">support@petshiwu.com</a> with your order number and reason. We reply within 1–2 business days with return instructions. Mail the item back to Petshiwu, 37-68 74th St, Jackson Heights, NY 11372, United States.</p>
+<h2>Refunds</h2>
+<p>Refunds are issued to the original payment method within 5–10 business days after we inspect the return.</p>
+`;
+
+export const buildReturnPolicyHtml = (template: string): string => {
+  const url = `${BASE}/return-policy`;
+  const title = 'Return & Exchange Policy | Petshiwu';
+  const description =
+    '365-day returns on unused Petshiwu orders. Return shipping is paid by the customer. Free return shipping if the item is damaged, defective, or incorrect.';
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'MerchantReturnPolicy',
+    name: 'Petshiwu Standard Return Policy for the United States',
+    applicableCountry: 'US',
+    returnPolicyCountry: 'US',
+    returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+    merchantReturnDays: 365,
+    returnMethod: 'https://schema.org/ReturnByMail',
+    returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility',
+    merchantReturnLink: url,
+    refundType: 'https://schema.org/FullRefund',
+  };
+
+  let html = template;
+  html = injectTitle(html, title);
+  html = injectDescription(html, description);
+  html = injectCanonical(html, url);
+  html = injectHreflang(html, url);
+  html = injectOgTags(html, title, description, url);
+  html = injectH1(html, 'Return & Exchange Policy');
+  html = injectBeforeHeadClose(html, `<script type="application/ld+json">${JSON.stringify(schema)}</script>`);
+  html = html.replace(
+    /<div class="ps-sr-only">[\s\S]*?<\/div>/i,
+    `<div class="ps-sr-only">${RETURN_POLICY_COPY}</div>`
+  );
+  html = html.replace(
+    /<div class="ps-ns-wrap">[\s\S]*?<\/div>\s*<\/noscript>/i,
+    `<div class="ps-ns-wrap">${RETURN_POLICY_COPY}</div></noscript>`
+  );
+  return html;
+};
+
 export const buildHomepageHtml = (template: string): string => {
   const meta = STATIC_PAGES['/'];
   const pageUrl = BASE;
@@ -1598,6 +1658,10 @@ export const createBotRenderer = (distPath: string) => {
 
     try {
       let html: string | null = null;
+      const reqPathClean = (req.path.split('?')[0] || '/').replace(/\/$/, '') || '/';
+      if (reqPathClean === '/return-policy') {
+        html = buildReturnPolicyHtml(template);
+      }
 
       // Consolidate ALL product URL variants to the single canonical path
       // /{petType}/{immediateCategory}/{slug}. This covers the legacy /products/{slug}

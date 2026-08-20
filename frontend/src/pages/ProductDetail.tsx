@@ -1230,7 +1230,9 @@ const ProductDetail = () => {
               <RotateCcw className="text-primary-600" size={24} />
               <div>
                 <p className="font-medium">Easy Returns</p>
-                <p className="text-sm text-gray-600">30-day return policy</p>
+                <p className="text-sm text-gray-600">
+                  <Link to="/return-policy" className="hover:underline">365-day return policy</Link>
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">

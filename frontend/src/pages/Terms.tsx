@@ -68,7 +68,7 @@ const Terms = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-3">5. Returns and Refunds</h2>
           <p>
             We want you to be fully satisfied with every purchase. If you are not satisfied, you may return
-            most items within 30 days of delivery for a refund or exchange, subject to the following:
+            most items within 365 days of delivery for a refund or exchange, subject to the following:
           </p>
           <ul className="list-disc pl-6 mt-3 space-y-2">
             <li>Items must be unused, in original packaging, and in the same condition as received.</li>

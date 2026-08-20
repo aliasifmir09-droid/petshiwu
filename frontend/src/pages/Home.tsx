@@ -337,7 +337,7 @@ const Home = () => {
               { title: 'Same-day NYC', desc: 'Order by 3 PM · before 11 PM' },
               { title: 'No autoship', desc: 'Buy once. No subscription trap.' },
               { title: 'Free over $49', desc: 'Flat $6 under that' },
-              { title: 'NYC support', desc: '(800) 259-2605 · 9 AM–8 PM' },
+              { title: '365-day returns', desc: 'Unused items · no hassle' },
             ].map((item) => (
               <div key={item.title} className="bg-white rounded-xl p-5 border border-slate-100">
                 <h3 className="text-base font-semibold text-[#1E3A8A] mb-1">{item.title}</h3>

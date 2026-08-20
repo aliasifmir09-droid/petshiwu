@@ -80,7 +80,7 @@ const ProductSchema = ({ product, selectedVariant }: ProductSchemaProps) => {
       applicableCountry: 'US',
       returnPolicyCountry: 'US',
       returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
-      merchantReturnDays: 30,
+      merchantReturnDays: 365,
       returnMethod: 'https://schema.org/ReturnByMail',
       returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility',
       merchantReturnLink: 'https://www.petshiwu.com/return-policy',

@@ -260,6 +260,21 @@ const OrderDetail = () => {
               </p>
             </div>
           )}
+
+          {order.orderStatus === 'delivered' && (
+            <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <p className="text-sm text-gray-700">
+                Eligible unused items can be returned within 365 days of delivery.{' '}
+                <Link to="/return-policy" className="text-primary-600 hover:underline font-medium">
+                  Return policy
+                </Link>
+                {' · '}
+                <Link to="/returns" className="text-primary-600 hover:underline font-medium">
+                  Start a return
+                </Link>
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

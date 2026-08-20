@@ -1,6 +1,7 @@
 import {
   buildCanonicalProductPath,
   buildHomepageHtml,
+  buildReturnPolicyHtml,
   normalizeReqPath,
   productRedirectTarget,
 } from '../../middleware/botRenderer';
@@ -95,5 +96,44 @@ describe('buildHomepageHtml delivery-only schema', () => {
         expect.objectContaining({ name: 'Queens' }),
       ])
     );
+  });
+});
+
+describe('buildReturnPolicyHtml', () => {
+  const template = `<!DOCTYPE html><html><head>
+<title>Petshiwu</title>
+<meta name="description" content="old" />
+</head><body>
+<div class="ps-sr-only"><h2>Shop by Pet Type</h2><p>Homepage dump</p></div>
+<noscript>
+<div class="ps-ns-wrap"><h2>Shop by Pet Type</h2></div>
+</noscript>
+</body></html>`;
+
+  const html = buildReturnPolicyHtml(template);
+
+  it('replaces homepage crawler copy with a 365-day US return policy', () => {
+    expect(html).toContain('365-day return window');
+    expect(html).toContain('365 days');
+    expect(html).toContain('paid by the customer');
+    expect(html).not.toContain('Shop by Pet Type');
+    expect(html).not.toContain('FreeReturn');
+  });
+
+  it('publishes MerchantReturnPolicy JSON-LD Google Merchant Center can verify', () => {
+    const scripts = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(
+      (m) => JSON.parse(m[1])
+    );
+    const policy = scripts.find((s) => s['@type'] === 'MerchantReturnPolicy');
+    expect(policy).toBeDefined();
+    expect(policy.merchantReturnDays).toBe(365);
+    expect(policy.applicableCountry).toBe('US');
+    expect(policy.returnFees).toBe('https://schema.org/ReturnFeesCustomerResponsibility');
+    expect(policy.merchantReturnLink).toBe('https://www.petshiwu.com/return-policy');
+  });
+
+  it('uses a crawlable title and description that match the live policy', () => {
+    expect(html).toContain('<title>Return &amp; Exchange Policy | Petshiwu</title>');
+    expect(html).toContain('Return shipping is paid by the customer');
   });
 });

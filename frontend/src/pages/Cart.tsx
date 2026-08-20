@@ -422,6 +422,10 @@ const Cart = () => {
               <Link to="/products" className="block text-center text-primary-600 hover:text-primary-700 font-medium">
                 Continue Shopping
               </Link>
+              <p className="text-xs text-gray-500 text-center mt-4">
+                365-day returns on unused items.{' '}
+                <Link to="/return-policy" className="underline hover:text-gray-700">Return policy</Link>
+              </p>
             </div>
           </div>
         </div>

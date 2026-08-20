@@ -144,7 +144,7 @@ const ShippingPolicy = () => {
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-3">Returns</h2>
           <p>
-            Not satisfied with your order? Visit our{' '}
+            Not satisfied with your order? You have <strong>365 days</strong> from delivery to return eligible items. Visit our{' '}
             <Link to="/return-policy" className="text-blue-600 hover:underline">Return & Exchange Policy</Link>{' '}
             for full details on how to return items.
           </p>
