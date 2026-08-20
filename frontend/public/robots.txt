@@ -37,6 +37,8 @@ Disallow: /search?
 # Allow all high-value shop pages explicitly (Allow: / already covers them)
 Allow: /products
 Allow: /products$
+Allow: /feeds
+Allow: /feeds/google.xml
 Allow: /dog
 Allow: /cat
 Allow: /bird

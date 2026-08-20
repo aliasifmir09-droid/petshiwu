@@ -57,6 +57,80 @@ const ProductSchema = ({ product, selectedVariant }: ProductSchemaProps) => {
     : `${product.name} - premium pet supplies at Petshiwu`;
 
   const brandName = product.brand?.trim() || 'Petshiwu';
+  const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const comparePrice = selectedVariant?.compareAtPrice ?? product.compareAtPrice;
+
+  const offers: Record<string, unknown> = {
+    '@type': 'Offer',
+    url: productUrl,
+    priceCurrency: 'USD',
+    price: price.toFixed(2),
+    priceValidUntil,
+    availability: inStock
+      ? 'https://schema.org/InStock'
+      : 'https://schema.org/OutOfStock',
+    itemCondition: 'https://schema.org/NewCondition',
+    seller: {
+      '@type': 'Organization',
+      name: 'Petshiwu',
+      url: 'https://www.petshiwu.com',
+    },
+    hasMerchantReturnPolicy: {
+      '@type': 'MerchantReturnPolicy',
+      applicableCountry: 'US',
+      returnPolicyCountry: 'US',
+      returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+      merchantReturnDays: 30,
+      returnMethod: 'https://schema.org/ReturnByMail',
+      returnFees: 'https://schema.org/FreeReturn',
+      merchantReturnLink: 'https://www.petshiwu.com/return-policy',
+    },
+    shippingDetails: {
+      '@type': 'OfferShippingDetails',
+      shippingRate: {
+        '@type': 'MonetaryAmount',
+        value: price >= 49 ? '0' : '6',
+        currency: 'USD',
+      },
+      shippingDestination: {
+        '@type': 'DefinedRegion',
+        addressCountry: 'US',
+        addressRegion: 'NY',
+      },
+      deliveryTime: {
+        '@type': 'ShippingDeliveryTime',
+        handlingTime: {
+          '@type': 'QuantitativeValue',
+          minValue: 0,
+          maxValue: 0,
+          unitCode: 'DAY',
+        },
+        transitTime: {
+          '@type': 'QuantitativeValue',
+          minValue: 0,
+          maxValue: 1,
+          unitCode: 'DAY',
+        },
+      },
+    },
+  };
+
+  if (comparePrice && comparePrice > price) {
+    offers.priceSpecification = [
+      {
+        '@type': 'UnitPriceSpecification',
+        priceType: 'https://schema.org/ListPrice',
+        price: comparePrice.toFixed(2),
+        priceCurrency: 'USD',
+      },
+      {
+        '@type': 'UnitPriceSpecification',
+        priceType: 'https://schema.org/SalePrice',
+        price: price.toFixed(2),
+        priceCurrency: 'USD',
+      },
+    ];
+  }
 
   // Build the Product JSON-LD
   const schema: Record<string, unknown> = {
@@ -70,58 +144,9 @@ const ProductSchema = ({ product, selectedVariant }: ProductSchemaProps) => {
       name: brandName,
     },
     sku,
-    offers: {
-      '@type': 'Offer',
-      url: productUrl,
-      priceCurrency: 'USD',
-      price: price.toFixed(2),
-      availability: inStock
-        ? 'https://schema.org/InStock'
-        : 'https://schema.org/OutOfStock',
-      itemCondition: 'https://schema.org/NewCondition',
-      seller: {
-        '@type': 'Organization',
-        name: 'Petshiwu',
-        url: 'https://www.petshiwu.com',
-      },
-      shippingDetails: {
-        '@type': 'OfferShippingDetails',
-        shippingRate: {
-          '@type': 'MonetaryAmount',
-          value: price >= 49 ? '0' : '6',
-          currency: 'USD',
-        },
-        shippingDestination: {
-          '@type': 'DefinedRegion',
-          addressCountry: 'US',
-        },
-        deliveryTime: {
-          '@type': 'ShippingDeliveryTime',
-          handlingTime: {
-            '@type': 'QuantitativeValue',
-            minValue: 0,
-            maxValue: 1,
-            unitCode: 'DAY',
-          },
-          transitTime: {
-            '@type': 'QuantitativeValue',
-            minValue: 2,
-            maxValue: 5,
-            unitCode: 'DAY',
-          },
-        },
-      },
-    },
+    mpn: sku,
+    offers,
   };
-
-  // Add compareAtPrice as highPrice if present
-  const comparePrice = selectedVariant?.compareAtPrice ?? product.compareAtPrice;
-  if (comparePrice && comparePrice > price) {
-    (schema.offers as Record<string, unknown>)['@type'] = 'AggregateOffer';
-    (schema.offers as Record<string, unknown>).lowPrice = price.toFixed(2);
-    (schema.offers as Record<string, unknown>).highPrice = comparePrice.toFixed(2);
-    delete (schema.offers as Record<string, unknown>).price;
-  }
 
   // Aggregate rating — only include if we have real data
   const ratingValue = product.averageRating ?? 0;
