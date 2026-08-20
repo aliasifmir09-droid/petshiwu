@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import { paypalClientId, paypalSdkEnvironment } from '@/config/paypal';
 import { orderService } from '@/services/orders';
 
 interface PayPalItemInput {
@@ -27,7 +28,8 @@ const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, coupon
   const [{ isPending }] = usePayPalScriptReducer();
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [checkoutToken, setCheckoutToken] = useState<string | null>(null);
+  // Keep the token in a ref. PayPal calls onApprove from the original
+  // createOrder closure; React state set during createOrder is often still null.
   const checkoutTokenRef = useRef<string>(crypto.randomUUID());
   const captureInFlightRef = useRef<string | null>(null);
 
@@ -56,7 +58,7 @@ const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, coupon
       if (!response.success || !paypalOrderId || !createdCheckoutToken) {
         throw new Error('PayPal could not initialize this payment.');
       }
-      setCheckoutToken(createdCheckoutToken);
+      checkoutTokenRef.current = createdCheckoutToken;
       return paypalOrderId;
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || err.message || 'PayPal could not initialize this payment.';
@@ -80,6 +82,7 @@ const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, coupon
     if (captureInFlightRef.current === paypalOrderId) return;
     captureInFlightRef.current = paypalOrderId;
 
+    const checkoutToken = checkoutTokenRef.current;
     if (!checkoutToken) {
       captureInFlightRef.current = null;
       const errorMsg = 'PayPal checkout session expired. Please try again.';
@@ -149,8 +152,6 @@ const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, coupon
 };
 
 const PayPalButton = (props: PayPalButtonProps) => {
-  const paypalClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
-
   if (!paypalClientId) {
     return (
       <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -167,6 +168,7 @@ const PayPalButton = (props: PayPalButtonProps) => {
         clientId: paypalClientId,
         currency: props.currency || 'USD',
         intent: 'capture',
+        environment: paypalSdkEnvironment,
         enableFunding: ['venmo', 'card'],
       }}
     >

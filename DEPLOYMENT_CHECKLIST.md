@@ -23,10 +23,11 @@
   - [ ] `EMAIL_FROM` - Email sender address
   - [ ] `RESEND_API_KEY` (if using Resend) - Email service API key
   - [ ] `STRIPE_SECRET_KEY` (if using Stripe) - Payment gateway secret
-  - [ ] `PAYPAL_ENV=sandbox` for testing, then `PAYPAL_ENV=live` for production
-  - [ ] `PAYPAL_CLIENT_ID` (if using PayPal) - PayPal client ID
-  - [ ] `PAYPAL_CLIENT_SECRET` (if using PayPal) - PayPal client secret
-  - [ ] `VITE_PAYPAL_CLIENT_ID` - frontend PayPal client ID, configured before the Vite production build
+  - [ ] `PAYPAL_ENV=live` in production (`sandbox` is only for local/test; sandbox keys cannot charge real PayPal accounts)
+  - [ ] `PAYPAL_CLIENT_ID` - **Live** PayPal REST client ID (same app as the frontend)
+  - [ ] `PAYPAL_CLIENT_SECRET` - **Live** PayPal REST secret
+  - [ ] `VITE_PAYPAL_CLIENT_ID` - same **live** client ID, set before the Vite production build
+  - [ ] `VITE_PAYPAL_ENV=live` - required for production Google Pay and to hide the checkout test-mode notice
 
 - [ ] **Security Headers**
   - [ ] Helmet.js configured (✅ Already implemented)

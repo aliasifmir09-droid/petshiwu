@@ -21,6 +21,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
 import { MapPin, Plus, Check, User, UserCheck } from 'lucide-react';
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
+import { isPayPalLive, paypalClientId } from '@/config/paypal';
 import { isNycDeliveryZip } from '@/utils/deliveryZip';
 
 const PaymentForm = lazy(() => import('@/components/PaymentForm'));
@@ -493,7 +494,18 @@ const Checkout = () => {
       showToast('Please complete the payment first.', 'error');
       return;
     }
-    if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay') return;
+    if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay') {
+      document.getElementById('paypal-payment')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const payPrompt = paymentMethod === 'apple_pay'
+        ? 'Click the Apple Pay button to complete your payment.'
+        : paymentMethod === 'google_pay'
+          ? 'Click the Google Pay button to complete your payment.'
+          : paypalPaymentMode === 'card'
+            ? 'Enter your card details in the PayPal form to complete your payment.'
+            : 'Click the PayPal button to complete your payment.';
+      showToast(payPrompt, 'info');
+      return;
+    }
 
     if (paymentIntentId) {
       await prepareAndSubmitOrder(paymentIntentId);
@@ -926,8 +938,13 @@ const Checkout = () => {
                 )}
 
                 <div className="space-y-3">
+                  {paypalClientId && !isPayPalLive && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900">
+                      PayPal is in test mode. Real PayPal logins and cards will not complete until live PayPal credentials are installed.
+                    </div>
+                  )}
                   {/* PayPal-powered Credit/Debit Card */}
-                  {import.meta.env.VITE_PAYPAL_CLIENT_ID ? (
+                  {paypalClientId ? (
                     <button type="button" onClick={() => { setPaymentMethod('paypal'); setPaypalPaymentMode('card'); }}
                       className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'paypal' && paypalPaymentMode === 'card' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
                       <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'paypal' && paypalPaymentMode === 'card' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
@@ -941,7 +958,7 @@ const Checkout = () => {
                   ) : null}
 
                   {/* Apple Pay through PayPal */}
-                  {import.meta.env.VITE_PAYPAL_CLIENT_ID ? (
+                  {paypalClientId ? (
                     <button type="button" onClick={() => { setPaymentMethod('apple_pay'); setPaypalPaymentMode('wallet'); }}
                       className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'apple_pay' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
                       <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'apple_pay' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
@@ -955,7 +972,7 @@ const Checkout = () => {
                   ) : null}
 
                   {/* Google Pay through PayPal */}
-                  {import.meta.env.VITE_PAYPAL_CLIENT_ID ? (
+                  {paypalClientId ? (
                     <button type="button" onClick={() => { setPaymentMethod('google_pay'); setPaypalPaymentMode('wallet'); }}
                       className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'google_pay' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
                       <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'google_pay' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
@@ -969,7 +986,7 @@ const Checkout = () => {
                   ) : null}
 
                   {/* PayPal Wallet */}
-                  {import.meta.env.VITE_PAYPAL_CLIENT_ID ? (
+                  {paypalClientId ? (
                     <button type="button" onClick={() => { setPaymentMethod('paypal'); setPaypalPaymentMode('wallet'); }}
                       className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'paypal' && paypalPaymentMode === 'wallet' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
                       <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'paypal' && paypalPaymentMode === 'wallet' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
@@ -1036,7 +1053,7 @@ const Checkout = () => {
 
               {/* Google Pay through PayPal */}
               {showPayPalButton && paymentMethod === 'google_pay' && (
-                <div className="bg-white rounded-lg shadow p-6">
+                <div id="paypal-payment" className="bg-white rounded-lg shadow p-6">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center">
                       <span className="text-gray-900 font-bold text-sm">G Pay</span>
@@ -1087,7 +1104,7 @@ const Checkout = () => {
 
               {/* Apple Pay through PayPal */}
               {showPayPalButton && paymentMethod === 'apple_pay' && (
-                <div className="bg-white rounded-lg shadow p-6">
+                <div id="paypal-payment" className="bg-white rounded-lg shadow p-6">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center">
                       <span className="text-white font-bold text-lg"></span>
@@ -1138,7 +1155,7 @@ const Checkout = () => {
 
               {/* PayPal Wallet or PayPal-powered Card Fields */}
               {showPayPalButton && paymentMethod === 'paypal' && (
-                <div className="bg-white rounded-lg shadow p-6">
+                <div id="paypal-payment" className="bg-white rounded-lg shadow p-6">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                       <span className="text-blue-600 font-bold text-lg">PP</span>
@@ -1328,6 +1345,8 @@ const Checkout = () => {
                   className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50">
                   {paymentMethod === 'cod'
                     ? (createOrderMutation.isPending ? 'Placing order...' : 'Place cash on delivery order')
+                    : paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay'
+                      ? 'Continue to PayPal'
                     : isProcessingPayment ? 'Initializing Payment...' : createOrderMutation.isPending ? 'Processing...' : 'Place Order'}
                 </button>
                 {/* Trust badges */}
