@@ -5,7 +5,9 @@ import {
   getNyDateParts,
   getSameDayCutoffHour,
   isCoordinateInNyc,
+  isNewYorkState,
   isNycDeliveryZip,
+  normalizeShippingState,
   isValidZip,
   lookupZip,
   normalizeZip,
@@ -82,6 +84,14 @@ describe('deliveryZip', () => {
   test('isNycDeliveryZip includes Astoria and excludes Hoboken', () => {
     expect(isNycDeliveryZip('11101')).toBe(true);
     expect(isNycDeliveryZip('07030')).toBe(false);
+  });
+
+  test('isNewYorkState accepts NY and New York for Queens ZIPs', () => {
+    expect(isNewYorkState('new york')).toBe(true);
+    expect(isNewYorkState('NY')).toBe(true);
+    expect(isNewYorkState('N.Y.')).toBe(true);
+    expect(normalizeShippingState('New York')).toBe('NY');
+    expect(isNycDeliveryZip('11372')).toBe(true);
   });
 
   test('padTime zero-pads', () => {

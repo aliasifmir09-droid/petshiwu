@@ -22,7 +22,7 @@ import OrdersOpenBanner from '@/components/OrdersOpenBanner';
 import { MapPin, Plus, Check, User, UserCheck } from 'lucide-react';
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
 import { isPayPalLive, paypalClientId } from '@/config/paypal';
-import { isNycDeliveryZip } from '@/utils/deliveryZip';
+import { isNycDeliveryZip, isNewYorkState, normalizeShippingState } from '@/utils/deliveryZip';
 
 const PaymentForm = lazy(() => import('@/components/PaymentForm'));
 const PayPalButton = lazy(() => import('@/components/PayPalButton'));
@@ -266,7 +266,7 @@ const Checkout = () => {
         await addressService.createAddress({
           street: shippingInfo.street,
           city: shippingInfo.city,
-          state: shippingInfo.state,
+          state: normalizeShippingState(shippingInfo.state),
           zipCode: shippingInfo.zipCode,
           country: shippingInfo.country,
           isDefault: savedAddresses.length === 0
@@ -457,7 +457,7 @@ const Checkout = () => {
     }
 
     // NYC-only delivery check (includes Queens 111xx Astoria/LIC, which the old range skipped)
-    const _isNY = shippingInfo.state.trim().toUpperCase() === 'NY';
+    const _isNY = isNewYorkState(shippingInfo.state);
     if (!_isNY || !isNycDeliveryZip(shippingInfo.zipCode)) {
       showToast('Sorry, we currently deliver only within New York City (all 5 boroughs).', 'error');
       return;
@@ -624,7 +624,7 @@ const Checkout = () => {
         lastName: shippingInfo.lastName,
         street: shippingInfo.street,
         city: shippingInfo.city,
-        state: shippingInfo.state,
+        state: normalizeShippingState(shippingInfo.state),
         zipCode: shippingInfo.zipCode,
         country: shippingInfo.country,
         phone: shippingInfo.phone
@@ -863,6 +863,9 @@ const Checkout = () => {
                         <label className="block text-sm font-medium mb-2">State *</label>
                         <input type="text" required value={shippingInfo.state}
                           onChange={(e) => setShippingInfo({ ...shippingInfo, state: e.target.value })}
+                          onBlur={() => setShippingInfo((prev) => ({ ...prev, state: normalizeShippingState(prev.state) }))}
+                          placeholder="NY"
+                          autoComplete="address-level1"
                           className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" />
                       </div>
                       <div>
@@ -1081,7 +1084,7 @@ const Checkout = () => {
                         lastName: shippingInfo.lastName,
                         street: shippingInfo.street,
                         city: shippingInfo.city,
-                        state: shippingInfo.state,
+                        state: normalizeShippingState(shippingInfo.state),
                         zipCode: shippingInfo.zipCode,
                         country: shippingInfo.country,
                         phone: shippingInfo.phone
@@ -1132,7 +1135,7 @@ const Checkout = () => {
                         lastName: shippingInfo.lastName,
                         street: shippingInfo.street,
                         city: shippingInfo.city,
-                        state: shippingInfo.state,
+                        state: normalizeShippingState(shippingInfo.state),
                         zipCode: shippingInfo.zipCode,
                         country: shippingInfo.country,
                         phone: shippingInfo.phone
@@ -1187,7 +1190,7 @@ const Checkout = () => {
                           lastName: shippingInfo.lastName,
                           street: shippingInfo.street,
                           city: shippingInfo.city,
-                          state: shippingInfo.state,
+                          state: normalizeShippingState(shippingInfo.state),
                           zipCode: shippingInfo.zipCode,
                           country: shippingInfo.country,
                           phone: shippingInfo.phone
@@ -1218,7 +1221,7 @@ const Checkout = () => {
                           lastName: shippingInfo.lastName,
                           street: shippingInfo.street,
                           city: shippingInfo.city,
-                          state: shippingInfo.state,
+                          state: normalizeShippingState(shippingInfo.state),
                           zipCode: shippingInfo.zipCode,
                           country: shippingInfo.country,
                           phone: shippingInfo.phone
