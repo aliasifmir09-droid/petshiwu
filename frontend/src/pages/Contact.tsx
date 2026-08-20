@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from 'lucide-react';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
+import api from '@/services/api';
 
 const Contact = () => {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   // Detect NY timezone abbreviation (EDT during DST, EST otherwise)
   const nyTzAbbr = (() => {
@@ -20,10 +22,15 @@ const Contact = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate submission (no backend email yet)
-    await new Promise(res => setTimeout(res, 1000));
-    setSubmitted(true);
-    setLoading(false);
+    setError('');
+    try {
+      await api.post('/v1/contact/general', form, { skipAuth: true });
+      setSubmitted(true);
+    } catch {
+      setError('Failed to send. Please email us directly at support@petshiwu.com');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -229,6 +236,8 @@ const Contact = () => {
                         className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       />
                     </div>
+
+                    {error && <p className="text-red-600 text-sm">{error}</p>}
 
                     <button
                       type="submit"
