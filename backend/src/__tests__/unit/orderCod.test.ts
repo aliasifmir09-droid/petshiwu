@@ -16,3 +16,26 @@ describe('createOrder cash on delivery', () => {
     expect(src).toContain('collect cash on delivery');
   });
 });
+
+describe('createOrder validation allows cash on delivery', () => {
+  const src = fs.readFileSync(
+    path.resolve(__dirname, '../../middleware/validation.ts'),
+    'utf8'
+  );
+
+  it('accepts cod on createOrderValidation', () => {
+    const createOrderBlock = src.slice(
+      src.indexOf('export const createOrderValidation'),
+      src.indexOf('export const createReviewValidation')
+    );
+    expect(createOrderBlock).toContain("'cod'");
+  });
+
+  it('does not require Stripe for COD payment intents', () => {
+    const paymentIntentBlock = src.slice(
+      src.indexOf('export const createPaymentIntentValidation'),
+      src.indexOf('const paypalItemsValidation')
+    );
+    expect(paymentIntentBlock).not.toContain("'cod'");
+  });
+});
