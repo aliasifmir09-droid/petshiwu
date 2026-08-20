@@ -1,4 +1,4 @@
-import { getPayPalBaseUrl, isPayPalLive } from '../../../services/paypalService';
+import { getPayPalBaseUrl, isPayPalLive } from '../../services/paypalService';
 
 describe('PayPal environment', () => {
   const originalEnv = process.env.PAYPAL_ENV;
