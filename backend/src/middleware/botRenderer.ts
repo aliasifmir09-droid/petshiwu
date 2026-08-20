@@ -1288,7 +1288,6 @@ const buildNeighborhoodHtml = (
 // can discover individual product pages from the listing page.
 // ---------------------------------------------------------------------------
 const RETURN_POLICY_COPY = `
-<h1>Return &amp; Exchange Policy</h1>
 <p>Petshiwu offers a <strong>365-day return window</strong> from the date you receive your order. This policy applies to the United States, including buyer&apos;s remorse on unused items.</p>
 <p>Return shipping is <strong>paid by the customer</strong> for customer-initiated returns. Return shipping is <strong>free</strong> if the item arrived damaged, defective, or incorrect.</p>
 <h2>Return window</h2>
@@ -1334,7 +1333,6 @@ export const buildReturnPolicyHtml = (template: string): string => {
   html = injectCanonical(html, url);
   html = injectHreflang(html, url);
   html = injectOgTags(html, title, description, url);
-  html = injectH1(html, 'Return & Exchange Policy');
   html = injectBeforeHeadClose(html, `<script type="application/ld+json">${JSON.stringify(schema)}</script>`);
   html = html.replace(
     /<div class="ps-sr-only">[\s\S]*?<\/div>/i,
@@ -1344,6 +1342,7 @@ export const buildReturnPolicyHtml = (template: string): string => {
     /<div class="ps-ns-wrap">[\s\S]*?<\/div>\s*<\/noscript>/i,
     `<div class="ps-ns-wrap">${RETURN_POLICY_COPY}</div></noscript>`
   );
+  html = injectH1(html, 'Return & Exchange Policy');
   return html;
 };
 

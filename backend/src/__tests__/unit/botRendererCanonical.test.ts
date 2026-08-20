@@ -104,6 +104,7 @@ describe('buildReturnPolicyHtml', () => {
 <title>Petshiwu</title>
 <meta name="description" content="old" />
 </head><body>
+<div id="root"></div>
 <div class="ps-sr-only"><h2>Shop by Pet Type</h2><p>Homepage dump</p></div>
 <noscript>
 <div class="ps-ns-wrap"><h2>Shop by Pet Type</h2></div>
@@ -135,5 +136,10 @@ describe('buildReturnPolicyHtml', () => {
   it('uses a crawlable title and description that match the live policy', () => {
     expect(html).toContain('<title>Return &amp; Exchange Policy | Petshiwu</title>');
     expect(html).toContain('Return shipping is paid by the customer');
+  });
+
+  it('keeps a single Return & Exchange Policy H1', () => {
+    expect([...html.matchAll(/<h1[^>]*>/gi)]).toHaveLength(1);
+    expect(html).toContain('<h1>Return &amp; Exchange Policy</h1>');
   });
 });
