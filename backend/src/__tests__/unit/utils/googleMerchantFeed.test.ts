@@ -75,6 +75,33 @@ describe('googleMerchantFeed helpers', () => {
     ).toEqual(['https://petshiwu-cdn.b-cdn.net/products/food.jpg']);
   });
 
+  test('does not use host-swapped Cloudinary paths as the primary image_link', () => {
+    expect(
+      productImages({
+        _id: '6975f1965f8fb0a308f8d7af',
+        name: 'Carrier',
+        slug: 'carrier',
+        images: ['https://petshiwu-cdn.b-cdn.net/products/6975f1965f8fb0a308f8d7af.jpg'],
+        bunnyImage:
+          'https://petshiwu-cdn.b-cdn.net/dtmes0dha/image/upload/v1779056475/petshiwu/products/6975f1965f8fb0a308f8d7af.jpg',
+        cloudinaryImage:
+          'https://res.cloudinary.com/dtmes0dha/image/upload/v1779056475/petshiwu/products/6975f1965f8fb0a308f8d7af.jpg',
+      })
+    ).toEqual(['https://petshiwu-cdn.b-cdn.net/products/6975f1965f8fb0a308f8d7af.jpg']);
+  });
+
+  test('maps a bunnyImage Cloudinary path to /products when images[] is empty', () => {
+    expect(
+      productImages({
+        _id: '6975f1965f8fb0a308f8d7af',
+        name: 'Carrier',
+        slug: 'carrier',
+        bunnyImage:
+          'https://petshiwu-cdn.b-cdn.net/dtmes0dha/image/upload/v1779056475/petshiwu/products/6975f1965f8fb0a308f8d7af.jpg',
+      })
+    ).toEqual(['https://petshiwu-cdn.b-cdn.net/products/6975f1965f8fb0a308f8d7af.jpg']);
+  });
+
   test('skips generic og-image stand-ins and keeps real CDN photos', () => {
     expect(
       productImages({
