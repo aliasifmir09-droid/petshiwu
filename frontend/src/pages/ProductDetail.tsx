@@ -356,23 +356,28 @@ const ProductDetail = () => {
     });
   }, [product?._id]); // Reset to first image/variant when product changes
 
-  // Redirect from old URL format (/products/slug) to new SEO-friendly format
-  // Also redirect if URL contains "undefined" (invalid category slug)
-  useEffect(() => {
-    if (product && slug) {
-      const newUrl = generateProductUrl(product);
-      const currentPath = location.pathname;
-      
-      const hasInvalidSegment = currentPath.includes('/undefined/') || currentPath.includes('/null/');
-      const shouldRedirect =
-        newUrl !== currentPath &&
-        (currentPath.startsWith('/products/') || hasInvalidSegment);
-      
-      if (shouldRedirect) {
-        navigate(newUrl, { replace: true });
+    // Redirect every extra URL shape to the one canonical product path.
+    // Nested hierarchy URLs 200 today and show up in GSC as
+    // "Duplicate without user-selected canonical".
+    useEffect(() => {
+      if (product && slug) {
+        const newUrl = generateProductUrl(product);
+        const currentPath = location.pathname.replace(/\/+$/, '') || '/';
+        if (newUrl === currentPath) return;
+
+        const parts = currentPath.split('/').filter(Boolean);
+        const hasInvalidSegment = currentPath.includes('/undefined/') || currentPath.includes('/null/');
+        const shouldRedirect =
+          currentPath.startsWith('/products/') ||
+          hasInvalidSegment ||
+          parts.length >= 4 ||
+          (parts.length === 3 && newUrl.split('/').filter(Boolean).length === 3);
+
+        if (shouldRedirect) {
+          navigate(newUrl, { replace: true });
+        }
       }
-    }
-  }, [product, slug, location.pathname, navigate]);
+    }, [product, slug, location.pathname, navigate]);
 
   // Calculate available stock: use variant stock if available, otherwise product total stock
   // This must be calculated before conditional returns to maintain hook order

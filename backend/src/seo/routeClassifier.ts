@@ -185,6 +185,28 @@ export const classifyRoute = (rawPath: string): RouteClassification => {
     return { status: 'indexable', indexable: true, canonicalPath, routeType: 'product' };
   }
 
+  // Legacy nested hierarchy URLs Google still has:
+  // /cat/food--treats/wet-food/{slug} and /fish/a/b/c/{slug}.
+  // 301 to /{pet}/{immediateCategory}/{slug} so they stop being
+  // "Duplicate without user-selected canonical".
+  if (segments.length >= 4 && PET_TYPES.has(segments[0])) {
+    const pet = canonicalPetSlug(segments[0]);
+    const categorySlug = segments[segments.length - 2];
+    const productSlug = segments[segments.length - 1];
+    if (categorySlug && productSlug) {
+      const redirectTo = `/${pet}/${categorySlug}/${productSlug}`;
+      if (redirectTo !== canonicalPath) {
+        return {
+          status: 'redirect',
+          indexable: false,
+          canonicalPath: redirectTo,
+          redirectTo,
+          routeType: 'nested-product',
+        };
+      }
+    }
+  }
+
   return { status: 'noindex', indexable: false, canonicalPath, routeType: 'unknown' };
 };
 

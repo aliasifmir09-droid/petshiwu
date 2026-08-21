@@ -38,6 +38,38 @@ describe('classifyRoute', () => {
     });
   });
 
+  test('nested product hierarchy URLs redirect to the 3-segment canonical', () => {
+    expect(
+      classifyRoute(
+        '/fish/marine-amp-freshwater/maintenance--repair/top-fin-upgraded-easy-pump-gravel-vacuum'
+      )
+    ).toMatchObject({
+      status: 'redirect',
+      routeType: 'nested-product',
+      redirectTo:
+        '/fish/maintenance--repair/top-fin-upgraded-easy-pump-gravel-vacuum',
+    });
+    expect(
+      classifyRoute(
+        '/cat/food--treats/wet-food/weruva-classics-wowzer-meowzer-wet-cat-food-variety-pack-12ct'
+      ).redirectTo
+    ).toBe('/cat/wet-food/weruva-classics-wowzer-meowzer-wet-cat-food-variety-pack-12ct');
+    expect(
+      classifyRoute(
+        '/dog/supplies/clothing--shoes/costumes/rubies-pet-shop-halloween-frozen-olaf-woody-dog--cat-costume'
+      ).redirectTo
+    ).toBe(
+      '/dog/costumes/rubies-pet-shop-halloween-frozen-olaf-woody-dog--cat-costume'
+    );
+  });
+
+  test('the 3-segment product URL stays indexable', () => {
+    expect(classifyRoute('/cat/wet-food/weruva-classics-wowzer-meowzer-wet-cat-food-variety-pack-12ct')).toMatchObject({
+      status: 'indexable',
+      routeType: 'product',
+    });
+  });
+
   test('query variants are noindex', () => {
     expect(classifyRoute('/dog?sort=price-asc').indexable).toBe(false);
   });
