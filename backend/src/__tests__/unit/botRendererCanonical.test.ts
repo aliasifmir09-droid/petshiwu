@@ -97,6 +97,22 @@ describe('buildHomepageHtml delivery-only schema', () => {
       ])
     );
   });
+
+  it('marks the call center as 24/7', () => {
+    expect(localBusiness.openingHoursSpecification).toEqual([
+      expect.objectContaining({
+        opens: '00:00',
+        closes: '23:59',
+      }),
+    ]);
+    const organization = scripts.find((s) => s['@type'] === 'Organization');
+    expect(organization?.contactPoint?.hoursAvailable).toEqual(
+      expect.objectContaining({
+        opens: '00:00',
+        closes: '23:59',
+      })
+    );
+  });
 });
 
 describe('buildReturnPolicyHtml', () => {

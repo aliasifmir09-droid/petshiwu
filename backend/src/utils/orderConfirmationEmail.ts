@@ -2,6 +2,8 @@ const SITE_ORIGIN = 'https://www.petshiwu.com';
 const BRAND_NAVY = '#1E3A8A';
 const ORDERS_OPEN_AT = new Date('2026-08-28T00:00:00-04:00');
 const ORDERS_OPEN_LABEL = 'August 28, 2026';
+export const SUPPORT_PHONE_DISPLAY = '+1 (800) 259-2605';
+export const SUPPORT_PHONE_TEL = '+18002592605';
 
 export type OrderConfirmationItem = {
   name: string;
@@ -241,11 +243,27 @@ export function buildOrderConfirmationEmail(
             </td>
           </tr>
           <tr>
+            <td style="padding:8px 32px 8px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#EFF6FF;border:1px solid #BFDBFE;">
+                <tr>
+                  <td style="padding:18px 20px;text-align:center;">
+                    <div style="font-size:16px;font-weight:700;color:#111827;margin-bottom:6px;">Need help? Call us 24/7</div>
+                    <div style="font-size:13px;color:#4B5563;margin-bottom:12px;">A real person answers day and night for order, delivery, and payment questions.</div>
+                    <a href="tel:${SUPPORT_PHONE_TEL}" style="display:inline-block;background:${BRAND_NAVY};color:#ffffff;font-size:18px;font-weight:700;text-decoration:none;padding:12px 24px;border-radius:6px;">
+                      ${SUPPORT_PHONE_DISPLAY}
+                    </a>
+                    <div style="font-size:12px;color:#1E3A8A;font-weight:600;margin-top:10px;">Available 24 hours a day, 7 days a week</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
             <td style="padding:16px 32px 8px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F9FAFB;border:1px solid #E5E7EB;">
                 <tr>
                   <td width="33%" style="padding:14px 10px;text-align:center;font-size:12px;color:#374151;font-weight:600;">365-day returns</td>
-                  <td width="33%" style="padding:14px 10px;text-align:center;font-size:12px;color:#374151;font-weight:600;border-left:1px solid #E5E7EB;border-right:1px solid #E5E7EB;">NYC same-day delivery</td>
+                  <td width="33%" style="padding:14px 10px;text-align:center;font-size:12px;color:#374151;font-weight:600;border-left:1px solid #E5E7EB;border-right:1px solid #E5E7EB;">Call support 24/7</td>
                   <td width="33%" style="padding:14px 10px;text-align:center;font-size:12px;color:#374151;font-weight:600;">Secure SSL checkout</td>
                 </tr>
               </table>
@@ -253,8 +271,10 @@ export function buildOrderConfirmationEmail(
           </tr>
           <tr>
             <td style="padding:20px 32px 28px;font-size:13px;line-height:1.6;color:#6B7280;">
-              Questions about this order? Email
-              <a href="mailto:support@petshiwu.com" style="color:${BRAND_NAVY};font-weight:600;">support@petshiwu.com</a>
+              Questions about this order? Call
+              <a href="tel:${SUPPORT_PHONE_TEL}" style="color:${BRAND_NAVY};font-weight:600;">${SUPPORT_PHONE_DISPLAY}</a>
+              anytime, email
+              <a href="mailto:support@petshiwu.com" style="color:${BRAND_NAVY};font-weight:600;">support@petshiwu.com</a>,
               or read our
               <a href="${origin}/return-policy" style="color:${BRAND_NAVY};font-weight:600;">return policy</a>.<br><br>
               Petshiwü · 37-68 74th Street, Jackson Heights, NY 11372<br>
@@ -297,7 +317,10 @@ export function buildOrderConfirmationEmail(
     '',
     `Track your order: ${trackUrl}`,
     '',
-    '365-day returns · NYC same-day delivery · Secure checkout',
+    `Need help? Call support 24/7: ${SUPPORT_PHONE_DISPLAY}`,
+    'A real person answers day and night.',
+    '',
+    '365-day returns · Call support 24/7 · Secure checkout',
     'support@petshiwu.com',
     'Petshiwu, 37-68 74th Street, Jackson Heights, NY 11372',
   ].filter((line) => line !== '').join('\n');

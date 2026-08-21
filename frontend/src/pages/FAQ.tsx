@@ -171,10 +171,13 @@ const FAQ = () => {
                 <Mail className="w-5 h-5 text-primary-600" />
                 <span className="text-sm font-medium text-gray-700">Contact Support</span>
               </a>
-              <div className="flex items-center gap-2 p-3 rounded-lg border border-gray-200 bg-gray-50">
-                <Clock className="w-5 h-5 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">Mon-Fri, 9AM-6PM EST</span>
-              </div>
+              <a
+                href="tel:+18002592605"
+                className="flex items-center gap-2 p-3 rounded-lg border border-gray-200 hover:border-primary-500 hover:bg-primary-50 transition-colors"
+              >
+                <Clock className="w-5 h-5 text-primary-600" />
+                <span className="text-sm font-medium text-gray-700">Call 24/7 · (800) 259-2605</span>
+              </a>
             </div>
           </div>
 
@@ -335,7 +338,7 @@ const FAQ = () => {
               </div>
               <p className="text-sm text-gray-600 mt-4 flex items-center justify-center gap-2">
                 <Clock className="w-4 h-4" />
-                Support Hours: Monday–Friday, 9 AM–6 PM (EST)
+                Support: Call 24/7 at +1 (800) 259-2605
               </p>
             </div>
           </div>

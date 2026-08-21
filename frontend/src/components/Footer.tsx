@@ -156,14 +156,14 @@ const Footer = () => {
                   📞 +1 (800) 259-2605
                 </a>
               </li>
+              <li className="text-gray-500">24/7 phone support</li>
               <li>
                 <a href="mailto:support@petshiwu.com" className="hover:text-white transition-colors">
                   📧 support@petshiwu.com
                 </a>
               </li>
               <li className="mt-3 leading-relaxed">📍 Office & warehouse<br />37-68 74th St<br />Jackson Heights, NY 11372<br /><span className="text-gray-500">Not a walk-in store — delivery only</span></li>
-              <li className="mt-1">🕐 Mon-Fri: 9AM - 8PM EST</li>
-              <li>🕐 Sat-Sun: 9AM - 6PM EST</li>
+              <li className="mt-1">🕐 Phone support 24/7</li>
             </ul>
             <div className="mt-4">
               <h4 className="font-semibold text-white mb-2 text-sm">Newsletter</h4>

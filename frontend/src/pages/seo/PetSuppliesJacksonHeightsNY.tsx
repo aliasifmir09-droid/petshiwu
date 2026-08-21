@@ -42,7 +42,7 @@ const PetSuppliesJacksonHeightsNY = () => (
       },
       {
         question: "What's the phone number for Petshiwu in Jackson Heights?",
-        answer: "You can reach us at (800) 259-2605 or by email at support@petshiwu.com. Customer service is here Monday through Sunday, 9am–8pm ET."
+        answer: "You can reach us at (800) 259-2605 or by email at support@petshiwu.com. The call center is open 24/7."
       },
       {
         question: "Do you carry food for South Asian pets and bird species in Jackson Heights?",

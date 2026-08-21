@@ -29,7 +29,11 @@ const About = () => {
             postalCode: '11372',
             addressCountry: 'US'
           },
-          openingHours: 'Mo-Su 08:00-20:00',
+          openingHoursSpecification: [{
+            dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+            opens: '00:00',
+            closes: '23:59',
+          }],
           priceRange: '$$',
           description: 'NYC same-day pet supply delivery. Jackson Heights is office and warehouse only — not a walk-in store. We deliver premium brands to all 5 boroughs.',
           areaServed: ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'],
