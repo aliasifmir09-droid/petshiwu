@@ -5,6 +5,7 @@ import {
   feedItemsForProduct,
   googleProductCategory,
   looksLikeGtin,
+  merchantMpn,
   parseUnitPricing,
   productImages,
 } from '../../../utils/googleMerchantFeed';
@@ -40,6 +41,12 @@ describe('googleMerchantFeed helpers', () => {
   test('treats 12-digit SKUs as GTINs and others as MPN', () => {
     expect(looksLikeGtin('012345678901')).toBe(true);
     expect(looksLikeGtin('HILLS-ADULT-30')).toBe(false);
+  });
+
+  test('omits MPNs outside Google\'s 1–70 character limit', () => {
+    expect(merchantMpn('MM-30')).toBe('MM-30');
+    expect(merchantMpn('')).toBeUndefined();
+    expect(merchantMpn('x'.repeat(71))).toBeUndefined();
   });
 
   test('skips generic og-image stand-ins and keeps real CDN photos', () => {
@@ -96,6 +103,47 @@ describe('googleMerchantFeed helpers', () => {
     expect(xml).toContain('<g:region>NY</g:region>');
     expect(xml).toContain('<g:min_transit_time>0</g:min_transit_time>');
     expect(xml).not.toContain('<g:identifier_exists>no</g:identifier_exists>');
+  });
+
+  test('does not emit a truncated MPN when the SKU is longer than 70 characters', () => {
+    const xml = buildMerchantItemXml({
+      id: 'ps-long',
+      title: 'PetSafe Cat Flap',
+      description: cleanText('Cat flap'),
+      link: 'https://www.petshiwu.com/cat/doors/petsafe-cat-flap',
+      image: 'https://petshiwu-cdn.b-cdn.net/products/flap.jpg',
+      price: 44.99,
+      availability: 'in stock',
+      brand: 'PetSafe',
+      mpn: merchantMpn('petsafe®-cat-flap:-2-way-locking---built-in-lock---durable---easy-install---hardware-kit-i'),
+      productType: 'Cat Supplies > Doors',
+      googleCategory: 'Animals & Pet Supplies > Pet Supplies > Cat Supplies',
+      petLabel: 'Cat',
+    });
+
+    expect(xml).not.toContain('<g:mpn>');
+    expect(xml).toContain('<g:identifier_exists>no</g:identifier_exists>');
+  });
+
+  test('feedItemsForProduct omits oversized imported SKUs from g:mpn', () => {
+    const longSku =
+      'whisker-city-black-mesh-soft-sided-cat-dog-carrier-19-in-oversized-sku-xx';
+    expect(longSku.length).toBeGreaterThan(70);
+
+    const xml = feedItemsForProduct({
+      _id: '507f1f77bcf86cd799439012',
+      name: 'Whisker City Black Mesh Carrier',
+      slug: 'whisker-city-black-mesh-soft-sided-cat-dog-carrier-19-in',
+      petType: 'cat',
+      brand: 'Whisker City',
+      category: { name: 'Carriers', slug: 'carriers' },
+      images: ['https://cdn.example.com/carrier.jpg'],
+      inStock: true,
+      variants: [{ price: 29.99, stock: 3, sku: longSku }],
+    });
+
+    expect(xml).not.toContain('<g:mpn>');
+    expect(xml).toContain('<g:identifier_exists>no</g:identifier_exists>');
   });
 
   test('feedItemsForProduct emits one item per in-stock variant', () => {

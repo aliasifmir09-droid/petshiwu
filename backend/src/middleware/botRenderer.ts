@@ -31,6 +31,7 @@ import {
   getNeighborhoodRoute,
 } from '../seo/neighborhoodRegistry';
 import { DEFAULT_OG_IMAGE, injectOgTags, resolveShareImage } from '../seo/ogTags';
+import { merchantMpn } from '../utils/googleMerchantFeed';
 
 // ---------------------------------------------------------------------------
 // Bot detection
@@ -676,7 +677,7 @@ export const productRedirectTarget = (reqPath: string, product: any): string | n
 const fetchProduct = async (slug: string) => {
   return withTimeout(
     Product.findOne({ slug, isActive: true })
-      .select('name slug description brand images basePrice compareAtPrice averageRating totalReviews inStock totalStock petType category createdAt updatedAt')
+      .select('name slug description brand images basePrice compareAtPrice averageRating totalReviews inStock totalStock petType category createdAt updatedAt variants.sku')
       .populate({ path: 'category', select: 'name slug' })
       .lean()
       .exec()
@@ -750,6 +751,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
   const productUrl = `${BASE}/${petType}${categorySlug ? `/${categorySlug}` : ''}/${slug}`;
 
   const title = `${productName} | Petshiwu`;
+  const mpn = merchantMpn(product.variants?.[0]?.sku);
 
   // JSON-LD Product schema
   const productSchema: Record<string, unknown> = {
@@ -759,7 +761,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
     description: rawDesc.substring(0, 500),
     image: images.length > 1 ? images : (images[0] ?? DEFAULT_OG_IMAGE),
     brand: { '@type': 'Brand', name: brandName },
-    sku: String(product._id),
+    sku: mpn || String(product._id),
     offers: {
       '@type': 'Offer',
       url: productUrl,
@@ -795,6 +797,7 @@ const buildProductHtml = (template: string, product: any, slug: string): string 
       },
     },
   };
+  if (mpn) productSchema.mpn = mpn;
 
   if ((product.averageRating ?? 0) > 0 && (product.totalReviews ?? 0) > 0) {
     productSchema.aggregateRating = {

@@ -207,6 +207,13 @@ export function looksLikeGtin(sku: string): boolean {
   return /^\d{8}$|^\d{12,14}$/.test(String(sku || '').trim());
 }
 
+/** Google Merchant MPN must be 1–70 characters. Omit anything else. */
+export function merchantMpn(sku?: string): string | undefined {
+  const value = String(sku || '').trim();
+  if (value.length < 1 || value.length > 70) return undefined;
+  return value;
+}
+
 function shippingXml(price: number): string {
   const shipPrice = price >= 49 ? '0.00' : '6.00';
   return `      <g:shipping>
@@ -251,7 +258,7 @@ export function buildMerchantItemXml(opts: {
   const identifier = opts.gtin
     ? `      <g:gtin>${xmlEscape(opts.gtin)}</g:gtin>`
     : opts.mpn
-      ? `      <g:mpn>${xmlEscape(opts.mpn.slice(0, 70))}</g:mpn>`
+      ? `      <g:mpn>${xmlEscape(opts.mpn)}</g:mpn>`
       : '      <g:identifier_exists>no</g:identifier_exists>';
 
   const lines = [
@@ -329,7 +336,7 @@ export function feedItemsForProduct(product: FeedProduct): string {
         salePrice: compare > price ? price : undefined,
         availability: available ? 'in stock' : 'out of stock',
         brand,
-        mpn: sku || undefined,
+        mpn: merchantMpn(sku),
         gtin: looksLikeGtin(sku) ? sku : undefined,
         productType,
         googleCategory,
@@ -362,7 +369,7 @@ export function feedItemsForProduct(product: FeedProduct): string {
     salePrice: compare > price ? price : undefined,
     availability: available ? 'in stock' : 'out of stock',
     brand,
-    mpn: sku || undefined,
+    mpn: merchantMpn(sku),
     gtin: looksLikeGtin(sku) ? sku : undefined,
     productType,
     googleCategory,
