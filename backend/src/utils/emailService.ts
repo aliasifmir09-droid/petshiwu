@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 import logger from './logger';
 import EmailTemplate from '../models/EmailTemplate';
+import { buildOrderConfirmationEmail } from './orderConfirmationEmail';
 
 // Helper to get a clean frontend base URL (handles comma-separated env values)
 const getFrontendBaseUrl = (): string => {
@@ -220,284 +221,17 @@ export const sendOrderConfirmationEmail = async (
 ) => {
   try {
     const frontendUrl = getFrontendBaseUrl();
-    // Use MongoDB _id for the URL — orderNumber format is rejected by the order detail page
-    const orderUrl = `${frontendUrl}/orders/${orderData.orderId || orderNumber}`;
-    const isCOD = orderData.paymentMethod === 'cod';
-    const paymentLabel = isCOD ? 'Cash on Delivery (COD)' : orderData.paymentMethod.replace(/_/g, ' ');
-
-    // ── Item rows (dark premium style) ───────────────────────
-    const itemRows = orderData.items.map(item => `
-      <tr>
-        <td style="padding:14px 16px;border-bottom:1px solid #1e3a5c;vertical-align:top;">
-          <table cellpadding="0" cellspacing="0" width="100%">
-            <tr>
-              <td width="72" valign="top" style="padding-right:14px;">
-                ${item.image
-                  ? `<img src="${item.image}" alt="${item.name}" width="64" height="64"
-                       style="width:64px;height:64px;border-radius:12px;object-fit:cover;
-                              border:1px solid #1e3a5c;display:block;">`
-                  : `<div style="width:64px;height:64px;background:#1a2e45;border-radius:12px;
-                                 text-align:center;line-height:64px;font-size:26px;border:1px solid #1e3a5c;">🐾</div>`}
-              </td>
-              <td valign="middle">
-                <div style="font-size:14px;font-weight:700;color:#ffffff;line-height:1.4;margin-bottom:10px;">${item.name}</div>
-                <table cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td style="padding-right:16px;">
-                      <div style="display:inline-flex;align-items:center;background:#1a2e45;border:1px solid #1e3a5c;
-                                  border-radius:8px;padding:5px 10px;">
-                        <span style="font-size:12px;color:#7aa3c8;font-weight:600;text-transform:uppercase;
-                                     letter-spacing:0.5px;margin-right:6px;">📦 QTY:</span>
-                        <span style="font-size:13px;font-weight:800;color:#ffffff;">${item.quantity}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <div style="display:inline-flex;align-items:center;background:#1a2e45;border:1px solid #1e3a5c;
-                                  border-radius:8px;padding:5px 10px;">
-                        <span style="font-size:12px;color:#7aa3c8;font-weight:600;text-transform:uppercase;
-                                     letter-spacing:0.5px;margin-right:6px;">💵 AMOUNT:</span>
-                        <span style="font-size:13px;font-weight:800;color:#60d394;">$${(item.price * item.quantity).toFixed(2)}</span>
-                      </div>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>`).join('');
-
-    // ── Full HTML email (dark premium) ────────────────────────
-    const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Order Confirmed – Petshiwu</title>
-</head>
-<body style="margin:0;padding:0;background:#071828;font-family:'Helvetica Neue',Arial,sans-serif;">
-
-  <!-- Wrapper -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#071828;padding:32px 0;">
-    <tr><td align="center">
-      <table width="580" cellpadding="0" cellspacing="0"
-             style="max-width:580px;width:100%;background:#0d2137;
-                    border-radius:24px;overflow:hidden;
-                    border:1px solid #1a3550;">
-
-        <!-- ── HEADER ── -->
-        <tr>
-          <td style="padding:44px 40px 36px;text-align:center;background:#0d2137;">
-
-            <!-- Logo -->
-            <div style="font-size:26px;font-weight:900;color:#ffffff;letter-spacing:-0.5px;margin-bottom:4px;">
-              🐾 Petshiwu
-            </div>
-            <div style="font-size:12px;color:#7aa3c8;letter-spacing:1px;margin-bottom:28px;">
-              — For the love of pets —
-            </div>
-
-            <!-- ORDER CONFIRMED badge -->
-            <div style="display:inline-block;background:#0f4c2a;border:1px solid #1a7a44;
-                        border-radius:50px;padding:8px 22px;margin-bottom:24px;">
-              <span style="color:#60d394;font-size:13px;font-weight:700;
-                           text-transform:uppercase;letter-spacing:1.2px;">
-                ✓ &nbsp;Order Confirmed
-              </span>
-            </div>
-
-            <h1 style="margin:0 0 10px;color:#ffffff;font-size:32px;font-weight:900;line-height:1.2;">
-              Thank You, ${firstName}! 🎉
-            </h1>
-            <p style="margin:0 0 28px;color:#7aa3c8;font-size:15px;line-height:1.5;">
-              Your furry friend is going to love this order.
-            </p>
-
-            <!-- Order number card -->
-            <div style="background:#112840;border:1px solid #1a3550;border-radius:14px;
-                        padding:16px 28px;display:inline-block;">
-              <div style="font-size:11px;color:#7aa3c8;font-weight:700;text-transform:uppercase;
-                          letter-spacing:1px;margin-bottom:6px;">📋 Order Number</div>
-              <div style="color:#ffffff;font-size:20px;font-weight:900;letter-spacing:1px;">
-                #${orderNumber}
-              </div>
-            </div>
-          </td>
-        </tr>
-
-        <!-- ── TAGLINE ── -->
-        <tr>
-          <td style="padding:20px 40px;text-align:center;background:#0a1e30;
-                     border-top:1px solid #1a3550;border-bottom:1px solid #1a3550;">
-            <div style="font-size:22px;margin-bottom:8px;">🐕 🐈 🐦 🐠</div>
-            <p style="margin:0;font-size:14px;color:#7aa3c8;font-style:italic;line-height:1.6;">
-              Premium care for every paw, wing, fin &amp; claw —<br>delivered to your door.
-            </p>
-          </td>
-        </tr>
-
-        <!-- ── YOUR ITEMS ── -->
-        <tr>
-          <td style="padding:28px 28px 8px;">
-            <div style="font-size:16px;font-weight:800;color:#ffffff;margin-bottom:14px;">
-              🛍 Your Items
-            </div>
-            <table width="100%" cellpadding="0" cellspacing="0"
-                   style="border-collapse:collapse;background:#112840;
-                          border-radius:14px;overflow:hidden;border:1px solid #1a3550;">
-              <tbody>
-                ${itemRows}
-              </tbody>
-            </table>
-          </td>
-        </tr>
-
-        <!-- ── ORDER TOTAL ── -->
-        <tr>
-          <td style="padding:16px 28px 8px;">
-            <table width="100%" cellpadding="0" cellspacing="0"
-                   style="background:#112840;border:1px solid #1a3550;border-radius:14px;overflow:hidden;">
-              <tr>
-                <td style="padding:12px 20px;font-size:14px;color:#7aa3c8;border-bottom:1px solid #1a3550;">Subtotal</td>
-                <td style="padding:12px 20px;font-size:14px;color:#ffffff;font-weight:600;
-                           text-align:right;border-bottom:1px solid #1a3550;">
-                  $${orderData.itemsPrice.toFixed(2)}
-                </td>
-              </tr>
-              <tr>
-                <td style="padding:12px 20px;font-size:14px;color:#7aa3c8;border-bottom:1px solid #1a3550;">Shipping</td>
-                <td style="padding:12px 20px;font-size:14px;text-align:right;font-weight:700;border-bottom:1px solid #1a3550;">
-                  ${orderData.shippingPrice === 0
-                    ? '<span style="color:#60d394;">FREE</span>'
-                    : `<span style="color:#ffffff;">$${orderData.shippingPrice.toFixed(2)}</span>`}
-                </td>
-              </tr>
-              <tr>
-                <td style="padding:12px 20px;font-size:14px;color:#7aa3c8;border-bottom:1px solid #1a3550;">Tax</td>
-                <td style="padding:12px 20px;font-size:14px;color:#ffffff;font-weight:600;
-                           text-align:right;border-bottom:1px solid #1a3550;">
-                  $${orderData.taxPrice.toFixed(2)}
-                </td>
-              </tr>
-              ${orderData.donationAmount && orderData.donationAmount > 0 ? `
-              <tr>
-                <td style="padding:12px 20px;font-size:14px;color:#60d394;border-bottom:1px solid #1a3550;">
-                  ❤️ Pet Welfare Donation
-                </td>
-                <td style="padding:12px 20px;font-size:14px;color:#60d394;font-weight:700;
-                           text-align:right;border-bottom:1px solid #1a3550;">
-                  +$${orderData.donationAmount.toFixed(2)}
-                </td>
-              </tr>` : ''}
-              <tr>
-                <td style="padding:16px 20px;font-size:16px;font-weight:800;color:#ffffff;">Total Paid</td>
-                <td style="padding:16px 20px;font-size:22px;font-weight:900;color:#60d394;text-align:right;">
-                  $${orderData.totalPrice.toFixed(2)}
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-
-        <!-- ── SHIPPING + PAYMENT ── -->
-        <tr>
-          <td style="padding:16px 28px 8px;">
-            <table width="100%" cellpadding="0" cellspacing="0">
-              <tr>
-                <td width="48%" valign="top"
-                    style="background:#112840;border:1px solid #1a3550;border-radius:14px;padding:18px;">
-                  <div style="font-size:11px;font-weight:700;color:#7aa3c8;
-                              text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">
-                    📦 Delivering To
-                  </div>
-                  <div style="font-size:14px;font-weight:700;color:#ffffff;margin-bottom:6px;">
-                    ${orderData.shippingAddress.firstName} ${orderData.shippingAddress.lastName}
-                  </div>
-                  <div style="font-size:13px;color:#7aa3c8;line-height:1.7;">
-                    ${orderData.shippingAddress.street}<br>
-                    ${orderData.shippingAddress.city}, ${orderData.shippingAddress.state} ${orderData.shippingAddress.zipCode}<br>
-                    ${orderData.shippingAddress.country}
-                  </div>
-                </td>
-                <td width="4%"></td>
-                <td width="48%" valign="top"
-                    style="background:#112840;border:1px solid #1a3550;border-radius:14px;padding:18px;">
-                  <div style="font-size:11px;font-weight:700;color:#7aa3c8;
-                              text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">
-                    💳 Payment
-                  </div>
-                  <div style="font-size:14px;font-weight:700;color:#ffffff;
-                              text-transform:capitalize;margin-bottom:6px;">
-                    ${paymentLabel}
-                  </div>
-                  <div style="font-size:13px;color:#7aa3c8;line-height:1.7;">
-                    ${isCOD
-                      ? 'Our driver will collect payment at your door.'
-                      : 'Payment successfully processed.'}
-                  </div>
-                  ${isCOD
-                    ? `<div style="margin-top:10px;background:#2a1f0a;border:1px solid #7a5c1a;
-                                  border-radius:8px;padding:7px 12px;font-size:12px;color:#f0b429;font-weight:600;">
-                         💡 Please keep exact change ready
-                       </div>`
-                    : ''}
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-
-        <!-- ── CTA ── -->
-        <tr>
-          <td style="padding:24px 28px;text-align:center;">
-            <a href="${orderUrl}"
-               style="display:inline-block;background:linear-gradient(135deg,#1a56db,#0e3fa5);
-                      color:#ffffff;font-size:15px;font-weight:800;padding:15px 44px;
-                      text-decoration:none;border-radius:50px;
-                      box-shadow:0 4px 20px rgba(26,86,219,0.5);letter-spacing:0.3px;">
-              Track My Order →
-            </a>
-            <p style="margin:12px 0 0;font-size:12px;color:#4a7090;">
-              We'll email you when your order ships.
-            </p>
-          </td>
-        </tr>
-
-        <!-- ── FOOTER ── -->
-        <tr>
-          <td style="padding:24px 40px 28px;text-align:center;
-                     border-top:1px solid #1a3550;">
-            <div style="font-size:22px;margin-bottom:10px;">🐾 &nbsp; 🐾 &nbsp; 🐾</div>
-            <p style="margin:0 0 6px;font-size:14px;color:#7aa3c8;font-style:italic;">
-              We're happy to be a part of your pet's journey.
-            </p>
-            <p style="margin:0 0 14px;font-size:13px;color:#4a7090;font-weight:600;">
-              — The Petshiwu.Team 🐾
-            </p>
-            <a href="https://www.petshiwu.com"
-               style="color:#3b82f6;font-size:13px;text-decoration:none;font-weight:600;">
-              www.petshiwu.com
-            </a>
-            <p style="margin:14px 0 0;font-size:11px;color:#2a4a60;">
-              © ${new Date().getFullYear()} Petshiwu &nbsp;·&nbsp; Jackson Heights, Queens, New York
-            </p>
-          </td>
-        </tr>
-
-      </table>
-    </td></tr>
-  </table>
-
-</body>
-</html>`;
+    const { subject, html, text } = buildOrderConfirmationEmail(firstName, orderNumber, orderData, frontendUrl);
 
     // ── Send via Resend (preferred) or SMTP fallback ─────────
     if (resendClient) {
       const result = await resendClient.emails.send({
-        from: 'Petshiwu Orders <noreply@petshiwu.com>',
+        from: 'Petshiwu <noreply@petshiwu.com>',
         to: email,
-        subject: `🎉 Order Confirmed! #${orderNumber} – Thank You, ${firstName}!`,
+        replyTo: 'support@petshiwu.com',
+        subject,
         html,
+        text,
       });
       logger.info(`✅ Order confirmation email sent via Resend to ${email} — ID: ${result.data?.id}`);
       return result;
@@ -511,10 +245,12 @@ export const sendOrderConfirmationEmail = async (
     }
     const transporter = createTransporter();
     const info = await transporter.sendMail({
-      from: process.env.SMTP_FROM || 'noreply@petshiwu.com',
+      from: process.env.SMTP_FROM || 'Petshiwu <noreply@petshiwu.com>',
+      replyTo: 'support@petshiwu.com',
       to: email,
-      subject: `🎉 Order Confirmed! #${orderNumber} – Thank You, ${firstName}!`,
+      subject,
       html,
+      text,
     });
     logger.info(`✅ Order confirmation email sent via SMTP to ${email}: ${info.messageId}`);
     return info;
