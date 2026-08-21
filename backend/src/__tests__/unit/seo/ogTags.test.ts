@@ -23,6 +23,14 @@ describe('resolveShareImage', () => {
     ).toBe('https://petshiwu-cdn.b-cdn.net/products/abc_v0.jpg');
   });
 
+  test('rewrites Bunny URLs that still have the Cloudinary path', () => {
+    expect(
+      toPublicProductImageUrl(
+        'https://petshiwu-cdn.b-cdn.net/dtmes0dha/image/upload/v1779056475/petshiwu/products/6975f1965f8fb0a308f8d7af.jpg'
+      )
+    ).toBe('https://petshiwu-cdn.b-cdn.net/products/6975f1965f8fb0a308f8d7af.jpg');
+  });
+
   test('drops Cloudinary URLs that cannot be mapped to Bunny', () => {
     expect(toPublicProductImageUrl('https://res.cloudinary.com/dtmes0dha/image/upload/v1/logo.png')).toBeUndefined();
     expect(resolveShareImage('https://res.cloudinary.com/dtmes0dha/image/upload/v1/logo.png')).toBe(

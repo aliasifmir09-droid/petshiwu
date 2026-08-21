@@ -105,9 +105,11 @@ export function canonicalProductUrl(product: FeedProduct): string {
 }
 
 export function productImages(product: FeedProduct): string[] {
+  // Match storefront priority: images[] (real Bunny /products files) first.
+  // bunnyImage is often a host-swapped Cloudinary path that 404s on Bunny.
   const raw: unknown[] = [];
-  if (product.bunnyImage) raw.push(product.bunnyImage);
   if (Array.isArray(product.images)) raw.push(...product.images);
+  if (product.bunnyImage) raw.push(product.bunnyImage);
   if (product.cloudinaryImage) raw.push(product.cloudinaryImage);
 
   const urls: string[] = [];
@@ -122,6 +124,7 @@ export function productImages(product: FeedProduct): string[] {
     if (!resolved || resolved === DEFAULT_OG_IMAGE) continue;
     if (!/^https?:\/\//i.test(resolved)) continue;
     if (/res\.cloudinary\.com/i.test(resolved)) continue;
+    if (/\/dtmes0dha\//i.test(resolved) || /\/image\/upload\//i.test(resolved)) continue;
     if (seen.has(resolved)) continue;
     seen.add(resolved);
     urls.push(resolved);
