@@ -1243,7 +1243,7 @@ const buildNeighborhoodHtml = (
       { '@type': 'Neighborhood', name: neighborhoodName },
     ],
     priceRange: '$',
-    openingHours: 'Mo-Su 09:00-20:00',
+    openingHours: 'Mo-Su 00:00-24:00',
   };
 
   const injectedTags = `
@@ -1382,6 +1382,12 @@ export const buildHomepageHtml = (template: string): string => {
       contactType: 'customer service',
       areaServed: 'US',
       availableLanguage: ['English', 'Spanish'],
+      hoursAvailable: {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        opens: '00:00',
+        closes: '23:59',
+      },
     },
     sameAs: [
       'https://www.facebook.com/petshiwu',
@@ -1423,8 +1429,8 @@ export const buildHomepageHtml = (template: string): string => {
       {
         '@type': 'OpeningHoursSpecification',
         dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-        opens: '09:00',
-        closes: '20:00',
+        opens: '00:00',
+        closes: '23:59',
       },
     ],
     priceRange: '$$',

@@ -51,9 +51,9 @@ Queens-based. Delivery to your door.
 - Flushing, NY
 - Forest Hills, NY
 
-## Hours (customer service — not store hours)
+## Hours (call center — not a walk-in store)
 
-Monday–Sunday: 9:00 AM – 8:00 PM
+Open 24 hours, 7 days a week.
 
 Same-day cutoff is **3 PM weekdays / 1 PM weekends**. We deliver before **11 PM**.
 

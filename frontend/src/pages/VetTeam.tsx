@@ -89,7 +89,7 @@ const VetTeam = () => {
             <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 sm:p-8">
               <h3 className="text-xl font-bold text-blue-900 mb-3">Questions for Our Veterinary Team?</h3>
               <p className="text-blue-800 mb-4">
-                Call us at <a href="tel:18002592605" className="font-bold underline">(800) 259-2605</a> for guidance on product selection, nutrition questions, or general pet care advice. Our customer care team is available 9am-8pm ET daily.
+                Call us at <a href="tel:18002592605" className="font-bold underline">(800) 259-2605</a> for guidance on product selection, nutrition questions, or general pet care advice. Our call center is available 24/7.
               </p>
               <p className="text-blue-800 text-sm">
                 For medical emergencies, contact your local veterinarian or nearest emergency animal hospital immediately.

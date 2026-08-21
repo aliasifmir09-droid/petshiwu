@@ -150,7 +150,13 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
           telephone: org.contactPoint.telephone,
           contactType: org.contactPoint.contactType,
           areaServed: 'US',
-          availableLanguage: 'English'
+          availableLanguage: 'English',
+          hoursAvailable: {
+            '@type': 'OpeningHoursSpecification',
+            dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+            opens: '00:00',
+            closes: '23:59',
+          },
         } : undefined,
         address: org.address ? {
           '@type': 'PostalAddress',

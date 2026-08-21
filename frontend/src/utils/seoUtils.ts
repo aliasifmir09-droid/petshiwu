@@ -314,7 +314,13 @@ export const generateOrganizationSchema = (): object => {
       telephone: '+1-800-259-2605',
       contactType: 'Customer Service',
       areaServed: 'US',
-      availableLanguage: 'English'
+      availableLanguage: 'English',
+      hoursAvailable: {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        opens: '00:00',
+        closes: '23:59',
+      },
     },
     address: {
       '@type': 'PostalAddress',
