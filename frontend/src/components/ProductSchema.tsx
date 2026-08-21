@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { ProductVariant } from '@/types';
 import { normalizeImageUrl } from '@/utils/imageUtils';
+import { productSchemaIdentifiers } from '@/utils/merchantIdentifiers';
 import { generateProductUrl } from '@/utils/productUrl';
 
 interface ProductSchemaProduct {
@@ -39,7 +40,9 @@ const ProductSchema = ({ product, selectedVariant }: ProductSchemaProps) => {
   const price = selectedVariant?.price ?? product.basePrice ?? 0;
   const stock = selectedVariant?.stock ?? product.totalStock ?? 0;
   const inStock = stock > 0 && (product.inStock !== false);
-  const sku = selectedVariant?.sku ?? product._id;
+  // Google Merchant listings MPN must be 1–70 characters. Many catalog SKUs are
+  // imported slugs longer than that; omit mpn rather than emit an invalid value.
+  const { sku, mpn } = productSchemaIdentifiers(selectedVariant?.sku, product._id);
 
   // Collect all product images, normalised
   const rawImages = product.images ?? [];
@@ -144,9 +147,9 @@ const ProductSchema = ({ product, selectedVariant }: ProductSchemaProps) => {
       name: brandName,
     },
     sku,
-    mpn: sku,
     offers,
   };
+  if (mpn) schema.mpn = mpn;
 
   // Aggregate rating — only include if we have real data
   const ratingValue = product.averageRating ?? 0;

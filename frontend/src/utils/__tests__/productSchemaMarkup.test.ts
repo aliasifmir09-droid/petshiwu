@@ -18,4 +18,10 @@ describe('ProductSchema Google shopping markup', () => {
     expect(schemaSrc).toContain('https://schema.org/SalePrice');
     expect(schemaSrc).not.toContain("minValue: 2");
   });
+
+  test('does not copy oversized catalog SKUs into mpn', () => {
+    expect(schemaSrc).not.toContain('mpn: sku');
+    expect(schemaSrc).toContain('productSchemaIdentifiers');
+    expect(schemaSrc).toContain('schema.mpn = mpn');
+  });
 });
