@@ -111,6 +111,7 @@ import searchAnalyticsRoutes from './routes/searchAnalytics';
 import cartRoutes from './routes/cart';
 import aiAdvisorRoutes from './routes/aiAdvisor';
 import feedRoutes from './routes/feed';
+import { warmMerchantFeedCache } from './controllers/merchantFeedController';
 import contactFormsRoutes from './routes/contactForms';
 import newsletterRoutes from './routes/newsletter';
 import couponRoutes from './routes/coupons';
@@ -187,6 +188,7 @@ const warmCache = async () => {
       } catch { /* skip this endpoint on error */ }
     }
     logger.info('✅ Cache warm-up complete');
+    warmMerchantFeedCache();
   } catch (err: any) {
     logger.warn('⚠️  Cache warm-up failed (non-fatal):', err.message);
   }
@@ -377,6 +379,9 @@ app.use(compression({
   level: 6, threshold: 1024,
   filter: (req: express.Request, res: express.Response) => {
     if (req.headers['x-no-compression']) { return false; }
+    const url = req.originalUrl || req.url || '';
+    // Gzip buffers the whole body; Google Merchant Center timed out fetching the feed.
+    if (/\/feeds\/google|\/feed\/google/.test(url)) { return false; }
     const contentType = res.getHeader('content-type') as string;
     if (contentType && (contentType.includes('image/') || contentType.includes('video/') || contentType.includes('application/zip') || contentType.includes('application/gzip'))) { return false; }
     return compression.filter(req, res);
