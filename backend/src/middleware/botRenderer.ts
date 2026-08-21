@@ -1673,26 +1673,32 @@ export const createBotRenderer = (distPath: string) => {
 
       // Consolidate ALL product URL variants to the single canonical path
       // /{petType}/{immediateCategory}/{slug}. This covers the legacy /products/{slug}
-      // form and nested full-hierarchy paths like /cat/food--treats/wet-food/{slug} or
-      // /fish/fish-shops/marine-amp-freshwater/starter-kits/{slug}, which otherwise get
-      // crawled as duplicate URLs with no agreed canonical. Runs for bots on any product
-      // path, and for all user agents on the legacy /products/ form (preserves prior
-      // behavior). Loop-free: the canonical path resolves to the same product.
-      const isLegacyProductPath = req.path.startsWith('/products/');
-      if (page?.type === 'product' && (bot || isLegacyProductPath)) {
-        const resolvedProduct = await fetchProduct(page.slug);
-        if (resolvedProduct) {
-          const redirectTo = productRedirectTarget(req.path, resolvedProduct);
-          if (redirectTo) {
-            res.redirect(301, redirectTo);
+      // form and nested full-hierarchy paths like /cat/food--treats/wet-food/{slug}.
+      // Runs for every user agent (not just bots): Google still 200s these URLs and
+      // reports "Duplicate without user-selected canonical" when we only hint via
+      // <link rel="canonical">.
+      if (page?.type === 'product') {
+        const isLegacyProductPath = req.path.startsWith('/products/');
+        try {
+          const resolvedProduct = await fetchProduct(page.slug);
+          if (resolvedProduct) {
+            const redirectTo = productRedirectTarget(req.path, resolvedProduct);
+            if (redirectTo) {
+              res.redirect(301, redirectTo);
+              return;
+            }
+          } else if (isLegacyProductPath) {
+            res.status(404);
+            res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            res.send(build404Html(template));
             return;
           }
-        } else if (isLegacyProductPath) {
-          res.status(404);
-          res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
-          res.setHeader('Content-Type', 'text/html; charset=utf-8');
-          res.send(build404Html(template));
-          return;
+        } catch (err) {
+          logger.warn(
+            'Product canonical redirect lookup failed:',
+            err instanceof Error ? err.message : err
+          );
         }
       }
 

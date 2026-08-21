@@ -70,6 +70,19 @@ describe('Product URL Utility', () => {
       expect(url).toBeDefined();
     });
 
+  test('uses only the immediate category, not parent folders', () => {
+    const nested = {
+      ...mockProduct,
+      category: {
+        _id: 'leaf',
+        name: 'Wet Food',
+        slug: 'wet-food',
+        parentCategory: { _id: 'parent', slug: 'food--treats', name: 'Food & Treats' },
+      } as any,
+    } as Product;
+    expect(generateProductUrl(nested)).toBe('/dog/wet-food/test-product');
+  });
+
     test('should generate valid URL format', () => {
       const url = generateProductUrl(mockProduct);
       
