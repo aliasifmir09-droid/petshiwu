@@ -431,7 +431,7 @@ PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
 - Name: Petshiwu | Website: petshiwu.com
 - Address: 37-68 74th Street, Jackson Heights, Queens, NY 11372
 - Phone: +1 (800) 259-2605 | Email: support@petshiwu.com
-- Support hours: 7 days a week, 9 AM – 8 PM EST
+- Support hours: 24/7 phone support at +1 (800) 259-2605
 - 10,000+ products for dogs, cats, birds, fish, reptiles, and small animals
 - Top brands: Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Orijen, Acana, Taste of the Wild
 
@@ -535,7 +535,7 @@ Q: How does the wishlist work?
 A: Click the heart icon on any product to save it. Your wishlist lives at petshiwu.com/favorites. You can generate a shareable link — great for family or friends buying your pet a gift.
 
 Q: How do I contact customer support?
-A: Phone: +1 (800) 259-2605 (7 days/week, 9 AM–8 PM EST). Email: support@petshiwu.com (response within 2 business hours). Or use the Contact form at petshiwu.com/contact. We're real people who love pets and are happy to help.
+A: Phone: +1 (800) 259-2605, 24 hours a day, 7 days a week. Email: support@petshiwu.com. Or use the Contact form at petshiwu.com/contact. We're real people who love pets and are happy to help.
 
 Q: Where is Petshiwu located?
 A: Jackson Heights, Queens, New York — 37-68 74th Street, NY 11372. We're proud to be a Queens-based pet store serving all of NYC and shipping nationwide.

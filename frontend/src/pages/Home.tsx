@@ -198,7 +198,7 @@ const Home = () => {
               name: 'How do I contact Petshiwu customer service?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Call +1 (800) 259-2605, email support@petshiwu.com, or use the contact form on our /contact page. We respond within one business day. Customer service hours are 9 AM to 8 PM, seven days a week. The Jackson Heights address is office and warehouse only — not open for walk-in shopping.'
+                text: 'Call +1 (800) 259-2605 anytime — support is 24/7. You can also email support@petshiwu.com or use the contact form on our /contact page. The Jackson Heights address is office and warehouse only — not open for walk-in shopping.'
               }
             }
           ]

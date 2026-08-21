@@ -34,8 +34,8 @@ const TrustBadges = () => {
     },
     {
       icon: HeadphonesIcon,
-      title: 'NYC Support',
-      description: '(800) 259-2605 · 9AM–8PM',
+      title: 'Call 24/7',
+      description: '(800) 259-2605 anytime',
       color: 'bg-[#1E3A8A]',
     },
   ];

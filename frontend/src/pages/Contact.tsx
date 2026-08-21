@@ -119,10 +119,11 @@ const Contact = () => {
                     <Phone className="w-5 h-5 text-blue-700" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900 text-sm mb-0.5">Phone</p>
+                    <p className="font-semibold text-gray-900 text-sm mb-0.5">Phone — 24/7</p>
                     <a href="tel:+18002592605" className="text-blue-700 hover:text-blue-800 text-sm font-medium">
                       +1 (800) 259-2605
                     </a>
+                    <p className="text-xs text-gray-500 mt-1">Call anytime. A real person answers day and night.</p>
                   </div>
                 </div>
 
@@ -144,17 +145,8 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900 text-sm mb-1">Customer service hours</p>
-                    <div className="space-y-0.5 text-sm text-gray-600">
-                      <div className="flex justify-between gap-6">
-                        <span>Monday - Friday</span>
-                        <span className="font-medium text-gray-800">9:00 AM - 8:00 PM</span>
-                      </div>
-                      <div className="flex justify-between gap-6">
-                        <span>Saturday - Sunday</span>
-                        <span className="font-medium text-gray-800">9:00 AM - 6:00 PM</span>
-                      </div>
-                      <p className="text-xs text-gray-400 mt-1">All times Eastern ({nyTzAbbr})</p>
-                    </div>
+                    <p className="text-sm text-gray-800 font-medium">24 hours a day, 7 days a week</p>
+                    <p className="text-xs text-gray-400 mt-1">Phone support in Eastern Time ({nyTzAbbr})</p>
                   </div>
                 </div>
               </div>

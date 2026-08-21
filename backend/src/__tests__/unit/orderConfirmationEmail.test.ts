@@ -57,6 +57,10 @@ describe('order confirmation email', () => {
     expect(email.html).toContain('/track-order?order=ORD-1787320995135-7555');
     expect(email.html).toContain('support@petshiwu.com');
     expect(email.html).toContain('365-day returns');
+    expect(email.html).toContain('Call us 24/7');
+    expect(email.html).toContain('tel:+18002592605');
+    expect(email.html).toContain('+1 (800) 259-2605');
+    expect(email.html).toContain('Available 24 hours a day, 7 days a week');
     expect(email.html).toContain('Delivery starts August 28, 2026');
   });
 
@@ -72,6 +76,7 @@ describe('order confirmation email', () => {
 
   test('keeps a plain-text receipt for inbox filters', () => {
     expect(email.text).toContain('Whisker City® 2-Door Pet Carrier');
+    expect(email.text).toContain('Call support 24/7: +1 (800) 259-2605');
     expect(email.text).toContain('support@petshiwu.com');
     expect(email.text).toContain('https://www.petshiwu.com/track-order?order=ORD-1787320995135-7555');
   });

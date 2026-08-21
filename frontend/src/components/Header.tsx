@@ -483,7 +483,7 @@ const Header = () => {
                         <Phone size={20} className="mt-1 flex-shrink-0" />
                         <div>
                           <p className="text-sm font-bold mb-1">We're Here to Help</p>
-                          <p className="text-xs text-gray-600 mb-2">Mon-Fri: 9AM - 8PM EST | Sat-Sun: 9AM - 6PM EST</p>
+                          <p className="text-xs text-gray-600 mb-2">Call 24/7 · +1 (800) 259-2605</p>
                           <a href="tel:+18002592605" className="text-xl font-bold hover:underline block">Call Us</a>
                           <a href="tel:+18002592605" className="text-2xl font-black text-[#1E3A8A] hover:text-blue-700 block">+1 (800) 259-2605</a>
                         </div>
