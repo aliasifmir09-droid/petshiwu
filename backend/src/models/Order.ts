@@ -271,21 +271,26 @@ const orderSchema = new Schema<IOrder>(
       runId: { type: Schema.Types.ObjectId, ref: 'DeliveryRun' },
       stopOrder: Number,
       notes: String,
+      // Optional nested schema: required fields inside proof must not run at checkout.
       proof: {
-        photoUrl: { type: String, required: false, select: false },
-        photoData: { type: Buffer, required: false, select: false },
-        uploadedAt: { type: Date, required: false },
-        uploadedBy: { type: Schema.Types.ObjectId, ref: 'User' },
-        recipientName: String,
-        handoffMethod: {
-          type: String,
-          enum: ['handed_to_customer', 'handed_to_household_member', 'left_at_door', 'left_with_doorman', 'other'],
-          required: true
-        },
-        notes: String,
-        storageKey: { type: String, select: false },
-        storageProvider: { type: String, enum: ['bunny', 'local', 'mongodb'], select: false },
-        mimeType: { type: String, select: false }
+        type: new Schema({
+          photoUrl: { type: String, required: false, select: false },
+          photoData: { type: Buffer, required: false, select: false },
+          uploadedAt: { type: Date, required: false },
+          uploadedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+          recipientName: String,
+          handoffMethod: {
+            type: String,
+            enum: ['handed_to_customer', 'handed_to_household_member', 'left_at_door', 'left_with_doorman', 'other'],
+            required: true
+          },
+          notes: String,
+          storageKey: { type: String, select: false },
+          storageProvider: { type: String, enum: ['bunny', 'local', 'mongodb'], select: false },
+          mimeType: { type: String, select: false }
+        }, { _id: false }),
+        required: false,
+        default: undefined
       },
       proofNotification: {
         status: { type: String, enum: ['queued', 'sent', 'failed', 'skipped_no_email'] },
