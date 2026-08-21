@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { DEFAULT_OG_IMAGE, injectOgTags, resolveShareImage } from '../../../seo/ogTags';
+import { DEFAULT_OG_IMAGE, injectOgTags, resolveShareImage, toPublicProductImageUrl } from '../../../seo/ogTags';
 import { looksLikeStaticAsset } from '../../../seo/staticAssetPath';
 
 describe('resolveShareImage', () => {
@@ -10,9 +10,32 @@ describe('resolveShareImage', () => {
     expect(resolveShareImage(null)).toBe(DEFAULT_OG_IMAGE);
   });
 
-  test('keeps absolute http(s) URLs', () => {
+  test('rewrites disabled Cloudinary product photos to Bunny CDN', () => {
+    expect(
+      resolveShareImage(
+        'https://res.cloudinary.com/dtmes0dha/image/upload/v1779056475/petshiwu/products/6975f1965f8fb0a308f8d7af.jpg'
+      )
+    ).toBe('https://petshiwu-cdn.b-cdn.net/products/6975f1965f8fb0a308f8d7af.jpg');
+    expect(
+      toPublicProductImageUrl(
+        'https://res.cloudinary.com/dtmes0dha/image/upload/v1/petshiwu/products/abc_v0.jpg'
+      )
+    ).toBe('https://petshiwu-cdn.b-cdn.net/products/abc_v0.jpg');
+  });
+
+  test('drops Cloudinary URLs that cannot be mapped to Bunny', () => {
+    expect(toPublicProductImageUrl('https://res.cloudinary.com/dtmes0dha/image/upload/v1/logo.png')).toBeUndefined();
+    expect(resolveShareImage('https://res.cloudinary.com/dtmes0dha/image/upload/v1/logo.png')).toBe(
+      DEFAULT_OG_IMAGE
+    );
+  });
+
+  test('keeps absolute http(s) URLs that are not on the disabled Cloudinary cloud', () => {
     expect(resolveShareImage('https://cdn.example.com/food.jpg')).toBe(
       'https://cdn.example.com/food.jpg'
+    );
+    expect(resolveShareImage('https://petshiwu-cdn.b-cdn.net/products/food.jpg')).toBe(
+      'https://petshiwu-cdn.b-cdn.net/products/food.jpg'
     );
   });
 

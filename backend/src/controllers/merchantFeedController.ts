@@ -8,7 +8,7 @@ import {
 
 const FEED_TTL_MS = 60 * 60 * 1000;
 const FEED_SELECT =
-  'name slug shortDescription description brand category images cloudinaryImage variants.price variants.compareAtPrice variants.stock variants.sku variants.size variants.weight variants.label variants.flavor variants.image basePrice compareAtPrice petType isFeatured inStock';
+  'name slug shortDescription description brand category images cloudinaryImage bunnyImage variants.price variants.compareAtPrice variants.stock variants.sku variants.size variants.weight variants.label variants.flavor variants.image basePrice compareAtPrice petType isFeatured inStock';
 
 let cachedFeed: { xml: string; builtAt: number } | null = null;
 let inflightFeed: Promise<string> | null = null;
