@@ -45,9 +45,14 @@ export interface FeedProduct {
   tags?: string[];
 }
 
+/** XML 1.0 forbids most C0 control characters; one bad name would fail the whole feed. */
+export function stripInvalidXmlChars(str: string): string {
+  return String(str || '').replace(/[^\u0009\u000A\u000D\u0020-\uD7FF\uE000-\uFFFD]/g, '');
+}
+
 export function xmlEscape(str: string): string {
   if (!str) return '';
-  return str
+  return stripInvalidXmlChars(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -391,5 +396,11 @@ export function feedHeader(): string {
 
 export function feedFooter(): string {
   return `  </channel>
-</rss>`;
+</rss>
+`;
+}
+
+export function assembleMerchantFeed(products: FeedProduct[]): string {
+  const items = products.map((product) => feedItemsForProduct(product)).join('');
+  return `${feedHeader()}${items}${feedFooter()}`;
 }

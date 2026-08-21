@@ -1,4 +1,5 @@
 import {
+  assembleMerchantFeed,
   buildMerchantItemXml,
   canonicalProductUrl,
   cleanText,
@@ -8,6 +9,7 @@ import {
   merchantMpn,
   parseUnitPricing,
   productImages,
+  xmlEscape,
 } from '../../../utils/googleMerchantFeed';
 
 describe('googleMerchantFeed helpers', () => {
@@ -180,5 +182,32 @@ describe('googleMerchantFeed helpers', () => {
         images: [],
       })
     ).toBe('');
+  });
+
+  test('strips illegal XML control characters so one product cannot break the file', () => {
+    expect(xmlEscape('Cat\u0000 door')).toBe('Cat door');
+  });
+
+  test('assembleMerchantFeed is a complete RSS document Google can parse', () => {
+    const xml = assembleMerchantFeed([
+      {
+        _id: '507f1f77bcf86cd799439011',
+        name: 'Purina Pro Plan Adult',
+        slug: 'purina-pro-plan-adult',
+        petType: 'dog',
+        brand: 'Purina',
+        category: { name: 'Dry Food', slug: 'dry-food' },
+        images: ['https://cdn.example.com/purina.jpg'],
+        inStock: true,
+        variants: [{ price: 24.99, stock: 4, sku: 'PP-15', size: '15 lb' }],
+      },
+    ]);
+
+    expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
+    expect(xml).toContain('<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">');
+    expect(xml).toContain('<item>');
+    expect(xml).toContain('</channel>');
+    expect(xml.trimEnd().endsWith('</rss>')).toBe(true);
+    expect((xml.match(/<item>/g) || []).length).toBe(1);
   });
 });
