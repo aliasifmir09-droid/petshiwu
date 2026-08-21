@@ -8,18 +8,31 @@
 
 export const SITE_ORIGIN = 'https://www.petshiwu.com';
 export const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og-image.jpg`;
+export const BUNNY_CDN_ORIGIN = 'https://petshiwu-cdn.b-cdn.net';
 
 const esc = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+/**
+ * Cloudinary cloud dtmes0dha is disabled ("cloud_name ... is disabled" / HTTP 401).
+ * Product photos live on Bunny CDN as /products/{filename}.
+ */
+export function toPublicProductImageUrl(url: string): string | undefined {
+  const value = String(url || '').trim();
+  if (!value) return undefined;
+  if (/res\.cloudinary\.com/i.test(value)) {
+    const file = value.match(/\/products\/([^/?#]+)/i)?.[1];
+    if (!file) return undefined;
+    return `${BUNNY_CDN_ORIGIN}/products/${file}`;
+  }
+  if (/^https?:\/\//i.test(value)) return value;
+  return `${SITE_ORIGIN}${value.startsWith('/') ? value : `/${value}`}`;
+}
+
 /** Turn a product/blog image (URL, relative path, or {url}) into an absolute share URL. */
 export function resolveShareImage(raw?: unknown): string {
   if (typeof raw === 'string') {
-    const value = raw.trim();
-    if (value) {
-      if (/^https?:\/\//i.test(value)) return value;
-      return `${SITE_ORIGIN}${value.startsWith('/') ? value : `/${value}`}`;
-    }
+    return toPublicProductImageUrl(raw) || DEFAULT_OG_IMAGE;
   }
   if (raw && typeof raw === 'object') {
     const url = (raw as { url?: unknown }).url;

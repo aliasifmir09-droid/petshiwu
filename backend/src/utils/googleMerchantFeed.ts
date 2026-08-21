@@ -36,6 +36,7 @@ export interface FeedProduct {
   category?: FeedCategory;
   images?: unknown[];
   cloudinaryImage?: string;
+  bunnyImage?: string;
   variants?: FeedVariant[];
   basePrice?: number;
   compareAtPrice?: number;
@@ -105,8 +106,9 @@ export function canonicalProductUrl(product: FeedProduct): string {
 
 export function productImages(product: FeedProduct): string[] {
   const raw: unknown[] = [];
-  if (product.cloudinaryImage) raw.push(product.cloudinaryImage);
+  if (product.bunnyImage) raw.push(product.bunnyImage);
   if (Array.isArray(product.images)) raw.push(...product.images);
+  if (product.cloudinaryImage) raw.push(product.cloudinaryImage);
 
   const urls: string[] = [];
   const seen = new Set<string>();
@@ -119,6 +121,7 @@ export function productImages(product: FeedProduct): string[] {
     const resolved = resolveShareImage(value);
     if (!resolved || resolved === DEFAULT_OG_IMAGE) continue;
     if (!/^https?:\/\//i.test(resolved)) continue;
+    if (/res\.cloudinary\.com/i.test(resolved)) continue;
     if (seen.has(resolved)) continue;
     seen.add(resolved);
     urls.push(resolved);

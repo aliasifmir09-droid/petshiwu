@@ -51,6 +51,30 @@ describe('googleMerchantFeed helpers', () => {
     expect(merchantMpn('x'.repeat(71))).toBeUndefined();
   });
 
+  test('rewrites Cloudinary photos to Bunny so Google can fetch them', () => {
+    expect(
+      productImages({
+        _id: '6975f1965f8fb0a308f8d7af',
+        name: 'Carrier',
+        slug: 'carrier',
+        cloudinaryImage:
+          'https://res.cloudinary.com/dtmes0dha/image/upload/v1779056475/petshiwu/products/6975f1965f8fb0a308f8d7af.jpg',
+      })
+    ).toEqual(['https://petshiwu-cdn.b-cdn.net/products/6975f1965f8fb0a308f8d7af.jpg']);
+  });
+
+  test('prefers an existing Bunny URL over a dead Cloudinary URL', () => {
+    expect(
+      productImages({
+        _id: '1',
+        name: 'Food',
+        slug: 'food',
+        bunnyImage: 'https://petshiwu-cdn.b-cdn.net/products/food.jpg',
+        cloudinaryImage: 'https://res.cloudinary.com/dtmes0dha/image/upload/v1/petshiwu/products/food.jpg',
+      })
+    ).toEqual(['https://petshiwu-cdn.b-cdn.net/products/food.jpg']);
+  });
+
   test('skips generic og-image stand-ins and keeps real CDN photos', () => {
     expect(
       productImages({
@@ -125,6 +149,25 @@ describe('googleMerchantFeed helpers', () => {
 
     expect(xml).not.toContain('<g:mpn>');
     expect(xml).toContain('<g:identifier_exists>no</g:identifier_exists>');
+  });
+
+  test('feed items never point Google at the disabled Cloudinary cloud', () => {
+    const xml = feedItemsForProduct({
+      _id: '6975f1965f8fb0a308f8d7af',
+      name: 'Whisker City Carrier',
+      slug: 'whisker-city-carrier',
+      petType: 'cat',
+      brand: 'Whisker City',
+      category: { name: 'Carriers', slug: 'carriers' },
+      images: [
+        'https://res.cloudinary.com/dtmes0dha/image/upload/v1779056475/petshiwu/products/6975f1965f8fb0a308f8d7af.jpg',
+      ],
+      inStock: true,
+      variants: [{ price: 29.99, stock: 3, sku: 'WC-19' }],
+    });
+
+    expect(xml).toContain('<g:image_link>https://petshiwu-cdn.b-cdn.net/products/6975f1965f8fb0a308f8d7af.jpg</g:image_link>');
+    expect(xml).not.toContain('res.cloudinary.com');
   });
 
   test('feedItemsForProduct omits oversized imported SKUs from g:mpn', () => {
