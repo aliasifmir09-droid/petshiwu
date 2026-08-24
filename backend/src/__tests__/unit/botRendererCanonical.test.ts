@@ -1,8 +1,10 @@
 import {
   buildCanonicalProductPath,
   buildHomepageHtml,
+  buildProductHtml,
   buildReturnPolicyHtml,
   normalizeReqPath,
+  productOfferPrice,
   productRedirectTarget,
 } from '../../middleware/botRenderer';
 
@@ -157,5 +159,42 @@ describe('buildReturnPolicyHtml', () => {
   it('keeps a single Return & Exchange Policy H1', () => {
     expect([...html.matchAll(/<h1[^>]*>/gi)]).toHaveLength(1);
     expect(html).toContain('<h1>Return &amp; Exchange Policy</h1>');
+  });
+});
+
+describe('product offer price in first-wave HTML', () => {
+  const template = `<!DOCTYPE html><html><head>
+<title>Petshiwu</title>
+<meta name="description" content="old" />
+</head><body><div id="root"></div></body></html>`;
+
+  it('uses basePrice, then the first variant price if basePrice is missing', () => {
+    expect(productOfferPrice({ basePrice: 14.39 })).toBe(14.39);
+    expect(productOfferPrice({ basePrice: 0, variants: [{ price: 52.99 }] })).toBe(52.99);
+    expect(productOfferPrice({ variants: [{ price: 0 }, { price: 2.39 }] })).toBe(2.39);
+    expect(productOfferPrice({})).toBe(0);
+  });
+
+  it('puts a visible dollar price and Offer schema in the HTML Google Shopping fetches', () => {
+    const html = buildProductHtml(
+      template,
+      {
+        name: 'Pet Botanics Training Reward Freeze Dried Dog Treat - Beef Liver',
+        slug: 'pet-botanics-training-reward-freeze-dried-dog-treat-beef-liver',
+        brand: 'Pet Botanics',
+        basePrice: 14.39,
+        inStock: true,
+        totalStock: 12,
+        petType: 'dog',
+        category: { slug: 'training-treats', name: 'Training Treats' },
+        images: ['https://petshiwu-cdn.b-cdn.net/products/6946b2708cb303af8765b681.jpg'],
+        description: 'Freeze-dried beef liver training treats.',
+      },
+      'pet-botanics-training-reward-freeze-dried-dog-treat-beef-liver'
+    );
+    expect(html).toContain('$14.39');
+    expect(html).toContain('product:price:amount" content="14.39"');
+    expect(html).toContain('"price":"14.39"');
+    expect(html).toContain('"@type":"Offer"');
   });
 });

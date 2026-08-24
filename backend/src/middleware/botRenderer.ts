@@ -38,7 +38,7 @@ import { merchantMpn } from '../utils/googleMerchantFeed';
 // ---------------------------------------------------------------------------
 
 const BOT_UA_RE =
-  /googlebot|adsbot-google|storebot-google|google-inspectiontool|feedfetcher-google|googleproducer|bingbot|duckduckbot|baiduspider|yandexbot|sogou|slurp|ia_archiver|facebookexternalhit|twitterbot|linkedinbot|discordbot|slackbot-linkexpanding|whatsapp|telegrambot|applebot|pinterestbot|rogerbot|embedly|quora\s+link\s+preview|showyoubot|outbrain|developers\.google\.com/i;
+  /googlebot|adsbot-google|storebot-google|google-inspectiontool|feedfetcher-google|googleproducer|google-shopping|shopping-crawler|bingbot|duckduckbot|baiduspider|yandexbot|sogou|slurp|ia_archiver|facebookexternalhit|twitterbot|linkedinbot|discordbot|slackbot-linkexpanding|whatsapp|telegrambot|applebot|pinterestbot|rogerbot|embedly|quora\s+link\s+preview|showyoubot|outbrain|developers\.google\.com/i;
 
 const isBot = (ua: string): boolean => BOT_UA_RE.test(ua);
 
@@ -677,7 +677,7 @@ export const productRedirectTarget = (reqPath: string, product: any): string | n
 const fetchProduct = async (slug: string) => {
   return withTimeout(
     Product.findOne({ slug, isActive: true })
-      .select('name slug description brand images basePrice compareAtPrice averageRating totalReviews inStock totalStock petType category createdAt updatedAt variants.sku')
+      .select('name slug description brand images basePrice compareAtPrice averageRating totalReviews inStock totalStock petType category createdAt updatedAt variants.sku variants.price variants.stock')
       .populate({ path: 'category', select: 'name slug' })
       .lean()
       .exec()
@@ -717,8 +717,20 @@ const fetchCategory = async (slug: string) => {
 
 const BASE = 'https://www.petshiwu.com';
 
-const buildProductHtml = (template: string, product: any, slug: string): string => {
-  const price: number = product.basePrice ?? 0;
+/** Price Google Shopping must see in first-wave HTML (not only after React hydrates). */
+export const productOfferPrice = (product: {
+  basePrice?: number;
+  variants?: Array<{ price?: number }>;
+}): number => {
+  const base = Number(product.basePrice);
+  if (Number.isFinite(base) && base > 0) return base;
+  const variant = (product.variants || []).find((item) => Number(item.price) > 0);
+  const variantPrice = Number(variant?.price);
+  return Number.isFinite(variantPrice) && variantPrice > 0 ? variantPrice : 0;
+};
+
+export const buildProductHtml = (template: string, product: any, slug: string): string => {
+  const price: number = productOfferPrice(product);
   const inStock: boolean = (product.totalStock ?? 0) > 0 && product.inStock !== false;
   const image: string = resolveShareImage(product.images?.[0]);
   const images: string[] = (product.images ?? [])
@@ -1677,10 +1689,11 @@ export const createBotRenderer = (distPath: string) => {
       // Runs for every user agent (not just bots): Google still 200s these URLs and
       // reports "Duplicate without user-selected canonical" when we only hint via
       // <link rel="canonical">.
+      let resolvedProduct: Awaited<ReturnType<typeof fetchProduct>> | null = null;
       if (page?.type === 'product') {
         const isLegacyProductPath = req.path.startsWith('/products/');
         try {
-          const resolvedProduct = await fetchProduct(page.slug);
+          resolvedProduct = await fetchProduct(page.slug);
           if (resolvedProduct) {
             const redirectTo = productRedirectTarget(req.path, resolvedProduct);
             if (redirectTo) {
@@ -1731,7 +1744,9 @@ export const createBotRenderer = (distPath: string) => {
         return;
       }
 
-      // DB-backed page enrichment — bots only (keeps non-bot requests fast with no DB queries)
+      // DB-backed page enrichment. Product pages must include a visible price and
+      // Offer schema for every user agent — Merchant Center crawls as Chrome, not
+      // Googlebot, and reports "Missing product price" on the SPA shell.
       let notFound = false;
 
       // Lightweight existence check for ALL requests — fixes cloaking pattern where
@@ -1744,13 +1759,20 @@ export const createBotRenderer = (distPath: string) => {
         const exists = await CareGuide.exists({ slug: page.slug, isPublished: true });
         if (!exists) notFound = true;
       } else if (page?.type === 'product') {
-        const exists = await Product.exists({ slug: page.slug, isActive: true });
-        if (!exists) notFound = true;
+        if (!resolvedProduct) {
+          const exists = await Product.exists({ slug: page.slug, isActive: true });
+          if (!exists) notFound = true;
+        }
       }
 
-      if ((bot || page?.type === 'neighborhood') && routeClassification.indexable && !hasQueryString(req)) {
+      const enrichHtml =
+        routeClassification.indexable &&
+        !hasQueryString(req) &&
+        (bot || page?.type === 'neighborhood' || page?.type === 'product');
+
+      if (enrichHtml) {
         if (page?.type === 'product') {
-          const product = await fetchProduct(page.slug);
+          const product = resolvedProduct ?? (await fetchProduct(page.slug));
           if (product) {
             html = buildProductHtml(template, product, page.slug);
           } else {
