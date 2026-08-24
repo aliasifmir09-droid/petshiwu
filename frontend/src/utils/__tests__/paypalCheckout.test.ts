@@ -17,6 +17,9 @@ describe('PayPal checkout', () => {
     expect(card).toContain('checkoutTokenRef.current = createdCheckoutToken');
     expect(card).toContain('const checkoutToken = checkoutTokenRef.current');
     expect(card).not.toContain('setCheckoutToken(');
+    expect(card).toContain("paymentSource: 'card'");
+    expect(card).toContain('billingAddress: toPayPalCardBillingAddress(shippingAddress)');
+    expect(card).toContain('name: cardholderName');
   });
 
   test('Place Order for PayPal scrolls to the PayPal button instead of doing nothing', () => {

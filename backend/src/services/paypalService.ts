@@ -25,6 +25,8 @@ export interface PayPalOrderResponse {
   }>;
 }
 
+export type PayPalCheckoutPaymentSource = 'card' | 'wallet';
+
 export const isPayPalLive = () => process.env.PAYPAL_ENV === 'live';
 
 export const getPayPalBaseUrl = () => (
@@ -87,13 +89,79 @@ const paypalRequest = async <T>(path: string, init: RequestInit = {}): Promise<T
 
   if (!response.ok) {
     const errorBody = await response.text();
-    throw new Error(`PayPal API request failed (${response.status}): ${errorBody.slice(0, 500)}`);
+    throw new Error(formatPayPalApiError(response.status, errorBody));
   }
 
   return await response.json() as T;
 };
 
-export const createPayPalOrder = async (amount: number, currency = 'USD', checkoutToken: string) => {
+export const formatPayPalApiError = (status: number, errorBody: string): string => {
+  try {
+    const parsed = JSON.parse(errorBody) as {
+      name?: string;
+      message?: string;
+      details?: Array<{ issue?: string; description?: string }>;
+    };
+    const issue = parsed.details?.[0]?.issue || parsed.name;
+    if (issue === 'INSTRUMENT_DECLINED') {
+      return 'This payment method was declined. Please try a different card or PayPal Wallet.';
+    }
+    if (issue === 'PAYER_CANNOT_PAY' || issue === 'PAYER_ACCOUNT_RESTRICTED') {
+      return 'PayPal could not complete this payment. Please try a different payment method.';
+    }
+    if (issue === 'CONTINGENCY' || /PAYER_ACTION_REQUIRED/i.test(parsed.name || '') || /PAYER_ACTION_REQUIRED/i.test(issue || '')) {
+      return 'This card requires extra verification. Please complete 3-D Secure and try again.';
+    }
+  } catch {
+    // Not JSON; fall through to the generic truncated body.
+  }
+
+  return `PayPal API request failed (${status}): ${errorBody.slice(0, 500)}`;
+};
+
+export const buildCreatePayPalOrderBody = (
+  amount: number,
+  currency: string,
+  checkoutToken: string,
+  paymentSource?: PayPalCheckoutPaymentSource
+) => {
+  const body: Record<string, unknown> = {
+    intent: 'CAPTURE',
+    purchase_units: [{
+      ...(checkoutToken ? { custom_id: checkoutToken, invoice_id: checkoutToken.slice(0, 127) } : {}),
+      amount: {
+        currency_code: currency,
+        value: amount.toFixed(2)
+      }
+    }],
+    application_context: {
+      user_action: 'PAY_NOW',
+      shipping_preference: 'NO_SHIPPING'
+    }
+  };
+
+  // Card Fields only. Do not attach payment_source.card to wallet / Apple Pay / Google Pay orders.
+  if (paymentSource === 'card') {
+    body.payment_source = {
+      card: {
+        attributes: {
+          verification: {
+            method: 'SCA_WHEN_REQUIRED'
+          }
+        }
+      }
+    };
+  }
+
+  return body;
+};
+
+export const createPayPalOrder = async (
+  amount: number,
+  currency = 'USD',
+  checkoutToken: string,
+  paymentSource?: PayPalCheckoutPaymentSource
+) => {
   if (!Number.isFinite(amount) || amount < 0.01) {
     throw new Error('PayPal order amount must be at least $0.01.');
   }
@@ -103,20 +171,7 @@ export const createPayPalOrder = async (amount: number, currency = 'USD', checko
     headers: {
       'PayPal-Request-Id': `petshiwu-create-${checkoutToken}`
     },
-    body: JSON.stringify({
-      intent: 'CAPTURE',
-      purchase_units: [{
-        ...(checkoutToken ? { custom_id: checkoutToken, invoice_id: checkoutToken.slice(0, 127) } : {}),
-        amount: {
-          currency_code: currency,
-          value: amount.toFixed(2)
-        }
-      }],
-      application_context: {
-        user_action: 'PAY_NOW',
-        shipping_preference: 'NO_SHIPPING'
-      }
-    })
+    body: JSON.stringify(buildCreatePayPalOrderBody(amount, currency, checkoutToken, paymentSource))
   });
 };
 

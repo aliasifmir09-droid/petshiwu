@@ -1492,7 +1492,7 @@ const sendPayPalOrderSideEffects = async (order: Awaited<ReturnType<typeof final
 // persisted before PayPal is called; capture never trusts a fresh browser cart.
 export const createPayPalCheckoutOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { items, shippingAddress, billingAddress, couponCode, donationAmount = 0, notes, guestEmail, checkoutToken: requestedCheckoutToken } = req.body;
+    const { items, shippingAddress, billingAddress, couponCode, donationAmount = 0, notes, guestEmail, checkoutToken: requestedCheckoutToken, paymentSource } = req.body;
     if (!isCompleteShippingAddress(shippingAddress)) {
       return res.status(400).json({ success: false, message: 'A complete shipping address is required before starting PayPal checkout.' });
     }
@@ -1607,7 +1607,12 @@ export const createPayPalCheckoutOrder = async (req: AuthRequest, res: Response,
     }
 
     try {
-      const paypalOrder = await createPayPalOrder(claim.totalPrice, 'USD', claim.checkoutToken);
+      const paypalOrder = await createPayPalOrder(
+        claim.totalPrice,
+        'USD',
+        claim.checkoutToken,
+        paymentSource === 'card' ? 'card' : undefined
+      );
       await PendingPayPalCheckout.updateOne(
         { _id: claim._id, status: 'creating', paypalOrderId: { $exists: false } },
         { $set: { paypalOrderId: paypalOrder.id, status: 'created' } }
