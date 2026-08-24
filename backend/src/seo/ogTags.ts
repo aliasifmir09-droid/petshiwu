@@ -16,11 +16,19 @@ const esc = (s: string): string =>
 /**
  * Cloudinary cloud dtmes0dha is disabled ("cloud_name ... is disabled" / HTTP 401).
  * Product photos live on Bunny CDN as /products/{filename}.
+ *
+ * Some records already swapped the host to petshiwu-cdn.b-cdn.net but kept the
+ * Cloudinary path (/dtmes0dha/image/upload/...), which 404s on Bunny. Map those
+ * to /products/{filename} the same way as res.cloudinary.com URLs.
  */
 export function toPublicProductImageUrl(url: string): string | undefined {
   const value = String(url || '').trim();
   if (!value) return undefined;
-  if (/res\.cloudinary\.com/i.test(value)) {
+  const isDisabledCloudinary =
+    /res\.cloudinary\.com/i.test(value) ||
+    /\/dtmes0dha\//i.test(value) ||
+    (/b-cdn\.net/i.test(value) && /\/image\/upload\//i.test(value));
+  if (isDisabledCloudinary) {
     const file = value.match(/\/products\/([^/?#]+)/i)?.[1];
     if (!file) return undefined;
     return `${BUNNY_CDN_ORIGIN}/products/${file}`;
