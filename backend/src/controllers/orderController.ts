@@ -461,13 +461,16 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
             items: fullOrderForAdmin.items.map((item) => ({
               name: item.name,
               quantity: item.quantity,
-              price: item.price
+              price: item.price,
+              image: item.image
             })),
             totalPrice: fullOrderForAdmin.totalPrice,
             itemsPrice: fullOrderForAdmin.itemsPrice,
             shippingPrice: fullOrderForAdmin.shippingPrice,
             taxPrice: fullOrderForAdmin.taxPrice,
+            donationAmount: fullOrderForAdmin.donationAmount,
             paymentMethod: fullOrderForAdmin.paymentMethod,
+            createdAt: fullOrderForAdmin.createdAt,
             shippingAddress: fullOrderForAdmin.shippingAddress
           }).catch((err) => logger.error('Admin notification email failed silently:', err));
         }
@@ -1470,12 +1473,14 @@ const sendPayPalOrderSideEffects = async (order: Awaited<ReturnType<typeof final
       customerFirstName: userDoc?.firstName || pending.shippingAddress.firstName || 'Guest',
       customerLastName: userDoc?.lastName || pending.shippingAddress.lastName || '',
       customerEmail: emailAddress || '',
-      items: fullOrder.items.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price })),
+      items: fullOrder.items.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price, image: item.image })),
       totalPrice: fullOrder.totalPrice,
       itemsPrice: fullOrder.itemsPrice,
       shippingPrice: fullOrder.shippingPrice,
       taxPrice: fullOrder.taxPrice,
+      donationAmount: fullOrder.donationAmount,
       paymentMethod: fullOrder.paymentMethod,
+      createdAt: fullOrder.createdAt,
       shippingAddress: fullOrder.shippingAddress
     }).catch((error) => logger.error('PayPal admin notification failed:', error));
   } catch (error) {
