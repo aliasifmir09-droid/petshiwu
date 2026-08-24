@@ -100,6 +100,7 @@ export const orderService = {
     couponCode?: string;
     donationAmount?: number;
     checkoutToken?: string;
+    paymentSource?: 'card' | 'wallet';
   }) => {
     const response = await api.post<ApiResponse<{ paypalOrderId: string; checkoutToken: string; status: string; amount: number; currency: string }>>('/orders/paypal/create-order', data);
     return response.data;

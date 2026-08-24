@@ -9,7 +9,7 @@ import {
 import { AlertCircle, CreditCard, Loader2, Lock } from 'lucide-react';
 import { paypalClientId, paypalSdkEnvironment } from '@/config/paypal';
 import { orderService } from '@/services/orders';
-import type { ShippingAddress, Order } from '@/types';
+import { toPayPalCardBillingAddress, toPayPalCardholderName } from '@/utils/paypalBillingAddress';
 
 interface PayPalItemInput {
   product: string;
@@ -48,7 +48,8 @@ const CardFieldsContent = ({
   onSetProcessing,
   onError,
   onCancel,
-  onSwitchToWallet
+  onSwitchToWallet,
+  shippingAddress
 }: CardFieldsContentProps) => {
   const [{ isPending }] = usePayPalScriptReducer();
   const { cardFieldsForm } = usePayPalCardFields();
@@ -70,9 +71,16 @@ const CardFieldsContent = ({
     onSetProcessing(true);
     onSetError(null);
     try {
-      await cardFieldsForm.submit();
+      const cardholderName = toPayPalCardholderName(shippingAddress);
+      await cardFieldsForm.submit({
+        ...(cardholderName ? { name: cardholderName } : {}),
+        billingAddress: toPayPalCardBillingAddress(shippingAddress)
+      });
     } catch (err: any) {
-      const errorMsg = err?.message || 'Please check your card details and try again.';
+      const raw = String(err?.message || '');
+      const errorMsg = /INSTRUMENT_DECLINED/i.test(raw)
+        ? 'This card was declined. Please try a different card or PayPal Wallet.'
+        : raw || 'Please check your card details and try again.';
       onSetError(errorMsg);
       onError(errorMsg);
       onSetProcessing(false);
@@ -216,7 +224,8 @@ const PayPalCardFields = (props: PayPalCardFieldsProps) => {
         notes: props.notes,
         couponCode: props.couponCode,
         donationAmount: props.donationAmount,
-        checkoutToken: checkoutTokenRef.current
+        checkoutToken: checkoutTokenRef.current,
+        paymentSource: 'card'
       });
       const paypalOrderId = response.data?.paypalOrderId;
       const createdCheckoutToken = response.data?.checkoutToken;

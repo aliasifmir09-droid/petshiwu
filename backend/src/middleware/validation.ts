@@ -632,6 +632,7 @@ export const createPayPalOrderValidation = [
   body('shippingAddress').isObject().withMessage('Shipping address is required'),
   body('guestEmail').optional({ nullable: true }).trim().isEmail().withMessage('Invalid guest email'),
   body('checkoutToken').optional().trim().matches(/^[a-zA-Z0-9_-]{20,100}$/).withMessage('Invalid checkout token'),
+  body('paymentSource').optional().isIn(['card', 'wallet']).withMessage('Invalid PayPal payment source'),
   validate
 ];
 
