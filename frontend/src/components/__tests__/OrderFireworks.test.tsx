@@ -56,5 +56,7 @@ describe('checkout celebration handoff', () => {
     );
     expect(orderDetail).toContain('OrderFireworks');
     expect(track).toContain('OrderFireworks');
+    expect(track).toContain("searchParams.get('newOrder') === 'true'");
+    expect(orderDetail).toContain("searchParams.get('newOrder') === 'true'");
   });
 });

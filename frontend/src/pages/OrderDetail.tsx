@@ -57,6 +57,12 @@ const OrderDetail = () => {
 
   // After a fresh checkout, blast fireworks first so the shopper knows it landed.
   useEffect(() => {
+    if (searchParams.get('newOrder') === 'true') {
+      setCelebrate(true);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     if (!wasNewOrderRef.current || !order || isLoading) return;
     const timer = setTimeout(() => {
       setShowDonationModal(true);

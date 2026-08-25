@@ -127,12 +127,14 @@ const OrderFireworks = ({ active, onDone }: OrderFireworksProps) => {
   const [visible, setVisible] = useState(active);
   const [fading, setFading] = useState(false);
   const finishedRef = useRef(false);
+  const clickableAtRef = useRef(Number.POSITIVE_INFINITY);
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
 
   useEffect(() => {
     if (active) {
       finishedRef.current = false;
+      clickableAtRef.current = Date.now() + 1800;
       setVisible(true);
       setFading(false);
     }
@@ -280,6 +282,7 @@ const OrderFireworks = ({ active, onDone }: OrderFireworksProps) => {
   }, [active, visible]);
 
   const dismissNow = () => {
+    if (Date.now() < clickableAtRef.current) return;
     if (finishedRef.current || fading) {
       if (!finishedRef.current) {
         finishedRef.current = true;
@@ -301,7 +304,7 @@ const OrderFireworks = ({ active, onDone }: OrderFireworksProps) => {
 
   return (
     <div
-      className={`fixed inset-0 z-[90] flex items-center justify-center px-3 transition-opacity duration-700 ${fading ? 'opacity-0' : 'opacity-100'}`}
+      className={`fixed inset-0 z-[200] flex items-center justify-center px-3 transition-opacity duration-700 ${fading ? 'opacity-0' : 'opacity-100'}`}
       role="status"
       aria-live="polite"
       onClick={dismissNow}

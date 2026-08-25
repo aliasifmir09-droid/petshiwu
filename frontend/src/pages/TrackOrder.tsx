@@ -19,6 +19,12 @@ const TrackOrder = () => {
     }
   }, [searchParams, searchOrderId]);
 
+  useEffect(() => {
+    if (searchParams.get('newOrder') === 'true') {
+      setCelebrate(true);
+    }
+  }, [searchParams]);
+
   const { data: order, isLoading, error } = useQuery({
     queryKey: ['trackOrder', searchOrderId],
     queryFn: () => orderService.trackOrder(searchOrderId),
