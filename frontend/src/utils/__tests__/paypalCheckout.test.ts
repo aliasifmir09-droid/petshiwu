@@ -22,11 +22,33 @@ describe('PayPal checkout', () => {
   test('Place Order for PayPal scrolls to the PayPal button instead of doing nothing', () => {
     const checkout = read('../../pages/Checkout.tsx');
     expect(checkout).toContain("getElementById('paypal-payment')");
-    expect(checkout).toContain('Click the PayPal button to complete your payment.');
+    expect(checkout).toContain('Click Apple Pay, Google Pay, or a PayPal button to complete your payment.');
     expect(checkout).toContain('Continue to PayPal');
     expect(checkout).not.toMatch(
       /if \(paymentMethod === 'paypal' \|\| paymentMethod === 'apple_pay' \|\| paymentMethod === 'google_pay'\) return;/
     );
+  });
+
+  test('checkout shows branded Apple Pay, Google Pay, and PayPal instead of a plain radio list', () => {
+    const checkout = read('../../pages/Checkout.tsx');
+    const branded = read('../../components/CheckoutBrandedPayments.tsx');
+    const paypalConfig = fs.readFileSync(
+      path.resolve(__dirname, '../../config/paypal.ts'),
+      'utf8'
+    );
+
+    expect(checkout).toContain('CheckoutBrandedPayments');
+    expect(checkout).not.toContain('Pay with Apple Pay through PayPal');
+    expect(checkout).not.toContain('Pay with Google Pay through PayPal');
+    expect(checkout).not.toContain('Pay securely by card through PayPal');
+    expect(checkout).not.toContain('PayPal Wallet');
+    expect(checkout).toContain('Cash on Delivery');
+    expect(checkout).toContain("setPaymentMethod('cod')");
+
+    expect(branded).toContain('PayPalApplePay');
+    expect(branded).toContain('PayPalGooglePay');
+    expect(branded).toContain('skipProvider');
+    expect(paypalConfig).toContain("components: 'buttons,applepay,googlepay'");
   });
 
   test('checkout warns when PayPal is still in sandbox test mode', () => {

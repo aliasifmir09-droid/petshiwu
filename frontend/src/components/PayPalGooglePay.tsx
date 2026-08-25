@@ -338,12 +338,8 @@ const PayPalGooglePay = ({
     }
   };
 
-  if (status === 'loading') {
-    return <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center text-sm text-gray-700">Checking Google Pay availability…</div>;
-  }
-
-  if (status === 'unavailable') {
-    return <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center text-sm text-gray-700">{error || unavailableMessage}</div>;
+  if (status === 'loading' || status === 'unavailable') {
+    return null;
   }
 
   return (
