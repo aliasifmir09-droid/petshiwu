@@ -146,6 +146,10 @@ const PayPalGooglePay = ({
   const googleConfigRef = useRef<GooglePayConfig | null>(null);
   const captureInFlightRef = useRef(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const totalRef = useRef(total);
+  const donationAmountRef = useRef(donationAmount);
+  totalRef.current = total;
+  donationAmountRef.current = donationAmount;
   const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID as string | undefined;
 
   useEffect(() => {
@@ -260,7 +264,7 @@ const PayPalGooglePay = ({
         transactionInfo: {
           currencyCode: 'USD',
           totalPriceStatus: 'FINAL',
-          totalPrice: total.toFixed(2),
+          totalPrice: totalRef.current.toFixed(2),
         },
         emailRequired: true,
         shippingAddressRequired: true,
@@ -299,7 +303,7 @@ const PayPalGooglePay = ({
         guestEmail: normalizedGuestEmail,
         notes,
         couponCode,
-        donationAmount,
+        donationAmount: donationAmountRef.current,
       });
       const paypalOrderId = createResponse.data?.paypalOrderId;
       const checkoutToken = createResponse.data?.checkoutToken;

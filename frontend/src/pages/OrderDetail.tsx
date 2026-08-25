@@ -64,6 +64,7 @@ const OrderDetail = () => {
 
   useEffect(() => {
     if (!wasNewOrderRef.current || !order || isLoading) return;
+    if ((order.donationAmount || 0) > 0) return;
     const timer = setTimeout(() => {
       setShowDonationModal(true);
     }, 8000);

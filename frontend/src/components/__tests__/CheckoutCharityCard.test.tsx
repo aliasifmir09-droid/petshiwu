@@ -12,13 +12,14 @@ describe('CheckoutCharityCard', () => {
     expect(screen.getByText(/optional/i)).toBeInTheDocument();
     expect(screen.getByText('a treat')).toBeInTheDocument();
     expect(screen.getByText('a meal')).toBeInTheDocument();
-    expect(screen.getByText('a bed')).toBeInTheDocument();
-    expect(screen.getByText('a week')).toBeInTheDocument();
+    expect(screen.getByText('a cozy bed')).toBeInTheDocument();
+    expect(screen.getByText("a week's care")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Donate $5 to animal rescue' }));
     expect(onChange).toHaveBeenCalledWith(5);
 
     rerender(<CheckoutCharityCard amount={5} onChange={onChange} />);
+    expect(screen.getByText('Thank you, pet parent.')).toBeInTheDocument();
     expect(screen.getByText('$5.00 will help a shelter pet rest tonight.')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove donation' }));
