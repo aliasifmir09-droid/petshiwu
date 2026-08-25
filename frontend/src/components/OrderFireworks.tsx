@@ -27,7 +27,7 @@ const CONFETTI = [
 const PetFamily = () => (
   <svg
     viewBox="0 0 920 360"
-    className="mx-auto h-auto w-[min(92vw,56rem)] drop-shadow-[0_28px_60px_rgba(15,23,42,0.45)]"
+    className="mx-auto h-auto w-[min(98vw,80rem)] drop-shadow-[0_28px_60px_rgba(15,23,42,0.45)]"
     role="img"
     aria-label="Celebrating pet family"
   >
@@ -310,7 +310,7 @@ const OrderFireworks = ({ active, onDone }: OrderFireworksProps) => {
       onClick={dismissNow}
     >
       <style>{`
-        @keyframes orderCeleBounce { 0%,100% { transform: translateY(0) rotate(0) } 50% { transform: translateY(-28px) rotate(-2deg) } }
+        @keyframes orderCeleBounce { 0%,100% { transform: translateY(0) rotate(0) } 50% { transform: translateY(-36px) rotate(-3deg) } }
         @keyframes orderCeleWag { 0%,100% { transform: rotate(-22deg) } 50% { transform: rotate(32deg) } }
         @keyframes orderCeleTail { 0%,100% { transform: rotate(-10deg) } 50% { transform: rotate(18deg) } }
         @keyframes orderCeleEar { 0%,100% { transform: rotate(-6deg) } 50% { transform: rotate(10deg) } }
