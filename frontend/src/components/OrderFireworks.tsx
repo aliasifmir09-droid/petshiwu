@@ -132,12 +132,24 @@ const OrderFireworks = ({ active, onDone }: OrderFireworksProps) => {
   onDoneRef.current = onDone;
 
   useEffect(() => {
-    if (active) {
-      finishedRef.current = false;
-      clickableAtRef.current = Date.now() + 1800;
-      setVisible(true);
-      setFading(false);
-    }
+    if (!active) return;
+    finishedRef.current = false;
+    clickableAtRef.current = Date.now() + 1800;
+    setVisible(true);
+    setFading(false);
+
+    const fadeTimer = window.setTimeout(() => setFading(true), SHOW_MS - FADE_MS);
+    const timer = window.setTimeout(() => {
+      if (finishedRef.current) return;
+      finishedRef.current = true;
+      setVisible(false);
+      onDoneRef.current?.();
+    }, SHOW_MS);
+
+    return () => {
+      window.clearTimeout(timer);
+      window.clearTimeout(fadeTimer);
+    };
   }, [active]);
 
   useEffect(() => {
@@ -145,39 +157,15 @@ const OrderFireworks = ({ active, onDone }: OrderFireworksProps) => {
 
     const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     const canvas = canvasRef.current;
+    if (reduceMotion || !canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
     const sparks: Spark[] = [];
     let frame = 0;
     let running = true;
     let raf = 0;
-
-    const finish = () => {
-      if (finishedRef.current) return;
-      finishedRef.current = true;
-      running = false;
-      cancelAnimationFrame(raf);
-      setVisible(false);
-      setFading(false);
-      onDoneRef.current?.();
-    };
-
-    const fadeTimer = window.setTimeout(() => setFading(true), SHOW_MS - FADE_MS);
-    const timer = window.setTimeout(finish, SHOW_MS);
-
-    if (reduceMotion || !canvas) {
-      return () => {
-        running = false;
-        window.clearTimeout(timer);
-        window.clearTimeout(fadeTimer);
-      };
-    }
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      return () => {
-        window.clearTimeout(timer);
-        window.clearTimeout(fadeTimer);
-      };
-    }
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -274,8 +262,6 @@ const OrderFireworks = ({ active, onDone }: OrderFireworksProps) => {
 
     return () => {
       running = false;
-      window.clearTimeout(timer);
-      window.clearTimeout(fadeTimer);
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
     };
