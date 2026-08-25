@@ -60,7 +60,7 @@ const OrderDetail = () => {
     if (!wasNewOrderRef.current || !order || isLoading) return;
     const timer = setTimeout(() => {
       setShowDonationModal(true);
-    }, 4200);
+    }, 8000);
     return () => clearTimeout(timer);
   }, [order, isLoading]);
 

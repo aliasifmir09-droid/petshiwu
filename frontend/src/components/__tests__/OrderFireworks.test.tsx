@@ -1,21 +1,37 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { describe, expect, test, vi } from 'vitest';
 import OrderFireworks from '../OrderFireworks';
 import fs from 'fs';
 import path from 'path';
 
 describe('OrderFireworks', () => {
-  test('tells the shopper the order is done when celebration is active', () => {
+  test('shows a big animated pet-family celebration when an order completes', () => {
     HTMLCanvasElement.prototype.getContext = vi.fn(() => null);
     render(<OrderFireworks active />);
     expect(screen.getByText("It's done")).toBeInTheDocument();
     expect(screen.getByText('Your order is placed')).toBeInTheDocument();
+    expect(screen.getByText('Your pet family is celebrating with you.')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Celebrating pet family' })).toBeInTheDocument();
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
   test('stays hidden until an order actually completes', () => {
     const { container } = render(<OrderFireworks active={false} />);
     expect(container).toBeEmptyDOMElement();
+  });
+
+  test('fades away and disappears after the celebration', () => {
+    vi.useFakeTimers();
+    HTMLCanvasElement.prototype.getContext = vi.fn(() => null);
+    const onDone = vi.fn();
+    const { container } = render(<OrderFireworks active onDone={onDone} />);
+    expect(screen.getByRole('img', { name: 'Celebrating pet family' })).toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(7200);
+    });
+    expect(onDone).toHaveBeenCalledTimes(1);
+    expect(container).toBeEmptyDOMElement();
+    vi.useRealTimers();
   });
 });
 
