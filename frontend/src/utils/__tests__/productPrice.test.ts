@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import {
   canonicalPetTypeSlug,
+  catalogPetType,
   getListingPrice,
   getListingVariant,
   getValidCompareAtPrice,
@@ -60,5 +61,10 @@ describe('productPrice', () => {
     expect(canonicalPetTypeSlug('small pet')).toBe('small-animal');
     expect(canonicalPetTypeSlug('small-pet')).toBe('small-animal');
     expect(canonicalPetTypeSlug('Dog')).toBe('dog');
+  });
+
+  test('maps /small-animal shop URLs back to catalog small-pet', () => {
+    expect(catalogPetType('small-animal')).toBe('small-pet');
+    expect(catalogPetType('small pet')).toBe('small-pet');
   });
 });

@@ -10,6 +10,16 @@ export const canonicalPetTypeSlug = (petType: unknown): string => {
   return slug;
 };
 
+/** Pet type sent to the products API (catalog uses small-pet, URLs use /small-animal). */
+export const catalogPetType = (petType: unknown): string => {
+  const slug = String(petType || '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-');
+  if (slug === 'small-animal') return 'small-pet';
+  return slug;
+};
+
 export const getValidCompareAtPrice = (
   price: number,
   compareAt?: number | null

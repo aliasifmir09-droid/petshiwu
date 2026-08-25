@@ -11,6 +11,7 @@ import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import { useSEO } from '@/hooks/useSEO';
 import { generateProductUrl } from '@/utils/productUrl';
+import { catalogPetType, canonicalPetTypeSlug } from '@/utils/productPrice';
 
 const PetType = () => {
   const { petType: petTypeParam } = useParams<{ petType: string }>();
@@ -19,7 +20,9 @@ const PetType = () => {
 
   // Normalize petType to slug format (hyphens) - handles both "small-pet" and "small pet" from URL
   // This ensures consistency with backend expectations
-  const petType = petTypeParam ? petTypeParam.toLowerCase().trim().replace(/\s+/g, '-') : '';
+  const urlPetType = petTypeParam ? petTypeParam.toLowerCase().trim().replace(/\s+/g, '-') : '';
+  const petType = catalogPetType(urlPetType);
+  const pathSlug = canonicalPetTypeSlug(urlPetType) || urlPetType;
 
   const page = parseInt(searchParams.get('page') || '1');
   const sort = searchParams.get('sort') || 'newest';
@@ -94,7 +97,7 @@ const PetType = () => {
     context: { petType },
     breadcrumbs: [
       { name: 'Home', url: '/' },
-      { name: petTypeDisplay, url: `/${petType}` }
+      { name: petTypeDisplay, url: `/${pathSlug}` }
     ],
     items: products?.data.slice(0, 20).map((product) => ({
       name: product.name,
