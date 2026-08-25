@@ -7,15 +7,19 @@ describe('CheckoutCharityCard', () => {
     const onChange = vi.fn();
     const { rerender } = render(<CheckoutCharityCard amount={0} onChange={onChange} />);
 
-    expect(screen.getByText('Help a shelter pet')).toBeInTheDocument();
-    expect(screen.getByText(/animal rescue and shelter care/i)).toBeInTheDocument();
+    expect(screen.getByText('From one pet parent to another')).toBeInTheDocument();
+    expect(screen.getByText(/still waiting for a home/i)).toBeInTheDocument();
     expect(screen.getByText(/optional/i)).toBeInTheDocument();
+    expect(screen.getByText('a treat')).toBeInTheDocument();
+    expect(screen.getByText('a meal')).toBeInTheDocument();
+    expect(screen.getByText('a bed')).toBeInTheDocument();
+    expect(screen.getByText('a week')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Donate $5 to animal rescue' }));
     expect(onChange).toHaveBeenCalledWith(5);
 
     rerender(<CheckoutCharityCard amount={5} onChange={onChange} />);
-    expect(screen.getByText('$5.00 added for shelter support')).toBeInTheDocument();
+    expect(screen.getByText('$5.00 will help a shelter pet rest tonight.')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove donation' }));
     expect(onChange).toHaveBeenCalledWith(0);
@@ -25,7 +29,7 @@ describe('CheckoutCharityCard', () => {
     const onChange = vi.fn();
     render(<CheckoutCharityCard amount={0} onChange={onChange} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Other amount' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Give a different amount' }));
     const input = screen.getByLabelText('Custom donation amount');
     fireEvent.change(input, { target: { value: '7.50' } });
     fireEvent.keyDown(input, { key: 'Enter' });

@@ -13,6 +13,10 @@ describe('checkout charity donation', () => {
     expect(checkout).toContain('Shelter donation');
     expect(checkout).not.toContain('CheckoutDonationModal');
     expect(checkout).not.toContain('donationAmount={0}');
+    const card = read('../../components/CheckoutCharityCard.tsx');
+    expect(card).toContain('From one pet parent to another');
+    expect(card).toContain('a treat');
+    expect(card).toContain('a bed');
   });
 
   test('checkout charges the selected donation with the order instead of stripping it after payment', () => {

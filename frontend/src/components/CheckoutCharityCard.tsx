@@ -1,9 +1,18 @@
 import { useEffect, useState } from 'react';
-import { HeartHandshake, PawPrint, X } from 'lucide-react';
+import { Heart, PawPrint, X } from 'lucide-react';
 
 export const CHECKOUT_CHARITY_PRESETS = [1, 3, 5, 10] as const;
+
+const GIFT_LABELS: Record<(typeof CHECKOUT_CHARITY_PRESETS)[number], string> = {
+  1: 'a treat',
+  3: 'a meal',
+  5: 'a bed',
+  10: 'a week'
+};
+
 const MIN_CUSTOM_DONATION = 1;
 const MAX_CUSTOM_DONATION = 500;
+const PET_PARENT_FONT = "'Nunito', 'Segoe UI', sans-serif";
 
 interface CheckoutCharityCardProps {
   amount: number;
@@ -12,6 +21,30 @@ interface CheckoutCharityCardProps {
 
 const isPreset = (value: number) =>
   CHECKOUT_CHARITY_PRESETS.some((preset) => preset === value);
+
+const SleepingPetMark = () => (
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 78 46"
+    className="pointer-events-none absolute right-1.5 top-1.5 h-12 w-[4.75rem] text-rose-200"
+  >
+    <ellipse cx="42" cy="30" rx="26" ry="13" fill="currentColor" />
+    <path
+      fill="currentColor"
+      d="M18 28c1-11 10-18 24-18 7 0 13 2 17 6l5-10 5 9 6-8 3 11c3 3 5 7 5 11 0 8-12 13-31 13-16 0-29-4-29-14z"
+    />
+    <path fill="#fda4af" d="M28 12l-6-8 10 5 4 7zM48 10l8-9-2 11-6 4z" />
+    <circle cx="36" cy="26" r="1.7" fill="#9f1239" />
+    <circle cx="46" cy="26" r="1.7" fill="#9f1239" />
+    <path
+      d="M38 31c3 2 8 2 11 0"
+      fill="none"
+      stroke="#9f1239"
+      strokeLinecap="round"
+      strokeWidth="1.5"
+    />
+  </svg>
+);
 
 const CheckoutCharityCard = ({ amount, onChange }: CheckoutCharityCardProps) => {
   const [showCustom, setShowCustom] = useState(amount > 0 && !isPreset(amount));
@@ -50,51 +83,66 @@ const CheckoutCharityCard = ({ amount, onChange }: CheckoutCharityCardProps) => 
   return (
     <section
       aria-label="Optional donation to animal rescue"
-      className="relative overflow-hidden rounded-2xl border border-rose-100 bg-gradient-to-br from-rose-50 via-white to-amber-50/70 p-4 shadow-[0_10px_30px_-18px_rgba(190,24,93,0.45)]"
+      className="relative overflow-hidden rounded-[1.4rem] border border-rose-100/90 p-4"
+      style={{
+        fontFamily: PET_PARENT_FONT,
+        background:
+          'linear-gradient(160deg, #fff7f5 0%, #fff 42%, #fff4e6 100%)',
+        boxShadow: '0 16px 34px -22px rgba(159, 18, 57, 0.45), inset 0 1px 0 rgba(255,255,255,0.9)'
+      }}
     >
+      <SleepingPetMark />
       <PawPrint
         aria-hidden="true"
-        className="pointer-events-none absolute -right-3 -top-3 h-24 w-24 rotate-12 text-rose-200/50"
+        className="pointer-events-none absolute -bottom-3 -left-2 h-16 w-16 -rotate-12 text-amber-200/50"
       />
 
       <div className="relative">
-        <div className="mb-3 flex items-start gap-3">
-          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 shadow-md shadow-rose-200">
-            <HeartHandshake className="text-white" size={22} />
+        <div className="mb-3 flex items-start gap-3 pr-16">
+          <div className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 via-pink-500 to-orange-400 shadow-[0_8px_18px_-8px_rgba(244,63,94,0.9)]">
+            <Heart className="text-white" size={20} fill="currentColor" />
+            <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-rose-100">
+              <PawPrint className="text-rose-500" size={11} fill="currentColor" />
+            </span>
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-base font-bold tracking-tight text-gray-900">
-                Help a shelter pet
+              <h3 className="text-[1.05rem] font-extrabold leading-tight tracking-tight text-stone-800">
+                From one pet parent to another
               </h3>
-              <span className="rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-700 ring-1 ring-rose-100">
+              <span className="rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-rose-600 ring-1 ring-rose-100">
                 Optional
               </span>
             </div>
-            <p className="mt-1 text-sm leading-snug text-gray-600">
-              Add a small gift for animal rescue and shelter care. Skip anytime — no pressure.
+            <p className="mt-1.5 text-sm leading-snug text-stone-600">
+              The same love you give your pet can help one still waiting for a home.
             </p>
           </div>
         </div>
 
         {amount > 0 && (
-          <div className="mb-3 flex items-center justify-between gap-2 rounded-xl bg-white/90 px-3 py-2 ring-1 ring-rose-100">
-            <p className="text-sm font-semibold text-rose-700">
-              ${amount.toFixed(2)} added for shelter support
-            </p>
+          <div className="mb-3 flex items-start justify-between gap-2 rounded-2xl bg-white/95 px-3 py-2.5 shadow-sm ring-1 ring-rose-100">
+            <div className="min-w-0">
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-rose-500">
+                Thank you
+              </p>
+              <p className="text-sm font-bold leading-snug text-stone-800">
+                ${amount.toFixed(2)} will help a shelter pet rest tonight.
+              </p>
+            </div>
             <button
               type="button"
               onClick={() => onChange(0)}
-              className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium text-gray-500 hover:bg-rose-50 hover:text-gray-800"
+              className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-bold text-stone-500 hover:bg-rose-50 hover:text-stone-800"
               aria-label="Remove donation"
             >
               <X size={14} />
-              Remove
+              Not now
             </button>
           </div>
         )}
 
-        <div className="grid grid-cols-4 gap-2" role="group" aria-label="Donation amounts">
+        <div className="grid grid-cols-4 gap-1.5" role="group" aria-label="Donation amounts">
           {CHECKOUT_CHARITY_PRESETS.map((preset) => {
             const selected = amount === preset && !showCustom;
             return (
@@ -104,13 +152,21 @@ const CheckoutCharityCard = ({ amount, onChange }: CheckoutCharityCardProps) => 
                 aria-pressed={selected}
                 aria-label={`Donate $${preset} to animal rescue`}
                 onClick={() => selectPreset(preset)}
-                className={`rounded-xl px-2 py-2.5 text-sm font-bold transition-all ${
+                className={`group flex min-h-[4.25rem] flex-col items-center justify-center rounded-2xl px-1 py-2 transition-all duration-200 ${
                   selected
-                    ? 'bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-md shadow-rose-200 ring-2 ring-white'
-                    : 'bg-white text-gray-800 ring-1 ring-rose-100 hover:bg-rose-50 hover:ring-rose-200'
+                    ? 'bg-gradient-to-b from-rose-500 to-pink-600 text-white shadow-[0_10px_18px_-10px_rgba(244,63,94,0.95)] ring-2 ring-white'
+                    : 'bg-white text-stone-800 shadow-sm ring-1 ring-rose-100 hover:-translate-y-0.5 hover:bg-rose-50 hover:shadow-md hover:ring-rose-200'
                 }`}
               >
-                ${preset}
+                {selected ? (
+                  <Heart size={11} fill="currentColor" className="mb-0.5 text-rose-100" />
+                ) : (
+                  <PawPrint size={11} className="mb-0.5 text-rose-300 group-hover:text-rose-500" />
+                )}
+                <span className="text-[15px] font-black leading-none">${preset}</span>
+                <span className={`mt-1 text-[10px] font-bold leading-none ${selected ? 'text-rose-100' : 'text-stone-500'}`}>
+                  {GIFT_LABELS[preset]}
+                </span>
               </button>
             );
           })}
@@ -124,13 +180,9 @@ const CheckoutCharityCard = ({ amount, onChange }: CheckoutCharityCardProps) => 
             setShowCustom(next);
             if (!next && !isPreset(amount)) onChange(0);
           }}
-          className={`mt-2 w-full rounded-xl px-3 py-2 text-sm font-semibold transition-all ${
-            showCustom
-              ? 'bg-rose-600 text-white shadow-sm'
-              : 'bg-white/80 text-gray-700 ring-1 ring-rose-100 hover:bg-white'
-          }`}
+          className="mt-2.5 w-full text-center text-sm font-bold text-rose-600 underline-offset-4 hover:text-rose-700 hover:underline"
         >
-          Other amount
+          {showCustom ? 'Hide other amount' : 'Give a different amount'}
         </button>
 
         {showCustom && (
@@ -139,7 +191,7 @@ const CheckoutCharityCard = ({ amount, onChange }: CheckoutCharityCardProps) => 
               Custom donation amount
             </label>
             <div className="relative">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-gray-500">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-extrabold text-rose-400">
                 $
               </span>
               <input
@@ -150,7 +202,7 @@ const CheckoutCharityCard = ({ amount, onChange }: CheckoutCharityCardProps) => 
                 step="0.01"
                 inputMode="decimal"
                 value={customValue}
-                placeholder="Enter amount"
+                placeholder="Your gift"
                 onChange={(event) => setCustomValue(event.target.value)}
                 onBlur={(event) => applyCustomAmount(event.target.value)}
                 onKeyDown={(event) => {
@@ -159,14 +211,14 @@ const CheckoutCharityCard = ({ amount, onChange }: CheckoutCharityCardProps) => 
                     applyCustomAmount(customValue);
                   }
                 }}
-                className="w-full rounded-xl border border-rose-200 bg-white py-2.5 pl-7 pr-3 text-sm font-semibold text-gray-900 outline-none ring-rose-200 placeholder:font-normal placeholder:text-gray-400 focus:border-rose-400 focus:ring-2"
+                className="w-full rounded-2xl border border-rose-200 bg-white py-2.5 pl-7 pr-3 text-sm font-bold text-stone-800 outline-none placeholder:font-semibold placeholder:text-stone-400 focus:border-rose-400 focus:ring-2 focus:ring-rose-200"
               />
             </div>
           </div>
         )}
 
-        <p className="mt-3 text-[11px] leading-relaxed text-gray-500">
-          100% of this add-on supports animal shelters and rescue groups. It is added to your order total only if you choose an amount.
+        <p className="mt-3 text-[11px] leading-relaxed text-stone-500">
+          Goes to NYC animal shelters and rescue groups. Skip anytime — no pressure.
         </p>
       </div>
     </section>
