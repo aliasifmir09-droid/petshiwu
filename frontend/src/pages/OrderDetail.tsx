@@ -3,9 +3,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orderService } from '@/services/orders';
 import ProductReviewForm from '@/components/ProductReviewForm';
 import { Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, ArrowLeft } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import DonationModal from '@/components/DonationModal';
+import OrderFireworks from '@/components/OrderFireworks';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { trackOrderCancel } from '@/utils/analytics';
@@ -17,6 +18,9 @@ const OrderDetail = () => {
   const { toast, showToast, hideToast } = useToast();
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showDonationModal, setShowDonationModal] = useState(false);
+  const isNewOrder = searchParams.get('newOrder') === 'true';
+  const wasNewOrderRef = useRef(isNewOrder);
+  const [celebrate, setCelebrate] = useState(isNewOrder);
 
   // Helper function to extract order ID as string
   const extractOrderId = (id: any): string => {
@@ -51,20 +55,14 @@ const OrderDetail = () => {
     retry: false // Don't retry on error
   });
 
-  // Check if this is a new order and show donation modal
+  // After a fresh checkout, blast fireworks first so the shopper knows it landed.
   useEffect(() => {
-    const isNewOrder = searchParams.get('newOrder') === 'true';
-    if (isNewOrder && order && !isLoading) {
-      // Show modal after a short delay for better UX
-      const timer = setTimeout(() => {
-        setShowDonationModal(true);
-        // Remove the query parameter from URL
-        searchParams.delete('newOrder');
-        setSearchParams(searchParams, { replace: true });
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [order, isLoading, searchParams, setSearchParams]);
+    if (!wasNewOrderRef.current || !order || isLoading) return;
+    const timer = setTimeout(() => {
+      setShowDonationModal(true);
+    }, 4200);
+    return () => clearTimeout(timer);
+  }, [order, isLoading]);
 
   const cancelOrderMutation = useMutation({
     mutationFn: orderService.cancelOrder,
@@ -125,9 +123,20 @@ const OrderDetail = () => {
     }
   };
 
+  const clearNewOrderParam = () => {
+    setCelebrate(false);
+    if (searchParams.get('newOrder') === 'true') {
+      searchParams.delete('newOrder');
+      setSearchParams(searchParams, { replace: true });
+    }
+  };
+
+  const fireworks = celebrate ? <OrderFireworks active onDone={clearNewOrderParam} /> : null;
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 lg:px-8 py-8">
+        {fireworks}
         <div className="flex justify-center items-center py-20" role="status" aria-label="Loading order details">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" aria-hidden="true"></div>
           <span className="sr-only">Loading order details...</span>
@@ -140,6 +149,7 @@ const OrderDetail = () => {
     const errorMessage = (error as any)?.response?.data?.message || (error as any)?.message || 'Failed to load order';
     return (
       <div className="container mx-auto px-4 lg:px-8 py-8">
+        {fireworks}
         <div className="text-center py-20">
           <h2 className="text-2xl font-bold mb-4 text-red-600">Error Loading Order</h2>
           <p className="text-gray-600 mb-4">{errorMessage}</p>
@@ -154,6 +164,7 @@ const OrderDetail = () => {
   if (!order && !isLoading) {
     return (
       <div className="container mx-auto px-4 lg:px-8 py-8">
+        {fireworks}
         <div className="text-center py-20">
           <h2 className="text-2xl font-bold mb-4">Order Not Found</h2>
           <p className="text-gray-600 mb-4">The order you're looking for doesn't exist or you don't have permission to view it.</p>
@@ -172,6 +183,7 @@ const OrderDetail = () => {
 
   return (
     <div className="container mx-auto px-4 lg:px-8 py-8">
+      {fireworks}
       <div className="max-w-6xl mx-auto">
         {/* Back Button */}
         <Link

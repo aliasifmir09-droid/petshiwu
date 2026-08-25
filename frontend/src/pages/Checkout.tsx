@@ -413,7 +413,7 @@ const Checkout = () => {
       await queryClient.invalidateQueries({ queryKey: ['order'] });
       // For guests, navigate to track order page instead of my orders
       if (!isAuthenticated) {
-        navigate(`/track-order?order=${order.orderNumber || orderId}`);
+        navigate(`/track-order?order=${order.orderNumber || orderId}&newOrder=true`);
       } else {
         navigate(`/orders/${orderId}?newOrder=true`);
       }
@@ -575,7 +575,7 @@ const Checkout = () => {
     await queryClient.invalidateQueries({ queryKey: ['orders'] });
     await queryClient.invalidateQueries({ queryKey: ['order'] });
     if (!isAuthenticated) {
-      navigate(`/track-order?order=${order.orderNumber || orderId}`);
+      navigate(`/track-order?order=${order.orderNumber || orderId}&newOrder=true`);
     } else {
       navigate(`/orders/${orderId}?newOrder=true`);
     }
