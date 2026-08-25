@@ -439,7 +439,7 @@ const ProductComparison = () => {
               {products.map((product) => (
                 <td key={product._id} className="p-4 text-center">
                   <span className="text-lg font-bold">${product.basePrice.toFixed(2)}</span>
-                  {product.compareAtPrice && (
+                  {product.compareAtPrice && product.compareAtPrice > product.basePrice && (
                     <span className="text-sm text-gray-500 line-through ml-2">
                       ${product.compareAtPrice.toFixed(2)}
                     </span>

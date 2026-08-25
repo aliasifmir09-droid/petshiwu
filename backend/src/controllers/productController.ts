@@ -103,7 +103,10 @@ const normalizeProductId = (product: ProductWithVariants | null | unknown): Norm
     images: resolvedImages,
     _id: plainProduct._id ? String(plainProduct._id) : '',
     totalStock: stockData.totalStock,
-    inStock: stockData.inStock
+    inStock: stockData.inStock,
+    petType: plainProduct.petType
+      ? String(plainProduct.petType).toLowerCase().trim().replace(/\s+/g, '-')
+      : plainProduct.petType
   } as NormalizedProduct;
   
   // Normalize category._id if category is populated

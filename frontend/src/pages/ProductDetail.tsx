@@ -13,6 +13,7 @@ import ProductCard from '@/components/ProductCard';
 import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home, Share2, Facebook, Twitter, Mail, Copy, Check } from 'lucide-react';
 import { normalizeImageUrl, handleImageError, getOptimizedImageUrl, generateSrcSet } from '@/utils/imageUtils';
 import { generateProductUrl, generateCategoryUrl } from '@/utils/productUrl';
+import { getValidCompareAtPrice } from '@/utils/productPrice';
 import { FREE_SHIPPING_THRESHOLD } from '@/config/constants';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
@@ -465,6 +466,10 @@ const ProductDetail = () => {
   const inWishlist = productId ? isInWishlist(productId) : false;
   
   const price = selectedVariantData?.price || product?.basePrice || 0;
+  const compareAtPrice = getValidCompareAtPrice(
+    price,
+    selectedVariantData?.compareAtPrice ?? product.compareAtPrice
+  );
 
   // Determine which images to display: variant image if available, otherwise product images
   const displayImages = (() => {
@@ -799,9 +804,9 @@ const ProductDetail = () => {
           <div className="mb-6">
             <div className="flex items-baseline gap-3">
               <span className="text-4xl font-bold">${price.toFixed(2)}</span>
-              {product.compareAtPrice && (
+              {compareAtPrice && (
                 <span className="text-xl text-gray-500 line-through">
-                  ${product.compareAtPrice.toFixed(2)}
+                  ${compareAtPrice.toFixed(2)}
                 </span>
               )}
             </div>

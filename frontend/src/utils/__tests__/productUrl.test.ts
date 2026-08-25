@@ -83,6 +83,15 @@ describe('Product URL Utility', () => {
     expect(generateProductUrl(nested)).toBe('/dog/wet-food/test-product');
   });
 
+  test('slugifies spaced small-pet types onto the canonical /small-animal path', () => {
+    const smallPet = {
+      ...mockProduct,
+      petType: 'small pet',
+      category: { _id: 'h', name: 'Hutches', slug: 'hutches' } as any,
+    } as Product;
+    expect(generateProductUrl(smallPet)).toBe('/small-animal/hutches/test-product');
+  });
+
     test('should generate valid URL format', () => {
       const url = generateProductUrl(mockProduct);
       

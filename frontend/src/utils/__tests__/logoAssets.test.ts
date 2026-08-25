@@ -25,6 +25,10 @@ describe('Petshiwu logo assets', () => {
     expect(fs.existsSync(sourceFile)).toBe(true);
   });
 
+  test('favicon.ico exists so browsers do not 404 the default icon request', () => {
+    expect(fs.existsSync(path.join(publicDir, 'favicon.ico'))).toBe(true);
+  });
+
   test('favicon is a navy tile with the real capital P, not a white icon', async () => {
     const { info, get } = await readRgba(path.join(publicDir, 'favicon-32.png'));
     expect(info.width).toBe(32);

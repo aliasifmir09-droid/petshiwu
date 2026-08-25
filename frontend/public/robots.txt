@@ -27,6 +27,8 @@ Disallow: /forgot-password
 # Error pages
 Disallow: /403
 Disallow: /404
+Disallow: /pay
+Disallow: /security-test.html
 
 # Prevent indexing of paginated/filtered query strings
 # (canonical pages without params are still indexed)

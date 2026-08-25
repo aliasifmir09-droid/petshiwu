@@ -12,6 +12,7 @@ import { preloadProductImages } from '@/utils/imagePreloader';
 import { highlightSearchTerm } from '@/utils/searchHighlight';
 import QuickViewModal from './QuickViewModal';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
+import { getListingPrice, getListingVariant, getValidCompareAtPrice } from '@/utils/productPrice';
 
 interface ProductCardProps {
   product: Product;
@@ -82,16 +83,23 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
     }
   }, [inWishlist, productId, addToWishlist, removeFromWishlist]);
 
+  const listingVariant = useMemo(() => getListingVariant(product), [product]);
+  const listingPrice = useMemo(() => getListingPrice(product), [product]);
+  const compareAtPrice = useMemo(
+    () => getValidCompareAtPrice(listingPrice, listingVariant?.compareAtPrice ?? product.compareAtPrice),
+    [listingPrice, listingVariant?.compareAtPrice, product.compareAtPrice]
+  );
+
   const handleAddToCart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    addToCart(product, product.variants[0]);
+    addToCart(product, listingVariant);
     setCartAdded(true);
     setTimeout(() => setCartAdded(false), 2500);
-  }, [product, addToCart]);
+  }, [product, listingVariant, addToCart]);
 
-  const discountPercent = useMemo(() => product.compareAtPrice
-    ? Math.round(((product.compareAtPrice - product.basePrice) / product.compareAtPrice) * 100)
-    : 0, [product.compareAtPrice, product.basePrice]);
+  const discountPercent = useMemo(() => compareAtPrice
+    ? Math.round(((compareAtPrice - listingPrice) / compareAtPrice) * 100)
+    : 0, [compareAtPrice, listingPrice]);
 
   // Calculate urgency level based on stock
   const urgencyLevel = useMemo(() => {
@@ -228,15 +236,15 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
           <div className="bg-slate-50 p-3 rounded-lg">
             <div className="flex items-baseline gap-2 mb-1">
               <span className="text-2xl font-black text-gray-900 tracking-tight">
-                ${(Number(product.basePrice) || 0).toFixed(2)}
+                ${listingPrice.toFixed(2)}
               </span>
-              {product.compareAtPrice && (
+              {compareAtPrice && (
                 <div className="flex flex-col">
                   <span className="text-xs text-gray-500 line-through">
-                    ${product.compareAtPrice.toFixed(2)}
+                    ${compareAtPrice.toFixed(2)}
                   </span>
                   <span className="text-[10px] text-green-600 font-bold">
-                    YOU SAVE ${(product.compareAtPrice - product.basePrice).toFixed(2)}
+                    YOU SAVE ${(compareAtPrice - listingPrice).toFixed(2)}
                   </span>
                 </div>
               )}
