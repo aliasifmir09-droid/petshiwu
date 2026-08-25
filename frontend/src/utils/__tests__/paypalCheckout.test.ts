@@ -51,9 +51,16 @@ describe('PayPal checkout', () => {
     expect(paypalConfig).toContain("components: 'buttons,applepay,googlepay'");
   });
 
-  test('checkout warns when PayPal is still in sandbox test mode', () => {
+  test('checkout does not tell shoppers PayPal is in test mode', () => {
     const checkout = read('../../pages/Checkout.tsx');
-    expect(checkout).toContain('PayPal is in test mode');
-    expect(checkout).toContain('!isPayPalLive');
+    expect(checkout).not.toContain('PayPal is in test mode');
+    expect(checkout).not.toContain('!isPayPalLive');
+  });
+
+  test('PayPal is live unless sandbox is explicit', () => {
+    const paypalConfig = read('../../config/paypal.ts');
+    expect(paypalConfig).toContain("paypalEnv !== 'sandbox'");
+    expect(paypalConfig).toContain("paypalClientId !== 'sb'");
+    expect(paypalConfig).not.toContain("import.meta.env.VITE_PAYPAL_ENV === 'live'");
   });
 });

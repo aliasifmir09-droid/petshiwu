@@ -21,7 +21,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
 import { MapPin, Plus, Check, User, UserCheck, Banknote, ShieldCheck, RotateCcw, Headphones } from 'lucide-react';
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
-import { isPayPalLive, paypalClientId } from '@/config/paypal';
+import { paypalClientId } from '@/config/paypal';
 import { isNycDeliveryZip, isNewYorkState, normalizeShippingState } from '@/utils/deliveryZip';
 
 const PaymentForm = lazy(() => import('@/components/PaymentForm'));
@@ -932,12 +932,6 @@ const Checkout = () => {
                       ))}
                     </div>
                     <div className="mt-3 text-sm text-gray-600"><span>Or use a branded payment button below</span></div>
-                  </div>
-                )}
-
-                {paypalClientId && !isPayPalLive && (
-                  <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900">
-                    PayPal is in test mode. Real PayPal logins and cards will not complete until live PayPal credentials are installed.
                   </div>
                 )}
 
