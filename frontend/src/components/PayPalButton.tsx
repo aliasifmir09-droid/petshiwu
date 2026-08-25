@@ -32,6 +32,8 @@ const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, coupon
   // createOrder closure; React state set during createOrder is often still null.
   const checkoutTokenRef = useRef<string>(crypto.randomUUID());
   const captureInFlightRef = useRef<string | null>(null);
+  const donationAmountRef = useRef(donationAmount);
+  donationAmountRef.current = donationAmount;
 
   const createOrder = async () => {
     setError(null);
@@ -50,7 +52,7 @@ const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, coupon
         guestEmail: normalizedGuestEmail,
         notes,
         couponCode,
-        donationAmount,
+        donationAmount: donationAmountRef.current,
         checkoutToken: checkoutTokenRef.current
       });
       const paypalOrderId = response.data?.paypalOrderId;

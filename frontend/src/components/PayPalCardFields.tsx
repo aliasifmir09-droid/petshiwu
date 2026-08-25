@@ -189,6 +189,8 @@ const PayPalCardFields = (props: PayPalCardFieldsProps) => {
   const [isEligible, setIsEligible] = useState<boolean | null>(null);
   const checkoutTokenRef = useRef<string>(crypto.randomUUID());
   const captureInFlightRef = useRef<string | null>(null);
+  const donationAmountRef = useRef(props.donationAmount);
+  donationAmountRef.current = props.donationAmount;
 
   if (!paypalClientId) {
     return (
@@ -215,7 +217,7 @@ const PayPalCardFields = (props: PayPalCardFieldsProps) => {
         guestEmail: normalizedGuestEmail,
         notes: props.notes,
         couponCode: props.couponCode,
-        donationAmount: props.donationAmount,
+        donationAmount: donationAmountRef.current,
         checkoutToken: checkoutTokenRef.current
       });
       const paypalOrderId = response.data?.paypalOrderId;

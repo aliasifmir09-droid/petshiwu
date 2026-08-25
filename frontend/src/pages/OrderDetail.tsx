@@ -55,12 +55,11 @@ const OrderDetail = () => {
   useEffect(() => {
     const isNewOrder = searchParams.get('newOrder') === 'true';
     if (isNewOrder && order && !isLoading) {
-      // Show modal after a short delay for better UX
+      searchParams.delete('newOrder');
+      setSearchParams(searchParams, { replace: true });
+      if ((order.donationAmount || 0) > 0) return;
       const timer = setTimeout(() => {
         setShowDonationModal(true);
-        // Remove the query parameter from URL
-        searchParams.delete('newOrder');
-        setSearchParams(searchParams, { replace: true });
       }, 1500);
       return () => clearTimeout(timer);
     }

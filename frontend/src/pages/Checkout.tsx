@@ -11,7 +11,7 @@ import { Address, Order } from '@/types';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
-import CheckoutDonationModal from '@/components/CheckoutDonationModal';
+import CheckoutCharityCard from '@/components/CheckoutCharityCard';
 import { useGooglePlacesAutocomplete } from '@/hooks/useGooglePlacesAutocomplete';
 const getStripe = () => import('@/utils/stripe').then(m => m.getStripe());
 import { normalizeId } from '@/utils/idNormalizer';
@@ -189,7 +189,6 @@ const Checkout = () => {
   const [showPayPalButton, setShowPayPalButton] = useState(false);
   const [paypalPaymentMode, setPaypalPaymentMode] = useState<'wallet' | 'card'>('wallet');
   const [donationAmount, setDonationAmount] = useState<number>(0);
-  const [showDonationModal, setShowDonationModal] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const paypalSuccessHandledRef = useRef(false);
@@ -405,43 +404,50 @@ const Checkout = () => {
   });
 
   useEffect(() => {
-    const createPaymentIntent = async () => {
-      if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay' || paymentMethod === 'cod') {
-        setShowPayPalButton(paymentMethod !== 'cod');
-        setShowPaymentForm(false);
-        setClientSecret(null);
-        setPaymentIntentId(null);
-        return;
-      }
+    if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay' || paymentMethod === 'cod') {
+      setShowPayPalButton(paymentMethod !== 'cod');
+      setShowPaymentForm(false);
+      setClientSecret(null);
+      setPaymentIntentId(null);
+      return;
+    }
 
-      if (!clientSecret && !isProcessingPayment) {
-        setIsProcessingPayment(true);
-        try {
-          const paymentIntentResponse = await orderService.createPaymentIntent({
-            totalPrice: onlineTotal,
-            paymentMethod: paymentMethod
-          });
-          if (paymentIntentResponse.success && paymentIntentResponse.data?.clientSecret) {
-            setClientSecret(paymentIntentResponse.data.clientSecret);
-            setPaymentIntentId(paymentIntentResponse.data.paymentIntentId);
-            setShowPaymentForm(true);
-            setShowPayPalButton(false);
-          } else {
-            showToast('Failed to initialize payment. Please try PayPal again.', 'error');
-            setPaymentMethod('paypal');
-          }
-        } catch (error: any) {
-          showToast(error.response?.data?.message || 'Payment initialization failed. Please try PayPal again.', 'error');
+    let cancelled = false;
+    const createPaymentIntent = async () => {
+      setIsProcessingPayment(true);
+      setShowPaymentForm(false);
+      setClientSecret(null);
+      setPaymentIntentId(null);
+      try {
+        const paymentIntentResponse = await orderService.createPaymentIntent({
+          totalPrice: total,
+          paymentMethod: paymentMethod
+        });
+        if (cancelled) return;
+        if (paymentIntentResponse.success && paymentIntentResponse.data?.clientSecret) {
+          setClientSecret(paymentIntentResponse.data.clientSecret);
+          setPaymentIntentId(paymentIntentResponse.data.paymentIntentId);
+          setShowPaymentForm(true);
+          setShowPayPalButton(false);
+        } else {
+          showToast('Failed to initialize payment. Please try PayPal again.', 'error');
           setPaymentMethod('paypal');
-        } finally {
-          setIsProcessingPayment(false);
         }
+      } catch (error: any) {
+        if (cancelled) return;
+        showToast(error.response?.data?.message || 'Payment initialization failed. Please try PayPal again.', 'error');
+        setPaymentMethod('paypal');
+      } finally {
+        if (!cancelled) setIsProcessingPayment(false);
       }
     };
 
     createPaymentIntent();
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paymentMethod]);
+  }, [paymentMethod, total]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -642,38 +648,9 @@ const Checkout = () => {
       ...(!isAuthenticated && shippingInfo.email ? { guestEmail: shippingInfo.email } : {})
     };
 
-    // Online payments are already captured for the exact checkout total.
-    // Do not open the optional donation step afterward, because changing the
-    // amount would make the verified PayPal/Stripe payment and store order differ.
-    {
-      createOrderMutation.mutate({
-        ...orderData,
-        donationAmount: undefined,
-        totalPrice: onlineTotal
-      });
-      return;
-    }
-  };
-
-  const handleDonationConfirm = (amount: number) => {
-    setDonationAmount(amount);
-    setShowDonationModal(false);
-    if (pendingOrderData) {
-      createOrderMutation.mutate({
-        ...pendingOrderData,
-        donationAmount: amount > 0 ? amount : undefined,
-        totalPrice: subtotal + shipping + tax - couponDiscount + amount
-      });
-      setPendingOrderData(null);
-    }
-  };
-
-  const handleDonationSkip = () => {
-    setShowDonationModal(false);
-    if (pendingOrderData) {
-      createOrderMutation.mutate(pendingOrderData);
-      setPendingOrderData(null);
-    }
+    // Include any optional shelter donation in the charged total so PayPal/Stripe
+    // capture matches the store order.
+    createOrderMutation.mutate(orderData);
   };
 
   if (items.length === 0) {
@@ -1203,7 +1180,7 @@ const Checkout = () => {
                         }}
                         notes={orderNotes.trim() || undefined}
                         couponCode={couponCode || undefined}
-                        donationAmount={0}
+                        donationAmount={donationAmount}
                         onSuccess={handlePayPalSuccess}
                         onError={handlePayPalError}
                         onCancel={handlePayPalCancel}
@@ -1234,7 +1211,7 @@ const Checkout = () => {
                         }}
                         notes={orderNotes.trim() || undefined}
                         couponCode={couponCode || undefined}
-                        donationAmount={0}
+                        donationAmount={donationAmount}
                         onSuccess={handlePayPalSuccess}
                         onError={handlePayPalError}
                         onCancel={handlePayPalCancel}
@@ -1292,22 +1269,12 @@ const Checkout = () => {
                     <span className="text-gray-600">Tax</span>
                     <span className="font-medium">${tax.toFixed(2)}</span>
                   </div>
-                  {donationAmount > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 flex items-center gap-1"><span>💝 Donation</span></span>
-                      <span className="font-medium text-pink-600">${donationAmount.toFixed(2)}</span>
-                    </div>
-                  )}
                   {couponDiscount > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span className="flex items-center gap-1">🏷️ Coupon ({couponCode})</span>
                       <span className="font-medium">-${couponDiscount.toFixed(2)}</span>
                     </div>
                   )}
-                  <div className="border-t pt-3 flex justify-between text-lg font-bold">
-                    <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
-                  </div>
                   {/* Coupon Code Input */}
                   <div className="pt-2">
                     {!couponCode ? (
@@ -1342,6 +1309,17 @@ const Checkout = () => {
                       <p className={`text-xs mt-1 ${couponValid ? 'text-green-600' : 'text-red-500'}`}>{couponMessage}</p>
                     )}
                   </div>
+                  <CheckoutCharityCard amount={donationAmount} onChange={setDonationAmount} />
+                  {donationAmount > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Shelter donation</span>
+                      <span className="font-medium text-rose-600">${donationAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="border-t pt-3 flex justify-between text-lg font-bold">
+                    <span>Total</span>
+                    <span>${total.toFixed(2)}</span>
+                  </div>
                 </div>
                 <button type="submit"
                   disabled={createOrderMutation.isPending || (isProcessingPayment && paymentMethod !== 'cod')}
@@ -1363,7 +1341,6 @@ const Checkout = () => {
           </div>
         </form>
 
-        <CheckoutDonationModal isOpen={showDonationModal} onClose={handleDonationSkip} onConfirm={handleDonationConfirm} />
         {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
       </div>
     </>
