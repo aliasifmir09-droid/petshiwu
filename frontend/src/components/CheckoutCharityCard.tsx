@@ -217,7 +217,7 @@ const CheckoutCharityCard = ({ amount, onChange }: CheckoutCharityCardProps) => 
                     applyCustomAmount(customValue);
                   }
                 }}
-                className="w-full rounded-2xl border border-rose-200 bg-white py-2.5 pl-7 pr-3 text-sm font-bold text-stone-800 outline-none placeholder:font-semibold placeholder:text-stone-400 focus:border-rose-400 focus:ring-2 focus:ring-rose-200"
+                className="w-full rounded-2xl border border-rose-200 bg-white py-2.5 pl-7 pr-3 text-sm font-bold text-stone-800 outline-none [appearance:textfield] placeholder:font-semibold placeholder:text-stone-400 focus:border-rose-400 focus:ring-2 focus:ring-rose-200 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
               />
             </div>
           </div>
