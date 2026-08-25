@@ -6,6 +6,7 @@ import path from 'path';
 
 describe('OrderFireworks', () => {
   test('tells the shopper the order is done when celebration is active', () => {
+    HTMLCanvasElement.prototype.getContext = vi.fn(() => null);
     render(<OrderFireworks active />);
     expect(screen.getByText("It's done")).toBeInTheDocument();
     expect(screen.getByText('Your order is placed')).toBeInTheDocument();
