@@ -1,12 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { orderService } from '@/services/orders';
 import { Package, Truck, CheckCircle, Clock, XCircle, Search, Loader2, MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import OrderFireworks from '@/components/OrderFireworks';
 
 const TrackOrder = () => {
-  const [orderId, setOrderId] = useState('');
-  const [searchOrderId, setSearchOrderId] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [orderId, setOrderId] = useState(searchParams.get('order') || '');
+  const [searchOrderId, setSearchOrderId] = useState(searchParams.get('order') || '');
+  const [celebrate, setCelebrate] = useState(searchParams.get('newOrder') === 'true');
+
+  useEffect(() => {
+    const fromUrl = searchParams.get('order');
+    if (fromUrl && fromUrl !== searchOrderId) {
+      setOrderId(fromUrl);
+      setSearchOrderId(fromUrl);
+    }
+  }, [searchParams, searchOrderId]);
+
+  useEffect(() => {
+    if (searchParams.get('newOrder') === 'true') {
+      setCelebrate(true);
+    }
+  }, [searchParams]);
 
   const { data: order, isLoading, error } = useQuery({
     queryKey: ['trackOrder', searchOrderId],
@@ -68,6 +85,18 @@ const TrackOrder = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
+      {celebrate && (
+        <OrderFireworks
+          active
+          onDone={() => {
+            setCelebrate(false);
+            if (searchParams.get('newOrder') === 'true') {
+              searchParams.delete('newOrder');
+              setSearchParams(searchParams, { replace: true });
+            }
+          }}
+        />
+      )}
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">

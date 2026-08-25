@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { AlertCircle, Loader2 } from 'lucide-react';
-import { paypalClientId, paypalSdkEnvironment } from '@/config/paypal';
+import { paypalCheckoutScriptOptions, paypalClientId } from '@/config/paypal';
 import { orderService } from '@/services/orders';
 
 interface PayPalItemInput {
@@ -10,7 +10,7 @@ interface PayPalItemInput {
   variant?: { sku: string };
 }
 
-interface PayPalButtonProps {
+export interface PayPalButtonProps {
   items: PayPalItemInput[];
   shippingAddress: import('@/types').ShippingAddress;
   guestEmail?: string;
@@ -22,6 +22,7 @@ interface PayPalButtonProps {
   onGuestEmailInvalid?: () => void;
   onCancel?: () => void;
   currency?: string;
+  skipProvider?: boolean;
 }
 
 const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, couponCode, donationAmount = 0, onSuccess, onError, onGuestEmailInvalid, onCancel, currency = 'USD' }: PayPalButtonProps) => {
@@ -147,13 +148,13 @@ const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, coupon
         onApprove={onApprove}
         onError={onErrorHandler}
         onCancel={onCancelHandler}
-        style={{ layout: 'vertical', color: 'blue', shape: 'rect', label: 'paypal' }}
+        style={{ layout: 'vertical', color: 'blue', shape: 'rect', label: 'paypal', height: 48 }}
       />
     </div>
   );
 };
 
-const PayPalButton = (props: PayPalButtonProps) => {
+const PayPalButton = ({ skipProvider = false, ...props }: PayPalButtonProps) => {
   if (!paypalClientId) {
     return (
       <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -164,17 +165,12 @@ const PayPalButton = (props: PayPalButtonProps) => {
     );
   }
 
+  const content = <PayPalButtonContent {...props} />;
+  if (skipProvider) return content;
+
   return (
-    <PayPalScriptProvider
-      options={{
-        clientId: paypalClientId,
-        currency: props.currency || 'USD',
-        intent: 'capture',
-        environment: paypalSdkEnvironment,
-        enableFunding: ['venmo', 'card'],
-      }}
-    >
-      <PayPalButtonContent {...props} />
+    <PayPalScriptProvider options={paypalCheckoutScriptOptions(props.currency || 'USD')}>
+      {content}
     </PayPalScriptProvider>
   );
 };

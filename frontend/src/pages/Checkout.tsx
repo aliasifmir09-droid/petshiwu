@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense, type ReactNode } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useCartStore } from '@/stores/cartStore';
@@ -19,16 +19,41 @@ import { trackPurchase } from '@/utils/analytics';
 import SEO from '@/components/SEO';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
-import { MapPin, Plus, Check, User, UserCheck } from 'lucide-react';
+import { MapPin, Plus, Check, User, UserCheck, Banknote, ShieldCheck, RotateCcw, Headphones, Lock, Truck } from 'lucide-react';
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
-import { isPayPalLive, paypalClientId } from '@/config/paypal';
+import { paypalClientId } from '@/config/paypal';
 import { isNycDeliveryZip, isNewYorkState, normalizeShippingState } from '@/utils/deliveryZip';
 
 const PaymentForm = lazy(() => import('@/components/PaymentForm'));
-const PayPalButton = lazy(() => import('@/components/PayPalButton'));
-const PayPalCardFields = lazy(() => import('@/components/PayPalCardFields'));
-const PayPalApplePay = lazy(() => import('@/components/PayPalApplePay'));
-const PayPalGooglePay = lazy(() => import('@/components/PayPalGooglePay'));
+const CheckoutBrandedPayments = lazy(() => import('@/components/CheckoutBrandedPayments'));
+
+const fieldClass =
+  'w-full h-12 rounded-xl border border-stone-200 bg-[#FBF9F5] px-4 text-[15px] text-stone-900 placeholder:text-stone-400 outline-none transition focus:border-[#1E3A8A] focus:bg-white focus:ring-4 focus:ring-[#1E3A8A]/10';
+
+const CheckoutStep = ({
+  step,
+  title,
+  subtitle,
+  children
+}: {
+  step: string;
+  title: string;
+  subtitle?: string;
+  children: ReactNode;
+}) => (
+  <section className="overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-[0_24px_60px_-32px_rgba(30,58,138,0.45)]">
+    <header className="flex items-start gap-4 border-b border-stone-100 px-6 py-5">
+      <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#1E3A8A] text-sm font-black text-amber-300 ring-4 ring-amber-200/50">
+        {step}
+      </span>
+      <div>
+        <h2 className="text-xl font-bold tracking-tight text-stone-900">{title}</h2>
+        {subtitle ? <p className="mt-0.5 text-sm leading-relaxed text-stone-500">{subtitle}</p> : null}
+      </div>
+    </header>
+    <div className="p-6 sm:p-7">{children}</div>
+  </section>
+);
 
 interface CreateOrderData {
   items: Array<{
@@ -186,8 +211,7 @@ const Checkout = () => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [showPayPalButton, setShowPayPalButton] = useState(false);
-  const [paypalPaymentMode, setPaypalPaymentMode] = useState<'wallet' | 'card'>('wallet');
+  const [showPayPalButton, setShowPayPalButton] = useState(true);
   const [donationAmount, setDonationAmount] = useState<number>(0);
   const [emailError, setEmailError] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
@@ -387,7 +411,7 @@ const Checkout = () => {
       await queryClient.invalidateQueries({ queryKey: ['order'] });
       // For guests, navigate to track order page instead of my orders
       if (!isAuthenticated) {
-        navigate(`/track-order?order=${order.orderNumber || orderId}`);
+        navigate(`/track-order?order=${order.orderNumber || orderId}&newOrder=true`);
       } else {
         navigate(`/orders/${orderId}?newOrder=true`);
       }
@@ -502,14 +526,7 @@ const Checkout = () => {
     }
     if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay') {
       document.getElementById('paypal-payment')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      const payPrompt = paymentMethod === 'apple_pay'
-        ? 'Click the Apple Pay button to complete your payment.'
-        : paymentMethod === 'google_pay'
-          ? 'Click the Google Pay button to complete your payment.'
-          : paypalPaymentMode === 'card'
-            ? 'Enter your card details in the PayPal form to complete your payment.'
-            : 'Click the PayPal button to complete your payment.';
-      showToast(payPrompt, 'info');
+      showToast('Click Apple Pay, Google Pay, or a PayPal button to complete your payment.', 'info');
       return;
     }
 
@@ -545,7 +562,6 @@ const Checkout = () => {
     setClientSecret(null);
     setPaymentIntentId(null);
     setPaymentMethod('paypal');
-    setPaypalPaymentMode('wallet');
   };
 
   const handlePayPalSuccess = async (order: Order) => {
@@ -564,7 +580,7 @@ const Checkout = () => {
     await queryClient.invalidateQueries({ queryKey: ['orders'] });
     await queryClient.invalidateQueries({ queryKey: ['order'] });
     if (!isAuthenticated) {
-      navigate(`/track-order?order=${order.orderNumber || orderId}`);
+      navigate(`/track-order?order=${order.orderNumber || orderId}&newOrder=true`);
     } else {
       navigate(`/orders/${orderId}?newOrder=true`);
     }
@@ -661,8 +677,24 @@ const Checkout = () => {
   return (
     <>
       <SEO title="Checkout | petshiwu" description="Complete your purchase at petshiwu" noindex={true} />
+      <div className="-mt-2 min-h-screen bg-[radial-gradient(circle_at_top,_#fff8e8,_#f4f0e8_42%,_#eef2f7_100%)] pb-16">
       <div className="container mx-auto px-4 lg:px-8 py-8">
-                <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-[#1E3A8A]">
+              <Lock size={13} /> Secure checkout
+            </p>
+            <h1 className="font-black tracking-tight text-stone-900 text-4xl sm:text-5xl">Almost home.</h1>
+            <p className="mt-2 max-w-xl text-stone-600">
+              Same-day Queens delivery, PayPal-secured payment, and a 24/7 call center — the kind of checkout a pet parent should trust.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> NYC same-day</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><ShieldCheck size={13} className="text-[#1E3A8A]" /> PayPal protected</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><RotateCcw size={13} className="text-[#1E3A8A]" /> 365-day returns</span>
+          </div>
+        </div>
 
                 <div className="mb-6">
                   <OrdersOpenBanner compact />
@@ -670,18 +702,24 @@ const Checkout = () => {
 
                 {/* GUEST CHECKOUT BANNER — show only when not logged in */}
         {!isAuthenticated && (
-          <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-            <User className="text-blue-600 mt-0.5 flex-shrink-0" size={20} />
-            <div className="flex-1">
-              <p className="text-sm text-blue-800 font-medium">Checking out as guest</p>
-              <p className="text-sm text-blue-700 mt-1">
-                Already have an account?{' '}
-                <Link to="/login?redirect=/checkout" className="font-semibold underline hover:text-blue-900">
-                  Sign in
-                </Link>{' '}
-                for faster checkout and order tracking. Or continue below as a guest.
-              </p>
+          <div className="mb-6 flex flex-col gap-4 rounded-3xl border border-stone-200/80 bg-white/90 p-5 shadow-[0_16px_40px_-28px_rgba(30,58,138,0.4)] sm:flex-row sm:items-center">
+            <div className="flex items-start gap-3 flex-1">
+              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#1E3A8A] text-amber-300">
+                <User size={20} />
+              </div>
+              <div>
+                <p className="text-base font-bold text-stone-900">Guest checkout is open</p>
+                <p className="text-sm text-stone-600 mt-1">
+                  Sign in for saved addresses, or continue below — no account required.
+                </p>
+              </div>
             </div>
+            <Link
+              to="/login?redirect=/checkout"
+              className="inline-flex items-center justify-center rounded-full bg-[#1E3A8A] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-900/20 hover:bg-[#16307a] transition-colors whitespace-nowrap"
+            >
+              Sign in
+            </Link>
           </div>
         )}
 
@@ -690,8 +728,7 @@ const Checkout = () => {
             {/* Checkout Form */}
             <div className="lg:col-span-2 space-y-6">
               {/* Shipping Information */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold mb-6">Shipping Information</h2>
+              <CheckoutStep step="1" title="Delivery" subtitle="Where should this care package land tonight?">
 
                 {/* Logged-in user info display */}
                 {isAuthenticated && user && (
@@ -715,7 +752,7 @@ const Checkout = () => {
                         required
                         value={shippingInfo.firstName}
                         onChange={(e) => setShippingInfo({ ...shippingInfo, firstName: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className={fieldClass}
                       />
                     </div>
                     <div>
@@ -725,7 +762,7 @@ const Checkout = () => {
                         required
                         value={shippingInfo.lastName}
                         onChange={(e) => setShippingInfo({ ...shippingInfo, lastName: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className={fieldClass}
                       />
                     </div>
                     <div>
@@ -737,7 +774,7 @@ const Checkout = () => {
                         value={shippingInfo.email}
                         onChange={(e) => { setShippingInfo({ ...shippingInfo, email: e.target.value }); setEmailError(false); }}
                         placeholder="you@example.com"
-                        className={`w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 ${emailError ? 'border-red-500 ring-2 ring-red-300 bg-red-50' : 'border-gray-300'}`}
+                        className={`${fieldClass} ${emailError ? 'border-red-500 bg-red-50 ring-2 ring-red-200' : ''}`}
                       />
                       {emailError && <p className="text-red-500 text-xs mt-1">Required — we'll send your order confirmation here</p>}
                     </div>
@@ -748,7 +785,7 @@ const Checkout = () => {
                         required
                         value={shippingInfo.phone}
                         onChange={(e) => setShippingInfo({ ...shippingInfo, phone: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className={fieldClass}
                       />
                     </div>
                   </div>
@@ -761,13 +798,13 @@ const Checkout = () => {
                       <label className="block text-sm font-medium mb-2">First Name *</label>
                       <input type="text" required value={shippingInfo.firstName}
                         onChange={(e) => setShippingInfo({ ...shippingInfo, firstName: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                        className={fieldClass} />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">Last Name *</label>
                       <input type="text" required value={shippingInfo.lastName}
                         onChange={(e) => setShippingInfo({ ...shippingInfo, lastName: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                        className={fieldClass} />
                     </div>
                   </div>
                 )}
@@ -778,7 +815,7 @@ const Checkout = () => {
                     <label className="block text-sm font-medium mb-2">Phone *</label>
                     <input type="tel" required value={shippingInfo.phone}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, phone: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                      className={fieldClass} />
                   </div>
                 )}
 
@@ -827,14 +864,14 @@ const Checkout = () => {
                       <input ref={streetInputRef} type="text" required value={shippingInfo.street}
                         onChange={(e) => setShippingInfo({ ...shippingInfo, street: e.target.value })}
                         placeholder="Start typing your address..." autoComplete="off"
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                        className={fieldClass} />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium mb-2">City *</label>
                         <input type="text" required value={shippingInfo.city}
                           onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
-                          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                          className={fieldClass} />
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">State *</label>
@@ -843,19 +880,19 @@ const Checkout = () => {
                           onBlur={() => setShippingInfo((prev) => ({ ...prev, state: normalizeShippingState(prev.state) }))}
                           placeholder="NY"
                           autoComplete="address-level1"
-                          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                          className={fieldClass} />
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">ZIP Code *</label>
                         <input type="text" required value={shippingInfo.zipCode}
                           onChange={(e) => setShippingInfo({ ...shippingInfo, zipCode: e.target.value })}
-                          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                          className={fieldClass} />
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">Country *</label>
                         <input type="text" required value={shippingInfo.country}
                           onChange={(e) => setShippingInfo({ ...shippingInfo, country: e.target.value })}
-                          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                          className={fieldClass} />
                       </div>
                     </div>
                     {isAuthenticated && showNewAddressForm && (
@@ -877,11 +914,10 @@ const Checkout = () => {
                     )}
                   </div>
                 )}
-              </div>
+              </CheckoutStep>
 
               {/* Payment Method */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold mb-6">Payment Method</h2>
+              <CheckoutStep step="2" title="Payment" subtitle="Apple Pay, Google Pay, PayPal, Venmo, or card — official buttons, the way a flagship store would do it.">
 
                 {isAuthenticated && savedPaymentMethods.length > 0 && (
                   <div className="mb-6">
@@ -913,96 +949,94 @@ const Checkout = () => {
                         </button>
                       ))}
                     </div>
-                    <div className="mt-3 text-sm text-gray-600"><span>Or use a new payment method below</span></div>
+                    <div className="mt-3 text-sm text-gray-600"><span>Or use a branded payment button below</span></div>
                   </div>
                 )}
 
-                <div className="space-y-3">
-                  {paypalClientId && !isPayPalLive && (
-                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900">
-                      PayPal is in test mode. Real PayPal logins and cards will not complete until live PayPal credentials are installed.
+                {showPayPalButton && paymentMethod !== 'cod' && paypalClientId ? (
+                  <div id="paypal-payment">
+                    <Suspense fallback={
+                      <div className="flex items-center justify-center py-8">
+                        <LoadingSpinner size="md" />
+                        <span className="ml-3 text-gray-600">Loading secure payment...</span>
+                      </div>
+                    }>
+                      <CheckoutBrandedPayments
+                        items={items.map((item: any) => ({
+                          product: normalizeId(item.product._id) || String(item.product._id),
+                          quantity: item.quantity,
+                          ...(item.variant?.sku ? { variant: { sku: item.variant.sku } } : {})
+                        }))}
+                        total={total}
+                        shippingAddress={{
+                          firstName: shippingInfo.firstName,
+                          lastName: shippingInfo.lastName,
+                          street: shippingInfo.street,
+                          city: shippingInfo.city,
+                          state: normalizeShippingState(shippingInfo.state),
+                          zipCode: shippingInfo.zipCode,
+                          country: shippingInfo.country,
+                          phone: shippingInfo.phone
+                        }}
+                        guestEmail={!isAuthenticated ? shippingInfo.email.trim() : undefined}
+                        onGuestEmailInvalid={() => {
+                          setEmailError(true);
+                          emailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          emailInputRef.current?.focus();
+                        }}
+                        notes={orderNotes.trim() || undefined}
+                        couponCode={couponCode || undefined}
+                        donationAmount={donationAmount}
+                        onSuccess={handlePayPalSuccess}
+                        onError={handlePayPalError}
+                        onCancel={handlePayPalCancel}
+                      />
+                    </Suspense>
+                  </div>
+                ) : !paypalClientId && paymentMethod !== 'cod' ? (
+                  <div className="p-4 border-2 border-gray-200 rounded-lg bg-gray-50">
+                    <p className="font-semibold text-gray-700">PayPal is temporarily unavailable</p>
+                    <p className="text-sm text-gray-500 mt-1">You can still pay cash when your order arrives.</p>
+                  </div>
+                ) : null}
+
+                {paymentMethod === 'cod' && (
+                  <div className="mb-4 p-4 rounded-lg border-2 border-primary-600 bg-primary-50">
+                    <p className="font-semibold text-gray-900">Cash on Delivery selected</p>
+                    <p className="text-sm text-gray-600 mt-1">Pay cash when your order arrives. No card needed.</p>
+                    <button
+                      type="button"
+                      onClick={() => { setPaymentMethod('paypal'); setSelectedSavedPaymentMethod(null); }}
+                      className="mt-3 text-sm font-semibold text-primary-700 hover:text-primary-800"
+                    >
+                      Use Apple Pay, Google Pay, or PayPal instead
+                    </button>
+                  </div>
+                )}
+
+                {paymentMethod !== 'cod' && (
+                  <>
+                    <div className="flex items-center gap-3 my-6">
+                      <div className="flex-1 h-px bg-gray-200" />
+                      <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">or</span>
+                      <div className="flex-1 h-px bg-gray-200" />
                     </div>
-                  )}
-                  {/* PayPal-powered Credit/Debit Card */}
-                  {paypalClientId ? (
-                    <button type="button" onClick={() => { setPaymentMethod('paypal'); setPaypalPaymentMode('card'); }}
-                      className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'paypal' && paypalPaymentMode === 'card' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
-                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'paypal' && paypalPaymentMode === 'card' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
-                        {paymentMethod === 'paypal' && paypalPaymentMode === 'card' && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                    <button type="button" onClick={() => {
+                      setPaymentMethod('cod');
+                      setSelectedSavedPaymentMethod(null);
+                      setSavePaymentMethod(false);
+                    }}
+                      className="w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all border-gray-300 bg-white hover:border-gray-400">
+                      <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
+                        <Banknote className="w-5 h-5" />
                       </div>
                       <div className="flex-1 text-left">
-                        <span className="font-semibold text-gray-900">Credit/Debit Card</span>
-                        <p className="text-sm text-gray-600 mt-1">Pay securely by card through PayPal</p>
+                        <span className="font-semibold text-gray-900">Cash on Delivery</span>
+                        <p className="text-sm text-gray-600 mt-1">Pay cash when your order arrives. No card needed.</p>
                       </div>
                     </button>
-                  ) : null}
-
-                  {/* Apple Pay through PayPal */}
-                  {paypalClientId ? (
-                    <button type="button" onClick={() => { setPaymentMethod('apple_pay'); setPaypalPaymentMode('wallet'); }}
-                      className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'apple_pay' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
-                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'apple_pay' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
-                        {paymentMethod === 'apple_pay' && <div className="w-2 h-2 bg-white rounded-full"></div>}
-                      </div>
-                      <div className="flex-1 text-left">
-                        <span className="font-semibold text-gray-900">Apple Pay</span>
-                        <p className="text-sm text-gray-600 mt-1">Pay with Apple Pay through PayPal</p>
-                      </div>
-                    </button>
-                  ) : null}
-
-                  {/* Google Pay through PayPal */}
-                  {paypalClientId ? (
-                    <button type="button" onClick={() => { setPaymentMethod('google_pay'); setPaypalPaymentMode('wallet'); }}
-                      className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'google_pay' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
-                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'google_pay' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
-                        {paymentMethod === 'google_pay' && <div className="w-2 h-2 bg-white rounded-full"></div>}
-                      </div>
-                      <div className="flex-1 text-left">
-                        <span className="font-semibold text-gray-900">Google Pay</span>
-                        <p className="text-sm text-gray-600 mt-1">Pay with Google Pay through PayPal</p>
-                      </div>
-                    </button>
-                  ) : null}
-
-                  {/* PayPal Wallet */}
-                  {paypalClientId ? (
-                    <button type="button" onClick={() => { setPaymentMethod('paypal'); setPaypalPaymentMode('wallet'); }}
-                      className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'paypal' && paypalPaymentMode === 'wallet' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
-                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'paypal' && paypalPaymentMode === 'wallet' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
-                        {paymentMethod === 'paypal' && paypalPaymentMode === 'wallet' && <div className="w-2 h-2 bg-white rounded-full"></div>}
-                      </div>
-                      <div className="flex-1 text-left">
-                        <span className="font-semibold text-gray-900">PayPal Wallet</span>
-                        <p className="text-sm text-gray-600 mt-1">Pay with your PayPal account</p>
-                      </div>
-                    </button>
-                  ) : (
-                    <div className="w-full flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg bg-gray-50 opacity-60 cursor-not-allowed">
-                      <div className="w-4 h-4 rounded-full border-2 border-gray-300"></div>
-                      <div className="flex-1 text-left">
-                        <span className="font-semibold text-gray-500">PayPal</span>
-                        <p className="text-sm text-gray-400 mt-1">PayPal is temporarily unavailable</p>
-                      </div>
-                    </div>
-                  )}
-
-                  <button type="button" onClick={() => {
-                    setPaymentMethod('cod');
-                    setPaypalPaymentMode('wallet');
-                    setSelectedSavedPaymentMethod(null);
-                    setSavePaymentMethod(false);
-                  }}
-                    className={`w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all ${paymentMethod === 'cod' ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center ${paymentMethod === 'cod' ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
-                      {paymentMethod === 'cod' && <div className="w-2 h-2 bg-white rounded-full"></div>}
-                    </div>
-                    <div className="flex-1 text-left">
-                      <span className="font-semibold text-gray-900">Cash on Delivery</span>
-                      <p className="text-sm text-gray-600 mt-1">Pay cash when your order arrives. No card needed.</p>
-                    </div>
-                  </button>
-                </div>
+                  </>
+                )}
 
                 {isAuthenticated && !selectedSavedPaymentMethod && paymentMethod !== 'cod' && (
                   <div className="mt-4 flex items-center gap-2">
@@ -1023,7 +1057,7 @@ const Checkout = () => {
                     </p>
                   </div>
                 )}
-              </div>
+              </CheckoutStep>
 
               {/* Stripe Payment Form */}
               {showPaymentForm && clientSecret && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && paymentMethod !== 'cod' && (
@@ -1031,211 +1065,25 @@ const Checkout = () => {
                   onSuccess={handlePaymentSuccess} onError={handlePaymentError} onCancel={handlePaymentCancel} />
               )}
 
-              {/* Google Pay through PayPal */}
-              {showPayPalButton && paymentMethod === 'google_pay' && (
-                <div id="paypal-payment" className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center">
-                      <span className="text-gray-900 font-bold text-sm">G Pay</span>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">Google Pay</h3>
-                      <p className="text-sm text-gray-600">Pay securely with Google Pay through PayPal</p>
-                    </div>
-                  </div>
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center py-8">
-                      <LoadingSpinner size="md" />
-                      <span className="ml-3 text-gray-600">Loading Google Pay...</span>
-                    </div>
-                  }>
-                    <PayPalGooglePay
-                      items={items.map((item: any) => ({
-                        product: normalizeId(item.product._id) || String(item.product._id),
-                        quantity: item.quantity,
-                        ...(item.variant?.sku ? { variant: { sku: item.variant.sku } } : {})
-                      }))}
-                      total={total}
-                      shippingAddress={{
-                        firstName: shippingInfo.firstName,
-                        lastName: shippingInfo.lastName,
-                        street: shippingInfo.street,
-                        city: shippingInfo.city,
-                        state: normalizeShippingState(shippingInfo.state),
-                        zipCode: shippingInfo.zipCode,
-                        country: shippingInfo.country,
-                        phone: shippingInfo.phone
-                      }}
-                      guestEmail={!isAuthenticated ? shippingInfo.email.trim() : undefined}
-                      onGuestEmailInvalid={() => {
-                        setEmailError(true);
-                        emailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        emailInputRef.current?.focus();
-                      }}
-                      notes={orderNotes.trim() || undefined}
-                      couponCode={couponCode || undefined}
-                      donationAmount={donationAmount}
-                      onSuccess={handlePayPalSuccess}
-                      onError={handlePayPalError}
-                    />
-                  </Suspense>
-                </div>
-              )}
-
-              {/* Apple Pay through PayPal */}
-              {showPayPalButton && paymentMethod === 'apple_pay' && (
-                <div id="paypal-payment" className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-lg"></span>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">Apple Pay</h3>
-                      <p className="text-sm text-gray-600">Pay securely with Apple Pay through PayPal</p>
-                    </div>
-                  </div>
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center py-8">
-                      <LoadingSpinner size="md" />
-                      <span className="ml-3 text-gray-600">Loading Apple Pay...</span>
-                    </div>
-                  }>
-                    <PayPalApplePay
-                      items={items.map((item: any) => ({
-                        product: normalizeId(item.product._id) || String(item.product._id),
-                        quantity: item.quantity,
-                        ...(item.variant?.sku ? { variant: { sku: item.variant.sku } } : {})
-                      }))}
-                      total={total}
-                      shippingAddress={{
-                        firstName: shippingInfo.firstName,
-                        lastName: shippingInfo.lastName,
-                        street: shippingInfo.street,
-                        city: shippingInfo.city,
-                        state: normalizeShippingState(shippingInfo.state),
-                        zipCode: shippingInfo.zipCode,
-                        country: shippingInfo.country,
-                        phone: shippingInfo.phone
-                      }}
-                      guestEmail={!isAuthenticated ? shippingInfo.email.trim() : undefined}
-                      onGuestEmailInvalid={() => {
-                        setEmailError(true);
-                        emailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        emailInputRef.current?.focus();
-                      }}
-                      notes={orderNotes.trim() || undefined}
-                      couponCode={couponCode || undefined}
-                      donationAmount={donationAmount}
-                      onSuccess={handlePayPalSuccess}
-                      onError={handlePayPalError}
-                    />
-                  </Suspense>
-                </div>
-              )}
-
-              {/* PayPal Wallet or PayPal-powered Card Fields */}
-              {showPayPalButton && paymentMethod === 'paypal' && (
-                <div id="paypal-payment" className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 font-bold text-lg">PP</span>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">
-                        {paypalPaymentMode === 'card' ? 'Credit/Debit Card Payment' : 'PayPal Wallet Payment'}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {paypalPaymentMode === 'card' ? 'Pay securely by card through PayPal' : 'Pay securely with your PayPal account'}
-                      </p>
-                    </div>
-                  </div>
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center py-8">
-                      <LoadingSpinner size="md" />
-                      <span className="ml-3 text-gray-600">Loading secure payment...</span>
-                    </div>
-                  }>
-                    {paypalPaymentMode === 'card' ? (
-                      <PayPalCardFields
-                        items={items.map((item: any) => ({
-                          product: normalizeId(item.product._id) || String(item.product._id),
-                          quantity: item.quantity,
-                          ...(item.variant?.sku ? { variant: { sku: item.variant.sku } } : {})
-                        }))}
-                        shippingAddress={{
-                          firstName: shippingInfo.firstName,
-                          lastName: shippingInfo.lastName,
-                          street: shippingInfo.street,
-                          city: shippingInfo.city,
-                          state: normalizeShippingState(shippingInfo.state),
-                          zipCode: shippingInfo.zipCode,
-                          country: shippingInfo.country,
-                          phone: shippingInfo.phone
-                        }}
-                        guestEmail={!isAuthenticated ? shippingInfo.email.trim() : undefined}
-                        onGuestEmailInvalid={() => {
-                          setEmailError(true);
-                          emailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                          emailInputRef.current?.focus();
-                        }}
-                        notes={orderNotes.trim() || undefined}
-                        couponCode={couponCode || undefined}
-                        donationAmount={donationAmount}
-                        onSuccess={handlePayPalSuccess}
-                        onError={handlePayPalError}
-                        onCancel={handlePayPalCancel}
-                        onSwitchToWallet={() => setPaypalPaymentMode('wallet')}
-                      />
-                    ) : (
-                      <PayPalButton
-                        items={items.map((item: any) => ({
-                          product: normalizeId(item.product._id) || String(item.product._id),
-                          quantity: item.quantity,
-                          ...(item.variant?.sku ? { variant: { sku: item.variant.sku } } : {})
-                        }))}
-                        shippingAddress={{
-                          firstName: shippingInfo.firstName,
-                          lastName: shippingInfo.lastName,
-                          street: shippingInfo.street,
-                          city: shippingInfo.city,
-                          state: normalizeShippingState(shippingInfo.state),
-                          zipCode: shippingInfo.zipCode,
-                          country: shippingInfo.country,
-                          phone: shippingInfo.phone
-                        }}
-                        guestEmail={!isAuthenticated ? shippingInfo.email.trim() : undefined}
-                        onGuestEmailInvalid={() => {
-                          setEmailError(true);
-                          emailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                          emailInputRef.current?.focus();
-                        }}
-                        notes={orderNotes.trim() || undefined}
-                        couponCode={couponCode || undefined}
-                        donationAmount={donationAmount}
-                        onSuccess={handlePayPalSuccess}
-                        onError={handlePayPalError}
-                        onCancel={handlePayPalCancel}
-                      />
-                    )}
-                  </Suspense>
-                </div>
-              )}
-
               {/* Order Notes */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold mb-6">Special Instructions (Optional)</h2>
+              <CheckoutStep step="3" title="A note for the courier" subtitle="Gate codes, doorman, or “leave with the neighbor.” Optional.">
                 <textarea value={orderNotes} onChange={(e) => setOrderNotes(e.target.value)}
                   placeholder="Add any special delivery instructions or notes for your order..."
                   rows={4} maxLength={500}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" />
-                <p className="text-xs text-gray-500 mt-2">{orderNotes.length}/500 characters</p>
-              </div>
+                  className={`${fieldClass} h-auto min-h-[7rem] py-3`} />
+                <p className="text-xs text-stone-500 mt-2">{orderNotes.length}/500 characters</p>
+              </CheckoutStep>
             </div>
 
             {/* Order Summary */}
             <div>
-              <div className="bg-white rounded-lg shadow p-6 sticky top-24">
-                <h2 className="text-xl font-bold mb-6">Order Summary</h2>
+              <div className="sticky top-24 overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-[0_24px_60px_-32px_rgba(30,58,138,0.5)]">
+                <div className="bg-[#1E3A8A] px-6 py-5 text-white">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-300">Your order</p>
+                  <h2 className="mt-1 text-2xl font-black tracking-tight">${total.toFixed(2)}</h2>
+                  <p className="mt-1 text-sm text-blue-100">{items.length} {items.length === 1 ? 'item' : 'items'} · packed in Queens</p>
+                </div>
+                <div className="p-6">
                 <div className="space-y-4 mb-6">
                   {items.map((item) => {
                     const price = item.variant?.price || item.product.basePrice;
@@ -1243,40 +1091,39 @@ const Checkout = () => {
                       <div key={`${item.product._id}-${item.variant?.sku}`} className="flex gap-3">
                         <img src={normalizeImageUrl(item.product.images?.[0])} alt={item.product.name}
                           onError={(e) => handleImageError(e, item.product.name)}
-                          className="w-16 h-16 object-cover rounded" />
+                          className="h-[4.5rem] w-[4.5rem] rounded-2xl object-cover ring-1 ring-stone-200" />
                         <div className="flex-1">
-                          <p className="font-medium text-sm">{item.product.name}</p>
-                          <p className="text-xs text-gray-600">Qty: {item.quantity}</p>
-                          {item.variant && <p className="text-xs text-gray-600">{item.variant.size || item.variant.weight}</p>}
+                          <p className="font-semibold text-sm text-stone-900 leading-snug">{item.product.name}</p>
+                          <p className="text-xs text-stone-500 mt-1">Qty {item.quantity}</p>
+                          {item.variant && <p className="text-xs text-stone-500">{item.variant.size || item.variant.weight}</p>}
                         </div>
-                        <p className="font-medium">${(price * item.quantity).toFixed(2)}</p>
+                        <p className="font-bold text-stone-900">${(price * item.quantity).toFixed(2)}</p>
                       </div>
                     );
                   })}
                 </div>
-                <div className="space-y-3 border-t pt-4 mb-6">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">${subtotal.toFixed(2)}</span>
+                <div className="space-y-3 border-t border-stone-100 pt-4 mb-5">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-stone-500">Subtotal</span>
+                    <span className="font-semibold text-stone-800">${subtotal.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Shipping</span>
-                    <span className="font-medium">
-                      {shipping === 0 ? <span className="text-green-600">FREE</span> : `$${shipping.toFixed(2)}`}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-stone-500">Shipping</span>
+                    <span className="font-semibold text-stone-800">
+                      {shipping === 0 ? <span className="text-emerald-600">FREE</span> : `$${shipping.toFixed(2)}`}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Tax</span>
-                    <span className="font-medium">${tax.toFixed(2)}</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-stone-500">Tax</span>
+                    <span className="font-semibold text-stone-800">${tax.toFixed(2)}</span>
                   </div>
                   {couponDiscount > 0 && (
-                    <div className="flex justify-between text-green-600">
-                      <span className="flex items-center gap-1">🏷️ Coupon ({couponCode})</span>
-                      <span className="font-medium">-${couponDiscount.toFixed(2)}</span>
+                    <div className="flex justify-between text-sm text-emerald-600">
+                      <span>Coupon ({couponCode})</span>
+                      <span className="font-semibold">-${couponDiscount.toFixed(2)}</span>
                     </div>
                   )}
-                  {/* Coupon Code Input */}
-                  <div className="pt-2">
+                  <div className="pt-1">
                     {!couponCode ? (
                       <div className="flex gap-2">
                         <input
@@ -1284,57 +1131,65 @@ const Checkout = () => {
                           value={couponInput}
                           onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
                           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleApplyCoupon(); } }}
-                          placeholder="Coupon code"
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Promo code"
+                          className="flex-1 rounded-xl border border-stone-200 bg-[#FBF9F5] px-3 py-2.5 text-sm outline-none focus:border-[#1E3A8A] focus:ring-2 focus:ring-[#1E3A8A]/15"
                         />
                         <button
                           type="button"
                           onClick={handleApplyCoupon}
                           disabled={couponLoading || !couponInput.trim()}
-                          className="px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-colors"
+                          className="rounded-xl bg-stone-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-stone-700 disabled:opacity-50 transition-colors"
                         >
                           {couponLoading ? '...' : 'Apply'}
                         </button>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-                        <span className="text-green-700 text-sm font-medium">🏷️ {couponCode} applied</span>
-                        <button type="button" onClick={handleRemoveCoupon} className="text-gray-400 hover:text-gray-600 text-xs ml-2">Remove</button>
+                      <div className="flex items-center justify-between rounded-xl bg-emerald-50 px-3 py-2 ring-1 ring-emerald-100">
+                        <span className="text-emerald-700 text-sm font-semibold">{couponCode} applied</span>
+                        <button type="button" onClick={handleRemoveCoupon} className="text-stone-400 hover:text-stone-700 text-xs ml-2">Remove</button>
                       </div>
                     )}
                     {!couponCode && !couponMessage && (
-                      <p className="text-xs text-gray-500 mt-1">First order: FREEDOM20 · 20% off, max $10 · no autoship</p>
+                      <p className="text-xs text-stone-500 mt-1.5">First order: FREEDOM20 · 20% off, max $10</p>
                     )}
                     {couponMessage && (
-                      <p className={`text-xs mt-1 ${couponValid ? 'text-green-600' : 'text-red-500'}`}>{couponMessage}</p>
+                      <p className={`text-xs mt-1.5 ${couponValid ? 'text-emerald-600' : 'text-red-500'}`}>{couponMessage}</p>
                     )}
                   </div>
                   <CheckoutCharityCard amount={donationAmount} onChange={setDonationAmount} />
                   {donationAmount > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Shelter donation</span>
-                      <span className="font-medium text-rose-600">${donationAmount.toFixed(2)}</span>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-rose-600 font-medium">Shelter donation</span>
+                      <span className="font-bold text-rose-600">${donationAmount.toFixed(2)}</span>
                     </div>
                   )}
-                  <div className="border-t pt-3 flex justify-between text-lg font-bold">
+                  <div className="border-t border-stone-200 pt-3 flex justify-between text-lg font-black text-stone-900">
                     <span>Total</span>
                     <span>${total.toFixed(2)}</span>
                   </div>
                 </div>
                 <button type="submit"
                   disabled={createOrderMutation.isPending || (isProcessingPayment && paymentMethod !== 'cod')}
-                  className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50">
+                  className="w-full rounded-2xl bg-[#1E3A8A] py-4 text-lg font-black text-white shadow-lg shadow-blue-900/25 hover:bg-[#16307a] disabled:opacity-50">
                   {paymentMethod === 'cod'
                     ? (createOrderMutation.isPending ? 'Placing order...' : 'Place cash on delivery order')
                     : paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay'
                       ? 'Continue to PayPal'
                     : isProcessingPayment ? 'Initializing Payment...' : createOrderMutation.isPending ? 'Processing...' : 'Place Order'}
                 </button>
-                {/* Trust badges */}
-                <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-500">
-                  <span>🔒 Secure Checkout</span>
-                  <span>✅ SSL Encrypted</span>
-                  <Link to="/return-policy" className="hover:text-gray-700">365-day returns</Link>
+                <div className="mt-5 rounded-2xl bg-[#FBF9F5] p-4 ring-1 ring-stone-200">
+                  <div className="flex items-start gap-3">
+                    <ShieldCheck className="w-6 h-6 text-[#1E3A8A] flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-stone-900">A promise worth the brand</p>
+                      <p className="text-sm text-stone-600 mt-1">Same-day Queens, PayPal-secured, and a human on the phone 24/7.</p>
+                      <ul className="mt-3 space-y-1.5 text-sm text-stone-700">
+                        <li className="flex items-center gap-2"><RotateCcw className="w-4 h-4 text-[#1E3A8A]" /> 365-day returns on unused items</li>
+                        <li className="flex items-center gap-2"><Headphones className="w-4 h-4 text-[#1E3A8A]" /> Call 24/7 · (800) 259-2605</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
                 </div>
               </div>
             </div>
@@ -1342,6 +1197,7 @@ const Checkout = () => {
         </form>
 
         {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
+      </div>
       </div>
     </>
   );
