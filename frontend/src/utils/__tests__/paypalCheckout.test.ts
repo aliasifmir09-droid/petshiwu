@@ -63,4 +63,11 @@ describe('PayPal checkout', () => {
     expect(paypalConfig).toContain("paypalClientId !== 'sb'");
     expect(paypalConfig).not.toContain("import.meta.env.VITE_PAYPAL_ENV === 'live'");
   });
+
+  test('checkout keeps the optional shelter charity card in the order summary', () => {
+    const checkout = read('../../pages/Checkout.tsx');
+    expect(checkout).toContain('CheckoutCharityCard');
+    expect(checkout).toContain('donationAmount={donationAmount}');
+    expect(checkout).toContain('Almost home.');
+  });
 });
