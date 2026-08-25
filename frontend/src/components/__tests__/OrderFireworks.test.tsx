@@ -12,12 +12,26 @@ describe('OrderFireworks', () => {
     expect(screen.getByText('Your order is placed')).toBeInTheDocument();
     expect(screen.getByText('Your pet family is celebrating with you.')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'Celebrating pet family' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
   test('stays hidden until an order actually completes', () => {
     const { container } = render(<OrderFireworks active={false} />);
     expect(container).toBeEmptyDOMElement();
+  });
+
+  test('stays on screen past the first couple of seconds', () => {
+    vi.useFakeTimers();
+    HTMLCanvasElement.prototype.getContext = vi.fn(() => null);
+    render(<OrderFireworks active />);
+    expect(screen.getByRole('img', { name: 'Celebrating pet family' })).toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
+    expect(screen.getByRole('img', { name: 'Celebrating pet family' })).toBeInTheDocument();
+    expect(screen.getByText('Your order is placed')).toBeInTheDocument();
+    vi.useRealTimers();
   });
 
   test('fades away and disappears after the celebration', () => {

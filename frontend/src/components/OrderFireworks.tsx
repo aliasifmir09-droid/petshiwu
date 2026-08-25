@@ -307,7 +307,6 @@ const OrderFireworks = ({ active, onDone }: OrderFireworksProps) => {
       className={`fixed inset-0 z-[200] flex items-center justify-center px-3 transition-opacity duration-700 ${fading ? 'opacity-0' : 'opacity-100'}`}
       role="status"
       aria-live="polite"
-      onClick={dismissNow}
     >
       <style>{`
         @keyframes orderCeleBounce { 0%,100% { transform: translateY(0) rotate(0) } 50% { transform: translateY(-36px) rotate(-3deg) } }
@@ -368,7 +367,16 @@ const OrderFireworks = ({ active, onDone }: OrderFireworksProps) => {
         <p className="mx-auto mt-4 max-w-2xl text-lg font-semibold text-white/85 sm:text-2xl">
           Your pet family is celebrating with you.
         </p>
-        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.22em] text-white/45">Tap anywhere to close</p>
+        <button
+          type="button"
+          className="mt-6 rounded-full bg-white/15 px-5 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white/80 ring-1 ring-white/30 hover:bg-white/25"
+          onClick={(e) => {
+            e.stopPropagation();
+            dismissNow();
+          }}
+        >
+          Close
+        </button>
       </div>
     </div>
   );
