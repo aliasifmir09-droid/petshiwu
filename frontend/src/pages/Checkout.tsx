@@ -980,7 +980,6 @@ const Checkout = () => {
                         onCancel={handlePayPalCancel}
                       />
                     </Suspense>
-                    <p className="mt-3 text-center text-xs text-gray-500">Powered by PayPal</p>
                   </div>
                 ) : !paypalClientId && paymentMethod !== 'cod' ? (
                   <div className="p-4 border-2 border-gray-200 rounded-lg bg-gray-50">
