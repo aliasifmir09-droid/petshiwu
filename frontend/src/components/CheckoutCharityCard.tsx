@@ -6,8 +6,8 @@ export const CHECKOUT_CHARITY_PRESETS = [1, 3, 5, 10] as const;
 const GIFT_LABELS: Record<(typeof CHECKOUT_CHARITY_PRESETS)[number], string> = {
   1: 'a treat',
   3: 'a meal',
-  5: 'a bed',
-  10: 'a week'
+  5: 'a cozy bed',
+  10: "a week's care"
 };
 
 const MIN_CUSTOM_DONATION = 1;
@@ -83,7 +83,7 @@ const CheckoutCharityCard = ({ amount, onChange }: CheckoutCharityCardProps) => 
   return (
     <section
       aria-label="Optional donation to animal rescue"
-      className="relative overflow-hidden rounded-[1.4rem] border border-rose-100/90 p-4"
+      className="relative overflow-hidden rounded-[1.4rem] border border-rose-100/90 p-4 sm:p-[1.15rem]"
       style={{
         fontFamily: PET_PARENT_FONT,
         background:
@@ -98,7 +98,7 @@ const CheckoutCharityCard = ({ amount, onChange }: CheckoutCharityCardProps) => 
       />
 
       <div className="relative">
-        <div className="mb-3 flex items-start gap-3 pr-16">
+        <div className="mb-3.5 flex items-start gap-3 pr-14">
           <div className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 via-pink-500 to-orange-400 shadow-[0_8px_18px_-8px_rgba(244,63,94,0.9)]">
             <Heart className="text-white" size={20} fill="currentColor" />
             <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-rose-100">
@@ -123,10 +123,10 @@ const CheckoutCharityCard = ({ amount, onChange }: CheckoutCharityCardProps) => 
         {amount > 0 && (
           <div className="mb-3 flex items-start justify-between gap-2 rounded-2xl bg-white/95 px-3 py-2.5 shadow-sm ring-1 ring-rose-100">
             <div className="min-w-0">
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-rose-500">
-                Thank you
+              <p className="text-sm font-extrabold leading-snug text-rose-600">
+                Thank you, pet parent.
               </p>
-              <p className="text-sm font-bold leading-snug text-stone-800">
+              <p className="text-sm font-semibold leading-snug text-stone-700">
                 ${amount.toFixed(2)} will help a shelter pet rest tonight.
               </p>
             </div>
@@ -142,7 +142,7 @@ const CheckoutCharityCard = ({ amount, onChange }: CheckoutCharityCardProps) => 
           </div>
         )}
 
-        <div className="grid grid-cols-4 gap-1.5" role="group" aria-label="Donation amounts">
+        <div className="grid grid-cols-2 gap-2" role="group" aria-label="Donation amounts">
           {CHECKOUT_CHARITY_PRESETS.map((preset) => {
             const selected = amount === preset && !showCustom;
             return (
@@ -152,20 +152,26 @@ const CheckoutCharityCard = ({ amount, onChange }: CheckoutCharityCardProps) => 
                 aria-pressed={selected}
                 aria-label={`Donate $${preset} to animal rescue`}
                 onClick={() => selectPreset(preset)}
-                className={`group flex min-h-[4.25rem] flex-col items-center justify-center rounded-2xl px-1 py-2 transition-all duration-200 ${
+                className={`group flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-left transition-all duration-200 ${
                   selected
-                    ? 'bg-gradient-to-b from-rose-500 to-pink-600 text-white shadow-[0_10px_18px_-10px_rgba(244,63,94,0.95)] ring-2 ring-white'
+                    ? 'bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-[0_10px_18px_-10px_rgba(244,63,94,0.95)] ring-2 ring-white'
                     : 'bg-white text-stone-800 shadow-sm ring-1 ring-rose-100 hover:-translate-y-0.5 hover:bg-rose-50 hover:shadow-md hover:ring-rose-200'
                 }`}
               >
-                {selected ? (
-                  <Heart size={11} fill="currentColor" className="mb-0.5 text-rose-100" />
-                ) : (
-                  <PawPrint size={11} className="mb-0.5 text-rose-300 group-hover:text-rose-500" />
-                )}
-                <span className="text-[15px] font-black leading-none">${preset}</span>
-                <span className={`mt-1 text-[10px] font-bold leading-none ${selected ? 'text-rose-100' : 'text-stone-500'}`}>
-                  {GIFT_LABELS[preset]}
+                <span className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${
+                  selected ? 'bg-white/20' : 'bg-rose-50'
+                }`}>
+                  {selected ? (
+                    <Heart size={14} fill="currentColor" className="text-white" />
+                  ) : (
+                    <PawPrint size={14} className="text-rose-400 group-hover:text-rose-500" />
+                  )}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-base font-black leading-none">${preset}</span>
+                  <span className={`mt-1 block text-[11px] font-bold leading-tight ${selected ? 'text-rose-100' : 'text-stone-500'}`}>
+                    {GIFT_LABELS[preset]}
+                  </span>
                 </span>
               </button>
             );
@@ -180,7 +186,7 @@ const CheckoutCharityCard = ({ amount, onChange }: CheckoutCharityCardProps) => 
             setShowCustom(next);
             if (!next && !isPreset(amount)) onChange(0);
           }}
-          className="mt-2.5 w-full text-center text-sm font-bold text-rose-600 underline-offset-4 hover:text-rose-700 hover:underline"
+          className="mt-3 w-full text-center text-sm font-semibold text-stone-500 underline-offset-4 hover:text-rose-600 hover:underline"
         >
           {showCustom ? 'Hide other amount' : 'Give a different amount'}
         </button>
