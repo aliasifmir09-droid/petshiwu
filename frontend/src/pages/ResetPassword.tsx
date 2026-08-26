@@ -78,9 +78,11 @@ const ResetPassword = () => {
       return;
     }
 
-    setLoading(true);
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      setError('Password must contain at least one uppercase letter, one lowercase letter, and one number');
+      return;
+    }
 
-    // If different user is logged in, prevent reset
     if (differentUser && loggedInUser) {
       setError('Please log out first before resetting another user\'s password.');
       showToast('Please log out first before resetting another user\'s password.', 'error');
@@ -184,7 +186,39 @@ const ResetPassword = () => {
     );
   }
 
-  if (!token || error) {
+  if (!token) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="bg-white p-8 rounded-lg shadow-md text-center">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+              <AlertCircle className="h-10 w-10 text-red-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Invalid Reset Link</h2>
+            <p className="text-gray-600 mb-6">
+              Invalid or missing reset token. Please request a new password reset link.
+            </p>
+            <div className="space-y-3">
+              <Link
+                to="/forgot-password"
+                className="block w-full bg-primary-600 text-white py-2 px-4 rounded-md hover:bg-primary-700 transition-colors"
+              >
+                Request New Reset Link
+              </Link>
+              <Link
+                to="/login"
+                className="block w-full text-primary-600 hover:text-primary-700 text-sm"
+              >
+                Back to Login
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !resetUserEmail) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
@@ -289,6 +323,9 @@ const ResetPassword = () => {
               </button>
             </div>
             <PasswordStrength password={password} />
+            <p className="mt-1 text-xs text-gray-500">
+              Use at least 8 characters with one uppercase letter, one lowercase letter, and one number.
+            </p>
           </div>
 
           <div>

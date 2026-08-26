@@ -14,6 +14,7 @@ import logger from '../utils/logger';
 import { executeCachedAggregation } from '../utils/aggregationCache';
 import { addEmailJob } from '../utils/jobQueue';
 import { cache } from '../utils/cache';
+import { attachGuestOrdersToUser } from '../utils/claimGuestOrders';
 
 import type { OrderItemInput, NormalizedOrderItem, NormalizedOrder } from '../types/common';
 import Stripe from 'stripe';
@@ -611,6 +612,8 @@ export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFun
       return res.status(401).json({ success: false, message: 'User not authenticated' });
     }
 
+    await attachGuestOrdersToUser(req.user._id, req.user.email);
+
     const orders = await Order.find({ user: req.user._id })
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -662,11 +665,19 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
       return res.status(400).json({ success: false, message: 'Invalid order ID format' });
     }
 
+    await attachGuestOrdersToUser(req.user._id, req.user.email);
+
     let order;
     if (req.user.role === 'admin' || req.user.permissions?.canManageOrders) {
       order = await Order.findById(orderId).populate('user', 'firstName lastName email').lean();
     } else {
-      order = await Order.findOne({ _id: orderId, user: req.user._id }).populate('user', 'firstName lastName email').lean();
+      order = await Order.findOne({
+        _id: orderId,
+        $or: [
+          { user: req.user._id },
+          { guestEmail: new RegExp(`^${String(req.user.email).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+        ],
+      }).populate('user', 'firstName lastName email').lean();
     }
 
     if (!order) {

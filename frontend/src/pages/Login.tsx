@@ -172,6 +172,13 @@ const Login = () => {
                 Sign up
               </Link>
             </p>
+            <p className="text-sm text-gray-500 mt-3">
+              Checked out as a guest?{' '}
+              <Link to="/forgot-password" className="text-primary-600 hover:text-primary-700 font-semibold">
+                Set a password with that email
+              </Link>{' '}
+              to see past orders.
+            </p>
           </div>
         </div>
       </div>

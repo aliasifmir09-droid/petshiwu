@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { orderService } from '@/services/orders';
-import { Package, Truck, CheckCircle, Clock, XCircle, Eye, ChevronRight } from 'lucide-react';
+import { Package, Truck, CheckCircle, Clock, XCircle, Eye, ChevronRight, RotateCcw } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { useCartStore } from '@/stores/cartStore';
+import { useToast } from '@/hooks/useToast';
+import Toast from '@/components/Toast';
+import { productsForReorder } from '@/utils/reorderFromOrder';
 
 const extractOrderId = (id: any): string => {
   if (!id) return '';
@@ -48,6 +52,10 @@ const extractOrderId = (id: any): string => {
 
 const MyOrders = () => {
   const [page, setPage] = useState(1);
+  const [reorderingId, setReorderingId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const addToCart = useCartStore((state) => state.addToCart);
+  const { toast, showToast, hideToast } = useToast();
 
   const { data: ordersData, isLoading } = useQuery({
     queryKey: ['myOrders', page],
@@ -95,6 +103,25 @@ const MyOrders = () => {
     }
   };
 
+  const handleReorder = async (order: { _id?: unknown; items?: Array<{ product?: unknown; variant?: { sku?: string }; quantity: number }> }) => {
+    const orderId = extractOrderId(order._id);
+    setReorderingId(orderId);
+    try {
+      const ready = await productsForReorder(order.items || []);
+      if (ready.length === 0) {
+        showToast('Those items are no longer in stock. Browse the catalog to replace them.', 'error');
+        return;
+      }
+      ready.forEach(({ product, variant, quantity }) => addToCart(product, variant, quantity));
+      showToast(`Added ${ready.length} item${ready.length === 1 ? '' : 's'} to your cart.`, 'success');
+      navigate('/cart');
+    } catch {
+      showToast('Could not add those items to your cart. Try again from the product page.', 'error');
+    } finally {
+      setReorderingId(null);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 lg:px-8 py-8">
       <SEO title="My Orders | Petshiwu" description="View and track your Petshiwu orders" noindex={true} />
@@ -127,9 +154,20 @@ const MyOrders = () => {
                         <div><p className="text-sm text-gray-600">Date</p><p className="font-medium">{new Date(order.createdAt).toLocaleDateString()}</p></div>
                         <div><p className="text-sm text-gray-600">Total</p><p className="font-bold text-primary-600">${order.totalPrice.toFixed(2)}</p></div>
                       </div>
-                      <Link to={`/orders/${orderId}`} className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium">
-                        <Eye size={18} />View Details<ChevronRight size={18} />
-                      </Link>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => handleReorder(order)}
+                          disabled={reorderingId === orderId}
+                          className="flex items-center gap-2 text-gray-700 hover:text-primary-700 font-medium disabled:opacity-50"
+                        >
+                          <RotateCcw size={18} />
+                          {reorderingId === orderId ? 'Adding…' : 'Buy again'}
+                        </button>
+                        <Link to={`/orders/${orderId}`} className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium">
+                          <Eye size={18} />View Details<ChevronRight size={18} />
+                        </Link>
+                      </div>
                     </div>
                   </div>
 
@@ -204,6 +242,9 @@ const MyOrders = () => {
           </div>
         )}
       </div>
+      {toast.isVisible && (
+        <Toast message={toast.message} type={toast.type} onClose={hideToast} />
+      )}
     </div>
   );
 };

@@ -21,6 +21,10 @@ const getFrontendBaseUrl = (): string => {
   return first.replace(/\/+$/, '');
 };
 
+/** BrowserRouter path — never HashRouter `/#/reset-password`. */
+export const buildPasswordResetUrl = (token: string): string =>
+  `${getFrontendBaseUrl()}/reset-password?token=${encodeURIComponent(token)}`;
+
 // Initialize Resend client if API key is provided
 let resendClient: Resend | null = null;
 if (process.env.RESEND_API_KEY) {
@@ -583,9 +587,7 @@ export const sendOrderDeliveredEmail = async (
 // Send password reset email
 export const sendPasswordResetEmail = async (email: string, token: string, firstName: string) => {
   try {
-    const frontendUrl = getFrontendBaseUrl();
-    // Use HashRouter format (#/) for frontend routing
-    const resetUrl = `${frontendUrl}/#/reset-password?token=${token}`;
+    const resetUrl = buildPasswordResetUrl(token);
     const fromEmail = process.env.SMTP_FROM || process.env.RESEND_FROM || 'noreply@petshiwu.com';
 
     // Try Resend API first (more reliable, no port blocking)

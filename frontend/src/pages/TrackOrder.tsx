@@ -5,9 +5,11 @@ import { Package, Truck, CheckCircle, Clock, XCircle, Search, Loader2, MapPin } 
 import { Link, useSearchParams } from 'react-router-dom';
 import OrderFireworks from '@/components/OrderFireworks';
 import GoogleCustomerReviewsOptIn from '@/components/GoogleCustomerReviewsOptIn';
+import { useAuthStore } from '@/stores/authStore';
 
 const TrackOrder = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isAuthenticated } = useAuthStore();
   const [orderId, setOrderId] = useState(searchParams.get('order') || '');
   const [searchOrderId, setSearchOrderId] = useState(searchParams.get('order') || '');
   const [celebrate, setCelebrate] = useState(searchParams.get('newOrder') === 'true');
@@ -335,10 +337,10 @@ const TrackOrder = () => {
                   Contact Support
                 </Link>
                 <Link
-                  to="/orders"
+                  to={isAuthenticated ? '/orders' : '/forgot-password'}
                   className="px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors"
                 >
-                  View My Orders
+                  {isAuthenticated ? 'View My Orders' : 'Set a password to see all orders'}
                 </Link>
               </div>
             </div>

@@ -1,8 +1,8 @@
-import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orderService } from '@/services/orders';
 import ProductReviewForm from '@/components/ProductReviewForm';
-import { Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, ArrowLeft } from 'lucide-react';
+import { Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, ArrowLeft, RotateCcw } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import DonationModal from '@/components/DonationModal';
@@ -12,6 +12,8 @@ import { useAuthStore } from '@/stores/authStore';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { trackOrderCancel } from '@/utils/analytics';
+import { useCartStore } from '@/stores/cartStore';
+import { productsForReorder } from '@/utils/reorderFromOrder';
 
 const OrderDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +21,9 @@ const OrderDetail = () => {
   const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
   const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const addToCart = useCartStore((state) => state.addToCart);
+  const [reordering, setReordering] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showDonationModal, setShowDonationModal] = useState(false);
   const isNewOrder = searchParams.get('newOrder') === 'true';
@@ -96,6 +101,25 @@ const OrderDetail = () => {
   const handleCancelOrder = () => {
     if (id) {
       cancelOrderMutation.mutate(id);
+    }
+  };
+
+  const handleReorder = async () => {
+    if (!order) return;
+    setReordering(true);
+    try {
+      const ready = await productsForReorder(order.items || []);
+      if (ready.length === 0) {
+        showToast('Those items are no longer in stock. Browse the catalog to replace them.', 'error');
+        return;
+      }
+      ready.forEach(({ product, variant, quantity }) => addToCart(product, variant, quantity));
+      showToast(`Added ${ready.length} item${ready.length === 1 ? '' : 's'} to your cart.`, 'success');
+      navigate('/cart');
+    } catch {
+      showToast('Could not add those items to your cart.', 'error');
+    } finally {
+      setReordering(false);
     }
   };
 
@@ -224,6 +248,17 @@ const OrderDetail = () => {
                 {getStatusIcon(order.orderStatus)}
                 <span className="font-bold text-lg capitalize">{order.orderStatus}</span>
               </div>
+              {order.orderStatus !== 'cancelled' && (
+                <button
+                  type="button"
+                  onClick={handleReorder}
+                  disabled={reordering}
+                  className="px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                >
+                  <RotateCcw size={20} />
+                  {reordering ? 'Adding…' : 'Buy again'}
+                </button>
+              )}
               
               {/* Cancel Order Button - Only show for pending orders */}
               {order.orderStatus === 'pending' && (
