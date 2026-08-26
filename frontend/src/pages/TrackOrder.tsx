@@ -1,15 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { orderService } from '@/services/orders';
 import { Package, Truck, CheckCircle, Clock, XCircle, Search, Loader2, MapPin } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import OrderFireworks from '@/components/OrderFireworks';
+import GoogleCustomerReviewsOptIn from '@/components/GoogleCustomerReviewsOptIn';
 
 const TrackOrder = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [orderId, setOrderId] = useState(searchParams.get('order') || '');
   const [searchOrderId, setSearchOrderId] = useState(searchParams.get('order') || '');
   const [celebrate, setCelebrate] = useState(searchParams.get('newOrder') === 'true');
+  const wasNewOrderRef = useRef(searchParams.get('newOrder') === 'true');
+  const confirmationOrderRef = useRef(searchParams.get('order') || '');
 
   useEffect(() => {
     const fromUrl = searchParams.get('order');
@@ -85,6 +88,10 @@ const TrackOrder = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
+      <GoogleCustomerReviewsOptIn
+        enabled={wasNewOrderRef.current && !celebrate && searchOrderId === confirmationOrderRef.current}
+        order={order}
+      />
       {celebrate && (
         <OrderFireworks
           active

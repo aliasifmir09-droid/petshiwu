@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { merchantMpn, productSchemaIdentifiers } from '../merchantIdentifiers';
+import { merchantMpn, looksLikeGtin, productSchemaIdentifiers } from '../merchantIdentifiers';
 
 describe('merchantMpn', () => {
   test('keeps SKUs within Google\'s 1–70 character limit', () => {
@@ -16,6 +16,14 @@ describe('merchantMpn', () => {
         'petsafe®-cat-flap:-2-way-locking---built-in-lock---durable---easy-install---hardware-kit-i'
       )
     ).toBeUndefined();
+  });
+});
+
+describe('looksLikeGtin', () => {
+  test('accepts 8 and 12-14 digit codes', () => {
+    expect(looksLikeGtin('01234567')).toBe(true);
+    expect(looksLikeGtin('012345678905')).toBe(true);
+    expect(looksLikeGtin('HILLS-KD')).toBe(false);
   });
 });
 

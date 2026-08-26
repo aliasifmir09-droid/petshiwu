@@ -150,7 +150,8 @@ export interface ShippingAddress {
 export interface Order {
   _id: string;
   orderNumber: string;
-  user: string;
+  user: string | { email?: string };
+  guestEmail?: string;
   items: OrderItem[];
   shippingAddress: ShippingAddress;
   billingAddress?: ShippingAddress;
