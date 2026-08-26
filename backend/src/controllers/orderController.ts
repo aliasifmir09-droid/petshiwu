@@ -26,6 +26,7 @@ import {
   getPayPalOrder
 } from '../services/paypalService';
 import { calculateTrustedOrderPricing } from '../services/orderPricingService';
+import { isReusableCoupon, normalizeCouponCode } from '../services/couponService';
 import { isNycShippingAddress } from '../utils/nycDelivery';
 
 const stripe: Stripe | null = process.env.STRIPE_SECRET_KEY
@@ -1338,8 +1339,8 @@ const finalizePendingPayPalCheckout = async (pending: IPendingPayPalCheckout | n
       const couponEmail = pending.guestEmail || (pending.user
         ? (await User.findById(pending.user).select('email').session(session || null).lean())?.email
         : undefined);
-      if (couponEmail) {
-        const normalizedCoupon = pending.couponCode.trim().toUpperCase();
+      const normalizedCoupon = normalizeCouponCode(pending.couponCode);
+      if (couponEmail && !isReusableCoupon(normalizedCoupon)) {
         const existingCouponUsage = await CouponUsage.findOne({
           email: couponEmail.trim().toLowerCase(),
           code: normalizedCoupon

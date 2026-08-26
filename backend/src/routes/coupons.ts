@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import CouponUsage from '../models/CouponUsage';
 import logger from '../utils/logger';
-import { COUPONS, getCouponDiscount } from '../services/couponService';
+import { COUPONS, getCouponDiscount, isReusableCoupon, normalizeCouponCode } from '../services/couponService';
 
 const router = express.Router();
 
@@ -16,15 +16,15 @@ router.post('/validate', async (req: Request, res: Response) => {
       return res.status(400).json({ valid: false, message: 'Please enter a coupon code.' });
     }
 
-    const normalized = code.trim().toUpperCase();
+    const normalized = normalizeCouponCode(code);
     const coupon = COUPONS[normalized];
 
     if (!coupon) {
       return res.status(200).json({ valid: false, message: 'Invalid coupon code. Please check and try again.' });
     }
 
-    // Check if this email has already used this code
-    if (email && typeof email === 'string' && email.trim()) {
+    // One-use-per-email lock — skip reusable private codes (FAMILY15)
+    if (email && typeof email === 'string' && email.trim() && !isReusableCoupon(normalized)) {
       const lowerEmail = email.trim().toLowerCase();
       const alreadyUsed = await CouponUsage.findOne({ email: lowerEmail, code: normalized });
       if (alreadyUsed) {
@@ -67,8 +67,13 @@ router.post('/use', async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: 'Missing required fields.' });
     }
 
-    const normalized = code.trim().toUpperCase();
+    const normalized = normalizeCouponCode(code);
     const lowerEmail = email.trim().toLowerCase();
+
+    if (isReusableCoupon(normalized)) {
+      logger.info(`[coupons] Reusable code ${normalized} left unlocked for ${lowerEmail}`);
+      return res.json({ success: true, reusable: true });
+    }
 
     // Upsert — if somehow called twice, just update orderId (no duplicate error)
     await CouponUsage.findOneAndUpdate(
