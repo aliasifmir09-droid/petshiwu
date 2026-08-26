@@ -31,7 +31,10 @@ describe('GoogleCustomerReviewsOptIn', () => {
       email: 'guest@example.com',
       delivery_country: 'US',
       estimated_delivery_date: '2026-08-13',
+      opt_in_style: 'CENTER_DIALOG',
     }));
+    expect(window.___gcfg).toEqual({ lang: 'en-US' });
+    expect(typeof window.renderOptIn).toBe('function');
   });
 
   test('does not load Google when this is not a fresh confirmation', () => {

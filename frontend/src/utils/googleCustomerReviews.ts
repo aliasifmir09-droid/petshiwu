@@ -5,7 +5,9 @@ export const GOOGLE_MERCHANT_ID = 5791232179;
 export const GCR_STORAGE_KEY = 'petshiwu_gcr_optin';
 export const GCR_PLATFORM_SCRIPT_ID = 'google-customer-reviews-platform';
 export const GCR_PLATFORM_SRC =
-  'https://apis.google.com/js/platform.js?onload=renderGcrOptIn';
+  'https://apis.google.com/js/platform.js?onload=renderOptIn';
+export const GCR_LANGUAGE = 'en-US';
+export const GCR_OPT_IN_STYLE = 'CENTER_DIALOG';
 
 export type GoogleReviewProduct = { gtin: string };
 
@@ -15,6 +17,7 @@ export type GoogleReviewOptInConfig = {
   email: string;
   delivery_country: string;
   estimated_delivery_date: string;
+  opt_in_style?: 'CENTER_DIALOG' | 'BOTTOM_RIGHT_DIALOG' | 'BOTTOM_LEFT_DIALOG' | 'TOP_RIGHT_DIALOG' | 'TOP_LEFT_DIALOG' | 'BOTTOM_TRAY';
   products?: GoogleReviewProduct[];
 };
 
@@ -41,7 +44,8 @@ type StoredOptIn = {
 
 declare global {
   interface Window {
-    renderGcrOptIn?: () => void;
+    renderOptIn?: () => void;
+    ___gcfg?: { lang?: string };
     gapi?: {
       load: (module: string, callback: () => void) => void;
       surveyoptin?: {
@@ -170,6 +174,7 @@ export function buildSurveyOptInConfig(
       order.shippingAddress?.state
     ),
     estimated_delivery_date: estimatedDeliveryDateYmd(order.shippingAddress?.zipCode, placedAt),
+    opt_in_style: GCR_OPT_IN_STYLE,
   };
 
   const products = reviewProductGtins(order.items);

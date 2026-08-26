@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import {
+  GCR_LANGUAGE,
   GCR_PLATFORM_SCRIPT_ID,
   GCR_PLATFORM_SRC,
   GoogleReviewOrder,
@@ -37,7 +38,8 @@ const GoogleCustomerReviewsOptIn = ({
       });
     };
 
-    window.renderGcrOptIn = render;
+    window.___gcfg = { lang: GCR_LANGUAGE };
+    window.renderOptIn = render;
 
     if (window.gapi?.load) {
       render();

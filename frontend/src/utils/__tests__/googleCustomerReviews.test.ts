@@ -1,6 +1,11 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test } from 'vitest';
+import fs from 'fs';
+import path from 'path';
 import {
   GOOGLE_MERCHANT_ID,
+  GCR_LANGUAGE,
+  GCR_OPT_IN_STYLE,
+  GCR_PLATFORM_SRC,
   addCalendarDays,
   buildSurveyOptInConfig,
   deliveryCountryCode,
@@ -63,8 +68,17 @@ describe('googleCustomerReviews', () => {
       email: 'family@example.com',
       delivery_country: 'US',
       estimated_delivery_date: '2026-08-13',
+      opt_in_style: GCR_OPT_IN_STYLE,
       products: [{ gtin: '012345678905' }],
     });
+  });
+
+  test('uses Google\'s official HTML5 DOCTYPE and renderOptIn snippet', () => {
+    const indexHtml = fs.readFileSync(path.resolve(__dirname, '../../../index.html'), 'utf8');
+    expect(indexHtml.startsWith('<!DOCTYPE html>\n')).toBe(true);
+    expect(GCR_PLATFORM_SRC).toBe('https://apis.google.com/js/platform.js?onload=renderOptIn');
+    expect(GCR_LANGUAGE).toBe('en-US');
+    expect(GCR_OPT_IN_STYLE).toBe('CENTER_DIALOG');
   });
 
   test('skips cancelled orders and invalid emails', () => {
