@@ -18,6 +18,8 @@ describe('tonight delivery promise', () => {
     expect(GBP_DESCRIPTION).toMatch(/1 PM/);
     expect(GBP_DESCRIPTION).toMatch(/11 PM/);
     expect(GBP_DESCRIPTION).toMatch(/No autoship/);
+    expect(GBP_DESCRIPTION).toMatch(/Petshiwu/);
+    expect(GBP_DESCRIPTION).not.toMatch(/PetShiwu/);
   });
 
   test('how-it-works has four clear steps', () => {

@@ -130,9 +130,8 @@ export const trackPurchase = (
   }>
 ) => {
   trackEvent('purchase', {
-    category: 'ecommerce',
-    action: 'purchase',
     transaction_id: transactionId,
+    currency: 'USD',
     value: value,
     items: items,
   });

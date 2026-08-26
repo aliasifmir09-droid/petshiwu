@@ -1,7 +1,7 @@
 import api from './api';
 import { Product, PaginatedResponse, ApiResponse } from '@/types';
 
-interface ProductFilters {
+export interface ProductFilters {
   page?: number;
   limit?: number;
   category?: string;

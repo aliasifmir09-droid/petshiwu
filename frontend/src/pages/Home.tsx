@@ -157,18 +157,10 @@ const Home = () => {
             },
             {
               '@type': 'Question',
-              name: 'Where is Petshiwu located?',
+              name: 'Is Petshiwu a walk-in store in Jackson Heights?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Our office and warehouse are at 37-68 74th Street, Jackson Heights, NY 11372. This is not a walk-in store — we do not have a retail shop for visits. Order online and we deliver to your door across all five NYC boroughs.'
-              }
-            },
-            {
-              '@type': 'Question',
-              name: 'Can I visit the Petshiwu store in Jackson Heights?',
-              acceptedAnswer: {
-                '@type': 'Answer',
-                text: 'No. Petshiwu is delivery only. The Jackson Heights address is office and warehouse for packing orders. Shop at petshiwu.com and we deliver same-day across NYC when you order before the cutoff.'
+                text: 'No. Petshiwu is delivery only. The office and warehouse at 37-68 74th Street, Jackson Heights, NY 11372 is for packing orders, not walk-in shopping. Order online and we deliver same-day across all five NYC boroughs when you order before cutoff.'
               }
             },
             {

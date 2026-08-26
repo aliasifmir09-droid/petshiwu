@@ -284,8 +284,8 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     description: 'Get dog food delivered anywhere in NYC. 1,000+ dog food options from top brands. Serving Queens, Brooklyn, Manhattan, Bronx & Staten Island. Free shipping over $49.',
   },
   '/pet-supplies-delivery-nyc': {
-    title: 'Pet Supplies Delivery NYC — Free Shipping Over $49 | Petshiwu',
-    description: 'Get pet supplies delivered anywhere in NYC. Dogs, cats, birds, fish, reptiles — 10,000+ products from top brands. Free delivery on orders over $49. Queens, Brooklyn, Manhattan, Bronx, Staten Island.',
+    title: 'Same-Day Pet Supplies Delivery NYC — Order by 3 PM | Petshiwu',
+    description: 'Same-day pet supplies delivery in NYC. Order by 3 PM weekdays (1 PM weekends), before 11 PM. No autoship. Free over $49. Dogs, cats, birds, fish, reptiles. All 5 boroughs.',
   },
   '/cat-food-delivery-nyc': {
     title: 'Cat Food Delivery NYC — Premium Brands | Petshiwu',
@@ -1577,6 +1577,120 @@ const buildProductListHtml = async (template: string): Promise<string> => {
   return html;
 };
 
+/** Pet-type filter for SEO landings — matches frontend/src/pages/seo/*.tsx. */
+export const landingTaxonomyForPath = (pathname: string): { petType?: string } => {
+  const path = pathname.split('?')[0].replace(/\/$/, '') || '/';
+  const byPath: Record<string, { petType?: string }> = {
+    '/best-dog-food-sensitive-stomach-diarrhea': { petType: 'dog' },
+    '/high-protein-dog-food-picky-eaters': { petType: 'dog' },
+    '/durable-dog-toys-aggressive-chewers': { petType: 'dog' },
+    '/dog-food-delivery-nyc': { petType: 'dog' },
+    '/raw-dog-food-nyc': { petType: 'dog' },
+    '/luxury-pet-accessories-nyc': { petType: 'dog' },
+    '/affordable-pet-food-nyc': { petType: 'dog' },
+    '/cat-food-delivery-nyc': { petType: 'cat' },
+    '/organic-cat-food-nyc': { petType: 'cat' },
+  };
+  return byPath[path] ?? {};
+};
+
+export type SeoLandingProduct = {
+  name?: string;
+  slug?: string;
+  brand?: string;
+  basePrice?: number;
+  petType?: string;
+  description?: string;
+  category?: { slug?: string; name?: string } | null;
+};
+
+/**
+ * First-wave HTML for NYC SEO landings. Googlebot previously saw title/H1 only
+ * (empty Recommended Products). Inject real in-stock product links + ItemList.
+ */
+export const buildSeoLandingHtmlFromProducts = (
+  template: string,
+  pathname: string,
+  products: SeoLandingProduct[]
+): string => {
+  const cleanPath = pathname.split('?')[0].replace(/\/$/, '') || '/';
+  const canonicalUrl = `${BASE}${cleanPath}`;
+  const meta = STATIC_PAGES[cleanPath] ?? {
+    title: 'Pet Supplies Delivery NYC | Petshiwu',
+    description: 'Same-day pet supplies delivery in NYC. Free shipping over $49.',
+  };
+  const h1 = meta.title.replace(/\s*\|\s*Petshiwu\s*$/i, '').trim();
+
+  const items = products.filter((p) => p.slug && p.name);
+  const productLinks = items
+    .map((p) => {
+      const path = buildCanonicalProductPath(p) || `/products/${p.slug}`;
+      const url = `${BASE}${path}`;
+      const price = typeof p.basePrice === 'number' ? ` — $${Number(p.basePrice).toFixed(2)}` : '';
+      const brand = p.brand ? ` by ${esc(String(p.brand))}` : '';
+      return `<li><a href="${url}">${esc(String(p.name))}${brand}${price}</a></li>`;
+    })
+    .join('\n');
+
+  const itemListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: h1,
+    numberOfItems: items.length,
+    itemListElement: items.map((p, i) => {
+      const path = buildCanonicalProductPath(p) || `/products/${p.slug}`;
+      return {
+        '@type': 'ListItem',
+        position: i + 1,
+        url: `${BASE}${path}`,
+        name: p.name,
+      };
+    }),
+  };
+
+  const bodyContent = `
+<div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
+  <p>${esc(meta.description)}</p>
+  <h2>Recommended Products</h2>
+  ${items.length > 0
+    ? `<ul style="list-style:none;padding:0;columns:2">\n    ${productLinks}\n  </ul>`
+    : `<p>Browse our catalog for same-day NYC pet delivery.</p>`}
+  <p><a href="${BASE}/products">Browse all products</a></p>
+</div>`;
+
+  let html = template;
+  html = injectTitle(html, meta.title);
+  html = injectDescription(html, meta.description);
+  html = injectCanonical(html, canonicalUrl);
+  html = injectHreflang(html, canonicalUrl);
+  html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
+  html = injectH1(html, h1);
+  if (items.length > 0) {
+    html = injectBeforeHeadClose(
+      html,
+      `<script type="application/ld+json">${JSON.stringify(itemListSchema)}</script>`
+    );
+  }
+  html = html.replace(/<div id="root">.*?<\/div>/s, `<div id="root">${bodyContent}</div>`) ||
+         html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+  return html;
+};
+
+const fetchSeoLandingProducts = async (pathname: string): Promise<SeoLandingProduct[]> => {
+  const { petType } = landingTaxonomyForPath(pathname);
+  const query: Record<string, unknown> = { isActive: true, inStock: true };
+  if (petType) query.petType = petType;
+  return withTimeout(
+    Product.find(query)
+      .select('name slug basePrice brand petType description category')
+      .populate({ path: 'category', select: 'name slug' })
+      .sort({ averageRating: -1, createdAt: -1 })
+      .limit(20)
+      .lean()
+      .exec()
+  ) as Promise<SeoLandingProduct[]>;
+};
+
 /**
  * List of URL paths that are valid SPA routes — used to detect unknown URLs
  * (soft 404 candidates) and return real 404 status instead of generic shell.
@@ -1818,6 +1932,16 @@ export const createBotRenderer = (distPath: string) => {
         } else if (req.path === '/products' || req.path === '/products/') {
           // SSR product listing for Google — inject real product links
           html = await buildProductListHtml(template);
+        } else if (INDEXABLE_LANDING_PATHS.has(reqPathClean)) {
+          try {
+            const landingProducts = await fetchSeoLandingProducts(reqPathClean);
+            html = buildSeoLandingHtmlFromProducts(template, reqPathClean, landingProducts);
+          } catch (err) {
+            logger.warn(
+              'SEO landing product fetch failed:',
+              err instanceof Error ? err.message : err
+            );
+          }
         }
       }
 

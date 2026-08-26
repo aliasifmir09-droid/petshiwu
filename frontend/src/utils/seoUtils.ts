@@ -43,6 +43,44 @@ export const generateDescription = (
     : `${truncated}...`;
 };
 
+/** Clip at a word boundary without mid-word cuts or trailing ellipsis. */
+const clipAtWord = (content: string, maxLength: number): string => {
+  const trimmed = content.trim();
+  if (trimmed.length <= maxLength) return trimmed;
+  const truncated = trimmed.substring(0, maxLength);
+  const lastSpace = truncated.lastIndexOf(' ');
+  const cut = lastSpace > Math.floor(maxLength * 0.5)
+    ? truncated.substring(0, lastSpace)
+    : truncated;
+  return cut.replace(/[.,;:]+$/, '').trim();
+};
+
+/**
+ * Search snippet for product pages. Prefer a readable sentence, not a mid-word cut.
+ */
+export function productSearchDescription(opts: {
+  description?: string;
+  brand?: string;
+  name?: string;
+  petType?: string;
+}): string {
+  const stripped = String(opts.description || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const suffix = ' Same-day NYC delivery. Free shipping over $49.';
+  const budget = Math.max(80, 160 - suffix.length);
+  if (stripped) {
+    return clipAtWord(`${clipAtWord(stripped, budget)}${suffix}`, 160);
+  }
+  const brand = opts.brand ? `${opts.brand} ` : '';
+  const pet = opts.petType && opts.petType !== 'other-animals' ? opts.petType : 'pet';
+  return clipAtWord(
+    `Buy ${brand}${opts.name || 'this product'} for your ${pet} at Petshiwu.${suffix}`,
+    160
+  );
+}
+
 /**
  * Generate keywords from array or string
  */
