@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/useToast';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Dropdown from '@/components/Dropdown';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
+import { resolveOrderApiId } from '@/utils/extractMongoId';
 
 const Orders = () => {
   const { toast, showToast, hideToast } = useToast();
@@ -61,7 +62,7 @@ const Orders = () => {
       return;
     }
     if (!ordersData?.data) return;
-    const found = ordersData.data.find((o: any) => String(o._id || o.id || '') === urlOrderId || o.orderNumber === urlOrderId);
+    const found = ordersData.data.find((o: any) => resolveOrderApiId(o) === urlOrderId || o.orderNumber === urlOrderId);
     if (found) {
       setSelectedOrder(found);
       setShowDetailsModal(true);
@@ -90,37 +91,16 @@ const Orders = () => {
     onError: onMutationError()
   });
 
-  const handleStatusChange = (orderId: any, newStatus: string) => {
-    // Extract order ID - handle both object and string formats
-    let id: string = '';
-    
-    if (typeof orderId === 'string') {
-      id = orderId.trim();
-    } else if (orderId && typeof orderId === 'object') {
-      // Handle ObjectId object
-      if (orderId.toString && typeof orderId.toString === 'function') {
-        id = orderId.toString().trim();
-      } else if (orderId._id) {
-        id = String(orderId._id).trim();
-      } else if (orderId.id) {
-        id = String(orderId.id).trim();
-      } else {
-        id = String(orderId).trim();
-      }
-    } else {
-      id = String(orderId || '').trim();
-    }
-    
-    // Validate the ID
-    if (!id || id === 'undefined' || id === 'null' || id === '[object Object]' || id.length < 10) {
-      // Use safe error logging
+  const handleStatusChange = (order: any, newStatus: string) => {
+    const id = resolveOrderApiId(order);
+    if (!id) {
       import('@/utils/safeLogger').then(({ safeWarn }) => {
-        safeWarn('Invalid order ID format', { orderId: orderId?.substring(0, 20) });
+        safeWarn('Invalid order ID format', { orderNumber: order?.orderNumber });
       });
       showToast('Invalid order ID', 'error');
       return;
     }
-    
+
     setPendingStatusChange({ orderId: id, status: newStatus });
     setShowStatusConfirm(true);
   };
@@ -143,9 +123,8 @@ const Orders = () => {
   };
 
   const handlePaymentUpdate = () => {
-    // Ensure order ID is a string
-    const orderId = String(selectedOrder._id || selectedOrder.id || '').trim();
-    if (!orderId || orderId === 'undefined' || orderId === 'null' || orderId === '[object Object]') {
+    const orderId = resolveOrderApiId(selectedOrder);
+    if (!orderId) {
       showToast('Invalid order ID', 'error');
       setShowPaymentConfirm(false);
       return;
@@ -179,8 +158,8 @@ const Orders = () => {
   const handleRefund = () => {
     if (!selectedOrder) return;
     
-    const orderId = String(selectedOrder._id || selectedOrder.id || '').trim();
-    if (!orderId || orderId === 'undefined' || orderId === 'null') {
+    const orderId = resolveOrderApiId(selectedOrder);
+    if (!orderId) {
       showToast('Invalid order ID', 'error');
       return;
     }
@@ -217,7 +196,7 @@ const Orders = () => {
   };
 
   const toggleOrderSelection = (order: any) => {
-    const id = String(order._id || order.id || '');
+    const id = resolveOrderApiId(order);
     if (!id) return;
     setSelectedOrderIds((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id]);
   };
@@ -245,7 +224,7 @@ const Orders = () => {
   });
 
   const proofMutation = useMutation({
-    mutationFn: () => adminService.uploadDeliveryProof(String(selectedOrder._id || selectedOrder.id), {
+    mutationFn: () => adminService.uploadDeliveryProof(resolveOrderApiId(selectedOrder), {
       file: proofFile!, recipientName: recipientName.trim(), handoffMethod, notes: proofNotes.trim()
     }),
     onSuccess: (proof) => {
@@ -403,7 +382,7 @@ const Orders = () => {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"><input type="checkbox" aria-label="Select all orders on this page" checked={Boolean(ordersData?.data?.length) && ordersData.data.every((order: any) => selectedOrderIds.includes(String(order._id || order.id || '')))} onChange={(event) => setSelectedOrderIds(event.target.checked ? (ordersData?.data || []).map((order: any) => String(order._id || order.id || '')) : [])} /></th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"><input type="checkbox" aria-label="Select all orders on this page" checked={Boolean(ordersData?.data?.length) && ordersData.data.every((order: any) => selectedOrderIds.includes(resolveOrderApiId(order)))} onChange={(event) => setSelectedOrderIds(event.target.checked ? (ordersData?.data || []).map((order: any) => resolveOrderApiId(order)).filter(Boolean) : [])} /></th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
@@ -429,8 +408,8 @@ const Orders = () => {
                 </tr>
               ) : (
                 ordersData?.data.map((order: any) => (
-                  <tr key={order._id} className="hover:bg-gray-50">
-                    <td className="px-4 py-4"><input type="checkbox" aria-label={`Select ${order.orderNumber}`} checked={selectedOrderIds.includes(String(order._id || order.id || ''))} onChange={() => toggleOrderSelection(order)} /></td>
+                  <tr key={resolveOrderApiId(order) || order.orderNumber} className="hover:bg-gray-50">
+                    <td className="px-4 py-4"><input type="checkbox" aria-label={`Select ${order.orderNumber}`} checked={selectedOrderIds.includes(resolveOrderApiId(order))} onChange={() => toggleOrderSelection(order)} /></td>
                     <td className="px-6 py-4 text-sm font-medium">
                       {order.orderNumber}
                     </td>
@@ -447,7 +426,7 @@ const Orders = () => {
                     <td className="px-6 py-4 text-sm">
                       <select
                         value={order.orderStatus}
-                        onChange={(e) => handleStatusChange(String(order._id || order.id || ''), e.target.value)}
+                        onChange={(e) => handleStatusChange(order, e.target.value)}
                         className={`px-2 py-1 rounded-full text-xs font-medium border-0 ${
                           order.orderStatus === 'delivered' ? 'bg-green-100 text-green-800' :
                           order.orderStatus === 'shipped' ? 'bg-blue-100 text-blue-800' :
@@ -609,7 +588,7 @@ const Orders = () => {
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => prepareDeliveryMutation.mutate(String(selectedOrder._id || selectedOrder.id || ''))}
+                      onClick={() => prepareDeliveryMutation.mutate(resolveOrderApiId(selectedOrder))}
                       disabled={prepareDeliveryMutation.isPending}
                       className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-2"
                     ><Route size={16} /> {prepareDeliveryMutation.isPending ? 'Calculating...' : 'Calculate delivery'}</button>
@@ -800,7 +779,7 @@ const Orders = () => {
         }}
         onConfirm={confirmStatusChange}
         title="Update Order Status"
-        message={`Are you sure you want to update the order status to "${pendingStatusChange?.status}"? This will notify the customer.`}
+        message={`Are you sure you want to update the order status to "${pendingStatusChange?.status}"? The customer will get an email, and a text if they provided a phone number.`}
         confirmText="Update Status"
         cancelText="Cancel"
         confirmButtonClass="bg-blue-600 hover:bg-blue-700"

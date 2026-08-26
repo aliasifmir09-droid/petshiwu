@@ -381,6 +381,20 @@ export const validateObjectId = (paramName: string = 'id') => [
   validate
 ];
 
+// Order status/cancel routes accept a 24-char ObjectId or an ORD-… number
+export const validateOrderIdentifier = (paramName: string = 'id') => [
+  param(paramName)
+    .custom((value) => {
+      if (typeof value !== 'string') return false;
+      const trimmed = value.trim();
+      if (/^[a-fA-F0-9]{24}$/.test(trimmed)) return true;
+      if (/^ORD-\d+-\d+$/i.test(trimmed)) return true;
+      return false;
+    })
+    .withMessage('Invalid order ID format'),
+  validate
+];
+
 // Validate product identifier (accepts both ObjectId and slug)
 // Slugs can contain letters, numbers, hyphens, and underscores
 export const validateProductIdentifier = (paramName: string = 'id') => [

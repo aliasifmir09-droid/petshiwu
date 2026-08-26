@@ -8,8 +8,10 @@ import Product from '../models/Product';
 import User from '../models/User';
 import { AuthRequest } from '../middleware/auth';
 import { safeToString, extractObjectId } from '../utils/types';
+import { extractHexId, findOrderByIdentifier, isOrderIdentifier } from '../utils/orderIdentity';
 import { asyncHandler, NotFoundError, UnauthorizedError, ValidationError } from '../utils/errors';
-import { sendOrderConfirmationEmail, sendOrderCancellationEmail, sendOrderDeliveredEmail, sendAdminNewOrderEmail } from '../utils/emailService';
+import { sendOrderConfirmationEmail, sendOrderCancellationEmail, sendAdminNewOrderEmail } from '../utils/emailService';
+import { notifyCustomerOfOrderStatusChange } from '../utils/orderCustomerNotify';
 import logger from '../utils/logger';
 import { executeCachedAggregation } from '../utils/aggregationCache';
 import { addEmailJob } from '../utils/jobQueue';
@@ -511,7 +513,7 @@ const normalizeOrderId = (order: unknown): NormalizedOrder | null => {
   if (!order || typeof order !== 'object') return null;
   try {
     const orderObj = order as Record<string, unknown>;
-    const id = safeToString(orderObj._id);
+    const id = extractHexId(orderObj._id) || safeToString(orderObj._id);
     let rest: Record<string, unknown>;
     if ('toObject' in orderObj && typeof orderObj.toObject === 'function') {
       rest = (orderObj.toObject as () => Record<string, unknown>)();
@@ -661,18 +663,23 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
     }
 
     const orderId = String(req.params.id).trim();
-    if (!orderId || !/^[0-9a-fA-F]{24}$/.test(orderId)) {
-      return res.status(400).json({ success: false, message: 'Invalid order ID format' });
+    const lookedUp = await findOrderByIdentifier(orderId);
+    if (!lookedUp) {
+      if (!isOrderIdentifier(orderId)) {
+        return res.status(400).json({ success: false, message: 'Invalid order ID format' });
+      }
+      return res.status(404).json({ success: false, message: 'Order not found' });
     }
+    const resolvedId = lookedUp._id;
 
     await attachGuestOrdersToUser(req.user._id, req.user.email);
 
     let order;
     if (req.user.role === 'admin' || req.user.permissions?.canManageOrders) {
-      order = await Order.findById(orderId).populate('user', 'firstName lastName email').lean();
+      order = await Order.findById(resolvedId).populate('user', 'firstName lastName email').lean();
     } else {
       order = await Order.findOne({
-        _id: orderId,
+        _id: resolvedId,
         $or: [
           { user: req.user._id },
           { guestEmail: new RegExp(`^${String(req.user.email).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
@@ -681,12 +688,7 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
     }
 
     if (!order) {
-      const orderExists = await Order.findById(orderId);
-      if (!orderExists) {
-        return res.status(404).json({ success: false, message: 'Order not found' });
-      } else {
-        return res.status(403).json({ success: false, message: 'Not authorized to access this order' });
-      }
+      return res.status(403).json({ success: false, message: 'Not authorized to access this order' });
     }
 
     const normalizedOrder = normalizeOrderId(order);
@@ -782,6 +784,20 @@ export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFu
   }
 };
 
+const restockCancelledOrderItems = async (order: { items?: Array<{ product?: unknown; quantity?: number }> }) => {
+  for (const item of order.items || []) {
+    if (!item.product || !item.quantity) continue;
+    await Product.updateOne(
+      { _id: item.product },
+      { $inc: { totalStock: item.quantity } }
+    );
+    await Product.updateOne(
+      { _id: item.product, totalStock: { $gt: 0 } },
+      { $set: { inStock: true } }
+    );
+  }
+};
+
 export const updateOrderStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { orderStatus, trackingNumber } = req.body;
@@ -794,17 +810,13 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response, next: N
       });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ success: false, message: 'Invalid order ID' });
-    }
-
-    const order = await Order.findById(req.params.id);
+    const order = await findOrderByIdentifier(req.params.id);
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
+    const previousStatus = order.orderStatus;
     if (orderStatus) order.orderStatus = orderStatus;
     if (trackingNumber !== undefined) order.trackingNumber = trackingNumber || null;
 
-    const wasDelivered = order.isDelivered;
     if (orderStatus === 'delivered') {
       order.isDelivered = true;
       order.deliveredAt = new Date();
@@ -815,47 +827,49 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response, next: N
       }
     }
 
-    await order.save();
+    if (orderStatus === 'cancelled' && previousStatus !== 'cancelled' && order.delivery) {
+      order.delivery.status = 'cancelled';
+    }
 
-    if (orderStatus === 'delivered' && !wasDelivered) {
-      try {
-        const user = await User.findById(order.user).select('email firstName lastName').lean();
-        if (user && user.email) {
-          const fullOrder = await Order.findById(order._id).lean();
-          if (fullOrder && fullOrder.orderNumber) {
-            await addEmailJob(
-              'order-delivered',
-              {
-                email: user.email,
-                firstName: user.firstName || 'Customer',
-                orderNumber: fullOrder.orderNumber,
-                orderData: {
-                  items: fullOrder.items.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price, image: item.image })),
-                  totalPrice: fullOrder.totalPrice,
-                  trackingNumber: fullOrder.trackingNumber,
-                  deliveredAt: fullOrder.deliveredAt || new Date(),
-                  shippingAddress: fullOrder.shippingAddress
-                }
-              },
-              async () => {
-                await sendOrderDeliveredEmail(
-                  user.email,
-                  user.firstName || 'Customer',
-                  fullOrder.orderNumber,
-                  {
-                    items: fullOrder.items.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price, image: item.image })),
-                    totalPrice: fullOrder.totalPrice,
-                    trackingNumber: fullOrder.trackingNumber,
-                    deliveredAt: fullOrder.deliveredAt || new Date(),
-                    shippingAddress: fullOrder.shippingAddress
-                  }
-                );
-              }
-            );
-          }
+    try {
+      await order.save({ validateModifiedOnly: true });
+    } catch (saveError: unknown) {
+      const mongooseError = saveError as { name?: string; message?: string; errors?: Record<string, { message: string }> };
+      if (mongooseError?.name === 'ValidationError') {
+        logger.warn(
+          `Order ${order.orderNumber} failed document validation on status change; applying status fields only. ${mongooseError.message}`
+        );
+        const statusSet: Record<string, unknown> = {
+          orderStatus: order.orderStatus,
+          trackingNumber: order.trackingNumber,
+          isDelivered: order.isDelivered,
+          deliveredAt: order.deliveredAt,
+          updatedAt: new Date()
+        };
+        if (order.delivery?.status) {
+          statusSet['delivery.status'] = order.delivery.status;
         }
-      } catch (emailError) {
-        logger.error('Error queuing order delivered email:', emailError);
+        await Order.collection.updateOne({ _id: order._id }, { $set: statusSet });
+      } else {
+        throw saveError;
+      }
+    }
+
+    if (orderStatus === 'cancelled' && previousStatus !== 'cancelled') {
+      try {
+        await restockCancelledOrderItems(order);
+      } catch (stockError) {
+        logger.error(`Failed to restock items for cancelled order ${order.orderNumber}:`, stockError);
+      }
+    }
+
+    if (orderStatus && orderStatus !== previousStatus) {
+      try {
+        await notifyCustomerOfOrderStatusChange(order, previousStatus, orderStatus, {
+          cancellationReason: 'Updated by Petshiwu'
+        });
+      } catch (notifyError) {
+        logger.error('Error notifying customer of order status change:', notifyError);
       }
     }
 
@@ -872,10 +886,11 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response, next: N
   } catch (error: unknown) {
     if (error instanceof Error && error.name === 'ValidationError') {
       const validationError = error as { errors?: Record<string, { message: string }> };
+      const messages = Object.values(validationError.errors || {}).map((err) => err.message);
       return res.status(400).json({
         success: false,
-        message: 'Validation error',
-        errors: Object.values(validationError.errors || {}).map((err) => err.message)
+        message: messages[0] || 'Could not update order status',
+        errors: messages
       });
     }
     next(error);
@@ -885,7 +900,7 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response, next: N
 export const updatePaymentStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { paymentStatus } = req.body;
-    const order = await Order.findById(req.params.id);
+    const order = await findOrderByIdentifier(req.params.id);
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
     const paymentUpdate: Record<string, unknown> = { paymentStatus };
@@ -916,13 +931,10 @@ export const updatePaymentStatus = async (req: AuthRequest, res: Response, next:
 export const processRefund = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { amount, reason } = req.body;
-    const orderId = extractObjectId(req.params.id);
+    const order = await findOrderByIdentifier(req.params.id);
 
-    if (!orderId) return res.status(400).json({ success: false, message: 'Invalid order ID' });
-    if (!amount || amount <= 0) return res.status(400).json({ success: false, message: 'Refund amount must be greater than 0' });
-
-    const order = await Order.findById(orderId);
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+    if (!amount || amount <= 0) return res.status(400).json({ success: false, message: 'Refund amount must be greater than 0' });
 
     if (order.paymentStatus !== 'paid') {
       return res.status(400).json({
@@ -997,13 +1009,13 @@ export const processRefund = async (req: AuthRequest, res: Response, next: NextF
 export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { reason } = req.body;
-    const orderId = extractObjectId(req.params.id);
-    if (!orderId) {
-      return res.status(400).json({ success: false, message: 'Invalid order ID format', errors: [{ field: 'id', message: 'Invalid ID format' }] });
+    const order = await findOrderByIdentifier(req.params.id);
+    if (!order) {
+      if (!isOrderIdentifier(String(req.params.id || ''))) {
+        return res.status(400).json({ success: false, message: 'Invalid order ID format', errors: [{ field: 'id', message: 'Invalid ID format' }] });
+      }
+      return res.status(404).json({ success: false, message: 'Order not found' });
     }
-
-    const order = await Order.findById(orderId);
-    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
     const userId = extractObjectId(req.user?._id);
     const orderUserId = extractObjectId(order.user);
@@ -1044,11 +1056,12 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
     }
 
     try {
+      const previousStatus = order.orderStatus;
       order.orderStatus = 'cancelled';
       if (reason) {
         order.notes = order.notes ? `${order.notes}\nCancellation reason: ${reason}` : `Cancellation reason: ${reason}`;
       }
-      await order.save(session ? { session } : {});
+      await order.save(session ? { session, validateModifiedOnly: true } : { validateModifiedOnly: true });
 
       for (const item of order.items) {
         const product = session ? await Product.findById(item.product).session(session) : await Product.findById(item.product);
@@ -1064,36 +1077,10 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
       const normalizedOrder = normalizeOrderId(order);
 
       try {
-        const user = await User.findById(order.user).select('email firstName lastName').lean();
-        if (user && user.email) {
-          const fullOrder = await Order.findById(order._id).lean();
-          if (fullOrder && fullOrder.orderNumber) {
-            await addEmailJob(
-              'order-cancellation',
-              {
-                email: user.email,
-                firstName: user.firstName || 'Customer',
-                orderNumber: fullOrder.orderNumber,
-                orderData: {
-                  items: fullOrder.items.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price, image: item.image })),
-                  totalPrice: fullOrder.totalPrice,
-                  cancellationReason: reason || 'Customer request',
-                  refundAmount: fullOrder.totalPrice,
-                  createdAt: fullOrder.createdAt
-                }
-              },
-              async () => {
-                await sendOrderCancellationEmail(user.email, user.firstName || 'Customer', fullOrder.orderNumber, {
-                  items: fullOrder.items.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price, image: item.image })),
-                  totalPrice: fullOrder.totalPrice,
-                  cancellationReason: reason || 'Customer request',
-                  refundAmount: fullOrder.totalPrice,
-                  createdAt: fullOrder.createdAt
-                });
-              }
-            );
-          }
-        }
+        await notifyCustomerOfOrderStatusChange(order, previousStatus, 'cancelled', {
+          cancellationReason: reason || 'Customer request',
+          refundAmount: order.isPaid ? order.totalPrice : undefined
+        });
       } catch (emailError) {
         logger.error('Error queuing order cancellation email:', emailError);
       }

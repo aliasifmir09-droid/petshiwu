@@ -282,7 +282,7 @@ const orderSchema = new Schema<IOrder>(
           handoffMethod: {
             type: String,
             enum: ['handed_to_customer', 'handed_to_household_member', 'left_at_door', 'left_with_doorman', 'other'],
-            required: true
+            required: false
           },
           notes: String,
           storageKey: { type: String, select: false },

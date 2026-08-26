@@ -286,6 +286,102 @@ describe('Orders API', () => {
 
       expect(response.status).toBe(403);
     });
+
+    const createPendingOrder = async (guestEmail: string, phone = '7185550199') => {
+      return Order.create({
+        items: [{
+          product: testProduct._id,
+          name: testProduct.name,
+          image: 'https://example.com/image.jpg',
+          quantity: 1,
+          price: testProduct.basePrice
+        }],
+        shippingAddress: {
+          firstName: 'Asif',
+          lastName: 'Ali',
+          street: '37-68 74th St',
+          city: 'Jackson Heights',
+          state: 'NY',
+          zipCode: '11372',
+          country: 'USA',
+          phone
+        },
+        paymentMethod: 'cod',
+        paymentStatus: 'pending',
+        orderStatus: 'pending',
+        itemsPrice: testProduct.basePrice,
+        shippingPrice: 0,
+        taxPrice: 0,
+        totalPrice: testProduct.basePrice,
+        guestEmail
+      });
+    };
+
+    it('cancels an order that has incomplete delivery proof without a validation error', async () => {
+      const order = await createPendingOrder(`guest.cancel.${Date.now()}@petshiwu.com`);
+      await Order.collection.updateOne(
+        { _id: order._id },
+        { $set: { delivery: { distanceMeters: 1200, proof: {} } } }
+      );
+
+      const response = await request(app)
+        .put(`/api/orders/${order._id}/status`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ orderStatus: 'cancelled' });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      const updated = await Order.findById(order._id);
+      expect(updated?.orderStatus).toBe('cancelled');
+      await Order.deleteOne({ _id: order._id });
+    });
+
+    it('cancels by order number and emails the guest customer', async () => {
+      const emailService = await import('../../utils/emailService');
+      const smsService = await import('../../utils/smsService');
+      const emailSpy = jest.spyOn(emailService, 'sendOrderCancellationEmail').mockResolvedValue({ messageId: 'test' } as any);
+      const smsSpy = jest.spyOn(smsService, 'sendSms').mockResolvedValue({ sent: true, messageSid: 'SM-test' });
+      const guestEmail = `guest.status.${Date.now()}@petshiwu.com`;
+      const order = await createPendingOrder(guestEmail, '7185550100');
+
+      const response = await request(app)
+        .put(`/api/orders/${order.orderNumber}/status`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ orderStatus: 'cancelled' });
+
+      expect(response.status).toBe(200);
+      expect(emailSpy).toHaveBeenCalledWith(
+        guestEmail,
+        'Asif',
+        order.orderNumber,
+        expect.objectContaining({ cancellationReason: 'Updated by Petshiwu' })
+      );
+      expect(smsSpy).toHaveBeenCalledWith('7185550100', expect.stringContaining(order.orderNumber));
+      emailSpy.mockRestore();
+      smsSpy.mockRestore();
+      await Order.deleteOne({ _id: order._id });
+    });
+
+    it('emails the customer when status changes to processing', async () => {
+      const emailService = await import('../../utils/emailService');
+      const emailSpy = jest.spyOn(emailService, 'sendOrderStatusEmail').mockResolvedValue({ messageId: 'test' } as any);
+      const order = await createPendingOrder(`guest.processing.${Date.now()}@petshiwu.com`);
+
+      const response = await request(app)
+        .put(`/api/orders/${order._id}/status`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ orderStatus: 'processing' });
+
+      expect(response.status).toBe(200);
+      expect(emailSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        'Asif',
+        order.orderNumber,
+        expect.objectContaining({ status: 'processing' })
+      );
+      emailSpy.mockRestore();
+      await Order.deleteOne({ _id: order._id });
+    });
   });
 
   describe('GET /api/orders/stats', () => {

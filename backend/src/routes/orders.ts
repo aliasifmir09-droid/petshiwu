@@ -27,6 +27,7 @@ import { checkPermission } from '../middleware/permissions';
 import {
   createOrderValidation,
   validateObjectId,
+  validateOrderIdentifier,
   paginationValidation,
   adminPaginationValidation,
   createReturnValidation,
@@ -53,11 +54,11 @@ router.post('/', createOrderValidation, createOrder);
 router.get('/myorders', protect, paginationValidation, getMyOrders);
 router.get('/stats', protect, checkPermission('canViewAnalytics'), getOrderStats);
 router.get('/all', protect, checkPermission('canManageOrders'), adminPaginationValidation, getAllOrders);
-router.get('/:id', protect, validateObjectId(), getOrder);
-router.put('/:id/cancel', protect, validateObjectId(), cancelOrder);
-router.put('/:id/status', protect, checkPermission('canManageOrders'), validateObjectId(), updateOrderStatus);
-router.put('/:id/payment', protect, checkPermission('canManageOrders'), validateObjectId(), updatePaymentStatus);
-router.post('/:id/refund', protect, checkPermission('canManageOrders'), validateObjectId(), processRefund);
+router.get('/:id', protect, validateOrderIdentifier(), getOrder);
+router.put('/:id/cancel', protect, validateOrderIdentifier(), cancelOrder);
+router.put('/:id/status', protect, checkPermission('canManageOrders'), validateOrderIdentifier(), updateOrderStatus);
+router.put('/:id/payment', protect, checkPermission('canManageOrders'), validateOrderIdentifier(), updatePaymentStatus);
+router.post('/:id/refund', protect, checkPermission('canManageOrders'), validateOrderIdentifier(), processRefund);
 
 // Return/Refund routes
 router.post('/returns', protect, createReturnValidation, createReturn);
