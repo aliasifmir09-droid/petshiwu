@@ -57,6 +57,7 @@ describe('checkout celebration handoff', () => {
     );
     expect(checkout).toContain("navigate(`/orders/${orderId}?newOrder=true`)");
     expect(checkout).toContain("navigate(`/track-order?order=${order.orderNumber || orderId}&newOrder=true`)");
+    expect(checkout).toContain('rememberGoogleReviewOptIn');
   });
 
   test('order confirmation and guest tracking render the fireworks blast', () => {
@@ -69,7 +70,9 @@ describe('checkout celebration handoff', () => {
       'utf8'
     );
     expect(orderDetail).toContain('OrderFireworks');
+    expect(orderDetail).toContain('GoogleCustomerReviewsOptIn');
     expect(track).toContain('OrderFireworks');
+    expect(track).toContain('GoogleCustomerReviewsOptIn');
     expect(track).toContain("searchParams.get('newOrder') === 'true'");
     expect(orderDetail).toContain("searchParams.get('newOrder') === 'true'");
   });

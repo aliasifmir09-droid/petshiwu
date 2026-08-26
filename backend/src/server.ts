@@ -249,7 +249,7 @@ app.use(helmet({
       imgSrc: process.env.NODE_ENV === 'production'
         ? ["'self'", "data:", "https:", "https://res.cloudinary.com", "https://wsrv.nl", "https://maps.gstatic.com", "https://maps.googleapis.com", "https://www.paypalobjects.com", "https://*.paypalobjects.com"]
         : ["'self'", "data:", "https:", "http:", "https://res.cloudinary.com", "https://wsrv.nl", "https://maps.gstatic.com", "https://maps.googleapis.com", "https://www.paypalobjects.com", "https://*.paypalobjects.com"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://maps.googleapis.com", "https://maps.gstatic.com", "https://www.paypal.com", "https://*.paypal.com", "https://applepay.cdn-apple.com", "https://pay.google.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://maps.googleapis.com", "https://maps.gstatic.com", "https://www.paypal.com", "https://*.paypal.com", "https://applepay.cdn-apple.com", "https://pay.google.com", "https://apis.google.com", "https://www.gstatic.com", "https://www.google.com"],
       workerSrc: ["'self'"],
       connectSrc: [
         "'self'",
@@ -262,9 +262,12 @@ app.use(helmet({
         "https://pay.google.com",
         "https://applepay.cdn-apple.com",
         "https://www.petshiwu.com",
-        "https://petshiwu.com"
+        "https://petshiwu.com",
+        "https://apis.google.com",
+        "https://www.gstatic.com",
+        "https://www.google.com"
       ],
-      frameSrc: ["'self'", "https://www.paypal.com", "https://*.paypal.com", "https://pay.google.com"],
+      frameSrc: ["'self'", "https://www.paypal.com", "https://*.paypal.com", "https://pay.google.com", "https://www.google.com", "https://apis.google.com"],
       frameAncestors: ["'self'"],
       upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
     }

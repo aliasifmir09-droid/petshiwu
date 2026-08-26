@@ -7,6 +7,8 @@ import { useState, useEffect, useRef } from 'react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import DonationModal from '@/components/DonationModal';
 import OrderFireworks from '@/components/OrderFireworks';
+import GoogleCustomerReviewsOptIn from '@/components/GoogleCustomerReviewsOptIn';
+import { useAuthStore } from '@/stores/authStore';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { trackOrderCancel } from '@/utils/analytics';
@@ -16,6 +18,7 @@ const OrderDetail = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const { toast, showToast, hideToast } = useToast();
+  const { user } = useAuthStore();
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showDonationModal, setShowDonationModal] = useState(false);
   const isNewOrder = searchParams.get('newOrder') === 'true';
@@ -191,6 +194,11 @@ const OrderDetail = () => {
   return (
     <div className="container mx-auto px-4 lg:px-8 py-8">
       {fireworks}
+      <GoogleCustomerReviewsOptIn
+        enabled={wasNewOrderRef.current && !celebrate}
+        order={order}
+        accountEmail={user?.email}
+      />
       <div className="max-w-6xl mx-auto">
         {/* Back Button */}
         <Link

@@ -16,6 +16,7 @@ import { useGooglePlacesAutocomplete } from '@/hooks/useGooglePlacesAutocomplete
 const getStripe = () => import('@/utils/stripe').then(m => m.getStripe());
 import { normalizeId } from '@/utils/idNormalizer';
 import { trackPurchase } from '@/utils/analytics';
+import { rememberGoogleReviewOptIn } from '@/utils/googleCustomerReviews';
 import SEO from '@/components/SEO';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
@@ -407,6 +408,11 @@ const Checkout = () => {
         quantity: item.quantity,
       }));
       trackPurchase(orderId, total, purchaseItems);
+      rememberGoogleReviewOptIn({
+        email: shippingInfo.email,
+        orderNumber: order.orderNumber,
+        orderId,
+      });
       await queryClient.invalidateQueries({ queryKey: ['orders'] });
       await queryClient.invalidateQueries({ queryKey: ['order'] });
       // For guests, navigate to track order page instead of my orders
@@ -577,6 +583,11 @@ const Checkout = () => {
       quantity: item.quantity
     }));
     trackPurchase(orderId, order.totalPrice, purchaseItems);
+    rememberGoogleReviewOptIn({
+      email: shippingInfo.email,
+      orderNumber: order.orderNumber,
+      orderId,
+    });
     await queryClient.invalidateQueries({ queryKey: ['orders'] });
     await queryClient.invalidateQueries({ queryKey: ['order'] });
     if (!isAuthenticated) {
