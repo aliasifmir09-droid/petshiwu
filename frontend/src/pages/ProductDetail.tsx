@@ -13,6 +13,7 @@ import ProductCard from '@/components/ProductCard';
 import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home, Share2, Facebook, Twitter, Mail, Copy, Check } from 'lucide-react';
 import { normalizeImageUrl, handleImageError, getOptimizedImageUrl, generateSrcSet } from '@/utils/imageUtils';
 import { generateProductUrl, generateCategoryUrl } from '@/utils/productUrl';
+import { productSearchDescription } from '@/utils/seoUtils';
 import { getProductImages, getValidCompareAtPrice } from '@/utils/productPrice';
 import { FREE_SHIPPING_THRESHOLD } from '@/config/constants';
 import { useToast } from '@/hooks/useToast';
@@ -409,20 +410,30 @@ const ProductDetail = () => {
   
   useEffect(() => {
     if (product?.description) {
-      // Lazy load DOMPurify for description sanitization
       getDOMPurify().then(DOMPurify => {
-        const sanitized = String(DOMPurify.sanitize(product.description, { ALLOWED_TAGS: [] })).substring(0, 150).trim() + (product.description.length > 150 ? '...' : '');
-        setProductDescription(sanitized);
+        const sanitized = String(DOMPurify.sanitize(product.description, { ALLOWED_TAGS: [] }));
+        setProductDescription(productSearchDescription({
+          description: sanitized,
+          brand: product.brand,
+          name: product.name,
+          petType: product.petType,
+        }));
       }).catch(() => {
-        // Fallback if DOMPurify fails to load
-        setProductDescription(product.description.substring(0, 150).trim() + (product.description.length > 150 ? '...' : ''));
+        setProductDescription(productSearchDescription({
+          description: product.description,
+          brand: product.brand,
+          name: product.name,
+          petType: product.petType,
+        }));
       });
     } else {
-      const brand = product?.brand ? `${product.brand} ` : '';
-      const petType = product?.petType && product.petType !== 'other-animals' ? product.petType : 'pet';
-      setProductDescription(`Buy ${brand}${product?.name || 'product'} for your ${petType} at Petshiwu. Delivered to Queens, Brooklyn & all NYC. Free shipping over $49.`);
+      setProductDescription(productSearchDescription({
+        brand: product?.brand,
+        name: product?.name,
+        petType: product?.petType,
+      }));
     }
-  }, [product?.description, product?.name, product?.petType]);
+  }, [product?.description, product?.name, product?.petType, product?.brand]);
 
   if (isLoading) {
     return (

@@ -14,7 +14,7 @@ Use this file in Google Business Profile. The website and Google must say the sa
 ---
 
 ## Business name
-PetShiwu — Same-Day Pet Food Delivery NYC
+Petshiwu — Same-Day Pet Food Delivery NYC
 
 ## Primary category
 Online pet store
@@ -25,7 +25,7 @@ Online pet store
 
 ## Description (paste exactly — 750 characters max)
 
-PetShiwu is same-day pet food and supplies delivery in New York City. We are not a walk-in store. Jackson Heights is office and warehouse only.
+Petshiwu is same-day pet food and supplies delivery in New York City. We are not a walk-in store. Jackson Heights is office and warehouse only.
 
 Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM to all 5 boroughs. No autoship. Free delivery over $49.
 
