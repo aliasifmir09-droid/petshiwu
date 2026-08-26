@@ -10,6 +10,7 @@ import StructuredData from '@/components/StructuredData';
 import { ChevronRight, Home, CheckCircle, AlertCircle } from 'lucide-react';
 import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
 import { TONIGHT, withTonightFaq } from '@/data/tonightDelivery';
+import { landingProductQuery } from '@/utils/landingProducts';
 
 interface SEOLandingPageProps {
   keyword: string;
@@ -52,21 +53,11 @@ const SEOLandingPage = ({
   const hasQueryVariant = searchParams.toString().length > 0;
   const faqItems = useMemo(() => withTonightFaq(faqItemsProp), [faqItemsProp]);
 
-  // Build search query from all search terms
-  const searchQuery = searchTerms.join(' ');
-
-  // Fetch products matching the search terms
   const { data: products, isLoading } = useQuery({
     queryKey: ['products', 'seo-landing', keyword, page, sort, petType, category],
     queryFn: () =>
       productService.getProducts({
-        page,
-        limit: 20,
-        search: searchQuery,
-        petType: petType || undefined,
-        category: category || undefined,
-        sort: sort as any,
-        minRating: 4.0 // Show highly rated products
+        ...landingProductQuery({ page, sort, petType, category }),
       }),
     staleTime: 30 * 1000,
     gcTime: 5 * 60 * 1000
@@ -200,13 +191,18 @@ const SEOLandingPage = ({
 
         {/* Products Section */}
         <div className="mb-12">
-          <h2 className="text-3xl font-bold mb-6 text-gray-900">
-            Recommended Products
-          </h2>
           {isLoading ? (
-            <LoadingSpinner size="lg" />
+            <>
+              <h2 className="text-3xl font-bold mb-6 text-gray-900">
+                Recommended Products
+              </h2>
+              <LoadingSpinner size="lg" />
+            </>
           ) : products && products.data && products.data.length > 0 ? (
             <>
+              <h2 className="text-3xl font-bold mb-6 text-gray-900">
+                Recommended Products
+              </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
                 {products.data.map((product) => (
                   <ProductCard key={product._id} product={product} />
@@ -232,7 +228,7 @@ const SEOLandingPage = ({
             </>
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-600 mb-4">No products found matching your criteria.</p>
+              <p className="text-gray-600 mb-4">Browse the full catalog for this topic.</p>
               <Link
                 to="/products"
                 className="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors"

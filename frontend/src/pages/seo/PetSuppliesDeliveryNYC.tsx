@@ -50,7 +50,6 @@ const PetSuppliesDeliveryNYC = () => {
         }
       ]}
       searchTerms={['dog food', 'cat food', 'pet food', 'pet supplies', 'pet toys', 'dog treats', 'cat treats']}
-      petType="dog"
     />
   );
 };

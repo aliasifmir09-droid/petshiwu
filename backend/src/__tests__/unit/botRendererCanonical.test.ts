@@ -3,6 +3,8 @@ import {
   buildHomepageHtml,
   buildProductHtml,
   buildReturnPolicyHtml,
+  buildSeoLandingHtmlFromProducts,
+  landingTaxonomyForPath,
   normalizeReqPath,
   productOfferPrice,
   productRedirectTarget,
@@ -159,6 +161,75 @@ describe('buildReturnPolicyHtml', () => {
   it('keeps a single Return & Exchange Policy H1', () => {
     expect([...html.matchAll(/<h1[^>]*>/gi)]).toHaveLength(1);
     expect(html).toContain('<h1>Return &amp; Exchange Policy</h1>');
+  });
+});
+
+describe('SEO landing first-wave HTML', () => {
+  const template = `<!DOCTYPE html><html><head>
+<title>Petshiwu</title>
+<meta name="description" content="old" />
+</head><body><h1>Homepage H1</h1><div id="root"></div></body></html>`;
+
+  const products = [
+    {
+      name: 'Hill\'s Science Diet Adult Dry Dog Food',
+      slug: 'hills-science-diet-adult-dry-dog-food',
+      brand: 'Hill\'s Science Diet',
+      basePrice: 54.99,
+      petType: 'dog',
+      category: { slug: 'dry-food', name: 'Dry Food' },
+    },
+    {
+      name: 'Royal Canin Indoor Adult Cat Food',
+      slug: 'royal-canin-indoor-adult-cat-food',
+      brand: 'Royal Canin',
+      basePrice: 42.5,
+      petType: 'cat',
+      category: { slug: 'dry-food', name: 'Dry Food' },
+    },
+  ];
+
+  const html = buildSeoLandingHtmlFromProducts(
+    template,
+    '/pet-supplies-delivery-nyc',
+    products
+  );
+
+  it('uses the same-day NYC title and H1 shoppers see', () => {
+    expect(html).toContain(
+      '<title>Same-Day Pet Supplies Delivery NYC — Order by 3 PM | Petshiwu</title>'
+    );
+    expect(html).toContain('<h1>Same-Day Pet Supplies Delivery NYC — Order by 3 PM</h1>');
+    expect([...html.matchAll(/<h1[^>]*>/gi)]).toHaveLength(1);
+  });
+
+  it('injects Recommended Products with canonical product links', () => {
+    expect(html).toContain('<h2>Recommended Products</h2>');
+    expect(html).toContain(
+      'href="https://www.petshiwu.com/dog/dry-food/hills-science-diet-adult-dry-dog-food"'
+    );
+    expect(html).toContain(
+      'href="https://www.petshiwu.com/cat/dry-food/royal-canin-indoor-adult-cat-food"'
+    );
+    expect(html).toContain('$54.99');
+  });
+
+  it('publishes ItemList JSON-LD for the product module', () => {
+    const scripts = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(
+      (m) => JSON.parse(m[1])
+    );
+    const itemList = scripts.find((s) => s['@type'] === 'ItemList');
+    expect(itemList).toBeDefined();
+    expect(itemList.numberOfItems).toBe(2);
+    expect(itemList.itemListElement[0].url).toBe(
+      'https://www.petshiwu.com/dog/dry-food/hills-science-diet-adult-dry-dog-food'
+    );
+  });
+
+  it('maps dog and cat landings to the matching catalog filter', () => {
+    expect(landingTaxonomyForPath('/dog-food-delivery-nyc')).toEqual({ petType: 'dog' });
+    expect(landingTaxonomyForPath('/cat-food-delivery-nyc')).toEqual({ petType: 'cat' });
+    expect(landingTaxonomyForPath('/pet-supplies-delivery-nyc')).toEqual({});
   });
 });
 
