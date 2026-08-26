@@ -162,7 +162,7 @@ const BirthdayBanner = ({ petName }: { petName?: string }) => (
       Happy Birthday{petName ? `, ${petName}` : ''}!
     </p>
     <p style={{ margin: '0 0 8px', fontSize: '11px', color: '#78350f' }}>
-      Use code at checkout for a free birthday gift!
+      Use code BDAYGIFT at checkout for 15% off today!
     </p>
     <div style={{
       background: '#fff', borderRadius: '8px', padding: '6px 14px',

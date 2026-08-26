@@ -7,6 +7,10 @@
  */
 
 import { DEFAULT_OG_IMAGE, SITE_ORIGIN, resolveShareImage } from '../seo/ogTags';
+import {
+  HILLS_CD_OCEAN_FISH_IMAGE,
+  HILLS_CD_OCEAN_FISH_SLUG,
+} from '../services/launchCatalogRepair';
 
 export const STORE_NAME = 'Petshiwu';
 export const FEED_TITLE = 'Petshiwu — NYC same-day pet supplies';
@@ -108,6 +112,9 @@ export function productImages(product: FeedProduct): string[] {
   // Match storefront priority: images[] (real Bunny /products files) first.
   // bunnyImage is often a host-swapped Cloudinary path that 404s on Bunny.
   const raw: unknown[] = [];
+  if (product.slug === HILLS_CD_OCEAN_FISH_SLUG) {
+    raw.push(HILLS_CD_OCEAN_FISH_IMAGE);
+  }
   if (Array.isArray(product.images)) raw.push(...product.images);
   if (product.bunnyImage) raw.push(product.bunnyImage);
   if (product.cloudinaryImage) raw.push(product.cloudinaryImage);

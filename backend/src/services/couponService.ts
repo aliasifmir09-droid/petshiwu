@@ -12,6 +12,8 @@ export const COUPONS: Record<string, Coupon> = {
   PETDAY10: { type: 'percent', value: 10, description: '10% off — National Pet Day' },
   WORLDCUP: { type: 'percent', value: 10, description: '10% off — World Cup 2026 🇺🇸⚽' },
   FREEDOM20: { type: 'percent', value: 20, maxDiscount: 10, description: '20% off first order (max $10, no autoship)' },
+  BDAYGIFT: { type: 'percent', value: 15, description: "15% off on your pet's birthday" },
+  RESCUE10: { type: 'percent', value: 10, description: '10% off for rescue and shelter adopters' },
 };
 
 export const getCouponDiscount = (code: string | undefined, subtotal: number): number => {

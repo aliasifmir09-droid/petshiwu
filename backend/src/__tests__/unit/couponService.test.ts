@@ -13,12 +13,20 @@ describe('couponService', () => {
   });
 
   test('unknown codes do nothing', () => {
-    expect(getCouponDiscount('RESCUE10', 50)).toBe(0);
+    expect(getCouponDiscount('NOTAREALCODE', 50)).toBe(0);
     expect(getCouponDiscount(undefined, 50)).toBe(0);
+  });
+
+  test('BDAYGIFT is 15% off and RESCUE10 is 10% off', () => {
+    expect(getCouponDiscount('BDAYGIFT', 40)).toBe(6);
+    expect(getCouponDiscount('bdaygift', 100)).toBe(15);
+    expect(getCouponDiscount('RESCUE10', 50)).toBe(5);
   });
 
   test('advertised launch codes exist', () => {
     expect(COUPONS.FREEDOM20).toBeDefined();
     expect(COUPONS.WELCOME10).toBeDefined();
+    expect(COUPONS.BDAYGIFT).toBeDefined();
+    expect(COUPONS.RESCUE10).toBeDefined();
   });
 });

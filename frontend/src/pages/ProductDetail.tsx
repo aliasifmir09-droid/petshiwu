@@ -13,7 +13,7 @@ import ProductCard from '@/components/ProductCard';
 import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home, Share2, Facebook, Twitter, Mail, Copy, Check } from 'lucide-react';
 import { normalizeImageUrl, handleImageError, getOptimizedImageUrl, generateSrcSet } from '@/utils/imageUtils';
 import { generateProductUrl, generateCategoryUrl } from '@/utils/productUrl';
-import { getValidCompareAtPrice } from '@/utils/productPrice';
+import { getProductImages, getValidCompareAtPrice } from '@/utils/productPrice';
 import { FREE_SHIPPING_THRESHOLD } from '@/config/constants';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
@@ -121,7 +121,7 @@ const ProductDetail = () => {
       // Preload product images
       if (product.images && product.images.length > 0) {
         import('@/utils/imagePreloader').then(({ preloadProductImages }) => {
-          preloadProductImages(product.images || []).catch(() => {
+          preloadProductImages(getProductImages(product)).catch(() => {
             // Silently fail
           });
         });
@@ -481,7 +481,7 @@ const ProductDetail = () => {
       return selectedVariantData.images;
     } else {
       // No variant images - fallback to product images
-      return product.images || [];
+      return getProductImages(product);
     }
   })();
 
@@ -610,8 +610,9 @@ const ProductDetail = () => {
   const productUrl = `https://www.petshiwu.com${generateProductUrl(product)}`;
   
   // Get product image for OG
-  const productImage = product.images && product.images.length > 0
-    ? normalizeImageUrl(product.images[0])
+  const productImages = getProductImages(product);
+  const productImage = productImages.length > 0
+    ? normalizeImageUrl(productImages[0])
     : '/og-image.jpg';
 
   return (

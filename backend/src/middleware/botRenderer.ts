@@ -1583,7 +1583,7 @@ const buildProductListHtml = async (template: string): Promise<string> => {
  * Keep in sync with frontend/src/App.tsx routes.
  */
 const VALID_SPA_PATHS = new Set([
-  '/', '/products', '/other-animals', '/cart', '/checkout', '/login', '/register',
+  '/', '/products', '/other-animals', '/cart', '/checkout', '/pay', '/login', '/register',
   '/verify-email', '/resend-verification', '/forgot-password', '/reset-password',
   '/profile', '/orders', '/track-order', '/donate', '/favorites', '/compare',
   '/returns', '/return-policy', '/addresses', '/stock-alerts', '/search',

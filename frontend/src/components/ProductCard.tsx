@@ -12,7 +12,7 @@ import { preloadProductImages } from '@/utils/imagePreloader';
 import { highlightSearchTerm } from '@/utils/searchHighlight';
 import QuickViewModal from './QuickViewModal';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
-import { getListingPrice, getListingVariant, getValidCompareAtPrice } from '@/utils/productPrice';
+import { getListingPrice, getListingVariant, getProductImage, getValidCompareAtPrice } from '@/utils/productPrice';
 
 interface ProductCardProps {
   product: Product;
@@ -131,11 +131,11 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
         <img
-          src={normalizeImageUrl(product.images?.[0], { 
+          src={normalizeImageUrl(getProductImage(product), { 
             size: getOptimalImageSize(254, 254),
             format: 'auto'
           })}
-          srcSet={generateSrcSet(product.images?.[0], [254, 400, 600])}
+          srcSet={generateSrcSet(getProductImage(product), [254, 400, 600])}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 254px"
           alt={product.name}
           width={254}

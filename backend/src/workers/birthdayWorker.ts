@@ -55,7 +55,7 @@ function buildBirthdayHtml(petName: string, parentName: string): string {
                     BDAYGIFT
                   </p>
                   <p style="margin:4px 0 0;font-size:14px;color:#92400e;font-weight:500;">
-                    $5 OFF your next order — valid today only!
+                    15% off your order — valid today only!
                   </p>
                 </td>
               </tr>
@@ -71,7 +71,7 @@ function buildBirthdayHtml(petName: string, parentName: string): string {
               </tr>
               <tr><td style="padding:4px 0;font-size:14px;color:#6b7280;">1. Visit <a href="${SITE_URL}" style="color:#ff6b35;text-decoration:none;font-weight:600;">petshiwu.com</a></td></tr>
               <tr><td style="padding:4px 0;font-size:14px;color:#6b7280;">2. Add ${petName}'s favorite treats or toys to your cart 🛒</td></tr>
-              <tr><td style="padding:4px 0;font-size:14px;color:#6b7280;">3. Enter <strong>BDAYGIFT</strong> at checkout for $5 off</td></tr>
+              <tr><td style="padding:4px 0;font-size:14px;color:#6b7280;">3. Enter <strong>BDAYGIFT</strong> at checkout for 15% off</td></tr>
             </table>
 
             <!-- CTA -->

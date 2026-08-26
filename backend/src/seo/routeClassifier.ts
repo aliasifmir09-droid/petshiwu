@@ -128,6 +128,16 @@ export const classifyRoute = (rawPath: string): RouteClassification => {
     return { status: 'noindex', indexable: false, canonicalPath, routeType: 'query-variant' };
   }
 
+  if (canonicalPath === '/pay') {
+    return {
+      status: 'redirect',
+      indexable: false,
+      canonicalPath: '/checkout',
+      redirectTo: '/checkout',
+      routeType: 'legacy-pay',
+    };
+  }
+
   if (INDEXABLE_LANDING_PATHS.has(canonicalPath)) {
     return { status: 'indexable', indexable: true, canonicalPath, routeType: 'landing' };
   }

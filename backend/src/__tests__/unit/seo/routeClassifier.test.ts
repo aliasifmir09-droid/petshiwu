@@ -25,6 +25,14 @@ describe('classifyRoute', () => {
     expect(INDEXABLE_LANDING_PATHS.size).toBeGreaterThan(10);
   });
 
+  test('legacy /pay sends shoppers to checkout instead of a 404', () => {
+    expect(classifyRoute('/pay')).toMatchObject({
+      status: 'redirect',
+      redirectTo: '/checkout',
+      indexable: false,
+    });
+  });
+
   test('search and neural are noindex utility pages', () => {
     expect(classifyRoute('/search')).toMatchObject({ indexable: false, status: 'noindex' });
     expect(classifyRoute('/neural')).toMatchObject({ indexable: false, status: 'noindex' });
