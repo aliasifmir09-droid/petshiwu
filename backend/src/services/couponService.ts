@@ -4,6 +4,10 @@ export type Coupon = {
   /** Optional dollar cap for percent codes (FREEDOM20 is 20% off, max $10). */
   maxDiscount?: number;
   description: string;
+  /** When true, the same email may apply this code on every order. */
+  reusable?: boolean;
+  /** When true, never list or advertise this code on public pages. */
+  hidden?: boolean;
 };
 
 export const COUPONS: Record<string, Coupon> = {
@@ -14,11 +18,27 @@ export const COUPONS: Record<string, Coupon> = {
   FREEDOM20: { type: 'percent', value: 20, maxDiscount: 10, description: '20% off first order (max $10, no autoship)' },
   BDAYGIFT: { type: 'percent', value: 15, description: "15% off on your pet's birthday" },
   RESCUE10: { type: 'percent', value: 10, description: '10% off for rescue and shelter adopters' },
+  // Private family code: 15% off every product, reusable, never advertised.
+  FAMILY15: {
+    type: 'percent',
+    value: 15,
+    description: '15% off',
+    reusable: true,
+    hidden: true,
+  },
+};
+
+export const normalizeCouponCode = (code: string | undefined): string =>
+  (code || '').trim().toUpperCase();
+
+export const isReusableCoupon = (code: string | undefined): boolean => {
+  const coupon = COUPONS[normalizeCouponCode(code)];
+  return Boolean(coupon?.reusable);
 };
 
 export const getCouponDiscount = (code: string | undefined, subtotal: number): number => {
   if (!code) return 0;
-  const coupon = COUPONS[code.trim().toUpperCase()];
+  const coupon = COUPONS[normalizeCouponCode(code)];
   if (!coupon) return 0;
 
   const amount = Number(subtotal) || 0;
