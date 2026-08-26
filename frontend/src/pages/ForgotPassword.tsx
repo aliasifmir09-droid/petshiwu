@@ -45,7 +45,7 @@ const ForgotPassword = () => {
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Check Your Email</h2>
             <p className="text-gray-600 mb-6">
-              If an account with <strong>{email}</strong> exists, we've sent you a password reset link.
+              If an account or a guest order with <strong>{email}</strong> exists, we sent a link to set your password.
             </p>
             <p className="text-sm text-gray-500 mb-6">
               The link will expire in 1 hour. If you don't see the email, check your spam folder.
@@ -81,7 +81,7 @@ const ForgotPassword = () => {
             Forgot Your Password?
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            No worries! Enter your email address and we'll send you a link to reset your password.
+            Enter the email you use on Petshiwu — including guest checkout — and we will send a link to set or reset your password.
           </p>
         </div>
         <form className="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md" onSubmit={handleSubmit}>

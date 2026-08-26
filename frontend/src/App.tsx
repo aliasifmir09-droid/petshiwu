@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { ALL_NEIGHBORHOOD_PAGES } from './data/neighborhoodPages';
 import NeighborhoodCategoryPage from './pages/seo/NeighborhoodCategoryPage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -14,7 +14,9 @@ import { initAnalytics, trackPageView } from './utils/analytics';
 import BottomNav from './components/BottomNav';
 import CookieConsent from './components/CookieConsent';
 import StructuredData from './components/StructuredData';
+import RequireAuth from './components/RequireAuth';
 import Home from './pages/Home';
+import { hashAuthRedirect } from './utils/hashAuthRedirect';
 import './index.css';
 
 const Products = lazy(() => import('./pages/Products'));
@@ -159,6 +161,15 @@ const ScrollToTop = () => {
   return null;
 };
 
+function LegacyHashAuthRedirect() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const next = hashAuthRedirect(window.location.hash);
+    if (next) navigate(next, { replace: true });
+  }, [navigate]);
+  return null;
+};
+
 function App() {
   const { setUser, setLoading } = useAuthStore();
   const { syncWithBackend } = useWishlistStore();
@@ -242,6 +253,7 @@ function App() {
       >
         <PageViewTracker />
         <ScrollToTop />
+        <LegacyHashAuthRedirect />
         {/* Delivery business schema — OnlineStore, not a walk-in PetStore */}
         <StructuredData
           type="localBusiness"
@@ -316,17 +328,17 @@ function App() {
                   <Route path="/resend-verification" element={<ResendVerification />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/orders/:id" element={<OrderDetail />} />
-                  <Route path="/orders" element={<MyOrders />} />
+                  <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+                  <Route path="/orders/:id" element={<RequireAuth><OrderDetail /></RequireAuth>} />
+                  <Route path="/orders" element={<RequireAuth><MyOrders /></RequireAuth>} />
                   <Route path="/track-order" element={<TrackOrder />} />
                   <Route path="/donate" element={<Donate />} />
-                  <Route path="/favorites" element={<Favorites />} />
+                  <Route path="/favorites" element={<RequireAuth><Favorites /></RequireAuth>} />
                   <Route path="/compare" element={<ProductComparison />} />
                   <Route path="/returns" element={<Returns />} />
                   <Route path="/return-policy" element={<ReturnPolicy />} />
-                  <Route path="/addresses" element={<AddressManagement />} />
-                  <Route path="/stock-alerts" element={<StockAlerts />} />
+                  <Route path="/addresses" element={<RequireAuth><AddressManagement /></RequireAuth>} />
+                  <Route path="/stock-alerts" element={<RequireAuth><StockAlerts /></RequireAuth>} />
                   <Route path="/search" element={<AdvancedSearch />} />
                   
                   {/* SEO LANDING PAGES */}

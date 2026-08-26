@@ -8,6 +8,11 @@ import crypto from 'crypto';
 import logger from '../utils/logger';
 import { safeToString } from '../utils/types';
 import { PASSWORD_RESET_EXPIRY_HOURS } from '../config/constants';
+import {
+  attachGuestOrdersToUser,
+  ensureCustomerForGuestEmail,
+  normalizeAccountEmail,
+} from '../utils/claimGuestOrders';
 
 // Check if email sending is configured
 const isEmailConfigured = (): boolean => {
@@ -73,6 +78,8 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       phone,
       emailVerified: !emailConfigured // Auto-verify if no email configured
     });
+
+    await attachGuestOrdersToUser(user._id, email);
 
     // If email is not configured, skip verification entirely - user can login right away
     if (!emailConfigured) {
@@ -243,6 +250,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       }
     }
 
+    await attachGuestOrdersToUser(user._id, user.email);
     sendTokenResponse(safeToString(user._id), 200, res, req);
   } catch (error: unknown) {
     logger.error('Login error:', error);
@@ -573,7 +581,14 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
 
     logger.info(`Password reset requested for email: ${email}`);
 
-    const user = await User.findOne({ email }).select('+passwordResetToken +passwordResetExpires');
+    const normalizedEmail = normalizeAccountEmail(email);
+    let user = await User.findOne({ email: normalizedEmail }).select(
+      '+passwordResetToken +passwordResetExpires'
+    );
+
+    if (!user) {
+      user = await ensureCustomerForGuestEmail(normalizedEmail);
+    }
 
     if (!user) {
       logger.info(`User not found for email: ${email}`);
@@ -710,7 +725,12 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     user.passwordChangedAt = new Date();
+    user.emailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
     await user.save();
+
+    await attachGuestOrdersToUser(user._id, user.email);
 
     logger.info(`Password reset successful for user: ${user.email} (ID: ${user._id})`);
 

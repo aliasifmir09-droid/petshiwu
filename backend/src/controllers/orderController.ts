@@ -14,6 +14,7 @@ import logger from '../utils/logger';
 import { executeCachedAggregation } from '../utils/aggregationCache';
 import { addEmailJob } from '../utils/jobQueue';
 import { cache } from '../utils/cache';
+import { attachGuestOrdersToUser } from '../utils/claimGuestOrders';
 
 import type { OrderItemInput, NormalizedOrderItem, NormalizedOrder } from '../types/common';
 import Stripe from 'stripe';
@@ -510,22 +511,14 @@ const normalizeOrderId = (order: unknown): NormalizedOrder | null => {
   if (!order || typeof order !== 'object') return null;
   try {
     const orderObj = order as Record<string, unknown>;
-    let normalized: Record<string, unknown>;
+    const id = safeToString(orderObj._id);
+    let rest: Record<string, unknown>;
     if ('toObject' in orderObj && typeof orderObj.toObject === 'function') {
-      normalized = orderObj.toObject() as Record<string, unknown>;
-    } else if ('toJSON' in orderObj && typeof orderObj.toJSON === 'function') {
-      normalized = orderObj.toJSON() as Record<string, unknown>;
+      rest = (orderObj.toObject as () => Record<string, unknown>)();
     } else {
-      normalized = { ...orderObj };
+      rest = { ...orderObj };
     }
-    if (normalized._id) {
-      const idValue = normalized._id as { toString?: () => string } | string | number;
-      if (typeof idValue === 'object' && idValue !== null && 'toString' in idValue && typeof idValue.toString === 'function') {
-        normalized._id = idValue.toString();
-      } else {
-        normalized._id = String(normalized._id);
-      }
-    }
+    const normalized: Record<string, unknown> = { ...rest, _id: id || rest._id };
     if (normalized.user && typeof normalized.user === 'object' && normalized.user !== null) {
       const userObj = normalized.user as Record<string, unknown>;
       if (userObj._id) {
@@ -611,13 +604,23 @@ export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFun
       return res.status(401).json({ success: false, message: 'User not authenticated' });
     }
 
-    const orders = await Order.find({ user: req.user._id })
+    await attachGuestOrdersToUser(req.user._id, req.user.email);
+
+    const email = String(req.user.email || '').trim().toLowerCase();
+    const orderQuery = {
+      $or: [
+        { user: req.user._id },
+        ...(email ? [{ guestEmail: email }, { guestEmail: req.user.email }] : []),
+      ],
+    };
+
+    const orders = await Order.find(orderQuery)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
 
-    const total = await Order.countDocuments({ user: req.user._id });
+    const total = await Order.countDocuments(orderQuery);
 
     const normalizedOrders = orders.map((order) => {
       const orderObj = order as Record<string, unknown>;
@@ -635,7 +638,7 @@ export const getMyOrders = async (req: AuthRequest, res: Response, next: NextFun
           orderObj._id = String(orderObj._id);
         }
       }
-      return normalizeOrderId(orderObj);
+      return normalizeOrderId(orderObj) ?? (orderObj as NormalizedOrder);
     }).filter((order): order is NormalizedOrder => order !== null && order !== undefined);
 
     res.status(200).json({
@@ -662,11 +665,19 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
       return res.status(400).json({ success: false, message: 'Invalid order ID format' });
     }
 
+    await attachGuestOrdersToUser(req.user._id, req.user.email);
+
     let order;
     if (req.user.role === 'admin' || req.user.permissions?.canManageOrders) {
       order = await Order.findById(orderId).populate('user', 'firstName lastName email').lean();
     } else {
-      order = await Order.findOne({ _id: orderId, user: req.user._id }).populate('user', 'firstName lastName email').lean();
+      order = await Order.findOne({
+        _id: orderId,
+        $or: [
+          { user: req.user._id },
+          { guestEmail: new RegExp(`^${String(req.user.email).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+        ],
+      }).populate('user', 'firstName lastName email').lean();
     }
 
     if (!order) {
