@@ -30,9 +30,6 @@ const BRANDS: { name: string; logo: string; dark?: boolean }[] = [
   { name: "Nature's Recipe",     logo: '/brands/natures.svg' },
 ];
 
-// ─── Today's pick — Hill's Science Diet 5% Off (quiet, no countdown theater) ─
-const DEAL_DISCOUNT = 0.05;
-
 const TodaysDeals = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['products', 'hills-deals'],
@@ -52,7 +49,7 @@ const TodaysDeals = () => {
               Hill's Science Diet
             </h2>
             <p className="text-sm text-slate-500 mt-1">
-              Extra 5% today · applied automatically at checkout
+              Vet-recommended nutrition, delivered in NYC
             </p>
           </div>
           <Link
@@ -67,22 +64,11 @@ const TodaysDeals = () => {
           <LoadingSpinner size="lg" />
         ) : (
           <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide">
-            {products.map((product, index) => {
-              const dealPrice = parseFloat((product.basePrice * (1 - DEAL_DISCOUNT)).toFixed(2));
-              const dealProduct = {
-                ...product,
-                basePrice: dealPrice,
-                compareAtPrice: product.basePrice,
-              };
-              return (
+            {products.map((product, index) => (
                 <div key={product._id} className="flex-shrink-0 w-56 md:w-64 relative">
-                  <div className="absolute top-2 left-2 z-10 bg-[#1E3A8A] text-white text-[11px] font-semibold px-2 py-1 rounded">
-                    5% today
-                  </div>
-                  <ProductCard product={dealProduct} hideCartButton={false} index={index} />
+                  <ProductCard product={product} hideCartButton={false} index={index} />
                 </div>
-              );
-            })}
+            ))}
           </div>
         )}
       </div>

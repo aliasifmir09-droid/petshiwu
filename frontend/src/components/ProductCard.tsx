@@ -12,6 +12,7 @@ import { preloadProductImages } from '@/utils/imagePreloader';
 import { highlightSearchTerm } from '@/utils/searchHighlight';
 import QuickViewModal from './QuickViewModal';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
+import { getListingPrice, getListingVariant, getProductImage, getValidCompareAtPrice } from '@/utils/productPrice';
 
 interface ProductCardProps {
   product: Product;
@@ -82,16 +83,23 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
     }
   }, [inWishlist, productId, addToWishlist, removeFromWishlist]);
 
+  const listingVariant = useMemo(() => getListingVariant(product), [product]);
+  const listingPrice = useMemo(() => getListingPrice(product), [product]);
+  const compareAtPrice = useMemo(
+    () => getValidCompareAtPrice(listingPrice, listingVariant?.compareAtPrice ?? product.compareAtPrice),
+    [listingPrice, listingVariant?.compareAtPrice, product.compareAtPrice]
+  );
+
   const handleAddToCart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    addToCart(product, product.variants[0]);
+    addToCart(product, listingVariant);
     setCartAdded(true);
     setTimeout(() => setCartAdded(false), 2500);
-  }, [product, addToCart]);
+  }, [product, listingVariant, addToCart]);
 
-  const discountPercent = useMemo(() => product.compareAtPrice
-    ? Math.round(((product.compareAtPrice - product.basePrice) / product.compareAtPrice) * 100)
-    : 0, [product.compareAtPrice, product.basePrice]);
+  const discountPercent = useMemo(() => compareAtPrice
+    ? Math.round(((compareAtPrice - listingPrice) / compareAtPrice) * 100)
+    : 0, [compareAtPrice, listingPrice]);
 
   // Calculate urgency level based on stock
   const urgencyLevel = useMemo(() => {
@@ -123,11 +131,11 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
         <img
-          src={normalizeImageUrl(product.images?.[0], { 
+          src={normalizeImageUrl(getProductImage(product), { 
             size: getOptimalImageSize(254, 254),
             format: 'auto'
           })}
-          srcSet={generateSrcSet(product.images?.[0], [254, 400, 600])}
+          srcSet={generateSrcSet(getProductImage(product), [254, 400, 600])}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 254px"
           alt={product.name}
           width={254}
@@ -228,15 +236,15 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
           <div className="bg-slate-50 p-3 rounded-lg">
             <div className="flex items-baseline gap-2 mb-1">
               <span className="text-2xl font-black text-gray-900 tracking-tight">
-                ${(Number(product.basePrice) || 0).toFixed(2)}
+                ${listingPrice.toFixed(2)}
               </span>
-              {product.compareAtPrice && (
+              {compareAtPrice && (
                 <div className="flex flex-col">
                   <span className="text-xs text-gray-500 line-through">
-                    ${product.compareAtPrice.toFixed(2)}
+                    ${compareAtPrice.toFixed(2)}
                   </span>
                   <span className="text-[10px] text-green-600 font-bold">
-                    YOU SAVE ${(product.compareAtPrice - product.basePrice).toFixed(2)}
+                    YOU SAVE ${(compareAtPrice - listingPrice).toFixed(2)}
                   </span>
                 </div>
               )}

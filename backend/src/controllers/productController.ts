@@ -10,6 +10,7 @@ import { formatProductDescription } from '../utils/descriptionFormatter';
 import logger from '../utils/logger';
 import { cache, cacheKeys } from '../utils/cache';
 import { safeToString } from '../utils/types';
+import { petTypeQueryValues } from '../utils/petTypeAliases';
 
 // Type definitions for product normalization
 interface ProductVariant {
@@ -103,7 +104,10 @@ const normalizeProductId = (product: ProductWithVariants | null | unknown): Norm
     images: resolvedImages,
     _id: plainProduct._id ? String(plainProduct._id) : '',
     totalStock: stockData.totalStock,
-    inStock: stockData.inStock
+    inStock: stockData.inStock,
+    petType: plainProduct.petType
+      ? String(plainProduct.petType).toLowerCase().trim().replace(/\s+/g, '-')
+      : plainProduct.petType
   } as NormalizedProduct;
   
   // Normalize category._id if category is populated
@@ -1706,12 +1710,12 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
 
     // Filter by pet type - normalize to handle both "small-pet" (slug) and "small pet" (space) formats
     if (req.query.petType) {
-      const petTypeParam = String(req.query.petType).toLowerCase().trim();
-      // Normalize to hyphen format (slug format) - this is the standard
-      const normalizedPetType = petTypeParam.replace(/\s+/g, '-');
-      // Match both hyphenated (slug) and space-separated versions for backward compatibility
-      // This handles cases where categories/products might have "small pet" instead of "small-pet"
-      baseQuery.petType = { $in: [normalizedPetType, normalizedPetType.replace(/-/g, ' ')] };
+      const aliases = petTypeQueryValues(String(req.query.petType));
+      if (aliases.length === 1) {
+        baseQuery.petType = aliases[0];
+      } else if (aliases.length > 1) {
+        baseQuery.petType = { $in: aliases };
+      }
     }
 
     // Filter by brand
@@ -2197,7 +2201,8 @@ export const getProductsCursor = async (req: Request, res: Response, next: NextF
 
     // Apply filters (same logic as getProducts)
     if (petType) {
-      baseQuery.petType = (petType as string).toLowerCase();
+      const aliases = petTypeQueryValues(String(petType));
+      baseQuery.petType = aliases.length > 1 ? { $in: aliases } : aliases[0];
     }
 
     // Category filtering - simplified for cursor-based pagination
@@ -3185,7 +3190,8 @@ export const getUniqueBrands = async (req: Request, res: Response, next: NextFun
 
     // Filter by petType if provided
     if (req.query.petType) {
-      filterQuery.petType = String(req.query.petType).toLowerCase().trim();
+      const aliases = petTypeQueryValues(String(req.query.petType));
+      filterQuery.petType = aliases.length > 1 ? { $in: aliases } : aliases[0];
     }
 
     // Use distinct to get unique brands efficiently - much faster than fetching all products
@@ -3230,7 +3236,8 @@ export const getTrendingProducts = async (req: Request, res: Response, next: Nex
     };
 
     if (petType) {
-      query.petType = petType.toLowerCase().trim();
+      const aliases = petTypeQueryValues(petType);
+      query.petType = aliases.length > 1 ? { $in: aliases } : aliases[0];
     }
 
     // Get products sorted by viewCount (trending based on views)

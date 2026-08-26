@@ -69,7 +69,7 @@ const Press = () => {
               <div><strong>Service Area:</strong> NYC all 5 boroughs + nationwide shipping</div>
               <div><strong>Products:</strong> 10,000+ SKUs, premium brands including Hill&apos;s, Royal Canin, Purina</div>
               <div><strong>Delivery:</strong> Same-day NYC, nationwide shipping</div>
-              <div><strong>Discount Code:</strong> FREEDOM20 (20% off, no autoship required)</div>
+              <div><strong>Discount Code:</strong> FREEDOM20 (20% off first order, max $10, no autoship)</div>
               <div><strong>Phone:</strong> +1 (800) 259-2605 (call center 24/7)</div>
             </div>
           </div>
@@ -89,11 +89,11 @@ const Press = () => {
               NYC Pet Supplier Petshiwu Launches FREEDOM20 — Same Great Price, No Subscription Lock
             </h3>
             <p className="text-sm text-gray-600 italic mb-4">
-              While most online pet retailers tie their best prices to mandatory recurring subscriptions, Petshiwu offers the same 20% discount on every order.
+              While most online pet retailers tie their best prices to mandatory recurring subscriptions, Petshiwu offers FREEDOM20 on the first order with no Autoship lock-in.
             </p>
 
             <div className="prose prose-sm max-w-none text-gray-700 space-y-4">
-              <p><strong>NEW YORK, NY — July 1, 2026 —</strong> Petshiwu, NYC&apos;s only all-5-borough same-day pet supply service, today launched FREEDOM20 — a 20% discount (capped at $10) that works on every order, with no Autoship subscription required.</p>
+              <p><strong>NEW YORK, NY — July 1, 2026 —</strong> Petshiwu, NYC&apos;s only all-5-borough same-day pet supply service, today launched FREEDOM20 — a 20% discount (capped at $10) on the first order, with no Autoship subscription required.</p>
 
               <p>The launch positions Petshiwu as the freedom-first alternative in NYC pet supply — same vet-quality brands, same-day delivery, with pricing that doesn't punish customers who want to order once.</p>
 
@@ -101,8 +101,8 @@ const Press = () => {
 
               <h4 className="text-base font-bold mt-6">FREEDOM20 details:</h4>
               <ul className="list-disc pl-6 space-y-1">
-                <li>20% off every order, capped at $10 maximum</li>
-                <li>Works on first order AND every repeat order</li>
+                <li>20% off the first order, capped at $10 maximum</li>
+                <li>Works on the first order — no Autoship required</li>
                 <li>No Autoship subscription required</li>
                 <li>Optional Autoship available for customer convenience (same price)</li>
                 <li>Same-day NYC delivery (order by 3 PM EST, delivered by 11 PM)</li>

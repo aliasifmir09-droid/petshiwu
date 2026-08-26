@@ -1,4 +1,5 @@
 import { Product } from '@/types';
+import { canonicalPetTypeSlug } from '@/utils/productPrice';
 
 /** Check if a slug is valid - never allow undefined, null, or empty in URLs */
 const isValidSlug = (val: unknown): val is string => {
@@ -26,7 +27,7 @@ export const generateProductUrl = (product: Product): string => {
   }
 
   const category = product.category;
-  const petType = product.petType || 'products';
+  const petType = canonicalPetTypeSlug(product.petType) || 'products';
 
   // Build category path from hierarchy - only include valid slugs
   const buildCategoryPath = (cat: typeof category): string[] => {
@@ -87,8 +88,9 @@ export const generateCategoryUrl = (categorySlug: string | undefined, petType?: 
   if (!isValidSlug(categorySlug)) return '/products';
   const slug = String(categorySlug).trim();
 
-  if (isValidSlug(petType) && petType !== 'all' && petType !== 'other-animals') {
-    return `/${petType}/${slug}`;
+  const petSlug = canonicalPetTypeSlug(petType);
+  if (isValidSlug(petSlug) && petSlug !== 'all' && petSlug !== 'other-animals') {
+    return `/${petSlug}/${slug}`;
   }
   if (petType) {
     return `/category/${slug}?petType=${petType}`;

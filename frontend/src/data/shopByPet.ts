@@ -8,5 +8,5 @@ export const PET_CATEGORIES = [
   { name: 'Fish', slug: 'fish', image: '/pets/fish.jpg' },
   { name: 'Bird', slug: 'bird', image: '/pets/bird.jpg' },
   { name: 'Reptile', slug: 'reptile', image: '/pets/reptile.jpg' },
-  { name: 'Small Pet', slug: 'small-pet', image: '/pets/small-pet.jpg' },
+  { name: 'Small Pet', slug: 'small-animal', image: '/pets/small-pet.jpg' },
 ] as const;

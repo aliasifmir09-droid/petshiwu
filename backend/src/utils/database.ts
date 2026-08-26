@@ -94,6 +94,8 @@ export const connectDatabase = async () => {
     logger.info(`📊 Connection Pool: max=${maxPoolSize}, min=${minPoolSize}`);
     await Promise.all([Order.createIndexes(), PendingPayPalCheckout.createIndexes()]);
     logger.info('✅ Payment idempotency indexes verified');
+    const { repairLaunchCatalog } = await import('../services/launchCatalogRepair');
+    void repairLaunchCatalog();
     
     // Optimize Mongoose settings for high concurrency
     optimizeMongooseSettings();

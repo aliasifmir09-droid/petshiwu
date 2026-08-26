@@ -202,8 +202,8 @@ A: Absolutely. Mental exercise is just as important as physical exercise. Puzzle
 // ─── Birthday Program ─────────────────────────────────────────────
 const BIRTHDAY_PROGRAM_INFO = `
 BIRTHDAY LOYALTY PROGRAM:
-- If TODAY is the pet's birthday: "HAPPY BIRTHDAY [Pet Name]! 🎂🐾 Use code BDAYGIFT at checkout for a special birthday gift — our treat for your furry friend!"
-- Discount code: BDAYGIFT
+- If TODAY is the pet's birthday: "HAPPY BIRTHDAY [Pet Name]! 🎂🐾 Use code BDAYGIFT at checkout for 15% off today."
+- Discount code: BDAYGIFT (15% off the order on the pet's birthday)
 `;
 
 // ─── Other Pet Species Knowledge ────────────────────────────────
@@ -465,7 +465,7 @@ PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
 
 === ACCOUNTS & PET PROFILES ===
 - Free account: Sign up in 30 seconds at petshiwu.com — enables order tracking, wishlist, pet profiles, faster checkout
-- Pet Passport: Save pet name, birthday, species, breed, allergies — unlocks personalized recs and birthday gifts
+- Pet Passport: Save pet name, birthday, species, breed, allergies — unlocks personalized recs and the BDAYGIFT 15% birthday discount
 - Multiple pets: Yes, unlimited pet profiles per account
 - Forgot password: Use Forgot Password link on login page — reset link sent to email
 
@@ -520,10 +520,10 @@ Q: How do I get the 10% first-order discount?
 A: Sign up for our newsletter at the bottom of petshiwu.com. Your 10% off code is emailed to you immediately and applies to your first order.
 
 Q: What is the birthday gift program?
-A: Save your pet's birthday in their profile under My Account → Pet Passport. On their birthday we'll notify you with code BDAYGIFT for 15% off your entire order — and we may even send a small gift for your pet. We celebrate every pet's birthday 🎂🐾
+A: Save your pet's birthday in their profile under My Account → Pet Passport. On their birthday we'll notify you with code BDAYGIFT for 15% off your entire order. We celebrate every pet's birthday 🎂🐾
 
 Q: How do I save my pet's profile?
-A: Log in → go to My Account → Pet Passport. Save your pet's name, birthday, species, breed, and allergies. You can save multiple pets. This powers personalized product recommendations and birthday gifts.
+A: Log in → go to My Account → Pet Passport. Save your pet's name, birthday, species, breed, and allergies. You can save multiple pets. This powers personalized product recommendations and the BDAYGIFT 15% birthday discount.
 
 Q: An item I want is out of stock. What should I do?
 A: Click "Notify Me" on the product page. We'll email you the moment it's back in stock. You can manage all your stock alerts at petshiwu.com/stock-alerts.
@@ -761,7 +761,7 @@ const buildBirthdayEmailHtml = (petName: string, parentName: string): string => 
                   <td align="center" style="padding:28px;">
                     <p style="margin:0 0 8px;font-size:36px;">🎁</p>
                     <h2 style="margin:0 0 8px;color:#92400e;font-size:20px;font-weight:700;">Your Birthday Gift</h2>
-                    <p style="margin:0 0 16px;color:#78350f;font-size:15px;">A FREE birthday gift with your next order — from us to your furry friend!</p>
+                    <p style="margin:0 0 16px;color:#78350f;font-size:15px;">15% off your order today with code BDAYGIFT — from us to your furry friend!</p>
                     <div style="background:#ffffff;border-radius:8px;padding:12px 24px;display:inline-block;">
                       <p style="margin:0;color:#6b7280;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Use code at checkout</p>
                       <p style="margin:4px 0 0;color:#1a3c5e;font-size:28px;font-weight:800;letter-spacing:4px;">BDAYGIFT</p>
@@ -964,7 +964,7 @@ export const getAIAdvice = async (req: Request, res: Response, next: NextFunctio
     }
 
     if (birthdayCelebration) {
-      contextParts.push(`[IMPORTANT: Today is ${mergedPetName}'s birthday! Start with an enthusiastic birthday celebration and mention code BDAYGIFT for a free birthday gift.]`);
+      contextParts.push(`[IMPORTANT: Today is ${mergedPetName}'s birthday! Start with an enthusiastic birthday celebration and mention code BDAYGIFT for 15% off.]`);
     }
 
     const enrichedMessage = contextParts.length > 0

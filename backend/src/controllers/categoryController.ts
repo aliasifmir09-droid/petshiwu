@@ -5,6 +5,7 @@ import { AuthRequest } from '../middleware/auth';
 import logger from '../utils/logger';
 import { cache, cacheKeys } from '../utils/cache';
 import { extractObjectId } from '../utils/types';
+import { petTypeQueryValues } from '../utils/petTypeAliases';
 
 // Helper function to normalize category _id to string
 const normalizeCategoryId = (category: any): any => {
@@ -84,9 +85,8 @@ export const getCategories = async (req: Request, res: Response, next: NextFunct
     const query: any = { isActive: true };
 
     if (petType) {
-      // Normalize petType and match both hyphenated and space-separated versions
-      const normalizedPetType = petType.toLowerCase().trim().replace(/\s+/g, '-');
-      query.petType = { $in: [normalizedPetType, normalizedPetType.replace(/-/g, ' ')] };
+      const aliases = petTypeQueryValues(petType);
+      query.petType = aliases.length > 1 ? { $in: aliases } : aliases[0];
     }
 
     const categories = await Category.find(query)
@@ -255,8 +255,8 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
     const buildQuery = (slugQuery: any) => {
       const query: any = { ...slugQuery, isActive: true };
       if (petType) {
-        // Match both "small-pet" and "small pet" formats
-        query.petType = { $in: [petType, petType.replace(/-/g, ' ')] };
+        const aliases = petTypeQueryValues(petType);
+        query.petType = aliases.length > 1 ? { $in: aliases } : aliases[0];
       }
       return query;
     };
@@ -267,8 +267,8 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
     if (mongoose.Types.ObjectId.isValid(identifier)) {
       const idQuery: any = { _id: identifier };
       if (petType) {
-        // Match both hyphenated and space-separated versions
-        idQuery.petType = { $in: [petType, petType.replace(/-/g, ' ')] };
+        const aliases = petTypeQueryValues(petType);
+        idQuery.petType = aliases.length > 1 ? { $in: aliases } : aliases[0];
       }
       category = await Category.findOne(idQuery)
         .populate({
@@ -307,8 +307,8 @@ export const getCategory = async (req: Request, res: Response, next: NextFunctio
       if (!category) {
         const query: any = { slug: normalizedSlug };
         if (petType) {
-          // Match both hyphenated and space-separated versions
-          query.petType = { $in: [petType, petType.replace(/-/g, ' ')] };
+          const aliases = petTypeQueryValues(petType);
+          query.petType = aliases.length > 1 ? { $in: aliases } : aliases[0];
         }
         category = await populateParentChain(Category.findOne(query)).lean();
       }

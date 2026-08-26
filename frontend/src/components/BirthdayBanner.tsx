@@ -148,10 +148,10 @@ export default function BirthdayBanner() {
               <span style={{ background:'linear-gradient(90deg,#FDE68A,#FCA5A5)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>Pet's Birthday!</span>
             </h2>
             <p style={{ margin: isMobile ? '0 0 12px' : '0 0 22px', fontSize: isMobile ? 13 : 14.5, lineHeight:1.6, color:'rgba(255,255,255,.82)', maxWidth:360 }}>
-              Tell our AI your pet's birthday and receive an exclusive <strong style={{ color:'#FDE68A' }}>20% OFF coupon</strong> + a <strong style={{ color:'#FDE68A' }}>FREE birthday gift</strong> delivered right on their special day!
+              Tell our AI your pet's birthday and unlock code <strong style={{ color:'#FDE68A' }}>BDAYGIFT</strong> for <strong style={{ color:'#FDE68A' }}>15% off</strong> on their special day.
             </p>
             <div style={{ display:'flex', flexDirection:'column', gap: isMobile ? 5 : 8, marginBottom: isMobile ? 16 : 26 }}>
-              {[['🎁','Free birthday gift with your order'],['💸','20% OFF — code BDAYGIFT auto-unlocked'],['🚚','Free shipping on birthday orders']].map(([icon,text]) => (
+              {[['🎁','Code BDAYGIFT — 15% off that day'],['📦','Apply it at checkout before you pay'],['🚚','Free shipping still starts at $49']].map(([icon,text]) => (
                 <div key={text} style={{ display:'flex', alignItems:'center', gap:10, fontSize: isMobile ? 12 : 13, color:'rgba(255,255,255,.88)', fontWeight:600 }}>
                   <span style={{ fontSize: isMobile ? 14 : 17, width:24, textAlign:'center' }}>{icon}</span>{text}
                 </div>
@@ -179,7 +179,7 @@ export default function BirthdayBanner() {
                 {[
                   { side:'bot', text:"What is your pet's birthday? 🎂" },
                   { side:'usr', text:'📅 June 15' },
-                  { side:'cel', text:"🎉 We'll send a birthday gift & 20% OFF coupon on June 15th!" },
+                  { side:'cel', text:"🎉 We'll send code BDAYGIFT for 15% off on June 15th!" },
                 ].map((m,i) => (
                   <div key={i} style={{ display:'flex', gap:7, alignItems:'flex-end', flexDirection: m.side==='usr' ? 'row-reverse' : 'row' }}>
                     {m.side!=='usr' && <div style={{ width:23, height:23, borderRadius:'50%', background:'#1e3a8a', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, flexShrink:0 }}>🐾</div>}
@@ -191,7 +191,7 @@ export default function BirthdayBanner() {
                   <div><div style={{ color:'#fff', fontSize:11, fontWeight:800, fontFamily:F }}>Special birthday discount</div><div style={{ color:'rgba(255,255,255,.8)', fontSize:10, fontWeight:600, fontFamily:F }}>unlocked automatically on the day!</div></div>
                 </div>
               </div>
-              <div style={{ background:'#1e3a8a', padding:'8px 14px', display:'flex', alignItems:'center', justifyContent:'center', gap:5, fontSize:11, color:'rgba(255,255,255,.9)', fontWeight:700, fontFamily:F }}>🚚 Free Shipping on Birthday Orders ❤️</div>
+              <div style={{ background:'#1e3a8a', padding:'8px 14px', display:'flex', alignItems:'center', justifyContent:'center', gap:5, fontSize:11, color:'rgba(255,255,255,.9)', fontWeight:700, fontFamily:F }}>🎁 15% off with code BDAYGIFT ❤️</div>
             </div>
           </div>}
         </div>

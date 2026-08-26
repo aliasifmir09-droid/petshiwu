@@ -215,8 +215,8 @@ productSchema.pre('save', function (next) {
     this.slug = this.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
   }
 
-  // Normalize petType to slug format (replace spaces with hyphens) for consistency
-  if (this.isModified('petType') && this.petType) {
+  // Always slugify petType so records saved as "small pet" become "small-pet"
+  if (this.petType) {
     this.petType = this.petType.toLowerCase().trim().replace(/\s+/g, '-');
   }
   

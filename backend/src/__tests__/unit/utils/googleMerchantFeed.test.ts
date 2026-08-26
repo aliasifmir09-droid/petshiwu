@@ -63,6 +63,18 @@ describe('googleMerchantFeed helpers', () => {
     ).toEqual(['https://petshiwu-cdn.b-cdn.net/products/6975f1965f8fb0a308f8d7af.jpg']);
   });
 
+  test('uses the Ocean Fish dry-bag packshot instead of the wet chicken can', () => {
+    const images = productImages({
+      _id: '694cf009f48d02e6055e2b1b',
+      name: "Hill's c/d Ocean Fish",
+      slug: 'hills-prescription-diet-cd-multicare-urinary-cat-food-ocean-fish',
+      images: ['https://petshiwu-cdn.b-cdn.net/products/694cf009f48d02e6055e2b1b.jpg'],
+    });
+    expect(images[0]).toBe(
+      'https://petshiwu-cdn.b-cdn.net/products/hills-cd-multicare-ocean-fish-dry.jpg'
+    );
+  });
+
   test('prefers an existing Bunny URL over a dead Cloudinary URL', () => {
     expect(
       productImages({

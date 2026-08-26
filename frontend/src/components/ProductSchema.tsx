@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { ProductVariant } from '@/types';
 import { normalizeImageUrl } from '@/utils/imageUtils';
+import { getProductImages } from '@/utils/productPrice';
 import { productSchemaIdentifiers } from '@/utils/merchantIdentifiers';
 import { generateProductUrl } from '@/utils/productUrl';
 
@@ -45,7 +46,7 @@ const ProductSchema = ({ product, selectedVariant }: ProductSchemaProps) => {
   const { sku, mpn } = productSchemaIdentifiers(selectedVariant?.sku, product._id);
 
   // Collect all product images, normalised
-  const rawImages = product.images ?? [];
+  const rawImages = getProductImages(product);
   const images = rawImages
     .map((img) => {
       try { return normalizeImageUrl(img); } catch { return img; }
