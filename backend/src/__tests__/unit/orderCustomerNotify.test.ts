@@ -1,4 +1,4 @@
-import { mergeCustomerContact } from '../../utils/orderCustomerNotify';
+import { mergeCustomerContact } from '../../utils/orderCustomerContact';
 
 describe('mergeCustomerContact', () => {
   it('uses guest email and shipping phone when there is no account', () => {

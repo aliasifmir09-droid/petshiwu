@@ -1,5 +1,3 @@
-import Order from '../models/Order';
-
 /**
  * Resolve Mongo ObjectIds and Petshiwu order numbers (ORD-...) from API params
  * and serialized BSON values the admin UI may send.
@@ -102,6 +100,7 @@ export const extractOrderIdentifier = (value: unknown, orderNumber?: unknown): s
 export const findOrderByIdentifier = async (rawId: unknown) => {
   const extracted = extractHexId(rawId) || (typeof rawId === 'string' ? rawId.trim() : '');
   if (!extracted || extracted === '[object Object]') return null;
+  const { default: Order } = await import('../models/Order');
   if (isStrictObjectId(extracted)) {
     return Order.findById(extracted);
   }
