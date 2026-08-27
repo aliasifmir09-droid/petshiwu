@@ -1169,6 +1169,7 @@ const Checkout = () => {
                         donationAmount={donationAmount}
                         onSuccess={handlePayPalSuccess}
                         onError={handlePayPalError}
+                        currency="USD"
                         onCancel={() => { setPaymentMethod('paypal'); setSelectedSavedPaymentMethod(null); }}
                         onSwitchToWallet={() => { setPaymentMethod('paypal'); setSelectedSavedPaymentMethod(null); }}
                       />

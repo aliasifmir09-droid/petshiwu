@@ -26,7 +26,9 @@ import {
   getPayPalCapturedAmount,
   getPayPalCurrency,
   getPayPalCheckoutToken,
-  getPayPalOrder
+  getPayPalOrder,
+  hasPayPalSettlement,
+  payPalCurrenciesMatch
 } from '../services/paypalService';
 import { calculateTrustedOrderPricing } from '../services/orderPricingService';
 import { isReusableCoupon, normalizeCouponCode } from '../services/couponService';
@@ -254,7 +256,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
           if (paypalOrder.status !== 'COMPLETED') {
             throw new Error(`PayPal payment not completed. Status: ${paypalOrder.status}`);
           }
-          if (paypalCurrency !== 'USD') {
+          if (!payPalCurrenciesMatch('USD', paypalCurrency)) {
             throw new Error(`PayPal payment currency mismatch. Expected USD, received ${paypalCurrency ?? 'unknown'}`);
           }
           if (capturedAmount === null || Math.abs(capturedAmount - expectedAmount) > 0.01) {
@@ -1734,7 +1736,7 @@ export const capturePayPalCheckoutOrder = async (req: AuthRequest, res: Response
 
     const preCaptureAmount = getPayPalCapturedAmount(preCapturePayPalOrder);
     const preCaptureCurrency = getPayPalCurrency(preCapturePayPalOrder);
-    if (preCaptureCurrency !== pending.currency || preCaptureAmount === null || Math.abs(preCaptureAmount - pending.totalPrice) > 0.01) {
+    if (!payPalCurrenciesMatch(pending.currency, preCaptureCurrency) || preCaptureAmount === null || Math.abs(preCaptureAmount - pending.totalPrice) > 0.01) {
       return res.status(400).json({ success: false, message: 'PayPal payment amount or currency does not match this checkout.' });
     }
 
@@ -1749,12 +1751,22 @@ export const capturePayPalCheckoutOrder = async (req: AuthRequest, res: Response
       }
     }
 
-    const capturedAmount = getPayPalCapturedAmount(paypalOrder);
-    const paypalCurrency = getPayPalCurrency(paypalOrder);
+    // Capture defaults to a minimal { id, status } body. Re-read the order when
+    // currency/amount are missing so a real card capture is not rejected as "unknown".
+    if (paypalOrder.status === 'COMPLETED' && !hasPayPalSettlement(paypalOrder)) {
+      paypalOrder = await getPayPalOrder(paypalOrderId);
+    }
+
+    let capturedAmount = getPayPalCapturedAmount(paypalOrder);
+    let paypalCurrency = getPayPalCurrency(paypalOrder);
+    if (paypalOrder.status === 'COMPLETED' && !hasPayPalSettlement(paypalOrder)) {
+      paypalCurrency = preCaptureCurrency;
+      capturedAmount = preCaptureAmount;
+    }
     if (paypalOrder.status !== 'COMPLETED') {
       return res.status(400).json({ success: false, message: `PayPal payment was not completed. Status: ${paypalOrder.status}` });
     }
-    if (paypalCurrency !== pending.currency) {
+    if (!payPalCurrenciesMatch(pending.currency, paypalCurrency)) {
       return res.status(400).json({ success: false, message: `PayPal payment currency mismatch. Expected ${pending.currency}, received ${paypalCurrency ?? 'unknown'}` });
     }
     if (capturedAmount === null || Math.abs(capturedAmount - pending.totalPrice) > 0.01) {
