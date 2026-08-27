@@ -107,6 +107,54 @@ const replaceTemplateVariables = (template: string, variables: Record<string, an
   return result;
 };
 
+const isSmtpConfigured = (): boolean =>
+  Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+
+const isEmailProviderConfigured = (): boolean => Boolean(resendClient) || isSmtpConfigured();
+
+const htmlToText = (html: string): string =>
+  html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
+async function sendHtmlEmail(options: {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+}): Promise<{ messageId: string; accepted: string[] } | null> {
+  const from = process.env.SMTP_FROM || process.env.RESEND_FROM || 'Petshiwu <noreply@petshiwu.com>';
+  const text = options.text || htmlToText(options.html);
+
+  if (resendClient) {
+    const result = await resendClient.emails.send({
+      from,
+      to: options.to,
+      replyTo: 'support@petshiwu.com',
+      subject: options.subject,
+      html: options.html,
+      text
+    });
+    if (!result.error) {
+      return { messageId: result.data?.id || 'resend', accepted: [options.to] };
+    }
+    logger.warn(`Resend failed for ${options.to}: ${result.error.message}`);
+  }
+
+  if (isSmtpConfigured()) {
+    const info = await createTransporter().sendMail({
+      from,
+      to: options.to,
+      replyTo: 'support@petshiwu.com',
+      subject: options.subject,
+      html: options.html,
+      text
+    });
+    return { messageId: info.messageId || 'smtp', accepted: [options.to] };
+  }
+
+  logger.warn(`No email provider configured. Skipping email to ${options.to}.`);
+  return { messageId: 'no-provider', accepted: [options.to] };
+}
+
 // Send email verification
 export const sendVerificationEmail = async (email: string, token: string, firstName: string) => {
   try {
@@ -284,10 +332,7 @@ export const sendOrderCancellationEmail = async (
   }
 ) => {
   try {
-    // Check if email is actually configured
-    const isEmailConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
-    
-    if (!isEmailConfigured) {
+    if (!isEmailProviderConfigured()) {
       logger.warn(`⚠️  Email not configured. Skipping order cancellation email to ${email}.`);
       logger.warn(`⚠️  Order #${orderNumber} cancelled, but cancellation email not sent.`);
       return { messageId: 'test-mode', accepted: [email] };
@@ -365,20 +410,136 @@ export const sendOrderCancellationEmail = async (
       body = body.replace(/{{#if refundAmount}}[\s\S]*?{{\/if}}/g, '');
     }
 
-    const transporter = createTransporter();
-    const mailOptions = {
-      from: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@petshiwu.com',
+    const info = await sendHtmlEmail({
       to: email,
       subject,
       html: body,
-      text: body.replace(/<[^>]*>/g, '').replace(/\n\s*\n/g, '\n\n')
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    logger.info(`✅ Order cancellation email sent to ${email} for order #${orderNumber}: ${info.messageId}`);
+      text: htmlToText(body)
+    });
+    logger.info(`✅ Order cancellation email sent to ${email} for order #${orderNumber}: ${info?.messageId}`);
     return info;
   } catch (error: any) {
     logger.error(`❌ Error sending order cancellation email to ${email}:`, error.message);
+    return null;
+  }
+};
+
+const ORDER_STATUS_COPY: Record<string, { title: string; intro: string; headerColor: string }> = {
+  pending: {
+    title: 'Order Pending',
+    intro: 'Your order is pending. We will start preparing it shortly.',
+    headerColor: '#64748b'
+  },
+  processing: {
+    title: 'We Are Preparing Your Order',
+    intro: "Great news — we're preparing your Petshiwu order now.",
+    headerColor: '#d97706'
+  },
+  shipped: {
+    title: 'Your Order Is On The Way',
+    intro: 'Your order is on the way to you.',
+    headerColor: '#2563eb'
+  },
+  delivered: {
+    title: 'Order Delivered',
+    intro: 'Your order has been delivered.',
+    headerColor: '#16a34a'
+  },
+  cancelled: {
+    title: 'Order Cancelled',
+    intro: 'Your order has been cancelled.',
+    headerColor: '#dc2626'
+  }
+};
+
+export const sendOrderStatusEmail = async (
+  email: string,
+  firstName: string,
+  orderNumber: string,
+  orderData: {
+    status: string;
+    trackingNumber?: string | null;
+    totalPrice: number;
+    shippingAddress: {
+      firstName: string;
+      lastName: string;
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+      country: string;
+    };
+  }
+) => {
+  try {
+    if (!isEmailProviderConfigured()) {
+      logger.warn(`⚠️  Email not configured. Skipping order status email to ${email} for #${orderNumber}.`);
+      return { messageId: 'test-mode', accepted: [email] };
+    }
+
+    const copy = ORDER_STATUS_COPY[orderData.status] || {
+      title: 'Order Update',
+      intro: `Your order status is now ${orderData.status}.`,
+      headerColor: '#166534'
+    };
+    const statusLabel = orderData.status.charAt(0).toUpperCase() + orderData.status.slice(1);
+    const address = `${orderData.shippingAddress.firstName} ${orderData.shippingAddress.lastName}, ${orderData.shippingAddress.street}, ${orderData.shippingAddress.city}, ${orderData.shippingAddress.state} ${orderData.shippingAddress.zipCode}`;
+
+    const defaultSubject = `${copy.title} #${orderNumber} - Petshiwu`;
+    const defaultBody = `
+      <!DOCTYPE html>
+      <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background-color: ${copy.headerColor}; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
+          <h1 style="margin: 0;">{{title}}</h1>
+          <p style="margin: 10px 0 0 0; font-size: 18px;">Order #{{orderNumber}}</p>
+        </div>
+        <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px;">
+          <p>Hi {{firstName}},</p>
+          <p>{{intro}}</p>
+          <div style="background-color: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
+            <p><strong>Order Number:</strong> {{orderNumber}}</p>
+            <p><strong>Status:</strong> {{statusLabel}}</p>
+            {{#if trackingNumber}}
+            <p><strong>Tracking Number:</strong> {{trackingNumber}}</p>
+            {{/if}}
+            <p><strong>Total:</strong> $${'{{totalPrice}}'}</p>
+            <p><strong>Delivery Address:</strong><br>{{shippingAddress}}</p>
+          </div>
+          <p style="color: #666; font-size: 12px; margin-top: 20px;">
+            Best regards,<br>
+            The Petshiwu Team
+          </p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const template = await getEmailTemplate(`order_status_${orderData.status}`, defaultSubject, defaultBody);
+    const variables = {
+      firstName: firstName || 'Customer',
+      orderNumber,
+      title: copy.title,
+      intro: copy.intro,
+      statusLabel,
+      trackingNumber: orderData.trackingNumber || '',
+      totalPrice: orderData.totalPrice.toFixed(2),
+      shippingAddress: address
+    };
+
+    let subject = replaceTemplateVariables(template.subject, variables);
+    let body = replaceTemplateVariables(template.body, variables);
+    if (orderData.trackingNumber) {
+      body = body.replace(/{{#if trackingNumber}}([\s\S]*?){{\/if}}/g, '$1');
+    } else {
+      body = body.replace(/{{#if trackingNumber}}[\s\S]*?{{\/if}}/g, '');
+    }
+
+    const info = await sendHtmlEmail({ to: email, subject, html: body, text: htmlToText(body) });
+    logger.info(`✅ Order status email (${orderData.status}) sent to ${email} for #${orderNumber}: ${info?.messageId}`);
+    return info;
+  } catch (error: any) {
+    logger.error(`❌ Error sending order status email to ${email}:`, error.message);
     return null;
   }
 };
@@ -484,10 +645,7 @@ export const sendOrderDeliveredEmail = async (
   }
 ) => {
   try {
-    // Check if email is actually configured
-    const isEmailConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
-    
-    if (!isEmailConfigured) {
+    if (!isEmailProviderConfigured()) {
       logger.warn(`⚠️  Email not configured. Skipping order delivered email to ${email}.`);
       logger.warn(`⚠️  Order #${orderNumber} delivered, but delivery email not sent.`);
       return { messageId: 'test-mode', accepted: [email] };
@@ -566,17 +724,13 @@ export const sendOrderDeliveredEmail = async (
       body = body.replace(/{{#if trackingNumber}}[\s\S]*?{{\/if}}/g, '');
     }
 
-    const transporter = createTransporter();
-    const mailOptions = {
-      from: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@petshiwu.com',
+    const info = await sendHtmlEmail({
       to: email,
       subject,
       html: body,
-      text: body.replace(/<[^>]*>/g, '').replace(/\n\s*\n/g, '\n\n')
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    logger.info(`✅ Order delivered email sent to ${email} for order #${orderNumber}: ${info.messageId}`);
+      text: htmlToText(body)
+    });
+    logger.info(`✅ Order delivered email sent to ${email} for order #${orderNumber}: ${info?.messageId}`);
     return info;
   } catch (error: any) {
     logger.error(`❌ Error sending order delivered email to ${email}:`, error.message);
