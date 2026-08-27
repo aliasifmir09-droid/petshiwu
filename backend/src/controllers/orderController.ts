@@ -1852,7 +1852,7 @@ export const createOrderPaymentIntent = async (req: AuthRequest, res: Response, 
     }
 
     if (!stripe) {
-      return res.status(500).json({ success: false, message: 'Payment processing not configured. Please set STRIPE_SECRET_KEY in environment variables.' });
+      return res.status(500).json({ success: false, message: 'Card payments are not available that way. Please pay with PayPal, Apple Pay, Google Pay, or cash on delivery.' });
     }
 
     const amountInCents = Math.round(totalPrice * 100);

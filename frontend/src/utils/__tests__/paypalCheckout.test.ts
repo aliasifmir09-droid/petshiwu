@@ -52,7 +52,10 @@ describe('PayPal checkout', () => {
     expect(paypalConfig).toContain("disableFunding: ['card']");
     expect(paypalConfig).not.toContain("'venmo', 'paylater', 'card'");
     expect(checkout).toContain("setPaymentMethod('credit_card')");
-    expect(checkout).toContain('Visa, Mastercard, Amex — typed on this page, not a PayPal popup.');
+    expect(checkout).toContain('PayPalCardFields');
+    expect(checkout).toContain('id="card-payment"');
+    expect(checkout).not.toContain('STRIPE_SECRET_KEY');
+    expect(checkout).toContain('PayPal charges the card on this page, same as your last payment.');
     expect(checkout).toContain('overflow-visible');
   });
 
