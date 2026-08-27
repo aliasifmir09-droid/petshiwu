@@ -15,6 +15,8 @@ import Toast from './Toast';
 import SearchSuggestions from './SearchSuggestions';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { cartItemCount } from '@/utils/cartCount';
+import { generateCategoryUrl } from '@/utils/productUrl';
+import { generateCategoryUrl } from '@/utils/productUrl';
 
 const Header = () => {
   const navigate = useNavigate();
