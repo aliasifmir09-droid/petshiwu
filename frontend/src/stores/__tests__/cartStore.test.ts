@@ -36,6 +36,18 @@ describe('cartStore addToCart', () => {
     expect(useCartStore.getState().getTotalItems()).toBe(1);
   });
 
+  test('adds when the product is marked in stock even if totalStock is 0', () => {
+    useCartStore.setState({ items: [] });
+    const product = inStockProduct({
+      totalStock: 0,
+      inStock: true,
+      variants: [{ price: 20, sku: 'bag', stock: undefined as unknown as number }],
+    });
+    const added = useCartStore.getState().addToCart(product, product.variants[0]);
+    expect(added).toBe(true);
+    expect(useCartStore.getState().items).toHaveLength(1);
+  });
+
   test('does not add a variant that is explicitly out of stock', () => {
     useCartStore.setState({ items: [] });
     const product = inStockProduct({

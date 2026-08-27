@@ -48,6 +48,7 @@ describe('availableCartStock', () => {
 
   test('treats in-stock products without a stock count as addable', () => {
     expect(availableCartStock(product({ totalStock: undefined as unknown as number, inStock: true }))).toBe(1);
+    expect(availableCartStock(product({ totalStock: 0, inStock: true }))).toBe(1);
     expect(availableCartStock(product({ totalStock: 0, inStock: false }))).toBe(0);
   });
 });
