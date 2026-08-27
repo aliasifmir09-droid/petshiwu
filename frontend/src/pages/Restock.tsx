@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { buyAgainService } from '@/services/buyAgain';
 import { useCartStore } from '@/stores/cartStore';
 import { productsForReorder } from '@/utils/reorderFromOrder';
-import { ASK_COUPON, AUTOSHIP_COUPON, isRestockCoupon, rememberRestockCoupon } from '@/utils/restock';
+import { ASK_COUPON, AUTOSHIP_COUPON, isRestockCoupon, isRestockPayMethod, rememberRestockCoupon, rememberRestockPay } from '@/utils/restock';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import SEO from '@/components/SEO';
 
@@ -48,7 +48,9 @@ const Restock = () => {
           return;
         }
         rememberRestockCoupon(coupon);
-        navigate(`/checkout?coupon=${coupon}`, { replace: true });
+        const pay = searchParams.get('pay');
+        if (isRestockPayMethod(pay)) rememberRestockPay(pay);
+        navigate(`/checkout?coupon=${coupon}${isRestockPayMethod(pay) ? `&pay=${pay}` : ''}`, { replace: true });
       } catch {
         if (!cancelled) navigate('/login?redirect=/restock', { replace: true });
       }
@@ -57,7 +59,7 @@ const Restock = () => {
     return () => {
       cancelled = true;
     };
-  }, [addToCart, coupon, navigate]);
+  }, [addToCart, coupon, navigate, searchParams]);
 
   return (
     <div className="container mx-auto px-4 py-20 text-center">

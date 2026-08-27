@@ -24,7 +24,7 @@ import { MapPin, Plus, Check, User, UserCheck, Banknote, ShieldCheck, RotateCcw,
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
 import { paypalClientId } from '@/config/paypal';
 import { isNycDeliveryZip, isNewYorkState, normalizeShippingState } from '@/utils/deliveryZip';
-import { clearRestockCoupon, readRestockCoupon, ASK_COUPON, ASK_DISCOUNT_COPY, AUTOSHIP_COUPON, AUTOSHIP_DISCOUNT_COPY } from '@/utils/restock';
+import { clearRestockCoupon, clearRestockPay, readRestockCoupon, readRestockPay, isRestockPayMethod, ASK_COUPON, ASK_DISCOUNT_COPY, AUTOSHIP_COUPON, AUTOSHIP_DISCOUNT_COPY } from '@/utils/restock';
 
 const PaymentForm = lazy(() => import('@/components/PaymentForm'));
 const CheckoutBrandedPayments = lazy(() => import('@/components/CheckoutBrandedPayments'));
@@ -242,6 +242,11 @@ const Checkout = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const restockPay = params.get('pay') || readRestockPay();
+    if (isRestockPayMethod(restockPay)) {
+      setPaymentMethod(restockPay);
+      return;
+    }
     if (params.get('quick') === 'true') {
       if (savedPaymentMethods.length > 0) {
         const defaultMethod = savedPaymentMethods.find((pm: any) => pm.isDefault) || savedPaymentMethods[0];
@@ -406,6 +411,7 @@ const Checkout = () => {
     onSuccess: async (order) => {
       clearCart();
       clearRestockCoupon();
+      clearRestockPay();
       const orderId = String(order._id || '');
       // Record coupon usage so it can't be reused
       if (couponCode && shippingInfo.email) {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { buyAgainService, type BuyAgainRegular } from '@/services/buyAgain';
@@ -14,6 +14,7 @@ import {
   AUTOSHIP_DISCOUNT_COPY,
   DEFAULT_INTERVAL_DAYS,
   RESTOCK_CADENCE,
+  RESTOCK_PAY_OPTIONS,
   cadenceLabel,
   defaultRemindParts,
   isRestockConsumable,
@@ -22,16 +23,33 @@ import {
   localTimeStr,
   pickKey,
   rememberRestockCoupon,
+  rememberRestockPay,
   remindAtIso,
+  restockCouponForMode,
   restockDiscountCopy,
+  restockPayLabel,
   type RestockIntervalDays,
   type RestockMode,
+  type RestockPayMethod,
   type RestockPick,
 } from '@/utils/restock';
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
-import { ArrowRight, Check, Minus, Plus, Search, ShoppingCart, Sparkles, X } from 'lucide-react';
+import {
+  Check,
+  CreditCard,
+  Lock,
+  Minus,
+  PackageCheck,
+  Plus,
+  Search,
+  ShieldCheck,
+  Smartphone,
+  Truck,
+  Wallet,
+  X,
+} from 'lucide-react';
 import { areOrdersOpen } from '@/config/launch';
 import type { Product } from '@/types';
 
@@ -39,6 +57,37 @@ const categoryHaystack = (product: Product): string => {
   const category = product.category;
   if (!category || typeof category === 'string') return `${product.name} ${category || ''}`;
   return `${product.name} ${category.name || ''} ${category.slug || ''}`;
+};
+
+const RestockStep = ({
+  step,
+  title,
+  subtitle,
+  children,
+}: {
+  step: string;
+  title: string;
+  subtitle?: string;
+  children: ReactNode;
+}) => (
+  <section className="overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-[0_24px_60px_-32px_rgba(30,58,138,0.45)]">
+    <header className="flex items-start gap-4 border-b border-stone-100 px-5 py-5 sm:px-6">
+      <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#1E3A8A] text-sm font-black text-amber-300 ring-4 ring-amber-200/50">
+        {step}
+      </span>
+      <div>
+        <h3 className="text-xl font-bold tracking-tight text-stone-900">{title}</h3>
+        {subtitle ? <p className="mt-0.5 text-sm leading-relaxed text-stone-500">{subtitle}</p> : null}
+      </div>
+    </header>
+    <div className="p-5 sm:p-6">{children}</div>
+  </section>
+);
+
+const payIcon = (id: RestockPayMethod) => {
+  if (id === 'apple_pay' || id === 'google_pay') return <Smartphone size={18} />;
+  if (id === 'credit_card') return <CreditCard size={18} />;
+  return <Wallet size={18} />;
 };
 
 const RestockDashboard = () => {
@@ -53,10 +102,11 @@ const RestockDashboard = () => {
   const [restocking, setRestocking] = useState(false);
   const [selected, setSelected] = useState<RestockPick[]>([]);
   const [hydrated, setHydrated] = useState(false);
-  const [addOpen, setAddOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [hits, setHits] = useState<Product[]>([]);
   const [searching, setSearching] = useState(false);
+  const [planMode, setPlanMode] = useState<RestockMode>('autoship');
+  const [payMethod, setPayMethod] = useState<RestockPayMethod>('paypal');
 
   const { data, isLoading } = useQuery({
     queryKey: ['buy-again'],
@@ -67,10 +117,12 @@ const RestockDashboard = () => {
   useEffect(() => {
     if (!data || hydrated) return;
     setSelected(data.usual || []);
-    setAddOpen(!(data.usual && data.usual.length));
     const days = Number(data.reminder?.intervalDays) || (data.reminder?.weeks ? data.reminder.weeks * 7 : DEFAULT_INTERVAL_DAYS);
     const cadence = isValidIntervalDays(days) ? days : DEFAULT_INTERVAL_DAYS;
     setIntervalDays(cadence);
+    if (data.reminder?.mode === 'ask' || data.reminder?.mode === 'autoship') {
+      setPlanMode(data.reminder.mode);
+    }
     if (data.reminder?.remindAt) {
       const at = new Date(data.reminder.remindAt);
       setRemindDate(localDateStr(at));
@@ -131,9 +183,7 @@ const RestockDashboard = () => {
         timeStyle: 'short',
       });
       showToast(
-        variables.mode === 'ask'
-          ? `Ask first is on. ${every}. Next email ${when}. Confirm then for ${ASK_DISCOUNT_COPY}. We never charge unless you pay.`
-          : `Autoship is on. ${every}. Next email ${when}. Ship then for ${AUTOSHIP_DISCOUNT_COPY}. We still never charge unless you pay.`,
+        `Saved. ${every}. Next email ${when}. Nothing ships until you pay.`,
         'success'
       );
     },
@@ -146,17 +196,18 @@ const RestockDashboard = () => {
     mutationFn: buyAgainService.cancelReminder,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['buy-again'] });
-      showToast('Restock plan stopped. Pick Ask first or Autoship any time.', 'success');
+      showToast('Plan stopped. You can still add items and ship now.', 'success');
     },
   });
 
   const petName = user?.pets?.[0]?.petName?.trim();
   const lastOrder = data?.lastOrder;
-  const heroItems = selected.slice(0, 4);
   const usualLabel = petName ? `${petName}'s usual` : 'Your usual';
   const reminderMode = data?.reminder?.mode === 'autoship' ? 'autoship' : data?.reminder ? 'ask' : null;
   const lastWasMostlyToys = Boolean(lastOrder?.items?.length) && selected.length === 0;
   const minDate = localDateStr(new Date());
+  const coupon = restockCouponForMode(planMode);
+  const discountCopy = restockDiscountCopy(planMode);
 
   const extraFromOrders = useMemo(() => {
     const keys = new Set(selected.map(pickKey));
@@ -167,11 +218,21 @@ const RestockDashboard = () => {
     });
   }, [data?.regulars, selected]);
 
-  const openCart = () => {
-    setAddOpen(true);
-    window.requestAnimationFrame(() => {
-      document.getElementById('restock-cart')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const unitPrice = (item: RestockPick): number => {
+    if (typeof item.price === 'number' && item.price > 0) return item.price;
+    const match = (lastOrder?.items || []).find((row) => {
+      const id = typeof row.product === 'string' ? row.product : String((row.product as { _id?: string } | undefined)?._id || '');
+      return id === item.product && (!item.sku || row.variant?.sku === item.sku);
     });
+    return Number(match?.price) || 0;
+  };
+
+  const subtotal = selected.reduce((sum, item) => sum + unitPrice(item) * item.quantity, 0);
+  const itemCount = selected.reduce((sum, item) => sum + item.quantity, 0);
+
+  const openCart = () => {
+    document.getElementById('restock-cart')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('restock-add')?.focus();
   };
 
   const changeCadence = (days: RestockIntervalDays) => {
@@ -195,7 +256,7 @@ const RestockDashboard = () => {
     });
     setQuery('');
     setHits([]);
-    showToast('Added to your restock cart. Add or remove anything else.', 'success');
+    showToast('Added to your restock cart. Change qty or add another.', 'success');
   };
 
   const addRegular = (item: BuyAgainRegular) => {
@@ -205,6 +266,7 @@ const RestockDashboard = () => {
       image: item.image,
       quantity: Math.max(1, item.lastQuantity || 1),
       sku: item.sku,
+      price: item.lastPrice,
     });
   };
 
@@ -217,6 +279,7 @@ const RestockDashboard = () => {
       image: product.images?.[0] || '',
       quantity: 1,
       sku: variant?.sku,
+      price: variant?.price || product.basePrice,
     });
   };
 
@@ -235,7 +298,7 @@ const RestockDashboard = () => {
   const handleConfirmNow = async () => {
     if (!selected.length) {
       openCart();
-      showToast('Add food or treats to your restock cart first. Toys skip restock.', 'error');
+      showToast('Add food or treats first. Then pick how you pay and ship.', 'error');
       return;
     }
     setRestocking(true);
@@ -253,12 +316,13 @@ const RestockDashboard = () => {
       });
       if (added === 0) {
         openCart();
-        showToast('Could not add those items. Add a replacement in your restock cart.', 'error');
+        showToast('Could not add those items. Add a replacement below.', 'error');
         return;
       }
-      rememberRestockCoupon(ASK_COUPON);
-      showToast(`Reorder — ${ASK_COUPON} is ${ASK_DISCOUNT_COPY}. We charge only when you pay.`, 'success');
-      navigate(`/checkout?coupon=${ASK_COUPON}`);
+      rememberRestockCoupon(coupon);
+      rememberRestockPay(payMethod);
+      showToast(`Ready to ship. Choose ${restockPayLabel(payMethod)} on the next screen.`, 'success');
+      navigate(`/checkout?coupon=${coupon}&pay=${payMethod}`);
     } catch {
       showToast('Could not add those items. Try again from your orders.', 'error');
     } finally {
@@ -266,13 +330,14 @@ const RestockDashboard = () => {
     }
   };
 
-  const pickPlan = (mode: RestockMode) => {
+  const savePlan = (mode: RestockMode = planMode) => {
     if (!lastOrder?._id) return;
     if (!selected.length) {
       openCart();
-      showToast('Add food or treats to your restock cart. Toys and costumes skip this list.', 'error');
+      showToast('Add food or treats first.', 'error');
       return;
     }
+    setPlanMode(mode);
     reminderMutation.mutate({
       orderId: lastOrder._id,
       intervalDays,
@@ -284,361 +349,345 @@ const RestockDashboard = () => {
 
   if (isLoading) {
     return (
-      <section id="restock" className="bg-[#0B1B4A] text-white">
+      <section id="restock" className="bg-[radial-gradient(circle_at_top,_#fff8e8,_#f4f0e8_42%,_#eef2f7_100%)]">
         <div className="container mx-auto px-4 lg:px-8 py-16">
-          <p className="text-white/70">Loading your dashboard…</p>
+          <p className="text-stone-500">Loading your restock checkout…</p>
         </div>
       </section>
     );
   }
 
   return (
-    <section id="restock" className="relative overflow-hidden bg-[#0B1B4A] text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(96,165,250,0.25),transparent_42%)]" />
-      <div className="container mx-auto px-4 lg:px-8 py-10 lg:py-14 relative">
-        <div className="flex flex-col lg:flex-row gap-10 items-stretch">
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold tracking-[0.2em] uppercase text-blue-200 mb-3">Your dashboard</p>
-            <h2 className="text-3xl md:text-5xl font-black leading-tight mb-3">
-              Hi {user?.firstName || 'there'}. {lastOrder ? usualLabel : 'Welcome back.'}
-            </h2>
-            <p className="text-blue-100 text-base md:text-lg max-w-xl mb-6">
-              {lastWasMostlyToys
-                ? `Latest order ${lastOrder?.orderNumber} looks like toys or gear. Restock is for food and treats — add what ${petName || 'they'} actually run out of.`
-                : lastOrder
-                  ? `Latest order ${lastOrder.orderNumber}. Build the restock cart, pick how often, then Ask first (${ASK_DISCOUNT_COPY}) or Autoship (${AUTOSHIP_DISCOUNT_COPY}). We never charge unless you pay.`
-                  : 'Same-day NYC when you order by cutoff. After your first order you can pick Ask first or Autoship.'}
+    <section id="restock" className="relative bg-[radial-gradient(circle_at_top,_#fff8e8,_#f4f0e8_42%,_#eef2f7_100%)]">
+      <div className="container mx-auto px-4 lg:px-8 py-10 lg:py-14">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-[#1E3A8A]">
+              <Lock size={13} /> Restock checkout
             </p>
-
-            {lastOrder ? (
-              <div className="flex flex-wrap items-center gap-3 mb-6">
-                <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-sm font-semibold capitalize">
-                  Latest · {lastOrder.orderStatus || 'order'}
-                </span>
-                <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-sm font-black">
-                  Reorder · {ASK_COUPON} · {ASK_DISCOUNT_COPY}
-                </span>
-                <span className="inline-flex items-center rounded-full bg-emerald-400 text-[#0B1B4A] px-3 py-1 text-sm font-black">
-                  Autoship · {AUTOSHIP_COUPON} · {AUTOSHIP_DISCOUNT_COPY}
-                </span>
-                {areOrdersOpen() && (
-                  <span className="text-sm text-blue-100">Order by 3 PM weekdays for tonight</span>
-                )}
-              </div>
-            ) : null}
-
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                type="button"
-                onClick={handleConfirmNow}
-                disabled={restocking || !lastOrder}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white text-[#0B1B4A] px-6 py-3.5 font-black text-base hover:bg-blue-50 disabled:opacity-50"
-              >
-                {restocking ? 'Adding…' : lastOrder ? `Confirm now — 5% off` : 'Start shopping'}
-                <ArrowRight size={18} />
-              </button>
-              {lastOrder ? (
-                <button
-                  type="button"
-                  onClick={openCart}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-6 py-3.5 font-bold hover:bg-white/15"
-                >
-                  <ShoppingCart size={18} />
-                  {selected.length ? 'Edit restock cart' : 'Add food or treats'}
-                </button>
-              ) : null}
-            </div>
+            <h2 className="font-black tracking-tight text-stone-900 text-3xl sm:text-5xl">
+              Hi {user?.firstName || 'there'}. {lastOrder ? `${usualLabel} is ready.` : 'Welcome back.'}
+            </h2>
+            <p className="mt-2 max-w-xl text-stone-600">
+              {lastWasMostlyToys
+                ? `Latest order ${lastOrder?.orderNumber} looks like toys or gear. Add food or treats, pick how you pay, then ship.`
+                : lastOrder
+                  ? 'Add or remove items, pick when, pick Apple Pay / Google Pay / PayPal / card, then Pay and ship now. We never charge unless you pay — unlike typical autoship.'
+                  : 'Same-day NYC when you order by cutoff. After your first order, restock checkout lives here.'}
+            </p>
           </div>
-
-          <div className="lg:w-[46%] grid grid-cols-2 gap-3">
-            {heroItems.length > 0 ? (
-              heroItems.map((item, index) => (
-                <button
-                  type="button"
-                  key={pickKey(item)}
-                  onClick={openCart}
-                  className={`relative overflow-hidden rounded-3xl bg-white/5 ring-1 ring-white/10 text-left ${index === 0 ? 'col-span-2 min-h-[240px] md:min-h-[320px]' : 'min-h-[140px]'}`}
-                >
-                  <img
-                    src={normalizeImageUrl(item.image, { size: index === 0 ? 'xlarge' : 'large', format: 'auto' })}
-                    alt={item.name || 'Your usual'}
-                    className="absolute inset-0 h-full w-full object-cover"
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                  />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                    <p className="font-bold text-sm md:text-base leading-snug">{item.name}</p>
-                    <p className="text-xs text-white/80">Qty {item.quantity} · tap to add or remove</p>
-                  </div>
-                </button>
-              ))
-            ) : (
-              <div className="col-span-2 rounded-3xl min-h-[280px] bg-gradient-to-br from-blue-500/30 to-indigo-700/40 ring-1 ring-white/10 flex items-center justify-center p-8 text-center">
-                <div>
-                  <Sparkles className="mx-auto mb-3 text-blue-200" />
-                  <p className="text-xl font-black mb-2">Add food or treats</p>
-                  <p className="text-sm text-blue-100 mb-3">Toys skip restock. Pick what they run out of.</p>
-                  <button type="button" className="underline font-semibold" onClick={openCart}>
-                    Open restock cart
-                  </button>
-                </div>
-              </div>
-            )}
+          <div className="flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200">
+              <Truck size={13} className="text-[#1E3A8A]" /> NYC same-day
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200">
+              <ShieldCheck size={13} className="text-[#1E3A8A]" /> No silent charge
+            </span>
+            {areOrdersOpen() ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200">
+                Order by 3 PM weekdays
+              </span>
+            ) : null}
           </div>
         </div>
 
-        {lastOrder?._id ? (
-          <div className="mt-10 space-y-6">
-            <div id="restock-cart" className="rounded-3xl bg-white/10 ring-1 ring-white/15 p-5 md:p-6 scroll-mt-24">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
-                <div>
-                  <p className="text-sm font-bold uppercase tracking-widest text-blue-200 mb-1">Your restock cart</p>
-                  <h3 className="text-xl md:text-2xl font-black">Add or remove anything</h3>
-                  <p className="text-blue-100 text-sm mt-1">
-                    Food and treats only. Change qty, remove a bag, or add another. This is the list we email. Toys stay off.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setAddOpen((open) => !open)}
-                  className="rounded-xl bg-white text-[#0B1B4A] px-4 py-2 text-sm font-black"
-                >
-                  {addOpen ? 'Hide search' : 'Add more items'}
-                </button>
-              </div>
+        {!lastOrder?._id ? null : (
+          <>
+            <ol className="mb-6 hidden grid-cols-4 gap-2 text-xs font-bold uppercase tracking-wide text-stone-500 sm:grid">
+              <li className="rounded-full bg-white px-3 py-2 ring-1 ring-stone-200 text-[#1E3A8A]">1 · Add items</li>
+              <li className="rounded-full bg-white px-3 py-2 ring-1 ring-stone-200">2 · When</li>
+              <li className="rounded-full bg-white px-3 py-2 ring-1 ring-stone-200">3 · How you pay</li>
+              <li className="rounded-full bg-white px-3 py-2 ring-1 ring-stone-200">4 · Ready to ship</li>
+            </ol>
 
-              {selected.length ? (
-                <ul className="space-y-3 mb-4">
-                  {selected.map((item) => {
-                    const key = pickKey(item);
-                    return (
-                      <li key={key} className="flex items-center gap-3 rounded-2xl bg-[#0B1B4A]/50 p-3">
-                        <img
-                          src={normalizeImageUrl(item.image, { size: 'small', format: 'auto' })}
-                          alt=""
-                          className="h-14 w-14 rounded-xl object-cover bg-white/10"
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-6">
+                <div id="restock-cart" className="scroll-mt-24">
+                  <RestockStep
+                    step="1"
+                    title="Your restock cart"
+                    subtitle="Search to add. Use + / − to change qty. Remove anything you do not want this time. Food and treats only."
+                  >
+                    {selected.length ? (
+                      <ul className="space-y-3 mb-5">
+                        {selected.map((item) => {
+                          const key = pickKey(item);
+                          const price = unitPrice(item);
+                          return (
+                            <li key={key} className="flex items-center gap-3 rounded-2xl border border-stone-200 bg-[#FBF9F5] p-3">
+                              <img
+                                src={normalizeImageUrl(item.image, { size: 'small', format: 'auto' })}
+                                alt=""
+                                className="h-16 w-16 rounded-xl object-cover bg-white"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <p className="font-semibold text-sm leading-snug text-stone-900 line-clamp-2">{item.name}</p>
+                                {price > 0 ? (
+                                  <p className="text-xs text-stone-500 mt-0.5">${price.toFixed(2)} each</p>
+                                ) : null}
+                                <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-white px-2 py-1 ring-1 ring-stone-200">
+                                  <button type="button" aria-label={`Remove one ${item.name}`} onClick={() => setQty(key, item.quantity - 1)}>
+                                    <Minus size={14} />
+                                  </button>
+                                  <span className="text-sm font-black w-6 text-center">{item.quantity}</span>
+                                  <button type="button" aria-label={`Add one ${item.name}`} onClick={() => setQty(key, Math.min(12, item.quantity + 1))}>
+                                    <Plus size={14} />
+                                  </button>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                aria-label={`Remove ${item.name} from cart`}
+                                onClick={() => removePick(key)}
+                                className="p-2 text-stone-400 hover:text-stone-900"
+                              >
+                                <X size={18} />
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="text-stone-600 mb-4 rounded-2xl border border-dashed border-stone-300 bg-[#FBF9F5] px-4 py-6 text-center">
+                        Cart is empty. Search below to add food or treats, then you can ship.
+                      </p>
+                    )}
+
+                    <label className="block">
+                      <span className="text-sm font-semibold text-stone-800">Add food or treats</span>
+                      <div className="mt-2 flex items-center gap-2 rounded-2xl border border-stone-200 bg-white px-3 py-2.5 focus-within:border-[#1E3A8A] focus-within:ring-4 focus-within:ring-[#1E3A8A]/10">
+                        <Search size={18} className="text-stone-400" />
+                        <input
+                          id="restock-add"
+                          value={query}
+                          onChange={(event) => setQuery(event.target.value)}
+                          placeholder="Type a brand or treat — then tap Add"
+                          className="w-full bg-transparent outline-none font-semibold text-stone-900 placeholder:text-stone-400"
                         />
-                        <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-sm leading-snug line-clamp-2">{item.name}</p>
-                          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/10 px-2 py-1">
-                            <button type="button" aria-label={`Remove one ${item.name}`} onClick={() => setQty(key, item.quantity - 1)}>
-                              <Minus size={14} />
-                            </button>
-                            <span className="text-sm font-black w-6 text-center">{item.quantity}</span>
-                            <button type="button" aria-label={`Add one ${item.name}`} onClick={() => setQty(key, Math.min(12, item.quantity + 1))}>
-                              <Plus size={14} />
-                            </button>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          aria-label={`Remove ${item.name} from cart`}
-                          onClick={() => removePick(key)}
-                          className="p-2 text-blue-100 hover:text-white"
-                        >
-                          <X size={18} />
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : (
-                <p className="text-blue-100 mb-4">Cart is empty. Add food or treats below.</p>
-              )}
-
-              {addOpen ? (
-                <div className="space-y-4">
-                  <label className="block">
-                    <span className="text-sm font-semibold text-blue-100">Search food or treats</span>
-                    <div className="mt-2 flex items-center gap-2 rounded-2xl bg-white text-[#0B1B4A] px-3 py-2">
-                      <Search size={18} />
-                      <input
-                        value={query}
-                        onChange={(event) => setQuery(event.target.value)}
-                        placeholder="Hill's, salmon topper, litter…"
-                        className="w-full bg-transparent outline-none font-semibold"
-                      />
-                    </div>
-                  </label>
-                  {searching ? <p className="text-sm text-blue-100">Searching…</p> : null}
-                  {hits.length ? (
-                    <ul className="space-y-2">
-                      {hits.map((product) => (
-                        <li key={product._id}>
-                          <button
-                            type="button"
-                            onClick={() => addProduct(product)}
-                            className="w-full flex items-center gap-3 rounded-2xl bg-white/10 p-2 text-left hover:bg-white/20"
-                          >
-                            <img
-                              src={normalizeImageUrl(product.images?.[0], { size: 'small', format: 'auto' })}
-                              alt=""
-                              className="h-12 w-12 rounded-xl object-cover"
-                            />
-                            <span className="flex-1 font-semibold text-sm line-clamp-2">{product.name}</span>
-                            <span className="text-xs font-black uppercase">Add</span>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : query.trim().length >= 2 && !searching ? (
-                    <p className="text-sm text-blue-100">No food or treats matched. Try a brand or “treats”.</p>
-                  ) : null}
-
-                  {extraFromOrders.length ? (
-                    <div>
-                      <p className="text-sm font-semibold text-blue-100 mb-2">From your orders</p>
-                      <div className="flex flex-wrap gap-2">
-                        {extraFromOrders.slice(0, 8).map((item) => (
-                          <button
-                            key={`${item.productId}-${item.sku || ''}`}
-                            type="button"
-                            onClick={() => addRegular(item)}
-                            className="rounded-full bg-white/10 px-3 py-1.5 text-sm font-semibold hover:bg-white/20"
-                          >
-                            + {item.name}
-                          </button>
-                        ))}
                       </div>
+                    </label>
+                    {searching ? <p className="text-sm text-stone-500 mt-2">Searching…</p> : null}
+                    {hits.length ? (
+                      <ul className="mt-3 space-y-2">
+                        {hits.map((product) => (
+                          <li key={product._id}>
+                            <button
+                              type="button"
+                              onClick={() => addProduct(product)}
+                              className="w-full flex items-center gap-3 rounded-2xl border border-stone-200 p-2 text-left hover:border-[#1E3A8A] hover:bg-blue-50"
+                            >
+                              <img
+                                src={normalizeImageUrl(product.images?.[0], { size: 'small', format: 'auto' })}
+                                alt=""
+                                className="h-12 w-12 rounded-xl object-cover"
+                              />
+                              <span className="flex-1 font-semibold text-sm text-stone-900 line-clamp-2">{product.name}</span>
+                              <span className="text-xs font-black uppercase text-[#1E3A8A]">Add</span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : query.trim().length >= 2 && !searching ? (
+                      <p className="text-sm text-stone-500 mt-2">No food or treats matched. Try a brand or “treats”.</p>
+                    ) : null}
+
+                    {extraFromOrders.length ? (
+                      <div className="mt-4">
+                        <p className="text-sm font-semibold text-stone-700 mb-2">From your orders — tap to add</p>
+                        <div className="flex flex-wrap gap-2">
+                          {extraFromOrders.slice(0, 8).map((item) => (
+                            <button
+                              key={`${item.productId}-${item.sku || ''}`}
+                              type="button"
+                              onClick={() => addRegular(item)}
+                              className="rounded-full bg-white px-3 py-1.5 text-sm font-semibold ring-1 ring-stone-200 hover:ring-[#1E3A8A]"
+                            >
+                              + {item.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </RestockStep>
+                </div>
+
+                <RestockStep
+                  step="2"
+                  title="When should this go out?"
+                  subtitle="You pick how often, the next date, and the time. We email you then. Ignore the email and nothing ships."
+                >
+                  <div className="grid sm:grid-cols-3 gap-3">
+                    <label className="text-sm font-medium text-stone-700">
+                      How often
+                      <select
+                        aria-label="How often to restock"
+                        value={intervalDays}
+                        onChange={(event) => changeCadence(Number(event.target.value) as RestockIntervalDays)}
+                        className="mt-2 w-full h-12 rounded-xl border border-stone-200 bg-[#FBF9F5] px-3 font-semibold text-stone-900 outline-none focus:border-[#1E3A8A] focus:bg-white"
+                      >
+                        {RESTOCK_CADENCE.map((option) => (
+                          <option key={option.intervalDays} value={option.intervalDays}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="text-sm font-medium text-stone-700">
+                      Next date
+                      <input
+                        type="date"
+                        aria-label="Next restock email date"
+                        min={minDate}
+                        value={remindDate}
+                        onChange={(event) => setRemindDate(event.target.value)}
+                        className="mt-2 w-full h-12 rounded-xl border border-stone-200 bg-[#FBF9F5] px-3 font-semibold text-stone-900 outline-none focus:border-[#1E3A8A] focus:bg-white"
+                      />
+                    </label>
+                    <label className="text-sm font-medium text-stone-700">
+                      Time
+                      <input
+                        type="time"
+                        aria-label="Next restock email time"
+                        value={remindTime}
+                        onChange={(event) => setRemindTime(event.target.value)}
+                        className="mt-2 w-full h-12 rounded-xl border border-stone-200 bg-[#FBF9F5] px-3 font-semibold text-stone-900 outline-none focus:border-[#1E3A8A] focus:bg-white"
+                      />
+                    </label>
+                  </div>
+                </RestockStep>
+
+                <RestockStep
+                  step="3"
+                  title="How do you want to pay?"
+                  subtitle="Pick Apple Pay, Google Pay, PayPal, or card now. You still pay on the next screen — we never charge a saved card in the background."
+                >
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {RESTOCK_PAY_OPTIONS.map((option) => {
+                      const active = payMethod === option.id;
+                      return (
+                        <button
+                          key={option.id}
+                          type="button"
+                          onClick={() => setPayMethod(option.id)}
+                          className={`flex items-start gap-3 rounded-2xl border-2 p-4 text-left transition ${
+                            active ? 'border-[#1E3A8A] bg-blue-50' : 'border-stone-200 bg-white hover:border-stone-400'
+                          }`}
+                        >
+                          <span
+                            className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full ${
+                              active ? 'bg-[#1E3A8A]' : 'border-2 border-stone-300'
+                            }`}
+                          >
+                            {active ? <Check className="h-3 w-3 text-white" /> : null}
+                          </span>
+                          <span>
+                            <span className="flex items-center gap-2 font-bold text-stone-900">
+                              {payIcon(option.id)}
+                              {option.label}
+                            </span>
+                            <span className="mt-1 block text-sm text-stone-500">{option.hint}</span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="mt-4 text-sm text-stone-500">
+                    Official checkout buttons appear after you tap <span className="font-semibold text-stone-700">Pay and ship now</span>.
+                  </p>
+                </RestockStep>
+              </div>
+
+              <aside className="lg:sticky lg:top-24 h-fit space-y-4">
+                <div className="rounded-3xl border border-stone-200/80 bg-white p-6 shadow-[0_24px_60px_-32px_rgba(30,58,138,0.45)]">
+                  <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-[#1E3A8A] mb-2">
+                    <PackageCheck size={14} /> 4 · Ready to ship
+                  </p>
+                  <h3 className="text-2xl font-black text-stone-900 mb-1">This order</h3>
+                  <p className="text-sm text-stone-500 mb-4">
+                    {itemCount ? `${itemCount} item${itemCount === 1 ? '' : 's'} · ${cadenceLabel(intervalDays).toLowerCase()}` : 'Add items to enable shipping.'}
+                  </p>
+                  <ul className="space-y-2 mb-4 text-sm">
+                    {selected.slice(0, 6).map((item) => (
+                      <li key={pickKey(item)} className="flex justify-between gap-3 text-stone-700">
+                        <span className="line-clamp-1">{item.quantity} × {item.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="space-y-2 text-sm border-t border-stone-100 pt-3 mb-4">
+                    <div className="flex justify-between">
+                      <span className="text-stone-500">Pay with</span>
+                      <span className="font-semibold text-stone-900">{restockPayLabel(payMethod)}</span>
                     </div>
+                    <div className="flex justify-between">
+                      <span className="text-stone-500">Restock save</span>
+                      <span className="font-semibold text-emerald-700">{coupon} · {discountCopy}</span>
+                    </div>
+                    {subtotal > 0 ? (
+                      <div className="flex justify-between font-black text-stone-900">
+                        <span>Subtotal</span>
+                        <span>${subtotal.toFixed(2)}</span>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <p className="text-sm font-semibold text-stone-800 mb-2">How this ships next time</p>
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <button
+                      type="button"
+                      onClick={() => setPlanMode('ask')}
+                      className={`rounded-xl px-3 py-2 text-left text-xs font-bold ring-2 ${
+                        planMode === 'ask' ? 'ring-[#1E3A8A] bg-blue-50 text-[#1E3A8A]' : 'ring-stone-200 text-stone-600'
+                      }`}
+                    >
+                      Ask first
+                      <span className="block font-semibold text-[11px] text-stone-500">5% · you confirm</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPlanMode('autoship')}
+                      className={`rounded-xl px-3 py-2 text-left text-xs font-bold ring-2 ${
+                        planMode === 'autoship' ? 'ring-emerald-500 bg-emerald-50 text-emerald-800' : 'ring-stone-200 text-stone-600'
+                      }`}
+                    >
+                      Autoship email
+                      <span className="block font-semibold text-[11px] text-stone-500">7% · still no auto-charge</span>
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleConfirmNow}
+                    disabled={restocking || !selected.length}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1E3A8A] px-4 py-3.5 font-black text-white shadow-lg shadow-blue-900/20 hover:bg-[#16307a] disabled:opacity-50"
+                  >
+                    {restocking ? 'Adding to checkout…' : 'Pay and ship now'}
+                  </button>
+                  <p className="mt-2 text-xs text-center text-stone-500">
+                    Next: checkout. Tap {restockPayLabel(payMethod)} there. Nothing is charged until you do.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => savePlan(planMode)}
+                    disabled={reminderMutation.isPending || !selected.length}
+                    className="mt-3 w-full rounded-2xl bg-white px-4 py-3 text-sm font-bold text-stone-800 ring-1 ring-stone-200 hover:bg-stone-50 disabled:opacity-50"
+                  >
+                    {reminderMutation.isPending ? 'Saving…' : 'Save list — email me next time'}
+                  </button>
+                  {reminderMode && data?.reminder ? (
+                    <button
+                      type="button"
+                      className="mt-2 w-full text-xs font-semibold text-stone-500 underline"
+                      onClick={() => cancelMutation.mutate(data.reminder!._id)}
+                      disabled={cancelMutation.isPending}
+                    >
+                      Stop reminder emails
+                    </button>
                   ) : null}
                 </div>
-              ) : null}
+              </aside>
             </div>
-
-            <div className="rounded-3xl bg-white/10 ring-1 ring-white/15 p-5 md:p-6">
-              <p className="text-sm font-bold uppercase tracking-widest text-blue-200 mb-1">When to email you</p>
-              <h3 className="text-xl md:text-2xl font-black mb-2">You pick the cadence and the time</h3>
-              <p className="text-blue-100 text-sm mb-4">
-                Every day, every week, or every 2–8 weeks. Pick the next date and time. We still never charge unless you pay.
-              </p>
-              <div className="grid sm:grid-cols-3 gap-3">
-                <label className="text-sm text-blue-100">
-                  How often
-                  <select
-                    aria-label="How often to restock"
-                    value={intervalDays}
-                    onChange={(event) => changeCadence(Number(event.target.value) as RestockIntervalDays)}
-                    className="mt-2 w-full rounded-xl bg-white/10 px-3 py-2 font-semibold text-white outline-none"
-                  >
-                    {RESTOCK_CADENCE.map((option) => (
-                      <option key={option.intervalDays} value={option.intervalDays} className="text-slate-900">
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="text-sm text-blue-100">
-                  Next date
-                  <input
-                    type="date"
-                    aria-label="Next restock email date"
-                    min={minDate}
-                    value={remindDate}
-                    onChange={(event) => setRemindDate(event.target.value)}
-                    className="mt-2 w-full rounded-xl bg-white/10 px-3 py-2 font-semibold text-white outline-none [color-scheme:dark]"
-                  />
-                </label>
-                <label className="text-sm text-blue-100">
-                  Time
-                  <input
-                    type="time"
-                    aria-label="Next restock email time"
-                    value={remindTime}
-                    onChange={(event) => setRemindTime(event.target.value)}
-                    className="mt-2 w-full rounded-xl bg-white/10 px-3 py-2 font-semibold text-white outline-none [color-scheme:dark]"
-                  />
-                </label>
-              </div>
-            </div>
-
-            {data?.reminder && reminderMode ? (
-              <div className="rounded-3xl bg-white/10 ring-1 ring-white/15 p-5 md:p-6">
-                <p className="text-sm font-bold uppercase tracking-widest text-blue-200 mb-2">Your plan</p>
-                <p className="text-xl md:text-2xl font-black mb-2">
-                  {reminderMode === 'ask' ? 'Ask first' : 'Autoship'} · {data.reminder.cadenceLabel || cadenceLabel(intervalDays)} · {restockDiscountCopy(reminderMode)}
-                </p>
-                <p className="text-blue-100 max-w-2xl mb-4">
-                  {reminderMode === 'ask'
-                    ? `Better control: we email you, you confirm, ${ASK_DISCOUNT_COPY}. Next email ${new Date(data.reminder.remindAt).toLocaleString()}. Ignore it and nothing ships.`
-                    : `Better price: we email you on your schedule. Tap Ship now for ${AUTOSHIP_DISCOUNT_COPY}. Next email ${new Date(data.reminder.remindAt).toLocaleString()}. Ignore it and we skip that cycle.`}
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    className="rounded-xl bg-white text-[#0B1B4A] px-4 py-2 text-sm font-black disabled:opacity-50"
-                    onClick={() => pickPlan(reminderMode)}
-                    disabled={reminderMutation.isPending || !selected.length}
-                  >
-                    Save cart and schedule
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold hover:bg-white/25"
-                    onClick={() => cancelMutation.mutate(data.reminder!._id)}
-                    disabled={cancelMutation.isPending}
-                  >
-                    Switch plan
-                  </button>
-                  <button
-                    type="button"
-                    className="underline font-semibold text-sm"
-                    onClick={() => cancelMutation.mutate(data.reminder!._id)}
-                    disabled={cancelMutation.isPending}
-                  >
-                    Stop emails
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="mb-4">
-                  <p className="text-sm font-bold uppercase tracking-widest text-blue-200 mb-1">Choose one</p>
-                  <h3 className="text-2xl md:text-3xl font-black">Which is better for you?</h3>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <button
-                    type="button"
-                    onClick={() => pickPlan('ask')}
-                    disabled={reminderMutation.isPending}
-                    className="text-left rounded-3xl bg-white/10 ring-1 ring-white/20 p-6 hover:bg-white/15 disabled:opacity-60"
-                  >
-                    <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-wide mb-3">
-                      Better control · reorder 5%
-                    </span>
-                    <p className="text-2xl font-black mb-2">Ask first</p>
-                    <ul className="space-y-2 text-sm text-blue-100 mb-4">
-                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-300 shrink-0" /> We email you on the cadence you pick. You confirm.</li>
-                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-300 shrink-0" /> Save {ASK_DISCOUNT_COPY} with {ASK_COUPON}.</li>
-                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-300 shrink-0" /> Ignore the email — we never charge.</li>
-                    </ul>
-                    <span className="inline-flex items-center font-black">
-                      Choose Ask first <ArrowRight size={16} className="ml-1" />
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => pickPlan('autoship')}
-                    disabled={reminderMutation.isPending}
-                    className="text-left rounded-3xl bg-white text-[#0B1B4A] p-6 ring-4 ring-emerald-300 hover:bg-blue-50 disabled:opacity-60"
-                  >
-                    <span className="inline-flex items-center rounded-full bg-emerald-400 px-3 py-1 text-xs font-black uppercase tracking-wide mb-3">
-                      Better price · 7% off
-                    </span>
-                    <p className="text-2xl font-black mb-2">Autoship</p>
-                    <ul className="space-y-2 text-sm text-slate-700 mb-4">
-                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-600 shrink-0" /> We email you at the date and time you pick so you never forget.</li>
-                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-600 shrink-0" /> Tap Ship now for {AUTOSHIP_DISCOUNT_COPY} with {AUTOSHIP_COUPON}.</li>
-                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-600 shrink-0" /> Skip a cycle by ignoring the email — still no silent charge.</li>
-                    </ul>
-                    <span className="inline-flex items-center font-black text-[#0B1B4A]">
-                      Choose Autoship <ArrowRight size={16} className="ml-1" />
-                    </span>
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        ) : null}
+          </>
+        )}
       </div>
       {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
     </section>

@@ -97,7 +97,9 @@ describe('RestockDashboard cart', () => {
       expect(screen.getByText('Your restock cart')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Add or remove anything')).toBeInTheDocument();
+    expect(screen.getByText(/Search to add/i)).toBeInTheDocument();
+    expect(screen.getByText('How do you want to pay?')).toBeInTheDocument();
+    expect(screen.getAllByText(/Ready to ship/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText("McLovin's Salmon freeze-dried topper").length).toBeGreaterThan(0);
 
     const cadence = screen.getByLabelText('How often to restock') as HTMLSelectElement;
@@ -112,10 +114,13 @@ describe('RestockDashboard cart', () => {
     expect(screen.queryAllByText("McLovin's Salmon freeze-dried topper")).toHaveLength(0);
     expect(screen.getByText(/Cart is empty/i)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Add more items' }));
     fireEvent.click(screen.getByRole('button', { name: "+ Hill's Science Diet" }));
     expect(screen.getAllByText("Hill's Science Diet").length).toBeGreaterThan(0);
     expect(screen.getByText(/Added to your restock cart/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: "Remove Hill's Science Diet from cart" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Apple Pay/i }));
+    expect(screen.getAllByText('Apple Pay').length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: /Pay and ship now/i })).toBeEnabled();
   });
 });
