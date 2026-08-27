@@ -43,7 +43,9 @@ describe('reorder reminder worker', () => {
       status: 'scheduled',
       save: mockSave,
     };
-    mockFind.mockResolvedValue([reminder]);
+    mockFind.mockReturnValue({
+      limit: jest.fn().mockResolvedValue([reminder]),
+    });
     mockSave.mockResolvedValue(undefined);
     mockCreate.mockResolvedValue({});
     (sendReorderReminderEmail as jest.Mock).mockResolvedValue({ messageId: 'm1' });
@@ -83,7 +85,9 @@ describe('reorder reminder worker', () => {
       status: 'scheduled',
       save: mockSave,
     };
-    mockFind.mockResolvedValue([reminder]);
+    mockFind.mockReturnValue({
+      limit: jest.fn().mockResolvedValue([reminder]),
+    });
     mockSave.mockResolvedValue(undefined);
     mockCreate.mockResolvedValue({});
     (sendReorderReminderEmail as jest.Mock).mockResolvedValue({ messageId: 'm2' });
