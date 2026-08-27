@@ -140,7 +140,7 @@ const Home = () => {
               name: 'Does Petshiwu require an autoship subscription?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'No. Autoship is optional. Ask first emails you every cycle — you confirm and pay, and get 7% off (max $10). Autoship emails you on the same schedule so you never forget; you still pay before anything ships. Ignore either email and we never charge. First order: FREEDOM20, 20% off max $10.'
+                text: 'No. Autoship is optional. Ask first / reorder is 5% off (max $10) when you confirm. Autoship is 7% off (max $10) on a schedule. You can add or change food and treats any time. Ignore either email and we never charge. First order: FREEDOM20, 20% off max $10.'
               }
             },
             {
@@ -331,7 +331,7 @@ const Home = () => {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { title: 'Same-day NYC', desc: 'Order by 3 PM · before 11 PM' },
-              { title: 'You choose', desc: 'Ask first (7% off) or Autoship. Never a silent charge.' },
+              { title: 'You choose', desc: 'Ask first 5% off or Autoship 7% off. Never a silent charge.' },
               { title: 'Free over $49', desc: 'Flat $6 under that' },
               { title: '365-day returns', desc: 'Unused items · no hassle' },
             ].map((item) => (

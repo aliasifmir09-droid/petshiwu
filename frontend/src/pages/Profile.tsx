@@ -634,7 +634,7 @@ const Profile = () => {
             <div className="bg-white rounded-2xl shadow-md p-6">
               <h3 className="text-lg font-bold mb-2">Restock</h3>
               <p className="text-sm text-gray-600 mb-4">
-                Pick Ask first (7% off, max $10 — better for most people) or Autoship (we email you on a schedule so you never forget). We never charge unless you pay.
+                Pick Ask first (5% off, max $10) or Autoship (7% off, max $10). Add or change food and treats. We never charge unless you pay.
               </p>
               <Link to="/#restock" className="inline-flex items-center text-sm font-semibold text-primary-600 hover:text-primary-700">
                 Open restock dashboard

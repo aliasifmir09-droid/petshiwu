@@ -1,10 +1,13 @@
 import {
   aggregateBuyAgainItems,
+  isRestockConsumable,
   isValidReminderWeeks,
   isValidRestockMode,
   normalizeRestockMode,
   remindAtFromWeeks,
   restockEmailPath,
+  sanitizeRestockItems,
+  usualFromOrderItems,
 } from '../../utils/buyAgain';
 
 describe('buyAgain helpers', () => {
@@ -22,9 +25,9 @@ describe('buyAgain helpers', () => {
     expect(isValidRestockMode('silent')).toBe(false);
     expect(normalizeRestockMode(undefined)).toBe('ask');
     expect(normalizeRestockMode('autoship')).toBe('autoship');
-    expect(restockEmailPath('ask')).toBe('/restock?coupon=RESTOCK7');
-    expect(restockEmailPath('autoship')).toBe('/restock?mode=autoship');
-    expect(restockEmailPath('autoship')).not.toMatch(/RESTOCK7/);
+    expect(restockEmailPath('ask')).toBe('/restock?coupon=RESTOCK5');
+    expect(restockEmailPath('autoship')).toBe('/restock?coupon=RESTOCK7&mode=autoship');
+    expect(restockEmailPath('ask')).not.toMatch(/RESTOCK7/);
   });
 
   test('remindAt is weeks * 7 days later', () => {
@@ -59,5 +62,27 @@ describe('buyAgain helpers', () => {
       lastPrice: 19,
       name: 'Hill\'s Science',
     });
+  });
+
+  test('restock list keeps food and drops toys', () => {
+    expect(isRestockConsumable("McLovin's Pet Premium Dog Meal Topper")).toBe(true);
+    expect(isRestockConsumable("Hill's Science Diet")).toBe(true);
+    expect(isRestockConsumable('Kong Classic Dog Toy')).toBe(false);
+    expect(isRestockConsumable('Moana Pua the Pig Costume')).toBe(false);
+
+    const usual = usualFromOrderItems([
+      { product: 'toy1', name: 'Kong Classic Dog Toy', quantity: 1, image: 't.jpg' },
+      { product: 'food1', name: "McLovin's Salmon Meal Topper", quantity: 2, image: 'f.jpg' },
+    ]);
+    expect(usual).toEqual([
+      expect.objectContaining({ product: 'food1', quantity: 2, name: "McLovin's Salmon Meal Topper" }),
+    ]);
+
+    expect(sanitizeRestockItems([
+      { product: 'toy1', name: 'Squeaky toy', quantity: 1 },
+      { product: 'food1', name: 'Royal Canin wet food', quantity: 3 },
+    ])).toEqual([
+      expect.objectContaining({ product: 'food1', quantity: 3 }),
+    ]);
   });
 });

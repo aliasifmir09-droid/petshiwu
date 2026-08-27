@@ -9,9 +9,9 @@ const PetFoodSubscriptionNYC = () => {
     <SEOLandingPage
       keyword="pet-food-subscription-nyc"
       title="Pet Food in NYC Without Autoship — Same-Day Delivery | Petshiwu"
-      description="Pet food in NYC without a lock-in subscription. Ask first for 7% off (max $10), or Autoship so you never forget. Same-day if you order by 3 PM weekdays. Free over $49."
+      description="Pet food in NYC without a lock-in subscription. Reorder for 5% off (max $10), or Autoship for 7% off (max $10). Same-day if you order by 3 PM weekdays. Free over $49."
       h1="NYC Pet Food Delivery — Ask First or Autoship"
-      introContent="You do not need a lock-in subscription to get pet food in NYC. Ask first: we email you, you confirm, 7% off (max $10). Autoship: we email you on a schedule so you never forget. Either way we never charge unless you pay. Same-day if you order by 3 PM weekdays. Free over $49."
+      introContent="You do not need a lock-in subscription to get pet food in NYC. Ask first: we email you, you confirm, 5% off (max $10). Autoship: 7% off (max $10) so you never forget. Add or change food and treats any time. Either way we never charge unless you pay. Same-day if you order by 3 PM weekdays. Free over $49."
       problemPoints={[
         "Forgetting to reorder and running out of pet food at the worst time",
         "Subscriptions that lock you in or are hard to cancel",
@@ -30,11 +30,11 @@ const PetFoodSubscriptionNYC = () => {
       faqItems={[
         {
           question: "Do you offer a subscription service for pet food in NYC?",
-          answer: "Autoship is optional, never required. Ask first emails you every cycle — you confirm and pay, and get 7% off (max $10). Autoship emails you on the same schedule so you never forget. Ignore either email and we never charge."
+          answer: "Autoship is optional, never required. Ask first / reorder is 5% off (max $10) when you confirm. Autoship is 7% off (max $10) so you never forget. Add or change food and treats on your dashboard. Ignore either email and we never charge."
         },
         {
           question: "How do I make sure I never run out of pet food?",
-          answer: "Log in and pick Ask first or Autoship on your homepage dashboard. Ask first is the better deal for most people (7% off, max $10). Autoship is better if you never want to forget. You can also reorder from order history any time."
+          answer: "Log in and pick Ask first or Autoship on your homepage dashboard. Autoship is the better price (7% off, max $10). Ask first is 5% off if you want to confirm each time. Add food and treats — toys skip restock. You can also reorder from order history any time."
         },
         {
           question: "Are auto-delivery services worth it for NYC pet owners?",

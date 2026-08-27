@@ -8,16 +8,29 @@ import {
   REMINDER_WEEK_OPTIONS,
   aggregateBuyAgainItems,
   customerOrderFilter,
+  isRestockConsumable,
   isValidReminderWeeks,
   isValidRestockMode,
   normalizeRestockMode,
   remindAtFromWeeks,
+  sanitizeRestockItems,
+  usualFromOrderItems,
+  type RestockPick,
 } from '../utils/buyAgain';
 import { extractObjectId } from '../utils/types';
 import logger from '../utils/logger';
 
 const ownedOrderQuery = (req: AuthRequest) =>
   customerOrderFilter(req.user?._id, req.user?.email);
+
+const serializeItems = (items: RestockPick[] | Array<{ product?: unknown; name: string; image?: string; quantity: number; sku?: string }> | undefined) =>
+  (items || []).map((item) => ({
+    product: item.product ? String(item.product) : '',
+    name: item.name,
+    image: item.image || '',
+    quantity: item.quantity,
+    ...(item.sku ? { sku: item.sku } : {}),
+  }));
 
 const serializeReminder = (reminder: {
   _id: unknown;
@@ -27,6 +40,7 @@ const serializeReminder = (reminder: {
   mode?: string;
   remindAt: Date;
   status: string;
+  items?: Array<{ product?: unknown; name: string; image?: string; quantity: number; sku?: string }>;
 }) => ({
   _id: String(reminder._id),
   orderId: String(reminder.order),
@@ -35,6 +49,7 @@ const serializeReminder = (reminder: {
   mode: normalizeRestockMode(reminder.mode),
   remindAt: reminder.remindAt,
   status: reminder.status,
+  items: serializeItems(reminder.items),
 });
 
 export const getBuyAgain = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -50,13 +65,22 @@ export const getBuyAgain = async (req: AuthRequest, res: Response, next: NextFun
       .lean();
 
     const lastOrder = orders.find((order) => order.orderStatus !== 'cancelled') || null;
-    const regulars = aggregateBuyAgainItems(orders).slice(0, 24);
+    const regulars = aggregateBuyAgainItems(orders)
+      .map((item) => ({
+        ...item,
+        restockable: isRestockConsumable(item.name),
+      }))
+      .slice(0, 24);
     const reminder = await ReorderReminder.findOne({
       user: req.user._id,
       status: 'scheduled',
     })
       .sort({ remindAt: 1 })
       .lean();
+
+    const usual = reminder?.items?.length
+      ? serializeItems(reminder.items)
+      : usualFromOrderItems(lastOrder?.items);
 
     res.status(200).json({
       success: true,
@@ -68,9 +92,13 @@ export const getBuyAgain = async (req: AuthRequest, res: Response, next: NextFun
               orderStatus: lastOrder.orderStatus,
               createdAt: lastOrder.createdAt,
               totalPrice: lastOrder.totalPrice,
-              items: lastOrder.items,
+              items: (lastOrder.items || []).map((item) => ({
+                ...item,
+                restockable: isRestockConsumable(item.name || ''),
+              })),
             }
           : null,
+        usual,
         regulars,
         reminder: reminder ? serializeReminder(reminder) : null,
       },
@@ -90,7 +118,7 @@ export const createReorderReminder = async (req: AuthRequest, res: Response, nex
     if (!isValidReminderWeeks(weeks)) {
       return res.status(400).json({
         success: false,
-        message: `Choose ${REMINDER_WEEK_OPTIONS.join(', ')} weeks, then pick Ask first (7% off, max $10) or Autoship.`,
+        message: `Choose ${REMINDER_WEEK_OPTIONS.join(', ')} weeks, then pick Ask first (5% off, max $10) or Autoship (7% off, max $10).`,
       });
     }
 
@@ -98,7 +126,7 @@ export const createReorderReminder = async (req: AuthRequest, res: Response, nex
     if (!isValidRestockMode(mode)) {
       return res.status(400).json({
         success: false,
-        message: 'Choose Ask first (email, then you confirm and save 7% off max $10) or Autoship (we email you on schedule). We never charge unless you pay.',
+        message: 'Choose Ask first (5% off when you confirm) or Autoship (7% off on schedule). We never charge unless you pay.',
       });
     }
 
@@ -122,6 +150,15 @@ export const createReorderReminder = async (req: AuthRequest, res: Response, nex
       return res.status(400).json({ success: false, message: 'Cannot set a reminder on a cancelled order' });
     }
 
+    const customItems = sanitizeRestockItems(req.body?.items);
+    const items = customItems.length ? customItems : usualFromOrderItems(order.items);
+    if (!items.length) {
+      return res.status(400).json({
+        success: false,
+        message: 'Pick food or treats to restock. Toys and gear skip the restock list — add what they actually run out of.',
+      });
+    }
+
     await ReorderReminder.updateMany(
       { user: req.user._id, status: 'scheduled' },
       { $set: { status: 'cancelled' } }
@@ -138,16 +175,13 @@ export const createReorderReminder = async (req: AuthRequest, res: Response, nex
       mode,
       remindAt,
       status: 'scheduled',
-      items: (order.items || []).map((item) => ({
-        name: item.name,
-        quantity: item.quantity,
-      })),
+      items,
     });
 
     const message =
       mode === 'ask'
-        ? `Ask first is on. We'll email you in ${weeks} weeks. Confirm then for 7% off (max $10). We never charge unless you confirm and pay.`
-        : `Autoship is on. We'll email you in ${weeks} weeks so you never forget. Tap Ship now when it's due — we still never charge unless you pay.`;
+        ? `Ask first is on. We'll email you in ${weeks} weeks. Confirm then for 5% off (max $10). We never charge unless you confirm and pay.`
+        : `Autoship is on. We'll email you in ${weeks} weeks. Ship then for 7% off (max $10). We still never charge unless you pay.`;
 
     res.status(200).json({
       success: true,

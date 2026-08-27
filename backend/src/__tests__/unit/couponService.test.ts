@@ -32,7 +32,19 @@ describe('couponService', () => {
     expect(COUPONS.RESCUE10).toBeDefined();
   });
 
-  test('RESTOCK7 is reusable 7% off capped at $10', () => {
+  test('RESTOCK5 is reusable 5% off capped at $10 for reorder', () => {
+    expect(COUPONS.RESTOCK5).toMatchObject({
+      type: 'percent',
+      value: 5,
+      maxDiscount: 10,
+      reusable: true,
+    });
+    expect(isReusableCoupon('restock5')).toBe(true);
+    expect(getCouponDiscount('RESTOCK5', 50)).toBe(2.5);
+    expect(getCouponDiscount('RESTOCK5', 200)).toBe(10);
+  });
+
+  test('RESTOCK7 is reusable 7% off capped at $10 for autoship', () => {
     expect(COUPONS.RESTOCK7).toMatchObject({
       type: 'percent',
       value: 7,

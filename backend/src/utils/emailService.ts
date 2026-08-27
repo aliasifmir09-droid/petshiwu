@@ -436,7 +436,7 @@ export const buildReorderReminderEmail = (
 ): { subject: string; html: string } => {
   const mode = reminder.mode === 'autoship' ? 'autoship' : 'ask';
   const buyAgainUrl = `${getFrontendBaseUrl()}${
-    reminder.buyAgainUrlPath || (mode === 'ask' ? '/restock?coupon=RESTOCK7' : '/restock?mode=autoship')
+    reminder.buyAgainUrlPath || (mode === 'ask' ? '/restock?coupon=RESTOCK5' : '/restock?coupon=RESTOCK7&mode=autoship')
   }`;
   const itemLines = (reminder.items || [])
     .slice(0, 8)
@@ -446,7 +446,7 @@ export const buildReorderReminderEmail = (
 
   if (mode === 'autoship') {
     return {
-      subject: `Your Petshiwu autoship is due — ship now or skip #${orderNumber}`,
+      subject: `Your Petshiwu autoship is due — 7% off or skip #${orderNumber}`,
       html: `
       <!DOCTYPE html>
       <html>
@@ -462,15 +462,15 @@ export const buildReorderReminderEmail = (
         </div>
         <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px;">
           <p>Hi ${safeName},</p>
-          <p>Your usual is on schedule. Tap <strong>Ship now</strong> to pay and we'll pack it. Regular price — Ask first is the better deal if you want 7% off (max $10).</p>
+          <p>Your usual is on schedule. Tap <strong>Ship now</strong> to pay and we'll pack it. Autoship is the better price: <strong>7% off (max $10)</strong>.</p>
           ${itemLines ? `<ul>${itemLines}</ul>` : ''}
           <p style="background:#ecfdf5;border-left:4px solid #059669;padding:12px 16px;">
             <strong>We will not charge your card unless you tap Ship now and pay.</strong> Ignore this email and we skip this cycle.
           </p>
           <p style="text-align:center;margin:28px 0;">
-            <a href="${buyAgainUrl}" style="background:#1E3A8A;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;">Ship now</a>
+            <a href="${buyAgainUrl}" style="background:#1E3A8A;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;">Ship now — 7% off (max $10)</a>
           </p>
-          <p style="color:#666;font-size:12px;">Not a silent charge. Switch to Ask first any time on your dashboard if you'd rather confirm for 7% off (max $10).</p>
+          <p style="color:#666;font-size:12px;">Not a silent charge. Ask first is 5% off if you'd rather confirm each time. Add or change food and treats on your dashboard.</p>
         </div>
       </body>
       </html>
@@ -479,31 +479,31 @@ export const buildReorderReminderEmail = (
   }
 
   return {
-    subject: `Confirm now for 7% off (max $10) — restock #${orderNumber}`,
+    subject: `Confirm now for 5% off (max $10) — restock #${orderNumber}`,
     html: `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Confirm now — 7% off your restock</title>
+        <title>Confirm now — 5% off your restock</title>
       </head>
       <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background-color: #1E3A8A; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
-          <h1 style="margin: 0;">Confirm now. Get 7% off.</h1>
+          <h1 style="margin: 0;">Confirm now. Get 5% off.</h1>
           <p style="margin: 10px 0 0 0;">Max $10 · Order #${orderNumber}</p>
         </div>
         <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px;">
           <p>Hi ${safeName},</p>
-          <p>Your usual is ready. Confirm now and we take <strong>7% off (max $10)</strong> at checkout.</p>
+          <p>Your usual is ready. Confirm now and we take <strong>5% off (max $10)</strong> at checkout. Autoship is 7% off if you'd rather we ping you on a schedule.</p>
           ${itemLines ? `<ul>${itemLines}</ul>` : ''}
           <p style="background:#ecfdf5;border-left:4px solid #059669;padding:12px 16px;">
             <strong>We will not charge your card unless you tap Confirm now and pay.</strong> Ignore this email and nothing ships.
           </p>
           <p style="text-align:center;margin:28px 0;">
-            <a href="${buyAgainUrl}" style="background:#1E3A8A;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;">Confirm now — 7% off (max $10)</a>
+            <a href="${buyAgainUrl}" style="background:#1E3A8A;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;">Confirm now — 5% off (max $10)</a>
           </p>
-          <p style="color:#666;font-size:12px;">Ask first is the better deal for most people. Switch to Autoship on your dashboard if you'd rather we ping you on a schedule.</p>
+          <p style="color:#666;font-size:12px;">Change food and treats any time on your dashboard. Toys skip restock — add what they actually run out of.</p>
         </div>
       </body>
       </html>
