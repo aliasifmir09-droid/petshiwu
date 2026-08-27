@@ -27,6 +27,7 @@ import { initializeJobQueues } from './utils/jobQueue';
 import { startEmailWorker } from './workers/emailWorker';
 import { startCartAbandonmentWorker } from './workers/cartAbandonmentWorker';
 import { startBirthdayWorker } from './workers/birthdayWorker';
+import { startReorderReminderWorker } from './workers/reorderReminderWorker';
 import { responseTimeMiddleware } from './middleware/responseTime';
 import { initializeAPM } from './utils/apm';
 
@@ -148,6 +149,7 @@ try {
   startEmailWorker();
   startCartAbandonmentWorker();
   startBirthdayWorker();
+  startReorderReminderWorker();
 } catch (error: unknown) {
   const errorMessage = error instanceof Error ? error.message : String(error);
   try { logger.warn('⚠️  Job queue initialization error (non-fatal):', errorMessage); }

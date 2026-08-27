@@ -424,6 +424,120 @@ export const sendOrderCancellationEmail = async (
   }
 };
 
+export const buildReorderReminderEmail = (
+  firstName: string,
+  orderNumber: string,
+  reminder: {
+    weeks: number;
+    items: Array<{ name: string; quantity: number }>;
+    buyAgainUrlPath?: string;
+    mode?: 'ask' | 'autoship';
+  }
+): { subject: string; html: string } => {
+  const mode = reminder.mode === 'autoship' ? 'autoship' : 'ask';
+  const buyAgainUrl = `${getFrontendBaseUrl()}${
+    reminder.buyAgainUrlPath || (mode === 'ask' ? '/restock?coupon=RESTOCK7' : '/restock?mode=autoship')
+  }`;
+  const itemLines = (reminder.items || [])
+    .slice(0, 8)
+    .map((item) => `<li>${item.quantity} × ${item.name}</li>`)
+    .join('');
+  const safeName = firstName || 'there';
+
+  if (mode === 'autoship') {
+    return {
+      subject: `Your Petshiwu autoship is due — ship now or skip #${orderNumber}`,
+      html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Your autoship is due</title>
+      </head>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background-color: #1E3A8A; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
+          <h1 style="margin: 0;">Autoship is due</h1>
+          <p style="margin: 10px 0 0 0;">Order #${orderNumber}</p>
+        </div>
+        <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px;">
+          <p>Hi ${safeName},</p>
+          <p>Your usual is on schedule. Tap <strong>Ship now</strong> to pay and we'll pack it. Regular price — Ask first is the better deal if you want 7% off (max $10).</p>
+          ${itemLines ? `<ul>${itemLines}</ul>` : ''}
+          <p style="background:#ecfdf5;border-left:4px solid #059669;padding:12px 16px;">
+            <strong>We will not charge your card unless you tap Ship now and pay.</strong> Ignore this email and we skip this cycle.
+          </p>
+          <p style="text-align:center;margin:28px 0;">
+            <a href="${buyAgainUrl}" style="background:#1E3A8A;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;">Ship now</a>
+          </p>
+          <p style="color:#666;font-size:12px;">Not a silent charge. Switch to Ask first any time on your dashboard if you'd rather confirm for 7% off (max $10).</p>
+        </div>
+      </body>
+      </html>
+    `,
+    };
+  }
+
+  return {
+    subject: `Confirm now for 7% off (max $10) — restock #${orderNumber}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Confirm now — 7% off your restock</title>
+      </head>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background-color: #1E3A8A; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
+          <h1 style="margin: 0;">Confirm now. Get 7% off.</h1>
+          <p style="margin: 10px 0 0 0;">Max $10 · Order #${orderNumber}</p>
+        </div>
+        <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px;">
+          <p>Hi ${safeName},</p>
+          <p>Your usual is ready. Confirm now and we take <strong>7% off (max $10)</strong> at checkout.</p>
+          ${itemLines ? `<ul>${itemLines}</ul>` : ''}
+          <p style="background:#ecfdf5;border-left:4px solid #059669;padding:12px 16px;">
+            <strong>We will not charge your card unless you tap Confirm now and pay.</strong> Ignore this email and nothing ships.
+          </p>
+          <p style="text-align:center;margin:28px 0;">
+            <a href="${buyAgainUrl}" style="background:#1E3A8A;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;">Confirm now — 7% off (max $10)</a>
+          </p>
+          <p style="color:#666;font-size:12px;">Ask first is the better deal for most people. Switch to Autoship on your dashboard if you'd rather we ping you on a schedule.</p>
+        </div>
+      </body>
+      </html>
+    `,
+  };
+};
+
+export const sendReorderReminderEmail = async (
+  email: string,
+  firstName: string,
+  orderNumber: string,
+  reminder: {
+    weeks: number;
+    items: Array<{ name: string; quantity: number }>;
+    buyAgainUrlPath?: string;
+    mode?: 'ask' | 'autoship';
+  }
+) => {
+  try {
+    const { subject, html } = buildReorderReminderEmail(firstName, orderNumber, reminder);
+
+    const info = await sendHtmlEmail({
+      to: email,
+      subject,
+      html,
+    });
+    logger.info(`✅ Reorder reminder emailed to ${email} for #${orderNumber}: ${info?.messageId}`);
+    return info;
+  } catch (error: any) {
+    logger.error(`❌ Error sending reorder reminder to ${email}:`, error.message);
+    throw error;
+  }
+};
+
 const ORDER_STATUS_COPY: Record<string, { title: string; intro: string; headerColor: string }> = {
   pending: {
     title: 'Order Pending',

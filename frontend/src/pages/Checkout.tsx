@@ -24,6 +24,7 @@ import { MapPin, Plus, Check, User, UserCheck, Banknote, ShieldCheck, RotateCcw,
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
 import { paypalClientId } from '@/config/paypal';
 import { isNycDeliveryZip, isNewYorkState, normalizeShippingState } from '@/utils/deliveryZip';
+import { clearRestockCoupon, readRestockCoupon, RESTOCK_COUPON, RESTOCK_DISCOUNT_COPY } from '@/utils/restock';
 
 const PaymentForm = lazy(() => import('@/components/PaymentForm'));
 const CheckoutBrandedPayments = lazy(() => import('@/components/CheckoutBrandedPayments'));
@@ -217,6 +218,7 @@ const Checkout = () => {
   const [emailError, setEmailError] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const paypalSuccessHandledRef = useRef(false);
+  const restockCouponAttempted = useRef(false);
   const [pendingOrderData, setPendingOrderData] = useState<CreateOrderData | null>(null);
   const [orderNotes, setOrderNotes] = useState('');
   const [selectedSavedPaymentMethod, setSelectedSavedPaymentMethod] = useState<string | null>(null);
@@ -339,8 +341,9 @@ const Checkout = () => {
   const onlineTotal = Math.max(0, subtotal + shipping + tax - couponDiscount);
   const total = Math.max(0, onlineTotal + donationAmount);
 
-  const handleApplyCoupon = async () => {
-    if (!couponInput.trim()) return;
+  const applyCoupon = async (codeToApply?: string) => {
+    const raw = (codeToApply ?? couponInput).trim();
+    if (!raw) return;
     if (!shippingInfo.email?.trim()) {
       setCouponValid(false);
       setCouponMessage('Please enter your email address above before applying a coupon.');
@@ -353,11 +356,12 @@ const Checkout = () => {
       const res = await fetch(`${API_URL}/v1/coupons/validate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: couponInput.trim(), subtotal, email: shippingInfo.email }),
+        body: JSON.stringify({ code: raw, subtotal, email: shippingInfo.email }),
       });
       const data = await res.json();
       if (data.valid) {
-        setCouponCode(couponInput.trim().toUpperCase());
+        setCouponCode(raw.toUpperCase());
+        setCouponInput(raw.toUpperCase());
         setCouponDiscount(data.discountAmount);
         setCouponValid(true);
         setCouponMessage(data.message);
@@ -375,7 +379,21 @@ const Checkout = () => {
     }
   };
 
+  const handleApplyCoupon = async () => {
+    await applyCoupon();
+  };
+
+  useEffect(() => {
+    const pending = readRestockCoupon();
+    if (!pending || couponCode || couponLoading || subtotal <= 0) return;
+    if (!shippingInfo.email?.trim() || restockCouponAttempted.current) return;
+    restockCouponAttempted.current = true;
+    void applyCoupon(pending);
+  }, [couponCode, couponLoading, shippingInfo.email, subtotal]);
+
   const handleRemoveCoupon = () => {
+    restockCouponAttempted.current = true;
+    clearRestockCoupon();
     setCouponCode('');
     setCouponInput('');
     setCouponDiscount(0);
@@ -387,6 +405,7 @@ const Checkout = () => {
     mutationFn: orderService.createOrder,
     onSuccess: async (order) => {
       clearCart();
+      clearRestockCoupon();
       const orderId = String(order._id || '');
       // Record coupon usage so it can't be reused
       if (couponCode && shippingInfo.email) {
@@ -1161,7 +1180,9 @@ const Checkout = () => {
                       </div>
                     )}
                     {!couponCode && !couponMessage && (
-                      <p className="text-xs text-stone-500 mt-1.5">First order: FREEDOM20 · 20% off, max $10</p>
+                      <p className="text-xs text-stone-500 mt-1.5">
+                        First order: FREEDOM20 · 20% off, max $10. Restock Ask first: {RESTOCK_COUPON} · {RESTOCK_DISCOUNT_COPY}.
+                      </p>
                     )}
                     {couponMessage && (
                       <p className={`text-xs mt-1.5 ${couponValid ? 'text-emerald-600' : 'text-red-500'}`}>{couponMessage}</p>

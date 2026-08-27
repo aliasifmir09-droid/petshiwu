@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { authService } from '@/services/auth';
 import { petService } from '@/services/pets';
 import { Pet } from '@/types';
+import { Link } from 'react-router-dom';
 import { User, Mail, Phone, Lock, Save, PawPrint, Plus, Pencil, Trash2, X, ChevronDown, ChevronUp } from 'lucide-react';
 import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
@@ -630,6 +631,15 @@ const Profile = () => {
           </div>
 
           <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white rounded-2xl shadow-md p-6">
+              <h3 className="text-lg font-bold mb-2">Restock</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Pick Ask first (7% off, max $10 — better for most people) or Autoship (we email you on a schedule so you never forget). We never charge unless you pay.
+              </p>
+              <Link to="/#restock" className="inline-flex items-center text-sm font-semibold text-primary-600 hover:text-primary-700">
+                Open restock dashboard
+              </Link>
+            </div>
             <div className="bg-white rounded-2xl shadow-md p-6">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="text-lg font-bold">Personal Information</h3>

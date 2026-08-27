@@ -32,6 +32,19 @@ describe('couponService', () => {
     expect(COUPONS.RESCUE10).toBeDefined();
   });
 
+  test('RESTOCK7 is reusable 7% off capped at $10', () => {
+    expect(COUPONS.RESTOCK7).toMatchObject({
+      type: 'percent',
+      value: 7,
+      maxDiscount: 10,
+      reusable: true,
+    });
+    expect(isReusableCoupon('restock7')).toBe(true);
+    expect(getCouponDiscount('RESTOCK7', 50)).toBe(3.5);
+    expect(getCouponDiscount('RESTOCK7', 200)).toBe(10);
+    expect(getCouponDiscount('restock7', 40)).toBe(2.8);
+  });
+
   test('FAMILY15 is a private reusable 15% code with no dollar cap', () => {
     expect(COUPONS.FAMILY15).toMatchObject({
       type: 'percent',

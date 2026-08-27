@@ -80,6 +80,35 @@ describe('coupon routes', () => {
     expect(res.body.message).toMatch(/already been used/i);
   });
 
+  it('lets RESTOCK7 be reused after a prior restock on the same email', async () => {
+    usages.push({ email: 'repeat@example.com', code: 'RESTOCK7', orderId: 'order-1' });
+
+    const res = await request(app).post('/api/v1/coupons/validate').send({
+      code: 'RESTOCK7',
+      subtotal: 200,
+      email: 'repeat@example.com',
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      valid: true,
+      code: 'RESTOCK7',
+      discountAmount: 10,
+    });
+  });
+
+  it('does not record usage for RESTOCK7', async () => {
+    const res = await request(app).post('/api/v1/coupons/use').send({
+      code: 'RESTOCK7',
+      email: 'repeat@example.com',
+      orderId: 'order-2',
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ success: true, reusable: true });
+    expect(usages).toHaveLength(0);
+  });
+
   it('does not record usage for FAMILY15', async () => {
     const res = await request(app).post('/api/v1/coupons/use').send({
       code: 'FAMILY15',

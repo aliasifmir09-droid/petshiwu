@@ -41,6 +41,7 @@ const AddressManagement = lazy(() => import('./pages/AddressManagement'));
 const StockAlerts = lazy(() => import('./pages/StockAlerts'));
 const AdvancedSearch = lazy(() => import('./pages/AdvancedSearch'));
 const MyOrders = lazy(() => import('./pages/MyOrders'));
+const Restock = lazy(() => import('./pages/Restock'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail'));
 const TrackOrder = lazy(() => import('./pages/TrackOrder'));
 const Donate = lazy(() => import('./pages/Donate'));
@@ -340,6 +341,7 @@ function App() {
                   <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
                   <Route path="/orders/:id" element={<RequireAuth><OrderDetail /></RequireAuth>} />
                   <Route path="/orders" element={<RequireAuth><MyOrders /></RequireAuth>} />
+                  <Route path="/restock" element={<RequireAuth><Restock /></RequireAuth>} />
                   <Route path="/track-order" element={<TrackOrder />} />
                   <Route path="/donate" element={<Donate />} />
                   <Route path="/favorites" element={<RequireAuth><Favorites /></RequireAuth>} />
