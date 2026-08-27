@@ -11,11 +11,13 @@ import CategoryIcons from '@/components/CategoryIcons';
 import ShopByPet from '@/components/ShopByPet';
 import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
+import RestockDashboard from '@/components/RestockDashboard';
 import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
 import { ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import { generateProductUrl } from '@/utils/productUrl';
+import { useAuthStore } from '@/stores/authStore';
 
 const BRANDS: { name: string; logo: string; dark?: boolean }[] = [
   { name: 'Purina',              logo: '/brands/purina.svg' },
@@ -79,6 +81,8 @@ const TodaysDeals = () => {
 
 const Home = () => {
   const navigate = useNavigate();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const authLoading = useAuthStore((state) => state.isLoading);
   const { data: featuredProducts, isLoading } = useQuery({
     queryKey: ['products', 'featured'],
     queryFn: () => productService.getProducts({ featured: true, limit: 8 }),
@@ -136,7 +140,7 @@ const Home = () => {
               name: 'Does Petshiwu require an autoship subscription?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'No. Petshiwu never requires autoship or any subscription. Order once for one-time delivery, or opt into autoship for 5% off recurring orders — your choice. Use FREEDOM20 for 20% off your first order (max $10 off, no subscription commitment).'
+                text: 'No. Autoship is optional. Ask first emails you every cycle — you confirm and pay, and get 7% off (max $10). Autoship emails you on the same schedule so you never forget; you still pay before anything ships. Ignore either email and we never charge. First order: FREEDOM20, 20% off max $10.'
               }
             },
             {
@@ -256,6 +260,8 @@ const Home = () => {
         />
       )}
 
+      {!authLoading && isAuthenticated ? <RestockDashboard /> : null}
+
       <ShopByPet />
 
       <OrdersOpenBanner />
@@ -304,7 +310,7 @@ const Home = () => {
             <h2 className="text-2xl md:text-3xl font-bold mb-1">Same-day NYC delivery</h2>
             <p className="text-white/80">
               {areOrdersOpen()
-                ? 'Order by 3 PM weekdays (1 PM weekends). No autoship. Free over $49.'
+                ? 'Order by 3 PM weekdays (1 PM weekends). Ask first or Autoship — we never charge unless you pay. Free over $49.'
                 : `We start taking orders ${ORDERS_OPEN_LABEL}. Browse now — checkout opens that day.`}
             </p>
           </div>
@@ -325,7 +331,7 @@ const Home = () => {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { title: 'Same-day NYC', desc: 'Order by 3 PM · before 11 PM' },
-              { title: 'No autoship', desc: 'Buy once. No subscription trap.' },
+              { title: 'You choose', desc: 'Ask first (7% off) or Autoship. Never a silent charge.' },
               { title: 'Free over $49', desc: 'Flat $6 under that' },
               { title: '365-day returns', desc: 'Unused items · no hassle' },
             ].map((item) => (
@@ -500,7 +506,7 @@ const NewsletterSection = () => {
             <>
               <h2 className="text-2xl md:text-3xl font-bold mb-3">Get delivery updates</h2>
               <p className="text-white/80 mb-8">
-                NYC same-day notes. First order: FREEDOM20 (20% off, max $10, no autoship).
+                NYC same-day notes. First order: FREEDOM20 (20% off, max $10). Restock: Ask first or Autoship.
               </p>
               <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={handleSubmit}>
                 <input

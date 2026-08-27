@@ -9,9 +9,9 @@ const PetFoodSubscriptionNYC = () => {
     <SEOLandingPage
       keyword="pet-food-subscription-nyc"
       title="Pet Food in NYC Without Autoship — Same-Day Delivery | Petshiwu"
-      description="No pet food subscription trap in NYC. Order when you want. Same-day if you order by 3 PM weekdays (1 PM weekends). No autoship. Free over $49."
-      h1="NYC Pet Food Delivery — No Subscription Required"
-      introContent="You do not need autoship to get pet food in NYC. Order when you want. Same-day if you order by 3 PM weekdays (1 PM weekends) — at the door before 11 PM. Reorder in a few clicks. No membership fee. Free over $49."
+      description="Pet food in NYC without a lock-in subscription. Ask first for 7% off (max $10), or Autoship so you never forget. Same-day if you order by 3 PM weekdays. Free over $49."
+      h1="NYC Pet Food Delivery — Ask First or Autoship"
+      introContent="You do not need a lock-in subscription to get pet food in NYC. Ask first: we email you, you confirm, 7% off (max $10). Autoship: we email you on a schedule so you never forget. Either way we never charge unless you pay. Same-day if you order by 3 PM weekdays. Free over $49."
       problemPoints={[
         "Forgetting to reorder and running out of pet food at the worst time",
         "Subscriptions that lock you in or are hard to cancel",
@@ -24,17 +24,17 @@ const PetFoodSubscriptionNYC = () => {
         "No subscription required — order when you need it",
         "No membership fee — free delivery is just part of the deal on $49+ orders",
         "Change your order any time — no commitment",
-        "Order reminders available so you never get caught off guard",
+        "Ask first emails so you confirm restock for 7% off (max $10) — or Autoship so you never forget",
         "Delivering to all 5 NYC boroughs"
       ]}
       faqItems={[
         {
           question: "Do you offer a subscription service for pet food in NYC?",
-          answer: "We make it easy to reorder from your account without requiring a subscription. No commitment, no locked-in pricing, no fees to cancel. Just reorder whenever you need to from your order history."
+          answer: "Autoship is optional, never required. Ask first emails you every cycle — you confirm and pay, and get 7% off (max $10). Autoship emails you on the same schedule so you never forget. Ignore either email and we never charge."
         },
         {
           question: "How do I make sure I never run out of pet food?",
-          answer: "Create an account at Petshiwu.com, and your order history is always saved. When you're running low, log in and reorder your pet's food in seconds. You can also set a reminder in your calendar for when to reorder based on how fast your pet goes through food."
+          answer: "Log in and pick Ask first or Autoship on your homepage dashboard. Ask first is the better deal for most people (7% off, max $10). Autoship is better if you never want to forget. You can also reorder from order history any time."
         },
         {
           question: "Are auto-delivery services worth it for NYC pet owners?",

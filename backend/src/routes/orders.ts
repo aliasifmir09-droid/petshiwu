@@ -16,6 +16,11 @@ import {
   confirmOrderPayment
 } from '../controllers/orderController';
 import {
+  getBuyAgain,
+  createReorderReminder,
+  cancelReorderReminder
+} from '../controllers/buyAgainController';
+import {
   createReturn,
   getMyReturns,
   getReturn,
@@ -52,8 +57,11 @@ router.post('/', createOrderValidation, createOrder);
 
 // Authenticated routes
 router.get('/myorders', protect, paginationValidation, getMyOrders);
+router.get('/buy-again', protect, getBuyAgain);
 router.get('/stats', protect, checkPermission('canViewAnalytics'), getOrderStats);
 router.get('/all', protect, checkPermission('canManageOrders'), adminPaginationValidation, getAllOrders);
+router.post('/:id/reminder', protect, validateOrderIdentifier(), createReorderReminder);
+router.delete('/reminders/:id', protect, cancelReorderReminder);
 router.get('/:id', protect, validateOrderIdentifier(), getOrder);
 router.put('/:id/cancel', protect, validateOrderIdentifier(), cancelOrder);
 router.put('/:id/status', protect, checkPermission('canManageOrders'), validateOrderIdentifier(), updateOrderStatus);

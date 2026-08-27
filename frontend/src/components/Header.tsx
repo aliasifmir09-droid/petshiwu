@@ -535,6 +535,7 @@ const Header = () => {
                         </div>
                       </Link>
                       <Link to="/orders" className="block px-4 py-2.5 hover:bg-gray-100 font-medium">My Orders</Link>
+                      <Link to="/#restock" className="block px-4 py-2.5 hover:bg-gray-100 font-medium">Restock</Link>
                       <button onClick={() => setShowLogoutModal(true)} className="block w-full text-left px-4 py-2.5 hover:bg-gray-100 font-medium">Logout</button>
                     </div>
                   </div>
@@ -782,6 +783,7 @@ const Header = () => {
                     )}
                     <li><Link to="/favorites" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><Heart size={20} className="text-pink-500" fill="currentColor" /><span>My Favorites</span></Link></li>
                     <li><Link to="/orders" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><ShoppingCart size={20} /><span>My Orders</span></Link></li>
+                    <li><Link to="/#restock" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><span className="text-xl">🔁</span><span>Restock</span></Link></li>
                     <li><button onClick={() => { setShowLogoutModal(true); setMobileMenuOpen(false); }} className="flex items-center gap-3 w-full text-left py-3 px-3 font-semibold hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"><span className="text-xl">🚪</span><span>Logout</span></button></li>
                   </>
                 ) : (
