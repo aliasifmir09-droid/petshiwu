@@ -53,6 +53,7 @@ describe('PayPal checkout', () => {
     expect(paypalConfig).not.toContain("'venmo', 'paylater', 'card'");
     expect(checkout).toContain("setPaymentMethod('credit_card')");
     expect(checkout).toContain('PayPalCardFields');
+    expect(checkout).toContain('currency="USD"');
     expect(checkout).toContain('id="card-payment"');
     expect(checkout).not.toContain('STRIPE_SECRET_KEY');
     expect(checkout).toContain('PayPal charges the card on this page, same as your last payment.');

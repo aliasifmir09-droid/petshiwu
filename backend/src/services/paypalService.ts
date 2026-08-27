@@ -2,28 +2,36 @@ interface PayPalAccessTokenResponse {
   access_token: string;
 }
 
+interface PayPalMoney {
+  currency_code?: string;
+  currency?: string;
+  value?: string;
+}
+
+interface PayPalCapture {
+  id?: string;
+  status?: string;
+  amount?: PayPalMoney;
+  seller_receivable_breakdown?: {
+    gross_amount?: PayPalMoney;
+  };
+}
+
 export interface PayPalOrderResponse {
   id: string;
   status: string;
+  amount?: PayPalMoney;
   purchase_units?: Array<{
     custom_id?: string;
     invoice_id?: string;
-    amount?: {
-      currency_code?: string;
-      value?: string;
-    };
+    amount?: PayPalMoney;
     payments?: {
-      captures?: Array<{
-        id?: string;
-        status?: string;
-        amount?: {
-          currency_code?: string;
-          value?: string;
-        };
-      }>;
+      captures?: PayPalCapture[];
     };
   }>;
 }
+
+const SUCCESSFUL_CAPTURE_STATUSES = new Set(['COMPLETED', 'PENDING']);
 
 export const isPayPalLive = () => process.env.PAYPAL_ENV === 'live';
 
@@ -101,7 +109,8 @@ export const createPayPalOrder = async (amount: number, currency = 'USD', checko
   return paypalRequest<PayPalOrderResponse>('/v2/checkout/orders', {
     method: 'POST',
     headers: {
-      'PayPal-Request-Id': `petshiwu-create-${checkoutToken}`
+      'PayPal-Request-Id': `petshiwu-create-${checkoutToken}`,
+      Prefer: 'return=representation'
     },
     body: JSON.stringify({
       intent: 'CAPTURE',
@@ -128,7 +137,10 @@ export const capturePayPalOrder = async (orderId: string) => {
   return paypalRequest<PayPalOrderResponse>(`/v2/checkout/orders/${encodeURIComponent(orderId)}/capture`, {
     method: 'POST',
     headers: {
-      'PayPal-Request-Id': `petshiwu-capture-${orderId}`
+      'PayPal-Request-Id': `petshiwu-capture-${orderId}`,
+      // Default is return=minimal (id + status only). Card Fields captures
+      // otherwise look unpaid because currency_code never appears.
+      Prefer: 'return=representation'
     },
     body: '{}'
   });
@@ -142,18 +154,60 @@ export const getPayPalOrder = async (orderId: string) => {
   return paypalRequest<PayPalOrderResponse>(`/v2/checkout/orders/${encodeURIComponent(orderId)}`);
 };
 
-export const getPayPalCapturedAmount = (order: PayPalOrderResponse): number | null => {
-  const capture = order.purchase_units?.[0]?.payments?.captures?.find((item) => item.status === 'COMPLETED');
-  const value = capture?.amount?.value || order.purchase_units?.[0]?.amount?.value;
-  if (!value) return null;
+export const normalizePayPalCurrency = (value?: string | null): string | null => {
+  if (typeof value !== 'string') return null;
+  const normalized = value.trim().toUpperCase();
+  return /^[A-Z]{3}$/.test(normalized) ? normalized : null;
+};
 
-  const amount = Number(value);
+const moneyCurrency = (money?: PayPalMoney | null): string | null =>
+  normalizePayPalCurrency(money?.currency_code || money?.currency);
+
+const moneyValue = (money?: PayPalMoney | null): number | null => {
+  if (!money?.value) return null;
+  const amount = Number(money.value);
   return Number.isFinite(amount) ? Math.round(amount * 100) / 100 : null;
 };
 
+const captureStatus = (capture?: PayPalCapture): string =>
+  (capture?.status || '').trim().toUpperCase();
+
+const pickCapture = (order: PayPalOrderResponse): PayPalCapture | undefined => {
+  const captures = order.purchase_units?.[0]?.payments?.captures || [];
+  return (
+    captures.find((item) => captureStatus(item) === 'COMPLETED')
+    || captures.find((item) => SUCCESSFUL_CAPTURE_STATUSES.has(captureStatus(item)))
+  );
+};
+
+export const getPayPalCapturedAmount = (order: PayPalOrderResponse): number | null => {
+  const capture = pickCapture(order);
+  return (
+    moneyValue(capture?.amount)
+    ?? moneyValue(capture?.seller_receivable_breakdown?.gross_amount)
+    ?? moneyValue(order.purchase_units?.[0]?.amount)
+    ?? moneyValue(order.amount)
+  );
+};
+
 export const getPayPalCurrency = (order: PayPalOrderResponse): string | null => {
-  const capture = order.purchase_units?.[0]?.payments?.captures?.find((item) => item.status === 'COMPLETED');
-  return capture?.amount?.currency_code || order.purchase_units?.[0]?.amount?.currency_code || null;
+  const capture = pickCapture(order);
+  return (
+    moneyCurrency(capture?.amount)
+    ?? moneyCurrency(capture?.seller_receivable_breakdown?.gross_amount)
+    ?? moneyCurrency(order.purchase_units?.[0]?.amount)
+    ?? moneyCurrency(order.amount)
+  );
+};
+
+export const hasPayPalSettlement = (order: PayPalOrderResponse): boolean => (
+  getPayPalCurrency(order) != null && getPayPalCapturedAmount(order) != null
+);
+
+export const payPalCurrenciesMatch = (expected?: string | null, received?: string | null): boolean => {
+  const left = normalizePayPalCurrency(expected);
+  const right = normalizePayPalCurrency(received);
+  return Boolean(left && right && left === right);
 };
 
 export const getPayPalCheckoutToken = (order: PayPalOrderResponse): string | null => {
