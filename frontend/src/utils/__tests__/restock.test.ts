@@ -13,7 +13,10 @@ import {
   isValidIntervalDays,
   readRestockCoupon,
   rememberRestockCoupon,
+  rememberRestockPay,
   remindAtIso,
+  readRestockPay,
+  RESTOCK_PAY_OPTIONS,
 } from '../restock';
 
 describe('restock coupon helpers', () => {
@@ -60,5 +63,16 @@ describe('restock coupon helpers', () => {
     const iso = remindAtIso('2026-09-03', '09:30');
     expect(new Date(iso).getHours()).toBeDefined();
     expect(Number.isNaN(new Date(iso).getTime())).toBe(false);
+  });
+
+  test('remembers Apple Pay, Google Pay, PayPal, or card for checkout', () => {
+    expect(RESTOCK_PAY_OPTIONS.map((row) => row.id)).toEqual([
+      'apple_pay',
+      'google_pay',
+      'paypal',
+      'credit_card',
+    ]);
+    rememberRestockPay('apple_pay');
+    expect(readRestockPay()).toBe('apple_pay');
   });
 });

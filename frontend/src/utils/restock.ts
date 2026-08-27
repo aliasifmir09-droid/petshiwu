@@ -2,6 +2,14 @@ export const ASK_COUPON = 'RESTOCK5';
 export const AUTOSHIP_COUPON = 'RESTOCK7';
 export const RESTOCK_COUPON = ASK_COUPON;
 export const RESTOCK_COUPON_STORAGE_KEY = 'petshiwu_restock_coupon';
+export const RESTOCK_PAY_STORAGE_KEY = 'petshiwu_restock_pay';
+export const RESTOCK_PAY_OPTIONS = [
+  { id: 'apple_pay', label: 'Apple Pay', hint: 'iPhone, iPad, or Mac' },
+  { id: 'google_pay', label: 'Google Pay', hint: 'Android or Chrome' },
+  { id: 'paypal', label: 'PayPal or Venmo', hint: 'PayPal protected' },
+  { id: 'credit_card', label: 'Credit or debit card', hint: 'Visa, Mastercard, Amex' },
+] as const;
+export type RestockPayMethod = (typeof RESTOCK_PAY_OPTIONS)[number]['id'];
 export const ASK_DISCOUNT_COPY = '5% off, max $10';
 export const AUTOSHIP_DISCOUNT_COPY = '7% off, max $10';
 export const RESTOCK_DISCOUNT_COPY = ASK_DISCOUNT_COPY;
@@ -26,6 +34,7 @@ export type RestockPick = {
   image: string;
   quantity: number;
   sku?: string;
+  price?: number;
 };
 
 const RESTOCK_EXCLUDE =
@@ -74,6 +83,40 @@ export const readRestockCoupon = (): string => {
 export const clearRestockCoupon = (): void => {
   try {
     sessionStorage.removeItem(RESTOCK_COUPON_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+};
+
+export const isRestockPayMethod = (value: unknown): value is RestockPayMethod =>
+  RESTOCK_PAY_OPTIONS.some((option) => option.id === value);
+
+export const restockPayLabel = (method: RestockPayMethod): string =>
+  RESTOCK_PAY_OPTIONS.find((option) => option.id === method)?.label || 'PayPal';
+
+export const rememberRestockPay = (method: RestockPayMethod): void => {
+  try {
+    sessionStorage.setItem(RESTOCK_PAY_STORAGE_KEY, method);
+  } catch {
+    // private mode
+  }
+};
+
+export const readRestockPay = (): RestockPayMethod | '' => {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get('pay');
+    if (isRestockPayMethod(fromUrl)) return fromUrl;
+    const stored = sessionStorage.getItem(RESTOCK_PAY_STORAGE_KEY);
+    return isRestockPayMethod(stored) ? stored : '';
+  } catch {
+    return '';
+  }
+};
+
+export const clearRestockPay = (): void => {
+  try {
+    sessionStorage.removeItem(RESTOCK_PAY_STORAGE_KEY);
   } catch {
     // ignore
   }
