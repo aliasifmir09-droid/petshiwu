@@ -34,6 +34,15 @@ import {
 
 const PaymentForm = lazy(() => import('@/components/PaymentForm'));
 const CheckoutBrandedPayments = lazy(() => import('@/components/CheckoutBrandedPayments'));
+const PayPalCardFields = lazy(() => import('@/components/PayPalCardFields'));
+
+const shopperPaymentError = (raw?: string) => {
+  const message = String(raw || '');
+  if (/STRIPE|environment variable|not configured/i.test(message)) {
+    return 'Card payment is not available that way. Enter the card below, or use PayPal, Apple Pay, or cash on delivery.';
+  }
+  return message || 'Payment failed. Please try again.';
+};
 
 const fieldClass =
   'w-full h-12 rounded-xl border border-stone-200 bg-[#FBF9F5] px-4 text-[15px] text-stone-900 placeholder:text-stone-400 outline-none transition focus:border-[#1E3A8A] focus:bg-white focus:ring-4 focus:ring-[#1E3A8A]/10';
@@ -482,8 +491,8 @@ const Checkout = () => {
       return;
     }
 
-    if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay' || paymentMethod === 'cod') {
-      setShowPayPalButton(paymentMethod !== 'cod');
+    if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay' || paymentMethod === 'cod' || paymentMethod === 'credit_card') {
+      setShowPayPalButton(paymentMethod !== 'cod' && paymentMethod !== 'credit_card');
       setShowPaymentForm(false);
       setClientSecret(null);
       setPaymentIntentId(null);
@@ -509,13 +518,13 @@ const Checkout = () => {
           setShowPaymentForm(true);
           setShowPayPalButton(false);
         } else {
-          showToast('Failed to initialize payment. Please try PayPal again.', 'error');
-          setPaymentMethod('paypal');
+          showToast('Could not start card payment. Enter the card below or use PayPal.', 'error');
+          setPaymentMethod('credit_card');
         }
       } catch (error: any) {
         if (cancelled) return;
-        showToast(error.response?.data?.message || 'Payment initialization failed. Please try PayPal again.', 'error');
-        setPaymentMethod('paypal');
+        showToast(shopperPaymentError(error.response?.data?.message) || 'Could not start card payment. Enter the card below or use PayPal.', 'error');
+        setPaymentMethod('credit_card');
       } finally {
         if (!cancelled) setIsProcessingPayment(false);
       }
@@ -587,7 +596,8 @@ const Checkout = () => {
             savedPaymentMethodId: selectedSavedPaymentMethod || undefined,
           });
           if (!paymentIntentResponse.success || !paymentIntentResponse.data?.clientSecret) {
-            showToast(paymentIntentResponse.message || 'Could not start payment with your saved card.', 'error');
+            showToast(shopperPaymentError(paymentIntentResponse.message) || 'Could not charge the saved card. Enter a card below instead.', 'error');
+            setSelectedSavedPaymentMethod(null);
             return;
           }
           secret = paymentIntentResponse.data.clientSecret;
@@ -596,7 +606,8 @@ const Checkout = () => {
         }
         const stripeJs = await getStripe();
         if (!stripeJs) {
-          showToast('Payment is not ready. Please try again.', 'error');
+          showToast('Card payment needs a moment. Enter the card below instead.', 'error');
+          setSelectedSavedPaymentMethod(null);
           return;
         }
         const result = await stripeJs.confirmCardPayment(secret);
@@ -610,10 +621,17 @@ const Checkout = () => {
           showToast('Payment was not completed. Please try again.', 'error');
         }
       } catch (err: any) {
-        showToast(err.response?.data?.message || err?.message || 'Could not charge the saved card.', 'error');
+        showToast(shopperPaymentError(err.response?.data?.message) || 'Could not charge the saved card. Enter a card below instead.', 'error');
+        setSelectedSavedPaymentMethod(null);
       } finally {
         setIsProcessingPayment(false);
       }
+      return;
+    }
+
+    if (paymentMethod === 'credit_card' && !usingSavedCard) {
+      document.getElementById('card-payment')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showToast('Enter your card below. PayPal charges it the same way as before — no popup over the header.', 'info');
       return;
     }
 
@@ -1116,6 +1134,48 @@ const Checkout = () => {
                   </div>
                 ) : null}
 
+                {paymentMethod === 'credit_card' && !usingSavedCard && paypalClientId ? (
+                  <div id="card-payment" className="relative overflow-visible rounded-2xl border-2 border-[#1E3A8A] bg-blue-50/40 p-4">
+                    <Suspense fallback={
+                      <div className="flex items-center justify-center py-8">
+                        <LoadingSpinner size="md" />
+                        <span className="ml-3 text-gray-600">Loading secure card fields...</span>
+                      </div>
+                    }>
+                      <PayPalCardFields
+                        items={items.map((item: any) => ({
+                          product: normalizeId(item.product._id) || String(item.product._id),
+                          quantity: item.quantity,
+                          ...(item.variant?.sku ? { variant: { sku: item.variant.sku } } : {})
+                        }))}
+                        shippingAddress={{
+                          firstName: shippingInfo.firstName,
+                          lastName: shippingInfo.lastName,
+                          street: shippingInfo.street,
+                          city: shippingInfo.city,
+                          state: normalizeShippingState(shippingInfo.state),
+                          zipCode: shippingInfo.zipCode,
+                          country: shippingInfo.country,
+                          phone: shippingInfo.phone
+                        }}
+                        guestEmail={!isAuthenticated ? shippingInfo.email.trim() : undefined}
+                        onGuestEmailInvalid={() => {
+                          setEmailError(true);
+                          emailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          emailInputRef.current?.focus();
+                        }}
+                        notes={orderNotes.trim() || undefined}
+                        couponCode={couponCode || undefined}
+                        donationAmount={donationAmount}
+                        onSuccess={handlePayPalSuccess}
+                        onError={handlePayPalError}
+                        onCancel={() => { setPaymentMethod('paypal'); setSelectedSavedPaymentMethod(null); }}
+                        onSwitchToWallet={() => { setPaymentMethod('paypal'); setSelectedSavedPaymentMethod(null); }}
+                      />
+                    </Suspense>
+                  </div>
+                ) : null}
+
                 {paymentMethod === 'cod' && (
                   <div className="mb-4 p-4 rounded-lg border-2 border-primary-600 bg-primary-50">
                     <p className="font-semibold text-gray-900">Cash on Delivery selected</p>
@@ -1148,7 +1208,7 @@ const Checkout = () => {
                         </div>
                         <div className="flex-1 text-left">
                           <span className="font-semibold text-gray-900">Credit or debit card</span>
-                          <p className="text-sm text-gray-600 mt-1">Visa, Mastercard, Amex — typed on this page, not a PayPal popup.</p>
+                          <p className="text-sm text-gray-600 mt-1">Visa, Mastercard, Amex — PayPal charges the card on this page, same as your last payment.</p>
                         </div>
                       </button>
                     ) : null}
@@ -1178,7 +1238,7 @@ const Checkout = () => {
                   </div>
                 ) : null}
 
-                {isAuthenticated && !selectedSavedPaymentMethod && paymentMethod !== 'cod' && (
+                {isAuthenticated && !selectedSavedPaymentMethod && paymentMethod !== 'cod' && showPaymentForm && (
                   <div className="mt-4 flex items-center gap-2">
                     <input type="checkbox" id="savePaymentMethod" checked={savePaymentMethod}
                       onChange={(e) => setSavePaymentMethod(e.target.checked)}
@@ -1189,7 +1249,7 @@ const Checkout = () => {
                   </div>
                 )}
 
-                {isProcessingPayment && !clientSecret && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && paymentMethod !== 'cod' && (
+                {isProcessingPayment && !clientSecret && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && paymentMethod !== 'cod' && paymentMethod !== 'credit_card' && (
 
                   <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <p className="text-sm text-yellow-800">
@@ -1317,6 +1377,8 @@ const Checkout = () => {
                     ? (createOrderMutation.isPending ? 'Placing order...' : 'Place cash on delivery order')
                     : usingSavedCard && selectedSaved
                       ? (createOrderMutation.isPending || isProcessingPayment ? 'Paying…' : `Pay with ${savedCardLabel(selectedSaved)}`)
+                    : paymentMethod === 'credit_card'
+                      ? 'Enter your card below'
                     : paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay'
                       ? 'Continue to PayPal'
                     : isProcessingPayment ? 'Initializing Payment...' : createOrderMutation.isPending ? 'Processing...' : 'Place Order'}
