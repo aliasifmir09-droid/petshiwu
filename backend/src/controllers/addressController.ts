@@ -9,7 +9,7 @@ export const getAddresses = async (req: AuthRequest, res: Response, next: NextFu
   try {
     const userId = req.user?._id;
 
-    const user = await User.findById(userId).select('addresses');
+    const user = await User.findById(userId).select('addresses').lean();
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -19,7 +19,15 @@ export const getAddresses = async (req: AuthRequest, res: Response, next: NextFu
 
     res.status(200).json({
       success: true,
-      data: user.addresses || []
+      data: (user.addresses || []).map((addr: any) => ({
+        _id: addr._id ? String(addr._id) : addr._id,
+        street: addr.street,
+        city: addr.city,
+        state: addr.state,
+        zipCode: addr.zipCode,
+        country: addr.country,
+        isDefault: addr.isDefault,
+      }))
     });
   } catch (error) {
     next(error);

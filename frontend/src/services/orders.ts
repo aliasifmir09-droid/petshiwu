@@ -86,7 +86,12 @@ export const orderService = {
     return response.data.data;
   },
 
-  createPaymentIntent: async (data: { totalPrice: number; paymentMethod: string }) => {
+  createPaymentIntent: async (data: {
+    totalPrice: number;
+    paymentMethod: string;
+    saveForReuse?: boolean;
+    savedPaymentMethodId?: string;
+  }) => {
     const response = await api.post<ApiResponse<{ clientSecret: string; paymentIntentId: string }>>('/orders/payment-intent', data);
     return response.data;
   },

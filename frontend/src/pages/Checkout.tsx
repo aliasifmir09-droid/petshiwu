@@ -25,6 +25,12 @@ import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/con
 import { paypalClientId } from '@/config/paypal';
 import { isNycDeliveryZip, isNewYorkState, normalizeShippingState } from '@/utils/deliveryZip';
 import { clearRestockCoupon, clearRestockPay, readRestockCoupon, readRestockPay, isRestockPayMethod, ASK_COUPON, ASK_DISCOUNT_COPY, AUTOSHIP_COUPON, AUTOSHIP_DISCOUNT_COPY } from '@/utils/restock';
+import {
+  formatCardExpiry,
+  isReusableSavedCard,
+  pickDefaultSavedCard,
+  savedCardLabel,
+} from '@/utils/savedCheckout';
 
 const PaymentForm = lazy(() => import('@/components/PaymentForm'));
 const CheckoutBrandedPayments = lazy(() => import('@/components/CheckoutBrandedPayments'));
@@ -174,7 +180,7 @@ const Checkout = () => {
 
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
-  const [saveNewAddress, setSaveNewAddress] = useState(false);
+  const [saveNewAddress, setSaveNewAddress] = useState(true);
 
   const [shippingInfo, setShippingInfo] = useState({
     firstName: user?.firstName || '',
@@ -228,9 +234,9 @@ const Checkout = () => {
   const [couponMessage, setCouponMessage] = useState('');
   const [couponValid, setCouponValid] = useState<boolean | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
-  const [savePaymentMethod, setSavePaymentMethod] = useState(false);
+  const [savePaymentMethod, setSavePaymentMethod] = useState(true);
 
-  const { data: savedPaymentMethods = [] } = useQuery({
+  const { data: savedPaymentMethods = [], isFetched: paymentMethodsFetched } = useQuery({
     queryKey: ['payment-methods'],
     queryFn: async () => {
       const response = await paymentMethodService.getPaymentMethods();
@@ -239,24 +245,33 @@ const Checkout = () => {
     enabled: isAuthenticated,
     retry: 1
   });
+  const selectedSaved = savedPaymentMethods.find((pm: any) => pm._id === selectedSavedPaymentMethod);
+  const usingSavedCard = isReusableSavedCard(selectedSaved);
+  const autoSelectedSavedCard = useRef(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const restockPay = params.get('pay') || readRestockPay();
-    if (isRestockPayMethod(restockPay)) {
-      setPaymentMethod(restockPay);
+    if (!isAuthenticated) {
+      if (isRestockPayMethod(restockPay)) setPaymentMethod(restockPay);
       return;
     }
-    if (params.get('quick') === 'true') {
-      if (savedPaymentMethods.length > 0) {
-        const defaultMethod = savedPaymentMethods.find((pm: any) => pm.isDefault) || savedPaymentMethods[0];
-        if (defaultMethod && defaultMethod.type !== 'cod') {
-          setSelectedSavedPaymentMethod(defaultMethod._id);
-          setPaymentMethod(defaultMethod.type);
-        }
-      }
+    if (!paymentMethodsFetched || autoSelectedSavedCard.current) return;
+    if (isRestockPayMethod(restockPay) && restockPay !== 'credit_card') {
+      setPaymentMethod(restockPay);
+      autoSelectedSavedCard.current = true;
+      return;
     }
-  }, [savedPaymentMethods]);
+    const savedCard = pickDefaultSavedCard(savedPaymentMethods);
+    if (savedCard) {
+      setSelectedSavedPaymentMethod(savedCard._id);
+      setPaymentMethod('credit_card');
+      autoSelectedSavedCard.current = true;
+      return;
+    }
+    if (isRestockPayMethod(restockPay)) setPaymentMethod(restockPay);
+    autoSelectedSavedCard.current = true;
+  }, [savedPaymentMethods, isAuthenticated, paymentMethodsFetched]);
 
   useEffect(() => {
     if (savedAddresses.length > 0 && !selectedAddressId) {
@@ -291,7 +306,7 @@ const Checkout = () => {
   };
 
   const saveAddressIfNeeded = async () => {
-    if (saveNewAddress && isAuthenticated && showNewAddressForm) {
+    if (saveNewAddress && isAuthenticated && !selectedAddressId && (showNewAddressForm || savedAddresses.length === 0)) {
       if (!shippingInfo.street || !shippingInfo.city || !shippingInfo.state || !shippingInfo.zipCode) return;
       try {
         await addressService.createAddress({
@@ -440,6 +455,8 @@ const Checkout = () => {
       });
       await queryClient.invalidateQueries({ queryKey: ['orders'] });
       await queryClient.invalidateQueries({ queryKey: ['order'] });
+      await queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
+      await queryClient.invalidateQueries({ queryKey: ['addresses'] });
       // For guests, navigate to track order page instead of my orders
       if (!isAuthenticated) {
         navigate(`/track-order?order=${order.orderNumber || orderId}&newOrder=true`);
@@ -459,6 +476,12 @@ const Checkout = () => {
   });
 
   useEffect(() => {
+    if (usingSavedCard) {
+      setShowPayPalButton(false);
+      setShowPaymentForm(false);
+      return;
+    }
+
     if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay' || paymentMethod === 'cod') {
       setShowPayPalButton(paymentMethod !== 'cod');
       setShowPaymentForm(false);
@@ -476,7 +499,8 @@ const Checkout = () => {
       try {
         const paymentIntentResponse = await orderService.createPaymentIntent({
           totalPrice: total,
-          paymentMethod: paymentMethod
+          paymentMethod,
+          saveForReuse: Boolean(isAuthenticated && savePaymentMethod),
         });
         if (cancelled) return;
         if (paymentIntentResponse.success && paymentIntentResponse.data?.clientSecret) {
@@ -502,7 +526,7 @@ const Checkout = () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paymentMethod, total]);
+  }, [paymentMethod, total, selectedSavedPaymentMethod, savePaymentMethod, usingSavedCard]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -548,6 +572,48 @@ const Checkout = () => {
 
     if (paymentMethod === 'cod') {
       await prepareAndSubmitOrder();
+      return;
+    }
+
+    if (usingSavedCard) {
+      setIsProcessingPayment(true);
+      try {
+        let secret = clientSecret;
+        if (!secret) {
+          const paymentIntentResponse = await orderService.createPaymentIntent({
+            totalPrice: total,
+            paymentMethod: 'credit_card',
+            saveForReuse: false,
+            savedPaymentMethodId: selectedSavedPaymentMethod || undefined,
+          });
+          if (!paymentIntentResponse.success || !paymentIntentResponse.data?.clientSecret) {
+            showToast(paymentIntentResponse.message || 'Could not start payment with your saved card.', 'error');
+            return;
+          }
+          secret = paymentIntentResponse.data.clientSecret;
+          setClientSecret(secret);
+          setPaymentIntentId(paymentIntentResponse.data.paymentIntentId);
+        }
+        const stripeJs = await getStripe();
+        if (!stripeJs) {
+          showToast('Payment is not ready. Please try again.', 'error');
+          return;
+        }
+        const result = await stripeJs.confirmCardPayment(secret);
+        if (result.error) {
+          showToast(result.error.message || 'Could not charge the saved card.', 'error');
+          return;
+        }
+        if (result.paymentIntent?.status === 'succeeded') {
+          await prepareAndSubmitOrder(result.paymentIntent.id);
+        } else {
+          showToast('Payment was not completed. Please try again.', 'error');
+        }
+      } catch (err: any) {
+        showToast(err.response?.data?.message || err?.message || 'Could not charge the saved card.', 'error');
+      } finally {
+        setIsProcessingPayment(false);
+      }
       return;
     }
 
@@ -746,7 +812,7 @@ const Checkout = () => {
               <div>
                 <p className="text-base font-bold text-stone-900">Guest checkout is open</p>
                 <p className="text-sm text-stone-600 mt-1">
-                  Sign in for saved addresses, or continue below — no account required.
+                  Sign in to save your card and address for next time, or continue below — no account required.
                 </p>
               </div>
             </div>
@@ -931,7 +997,7 @@ const Checkout = () => {
                           className={fieldClass} />
                       </div>
                     </div>
-                    {isAuthenticated && showNewAddressForm && (
+                    {isAuthenticated && (showNewAddressForm || savedAddresses.length === 0) && (
                       <div className="flex items-center gap-2">
                         <input type="checkbox" id="saveAddress" checked={saveNewAddress}
                           onChange={(e) => setSaveNewAddress(e.target.checked)}
@@ -961,7 +1027,10 @@ const Checkout = () => {
                     <div className="space-y-3">
                       {savedPaymentMethods.filter((pm: any) => pm.type !== 'cod').map((pm: any) => (
                         <button key={pm._id} type="button"
-                          onClick={() => { setSelectedSavedPaymentMethod(pm._id); setPaymentMethod(pm.type); }}
+                          onClick={() => {
+                            setSelectedSavedPaymentMethod(pm._id);
+                            setPaymentMethod(isReusableSavedCard(pm) ? 'credit_card' : pm.type);
+                          }}
                           className={`w-full text-left p-4 border-2 rounded-lg transition-all ${selectedSavedPaymentMethod === pm._id ? 'border-primary-600 bg-primary-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}>
                           <div className="flex items-start gap-3">
                             <div className={`mt-1 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${selectedSavedPaymentMethod === pm._id ? 'bg-primary-600' : 'border-2 border-gray-400'}`}>
@@ -977,7 +1046,7 @@ const Checkout = () => {
                               {pm.last4 && (
                                 <p className="text-sm text-gray-600">
                                   {pm.brand ? `${pm.brand.charAt(0).toUpperCase() + pm.brand.slice(1)} ` : ''}•••• {pm.last4}
-                                  {pm.expiryMonth && pm.expiryYear && ` • Expires ${pm.expiryMonth}/${pm.expiryYear}`}
+                                  {formatCardExpiry(pm) ? ` • Expires ${formatCardExpiry(pm)}` : ''}
                                 </p>
                               )}
                             </div>
@@ -985,11 +1054,22 @@ const Checkout = () => {
                         </button>
                       ))}
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedSavedPaymentMethod(null);
+                        setPaymentMethod('paypal');
+                        setShowPayPalButton(true);
+                      }}
+                      className="mt-3 text-sm font-semibold text-primary-700 hover:text-primary-800"
+                    >
+                      Use a different payment method
+                    </button>
                     <div className="mt-3 text-sm text-gray-600"><span>Or use a branded payment button below</span></div>
                   </div>
                 )}
 
-                {showPayPalButton && paymentMethod !== 'cod' && paypalClientId ? (
+                {showPayPalButton && paymentMethod !== 'cod' && paypalClientId && !usingSavedCard ? (
                   <div id="paypal-payment">
                     <Suspense fallback={
                       <div className="flex items-center justify-center py-8">
@@ -1074,6 +1154,15 @@ const Checkout = () => {
                   </>
                 )}
 
+                {usingSavedCard && selectedSaved ? (
+                  <div className="mt-4 rounded-2xl border-2 border-[#1E3A8A] bg-blue-50 p-4">
+                    <p className="font-semibold text-stone-900">Paying with {savedCardLabel(selectedSaved)}</p>
+                    <p className="text-sm text-stone-600 mt-1">
+                      We’ll use this saved card. You still confirm on this page — we never charge in the background.
+                    </p>
+                  </div>
+                ) : null}
+
                 {isAuthenticated && !selectedSavedPaymentMethod && paymentMethod !== 'cod' && (
                   <div className="mt-4 flex items-center gap-2">
                     <input type="checkbox" id="savePaymentMethod" checked={savePaymentMethod}
@@ -1096,7 +1185,7 @@ const Checkout = () => {
               </CheckoutStep>
 
               {/* Stripe Payment Form */}
-              {showPaymentForm && clientSecret && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && paymentMethod !== 'cod' && (
+              {showPaymentForm && clientSecret && !usingSavedCard && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && paymentMethod !== 'cod' && (
                 <StripePaymentWrapper clientSecret={clientSecret} total={total}
                   onSuccess={handlePaymentSuccess} onError={handlePaymentError} onCancel={handlePaymentCancel} />
               )}
@@ -1211,6 +1300,8 @@ const Checkout = () => {
                   className="w-full rounded-2xl bg-[#1E3A8A] py-4 text-lg font-black text-white shadow-lg shadow-blue-900/25 hover:bg-[#16307a] disabled:opacity-50">
                   {paymentMethod === 'cod'
                     ? (createOrderMutation.isPending ? 'Placing order...' : 'Place cash on delivery order')
+                    : usingSavedCard && selectedSaved
+                      ? (createOrderMutation.isPending || isProcessingPayment ? 'Paying…' : `Pay with ${savedCardLabel(selectedSaved)}`)
                     : paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay'
                       ? 'Continue to PayPal'
                     : isProcessingPayment ? 'Initializing Payment...' : createOrderMutation.isPending ? 'Processing...' : 'Place Order'}

@@ -31,6 +31,12 @@ import {
 import { calculateTrustedOrderPricing } from '../services/orderPricingService';
 import { isReusableCoupon, normalizeCouponCode } from '../services/couponService';
 import { isNycShippingAddress } from '../utils/nycDelivery';
+import {
+  getOrCreateStripeCustomer,
+  rememberPaidCardForUser,
+  rememberShippingAddress,
+} from '../utils/savedCheckout';
+import PaymentMethod from '../models/PaymentMethod';
 
 const stripe: Stripe | null = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2024-11-20.acacia' as any })
@@ -311,6 +317,33 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
 
       if (session) {
         await session.commitTransaction();
+      }
+
+      if (req.user?._id) {
+        try {
+          await rememberShippingAddress(String(req.user._id), {
+            street: shippingAddress.street,
+            city: shippingAddress.city,
+            state: shippingAddress.state,
+            zipCode: shippingAddress.zipCode,
+            country: shippingAddress.country,
+          });
+        } catch (saveAddressError) {
+          logger.warn('Could not remember shipping address after order', {
+            userId: String(req.user._id),
+            error: saveAddressError instanceof Error ? saveAddressError.message : String(saveAddressError),
+          });
+        }
+        if (paymentIntentId && isPaymentVerified) {
+          try {
+            await rememberPaidCardForUser(req.user, paymentIntentId);
+          } catch (saveCardError) {
+            logger.warn('Could not remember card after order', {
+              userId: String(req.user._id),
+              error: saveCardError instanceof Error ? saveCardError.message : String(saveCardError),
+            });
+          }
+        }
       }
 
       let normalizedOrder = normalizeOrderId(order[0]);
@@ -1776,6 +1809,23 @@ export const capturePayPalCheckoutOrder = async (req: AuthRequest, res: Response
 
     await sendPayPalOrderSideEffects(finalizedOrder, claim);
 
+    if (claim.user && claim.shippingAddress) {
+      try {
+        await rememberShippingAddress(String(claim.user), {
+          street: claim.shippingAddress.street,
+          city: claim.shippingAddress.city,
+          state: claim.shippingAddress.state,
+          zipCode: claim.shippingAddress.zipCode,
+          country: claim.shippingAddress.country,
+        });
+      } catch (saveAddressError) {
+        logger.warn('Could not remember shipping address after PayPal order', {
+          userId: String(claim.user),
+          error: saveAddressError instanceof Error ? saveAddressError.message : String(saveAddressError),
+        });
+      }
+    }
+
     return res.status(200).json({
       success: true,
       message: 'PayPal payment captured and order finalized successfully',
@@ -1790,7 +1840,7 @@ export const capturePayPalCheckoutOrder = async (req: AuthRequest, res: Response
 
 export const createOrderPaymentIntent = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { totalPrice, paymentMethod } = req.body;
+    const { totalPrice, paymentMethod, saveForReuse, savedPaymentMethodId } = req.body;
 
     if (!totalPrice || totalPrice < 0.5) {
       return res.status(400).json({ success: false, message: 'Order total must be at least $0.50' });
@@ -1806,9 +1856,10 @@ export const createOrderPaymentIntent = async (req: AuthRequest, res: Response, 
     }
 
     const amountInCents = Math.round(totalPrice * 100);
+    const shouldSaveForReuse = Boolean(req.user?._id) && saveForReuse !== false && !savedPaymentMethodId;
 
     try {
-      const paymentIntent = await stripe.paymentIntents.create({
+      const intentParams: Stripe.PaymentIntentCreateParams = {
         amount: amountInCents,
         currency: 'usd',
         payment_method_types: paymentMethod === 'credit_card' ? ['card'] : paymentMethod === 'apple_pay' ? ['card', 'apple_pay'] : paymentMethod === 'google_pay' ? ['card', 'google_pay'] : ['card'],
@@ -1816,9 +1867,35 @@ export const createOrderPaymentIntent = async (req: AuthRequest, res: Response, 
           order: 'true',
           userId: String(req.user?._id || 'guest'),
           userEmail: req.user?.email || '',
-          userName: req.user ? `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() : 'Guest'
+          userName: req.user ? `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() : 'Guest',
+          saveForReuse: shouldSaveForReuse ? 'true' : 'false',
         }
-      });
+      };
+
+      if (req.user?._id) {
+        intentParams.customer = await getOrCreateStripeCustomer(req.user);
+      }
+
+      if (shouldSaveForReuse) {
+        intentParams.setup_future_usage = 'on_session';
+      }
+
+      if (savedPaymentMethodId) {
+        if (!req.user?._id) {
+          return res.status(401).json({ success: false, message: 'Sign in to use a saved card.' });
+        }
+        const saved = await PaymentMethod.findOne({
+          _id: String(savedPaymentMethodId),
+          user: req.user._id,
+        });
+        if (!saved?.stripePaymentMethodId) {
+          return res.status(400).json({ success: false, message: 'Saved card was not found. Add a card again at checkout.' });
+        }
+        intentParams.payment_method = saved.stripePaymentMethodId;
+        intentParams.payment_method_types = ['card'];
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create(intentParams);
 
       res.status(200).json({ success: true, data: { clientSecret: paymentIntent.client_secret, paymentIntentId: paymentIntent.id } });
     } catch (stripeError: unknown) {
