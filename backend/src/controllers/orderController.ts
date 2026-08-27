@@ -798,6 +798,41 @@ const restockCancelledOrderItems = async (order: { items?: Array<{ product?: unk
   }
 };
 
+/**
+ * Status-only writes must not re-validate leftover nested delivery/proof data.
+ * Saving the document is what produced the admin "Validation error" toast.
+ */
+const persistOrderStatusFields = async (
+  orderId: mongoose.Types.ObjectId,
+  fields: {
+    orderStatus?: string;
+    trackingNumber?: string | null;
+    isDelivered?: boolean;
+    deliveredAt?: Date | null;
+    deliveryStatus?: string;
+    notes?: string;
+  },
+  session?: mongoose.ClientSession | null
+) => {
+  const $set: Record<string, unknown> = { updatedAt: new Date() };
+  if (fields.orderStatus !== undefined) $set.orderStatus = fields.orderStatus;
+  if (fields.trackingNumber !== undefined) $set.trackingNumber = fields.trackingNumber;
+  if (fields.isDelivered !== undefined) $set.isDelivered = fields.isDelivered;
+  if (fields.deliveredAt !== undefined) $set.deliveredAt = fields.deliveredAt;
+  if (fields.deliveryStatus !== undefined) $set['delivery.status'] = fields.deliveryStatus;
+  if (fields.notes !== undefined) $set.notes = fields.notes;
+
+  const updated = await Order.findByIdAndUpdate(
+    orderId,
+    { $set },
+    { new: true, runValidators: false, ...(session ? { session } : {}) }
+  );
+  if (!updated) {
+    throw new Error('Order not found');
+  }
+  return updated;
+};
+
 export const updateOrderStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { orderStatus, trackingNumber } = req.body;
@@ -814,58 +849,42 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response, next: N
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
     const previousStatus = order.orderStatus;
-    if (orderStatus) order.orderStatus = orderStatus;
-    if (trackingNumber !== undefined) order.trackingNumber = trackingNumber || null;
+    const statusFields: {
+      orderStatus?: string;
+      trackingNumber?: string | null;
+      isDelivered?: boolean;
+      deliveredAt?: Date | null;
+      deliveryStatus?: string;
+    } = {};
+
+    if (orderStatus) statusFields.orderStatus = orderStatus;
+    if (trackingNumber !== undefined) statusFields.trackingNumber = trackingNumber || null;
 
     if (orderStatus === 'delivered') {
-      order.isDelivered = true;
-      order.deliveredAt = new Date();
-    } else if (orderStatus && orderStatus !== 'delivered') {
-      if (order.isDelivered) {
-        order.isDelivered = false;
-        order.deliveredAt = undefined;
-      }
+      statusFields.isDelivered = true;
+      statusFields.deliveredAt = new Date();
+    } else if (orderStatus && orderStatus !== 'delivered' && order.isDelivered) {
+      statusFields.isDelivered = false;
+      statusFields.deliveredAt = null;
     }
 
     if (orderStatus === 'cancelled' && previousStatus !== 'cancelled' && order.delivery) {
-      order.delivery.status = 'cancelled';
+      statusFields.deliveryStatus = 'cancelled';
     }
 
-    try {
-      await order.save({ validateModifiedOnly: true });
-    } catch (saveError: unknown) {
-      const mongooseError = saveError as { name?: string; message?: string; errors?: Record<string, { message: string }> };
-      if (mongooseError?.name === 'ValidationError') {
-        logger.warn(
-          `Order ${order.orderNumber} failed document validation on status change; applying status fields only. ${mongooseError.message}`
-        );
-        const statusSet: Record<string, unknown> = {
-          orderStatus: order.orderStatus,
-          trackingNumber: order.trackingNumber,
-          isDelivered: order.isDelivered,
-          deliveredAt: order.deliveredAt,
-          updatedAt: new Date()
-        };
-        if (order.delivery?.status) {
-          statusSet['delivery.status'] = order.delivery.status;
-        }
-        await Order.collection.updateOne({ _id: order._id }, { $set: statusSet });
-      } else {
-        throw saveError;
-      }
-    }
+    const updatedOrder = await persistOrderStatusFields(order._id as mongoose.Types.ObjectId, statusFields);
 
     if (orderStatus === 'cancelled' && previousStatus !== 'cancelled') {
       try {
-        await restockCancelledOrderItems(order);
+        await restockCancelledOrderItems(updatedOrder);
       } catch (stockError) {
-        logger.error(`Failed to restock items for cancelled order ${order.orderNumber}:`, stockError);
+        logger.error(`Failed to restock items for cancelled order ${updatedOrder.orderNumber}:`, stockError);
       }
     }
 
     if (orderStatus && orderStatus !== previousStatus) {
       try {
-        await notifyCustomerOfOrderStatusChange(order, previousStatus, orderStatus, {
+        await notifyCustomerOfOrderStatusChange(updatedOrder, previousStatus, orderStatus, {
           cancellationReason: 'Updated by Petshiwu'
         });
       } catch (notifyError) {
@@ -873,26 +892,17 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response, next: N
       }
     }
 
-    const normalizedOrder = normalizeOrderId(order);
+    const normalizedOrder = normalizeOrderId(updatedOrder);
 
     try {
       const { notifyOrderUpdate } = await import('../utils/orderNotifications');
-      notifyOrderUpdate(order, 'status');
+      notifyOrderUpdate(updatedOrder, 'status');
     } catch (notificationError) {
       logger.error('Error sending order update notification:', notificationError);
     }
 
     res.status(200).json({ success: true, message: 'Order status updated successfully', data: normalizedOrder });
   } catch (error: unknown) {
-    if (error instanceof Error && error.name === 'ValidationError') {
-      const validationError = error as { errors?: Record<string, { message: string }> };
-      const messages = Object.values(validationError.errors || {}).map((err) => err.message);
-      return res.status(400).json({
-        success: false,
-        message: messages[0] || 'Could not update order status',
-        errors: messages
-      });
-    }
     next(error);
   }
 };
@@ -1057,13 +1067,20 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
 
     try {
       const previousStatus = order.orderStatus;
-      order.orderStatus = 'cancelled';
-      if (reason) {
-        order.notes = order.notes ? `${order.notes}\nCancellation reason: ${reason}` : `Cancellation reason: ${reason}`;
-      }
-      await order.save(session ? { session, validateModifiedOnly: true } : { validateModifiedOnly: true });
+      const notes = reason
+        ? (order.notes ? `${order.notes}\nCancellation reason: ${reason}` : `Cancellation reason: ${reason}`)
+        : undefined;
+      const updatedOrder = await persistOrderStatusFields(
+        order._id as mongoose.Types.ObjectId,
+        {
+          orderStatus: 'cancelled',
+          ...(order.delivery ? { deliveryStatus: 'cancelled' } : {}),
+          ...(notes !== undefined ? { notes } : {})
+        },
+        session
+      );
 
-      for (const item of order.items) {
+      for (const item of updatedOrder.items) {
         const product = session ? await Product.findById(item.product).session(session) : await Product.findById(item.product);
         if (product) {
           product.totalStock += item.quantity;
@@ -1074,12 +1091,12 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
 
       if (session) { await session.commitTransaction(); session.endSession(); }
 
-      const normalizedOrder = normalizeOrderId(order);
+      const normalizedOrder = normalizeOrderId(updatedOrder);
 
       try {
-        await notifyCustomerOfOrderStatusChange(order, previousStatus, 'cancelled', {
+        await notifyCustomerOfOrderStatusChange(updatedOrder, previousStatus, 'cancelled', {
           cancellationReason: reason || 'Customer request',
-          refundAmount: order.isPaid ? order.totalPrice : undefined
+          refundAmount: updatedOrder.isPaid ? updatedOrder.totalPrice : undefined
         });
       } catch (emailError) {
         logger.error('Error queuing order cancellation email:', emailError);
@@ -1089,7 +1106,7 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
         success: true,
         message: 'Order cancelled successfully',
         data: normalizedOrder,
-        refundInfo: order.isPaid ? { willRefund: true, refundAmount: order.totalPrice, refundMethod: 'original', estimatedTime: '5-7 business days' } : null
+        refundInfo: updatedOrder.isPaid ? { willRefund: true, refundAmount: updatedOrder.totalPrice, refundMethod: 'original', estimatedTime: '5-7 business days' } : null
       });
     } catch (error: any) {
       if (session) {

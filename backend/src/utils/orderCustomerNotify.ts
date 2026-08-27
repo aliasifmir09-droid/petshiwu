@@ -55,38 +55,51 @@ export const notifyCustomerOfOrderStatusChange = async (
 
   if (contact.email) {
     try {
-      await addEmailJob(
-        'order-status',
-        { email: contact.email, orderNumber, status: newStatus },
-        async () => {
-          if (newStatus === 'cancelled') {
-            await emailService.sendOrderCancellationEmail(contact.email, contact.firstName, orderNumber, {
-              items: itemsForEmail(order),
-              totalPrice: order.totalPrice || 0,
-              cancellationReason: options?.cancellationReason || 'Updated by Petshiwu',
-              refundAmount: options?.refundAmount,
-              createdAt: order.createdAt || new Date()
-            });
-            return;
+      if (newStatus === 'cancelled') {
+        const orderData = {
+          items: itemsForEmail(order),
+          totalPrice: order.totalPrice || 0,
+          cancellationReason: options?.cancellationReason || 'Updated by Petshiwu',
+          refundAmount: options?.refundAmount,
+          createdAt: order.createdAt || new Date()
+        };
+        await addEmailJob(
+          'order-cancellation',
+          { email: contact.email, firstName: contact.firstName, orderNumber, orderData },
+          async () => {
+            await emailService.sendOrderCancellationEmail(contact.email, contact.firstName, orderNumber, orderData);
           }
-          if (newStatus === 'delivered') {
-            await emailService.sendOrderDeliveredEmail(contact.email, contact.firstName, orderNumber, {
-              items: itemsForEmail(order),
-              totalPrice: order.totalPrice || 0,
-              trackingNumber: order.trackingNumber || undefined,
-              deliveredAt: order.deliveredAt || new Date(),
-              shippingAddress: shippingForEmail(order)
-            });
-            return;
+        );
+      } else if (newStatus === 'delivered') {
+        const orderData = {
+          items: itemsForEmail(order),
+          totalPrice: order.totalPrice || 0,
+          trackingNumber: order.trackingNumber || undefined,
+          deliveredAt: order.deliveredAt || new Date(),
+          shippingAddress: shippingForEmail(order)
+        };
+        await addEmailJob(
+          'order-delivered',
+          { email: contact.email, firstName: contact.firstName, orderNumber, orderData },
+          async () => {
+            await emailService.sendOrderDeliveredEmail(contact.email, contact.firstName, orderNumber, orderData);
           }
-          await emailService.sendOrderStatusEmail(contact.email, contact.firstName, orderNumber, {
-            status: newStatus,
-            trackingNumber: order.trackingNumber,
-            totalPrice: order.totalPrice || 0,
-            shippingAddress: shippingForEmail(order)
-          });
-        }
-      );
+        );
+      } else {
+        const orderData = {
+          status: newStatus,
+          trackingNumber: order.trackingNumber,
+          totalPrice: order.totalPrice || 0,
+          shippingAddress: shippingForEmail(order)
+        };
+        await addEmailJob(
+          'order-status',
+          { email: contact.email, firstName: contact.firstName, orderNumber, orderData },
+          async () => {
+            await emailService.sendOrderStatusEmail(contact.email, contact.firstName, orderNumber, orderData);
+          }
+        );
+      }
       emailSent = true;
     } catch (error) {
       logger.error(`Failed to send status email for order ${orderNumber}:`, error);
