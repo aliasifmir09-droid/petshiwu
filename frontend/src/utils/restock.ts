@@ -5,7 +5,18 @@ export const RESTOCK_COUPON_STORAGE_KEY = 'petshiwu_restock_coupon';
 export const ASK_DISCOUNT_COPY = '5% off, max $10';
 export const AUTOSHIP_DISCOUNT_COPY = '7% off, max $10';
 export const RESTOCK_DISCOUNT_COPY = ASK_DISCOUNT_COPY;
-export const REMINDER_WEEK_OPTIONS = [3, 4, 5, 6] as const;
+export const RESTOCK_CADENCE = [
+  { intervalDays: 1, label: 'Every day' },
+  { intervalDays: 7, label: 'Every week' },
+  { intervalDays: 14, label: 'Every 2 weeks' },
+  { intervalDays: 21, label: 'Every 3 weeks' },
+  { intervalDays: 28, label: 'Every 4 weeks' },
+  { intervalDays: 35, label: 'Every 5 weeks' },
+  { intervalDays: 42, label: 'Every 6 weeks' },
+  { intervalDays: 56, label: 'Every 8 weeks' },
+] as const;
+export const DEFAULT_INTERVAL_DAYS = 7;
+export type RestockIntervalDays = (typeof RESTOCK_CADENCE)[number]['intervalDays'];
 export const RESTOCK_MODES = ['ask', 'autoship'] as const;
 export type RestockMode = (typeof RESTOCK_MODES)[number];
 
@@ -70,3 +81,31 @@ export const clearRestockCoupon = (): void => {
 
 export const pickKey = (item: { product?: string; sku?: string }): string =>
   `${item.product || ''}::${item.sku || ''}`;
+
+export const isValidIntervalDays = (days: unknown): days is RestockIntervalDays =>
+  typeof days === 'number' && Number.isInteger(days) && RESTOCK_CADENCE.some((row) => row.intervalDays === days);
+
+export const cadenceLabel = (intervalDays: number): string =>
+  RESTOCK_CADENCE.find((row) => row.intervalDays === intervalDays)?.label || `Every ${intervalDays} days`;
+
+export const pad2 = (n: number): string => String(n).padStart(2, '0');
+
+export const localDateStr = (d: Date): string =>
+  `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+
+export const localTimeStr = (d: Date): string => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+
+export const defaultRemindParts = (intervalDays: number, from: Date = new Date()): { date: string; time: string } => {
+  const d = new Date(from);
+  d.setDate(d.getDate() + Math.max(1, intervalDays));
+  d.setHours(9, 0, 0, 0);
+  return { date: localDateStr(d), time: localTimeStr(d) };
+};
+
+export const remindAtIso = (date: string, time: string): string => {
+  const d = new Date(`${date}T${time || '09:00'}:00`);
+  if (Number.isNaN(d.getTime())) {
+    return new Date(Date.now() + DEFAULT_INTERVAL_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  }
+  return d.toISOString();
+};

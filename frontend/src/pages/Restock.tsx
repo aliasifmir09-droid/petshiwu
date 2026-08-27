@@ -39,11 +39,14 @@ const Restock = () => {
         }
         const ready = await productsForReorder(source as any);
         if (cancelled) return;
-        if (!ready.length) {
-          setMessage('Those items are no longer in stock.');
+        let added = 0;
+        ready.forEach(({ product, variant, quantity }) => {
+          if (addToCart(product, variant, quantity)) added += 1;
+        });
+        if (!ready.length || added === 0) {
+          setMessage('Could not add those items. Open your dashboard to add or remove from the restock cart.');
           return;
         }
-        ready.forEach(({ product, variant, quantity }) => addToCart(product, variant, quantity));
         rememberRestockCoupon(coupon);
         navigate(`/checkout?coupon=${coupon}`, { replace: true });
       } catch {

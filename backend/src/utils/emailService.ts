@@ -470,7 +470,7 @@ export const buildReorderReminderEmail = (
           <p style="text-align:center;margin:28px 0;">
             <a href="${buyAgainUrl}" style="background:#1E3A8A;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;">Ship now — 7% off (max $10)</a>
           </p>
-          <p style="color:#666;font-size:12px;">Not a silent charge. Ask first is 5% off if you'd rather confirm each time. Add or change food and treats on your dashboard.</p>
+          <p style="color:#666;font-size:12px;">Not a silent charge. Ask first is 5% off if you'd rather confirm each time. Add or remove items in your restock cart on the dashboard.</p>
         </div>
       </body>
       </html>
@@ -503,7 +503,7 @@ export const buildReorderReminderEmail = (
           <p style="text-align:center;margin:28px 0;">
             <a href="${buyAgainUrl}" style="background:#1E3A8A;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;">Confirm now — 5% off (max $10)</a>
           </p>
-          <p style="color:#666;font-size:12px;">Change food and treats any time on your dashboard. Toys skip restock — add what they actually run out of.</p>
+          <p style="color:#666;font-size:12px;">Add or remove items in your restock cart any time. Toys skip restock — add what they actually run out of.</p>
         </div>
       </body>
       </html>

@@ -5,16 +5,20 @@ import ReorderReminder from '../models/ReorderReminder';
 import { AuthRequest } from '../middleware/auth';
 import { findOrderByIdentifier } from '../utils/orderIdentity';
 import {
-  REMINDER_WEEK_OPTIONS,
+  RESTOCK_CADENCE,
   aggregateBuyAgainItems,
+  cadenceLabel,
   customerOrderFilter,
+  intervalFromReminder,
   isRestockConsumable,
-  isValidReminderWeeks,
   isValidRestockMode,
   normalizeRestockMode,
-  remindAtFromWeeks,
+  parseRemindAt,
+  remindAtFromInterval,
+  resolveIntervalDays,
   sanitizeRestockItems,
   usualFromOrderItems,
+  weeksFromInterval,
   type RestockPick,
 } from '../utils/buyAgain';
 import { extractObjectId } from '../utils/types';
@@ -37,20 +41,26 @@ const serializeReminder = (reminder: {
   order: unknown;
   orderNumber: string;
   weeks: number;
+  intervalDays?: number;
   mode?: string;
   remindAt: Date;
   status: string;
   items?: Array<{ product?: unknown; name: string; image?: string; quantity: number; sku?: string }>;
-}) => ({
-  _id: String(reminder._id),
-  orderId: String(reminder.order),
-  orderNumber: reminder.orderNumber,
-  weeks: reminder.weeks,
-  mode: normalizeRestockMode(reminder.mode),
-  remindAt: reminder.remindAt,
-  status: reminder.status,
-  items: serializeItems(reminder.items),
-});
+}) => {
+  const intervalDays = intervalFromReminder(reminder);
+  return {
+    _id: String(reminder._id),
+    orderId: String(reminder.order),
+    orderNumber: reminder.orderNumber,
+    weeks: weeksFromInterval(intervalDays),
+    intervalDays,
+    cadenceLabel: cadenceLabel(intervalDays),
+    mode: normalizeRestockMode(reminder.mode),
+    remindAt: reminder.remindAt,
+    status: reminder.status,
+    items: serializeItems(reminder.items),
+  };
+};
 
 export const getBuyAgain = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -114,13 +124,14 @@ export const createReorderReminder = async (req: AuthRequest, res: Response, nex
       return res.status(401).json({ success: false, message: 'User not authenticated' });
     }
 
-    const weeks = Number(req.body?.weeks);
-    if (!isValidReminderWeeks(weeks)) {
+    const intervalDays = resolveIntervalDays(req.body || {});
+    if (intervalDays == null) {
       return res.status(400).json({
         success: false,
-        message: `Choose ${REMINDER_WEEK_OPTIONS.join(', ')} weeks, then pick Ask first (5% off, max $10) or Autoship (7% off, max $10).`,
+        message: `Choose ${RESTOCK_CADENCE.map((row) => row.label.toLowerCase()).join(', ')}, then pick Ask first (5% off, max $10) or Autoship (7% off, max $10).`,
       });
     }
+    const weeks = weeksFromInterval(intervalDays);
 
     const mode = req.body?.mode;
     if (!isValidRestockMode(mode)) {
@@ -164,7 +175,7 @@ export const createReorderReminder = async (req: AuthRequest, res: Response, nex
       { $set: { status: 'cancelled' } }
     );
 
-    const remindAt = remindAtFromWeeks(weeks);
+    const remindAt = parseRemindAt(req.body?.remindAt, remindAtFromInterval(intervalDays));
     const reminder = await ReorderReminder.create({
       user: req.user._id,
       order: order._id,
@@ -172,16 +183,19 @@ export const createReorderReminder = async (req: AuthRequest, res: Response, nex
       email: email || guestEmail,
       firstName: req.user.firstName || order.shippingAddress?.firstName || 'there',
       weeks,
+      intervalDays,
       mode,
       remindAt,
       status: 'scheduled',
       items,
     });
 
+    const when = remindAt.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+    const every = cadenceLabel(intervalDays).toLowerCase();
     const message =
       mode === 'ask'
-        ? `Ask first is on. We'll email you in ${weeks} weeks. Confirm then for 5% off (max $10). We never charge unless you confirm and pay.`
-        : `Autoship is on. We'll email you in ${weeks} weeks. Ship then for 7% off (max $10). We still never charge unless you pay.`;
+        ? `Ask first is on. ${every.charAt(0).toUpperCase()}${every.slice(1)}. Next email ${when}. Confirm then for 5% off (max $10). We never charge unless you confirm and pay.`
+        : `Autoship is on. ${every.charAt(0).toUpperCase()}${every.slice(1)}. Next email ${when}. Ship then for 7% off (max $10). We still never charge unless you pay.`;
 
     res.status(200).json({
       success: true,

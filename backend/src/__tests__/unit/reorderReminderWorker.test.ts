@@ -68,6 +68,7 @@ describe('reorder reminder worker', () => {
         mode: 'ask',
         status: 'scheduled',
         weeks: 4,
+        intervalDays: 28,
       })
     );
   });
@@ -105,6 +106,6 @@ describe('reorder reminder worker', () => {
     );
     const payload = (sendReorderReminderEmail as jest.Mock).mock.calls[0][3];
     expect(payload.buyAgainUrlPath).toMatch(/RESTOCK7/);
-    expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ mode: 'autoship' }));
+    expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ mode: 'autoship', intervalDays: 21 }));
   });
 });
