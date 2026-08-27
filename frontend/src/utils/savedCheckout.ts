@@ -28,8 +28,9 @@ export const pickDefaultSavedCard = (methods: SavedPayRow[] = []): SavedPayRow |
 };
 
 export const pickDefaultSavedAddress = (addresses: SavedAddressRow[] = []): SavedAddressRow | null => {
-  if (!addresses.length) return null;
-  return addresses.find((addr) => addr.isDefault) || addresses[0];
+  const usable = (addresses || []).filter((addr) => Boolean(addr?.street && addr?.zipCode));
+  if (!usable.length) return null;
+  return usable.find((addr) => addr.isDefault) || usable[0];
 };
 
 export const savedCardLabel = (pm: SavedPayRow): string => {

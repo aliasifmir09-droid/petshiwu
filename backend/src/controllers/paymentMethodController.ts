@@ -29,7 +29,7 @@ export const getPaymentMethods = async (req: AuthRequest, res: Response, next: N
 
     // Sanitize sensitive data - only return safe fields
     const sanitized = paymentMethods.map((pm: any) => ({
-      _id: pm._id,
+      _id: String(pm._id),
       type: pm.type,
       last4: pm.last4,
       brand: pm.brand,
@@ -102,7 +102,7 @@ export const savePaymentMethod = async (req: AuthRequest, res: Response, next: N
     res.status(201).json({
       success: true,
       data: {
-        _id: paymentMethod._id,
+        _id: String(paymentMethod._id),
         type: paymentMethod.type,
         last4: paymentMethod.last4,
         brand: paymentMethod.brand,
@@ -150,7 +150,7 @@ export const updatePaymentMethod = async (req: AuthRequest, res: Response, next:
     res.status(200).json({
       success: true,
       data: {
-        _id: paymentMethod._id,
+        _id: String(paymentMethod._id),
         type: paymentMethod.type,
         last4: paymentMethod.last4,
         brand: paymentMethod.brand,
@@ -218,7 +218,7 @@ export const getDefaultPaymentMethod = async (req: AuthRequest, res: Response, n
     res.status(200).json({
       success: true,
       data: {
-        _id: paymentMethod._id,
+        _id: String(paymentMethod._id),
         type: paymentMethod.type,
         last4: paymentMethod.last4,
         brand: paymentMethod.brand,

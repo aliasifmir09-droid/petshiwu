@@ -1885,7 +1885,7 @@ export const createOrderPaymentIntent = async (req: AuthRequest, res: Response, 
           return res.status(401).json({ success: false, message: 'Sign in to use a saved card.' });
         }
         const saved = await PaymentMethod.findOne({
-          _id: savedPaymentMethodId,
+          _id: String(savedPaymentMethodId),
           user: req.user._id,
         });
         if (!saved?.stripePaymentMethodId) {

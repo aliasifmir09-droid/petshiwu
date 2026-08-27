@@ -81,9 +81,27 @@ function sanitizeObject(obj: any, visited = new WeakSet(), depth = 0, allowToken
   if (obj instanceof Date || obj instanceof RegExp) {
     return obj;
   }
+
+  // BSON ObjectId: copying own keys produces {} and breaks saved-card lookup.
+  if (
+    typeof obj.toHexString === 'function' &&
+    (obj._bsontype === 'ObjectID' || obj._bsontype === 'ObjectId' || obj.constructor?.name === 'ObjectId')
+  ) {
+    return String(obj);
+  }
+
+  // Mongoose documents and address subdocs keep fields on the schema, not always
+  // as enumerable own properties. Flatten before sanitizing keys.
+  if (typeof obj.toObject === 'function') {
+    try {
+      obj = obj.toObject({ depopulate: false });
+    } catch {
+      // keep original object
+    }
+  }
   
   // Handle Mongoose documents (they have circular references)
-  if (obj.constructor && obj.constructor.name === 'model') {
+  if (obj?.constructor && obj.constructor.name === 'model') {
     // Convert Mongoose document to plain object
     try {
       obj = obj.toObject ? obj.toObject() : obj;
@@ -160,4 +178,8 @@ function sanitizeObject(obj: any, visited = new WeakSet(), depth = 0, allowToken
   
   return sanitized;
 }
+
+/** Test helper: same sanitizer used on API JSON responses. */
+export const sanitizeApiPayload = (data: unknown): unknown =>
+  sanitizeObject(data, new WeakSet(), 0, true, false);
 
