@@ -331,8 +331,49 @@ describe('Orders API', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
+      expect(response.body.message).not.toMatch(/validation/i);
       const updated = await Order.findById(order._id);
       expect(updated?.orderStatus).toBe('cancelled');
+      expect(updated?.delivery?.status).toBe('cancelled');
+      await Order.deleteOne({ _id: order._id });
+    });
+
+    it('cancels an order whose leftover proof is missing a handoff method', async () => {
+      const guestEmail = `guest.proof.${Date.now()}@petshiwu.com`;
+      const order = await createPendingOrder(guestEmail);
+      await Order.collection.updateOne(
+        { _id: order._id },
+        {
+          $set: {
+            delivery: {
+              distanceMeters: 850,
+              status: 'ready',
+              proof: { uploadedAt: new Date('2026-08-27T12:00:00.000Z') }
+            }
+          }
+        }
+      );
+
+      const emailService = await import('../../utils/emailService');
+      const emailSpy = jest.spyOn(emailService, 'sendOrderCancellationEmail').mockResolvedValue({ messageId: 'test' } as any);
+
+      const response = await request(app)
+        .put(`/api/orders/${order.orderNumber}/status`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ orderStatus: 'cancelled' });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe('Order status updated successfully');
+      const updated = await Order.findById(order._id);
+      expect(updated?.orderStatus).toBe('cancelled');
+      expect(emailSpy).toHaveBeenCalledWith(
+        guestEmail,
+        'Asif',
+        order.orderNumber,
+        expect.objectContaining({ cancellationReason: 'Updated by Petshiwu' })
+      );
+      emailSpy.mockRestore();
       await Order.deleteOne({ _id: order._id });
     });
 
