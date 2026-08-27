@@ -251,7 +251,7 @@ app.use(helmet({
       imgSrc: process.env.NODE_ENV === 'production'
         ? ["'self'", "data:", "https:", "https://res.cloudinary.com", "https://wsrv.nl", "https://maps.gstatic.com", "https://maps.googleapis.com", "https://www.paypalobjects.com", "https://*.paypalobjects.com"]
         : ["'self'", "data:", "https:", "http:", "https://res.cloudinary.com", "https://wsrv.nl", "https://maps.gstatic.com", "https://maps.googleapis.com", "https://www.paypalobjects.com", "https://*.paypalobjects.com"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://maps.googleapis.com", "https://maps.gstatic.com", "https://www.paypal.com", "https://*.paypal.com", "https://applepay.cdn-apple.com", "https://pay.google.com", "https://apis.google.com", "https://www.gstatic.com", "https://www.google.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://maps.googleapis.com", "https://maps.gstatic.com", "https://www.paypal.com", "https://*.paypal.com", "https://applepay.cdn-apple.com", "https://pay.google.com", "https://apis.google.com", "https://www.gstatic.com", "https://www.google.com", "https://accounts.google.com"],
       workerSrc: ["'self'"],
       connectSrc: [
         "'self'",
@@ -267,9 +267,10 @@ app.use(helmet({
         "https://petshiwu.com",
         "https://apis.google.com",
         "https://www.gstatic.com",
-        "https://www.google.com"
+        "https://www.google.com",
+        "https://accounts.google.com"
       ],
-      frameSrc: ["'self'", "https://www.paypal.com", "https://*.paypal.com", "https://pay.google.com", "https://www.google.com", "https://apis.google.com"],
+      frameSrc: ["'self'", "https://www.paypal.com", "https://*.paypal.com", "https://pay.google.com", "https://www.google.com", "https://apis.google.com", "https://accounts.google.com"],
       frameAncestors: ["'self'"],
       upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
     }
@@ -310,7 +311,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: isDevelopment ? 1000 : 500, message: 'Too many requests from this IP, please try again later.', standardHeaders: true, legacyHeaders: false, skipSuccessfulRequests: isDevelopment, store: createRateLimiterStore(15 * 60 * 1000) });
 const publicDataLimiter = rateLimit({ windowMs: 1 * 60 * 1000, max: isDevelopment ? 500 : 300, message: 'Too many requests from this IP, please try again in a moment.', standardHeaders: true, legacyHeaders: false, skipSuccessfulRequests: true, store: createRateLimiterStore(1 * 60 * 1000) });
 
-app.use(['/api/v1/auth/login', '/api/auth/login'], authLimiter);
+app.use(['/api/v1/auth/login', '/api/auth/login', '/api/v1/auth/google', '/api/auth/google'], authLimiter);
 app.use(['/api/v1/auth/register', '/api/auth/register'], registerLimiter);
 app.use(['/api/v1/auth/updatepassword', '/api/auth/updatepassword'], passwordUpdateLimiter);
 app.use(['/api/v1/auth/me', '/api/auth/me'], (req, res, next) => { if (req.method === 'GET') { return authStatusLimiter(req, res, next); } next(); });

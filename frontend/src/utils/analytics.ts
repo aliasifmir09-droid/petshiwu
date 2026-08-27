@@ -163,7 +163,7 @@ export const trackSignUp = (method: 'email' | 'social' = 'email') => {
 /**
  * Track user login
  */
-export const trackLogin = (method: 'email' | 'social' = 'email') => {
+export const trackLogin = (method: 'email' | 'social' | 'google' = 'email') => {
   trackEvent('login', {
     category: 'user',
     action: 'login',

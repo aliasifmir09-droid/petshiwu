@@ -83,8 +83,8 @@ describe('checkout celebration handoff', () => {
       path.resolve(__dirname, '../../pages/TrackOrder.tsx'),
       'utf8'
     );
-    expect(track).toContain('There is no password yet');
-    expect(track).toContain('guestSetPasswordPath');
-    expect(track).toContain('Create a password');
+    expect(track).toContain('Keep this order on your account');
+    expect(track).toContain('GoogleSignInButton');
+    expect(track).toContain('Or create a password instead');
   });
 });

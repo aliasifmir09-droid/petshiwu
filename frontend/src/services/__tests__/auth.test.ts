@@ -74,6 +74,18 @@ describe('Auth Service', () => {
     });
   });
 
+  describe('loginWithGoogle', () => {
+    test('should send the Google credential to /auth/google', async () => {
+      const mockResponse = { data: { success: true, token: 'jwt' } };
+      (api.post as any).mockResolvedValue(mockResponse);
+
+      const result = await authService.loginWithGoogle('google-credential');
+
+      expect(api.post).toHaveBeenCalledWith('/auth/google', { credential: 'google-credential' });
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
   describe('logout', () => {
     test('should call logout endpoint', async () => {
       const mockResponse = { data: { success: true } };

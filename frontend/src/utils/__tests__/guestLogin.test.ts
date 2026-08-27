@@ -9,7 +9,8 @@ describe('guest checkout login', () => {
     const login = read('../../pages/Login.tsx');
     const forgot = read('../../pages/ForgotPassword.tsx');
 
-    expect(login).toContain('Paid as a guest? There is no password yet.');
+    expect(login).toContain('Continue with Google using the same Gmail you used at checkout');
+    expect(login).toContain('GoogleSignInButton');
     expect(login).toContain('guestSetPasswordPath');
     expect(forgot).toContain("searchParams.get('guest') === '1'");
     expect(forgot).toContain('Create a password for your order');

@@ -2,17 +2,21 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { authService } from '@/services/auth';
+import { useAuthStore } from '@/stores/authStore';
 import Toast from '@/components/Toast';
 import PasswordStrength from '@/components/PasswordStrength';
 import { useToast } from '@/hooks/useToast';
-import { trackSignUp } from '@/utils/analytics';
+import { trackLogin, trackSignUp } from '@/utils/analytics';
 import { validateEmail, validateName, validatePassword, sanitizeFormData } from '@/utils/inputValidation';
 import { extractErrorMessage } from '@/utils/errorHandler';
 import { readGuestCheckoutAccount } from '@/utils/guestCheckoutAccount';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
+import { isGoogleLoginConfigured } from '@/config/google';
 
 const Register = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const setUser = useAuthStore((state) => state.setUser);
   const { toast, showToast, hideToast } = useToast();
   const guestDetails = readGuestCheckoutAccount();
 
@@ -99,13 +103,36 @@ const Register = () => {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Create Account</h1>
           <p className="text-gray-600">
-            {formData.email
-              ? 'Choose a password for this email. If you already paid as a guest, your order will attach to this login.'
-              : 'Join petshiwu today'}
+            {isGoogleLoginConfigured
+              ? 'Continue with Google — no password. Guest orders on that Gmail are attached automatically.'
+              : (formData.email
+                ? 'Choose a password for this email. If you already paid as a guest, your order will attach to this login.'
+                : 'Join petshiwu today')}
           </p>
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-8">
+          {isGoogleLoginConfigured && (
+            <div className="mb-6 space-y-4">
+              <GoogleSignInButton
+                onSuccess={async () => {
+                  await new Promise((resolve) => setTimeout(resolve, 100));
+                  const user = await authService.getMe();
+                  setUser(user);
+                  const { persistLocalCartAfterLogin } = await import('@/utils/persistLocalCartAfterLogin');
+                  await persistLocalCartAfterLogin();
+                  trackLogin('google');
+                  navigate('/');
+                }}
+                onError={(message) => showToast(message, 'error')}
+              />
+              <div className="flex items-center gap-3">
+                <div className="h-px flex-1 bg-gray-200" />
+                <span className="text-xs uppercase tracking-wide text-gray-400">or email and password</span>
+                <div className="h-px flex-1 bg-gray-200" />
+              </div>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>

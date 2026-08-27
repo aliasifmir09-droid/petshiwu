@@ -7,6 +7,7 @@ describe('Google Customer Reviews CSP', () => {
     expect(src).toContain('https://apis.google.com');
     expect(src).toContain('https://www.gstatic.com');
     expect(src).toContain('https://www.google.com');
+    expect(src).toContain('https://accounts.google.com');
     expect(src).toContain("frameSrc: [\"'self'\"");
   });
 });

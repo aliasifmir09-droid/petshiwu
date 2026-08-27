@@ -70,22 +70,23 @@ describe('order confirmation email', () => {
     expect(email.html).toContain('We pack and deliver this order on August 28, 2026');
   });
 
-  test('guest receipts explain there is no password and how to create one', () => {
+  test('guest receipts explain Google sign-in and how to create a password', () => {
     const guest = buildOrderConfirmationEmail('asif', 'ORD-GUEST-1', {
       ...sample,
       paymentMethod: 'paypal',
       isGuestCheckout: true,
       customerEmail: 'asif@example.com',
     });
-    expect(guest.html).toContain('You checked out as a guest — there is no password yet');
+    expect(guest.html).toContain('You checked out as a guest — no password needed');
+    expect(guest.html).toContain('Continue with Google');
     expect(guest.html).toContain('Create a password');
     expect(guest.html).toContain('/forgot-password?guest=1&amp;email=asif%40example.com');
-    expect(guest.text).toContain('there is no password yet');
+    expect(guest.text).toContain('Continue with Google');
     expect(guest.text).toContain('/forgot-password?guest=1&email=asif%40example.com');
   });
 
   test('signed-in receipts do not tell the shopper to create a password', () => {
-    expect(email.html).not.toContain('there is no password yet');
+    expect(email.html).not.toContain('no password needed');
     expect(email.html).not.toContain('/forgot-password?guest=1');
   });
 

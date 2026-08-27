@@ -67,6 +67,7 @@ describe('validateEnv', () => {
     validateEnv();
     const warned = consoleSpy.mock.calls.flat().join(' ');
     expect(warned).toContain('PAYPAL_ENV is not live');
+    expect(warned).toContain('GOOGLE_CLIENT_ID not set');
     consoleSpy.mockRestore();
   });
 });

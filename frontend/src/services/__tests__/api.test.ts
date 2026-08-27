@@ -30,6 +30,7 @@ describe('API Service', () => {
       const publicEndpoints = [
         '/api/auth/login',
         '/api/auth/register',
+        '/api/auth/google',
         '/api/products',
         '/api/categories'
       ];
@@ -37,6 +38,7 @@ describe('API Service', () => {
       publicEndpoints.forEach(endpoint => {
         const isPublic = endpoint.includes('/auth/login') || 
                         endpoint.includes('/auth/register') ||
+                        endpoint.includes('/auth/google') ||
                         endpoint.includes('/products') ||
                         endpoint.includes('/categories');
         expect(isPublic).toBe(true);
