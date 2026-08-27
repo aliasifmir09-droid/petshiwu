@@ -49,6 +49,11 @@ describe('PayPal checkout', () => {
     expect(branded).toContain('PayPalGooglePay');
     expect(branded).toContain('skipProvider');
     expect(paypalConfig).toContain("components: 'buttons,applepay,googlepay'");
+    expect(paypalConfig).toContain("disableFunding: ['card']");
+    expect(paypalConfig).not.toContain("'venmo', 'paylater', 'card'");
+    expect(checkout).toContain("setPaymentMethod('credit_card')");
+    expect(checkout).toContain('Visa, Mastercard, Amex — typed on this page, not a PayPal popup.');
+    expect(checkout).toContain('overflow-visible');
   });
 
   test('checkout does not tell shoppers PayPal is in test mode', () => {

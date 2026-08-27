@@ -20,7 +20,7 @@ import { rememberGoogleReviewOptIn } from '@/utils/googleCustomerReviews';
 import SEO from '@/components/SEO';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
-import { MapPin, Plus, Check, User, UserCheck, Banknote, ShieldCheck, RotateCcw, Headphones, Lock, Truck } from 'lucide-react';
+import { MapPin, Plus, Check, User, UserCheck, Banknote, ShieldCheck, RotateCcw, Headphones, Lock, Truck, CreditCard } from 'lucide-react';
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
 import { paypalClientId } from '@/config/paypal';
 import { isNycDeliveryZip, isNewYorkState, normalizeShippingState } from '@/utils/deliveryZip';
@@ -49,7 +49,7 @@ const CheckoutStep = ({
   subtitle?: string;
   children: ReactNode;
 }) => (
-  <section className="overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-[0_24px_60px_-32px_rgba(30,58,138,0.45)]">
+  <section className="overflow-visible rounded-3xl border border-stone-200/80 bg-white shadow-[0_24px_60px_-32px_rgba(30,58,138,0.45)]">
     <header className="flex items-start gap-4 border-b border-stone-100 px-6 py-5">
       <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#1E3A8A] text-sm font-black text-amber-300 ring-4 ring-amber-200/50">
         {step}
@@ -1070,7 +1070,7 @@ const Checkout = () => {
                 )}
 
                 {showPayPalButton && paymentMethod !== 'cod' && paypalClientId && !usingSavedCard ? (
-                  <div id="paypal-payment">
+                  <div id="paypal-payment" className="relative overflow-visible">
                     <Suspense fallback={
                       <div className="flex items-center justify-center py-8">
                         <LoadingSpinner size="md" />
@@ -1130,13 +1130,28 @@ const Checkout = () => {
                   </div>
                 )}
 
-                {paymentMethod !== 'cod' && (
+                {paymentMethod !== 'cod' && !usingSavedCard && (
                   <>
                     <div className="flex items-center gap-3 my-6">
                       <div className="flex-1 h-px bg-gray-200" />
                       <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">or</span>
                       <div className="flex-1 h-px bg-gray-200" />
                     </div>
+                    {paymentMethod !== 'credit_card' ? (
+                      <button type="button" onClick={() => {
+                        setPaymentMethod('credit_card');
+                        setSelectedSavedPaymentMethod(null);
+                      }}
+                        className="mb-3 w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all border-gray-300 bg-white hover:border-gray-400">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 text-[#1E3A8A] flex items-center justify-center flex-shrink-0">
+                          <CreditCard className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <span className="font-semibold text-gray-900">Credit or debit card</span>
+                          <p className="text-sm text-gray-600 mt-1">Visa, Mastercard, Amex — typed on this page, not a PayPal popup.</p>
+                        </div>
+                      </button>
+                    ) : null}
                     <button type="button" onClick={() => {
                       setPaymentMethod('cod');
                       setSelectedSavedPaymentMethod(null);
