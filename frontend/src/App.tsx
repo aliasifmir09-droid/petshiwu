@@ -17,6 +17,7 @@ import StructuredData from './components/StructuredData';
 import RequireAuth from './components/RequireAuth';
 import Home from './pages/Home';
 import { hashAuthRedirect } from './utils/hashAuthRedirect';
+import { useCustomerSessionTimeout } from './hooks/useCustomerSessionTimeout';
 import './index.css';
 
 const Products = lazy(() => import('./pages/Products'));
@@ -173,6 +174,7 @@ function LegacyHashAuthRedirect() {
 function App() {
   const { setUser, setLoading } = useAuthStore();
   const { syncWithBackend } = useWishlistStore();
+  useCustomerSessionTimeout();
 
   useEffect(() => {
     initAnalytics();
@@ -231,6 +233,8 @@ function App() {
         if (user) {
           setUser(user);
           await syncWithBackend();
+          const { persistLocalCartAfterLogin } = await import('./utils/persistLocalCartAfterLogin');
+          await persistLocalCartAfterLogin();
         } else {
           setUser(null);
         }

@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { availableCartStock } from '@/utils/cartStock';
 
 interface QuickViewModalProps {
   productSlug: string;
@@ -61,9 +62,12 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
       ? product.variants[selectedVariant] 
       : undefined;
     
-    addToCart(product, variant, quantity);
-    
-    showToast('Product added to cart!', 'success');
+    const added = addToCart(product, variant, quantity);
+    if (added) {
+      showToast('Product added to cart!', 'success');
+    } else {
+      showToast('This item is out of stock', 'error');
+    }
   };
 
   const handleWishlistToggle = () => {
@@ -82,6 +86,11 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
     onClose();
     navigate(generateProductUrl(product!));
   };
+
+  const quickVariant = product?.variants && product.variants.length > 0
+    ? product.variants[selectedVariant]
+    : undefined;
+  const availableStock = availableCartStock(product, quickVariant);
 
   return (
     <>
@@ -224,7 +233,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
                 </div>
 
                 {/* Stock Status */}
-                {product.totalStock > 0 ? (
+                {availableStock > 0 ? (
                   <p className="text-green-600 font-medium">✓ In Stock</p>
                 ) : (
                   <p className="text-red-600 font-medium">✗ Out of Stock</p>
@@ -234,7 +243,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
                 <div className="flex gap-3 pt-4">
                   <button
                     onClick={handleAddToCart}
-                    disabled={product.totalStock === 0}
+                    disabled={availableStock <= 0}
                     className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
                   >
                     <ShoppingCart size={20} />

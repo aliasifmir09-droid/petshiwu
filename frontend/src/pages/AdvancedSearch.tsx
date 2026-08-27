@@ -194,8 +194,8 @@ const AdvancedSearch = () => {
     const variant =
       topPhotoMatch.variants?.find((v: { stock?: number }) => (v.stock || 0) > 0) ||
       topPhotoMatch.variants?.[0];
-    addToCart(topPhotoMatch, variant);
-    setAddedTopMatch(true);
+    const added = addToCart(topPhotoMatch, variant);
+    if (added) setAddedTopMatch(true);
   };
 
   return (

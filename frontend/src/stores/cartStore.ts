@@ -3,10 +3,11 @@ import { persist } from 'zustand/middleware';
 import { CartItem, Product, ProductVariant } from '@/types';
 import { normalizeId } from '@/utils/idNormalizer';
 import { trackAddToCart, trackRemoveFromCart } from '@/utils/analytics';
+import { availableCartStock } from '@/utils/cartStock';
 
 interface CartState {
   items: CartItem[];
-  addToCart: (product: Product, variant?: ProductVariant, quantity?: number) => void;
+  addToCart: (product: Product, variant?: ProductVariant, quantity?: number) => boolean;
   removeFromCart: (productId: string, variantSku?: string) => void;
   updateQuantity: (productId: string, quantity: number, variantSku?: string) => void;
   clearCart: () => void;
@@ -41,8 +42,8 @@ export const useCartStore = create<CartState>()(
       items: [],
 
       addToCart: (product, variant, quantity = 1) => {
-        const availableStock = variant?.stock || 0;
-        if (availableStock === 0) return;
+        const availableStock = availableCartStock(product, variant);
+        if (availableStock <= 0) return false;
 
         const normalizedId = normalizeId(product._id) || String(product._id);
         const normalizedProduct = { ...product, _id: normalizedId };
@@ -57,19 +58,21 @@ export const useCartStore = create<CartState>()(
         if (existingItemIndex > -1) {
           const currentQuantity = items[existingItemIndex].quantity;
           const newQuantity = currentQuantity + quantity;
-          if (newQuantity > availableStock) return;
+          if (newQuantity > availableStock) return false;
           const newItems = [...items];
           newItems[existingItemIndex].quantity = newQuantity;
           set({ items: newItems });
           broadcastCartUpdate(newItems);
-        } else {
-          if (quantity > availableStock) return;
-          const newItems = [...items, { product: normalizedProduct, variant, quantity }];
-          set({ items: newItems });
-          broadcastCartUpdate(newItems);
-          const price = variant?.price || product.basePrice || 0;
-          trackAddToCart(normalizedId, product.name, price, quantity);
+          return true;
         }
+
+        if (quantity > availableStock) return false;
+        const newItems = [...items, { product: normalizedProduct, variant, quantity }];
+        set({ items: newItems });
+        broadcastCartUpdate(newItems);
+        const price = variant?.price || product.basePrice || 0;
+        trackAddToCart(normalizedId, product.name, price, quantity);
+        return true;
       },
 
       removeFromCart: (productId, variantSku) => {
@@ -105,7 +108,7 @@ export const useCartStore = create<CartState>()(
         );
         if (itemIndex > -1) {
           const item = items[itemIndex];
-          const availableStock = item.variant?.stock || 0;
+          const availableStock = availableCartStock(item.product, item.variant);
           if (quantity > availableStock) return;
           const newItems = [...items];
           newItems[itemIndex].quantity = quantity;
