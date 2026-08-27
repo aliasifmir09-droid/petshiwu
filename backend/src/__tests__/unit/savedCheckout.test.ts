@@ -13,7 +13,7 @@ describe('saved checkout addresses', () => {
       city: string;
       state: string;
       zipCode: string;
-      country?: string;
+      country: string;
       isDefault?: boolean;
     }> = [];
 

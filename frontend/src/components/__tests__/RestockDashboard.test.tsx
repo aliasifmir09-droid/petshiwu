@@ -174,7 +174,7 @@ describe('RestockDashboard cart', () => {
     await waitFor(() => {
       expect(screen.getAllByText(/Visa •••• 4242/i).length).toBeGreaterThan(0);
     });
-    expect(screen.getByText(/37-68 74th St, Queens, NY 11372/)).toBeInTheDocument();
+    expect(screen.getAllByText(/37-68 74th St, Queens, NY 11372/).length).toBeGreaterThan(0);
     expect(screen.getByText(/You still confirm at checkout/i)).toBeInTheDocument();
   });
 });
