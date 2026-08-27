@@ -9,10 +9,11 @@ import { useAuthStore } from '@/stores/authStore';
 const HIDE_ON = ['/cart', '/checkout', '/login', '/register', '/checkout'];
 
 const BottomNav = () => {
-  const { getTotalItems } = useCartStore();
-  const { isAuthenticated } = useAuthStore();
   const location = useLocation();
-  const cartCount = getTotalItems();
+  const cartCount = useCartStore((state) =>
+    state.items.reduce((total, item) => total + (Number(item?.quantity) || 0), 0)
+  );
+  const { isAuthenticated } = useAuthStore();
 
   // Don't show on pages that have their own bottom CTAs
   if (HIDE_ON.some(path => location.pathname.startsWith(path))) return null;

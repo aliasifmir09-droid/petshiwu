@@ -92,7 +92,9 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
 
   const handleAddToCart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    addToCart(product, listingVariant);
+    e.stopPropagation();
+    const added = addToCart(product, listingVariant);
+    if (!added) return;
     setCartAdded(true);
     setTimeout(() => setCartAdded(false), 2500);
   }, [product, listingVariant, addToCart]);
@@ -299,6 +301,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
         {!hideCartButton && (
           <div className="mt-auto pt-3">
             <button
+              type="button"
               onClick={handleAddToCart}
               disabled={!product.inStock}
               aria-label={product.inStock ? `Add ${product.name} to cart` : `${product.name} is out of stock`}

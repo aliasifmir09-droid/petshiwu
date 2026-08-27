@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getGuestSessionId } from '@/utils/guestSession';
 
 // Extend AxiosRequestConfig to include our custom skipAuth property
 declare module 'axios' {
@@ -23,11 +24,12 @@ export const saveToken = (token: string) => {
 };
 
 export const getToken = (): string | null => {
-  return localStorage.getItem(TOKEN_KEY);
+  return localStorage.getItem(TOKEN_KEY) || localStorage.getItem('auth_token');
 };
 
 export const removeToken = () => {
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem('auth_token');
 };
 
 const api = axios.create({
@@ -41,11 +43,17 @@ const api = axios.create({
 // Add Authorization header from localStorage token
 api.interceptors.request.use(
   (config: any) => {
-    if (!config.skipAuth) {
-      const token = getToken();
-      if (token) {
+    const token = getToken();
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    const isCartEndpoint = String(config.url || '').includes('/cart');
+    if (isCartEndpoint) {
+      const sessionId = getGuestSessionId();
+      if (sessionId) {
         config.headers = config.headers || {};
-        config.headers['Authorization'] = `Bearer ${token}`;
+        config.headers['x-session-id'] = sessionId;
       }
     }
     return config;
@@ -99,6 +107,8 @@ api.interceptors.response.use(
 
       if (!skipAuth &&
           !isPublicEndpoint &&
+          !isCartEndpoint &&
+          !isWishlistEndpoint &&
           !(isNavigating && !isStale) &&
           window.location.pathname !== '/login' &&
           window.location.pathname !== '/register' &&

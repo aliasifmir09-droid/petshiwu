@@ -48,6 +48,8 @@ const Login = () => {
       
       const user = await authService.getMe();
       setUser(user);
+      const { persistLocalCartAfterLogin } = await import('@/utils/persistLocalCartAfterLogin');
+      await persistLocalCartAfterLogin();
       
       // Track login
       trackLogin('email');

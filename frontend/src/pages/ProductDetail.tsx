@@ -15,6 +15,7 @@ import { normalizeImageUrl, handleImageError, getOptimizedImageUrl, generateSrcS
 import { generateProductUrl, generateCategoryUrl } from '@/utils/productUrl';
 import { productSearchDescription } from '@/utils/seoUtils';
 import { getProductImages, getValidCompareAtPrice } from '@/utils/productPrice';
+import { availableCartStock } from '@/utils/cartStock';
 import { FREE_SHIPPING_THRESHOLD } from '@/config/constants';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
@@ -388,7 +389,7 @@ const ProductDetail = () => {
     ? Math.max(0, Math.min(selectedVariant, product.variants.length - 1))
     : 0;
   const selectedVariantData = hasVariants ? product.variants[safeSelectedVariant] : undefined;
-  const availableStock = selectedVariantData?.stock ?? product?.totalStock ?? 0;
+  const availableStock = availableCartStock(product, selectedVariantData);
 
   // Reset quantity to 1 when variant changes
   useEffect(() => {
@@ -502,8 +503,13 @@ const ProductDetail = () => {
     : 0;
 
   const handleAddToCart = () => {
-    addToCart(product, selectedVariantData || undefined, quantity);
-    showToast(`✓ ${product.name.substring(0, 40)}${product.name.length > 40 ? '...' : ''} added to cart`, 'success');
+    if (!product) return;
+    const added = addToCart(product, selectedVariantData || undefined, quantity);
+    if (added) {
+      showToast(`✓ ${product.name.substring(0, 40)}${product.name.length > 40 ? '...' : ''} added to cart`, 'success');
+    } else {
+      showToast('This item is out of stock', 'error');
+    }
   };
 
   const handleWishlistToggle = async () => {
@@ -1127,15 +1133,15 @@ const ProductDetail = () => {
             {/* Primary — full-width Add to Cart */}
             <button
               onClick={handleAddToCart}
-              disabled={!selectedVariantData || (selectedVariantData ? selectedVariantData.stock === 0 : true)}
+              disabled={availableStock <= 0}
               className={`w-full flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-bold text-lg transition-all active:scale-[0.98] ${
-                selectedVariantData && selectedVariantData.stock > 0
+                availableStock > 0
                   ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
               <ShoppingCart size={22} />
-              {selectedVariantData && selectedVariantData.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+              {availableStock <= 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
             {/* Secondary row — wishlist + share */}
             <div className="flex gap-3 mt-3">
@@ -1634,15 +1640,15 @@ const ProductDetail = () => {
           {/* Full-width Add to Cart */}
           <button
             onClick={handleAddToCart}
-            disabled={!selectedVariantData || (selectedVariantData ? selectedVariantData.stock === 0 : true)}
+            disabled={availableStock <= 0}
             className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-base transition-all active:scale-[0.98] ${
-              selectedVariantData && selectedVariantData.stock > 0
+              availableStock > 0
                 ? 'bg-blue-600 text-white shadow-md'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >
             <ShoppingCart size={20} />
-            {selectedVariantData && selectedVariantData.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+            {availableStock <= 0 ? 'Out of Stock' : 'Add to Cart'}
           </button>
         </div>
       )}

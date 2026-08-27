@@ -19,7 +19,9 @@ import { generateCategoryUrl } from '@/utils/productUrl';
 const Header = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuthStore();
-  const { getTotalItems } = useCartStore();
+  const totalItems = useCartStore((state) =>
+    state.items.reduce((total, item) => total + (Number(item?.quantity) || 0), 0)
+  );
   const { items: wishlistItems } = useWishlistStore();
   const { toast, hideToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
@@ -555,13 +557,13 @@ const Header = () => {
                 <div className="relative group">
                   <Link to="/cart" className="relative px-1.5 lg:px-2.5 py-1.5 lg:py-2 rounded-xl hover:bg-white/15 transition-all hover:scale-110 flex items-center justify-center">
                     <ShoppingCart size={20} className="lg:w-6 lg:h-6 group-hover:animate-wiggle" />
-                    {getTotalItems() > 0 && (
+                    {totalItems > 0 && (
                       <span className="absolute -top-1 -right-1 lg:-top-2 lg:-right-2 bg-gradient-to-r from-red-500 to-pink-600 text-white text-[10px] lg:text-xs rounded-full min-w-[18px] lg:min-w-[22px] h-[18px] lg:h-[22px] flex items-center justify-center font-black shadow-lg animate-pulse-slow border-2 border-white leading-none">
-                        {getTotalItems()}
+                        {totalItems}
                       </span>
                     )}
                   </Link>
-                  {!isAuthenticated && (
+                  {!isAuthenticated && totalItems === 0 && (
                     <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-gray-900">
                       <p className="text-sm font-semibold mb-2">Your cart is empty.</p>
                       <p className="text-xs text-gray-600">
