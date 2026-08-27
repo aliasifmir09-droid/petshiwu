@@ -86,6 +86,18 @@ describe('Auth Service', () => {
     });
   });
 
+  describe('getGoogleConfig', () => {
+    test('should fetch the public Google client id', async () => {
+      const mockResponse = { data: { success: true, data: { enabled: true, clientId: 'abc.apps.googleusercontent.com' } } };
+      (api.get as any).mockResolvedValue(mockResponse);
+
+      const result = await authService.getGoogleConfig();
+
+      expect(api.get).toHaveBeenCalledWith('/auth/google-config', { skipAuth: true });
+      expect(result).toEqual({ enabled: true, clientId: 'abc.apps.googleusercontent.com' });
+    });
+  });
+
   describe('logout', () => {
     test('should call logout endpoint', async () => {
       const mockResponse = { data: { success: true } };

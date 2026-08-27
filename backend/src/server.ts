@@ -242,6 +242,7 @@ const app: Application = express();
 app.set('trust proxy', 1);
 
 app.use(helmet({
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
   crossOriginResourcePolicy: { policy: "cross-origin" },
   contentSecurityPolicy: {
     directives: {
@@ -282,6 +283,14 @@ app.use(helmet({
   frameguard: false,
   permittedCrossDomainPolicies: false
 }));
+
+app.use((_req, res, next) => {
+  res.setHeader(
+    'Permissions-Policy',
+    'identity-credentials-get=(self "https://accounts.google.com")'
+  );
+  next();
+});
 
 import { createRedisRateLimitStore } from './utils/redisRateLimitStore';
 

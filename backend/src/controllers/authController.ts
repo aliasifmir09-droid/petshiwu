@@ -13,6 +13,7 @@ import {
   ensureCustomerForGuestEmail,
   normalizeAccountEmail,
 } from '../utils/claimGuestOrders';
+import { getGoogleClientId } from '../utils/googleClientId';
 
 // Check if email sending is configured
 const isEmailConfigured = (): boolean => {
@@ -256,6 +257,17 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     logger.error('Login error:', error);
     next(error);
   }
+};
+
+export const getGoogleConfig = (_req: Request, res: Response) => {
+  const clientId = getGoogleClientId();
+  return res.status(200).json({
+    success: true,
+    data: {
+      enabled: Boolean(clientId),
+      clientId,
+    },
+  });
 };
 
 export const googleLogin = async (req: Request, res: Response, next: NextFunction) => {

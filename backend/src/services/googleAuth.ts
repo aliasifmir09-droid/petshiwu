@@ -2,6 +2,9 @@ import crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 import User, { IUser } from '../models/User';
 import { attachGuestOrdersToUser, normalizeAccountEmail } from '../utils/claimGuestOrders';
+import { getGoogleClientId } from '../utils/googleClientId';
+
+export { getGoogleClientId };
 
 export type GoogleProfile = {
   sub: string;
@@ -31,9 +34,6 @@ export const namesFromGoogleProfile = (profile: Pick<GoogleProfile, 'givenName' 
     lastName: 'Parent',
   };
 };
-
-export const getGoogleClientId = () =>
-  String(process.env.GOOGLE_CLIENT_ID || '').trim();
 
 export const verifyGoogleIdToken = async (idToken: string): Promise<GoogleProfile> => {
   const clientId = getGoogleClientId();

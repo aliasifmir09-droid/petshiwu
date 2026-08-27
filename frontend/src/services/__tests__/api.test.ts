@@ -31,6 +31,7 @@ describe('API Service', () => {
         '/api/auth/login',
         '/api/auth/register',
         '/api/auth/google',
+        '/api/auth/google-config',
         '/api/products',
         '/api/categories'
       ];

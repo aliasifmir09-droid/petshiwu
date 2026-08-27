@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { googleClientId, isGoogleLoginConfigured } from '@/config/google';
+import { useGoogleLoginConfig } from '@/config/google';
 import { authService } from '@/services/auth';
 import { extractErrorMessage } from '@/utils/errorHandler';
 
@@ -32,6 +32,7 @@ const loadGoogleScript = () =>
   });
 
 const GoogleSignInButton = ({ onSuccess, onError }: GoogleSignInButtonProps) => {
+  const { clientId, enabled, ready: configReady } = useGoogleLoginConfig();
   const buttonRef = useRef<HTMLDivElement>(null);
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
@@ -40,7 +41,7 @@ const GoogleSignInButton = ({ onSuccess, onError }: GoogleSignInButtonProps) => 
   onErrorRef.current = onError;
 
   useEffect(() => {
-    if (!isGoogleLoginConfigured) return;
+    if (!configReady || !enabled || !clientId) return;
     let cancelled = false;
 
     const start = async () => {
@@ -48,7 +49,7 @@ const GoogleSignInButton = ({ onSuccess, onError }: GoogleSignInButtonProps) => 
         await loadGoogleScript();
         if (cancelled || !buttonRef.current || !window.google?.accounts?.id) return;
         window.google.accounts.id.initialize({
-          client_id: googleClientId,
+          client_id: clientId,
           callback: async (response) => {
             try {
               if (!response.credential) {
@@ -68,13 +69,14 @@ const GoogleSignInButton = ({ onSuccess, onError }: GoogleSignInButtonProps) => 
           auto_select: false,
         });
         buttonRef.current.innerHTML = '';
+        const width = Math.max(240, Math.min(buttonRef.current.parentElement?.clientWidth || 336, 400));
         window.google.accounts.id.renderButton(buttonRef.current, {
           type: 'standard',
           theme: 'outline',
           size: 'large',
           text: 'continue_with',
           shape: 'rectangular',
-          width: 336,
+          width,
           logo_alignment: 'left',
         });
         setReady(true);
@@ -87,9 +89,9 @@ const GoogleSignInButton = ({ onSuccess, onError }: GoogleSignInButtonProps) => 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [clientId, configReady, enabled]);
 
-  if (!isGoogleLoginConfigured) return null;
+  if (configReady && !enabled) return null;
 
   return (
     <div className="w-full">
