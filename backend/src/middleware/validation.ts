@@ -612,6 +612,14 @@ export const createPaymentIntentValidation = [
   body('paymentMethod')
     .isIn(['credit_card', 'paypal', 'apple_pay', 'google_pay'])
     .withMessage('Invalid payment method'),
+  body('saveForReuse')
+    .optional()
+    .isBoolean()
+    .withMessage('saveForReuse must be a boolean'),
+  body('savedPaymentMethodId')
+    .optional({ nullable: true, checkFalsy: true })
+    .custom((value) => mongoose.Types.ObjectId.isValid(value))
+    .withMessage('Invalid saved payment method ID'),
   validate
 ];
 

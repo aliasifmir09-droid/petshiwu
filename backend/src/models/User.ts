@@ -57,6 +57,8 @@ export interface IUser extends Document {
   addresses: IAddress[];
   pets: IPet[];
   wishlist: mongoose.Types.ObjectId[];
+  /** Stripe Customer id so saved cards can be reused on later checkouts. */
+  stripeCustomerId?: string;
   passwordChangedAt?: Date;
   passwordExpiresAt?: Date;
   createdAt: Date;
@@ -151,6 +153,12 @@ const userSchema = new Schema<IUser>(
       type: Schema.Types.ObjectId,
       ref: 'Product'
     }],
+    stripeCustomerId: {
+      type: String,
+      sparse: true,
+      unique: true,
+      trim: true,
+    },
     passwordChangedAt: {
       type: Date
     },

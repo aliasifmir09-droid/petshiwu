@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { buyAgainService, type BuyAgainRegular } from '@/services/buyAgain';
 import { productService } from '@/services/products';
+import { addressService } from '@/services/addresses';
+import paymentMethodService from '@/services/paymentMethods';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 import { productsForReorder } from '@/utils/reorderFromOrder';
@@ -33,6 +35,12 @@ import {
   type RestockPayMethod,
   type RestockPick,
 } from '@/utils/restock';
+import {
+  pickDefaultSavedAddress,
+  pickDefaultSavedCard,
+  savedAddressLine,
+  savedCardLabel,
+} from '@/utils/savedCheckout';
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
@@ -107,12 +115,28 @@ const RestockDashboard = () => {
   const [searching, setSearching] = useState(false);
   const [planMode, setPlanMode] = useState<RestockMode>('autoship');
   const [payMethod, setPayMethod] = useState<RestockPayMethod>('paypal');
+  const defaultedPayFromCard = useRef(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['buy-again'],
     queryFn: buyAgainService.getBuyAgain,
     staleTime: 30 * 1000,
   });
+  const { data: savedAddresses = [] } = useQuery({
+    queryKey: ['addresses'],
+    queryFn: addressService.getAddresses,
+    staleTime: 60 * 1000,
+  });
+  const { data: savedPaymentMethods = [] } = useQuery({
+    queryKey: ['payment-methods'],
+    queryFn: async () => {
+      const response = await paymentMethodService.getPaymentMethods();
+      return response.data || [];
+    },
+    staleTime: 60 * 1000,
+  });
+  const savedCard = pickDefaultSavedCard(savedPaymentMethods);
+  const savedAddress = pickDefaultSavedAddress(savedAddresses);
 
   useEffect(() => {
     if (!data || hydrated) return;
@@ -134,6 +158,12 @@ const RestockDashboard = () => {
     }
     setHydrated(true);
   }, [data, hydrated]);
+
+  useEffect(() => {
+    if (!savedCard || defaultedPayFromCard.current) return;
+    defaultedPayFromCard.current = true;
+    setPayMethod('credit_card');
+  }, [savedCard]);
 
   useEffect(() => {
     const term = query.trim();
@@ -321,7 +351,12 @@ const RestockDashboard = () => {
       }
       rememberRestockCoupon(coupon);
       rememberRestockPay(payMethod);
-      showToast(`Ready to ship. Choose ${restockPayLabel(payMethod)} on the next screen.`, 'success');
+      showToast(
+        savedCard && payMethod === 'credit_card'
+          ? `Ready to ship. Pay with ${savedCardLabel(savedCard)} on the next screen.`
+          : `Ready to ship. Choose ${restockPayLabel(payMethod)} on the next screen.`,
+        'success'
+      );
       navigate(`/checkout?coupon=${coupon}&pay=${payMethod}`);
     } catch {
       showToast('Could not add those items. Try again from your orders.', 'error');
@@ -372,7 +407,7 @@ const RestockDashboard = () => {
               {lastWasMostlyToys
                 ? `Latest order ${lastOrder?.orderNumber} looks like toys or gear. Add food or treats, pick how you pay, then ship.`
                 : lastOrder
-                  ? 'Add or remove items, pick when, pick Apple Pay / Google Pay / PayPal / card, then Pay and ship now. We never charge unless you pay — unlike typical autoship.'
+                  ? 'Add or remove items, pick when, then Pay and ship now. Saved card and address are reused at checkout. We never charge unless you pay — unlike typical autoship.'
                   : 'Same-day NYC when you order by cutoff. After your first order, restock checkout lives here.'}
             </p>
           </div>
@@ -559,7 +594,11 @@ const RestockDashboard = () => {
                 <RestockStep
                   step="3"
                   title="How do you want to pay?"
-                  subtitle="Pick Apple Pay, Google Pay, PayPal, or card now. You still pay on the next screen — we never charge a saved card in the background."
+                  subtitle={
+                    savedCard
+                      ? `We’ll use ${savedCardLabel(savedCard)}${savedAddress ? ` and ${savedAddressLine(savedAddress)}` : ''}. You still confirm at checkout — no silent charge.`
+                      : 'Pick Apple Pay, Google Pay, PayPal, or card now. You still pay on the next screen — we never charge a saved card in the background.'
+                  }
                 >
                   <div className="grid sm:grid-cols-2 gap-3">
                     {RESTOCK_PAY_OPTIONS.map((option) => {
@@ -592,7 +631,9 @@ const RestockDashboard = () => {
                     })}
                   </div>
                   <p className="mt-4 text-sm text-stone-500">
-                    Official checkout buttons appear after you tap <span className="font-semibold text-stone-700">Pay and ship now</span>.
+                    {savedCard
+                      ? 'Checkout opens with your saved details filled in. You still tap pay there.'
+                      : <>Official checkout buttons appear after you tap <span className="font-semibold text-stone-700">Pay and ship now</span>.</>}
                   </p>
                 </RestockStep>
               </div>
@@ -616,8 +657,16 @@ const RestockDashboard = () => {
                   <div className="space-y-2 text-sm border-t border-stone-100 pt-3 mb-4">
                     <div className="flex justify-between">
                       <span className="text-stone-500">Pay with</span>
-                      <span className="font-semibold text-stone-900">{restockPayLabel(payMethod)}</span>
+                      <span className="font-semibold text-stone-900">
+                        {savedCard && payMethod === 'credit_card' ? savedCardLabel(savedCard) : restockPayLabel(payMethod)}
+                      </span>
                     </div>
+                    {savedAddress ? (
+                      <div className="flex justify-between gap-3">
+                        <span className="text-stone-500">Ship to</span>
+                        <span className="font-semibold text-stone-900 text-right">{savedAddressLine(savedAddress)}</span>
+                      </div>
+                    ) : null}
                     <div className="flex justify-between">
                       <span className="text-stone-500">Restock save</span>
                       <span className="font-semibold text-emerald-700">{coupon} · {discountCopy}</span>
@@ -663,7 +712,7 @@ const RestockDashboard = () => {
                     {restocking ? 'Adding to checkout…' : 'Pay and ship now'}
                   </button>
                   <p className="mt-2 text-xs text-center text-stone-500">
-                    Next: checkout. Tap {restockPayLabel(payMethod)} there. Nothing is charged until you do.
+                    Next: checkout. {savedCard ? `Pay with ${savedCardLabel(savedCard)} there.` : `Tap ${restockPayLabel(payMethod)} there.`} Nothing is charged until you do.
                   </p>
                   <button
                     type="button"

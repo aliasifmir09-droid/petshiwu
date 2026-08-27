@@ -27,7 +27,7 @@ import {
   updateReturnStatus,
   getAllReturns
 } from '../controllers/returnController';
-import { protect, authorize } from '../middleware/auth';
+import { protect, optionalAuth } from '../middleware/auth';
 import { checkPermission } from '../middleware/permissions';
 import {
   createOrderValidation,
@@ -49,11 +49,12 @@ router.get('/track/:id', trackOrder);
 
 // GUEST CHECKOUT: These routes no longer require auth middleware
 // The controller handles both guests and logged-in users
-router.post('/payment-intent', createPaymentIntentValidation, createOrderPaymentIntent);
-router.post('/paypal/create-order', createPayPalOrderValidation, createPayPalCheckoutOrder);
-router.post('/paypal/capture-order', capturePayPalOrderValidation, capturePayPalCheckoutOrder);
-router.post('/confirm-payment', confirmPaymentValidation, confirmOrderPayment);
-router.post('/', createOrderValidation, createOrder);
+// Guest checkout: optionalAuth so a logged-in shopper's card and address can be saved.
+router.post('/payment-intent', optionalAuth, createPaymentIntentValidation, createOrderPaymentIntent);
+router.post('/paypal/create-order', optionalAuth, createPayPalOrderValidation, createPayPalCheckoutOrder);
+router.post('/paypal/capture-order', optionalAuth, capturePayPalOrderValidation, capturePayPalCheckoutOrder);
+router.post('/confirm-payment', optionalAuth, confirmPaymentValidation, confirmOrderPayment);
+router.post('/', optionalAuth, createOrderValidation, createOrder);
 
 // Authenticated routes
 router.get('/myorders', protect, paginationValidation, getMyOrders);

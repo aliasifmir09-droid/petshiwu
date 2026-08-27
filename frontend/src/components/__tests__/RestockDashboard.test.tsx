@@ -1,15 +1,29 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi, beforeEach } from 'vitest';
 import RestockDashboard from '../RestockDashboard';
 import { buyAgainService } from '@/services/buyAgain';
+import { addressService } from '@/services/addresses';
+import paymentMethodService from '@/services/paymentMethods';
 
 vi.mock('@/services/buyAgain', () => ({
   buyAgainService: {
     getBuyAgain: vi.fn(),
     createReminder: vi.fn(),
     cancelReminder: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/addresses', () => ({
+  addressService: {
+    getAddresses: vi.fn().mockResolvedValue([]),
+  },
+}));
+
+vi.mock('@/services/paymentMethods', () => ({
+  default: {
+    getPaymentMethods: vi.fn().mockResolvedValue({ data: [] }),
   },
 }));
 
@@ -87,6 +101,11 @@ const renderDashboard = () => {
 };
 
 describe('RestockDashboard cart', () => {
+  beforeEach(() => {
+    vi.mocked(addressService.getAddresses).mockResolvedValue([]);
+    vi.mocked(paymentMethodService.getPaymentMethods).mockResolvedValue({ data: [] });
+  });
+
   test('lets a customer add and remove restock items and pick cadence plus a time', async () => {
     HTMLElement.prototype.scrollIntoView = vi.fn();
     vi.mocked(buyAgainService.getBuyAgain).mockResolvedValue(payload as any);
@@ -122,5 +141,40 @@ describe('RestockDashboard cart', () => {
     fireEvent.click(screen.getByRole('button', { name: /Apple Pay/i }));
     expect(screen.getAllByText('Apple Pay').length).toBeGreaterThan(0);
     expect(screen.getByRole('button', { name: /Pay and ship now/i })).toBeEnabled();
+  });
+
+  test('shows saved card and address so the customer is not asked again', async () => {
+    HTMLElement.prototype.scrollIntoView = vi.fn();
+    vi.mocked(buyAgainService.getBuyAgain).mockResolvedValue(payload as any);
+    vi.mocked(addressService.getAddresses).mockResolvedValue([
+      {
+        _id: 'a1',
+        street: '37-68 74th St',
+        city: 'Queens',
+        state: 'NY',
+        zipCode: '11372',
+        country: 'USA',
+        isDefault: true,
+      },
+    ] as any);
+    vi.mocked(paymentMethodService.getPaymentMethods).mockResolvedValue({
+      data: [
+        {
+          _id: 'pm1',
+          type: 'credit_card',
+          last4: '4242',
+          brand: 'visa',
+          isDefault: true,
+        },
+      ],
+    } as any);
+
+    renderDashboard();
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/Visa •••• 4242/i).length).toBeGreaterThan(0);
+    });
+    expect(screen.getByText(/37-68 74th St, Queens, NY 11372/)).toBeInTheDocument();
+    expect(screen.getByText(/You still confirm at checkout/i)).toBeInTheDocument();
   });
 });
