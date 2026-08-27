@@ -80,6 +80,23 @@ describe('coupon routes', () => {
     expect(res.body.message).toMatch(/already been used/i);
   });
 
+  it('lets RESTOCK5 be reused after a prior reorder on the same email', async () => {
+    usages.push({ email: 'repeat@example.com', code: 'RESTOCK5', orderId: 'order-1' });
+
+    const res = await request(app).post('/api/v1/coupons/validate').send({
+      code: 'RESTOCK5',
+      subtotal: 200,
+      email: 'repeat@example.com',
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      valid: true,
+      code: 'RESTOCK5',
+      discountAmount: 10,
+    });
+  });
+
   it('lets RESTOCK7 be reused after a prior restock on the same email', async () => {
     usages.push({ email: 'repeat@example.com', code: 'RESTOCK7', orderId: 'order-1' });
 

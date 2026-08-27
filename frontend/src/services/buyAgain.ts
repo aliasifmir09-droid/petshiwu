@@ -1,5 +1,5 @@
 import api from './api';
-import type { RestockMode } from '@/utils/restock';
+import type { RestockMode, RestockPick } from '@/utils/restock';
 
 export type BuyAgainItem = {
   product?: unknown;
@@ -8,6 +8,7 @@ export type BuyAgainItem = {
   price?: number;
   quantity?: number;
   variant?: { sku?: string };
+  restockable?: boolean;
 };
 
 export type BuyAgainLastOrder = {
@@ -28,6 +29,7 @@ export type BuyAgainRegular = {
   lastQuantity: number;
   timesOrdered: number;
   lastOrderedAt: string;
+  restockable?: boolean;
 };
 
 export type BuyAgainReminder = {
@@ -38,10 +40,12 @@ export type BuyAgainReminder = {
   mode: RestockMode;
   remindAt: string;
   status: string;
+  items?: RestockPick[];
 };
 
 export type BuyAgainPayload = {
   lastOrder: BuyAgainLastOrder | null;
+  usual: RestockPick[];
   regulars: BuyAgainRegular[];
   reminder: BuyAgainReminder | null;
 };
@@ -55,9 +59,14 @@ export const buyAgainService = {
   createReminder: async (
     orderId: string,
     weeks: number,
-    mode: RestockMode
+    mode: RestockMode,
+    items: RestockPick[]
   ): Promise<BuyAgainReminder> => {
-    const response = await api.post(`/orders/${encodeURIComponent(orderId)}/reminder`, { weeks, mode });
+    const response = await api.post(`/orders/${encodeURIComponent(orderId)}/reminder`, {
+      weeks,
+      mode,
+      items,
+    });
     return response.data.data;
   },
 

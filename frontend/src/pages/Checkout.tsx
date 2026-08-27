@@ -24,7 +24,7 @@ import { MapPin, Plus, Check, User, UserCheck, Banknote, ShieldCheck, RotateCcw,
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
 import { paypalClientId } from '@/config/paypal';
 import { isNycDeliveryZip, isNewYorkState, normalizeShippingState } from '@/utils/deliveryZip';
-import { clearRestockCoupon, readRestockCoupon, RESTOCK_COUPON, RESTOCK_DISCOUNT_COPY } from '@/utils/restock';
+import { clearRestockCoupon, readRestockCoupon, ASK_COUPON, ASK_DISCOUNT_COPY, AUTOSHIP_COUPON, AUTOSHIP_DISCOUNT_COPY } from '@/utils/restock';
 
 const PaymentForm = lazy(() => import('@/components/PaymentForm'));
 const CheckoutBrandedPayments = lazy(() => import('@/components/CheckoutBrandedPayments'));
@@ -1181,7 +1181,7 @@ const Checkout = () => {
                     )}
                     {!couponCode && !couponMessage && (
                       <p className="text-xs text-stone-500 mt-1.5">
-                        First order: FREEDOM20 · 20% off, max $10. Restock Ask first: {RESTOCK_COUPON} · {RESTOCK_DISCOUNT_COPY}.
+                        First order: FREEDOM20 · 20% off, max $10. Reorder {ASK_COUPON} · {ASK_DISCOUNT_COPY}. Autoship {AUTOSHIP_COUPON} · {AUTOSHIP_DISCOUNT_COPY}.
                       </p>
                     )}
                     {couponMessage && (

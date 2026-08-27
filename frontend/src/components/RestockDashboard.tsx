@@ -1,22 +1,36 @@
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
-import { buyAgainService } from '@/services/buyAgain';
+import { useNavigate } from 'react-router-dom';
+import { buyAgainService, type BuyAgainRegular } from '@/services/buyAgain';
+import { productService } from '@/services/products';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 import { productsForReorder } from '@/utils/reorderFromOrder';
 import {
-  rememberRestockCoupon,
-  RESTOCK_COUPON,
-  RESTOCK_DISCOUNT_COPY,
+  ASK_COUPON,
+  ASK_DISCOUNT_COPY,
+  AUTOSHIP_COUPON,
+  AUTOSHIP_DISCOUNT_COPY,
   REMINDER_WEEK_OPTIONS,
+  isRestockConsumable,
+  pickKey,
+  rememberRestockCoupon,
+  restockDiscountCopy,
   type RestockMode,
+  type RestockPick,
 } from '@/utils/restock';
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
-import { useState } from 'react';
-import { ArrowRight, Check, Sparkles } from 'lucide-react';
+import { ArrowRight, Check, Minus, Plus, Search, Sparkles, X } from 'lucide-react';
 import { areOrdersOpen } from '@/config/launch';
+import type { Product } from '@/types';
+
+const categoryHaystack = (product: Product): string => {
+  const category = product.category;
+  if (!category || typeof category === 'string') return `${product.name} ${category || ''}`;
+  return `${product.name} ${category.name || ''} ${category.slug || ''}`;
+};
 
 const RestockDashboard = () => {
   const { user } = useAuthStore();
@@ -26,6 +40,12 @@ const RestockDashboard = () => {
   const queryClient = useQueryClient();
   const [weeks, setWeeks] = useState<(typeof REMINDER_WEEK_OPTIONS)[number]>(4);
   const [restocking, setRestocking] = useState(false);
+  const [selected, setSelected] = useState<RestockPick[]>([]);
+  const [hydrated, setHydrated] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [hits, setHits] = useState<Product[]>([]);
+  const [searching, setSearching] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['buy-again'],
@@ -33,15 +53,57 @@ const RestockDashboard = () => {
     staleTime: 30 * 1000,
   });
 
+  useEffect(() => {
+    if (!data || hydrated) return;
+    setSelected(data.usual || []);
+    setAddOpen(!(data.usual && data.usual.length));
+    setHydrated(true);
+  }, [data, hydrated]);
+
+  useEffect(() => {
+    const term = query.trim();
+    if (term.length < 2) {
+      setHits([]);
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      setSearching(true);
+      try {
+        const response = await productService.search(term, { limit: 8, inStock: true });
+        if (cancelled) return;
+        const products = (response.data || []).filter((product) => isRestockConsumable(categoryHaystack(product)));
+        setHits(products);
+      } catch {
+        if (!cancelled) setHits([]);
+      } finally {
+        if (!cancelled) setSearching(false);
+      }
+    }, 300);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [query]);
+
   const reminderMutation = useMutation({
-    mutationFn: ({ orderId, weeks, mode }: { orderId: string; weeks: number; mode: RestockMode }) =>
-      buyAgainService.createReminder(orderId, weeks, mode),
+    mutationFn: ({
+      orderId,
+      weeks,
+      mode,
+      items,
+    }: {
+      orderId: string;
+      weeks: number;
+      mode: RestockMode;
+      items: RestockPick[];
+    }) => buyAgainService.createReminder(orderId, weeks, mode, items),
     onSuccess: (_reminder, variables) => {
       queryClient.invalidateQueries({ queryKey: ['buy-again'] });
       showToast(
         variables.mode === 'ask'
-          ? `Ask first is on. We'll email you in ${variables.weeks} weeks. Confirm then for ${RESTOCK_DISCOUNT_COPY}. We never charge unless you pay.`
-          : `Autoship is on. We'll email you in ${variables.weeks} weeks so you never forget. Tap Ship now when it's due — we still never charge unless you pay.`,
+          ? `Ask first is on. We'll email you in ${variables.weeks} weeks. Confirm then for ${ASK_DISCOUNT_COPY}. We never charge unless you pay.`
+          : `Autoship is on. We'll email you in ${variables.weeks} weeks. Ship then for ${AUTOSHIP_DISCOUNT_COPY}. We still never charge unless you pay.`,
         'success'
       );
     },
@@ -60,26 +122,93 @@ const RestockDashboard = () => {
 
   const petName = user?.pets?.[0]?.petName?.trim();
   const lastOrder = data?.lastOrder;
-  const heroItems = (lastOrder?.items || []).slice(0, 4);
+  const heroItems = selected.slice(0, 4);
   const usualLabel = petName ? `${petName}'s usual` : 'Your usual';
   const reminderMode = data?.reminder?.mode === 'autoship' ? 'autoship' : data?.reminder ? 'ask' : null;
+  const lastWasMostlyToys = Boolean(lastOrder?.items?.length) && selected.length === 0;
+
+  const extraFromOrders = useMemo(() => {
+    const keys = new Set(selected.map(pickKey));
+    return (data?.regulars || []).filter((item) => {
+      if (item.restockable === false) return false;
+      if (!isRestockConsumable(item.name)) return false;
+      return !keys.has(`${item.productId}::${item.sku || ''}`);
+    });
+  }, [data?.regulars, selected]);
+
+  const addPick = (pick: RestockPick) => {
+    setSelected((current) => {
+      const key = pickKey(pick);
+      const existing = current.find((item) => pickKey(item) === key);
+      if (existing) {
+        return current.map((item) =>
+          pickKey(item) === key ? { ...item, quantity: Math.min(12, item.quantity + pick.quantity) } : item
+        );
+      }
+      if (current.length >= 12) return current;
+      return [...current, pick];
+    });
+    setQuery('');
+    setHits([]);
+    showToast('Added. Want to add more food or treats?', 'success');
+  };
+
+  const addRegular = (item: BuyAgainRegular) => {
+    addPick({
+      product: item.productId,
+      name: item.name,
+      image: item.image,
+      quantity: Math.max(1, item.lastQuantity || 1),
+      sku: item.sku,
+    });
+  };
+
+  const addProduct = (product: Product) => {
+    const variant = (product.variants || []).find((row) => (row.stock || 0) > 0) || product.variants?.[0];
+    addPick({
+      product: product._id,
+      name: product.name,
+      image: product.images?.[0] || '',
+      quantity: 1,
+      sku: variant?.sku,
+    });
+  };
+
+  const setQty = (key: string, quantity: number) => {
+    setSelected((current) =>
+      current
+        .map((item) => (pickKey(item) === key ? { ...item, quantity } : item))
+        .filter((item) => item.quantity >= 1)
+    );
+  };
+
+  const removePick = (key: string) => {
+    setSelected((current) => current.filter((item) => pickKey(item) !== key));
+  };
 
   const handleConfirmNow = async () => {
-    if (!lastOrder?.items?.length) {
-      navigate('/products');
+    if (!selected.length) {
+      setAddOpen(true);
+      showToast('Add food or treats first. Toys skip restock.', 'error');
       return;
     }
     setRestocking(true);
     try {
-      const ready = await productsForReorder(lastOrder.items as any);
+      const ready = await productsForReorder(
+        selected.map((item) => ({
+          product: item.product,
+          quantity: item.quantity,
+          variant: item.sku ? { sku: item.sku } : undefined,
+        }))
+      );
       if (ready.length === 0) {
-        showToast('Those items are no longer in stock. Browse the catalog to replace them.', 'error');
+        showToast('Those items are no longer in stock. Add a replacement below.', 'error');
         return;
       }
       ready.forEach(({ product, variant, quantity }) => addToCart(product, variant, quantity));
-      rememberRestockCoupon();
-      showToast(`Confirm now — ${RESTOCK_COUPON} is ${RESTOCK_DISCOUNT_COPY}. We charge only when you pay.`, 'success');
-      navigate(`/checkout?coupon=${RESTOCK_COUPON}`);
+      rememberRestockCoupon(ASK_COUPON);
+      showToast(`Reorder — ${ASK_COUPON} is ${ASK_DISCOUNT_COPY}. We charge only when you pay.`, 'success');
+      navigate(`/checkout?coupon=${ASK_COUPON}`);
     } catch {
       showToast('Could not add those items. Try again from your orders.', 'error');
     } finally {
@@ -89,7 +218,12 @@ const RestockDashboard = () => {
 
   const pickPlan = (mode: RestockMode) => {
     if (!lastOrder?._id) return;
-    reminderMutation.mutate({ orderId: lastOrder._id, weeks, mode });
+    if (!selected.length) {
+      setAddOpen(true);
+      showToast('Add food or treats to restock. Toys and costumes skip this list.', 'error');
+      return;
+    }
+    reminderMutation.mutate({ orderId: lastOrder._id, weeks, mode, items: selected });
   };
 
   if (isLoading) {
@@ -113,9 +247,11 @@ const RestockDashboard = () => {
               Hi {user?.firstName || 'there'}. {lastOrder ? usualLabel : 'Welcome back.'}
             </h2>
             <p className="text-blue-100 text-base md:text-lg max-w-xl mb-6">
-              {lastOrder
-                ? `Latest order ${lastOrder.orderNumber}. Pick Ask first or Autoship below — we'll tell you which is better. We never charge unless you pay.`
-                : 'Same-day NYC when you order by cutoff. After your first order you can pick Ask first or Autoship.'}
+              {lastWasMostlyToys
+                ? `Latest order ${lastOrder?.orderNumber} looks like toys or gear. Restock is for food and treats — add what ${petName || 'they'} actually run out of.`
+                : lastOrder
+                  ? `Latest order ${lastOrder.orderNumber}. Change the usual, then pick Ask first (${ASK_DISCOUNT_COPY}) or Autoship (${AUTOSHIP_DISCOUNT_COPY}). We never charge unless you pay.`
+                  : 'Same-day NYC when you order by cutoff. After your first order you can pick Ask first or Autoship.'}
             </p>
 
             {lastOrder ? (
@@ -123,8 +259,11 @@ const RestockDashboard = () => {
                 <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-sm font-semibold capitalize">
                   Latest · {lastOrder.orderStatus || 'order'}
                 </span>
+                <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-sm font-black">
+                  Reorder · {ASK_COUPON} · {ASK_DISCOUNT_COPY}
+                </span>
                 <span className="inline-flex items-center rounded-full bg-emerald-400 text-[#0B1B4A] px-3 py-1 text-sm font-black">
-                  Ask first · {RESTOCK_COUPON} · {RESTOCK_DISCOUNT_COPY}
+                  Autoship · {AUTOSHIP_COUPON} · {AUTOSHIP_DISCOUNT_COPY}
                 </span>
                 {areOrdersOpen() && (
                   <span className="text-sm text-blue-100">Order by 3 PM weekdays for tonight</span>
@@ -139,9 +278,18 @@ const RestockDashboard = () => {
                 disabled={restocking || !lastOrder}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white text-[#0B1B4A] px-6 py-3.5 font-black text-base hover:bg-blue-50 disabled:opacity-50"
               >
-                {restocking ? 'Adding…' : lastOrder ? 'Confirm now — 7% off' : 'Start shopping'}
+                {restocking ? 'Adding…' : lastOrder ? `Confirm now — 5% off` : 'Start shopping'}
                 <ArrowRight size={18} />
               </button>
+              {lastOrder ? (
+                <button
+                  type="button"
+                  onClick={() => setAddOpen(true)}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-6 py-3.5 font-bold hover:bg-white/15"
+                >
+                  {selected.length ? 'Add more items' : 'Add food or treats'}
+                </button>
+              ) : null}
             </div>
           </div>
 
@@ -149,7 +297,7 @@ const RestockDashboard = () => {
             {heroItems.length > 0 ? (
               heroItems.map((item, index) => (
                 <div
-                  key={`${item.name}-${index}`}
+                  key={pickKey(item)}
                   className={`relative overflow-hidden rounded-3xl bg-white/5 ring-1 ring-white/10 ${index === 0 ? 'col-span-2 min-h-[240px] md:min-h-[320px]' : 'min-h-[140px]'}`}
                 >
                   <img
@@ -168,8 +316,11 @@ const RestockDashboard = () => {
               <div className="col-span-2 rounded-3xl min-h-[280px] bg-gradient-to-br from-blue-500/30 to-indigo-700/40 ring-1 ring-white/10 flex items-center justify-center p-8 text-center">
                 <div>
                   <Sparkles className="mx-auto mb-3 text-blue-200" />
-                  <p className="text-xl font-black mb-2">HD restock, when you say so</p>
-                  <Link to="/products" className="underline font-semibold">Shop tonight</Link>
+                  <p className="text-xl font-black mb-2">Add food or treats</p>
+                  <p className="text-sm text-blue-100 mb-3">Toys skip restock. Pick what they run out of.</p>
+                  <button type="button" className="underline font-semibold" onClick={() => setAddOpen(true)}>
+                    Add items
+                  </button>
                 </div>
               </div>
             )}
@@ -177,19 +328,139 @@ const RestockDashboard = () => {
         </div>
 
         {lastOrder?._id ? (
-          <div className="mt-10">
+          <div className="mt-10 space-y-6">
+            <div className="rounded-3xl bg-white/10 ring-1 ring-white/15 p-5 md:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-widest text-blue-200 mb-1">Your restock list</p>
+                  <h3 className="text-xl md:text-2xl font-black">Want to add more?</h3>
+                  <p className="text-blue-100 text-sm mt-1">
+                    Food and treats only. Change qty, remove a bag, or add another. Toys stay off this list.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAddOpen((open) => !open)}
+                  className="rounded-xl bg-white text-[#0B1B4A] px-4 py-2 text-sm font-black"
+                >
+                  {addOpen ? 'Hide search' : 'Add more items'}
+                </button>
+              </div>
+
+              {selected.length ? (
+                <ul className="space-y-3 mb-4">
+                  {selected.map((item) => {
+                    const key = pickKey(item);
+                    return (
+                      <li key={key} className="flex items-center gap-3 rounded-2xl bg-[#0B1B4A]/50 p-3">
+                        <img
+                          src={normalizeImageUrl(item.image, { size: 'small', format: 'auto' })}
+                          alt=""
+                          className="h-14 w-14 rounded-xl object-cover bg-white/10"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-sm leading-snug line-clamp-2">{item.name}</p>
+                          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/10 px-2 py-1">
+                            <button type="button" aria-label="Less" onClick={() => setQty(key, item.quantity - 1)}>
+                              <Minus size={14} />
+                            </button>
+                            <span className="text-sm font-black w-6 text-center">{item.quantity}</span>
+                            <button type="button" aria-label="More" onClick={() => setQty(key, Math.min(12, item.quantity + 1))}>
+                              <Plus size={14} />
+                            </button>
+                          </div>
+                        </div>
+                        <button type="button" aria-label={`Remove ${item.name}`} onClick={() => removePick(key)} className="p-2 text-blue-100 hover:text-white">
+                          <X size={18} />
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="text-blue-100 mb-4">Nothing on the restock list yet. Add food or treats below.</p>
+              )}
+
+              {addOpen ? (
+                <div className="space-y-4">
+                  <label className="block">
+                    <span className="text-sm font-semibold text-blue-100">Search food or treats</span>
+                    <div className="mt-2 flex items-center gap-2 rounded-2xl bg-white text-[#0B1B4A] px-3 py-2">
+                      <Search size={18} />
+                      <input
+                        value={query}
+                        onChange={(event) => setQuery(event.target.value)}
+                        placeholder="Hill's, salmon topper, litter…"
+                        className="w-full bg-transparent outline-none font-semibold"
+                      />
+                    </div>
+                  </label>
+                  {searching ? <p className="text-sm text-blue-100">Searching…</p> : null}
+                  {hits.length ? (
+                    <ul className="space-y-2">
+                      {hits.map((product) => (
+                        <li key={product._id}>
+                          <button
+                            type="button"
+                            onClick={() => addProduct(product)}
+                            className="w-full flex items-center gap-3 rounded-2xl bg-white/10 p-2 text-left hover:bg-white/20"
+                          >
+                            <img
+                              src={normalizeImageUrl(product.images?.[0], { size: 'small', format: 'auto' })}
+                              alt=""
+                              className="h-12 w-12 rounded-xl object-cover"
+                            />
+                            <span className="flex-1 font-semibold text-sm line-clamp-2">{product.name}</span>
+                            <span className="text-xs font-black uppercase">Add</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : query.trim().length >= 2 && !searching ? (
+                    <p className="text-sm text-blue-100">No food or treats matched. Try a brand or “treats”.</p>
+                  ) : null}
+
+                  {extraFromOrders.length ? (
+                    <div>
+                      <p className="text-sm font-semibold text-blue-100 mb-2">From your orders</p>
+                      <div className="flex flex-wrap gap-2">
+                        {extraFromOrders.slice(0, 8).map((item) => (
+                          <button
+                            key={`${item.productId}-${item.sku || ''}`}
+                            type="button"
+                            onClick={() => addRegular(item)}
+                            className="rounded-full bg-white/10 px-3 py-1.5 text-sm font-semibold hover:bg-white/20"
+                          >
+                            + {item.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+
             {data?.reminder && reminderMode ? (
               <div className="rounded-3xl bg-white/10 ring-1 ring-white/15 p-5 md:p-6">
                 <p className="text-sm font-bold uppercase tracking-widest text-blue-200 mb-2">Your plan</p>
                 <p className="text-xl md:text-2xl font-black mb-2">
-                  {reminderMode === 'ask' ? 'Ask first' : 'Autoship'} · every {data.reminder.weeks} weeks
+                  {reminderMode === 'ask' ? 'Ask first' : 'Autoship'} · every {data.reminder.weeks} weeks · {restockDiscountCopy(reminderMode)}
                 </p>
                 <p className="text-blue-100 max-w-2xl mb-4">
                   {reminderMode === 'ask'
-                    ? `Better for most people: we email you, you confirm, ${RESTOCK_DISCOUNT_COPY}. Next email ${new Date(data.reminder.remindAt).toLocaleDateString()}. Ignore it and nothing ships.`
-                    : `Better if you never want to forget: we email you on schedule. Tap Ship now when it's due. Regular price. Next email ${new Date(data.reminder.remindAt).toLocaleDateString()}. Ignore it and we skip that cycle.`}
+                    ? `Better control: we email you, you confirm, ${ASK_DISCOUNT_COPY}. Next email ${new Date(data.reminder.remindAt).toLocaleDateString()}. Ignore it and nothing ships.`
+                    : `Better price: we email you on schedule. Tap Ship now for ${AUTOSHIP_DISCOUNT_COPY}. Next email ${new Date(data.reminder.remindAt).toLocaleDateString()}. Ignore it and we skip that cycle.`}
                 </p>
                 <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    className="rounded-xl bg-white text-[#0B1B4A] px-4 py-2 text-sm font-black disabled:opacity-50"
+                    onClick={() => pickPlan(reminderMode)}
+                    disabled={reminderMutation.isPending || !selected.length}
+                  >
+                    Save item changes
+                  </button>
                   <button
                     type="button"
                     className="rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold hover:bg-white/25"
@@ -236,18 +507,18 @@ const RestockDashboard = () => {
                     type="button"
                     onClick={() => pickPlan('ask')}
                     disabled={reminderMutation.isPending}
-                    className="text-left rounded-3xl bg-white text-[#0B1B4A] p-6 ring-4 ring-emerald-300 hover:bg-blue-50 disabled:opacity-60"
+                    className="text-left rounded-3xl bg-white/10 ring-1 ring-white/20 p-6 hover:bg-white/15 disabled:opacity-60"
                   >
-                    <span className="inline-flex items-center rounded-full bg-emerald-400 px-3 py-1 text-xs font-black uppercase tracking-wide mb-3">
-                      Better for most people
+                    <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-wide mb-3">
+                      Better control · reorder 5%
                     </span>
                     <p className="text-2xl font-black mb-2">Ask first</p>
-                    <ul className="space-y-2 text-sm text-slate-700 mb-4">
-                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-600 shrink-0" /> We email you every cycle. You confirm.</li>
-                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-600 shrink-0" /> Save {RESTOCK_DISCOUNT_COPY} with {RESTOCK_COUPON}.</li>
-                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-600 shrink-0" /> Ignore the email — we never charge.</li>
+                    <ul className="space-y-2 text-sm text-blue-100 mb-4">
+                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-300 shrink-0" /> We email you every cycle. You confirm.</li>
+                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-300 shrink-0" /> Save {ASK_DISCOUNT_COPY} with {ASK_COUPON}.</li>
+                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-300 shrink-0" /> Ignore the email — we never charge.</li>
                     </ul>
-                    <span className="inline-flex items-center font-black text-[#0B1B4A]">
+                    <span className="inline-flex items-center font-black">
                       Choose Ask first <ArrowRight size={16} className="ml-1" />
                     </span>
                   </button>
@@ -255,18 +526,18 @@ const RestockDashboard = () => {
                     type="button"
                     onClick={() => pickPlan('autoship')}
                     disabled={reminderMutation.isPending}
-                    className="text-left rounded-3xl bg-white/10 ring-1 ring-white/20 p-6 hover:bg-white/15 disabled:opacity-60"
+                    className="text-left rounded-3xl bg-white text-[#0B1B4A] p-6 ring-4 ring-emerald-300 hover:bg-blue-50 disabled:opacity-60"
                   >
-                    <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-wide mb-3">
-                      Better if you never want to forget
+                    <span className="inline-flex items-center rounded-full bg-emerald-400 px-3 py-1 text-xs font-black uppercase tracking-wide mb-3">
+                      Better price · 7% off
                     </span>
                     <p className="text-2xl font-black mb-2">Autoship</p>
-                    <ul className="space-y-2 text-sm text-blue-100 mb-4">
-                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-300 shrink-0" /> We email you on this schedule.</li>
-                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-300 shrink-0" /> Tap Ship now when it's due. Regular price.</li>
-                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-300 shrink-0" /> Skip a cycle by ignoring the email — still no silent charge.</li>
+                    <ul className="space-y-2 text-sm text-slate-700 mb-4">
+                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-600 shrink-0" /> We email you on this schedule so you never forget.</li>
+                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-600 shrink-0" /> Tap Ship now for {AUTOSHIP_DISCOUNT_COPY} with {AUTOSHIP_COUPON}.</li>
+                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-600 shrink-0" /> Skip a cycle by ignoring the email — still no silent charge.</li>
                     </ul>
-                    <span className="inline-flex items-center font-black">
+                    <span className="inline-flex items-center font-black text-[#0B1B4A]">
                       Choose Autoship <ArrowRight size={16} className="ml-1" />
                     </span>
                   </button>

@@ -13,34 +13,33 @@ describe('reorder reminder emails', () => {
 
   const items = [{ name: 'Hill\'s Science Diet', quantity: 2 }];
 
-  test('Ask first email is confirm-to-pay with RESTOCK7 and no silent charge', () => {
+  test('Ask first email is confirm-to-pay with RESTOCK5 and no silent charge', () => {
     const email = buildReorderReminderEmail('Sam', 'PW-100', {
       weeks: 4,
       items,
       mode: 'ask',
-      buyAgainUrlPath: '/restock?coupon=RESTOCK7',
+      buyAgainUrlPath: '/restock?coupon=RESTOCK5',
     });
 
-    expect(email.subject).toMatch(/7% off/i);
+    expect(email.subject).toMatch(/5% off/i);
     expect(email.html).toContain('Confirm now');
-    expect(email.html).toContain('/restock?coupon=RESTOCK7');
+    expect(email.html).toContain('/restock?coupon=RESTOCK5');
     expect(email.html).toMatch(/will not charge your card/i);
     expect(email.html).not.toMatch(/we will charge/i);
   });
 
-  test('Autoship email is ship-now at regular price and still no silent charge', () => {
+  test('Autoship email is ship-now at 7% off and still no silent charge', () => {
     const email = buildReorderReminderEmail('Sam', 'PW-100', {
       weeks: 4,
       items,
       mode: 'autoship',
-      buyAgainUrlPath: '/restock?mode=autoship',
+      buyAgainUrlPath: '/restock?coupon=RESTOCK7&mode=autoship',
     });
 
     expect(email.subject).toMatch(/autoship/i);
     expect(email.html).toContain('Ship now');
-    expect(email.html).toContain('/restock?mode=autoship');
-    expect(email.html).not.toContain('RESTOCK7');
+    expect(email.html).toContain('RESTOCK7');
+    expect(email.html).toMatch(/7% off/i);
     expect(email.html).toMatch(/will not charge your card/i);
-    expect(email.html).toMatch(/Ask first is the better deal/i);
   });
 });

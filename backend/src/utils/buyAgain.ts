@@ -14,7 +14,83 @@ export const normalizeRestockMode = (mode: unknown): RestockMode =>
   mode === 'autoship' ? 'autoship' : 'ask';
 
 export const restockEmailPath = (mode: RestockMode = 'ask'): string =>
-  mode === 'ask' ? '/restock?coupon=RESTOCK7' : '/restock?mode=autoship';
+  mode === 'autoship' ? '/restock?coupon=RESTOCK7&mode=autoship' : '/restock?coupon=RESTOCK5';
+
+export const ASK_COUPON = 'RESTOCK5';
+export const AUTOSHIP_COUPON = 'RESTOCK7';
+
+export const restockCouponForMode = (mode: RestockMode): string =>
+  mode === 'autoship' ? AUTOSHIP_COUPON : ASK_COUPON;
+
+const RESTOCK_EXCLUDE =
+  /\b(toy|toys|costume|costumes|apparel|bed|beds|collar|collars|leash|leashes|harness|crate|carrier|furniture|scratch(er|ing)?|hoodie|shirt|bandana|bowl|bowls|feeder|fountain|litter[- ]?box|outfit|dress|halloween)\b/i;
+
+export const isRestockConsumable = (haystack: string): boolean => {
+  const text = String(haystack || '');
+  if (!text.trim()) return false;
+  if (RESTOCK_EXCLUDE.test(text) && !/\b(food|treat|treats|kibble|diet|meal|litter)\b/i.test(text)) {
+    return false;
+  }
+  return true;
+};
+
+export type RestockPick = {
+  product: string;
+  name: string;
+  image: string;
+  quantity: number;
+  sku?: string;
+};
+
+export const sanitizeRestockItems = (raw: unknown): RestockPick[] => {
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set<string>();
+  const picks: RestockPick[] = [];
+  for (const row of raw.slice(0, 12)) {
+    if (!row || typeof row !== 'object') continue;
+    const rec = row as RestockPick & { product?: unknown };
+    const product = productIdOf(rec.product);
+    const name = String(rec.name || '').trim().slice(0, 200);
+    const quantity = Math.min(12, Math.max(1, Math.round(Number(rec.quantity) || 1)));
+    if (!product || product === 'undefined' || !name) continue;
+    if (!isRestockConsumable(name)) continue;
+    const sku = rec.sku ? String(rec.sku).trim().slice(0, 80) : undefined;
+    const key = `${product}::${sku || ''}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    picks.push({
+      product,
+      name,
+      image: String(rec.image || '').slice(0, 500),
+      quantity,
+      ...(sku ? { sku } : {}),
+    });
+  }
+  return picks;
+};
+
+export const usualFromOrderItems = (items: BuyAgainOrderItem[] | undefined): RestockPick[] => {
+  const picks: RestockPick[] = [];
+  const seen = new Set<string>();
+  for (const item of items || []) {
+    const product = productIdOf(item.product);
+    const name = String(item.name || '').trim();
+    if (!product || !name || !isRestockConsumable(name)) continue;
+    const sku = item.variant?.sku;
+    const key = `${product}::${sku || ''}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    picks.push({
+      product,
+      name,
+      image: String(item.image || ''),
+      quantity: Math.max(1, Number(item.quantity) || 1),
+      ...(sku ? { sku } : {}),
+    });
+    if (picks.length >= 12) break;
+  }
+  return picks;
+};
 
 export const remindAtFromWeeks = (weeks: number, from: Date = new Date()): Date => {
   const remindAt = new Date(from);

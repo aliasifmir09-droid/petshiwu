@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { buyAgainService } from '@/services/buyAgain';
 import { useCartStore } from '@/stores/cartStore';
 import { productsForReorder } from '@/utils/reorderFromOrder';
-import { rememberRestockCoupon, RESTOCK_COUPON } from '@/utils/restock';
+import { ASK_COUPON, AUTOSHIP_COUPON, isRestockCoupon, rememberRestockCoupon } from '@/utils/restock';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import SEO from '@/components/SEO';
 
@@ -12,32 +12,40 @@ const Restock = () => {
   const [searchParams] = useSearchParams();
   const addToCart = useCartStore((state) => state.addToCart);
   const [message, setMessage] = useState('Loading your restock…');
-  const applyAskDiscount = searchParams.get('coupon')?.toUpperCase() === RESTOCK_COUPON;
-  const isAutoship = searchParams.get('mode') === 'autoship';
+  const couponParam = (searchParams.get('coupon') || '').toUpperCase();
+  const coupon = isRestockCoupon(couponParam)
+    ? couponParam
+    : searchParams.get('mode') === 'autoship'
+      ? AUTOSHIP_COUPON
+      : ASK_COUPON;
 
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
       try {
         const data = await buyAgainService.getBuyAgain();
-        const items = data.lastOrder?.items || [];
-        if (!items.length) {
-          navigate('/orders', { replace: true });
+        const items = (data.reminder?.items?.length ? data.reminder.items : data.usual) || [];
+        const fallback = data.lastOrder?.items || [];
+        const source = items.length
+          ? items.map((item) => ({
+              product: item.product,
+              quantity: item.quantity,
+              variant: item.sku ? { sku: item.sku } : undefined,
+            }))
+          : fallback;
+        if (!source.length) {
+          navigate('/#restock', { replace: true });
           return;
         }
-        const ready = await productsForReorder(items as any);
+        const ready = await productsForReorder(source as any);
         if (cancelled) return;
         if (!ready.length) {
           setMessage('Those items are no longer in stock.');
           return;
         }
         ready.forEach(({ product, variant, quantity }) => addToCart(product, variant, quantity));
-        if (applyAskDiscount) {
-          rememberRestockCoupon();
-          navigate(`/checkout?coupon=${RESTOCK_COUPON}`, { replace: true });
-          return;
-        }
-        navigate(isAutoship ? '/checkout?mode=autoship' : '/checkout', { replace: true });
+        rememberRestockCoupon(coupon);
+        navigate(`/checkout?coupon=${coupon}`, { replace: true });
       } catch {
         if (!cancelled) navigate('/login?redirect=/restock', { replace: true });
       }
@@ -46,7 +54,7 @@ const Restock = () => {
     return () => {
       cancelled = true;
     };
-  }, [addToCart, applyAskDiscount, isAutoship, navigate]);
+  }, [addToCart, coupon, navigate]);
 
   return (
     <div className="container mx-auto px-4 py-20 text-center">

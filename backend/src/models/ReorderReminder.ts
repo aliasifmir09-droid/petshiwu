@@ -7,11 +7,11 @@ export interface IReorderReminder extends Document {
   email: string;
   firstName: string;
   weeks: number;
-  /** ask = email then confirm/pay for 7% off. autoship = email on schedule, regular price, still no charge until they pay. */
+  /** ask = email then confirm/pay for 5% off. autoship = email on schedule, 7% off. Still no charge until they pay. */
   mode: 'ask' | 'autoship';
   remindAt: Date;
   status: 'scheduled' | 'sent' | 'cancelled';
-  items: Array<{ name: string; quantity: number }>;
+  items: Array<{ product?: mongoose.Types.ObjectId; name: string; image?: string; quantity: number; sku?: string }>;
   sentAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -39,8 +39,11 @@ const reorderReminderSchema = new Schema<IReorderReminder>(
     },
     items: [
       {
+        product: { type: Schema.Types.ObjectId, ref: 'Product' },
         name: { type: String, required: true },
+        image: { type: String, default: '' },
         quantity: { type: Number, required: true, min: 1 },
+        sku: { type: String },
         _id: false,
       },
     ],

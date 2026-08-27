@@ -26,17 +26,26 @@ export const COUPONS: Record<string, Coupon> = {
     reusable: true,
     hidden: true,
   },
-  // Restock confirm-now: 7% off, max $10, reusable. Never charged unless they confirm checkout.
+  // Ask first / reorder: 5% off, max $10. Autoship: 7% off, max $10. Reusable.
+  RESTOCK5: {
+    type: 'percent',
+    value: 5,
+    maxDiscount: 10,
+    description: '5% off when you confirm a reorder (max $10)',
+    reusable: true,
+  },
   RESTOCK7: {
     type: 'percent',
     value: 7,
     maxDiscount: 10,
-    description: '7% off when you confirm your restock (max $10)',
+    description: '7% off Autoship restock (max $10)',
     reusable: true,
   },
 };
 
-export const RESTOCK_COUPON_CODE = 'RESTOCK7';
+export const ASK_COUPON_CODE = 'RESTOCK5';
+export const AUTOSHIP_COUPON_CODE = 'RESTOCK7';
+export const RESTOCK_COUPON_CODE = 'RESTOCK5';
 
 export const normalizeCouponCode = (code: string | undefined): string =>
   (code || '').trim().toUpperCase();

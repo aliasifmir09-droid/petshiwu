@@ -30,7 +30,7 @@ describe('reorder reminder worker', () => {
     (sendReorderReminderEmail as jest.Mock).mockReset();
   });
 
-  test('Ask first due reminders send RESTOCK7 confirm email and reschedule', async () => {
+  test('Ask first due reminders send RESTOCK5 confirm email and reschedule', async () => {
     const reminder = {
       email: 'sam@example.com',
       firstName: 'Sam',
@@ -59,7 +59,7 @@ describe('reorder reminder worker', () => {
       'PW-1',
       expect.objectContaining({
         mode: 'ask',
-        buyAgainUrlPath: '/restock?coupon=RESTOCK7',
+        buyAgainUrlPath: '/restock?coupon=RESTOCK5',
       })
     );
     expect(reminder.status).toBe('sent');
@@ -72,7 +72,7 @@ describe('reorder reminder worker', () => {
     );
   });
 
-  test('Autoship due reminders send ship-now email without RESTOCK7', async () => {
+  test('Autoship due reminders send RESTOCK7 ship-now email', async () => {
     const reminder = {
       email: 'sam@example.com',
       firstName: 'Sam',
@@ -100,11 +100,11 @@ describe('reorder reminder worker', () => {
       'PW-2',
       expect.objectContaining({
         mode: 'autoship',
-        buyAgainUrlPath: '/restock?mode=autoship',
+        buyAgainUrlPath: '/restock?coupon=RESTOCK7&mode=autoship',
       })
     );
     const payload = (sendReorderReminderEmail as jest.Mock).mock.calls[0][3];
-    expect(payload.buyAgainUrlPath).not.toMatch(/RESTOCK7/);
+    expect(payload.buyAgainUrlPath).toMatch(/RESTOCK7/);
     expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ mode: 'autoship' }));
   });
 });
