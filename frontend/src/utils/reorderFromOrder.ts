@@ -1,5 +1,6 @@
 import { productService } from '@/services/products';
 import { Product, ProductVariant } from '@/types';
+import { availableCartStock } from '@/utils/cartStock';
 
 export function orderItemProductId(item: { product?: unknown }): string {
   const product = item.product;
@@ -13,19 +14,28 @@ export function orderItemProductId(item: { product?: unknown }): string {
   return String(product);
 }
 
+const restockStock = (product: Product, variant?: ProductVariant | null): number => {
+  const listed = availableCartStock(product, variant || null);
+  if (listed > 0) return listed;
+  if (product.inStock) return 1;
+  return 0;
+};
+
 export function pickInStockVariant(
   product: Product,
   sku?: string
 ): ProductVariant | undefined {
   const variants = Array.isArray(product.variants) ? product.variants : [];
-  const bySku = sku ? variants.find((v) => v.sku === sku && (v.stock || 0) > 0) : undefined;
-  if (bySku) return bySku;
-  const anyStock = variants.find((v) => (v.stock || 0) > 0);
-  if (anyStock) return anyStock;
-  if ((product.totalStock || 0) > 0) {
+  const bySku = sku ? variants.find((v) => v.sku === sku) : undefined;
+  const ranked = [...(bySku ? [bySku] : []), ...variants.filter((v) => v !== bySku)];
+  const chosen = ranked.find((variant) => restockStock(product, variant) > 0);
+  if (chosen) {
+    return { ...chosen, stock: restockStock(product, chosen) };
+  }
+  if (restockStock(product) > 0) {
     return {
       sku: sku || 'default',
-      stock: product.totalStock,
+      stock: restockStock(product),
       price: product.basePrice,
     } as ProductVariant;
   }

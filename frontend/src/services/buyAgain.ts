@@ -37,6 +37,8 @@ export type BuyAgainReminder = {
   orderId: string;
   orderNumber: string;
   weeks: number;
+  intervalDays?: number;
+  cadenceLabel?: string;
   mode: RestockMode;
   remindAt: string;
   status: string;
@@ -58,14 +60,18 @@ export const buyAgainService = {
 
   createReminder: async (
     orderId: string,
-    weeks: number,
-    mode: RestockMode,
-    items: RestockPick[]
+    payload: {
+      mode: RestockMode;
+      items: RestockPick[];
+      intervalDays: number;
+      remindAt?: string;
+    }
   ): Promise<BuyAgainReminder> => {
     const response = await api.post(`/orders/${encodeURIComponent(orderId)}/reminder`, {
-      weeks,
-      mode,
-      items,
+      intervalDays: payload.intervalDays,
+      remindAt: payload.remindAt,
+      mode: payload.mode,
+      items: payload.items,
     });
     return response.data.data;
   },

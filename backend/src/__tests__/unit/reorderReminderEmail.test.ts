@@ -25,6 +25,7 @@ describe('reorder reminder emails', () => {
     expect(email.html).toContain('Confirm now');
     expect(email.html).toContain('/restock?coupon=RESTOCK5');
     expect(email.html).toMatch(/will not charge your card/i);
+    expect(email.html).toMatch(/restock cart/i);
     expect(email.html).not.toMatch(/we will charge/i);
   });
 
@@ -41,5 +42,6 @@ describe('reorder reminder emails', () => {
     expect(email.html).toContain('RESTOCK7');
     expect(email.html).toMatch(/7% off/i);
     expect(email.html).toMatch(/will not charge your card/i);
+    expect(email.html).toMatch(/restock cart/i);
   });
 });

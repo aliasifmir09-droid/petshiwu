@@ -6,23 +6,32 @@ import { productService } from '@/services/products';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 import { productsForReorder } from '@/utils/reorderFromOrder';
+import { availableCartStock } from '@/utils/cartStock';
 import {
   ASK_COUPON,
   ASK_DISCOUNT_COPY,
   AUTOSHIP_COUPON,
   AUTOSHIP_DISCOUNT_COPY,
-  REMINDER_WEEK_OPTIONS,
+  DEFAULT_INTERVAL_DAYS,
+  RESTOCK_CADENCE,
+  cadenceLabel,
+  defaultRemindParts,
   isRestockConsumable,
+  isValidIntervalDays,
+  localDateStr,
+  localTimeStr,
   pickKey,
   rememberRestockCoupon,
+  remindAtIso,
   restockDiscountCopy,
+  type RestockIntervalDays,
   type RestockMode,
   type RestockPick,
 } from '@/utils/restock';
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
-import { ArrowRight, Check, Minus, Plus, Search, Sparkles, X } from 'lucide-react';
+import { ArrowRight, Check, Minus, Plus, Search, ShoppingCart, Sparkles, X } from 'lucide-react';
 import { areOrdersOpen } from '@/config/launch';
 import type { Product } from '@/types';
 
@@ -38,7 +47,9 @@ const RestockDashboard = () => {
   const addToCart = useCartStore((state) => state.addToCart);
   const { toast, showToast, hideToast } = useToast();
   const queryClient = useQueryClient();
-  const [weeks, setWeeks] = useState<(typeof REMINDER_WEEK_OPTIONS)[number]>(4);
+  const [intervalDays, setIntervalDays] = useState<RestockIntervalDays>(DEFAULT_INTERVAL_DAYS);
+  const [remindDate, setRemindDate] = useState(() => defaultRemindParts(DEFAULT_INTERVAL_DAYS).date);
+  const [remindTime, setRemindTime] = useState(() => defaultRemindParts(DEFAULT_INTERVAL_DAYS).time);
   const [restocking, setRestocking] = useState(false);
   const [selected, setSelected] = useState<RestockPick[]>([]);
   const [hydrated, setHydrated] = useState(false);
@@ -57,6 +68,18 @@ const RestockDashboard = () => {
     if (!data || hydrated) return;
     setSelected(data.usual || []);
     setAddOpen(!(data.usual && data.usual.length));
+    const days = Number(data.reminder?.intervalDays) || (data.reminder?.weeks ? data.reminder.weeks * 7 : DEFAULT_INTERVAL_DAYS);
+    const cadence = isValidIntervalDays(days) ? days : DEFAULT_INTERVAL_DAYS;
+    setIntervalDays(cadence);
+    if (data.reminder?.remindAt) {
+      const at = new Date(data.reminder.remindAt);
+      setRemindDate(localDateStr(at));
+      setRemindTime(localTimeStr(at));
+    } else {
+      const parts = defaultRemindParts(cadence);
+      setRemindDate(parts.date);
+      setRemindTime(parts.time);
+    }
     setHydrated(true);
   }, [data, hydrated]);
 
@@ -89,21 +112,28 @@ const RestockDashboard = () => {
   const reminderMutation = useMutation({
     mutationFn: ({
       orderId,
-      weeks,
+      intervalDays,
+      remindAt,
       mode,
       items,
     }: {
       orderId: string;
-      weeks: number;
+      intervalDays: number;
+      remindAt: string;
       mode: RestockMode;
       items: RestockPick[];
-    }) => buyAgainService.createReminder(orderId, weeks, mode, items),
+    }) => buyAgainService.createReminder(orderId, { intervalDays, remindAt, mode, items }),
     onSuccess: (_reminder, variables) => {
       queryClient.invalidateQueries({ queryKey: ['buy-again'] });
+      const every = cadenceLabel(variables.intervalDays);
+      const when = new Date(variables.remindAt).toLocaleString(undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      });
       showToast(
         variables.mode === 'ask'
-          ? `Ask first is on. We'll email you in ${variables.weeks} weeks. Confirm then for ${ASK_DISCOUNT_COPY}. We never charge unless you pay.`
-          : `Autoship is on. We'll email you in ${variables.weeks} weeks. Ship then for ${AUTOSHIP_DISCOUNT_COPY}. We still never charge unless you pay.`,
+          ? `Ask first is on. ${every}. Next email ${when}. Confirm then for ${ASK_DISCOUNT_COPY}. We never charge unless you pay.`
+          : `Autoship is on. ${every}. Next email ${when}. Ship then for ${AUTOSHIP_DISCOUNT_COPY}. We still never charge unless you pay.`,
         'success'
       );
     },
@@ -126,6 +156,7 @@ const RestockDashboard = () => {
   const usualLabel = petName ? `${petName}'s usual` : 'Your usual';
   const reminderMode = data?.reminder?.mode === 'autoship' ? 'autoship' : data?.reminder ? 'ask' : null;
   const lastWasMostlyToys = Boolean(lastOrder?.items?.length) && selected.length === 0;
+  const minDate = localDateStr(new Date());
 
   const extraFromOrders = useMemo(() => {
     const keys = new Set(selected.map(pickKey));
@@ -135,6 +166,20 @@ const RestockDashboard = () => {
       return !keys.has(`${item.productId}::${item.sku || ''}`);
     });
   }, [data?.regulars, selected]);
+
+  const openCart = () => {
+    setAddOpen(true);
+    window.requestAnimationFrame(() => {
+      document.getElementById('restock-cart')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
+
+  const changeCadence = (days: RestockIntervalDays) => {
+    setIntervalDays(days);
+    const parts = defaultRemindParts(days);
+    setRemindDate(parts.date);
+    setRemindTime(parts.time);
+  };
 
   const addPick = (pick: RestockPick) => {
     setSelected((current) => {
@@ -150,7 +195,7 @@ const RestockDashboard = () => {
     });
     setQuery('');
     setHits([]);
-    showToast('Added. Want to add more food or treats?', 'success');
+    showToast('Added to your restock cart. Add or remove anything else.', 'success');
   };
 
   const addRegular = (item: BuyAgainRegular) => {
@@ -164,7 +209,8 @@ const RestockDashboard = () => {
   };
 
   const addProduct = (product: Product) => {
-    const variant = (product.variants || []).find((row) => (row.stock || 0) > 0) || product.variants?.[0];
+    const variant =
+      (product.variants || []).find((row) => availableCartStock(product, row) > 0) || product.variants?.[0];
     addPick({
       product: product._id,
       name: product.name,
@@ -188,8 +234,8 @@ const RestockDashboard = () => {
 
   const handleConfirmNow = async () => {
     if (!selected.length) {
-      setAddOpen(true);
-      showToast('Add food or treats first. Toys skip restock.', 'error');
+      openCart();
+      showToast('Add food or treats to your restock cart first. Toys skip restock.', 'error');
       return;
     }
     setRestocking(true);
@@ -201,11 +247,15 @@ const RestockDashboard = () => {
           variant: item.sku ? { sku: item.sku } : undefined,
         }))
       );
-      if (ready.length === 0) {
-        showToast('Those items are no longer in stock. Add a replacement below.', 'error');
+      let added = 0;
+      ready.forEach(({ product, variant, quantity }) => {
+        if (addToCart(product, variant, quantity)) added += 1;
+      });
+      if (added === 0) {
+        openCart();
+        showToast('Could not add those items. Add a replacement in your restock cart.', 'error');
         return;
       }
-      ready.forEach(({ product, variant, quantity }) => addToCart(product, variant, quantity));
       rememberRestockCoupon(ASK_COUPON);
       showToast(`Reorder — ${ASK_COUPON} is ${ASK_DISCOUNT_COPY}. We charge only when you pay.`, 'success');
       navigate(`/checkout?coupon=${ASK_COUPON}`);
@@ -219,11 +269,17 @@ const RestockDashboard = () => {
   const pickPlan = (mode: RestockMode) => {
     if (!lastOrder?._id) return;
     if (!selected.length) {
-      setAddOpen(true);
-      showToast('Add food or treats to restock. Toys and costumes skip this list.', 'error');
+      openCart();
+      showToast('Add food or treats to your restock cart. Toys and costumes skip this list.', 'error');
       return;
     }
-    reminderMutation.mutate({ orderId: lastOrder._id, weeks, mode, items: selected });
+    reminderMutation.mutate({
+      orderId: lastOrder._id,
+      intervalDays,
+      remindAt: remindAtIso(remindDate, remindTime),
+      mode,
+      items: selected,
+    });
   };
 
   if (isLoading) {
@@ -250,7 +306,7 @@ const RestockDashboard = () => {
               {lastWasMostlyToys
                 ? `Latest order ${lastOrder?.orderNumber} looks like toys or gear. Restock is for food and treats — add what ${petName || 'they'} actually run out of.`
                 : lastOrder
-                  ? `Latest order ${lastOrder.orderNumber}. Change the usual, then pick Ask first (${ASK_DISCOUNT_COPY}) or Autoship (${AUTOSHIP_DISCOUNT_COPY}). We never charge unless you pay.`
+                  ? `Latest order ${lastOrder.orderNumber}. Build the restock cart, pick how often, then Ask first (${ASK_DISCOUNT_COPY}) or Autoship (${AUTOSHIP_DISCOUNT_COPY}). We never charge unless you pay.`
                   : 'Same-day NYC when you order by cutoff. After your first order you can pick Ask first or Autoship.'}
             </p>
 
@@ -284,10 +340,11 @@ const RestockDashboard = () => {
               {lastOrder ? (
                 <button
                   type="button"
-                  onClick={() => setAddOpen(true)}
+                  onClick={openCart}
                   className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-6 py-3.5 font-bold hover:bg-white/15"
                 >
-                  {selected.length ? 'Add more items' : 'Add food or treats'}
+                  <ShoppingCart size={18} />
+                  {selected.length ? 'Edit restock cart' : 'Add food or treats'}
                 </button>
               ) : null}
             </div>
@@ -296,9 +353,11 @@ const RestockDashboard = () => {
           <div className="lg:w-[46%] grid grid-cols-2 gap-3">
             {heroItems.length > 0 ? (
               heroItems.map((item, index) => (
-                <div
+                <button
+                  type="button"
                   key={pickKey(item)}
-                  className={`relative overflow-hidden rounded-3xl bg-white/5 ring-1 ring-white/10 ${index === 0 ? 'col-span-2 min-h-[240px] md:min-h-[320px]' : 'min-h-[140px]'}`}
+                  onClick={openCart}
+                  className={`relative overflow-hidden rounded-3xl bg-white/5 ring-1 ring-white/10 text-left ${index === 0 ? 'col-span-2 min-h-[240px] md:min-h-[320px]' : 'min-h-[140px]'}`}
                 >
                   <img
                     src={normalizeImageUrl(item.image, { size: index === 0 ? 'xlarge' : 'large', format: 'auto' })}
@@ -308,9 +367,9 @@ const RestockDashboard = () => {
                   />
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                     <p className="font-bold text-sm md:text-base leading-snug">{item.name}</p>
-                    <p className="text-xs text-white/80">Qty {item.quantity}</p>
+                    <p className="text-xs text-white/80">Qty {item.quantity} · tap to add or remove</p>
                   </div>
-                </div>
+                </button>
               ))
             ) : (
               <div className="col-span-2 rounded-3xl min-h-[280px] bg-gradient-to-br from-blue-500/30 to-indigo-700/40 ring-1 ring-white/10 flex items-center justify-center p-8 text-center">
@@ -318,8 +377,8 @@ const RestockDashboard = () => {
                   <Sparkles className="mx-auto mb-3 text-blue-200" />
                   <p className="text-xl font-black mb-2">Add food or treats</p>
                   <p className="text-sm text-blue-100 mb-3">Toys skip restock. Pick what they run out of.</p>
-                  <button type="button" className="underline font-semibold" onClick={() => setAddOpen(true)}>
-                    Add items
+                  <button type="button" className="underline font-semibold" onClick={openCart}>
+                    Open restock cart
                   </button>
                 </div>
               </div>
@@ -329,13 +388,13 @@ const RestockDashboard = () => {
 
         {lastOrder?._id ? (
           <div className="mt-10 space-y-6">
-            <div className="rounded-3xl bg-white/10 ring-1 ring-white/15 p-5 md:p-6">
+            <div id="restock-cart" className="rounded-3xl bg-white/10 ring-1 ring-white/15 p-5 md:p-6 scroll-mt-24">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-widest text-blue-200 mb-1">Your restock list</p>
-                  <h3 className="text-xl md:text-2xl font-black">Want to add more?</h3>
+                  <p className="text-sm font-bold uppercase tracking-widest text-blue-200 mb-1">Your restock cart</p>
+                  <h3 className="text-xl md:text-2xl font-black">Add or remove anything</h3>
                   <p className="text-blue-100 text-sm mt-1">
-                    Food and treats only. Change qty, remove a bag, or add another. Toys stay off this list.
+                    Food and treats only. Change qty, remove a bag, or add another. This is the list we email. Toys stay off.
                   </p>
                 </div>
                 <button
@@ -361,16 +420,21 @@ const RestockDashboard = () => {
                         <div className="min-w-0 flex-1">
                           <p className="font-semibold text-sm leading-snug line-clamp-2">{item.name}</p>
                           <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/10 px-2 py-1">
-                            <button type="button" aria-label="Less" onClick={() => setQty(key, item.quantity - 1)}>
+                            <button type="button" aria-label={`Remove one ${item.name}`} onClick={() => setQty(key, item.quantity - 1)}>
                               <Minus size={14} />
                             </button>
                             <span className="text-sm font-black w-6 text-center">{item.quantity}</span>
-                            <button type="button" aria-label="More" onClick={() => setQty(key, Math.min(12, item.quantity + 1))}>
+                            <button type="button" aria-label={`Add one ${item.name}`} onClick={() => setQty(key, Math.min(12, item.quantity + 1))}>
                               <Plus size={14} />
                             </button>
                           </div>
                         </div>
-                        <button type="button" aria-label={`Remove ${item.name}`} onClick={() => removePick(key)} className="p-2 text-blue-100 hover:text-white">
+                        <button
+                          type="button"
+                          aria-label={`Remove ${item.name} from cart`}
+                          onClick={() => removePick(key)}
+                          className="p-2 text-blue-100 hover:text-white"
+                        >
                           <X size={18} />
                         </button>
                       </li>
@@ -378,7 +442,7 @@ const RestockDashboard = () => {
                   })}
                 </ul>
               ) : (
-                <p className="text-blue-100 mb-4">Nothing on the restock list yet. Add food or treats below.</p>
+                <p className="text-blue-100 mb-4">Cart is empty. Add food or treats below.</p>
               )}
 
               {addOpen ? (
@@ -441,16 +505,62 @@ const RestockDashboard = () => {
               ) : null}
             </div>
 
+            <div className="rounded-3xl bg-white/10 ring-1 ring-white/15 p-5 md:p-6">
+              <p className="text-sm font-bold uppercase tracking-widest text-blue-200 mb-1">When to email you</p>
+              <h3 className="text-xl md:text-2xl font-black mb-2">You pick the cadence and the time</h3>
+              <p className="text-blue-100 text-sm mb-4">
+                Every day, every week, or every 2–8 weeks. Pick the next date and time. We still never charge unless you pay.
+              </p>
+              <div className="grid sm:grid-cols-3 gap-3">
+                <label className="text-sm text-blue-100">
+                  How often
+                  <select
+                    aria-label="How often to restock"
+                    value={intervalDays}
+                    onChange={(event) => changeCadence(Number(event.target.value) as RestockIntervalDays)}
+                    className="mt-2 w-full rounded-xl bg-white/10 px-3 py-2 font-semibold text-white outline-none"
+                  >
+                    {RESTOCK_CADENCE.map((option) => (
+                      <option key={option.intervalDays} value={option.intervalDays} className="text-slate-900">
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="text-sm text-blue-100">
+                  Next date
+                  <input
+                    type="date"
+                    aria-label="Next restock email date"
+                    min={minDate}
+                    value={remindDate}
+                    onChange={(event) => setRemindDate(event.target.value)}
+                    className="mt-2 w-full rounded-xl bg-white/10 px-3 py-2 font-semibold text-white outline-none [color-scheme:dark]"
+                  />
+                </label>
+                <label className="text-sm text-blue-100">
+                  Time
+                  <input
+                    type="time"
+                    aria-label="Next restock email time"
+                    value={remindTime}
+                    onChange={(event) => setRemindTime(event.target.value)}
+                    className="mt-2 w-full rounded-xl bg-white/10 px-3 py-2 font-semibold text-white outline-none [color-scheme:dark]"
+                  />
+                </label>
+              </div>
+            </div>
+
             {data?.reminder && reminderMode ? (
               <div className="rounded-3xl bg-white/10 ring-1 ring-white/15 p-5 md:p-6">
                 <p className="text-sm font-bold uppercase tracking-widest text-blue-200 mb-2">Your plan</p>
                 <p className="text-xl md:text-2xl font-black mb-2">
-                  {reminderMode === 'ask' ? 'Ask first' : 'Autoship'} · every {data.reminder.weeks} weeks · {restockDiscountCopy(reminderMode)}
+                  {reminderMode === 'ask' ? 'Ask first' : 'Autoship'} · {data.reminder.cadenceLabel || cadenceLabel(intervalDays)} · {restockDiscountCopy(reminderMode)}
                 </p>
                 <p className="text-blue-100 max-w-2xl mb-4">
                   {reminderMode === 'ask'
-                    ? `Better control: we email you, you confirm, ${ASK_DISCOUNT_COPY}. Next email ${new Date(data.reminder.remindAt).toLocaleDateString()}. Ignore it and nothing ships.`
-                    : `Better price: we email you on schedule. Tap Ship now for ${AUTOSHIP_DISCOUNT_COPY}. Next email ${new Date(data.reminder.remindAt).toLocaleDateString()}. Ignore it and we skip that cycle.`}
+                    ? `Better control: we email you, you confirm, ${ASK_DISCOUNT_COPY}. Next email ${new Date(data.reminder.remindAt).toLocaleString()}. Ignore it and nothing ships.`
+                    : `Better price: we email you on your schedule. Tap Ship now for ${AUTOSHIP_DISCOUNT_COPY}. Next email ${new Date(data.reminder.remindAt).toLocaleString()}. Ignore it and we skip that cycle.`}
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <button
@@ -459,7 +569,7 @@ const RestockDashboard = () => {
                     onClick={() => pickPlan(reminderMode)}
                     disabled={reminderMutation.isPending || !selected.length}
                   >
-                    Save item changes
+                    Save cart and schedule
                   </button>
                   <button
                     type="button"
@@ -481,26 +591,9 @@ const RestockDashboard = () => {
               </div>
             ) : (
               <>
-                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-4">
-                  <div>
-                    <p className="text-sm font-bold uppercase tracking-widest text-blue-200 mb-1">Choose one</p>
-                    <h3 className="text-2xl md:text-3xl font-black">Which is better for you?</h3>
-                  </div>
-                  <label className="text-sm text-blue-100">
-                    Every
-                    <select
-                      aria-label="Restock in how many weeks"
-                      value={weeks}
-                      onChange={(event) => setWeeks(Number(event.target.value) as (typeof REMINDER_WEEK_OPTIONS)[number])}
-                      className="ml-2 rounded-xl bg-white/10 px-3 py-2 font-semibold text-white outline-none"
-                    >
-                      {REMINDER_WEEK_OPTIONS.map((option) => (
-                        <option key={option} value={option} className="text-slate-900">
-                          {option} weeks
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                <div className="mb-4">
+                  <p className="text-sm font-bold uppercase tracking-widest text-blue-200 mb-1">Choose one</p>
+                  <h3 className="text-2xl md:text-3xl font-black">Which is better for you?</h3>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
                   <button
@@ -514,7 +607,7 @@ const RestockDashboard = () => {
                     </span>
                     <p className="text-2xl font-black mb-2">Ask first</p>
                     <ul className="space-y-2 text-sm text-blue-100 mb-4">
-                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-300 shrink-0" /> We email you every cycle. You confirm.</li>
+                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-300 shrink-0" /> We email you on the cadence you pick. You confirm.</li>
                       <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-300 shrink-0" /> Save {ASK_DISCOUNT_COPY} with {ASK_COUPON}.</li>
                       <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-300 shrink-0" /> Ignore the email — we never charge.</li>
                     </ul>
@@ -533,7 +626,7 @@ const RestockDashboard = () => {
                     </span>
                     <p className="text-2xl font-black mb-2">Autoship</p>
                     <ul className="space-y-2 text-sm text-slate-700 mb-4">
-                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-600 shrink-0" /> We email you on this schedule so you never forget.</li>
+                      <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-600 shrink-0" /> We email you at the date and time you pick so you never forget.</li>
                       <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-600 shrink-0" /> Tap Ship now for {AUTOSHIP_DISCOUNT_COPY} with {AUTOSHIP_COUPON}.</li>
                       <li className="flex gap-2"><Check size={16} className="mt-0.5 text-emerald-600 shrink-0" /> Skip a cycle by ignoring the email — still no silent charge.</li>
                     </ul>

@@ -1,11 +1,55 @@
+export const RESTOCK_CADENCE = [
+  { intervalDays: 1, label: 'Every day' },
+  { intervalDays: 7, label: 'Every week' },
+  { intervalDays: 14, label: 'Every 2 weeks' },
+  { intervalDays: 21, label: 'Every 3 weeks' },
+  { intervalDays: 28, label: 'Every 4 weeks' },
+  { intervalDays: 35, label: 'Every 5 weeks' },
+  { intervalDays: 42, label: 'Every 6 weeks' },
+  { intervalDays: 56, label: 'Every 8 weeks' },
+] as const;
+
+export const DEFAULT_INTERVAL_DAYS = 7;
 export const REMINDER_WEEK_OPTIONS = [3, 4, 5, 6] as const;
 export type ReminderWeeks = (typeof REMINDER_WEEK_OPTIONS)[number];
+export type RestockIntervalDays = (typeof RESTOCK_CADENCE)[number]['intervalDays'];
 
 export const RESTOCK_MODES = ['ask', 'autoship'] as const;
 export type RestockMode = (typeof RESTOCK_MODES)[number];
 
 export const isValidReminderWeeks = (weeks: unknown): weeks is ReminderWeeks =>
   typeof weeks === 'number' && Number.isInteger(weeks) && (REMINDER_WEEK_OPTIONS as readonly number[]).includes(weeks);
+
+export const isValidIntervalDays = (days: unknown): days is RestockIntervalDays =>
+  typeof days === 'number' && Number.isInteger(days) && RESTOCK_CADENCE.some((row) => row.intervalDays === days);
+
+export const resolveIntervalDays = (body: { intervalDays?: unknown; weeks?: unknown }): RestockIntervalDays | null => {
+  if (body.intervalDays != null && body.intervalDays !== '') {
+    const days = Number(body.intervalDays);
+    return isValidIntervalDays(days) ? days : null;
+  }
+  if (body.weeks != null && body.weeks !== '') {
+    const weeks = Number(body.weeks);
+    const asDays = weeks * 7;
+    if (isValidIntervalDays(asDays)) return asDays;
+    return null;
+  }
+  return DEFAULT_INTERVAL_DAYS;
+};
+
+export const cadenceLabel = (intervalDays: number): string =>
+  RESTOCK_CADENCE.find((row) => row.intervalDays === intervalDays)?.label || `Every ${intervalDays} days`;
+
+export const weeksFromInterval = (intervalDays: number): number =>
+  Math.max(0, Math.min(8, Math.round(intervalDays / 7) || 0));
+
+export const intervalFromReminder = (reminder: { intervalDays?: unknown; weeks?: unknown }): number => {
+  const days = Number(reminder.intervalDays);
+  if (Number.isFinite(days) && days >= 1) return days;
+  const weeks = Number(reminder.weeks);
+  if (Number.isFinite(weeks) && weeks >= 1) return weeks * 7;
+  return DEFAULT_INTERVAL_DAYS;
+};
 
 export const isValidRestockMode = (mode: unknown): mode is RestockMode =>
   typeof mode === 'string' && (RESTOCK_MODES as readonly string[]).includes(mode);
@@ -92,10 +136,31 @@ export const usualFromOrderItems = (items: BuyAgainOrderItem[] | undefined): Res
   return picks;
 };
 
-export const remindAtFromWeeks = (weeks: number, from: Date = new Date()): Date => {
-  const remindAt = new Date(from);
-  remindAt.setUTCDate(remindAt.getUTCDate() + weeks * 7);
-  return remindAt;
+export const remindAtFromWeeks = (weeks: number, from: Date = new Date()): Date =>
+  remindAtFromInterval(Math.max(1, weeks * 7), from);
+
+export const remindAtFromInterval = (intervalDays: number, from: Date = new Date()): Date =>
+  new Date(from.getTime() + Math.max(1, intervalDays) * 24 * 60 * 60 * 1000);
+
+export const nextRemindAt = (intervalDays: number, previous: Date, from: Date = new Date()): Date => {
+  const step = Math.max(1, intervalDays) * 24 * 60 * 60 * 1000;
+  let next = new Date(previous.getTime() + step);
+  let guard = 0;
+  while (next.getTime() <= from.getTime() && guard < 400) {
+    next = new Date(next.getTime() + step);
+    guard += 1;
+  }
+  return next;
+};
+
+export const parseRemindAt = (raw: unknown, fallback: Date): Date => {
+  if (raw == null || raw === '') return fallback;
+  const parsed = new Date(String(raw));
+  if (Number.isNaN(parsed.getTime())) return fallback;
+  const now = Date.now();
+  if (parsed.getTime() < now - 60 * 1000) return fallback;
+  if (parsed.getTime() > now + 366 * 24 * 60 * 60 * 1000) return fallback;
+  return parsed;
 };
 
 export type BuyAgainOrderItem = {

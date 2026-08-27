@@ -4,10 +4,16 @@ import {
   ASK_DISCOUNT_COPY,
   AUTOSHIP_COUPON,
   AUTOSHIP_DISCOUNT_COPY,
+  DEFAULT_INTERVAL_DAYS,
+  RESTOCK_CADENCE,
+  cadenceLabel,
   clearRestockCoupon,
+  defaultRemindParts,
   isRestockConsumable,
+  isValidIntervalDays,
   readRestockCoupon,
   rememberRestockCoupon,
+  remindAtIso,
 } from '../restock';
 
 describe('restock coupon helpers', () => {
@@ -41,5 +47,18 @@ describe('restock coupon helpers', () => {
     expect(isRestockConsumable("McLovin's Salmon Meal Topper")).toBe(true);
     expect(isRestockConsumable('Kong Classic Dog Toy')).toBe(false);
     expect(isRestockConsumable('Halloween costume')).toBe(false);
+  });
+
+  test('cadence includes every day and every week, not a locked 4 weeks', () => {
+    expect(DEFAULT_INTERVAL_DAYS).toBe(7);
+    expect(isValidIntervalDays(1)).toBe(true);
+    expect(isValidIntervalDays(7)).toBe(true);
+    expect(RESTOCK_CADENCE.map((row) => row.intervalDays)).toEqual([1, 7, 14, 21, 28, 35, 42, 56]);
+    expect(cadenceLabel(7)).toBe('Every week');
+    const parts = defaultRemindParts(7, new Date('2026-08-27T15:00:00'));
+    expect(parts.time).toBe('09:00');
+    const iso = remindAtIso('2026-09-03', '09:30');
+    expect(new Date(iso).getHours()).toBeDefined();
+    expect(Number.isNaN(new Date(iso).getTime())).toBe(false);
   });
 });

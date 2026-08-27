@@ -1,17 +1,41 @@
 import {
   aggregateBuyAgainItems,
+  cadenceLabel,
+  intervalFromReminder,
   isRestockConsumable,
+  isValidIntervalDays,
   isValidReminderWeeks,
   isValidRestockMode,
+  nextRemindAt,
   normalizeRestockMode,
+  parseRemindAt,
+  remindAtFromInterval,
   remindAtFromWeeks,
+  resolveIntervalDays,
   restockEmailPath,
   sanitizeRestockItems,
   usualFromOrderItems,
+  weeksFromInterval,
 } from '../../utils/buyAgain';
 
 describe('buyAgain helpers', () => {
-  test('accepts reminder weeks 3–6 only', () => {
+  test('accepts cadence from every day through every 8 weeks', () => {
+    expect(isValidIntervalDays(1)).toBe(true);
+    expect(isValidIntervalDays(7)).toBe(true);
+    expect(isValidIntervalDays(56)).toBe(true);
+    expect(isValidIntervalDays(10)).toBe(false);
+    expect(resolveIntervalDays({ intervalDays: 7 })).toBe(7);
+    expect(resolveIntervalDays({ weeks: 4 })).toBe(28);
+    expect(resolveIntervalDays({})).toBe(7);
+    expect(resolveIntervalDays({ intervalDays: 99 })).toBeNull();
+    expect(cadenceLabel(7)).toBe('Every week');
+    expect(weeksFromInterval(1)).toBe(0);
+    expect(weeksFromInterval(28)).toBe(4);
+    expect(intervalFromReminder({ weeks: 4 })).toBe(28);
+    expect(intervalFromReminder({ intervalDays: 1 })).toBe(1);
+  });
+
+  test('legacy week validator still accepts 3–6', () => {
     expect(isValidReminderWeeks(3)).toBe(true);
     expect(isValidReminderWeeks(4)).toBe(true);
     expect(isValidReminderWeeks(2)).toBe(false);
@@ -30,9 +54,19 @@ describe('buyAgain helpers', () => {
     expect(restockEmailPath('ask')).not.toMatch(/RESTOCK7/);
   });
 
-  test('remindAt is weeks * 7 days later', () => {
+  test('remindAt is interval days later and parseRemindAt rejects past or far-future', () => {
     const from = new Date('2026-08-01T00:00:00.000Z');
     expect(remindAtFromWeeks(4, from).toISOString()).toBe('2026-08-29T00:00:00.000Z');
+    expect(remindAtFromInterval(7, from).toISOString()).toBe('2026-08-08T00:00:00.000Z');
+    expect(nextRemindAt(7, from, new Date('2026-08-20T00:00:00.000Z')).toISOString()).toBe(
+      '2026-08-22T00:00:00.000Z'
+    );
+    const fallback = new Date('2026-09-03T13:00:00.000Z');
+    expect(parseRemindAt('2026-09-10T09:00:00.000Z', fallback).toISOString()).toBe(
+      '2026-09-10T09:00:00.000Z'
+    );
+    expect(parseRemindAt('2020-01-01T00:00:00.000Z', fallback).toISOString()).toBe(fallback.toISOString());
+    expect(parseRemindAt('not-a-date', fallback).toISOString()).toBe(fallback.toISOString());
   });
 
   test('aggregates repeat items and skips cancelled orders', () => {

@@ -1,6 +1,12 @@
 import ReorderReminder from '../models/ReorderReminder';
 import { sendReorderReminderEmail } from '../utils/emailService';
-import { normalizeRestockMode, remindAtFromWeeks, restockEmailPath } from '../utils/buyAgain';
+import {
+  intervalFromReminder,
+  nextRemindAt,
+  normalizeRestockMode,
+  restockEmailPath,
+  weeksFromInterval,
+} from '../utils/buyAgain';
 import logger from '../utils/logger';
 
 const CHECK_EVERY_MS = 60 * 60 * 1000;
@@ -15,12 +21,14 @@ export const processDueReorderReminders = async (now: Date = new Date()): Promis
   for (const reminder of due) {
     try {
       const mode = normalizeRestockMode(reminder.mode);
+      const intervalDays = intervalFromReminder(reminder);
+      const weeks = weeksFromInterval(intervalDays);
       await sendReorderReminderEmail(
         reminder.email,
         reminder.firstName,
         reminder.orderNumber,
         {
-          weeks: reminder.weeks,
+          weeks,
           items: reminder.items,
           mode,
           buyAgainUrlPath: restockEmailPath(mode),
@@ -36,9 +44,10 @@ export const processDueReorderReminders = async (now: Date = new Date()): Promis
         orderNumber: reminder.orderNumber,
         email: reminder.email,
         firstName: reminder.firstName,
-        weeks: reminder.weeks,
+        weeks,
+        intervalDays,
         mode,
-        remindAt: remindAtFromWeeks(reminder.weeks, now),
+        remindAt: nextRemindAt(intervalDays, reminder.remindAt || now, now),
         status: 'scheduled',
         items: reminder.items,
       });

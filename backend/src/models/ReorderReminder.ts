@@ -7,6 +7,7 @@ export interface IReorderReminder extends Document {
   email: string;
   firstName: string;
   weeks: number;
+  intervalDays: number;
   /** ask = email then confirm/pay for 5% off. autoship = email on schedule, 7% off. Still no charge until they pay. */
   mode: 'ask' | 'autoship';
   remindAt: Date;
@@ -24,7 +25,8 @@ const reorderReminderSchema = new Schema<IReorderReminder>(
     orderNumber: { type: String, required: true },
     email: { type: String, required: true, lowercase: true, trim: true },
     firstName: { type: String, required: true, trim: true },
-    weeks: { type: Number, required: true, min: 2, max: 8 },
+    weeks: { type: Number, min: 0, max: 8, default: 1 },
+    intervalDays: { type: Number, min: 1, max: 56, default: 7 },
     mode: {
       type: String,
       enum: ['ask', 'autoship'],
