@@ -17,6 +17,7 @@ const getStripe = () => import('@/utils/stripe').then(m => m.getStripe());
 import { normalizeId } from '@/utils/idNormalizer';
 import { trackPurchase } from '@/utils/analytics';
 import { rememberGoogleReviewOptIn } from '@/utils/googleCustomerReviews';
+import { rememberGuestCheckoutAccount } from '@/utils/guestCheckoutAccount';
 import SEO from '@/components/SEO';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
@@ -462,6 +463,13 @@ const Checkout = () => {
         orderNumber: order.orderNumber,
         orderId,
       });
+      if (!isAuthenticated && shippingInfo.email.trim()) {
+        rememberGuestCheckoutAccount({
+          email: shippingInfo.email,
+          firstName: shippingInfo.firstName,
+          lastName: shippingInfo.lastName,
+        });
+      }
       await queryClient.invalidateQueries({ queryKey: ['orders'] });
       await queryClient.invalidateQueries({ queryKey: ['order'] });
       await queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
@@ -697,6 +705,13 @@ const Checkout = () => {
       orderNumber: order.orderNumber,
       orderId,
     });
+    if (!isAuthenticated && shippingInfo.email.trim()) {
+      rememberGuestCheckoutAccount({
+        email: shippingInfo.email,
+        firstName: shippingInfo.firstName,
+        lastName: shippingInfo.lastName,
+      });
+    }
     await queryClient.invalidateQueries({ queryKey: ['orders'] });
     await queryClient.invalidateQueries({ queryKey: ['order'] });
     if (!isAuthenticated) {

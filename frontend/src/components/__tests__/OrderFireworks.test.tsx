@@ -58,6 +58,7 @@ describe('checkout celebration handoff', () => {
     expect(checkout).toContain("navigate(`/orders/${orderId}?newOrder=true`)");
     expect(checkout).toContain("navigate(`/track-order?order=${order.orderNumber || orderId}&newOrder=true`)");
     expect(checkout).toContain('rememberGoogleReviewOptIn');
+    expect(checkout).toContain('rememberGuestCheckoutAccount');
   });
 
   test('order confirmation and guest tracking render the fireworks blast', () => {
@@ -75,5 +76,15 @@ describe('checkout celebration handoff', () => {
     expect(track).toContain('GoogleCustomerReviewsOptIn');
     expect(track).toContain("searchParams.get('newOrder') === 'true'");
     expect(orderDetail).toContain("searchParams.get('newOrder') === 'true'");
+  });
+
+  test('guest tracking tells the shopper how to create a password', () => {
+    const track = fs.readFileSync(
+      path.resolve(__dirname, '../../pages/TrackOrder.tsx'),
+      'utf8'
+    );
+    expect(track).toContain('Keep this order on your account');
+    expect(track).toContain('GoogleSignInButton');
+    expect(track).toContain('Or create a password instead');
   });
 });

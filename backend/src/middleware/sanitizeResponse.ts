@@ -17,6 +17,7 @@ export const sanitizeResponse = (req: Request, res: Response, next: NextFunction
   // Check if this is an authentication endpoint that needs to return tokens
   const isAuthEndpoint = req.path.includes('/auth/login') || 
                          req.path.includes('/auth/register') ||
+                         req.path.includes('/auth/google') ||
                          req.path.includes('/auth/updatepassword');
   const isPayPalCreateOrderEndpoint = req.originalUrl.split('?')[0].endsWith('/orders/paypal/create-order');
   

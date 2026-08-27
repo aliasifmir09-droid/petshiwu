@@ -52,6 +52,14 @@ export const authService = {
     return response.data;
   },
 
+  loginWithGoogle: async (credential: string) => {
+    const response = await api.post<any>('/auth/google', { credential });
+    if (response.data?.token) {
+      setStoredToken(response.data.token);
+    }
+    return response.data;
+  },
+
   logout: async () => {
     clearStoredToken();
     await api.post('/auth/logout');

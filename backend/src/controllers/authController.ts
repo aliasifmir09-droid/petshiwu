@@ -258,6 +258,33 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
+export const googleLogin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const idToken = String(req.body?.credential || req.body?.idToken || '').trim();
+    if (!idToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Google sign-in is missing a credential.'
+      });
+    }
+
+    const { verifyGoogleIdToken, upsertGoogleCustomer } = await import('../services/googleAuth');
+    const profile = await verifyGoogleIdToken(idToken);
+    const user = await upsertGoogleCustomer(profile);
+    sendTokenResponse(safeToString(user._id), 200, res, req);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Google sign-in failed';
+    logger.warn('Google login failed:', message);
+    const status = /not configured/i.test(message) ? 503 : 401;
+    return res.status(status).json({
+      success: false,
+      message: /not configured/i.test(message)
+        ? 'Google sign-in is not available yet.'
+        : 'Google sign-in could not be verified. Try again, or create a password with the email from checkout.'
+    });
+  }
+};
+
 // Get current user
 // Uses optionalAuth middleware - returns user if authenticated, null if not
 // Never returns 401 - always returns 200 with data or null

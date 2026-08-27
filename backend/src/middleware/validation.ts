@@ -67,6 +67,25 @@ export const loginValidation = [
   validate
 ];
 
+export const googleLoginValidation = [
+  body('credential')
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ min: 20, max: 8192 })
+    .withMessage('Google credential is invalid'),
+  body('idToken')
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ min: 20, max: 8192 })
+    .withMessage('Google credential is invalid'),
+  body()
+    .custom((_, { req }) => Boolean(String(req.body?.credential || req.body?.idToken || '').trim()))
+    .withMessage('Google credential is required'),
+  validate
+];
+
 export const updatePasswordValidation = [
   body('currentPassword')
     .notEmpty()

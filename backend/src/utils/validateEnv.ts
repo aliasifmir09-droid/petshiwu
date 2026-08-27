@@ -39,6 +39,9 @@ export const validateEnv = () => {
     } else if (process.env.PAYPAL_ENV !== 'live') {
       warnings.push('PAYPAL_ENV is not live. Production is using PayPal Sandbox, so real customer PayPal payments will fail. Set PAYPAL_ENV=live with live REST credentials, and rebuild the frontend with VITE_PAYPAL_ENV=live and the live VITE_PAYPAL_CLIENT_ID.');
     }
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      warnings.push('GOOGLE_CLIENT_ID not set - Continue with Google will stay hidden until you add the OAuth web client id and rebuild the frontend with VITE_GOOGLE_CLIENT_ID');
+    }
   }
 
   if (missing.length > 0) {

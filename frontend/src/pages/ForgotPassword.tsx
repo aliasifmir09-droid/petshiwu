@@ -1,17 +1,25 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
 import { authService } from '@/services/auth';
 import { useToast } from '@/hooks/useToast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { trackPasswordReset } from '@/utils/analytics';
 import { extractErrorMessage } from '@/utils/errorHandler';
+import { readGuestCheckoutAccount } from '@/utils/guestCheckoutAccount';
 
 const ForgotPassword = () => {
-  const [email, setEmail] = useState('');
+  const [searchParams] = useSearchParams();
+  const guestCheckout = searchParams.get('guest') === '1';
+  const emailFromQuery = searchParams.get('email')?.trim() || readGuestCheckoutAccount()?.email || '';
+  const [email, setEmail] = useState(emailFromQuery);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const { showToast } = useToast();
+
+  useEffect(() => {
+    if (emailFromQuery && !email) setEmail(emailFromQuery);
+  }, [emailFromQuery, email]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +53,7 @@ const ForgotPassword = () => {
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Check Your Email</h2>
             <p className="text-gray-600 mb-6">
-              If an account or a guest order with <strong>{email}</strong> exists, we sent a link to set your password.
+              If an account or a guest order with <strong>{email}</strong> exists, we sent a link to create or reset your password.
             </p>
             <p className="text-sm text-gray-500 mb-6">
               The link will expire in 1 hour. If you don't see the email, check your spam folder.
@@ -78,10 +86,12 @@ const ForgotPassword = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Forgot Your Password?
+            {guestCheckout ? 'Create a password for your order' : 'Forgot Your Password?'}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Enter the email you use on Petshiwu — including guest checkout — and we will send a link to set or reset your password.
+            {guestCheckout
+              ? 'Checkout never asked for a password. Enter the email from your order and we will send a link to create one. Then you can log in.'
+              : 'Enter the email you use on Petshiwu — including guest checkout — and we will send a link to set or reset your password.'}
           </p>
         </div>
         <form className="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md" onSubmit={handleSubmit}>
@@ -118,7 +128,7 @@ const ForgotPassword = () => {
               ) : (
                 <>
                   <Mail className="h-5 w-5 mr-2" />
-                  Send Reset Link
+                  {guestCheckout ? 'Email me a password link' : 'Send Reset Link'}
                 </>
               )}
             </button>

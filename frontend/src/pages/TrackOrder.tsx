@@ -2,14 +2,21 @@ import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { orderService } from '@/services/orders';
 import { Package, Truck, CheckCircle, Clock, XCircle, Search, Loader2, MapPin } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import OrderFireworks from '@/components/OrderFireworks';
 import GoogleCustomerReviewsOptIn from '@/components/GoogleCustomerReviewsOptIn';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
 import { useAuthStore } from '@/stores/authStore';
+import { authService } from '@/services/auth';
+import { guestSetPasswordPath, readGuestCheckoutAccount } from '@/utils/guestCheckoutAccount';
+import { isGoogleLoginConfigured } from '@/config/google';
+import { trackLogin } from '@/utils/analytics';
 
 const TrackOrder = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isAuthenticated } = useAuthStore();
+  const navigate = useNavigate();
+  const { isAuthenticated, setUser } = useAuthStore();
+  const guestCheckout = readGuestCheckoutAccount();
   const [orderId, setOrderId] = useState(searchParams.get('order') || '');
   const [searchOrderId, setSearchOrderId] = useState(searchParams.get('order') || '');
   const [celebrate, setCelebrate] = useState(searchParams.get('newOrder') === 'true');
@@ -323,7 +330,50 @@ const TrackOrder = () => {
               </div>
             </div>
 
-            {/* Help Section */}
+            {/* Guest password — they never chose one at checkout */}
+            {!isAuthenticated && (
+              <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-6 md:p-8">
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Keep this order on your account</h2>
+                <p className="text-gray-700 mb-4">
+                  You paid as a guest, so there is no password. Continue with Google using the Gmail from this order
+                  {guestCheckout?.email ? (
+                    <> (<span className="font-semibold">{guestCheckout.email}</span>)</>
+                  ) : null}
+                  . Your order attaches automatically.
+                </p>
+                {isGoogleLoginConfigured ? (
+                  <div className="mb-4 max-w-sm">
+                    <GoogleSignInButton
+                      onSuccess={async () => {
+                        await new Promise((resolve) => setTimeout(resolve, 100));
+                        const user = await authService.getMe();
+                        setUser(user);
+                        const { persistLocalCartAfterLogin } = await import('@/utils/persistLocalCartAfterLogin');
+                        await persistLocalCartAfterLogin();
+                        trackLogin('google');
+                        navigate('/orders');
+                      }}
+                      onError={() => navigate('/login')}
+                    />
+                  </div>
+                ) : (
+                  <Link
+                    to="/login"
+                    className="inline-block mb-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Continue with Google
+                  </Link>
+                )}
+                <div>
+                  <Link
+                    to={guestSetPasswordPath(guestCheckout?.email)}
+                    className="text-blue-700 font-semibold underline"
+                  >
+                    Or create a password instead
+                  </Link>
+                </div>
+              </div>
+            )}
             <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl shadow-lg p-6 md:p-8 text-center">
               <h3 className="text-lg font-bold text-gray-900 mb-2">Need Help?</h3>
               <p className="text-gray-600 mb-4">
@@ -337,10 +387,10 @@ const TrackOrder = () => {
                   Contact Support
                 </Link>
                 <Link
-                  to={isAuthenticated ? '/orders' : '/forgot-password'}
+                  to={isAuthenticated ? '/orders' : '/login'}
                   className="px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors"
                 >
-                  {isAuthenticated ? 'View My Orders' : 'Set a password to see all orders'}
+                  {isAuthenticated ? 'View My Orders' : 'Continue with Google'}
                 </Link>
               </div>
             </div>

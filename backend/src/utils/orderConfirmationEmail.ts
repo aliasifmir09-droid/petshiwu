@@ -38,6 +38,7 @@ export type OrderConfirmationData = {
   orderStatus?: string;
   createdAt: Date | string;
   customerEmail?: string;
+  isGuestCheckout?: boolean;
 };
 
 export function escapeHtml(value: unknown): string {
@@ -104,6 +105,10 @@ export function buildOrderConfirmationEmail(
   const shipName = `${addr.firstName || ''} ${addr.lastName || ''}`.trim();
   const logoUrl = `${origin}/logo.png`;
   const customerEmail = String(orderData.customerEmail || '').trim();
+  const guestPasswordUrl = customerEmail
+    ? `${origin}/forgot-password?guest=1&email=${encodeURIComponent(customerEmail)}`
+    : `${origin}/forgot-password?guest=1`;
+  const showGuestPasswordHelp = Boolean(orderData.isGuestCheckout);
   const preheader = isCod
     ? `Packing slip for Petshiwu order ${orderNumber}. ${formatUsd(orderData.totalPrice)} is due when your driver arrives.`
     : `Packing slip and official receipt for Petshiwu order ${orderNumber} · ${formatUsd(orderData.totalPrice)}.`;
@@ -309,6 +314,29 @@ export function buildOrderConfirmationEmail(
               </a>
             </td>
           </tr>
+          ${showGuestPasswordHelp ? `
+          <tr class="ps-screen-only">
+            <td style="padding:8px 28px 6px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #FCD34D;background:#FFFBEB;">
+                <tr>
+                  <td style="padding:16px 18px;">
+                    <div style="font-size:15px;font-weight:800;color:#92400E;">You checked out as a guest — no password needed</div>
+                    <div style="margin-top:8px;font-size:14px;line-height:1.55;color:#78350F;">
+                      Continue with Google using ${customerEmail ? escapeHtml(customerEmail) : 'the Gmail from this order'}. That signs you in and shows this order. You can also create a password if you prefer.
+                    </div>
+                    <div style="margin-top:14px;">
+                      <a href="${origin}/login" style="display:inline-block;background:${BRAND_NAVY};color:#ffffff;font-size:14px;font-weight:800;text-decoration:none;padding:11px 20px;margin-right:10px;">
+                        Continue with Google
+                      </a>
+                      <a href="${escapeHtml(guestPasswordUrl)}" style="display:inline-block;color:${BRAND_NAVY};font-size:14px;font-weight:800;text-decoration:underline;padding:11px 0;">
+                        Create a password
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>` : ''}
 
           <tr>
             <td style="padding:14px 28px 8px;">
@@ -384,6 +412,9 @@ export function buildOrderConfirmationEmail(
     '',
     `Ship from: Petshiwu, ${WAREHOUSE_ADDRESS}`,
     `Track: ${trackUrl}`,
+    showGuestPasswordHelp
+      ? `You checked out as a guest. Continue with Google at ${origin}/login using the same Gmail, or create a password: ${guestPasswordUrl}`
+      : '',
     '',
     `Call support 24/7: ${SUPPORT_PHONE_DISPLAY}`,
     'support@petshiwu.com',

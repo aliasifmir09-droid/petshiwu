@@ -2,6 +2,7 @@ import express from 'express';
 import {
   register,
   login,
+  googleLogin,
   getMe,
   updateProfile,
   updatePassword,
@@ -16,6 +17,7 @@ import { protect, optionalAuth } from '../middleware/auth';
 import {
   registerValidation,
   loginValidation,
+  googleLoginValidation,
   updatePasswordValidation,
   forgotPasswordValidation,
   resetPasswordValidation,
@@ -29,6 +31,7 @@ const router = express.Router();
 
 router.post('/register', registerValidation, register);
 router.post('/login', loginValidation, login);
+router.post('/google', googleLoginValidation, googleLogin);
 router.post('/logout', logout);
 router.get('/verify-email', verifyEmailValidation, verifyEmail);
 router.post('/resend-verification', resendVerificationValidation, resendVerificationEmail);

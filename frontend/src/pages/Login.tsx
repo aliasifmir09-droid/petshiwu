@@ -9,6 +9,9 @@ import { trackLogin } from '@/utils/analytics';
 import { validateEmail, sanitizeFormData } from '@/utils/inputValidation';
 import { extractErrorMessage } from '@/utils/errorHandler';
 import SEO from '@/components/SEO';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
+import { isGoogleLoginConfigured } from '@/config/google';
+import { guestSetPasswordPath, readGuestCheckoutAccount } from '@/utils/guestCheckoutAccount';
 
 interface LoginData {
   email: string;
@@ -18,11 +21,12 @@ interface LoginData {
 const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const guestEmail = searchParams.get('email')?.trim() || readGuestCheckoutAccount()?.email || '';
   const setUser = useAuthStore((state) => state.setUser);
   const { toast, showToast, hideToast } = useToast();
 
   const [formData, setFormData] = useState({
-    email: '',
+    email: guestEmail,
     password: ''
   });
 
@@ -105,7 +109,11 @@ const Login = () => {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
-          <p className="text-gray-600">Sign in to your account</p>
+          <p className="text-gray-600">
+            {isGoogleLoginConfigured
+              ? 'Continue with Google using the same Gmail you used at checkout. No password needed.'
+              : 'Sign in with the password you created. Checkout does not set one for you.'}
+          </p>
         </div>
 
         {isRegistered && (
@@ -123,6 +131,27 @@ const Login = () => {
         )}
 
         <div className="bg-white rounded-lg shadow-lg p-8">
+          {isGoogleLoginConfigured && (
+            <div className="mb-6 space-y-4">
+              <GoogleSignInButton
+                onSuccess={async () => {
+                  await new Promise((resolve) => setTimeout(resolve, 100));
+                  const user = await authService.getMe();
+                  setUser(user);
+                  const { persistLocalCartAfterLogin } = await import('@/utils/persistLocalCartAfterLogin');
+                  await persistLocalCartAfterLogin();
+                  trackLogin('google');
+                  navigate(searchParams.get('redirect') || '/');
+                }}
+                onError={(message) => showToast(message, 'error')}
+              />
+              <div className="flex items-center gap-3">
+                <div className="h-px flex-1 bg-gray-200" />
+                <span className="text-xs uppercase tracking-wide text-gray-400">or email and password</span>
+                <div className="h-px flex-1 bg-gray-200" />
+              </div>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium mb-2">Email Address</label>
@@ -153,7 +182,7 @@ const Login = () => {
                 <input type="checkbox" className="w-4 h-4 mr-2" />
                 <span className="text-sm">Remember me</span>
               </label>
-              <Link to="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700">
+              <Link to={guestSetPasswordPath(formData.email || guestEmail)} className="text-sm text-primary-600 hover:text-primary-700">
                 Forgot password?
               </Link>
             </div>
@@ -175,11 +204,17 @@ const Login = () => {
               </Link>
             </p>
             <p className="text-sm text-gray-500 mt-3">
-              Checked out as a guest?{' '}
-              <Link to="/forgot-password" className="text-primary-600 hover:text-primary-700 font-semibold">
-                Set a password with that email
-              </Link>{' '}
-              to see past orders.
+              {isGoogleLoginConfigured
+                ? 'Paid as a guest? Continue with Google using that Gmail. A password is optional.'
+                : (
+                  <>
+                    Paid as a guest? There is no password yet.{' '}
+                    <Link to={guestSetPasswordPath(formData.email || guestEmail)} className="text-primary-600 hover:text-primary-700 font-semibold">
+                      Create one with the email from checkout
+                    </Link>
+                    . We email a link — we never invent a password for you.
+                  </>
+                )}
             </p>
           </div>
         </div>
