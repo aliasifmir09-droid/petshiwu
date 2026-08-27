@@ -18,6 +18,7 @@ import RequireAuth from './components/RequireAuth';
 import Home from './pages/Home';
 import { hashAuthRedirect } from './utils/hashAuthRedirect';
 import { useCustomerSessionTimeout } from './hooks/useCustomerSessionTimeout';
+import { readLastActiveAt, shouldExpireCustomerSession } from './utils/sessionTimeout';
 import './index.css';
 
 const Products = lazy(() => import('./pages/Products'));
@@ -231,10 +232,14 @@ function App() {
       try {
         const user = await authService.getMe(true);
         if (user) {
-          setUser(user);
-          await syncWithBackend();
-          const { persistLocalCartAfterLogin } = await import('./utils/persistLocalCartAfterLogin');
-          await persistLocalCartAfterLogin();
+          if (shouldExpireCustomerSession(readLastActiveAt(), Date.now())) {
+            useAuthStore.getState().logout({ redirect: false });
+          } else {
+            setUser(user);
+            await syncWithBackend();
+            const { persistLocalCartAfterLogin } = await import('./utils/persistLocalCartAfterLogin');
+            await persistLocalCartAfterLogin();
+          }
         } else {
           setUser(null);
         }
@@ -298,9 +303,9 @@ function App() {
           }}
         />
         <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-1 pb-16 lg:pb-0">
-            <ErrorBoundaryWithReporting>
+          <ErrorBoundaryWithReporting>
+            <Header />
+            <main className="flex-1 pb-16 lg:pb-0">
               <Suspense fallback={
                 <div className="container mx-auto px-4 py-12">
                   <LoadingSpinner size="lg" />
@@ -421,10 +426,10 @@ function App() {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
-            </ErrorBoundaryWithReporting>
-          </main>
-          <Footer />
-          <BottomNav />
+            </main>
+            <Footer />
+            <BottomNav />
+          </ErrorBoundaryWithReporting>
         </div>
         <CookieConsent />
       </BrowserRouter>

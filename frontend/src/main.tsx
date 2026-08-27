@@ -3,16 +3,6 @@ import ReactDOM from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
 import App from './App';
 
-function hideStaticShell() {
-  const shell = document.getElementById('static-shell');
-  if (!shell || shell.classList.contains('ps-fadeout')) return;
-  shell.classList.add('ps-fadeout');
-  window.setTimeout(() => {
-    shell.style.display = 'none';
-    shell.setAttribute('aria-hidden', 'true');
-  }, 180);
-}
-
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <HelmetProvider>
@@ -21,7 +11,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   </React.StrictMode>
 );
 
-requestAnimationFrame(hideStaticShell);
+// Do not hide #static-shell here. index.html waits until #root has children.
+// Hiding it on the first animation frame left a white page when React was
+// still booting or when an idle-logout redirect ran in a background tab.
 
 
 

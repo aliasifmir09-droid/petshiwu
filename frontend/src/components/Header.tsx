@@ -14,14 +14,12 @@ import { useToast } from '@/hooks/useToast';
 import Toast from './Toast';
 import SearchSuggestions from './SearchSuggestions';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
-import { generateCategoryUrl } from '@/utils/productUrl';
+import { cartItemCount } from '@/utils/cartCount';
 
 const Header = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuthStore();
-  const totalItems = useCartStore((state) =>
-    state.items.reduce((total, item) => total + (Number(item?.quantity) || 0), 0)
-  );
+  const totalItems = useCartStore((state) => cartItemCount(state.items));
   const { items: wishlistItems } = useWishlistStore();
   const { toast, hideToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
