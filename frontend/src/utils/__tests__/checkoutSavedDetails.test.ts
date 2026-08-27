@@ -12,6 +12,7 @@ describe('checkout reuses saved card and address', () => {
     expect(src).toContain('pickDefaultSavedCard');
     expect(src).toContain('savedPaymentMethodId');
     expect(src).toContain('confirmCardPayment');
+    expect(src).not.toContain("setSelectedSavedPaymentMethod(null);\n        }");
     expect(src).toContain('Pay with ${savedCardLabel(selectedSaved)}');
     expect(src).toContain('Save this payment method for faster checkout next time');
     expect(src).toContain('useState(true)');

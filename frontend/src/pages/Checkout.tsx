@@ -476,7 +476,13 @@ const Checkout = () => {
   });
 
   useEffect(() => {
-    if (!usingSavedCard && (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay' || paymentMethod === 'cod')) {
+    if (usingSavedCard) {
+      setShowPayPalButton(false);
+      setShowPaymentForm(false);
+      return;
+    }
+
+    if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay' || paymentMethod === 'cod') {
       setShowPayPalButton(paymentMethod !== 'cod');
       setShowPaymentForm(false);
       setClientSecret(null);
@@ -493,26 +499,23 @@ const Checkout = () => {
       try {
         const paymentIntentResponse = await orderService.createPaymentIntent({
           totalPrice: total,
-          paymentMethod: usingSavedCard ? 'credit_card' : paymentMethod,
-          saveForReuse: Boolean(isAuthenticated && savePaymentMethod && !usingSavedCard),
-          savedPaymentMethodId: usingSavedCard ? selectedSavedPaymentMethod || undefined : undefined,
+          paymentMethod,
+          saveForReuse: Boolean(isAuthenticated && savePaymentMethod),
         });
         if (cancelled) return;
         if (paymentIntentResponse.success && paymentIntentResponse.data?.clientSecret) {
           setClientSecret(paymentIntentResponse.data.clientSecret);
           setPaymentIntentId(paymentIntentResponse.data.paymentIntentId);
-          setShowPaymentForm(!usingSavedCard);
+          setShowPaymentForm(true);
           setShowPayPalButton(false);
         } else {
           showToast('Failed to initialize payment. Please try PayPal again.', 'error');
           setPaymentMethod('paypal');
-          setSelectedSavedPaymentMethod(null);
         }
       } catch (error: any) {
         if (cancelled) return;
         showToast(error.response?.data?.message || 'Payment initialization failed. Please try PayPal again.', 'error');
         setPaymentMethod('paypal');
-        setSelectedSavedPaymentMethod(null);
       } finally {
         if (!cancelled) setIsProcessingPayment(false);
       }
@@ -573,18 +576,30 @@ const Checkout = () => {
     }
 
     if (usingSavedCard) {
-      if (!clientSecret) {
-        showToast('Please wait for payment initialization...', 'info');
-        return;
-      }
       setIsProcessingPayment(true);
       try {
+        let secret = clientSecret;
+        if (!secret) {
+          const paymentIntentResponse = await orderService.createPaymentIntent({
+            totalPrice: total,
+            paymentMethod: 'credit_card',
+            saveForReuse: false,
+            savedPaymentMethodId: selectedSavedPaymentMethod || undefined,
+          });
+          if (!paymentIntentResponse.success || !paymentIntentResponse.data?.clientSecret) {
+            showToast(paymentIntentResponse.message || 'Could not start payment with your saved card.', 'error');
+            return;
+          }
+          secret = paymentIntentResponse.data.clientSecret;
+          setClientSecret(secret);
+          setPaymentIntentId(paymentIntentResponse.data.paymentIntentId);
+        }
         const stripeJs = await getStripe();
         if (!stripeJs) {
           showToast('Payment is not ready. Please try again.', 'error');
           return;
         }
-        const result = await stripeJs.confirmCardPayment(clientSecret);
+        const result = await stripeJs.confirmCardPayment(secret);
         if (result.error) {
           showToast(result.error.message || 'Could not charge the saved card.', 'error');
           return;
@@ -595,7 +610,7 @@ const Checkout = () => {
           showToast('Payment was not completed. Please try again.', 'error');
         }
       } catch (err: any) {
-        showToast(err?.message || 'Could not charge the saved card.', 'error');
+        showToast(err.response?.data?.message || err?.message || 'Could not charge the saved card.', 'error');
       } finally {
         setIsProcessingPayment(false);
       }
