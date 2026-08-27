@@ -17,6 +17,9 @@ export const paypalCheckoutScriptOptions = (currency = 'USD') => ({
   intent: 'capture' as const,
   environment: paypalSdkEnvironment,
   components: 'buttons,applepay,googlepay',
-  enableFunding: ['venmo', 'paylater', 'card'],
+  // PayPal's black "Debit or Credit Card" bar expands a hosted overlay that
+  // jumps to the top of checkout and covers the header. Card is Stripe instead.
+  enableFunding: ['venmo', 'paylater'],
+  disableFunding: ['card'],
   ...(!isPayPalLive ? { buyerCountry: 'US' } : {}),
 });
