@@ -21,6 +21,15 @@ export const touchCustomerActivity = (at: number = Date.now()): void => {
   }
 };
 
+export const clearCustomerActivity = (): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(LAST_ACTIVE_KEY);
+  } catch {
+    // ignore
+  }
+};
+
 export const shouldExpireCustomerSession = (
   lastActiveAt: number,
   currentTime: number,

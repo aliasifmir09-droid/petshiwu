@@ -8,7 +8,7 @@ interface AuthState {
   isLoading: boolean;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
-  logout: () => void;
+  logout: (options?: { redirect?: boolean }) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -20,27 +20,31 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user, isAuthenticated: !!user, isLoading: false });
   },
   setLoading: (loading) => set({ isLoading: loading }),
-  logout: async () => {
-    // Clear local state immediately to prevent any redirect loops
-    set({ user: null, isAuthenticated: false });
-    
+  logout: async (options?: { redirect?: boolean }) => {
+    set({ user: null, isAuthenticated: false, isLoading: false });
+
+    try {
+      const { clearCustomerActivity } = await import('@/utils/sessionTimeout');
+      clearCustomerActivity();
+    } catch {
+      // ignore
+    }
+
     try {
       const { default: api, removeToken } = await import('@/services/api');
       removeToken();
       await api.post('/auth/logout', {}, { skipAuth: true }).catch(() => {
         // Ignore errors - cookie clearing is best effort, state already cleared
       });
-    } catch (error) {
+    } catch {
       // If logout endpoint fails, state is already cleared above
     }
-    
-    // Use pathname navigation (BrowserRouter handles it)
-    // Small delay to ensure cookie is cleared
-    setTimeout(() => {
-      if (window.location.pathname !== '/') {
-        window.location.href = '/';
-      }
-    }, 50);
+
+    // Idle timeout must not navigate — a hidden-tab redirect painted a white page.
+    if (options?.redirect === false) return;
+    if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+      window.location.assign('/');
+    }
   }
 }));
 

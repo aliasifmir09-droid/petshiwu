@@ -2,6 +2,7 @@ import { Home, Search, ShoppingCart, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
+import { cartItemCount } from '@/utils/cartCount';
 
 // Mobile bottom navigation bar — hidden on lg+ screens
 // Matches major retailer mobile UX pattern
@@ -10,9 +11,7 @@ const HIDE_ON = ['/cart', '/checkout', '/login', '/register', '/checkout'];
 
 const BottomNav = () => {
   const location = useLocation();
-  const cartCount = useCartStore((state) =>
-    state.items.reduce((total, item) => total + (Number(item?.quantity) || 0), 0)
-  );
+  const cartCount = useCartStore((state) => cartItemCount(state.items));
   const { isAuthenticated } = useAuthStore();
 
   // Don't show on pages that have their own bottom CTAs
