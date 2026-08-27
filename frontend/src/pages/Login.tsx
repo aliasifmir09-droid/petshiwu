@@ -9,6 +9,7 @@ import { trackLogin } from '@/utils/analytics';
 import { validateEmail, sanitizeFormData } from '@/utils/inputValidation';
 import { extractErrorMessage } from '@/utils/errorHandler';
 import SEO from '@/components/SEO';
+import { guestSetPasswordPath, readGuestCheckoutAccount } from '@/utils/guestCheckoutAccount';
 
 interface LoginData {
   email: string;
@@ -18,11 +19,12 @@ interface LoginData {
 const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const guestEmail = searchParams.get('email')?.trim() || readGuestCheckoutAccount()?.email || '';
   const setUser = useAuthStore((state) => state.setUser);
   const { toast, showToast, hideToast } = useToast();
 
   const [formData, setFormData] = useState({
-    email: '',
+    email: guestEmail,
     password: ''
   });
 
@@ -105,7 +107,7 @@ const Login = () => {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
-          <p className="text-gray-600">Sign in to your account</p>
+          <p className="text-gray-600">Sign in with the password you created. Checkout does not set one for you.</p>
         </div>
 
         {isRegistered && (
@@ -153,7 +155,7 @@ const Login = () => {
                 <input type="checkbox" className="w-4 h-4 mr-2" />
                 <span className="text-sm">Remember me</span>
               </label>
-              <Link to="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700">
+              <Link to={guestSetPasswordPath(formData.email || guestEmail)} className="text-sm text-primary-600 hover:text-primary-700">
                 Forgot password?
               </Link>
             </div>
@@ -175,11 +177,11 @@ const Login = () => {
               </Link>
             </p>
             <p className="text-sm text-gray-500 mt-3">
-              Checked out as a guest?{' '}
-              <Link to="/forgot-password" className="text-primary-600 hover:text-primary-700 font-semibold">
-                Set a password with that email
-              </Link>{' '}
-              to see past orders.
+              Paid as a guest? There is no password yet.{' '}
+              <Link to={guestSetPasswordPath(formData.email || guestEmail)} className="text-primary-600 hover:text-primary-700 font-semibold">
+                Create one with the email from checkout
+              </Link>
+              . We email a link — we never invent a password for you.
             </p>
           </div>
         </div>

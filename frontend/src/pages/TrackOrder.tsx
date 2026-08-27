@@ -6,10 +6,12 @@ import { Link, useSearchParams } from 'react-router-dom';
 import OrderFireworks from '@/components/OrderFireworks';
 import GoogleCustomerReviewsOptIn from '@/components/GoogleCustomerReviewsOptIn';
 import { useAuthStore } from '@/stores/authStore';
+import { guestSetPasswordPath, readGuestCheckoutAccount } from '@/utils/guestCheckoutAccount';
 
 const TrackOrder = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthenticated } = useAuthStore();
+  const guestCheckout = readGuestCheckoutAccount();
   const [orderId, setOrderId] = useState(searchParams.get('order') || '');
   const [searchOrderId, setSearchOrderId] = useState(searchParams.get('order') || '');
   const [celebrate, setCelebrate] = useState(searchParams.get('newOrder') === 'true');
@@ -323,7 +325,25 @@ const TrackOrder = () => {
               </div>
             </div>
 
-            {/* Help Section */}
+            {/* Guest password — they never chose one at checkout */}
+            {!isAuthenticated && (
+              <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-6 md:p-8">
+                <h2 className="text-xl font-bold text-gray-900 mb-2">There is no password yet</h2>
+                <p className="text-gray-700 mb-4">
+                  You paid as a guest, so Petshiwu did not create a login. Use the email from this order
+                  {guestCheckout?.email ? (
+                    <> (<span className="font-semibold">{guestCheckout.email}</span>)</>
+                  ) : null}
+                  . We will send a link to create a password. Then you can log in and see this order anytime.
+                </p>
+                <Link
+                  to={guestSetPasswordPath(guestCheckout?.email)}
+                  className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Create a password
+                </Link>
+              </div>
+            )}
             <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl shadow-lg p-6 md:p-8 text-center">
               <h3 className="text-lg font-bold text-gray-900 mb-2">Need Help?</h3>
               <p className="text-gray-600 mb-4">
@@ -337,10 +357,10 @@ const TrackOrder = () => {
                   Contact Support
                 </Link>
                 <Link
-                  to={isAuthenticated ? '/orders' : '/forgot-password'}
+                  to={isAuthenticated ? '/orders' : guestSetPasswordPath(guestCheckout?.email)}
                   className="px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors"
                 >
-                  {isAuthenticated ? 'View My Orders' : 'Set a password to see all orders'}
+                  {isAuthenticated ? 'View My Orders' : 'Create a password to see all orders'}
                 </Link>
               </div>
             </div>

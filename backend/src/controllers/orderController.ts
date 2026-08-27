@@ -439,7 +439,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
                   shippingAddress: fullOrder.shippingAddress,
                   paymentMethod: fullOrder.paymentMethod,
                   orderStatus: fullOrder.orderStatus,
-                  createdAt: fullOrder.createdAt
+                  createdAt: fullOrder.createdAt,
+                  isGuestCheckout: isGuest
                 }
               },
               async () => {
@@ -463,7 +464,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
                     shippingAddress: fullOrder.shippingAddress,
                     paymentMethod: fullOrder.paymentMethod,
                     orderStatus: fullOrder.orderStatus,
-                    createdAt: fullOrder.createdAt
+                    createdAt: fullOrder.createdAt,
+                    isGuestCheckout: isGuest
                   }
                 );
               }
@@ -1497,7 +1499,8 @@ const sendPayPalOrderSideEffects = async (order: Awaited<ReturnType<typeof final
             shippingAddress: fullOrder.shippingAddress,
             paymentMethod: fullOrder.paymentMethod,
             orderStatus: fullOrder.orderStatus,
-            createdAt: fullOrder.createdAt
+            createdAt: fullOrder.createdAt,
+            isGuestCheckout: Boolean(pending.guestEmail && !pending.user)
           }
         },
         async () => {
@@ -1512,7 +1515,8 @@ const sendPayPalOrderSideEffects = async (order: Awaited<ReturnType<typeof final
             shippingAddress: fullOrder.shippingAddress,
             paymentMethod: fullOrder.paymentMethod,
             orderStatus: fullOrder.orderStatus,
-            createdAt: fullOrder.createdAt
+            createdAt: fullOrder.createdAt,
+            isGuestCheckout: Boolean(pending.guestEmail && !pending.user)
           });
         }
       );
