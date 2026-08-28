@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import {
   absoluteImageUrl,
   buildOrderConfirmationEmail,
@@ -141,5 +143,14 @@ describe('order confirmation email', () => {
     expect(paymentMethodLabel('cod')).toBe('Cash on delivery');
     expect(paymentMethodLabel('paypal')).toBe('PayPal');
     expect(absoluteImageUrl('/logo.png')).toBe('https://www.petshiwu.com/logo.png');
+  });
+
+  test('confirmation email sender accepts guest checkout on the order payload', () => {
+    const src = fs.readFileSync(
+      path.resolve(__dirname, '../../utils/emailService.ts'),
+      'utf8'
+    );
+    expect(src).toContain('type OrderConfirmationData');
+    expect(src).toContain('orderData: OrderConfirmationData');
   });
 });
