@@ -7,16 +7,18 @@ import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
 const Footer = () => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [newsletterCode, setNewsletterCode] = useState('');
 
   const handleNewsletter = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newsletterEmail.trim()) return;
     setNewsletterStatus('loading');
     try {
-      await api.post('/v1/newsletter/subscribe', {
+      const res = await api.post('/v1/newsletter/subscribe', {
         email: newsletterEmail.trim(),
         source: 'footer',
       }, { skipAuth: true });
+      setNewsletterCode(res.data?.code || 'FREEDOM20');
       setNewsletterStatus('done');
       setNewsletterEmail('');
     } catch {
@@ -186,7 +188,9 @@ const Footer = () => {
                 </button>
               </form>
               {newsletterStatus === 'done' && (
-                <p className="text-green-400 text-xs mt-2">You are in. Check your inbox.</p>
+                <p className="text-green-400 text-xs mt-2">
+                  You are in. Use {newsletterCode || 'FREEDOM20'} at checkout — 20% off, max $10.
+                </p>
               )}
               {newsletterStatus === 'error' && (
                 <p className="text-red-400 text-xs mt-2">Could not subscribe. Email support@petshiwu.com</p>

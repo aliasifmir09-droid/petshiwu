@@ -5,54 +5,21 @@ import logger from '../utils/logger';
 
 const router = express.Router();
 
-const DISCOUNT_CODE = 'WELCOME10';
+const DISCOUNT_CODE = 'FREEDOM20';
+const DISCOUNT_COPY = '20% off your first order (max $10)';
 const FROM_EMAIL = 'Petshiwu <hello@petshiwu.com>';
 const BASE = 'https://www.petshiwu.com';
 
-// POST /api/v1/newsletter/subscribe
-router.post('/subscribe', async (req: Request, res: Response) => {
+async function sendWelcomeEmail(lowerEmail: string): Promise<boolean> {
+  if (!process.env.RESEND_API_KEY) return false;
+
   try {
-    const { email, source = 'homepage' } = req.body;
-
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-      return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
-    }
-
-    const lowerEmail = email.toLowerCase().trim();
-
-    // Check if already subscribed
-    const existing = await Newsletter.findOne({ email: lowerEmail });
-    if (existing && !existing.unsubscribed) {
-      return res.status(200).json({
-        success: true,
-        alreadySubscribed: true,
-        message: "You're already subscribed! Check your inbox for the discount code.",
-      });
-    }
-
-    // Save or reactivate
-    if (existing) {
-      existing.unsubscribed = false;
-      existing.unsubscribedAt = undefined;
-      existing.source = source;
-      await existing.save();
-    } else {
-      await Newsletter.create({
-        email: lowerEmail,
-        source,
-        ipAddress: req.ip,
-      });
-    }
-
-    // Send welcome email with discount code via Resend
-    if (process.env.RESEND_API_KEY) {
-      try {
-        const resend = new Resend(process.env.RESEND_API_KEY);
-        await resend.emails.send({
-          from: FROM_EMAIL,
-          to: lowerEmail,
-          subject: `🐾 Your 10% Off Code is Here — Welcome to Petshiwu!`,
-          html: `
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: lowerEmail,
+      subject: `🐾 Your FREEDOM20 code is here — Welcome to Petshiwu!`,
+      html: `
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -64,12 +31,12 @@ router.post('/subscribe', async (req: Request, res: Response) => {
     </div>
     <div style="padding:40px 32px;text-align:center">
       <p style="color:#333;font-size:17px;line-height:1.6;margin:0 0 24px">
-        Thanks for joining our community of NYC pet parents! Here's your exclusive welcome discount:
+        Thanks for joining our community of NYC pet parents! Here's your exclusive first-order discount:
       </p>
       <div style="background:#f0f4ff;border:2px dashed #7c3aed;border-radius:12px;padding:24px;margin:0 0 32px">
         <p style="color:#555;font-size:14px;margin:0 0 8px;text-transform:uppercase;letter-spacing:1px">Your Discount Code</p>
         <div style="font-size:32px;font-weight:900;color:#1e3a8a;letter-spacing:4px">${DISCOUNT_CODE}</div>
-        <p style="color:#555;font-size:14px;margin:8px 0 0">10% off your entire first order</p>
+        <p style="color:#555;font-size:14px;margin:8px 0 0">${DISCOUNT_COPY}. No autoship required.</p>
       </div>
       <a href="${BASE}/products" style="display:inline-block;background:linear-gradient(135deg,#1e3a8a,#7c3aed);color:#fff;text-decoration:none;padding:16px 40px;border-radius:50px;font-size:17px;font-weight:700;margin-bottom:32px">
         Shop Now →
@@ -100,18 +67,65 @@ router.post('/subscribe', async (req: Request, res: Response) => {
   </div>
 </body>
 </html>`,
-        });
+    });
 
-        await Newsletter.updateOne({ email: lowerEmail }, { discountCodeSent: true });
-        logger.info(`[newsletter] Welcome email sent to ${lowerEmail}`);
-      } catch (emailErr: any) {
-        logger.warn(`[newsletter] Failed to send welcome email to ${lowerEmail}: ${emailErr?.message}`);
-      }
+    await Newsletter.updateOne({ email: lowerEmail }, { discountCodeSent: true });
+    logger.info(`[newsletter] Welcome email sent to ${lowerEmail}`);
+    return true;
+  } catch (emailErr: any) {
+    logger.warn(`[newsletter] Failed to send welcome email to ${lowerEmail}: ${emailErr?.message}`);
+    return false;
+  }
+}
+
+function wantsJson(req: Request): boolean {
+  const accept = String(req.headers.accept || '');
+  return /application\/json/i.test(accept) || String(req.query.format || '') === 'json';
+}
+
+// POST /api/v1/newsletter/subscribe
+router.post('/subscribe', async (req: Request, res: Response) => {
+  try {
+    const { email, source = 'homepage' } = req.body;
+
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
     }
+
+    const lowerEmail = email.toLowerCase().trim();
+
+    const existing = await Newsletter.findOne({ email: lowerEmail });
+    if (existing && !existing.unsubscribed) {
+      return res.status(200).json({
+        success: true,
+        alreadySubscribed: true,
+        emailSent: false,
+        message: "You're already subscribed. Use FREEDOM20 at checkout — 20% off, max $10.",
+        code: DISCOUNT_CODE,
+      });
+    }
+
+    if (existing) {
+      existing.unsubscribed = false;
+      existing.unsubscribedAt = undefined;
+      existing.source = source;
+      await existing.save();
+    } else {
+      await Newsletter.create({
+        email: lowerEmail,
+        source,
+        ipAddress: req.ip,
+      });
+    }
+
+    const emailSent = await sendWelcomeEmail(lowerEmail);
 
     return res.status(201).json({
       success: true,
-      message: `Welcome! Your 10% discount code ${DISCOUNT_CODE} has been sent to ${lowerEmail}.`,
+      emailSent,
+      message: emailSent
+        ? `Welcome! Your FREEDOM20 code has been sent to ${lowerEmail}.`
+        : `You're in. Use FREEDOM20 at checkout — ${DISCOUNT_COPY}.`,
       code: DISCOUNT_CODE,
     });
   } catch (err: any) {
@@ -124,13 +138,23 @@ router.post('/subscribe', async (req: Request, res: Response) => {
 router.get('/unsubscribe', async (req: Request, res: Response) => {
   try {
     const { email } = req.query as { email: string };
-    if (!email) return res.status(400).send('Missing email');
+    if (!email) {
+      if (wantsJson(req)) return res.status(400).json({ success: false, message: 'Missing email' });
+      return res.status(400).send('Missing email');
+    }
     await Newsletter.updateOne(
       { email: email.toLowerCase().trim() },
       { unsubscribed: true, unsubscribedAt: new Date() }
     );
+    if (wantsJson(req)) {
+      return res.json({
+        success: true,
+        message: "You've been removed from Petshiwu email updates.",
+      });
+    }
     return res.send(`<html><body style="font-family:sans-serif;text-align:center;padding:60px"><h2>Unsubscribed</h2><p>You've been removed from Petshiwu email updates.</p><a href="https://www.petshiwu.com">Return to Petshiwu</a></body></html>`);
   } catch {
+    if (wantsJson(req)) return res.status(500).json({ success: false, message: 'Error processing unsubscribe.' });
     return res.status(500).send('Error processing unsubscribe.');
   }
 });

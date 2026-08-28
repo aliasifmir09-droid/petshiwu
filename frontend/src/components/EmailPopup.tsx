@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Gift, Truck, Shield, Star } from 'lucide-react';
+import { NEWSLETTER_CODE, NEWSLETTER_CODE_COPY } from '@/config/constants';
 
 const STORAGE_KEY = 'petshiwu_popup_dismissed';
 const API_URL = import.meta.env.VITE_API_URL || 'https://www.petshiwu.com/api';
@@ -57,13 +58,9 @@ const EmailPopup = () => {
       });
       const data = await res.json();
 
-      if (data.success) {
+      if (data.success || data.alreadySubscribed) {
         setSubmitted(true);
-        setCode(data.code || 'WELCOME10');
-        localStorage.setItem(STORAGE_KEY, 'true');
-      } else if (data.alreadySubscribed) {
-        setSubmitted(true);
-        setCode('WELCOME10');
+        setCode(data.code || NEWSLETTER_CODE);
         localStorage.setItem(STORAGE_KEY, 'true');
       } else {
         setError(data.message || 'Something went wrong. Please try again.');
@@ -97,10 +94,10 @@ const EmailPopup = () => {
         <div className="bg-gradient-to-br from-blue-900 via-indigo-800 to-purple-800 px-8 py-8 text-center">
           <div className="text-5xl mb-3">🐾</div>
           <h2 className="text-white text-2xl font-black leading-tight">
-            Get <span className="text-yellow-300">10% Off</span> Your First Order
+            Get <span className="text-yellow-300">FREEDOM20</span> on Your First Order
           </h2>
           <p className="text-white/80 text-sm mt-2">
-            Join NYC pet parents getting the best deals delivered.
+            20% off, max $10. No autoship. NYC same-day notes.
           </p>
         </div>
 
@@ -139,7 +136,7 @@ const EmailPopup = () => {
                   disabled={loading}
                   className="w-full bg-gradient-to-r from-blue-700 to-purple-700 hover:from-blue-800 hover:to-purple-800 text-white font-bold py-3 rounded-xl transition-all hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed text-base"
                 >
-                  {loading ? 'Sending...' : 'Get My 10% Off Code →'}
+                  {loading ? 'Sending...' : 'Get My FREEDOM20 Code →'}
                 </button>
               </form>
               <p className="text-center text-gray-400 text-xs mt-3">
@@ -153,7 +150,7 @@ const EmailPopup = () => {
               <p className="text-gray-600 text-sm mb-4">Check your inbox. Your code:</p>
               <div className="bg-blue-50 border-2 border-dashed border-blue-400 rounded-xl py-4 px-6 mb-4">
                 <p className="text-3xl font-black text-blue-800 tracking-widest">{code}</p>
-                <p className="text-sm text-gray-500 mt-1">10% off your entire order</p>
+                <p className="text-sm text-gray-500 mt-1">{NEWSLETTER_CODE_COPY}</p>
               </div>
               <a
                 href="/products"
