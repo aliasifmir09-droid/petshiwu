@@ -470,7 +470,7 @@ PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
 - Forgot password: Use Forgot Password link on login page — reset link sent to email
 
 === DISCOUNTS & PROMOS ===
-- First-order 10% off: Sign up for newsletter at petshiwu.com homepage — code emailed instantly
+- First-order FREEDOM20: Sign up for newsletter at petshiwu.com homepage — 20% off first order, max $10, emailed instantly (also shown on screen)
 - Birthday discount: Code BDAYGIFT — 15% off entire order on pet's birthday (auto-notified when birthday saved in profile)
 - How to apply a code: Enter in Coupon Code box at checkout before payment, click Apply
 - Deals section: petshiwu.com/products?featured=true
@@ -514,10 +514,10 @@ Q: What payment methods do you accept?
 A: Visa, Mastercard, American Express, Discover, PayPal, Apple Pay, and Google Pay. All transactions are SSL-encrypted.
 
 Q: How do I use a discount code?
-A: Enter your code in the Coupon Code box at checkout, before the payment step. Click Apply — the discount shows in your total before you pay. Newsletter signup gives 10% off your first order; code BDAYGIFT gives 15% off on your pet's birthday.
+A: Enter your code in the Coupon Code box at checkout, before the payment step. Click Apply — the discount shows in your total before you pay. Newsletter signup gives FREEDOM20 (20% off first order, max $10); code BDAYGIFT gives 15% off on your pet's birthday.
 
-Q: How do I get the 10% first-order discount?
-A: Sign up for our newsletter at the bottom of petshiwu.com. Your 10% off code is emailed to you immediately and applies to your first order.
+Q: How do I get the FREEDOM20 first-order discount?
+A: Sign up for delivery updates on petshiwu.com (homepage blue banner or footer). Your FREEDOM20 code is shown on screen and emailed when mail is configured. Enter it at checkout — 20% off, max $10, no autoship.
 
 Q: What is the birthday gift program?
 A: Save your pet's birthday in their profile under My Account → Pet Passport. On their birthday we'll notify you with code BDAYGIFT for 15% off your entire order. We celebrate every pet's birthday 🎂🐾

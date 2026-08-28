@@ -5,7 +5,7 @@ const MESSAGES = [
   { text: '🚀 We start taking orders August 28, 2026 — browse now' },
   { text: '⚡ Same-Day Delivery NYC — Order before 3 PM, get it before 11 PM' },
   { text: '🚚 Free shipping on all orders over $49 — no code needed' },
-  { text: '🎁 10% off your first order — sign up for our newsletter' },
+  { text: '🎁 FREEDOM20 — 20% off first order, max $10. Subscribe below.' },
   { text: '⭐ Over 10,000 products for dogs, cats, birds, reptiles & more' },
   { text: '🎂 Save your pet\'s birthday — get 15% off on their special day!' },
   { text: '📞 Call support 24/7 — +1 (800) 259-2605' },

@@ -41,6 +41,9 @@ export const API_RETRY_ATTEMPTS = 3;
 // UI configuration
 export const TOAST_DURATION = 3000; // 3 seconds
 export const DEBOUNCE_DELAY = 300; // 300ms
+// Newsletter / first-order code shown after Subscribe (must match backend newsletter.ts)
+export const NEWSLETTER_CODE = 'FREEDOM20';
+export const NEWSLETTER_CODE_COPY = '20% off your first order, max $10';
 // Contact information
 export const CONTACT_PHONE = '+1 (800) 259-2605';
 export const CONTACT_PHONE_TEL = '+18002592605'; // For tel: links

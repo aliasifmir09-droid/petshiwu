@@ -94,6 +94,7 @@ const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Terms = lazy(() => import('./pages/Terms'));
 const ShippingPolicy = lazy(() => import('./pages/ShippingPolicy'));
 const Accessibility = lazy(() => import('./pages/Accessibility'));
+const Unsubscribe = lazy(() => import('./pages/Unsubscribe'));
 
 /**
  * FIXED SEO ROUTE
@@ -403,6 +404,7 @@ function App() {
                   <Route path="/shipping" element={<ShippingPolicy />} />
                   <Route path="/shipping-policy" element={<ShippingPolicy />} />
                   <Route path="/accessibility" element={<Accessibility />} />
+                  <Route path="/unsubscribe" element={<Unsubscribe />} />
                   <Route path="/cookie-policy" element={<Navigate to="/privacy#cookies" replace />} />
 
                   {/* Explicit routes that must NOT be caught by /:petType */}

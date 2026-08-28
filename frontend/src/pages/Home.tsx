@@ -13,6 +13,7 @@ import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
 import RestockDashboard from '@/components/RestockDashboard';
 import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
+import { NEWSLETTER_CODE, NEWSLETTER_CODE_COPY } from '@/config/constants';
 import { ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
@@ -471,6 +472,7 @@ const NewsletterSection = () => {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [code, setCode] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -487,7 +489,8 @@ const NewsletterSection = () => {
       const data = await res.json();
       if (data.success || data.alreadySubscribed) {
         setSubmitted(true);
-        setCode(data.code || 'WELCOME10');
+        setCode(data.code || NEWSLETTER_CODE);
+        setEmailSent(Boolean(data.emailSent));
       } else {
         setError(data.message || 'Something went wrong.');
       }
@@ -531,10 +534,12 @@ const NewsletterSection = () => {
           ) : (
             <>
               <h2 className="text-2xl md:text-3xl font-bold mb-3">You're in</h2>
-              <p className="text-white/80 mb-4">Check your inbox. Your code:</p>
+              <p className="text-white/80 mb-4">
+                {emailSent ? 'Check your inbox. Your code:' : 'Save this code and enter it at checkout:'}
+              </p>
               <div className="inline-block bg-white/10 border border-white/30 rounded-xl px-10 py-4 mb-6">
                 <span className="text-3xl font-bold tracking-widest">{code}</span>
-                <p className="text-white/70 text-sm mt-1">10% off your order</p>
+                <p className="text-white/70 text-sm mt-1">{NEWSLETTER_CODE_COPY}</p>
               </div>
               <br />
               <a href="/products" className="inline-block bg-white text-[#1E3A8A] font-semibold px-8 py-3 rounded-lg">
