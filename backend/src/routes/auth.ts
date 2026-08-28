@@ -3,6 +3,7 @@ import {
   register,
   login,
   googleLogin,
+  getGoogleConfig,
   getMe,
   updateProfile,
   updatePassword,
@@ -32,6 +33,7 @@ const router = express.Router();
 router.post('/register', registerValidation, register);
 router.post('/login', loginValidation, login);
 router.post('/google', googleLoginValidation, googleLogin);
+router.get('/google-config', getGoogleConfig);
 router.post('/logout', logout);
 router.get('/verify-email', verifyEmailValidation, verifyEmail);
 router.post('/resend-verification', resendVerificationValidation, resendVerificationEmail);

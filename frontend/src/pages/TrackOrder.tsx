@@ -9,7 +9,6 @@ import GoogleSignInButton from '@/components/GoogleSignInButton';
 import { useAuthStore } from '@/stores/authStore';
 import { authService } from '@/services/auth';
 import { guestSetPasswordPath, readGuestCheckoutAccount } from '@/utils/guestCheckoutAccount';
-import { isGoogleLoginConfigured } from '@/config/google';
 import { trackLogin } from '@/utils/analytics';
 
 const TrackOrder = () => {
@@ -341,29 +340,20 @@ const TrackOrder = () => {
                   ) : null}
                   . Your order attaches automatically.
                 </p>
-                {isGoogleLoginConfigured ? (
-                  <div className="mb-4 max-w-sm">
-                    <GoogleSignInButton
-                      onSuccess={async () => {
-                        await new Promise((resolve) => setTimeout(resolve, 100));
-                        const user = await authService.getMe();
-                        setUser(user);
-                        const { persistLocalCartAfterLogin } = await import('@/utils/persistLocalCartAfterLogin');
-                        await persistLocalCartAfterLogin();
-                        trackLogin('google');
-                        navigate('/orders');
-                      }}
-                      onError={() => navigate('/login')}
-                    />
-                  </div>
-                ) : (
-                  <Link
-                    to="/login"
-                    className="inline-block mb-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Continue with Google
-                  </Link>
-                )}
+                <div className="mb-4 max-w-sm">
+                  <GoogleSignInButton
+                    onSuccess={async () => {
+                      await new Promise((resolve) => setTimeout(resolve, 100));
+                      const user = await authService.getMe();
+                      setUser(user);
+                      const { persistLocalCartAfterLogin } = await import('@/utils/persistLocalCartAfterLogin');
+                      await persistLocalCartAfterLogin();
+                      trackLogin('google');
+                      navigate('/orders');
+                    }}
+                    onError={() => navigate('/login')}
+                  />
+                </div>
                 <div>
                   <Link
                     to={guestSetPasswordPath(guestCheckout?.email)}
@@ -390,7 +380,7 @@ const TrackOrder = () => {
                   to={isAuthenticated ? '/orders' : '/login'}
                   className="px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors"
                 >
-                  {isAuthenticated ? 'View My Orders' : 'Continue with Google'}
+                  {isAuthenticated ? 'View My Orders' : 'Sign in'}
                 </Link>
               </div>
             </div>

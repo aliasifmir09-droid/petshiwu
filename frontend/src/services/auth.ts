@@ -60,6 +60,11 @@ export const authService = {
     return response.data;
   },
 
+  getGoogleConfig: async () => {
+    const response = await api.get<any>('/auth/google-config', { skipAuth: true } as any);
+    return response.data?.data || { enabled: false, clientId: '' };
+  },
+
   logout: async () => {
     clearStoredToken();
     await api.post('/auth/logout');

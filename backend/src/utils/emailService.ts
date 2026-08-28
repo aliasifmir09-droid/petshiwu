@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 import logger from './logger';
 import EmailTemplate from '../models/EmailTemplate';
-import { buildOrderConfirmationEmail } from './orderConfirmationEmail';
+import { buildOrderConfirmationEmail, type OrderConfirmationData } from './orderConfirmationEmail';
 
 // Helper to get a clean frontend base URL (handles comma-separated env values)
 const getFrontendBaseUrl = (): string => {
@@ -249,27 +249,7 @@ export const sendOrderConfirmationEmail = async (
   email: string,
   firstName: string,
   orderNumber: string,
-  orderData: {
-    orderId?: string;
-    items: Array<{ name: string; quantity: number; price: number; image?: string }>;
-    totalPrice: number;
-    itemsPrice: number;
-    shippingPrice: number;
-    taxPrice: number;
-    donationAmount?: number;
-    shippingAddress: {
-      firstName: string;
-      lastName: string;
-      street: string;
-      city: string;
-      state: string;
-      zipCode: string;
-      country: string;
-    };
-    paymentMethod: string;
-    orderStatus: string;
-    createdAt: Date;
-  }
+  orderData: OrderConfirmationData
 ) => {
   try {
     const frontendUrl = getFrontendBaseUrl();
