@@ -13,6 +13,7 @@ describe('PayPal checkout', () => {
     expect(button).toContain('checkoutTokenRef.current = createdCheckoutToken');
     expect(button).toContain('const checkoutToken = checkoutTokenRef.current');
     expect(button).not.toContain('setCheckoutToken(');
+    expect(button).toContain('fundingSource={FUNDING.PAYPAL}');
 
     expect(card).toContain('checkoutTokenRef.current = createdCheckoutToken');
     expect(card).toContain('const checkoutToken = checkoutTokenRef.current');
@@ -49,8 +50,8 @@ describe('PayPal checkout', () => {
     expect(branded).toContain('PayPalGooglePay');
     expect(branded).toContain('skipProvider');
     expect(paypalConfig).toContain("components: 'buttons,applepay,googlepay'");
-    expect(paypalConfig).toContain("disableFunding: ['card']");
-    expect(paypalConfig).not.toContain("'venmo', 'paylater', 'card'");
+    expect(paypalConfig).toContain("disableFunding: ['card', 'venmo', 'paylater']");
+    expect(paypalConfig).not.toContain('enableFunding');
     expect(checkout).toContain("setPaymentMethod('credit_card')");
     expect(checkout).toContain('PayPalCardFields');
     expect(checkout).toContain('currency="USD"');
@@ -58,6 +59,17 @@ describe('PayPal checkout', () => {
     expect(checkout).not.toContain('STRIPE_SECRET_KEY');
     expect(checkout).toContain('PayPal charges the card on this page, same as your last payment.');
     expect(checkout).toContain('overflow-visible');
+    expect(checkout).toContain('paypal-wallet-slot');
+    expect(checkout).toContain("paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay'");
+    expect(checkout).not.toContain('PayPal, Venmo, or card');
+  });
+
+  test('checkout CSS hides stray Venmo and Pay Later bars that jump over the header', () => {
+    const css = read('../../index.css');
+    expect(css).toContain('iframe[title="Venmo"]');
+    expect(css).toContain('iframe[title="PayPal Pay Later"]');
+    expect(css).toContain('.paypal-wallet-slot');
+    expect(css).not.toContain('.paypal-checkout-sandbox {');
   });
 
   test('checkout does not tell shoppers PayPal is in test mode', () => {

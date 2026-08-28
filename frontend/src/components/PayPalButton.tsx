@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer } from '@paypal/react-paypal-js';
+import { FUNDING, PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { paypalCheckoutScriptOptions, paypalClientId } from '@/config/paypal';
 import { orderService } from '@/services/orders';
@@ -144,6 +144,7 @@ const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, coupon
         </div>
       )}
       <PayPalButtons
+        fundingSource={FUNDING.PAYPAL}
         createOrder={createOrder}
         onApprove={onApprove}
         onError={onErrorHandler}
