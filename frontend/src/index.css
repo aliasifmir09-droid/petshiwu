@@ -479,5 +479,18 @@ html {
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* PayPal Venmo / Pay Later bars jump to position:fixed and slide over the
+   sticky header. Keep wallet buttons in the checkout slot; never hide the
+   PayPal login lightbox (.paypal-checkout-sandbox). */
+.paypal-wallet-slot {
+  isolation: isolate;
+  transform: translateZ(0);
+}
+
+body > iframe[title="Venmo"],
+body > iframe[title="PayPal Pay Later"] {
+  display: none !important;
+}
+
 
 

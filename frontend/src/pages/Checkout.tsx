@@ -1052,7 +1052,7 @@ const Checkout = () => {
               </CheckoutStep>
 
               {/* Payment Method */}
-              <CheckoutStep step="2" title="Payment" subtitle="Apple Pay, Google Pay, PayPal, Venmo, or card — official buttons, the way a flagship store would do it.">
+              <CheckoutStep step="2" title="Payment" subtitle="Apple Pay, Google Pay, PayPal, or card — official buttons, the way a flagship store would do it.">
 
                 {isAuthenticated && savedPaymentMethods.length > 0 && (
                   <div className="mb-6">
@@ -1102,8 +1102,8 @@ const Checkout = () => {
                   </div>
                 )}
 
-                {showPayPalButton && paymentMethod !== 'cod' && paypalClientId && !usingSavedCard ? (
-                  <div id="paypal-payment" className="relative overflow-visible">
+                {showPayPalButton && (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay') && paypalClientId && !usingSavedCard ? (
+                  <div id="paypal-payment" className="paypal-wallet-slot relative overflow-hidden">
                     <Suspense fallback={
                       <div className="flex items-center justify-center py-8">
                         <LoadingSpinner size="md" />
