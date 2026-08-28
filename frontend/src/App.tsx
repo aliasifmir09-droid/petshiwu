@@ -1,4 +1,4 @@
-import { useEffect, lazy, Suspense } from 'react';
+import { useEffect, lazy, Suspense, type ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { ALL_NEIGHBORHOOD_PAGES } from './data/neighborhoodPages';
 import NeighborhoodCategoryPage from './pages/seo/NeighborhoodCategoryPage';
@@ -172,7 +172,20 @@ function LegacyHashAuthRedirect() {
     if (next) navigate(next, { replace: true });
   }, [navigate]);
   return null;
-};
+}
+
+function StoreFrame({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation();
+  const isCheckout = pathname === '/checkout';
+  return (
+    <div className={`flex min-h-screen flex-col ${isCheckout ? 'bg-[#F3F4F6]' : ''}`}>
+      {!isCheckout && <Header />}
+      <main className={isCheckout ? 'flex-1' : 'flex-1 pb-16 lg:pb-0'}>{children}</main>
+      {!isCheckout && <Footer />}
+      {!isCheckout && <BottomNav />}
+    </div>
+  );
+}
 
 function App() {
   const { setUser, setLoading } = useAuthStore();
@@ -304,15 +317,13 @@ function App() {
             ],
           }}
         />
-        <div className="flex flex-col min-h-screen">
-          <ErrorBoundaryWithReporting>
-            <Header />
-            <main className="flex-1 pb-16 lg:pb-0">
-              <Suspense fallback={
-                <div className="container mx-auto px-4 py-12">
-                  <LoadingSpinner size="lg" />
-                </div>
-              }>
+        <ErrorBoundaryWithReporting>
+          <StoreFrame>
+            <Suspense fallback={
+              <div className="container mx-auto px-4 py-12">
+                <LoadingSpinner size="lg" />
+              </div>
+            }>
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/products" element={<Products />} />
@@ -429,12 +440,9 @@ function App() {
                   <Route path="/:petType/*" element={<ProductDetail />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-              </Suspense>
-            </main>
-            <Footer />
-            <BottomNav />
-          </ErrorBoundaryWithReporting>
-        </div>
+            </Suspense>
+          </StoreFrame>
+        </ErrorBoundaryWithReporting>
         <CookieConsent />
       </BrowserRouter>
     </QueryClientProvider>

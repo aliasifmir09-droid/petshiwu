@@ -12,6 +12,9 @@ import Toast from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import CheckoutCharityCard from '@/components/CheckoutCharityCard';
+import CheckoutSecureHeader from '@/components/CheckoutSecureHeader';
+import CheckoutHelpFooter from '@/components/CheckoutHelpFooter';
+import CheckoutConfidence from '@/components/CheckoutConfidence';
 import { useGooglePlacesAutocomplete } from '@/hooks/useGooglePlacesAutocomplete';
 const getStripe = () => import('@/utils/stripe').then(m => m.getStripe());
 import { normalizeId } from '@/utils/idNormalizer';
@@ -21,7 +24,7 @@ import { rememberGuestCheckoutAccount } from '@/utils/guestCheckoutAccount';
 import SEO from '@/components/SEO';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
-import { MapPin, Plus, Check, User, UserCheck, Banknote, ShieldCheck, RotateCcw, Headphones, Lock, Truck, CreditCard } from 'lucide-react';
+import { MapPin, Plus, Check, UserCheck, Banknote, Lock, CreditCard } from 'lucide-react';
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
 import { paypalClientId } from '@/config/paypal';
 import { isNycDeliveryZip, isNewYorkState, normalizeShippingState } from '@/utils/deliveryZip';
@@ -59,17 +62,17 @@ const CheckoutStep = ({
   subtitle?: string;
   children: ReactNode;
 }) => (
-  <section className="overflow-visible rounded-3xl border border-stone-200/80 bg-white shadow-[0_24px_60px_-32px_rgba(30,58,138,0.45)]">
-    <header className="flex items-start gap-4 border-b border-stone-100 px-6 py-5">
-      <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#1E3A8A] text-sm font-black text-amber-300 ring-4 ring-amber-200/50">
+  <section className="overflow-visible rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <header className="flex items-start gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
+      <span className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#1E3A8A] text-xs font-bold text-white">
         {step}
       </span>
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-stone-900">{title}</h2>
-        {subtitle ? <p className="mt-0.5 text-sm leading-relaxed text-stone-500">{subtitle}</p> : null}
+        <h2 className="text-lg font-bold tracking-tight text-slate-900">{title}</h2>
+        {subtitle ? <p className="mt-0.5 text-sm leading-relaxed text-slate-500">{subtitle}</p> : null}
       </div>
     </header>
-    <div className="p-6 sm:p-7">{children}</div>
+    <div className="p-5 sm:p-6">{children}</div>
   </section>
 );
 
@@ -804,6 +807,17 @@ const Checkout = () => {
     createOrderMutation.mutate(orderData);
   };
 
+  const placeOrderBusy = createOrderMutation.isPending || (isProcessingPayment && paymentMethod !== 'cod');
+  const placeOrderLabel = paymentMethod === 'cod'
+    ? (createOrderMutation.isPending ? 'Placing order...' : 'Place cash on delivery order')
+    : usingSavedCard && selectedSaved
+      ? (createOrderMutation.isPending || isProcessingPayment ? 'Paying…' : `Pay with ${savedCardLabel(selectedSaved)}`)
+    : paymentMethod === 'credit_card'
+      ? 'Enter your card below'
+    : paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay'
+      ? 'Continue to PayPal'
+    : isProcessingPayment ? 'Initializing Payment...' : createOrderMutation.isPending ? 'Processing...' : 'Place Order';
+
   if (items.length === 0) {
     navigate('/cart');
     return null;
@@ -811,24 +825,15 @@ const Checkout = () => {
 
   return (
     <>
-      <SEO title="Checkout | petshiwu" description="Complete your purchase at petshiwu" noindex={true} />
-      <div className="-mt-2 min-h-screen bg-[radial-gradient(circle_at_top,_#fff8e8,_#f4f0e8_42%,_#eef2f7_100%)] pb-16">
-      <div className="container mx-auto px-4 lg:px-8 py-8">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-[#1E3A8A]">
-              <Lock size={13} /> Secure checkout
-            </p>
-            <h1 className="font-black tracking-tight text-stone-900 text-4xl sm:text-5xl">Almost home.</h1>
-            <p className="mt-2 max-w-xl text-stone-600">
-              Same-day Queens delivery, PayPal-secured payment, and a 24/7 call center — the kind of checkout a pet parent should trust.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> NYC same-day</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><ShieldCheck size={13} className="text-[#1E3A8A]" /> PayPal protected</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><RotateCcw size={13} className="text-[#1E3A8A]" /> 365-day returns</span>
-          </div>
+      <SEO title="Secure Checkout | Petshiwu" description="Complete your purchase at Petshiwu" noindex={true} />
+      <div className="flex min-h-screen flex-col bg-[#F3F4F6]">
+      <CheckoutSecureHeader />
+      <div className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 lg:px-8 lg:pb-12">
+        <div className="mb-6">
+          <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">Checkout</h1>
+          <p className="mt-1 text-sm text-slate-600">
+            SSL encrypted · PayPal protected · packed in Queens
+          </p>
         </div>
 
                 <div className="mb-6">
@@ -837,33 +842,33 @@ const Checkout = () => {
 
                 {/* GUEST CHECKOUT BANNER — show only when not logged in */}
         {!isAuthenticated && (
-          <div className="mb-6 flex flex-col gap-4 rounded-3xl border border-stone-200/80 bg-white/90 p-5 shadow-[0_16px_40px_-28px_rgba(30,58,138,0.4)] sm:flex-row sm:items-center">
+          <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center">
             <div className="flex items-start gap-3 flex-1">
               <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#1E3A8A] text-amber-300">
-                <User size={20} />
+                <Lock size={18} />
               </div>
               <div>
-                <p className="text-base font-bold text-stone-900">Guest checkout is open</p>
-                <p className="text-sm text-stone-600 mt-1">
-                  Sign in to save your card and address for next time, or continue below — no account required.
+                <p className="text-base font-bold text-slate-900">Faster with an account — or continue as guest</p>
+                <p className="text-sm text-slate-600 mt-1">
+                  Sign in to save your address and card. Guest checkout stays open. We never start autoship unless you ask.
                 </p>
               </div>
             </div>
             <Link
               to="/login?redirect=/checkout"
-              className="inline-flex items-center justify-center rounded-full bg-[#1E3A8A] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-900/20 hover:bg-[#16307a] transition-colors whitespace-nowrap"
+              className="inline-flex items-center justify-center rounded-xl bg-[#1E3A8A] px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#16307a] transition-colors whitespace-nowrap"
             >
-              Sign in
+              Sign in or create account
             </Link>
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form id="checkout-form" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Checkout Form */}
             <div className="lg:col-span-2 space-y-6">
               {/* Shipping Information */}
-              <CheckoutStep step="1" title="Delivery" subtitle="Where should this care package land tonight?">
+              <CheckoutStep step="1" title="Delivery" subtitle="From our Queens warehouse to your door. No autoship unless you choose it.">
 
                 {/* Logged-in user info display */}
                 {isAuthenticated && user && (
@@ -1052,7 +1057,7 @@ const Checkout = () => {
               </CheckoutStep>
 
               {/* Payment Method */}
-              <CheckoutStep step="2" title="Payment" subtitle="Apple Pay, Google Pay, PayPal, or card — official buttons, the way a flagship store would do it.">
+              <CheckoutStep step="2" title="Payment" subtitle="Encrypted checkout. Nothing is charged until you confirm on this page.">
 
                 {isAuthenticated && savedPaymentMethods.length > 0 && (
                   <div className="mb-6">
@@ -1282,7 +1287,7 @@ const Checkout = () => {
               )}
 
               {/* Order Notes */}
-              <CheckoutStep step="3" title="A note for the courier" subtitle="Gate codes, doorman, or “leave with the neighbor.” Optional.">
+              <CheckoutStep step="3" title="Delivery notes" subtitle="Gate codes, doorman, or leave with a neighbor. Optional.">
                 <textarea value={orderNotes} onChange={(e) => setOrderNotes(e.target.value)}
                   placeholder="Add any special delivery instructions or notes for your order..."
                   rows={4} maxLength={500}
@@ -1292,14 +1297,25 @@ const Checkout = () => {
             </div>
 
             {/* Order Summary */}
-            <div>
-              <div className="sticky top-24 overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-[0_24px_60px_-32px_rgba(30,58,138,0.5)]">
-                <div className="bg-[#1E3A8A] px-6 py-5 text-white">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-300">Your order</p>
-                  <h2 className="mt-1 text-2xl font-black tracking-tight">${total.toFixed(2)}</h2>
-                  <p className="mt-1 text-sm text-blue-100">{items.length} {items.length === 1 ? 'item' : 'items'} · packed in Queens</p>
+            <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="border-b border-slate-100 px-5 py-4">
+                  <h2 className="text-lg font-bold text-slate-900">Order summary</h2>
+                  <p className="text-sm text-slate-500">{items.length} {items.length === 1 ? 'item' : 'items'} · packed in Queens</p>
                 </div>
-                <div className="p-6">
+                <div className="p-5">
+                <button type="submit"
+                  id="checkout-place-order"
+                  disabled={placeOrderBusy}
+                  className="mb-5 hidden w-full rounded-xl bg-amber-400 py-3.5 text-base font-black text-[#1E3A8A] shadow-sm hover:bg-amber-300 disabled:opacity-50 lg:block">
+                  {placeOrderLabel}
+                </button>
+                <p className="mb-5 hidden text-center text-xs text-slate-500 lg:block">
+                  By placing your order, you agree to Petshiwu&apos;s{' '}
+                  <Link to="/privacy" className="underline hover:text-[#1E3A8A]">Privacy Policy</Link>
+                  {' '}and{' '}
+                  <Link to="/terms" className="underline hover:text-[#1E3A8A]">Terms of Use</Link>.
+                </p>
                 <div className="space-y-4 mb-6">
                   {items.map((item) => {
                     const price = item.variant?.price || item.product.basePrice;
@@ -1307,31 +1323,31 @@ const Checkout = () => {
                       <div key={`${item.product._id}-${item.variant?.sku}`} className="flex gap-3">
                         <img src={normalizeImageUrl(item.product.images?.[0])} alt={item.product.name}
                           onError={(e) => handleImageError(e, item.product.name)}
-                          className="h-[4.5rem] w-[4.5rem] rounded-2xl object-cover ring-1 ring-stone-200" />
+                          className="h-16 w-16 rounded-xl object-cover ring-1 ring-slate-200" />
                         <div className="flex-1">
-                          <p className="font-semibold text-sm text-stone-900 leading-snug">{item.product.name}</p>
-                          <p className="text-xs text-stone-500 mt-1">Qty {item.quantity}</p>
-                          {item.variant && <p className="text-xs text-stone-500">{item.variant.size || item.variant.weight}</p>}
+                          <p className="font-semibold text-sm text-slate-900 leading-snug">{item.product.name}</p>
+                          <p className="text-xs text-slate-500 mt-1">Qty {item.quantity}</p>
+                          {item.variant && <p className="text-xs text-slate-500">{item.variant.size || item.variant.weight}</p>}
                         </div>
-                        <p className="font-bold text-stone-900">${(price * item.quantity).toFixed(2)}</p>
+                        <p className="font-bold text-slate-900">${(price * item.quantity).toFixed(2)}</p>
                       </div>
                     );
                   })}
                 </div>
-                <div className="space-y-3 border-t border-stone-100 pt-4 mb-5">
+                <div className="space-y-3 border-t border-slate-100 pt-4 mb-5">
                   <div className="flex justify-between text-sm">
-                    <span className="text-stone-500">Subtotal</span>
-                    <span className="font-semibold text-stone-800">${subtotal.toFixed(2)}</span>
+                    <span className="text-slate-500">Items ({items.length})</span>
+                    <span className="font-semibold text-slate-800">${subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-stone-500">Shipping</span>
-                    <span className="font-semibold text-stone-800">
+                    <span className="text-slate-500">Shipping</span>
+                    <span className="font-semibold text-slate-800">
                       {shipping === 0 ? <span className="text-emerald-600">FREE</span> : `$${shipping.toFixed(2)}`}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-stone-500">Tax</span>
-                    <span className="font-semibold text-stone-800">${tax.toFixed(2)}</span>
+                    <span className="text-slate-500">Estimated tax</span>
+                    <span className="font-semibold text-slate-800">${tax.toFixed(2)}</span>
                   </div>
                   {couponDiscount > 0 && (
                     <div className="flex justify-between text-sm text-emerald-600">
@@ -1347,14 +1363,15 @@ const Checkout = () => {
                           value={couponInput}
                           onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
                           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleApplyCoupon(); } }}
-                          placeholder="Promo code"
-                          className="flex-1 rounded-xl border border-stone-200 bg-[#FBF9F5] px-3 py-2.5 text-sm outline-none focus:border-[#1E3A8A] focus:ring-2 focus:ring-[#1E3A8A]/15"
+                          placeholder="Add promo code"
+                          aria-label="Promo code"
+                          className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1E3A8A] focus:ring-2 focus:ring-[#1E3A8A]/15"
                         />
                         <button
                           type="button"
                           onClick={handleApplyCoupon}
                           disabled={couponLoading || !couponInput.trim()}
-                          className="rounded-xl bg-stone-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-stone-700 disabled:opacity-50 transition-colors"
+                          className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-[#1E3A8A] hover:bg-slate-50 disabled:opacity-50 transition-colors"
                         >
                           {couponLoading ? '...' : 'Apply'}
                         </button>
@@ -1362,11 +1379,11 @@ const Checkout = () => {
                     ) : (
                       <div className="flex items-center justify-between rounded-xl bg-emerald-50 px-3 py-2 ring-1 ring-emerald-100">
                         <span className="text-emerald-700 text-sm font-semibold">{couponCode} applied</span>
-                        <button type="button" onClick={handleRemoveCoupon} className="text-stone-400 hover:text-stone-700 text-xs ml-2">Remove</button>
+                        <button type="button" onClick={handleRemoveCoupon} className="text-slate-400 hover:text-slate-700 text-xs ml-2">Remove</button>
                       </div>
                     )}
                     {!couponCode && !couponMessage && (
-                      <p className="text-xs text-stone-500 mt-1.5">
+                      <p className="text-xs text-slate-500 mt-1.5">
                         First order: FREEDOM20 · 20% off, max $10. Reorder {ASK_COUPON} · {ASK_DISCOUNT_COPY}. Autoship {AUTOSHIP_COUPON} · {AUTOSHIP_DISCOUNT_COPY}.
                       </p>
                     )}
@@ -1381,44 +1398,45 @@ const Checkout = () => {
                       <span className="font-bold text-rose-600">${donationAmount.toFixed(2)}</span>
                     </div>
                   )}
-                  <div className="border-t border-stone-200 pt-3 flex justify-between text-lg font-black text-stone-900">
-                    <span>Total</span>
+                  <div className="border-t border-slate-200 pt-3 flex justify-between text-lg font-black text-slate-900">
+                    <span>Order total</span>
                     <span>${total.toFixed(2)}</span>
                   </div>
                 </div>
                 <button type="submit"
-                  disabled={createOrderMutation.isPending || (isProcessingPayment && paymentMethod !== 'cod')}
-                  className="w-full rounded-2xl bg-[#1E3A8A] py-4 text-lg font-black text-white shadow-lg shadow-blue-900/25 hover:bg-[#16307a] disabled:opacity-50">
-                  {paymentMethod === 'cod'
-                    ? (createOrderMutation.isPending ? 'Placing order...' : 'Place cash on delivery order')
-                    : usingSavedCard && selectedSaved
-                      ? (createOrderMutation.isPending || isProcessingPayment ? 'Paying…' : `Pay with ${savedCardLabel(selectedSaved)}`)
-                    : paymentMethod === 'credit_card'
-                      ? 'Enter your card below'
-                    : paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay'
-                      ? 'Continue to PayPal'
-                    : isProcessingPayment ? 'Initializing Payment...' : createOrderMutation.isPending ? 'Processing...' : 'Place Order'}
+                  disabled={placeOrderBusy}
+                  className="w-full rounded-xl bg-amber-400 py-3.5 text-base font-black text-[#1E3A8A] shadow-sm hover:bg-amber-300 disabled:opacity-50 lg:hidden">
+                  {placeOrderLabel}
                 </button>
-                <div className="mt-5 rounded-2xl bg-[#FBF9F5] p-4 ring-1 ring-stone-200">
-                  <div className="flex items-start gap-3">
-                    <ShieldCheck className="w-6 h-6 text-[#1E3A8A] flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-bold text-stone-900">A promise worth the brand</p>
-                      <p className="text-sm text-stone-600 mt-1">Same-day Queens, PayPal-secured, and a human on the phone 24/7.</p>
-                      <ul className="mt-3 space-y-1.5 text-sm text-stone-700">
-                        <li className="flex items-center gap-2"><RotateCcw className="w-4 h-4 text-[#1E3A8A]" /> 365-day returns on unused items</li>
-                        <li className="flex items-center gap-2"><Headphones className="w-4 h-4 text-[#1E3A8A]" /> Call 24/7 · (800) 259-2605</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
+                <p className="mt-3 flex items-center justify-center gap-1.5 text-xs font-medium text-slate-500">
+                  <Lock className="h-3.5 w-3.5 text-[#1E3A8A]" aria-hidden />
+                  SSL encrypted · no charge until you confirm
+                </p>
                 </div>
               </div>
+              <CheckoutConfidence />
             </div>
           </div>
         </form>
 
         {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
+      </div>
+      <CheckoutHelpFooter />
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 p-3 shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.35)] backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-6xl items-center gap-3">
+          <div className="min-w-0">
+            <p className="text-xs text-slate-500">Order total</p>
+            <p className="text-lg font-black text-slate-900">${total.toFixed(2)}</p>
+          </div>
+          <button
+            type="submit"
+            form="checkout-form"
+            disabled={placeOrderBusy}
+            className="ml-auto flex-1 rounded-xl bg-amber-400 py-3 text-sm font-black text-[#1E3A8A] shadow-sm hover:bg-amber-300 disabled:opacity-50"
+          >
+            {placeOrderLabel}
+          </button>
+        </div>
       </div>
       </div>
     </>
