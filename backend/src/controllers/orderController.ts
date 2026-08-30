@@ -864,7 +864,7 @@ const persistOrderFieldsWithoutValidation = async (
   $set: Record<string, unknown>,
   session?: mongoose.ClientSession | null,
   $unset?: Record<string, string>
-) => {
+): Promise<Record<string, any>> => {
   const update: Record<string, unknown> = { $set: { ...$set, updatedAt: new Date() } };
   if ($unset && Object.keys($unset).length) {
     update.$unset = $unset;
@@ -872,7 +872,7 @@ const persistOrderFieldsWithoutValidation = async (
   const writeOptions = session ? { session } : {};
   const result = await Order.collection.updateOne(
     { _id: orderId },
-    update,
+    update as any,
     writeOptions
   );
   if (!result.matchedCount) {
@@ -1092,7 +1092,7 @@ export const processRefund = async (req: AuthRequest, res: Response, next: NextF
       const user = await User.findById(order.user);
       if (user) {
         await sendOrderCancellationEmail(user.email, user.firstName, order.orderNumber || '', {
-          items: order.items.map(item => ({ name: item.name, quantity: item.quantity, price: item.price, image: item.image })),
+          items: order.items.map((item: { name: string; quantity: number; price: number; image?: string }) => ({ name: item.name, quantity: item.quantity, price: item.price, image: item.image })),
           totalPrice: order.totalPrice,
           refundAmount: amount,
           createdAt: order.createdAt

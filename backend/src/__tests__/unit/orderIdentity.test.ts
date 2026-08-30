@@ -1,7 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import fs from 'fs';
-import path from 'path';
 import { extractHexId, isOrderIdentifier, isOrderNumber, isStrictObjectId } from '../../utils/orderIdentity';
 
 describe('orderIdentity', () => {

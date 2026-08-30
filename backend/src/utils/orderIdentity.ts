@@ -99,7 +99,7 @@ export const extractOrderIdentifier = (value: unknown, orderNumber?: unknown): s
   return hex;
 };
 
-export const findOrderByIdentifier = async (rawId: unknown) => {
+export const findOrderByIdentifier = async (rawId: unknown): Promise<Record<string, any> | null> => {
   const extracted = extractHexId(rawId) || (typeof rawId === 'string' ? rawId.trim() : '');
   if (!extracted || extracted === '[object Object]') return null;
   const { default: Order } = await import('../models/Order');

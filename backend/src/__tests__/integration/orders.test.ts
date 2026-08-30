@@ -423,12 +423,12 @@ describe('Orders API', () => {
       );
 
       const hydrateError = Object.assign(new Error('Validation failed'), { name: 'ValidationError' });
-      const findByIdSpy = jest.spyOn(Order, 'findById').mockImplementation(() => {
+      const findByIdSpy = jest.spyOn(Order, 'findById').mockImplementation((): never => {
         throw hydrateError;
-      } as any);
-      const findOneSpy = jest.spyOn(Order, 'findOne').mockImplementation(() => {
+      });
+      const findOneSpy = jest.spyOn(Order, 'findOne').mockImplementation((): never => {
         throw hydrateError;
-      } as any);
+      });
 
       const emailService = await import('../../utils/emailService');
       const emailSpy = jest.spyOn(emailService, 'sendOrderCancellationEmail').mockResolvedValue({ messageId: 'test' } as any);
