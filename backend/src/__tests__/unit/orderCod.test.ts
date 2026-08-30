@@ -17,6 +17,12 @@ describe('createOrder cash on delivery', () => {
     expect(src).toContain("paymentMethod === 'cod' ? 'pending'");
     expect(src).toContain('collect cash on delivery');
   });
+
+  it('cancels and updates status without Mongoose document validation', () => {
+    expect(src).toContain('persistOrderFieldsWithoutValidation');
+    expect(src).toContain('Order.collection.updateOne');
+    expect(src).not.toMatch(/await order\.save\(\{\s*validateModifiedOnly:\s*true/);
+  });
 });
 
 describe('createOrder validation allows cash on delivery', () => {
@@ -78,11 +84,21 @@ describe('Order delivery proof is not required at checkout', () => {
     expect(err).toBeUndefined();
   });
 
-  it('still requires a handoff method when a driver uploads proof', () => {
+  it('lets leftover routing proof save without a driver handoff method', () => {
+    const err = checkoutOrder({
+      delivery: {
+        status: 'ready',
+        proof: { uploadedAt: new Date(), handoffMethod: '' },
+      },
+    }).validateSync();
+    expect(err).toBeUndefined();
+  });
+
+  it('still requires a handoff method when a driver uploads proof media', () => {
     const err = checkoutOrder({
       delivery: {
         status: 'delivered',
-        proof: { uploadedAt: new Date() },
+        proof: { uploadedAt: new Date(), photoUrl: 'https://cdn.example.com/proof.jpg' },
       },
     }).validateSync();
     expect(err?.errors['delivery.proof.handoffMethod']).toBeDefined();
