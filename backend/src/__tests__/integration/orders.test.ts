@@ -405,6 +405,56 @@ describe('Orders API', () => {
       await Order.deleteOne({ _id: order._id });
     });
 
+    it('cancels even if hydrating the Mongoose order document throws', async () => {
+      mongoose.set('runValidators', true);
+      const guestEmail = `guest.hydrate.${Date.now()}@petshiwu.com`;
+      const order = await createPendingOrder(guestEmail);
+      await Order.collection.updateOne(
+        { _id: order._id },
+        {
+          $set: {
+            delivery: {
+              distanceMeters: 900,
+              status: 'ready',
+              proof: { uploadedAt: new Date('2026-08-30T18:00:00.000Z'), handoffMethod: '' }
+            }
+          }
+        }
+      );
+
+      const hydrateError = Object.assign(new Error('Validation failed'), { name: 'ValidationError' });
+      const findByIdSpy = jest.spyOn(Order, 'findById').mockImplementation(() => {
+        throw hydrateError;
+      } as any);
+      const findOneSpy = jest.spyOn(Order, 'findOne').mockImplementation(() => {
+        throw hydrateError;
+      } as any);
+
+      const emailService = await import('../../utils/emailService');
+      const emailSpy = jest.spyOn(emailService, 'sendOrderCancellationEmail').mockResolvedValue({ messageId: 'test' } as any);
+
+      const response = await request(app)
+        .put(`/api/orders/${order.orderNumber}/status`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ orderStatus: 'cancelled' });
+
+      findByIdSpy.mockRestore();
+      findOneSpy.mockRestore();
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(emailSpy).toHaveBeenCalledWith(
+        guestEmail,
+        'Asif',
+        order.orderNumber,
+        expect.objectContaining({ cancellationReason: 'Updated by Petshiwu' })
+      );
+      const updated = await Order.collection.findOne({ _id: order._id });
+      expect(updated?.orderStatus).toBe('cancelled');
+      emailSpy.mockRestore();
+      await Order.deleteOne({ _id: order._id });
+    });
+
     it('cancels by order number and emails the guest customer', async () => {
       const emailService = await import('../../utils/emailService');
       const smsService = await import('../../utils/smsService');

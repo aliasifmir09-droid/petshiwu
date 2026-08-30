@@ -1,3 +1,7 @@
+import fs from 'fs';
+import path from 'path';
+import fs from 'fs';
+import path from 'path';
 import { extractHexId, isOrderIdentifier, isOrderNumber, isStrictObjectId } from '../../utils/orderIdentity';
 
 describe('orderIdentity', () => {
@@ -18,5 +22,15 @@ describe('orderIdentity', () => {
     expect(extractHexId({
       buffer: { 0: 0x50, 1: 0x7f, 2: 0x1f, 3: 0x77, 4: 0xbc, 5: 0xf8, 6: 0x6c, 7: 0xd7, 8: 0x99, 9: 0x43, 10: 0x90, 11: 0x11 }
     })).toBe(hex);
+  });
+
+  it('loads orders through the native collection so leftover proof cannot fail hydrate', () => {
+    const src = fs.readFileSync(
+      path.resolve(__dirname, '../../utils/orderIdentity.ts'),
+      'utf8'
+    );
+    expect(src).toContain('Order.collection.findOne');
+    expect(src).not.toMatch(/return Order\.findById\(extracted\)/);
+    expect(src).not.toMatch(/return Order\.findOne\(\{ orderNumber/);
   });
 });

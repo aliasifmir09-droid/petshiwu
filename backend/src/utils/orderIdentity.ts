@@ -1,3 +1,5 @@
+import mongoose from 'mongoose';
+
 /**
  * Resolve Mongo ObjectIds and Petshiwu order numbers (ORD-...) from API params
  * and serialized BSON values the admin UI may send.
@@ -101,11 +103,13 @@ export const findOrderByIdentifier = async (rawId: unknown) => {
   const extracted = extractHexId(rawId) || (typeof rawId === 'string' ? rawId.trim() : '');
   if (!extracted || extracted === '[object Object]') return null;
   const { default: Order } = await import('../models/Order');
+  // Native collection read: leftover delivery.proof (empty enum / missing
+  // handoffMethod) can throw Mongoose ValidationError on document hydrate.
   if (isStrictObjectId(extracted)) {
-    return Order.findById(extracted);
+    return Order.collection.findOne({ _id: new mongoose.Types.ObjectId(extracted) });
   }
   if (isOrderNumber(extracted)) {
-    return Order.findOne({ orderNumber: extracted.toUpperCase() });
+    return Order.collection.findOne({ orderNumber: extracted.toUpperCase() });
   }
   return null;
 };

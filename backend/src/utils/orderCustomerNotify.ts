@@ -63,13 +63,20 @@ export const notifyCustomerOfOrderStatusChange = async (
           refundAmount: options?.refundAmount,
           createdAt: order.createdAt || new Date()
         };
-        await addEmailJob(
-          'order-cancellation',
-          { email: contact.email, firstName: contact.firstName, orderNumber, orderData },
-          async () => {
-            await emailService.sendOrderCancellationEmail(contact.email, contact.firstName, orderNumber, orderData);
-          }
-        );
+        // Send now. Redis/Bull only *queues* the job; if the worker is down
+        // the customer never receives the cancellation email.
+        try {
+          await emailService.sendOrderCancellationEmail(contact.email, contact.firstName, orderNumber, orderData);
+        } catch (directError) {
+          logger.error(`Direct cancellation email failed for ${orderNumber}, queueing retry:`, directError);
+          await addEmailJob(
+            'order-cancellation',
+            { email: contact.email, firstName: contact.firstName, orderNumber, orderData },
+            async () => {
+              await emailService.sendOrderCancellationEmail(contact.email, contact.firstName, orderNumber, orderData);
+            }
+          );
+        }
       } else if (newStatus === 'delivered') {
         const orderData = {
           items: itemsForEmail(order),
