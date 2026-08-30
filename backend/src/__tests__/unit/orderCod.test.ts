@@ -21,6 +21,7 @@ describe('createOrder cash on delivery', () => {
   it('cancels and updates status without Mongoose document validation', () => {
     expect(src).toContain('persistOrderFieldsWithoutValidation');
     expect(src).toContain('Order.collection.updateOne');
+    expect(src).toContain('Order.collection.findOne');
     expect(src).not.toMatch(/await order\.save\(\{\s*validateModifiedOnly:\s*true/);
   });
 });

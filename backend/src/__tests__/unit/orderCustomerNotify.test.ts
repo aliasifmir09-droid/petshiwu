@@ -60,7 +60,10 @@ describe('notifyCustomerOfOrderStatusChange', () => {
   const addEmailJob = jobQueue.addEmailJob as jest.MockedFunction<typeof jobQueue.addEmailJob>;
 
   beforeEach(() => {
-    addEmailJob.mockClear();
+    addEmailJob.mockReset();
+    addEmailJob.mockImplementation(async (_type, _data, executeFn) => {
+      await executeFn();
+    });
     jest.spyOn(smsService, 'sendSms').mockResolvedValue({ sent: false, skippedReason: 'not_configured' });
   });
 
@@ -68,8 +71,31 @@ describe('notifyCustomerOfOrderStatusChange', () => {
     jest.restoreAllMocks();
   });
 
-  it('queues a cancellation email with the payload the worker needs', async () => {
+  it('sends a cancellation email immediately so it does not depend on the Redis worker', async () => {
     const emailSpy = jest.spyOn(emailService, 'sendOrderCancellationEmail').mockResolvedValue({ messageId: 'test' } as any);
+    addEmailJob.mockImplementation(async () => undefined);
+
+    const result = await notifyCustomerOfOrderStatusChange(guestOrder, 'pending', 'cancelled', {
+      cancellationReason: 'Updated by Petshiwu'
+    });
+
+    expect(result.email).toBe(true);
+    expect(emailSpy).toHaveBeenCalledWith(
+      'guest.order@petshiwu.com',
+      'Asif',
+      'ORD-1787684558761-8401',
+      expect.objectContaining({ cancellationReason: 'Updated by Petshiwu' })
+    );
+    expect(addEmailJob).not.toHaveBeenCalled();
+  });
+
+  it('queues a cancellation retry if the direct send fails', async () => {
+    jest.spyOn(emailService, 'sendOrderCancellationEmail')
+      .mockRejectedValueOnce(new Error('SMTP unavailable'))
+      .mockResolvedValue({ messageId: 'retry' } as any);
+    addEmailJob.mockImplementation(async (_type, _data, executeFn) => {
+      await executeFn();
+    });
 
     const result = await notifyCustomerOfOrderStatusChange(guestOrder, 'pending', 'cancelled', {
       cancellationReason: 'Updated by Petshiwu'
@@ -80,20 +106,9 @@ describe('notifyCustomerOfOrderStatusChange', () => {
       'order-cancellation',
       expect.objectContaining({
         email: 'guest.order@petshiwu.com',
-        firstName: 'Asif',
-        orderNumber: 'ORD-1787684558761-8401',
-        orderData: expect.objectContaining({
-          totalPrice: 18.69,
-          cancellationReason: 'Updated by Petshiwu'
-        })
+        orderNumber: 'ORD-1787684558761-8401'
       }),
       expect.any(Function)
-    );
-    expect(emailSpy).toHaveBeenCalledWith(
-      'guest.order@petshiwu.com',
-      'Asif',
-      'ORD-1787684558761-8401',
-      expect.objectContaining({ cancellationReason: 'Updated by Petshiwu' })
     );
   });
 

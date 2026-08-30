@@ -711,17 +711,36 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
 
     await attachGuestOrdersToUser(req.user._id, req.user.email);
 
-    let order;
-    if (req.user.role === 'admin' || req.user.permissions?.canManageOrders) {
-      order = await Order.findById(resolvedId).populate('user', 'firstName lastName email').lean();
-    } else {
-      order = await Order.findOne({
-        _id: resolvedId,
-        $or: [
-          { user: req.user._id },
-          { guestEmail: new RegExp(`^${String(req.user.email).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
-        ],
-      }).populate('user', 'firstName lastName email').lean();
+    const canManage = req.user.role === 'admin' || req.user.permissions?.canManageOrders;
+    let order: Record<string, unknown> | null = null;
+    try {
+      if (canManage) {
+        order = await Order.findById(resolvedId).populate('user', 'firstName lastName email').lean();
+      } else {
+        order = await Order.findOne({
+          _id: resolvedId,
+          $or: [
+            { user: req.user._id },
+            { guestEmail: new RegExp(`^${String(req.user.email).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+          ],
+        }).populate('user', 'firstName lastName email').lean();
+      }
+    } catch (hydrateError) {
+      logger.warn('Falling back to raw order document after hydrate failed', hydrateError);
+      order = lookedUp as Record<string, unknown>;
+      if (!canManage) {
+        const email = String(req.user.email || '').trim().toLowerCase();
+        const guestEmail = String(order.guestEmail || '').trim().toLowerCase();
+        const userId = extractObjectId(req.user._id);
+        const orderUserId = extractObjectId(order.user);
+        const ownsOrder = Boolean(
+          (userId && orderUserId && userId.equals(orderUserId)) ||
+          (email && guestEmail && email === guestEmail)
+        );
+        if (!ownsOrder) {
+          return res.status(403).json({ success: false, message: 'Not authorized to access this order' });
+        }
+      }
     }
 
     if (!order) {
@@ -843,24 +862,39 @@ const restockCancelledOrderItems = async (order: { items?: Array<{ product?: unk
 const persistOrderFieldsWithoutValidation = async (
   orderId: mongoose.Types.ObjectId,
   $set: Record<string, unknown>,
-  session?: mongoose.ClientSession | null
-) => {
-  const update = { $set: { ...$set, updatedAt: new Date() } };
+  session?: mongoose.ClientSession | null,
+  $unset?: Record<string, string>
+): Promise<Record<string, any>> => {
+  const update: Record<string, unknown> = { $set: { ...$set, updatedAt: new Date() } };
+  if ($unset && Object.keys($unset).length) {
+    update.$unset = $unset;
+  }
+  const writeOptions = session ? { session } : {};
   const result = await Order.collection.updateOne(
     { _id: orderId },
-    update,
-    session ? { session } : {}
+    update as any,
+    writeOptions
   );
   if (!result.matchedCount) {
     throw new Error('Order not found');
   }
-  const query = Order.findById(orderId);
-  if (session) query.session(session);
-  const updated = await query;
+  // Reload as a raw BSON document. findById hydrates leftover delivery.proof
+  // and can throw ValidationError after a successful cancel write.
+  const updated = await Order.collection.findOne({ _id: orderId }, writeOptions);
   if (!updated) {
-    throw new Error('Order not found');
+    logger.warn(`Order ${String(orderId)} was updated but could not be reloaded`);
+    return { _id: orderId, ...$set };
   }
   return updated;
+};
+
+const leftoverDeliveryProof = (delivery: unknown): boolean => {
+  if (!delivery || typeof delivery !== 'object') return false;
+  const proof = (delivery as { proof?: Record<string, unknown> }).proof;
+  if (!proof || typeof proof !== 'object') return false;
+  const hasMedia = Boolean(proof.photoUrl || proof.photoData || proof.storageKey);
+  const method = typeof proof.handoffMethod === 'string' ? proof.handoffMethod.trim() : proof.handoffMethod;
+  return !hasMedia && !method;
 };
 
 const persistOrderStatusFields = async (
@@ -872,6 +906,7 @@ const persistOrderStatusFields = async (
     deliveredAt?: Date | null;
     deliveryStatus?: string;
     notes?: string;
+    unsetProof?: boolean;
   },
   session?: mongoose.ClientSession | null
 ) => {
@@ -882,7 +917,8 @@ const persistOrderStatusFields = async (
   if (fields.deliveredAt !== undefined) $set.deliveredAt = fields.deliveredAt;
   if (fields.deliveryStatus !== undefined) $set['delivery.status'] = fields.deliveryStatus;
   if (fields.notes !== undefined) $set.notes = fields.notes;
-  return persistOrderFieldsWithoutValidation(orderId, $set, session);
+  const $unset = fields.unsetProof ? { 'delivery.proof': '' } : undefined;
+  return persistOrderFieldsWithoutValidation(orderId, $set, session, $unset);
 };
 
 export const updateOrderStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -924,7 +960,10 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response, next: N
       statusFields.deliveryStatus = 'cancelled';
     }
 
-    const updatedOrder = await persistOrderStatusFields(order._id as mongoose.Types.ObjectId, statusFields);
+    const updatedOrder = await persistOrderStatusFields(order._id as mongoose.Types.ObjectId, {
+      ...statusFields,
+      unsetProof: orderStatus === 'cancelled' && leftoverDeliveryProof(order.delivery)
+    });
 
     if (orderStatus === 'cancelled' && previousStatus !== 'cancelled') {
       try {
@@ -1053,7 +1092,7 @@ export const processRefund = async (req: AuthRequest, res: Response, next: NextF
       const user = await User.findById(order.user);
       if (user) {
         await sendOrderCancellationEmail(user.email, user.firstName, order.orderNumber || '', {
-          items: order.items.map(item => ({ name: item.name, quantity: item.quantity, price: item.price, image: item.image })),
+          items: order.items.map((item: { name: string; quantity: number; price: number; image?: string }) => ({ name: item.name, quantity: item.quantity, price: item.price, image: item.image })),
           totalPrice: order.totalPrice,
           refundAmount: amount,
           createdAt: order.createdAt
@@ -1129,7 +1168,8 @@ export const cancelOrder = async (req: AuthRequest, res: Response, next: NextFun
         {
           orderStatus: 'cancelled',
           ...(order.delivery ? { deliveryStatus: 'cancelled' } : {}),
-          ...(notes !== undefined ? { notes } : {})
+          ...(notes !== undefined ? { notes } : {}),
+          unsetProof: leftoverDeliveryProof(order.delivery)
         },
         session
       );
