@@ -836,9 +836,33 @@ const restockCancelledOrderItems = async (order: { items?: Array<{ product?: unk
 };
 
 /**
- * Status-only writes must not re-validate leftover nested delivery/proof data.
- * Saving the document is what produced the admin "Validation error" toast.
+ * Status/payment writes must not re-validate leftover nested delivery/proof data.
+ * Mongoose findByIdAndUpdate still honors the global `runValidators` setting and
+ * was producing the admin "Validation error" toast on cancel.
  */
+const persistOrderFieldsWithoutValidation = async (
+  orderId: mongoose.Types.ObjectId,
+  $set: Record<string, unknown>,
+  session?: mongoose.ClientSession | null
+) => {
+  const update = { $set: { ...$set, updatedAt: new Date() } };
+  const result = await Order.collection.updateOne(
+    { _id: orderId },
+    update,
+    session ? { session } : {}
+  );
+  if (!result.matchedCount) {
+    throw new Error('Order not found');
+  }
+  const query = Order.findById(orderId);
+  if (session) query.session(session);
+  const updated = await query;
+  if (!updated) {
+    throw new Error('Order not found');
+  }
+  return updated;
+};
+
 const persistOrderStatusFields = async (
   orderId: mongoose.Types.ObjectId,
   fields: {
@@ -851,23 +875,14 @@ const persistOrderStatusFields = async (
   },
   session?: mongoose.ClientSession | null
 ) => {
-  const $set: Record<string, unknown> = { updatedAt: new Date() };
+  const $set: Record<string, unknown> = {};
   if (fields.orderStatus !== undefined) $set.orderStatus = fields.orderStatus;
   if (fields.trackingNumber !== undefined) $set.trackingNumber = fields.trackingNumber;
   if (fields.isDelivered !== undefined) $set.isDelivered = fields.isDelivered;
   if (fields.deliveredAt !== undefined) $set.deliveredAt = fields.deliveredAt;
   if (fields.deliveryStatus !== undefined) $set['delivery.status'] = fields.deliveryStatus;
   if (fields.notes !== undefined) $set.notes = fields.notes;
-
-  const updated = await Order.findByIdAndUpdate(
-    orderId,
-    { $set },
-    { new: true, runValidators: false, ...(session ? { session } : {}) }
-  );
-  if (!updated) {
-    throw new Error('Order not found');
-  }
-  return updated;
+  return persistOrderFieldsWithoutValidation(orderId, $set, session);
 };
 
 export const updateOrderStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -955,12 +970,10 @@ export const updatePaymentStatus = async (req: AuthRequest, res: Response, next:
       paymentUpdate.isPaid = true;
       paymentUpdate.paidAt = new Date();
     }
-    const updatedOrder = await Order.findByIdAndUpdate(
-      order._id,
-      { $set: paymentUpdate },
-      { new: true, runValidators: true, context: 'query' }
+    const updatedOrder = await persistOrderFieldsWithoutValidation(
+      order._id as mongoose.Types.ObjectId,
+      paymentUpdate
     );
-    if (!updatedOrder) return res.status(404).json({ success: false, message: 'Order not found' });
 
     try {
       const { notifyOrderUpdate } = await import('../utils/orderNotifications');
@@ -1024,13 +1037,17 @@ export const processRefund = async (req: AuthRequest, res: Response, next: NextF
       return res.status(400).json({ success: false, message: 'Unable to process refund: No payment method information available' });
     }
 
-    if (amount === order.totalPrice) order.paymentStatus = 'refunded';
-
-    order.notes = order.notes
+    const notes = order.notes
       ? `${order.notes}\n\nRefund: $${amount.toFixed(2)} on ${new Date().toLocaleString()}${reason ? ` - ${reason}` : ''}${refundId ? ` (Refund ID: ${refundId})` : ''}`
       : `Refund: $${amount.toFixed(2)} on ${new Date().toLocaleString()}${reason ? ` - ${reason}` : ''}${refundId ? ` (Refund ID: ${refundId})` : ''}`;
 
-    await order.save();
+    const updatedOrder = await persistOrderFieldsWithoutValidation(
+      order._id as mongoose.Types.ObjectId,
+      {
+        notes,
+        ...(amount === order.totalPrice ? { paymentStatus: 'refunded' } : {})
+      }
+    );
 
     try {
       const user = await User.findById(order.user);
@@ -1046,7 +1063,7 @@ export const processRefund = async (req: AuthRequest, res: Response, next: NextF
       logger.error('Failed to send refund email:', emailError);
     }
 
-    res.status(200).json({ success: true, message: 'Refund processed successfully', data: { order, refundId, refundAmount: amount, refundStatus } });
+    res.status(200).json({ success: true, message: 'Refund processed successfully', data: { order: updatedOrder, refundId, refundAmount: amount, refundStatus } });
   } catch (error: any) {
     logger.error('Refund processing error:', error);
     next(error);

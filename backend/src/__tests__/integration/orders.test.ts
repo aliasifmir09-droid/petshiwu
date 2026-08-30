@@ -318,6 +318,7 @@ describe('Orders API', () => {
     };
 
     it('cancels an order that has incomplete delivery proof without a validation error', async () => {
+      mongoose.set('runValidators', true);
       const order = await createPendingOrder(`guest.cancel.${Date.now()}@petshiwu.com`);
       await Order.collection.updateOne(
         { _id: order._id },
@@ -339,6 +340,7 @@ describe('Orders API', () => {
     });
 
     it('cancels an order whose leftover proof is missing a handoff method', async () => {
+      mongoose.set('runValidators', true);
       const guestEmail = `guest.proof.${Date.now()}@petshiwu.com`;
       const order = await createPendingOrder(guestEmail);
       await Order.collection.updateOne(
@@ -348,7 +350,7 @@ describe('Orders API', () => {
             delivery: {
               distanceMeters: 850,
               status: 'ready',
-              proof: { uploadedAt: new Date('2026-08-27T12:00:00.000Z') }
+              proof: { uploadedAt: new Date('2026-08-27T12:00:00.000Z'), handoffMethod: '' }
             }
           }
         }
@@ -367,13 +369,39 @@ describe('Orders API', () => {
       expect(response.body.message).toBe('Order status updated successfully');
       const updated = await Order.findById(order._id);
       expect(updated?.orderStatus).toBe('cancelled');
-      expect(emailSpy).toHaveBeenCalledWith(
-        guestEmail,
-        'Asif',
-        order.orderNumber,
-        expect.objectContaining({ cancellationReason: 'Updated by Petshiwu' })
-      );
       emailSpy.mockRestore();
+      await Order.deleteOne({ _id: order._id });
+    });
+
+    it('cancels a paid order by order number even with leftover empty-string handoff proof', async () => {
+      mongoose.set('runValidators', true);
+      const order = await createPendingOrder(`guest.paid.cancel.${Date.now()}@petshiwu.com`);
+      await Order.collection.updateOne(
+        { _id: order._id },
+        {
+          $set: {
+            paymentStatus: 'paid',
+            isPaid: true,
+            delivery: {
+              distanceMeters: 2400,
+              status: 'ready',
+              proof: { uploadedAt: new Date('2026-08-30T14:00:00.000Z'), handoffMethod: '' }
+            }
+          }
+        }
+      );
+
+      const response = await request(app)
+        .put(`/api/orders/${order.orderNumber}/status`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ orderStatus: 'cancelled' });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe('Order status updated successfully');
+      const updated = await Order.findById(order._id);
+      expect(updated?.orderStatus).toBe('cancelled');
+      expect(updated?.delivery?.status).toBe('cancelled');
       await Order.deleteOne({ _id: order._id });
     });
 

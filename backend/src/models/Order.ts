@@ -271,7 +271,8 @@ const orderSchema = new Schema<IOrder>(
       runId: { type: Schema.Types.ObjectId, ref: 'DeliveryRun' },
       stopOrder: Number,
       notes: String,
-      // Optional nested schema: required fields inside proof must not run at checkout.
+      // Optional nested schema: leftover empty proof from routing must not fail later saves.
+      // A handoff method is only required once actual proof media exists.
       proof: {
         type: new Schema({
           photoUrl: { type: String, required: false, select: false },
@@ -282,7 +283,14 @@ const orderSchema = new Schema<IOrder>(
           handoffMethod: {
             type: String,
             enum: ['handed_to_customer', 'handed_to_household_member', 'left_at_door', 'left_with_doorman', 'other'],
-            required: false
+            required: function (this: { photoUrl?: string; photoData?: Buffer; storageKey?: string }) {
+              return Boolean(this.photoUrl || this.photoData || this.storageKey);
+            },
+            set: (value: unknown) => {
+              if (typeof value !== 'string') return value;
+              const trimmed = value.trim();
+              return trimmed === '' ? undefined : trimmed;
+            }
           },
           notes: String,
           storageKey: { type: String, select: false },

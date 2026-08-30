@@ -45,7 +45,7 @@ export const errorHandler = (err: Error | AppError, req: Request, res: Response,
 
   // Mongoose validation error
   // SECURITY FIX: Use generic message in production to prevent information disclosure
-  if (err.name === 'ValidationError') {
+  if (err.name === 'ValidationError' && !(err instanceof AppError)) {
     const mongooseError = err as { errors?: Record<string, { message: string }> };
     if (process.env.NODE_ENV === 'production') {
       // Generic message in production to prevent information disclosure
@@ -56,13 +56,10 @@ export const errorHandler = (err: Error | AppError, req: Request, res: Response,
         logger.warn('Validation error details (server-side only):', detailedErrors);
       }
     } else {
-      // Detailed message in development for debugging
-      const message = mongooseError.errors 
-        ? Object.values(mongooseError.errors)
-            .map((val) => val.message)
-            .join(', ')
-        : 'Validation error';
-      error = { message, statusCode: 400 };
+      const detailed = mongooseError.errors
+        ? Object.values(mongooseError.errors).map((val) => val.message).filter(Boolean).join(', ')
+        : '';
+      error = { message: detailed || err.message || 'Validation error', statusCode: 400 };
     }
   }
 
@@ -82,8 +79,11 @@ export const errorHandler = (err: Error | AppError, req: Request, res: Response,
     };
   }
 
-  // Use standardized error response
-  const response = createErrorResponse(err, error.message);
+  // Use the mapped message. createErrorResponse prefers Error.message for
+  // non-AppError values, which hid the user-facing ValidationError mapping.
+  const response = err instanceof AppError
+    ? createErrorResponse(err, error.message)
+    : { success: false, message: error.message };
 
   // Only include stack trace in development
   if (process.env.NODE_ENV === 'development') {

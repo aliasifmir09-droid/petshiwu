@@ -79,9 +79,10 @@ export const extractMongoId = (value: unknown): string => {
 
 export const resolveOrderApiId = (order: { _id?: unknown; id?: unknown; orderNumber?: unknown } | null | undefined): string => {
   if (!order) return '';
-  const hex = extractMongoId(order._id) || extractMongoId(order.id);
-  if (hex) return hex;
+  // Prefer the human-visible ORD- number. Serialized Mongo _id values from the
+  // admin list have been sent as objects and failed status-update validation.
   const orderNumber = typeof order.orderNumber === 'string' ? order.orderNumber.trim() : '';
   if (ORDER_NUMBER.test(orderNumber)) return orderNumber.toUpperCase();
-  return '';
+  const hex = extractMongoId(order._id) || extractMongoId(order.id);
+  return OBJECT_ID_HEX.test(hex) ? hex : '';
 };
