@@ -24,10 +24,10 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import OrdersHoldNotice from '@/components/OrdersHoldNotice';
 import { ORDERING_PAUSED } from '@/config/ordering';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
-import { MapPin, Plus, Check, User, UserCheck, ShieldCheck, RotateCcw, Headphones, Lock, Truck, CreditCard } from 'lucide-react';
+import { MapPin, Plus, Check, User, UserCheck, ShieldCheck, RotateCcw, Headphones, Lock, Truck, CreditCard, AlertCircle } from 'lucide-react';
 import { TAX_RATE } from '@/config/constants';
 import { paypalClientId } from '@/config/paypal';
-import { isNycDeliveryZip, isNewYorkState, normalizeShippingState } from '@/utils/deliveryZip';
+import { isNycDeliveryZip, isNewYorkState, normalizeShippingState, isOutsideCurrentDeliveryRange, outOfRangeCheckoutMessage, CURRENT_DELIVERY_RANGE_HINT } from '@/utils/deliveryZip';
 import { shippingCostForSubtotal } from '@/utils/orderTotals';
 import { checkoutCodeFromError, checkoutCodeFromResponse } from '@/utils/checkoutCoupon';
 import { isCheckoutDeliveryReady, shouldHoldCheckoutOnEmptyCart } from '@/utils/checkoutFlow';
@@ -195,6 +195,7 @@ const Checkout = () => {
   const cartReady = useCartHasHydrated();
   const { isAuthenticated, user } = useAuthStore();
   const { toast, showToast, hideToast } = useToast();
+  const deliveryRangeNoticeRef = useRef<HTMLDivElement>(null);
 
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
@@ -381,6 +382,10 @@ const Checkout = () => {
   const onlineTotal = Math.max(0, subtotal + shipping + tax - couponDiscount);
   const total = Math.max(0, onlineTotal + donationAmount);
   const deliveryReady = isCheckoutDeliveryReady(shippingInfo, isAuthenticated);
+  const outsideDeliveryRange = isOutsideCurrentDeliveryRange(shippingInfo.state, shippingInfo.zipCode);
+  const deliveryRangeNotice = outsideDeliveryRange
+    ? outOfRangeCheckoutMessage(shippingInfo.state, shippingInfo.zipCode)
+    : '';
 
   const applyCoupon = async (codeToApply?: string) => {
     const raw = (codeToApply ?? couponInput).trim();
@@ -576,10 +581,11 @@ const Checkout = () => {
       return;
     }
 
-    // NYC-only delivery check (includes Queens 111xx Astoria/LIC, which the old range skipped)
-    const _isNY = isNewYorkState(shippingInfo.state);
-    if (!_isNY || !isNycDeliveryZip(shippingInfo.zipCode)) {
-      showToast('Sorry, we currently deliver only within New York City (all 5 boroughs).', 'error');
+    // NYC 5-borough delivery check — tell the shopper why checkout cannot complete
+    if (!isNewYorkState(shippingInfo.state) || !isNycDeliveryZip(shippingInfo.zipCode)) {
+      const notice = outOfRangeCheckoutMessage(shippingInfo.state, shippingInfo.zipCode);
+      deliveryRangeNoticeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showToast(notice, 'error');
       return;
     }
 
@@ -924,6 +930,7 @@ const Checkout = () => {
             <div className="lg:col-span-2 space-y-6">
               {!ORDERING_PAUSED && (
               <CheckoutStep step="1" title="Delivery" subtitle="Where should this order land?">
+                <p className="mb-4 text-sm text-stone-600">{CURRENT_DELIVERY_RANGE_HINT}</p>
 
                 {/* Logged-in user info display */}
                 {isAuthenticated && user && (
@@ -1109,6 +1116,19 @@ const Checkout = () => {
                     )}
                   </div>
                 )}
+                {outsideDeliveryRange && (
+                  <div
+                    ref={deliveryRangeNoticeRef}
+                    role="alert"
+                    className="mt-4 rounded-xl border-2 border-rose-300 bg-rose-50 px-4 py-3 text-rose-950"
+                  >
+                    <p className="flex items-start gap-2 font-bold">
+                      <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" aria-hidden />
+                      We can&apos;t complete checkout for this address
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed">{deliveryRangeNotice}</p>
+                  </div>
+                )}
               </CheckoutStep>
               )}
 
@@ -1118,7 +1138,9 @@ const Checkout = () => {
                 title="Payment"
                 subtitle={ORDERING_PAUSED
                   ? 'Payment stays locked until we start accepting orders. Your bag is saved.'
-                  : 'Apple Pay, Google Pay, PayPal, or card — official buttons, the way a flagship store would do it.'}
+                  : outsideDeliveryRange
+                    ? 'Payment is paused until we can deliver to this address.'
+                    : 'Apple Pay, Google Pay, PayPal, or card — official buttons, the way a flagship store would do it.'}
               >
                 {ORDERING_PAUSED ? (
                   <div className="rounded-2xl bg-[radial-gradient(circle_at_top_left,_#fff8e8,_#ffffff_55%)] p-5 ring-1 ring-amber-200/80">
@@ -1127,9 +1149,14 @@ const Checkout = () => {
                       Apple Pay, Google Pay, PayPal, and cards will unlock here the moment we start accepting orders. Nothing will be charged today — your bag stays saved.
                     </p>
                   </div>
+                ) : outsideDeliveryRange ? (
+                  <div className="rounded-xl border-2 border-rose-200 bg-rose-50 px-4 py-5 text-rose-950">
+                    <p className="font-semibold">Payment is paused for this address</p>
+                    <p className="mt-1 text-sm leading-relaxed">{deliveryRangeNotice}</p>
+                  </div>
                 ) : null}
 
-                {!ORDERING_PAUSED && isAuthenticated && savedPaymentMethods.length > 0 && (
+                {!ORDERING_PAUSED && !outsideDeliveryRange && isAuthenticated && savedPaymentMethods.length > 0 && (
                   <div className="mb-6">
                     <label className="block text-sm font-medium mb-3">Saved Payment Methods</label>
                     <div className="space-y-3">
@@ -1177,7 +1204,7 @@ const Checkout = () => {
                   </div>
                 )}
 
-                {!ORDERING_PAUSED && showPayPalButton && (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay') && paypalClientId && !usingSavedCard ? (
+                {!ORDERING_PAUSED && !outsideDeliveryRange && showPayPalButton && (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay') && paypalClientId && !usingSavedCard ? (
                   <div id="paypal-payment" className="paypal-wallet-slot relative overflow-hidden">
                     {deliveryReady ? (
                     <ErrorBoundary
@@ -1235,14 +1262,14 @@ const Checkout = () => {
                       </div>
                     )}
                   </div>
-                ) : !ORDERING_PAUSED && !paypalClientId ? (
+                ) : !ORDERING_PAUSED && !outsideDeliveryRange && !paypalClientId ? (
                   <div className="p-4 border-2 border-gray-200 rounded-lg bg-gray-50">
                     <p className="font-semibold text-gray-700">PayPal is temporarily unavailable</p>
                     <p className="text-sm text-gray-500 mt-1">Use a credit or debit card below to complete this order.</p>
                   </div>
                 ) : null}
 
-                {!ORDERING_PAUSED && paymentMethod === 'credit_card' && !usingSavedCard && paypalClientId ? (
+                {!ORDERING_PAUSED && !outsideDeliveryRange && paymentMethod === 'credit_card' && !usingSavedCard && paypalClientId ? (
                   <div id="card-payment" className="relative overflow-visible rounded-2xl border-2 border-[#1E3A8A] bg-blue-50/40 p-4">
                     {deliveryReady ? (
                     <ErrorBoundary
@@ -1302,7 +1329,7 @@ const Checkout = () => {
                   </div>
                 ) : null}
 
-                {!ORDERING_PAUSED && !usingSavedCard && (
+                {!ORDERING_PAUSED && !outsideDeliveryRange && !usingSavedCard && (
                   <>
                     <div className="flex items-center gap-3 my-6">
                       <div className="flex-1 h-px bg-gray-200" />
@@ -1358,7 +1385,7 @@ const Checkout = () => {
               </CheckoutStep>
 
               {/* Stripe Payment Form */}
-              {showPaymentForm && clientSecret && !usingSavedCard && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && (
+              {showPaymentForm && clientSecret && !usingSavedCard && !outsideDeliveryRange && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && (
                 <StripePaymentWrapper clientSecret={clientSecret} total={total}
                   onSuccess={handlePaymentSuccess} onError={handlePaymentError} onCancel={handlePaymentCancel} />
               )}
@@ -1479,10 +1506,12 @@ const Checkout = () => {
                   </div>
                 </div>
                 <button type="submit"
-                  disabled={ORDERING_PAUSED || createOrderMutation.isPending || isProcessingPayment}
+                  disabled={ORDERING_PAUSED || outsideDeliveryRange || createOrderMutation.isPending || isProcessingPayment}
                   className="w-full rounded-2xl bg-[#1E3A8A] py-4 text-lg font-black text-white shadow-lg shadow-blue-900/25 hover:bg-[#16307a] disabled:opacity-50">
                   {ORDERING_PAUSED
                     ? 'We will start accepting orders soon'
+                    : outsideDeliveryRange
+                    ? "Can't deliver here yet"
                     : usingSavedCard && selectedSaved
                       ? (createOrderMutation.isPending || isProcessingPayment ? 'Paying…' : `Pay with ${savedCardLabel(selectedSaved)}`)
                     : paymentMethod === 'credit_card'

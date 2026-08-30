@@ -436,10 +436,10 @@ PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
 - Top brands: Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Iams, Pedigree, Nutro
 
 === SHIPPING ===
-- FREE shipping automatically applied on all orders over $49 — no code needed
-- NYC (Queens, Brooklyn, Manhattan, Bronx, Staten Island): same-day if ordered by 3 PM weekdays (1 PM weekends), otherwise next day
-- Same-day delivery: all five NYC boroughs — order by 3 PM EST weekdays (1 PM weekends)
-- Nationwide shipping is not available yet
+- FREE shipping automatically applied on all NYC orders over $49 — no code needed
+- We currently deliver only in New York City's 5 boroughs: Manhattan, Brooklyn, Queens, the Bronx, and Staten Island
+- Same-day NYC: order by 3 PM EST weekdays (1 PM weekends) for delivery before 11 PM; after cutoff, next-day in all five boroughs
+- New York State and nationwide shipping are coming soon — checkout cannot be completed for addresses outside the 5 boroughs
 - Checkout may be paused: if orders are not open, tell the shopper we will start accepting orders soon and they can browse and save a cart
 - Tracking number emailed immediately after shipment
 - USA only — no international shipping

@@ -14,7 +14,7 @@ const ShippingPolicy = () => {
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <SEO
         title="Shipping Information | Petshiwu — Same-Day NYC Delivery"
-        description="Petshiwu same-day NYC delivery: order by 3 PM ET weekdays or 1 PM ET weekends, delivered before 11 PM. Free over $49. After cutoff, next-day in all five boroughs."
+        description="Petshiwu same-day NYC delivery: order by 3 PM ET weekdays or 1 PM ET weekends, delivered before 11 PM. Five boroughs only. New York State and nationwide shipping coming soon. Free over $49."
         url="/shipping"
       />
 
@@ -39,7 +39,7 @@ const ShippingPolicy = () => {
         {[
           { title: 'Weekdays', desc: `Order by ${TONIGHT.weekdayCutoff} ET → before ${TONIGHT.deliverBy}` },
           { title: 'Weekends', desc: `Order by ${TONIGHT.weekendCutoff} ET → before ${TONIGHT.deliverBy}` },
-          { title: 'After cutoff', desc: 'Next-day across the five boroughs' },
+          { title: 'Coming soon', desc: 'NY State, then nationwide' },
         ].map((item) => (
           <div key={item.title} className="bg-blue-50 rounded-xl p-5 text-center border border-blue-100">
             <h3 className="font-bold text-gray-900">{item.title}</h3>
@@ -101,6 +101,9 @@ const ShippingPolicy = () => {
               </tr>
             </tbody>
           </table>
+          <p className="mt-3 text-sm text-gray-600">
+            Checkout cannot be completed for addresses outside New York City. New York State and nationwide shipping are coming soon.
+          </p>
         </section>
 
         <section>
@@ -110,7 +113,7 @@ const ShippingPolicy = () => {
             Long Island City is Queens. We pack in Jackson Heights, NY.
           </p>
           <p className="mt-2">
-            Nearby New Jersey and Westchester ZIPs may be offered as next-day only. Nationwide and international shipping are not available yet.
+            <strong>Coming soon:</strong> New York State, then nationwide. Checkout cannot be completed for addresses outside NYC until those regions open. International shipping is not available.
           </p>
         </section>
 
