@@ -3,7 +3,15 @@
  * Same-day cutoff matches ShippingPolicy: 3 PM EST weekdays, 1 PM EST weekends.
  */
 
-export type DeliverySpeed = 'same-day' | 'next-day' | 'standard';
+export type DeliverySpeed = 'same-day' | 'next-day' | 'unavailable';
+
+export const NYC_BOROUGHS_LABEL = 'Manhattan, Brooklyn, Queens, the Bronx, and Staten Island';
+
+export const CURRENT_DELIVERY_RANGE_HINT =
+  "Now delivering: New York City's 5 boroughs only. New York State and nationwide shipping are coming soon.";
+
+export const OUTSIDE_DELIVERY_RANGE_MESSAGE =
+  `We currently deliver only in New York City's 5 boroughs (${NYC_BOROUGHS_LABEL}). New York State and nationwide shipping are coming soon — we can't complete checkout for this address yet.`;
 
 export interface ZipLookupResult {
   zip: string;
@@ -150,6 +158,28 @@ export function normalizeShippingState(state: string): string {
   return isNewYorkState(trimmed) ? 'NY' : trimmed;
 }
 
+export function isInCurrentDeliveryRange(state: string, zip: string): boolean {
+  return isNewYorkState(state) && isNycDeliveryZip(zip);
+}
+
+/** True once the ZIP is complete and it is not an NYC 5-borough address. */
+export function isOutsideCurrentDeliveryRange(state: string, zip: string): boolean {
+  const z = normalizeZip(zip);
+  if (z.length !== 5) return false;
+  if (isNycDeliveryZip(z)) {
+    return Boolean(String(state || '').trim()) && !isNewYorkState(state);
+  }
+  return true;
+}
+
+export function outOfRangeCheckoutMessage(state: string, zip: string): string {
+  const z = normalizeZip(zip);
+  if (isNewYorkState(state) && z.length === 5 && !isNycDeliveryZip(z)) {
+    return `This ZIP is in New York State, but outside New York City. We currently deliver only in NYC's 5 boroughs (${NYC_BOROUGHS_LABEL}). New York State and nationwide shipping are coming soon — we can't complete checkout for this address yet.`;
+  }
+  return OUTSIDE_DELIVERY_RANGE_MESSAGE;
+}
+
 export function lookupZip(input: string, now: Date = new Date()): ZipLookupResult | null {
   const zip = normalizeZip(input);
   if (!isValidZip(zip)) return null;
@@ -179,23 +209,14 @@ export function lookupZip(input: string, now: Date = new Date()): ZipLookupResul
   }
 
   const nearby = NEXT_DAY_ZIPS[zip];
-  if (nearby) {
-    return {
-      zip,
-      area: nearby,
-      speed: 'next-day',
-      headline: `Next-day delivery to ${nearby}`,
-      detail: 'We deliver to Jersey City, Hoboken, and select Westchester addresses the next business day.',
-      cutoffPassed: countdown.passed,
-    };
-  }
-
   return {
     zip,
-    area: 'the US',
-    speed: 'standard',
-    headline: '2-day nationwide shipping',
-    detail: 'Free shipping on orders over $49. Same-day is currently NYC + nearby metro.',
+    area: nearby || 'outside NYC',
+    speed: 'unavailable',
+    headline: "We don't deliver here yet",
+    detail: nearby
+      ? `${nearby} is outside NYC's 5 boroughs. We currently deliver only in ${NYC_BOROUGHS_LABEL}. New York State and nationwide shipping are coming soon.`
+      : `We currently deliver only in NYC's 5 boroughs (${NYC_BOROUGHS_LABEL}). New York State and nationwide shipping are coming soon.`,
     cutoffPassed: countdown.passed,
   };
 }

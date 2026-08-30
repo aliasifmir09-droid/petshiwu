@@ -436,10 +436,10 @@ PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
 - Top brands: Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Orijen, Acana, Taste of the Wild
 
 === SHIPPING ===
-- FREE shipping automatically applied on all orders over $49 — no code needed
-- NYC (Queens, Brooklyn, Manhattan, Bronx, Staten Island): 1–2 business day delivery
-- Same-day delivery: Select Queens neighborhoods (Jackson Heights, Elmhurst, Flushing, Astoria) — order by 12 PM EST
-- Nationwide standard shipping: 3–7 business days
+- FREE shipping automatically applied on all NYC orders over $49 — no code needed
+- We currently deliver only in New York City's 5 boroughs: Manhattan, Brooklyn, Queens, the Bronx, and Staten Island
+- Same-day NYC: order by 3 PM EST weekdays (1 PM weekends) for delivery before 11 PM
+- New York State and nationwide shipping are coming soon — checkout cannot be completed for addresses outside the 5 boroughs
 - Tracking number emailed immediately after shipment
 - USA only — no international shipping
 
