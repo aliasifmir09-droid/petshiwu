@@ -36,7 +36,7 @@ const PetSuppliesBrooklynNY = () => (
       },
       {
         question: "What pet brands do you carry for Brooklyn customers?",
-        answer: "We stock all the top brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Orijen, Iams, Pedigree, Nutro, and hundreds more. Over 10,000 products in total."
+        answer: "We stock all the top brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Iams, Pedigree, Nutro, and hundreds more. Over 10,000 products in total."
       },
       {
         question: "Can I get cat food delivered in Brooklyn?",

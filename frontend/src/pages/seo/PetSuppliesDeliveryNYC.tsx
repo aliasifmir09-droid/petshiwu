@@ -46,7 +46,7 @@ const PetSuppliesDeliveryNYC = () => {
         },
         {
           question: "Are the products the same brands I'd find at major pet stores?",
-          answer: "Yes. We carry the same trusted brands you know — Purina, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Orijen, Pedigree, and many more. Same quality, delivered to your door in NYC."
+          answer: "Yes. We carry the same trusted brands you know — Purina, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Pedigree, and many more. Same quality, delivered to your door in NYC."
         }
       ]}
       searchTerms={['dog food', 'cat food', 'pet food', 'pet supplies', 'pet toys', 'dog treats', 'cat treats']}

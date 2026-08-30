@@ -21,7 +21,7 @@ const PetSuppliesParkSlopeNY = () => (
       "Delivery throughout Park Slope, Gowanus, Windsor Terrace, and Prospect Heights",
       "Organic, natural, and premium brands at competitive prices",
       "10,000+ products: raw diets, grain-free, prescription food, natural treats",
-      "Top brands: Orijen, Wellness, Blue Buffalo, Royal Canin, Hill's Science Diet",
+      "Top brands: Wellness, Blue Buffalo, Royal Canin, Hill's Science Diet",
       "Free delivery on orders over $49 — no boutique markup",
       "Dogs, cats, birds, fish, and small animals all covered"
     ]}
@@ -32,11 +32,11 @@ const PetSuppliesParkSlopeNY = () => (
       },
       {
         question: "Do you carry organic or natural pet food for Park Slope?",
-        answer: "Yes — we stock a wide range of organic, natural, and holistic pet food brands. Orijen, Acana, Wellness, Merrick, and many more. Perfect for health-conscious Park Slope pet parents."
+        answer: "Yes — we stock a wide range of organic, natural, and holistic pet food brands. Wellness, Merrick, and many more. Perfect for health-conscious Park Slope pet parents."
       },
       {
         question: "What dog food brands do you carry for delivery to Park Slope?",
-        answer: "We carry all major brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Orijen, Acana, Wellness, Merrick, Nutro, and many more. Over 10,000 products total."
+        answer: "We carry all major brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Merrick, Nutro, and many more. Over 10,000 products total."
       },
       {
         question: "Can I get prescription pet food delivered to Park Slope?",

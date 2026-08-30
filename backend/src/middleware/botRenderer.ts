@@ -321,7 +321,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/organic-cat-food-nyc': {
     title: 'Organic Cat Food NYC — Natural & Non-GMO Delivery | Petshiwu',
-    description: 'Organic and natural cat food delivered to all NYC boroughs. No artificial preservatives, no by-products. Wellness, Blue Buffalo, Orijen and more. Free delivery over $49.',
+    description: 'Organic and natural cat food delivered to all NYC boroughs. No artificial preservatives, no by-products. Wellness, Blue Buffalo and more. Free delivery over $49.',
   },
   '/luxury-pet-accessories-nyc': {
     title: 'Luxury Pet Accessories NYC — Premium Supplies Delivered | Petshiwu',
@@ -779,6 +779,7 @@ export const buildProductHtml = (template: string, product: any, slug: string): 
       url: productUrl,
       priceCurrency: 'USD',
       price: price.toFixed(2),
+      validFrom: new Date().toISOString().split('T')[0],
       priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',

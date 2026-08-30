@@ -26,7 +26,6 @@ const BRANDS: { name: string; logo: string; dark?: boolean }[] = [
   { name: 'Royal Canin',         logo: '/brands/royalcanin.svg' },
   { name: "Hill's Science Diet", logo: '/brands/hills.png' },
   { name: 'Wellness',            logo: '/brands/wellness.png' },
-  { name: 'Orijen',              logo: '/brands/orijen.svg' },
   { name: 'Nutro',               logo: '/brands/nutro.png' },
   { name: 'Iams',                logo: '/brands/iams.png' },
   { name: 'Pedigree',            logo: '/brands/pedigree.png', dark: true },
@@ -133,7 +132,7 @@ const Home = () => {
               name: 'What brands does Petshiwu carry?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Petshiwu carries 10,000+ products from 200+ premium brands including Hill\'s Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Orijen, Acana, Fromm, Stella & Chewy\'s, Taste of the Wild, and many more. We carry both regular and veterinary-prescription diets.'
+                text: 'Petshiwu carries 10,000+ products from 200+ premium brands including Hill\'s Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Fromm, Stella & Chewy\'s, Taste of the Wild, and many more. We carry both regular and veterinary-prescription diets.'
               }
             },
             {
@@ -173,7 +172,7 @@ const Home = () => {
               name: 'Does Petshiwu deliver cat supplies too?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Yes. We carry full cat supply lines — food (Hill\'s, Royal Canin, Purina, Orijen), litter, toys, scratching posts, and prescription diets. Same delivery speeds as dog supplies.'
+                text: 'Yes. We carry full cat supply lines — food (Hill\'s, Royal Canin, Purina, Iams), litter, toys, scratching posts, and prescription diets. Same delivery speeds as dog supplies.'
               }
             },
             {

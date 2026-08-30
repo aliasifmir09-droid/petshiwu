@@ -20,7 +20,7 @@ const PetSuppliesUpperWestSideNYC = () => (
     solutionPoints={[
       "Delivery throughout the Upper West Side, Morningside Heights, and Lincoln Square",
       "10,000+ products from premium and specialty brands",
-      "Purina Pro Plan, Royal Canin, Hill's Science Diet, Orijen, Blue Buffalo, and more",
+      "Purina Pro Plan, Royal Canin, Hill's Science Diet Blue Buffalo, and more",
       "Grain-free, raw, prescription diets, and senior formulas all available",
       "Free delivery on orders over $49 — no boutique markup",
       "Perfect for Central Park dog walkers: bulk treats, leashes, harnesses, and more"
@@ -32,7 +32,7 @@ const PetSuppliesUpperWestSideNYC = () => (
       },
       {
         question: "What premium pet food brands do you carry for UWS delivery?",
-        answer: "We carry all premium brands: Royal Canin, Hill's Science Diet, Orijen, Acana, Wellness, Blue Buffalo, Purina Pro Plan, and many more. Over 10,000 products across dogs, cats, birds, and small animals."
+        answer: "We carry all premium brands: Royal Canin, Hill's Science Diet, Wellness, Blue Buffalo, Purina Pro Plan, and many more. Over 10,000 products across dogs, cats, birds, and small animals."
       },
       {
         question: "Can I get dog supplies for Central Park walks delivered to the Upper West Side?",

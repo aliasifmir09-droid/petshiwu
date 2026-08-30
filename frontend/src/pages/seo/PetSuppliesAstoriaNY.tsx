@@ -21,7 +21,7 @@ const PetSuppliesAstoriaNY = () => (
       "Queens-based delivery — Astoria is part of our home territory",
       "Delivery to Ditmars, Steinway, Astoria Park area, and all Astoria neighborhoods",
       "10,000+ products from premium and everyday brands",
-      "Purina, Blue Buffalo, Royal Canin, Hill's, Orijen, Iams, and more",
+      "Purina, Blue Buffalo, Royal Canin, Hill's, Iams, and more",
       "Free delivery on orders over $49",
       "Dogs, cats, birds, fish, reptiles, and small animals all covered"
     ]}
@@ -40,7 +40,7 @@ const PetSuppliesAstoriaNY = () => (
       },
       {
         question: "What dog food brands do you deliver to Astoria?",
-        answer: "We carry all the top brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Orijen, Wellness, Merrick, Iams, Pedigree, and many more. Over 10,000 products in total."
+        answer: "We carry all the top brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Merrick, Iams, Pedigree, and many more. Over 10,000 products in total."
       },
       {
         question: "Do you deliver near Astoria Park?",

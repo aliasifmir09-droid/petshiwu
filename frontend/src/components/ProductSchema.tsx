@@ -69,6 +69,7 @@ const ProductSchema = ({ product, selectedVariant }: ProductSchemaProps) => {
     url: productUrl,
     priceCurrency: 'USD',
     price: price.toFixed(2),
+    validFrom: new Date().toISOString().split('T')[0],
     priceValidUntil,
     availability: inStock
       ? 'https://schema.org/InStock'

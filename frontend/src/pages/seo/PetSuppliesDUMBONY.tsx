@@ -20,7 +20,7 @@ const PetSuppliesDUMBONY = () => (
     solutionPoints={[
       "Delivery throughout DUMBO, Brooklyn Heights, Vinegar Hill, and Dumbo waterfront",
       "10,000+ products — the biggest selection without leaving your building",
-      "Premium brands: Orijen, Wellness, Royal Canin, Blue Buffalo, Hill's",
+      "Premium brands: Wellness, Royal Canin, Blue Buffalo, Hill's",
       "Grain-free, raw, limited ingredient, and prescription diets available",
       "Free delivery on orders over $49",
       "Fast NYC delivery — order early, receive quickly"
@@ -32,7 +32,7 @@ const PetSuppliesDUMBONY = () => (
       },
       {
         question: "What pet food brands do you deliver to DUMBO?",
-        answer: "We carry all major premium brands: Orijen, Acana, Wellness, Blue Buffalo, Royal Canin, Purina Pro Plan, Hill's Science Diet, and hundreds more. Over 10,000 products total."
+        answer: "We carry all major premium brands: Wellness, Blue Buffalo, Royal Canin, Purina Pro Plan, Hill's Science Diet, and hundreds more. Over 10,000 products total."
       },
       {
         question: "Can I get cat supplies delivered to my DUMBO loft?",

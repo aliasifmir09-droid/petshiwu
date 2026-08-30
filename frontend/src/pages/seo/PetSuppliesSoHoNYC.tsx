@@ -21,7 +21,7 @@ const PetSuppliesSoHoNYC = () => (
       "Delivery to SoHo, Tribeca, NoHo, Little Italy, and Lower Manhattan",
       "Premium and luxury brands at competitive prices — no boutique markup",
       "10,000+ products: raw diets, grain-free, limited ingredient, prescription food",
-      "Orijen, Acana, Stella & Chewy's, Wellness, Royal Canin, and more",
+      "Stella & Chewy's, Wellness, Royal Canin, and more",
       "Free delivery on orders over $49",
       "Order what your pet actually eats — no subscription lock-in"
     ]}
@@ -32,7 +32,7 @@ const PetSuppliesSoHoNYC = () => (
       },
       {
         question: "Do you carry luxury or premium pet food for SoHo delivery?",
-        answer: "Yes — we carry a wide range of premium and specialty brands including Orijen, Acana, Stella & Chewy's, Wellness, Merrick, and more. The same quality you'd find at boutique stores, at better prices."
+        answer: "Yes — we carry a wide range of premium and specialty brands including Stella & Chewy's, Wellness, Merrick, and more. The same quality you'd find at boutique stores, at better prices."
       },
       {
         question: "Can I get raw pet food delivered to SoHo?",

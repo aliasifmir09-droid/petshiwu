@@ -34,7 +34,7 @@ const OnlinePetStoreNYC = () => {
         },
         {
           question: "Do you have the same brands as large national pet stores?",
-          answer: "Yes. We carry Purina, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Orijen, Acana, Pedigree, Iams, Fancy Feast, Friskies, and hundreds of other brands. Over 10,000 products in stock."
+          answer: "Yes. We carry Purina, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Pedigree, Iams, Fancy Feast, Friskies, and hundreds of other brands. Over 10,000 products in stock."
         },
         {
           question: "How fast is delivery in NYC?",

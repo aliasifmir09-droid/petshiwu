@@ -40,7 +40,7 @@ const PetSuppliesStatenIslandNY = () => (
       },
       {
         question: "Do you deliver premium dog food brands to Staten Island?",
-        answer: "Yes — we carry Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Orijen, and many more premium brands, all delivered to your Staten Island home."
+        answer: "Yes — we carry Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, and many more premium brands, all delivered to your Staten Island home."
       },
       {
         question: "How fast is delivery to Staten Island?",

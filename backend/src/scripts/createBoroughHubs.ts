@@ -64,7 +64,7 @@ const hubs = [
 </ol>
 
 <h2>Top Brands Available in Queens</h2>
-<p>We carry the brands Queens pet owners trust most — Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Orijen, Acana, Taste of the Wild, Fancy Feast, Iams, Merrick, and hundreds more.</p>
+<p>We carry the brands Queens pet owners trust most — Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Taste of the Wild, Fancy Feast, Iams, Merrick, and hundreds more.</p>
 
 <h2>Frequently Asked Questions</h2>
 
@@ -163,7 +163,7 @@ const hubs = [
 </ol>
 
 <h2>Top Brands Available</h2>
-<p>Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Orijen, Acana, Taste of the Wild, Fancy Feast, Iams, Merrick, Nature's Variety, and hundreds more.</p>
+<p>Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Taste of the Wild, Fancy Feast, Iams, Merrick, Nature's Variety, and hundreds more.</p>
 
 <h2>Frequently Asked Questions</h2>
 
@@ -200,7 +200,7 @@ const hubs = [
   <div itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
     <h3 itemprop="name">What pet food brands do you carry for Brooklyn delivery?</h3>
     <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-      <p itemprop="text">We carry 10,000+ products from over 100 brands including Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Orijen, Acana, and many more — all available for Brooklyn delivery.</p>
+      <p itemprop="text">We carry 10,000+ products from over 100 brands including Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, and many more — all available for Brooklyn delivery.</p>
     </div>
   </div>
 
@@ -375,7 +375,7 @@ const hubs = [
   <div itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
     <h3 itemprop="name">What brands do you carry?</h3>
     <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-      <p itemprop="text">Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Orijen, Taste of the Wild, Fancy Feast, Iams, Merrick, and over 100 more brands — all available for Bronx delivery.</p>
+      <p itemprop="text">Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Taste of the Wild, Fancy Feast, Iams, Merrick, and over 100 more brands — all available for Bronx delivery.</p>
     </div>
   </div>
 

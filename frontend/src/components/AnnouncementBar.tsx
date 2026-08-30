@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const MESSAGES = [
-  { text: '🚀 We start taking orders August 28, 2026 — browse now' },
+  { text: '🛒 Checkout is live — place your order today' },
   { text: '⚡ Same-Day Delivery NYC — Order before 3 PM, get it before 11 PM' },
   { text: '🚚 Free shipping on all orders over $49 — no code needed' },
   { text: '🎁 FREEDOM20 — 20% off first order, max $10. Subscribe below.' },

@@ -433,7 +433,7 @@ PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
 - Phone: +1 (800) 259-2605 | Email: support@petshiwu.com
 - Support hours: 24/7 phone support at +1 (800) 259-2605
 - 10,000+ products for dogs, cats, birds, fish, reptiles, and small animals
-- Top brands: Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Orijen, Acana, Taste of the Wild
+- Top brands: Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Taste of the Wild
 
 === SHIPPING ===
 - FREE shipping automatically applied on all orders over $49 — no code needed

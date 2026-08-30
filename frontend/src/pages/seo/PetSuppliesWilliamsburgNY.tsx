@@ -20,7 +20,7 @@ const PetSuppliesWilliamsburgNY = () => (
     solutionPoints={[
       "Delivery to all Williamsburg streets — North Side, South Side, East Williamsburg, Greenpoint border",
       "10,000+ products: dog food, cat food, bird supplies, fish food, reptile care",
-      "Premium brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Orijen, Wellness",
+      "Premium brands: Purina Pro Plan, Blue Buffalo, Royal Canin Wellness",
       "Free delivery on orders over $49 — most pet food orders qualify",
       "Raw diets, grain-free, prescription food, and specialty diets in stock",
       "Same-day delivery available in Brooklyn — order by noon"
@@ -36,7 +36,7 @@ const PetSuppliesWilliamsburgNY = () => (
       },
       {
         question: "Can I get raw or grain-free dog food delivered in Williamsburg?",
-        answer: "Yes — we stock a wide range of grain-free, raw, and specialty diets. Brands include Orijen, Acana, Stella & Chewy's, and Merrick. Delivered to your Williamsburg address."
+        answer: "Yes — we stock a wide range of grain-free, raw, and specialty diets. Brands include Stella & Chewy's, and Merrick. Delivered to your Williamsburg address."
       },
       {
         question: "Do you carry cat litter delivery for Williamsburg apartments?",
