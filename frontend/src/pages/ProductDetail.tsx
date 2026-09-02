@@ -483,18 +483,21 @@ const ProductDetail = () => {
     selectedVariantData?.compareAtPrice ?? product.compareAtPrice
   );
 
-  // Determine which images to display: variant image if available, otherwise product images
+  // Determine which images to display: combine variant images with product images
   const displayImages = (() => {
-    if (selectedVariantData?.image) {
-      // Variant has a primary image - use it as the main image
-      return [selectedVariantData.image];
-    } else if (selectedVariantData?.images && selectedVariantData.images.length > 0) {
-      // Variant has image gallery - use it
-      return selectedVariantData.images;
-    } else {
-      // No variant images - fallback to product images
-      return getProductImages(product);
+    const productImages = getProductImages(product);
+    const variantImages = selectedVariantData?.images && selectedVariantData.images.length > 0
+      ? selectedVariantData.images
+      : (selectedVariantData?.image ? [selectedVariantData.image] : []);
+
+    // Merge: variant images first (if any), then product images, deduped
+    const merged = [...variantImages];
+    for (const img of productImages) {
+      if (img && !merged.includes(img)) {
+        merged.push(img);
+      }
     }
+    return merged.length > 0 ? merged : productImages;
   })();
 
   const hasDisplayImages = displayImages.length > 0;
