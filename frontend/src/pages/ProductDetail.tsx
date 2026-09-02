@@ -902,11 +902,15 @@ const ProductDetail = () => {
                 }
               });
               // Numeric-aware sort: "5Lb" < "15Lb" < "35Lb" (not string "15" < "5")
+              // Guard: attribute values may be non-string (e.g. weight is a number),
+              // so coerce to string before calling .replace()
               return Array.from(values).sort((a, b) => {
-                const numA = parseFloat(a.replace(/[^0-9.]/g, ''));
-                const numB = parseFloat(b.replace(/[^0-9.]/g, ''));
+                const sa = String(a);
+                const sb = String(b);
+                const numA = parseFloat(sa.replace(/[^0-9.]/g, ''));
+                const numB = parseFloat(sb.replace(/[^0-9.]/g, ''));
                 if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
-                return a.localeCompare(b);
+                return sa.localeCompare(sb);
               });
             };
 
@@ -921,7 +925,8 @@ const ProductDetail = () => {
 
             // Decode HTML entities in variant values (&amp; → &, etc.)
             const decodeEntities = (str: string): string => {
-              return str
+              const s = String(str ?? '');
+              return s
                 .replace(/&amp;/g, '&')
                 .replace(/&lt;/g, '<')
                 .replace(/&gt;/g, '>')
