@@ -483,21 +483,13 @@ const ProductDetail = () => {
     selectedVariantData?.compareAtPrice ?? product.compareAtPrice
   );
 
-  // Determine which images to display: combine variant images with product images
+  // Display ONLY the selected variant's images. Fall back to product images only if no variant images.
   const displayImages = (() => {
-    const productImages = getProductImages(product);
     const variantImages = selectedVariantData?.images && selectedVariantData.images.length > 0
       ? selectedVariantData.images
       : (selectedVariantData?.image ? [selectedVariantData.image] : []);
-
-    // Merge: variant images first (if any), then product images, deduped
-    const merged = [...variantImages];
-    for (const img of productImages) {
-      if (img && !merged.includes(img)) {
-        merged.push(img);
-      }
-    }
-    return merged.length > 0 ? merged : productImages;
+    if (variantImages.length > 0) return variantImages;
+    return getProductImages(product);
   })();
 
   const hasDisplayImages = displayImages.length > 0;
