@@ -797,6 +797,8 @@ const ProductDetail = () => {
           <h1 className="text-3xl font-bold mb-4">{decodeHtmlEntities(product.name)}</h1>
 
           {/* Rating */}
+          {/* Rating - only show when there are actual reviews */}
+          {(product.averageRating ?? 0) > 0 && (product.totalReviews ?? 0) > 0 && (
           <div className="flex items-center gap-4 mb-6">
             <div className="flex items-center">
               {[...Array(5)].map((_, i) => (
@@ -812,6 +814,7 @@ const ProductDetail = () => {
               ({product.totalReviews} reviews)
             </a>
           </div>
+          )}
 
           {/* Price */}
           <div className="mb-6">
