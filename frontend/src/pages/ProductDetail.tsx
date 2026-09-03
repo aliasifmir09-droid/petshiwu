@@ -855,8 +855,13 @@ const ProductDetail = () => {
             if (selectedVariantData.weight) selectedAttributes.weight = selectedVariantData.weight;
 
             // Function to find variant index by attribute values
+            // Uses best-match (most attributes matching) instead of exact match
+            // to handle derived fields like weight that stay stale when size changes
             const findVariantByAttributes = (attributes: { [key: string]: string }): number => {
-              return product.variants.findIndex((variant) => {
+              const attrKeys = Object.keys(attributes);
+              let bestIndex = -1;
+              let bestScore = 0;
+              product.variants.forEach((variant, idx) => {
                 const variantAttrs: { [key: string]: string } = {};
                 if (variant.attributes) {
                   Object.entries(variant.attributes).forEach(([key, value]) => {
@@ -864,16 +869,28 @@ const ProductDetail = () => {
                   });
                 }
                 if (variant.size) variantAttrs.size = variant.size;
-                if (variant.weight) variantAttrs.weight = variant.weight;
+                if (variant.weight) variantAttrs.weight = String(variant.weight);
 
-                // Check if all attributes match
-                return Object.keys(attributes).every(key => variantAttrs[key] === attributes[key]);
+                let score = 0;
+                for (const key of attrKeys) {
+                  if (variantAttrs[key] === attributes[key]) score++;
+                }
+                if (score > bestScore) {
+                  bestScore = score;
+                  bestIndex = idx;
+                }
               });
+              return bestIndex;
             };
 
             // Function to handle attribute selection
             const handleAttributeSelect = (attributeKey: string, value: string) => {
               const newSelectedAttributes = { ...selectedAttributes, [attributeKey]: value };
+              // When changing size, also clear weight so it doesn't block matching
+              // (weight is derived from size and stays stale otherwise)
+              if (attributeKey === 'size' && 'weight' in newSelectedAttributes) {
+                delete newSelectedAttributes.weight;
+              }
               const variantIndex = findVariantByAttributes(newSelectedAttributes);
               if (variantIndex >= 0) {
                 setSelectedVariant(variantIndex);
