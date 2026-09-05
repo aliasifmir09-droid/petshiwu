@@ -89,6 +89,7 @@ describe('PayPal checkout', () => {
     const checkout = read('../../pages/Checkout.tsx');
     expect(checkout).toContain('CheckoutCharityCard');
     expect(checkout).toContain('donationAmount={donationAmount}');
-    expect(checkout).toContain('Almost home.');
+    expect(checkout).toContain('CheckoutConfidence');
+    expect(checkout).toContain('CheckoutSecureHeader');
   });
 });
