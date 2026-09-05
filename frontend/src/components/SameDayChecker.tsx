@@ -72,8 +72,8 @@ const SameDayChecker = () => {
       ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
       : result?.speed === 'next-day'
         ? 'border-amber-200 bg-amber-50 text-amber-900'
-        : result
-          ? 'border-blue-200 bg-blue-50 text-blue-900'
+        : result?.speed === 'unavailable'
+          ? 'border-rose-200 bg-rose-50 text-rose-950'
           : '';
 
   return (
@@ -125,7 +125,7 @@ const SameDayChecker = () => {
       )}
       {geoStatus === 'outside' && (
         <p className="mt-2 text-xs text-white/70">
-          You appear to be outside NYC. Enter your ZIP to see 2-day nationwide shipping.
+          You appear to be outside NYC. We currently deliver only in the 5 boroughs — New York State and nationwide shipping are coming soon.
         </p>
       )}
 
@@ -138,12 +138,14 @@ const SameDayChecker = () => {
               Order in {padTime(countdown.hours)}:{padTime(countdown.minutes)}:{padTime(countdown.seconds)} for tonight.
             </p>
           )}
-          <Link
-            to="/products"
-            className="inline-flex mt-3 text-sm font-bold underline underline-offset-2 hover:opacity-80"
-          >
-            Shop now →
-          </Link>
+          {result.speed !== 'unavailable' && (
+            <Link
+              to="/products"
+              className="inline-flex mt-3 text-sm font-bold underline underline-offset-2 hover:opacity-80"
+            >
+              Shop now →
+            </Link>
+          )}
         </div>
       )}
     </div>

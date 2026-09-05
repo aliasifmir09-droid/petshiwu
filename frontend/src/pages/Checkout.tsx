@@ -21,10 +21,10 @@ import { rememberGuestCheckoutAccount } from '@/utils/guestCheckoutAccount';
 import SEO from '@/components/SEO';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
-import { MapPin, Plus, Check, User, UserCheck, Banknote, ShieldCheck, RotateCcw, Headphones, Lock, Truck, CreditCard } from 'lucide-react';
+import { MapPin, Plus, Check, User, UserCheck, Banknote, ShieldCheck, RotateCcw, Headphones, Lock, Truck, CreditCard, AlertCircle } from 'lucide-react';
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
 import { paypalClientId } from '@/config/paypal';
-import { isNycDeliveryZip, isNewYorkState, normalizeShippingState } from '@/utils/deliveryZip';
+import { isNycDeliveryZip, isNewYorkState, normalizeShippingState, isOutsideCurrentDeliveryRange, outOfRangeCheckoutMessage, CURRENT_DELIVERY_RANGE_HINT } from '@/utils/deliveryZip';
 import { clearRestockCoupon, clearRestockPay, readRestockCoupon, readRestockPay, isRestockPayMethod, ASK_COUPON, ASK_DISCOUNT_COPY, AUTOSHIP_COUPON, AUTOSHIP_DISCOUNT_COPY } from '@/utils/restock';
 import {
   formatCardExpiry,
@@ -187,6 +187,7 @@ const Checkout = () => {
   const { items, getTotalPrice, clearCart } = useCartStore();
   const { isAuthenticated, user } = useAuthStore();
   const { toast, showToast, hideToast } = useToast();
+  const deliveryRangeNoticeRef = useRef<HTMLDivElement>(null);
 
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
@@ -370,6 +371,10 @@ const Checkout = () => {
   const tax = subtotal * TAX_RATE;
   const onlineTotal = Math.max(0, subtotal + shipping + tax - couponDiscount);
   const total = Math.max(0, onlineTotal + donationAmount);
+  const outsideDeliveryRange = isOutsideCurrentDeliveryRange(shippingInfo.state, shippingInfo.zipCode);
+  const deliveryRangeNotice = outsideDeliveryRange
+    ? outOfRangeCheckoutMessage(shippingInfo.state, shippingInfo.zipCode)
+    : '';
 
   const applyCoupon = async (codeToApply?: string) => {
     const raw = (codeToApply ?? couponInput).trim();
@@ -558,10 +563,11 @@ const Checkout = () => {
       return;
     }
 
-    // NYC-only delivery check (includes Queens 111xx Astoria/LIC, which the old range skipped)
-    const _isNY = isNewYorkState(shippingInfo.state);
-    if (!_isNY || !isNycDeliveryZip(shippingInfo.zipCode)) {
-      showToast('Sorry, we currently deliver only within New York City (all 5 boroughs).', 'error');
+    // NYC 5-borough delivery check — tell the shopper why checkout cannot complete
+    if (!isNewYorkState(shippingInfo.state) || !isNycDeliveryZip(shippingInfo.zipCode)) {
+      const notice = outOfRangeCheckoutMessage(shippingInfo.state, shippingInfo.zipCode);
+      deliveryRangeNoticeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showToast(notice, 'error');
       return;
     }
 
@@ -864,6 +870,7 @@ const Checkout = () => {
             <div className="lg:col-span-2 space-y-6">
               {/* Shipping Information */}
               <CheckoutStep step="1" title="Delivery" subtitle="Where should this care package land tonight?">
+                <p className="mb-4 text-sm text-stone-600">{CURRENT_DELIVERY_RANGE_HINT}</p>
 
                 {/* Logged-in user info display */}
                 {isAuthenticated && user && (
@@ -1049,10 +1056,30 @@ const Checkout = () => {
                     )}
                   </div>
                 )}
+                {outsideDeliveryRange && (
+                  <div
+                    ref={deliveryRangeNoticeRef}
+                    role="alert"
+                    className="mt-4 rounded-xl border-2 border-rose-300 bg-rose-50 px-4 py-3 text-rose-950"
+                  >
+                    <p className="flex items-start gap-2 font-bold">
+                      <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" aria-hidden />
+                      We can&apos;t complete checkout for this address
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed">{deliveryRangeNotice}</p>
+                  </div>
+                )}
               </CheckoutStep>
 
               {/* Payment Method */}
               <CheckoutStep step="2" title="Payment" subtitle="Apple Pay, Google Pay, PayPal, or card — official buttons, the way a flagship store would do it.">
+                {outsideDeliveryRange ? (
+                  <div className="rounded-xl border border-stone-200 bg-stone-50 px-4 py-5 text-stone-700">
+                    <p className="font-semibold text-stone-900">Payment is paused for this address</p>
+                    <p className="mt-1 text-sm leading-relaxed">{deliveryRangeNotice}</p>
+                  </div>
+                ) : (
+                <>
 
                 {isAuthenticated && savedPaymentMethods.length > 0 && (
                   <div className="mb-6">
@@ -1273,10 +1300,12 @@ const Checkout = () => {
                     </p>
                   </div>
                 )}
+                </>
+                )}
               </CheckoutStep>
 
               {/* Stripe Payment Form */}
-              {showPaymentForm && clientSecret && !usingSavedCard && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && paymentMethod !== 'cod' && (
+              {showPaymentForm && clientSecret && !usingSavedCard && !outsideDeliveryRange && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && paymentMethod !== 'cod' && (
                 <StripePaymentWrapper clientSecret={clientSecret} total={total}
                   onSuccess={handlePaymentSuccess} onError={handlePaymentError} onCancel={handlePaymentCancel} />
               )}
@@ -1387,9 +1416,11 @@ const Checkout = () => {
                   </div>
                 </div>
                 <button type="submit"
-                  disabled={createOrderMutation.isPending || (isProcessingPayment && paymentMethod !== 'cod')}
+                  disabled={outsideDeliveryRange || createOrderMutation.isPending || (isProcessingPayment && paymentMethod !== 'cod')}
                   className="w-full rounded-2xl bg-[#1E3A8A] py-4 text-lg font-black text-white shadow-lg shadow-blue-900/25 hover:bg-[#16307a] disabled:opacity-50">
-                  {paymentMethod === 'cod'
+                  {outsideDeliveryRange
+                    ? "Can't deliver here yet"
+                    : paymentMethod === 'cod'
                     ? (createOrderMutation.isPending ? 'Placing order...' : 'Place cash on delivery order')
                     : usingSavedCard && selectedSaved
                       ? (createOrderMutation.isPending || isProcessingPayment ? 'Paying…' : `Pay with ${savedCardLabel(selectedSaved)}`)

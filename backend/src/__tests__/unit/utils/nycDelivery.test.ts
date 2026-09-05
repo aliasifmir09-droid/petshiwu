@@ -1,4 +1,4 @@
-import { isNycDeliveryZip, isNycShippingAddress, isNewYorkState, normalizeShippingState, normalizeZip } from '../../../utils/nycDelivery';
+import { isNycDeliveryZip, isNycShippingAddress, isNewYorkState, normalizeShippingState, normalizeZip, outsideDeliveryRangeMessage } from '../../../utils/nycDelivery';
 
 describe('nycDelivery', () => {
   test('normalizeZip keeps the first five digits', () => {
@@ -33,5 +33,12 @@ describe('nycDelivery', () => {
     expect(normalizeShippingState('new york')).toBe('NY');
     expect(isNycShippingAddress('new york', '11372')).toBe(true);
     expect(isNycShippingAddress('New York', '11372')).toBe(true);
+  });
+
+  test('outsideDeliveryRangeMessage explains NYC now and NY/nationwide later', () => {
+    expect(outsideDeliveryRangeMessage('CA', '94105')).toMatch(/5 boroughs/);
+    expect(outsideDeliveryRangeMessage('CA', '94105')).toMatch(/coming soon/);
+    expect(outsideDeliveryRangeMessage('NY', '12207')).toMatch(/New York State/);
+    expect(outsideDeliveryRangeMessage('NY', '12207')).toMatch(/can't complete checkout/);
   });
 });

@@ -13,6 +13,8 @@ import {
   normalizeZip,
   padTime,
   tonightStatusLine,
+  isOutsideCurrentDeliveryRange,
+  outOfRangeCheckoutMessage,
 } from '../deliveryZip';
 
 describe('deliveryZip', () => {
@@ -49,15 +51,19 @@ describe('deliveryZip', () => {
     expect(lookupZip('11101', morning)?.area).toBe('Queens');
   });
 
-  test('lookupZip marks Hoboken as next-day', () => {
+  test('lookupZip marks Hoboken as outside the current 5-borough range', () => {
     const result = lookupZip('07030', new Date('2026-08-13T14:00:00Z'));
     expect(result?.area).toBe('Hoboken');
-    expect(result?.speed).toBe('next-day');
+    expect(result?.speed).toBe('unavailable');
+    expect(result?.detail).toMatch(/coming soon/i);
   });
 
-  test('lookupZip offers nationwide standard shipping outside the metro', () => {
+  test('lookupZip tells shoppers outside NYC that we cannot deliver yet', () => {
     const result = lookupZip('94105', new Date('2026-08-13T14:00:00Z'));
-    expect(result?.speed).toBe('standard');
+    expect(result?.speed).toBe('unavailable');
+    expect(result?.headline).toMatch(/don.?t deliver here yet/i);
+    expect(result?.detail).toMatch(/5 boroughs/);
+    expect(result?.detail).toMatch(/coming soon/i);
   });
 
   test('lookupZip returns null for incomplete input', () => {
@@ -84,6 +90,15 @@ describe('deliveryZip', () => {
   test('isNycDeliveryZip includes Astoria and excludes Hoboken', () => {
     expect(isNycDeliveryZip('11101')).toBe(true);
     expect(isNycDeliveryZip('07030')).toBe(false);
+  });
+
+  test('isOutsideCurrentDeliveryRange flags Albany and California, not Queens', () => {
+    expect(isOutsideCurrentDeliveryRange('NY', '11372')).toBe(false);
+    expect(isOutsideCurrentDeliveryRange('NY', '12207')).toBe(true);
+    expect(isOutsideCurrentDeliveryRange('CA', '94105')).toBe(true);
+    expect(isOutsideCurrentDeliveryRange('', '113')).toBe(false);
+    expect(outOfRangeCheckoutMessage('NY', '12207')).toMatch(/New York State/);
+    expect(outOfRangeCheckoutMessage('CA', '94105')).toMatch(/coming soon/);
   });
 
   test('isNewYorkState accepts NY and New York for Queens ZIPs', () => {
