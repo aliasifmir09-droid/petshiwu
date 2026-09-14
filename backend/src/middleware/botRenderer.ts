@@ -750,9 +750,13 @@ export const buildProductHtml = (template: string, product: any, slug: string): 
     }
   }
   
-  const rawDesc: string = product.description
-    ? clean(product.description)
-    : `${productName} — premium pet supplies at Petshiwu.`;
+  // GSC Merchant listings requires a NON-EMPTY Product.description. 805 products
+  // have blank/whitespace DB descriptions — trim the cleaned value and fall back
+  // whenever it ends up empty, otherwise we serve description: " " which Google
+  // rejects as "Missing field 'description'".
+  const cleanedDbDesc: string = product.description ? clean(product.description).trim() : '';
+  const rawDesc: string =
+    cleanedDbDesc || `${productName} — premium pet supplies at Petshiwu.`;
   const description = truncate(rawDesc, 160);
 
   const categoryName = typeof product.category === 'object' ? product.category?.name : product.category;
