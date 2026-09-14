@@ -9,7 +9,7 @@ const PetSuppliesBrooklynNY = () => (
     title="Same-Day Pet Supplies Brooklyn — Order by 3 PM | Petshiwu"
     description="Same-day pet delivery in Brooklyn. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Williamsburg, Park Slope, Bushwick, Bay Ridge. No autoship. Free over $49."
     h1="Same-Day Pet Supplies Across Brooklyn, NY"
-    introContent="Petshiwu delivers pet food and supplies tonight across Brooklyn — Williamsburg, Park Slope, Bushwick, Flatbush, Bay Ridge. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No autoship. 10,000+ products. Free over $49."
+    introContent="Petshiwu delivers pet food and supplies tonight across Brooklyn — Williamsburg, Park Slope, Bushwick, Flatbush, Bay Ridge. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No autoship. 4,000+ products. Free over $49."
     problemPoints={[
       "Long subway rides carrying heavy bags of pet food",
       "Local Brooklyn pet stores with limited selection",
@@ -19,7 +19,7 @@ const PetSuppliesBrooklynNY = () => (
     ]}
     solutionPoints={[
       "Delivery to all Brooklyn neighborhoods — Williamsburg, Park Slope, Bushwick, Crown Heights, Bay Ridge, Flatbush, Bensonhurst, and more",
-      "10,000+ products for dogs, cats, birds, fish, reptiles, and small animals",
+      "4,000+ products for dogs, cats, birds, fish, reptiles, and small animals",
       "Top brands at fair prices — Purina, Blue Buffalo, Royal Canin, Hill's and more",
       "Free delivery on orders over $49 — no membership needed",
       "Same-day: order by 3 PM weekdays (1 PM weekends), before 11 PM",
@@ -36,7 +36,7 @@ const PetSuppliesBrooklynNY = () => (
       },
       {
         question: "What pet brands do you carry for Brooklyn customers?",
-        answer: "We stock all the top brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Orijen, Iams, Pedigree, Nutro, and hundreds more. Over 10,000 products in total."
+        answer: "We stock all the top brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Iams, Pedigree, Nutro, and hundreds more. Thousands of products in total."
       },
       {
         question: "Can I get cat food delivered in Brooklyn?",

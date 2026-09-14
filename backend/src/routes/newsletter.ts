@@ -53,7 +53,7 @@ async function sendWelcomeEmail(lowerEmail: string): Promise<boolean> {
         </div>
         <div style="text-align:center;padding:0 12px">
           <div style="font-size:24px">📦</div>
-          <p style="color:#333;font-size:13px;margin:4px 0 0;font-weight:600">10,000+ products</p>
+          <p style="color:#333;font-size:13px;margin:4px 0 0;font-weight:600">4,000+ products</p>
         </div>
       </div>
     </div>

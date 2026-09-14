@@ -11,7 +11,7 @@ const PetSuppliesNearMeNYC = () => {
       title="Pet Supplies Near Me NYC — Same-Day Delivery, Not a Store | Petshiwu"
       description="Pet supplies near you in NYC means delivery to your door. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Not a walk-in store. No autoship. Free over $49."
       h1="Pet Supplies Near You — Delivered Tonight in NYC"
-      introContent="Searching pet supplies near me in NYC? We do not have a walk-in shop. We deliver 10,000+ products to your door tonight if you order by 3 PM weekdays (1 PM weekends). All 5 boroughs. No autoship. Free over $49."
+      introContent="Searching pet supplies near me in NYC? We do not have a walk-in shop. We deliver 4,000+ products to your door tonight if you order by 3 PM weekdays (1 PM weekends). All 5 boroughs. No autoship. Free over $49."
       problemPoints={[
         "The nearest pet store is inconvenient or closed",
         "Limited selection at nearby stores",
@@ -21,7 +21,7 @@ const PetSuppliesNearMeNYC = () => {
       ]}
       solutionPoints={[
         "Delivered right to your door — closer than any store",
-        "10,000+ products from every major brand",
+        "4,000+ products from every major brand",
         "All pets covered — dogs, cats, birds, fish, reptiles, small pets",
         "Free delivery on orders over $49",
         "No need to leave your apartment — order from your phone",

@@ -3,15 +3,14 @@
  * MongoDB $text is whole-word only, so "pur" / "hill" miss Purina / Hill's on the first letters.
  */
 
+import { catalogFlexPattern } from './catalogText';
+
 export function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 export function apostropheFlexPattern(term: string): string {
-  return term
-    .split('')
-    .map((char) => escapeRegex(char))
-    .join("['\u2019]?");
+  return catalogFlexPattern(term);
 }
 
 const NOT_DELETED = {

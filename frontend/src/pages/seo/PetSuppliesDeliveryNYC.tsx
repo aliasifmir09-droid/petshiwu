@@ -11,7 +11,7 @@ const PetSuppliesDeliveryNYC = () => {
       title="Same-Day Pet Supplies Delivery NYC — Order by 3 PM | Petshiwu"
       description="Same-day pet supplies delivery in NYC. Order by 3 PM weekdays (1 PM weekends), before 11 PM. No autoship. Free over $49. Dogs, cats, birds, fish, reptiles. All 5 boroughs."
       h1="Same-Day Pet Supplies Delivery in New York City"
-      introContent="Need pet food tonight in NYC? Order by 3 PM weekdays (1 PM weekends) and Petshiwu delivers before 11 PM to Queens, Brooklyn, Manhattan, the Bronx, and Staten Island. No autoship. 10,000+ products from Purina, Blue Buffalo, and Royal Canin. Free over $49."
+      introContent="Need pet food tonight in NYC? Order by 3 PM weekdays (1 PM weekends) and Petshiwu delivers before 11 PM to Queens, Brooklyn, Manhattan, the Bronx, and Staten Island. No autoship. 4,000+ products from Purina, Blue Buffalo, and Royal Canin. Free over $49."
       problemPoints={[
         "Lugging heavy bags of pet food from a store",
         "Pet stores with limited selection or out-of-stock items",
@@ -20,7 +20,7 @@ const PetSuppliesDeliveryNYC = () => {
         "Finding specialty items for exotic pets like birds, fish, or reptiles"
       ]}
       solutionPoints={[
-        "10,000+ products delivered to your NYC door",
+        "4,000+ products delivered to your NYC door",
         "Free delivery on all orders over $49",
         "All pet types covered — dogs, cats, birds, fish, reptiles, small pets",
         "Top brands: Purina, Blue Buffalo, Royal Canin, Hill's Science Diet and more",
@@ -38,7 +38,7 @@ const PetSuppliesDeliveryNYC = () => {
         },
         {
           question: "What pet supplies can I order for delivery in NYC?",
-          answer: "Everything — dry food, wet food, treats, toys, leashes, beds, crates, litter, aquarium supplies, bird food, reptile supplies, grooming products, and health supplements. Over 10,000 products across all categories."
+          answer: "Everything — dry food, wet food, treats, toys, leashes, beds, crates, litter, aquarium supplies, bird food, reptile supplies, grooming products, and health supplements. Thousands of products across all categories."
         },
         {
           question: "Do you carry supplies for pets other than dogs and cats?",
@@ -46,7 +46,7 @@ const PetSuppliesDeliveryNYC = () => {
         },
         {
           question: "Are the products the same brands I'd find at major pet stores?",
-          answer: "Yes. We carry the same trusted brands you know — Purina, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Orijen, Pedigree, and many more. Same quality, delivered to your door in NYC."
+          answer: "Yes. We carry the same trusted brands you know — Purina, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Pedigree, and many more. Same quality, delivered to your door in NYC."
         }
       ]}
       searchTerms={['dog food', 'cat food', 'pet food', 'pet supplies', 'pet toys', 'dog treats', 'cat treats']}

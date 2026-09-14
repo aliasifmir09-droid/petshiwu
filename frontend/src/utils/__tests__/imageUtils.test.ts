@@ -18,10 +18,8 @@ describe('Image URL Security Tests', () => {
       expect(result).toBe(httpsUrl);
     });
 
-    test('should handle relative upload paths', () => {
-      const relativePath = '/uploads/image.jpg';
-      const result = normalizeImageUrl(relativePath);
-      expect(result).toContain('/uploads/image.jpg');
+    test('should keep public product-image paths', () => {
+      expect(normalizeImageUrl('/product-images/hills.jpg')).toBe('/product-images/hills.jpg');
     });
 
     test('should return placeholder for invalid URLs', () => {

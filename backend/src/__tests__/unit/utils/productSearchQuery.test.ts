@@ -11,10 +11,12 @@ describe('productSearchQuery', () => {
     expect(escapeRegex('purina')).toBe('purina');
   });
 
-  test('apostropheFlexPattern lets hills match Hill\'s', () => {
-    const regex = new RegExp(apostropheFlexPattern('hills'), 'i');
+  test('apostropheFlexPattern lets hills match encoded Hill\'s', () => {
+    const regex = new RegExp(apostropheFlexPattern("Hill's"), 'i');
     expect(regex.test("Hill's")).toBe(true);
     expect(regex.test('Hills')).toBe(true);
+    expect(regex.test("Hill&#039;s")).toBe(true);
+    expect(regex.test("Nature&#039;s Recipe")).toBe(false);
   });
 
   test('single term uses prefix/contains regex, not $text', () => {

@@ -29,7 +29,7 @@ const Products = () => {
   const petType = searchParams.get('petType') || '';
   const category = searchParams.get('category') || '';
   const search = searchParams.get('search') || '';
-  const sort = searchParams.get('sort') || 'newest';
+  const sort = searchParams.get('sort') || 'name';
   const featured = searchParams.get('featured') === 'true';
   const minRating = searchParams.get('minRating') || '';
   const brand = searchParams.get('brand') || '';
@@ -251,7 +251,7 @@ const Products = () => {
 
   // Noindex any URL with filter/search/pagination params to eliminate 9K duplicate-content entries in GSC.
   // Includes sort != default (any non-default sort), pagination beyond first page, all filters, and search query.
-  const hasFilters = Boolean(petType || category || brand || minRating || inStock || search) || page > 1 || featured || (sort && sort !== 'newest');
+  const hasFilters = Boolean(petType || category || brand || minRating || inStock || search) || page > 1 || featured || (sort && sort !== 'name');
 
   return (
     <>
@@ -274,7 +274,7 @@ const Products = () => {
           type="itemList"
           data={{
             name: featured ? 'Featured Pet Products' : petType ? `${petType.charAt(0).toUpperCase() + petType.slice(1)} Products` : 'All Pet Products',
-            description: 'Premium pet supplies delivered to NYC and nationwide.',
+            description: 'Premium pet supplies delivered same-day across NYC.',
             numberOfItems: filteredProducts.length,
             itemListElement: filteredProducts.slice(0, 20).map((p, idx) => ({
               '@type': 'ListItem',
@@ -549,6 +549,7 @@ const Products = () => {
               <span className="text-sm text-gray-600 hidden sm:inline">Sort by:</span>
               <Dropdown
                 options={[
+                  { value: 'name', label: 'Name A–Z', description: 'Alphabetical' },
                   { value: 'newest', label: 'Newest First', description: 'Latest products' },
                   { value: 'price-asc', label: 'Price: Low to High', description: 'Cheapest first' },
                   { value: 'price-desc', label: 'Price: High to Low', description: 'Most expensive first' },

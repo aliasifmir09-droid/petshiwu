@@ -27,7 +27,7 @@ const BENEFITS = [
   {
     icon: TrendingUp,
     title: 'Growing Platform',
-    desc: 'Petshiwu is scaling fast with 10,000+ products, active SEO, Google Shopping integration, and a customer base of NYC pet parents actively searching and buying.',
+    desc: 'Petshiwu is scaling fast with 4,000+ products, active SEO, Google Shopping integration, and a customer base of NYC pet parents actively searching and buying.',
   },
   {
     icon: Users,

@@ -20,17 +20,17 @@ const LuxuryPetAccessoriesNYC = () => {
         "Gift shopping for a pet owner friend and can't find something genuinely impressive"
       ]}
       solutionPoints={[
-        "Premium brands including Orijen, Wellness, Kong, and more delivered to your door",
+        "Premium brands including Wellness, Kong, and more delivered to your door",
         "Orthopedic and memory foam dog beds — delivered, no subway carry required",
         "High-end grooming accessories, interactive toys, and enrichment products",
         "Free delivery to all 5 NYC boroughs on orders over $49",
-        "10,000+ products — the widest selection of premium pet supplies in NYC delivery",
+        "4,000+ products — the widest selection of premium pet supplies in NYC delivery",
         "Queens-based operation — faster delivery than national retailers"
       ]}
       faqItems={[
         {
           question: "What premium pet accessories do you carry?",
-          answer: "We stock a wide range of premium pet products including high-protein dog and cat food from Orijen and Wellness, interactive enrichment toys from Kong, premium grooming tools, orthopedic dog beds, and gourmet treat options. Our 10,000+ product catalog covers the full range from everyday essentials to luxury splurges."
+          answer: "We stock a wide range of premium pet products including high-protein dog and cat food from Wellness and Wellness, interactive enrichment toys from Kong, premium grooming tools, orthopedic dog beds, and gourmet treat options. Our 4,000+ product catalog covers the full range from everyday essentials to luxury splurges."
         },
         {
           question: "Do you carry luxury pet products as gifts?",
@@ -38,7 +38,7 @@ const LuxuryPetAccessoriesNYC = () => {
         },
         {
           question: "What are the most popular premium dog products in NYC?",
-          answer: "In NYC, top premium dog purchases include orthopedic memory foam beds (essential for apartment dogs that spend long periods resting), high-protein freeze-dried treat pouches, puzzle and enrichment toys for mental stimulation, and premium training treats from respected brands. For food, Orijen and Hill's Science Diet are the top premium picks among NYC dog owners."
+          answer: "In NYC, top premium dog purchases include orthopedic memory foam beds (essential for apartment dogs that spend long periods resting), high-protein freeze-dried treat pouches, puzzle and enrichment toys for mental stimulation, and premium training treats from respected brands. For food and Hill's Science Diet are the top premium picks among NYC dog owners."
         },
         {
           question: "Do you carry premium cat accessories for NYC apartments?",

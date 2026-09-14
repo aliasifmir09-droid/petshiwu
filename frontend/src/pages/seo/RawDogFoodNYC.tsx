@@ -21,7 +21,7 @@ const RawDogFoodNYC = () => {
       ]}
       solutionPoints={[
         "Freeze-dried and air-dried raw dog food — no frozen storage required",
-        "Raw-inspired formulas from top brands including Orijen and Wellness",
+        "Raw-inspired formulas from top brands including Wellness and Wellness",
         "Free delivery to all 5 NYC boroughs on orders over $49",
         "Full ingredient transparency — you know exactly what your dog eats",
         "Apartment-friendly formats that are easy to store and serve",
@@ -38,7 +38,7 @@ const RawDogFoodNYC = () => {
         },
         {
           question: "What raw dog food brands do you carry?",
-          answer: "We carry freeze-dried and raw-inspired formulas from Orijen, Wellness Core, Instinct, and other premium brands. Our selection focuses on high-protein, minimally processed options that align with raw feeding principles."
+          answer: "We carry freeze-dried and raw-inspired formulas from Wellness Core, Instinct, and other premium brands. Our selection focuses on high-protein, minimally processed options that align with raw feeding principles."
         },
         {
           question: "How do I transition my dog to raw food?",

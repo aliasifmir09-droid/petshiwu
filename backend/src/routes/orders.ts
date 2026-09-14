@@ -29,6 +29,7 @@ import {
 } from '../controllers/returnController';
 import { protect, optionalAuth } from '../middleware/auth';
 import { checkPermission } from '../middleware/permissions';
+import { ORDERING_PAUSED, ORDERING_PAUSED_MESSAGE } from '../config/ordering';
 import {
   createOrderValidation,
   validateObjectId,
@@ -46,11 +47,12 @@ const router = express.Router();
 
 // Emergency checkout stop: rejects every new order before PayPal or another
 // payment path can create or capture a charge. Existing-order operations stay available.
+// Flip ORDERING_PAUSED in config/ordering.ts when we are ready to take payment.
 const orderAcceptancePaused = (_req: express.Request, res: express.Response): void => {
   res.status(503).json({
     success: false,
     code: 'ORDERING_TEMPORARILY_PAUSED',
-    message: 'Ordering is temporarily unavailable. Please check back shortly.'
+    message: ORDERING_PAUSED_MESSAGE
   });
 };
 
@@ -60,11 +62,19 @@ router.get('/track/:id', trackOrder);
 // GUEST CHECKOUT: These routes no longer require auth middleware
 // The controller handles both guests and logged-in users
 // Guest checkout: optionalAuth so a logged-in shopper's card and address can be saved.
-router.post('/payment-intent', orderAcceptancePaused);
-router.post('/paypal/create-order', orderAcceptancePaused);
-router.post('/paypal/capture-order', orderAcceptancePaused);
-router.post('/confirm-payment', orderAcceptancePaused);
-router.post('/', orderAcceptancePaused);
+if (ORDERING_PAUSED) {
+  router.post('/payment-intent', orderAcceptancePaused);
+  router.post('/paypal/create-order', orderAcceptancePaused);
+  router.post('/paypal/capture-order', orderAcceptancePaused);
+  router.post('/confirm-payment', orderAcceptancePaused);
+  router.post('/', orderAcceptancePaused);
+} else {
+  router.post('/payment-intent', optionalAuth, createPaymentIntentValidation, createOrderPaymentIntent);
+  router.post('/paypal/create-order', optionalAuth, createPayPalOrderValidation, createPayPalCheckoutOrder);
+  router.post('/paypal/capture-order', optionalAuth, capturePayPalOrderValidation, capturePayPalCheckoutOrder);
+  router.post('/confirm-payment', optionalAuth, confirmPaymentValidation, confirmOrderPayment);
+  router.post('/', optionalAuth, createOrderValidation, createOrder);
+}
 
 // Authenticated routes
 router.get('/myorders', protect, paginationValidation, getMyOrders);

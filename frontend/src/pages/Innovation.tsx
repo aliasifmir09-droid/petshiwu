@@ -33,7 +33,7 @@ const TOOLS = [
   {
     icon: Camera,
     title: 'Visual product search',
-    desc: 'Photograph a bag of food, a toy, or a barcode-style label. Our visual search matches it against 10,000+ SKUs so you do not have to type the tiny print.',
+    desc: 'Photograph a bag of food, a toy, or a barcode-style label. Our visual search matches it against 4,000+ SKUs so you do not have to type the tiny print.',
     cta: 'Try photo search',
     to: '/search',
   },
@@ -124,7 +124,7 @@ const Innovation = () => {
               to="/products"
               className="inline-flex items-center gap-2 bg-yellow-300 text-slate-900 font-bold px-6 py-3 rounded-full hover:bg-yellow-200 transition-colors"
             >
-              Shop 10,000+ products <ArrowRight size={18} />
+              Shop 4,000+ products <ArrowRight size={18} />
             </Link>
             <button
               type="button"

@@ -20,7 +20,8 @@ import { rememberGoogleReviewOptIn } from '@/utils/googleCustomerReviews';
 import { rememberGuestCheckoutAccount } from '@/utils/guestCheckoutAccount';
 import SEO from '@/components/SEO';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import OrdersOpenBanner from '@/components/OrdersOpenBanner';
+import OrdersHoldNotice from '@/components/OrdersHoldNotice';
+import { ORDERING_PAUSED } from '@/config/ordering';
 import { MapPin, Plus, Check, User, UserCheck, Banknote, ShieldCheck, RotateCcw, Headphones, Lock, Truck, CreditCard } from 'lucide-react';
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
 import { paypalClientId } from '@/config/paypal';
@@ -493,6 +494,13 @@ const Checkout = () => {
   });
 
   useEffect(() => {
+    if (ORDERING_PAUSED) {
+      setShowPayPalButton(false);
+      setShowPaymentForm(false);
+      setIsProcessingPayment(false);
+      return;
+    }
+
     if (usingSavedCard) {
       setShowPayPalButton(false);
       setShowPaymentForm(false);
@@ -547,6 +555,10 @@ const Checkout = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (ORDERING_PAUSED) {
+      showToast('We will start accepting orders soon. Your cart is saved.', 'info');
+      return;
+    }
 
     // GUEST CHECKOUT: No longer redirect to login — guests can proceed
     // Validate required fields
@@ -812,16 +824,33 @@ const Checkout = () => {
   return (
     <>
       <SEO title="Checkout | petshiwu" description="Complete your purchase at petshiwu" noindex={true} />
-      <div className="-mt-2 min-h-screen bg-[radial-gradient(circle_at_top,_#fff8e8,_#f4f0e8_42%,_#eef2f7_100%)] pb-16">
+      <header className="sticky top-0 z-50 border-b border-[#1E3A8A]/10 bg-[#1E3A8A] text-white">
+        <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-3 lg:px-8">
+          <Link to="/" className="flex items-center gap-3">
+            <img src="/logo.png" alt="Petshiwu" className="h-9 w-auto" />
+            <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.2em] text-amber-200">
+              <Lock size={12} /> {ORDERING_PAUSED ? 'Opening soon' : 'Secure checkout'}
+            </span>
+          </Link>
+          <Link to="/cart" className="text-sm font-semibold text-white/80 hover:text-white">
+            Back to cart
+          </Link>
+        </div>
+      </header>
+      <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#fff8e8,_#f4f0e8_42%,_#eef2f7_100%)] pb-16">
       <div className="container mx-auto px-4 lg:px-8 py-8">
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-[#1E3A8A]">
-              <Lock size={13} /> Secure checkout
+              <Lock size={13} /> {ORDERING_PAUSED ? 'Opening soon' : 'Secure checkout'}
             </p>
-            <h1 className="font-black tracking-tight text-stone-900 text-4xl sm:text-5xl">Almost home.</h1>
+            <h1 className="font-black tracking-tight text-stone-900 text-4xl sm:text-5xl">
+              {ORDERING_PAUSED ? 'Your cart is safe.' : 'Almost home.'}
+            </h1>
             <p className="mt-2 max-w-xl text-stone-600">
-              Same-day Queens delivery, PayPal-secured payment, and a 24/7 call center — the kind of checkout a pet parent should trust.
+              {ORDERING_PAUSED
+                ? 'Same-day NYC delivery, PayPal-secured payment, and 24/7 support will be ready when we start accepting orders.'
+                : 'Same-day Queens delivery, PayPal-secured payment, and a 24/7 call center — the kind of checkout a pet parent should trust.'}
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
@@ -831,12 +860,12 @@ const Checkout = () => {
           </div>
         </div>
 
-                <div className="mb-6">
-                  <OrdersOpenBanner compact />
-                </div>
+        <div className="mb-8">
+          <OrdersHoldNotice />
+        </div>
 
-                {/* GUEST CHECKOUT BANNER — show only when not logged in */}
-        {!isAuthenticated && (
+                {/* GUEST CHECKOUT BANNER — show only when not logged in and orders are open */}
+        {!ORDERING_PAUSED && !isAuthenticated && (
           <div className="mb-6 flex flex-col gap-4 rounded-3xl border border-stone-200/80 bg-white/90 p-5 shadow-[0_16px_40px_-28px_rgba(30,58,138,0.4)] sm:flex-row sm:items-center">
             <div className="flex items-start gap-3 flex-1">
               <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#1E3A8A] text-amber-300">
@@ -1052,9 +1081,23 @@ const Checkout = () => {
               </CheckoutStep>
 
               {/* Payment Method */}
-              <CheckoutStep step="2" title="Payment" subtitle="Apple Pay, Google Pay, PayPal, or card — official buttons, the way a flagship store would do it.">
+              <CheckoutStep
+                step="2"
+                title="Payment"
+                subtitle={ORDERING_PAUSED
+                  ? 'Payment stays locked until we start accepting orders. Your bag is saved.'
+                  : 'Apple Pay, Google Pay, PayPal, or card — official buttons, the way a flagship store would do it.'}
+              >
+                {ORDERING_PAUSED ? (
+                  <div className="rounded-2xl bg-[radial-gradient(circle_at_top_left,_#fff8e8,_#ffffff_55%)] p-5 ring-1 ring-amber-200/80">
+                    <p className="text-base font-bold text-[#1E3A8A]">Payment stays locked for now</p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-stone-600">
+                      Apple Pay, Google Pay, PayPal, and cards will unlock here the moment we start accepting orders. Nothing will be charged today — your bag stays saved.
+                    </p>
+                  </div>
+                ) : null}
 
-                {isAuthenticated && savedPaymentMethods.length > 0 && (
+                {!ORDERING_PAUSED && isAuthenticated && savedPaymentMethods.length > 0 && (
                   <div className="mb-6">
                     <label className="block text-sm font-medium mb-3">Saved Payment Methods</label>
                     <div className="space-y-3">
@@ -1102,7 +1145,7 @@ const Checkout = () => {
                   </div>
                 )}
 
-                {showPayPalButton && (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay') && paypalClientId && !usingSavedCard ? (
+                {!ORDERING_PAUSED && showPayPalButton && (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay') && paypalClientId && !usingSavedCard ? (
                   <div id="paypal-payment" className="paypal-wallet-slot relative overflow-hidden">
                     <Suspense fallback={
                       <div className="flex items-center justify-center py-8">
@@ -1142,14 +1185,14 @@ const Checkout = () => {
                       />
                     </Suspense>
                   </div>
-                ) : !paypalClientId && paymentMethod !== 'cod' ? (
+                ) : !ORDERING_PAUSED && !paypalClientId && paymentMethod !== 'cod' ? (
                   <div className="p-4 border-2 border-gray-200 rounded-lg bg-gray-50">
                     <p className="font-semibold text-gray-700">PayPal is temporarily unavailable</p>
                     <p className="text-sm text-gray-500 mt-1">You can still pay cash when your order arrives.</p>
                   </div>
                 ) : null}
 
-                {paymentMethod === 'credit_card' && !usingSavedCard && paypalClientId ? (
+                {!ORDERING_PAUSED && paymentMethod === 'credit_card' && !usingSavedCard && paypalClientId ? (
                   <div id="card-payment" className="relative overflow-visible rounded-2xl border-2 border-[#1E3A8A] bg-blue-50/40 p-4">
                     <Suspense fallback={
                       <div className="flex items-center justify-center py-8">
@@ -1192,7 +1235,7 @@ const Checkout = () => {
                   </div>
                 ) : null}
 
-                {paymentMethod === 'cod' && (
+                {!ORDERING_PAUSED && paymentMethod === 'cod' && (
                   <div className="mb-4 p-4 rounded-lg border-2 border-primary-600 bg-primary-50">
                     <p className="font-semibold text-gray-900">Cash on Delivery selected</p>
                     <p className="text-sm text-gray-600 mt-1">Pay cash when your order arrives. No card needed.</p>
@@ -1206,7 +1249,7 @@ const Checkout = () => {
                   </div>
                 )}
 
-                {paymentMethod !== 'cod' && !usingSavedCard && (
+                {!ORDERING_PAUSED && paymentMethod !== 'cod' && !usingSavedCard && (
                   <>
                     <div className="flex items-center gap-3 my-6">
                       <div className="flex-1 h-px bg-gray-200" />
@@ -1387,9 +1430,11 @@ const Checkout = () => {
                   </div>
                 </div>
                 <button type="submit"
-                  disabled={createOrderMutation.isPending || (isProcessingPayment && paymentMethod !== 'cod')}
+                  disabled={ORDERING_PAUSED || createOrderMutation.isPending || (isProcessingPayment && paymentMethod !== 'cod')}
                   className="w-full rounded-2xl bg-[#1E3A8A] py-4 text-lg font-black text-white shadow-lg shadow-blue-900/25 hover:bg-[#16307a] disabled:opacity-50">
-                  {paymentMethod === 'cod'
+                  {ORDERING_PAUSED
+                    ? 'We will start accepting orders soon'
+                    : paymentMethod === 'cod'
                     ? (createOrderMutation.isPending ? 'Placing order...' : 'Place cash on delivery order')
                     : usingSavedCard && selectedSaved
                       ? (createOrderMutation.isPending || isProcessingPayment ? 'Paying…' : `Pay with ${savedCardLabel(selectedSaved)}`)

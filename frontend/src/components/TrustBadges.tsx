@@ -16,8 +16,8 @@ const TrustBadges = () => {
     },
     {
       icon: Package,
-      title: '10,000+ Products',
-      description: 'Every pet, every brand',
+      title: '4,000+ Products',
+      description: 'Food, treats, toys & more',
       color: 'bg-[#1E3A8A]',
     },
     {

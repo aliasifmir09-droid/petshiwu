@@ -107,12 +107,12 @@ const dogFoodGenerator: PageGenerator = (n) => ({
     `Local ${n.borough} pet shops with limited brand selection or frequent stockouts`,
     `Big national chains that charge premium delivery fees and don't know NYC`,
     `Driving or taking multiple trains to find prescription or specialty dog food`,
-    `Inconsistent availability of brands like Royal Canin, Hill's, or Orijen near ${n.name}`,
+    `Inconsistent availability of brands like Royal Canin, Hill's, or Wellness near ${n.name}`,
   ],
   solutionPoints: [
     `NYC-based delivery covering all of ${n.name} and nearby ${n.nearbyAreas}`,
-    `10,000+ dog food products — dry, wet, raw, grain-free, prescription, and puppy`,
-    `All top brands: Purina Pro Plan, Blue Buffalo, Hill's Science Diet, Royal Canin, Orijen, Merrick, and more`,
+    `4,000+ dog food products — dry, wet, raw, grain-free, prescription, and puppy`,
+    `All top brands: Purina Pro Plan, Blue Buffalo, Hill's Science Diet, Royal Canin, Merrick, and more`,
     `Free delivery on orders over $49 — most dog food orders qualify automatically`,
     `Queens-based operation: faster, more reliable NYC delivery than national chains`,
     `Dogs of all sizes covered: small breed, large breed, senior, puppy, and weight management formulas`,
@@ -124,7 +124,7 @@ const dogFoodGenerator: PageGenerator = (n) => ({
     },
     {
       question: `What dog food brands do you carry for ${n.name} delivery?`,
-      answer: `We carry all major dog food brands: Purina Pro Plan, Blue Buffalo, Hill's Science Diet, Royal Canin, Orijen, Merrick, Wellness, Iams, Pedigree, and many more. Over 10,000 dog products in total — dry, wet, grain-free, raw, and prescription formulas.`,
+      answer: `We carry all major dog food brands: Purina Pro Plan, Blue Buffalo, Hill's Science Diet, Royal Canin, Merrick, Wellness, Iams, Pedigree, and many more. Thousands of dog products in total — dry, wet, grain-free, raw, and prescription formulas.`,
     },
     {
       question: `How much does dog food delivery cost in ${n.name}?`,
@@ -183,7 +183,7 @@ const catFoodGenerator: PageGenerator = (n) => ({
     },
     {
       question: `Do you have grain-free cat food delivery options for ${n.name}?`,
-      answer: `Yes — we carry a wide range of grain-free cat food from brands like Blue Buffalo Wilderness, Wellness CORE, Merrick Grain-Free, and Orijen. All delivered to ${n.name} with free shipping on orders over $49.`,
+      answer: `Yes — we carry a wide range of grain-free cat food from brands like Blue Buffalo Wilderness, Merrick Grain-Free, and Wellness. All delivered to ${n.name} with free shipping on orders over $49.`,
     },
   ],
   searchTerms: ['cat food', 'wet cat food', 'dry cat food', 'grain-free cat food', 'prescription cat food', 'kitten food', 'senior cat food'],
@@ -191,10 +191,10 @@ const catFoodGenerator: PageGenerator = (n) => ({
 
 const petSuppliesGenerator: PageGenerator = (n) => ({
   keyword: `pet-supplies-delivery-${n.slug}`,
-  title: `Pet Supplies Delivery in ${n.name}, ${n.borough} — 10,000+ Products | Petshiwu`,
-  description: `Shop 10,000+ pet supplies and get delivered in ${n.name}, ${n.borough}. Dog food, cat food, toys, treats, litter, leashes, and more. Free shipping over $49. Queens-based, NYC-wide.`,
+  title: `Pet Supplies Delivery in ${n.name}, ${n.borough} — 4,000+ Products | Petshiwu`,
+  description: `Shop 4,000+ pet supplies and get delivered in ${n.name}, ${n.borough}. Dog food, cat food, toys, treats, litter, leashes, and more. Free shipping over $49. Queens-based, NYC-wide.`,
   h1: `Pet Supplies Delivery in ${n.name}, ${n.borough}`,
-  introContent: `${n.flavor} Petshiwu is a Queens-based pet supply store that delivers 10,000+ products to every address in ${n.name} — dog food, cat food, toys, treats, leashes, litter, and everything else your pet needs. Free delivery on orders over $49. No subscription, no membership fee.`,
+  introContent: `${n.flavor} Petshiwu is a Queens-based pet supply store that delivers 4,000+ products to every address in ${n.name} — dog food, cat food, toys, treats, leashes, litter, and everything else your pet needs. Free delivery on orders over $49. No subscription, no membership fee.`,
   problemPoints: [
     `Limited selection at local ${n.borough} pet stores near ${n.name}`,
     `Carrying multiple heavy items home from the store`,
@@ -204,7 +204,7 @@ const petSuppliesGenerator: PageGenerator = (n) => ({
   ],
   solutionPoints: [
     `Delivery to all of ${n.name} and nearby ${n.nearbyAreas}`,
-    `10,000+ products: dog food, cat food, toys, treats, litter, leashes, beds, supplements, and more`,
+    `4,000+ products: dog food, cat food, toys, treats, litter, leashes, beds, supplements, and more`,
     `All major brands: Purina, Blue Buffalo, Royal Canin, Hill's, Kong, Frisco, and hundreds more`,
     `Dogs, cats, birds, fish, reptiles, and small animals all covered`,
     `Free delivery on orders over $49 — Queens-based for faster NYC shipping`,
@@ -213,11 +213,11 @@ const petSuppliesGenerator: PageGenerator = (n) => ({
   faqItems: [
     {
       question: `Do you deliver pet supplies to ${n.name}, ${n.borough}?`,
-      answer: `Yes — Petshiwu delivers pet supplies throughout ${n.name} and the surrounding ${n.borough} area including ${n.nearbyAreas}. We carry 10,000+ products for dogs, cats, birds, fish, reptiles, and small animals. Free delivery on orders over $49.`,
+      answer: `Yes — Petshiwu delivers pet supplies throughout ${n.name} and the surrounding ${n.borough} area including ${n.nearbyAreas}. We carry 4,000+ products for dogs, cats, birds, fish, reptiles, and small animals. Free delivery on orders over $49.`,
     },
     {
       question: `What kinds of pet supplies do you deliver to ${n.name}?`,
-      answer: `We deliver everything: dog and cat food, treats, toys, leashes, collars, beds, litter, supplements, grooming supplies, aquarium supplies, bird food, reptile supplies, and much more. Over 10,000 products in total.`,
+      answer: `We deliver everything: dog and cat food, treats, toys, leashes, collars, beds, litter, supplements, grooming supplies, aquarium supplies, bird food, reptile supplies, and much more. Thousands of products in total.`,
     },
     {
       question: `How much does pet supply delivery cost in ${n.name}?`,
@@ -287,7 +287,7 @@ const puppyFoodGenerator: PageGenerator = (n) => ({
   title: `Puppy Food Delivery in ${n.name}, ${n.borough} — Same-Day Delivery | Petshiwu`,
   description: `Premium puppy food delivered to ${n.name}, ${n.borough}. Hill's Science Diet Puppy, Purina Pro Plan Puppy, Royal Canin Puppy. Free shipping over $49. Queens-based NYC delivery.`,
   h1: `Puppy Food Delivery in ${n.name}, ${n.borough}`,
-  introContent: `Bringing home a new puppy in ${n.name} is one of the best decisions ${n.borough} residents make — but the first months set the stage for a lifetime of health, and choosing the right food from day one matters. Puppies need carefully balanced levels of protein, calcium, DHA, and controlled calories to grow at a healthy pace. Large breed puppies in particular need special formulas to prevent their bones and joints from developing too fast, while small breed puppies need calorie-dense kibble sized for tiny mouths. Weaning typically happens around 6–8 weeks, so most ${n.name} puppies come home already eating solid food. Petshiwu delivers every major puppy food brand to ${n.name}, including Hill's Science Diet Puppy, Purina Pro Plan Puppy, Royal Canin Puppy, Blue Buffalo Life Protection Puppy, Wellness Core Puppy, and Orijen Puppy. We also carry puppy-specific wet food, training treats sized for small mouths, and transition formulas that help puppies move smoothly from one life stage to the next. Whether you have a 4-week-old Yorkie or a 6-month-old Labrador growing fast in your ${n.borough} apartment, we have the right formula. Our team understands the difference between small breed puppy food (tiny kibble, more calories per cup) and large breed puppy food (controlled calcium and phosphorus for joint protection), and we help ${n.name} owners pick the right one. Free delivery on orders over $49, no subscription, and we're Queens-based for fast NYC service to ${n.name} and nearby ${n.nearbyAreas}.`,
+  introContent: `Bringing home a new puppy in ${n.name} is one of the best decisions ${n.borough} residents make — but the first months set the stage for a lifetime of health, and choosing the right food from day one matters. Puppies need carefully balanced levels of protein, calcium, DHA, and controlled calories to grow at a healthy pace. Large breed puppies in particular need special formulas to prevent their bones and joints from developing too fast, while small breed puppies need calorie-dense kibble sized for tiny mouths. Weaning typically happens around 6–8 weeks, so most ${n.name} puppies come home already eating solid food. Petshiwu delivers every major puppy food brand to ${n.name}, including Hill's Science Diet Puppy, Purina Pro Plan Puppy, Royal Canin Puppy, Blue Buffalo Life Protection Puppy, Wellness Core Puppy, and Wellness Puppy. We also carry puppy-specific wet food, training treats sized for small mouths, and transition formulas that help puppies move smoothly from one life stage to the next. Whether you have a 4-week-old Yorkie or a 6-month-old Labrador growing fast in your ${n.borough} apartment, we have the right formula. Our team understands the difference between small breed puppy food (tiny kibble, more calories per cup) and large breed puppy food (controlled calcium and phosphorus for joint protection), and we help ${n.name} owners pick the right one. Free delivery on orders over $49, no subscription, and we're Queens-based for fast NYC service to ${n.name} and nearby ${n.nearbyAreas}.`,
   petType: 'dog' as const,
   problemPoints: [
     `Confusion about which puppy food formula matches your puppy's breed size in ${n.name}`,
@@ -298,7 +298,7 @@ const puppyFoodGenerator: PageGenerator = (n) => ({
   ],
   solutionPoints: [
     `Complete puppy food selection delivered to ${n.name} and ${n.nearbyAreas}`,
-    `Large breed puppy formulas from Royal Canin, Hill's, Purina, and Orijen to control growth rate`,
+    `Large breed puppy formulas from Royal Canin, Hill's, Purina, and Wellness to control growth rate`,
     `Small breed puppy formulas with smaller kibble and calorie-dense nutrition`,
     `All life stages covered: 4 weeks, 8 weeks, 4 months, 6 months, and beyond`,
     `Free delivery on orders over $49 — most puppy food orders easily qualify`,
@@ -311,11 +311,11 @@ const puppyFoodGenerator: PageGenerator = (n) => ({
     },
     {
       question: `What puppy food brands do you carry for ${n.name} delivery?`,
-      answer: `We carry every major puppy food brand: Hill's Science Diet Puppy, Purina Pro Plan Puppy, Royal Canin Puppy, Blue Buffalo Life Protection Puppy, Wellness Core Puppy, Orijen Puppy, and Merrick Grain-Free Puppy. Formulas for small, medium, and large breeds.`,
+      answer: `We carry every major puppy food brand: Hill's Science Diet Puppy, Purina Pro Plan Puppy, Royal Canin Puppy, Blue Buffalo Life Protection Puppy, Wellness Core Puppy, Wellness Puppy, and Merrick Grain-Free Puppy. Formulas for small, medium, and large breeds.`,
     },
     {
       question: `Do you have large breed puppy food for ${n.name} delivery?`,
-      answer: `Yes — large breed puppy formulas are a specialty. We carry Royal Canin Large Puppy, Hill's Science Diet Large Breed Puppy, Purina Pro Plan Large Breed Puppy, and Orijen Large Puppy. All are designed to control growth rate and protect developing joints.`,
+      answer: `Yes — large breed puppy formulas are a specialty. We carry Royal Canin Large Puppy, Hill's Science Diet Large Breed Puppy, Purina Pro Plan Large Breed Puppy, and Wellness Large Puppy. All are designed to control growth rate and protect developing joints.`,
     },
     {
       question: `How often should I order puppy food delivery in ${n.name}?`,
@@ -334,7 +334,7 @@ const seniorDogFoodGenerator: PageGenerator = (n) => ({
   title: `Senior Dog Food Delivery in ${n.name}, ${n.borough} — Same-Day Delivery | Petshiwu`,
   description: `Premium senior dog food delivered in ${n.name}, ${n.borough}. Hill's Science Diet Senior, Purina Pro Plan Senior 7+, Royal Canin Mature. Free shipping over $49. NYC delivery.`,
   h1: `Senior Dog Food Delivery in ${n.name}, ${n.borough}`,
-  introContent: `Older dogs in ${n.name} have different nutritional needs than younger adults — fewer calories, more joint-supporting glucosamine and chondroitin, easier-to-digest proteins, and targeted omega-3s for aging brains. ${n.borough} pet owners searching for senior dog food know that switching at the right time can add healthy years to a dog's life. As dogs age, their metabolism slows, kidney function naturally declines, and joint stiffness becomes more common. Senior formulas address all of these concerns with carefully calibrated nutrient profiles. Petshiwu delivers every senior and mature dog formula on the market to ${n.name}: Hill's Science Diet Senior, Hill's Science Diet Perfect Weight 7+, Purina Pro Plan Senior 7+, Royal Canin Mature, Blue Buffalo Life Protection Senior, Wellness Complete Health Senior, Orijen Senior, and more. We also carry cognitive-support formulas with medium-chain triglycerides (MCTs) for aging canine brains, plus dental-focused senior kibble sized for older jaws. Whether your dog is a 7-year-old Labrador slowing down or a 13-year-old Chihuahua whose kidneys need gentler protein, we have the right formula delivered to your door. Our Queens-based team helps ${n.name} owners understand when to transition from adult food (typically around age 7 for large breeds, 8–9 for small breeds) and which formula matches their dog's specific senior needs. Free delivery on orders over $49, no subscription required. Serving all of ${n.name} and ${n.nearbyAreas}.`,
+  introContent: `Older dogs in ${n.name} have different nutritional needs than younger adults — fewer calories, more joint-supporting glucosamine and chondroitin, easier-to-digest proteins, and targeted omega-3s for aging brains. ${n.borough} pet owners searching for senior dog food know that switching at the right time can add healthy years to a dog's life. As dogs age, their metabolism slows, kidney function naturally declines, and joint stiffness becomes more common. Senior formulas address all of these concerns with carefully calibrated nutrient profiles. Petshiwu delivers every senior and mature dog formula on the market to ${n.name}: Hill's Science Diet Senior, Hill's Science Diet Perfect Weight 7+, Purina Pro Plan Senior 7+, Royal Canin Mature, Blue Buffalo Life Protection Senior, Wellness Complete Health Senior, Wellness Senior, and more. We also carry cognitive-support formulas with medium-chain triglycerides (MCTs) for aging canine brains, plus dental-focused senior kibble sized for older jaws. Whether your dog is a 7-year-old Labrador slowing down or a 13-year-old Chihuahua whose kidneys need gentler protein, we have the right formula delivered to your door. Our Queens-based team helps ${n.name} owners understand when to transition from adult food (typically around age 7 for large breeds, 8–9 for small breeds) and which formula matches their dog's specific senior needs. Free delivery on orders over $49, no subscription required. Serving all of ${n.name} and ${n.nearbyAreas}.`,
   petType: 'dog' as const,
   problemPoints: [
     `Hard to tell when your dog should switch to a senior formula in ${n.name}`,
@@ -345,7 +345,7 @@ const seniorDogFoodGenerator: PageGenerator = (n) => ({
   ],
   solutionPoints: [
     `Wide senior dog food selection delivered to ${n.name} and ${n.nearbyAreas}`,
-    `Hill's Science Diet Senior, Purina Pro Plan Senior 7+, Royal Canin Mature, Orijen Senior`,
+    `Hill's Science Diet Senior, Purina Pro Plan Senior 7+, Royal Canin Mature, Wellness Senior`,
     `Joint-support formulas with glucosamine, chondroitin, and omega-3s`,
     `Weight management for less-active senior dogs from Hill's, Purina, and Blue Buffalo`,
     `Free delivery on orders over $49 throughout ${n.borough}`,
@@ -354,11 +354,11 @@ const seniorDogFoodGenerator: PageGenerator = (n) => ({
   faqItems: [
     {
       question: `Do you deliver senior dog food to ${n.name}, ${n.borough}?`,
-      answer: `Yes — Petshiwu delivers senior dog food to all of ${n.name} and the surrounding ${n.borough} area including ${n.nearbyAreas}. We carry Hill's Science Diet Senior, Purina Pro Plan Senior 7+, Royal Canin Mature, Orijen Senior, and many more. Free delivery on orders over $49.`,
+      answer: `Yes — Petshiwu delivers senior dog food to all of ${n.name} and the surrounding ${n.borough} area including ${n.nearbyAreas}. We carry Hill's Science Diet Senior, Purina Pro Plan Senior 7+, Royal Canin Mature, Wellness Senior, and many more. Free delivery on orders over $49.`,
     },
     {
       question: `What senior dog food brands do you carry for ${n.name} delivery?`,
-      answer: `We carry every major senior dog brand: Hill's Science Diet Senior, Hill's Science Diet Perfect Weight 7+, Purina Pro Plan Senior 7+, Royal Canin Mature, Blue Buffalo Life Protection Senior, Wellness Complete Health Senior, Orijen Senior, and Merrick Grain-Free Senior.`,
+      answer: `We carry every major senior dog brand: Hill's Science Diet Senior, Hill's Science Diet Perfect Weight 7+, Purina Pro Plan Senior 7+, Royal Canin Mature, Blue Buffalo Life Protection Senior, Wellness Complete Health Senior, Wellness Senior, and Merrick Grain-Free Senior.`,
     },
     {
       question: `When should I switch my dog to senior food in ${n.name}?`,
@@ -366,7 +366,7 @@ const seniorDogFoodGenerator: PageGenerator = (n) => ({
     },
     {
       question: `Do you carry joint-support dog food for ${n.name} delivery?`,
-      answer: `Yes — we carry joint-support formulas from Purina Pro Plan, Hill's Science Diet, Royal Canin, and Orijen, all with added glucosamine, chondroitin, and omega-3s. Delivered to ${n.name} with free shipping on orders over $49.`,
+      answer: `Yes — we carry joint-support formulas from Purina Pro Plan, Hill's Science Diet, Royal Canin, and all with added glucosamine, chondroitin, and omega-3s. Delivered to ${n.name} with free shipping on orders over $49.`,
     },
     {
       question: `Can senior dogs in ${n.name} get weight management food delivered?`,
@@ -428,7 +428,7 @@ const dryDogFoodGenerator: PageGenerator = (n) => ({
   title: `Dry Dog Food (Kibble) Delivery in ${n.name}, ${n.borough} | Petshiwu`,
   description: `Premium dry dog food (kibble) delivered to ${n.name}, ${n.borough}. Purina ONE, Iams ProActive Health, Hill's, Royal Canin. Free shipping over $49. Queens-based NYC delivery.`,
   h1: `Dry Dog Food (Kibble) Delivery in ${n.name}, ${n.borough}`,
-  introContent: `Dry kibble is still the backbone of most ${n.name} dogs' diets — affordable per serving, easy to store, gentle on teeth, and convenient for working ${n.borough} pet owners. The crunchy texture of premium kibble also provides mild dental benefits, scraping plaque off teeth as dogs chew. Modern dry foods come in highly specialized formulas — breed-specific, life-stage specific, size-specific, and activity-level specific — far beyond the generic kibble of decades past. Petshiwu delivers every premium dry dog food brand to ${n.name}: Purina ONE SmartBlend, Purina Pro Plan, Iams ProActive Health, Hill's Science Diet, Royal Canin, Blue Buffalo Life Protection, Wellness Complete Health, Orijen, Acana, and Taste of the Wild. We also carry Royal Canin's breed-specific lines (Yorkie, French Bulldog, Labrador, Golden Retriever, German Shepherd, Dachshund, and more) which are formulated to match the specific jaw shape, coat type, and health predispositions of each breed. From 4 lb bags for small apartments to 40 lb bags for big dogs in ${n.borough} homes, every size ships fast from our Queens warehouse. Free delivery on orders over $49, no subscription required. Serving ${n.name}, ${n.nearbyAreas}, and all of NYC with reliable door-to-door delivery.`,
+  introContent: `Dry kibble is still the backbone of most ${n.name} dogs' diets — affordable per serving, easy to store, gentle on teeth, and convenient for working ${n.borough} pet owners. The crunchy texture of premium kibble also provides mild dental benefits, scraping plaque off teeth as dogs chew. Modern dry foods come in highly specialized formulas — breed-specific, life-stage specific, size-specific, and activity-level specific — far beyond the generic kibble of decades past. Petshiwu delivers every premium dry dog food brand to ${n.name}: Purina ONE SmartBlend, Purina Pro Plan, Iams ProActive Health, Hill's Science Diet, Royal Canin, Blue Buffalo Life Protection, Wellness Complete Health, Acana, and Taste of the Wild. We also carry Royal Canin's breed-specific lines (Yorkie, French Bulldog, Labrador, Golden Retriever, German Shepherd, Dachshund, and more) which are formulated to match the specific jaw shape, coat type, and health predispositions of each breed. From 4 lb bags for small apartments to 40 lb bags for big dogs in ${n.borough} homes, every size ships fast from our Queens warehouse. Free delivery on orders over $49, no subscription required. Serving ${n.name}, ${n.nearbyAreas}, and all of NYC with reliable door-to-door delivery.`,
   petType: 'dog' as const,
   problemPoints: [
     `Hauling heavy 30–40 lb bags of kibble home from ${n.borough} stores`,
@@ -439,7 +439,7 @@ const dryDogFoodGenerator: PageGenerator = (n) => ({
   ],
   solutionPoints: [
     `Wide dry dog food selection delivered to ${n.name} and ${n.nearbyAreas}`,
-    `Purina ONE, Iams ProActive Health, Hill's Science Diet, Royal Canin, Blue Buffalo, Orijen, Acana`,
+    `Purina ONE, Iams ProActive Health, Hill's Science Diet, Royal Canin, Blue Buffalo, Acana`,
     `Breed-specific formulas: Yorkie, French Bulldog, Labrador, Golden Retriever, German Shepherd`,
     `Life-stage formulas: puppy, adult, senior, and weight management`,
     `Free delivery on orders over $49 — most kibble bags easily qualify`,
@@ -452,7 +452,7 @@ const dryDogFoodGenerator: PageGenerator = (n) => ({
     },
     {
       question: `What dry dog food brands do you carry for ${n.name} delivery?`,
-      answer: `We carry every major dry dog food brand: Purina ONE SmartBlend, Purina Pro Plan, Iams ProActive Health, Hill's Science Diet, Royal Canin, Blue Buffalo Life Protection, Wellness Complete Health, Orijen, Acana, Taste of the Wild, Merrick, and dozens more.`,
+      answer: `We carry every major dry dog food brand: Purina ONE SmartBlend, Purina Pro Plan, Iams ProActive Health, Hill's Science Diet, Royal Canin, Blue Buffalo Life Protection, Wellness Complete Health, Acana, Taste of the Wild, Merrick, and dozens more.`,
     },
     {
       question: `Do you deliver large bags of kibble to ${n.name}?`,
@@ -473,9 +473,9 @@ const dryDogFoodGenerator: PageGenerator = (n) => ({
 const grainFreeDogFoodGenerator: PageGenerator = (n) => ({
   keyword: `grain-free-dog-food-delivery-${n.slug}`,
   title: `Grain-Free Dog Food Delivery in ${n.name}, ${n.borough} | Petshiwu`,
-  description: `Premium grain-free dog food delivered in ${n.name}, ${n.borough}. Orijen, Acana, Taste of the Wild, Blue Buffalo Wilderness. Free shipping over $49. Queens-based NYC delivery.`,
+  description: `Premium grain-free dog food delivered in ${n.name}, ${n.borough}. Acana, Taste of the Wild, Blue Buffalo Wilderness. Free shipping over $49. Queens-based NYC delivery.`,
   h1: `Grain-Free Dog Food Delivery in ${n.name}, ${n.borough}`,
-  introContent: `Grain-free dog food remains popular in ${n.name}, particularly among owners whose dogs have shown sensitivity to wheat, corn, or soy. Some ${n.borough} dogs genuinely thrive on grain-free diets — itchy skin, ear infections, and digestive upset often improve when common allergens are removed. Petshiwu delivers every premium grain-free brand to ${n.name}: Orijen, Acana, Taste of the Wild, Blue Buffalo Wilderness, Wellness CORE, Merrick Grain-Free, Nature's Variety Instinct, and more. Each recipe uses meat, fish, sweet potatoes, peas, or lentils in place of grains. We also offer limited-ingredient grain-free diets (Natural Balance L.I.D., Canidae Pure) for ${n.name} dogs with multiple sensitivities. We also want to be transparent: the FDA has been investigating a possible link between some grain-free diets (especially those heavy in peas, lentils, or chickpea flour) and a heart condition called dilated cardiomyopathy (DCM) in dogs. The investigation is ongoing and not conclusive, but ${n.borough} pet owners should know about it. We share this so ${n.name} owners can make informed decisions and talk to their vets about whether grain-free is right for their specific dog. Whether you're committed to grain-free or just exploring alternatives, we deliver the full range of options to ${n.name}, ${n.nearbyAreas}, and all of NYC. Free delivery on orders over $49, no subscription required.`,
+  introContent: `Grain-free dog food remains popular in ${n.name}, particularly among owners whose dogs have shown sensitivity to wheat, corn, or soy. Some ${n.borough} dogs genuinely thrive on grain-free diets — itchy skin, ear infections, and digestive upset often improve when common allergens are removed. Petshiwu delivers every premium grain-free brand to ${n.name}: Acana, Taste of the Wild, Blue Buffalo Wilderness, Merrick Grain-Free, Nature's Variety Instinct, and more. Each recipe uses meat, fish, sweet potatoes, peas, or lentils in place of grains. We also offer limited-ingredient grain-free diets (Natural Balance L.I.D., Canidae Pure) for ${n.name} dogs with multiple sensitivities. We also want to be transparent: the FDA has been investigating a possible link between some grain-free diets (especially those heavy in peas, lentils, or chickpea flour) and a heart condition called dilated cardiomyopathy (DCM) in dogs. The investigation is ongoing and not conclusive, but ${n.borough} pet owners should know about it. We share this so ${n.name} owners can make informed decisions and talk to their vets about whether grain-free is right for their specific dog. Whether you're committed to grain-free or just exploring alternatives, we deliver the full range of options to ${n.name}, ${n.nearbyAreas}, and all of NYC. Free delivery on orders over $49, no subscription required.`,
   petType: 'dog' as const,
   problemPoints: [
     `Hard to find genuine grain-free kibble (not just grain-included) near ${n.name}`,
@@ -486,7 +486,7 @@ const grainFreeDogFoodGenerator: PageGenerator = (n) => ({
   ],
   solutionPoints: [
     `Complete grain-free dog food line delivered to ${n.name} and ${n.nearbyAreas}`,
-    `Orijen, Acana, Taste of the Wild, Blue Buffalo Wilderness, Wellness CORE, Merrick`,
+    `Acana, Taste of the Wild, Blue Buffalo Wilderness, Merrick`,
     `Exotic protein options: duck, lamb, rabbit, venison, salmon, bison`,
     `Both kibble and wet/canned grain-free formulas available`,
     `Free delivery on orders over $49 — Queens-based for fast NYC shipping`,
@@ -495,11 +495,11 @@ const grainFreeDogFoodGenerator: PageGenerator = (n) => ({
   faqItems: [
     {
       question: `Do you deliver grain-free dog food to ${n.name}, ${n.borough}?`,
-      answer: `Yes — Petshiwu delivers grain-free dog food throughout ${n.name} and the surrounding ${n.borough} area including ${n.nearbyAreas}. We carry Orijen, Acana, Taste of the Wild, Blue Buffalo Wilderness, Wellness CORE, Merrick Grain-Free, and more. Free delivery on orders over $49.`,
+      answer: `Yes — Petshiwu delivers grain-free dog food throughout ${n.name} and the surrounding ${n.borough} area including ${n.nearbyAreas}. We carry Acana, Taste of the Wild, Blue Buffalo Wilderness, Merrick Grain-Free, and more. Free delivery on orders over $49.`,
     },
     {
       question: `What grain-free dog food brands do you carry for ${n.name} delivery?`,
-      answer: `We carry Orijen, Acana, Taste of the Wild, Blue Buffalo Wilderness, Wellness CORE, Merrick Grain-Free, Nature's Variety Instinct, Canidae Pure, Diamond Naturals Grain-Free, and many more — including limited-ingredient diets.`,
+      answer: `We carry Acana, Taste of the Wild, Blue Buffalo Wilderness, Merrick Grain-Free, Nature's Variety Instinct, Canidae Pure, Diamond Naturals Grain-Free, and many more — including limited-ingredient diets.`,
     },
     {
       question: `Is grain-free dog food safe for dogs in ${n.name}?`,
@@ -511,10 +511,10 @@ const grainFreeDogFoodGenerator: PageGenerator = (n) => ({
     },
     {
       question: `Can I get exotic protein grain-free dog food delivered to ${n.name}?`,
-      answer: `Yes — we carry grain-free formulas with duck, lamb, rabbit, venison, salmon, bison, and wild boar from Orijen, Acana, and Nature's Variety. Delivered to ${n.name} with free shipping on orders over $49.`,
+      answer: `Yes — we carry grain-free formulas with duck, lamb, rabbit, venison, salmon, bison, and wild boar from Acana, and Nature's Variety. Delivered to ${n.name} with free shipping on orders over $49.`,
     },
   ],
-  searchTerms: ['grain-free dog food', 'grain free dog food delivery', 'Orijen', 'Acana', 'Taste of the Wild', 'Blue Buffalo Wilderness', 'limited ingredient dog food', 'DCM grain-free'],
+  searchTerms: ['grain-free dog food', 'grain free dog food delivery', 'Wellness', 'Acana', 'Taste of the Wild', 'Blue Buffalo Wilderness', 'limited ingredient dog food', 'DCM grain-free'],
 });
 
 const rawDogFoodGenerator: PageGenerator = (n) => ({
@@ -757,7 +757,7 @@ const kittenFoodGenerator: PageGenerator = (n) => ({
   title: `Kitten Food Delivery in ${n.name}, ${n.borough} — Same-Day Delivery | Petshiwu`,
   description: `Premium kitten food delivered to ${n.name}, ${n.borough}. Hill's Science Diet Kitten, Royal Canin Kitten, high-protein formulas. Free shipping over $49. NYC delivery.`,
   h1: `Kitten Food Delivery in ${n.name}, ${n.borough}`,
-  introContent: `Kittens in ${n.name} grow at a remarkable pace — they typically double their birth weight in the first week and continue growing rapidly for 12 months. They need food specifically designed for that growth, with higher levels of protein, fat, and key nutrients like DHA for brain development and calcium for bone growth. Adult cat food simply doesn't have enough of these critical nutrients for kittens to develop properly. Petshiwu delivers every major kitten food brand to ${n.name}: Hill's Science Diet Kitten, Royal Canin Kitten, Purina Pro Plan Kitten, Blue Buffalo Wilderness Kitten, Wellness Core Kitten, and Orijen Cat & Kitten. We carry dry kibble, wet food (pâté, cuts, shreds), and mixed-feeding options, plus growth-stage transitions for kittens moving toward adult food around 12 months. Royal Canin's breed-specific kitten food (Maine Coon Kitten, Persian Kitten, British Shorthair Kitten) addresses the unique needs of large and long-haired breeds. Whether you just adopted a 6-week-old kitten from a ${n.borough} rescue or are feeding a 6-month-old growing furball, we have the right formula delivered to your door. Free delivery on orders over $49, no subscription required. Serving ${n.name}, ${n.nearbyAreas}, and all of NYC.`,
+  introContent: `Kittens in ${n.name} grow at a remarkable pace — they typically double their birth weight in the first week and continue growing rapidly for 12 months. They need food specifically designed for that growth, with higher levels of protein, fat, and key nutrients like DHA for brain development and calcium for bone growth. Adult cat food simply doesn't have enough of these critical nutrients for kittens to develop properly. Petshiwu delivers every major kitten food brand to ${n.name}: Hill's Science Diet Kitten, Royal Canin Kitten, Purina Pro Plan Kitten, Blue Buffalo Wilderness Kitten, Wellness Core Kitten, and Wellness Kitten. We carry dry kibble, wet food (pâté, cuts, shreds), and mixed-feeding options, plus growth-stage transitions for kittens moving toward adult food around 12 months. Royal Canin's breed-specific kitten food (Maine Coon Kitten, Persian Kitten, British Shorthair Kitten) addresses the unique needs of large and long-haired breeds. Whether you just adopted a 6-week-old kitten from a ${n.borough} rescue or are feeding a 6-month-old growing furball, we have the right formula delivered to your door. Free delivery on orders over $49, no subscription required. Serving ${n.name}, ${n.nearbyAreas}, and all of NYC.`,
   petType: 'cat' as const,
   problemPoints: [
     `Limited kitten-specific formulas at local ${n.borough} pet stores`,
@@ -781,7 +781,7 @@ const kittenFoodGenerator: PageGenerator = (n) => ({
     },
     {
       question: `What kitten food brands do you carry for ${n.name} delivery?`,
-      answer: `We carry Hill's Science Diet Kitten, Royal Canin Kitten, Purina Pro Plan Kitten, Blue Buffalo Wilderness Kitten, Wellness Core Kitten, Orijen Cat & Kitten, Fancy Feast Kitten, and many more. Wet and dry formulas available.`,
+      answer: `We carry Hill's Science Diet Kitten, Royal Canin Kitten, Purina Pro Plan Kitten, Blue Buffalo Wilderness Kitten, Wellness Core Kitten, Wellness Kitten, Fancy Feast Kitten, and many more. Wet and dry formulas available.`,
     },
     {
       question: `When should kittens in ${n.name} switch to adult cat food?`,
@@ -804,7 +804,7 @@ const seniorCatFoodGenerator: PageGenerator = (n) => ({
   title: `Senior Cat Food Delivery in ${n.name}, ${n.borough} — Same-Day Delivery | Petshiwu`,
   description: `Premium senior cat food delivered in ${n.name}, ${n.borough}. Hill's Science Diet Senior 7+, Purina Pro Plan Senior, kidney support. Free shipping over $49. NYC-wide.`,
   h1: `Senior Cat Food Delivery in ${n.name}, ${n.borough}`,
-  introContent: `Senior cats — typically 7 years and older — need food tailored to slower metabolisms, kidney support, easier-to-digest proteins, and joint health. As cats age, they become less efficient at processing protein and phosphorus, which can stress aging kidneys. They also tend to lose muscle mass and may have dental issues that make chewing harder. Senior cat formulas address all of these concerns with controlled mineral levels, highly digestible proteins, and softer kibble textures. Petshiwu delivers every senior cat formula to ${n.name}: Hill's Science Diet Senior 7+, Hill's Science Diet Senior Hairball, Purina Pro Plan Senior, Royal Canin Indoor 7+, Royal Canin Mature, Blue Buffalo Life Protection Senior, Wellness Complete Health Senior, and Orijen Cat & Kitten (for active seniors who need more calories). ${n.borough} cat owners searching for kidney-support diets can find Hill's Prescription Diet k/d and Royal Canin Renal Support through our vet-diet line — these therapeutic formulas are specifically designed for cats with diagnosed kidney disease. We also carry senior wet food formulas for ${n.name} cats who need easier-to-eat textures. Free delivery on orders over $49, no subscription required. Queens-based for fast NYC service to ${n.name}, ${n.nearbyAreas}, and all five boroughs.`,
+  introContent: `Senior cats — typically 7 years and older — need food tailored to slower metabolisms, kidney support, easier-to-digest proteins, and joint health. As cats age, they become less efficient at processing protein and phosphorus, which can stress aging kidneys. They also tend to lose muscle mass and may have dental issues that make chewing harder. Senior cat formulas address all of these concerns with controlled mineral levels, highly digestible proteins, and softer kibble textures. Petshiwu delivers every senior cat formula to ${n.name}: Hill's Science Diet Senior 7+, Hill's Science Diet Senior Hairball, Purina Pro Plan Senior, Royal Canin Indoor 7+, Royal Canin Mature, Blue Buffalo Life Protection Senior, Wellness Complete Health Senior, and Wellness Kitten (for active seniors who need more calories). ${n.borough} cat owners searching for kidney-support diets can find Hill's Prescription Diet k/d and Royal Canin Renal Support through our vet-diet line — these therapeutic formulas are specifically designed for cats with diagnosed kidney disease. We also carry senior wet food formulas for ${n.name} cats who need easier-to-eat textures. Free delivery on orders over $49, no subscription required. Queens-based for fast NYC service to ${n.name}, ${n.nearbyAreas}, and all five boroughs.`,
   petType: 'cat' as const,
   problemPoints: [
     `Hard to tell when cats should switch to senior food in ${n.name}`,
@@ -828,7 +828,7 @@ const seniorCatFoodGenerator: PageGenerator = (n) => ({
     },
     {
       question: `What senior cat food brands do you carry for ${n.name} delivery?`,
-      answer: `We carry Hill's Science Diet Senior 7+, Purina Pro Plan Senior, Royal Canin Indoor 7+, Royal Canin Mature, Blue Buffalo Life Protection Senior, Wellness Complete Health Senior, and Orijen. Wet and dry formulas.`,
+      answer: `We carry Hill's Science Diet Senior 7+, Purina Pro Plan Senior, Royal Canin Indoor 7+, Royal Canin Mature, Blue Buffalo Life Protection Senior, Wellness Complete Health Senior, and Wellness. Wet and dry formulas.`,
     },
     {
       question: `When should cats in ${n.name} switch to senior food?`,

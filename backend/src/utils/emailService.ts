@@ -1280,7 +1280,7 @@ export const sendWelcomeEmail = async (email: string, firstName: string): Promis
           <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 14px">
             <div style="font-size:22px;margin-bottom:8px">🚚</div>
             <div style="font-size:13px;font-weight:700;color:#cbd5e1;margin-bottom:3px">Free Shipping</div>
-            <div style="font-size:11px;color:#475569;line-height:1.5">On all orders over $49. Fast delivery nationwide.</div>
+            <div style="font-size:11px;color:#475569;line-height:1.5">On all orders over $49. Fast delivery in NYC.</div>
           </div>
         </td>
         <td width="50%" style="padding:5px">

@@ -9,7 +9,8 @@ import EmptyState from '@/components/EmptyState';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
 import SEO from '@/components/SEO';
-import OrdersOpenBanner from '@/components/OrdersOpenBanner';
+import OrdersHoldNotice from '@/components/OrdersHoldNotice';
+import { ORDERING_PAUSED } from '@/config/ordering';
 import { TAX_RATE, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST } from '@/config/constants';
 import cartService from '@/services/cart';
 import { useToast } from '@/hooks/useToast';
@@ -261,7 +262,7 @@ const Cart = () => {
             <div className="container mx-auto px-4 lg:px-8 py-8">
 
               <div className="mb-6">
-                <OrdersOpenBanner compact />
+                <OrdersHoldNotice variant="compact" />
               </div>
 
               <div className="flex justify-between items-center mb-8">
@@ -409,7 +410,7 @@ const Cart = () => {
                   Add ${((FREE_SHIPPING_THRESHOLD || 49) - subtotal).toFixed(2)} more for FREE shipping!
                 </p>
               )}
-              {isAuthenticated && (
+              {isAuthenticated && !ORDERING_PAUSED && (
                 <button
                   onClick={handleOneClickCheckout}
                   className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 mb-3 flex items-center justify-center gap-2 transition-all"
@@ -422,7 +423,7 @@ const Cart = () => {
                 onClick={() => navigate('/checkout')}
                 className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 mb-4"
               >
-                Proceed to Checkout
+                {ORDERING_PAUSED ? 'See checkout status' : 'Proceed to Checkout'}
               </button>
               <Link to="/products" className="block text-center text-primary-600 hover:text-primary-700 font-medium">
                 Continue Shopping
@@ -453,7 +454,7 @@ const Cart = () => {
                 </span>
               )}
             </div>
-            {isAuthenticated && (
+            {isAuthenticated && !ORDERING_PAUSED && (
               <button
                 onClick={handleOneClickCheckout}
                 className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 rounded-lg font-semibold mb-2 flex items-center justify-center gap-2 text-sm"
@@ -465,9 +466,9 @@ const Cart = () => {
             <button
               onClick={() => navigate('/checkout')}
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform min-h-[56px]"
-              aria-label="Proceed to checkout"
+              aria-label={ORDERING_PAUSED ? 'See checkout status' : 'Proceed to checkout'}
             >
-              Proceed to Checkout
+              {ORDERING_PAUSED ? 'See checkout status' : 'Proceed to Checkout'}
             </button>
           </div>
         </div>

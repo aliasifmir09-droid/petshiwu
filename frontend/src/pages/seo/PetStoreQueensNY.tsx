@@ -22,7 +22,7 @@ const PetStoreQueensNY = () => {
       solutionPoints={[
         "Delivery from our Jackson Heights warehouse — not a walk-in store",
         "Delivery throughout all Queens neighborhoods",
-        "10,000+ products for every type of pet",
+        "4,000+ products for every type of pet",
         "All the top national brands at competitive prices",
         "Free delivery on orders over $49 — no membership required",
         "Multilingual customer support for Queens' diverse communities"

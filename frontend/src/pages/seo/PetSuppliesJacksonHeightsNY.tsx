@@ -10,7 +10,7 @@ const PetSuppliesJacksonHeightsNY = () => (
     title="Pet Supplies Jackson Heights NY — Local Delivery from Our Warehouse | Petshiwu"
     description="Petshiwu delivers pet supplies in Jackson Heights, Queens. We are not a walk-in store — office and warehouse only. Delivery to Jackson Heights, Elmhurst, Woodside & nearby. Free shipping over $49."
     h1="Jackson Heights Pet Supply Delivery"
-    introContent="Petshiwu delivers pet food and supplies in Jackson Heights from our office and warehouse at 37-68 74th Street. We are not a walk-in store. Order online and we bring premium pet food, toys, and supplies to Jackson Heights, Elmhurst, Woodside, Corona, and all surrounding areas. 10,000+ products, free delivery on orders over $49."
+    introContent="Petshiwu delivers pet food and supplies in Jackson Heights from our office and warehouse at 37-68 74th Street. We are not a walk-in store. Order online and we bring premium pet food, toys, and supplies to Jackson Heights, Elmhurst, Woodside, Corona, and all surrounding areas. 4,000+ products, free delivery on orders over $49."
     problemPoints={[
       "Having to travel to big pet stores outside the neighborhood",
       "Local stores with limited selection and inconsistent stock",
@@ -21,7 +21,7 @@ const PetSuppliesJacksonHeightsNY = () => (
     solutionPoints={[
       "Jackson Heights warehouse — delivery only, not a walk-in shop",
       "Delivery throughout Jackson Heights, Elmhurst, Woodside, Corona, and beyond",
-      "10,000+ products — the widest selection without leaving home",
+      "4,000+ products — the widest selection without leaving home",
       "Multilingual support reflecting Jackson Heights' diverse community",
       "Free delivery on orders over $49 — no more heavy bags",
       "Serving dogs, cats, birds, fish, reptiles, and small animals",

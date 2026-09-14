@@ -7,7 +7,7 @@ const PetSuppliesAstoriaNY = () => (
   <SEOLandingPage
     keyword="pet-supplies-astoria-queens-ny"
     title="Pet Supplies Astoria Queens NY — Local Delivery | Petshiwu"
-    description="Pet supply delivery to Astoria, Queens. Dog food, cat food, and pet accessories delivered to Astoria, Long Island City, Ditmars, and Steinway. Queens-based service. 10,000+ products, free shipping over $49."
+    description="Pet supply delivery to Astoria, Queens. Dog food, cat food, and pet accessories delivered to Astoria, Long Island City, Ditmars, and Steinway. Queens-based service. 4,000+ products, free shipping over $49."
     h1="Pet Supplies Delivered Across Astoria, Queens"
     introContent="Astoria is one of Queens' most beloved neighborhoods — and its pet owners are passionate. Petshiwu is Queens-based and delivers premium pet food, toys, and supplies throughout Astoria, from Ditmars Boulevard to Steinway Street. Local service, big selection, free delivery on orders over $49."
     problemPoints={[
@@ -20,8 +20,8 @@ const PetSuppliesAstoriaNY = () => (
     solutionPoints={[
       "Queens-based delivery — Astoria is part of our home territory",
       "Delivery to Ditmars, Steinway, Astoria Park area, and all Astoria neighborhoods",
-      "10,000+ products from premium and everyday brands",
-      "Purina, Blue Buffalo, Royal Canin, Hill's, Orijen, Iams, and more",
+      "4,000+ products from premium and everyday brands",
+      "Purina, Blue Buffalo, Royal Canin, Hill's, Iams, and more",
       "Free delivery on orders over $49",
       "Dogs, cats, birds, fish, reptiles, and small animals all covered"
     ]}
@@ -40,7 +40,7 @@ const PetSuppliesAstoriaNY = () => (
       },
       {
         question: "What dog food brands do you deliver to Astoria?",
-        answer: "We carry all the top brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Orijen, Wellness, Merrick, Iams, Pedigree, and many more. Over 10,000 products in total."
+        answer: "We carry all the top brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Merrick, Iams, Pedigree, and many more. Thousands of products in total."
       },
       {
         question: "Do you deliver near Astoria Park?",

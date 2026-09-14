@@ -208,7 +208,7 @@ export const normalizeImageUrl = (
       return optimizeCloudinaryUrl(imageUrl, finalWidth, finalHeight, format);
     }
     if (imageUrl.includes('b-cdn.net')) {
-      return optimizeBunnyUrl(imageUrl, finalWidth, finalHeight);
+      return optimizeBunnyUrl(imageUrl, finalWidth);
     }
     if (imageUrl.includes('scene7.com')) {
       return optimizeScene7Url(imageUrl, finalWidth, finalHeight);
@@ -237,6 +237,11 @@ export const normalizeImageUrl = (
   if (imageUrl.startsWith('uploads/')) {
     const backendUrl = API_URL.replace(/\/api$/, '');
     return `${backendUrl}/${imageUrl}`;
+  }
+
+  // Public files (logo, product-images, brands) live on the frontend origin
+  if (imageUrl.startsWith('/') && !imageUrl.startsWith('//')) {
+    return imageUrl;
   }
 
   // Fallback to placeholder

@@ -11,6 +11,13 @@ import logger from '../utils/logger';
 import { cache, cacheKeys } from '../utils/cache';
 import { safeToString } from '../utils/types';
 import { petTypeQueryValues } from '../utils/petTypeAliases';
+import {
+  FEATURED_FALLBACK_BRANDS,
+  anyBrandMatchQuery,
+  brandMatchQuery,
+  catalogFlexPattern,
+  decodeHtmlEntities,
+} from '../utils/catalogText';
 
 // Type definitions for product normalization
 interface ProductVariant {
@@ -1538,8 +1545,14 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     // Try to get from cache
     const cached = await cache.get(cacheKey);
     if (cached) {
-      logger.debug(`Cache HIT: ${cacheKey}`);
-      return res.status(200).json(cached);
+      const cachedEmptyFeatured =
+        String(req.query.featured).toLowerCase() === 'true' &&
+        Array.isArray((cached as { data?: unknown[] }).data) &&
+        (cached as { data: unknown[] }).data.length === 0;
+      if (!cachedEmptyFeatured) {
+        logger.debug(`Cache HIT: ${cacheKey}`);
+        return res.status(200).json(cached);
+      }
     }
     
     // Check if this is an admin request (user is authenticated and has admin role)
@@ -1718,9 +1731,9 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       }
     }
 
-    // Filter by brand
+    // Filter by brand — match encoded apostrophes and prefixes (Purina → Purina Pro Plan)
     if (req.query.brand) {
-      baseQuery.brand = req.query.brand;
+      Object.assign(baseQuery, brandMatchQuery(String(req.query.brand)));
     }
 
     // Filter by price range with validation
@@ -1798,6 +1811,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
         // Escape only regex metacharacters, preserve Unicode chars like ®, &, etc.
         const escapedExactPhrase = escapeRegex(normalizedSearchTerm);
         const exactPhraseRegex = new RegExp(escapedExactPhrase, 'i');
+        const entityPhraseRegex = new RegExp(catalogFlexPattern(normalizedSearchTerm), 'i');
         
         // Strategy 2: Flexible whitespace (handle multiple spaces/tabs)
         const flexibleWhitespace = normalizedSearchTerm.replace(/\s+/g, '\\s+');
@@ -1843,6 +1857,8 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
                 { description: exactPhraseRegex },
                 // Priority 5: Exact phrase in brand
                 { brand: exactPhraseRegex },
+                { name: entityPhraseRegex },
+                { brand: entityPhraseRegex },
                 // Priority 6: All words present (AND logic)
                 {
                   $and: andConditions
@@ -1860,13 +1876,8 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
         const escapedTerm = escapeRegex(normalizedSearchTerm);
         const termRegex = new RegExp(escapedTerm, 'i');
         
-        // Apostrophe-flexible regex: allows "hills" to match "Hill's", "daves" to match "Dave's", etc.
-        // Inserts optional apostrophe between each character so brand name apostrophes are ignored
-        const apostropheFlex = normalizedSearchTerm
-          .split('')
-          .map(c => escapeRegex(c))
-          .join("['\u2019]?");
-        const apostropheFlexRegex = new RegExp(apostropheFlex, 'i');
+        // Apostrophe + HTML-entity flexible: "hills" / "Hill's" match Hill&#039;s
+        const apostropheFlexRegex = new RegExp(catalogFlexPattern(normalizedSearchTerm), 'i');
         
         query = {
           $and: [
@@ -1893,7 +1904,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     }
 
     // Determine sort order based on query parameter
-    let sortOrder: any = { createdAt: -1 }; // Default to newest first
+    let sortOrder: any = { name: 1 };
     if (req.query.sort) {
       const sortParam = String(req.query.sort).toLowerCase();
       switch (sortParam) {
@@ -1907,8 +1918,11 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
           sortOrder = { averageRating: -1, totalReviews: -1 }; // Highest rated first
           break;
         case 'newest':
-        default:
           sortOrder = { createdAt: -1 }; // Newest first
+          break;
+        case 'name':
+        default:
+          sortOrder = { name: 1 };
           break;
       }
     }
@@ -1988,11 +2002,34 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       productsQuery.select(selectFields);
     }
 
-    const products = await productsQuery
+    let products = await productsQuery
       .sort(sortOrder)
       .skip(skip)
       .limit(limit)
       .lean(); // Use lean() for better performance (returns plain JS objects)
+
+    let usedFeaturedFallback = false;
+    if (
+      !isAdminRequest &&
+      req.query.featured === 'true' &&
+      products.length === 0
+    ) {
+      const fallbackQuery: any = {
+        deletedAt: null,
+        isActive: true,
+        inStock: true,
+        images: { $exists: true, $ne: [] },
+        ...anyBrandMatchQuery(FEATURED_FALLBACK_BRANDS),
+      };
+      products = await Product.find(fallbackQuery)
+        .select(selectFields || '')
+        .populate({ path: 'category', select: 'name slug petType' })
+        .sort({ totalReviews: -1, createdAt: -1 })
+        .limit(limit)
+        .maxTimeMS(5000)
+        .lean();
+      usedFeaturedFallback = products.length > 0;
+    }
 
     // PERFORMANCE FIX: Build category hierarchy in memory for frontend requests
     // Only build hierarchy if products have categories (skip if no categories in results)
@@ -2126,7 +2163,8 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       }
     }
     
-    const total = await countQuery;
+    const counted = await countQuery;
+    const total = usedFeaturedFallback ? products.length : counted;
 
     // Normalize _id to string for all products (use filtered products)
     const normalizedProducts = normalizeProducts(activeProducts);
@@ -2142,8 +2180,12 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       }
     };
 
-    // Cache the response (10 minutes for product listings)
-    await cache.set(cacheKey, response, 600);
+    // Do not cache an empty featured rail — homepage would stay blank until TTL.
+    const skipEmptyFeaturedCache =
+      String(req.query.featured).toLowerCase() === 'true' && normalizedProducts.length === 0;
+    if (!skipEmptyFeaturedCache) {
+      await cache.set(cacheKey, response, 600);
+    }
 
     res.status(200).json(response);
   } catch (error) {
@@ -2233,7 +2275,7 @@ export const getProductsCursor = async (req: Request, res: Response, next: NextF
     }
 
     if (brand) {
-      baseQuery.brand = { $regex: new RegExp(`^${brand}$`, 'i') };
+      Object.assign(baseQuery, brandMatchQuery(String(brand)));
     }
 
     if (search) {
@@ -3198,10 +3240,12 @@ export const getUniqueBrands = async (req: Request, res: Response, next: NextFun
     const brands = await Product.distinct('brand', filterQuery);
     
     // Filter out null/empty and sort
-    const uniqueBrands = brands
-      .filter(brand => brand && typeof brand === 'string' && brand.trim().length > 0)
-      .map(brand => brand.trim())
-      .sort();
+    const uniqueBrands = Array.from(new Set(
+      brands
+        .filter((brand) => brand && typeof brand === 'string' && brand.trim().length > 0)
+        .map((brand) => decodeHtmlEntities(brand))
+        .filter(Boolean)
+    )).sort();
 
     res.status(200).json({
       success: true,

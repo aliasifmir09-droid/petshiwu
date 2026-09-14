@@ -13,6 +13,8 @@ import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
 import RestockDashboard from '@/components/RestockDashboard';
 import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
+import { ORDERING_PAUSED, ORDERING_PAUSED_HEADLINE } from '@/config/ordering';
+import { CATALOG_BRANDS_FAQ, CATALOG_BRANDS_SHORT, CATALOG_PRODUCT_COUNT_LABEL } from '@/config/catalog';
 import { NEWSLETTER_CODE, NEWSLETTER_CODE_COPY } from '@/config/constants';
 import { ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -20,17 +22,16 @@ import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import { generateProductUrl } from '@/utils/productUrl';
 import { useAuthStore } from '@/stores/authStore';
 
-const BRANDS: { name: string; logo: string; dark?: boolean }[] = [
-  { name: 'Purina',              logo: '/brands/purina.svg' },
-  { name: 'Blue Buffalo',        logo: '/brands/bluebuffalo.png' },
-  { name: 'Royal Canin',         logo: '/brands/royalcanin.svg' },
-  { name: "Hill's Science Diet", logo: '/brands/hills.png' },
-  { name: 'Wellness',            logo: '/brands/wellness.png' },
-  { name: 'Orijen',              logo: '/brands/orijen.svg' },
-  { name: 'Nutro',               logo: '/brands/nutro.png' },
-  { name: 'Iams',                logo: '/brands/iams.png' },
-  { name: 'Pedigree',            logo: '/brands/pedigree.png', dark: true },
-  { name: "Nature's Recipe",     logo: '/brands/natures.svg' },
+const BRANDS: { name: string; query: string; logo: string; dark?: boolean }[] = [
+  { name: 'Purina',              query: 'Purina',              logo: '/brands/purina.svg' },
+  { name: 'Blue Buffalo',        query: 'Blue Buffalo',        logo: '/brands/bluebuffalo.png' },
+  { name: 'Royal Canin',         query: 'Royal Canin',         logo: '/brands/royalcanin.svg' },
+  { name: "Hill's Science Diet", query: "Hill's Science Diet", logo: '/brands/hills.png' },
+  { name: 'Wellness',            query: 'Wellness',            logo: '/brands/wellness.png' },
+  { name: 'Nutro',               query: 'NUTRO',               logo: '/brands/nutro.png' },
+  { name: 'Iams',                query: 'Iams',                logo: '/brands/iams.png' },
+  { name: 'Pedigree',            query: 'Pedigree',            logo: '/brands/pedigree.png', dark: true },
+  { name: "Nature's Recipe",     query: "Nature's Recipe",     logo: '/brands/natures.svg' },
 ];
 
 const TodaysDeals = () => {
@@ -106,13 +107,15 @@ const Home = () => {
       {/* Single semantic H1 for the homepage (visually hidden — the hero is a
           designed image slideshow). Gives browsers a real H1 that matches the
           page title/description without altering the visual layout. */}
-      <h1 className="sr-only">Petshiwu — Premium Pet Food, Toys & Supplies Delivered to NYC & Nationwide</h1>
+      <h1 className="sr-only">Petshiwu — Premium Pet Food, Toys & Supplies Delivered to NYC</h1>
       <SEO
         title="Petshiwu — Premium Pet Food, Toys & Supplies Delivered to NYC"
         description={
-          areOrdersOpen()
-            ? '10,000+ pet products delivered to Queens, Brooklyn & all of NYC. Top brands — Purina, Blue Buffalo, Royal Canin. Free shipping over $49. Dog food, cat food, toys & more.'
-            : `10,000+ pet products delivered to Queens, Brooklyn & all of NYC. We start taking orders ${ORDERS_OPEN_LABEL}. Free shipping over $49.`
+          ORDERING_PAUSED
+            ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products delivered to Queens, Brooklyn & all of NYC. ${ORDERING_PAUSED_HEADLINE}. Free shipping over $49.`
+            : areOrdersOpen()
+            ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products delivered to Queens, Brooklyn & all of NYC. Top brands — ${CATALOG_BRANDS_SHORT}. Free shipping over $49. Dog food, cat food, toys & more.`
+            : `${CATALOG_PRODUCT_COUNT_LABEL} pet products delivered to Queens, Brooklyn & all of NYC. We start taking orders ${ORDERS_OPEN_LABEL}. Free shipping over $49.`
         }
       />
       <StructuredData type="website" data={{}} />
@@ -133,7 +136,7 @@ const Home = () => {
               name: 'What brands does Petshiwu carry?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Petshiwu carries 10,000+ products from 200+ premium brands including Hill\'s Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Orijen, Acana, Fromm, Stella & Chewy\'s, Taste of the Wild, and many more. We carry both regular and veterinary-prescription diets.'
+                text: `Petshiwu carries ${CATALOG_PRODUCT_COUNT_LABEL} products from premium brands including ${CATALOG_BRANDS_FAQ}. We carry both regular and veterinary-prescription diets.`
               }
             },
             {
@@ -141,7 +144,7 @@ const Home = () => {
               name: 'Does Petshiwu require an autoship subscription?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'No. Autoship is optional. Ask first / reorder is 5% off (max $10) when you confirm. Autoship is 7% off (max $10) on a schedule. You can add or change food and treats any time. Ignore either email and we never charge. First order: FREEDOM20, 20% off max $10.'
+                text: 'No. There is no required subscription. Optional restock reminders (ask first or a schedule you choose) only charge when you confirm. First order: FREEDOM20, 20% off max $10.'
               }
             },
             {
@@ -173,7 +176,7 @@ const Home = () => {
               name: 'Does Petshiwu deliver cat supplies too?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Yes. We carry full cat supply lines — food (Hill\'s, Royal Canin, Purina, Orijen), litter, toys, scratching posts, and prescription diets. Same delivery speeds as dog supplies.'
+                text: `Yes. We carry full cat supply lines — food (${CATALOG_BRANDS_SHORT}), litter, toys, scratching posts, and prescription diets. Same delivery speeds as dog supplies.`
               }
             },
             {
@@ -194,7 +197,7 @@ const Home = () => {
           url: 'https://www.petshiwu.com',
           logo: 'https://www.petshiwu.com/logo-square-512.png',
           description:
-            'Petshiwu — premium pet food, toys, and supplies delivered to Queens, Brooklyn, Manhattan, and all of NYC. 10,000+ products, free shipping over $49.',
+            `Petshiwu — premium pet food, toys, and supplies delivered to Queens, Brooklyn, Manhattan, and all of NYC. ${CATALOG_PRODUCT_COUNT_LABEL} products, free shipping over $49.`,
           contactPoint: { telephone: '+1-800-259-2605', contactType: 'customer service' },
           address: {
             streetAddress: '37-68 74th St',
@@ -214,7 +217,7 @@ const Home = () => {
           logo: 'https://www.petshiwu.com/logo-square-512.png',
           image: 'https://www.petshiwu.com/logo-square-512.png',
           description:
-            'Same-day pet food and supplies delivery in New York City. Jackson Heights is office and warehouse only — not a walk-in store. 10,000+ products from top brands. Free delivery on orders over $49.',
+            `Same-day pet food and supplies delivery in New York City. Jackson Heights is office and warehouse only — not a walk-in store. ${CATALOG_PRODUCT_COUNT_LABEL} products from top brands. Free delivery on orders over $49.`,
           telephone: '+1-800-259-2605',
           email: 'support@petshiwu.com',
           address: {
@@ -284,6 +287,10 @@ const Home = () => {
           </h2>
           {isLoading ? (
             <LoadingSpinner size="lg" />
+          ) : filteredFeaturedProducts.length === 0 ? (
+            <p className="text-slate-500">
+              Browse the shop — featured picks from {CATALOG_BRANDS_SHORT} will appear here.
+            </p>
           ) : (
             <div className="flex overflow-x-auto gap-4 md:gap-5 pb-4 scrollbar-hide">
               {filteredFeaturedProducts.map((product, index) => (
@@ -310,8 +317,10 @@ const Home = () => {
           <div>
             <h2 className="text-2xl md:text-3xl font-bold mb-1">Same-day NYC delivery</h2>
             <p className="text-white/80">
-              {areOrdersOpen()
-                ? 'Order by 3 PM weekdays (1 PM weekends). Ask first or Autoship — we never charge unless you pay. Free over $49.'
+              {ORDERING_PAUSED
+                ? `${ORDERING_PAUSED_HEADLINE}. Browse now — your cart stays saved.`
+                : areOrdersOpen()
+                ? 'Order by 3 PM weekdays (1 PM weekends). No subscription required. Free over $49.'
                 : `We start taking orders ${ORDERS_OPEN_LABEL}. Browse now — checkout opens that day.`}
             </p>
           </div>
@@ -319,7 +328,7 @@ const Home = () => {
             to="/products"
             className="bg-white text-[#1E3A8A] px-6 py-3 rounded-lg font-semibold hover:bg-slate-100 transition-colors"
           >
-            {areOrdersOpen() ? 'Shop tonight' : 'Browse products'}
+            {ORDERING_PAUSED || !areOrdersOpen() ? 'Browse products' : 'Shop tonight'}
           </Link>
         </div>
       </section>
@@ -332,7 +341,7 @@ const Home = () => {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { title: 'Same-day NYC', desc: 'Order by 3 PM · before 11 PM' },
-              { title: 'You choose', desc: 'Ask first 5% off or Autoship 7% off. Never a silent charge.' },
+              { title: 'No lock-in', desc: 'No required subscription. Order when you want.' },
               { title: 'Free over $49', desc: 'Flat $6 under that' },
               { title: '365-day returns', desc: 'Unused items · no hassle' },
             ].map((item) => (
@@ -366,7 +375,7 @@ const Home = () => {
             {BRANDS.map((brand, i) => (
               <button
                 key={i}
-                onClick={() => navigate(`/products?brand=${encodeURIComponent(brand.name)}`)}
+                onClick={() => navigate(`/products?brand=${encodeURIComponent(brand.query)}`)}
                 className="group flex-none snap-start focus:outline-none"
                 aria-label={`Shop ${brand.name} products`}
               >
@@ -410,47 +419,28 @@ const Home = () => {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-10">
             <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-2">
-              From NYC pet parents
+              Built for NYC pet parents
             </h2>
-            <p className="text-slate-500">Queens, Brooklyn, and Manhattan</p>
+            <p className="text-slate-500">Queens packing · all five boroughs · no walk-in store</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
               {
-                name: 'Maria G.',
-                initials: 'MG',
-                location: 'Queens, NY',
-                pet: 'Dog parent',
-                text: "Best pet delivery I've used in Queens. My golden retriever loves the Blue Buffalo food and it arrived the next day.",
+                title: 'Same-day when you order by cutoff',
+                text: 'Weekdays 3 PM, weekends 1 PM. We pack in Jackson Heights and deliver before 11 PM across Manhattan, Brooklyn, Queens, the Bronx, and Staten Island.',
               },
               {
-                name: 'Kevin T.',
-                initials: 'KT',
-                location: 'Brooklyn, NY',
-                pet: 'Cat parent',
-                text: 'I order Royal Canin for my cats every month. The prices are fair and delivery is fast. This is my go-to shop now.',
+                title: 'Vet-quality brands, no subscription trap',
+                text: `${CATALOG_BRANDS_SHORT} — plus prescription diets. Order once or restock when you want. We never charge in the background.`,
               },
               {
-                name: 'Sandra L.',
-                initials: 'SL',
-                location: 'Manhattan, NY',
-                pet: 'Fish and reptile',
-                text: 'Finally a store that carries food for my aquarium and my bearded dragon. Helpful when I called with a question.',
+                title: '365-day returns and 24/7 support',
+                text: 'Unused items come back easy. Call +1 (800) 259-2605 any time. The 74th Street address is warehouse only — not a shop you can walk into.',
               },
-            ].map((review) => (
-              <div key={review.name} className="bg-slate-50 rounded-xl p-6 border border-slate-100">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-[#1E3A8A] text-white text-sm font-semibold flex items-center justify-center">
-                    {review.initials}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">{review.name}</p>
-                    <p className="text-slate-400 text-xs">
-                      {review.location} · {review.pet}
-                    </p>
-                  </div>
-                </div>
-                <p className="text-slate-700 text-sm leading-relaxed">"{review.text}"</p>
+            ].map((item) => (
+              <div key={item.title} className="bg-slate-50 rounded-xl p-6 border border-slate-100">
+                <h3 className="font-semibold text-[#1E3A8A] mb-2">{item.title}</h3>
+                <p className="text-slate-700 text-sm leading-relaxed">{item.text}</p>
               </div>
             ))}
           </div>
@@ -509,7 +499,7 @@ const NewsletterSection = () => {
             <>
               <h2 className="text-2xl md:text-3xl font-bold mb-3">Get delivery updates</h2>
               <p className="text-white/80 mb-8">
-                NYC same-day notes. First order: FREEDOM20 (20% off, max $10). Restock: Ask first or Autoship.
+                NYC same-day notes. First order: FREEDOM20 (20% off, max $10). No required subscription.
               </p>
               <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={handleSubmit}>
                 <input
