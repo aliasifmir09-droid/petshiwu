@@ -32,7 +32,7 @@ import {
 } from '../services/paypalService';
 import { calculateTrustedOrderPricing } from '../services/orderPricingService';
 import { isReusableCoupon, normalizeCouponCode } from '../services/couponService';
-import { isNycShippingAddress } from '../utils/nycDelivery';
+import { isNycShippingAddress, outsideDeliveryRangeMessage } from '../utils/nycDelivery';
 import {
   getOrCreateStripeCustomer,
   rememberPaidCardForUser,
@@ -104,10 +104,12 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
 
     // NYC-only delivery restriction — all 5 boroughs, including Queens 111xx
     if (!isNycShippingAddress(shippingAddress.state, shippingAddress.zipCode)) {
+      const message = outsideDeliveryRangeMessage(shippingAddress.state, shippingAddress.zipCode);
       return res.status(400).json({
         success: false,
-        message: 'We currently deliver only within New York City (all 5 boroughs). Please enter a valid NYC address.',
-        errors: ['Delivery is only available within the 5 boroughs of New York City.']
+        message,
+        errors: [message],
+        code: 'OUTSIDE_DELIVERY_RANGE'
       });
     }
 
@@ -1609,7 +1611,11 @@ export const createPayPalCheckoutOrder = async (req: AuthRequest, res: Response,
       return res.status(400).json({ success: false, message: 'A complete shipping address is required before starting PayPal checkout.' });
     }
     if (!isNycShippingAddress(shippingAddress.state, shippingAddress.zipCode)) {
-      return res.status(400).json({ success: false, message: 'We currently deliver only within New York City (all 5 boroughs). Please enter a valid NYC address.' });
+      return res.status(400).json({
+        success: false,
+        message: outsideDeliveryRangeMessage(shippingAddress.state, shippingAddress.zipCode),
+        code: 'OUTSIDE_DELIVERY_RANGE'
+      });
     }
     const isGuest = !req.user?._id;
     const customerEmail = isGuest ? (guestEmail || '').trim() : undefined;

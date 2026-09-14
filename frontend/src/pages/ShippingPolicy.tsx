@@ -6,12 +6,12 @@ const ShippingPolicy = () => {
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <SEO
         title="Shipping Information | Petshiwu — Same-Day NYC Delivery"
-        description="Petshiwu ships pet supplies across all 50 US states. Same-day delivery available across NYC: order before 3 PM EST, delivered before 11 PM. Free shipping over $49. Store launches August 28, 2026."
+        description="Petshiwu delivers pet supplies across New York City's 5 boroughs. Same-day: order before 3 PM EST weekdays (1 PM weekends), delivered before 11 PM. New York State and nationwide shipping coming soon. Free shipping over $49."
         url="/shipping"
       />
 
       <h1 className="text-4xl font-black mb-2 text-gray-900">Shipping Information</h1>
-      <p className="text-gray-500 mb-8">Last updated: June 24, 2026</p>
+      <p className="text-gray-500 mb-8">Last updated: August 30, 2026</p>
 
       {/* Hero launch banner */}
       <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-2xl p-6 mb-8 text-center shadow-lg">
@@ -31,7 +31,7 @@ const ShippingPolicy = () => {
         {[
           { icon: '⚡', title: 'Same-Day NYC', desc: 'Order before 3 PM → delivered by 11 PM' },
           { icon: '🚚', title: 'Free Shipping', desc: 'On all orders over $49' },
-          { icon: '📦', title: 'Standard Delivery', desc: '2 business days nationwide' },
+          { icon: '📦', title: 'Coming soon', desc: 'NY State, then nationwide' },
         ].map((item, i) => (
           <div key={i} className="bg-blue-50 rounded-xl p-5 text-center border border-blue-100">
             <div className="text-3xl mb-2">{item.icon}</div>
@@ -51,7 +51,6 @@ const ShippingPolicy = () => {
               <li><strong>Order before 3:00 PM EST</strong> on any business day.</li>
               <li><strong>Delivery before 11:00 PM</strong> the same day.</li>
               <li>Available across <strong>all 5 NYC boroughs</strong>: Manhattan, Brooklyn, Queens, Bronx, Staten Island.</li>
-              <li>Plus Jersey City, Hoboken, Long Island City, and select Westchester addresses.</li>
               <li>Same-day delivery included free on orders $49+. Just $6 on smaller orders.</li>
             </ul>
           </div>
@@ -94,23 +93,22 @@ const ShippingPolicy = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-3">Delivery Times</h2>
           <ul className="list-disc pl-6 space-y-2">
             <li><strong>Same-Day NYC:</strong> Order before 3 PM EST → delivered before 11 PM same day. Order before 1 PM EST on weekends/holidays.</li>
-            <li><strong>Standard Shipping:</strong> 2 business days nationwide after order confirmation (improved from 5 days).</li>
-            <li><strong>Express Shipping:</strong> 1-2 business days nationwide after order confirmation.</li>
+            <li><strong>Outside NYC:</strong> We cannot complete checkout yet. New York State shipping, then nationwide shipping, are coming soon.</li>
             <li>All orders placed before 2 PM EST on business days are processed the same day.</li>
             <li>Orders placed after 2 PM EST, on weekends, or holidays are processed the next business day.</li>
           </ul>
           <p className="mt-3 text-sm text-gray-500">
-            Note: Delivery times are estimates and not guaranteed. Same-day NYC orders placed before the 3 PM cutoff are guaranteed to arrive before 11 PM. Nationwide shipping times may vary due to carrier delays, weather, or high order volumes.
+            Note: Delivery times are estimates and not guaranteed. Same-day NYC orders placed before the 3 PM cutoff are guaranteed to arrive before 11 PM.
           </p>
         </section>
 
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-3">Where We Ship</h2>
           <p>
-            <strong>Same-day delivery:</strong> All 5 NYC boroughs (Manhattan, Brooklyn, Queens, Bronx, Staten Island), plus Jersey City, Hoboken, Long Island City, and select Westchester addresses.
+            <strong>Same-day delivery:</strong> All 5 NYC boroughs (Manhattan, Brooklyn, Queens, Bronx, Staten Island).
           </p>
           <p className="mt-2">
-            <strong>Standard + Express nationwide:</strong> All 50 US states and Washington D.C. We are based in Jackson Heights, NY and offer particularly fast delivery across the New York City metro area.
+            <strong>Coming soon:</strong> New York State, then nationwide shipping to all 50 US states. Checkout cannot be completed for addresses outside NYC until those regions open.
           </p>
           <p className="mt-2">
             International shipping is not available at this time.
