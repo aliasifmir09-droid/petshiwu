@@ -152,3 +152,24 @@ export const normalizeBlogContent = (html: string | null | undefined): string =>
   return normalized;
 };
 
+/** Pull H2/H3 headings plus following paragraphs for FAQPage schema. */
+export const extractFaqPairs = (htmlContent: string): Array<{ question: string; answer: string }> => {
+  if (!htmlContent) return [];
+  const pairs: Array<{ question: string; answer: string }> = [];
+  const sections = htmlContent.split(/<h[23][^>]*>/i);
+  for (const section of sections.slice(1)) {
+    const headingEnd = section.indexOf('</h');
+    if (headingEnd < 0) continue;
+    const question = section.substring(0, headingEnd).replace(/<[^>]*>/g, '').trim();
+    if (!question || question.length < 5 || question.length > 120) continue;
+    const afterHeading = section.substring(headingEnd);
+    const paraMatches = afterHeading.match(/<p[^>]*>([\s\S]*?)<\/p>/gi);
+    if (!paraMatches || paraMatches.length === 0) continue;
+    const answer = paraMatches.slice(0, 2).join(' ').replace(/<[^>]*>/g, '').trim().replace(/\s+/g, ' ');
+    if (answer.length < 20) continue;
+    pairs.push({ question, answer: answer.substring(0, 500) });
+    if (pairs.length >= 8) break;
+  }
+  return pairs;
+};
+

@@ -33,6 +33,33 @@ describe('classifyRoute', () => {
     });
   });
 
+  test('legacy /blog consolidates onto /learning', () => {
+    expect(classifyRoute('/blog')).toMatchObject({
+      status: 'redirect',
+      redirectTo: '/learning',
+      indexable: false,
+      routeType: 'legacy-blog',
+    });
+    expect(classifyRoute('/blog/')).toMatchObject({
+      status: 'redirect',
+      redirectTo: '/learning',
+    });
+  });
+
+  test('legacy /blog/:slug consolidates onto /learning/:slug', () => {
+    expect(classifyRoute('/blog/how-to-groom-a-cat')).toMatchObject({
+      status: 'redirect',
+      redirectTo: '/learning/how-to-groom-a-cat',
+      indexable: false,
+      routeType: 'legacy-blog',
+    });
+    expect(classifyRoute('/learning/how-to-groom-a-cat')).toMatchObject({
+      status: 'indexable',
+      indexable: true,
+      routeType: 'learning',
+    });
+  });
+
   test('search and neural are noindex utility pages', () => {
     expect(classifyRoute('/search')).toMatchObject({ indexable: false, status: 'noindex' });
     expect(classifyRoute('/neural')).toMatchObject({ indexable: false, status: 'noindex' });

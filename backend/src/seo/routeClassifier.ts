@@ -124,6 +124,16 @@ export const classifyRoute = (rawPath: string): RouteClassification => {
     return { status: 'redirect', indexable: false, canonicalPath: '/learning', redirectTo: '/learning', routeType: 'legacy-blog' };
   }
 
+  if (segments[0] === 'blog' && segments.length === 2 && segments[1]) {
+    return {
+      status: 'redirect',
+      indexable: false,
+      canonicalPath: `/learning/${segments[1]}`,
+      redirectTo: `/learning/${segments[1]}`,
+      routeType: 'legacy-blog',
+    };
+  }
+
   if (hasQuery) {
     return { status: 'noindex', indexable: false, canonicalPath, routeType: 'query-variant' };
   }

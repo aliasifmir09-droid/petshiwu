@@ -5,7 +5,9 @@ import { blogService, Blog } from '@/services/blogs';
 import { Search, Calendar, Eye, ChevronRight, BookOpen } from 'lucide-react';
 import Dropdown from '@/components/Dropdown';
 import SEO from '@/components/SEO';
+import StructuredData from '@/components/StructuredData';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
+import { generateCollectionPageSchema } from '@/utils/seoUtils';
 import AdSense from '@/components/AdSense';
 
 const Learning = () => {
@@ -72,17 +74,12 @@ const Learning = () => {
 
   const petTypeLabel = petType ? ` - ${petType.charAt(0).toUpperCase() + petType.slice(1)}` : '';
   const categoryLabel = category ? ` - ${category}` : '';
-  const params = new URLSearchParams();
-  if (petType) params.set('petType', petType);
-  if (category) params.set('category', category);
-  const queryString = params.toString();
-  // FIX: Strip query string from canonical — same logic as useSEO.ts. Filter variants
-  // (/learning?petType=dog, /learning?category=nutrition) MUST canonicalize to /learning
-  // so Google consolidates them. Otherwise each filter combo becomes a self-canonical
-  // duplicate (GSC "Duplicate without user-selected canonical" — 4,810 URLs).
+  // Filter variants (/learning?petType=dog, /learning?category=nutrition) MUST canonicalize
+  // to /learning so Google consolidates them.
   const seoUrl = 'https://www.petshiwu.com/learning';
-  // Track if any filter is active — used for noindex on the rendered page.
-  const hasFilteredParams = Boolean(petType || category || searchQuery);
+  // Only URL filters get noindex — typing in the search box must not noindex /learning.
+  const urlSearch = searchParams.get('search') || '';
+  const hasFilteredParams = Boolean(petType || category || urlSearch);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
@@ -92,6 +89,20 @@ const Learning = () => {
         url={seoUrl}
         noindex={hasFilteredParams}
       />
+      {!hasFilteredParams && blogsData?.data && blogsData.data.length > 0 && (
+        <StructuredData
+          type="collectionPage"
+          data={generateCollectionPageSchema(
+            'Petshiwu Learning Center',
+            'Expert pet care advice, tips, and guides for dogs, cats, fish, and more.',
+            '/learning',
+            blogsData.data.map((blog: Blog) => ({
+              name: blog.title,
+              url: `/learning/${blog.slug}`,
+            }))
+          )}
+        />
+      )}
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">

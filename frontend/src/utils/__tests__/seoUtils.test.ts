@@ -1,5 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import { generateOGImage, productSearchDescription } from '../seoUtils';
+import {
+  generateBreadcrumbSchema,
+  generateFAQSchema,
+  generateOGImage,
+  productSearchDescription,
+} from '../seoUtils';
 
 describe('generateOGImage', () => {
   test('defaults to the branded 1200x630 share image', () => {
@@ -48,3 +53,28 @@ describe('productSearchDescription', () => {
     expect(snippet).toMatch(/Same-day NYC delivery/);
   });
 });
+
+describe('article JSON-LD helpers', () => {
+  test('generateFAQSchema uses Question / acceptedAnswer mainEntity', () => {
+    const schema = generateFAQSchema([
+      { question: 'How often should I feed my dog?', answer: 'Most adult dogs do well with two meals a day.' },
+    ]) as { '@type': string; mainEntity: Array<{ '@type': string; name: string }> };
+    expect(schema['@type']).toBe('FAQPage');
+    expect(schema.mainEntity[0]).toMatchObject({
+      '@type': 'Question',
+      name: 'How often should I feed my dog?',
+    });
+  });
+
+  test('generateBreadcrumbSchema lists Home → Learning → article', () => {
+    const schema = generateBreadcrumbSchema([
+      { name: 'Home', url: '/' },
+      { name: 'Learning', url: '/learning' },
+      { name: 'How to Groom a Cat', url: '/learning/how-to-groom-a-cat' },
+    ]) as { '@type': string; itemListElement: Array<{ name: string; item: string }> };
+    expect(schema['@type']).toBe('BreadcrumbList');
+    expect(schema.itemListElement[1].item).toBe('https://www.petshiwu.com/learning');
+    expect(schema.itemListElement[2].name).toBe('How to Groom a Cat');
+  });
+});
+

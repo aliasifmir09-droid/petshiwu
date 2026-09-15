@@ -1,13 +1,17 @@
 import {
+  buildBlogHtml,
   buildCanonicalProductPath,
+  buildCareGuideHtml,
   buildHomepageHtml,
   buildProductHtml,
   buildReturnPolicyHtml,
   buildSeoLandingHtmlFromProducts,
+  extractFaqPairs,
   landingTaxonomyForPath,
   normalizeReqPath,
   productOfferPrice,
   productRedirectTarget,
+  sanitizeArticleHtml,
 } from '../../middleware/botRenderer';
 
 describe('botRenderer product canonical helpers', () => {
@@ -269,3 +273,80 @@ describe('product offer price in first-wave HTML', () => {
     expect(html).toContain('"@type":"Offer"');
   });
 });
+
+const ARTICLE_TEMPLATE = `<!DOCTYPE html><html><head>
+<title>Petshiwu</title>
+<meta name="description" content="old" />
+</head><body><div id="root"></div></body></html>`;
+
+describe('blog and care-guide bot HTML', () => {
+  it('strips scripts and demotes extra H1s so the injected title stays the only H1', () => {
+    expect(sanitizeArticleHtml('<h1>Inner title</h1><script>alert(1)</script><p onclick="x">Safe</p>')).toBe(
+      '<h2>Inner title</h2><p>Safe</p>'
+    );
+  });
+
+  it('extracts FAQ pairs from H2/H3 plus following paragraphs', () => {
+    const pairs = extractFaqPairs(`
+      <h2>How often should I feed my dog?</h2>
+      <p>Most adult dogs do well with two meals a day, morning and evening.</p>
+      <h2>What food is best for puppies?</h2>
+      <p>Choose a complete puppy formula with DHA to support brain development.</p>
+    `);
+    expect(pairs).toHaveLength(2);
+    expect(pairs[0].question).toBe('How often should I feed my dog?');
+    expect(pairs[0].answer).toMatch(/two meals a day/);
+  });
+
+  it('serves the full article body to crawlers instead of an excerpt teaser', () => {
+    const html = buildBlogHtml(ARTICLE_TEMPLATE, {
+      title: 'How to Groom a Cat',
+      slug: 'how-to-groom-a-cat',
+      content: '<h1>How to Groom a Cat</h1><p>Brush your cat several times a week to reduce hairballs in NYC apartments.</p>',
+      excerpt: 'Short excerpt only',
+      featuredImage: 'https://cdn.example.com/cat.jpg',
+      metaDescription: 'Grooming tips for cats in NYC apartments.',
+      publishedAt: '2026-01-15T00:00:00.000Z',
+      author: { name: 'Aisha Khan' },
+    });
+    expect(html).toContain('Brush your cat several times a week');
+    expect(html).not.toContain('Read Full Article');
+    expect(html).not.toContain('<h1>How to Groom a Cat</h1>');
+    expect(html).toContain('<article');
+    expect(html).toContain('"@type":"Article"');
+    expect(html).toContain('"@type":"BreadcrumbList"');
+    expect(html).toContain('https://www.petshiwu.com/learning/how-to-groom-a-cat');
+    expect(html).toContain('Aisha Khan');
+  });
+
+  it('serves care-guide sections as crawlable article HTML with FAQ schema', () => {
+    const html = buildCareGuideHtml(ARTICLE_TEMPLATE, {
+      title: 'Puppy Feeding Schedule',
+      slug: 'puppy-feeding-schedule',
+      content: '',
+      excerpt: 'Excerpt only',
+      metaDescription: 'How often to feed a puppy in the first months.',
+      featuredImage: 'https://cdn.example.com/puppy.jpg',
+      publishedAt: '2026-02-01T00:00:00.000Z',
+      author: { name: 'Petshiwu' },
+      sections: [
+        {
+          title: 'How often should I feed a puppy?',
+          content: '<p>Young puppies usually need three to four meals a day until they are six months old.</p>',
+          order: 1,
+        },
+        {
+          title: 'When can puppies eat adult food?',
+          content: '<p>Most puppies can switch to adult food around 12 months, depending on breed size.</p>',
+          order: 2,
+        },
+      ],
+    });
+    expect(html).toContain('three to four meals a day');
+    expect(html).not.toContain('Read Full Article');
+    expect(html).toContain('"@type":"FAQPage"');
+    expect(html).toContain('How often should I feed a puppy?');
+    expect(html).toContain('https://www.petshiwu.com/care-guides/puppy-feeding-schedule');
+  });
+});
+

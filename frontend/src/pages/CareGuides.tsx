@@ -7,7 +7,9 @@ import Dropdown from '@/components/Dropdown';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import SEO from '@/components/SEO';
+import StructuredData from '@/components/StructuredData';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
+import { generateCollectionPageSchema } from '@/utils/seoUtils';
 import AdSense from '@/components/AdSense';
 
 const CareGuides = () => {
@@ -18,6 +20,9 @@ const CareGuides = () => {
   const petType = searchParams.get('petType') || '';
   const category = searchParams.get('category') || '';
   const difficulty = searchParams.get('difficulty') || '';
+  const urlSearch = searchParams.get('search') || '';
+  const urlPage = Number(searchParams.get('page') || '1');
+  const hasFilters = Boolean(petType || category || difficulty || urlSearch || urlPage > 1);
 
   // Fetch care guides
   const { data: guidesData, isLoading } = useQuery({
@@ -104,7 +109,23 @@ const CareGuides = () => {
       <SEO
         title="Pet Care Guides | Petshiwu"
         description="Expert pet care guides for dogs, cats, birds, reptiles and more — nutrition, grooming, health and training tips from Petshiwu."
+        url="https://www.petshiwu.com/care-guides"
+        noindex={hasFilters}
       />
+      {!hasFilters && guidesData?.data && guidesData.data.length > 0 && (
+        <StructuredData
+          type="collectionPage"
+          data={generateCollectionPageSchema(
+            'Pet Care Guides | Petshiwu',
+            'Expert pet care guides for dogs, cats, birds, reptiles and more — nutrition, grooming, health and training tips from Petshiwu.',
+            '/care-guides',
+            guidesData.data.map((guide: CareGuide) => ({
+              name: guide.title,
+              url: `/care-guides/${guide.slug}`,
+            }))
+          )}
+        />
+      )}
       {/* Header */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 lg:px-8 py-8">

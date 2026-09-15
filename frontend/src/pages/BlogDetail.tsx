@@ -3,13 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { blogService } from '@/services/blogs';
 import { Calendar, User, Eye, ArrowLeft, Tag } from 'lucide-react';
 import DOMPurify from 'dompurify';
-import { decodeHtmlEntities } from '@/utils/htmlUtils';
-import { normalizeBlogContent } from '@/utils/htmlUtils';
+import { decodeHtmlEntities, normalizeBlogContent, extractFaqPairs } from '@/utils/htmlUtils';
 import { useMemo } from 'react';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import AdSense from '@/components/AdSense';
 import StickySidebarAd from '@/components/StickySidebarAd';
+import { generateBreadcrumbSchema, generateFAQSchema } from '@/utils/seoUtils';
 
 const BlogDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -85,6 +85,7 @@ const BlogDetail = () => {
   }
 
   const blogUrl = `https://www.petshiwu.com/learning/${blog.slug}`;
+  const faqPairs = extractFaqPairs(blog.content || '');
 
   return (
     <div className="min-h-screen bg-white">
@@ -124,6 +125,17 @@ const BlogDetail = () => {
           publisher: { name: 'Petshiwu', logo: 'https://www.petshiwu.com/logo.png' },
           speakable: !!blog.speakable
         }}
+      />
+      {faqPairs.length >= 2 && (
+        <StructuredData type="faq" data={generateFAQSchema(faqPairs)} />
+      )}
+      <StructuredData
+        type="breadcrumb"
+        data={generateBreadcrumbSchema([
+          { name: 'Home', url: '/' },
+          { name: 'Learning', url: '/learning' },
+          { name: blog.title, url: `/learning/${blog.slug}` },
+        ])}
       />
       {/* Red border at top */}
       <div className="h-1 bg-red-600"></div>
