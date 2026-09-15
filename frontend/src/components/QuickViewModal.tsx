@@ -26,7 +26,6 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
   const { toast, showToast, hideToast } = useToast();
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState(0);
-  const [quantity, setQuantity] = useState(1);
 
   const { data: product, isLoading } = useQuery({
     queryKey: ['product', productSlug],
@@ -62,7 +61,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
       ? product.variants[selectedVariant] 
       : undefined;
     
-    const added = addToCart(product, variant, quantity);
+    const added = addToCart(product, variant, 1);
     if (added) {
       showToast('Product added to cart!', 'success');
     } else {
@@ -91,6 +90,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
     ? product.variants[selectedVariant]
     : undefined;
   const availableStock = availableCartStock(product, quickVariant);
+  const isReadyToShip = availableStock > 0;
 
   return (
     <>
@@ -212,42 +212,22 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
                   </div>
                 )}
 
-                {/* Quantity */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Quantity:</label>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50"
-                    >
-                      -
-                    </button>
-                    <span className="text-lg font-semibold w-12 text-center">{quantity}</span>
-                    <button
-                      onClick={() => setQuantity(quantity + 1)}
-                      className="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-
-                {/* Stock Status */}
-                {availableStock > 0 ? (
-                  <p className="text-green-600 font-medium">✓ In Stock</p>
+                {/* Stock Status — no unit counts until inventory is maintained */}
+                {isReadyToShip ? (
+                  <p className="text-green-700 font-medium">Ready to ship</p>
                 ) : (
-                  <p className="text-red-600 font-medium">✗ Out of Stock</p>
+                  <p className="text-red-600 font-medium">Out of stock</p>
                 )}
 
                 {/* Actions */}
                 <div className="flex gap-3 pt-4">
                   <button
                     onClick={handleAddToCart}
-                    disabled={availableStock <= 0}
+                    disabled={!isReadyToShip}
                     className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
                   >
                     <ShoppingCart size={20} />
-                    Add to Cart
+                    {isReadyToShip ? 'Add to Cart' : 'Out of Stock'}
                   </button>
                   <button
                     onClick={handleWishlistToggle}

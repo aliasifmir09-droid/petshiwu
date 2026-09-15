@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { generateProductUrl } from '@/utils/productUrl';
-import { Heart, Star, ShoppingCart, TrendingUp, Clock, Eye } from 'lucide-react';
+import { Heart, Star, ShoppingCart, TrendingUp, Eye } from 'lucide-react';
 import { Product } from '@/types';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useCartStore } from '@/stores/cartStore';
@@ -103,14 +103,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
     ? Math.round(((compareAtPrice - listingPrice) / compareAtPrice) * 100)
     : 0, [compareAtPrice, listingPrice]);
 
-  // Calculate urgency level based on stock
-  const urgencyLevel = useMemo(() => {
-    if (!product.inStock) return 'out';
-    if (product.totalStock <= 3) return 'critical';
-    if (product.totalStock <= 5) return 'high';
-    if (product.totalStock <= 10) return 'medium';
-    return 'low';
-  }, [product.inStock, product.totalStock]);
+  const isReadyToShip = product.inStock;
 
 
   return (
@@ -254,44 +247,16 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
 
           </div>
 
-          {/* Urgency Indicator with Animations */}
           <div className="mb-2 min-h-[2rem]">
-            {urgencyLevel === 'critical' && (
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-2.5">
-                <div className="flex items-center gap-2">
-                  <Clock size={16} className="text-slate-600" />
-                  <p className="text-xs text-slate-600">
-                    Only {product.totalStock} left
-                  </p>
-                </div>
-              </div>
-            )}
-            {urgencyLevel === 'high' && (
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
-                <span className="text-xs text-slate-600">
-                  {product.totalStock} left
-                </span>
-              </div>
-            )}
-            {urgencyLevel === 'medium' && (
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                <span className="text-xs text-yellow-700 font-semibold">
-                  Low stock - {product.totalStock} remaining
-                </span>
-              </div>
-            )}
-            {urgencyLevel === 'low' && product.inStock && (
+            {isReadyToShip ? (
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
-                <span className="text-xs text-slate-600">In stock</span>
+                <span className="text-xs text-slate-600">Ready to ship</span>
               </div>
-            )}
-            {urgencyLevel === 'out' && (
+            ) : (
               <div className="bg-gray-100 border border-gray-300 rounded-lg p-2 flex items-center gap-2">
                 <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                <span className="text-xs text-red-600 font-bold">Currently Unavailable</span>
+                <span className="text-xs text-red-600 font-bold">Out of stock</span>
               </div>
             )}
           </div>

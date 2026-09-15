@@ -98,7 +98,6 @@ const ProductDetail = () => {
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState(0);
-  const [quantity, setQuantity] = useState(1);
   const [zoomPosition, setZoomPosition] = useState<{ x: number; y: number } | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -391,20 +390,7 @@ const ProductDetail = () => {
     : 0;
   const selectedVariantData = hasVariants ? product.variants[safeSelectedVariant] : undefined;
   const availableStock = availableCartStock(product, selectedVariantData);
-
-  // Reset quantity to 1 when variant changes
-  useEffect(() => {
-    setQuantity(1);
-  }, [selectedVariant]);
-
-  // Adjust quantity if it exceeds available stock
-  useEffect(() => {
-    if (quantity > availableStock && availableStock > 0) {
-      setQuantity(availableStock);
-    } else if (availableStock === 0 && quantity > 0) {
-      setQuantity(1); // Reset to 1 if out of stock (will be disabled anyway)
-    }
-  }, [availableStock, quantity]);
+  const isReadyToShip = availableStock > 0;
 
   // Create description from product description or fallback (lazy load DOMPurify)
   // MUST be called before any conditional returns to maintain hook order
@@ -500,7 +486,7 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (!product) return;
-    const added = addToCart(product, selectedVariantData || undefined, quantity);
+    const added = addToCart(product, selectedVariantData || undefined, 1);
     if (added) {
       showToast(`✓ ${product.name.substring(0, 40)}${product.name.length > 40 ? '...' : ''} added to cart`, 'success');
     } else {
@@ -838,92 +824,18 @@ const ProductDetail = () => {
             }}
           />
 
-          {/* Stock Availability */}
+          {/* Stock Availability — no unit counts until inventory is maintained */}
           <div className="mb-6">
-            {selectedVariantData ? (
-              selectedVariantData.stock > 0 ? (
-                <div className="flex items-center gap-2">
-                  {selectedVariantData.stock <= 5 ? (
-                    <>
-                      <span className="w-3 h-3 bg-orange-500 rounded-full"></span>
-                      <span className="text-orange-600 font-medium">
-                        Only {selectedVariantData.stock} left in stock!
-                      </span>
-                    </>
-                  ) : selectedVariantData.stock <= 10 ? (
-                    <>
-                      <span className="w-3 h-3 bg-yellow-500 rounded-full"></span>
-                      <span className="text-yellow-600 font-medium">
-                        Low stock - {selectedVariantData.stock} available
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-                      <span className="text-green-600 font-medium">In Stock ({selectedVariantData.stock} available)</span>
-                    </>
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 bg-red-500 rounded-full"></span>
-                  <span className="text-red-600 font-medium">Out of Stock</span>
-                </div>
-              )
-            ) : (
+            {isReadyToShip ? (
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-                <span className="text-green-600 font-medium">In Stock</span>
+                <span className="text-green-700 font-medium">Ready to ship</span>
               </div>
-            )}
-          </div>
-
-          {/* Quantity */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-2">Quantity</label>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                disabled={quantity <= 1}
-                className={`w-11 h-11 border border-gray-300 rounded-lg flex items-center justify-center text-lg font-semibold active:scale-95 transition-transform min-w-[44px] min-h-[44px] ${
-                  quantity <= 1
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'hover:bg-gray-100'
-                }`}
-                aria-label="Decrease quantity"
-              >
-                -
-              </button>
-              <input
-                type="number"
-                min="1"
-                max={availableStock}
-                value={quantity}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value) || 1;
-                  const clampedValue = Math.max(1, Math.min(value, availableStock));
-                  setQuantity(clampedValue);
-                }}
-                className="w-20 text-center border border-gray-300 rounded-lg px-3 py-2 min-h-[44px]"
-                aria-label="Quantity"
-              />
-              <button
-                onClick={() => setQuantity(Math.min(availableStock, quantity + 1))}
-                disabled={quantity >= availableStock || availableStock === 0}
-                className={`w-11 h-11 border border-gray-300 rounded-lg flex items-center justify-center text-lg font-semibold active:scale-95 transition-transform min-w-[44px] min-h-[44px] ${
-                  quantity >= availableStock || availableStock === 0
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'hover:bg-gray-100'
-                }`}
-                aria-label="Increase quantity"
-              >
-                +
-              </button>
-            </div>
-            {availableStock > 0 && (
-              <p className="text-xs text-gray-500 mt-1">
-                Maximum {availableStock} {availableStock === 1 ? 'item' : 'items'} available
-              </p>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 bg-red-500 rounded-full"></span>
+                <span className="text-red-600 font-medium">Out of stock</span>
+              </div>
             )}
           </div>
 
@@ -932,15 +844,15 @@ const ProductDetail = () => {
             {/* Primary — full-width Add to Cart */}
             <button
               onClick={handleAddToCart}
-              disabled={availableStock <= 0}
+              disabled={!isReadyToShip}
               className={`w-full flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-bold text-lg transition-all active:scale-[0.98] ${
-                availableStock > 0
+                isReadyToShip
                   ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
               <ShoppingCart size={22} />
-              {availableStock <= 0 ? 'Out of Stock' : 'Add to Cart'}
+              {isReadyToShip ? 'Add to Cart' : 'Out of Stock'}
             </button>
             {/* Secondary row — wishlist + share */}
             <div className="flex gap-3 mt-3">
@@ -1439,15 +1351,15 @@ const ProductDetail = () => {
           {/* Full-width Add to Cart */}
           <button
             onClick={handleAddToCart}
-            disabled={availableStock <= 0}
+            disabled={!isReadyToShip}
             className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-base transition-all active:scale-[0.98] ${
-              availableStock > 0
+              isReadyToShip
                 ? 'bg-blue-600 text-white shadow-md'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >
             <ShoppingCart size={20} />
-            {availableStock <= 0 ? 'Out of Stock' : 'Add to Cart'}
+            {isReadyToShip ? 'Add to Cart' : 'Out of Stock'}
           </button>
         </div>
       )}
