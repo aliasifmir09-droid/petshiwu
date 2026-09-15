@@ -38,10 +38,16 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
     gcTime: 2 * 60 * 1000,
   });
 
-  // Close suggestions when clicking outside
+  // Close suggestions when clicking outside. Header mounts this twice (desktop
+  // + mobile). A mousedown on the visible list must not look "outside" to the
+  // hidden copy, or onClose unmounts the links before click/navigate can run.
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target;
+      if (target instanceof Element && target.closest('[data-search-suggestions]')) {
+        return;
+      }
+      if (containerRef.current && !containerRef.current.contains(target as Node)) {
         onClose();
       }
     };
@@ -77,6 +83,8 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
   return (
     <div
       ref={containerRef}
+      data-search-suggestions
+      onMouseDown={(event) => event.stopPropagation()}
       className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 max-h-96 overflow-y-auto"
     >
       {isLoading ? (

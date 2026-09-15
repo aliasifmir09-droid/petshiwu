@@ -84,6 +84,37 @@ describe('SearchSuggestions', () => {
     expect(screen.getByText('product page')).toBeInTheDocument();
   });
 
+  test('a hidden second dropdown does not cancel the product click', async () => {
+    const onSelect = vi.fn();
+    const onClose = vi.fn();
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <>
+                  <SearchSuggestions query="blue buffalo" isOpen onSelect={onSelect} onClose={onClose} />
+                  <SearchSuggestions query="blue buffalo" isOpen onSelect={onSelect} onClose={onClose} />
+                </>
+              }
+            />
+            <Route path="/dog/:category/:slug" element={<div>product page</div>} />
+            <Route path="/products/:slug" element={<div>product page</div>} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    const links = await screen.findAllByRole('link', { name: /blue buffalo life protection formula/i });
+    fireEvent.mouseDown(links[0]);
+    fireEvent.click(links[0]);
+    expect(onSelect).not.toHaveBeenCalled();
+    expect(screen.getByText('product page')).toBeInTheDocument();
+  });
+
   test('view-all stays on search results for that query', async () => {
     const onSelect = vi.fn();
     const onClose = vi.fn();
