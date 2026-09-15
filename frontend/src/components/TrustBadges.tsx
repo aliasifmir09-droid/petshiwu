@@ -4,32 +4,32 @@ const TrustBadges = () => {
   const badges = [
     {
       icon: MapPin,
-      title: 'Queens-Based',
-      description: 'Local to Jackson Heights, NYC',
+      title: 'Packed in Queens',
+      description: 'Jackson Heights warehouse',
       color: 'bg-[#1E3A8A]',
     },
     {
       icon: Truck,
-      title: 'Free Delivery',
-      description: 'On all orders over $49',
+      title: 'Tonight delivery',
+      description: 'Order by 3 PM weekdays',
       color: 'bg-[#1E3A8A]',
     },
     {
       icon: Package,
-      title: '4,000+ Products',
-      description: 'Food, treats, toys & more',
+      title: 'One-tap cart',
+      description: 'Add 1, then checkout',
       color: 'bg-[#1E3A8A]',
     },
     {
       icon: RotateCcw,
-      title: '365-Day Returns',
+      title: '365-day returns',
       description: 'Unused items, no hassle',
       color: 'bg-[#1E3A8A]',
     },
     {
       icon: Star,
-      title: 'Top Brands',
-      description: 'Purina, Royal Canin & more',
+      title: 'No autoship',
+      description: 'You confirm every order',
       color: 'bg-[#1E3A8A]',
     },
     {

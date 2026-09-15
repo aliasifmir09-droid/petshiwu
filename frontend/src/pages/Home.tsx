@@ -10,6 +10,7 @@ import TrustBadges from '@/components/TrustBadges';
 import CategoryIcons from '@/components/CategoryIcons';
 import ShopByPet from '@/components/ShopByPet';
 import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
+import TonightPromiseCard from '@/components/TonightPromiseCard';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
 import RestockDashboard from '@/components/RestockDashboard';
 import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
@@ -268,6 +269,8 @@ const Home = () => {
 
       <ShopByPet />
 
+      <TonightPromiseCard />
+
       <OrdersOpenBanner />
 
       <div className="mt-4">
@@ -295,7 +298,7 @@ const Home = () => {
             <div className="flex overflow-x-auto gap-4 md:gap-5 pb-4 scrollbar-hide">
               {filteredFeaturedProducts.map((product, index) => (
                 <div key={product._id} className="flex-shrink-0 w-56 md:w-64">
-                  <ProductCard product={product} hideCartButton={true} index={index} />
+                  <ProductCard product={product} hideCartButton={false} index={index} />
                 </div>
               ))}
             </div>
