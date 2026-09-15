@@ -5,7 +5,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { productService } from '@/services/products';
 import { Search, Package, FolderTree } from 'lucide-react';
 import { generateProductUrl } from '@/utils/productUrl';
@@ -22,6 +22,12 @@ interface SearchSuggestionsProps {
 
 const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestionsProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  const goTo = (href: string) => {
+    navigate(href);
+    onClose();
+  };
 
   // Fetch suggestions when query is at least 1 character
   const { data: suggestions, isLoading } = useQuery({
@@ -91,12 +97,17 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
                 Products
               </div>
               <ul className="mt-1">
-                {products.map((product: any) => (
+                {products.map((product: any) => {
+                  const href = generateProductUrl(product);
+                  return (
                   <li key={product._id || product.slug}>
                     <Link
-                      to={generateProductUrl(product)}
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => onClose()}
+                      to={href}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        goTo(href);
+                      }}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors group"
                     >
                       <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-100">
@@ -130,7 +141,8 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
                       <Search size={16} className="text-gray-400 group-hover:text-blue-600 flex-shrink-0" />
                     </Link>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             </div>
           )}
@@ -142,12 +154,17 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
                 Categories
               </div>
               <ul className="mt-1">
-                {categories.map((category: any) => (
+                {categories.map((category: any) => {
+                  const href = generateCategoryUrl(category.slug, category.petType);
+                  return (
                   <li key={category._id || category.slug}>
                     <Link
-                      to={generateCategoryUrl(category.slug, category.petType)}
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => onClose()}
+                      to={href}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        goTo(href);
+                      }}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors group"
                     >
                       <FolderTree size={20} className="text-gray-400 group-hover:text-blue-600" />
@@ -164,7 +181,8 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
                       <Search size={16} className="text-gray-400 group-hover:text-blue-600 flex-shrink-0" />
                     </Link>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             </div>
           )}
@@ -173,8 +191,11 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
           <div className="border-t border-gray-100 mt-2">
             <Link
               to={`/search?q=${encodeURIComponent(query)}`}
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => onSelect(query)}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                onSelect(query);
+              }}
               className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
             >
               <Search size={16} />

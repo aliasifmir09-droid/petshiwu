@@ -138,7 +138,7 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
 
     // Build sort
     const sortKey = typeof sort === 'string' ? sort : '';
-    const useRelevance = !!searchText && (sortKey === '' || sortKey === 'newest' || sortKey === 'relevance');
+    const useRelevance = !!searchText && (sortKey === '' || sortKey === 'relevance');
     let sortOption: any = { createdAt: -1 };
     switch (sortKey) {
       case 'price-asc':
@@ -155,6 +155,9 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
         break;
       case 'name-desc':
         sortOption = { name: -1 };
+        break;
+      case 'featured':
+        sortOption = { isFeatured: -1, createdAt: -1 };
         break;
       case 'newest':
         sortOption = { createdAt: -1 };

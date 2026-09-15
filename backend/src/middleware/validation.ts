@@ -387,7 +387,7 @@ export const searchValidation = [
     .withMessage('inStock must be a boolean'),
   query('sort')
     .optional()
-    .isIn(['newest', 'price-asc', 'price-desc', 'rating', 'name-asc', 'name-desc'])
+    .isIn(['newest', 'price-asc', 'price-desc', 'rating', 'name-asc', 'name-desc', 'relevance', 'featured'])
     .withMessage('Invalid sort option'),
   validate
 ];
