@@ -95,7 +95,7 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
                   <li key={product._id || product.slug}>
                     <Link
                       to={generateProductUrl(product)}
-                      onClick={() => onSelect(product.name)}
+                      onClick={() => onClose()}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors group"
                     >
                       <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-gray-100">
@@ -145,7 +145,7 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
                   <li key={category._id || category.slug}>
                     <Link
                       to={generateCategoryUrl(category.slug, category.petType)}
-                      onClick={() => onSelect(category.name)}
+                      onClick={() => onClose()}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors group"
                     >
                       <FolderTree size={20} className="text-gray-400 group-hover:text-blue-600" />

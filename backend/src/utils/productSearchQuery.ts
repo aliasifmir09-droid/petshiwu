@@ -3,7 +3,7 @@
  * MongoDB $text is whole-word only, so "pur" / "hill" miss Purina / Hill's on the first letters.
  */
 
-import { catalogFlexPattern } from './catalogText';
+import { catalogFlexPattern, decodeHtmlEntities } from './catalogText';
 
 export function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -113,4 +113,43 @@ export function buildProductSearchQuery(
     $or: [{ name: exactNameRegex }, { $and: andConditions }],
   });
   return base;
+}
+
+export type SearchHit = {
+  name?: string;
+  brand?: string;
+  isFeatured?: boolean;
+  totalReviews?: number;
+};
+
+/** Lower is a better match. Phrase / prefix beats a newest-treat dump. */
+export function scoreSearchHit(product: SearchHit, rawQuery: string): number {
+  const query = decodeHtmlEntities(rawQuery).trim().toLowerCase();
+  if (!query) return 1000;
+  const name = decodeHtmlEntities(product.name || '').toLowerCase();
+  const brand = decodeHtmlEntities(product.brand || '').toLowerCase();
+  let score = 80;
+  if (name === query) score = 0;
+  else if (name.startsWith(query)) score = 10;
+  else if (brand === query) score = 16;
+  else if (brand.startsWith(query)) score = 18;
+  else if (name.includes(query)) score = 28;
+  else if (brand.includes(query)) score = 40;
+  const queryWantsTreats = /\b(treat|treats|chew|chews|biscuit|bits)\b/.test(query);
+  if (!queryWantsTreats && /\b(treat|treats|chew|chews|biscuit|bits|topper)\b/.test(name)) {
+    score += 22;
+  }
+  if (product.isFeatured) score -= 3;
+  score -= Math.min(8, Math.log10((product.totalReviews || 0) + 1) * 3);
+  return score;
+}
+
+export function compareSearchHits(a: SearchHit, b: SearchHit, query: string): number {
+  const delta = scoreSearchHit(a, query) - scoreSearchHit(b, query);
+  if (delta !== 0) return delta;
+  return decodeHtmlEntities(a.name || '').localeCompare(decodeHtmlEntities(b.name || ''));
+}
+
+export function rankSearchHits<T extends SearchHit>(hits: T[], query: string): T[] {
+  return [...hits].sort((a, b) => compareSearchHits(a, b, query));
 }

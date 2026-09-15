@@ -2,6 +2,8 @@ import {
   apostropheFlexPattern,
   buildProductSearchQuery,
   escapeRegex,
+  rankSearchHits,
+  scoreSearchHit,
   singleTermNameMatch,
 } from '../../../utils/productSearchQuery';
 
@@ -44,5 +46,20 @@ describe('productSearchQuery', () => {
     const query = buildProductSearchQuery('dog food') as { $and: unknown[] };
     expect(JSON.stringify(query)).toContain('"petType":"dog"');
     expect(JSON.stringify(query)).toContain('food');
+  });
+
+  test('ranks a flagship Blue Buffalo bag ahead of a later treat SKU', () => {
+    const ranked = rankSearchHits(
+      [
+        { name: 'Blue Buffalo Bits Soft Treats', totalReviews: 2 },
+        { name: 'Blue Buffalo Life Protection Formula Adult Dry Dog Food', isFeatured: true, totalReviews: 40 },
+        { name: 'Wilderness Trail Mix', brand: 'Blue Buffalo' },
+      ],
+      'blue buffalo'
+    );
+    expect(ranked[0].name).toMatch(/Life Protection/i);
+    expect(scoreSearchHit(ranked[0], 'blue buffalo')).toBeLessThan(
+      scoreSearchHit(ranked[1], 'blue buffalo')
+    );
   });
 });

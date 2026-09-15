@@ -8,9 +8,40 @@ import { executeCachedAggregation } from '../utils/aggregationCache';
 import { cache, cacheKeys } from '../utils/cache';
 import { extractJsonObject, parseNeuralTwin } from '../utils/neuralScan';
 import { mimeFromDataUrl, parseVisualIdentification, visualSearchTerms } from '../utils/visualSearch';
-import { buildProductSearchQuery, singleTermNameMatch } from '../utils/productSearchQuery';
+import { buildProductSearchQuery, rankSearchHits, singleTermNameMatch } from '../utils/productSearchQuery';
 
 const GEMINI_VISION_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
+
+const SEARCH_RANK_SCAN = 1500;
+const AUTOCOMPLETE_FIELDS =
+  'name slug brand images basePrice petType category isFeatured totalReviews';
+
+const restoreRankedOrder = <T extends { _id?: unknown }>(rows: T[], orderedIds: unknown[]): T[] => {
+  const order = new Map(orderedIds.map((id, index) => [String(id), index]));
+  return [...rows].sort(
+    (a, b) => (order.get(String(a._id)) ?? 0) - (order.get(String(b._id)) ?? 0)
+  );
+};
+
+const rankedProductPage = async (
+  query: Record<string, unknown>,
+  searchText: string,
+  skip: number,
+  limitNum: number
+) => {
+  const hits = await Product.find(query)
+    .select('_id name brand isFeatured totalReviews')
+    .limit(SEARCH_RANK_SCAN)
+    .lean();
+  const pageIds = rankSearchHits(hits, searchText)
+    .slice(skip, skip + limitNum)
+    .map((row) => row._id);
+  if (pageIds.length === 0) return [];
+  const products = await Product.find({ _id: { $in: pageIds } })
+    .populate('category')
+    .lean();
+  return restoreRankedOrder(products, pageIds);
+};
 
 // Advanced search with filters
 export const advancedSearch = async (req: Request, res: Response, next: NextFunction) => {
@@ -106,8 +137,10 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
     }
 
     // Build sort
+    const sortKey = typeof sort === 'string' ? sort : '';
+    const useRelevance = !!searchText && (sortKey === '' || sortKey === 'newest' || sortKey === 'relevance');
     let sortOption: any = { createdAt: -1 };
-    switch (sort) {
+    switch (sortKey) {
       case 'price-asc':
         sortOption = { basePrice: 1 };
         break;
@@ -117,37 +150,30 @@ export const advancedSearch = async (req: Request, res: Response, next: NextFunc
       case 'rating':
         sortOption = { averageRating: -1, totalReviews: -1 };
         break;
-      case 'newest':
-        sortOption = { createdAt: -1 };
-        break;
       case 'name-asc':
         sortOption = { name: 1 };
         break;
       case 'name-desc':
         sortOption = { name: -1 };
         break;
+      case 'newest':
+        sortOption = { createdAt: -1 };
+        break;
       default:
         sortOption = { createdAt: -1 };
     }
 
-    // Execute query
-    // When using $text search, sort by textScore for relevance, then by sortOption
-    let productsQuery = Product.find(query) as any;
-    
-    if (query.$text) {
-      // Add text score for relevance ranking
-      productsQuery = productsQuery.select({ score: { $meta: 'textScore' } });
-      // Sort by text score first (relevance), then by sortOption
-      productsQuery = productsQuery.sort({ score: { $meta: 'textScore' }, ...sortOption });
+    let products: any[];
+    if (useRelevance) {
+      products = await rankedProductPage(query, searchText, skip, limitNum);
     } else {
-      productsQuery = productsQuery.sort(sortOption);
+      products = await Product.find(query)
+        .sort(sortOption)
+        .populate('category')
+        .skip(skip)
+        .limit(limitNum)
+        .lean();
     }
-    
-    const products = await productsQuery
-      .populate('category')
-      .skip(skip)
-      .limit(limitNum)
-      .lean();
 
     const total = await Product.countDocuments(query);
 
@@ -221,55 +247,22 @@ export const searchAutocomplete = async (req: Request, res: Response, next: Next
     const searchText = q.trim();
     
     // Cache autocomplete results for 1-2 minutes (popular searches)
-    const autocompleteCacheKey = `autocomplete:v2:${searchText}:${limit}`;
+    const autocompleteCacheKey = `autocomplete:v4:${searchText}:${limit}`;
     let products = await cache.get<any[]>(autocompleteCacheKey);
     
     if (!products) {
-      const baseQuery: any = {
-        isActive: true,
-        $or: [
-          { deletedAt: null },
-          { deletedAt: { $exists: false } }
-        ]
-      };
       const regexProductQuery = buildProductSearchQuery(searchText) || {
-        ...baseQuery,
+        isActive: true,
+        $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
         ...singleTermNameMatch(searchText),
       };
 
-      products = [];
-      
-      try {
-        // Short queries ("p", "pur", "hill") must use regex. $text is whole-word
-        // only and would return 0 (or a few full-word hits) and skip the fallback.
-        if (searchText.length >= 4) {
-          const textSearchQuery = {
-            ...baseQuery,
-            $text: { $search: searchText }
-          };
-          
-          products = await Product.find(textSearchQuery)
-            .select('name slug brand images basePrice')
-            .limit(limit)
-            .lean();
-        }
-        
-        if (products.length === 0) {
-          products = await Product.find(regexProductQuery)
-            .select('name slug brand images basePrice')
-            .limit(limit)
-            .lean();
-        }
-      } catch (error: any) {
-        logger.debug(`Text search failed, using regex fallback: ${error.message}`);
-        
-        products = await Product.find(regexProductQuery)
-          .select('name slug brand images basePrice')
-          .limit(limit)
-          .lean();
-      }
-      
-      // Cache popular searches for 2 minutes
+      const hits = await Product.find(regexProductQuery)
+        .select(AUTOCOMPLETE_FIELDS)
+        .populate('category', 'name slug petType parentCategory')
+        .limit(40)
+        .lean();
+      products = rankSearchHits(hits, searchText).slice(0, limit);
       await cache.set(autocompleteCacheKey, products, 120);
     }
 
