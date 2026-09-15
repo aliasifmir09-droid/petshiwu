@@ -95,6 +95,7 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
                   <li key={product._id || product.slug}>
                     <Link
                       to={generateProductUrl(product)}
+                      onMouseDown={(event) => event.preventDefault()}
                       onClick={() => onClose()}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors group"
                     >
@@ -145,6 +146,7 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
                   <li key={category._id || category.slug}>
                     <Link
                       to={generateCategoryUrl(category.slug, category.petType)}
+                      onMouseDown={(event) => event.preventDefault()}
                       onClick={() => onClose()}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors group"
                     >
@@ -170,7 +172,8 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
           {/* View All Results Link */}
           <div className="border-t border-gray-100 mt-2">
             <Link
-              to={`/products?search=${encodeURIComponent(query)}`}
+              to={`/search?q=${encodeURIComponent(query)}`}
+              onMouseDown={(event) => event.preventDefault()}
               onClick={() => onSelect(query)}
               className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
             >

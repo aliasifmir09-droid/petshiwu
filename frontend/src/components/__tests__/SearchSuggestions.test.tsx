@@ -52,4 +52,15 @@ describe('SearchSuggestions', () => {
     expect(onSelect).not.toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
   });
+
+  test('view-all stays on search results for that query', async () => {
+    const onSelect = vi.fn();
+    const onClose = vi.fn();
+    renderSuggestions(onSelect, onClose);
+
+    const viewAll = await screen.findByRole('link', { name: /view all results for "blue buffalo"/i });
+    expect(viewAll).toHaveAttribute('href', '/search?q=blue%20buffalo');
+    fireEvent.click(viewAll);
+    expect(onSelect).toHaveBeenCalledWith('blue buffalo');
+  });
 });

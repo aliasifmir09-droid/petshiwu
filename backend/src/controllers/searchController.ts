@@ -247,7 +247,7 @@ export const searchAutocomplete = async (req: Request, res: Response, next: Next
     const searchText = q.trim();
     
     // Cache autocomplete results for 1-2 minutes (popular searches)
-    const autocompleteCacheKey = `autocomplete:v4:${searchText}:${limit}`;
+    const autocompleteCacheKey = `autocomplete:v5:${searchText}:${limit}`;
     let products = await cache.get<any[]>(autocompleteCacheKey);
     
     if (!products) {
@@ -257,12 +257,24 @@ export const searchAutocomplete = async (req: Request, res: Response, next: Next
         ...singleTermNameMatch(searchText),
       };
 
+      // Rank the full match window (not the first 40 inserts). Otherwise
+      // "blue buffalo" keeps returning Baby BLUE treats and the bag never appears.
       const hits = await Product.find(regexProductQuery)
-        .select(AUTOCOMPLETE_FIELDS)
-        .populate('category', 'name slug petType parentCategory')
-        .limit(40)
+        .select('_id name brand isFeatured totalReviews')
+        .limit(SEARCH_RANK_SCAN)
         .lean();
-      products = rankSearchHits(hits, searchText).slice(0, limit);
+      const pageIds = rankSearchHits(hits, searchText)
+        .slice(0, limit)
+        .map((row) => row._id);
+      if (pageIds.length === 0) {
+        products = [];
+      } else {
+        const hydrated = await Product.find({ _id: { $in: pageIds } })
+          .select(AUTOCOMPLETE_FIELDS)
+          .populate('category', 'name slug petType parentCategory')
+          .lean();
+        products = restoreRankedOrder(hydrated, pageIds);
+      }
       await cache.set(autocompleteCacheKey, products, 120);
     }
 
