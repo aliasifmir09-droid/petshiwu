@@ -244,8 +244,9 @@ export const generateSitemap = async (req: Request, res: Response) => {
               xml += '  </url>\n';
             });
 
-    // Care guide pages
+    // Care guide pages — skip broken slugs (soft-404 trap)
     careGuides.forEach(guide => {
+      if (!isCleanSlug(guide.slug)) return;
       const lastmod = guide.updatedAt 
         ? new Date(guide.updatedAt).toISOString().split('T')[0]
         : currentDate;

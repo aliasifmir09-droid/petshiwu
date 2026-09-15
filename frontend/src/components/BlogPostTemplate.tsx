@@ -65,7 +65,7 @@ const BlogPostTemplate = ({
       '@type': 'WebPage',
       '@id': canonicalUrl
     },
-    speakable: !!blog.speakable
+    speakable: false
   };
 
   return (

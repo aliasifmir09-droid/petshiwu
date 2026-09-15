@@ -73,6 +73,46 @@ const esc = (s: string): string =>
 
 const stripTags = (html: string): string => html.replace(/<[^>]*>/g, '');
 
+/** Keep article HTML crawlable without scripts, handlers, or a second H1. */
+export const sanitizeArticleHtml = (html: string): string => {
+  if (!html) return '';
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
+    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    .replace(/javascript:/gi, '')
+    .replace(/<h1(\s[^>]*)?>/gi, '<h2$1>')
+    .replace(/<\/h1>/gi, '</h2>')
+    .trim();
+};
+
+const organizationAuthorName = (author: unknown): string => {
+  if (typeof author === 'string' && author.trim() && !/^[a-f0-9]{24}$/i.test(author.trim())) {
+    return author.trim();
+  }
+  if (author && typeof author === 'object' && typeof (author as { name?: unknown }).name === 'string') {
+    const name = (author as { name: string }).name.trim();
+    if (name) return name;
+  }
+  return 'Petshiwu';
+};
+
+const careGuideArticleHtml = (guide: {
+  content?: string;
+  sections?: Array<{ title?: string; content?: string; order?: number }>;
+}): string => {
+  const parts: string[] = [guide.content || ''];
+  if (Array.isArray(guide.sections)) {
+    const sections = [...guide.sections].sort((a, b) => (a.order || 0) - (b.order || 0));
+    for (const section of sections) {
+      if (section.title) parts.push(`<h2>${esc(section.title)}</h2>`);
+      if (section.content) parts.push(section.content);
+    }
+  }
+  return sanitizeArticleHtml(parts.join('\n'));
+};
+
 /** Decode HTML entities so DB-stored descriptions don't get double-encoded by esc() */
 const decodeEntities = (s: string): string =>
   s
@@ -687,7 +727,8 @@ const fetchProduct = async (slug: string) => {
 const fetchBlog = async (slug: string) => {
   return withTimeout(
     Blog.findOne({ slug, isPublished: true })
-      .select('title slug excerpt content coverImage metaDescription speakable author publishedAt updatedAt')
+      .select('title slug excerpt content featuredImage metaTitle metaDescription speakable author authorByline authorProfileUrl publishedAt createdAt updatedAt')
+      .populate({ path: 'author', select: 'name' })
       .lean()
       .exec()
   );
@@ -696,7 +737,8 @@ const fetchBlog = async (slug: string) => {
 const fetchCareGuide = async (slug: string) => {
   return withTimeout(
     CareGuide.findOne({ slug, isPublished: true })
-      .select('title slug excerpt coverImage petType updatedAt')
+      .select('title slug excerpt content featuredImage metaDescription petType sections author publishedAt createdAt updatedAt')
+      .populate({ path: 'author', select: 'name' })
       .lean()
       .exec()
   );
@@ -916,7 +958,7 @@ export const buildProductHtml = (template: string, product: any, slug: string): 
  * Pulls H2/H3 headings as questions and their following paragraph(s) as answers.
  * Returns up to 8 pairs — enough for a solid FAQPage schema.
  */
-const extractFaqPairs = (htmlContent: string): Array<{ question: string; answer: string }> => {
+export const extractFaqPairs = (htmlContent: string): Array<{ question: string; answer: string }> => {
   const pairs: Array<{ question: string; answer: string }> = [];
   // Match each H2/H3 heading + content until the next heading or end
   const sections = htmlContent.split(/<h[23][^>]*>/i);
@@ -937,7 +979,7 @@ const extractFaqPairs = (htmlContent: string): Array<{ question: string; answer:
   return pairs;
 };
 
-const buildBlogHtml = (template: string, blog: any): string => {
+export const buildBlogHtml = (template: string, blog: any): string => {
   const title = `${blog.title} | Petshiwu Learning`;
   const description = truncate(
     blog.metaDescription ?? blog.excerpt ?? stripTags(blog.content ?? '').substring(0, 160),
@@ -965,7 +1007,7 @@ const buildBlogHtml = (template: string, blog: any): string => {
     description,
     image,
     url,
-    author: { '@type': 'Organization', name: blog.author ?? 'Petshiwu' },
+    author: { '@type': 'Organization', name: organizationAuthorName(blog.author) },
     publisher: {
       '@type': 'Organization',
       name: 'Petshiwu',
@@ -1011,6 +1053,7 @@ const buildBlogHtml = (template: string, blog: any): string => {
   ${faqSchema ? `<script type="application/ld+json">${JSON.stringify(faqSchema)}</script>` : ''}
   ${speakableSchema ? `<script type="application/ld+json">${JSON.stringify(speakableSchema)}</script>` : ''}`;
 
+  const articleHtml = sanitizeArticleHtml(blog.content || '');
   const blogExcerpt = blog.excerpt ?? stripTags(blog.content ?? '').substring(0, 400);
   const blogBodyContent = `
 <div style="font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px">
@@ -1020,10 +1063,10 @@ const buildBlogHtml = (template: string, blog: any): string => {
     <span style="color:#555">${esc(blog.title)}</span>
   </nav>
   ${image !== DEFAULT_OG_IMAGE ? `<img src="${esc(image)}" alt="${esc(blog.title)}" style="max-width:100%;height:auto;border-radius:8px;margin-bottom:16px" loading="lazy" />` : ''}
-  <h2 style="font-size:1.6em;margin:0 0 12px">${esc(blog.title)}</h2>
   <p style="color:#555;font-size:0.9em;margin-bottom:16px">${blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}</p>
-  <p style="line-height:1.7;color:#333;font-size:1.05em">${esc(blogExcerpt)}</p>
-  <a href="${esc(url)}" style="display:inline-block;margin-top:16px;padding:10px 24px;background:#1976d2;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Read Full Article</a>
+  ${articleHtml
+    ? `<article style="line-height:1.7;color:#333;font-size:1.05em">${articleHtml}</article>`
+    : `<p style="line-height:1.7;color:#333;font-size:1.05em">${esc(blogExcerpt)}</p>`}
   <hr style="margin:24px 0;border:none;border-top:1px solid #eee" />
   <p style="color:#555;font-size:0.9em"><a href="${BASE}/learning" style="color:#1976d2">More Pet Care Articles</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — NYC&rsquo;s Local Pet Store</a></p>
 </div>`;
@@ -1043,11 +1086,25 @@ const buildBlogHtml = (template: string, blog: any): string => {
   return html;
 };
 
-const buildCareGuideHtml = (template: string, guide: any): string => {
+export const buildCareGuideHtml = (template: string, guide: any): string => {
   const title = `${guide.title} | Petshiwu Care Guides`;
-  const description = truncate(guide.excerpt ?? `Care guide for ${guide.title} at Petshiwu.`, 160);
+  const description = truncate(
+    guide.metaDescription || guide.excerpt || stripTags(guide.content ?? '').substring(0, 160) || `Care guide for ${guide.title} at Petshiwu.`,
+    160
+  );
   const image = resolveShareImage(guide.featuredImage ?? guide.coverImage);
   const url = `${BASE}/care-guides/${guide.slug}`;
+  const articleHtml = careGuideArticleHtml(guide);
+  const faqPairs = extractFaqPairs(articleHtml);
+  const faqSchema = faqPairs.length >= 2 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqPairs.map(({ question, answer }) => ({
+      '@type': 'Question',
+      name: question,
+      acceptedAnswer: { '@type': 'Answer', text: answer },
+    })),
+  } : null;
 
   const schema = {
     '@context': 'https://schema.org',
@@ -1056,13 +1113,14 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
     description,
     image,
     url,
-    author: { '@type': 'Organization', name: 'Petshiwu' },
+    author: { '@type': 'Organization', name: organizationAuthorName(guide.author) },
     publisher: {
       '@type': 'Organization',
       name: 'Petshiwu',
       logo: { '@type': 'ImageObject', url: `${BASE}/logo.png` },
     },
-    dateModified: guide.updatedAt,
+    datePublished: guide.publishedAt ?? guide.createdAt,
+    dateModified: guide.updatedAt ?? guide.publishedAt ?? guide.createdAt,
   };
 
   const breadcrumbSchema = {
@@ -1082,9 +1140,10 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
   <meta property="og:image" content="${esc(image)}" />
   <meta property="og:url" content="${esc(url)}" />
   <script type="application/ld+json">${JSON.stringify(schema)}</script>
-  <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>`;
+  <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
+  ${faqSchema ? `<script type="application/ld+json">${JSON.stringify(faqSchema)}</script>` : ''}`;
 
-  const guideExcerpt = guide.excerpt ?? `Complete care guide for ${guide.title} — tips, advice, and expert information for pet owners.`;
+  const guideExcerpt = guide.excerpt || stripTags(guide.content ?? '').substring(0, 400) || `Complete care guide for ${guide.title} — tips, advice, and expert information for pet owners.`;
   const guideBodyContent = `
 <div style="font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px">
   <nav style="font-size:0.85em;margin-bottom:16px;color:#555">
@@ -1093,9 +1152,9 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
     <span style="color:#555">${esc(guide.title)}</span>
   </nav>
   ${image !== DEFAULT_OG_IMAGE ? `<img src="${esc(image)}" alt="${esc(guide.title)}" style="max-width:100%;height:auto;border-radius:8px;margin-bottom:16px" loading="lazy" />` : ''}
-  <h2 style="font-size:1.6em;margin:0 0 12px">${esc(guide.title)}</h2>
-  <p style="line-height:1.7;color:#333;font-size:1.05em">${esc(guideExcerpt)}</p>
-  <a href="${esc(url)}" style="display:inline-block;margin-top:16px;padding:10px 24px;background:#1976d2;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Read Full Guide</a>
+  ${articleHtml
+    ? `<article style="line-height:1.7;color:#333;font-size:1.05em">${articleHtml}</article>`
+    : `<p style="line-height:1.7;color:#333;font-size:1.05em">${esc(guideExcerpt)}</p>`}
   <hr style="margin:24px 0;border:none;border-top:1px solid #eee" />
   <p style="color:#555;font-size:0.9em"><a href="${BASE}/care-guides" style="color:#1976d2">All Care Guides</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — NYC&rsquo;s Local Pet Store</a></p>
 </div>`;

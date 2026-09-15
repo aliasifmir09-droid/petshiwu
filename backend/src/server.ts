@@ -907,6 +907,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   if (target) {
     return res.redirect(301, target);
   }
+  const blogSlug = req.path.match(/^\/blog\/([^/]+)\/?$/);
+  if (blogSlug?.[1]) {
+    return res.redirect(301, `/learning/${blogSlug[1]}`);
+  }
   next();
 });
 

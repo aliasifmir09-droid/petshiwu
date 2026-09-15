@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ALL_NEIGHBORHOOD_PAGES } from './data/neighborhoodPages';
 import NeighborhoodCategoryPage from './pages/seo/NeighborhoodCategoryPage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -191,6 +191,11 @@ function StoreFrame({ children }: { children: React.ReactNode }) {
   );
 }
 
+function LegacyBlogRedirect() {
+  const { slug } = useParams();
+  return <Navigate to={slug ? `/learning/${slug}` : '/learning'} replace />;
+}
+
 function App() {
   const { setUser, setLoading } = useAuthStore();
   const { syncWithBackend } = useWishlistStore();
@@ -334,7 +339,7 @@ function App() {
                   <Route path="/:petType/:categorySlug" element={<Category />} />
                   <Route path="/category/:slug" element={<Category />} />
                   <Route path="/blog" element={<Navigate to="/learning" replace />} />
-                  <Route path="/blog/:slug" element={<Navigate to="/learning" replace />} />
+                  <Route path="/blog/:slug" element={<LegacyBlogRedirect />} />
                   <Route path="/learning" element={<Learning />} />
                   <Route path="/learning/:slug" element={<BlogDetail />} />
                   <Route path="/care-guides" element={<CareGuides />} />

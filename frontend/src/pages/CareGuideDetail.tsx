@@ -8,8 +8,8 @@ import DOMPurify from 'dompurify';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import ProductCard from '@/components/ProductCard';
-import { decodeHtmlEntities } from '@/utils/htmlUtils';
-import { generateBreadcrumbSchema } from '@/utils/seoUtils';
+import { decodeHtmlEntities, extractFaqPairs } from '@/utils/htmlUtils';
+import { generateBreadcrumbSchema, generateFAQSchema } from '@/utils/seoUtils';
 import AdSense from '@/components/AdSense';
 
 const CareGuideDetail = () => {
@@ -71,11 +71,28 @@ const CareGuideDetail = () => {
     );
   }
 
+  const guideUrl = `https://www.petshiwu.com/care-guides/${slug}`;
+  const faqSource = [
+    guide.content || '',
+    ...(guide.sections || [])
+      .slice()
+      .sort((a, b) => a.order - b.order)
+      .map((section) => `${section.title ? `<h2>${section.title}</h2>` : ''}${section.content || ''}`),
+  ].join('\n');
+  const faqPairs = extractFaqPairs(faqSource);
+
   return (
     <>
       <SEO
         title={guide.metaTitle || guide.title}
         description={guide.metaDescription || guide.excerpt || guide.title}
+        url={guideUrl}
+        type="article"
+        image={guide.featuredImage ? normalizeImageUrl(guide.featuredImage) : undefined}
+        author={guide.author?.name}
+        publishedTime={guide.publishedAt}
+        modifiedTime={guide.updatedAt || guide.publishedAt}
+        category={guide.category}
       />
       {/* Client-side structured data so browsers match the Article + BreadcrumbList
           schema the backend botRenderer already serves to crawlers. */}
@@ -86,12 +103,15 @@ const CareGuideDetail = () => {
           description: guide.metaDescription || guide.excerpt || guide.title,
           image: guide.featuredImage ? normalizeImageUrl(guide.featuredImage) : undefined,
           datePublished: guide.publishedAt,
-          dateModified: guide.publishedAt,
-          url: `https://www.petshiwu.com/care-guides/${slug}`,
+          dateModified: guide.updatedAt || guide.publishedAt,
+          url: guideUrl,
           author: guide.author ? { name: guide.author.name || 'Petshiwu' } : undefined,
           publisher: { name: 'Petshiwu', logo: 'https://www.petshiwu.com/logo.png' },
         }}
       />
+      {faqPairs.length >= 2 && (
+        <StructuredData type="faq" data={generateFAQSchema(faqPairs)} />
+      )}
       <StructuredData
         type="breadcrumb"
         data={generateBreadcrumbSchema([
