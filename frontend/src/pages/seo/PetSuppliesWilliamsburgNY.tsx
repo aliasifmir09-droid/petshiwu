@@ -7,9 +7,9 @@ const PetSuppliesWilliamsburgNY = () => (
   <SEOLandingPage
     keyword="pet-supplies-williamsburg-brooklyn-ny"
     title="Pet Supplies Williamsburg Brooklyn NY — Same-Day Delivery | Petshiwu"
-    description="Pet supply delivery to Williamsburg, Brooklyn. Dog food, cat food, pet accessories delivered same-day to North Side, South Side, East Williamsburg & Greenpoint. 10,000+ products, free shipping over $49."
+    description="Pet supply delivery to Williamsburg, Brooklyn. Dog food, cat food, pet accessories delivered same-day to North Side, South Side, East Williamsburg & Greenpoint. 4,000+ products, free shipping over $49."
     h1="Pet Supplies Delivered to Williamsburg, Brooklyn"
-    introContent="Petshiwu delivers premium pet food and supplies straight to your Williamsburg apartment. No car, no lugging bags on the L train — we bring everything from dry kibble to raw diets, litter, toys, and accessories right to your door. 10,000+ products from top brands, free delivery on orders over $49."
+    introContent="Petshiwu delivers premium pet food and supplies straight to your Williamsburg apartment. No car, no lugging bags on the L train — we bring everything from dry kibble to raw diets, litter, toys, and accessories right to your door. 4,000+ products from top brands, free delivery on orders over $49."
     problemPoints={[
       "Carrying heavy pet food bags on the L or G train",
       "Limited selection at local Williamsburg corner stores",
@@ -19,8 +19,8 @@ const PetSuppliesWilliamsburgNY = () => (
     ]}
     solutionPoints={[
       "Delivery to all Williamsburg streets — North Side, South Side, East Williamsburg, Greenpoint border",
-      "10,000+ products: dog food, cat food, bird supplies, fish food, reptile care",
-      "Premium brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Orijen, Wellness",
+      "4,000+ products: dog food, cat food, bird supplies, fish food, reptile care",
+      "Premium brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Wellness",
       "Free delivery on orders over $49 — most pet food orders qualify",
       "Raw diets, grain-free, prescription food, and specialty diets in stock",
       "Same-day delivery available in Brooklyn — order by noon"
@@ -36,7 +36,7 @@ const PetSuppliesWilliamsburgNY = () => (
       },
       {
         question: "Can I get raw or grain-free dog food delivered in Williamsburg?",
-        answer: "Yes — we stock a wide range of grain-free, raw, and specialty diets. Brands include Orijen, Acana, Stella & Chewy's, and Merrick. Delivered to your Williamsburg address."
+        answer: "Yes — we stock a wide range of grain-free, raw, and specialty diets. Brands include Acana, Stella & Chewy's, and Merrick. Delivered to your Williamsburg address."
       },
       {
         question: "Do you carry cat litter delivery for Williamsburg apartments?",

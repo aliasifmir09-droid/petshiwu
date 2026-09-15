@@ -174,6 +174,23 @@ function LegacyHashAuthRedirect() {
   return null;
 };
 
+function StoreFrame({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  const isCheckout = location.pathname === '/checkout';
+  return (
+    <div className="flex flex-col min-h-screen">
+      <ErrorBoundaryWithReporting>
+        {!isCheckout && <Header />}
+        <main className={isCheckout ? 'flex-1' : 'flex-1 pb-16 lg:pb-0'}>
+          {children}
+        </main>
+        {!isCheckout && <Footer />}
+        {!isCheckout && <BottomNav />}
+      </ErrorBoundaryWithReporting>
+    </div>
+  );
+}
+
 function App() {
   const { setUser, setLoading } = useAuthStore();
   const { syncWithBackend } = useWishlistStore();
@@ -275,7 +292,7 @@ function App() {
             logo: 'https://www.petshiwu.com/logo-square-512.png',
             image: 'https://www.petshiwu.com/logo-square-512.png',
             description:
-              'Same-day pet food and supplies delivery in New York City. Jackson Heights is office and warehouse only — not a walk-in store. 10,000+ products. Free delivery on orders over $49.',
+              `Same-day pet food and supplies delivery in New York City. Jackson Heights is office and warehouse only — not a walk-in store. 4,000+ products. Free delivery on orders over $49.`,
             telephone: '+1-800-259-2605',
             email: 'support@petshiwu.com',
             address: {
@@ -304,10 +321,7 @@ function App() {
             ],
           }}
         />
-        <div className="flex flex-col min-h-screen">
-          <ErrorBoundaryWithReporting>
-            <Header />
-            <main className="flex-1 pb-16 lg:pb-0">
+        <StoreFrame>
               <Suspense fallback={
                 <div className="container mx-auto px-4 py-12">
                   <LoadingSpinner size="lg" />
@@ -430,11 +444,7 @@ function App() {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
-            </main>
-            <Footer />
-            <BottomNav />
-          </ErrorBoundaryWithReporting>
-        </div>
+        </StoreFrame>
         <CookieConsent />
       </BrowserRouter>
     </QueryClientProvider>

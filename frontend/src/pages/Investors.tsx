@@ -14,7 +14,7 @@ const INVESTMENT_RANGES = [
 ];
 
 const STATS = [
-  { label: 'Products', value: '10,000+', icon: Package },
+  { label: 'Products', value: '4,000+', icon: Package },
   { label: 'NYC Boroughs Served', value: '5', icon: Globe2 },
   { label: 'US Pet Industry (2025)', value: '$150B+', icon: TrendingUp },
   { label: 'Free Shipping Threshold', value: '$49', icon: DollarSign },
@@ -39,7 +39,7 @@ const WHY = [
   {
     icon: Package,
     title: 'Scalable Infrastructure',
-    desc: '10,000+ SKUs live on day one. Full e-commerce stack, AI-powered product advisor, real-time inventory, and delivery logistics already operational. Capital goes toward growth, not setup.',
+    desc: '4,000+ SKUs live. Full e-commerce stack, AI-powered product advisor, real-time inventory, and delivery logistics already operational. Capital goes toward growth, not setup.',
   },
   {
     icon: ShieldCheck,

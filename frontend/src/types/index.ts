@@ -77,6 +77,8 @@ export interface Product {
   brand: string;
   category: Category | string;
   images: string[];
+  bunnyImage?: string;
+  cloudinaryImage?: string;
   video?: string; // Optional product video URL (Cloudinary supports video uploads)
   variants: ProductVariant[];
   basePrice: number;

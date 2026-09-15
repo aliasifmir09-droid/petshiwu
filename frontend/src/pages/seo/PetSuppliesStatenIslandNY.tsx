@@ -19,7 +19,7 @@ const PetSuppliesStatenIslandNY = () => (
     ]}
     solutionPoints={[
       "Delivery to all Staten Island neighborhoods — St. George, New Dorp, Tottenville, Stapleton, Richmond, Eltingville, Great Kills, and more",
-      "10,000+ products for every type of pet",
+      "4,000+ products for every type of pet",
       "All top national brands at competitive prices",
       "Free delivery on orders $49+ — saves on gas too",
       "Consistent stock — never backordered on the basics",
@@ -36,11 +36,11 @@ const PetSuppliesStatenIslandNY = () => (
       },
       {
         question: "What pet supplies can I order for delivery to Staten Island?",
-        answer: "Everything — dog food, cat food, dog treats, cat litter, bird seed, fish supplies, reptile food, small animal bedding, pet toys, leashes, collars, beds, carriers, and much more. Over 10,000 products available."
+        answer: "Everything — dog food, cat food, dog treats, cat litter, bird seed, fish supplies, reptile food, small animal bedding, pet toys, leashes, collars, beds, carriers, and much more. Thousands of products available."
       },
       {
         question: "Do you deliver premium dog food brands to Staten Island?",
-        answer: "Yes — we carry Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Orijen, and many more premium brands, all delivered to your Staten Island home."
+        answer: "Yes — we carry Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, and many more premium brands, all delivered to your Staten Island home."
       },
       {
         question: "How fast is delivery to Staten Island?",

@@ -69,6 +69,14 @@ describe('productPrice', () => {
     expect(catalogPetType('small pet')).toBe('small-pet');
   });
 
+  test('falls back to bunnyImage when images are empty', () => {
+    const p = product({
+      images: [],
+      bunnyImage: 'https://petshiwu-cdn.b-cdn.net/products/abc.jpg',
+    });
+    expect(getProductImage(p)).toBe('https://petshiwu-cdn.b-cdn.net/products/abc.jpg');
+  });
+
   test('overrides the Hills Ocean Fish wet-can photo with the dry bag packshot', () => {
     const p = product({
       slug: 'hills-prescription-diet-cd-multicare-urinary-cat-food-ocean-fish',

@@ -432,14 +432,15 @@ PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
 - Address: 37-68 74th Street, Jackson Heights, Queens, NY 11372
 - Phone: +1 (800) 259-2605 | Email: support@petshiwu.com
 - Support hours: 24/7 phone support at +1 (800) 259-2605
-- 10,000+ products for dogs, cats, birds, fish, reptiles, and small animals
-- Top brands: Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Orijen, Acana, Taste of the Wild
+- 4,000+ products for dogs, cats, birds, fish, reptiles, and small animals
+- Top brands: Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Iams, Pedigree, Nutro
 
 === SHIPPING ===
 - FREE shipping automatically applied on all orders over $49 — no code needed
-- NYC (Queens, Brooklyn, Manhattan, Bronx, Staten Island): 1–2 business day delivery
-- Same-day delivery: Select Queens neighborhoods (Jackson Heights, Elmhurst, Flushing, Astoria) — order by 12 PM EST
-- Nationwide standard shipping: 3–7 business days
+- NYC (Queens, Brooklyn, Manhattan, Bronx, Staten Island): same-day if ordered by 3 PM weekdays (1 PM weekends), otherwise next day
+- Same-day delivery: all five NYC boroughs — order by 3 PM EST weekdays (1 PM weekends)
+- Nationwide shipping is not available yet
+- Checkout may be paused: if orders are not open, tell the shopper we will start accepting orders soon and they can browse and save a cart
 - Tracking number emailed immediately after shipment
 - USA only — no international shipping
 
@@ -490,16 +491,16 @@ const CUSTOMER_SERVICE_QA = `
 PETSHIWU CUSTOMER SERVICE EXPERT Q&A:
 
 Q: How do I place an order?
-A: Browse our 10,000+ products, add items to your cart, and check out as a guest or with a free account. We accept all major credit cards, PayPal, Apple Pay, and Google Pay. You'll receive a confirmation email the moment your order is placed.
+A: Browse our 4,000+ products, add items to your cart, and check out as a guest or with a free account when we start accepting orders. We accept all major credit cards, PayPal, Apple Pay, and Google Pay. You'll receive a confirmation email the moment your order is placed.
 
 Q: Do I need an account to order?
 A: No — guest checkout is available. But a free account at petshiwu.com gives you order tracking, saved pet profiles, wishlist access, personalized recommendations, and member deals. It takes 30 seconds to create.
 
 Q: How do I track my order?
-A: Check petshiwu.com/track-order or log in and go to My Orders. Your tracking number is emailed as soon as your order ships. NYC orders arrive in 1–2 business days; nationwide takes 3–7 business days.
+A: Check petshiwu.com/track-order or log in and go to My Orders. Your tracking number is emailed as soon as your order ships. NYC orders arrive same-day before 11 PM if you order by cutoff, otherwise the next day.
 
 Q: Do you offer free shipping?
-A: Yes — all orders over $49 ship free automatically, no code needed. NYC customers get fast 1–2 day delivery. Same-day delivery is available in select Queens neighborhoods (Jackson Heights, Elmhurst, Flushing, Astoria) for orders before 12 PM.
+A: Yes — all orders over $49 ship free automatically, no code needed. Same-day delivery is available across all five NYC boroughs for orders before 3 PM weekdays (1 PM weekends).
 
 Q: How do I return something?
 A: Go to petshiwu.com/returns within 365 days of delivery, enter your order number, and select the items to return. Refunds go back to your original payment method in 5–7 business days. If your pet simply refuses to eat a food — return it, no questions asked.
@@ -538,7 +539,7 @@ Q: How do I contact customer support?
 A: Phone: +1 (800) 259-2605, 24 hours a day, 7 days a week. Email: support@petshiwu.com. Or use the Contact form at petshiwu.com/contact. We're real people who love pets and are happy to help.
 
 Q: Where is Petshiwu located?
-A: Jackson Heights, Queens, New York — 37-68 74th Street, NY 11372. We're proud to be a Queens-based pet store serving all of NYC and shipping nationwide.
+A: Jackson Heights, Queens, New York — 37-68 74th Street, NY 11372. We're a Queens-based pet store delivering across all five NYC boroughs. The address is warehouse only — not a walk-in store.
 
 Q: Do you ship outside the USA?
 A: Not at this time. We ship within the USA only — all 50 states.
@@ -685,7 +686,7 @@ CONVERSATION STYLE:
 PRODUCT RULES — CRITICAL:
 - For ANY question about products, brands, food, treats, toys, or supplies → ALWAYS end with [SEARCH:query]
 - This is MANDATORY for every product-related question — even if the product is in the snapshot above
-- The [SEARCH:] tag surfaces real, buyable products from our live 10,000+ inventory for the customer
+- The [SEARCH:] tag surfaces real, buyable products from our live 4,000+ inventory for the customer
 - Only ONE [SEARCH:] tag per response, placed at the very end before any closing sentence
 - Pick the most specific query possible: e.g. [SEARCH:grain-free cat food] not just [SEARCH:cat food]
 - If the question is about health/behavior only (no product needed), skip the search tag

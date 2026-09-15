@@ -58,8 +58,14 @@ export const PRODUCT_IMAGE_OVERRIDES: Record<string, string> = {
 export const getProductImages = (product: {
   slug?: string;
   images?: string[];
+  bunnyImage?: string;
+  cloudinaryImage?: string;
 }): string[] => {
-  const images = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
+  const images = [
+    ...(Array.isArray(product.images) ? product.images : []),
+    product.bunnyImage,
+    product.cloudinaryImage,
+  ].filter((image): image is string => Boolean(image));
   const override = product.slug ? PRODUCT_IMAGE_OVERRIDES[product.slug] : undefined;
   if (!override) return images;
   return [override, ...images.filter((image) => image !== override)];

@@ -43,7 +43,13 @@ function decodeXml(value) {
     .replace(/&gt;/g, '>');
 }
 
-function sanitizeLegacySitemapEntries(xml) {
+/** Scene7 and similar image URLs put raw & in query strings. That is invalid XML. */
+export function escapeBareXmlAmpersands(xml) {
+  return String(xml || '').replace(/&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9A-Fa-f]+);)/g, '&amp;');
+}
+
+export function sanitizeLegacySitemapEntries(xml) {
+  xml = escapeBareXmlAmpersands(xml);
   const seenPaths = new Set();
   let removed = 0;
   const sanitized = xml.replace(/<url>[\s\S]*?<\/url>/g, (block) => {
@@ -123,7 +129,7 @@ function parseXmlTag(token) {
  * Validate XML structure and the sitemap root/URL contract without adding a
  * runtime dependency solely for build-time validation.
  */
-function validateSitemapXml(xml) {
+export function validateSitemapXml(xml) {
   if (typeof xml !== 'string' || !xml.trim()) {
     throw new Error('Sitemap response is empty');
   }
@@ -328,7 +334,10 @@ async function generateSitemap() {
   throw new Error(`Sitemap generation failed; no valid backend sitemap was available. ${failures.join(' | ')}`);
 }
 
-generateSitemap().catch((error) => {
-  console.error(`❌ ${error.message}`);
-  process.exitCode = 1;
-});
+const isCli = process.argv[1] && path.resolve(fileURLToPath(import.meta.url)) === path.resolve(process.argv[1]);
+if (isCli) {
+  generateSitemap().catch((error) => {
+    console.error(`❌ ${error.message}`);
+    process.exitCode = 1;
+  });
+}

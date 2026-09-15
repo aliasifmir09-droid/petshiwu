@@ -19,7 +19,7 @@ const PetSuppliesManhattanNY = () => (
     ]}
     solutionPoints={[
       "Delivery throughout Manhattan — Upper West Side, Upper East Side, Harlem, Midtown, Hell's Kitchen, Chelsea, Tribeca, Financial District and more",
-      "10,000+ products including specialty and prescription diets",
+      "4,000+ products including specialty and prescription diets",
       "Top brands — Purina, Royal Canin, Blue Buffalo, Hill's Science Diet",
       "Free delivery on orders over $49",
       "Compact packaging options for Manhattan apartments",

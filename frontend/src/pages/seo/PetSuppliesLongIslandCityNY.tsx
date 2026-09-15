@@ -20,8 +20,8 @@ const PetSuppliesLongIslandCityNY = () => (
     solutionPoints={[
       "Queens-based delivery — we're right across the Queensboro Bridge",
       "Delivery to LIC, Hunters Point, Sunnyside, Woodside, and Astoria",
-      "10,000+ products from premium brands at competitive prices",
-      "Purina, Blue Buffalo, Royal Canin, Hill's, Orijen, Wellness, and more",
+      "4,000+ products from premium brands at competitive prices",
+      "Purina, Blue Buffalo, Royal Canin, Hill's, Wellness, and more",
       "Free delivery on orders over $49",
       "Dogs, cats, birds, fish, reptiles, and small animals all covered"
     ]}
@@ -36,7 +36,7 @@ const PetSuppliesLongIslandCityNY = () => (
       },
       {
         question: "What dog food brands do you carry for LIC delivery?",
-        answer: "We carry all top brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Orijen, Wellness, Merrick, and hundreds more. Over 10,000 products in total."
+        answer: "We carry all top brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Merrick, and hundreds more. Thousands of products in total."
       },
       {
         question: "Can I get pet supplies delivered to a high-rise in Long Island City?",

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { MapPin } from 'lucide-react';
 import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
+import { ORDERING_PAUSED, ORDERING_PAUSED_HEADLINE } from '@/config/ordering';
 import {
   LAST_ZIP_STORAGE_KEY,
   formatCountdownShort,
@@ -53,6 +54,39 @@ const TonightBar = () => {
     : countdown.passed
       ? `Cutoff passed · next-day NYC · no autoship`
       : `Order by ${countdown.cutoffLabel} · ${formatCountdownShort(countdown)}`;
+
+  if (ORDERING_PAUSED) {
+    return (
+      <div className="bg-[#1E3A8A] text-white">
+        <div className="container mx-auto px-3 lg:px-4 py-1.5 flex items-center gap-2">
+          <MapPin size={14} className="flex-shrink-0 text-amber-200 hidden sm:block" aria-hidden />
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] sm:text-xs font-semibold leading-tight truncate">
+              {ORDERING_PAUSED_HEADLINE}
+            </p>
+            <p className="text-[10px] sm:text-[11px] text-blue-100 leading-tight truncate">
+              {result ? result.headline : 'Browse now · same-day NYC when checkout opens'}
+            </p>
+          </div>
+          <label className="sr-only" htmlFor="tonight-zip">
+            Check same-day delivery ZIP
+          </label>
+          <input
+            id="tonight-zip"
+            type="text"
+            inputMode="numeric"
+            autoComplete="postal-code"
+            maxLength={5}
+            value={zip}
+            onChange={(e) => setZip(normalizeZip(e.target.value))}
+            placeholder="ZIP"
+            aria-label="Check same-day delivery by ZIP code"
+            className="w-[4.5rem] sm:w-20 h-7 px-2 rounded-md text-gray-900 text-xs font-semibold tracking-widest placeholder:tracking-normal placeholder:font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+          />
+        </div>
+      </div>
+    );
+  }
 
   if (!areOrdersOpen()) {
     return (

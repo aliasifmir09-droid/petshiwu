@@ -19,7 +19,7 @@ const PetSuppliesBronxNY = () => (
     ]}
     solutionPoints={[
       "Delivery to all Bronx neighborhoods — Fordham, Riverdale, Mott Haven, Hunts Point, Pelham Bay, Soundview, Morris Heights, and more",
-      "10,000+ products including specialty and senior pet food",
+      "4,000+ products including specialty and senior pet food",
       "Top brands: Purina, Blue Buffalo, Royal Canin, Hill's Science Diet",
       "Free delivery on orders $49+ — no membership required",
       "Same reliable quality as any Manhattan pet boutique",

@@ -1,5 +1,7 @@
 /** One NYC tonight promise — website, landing pages, and Google Business paste. */
 
+import { CATALOG_PRODUCT_COUNT_LABEL } from '@/config/catalog';
+
 export const TONIGHT = {
   weekdayCutoff: '3 PM',
   weekendCutoff: '1 PM',
@@ -43,7 +45,7 @@ export const GBP_DESCRIPTION = `Petshiwu is same-day pet food and supplies deliv
 
 Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM to all 5 boroughs. No autoship. Free delivery over $49.
 
-Shop 10,000+ products from Hill's Science Diet, Blue Buffalo, Royal Canin, Wellness, Orijen, and Kong.
+Shop ${CATALOG_PRODUCT_COUNT_LABEL} products from Hill's Science Diet, Blue Buffalo, Royal Canin, Wellness, and Purina.
 
 Queens-based. Delivery to your door.`;
 

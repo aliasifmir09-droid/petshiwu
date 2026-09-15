@@ -7,7 +7,7 @@ const PetSuppliesParkSlopeNY = () => (
   <SEOLandingPage
     keyword="pet-supplies-park-slope-brooklyn-ny"
     title="Pet Supplies Park Slope Brooklyn NY — Delivery to Your Door | Petshiwu"
-    description="Pet supply delivery to Park Slope, Brooklyn. Premium dog food, cat food, organic and natural pet products delivered to your Park Slope home. 10,000+ products, free shipping over $49."
+    description="Pet supply delivery to Park Slope, Brooklyn. Premium dog food, cat food, organic and natural pet products delivered to your Park Slope home. 4,000+ products, free shipping over $49."
     h1="Premium Pet Supplies Delivered to Park Slope, Brooklyn"
     introContent="Park Slope is one of Brooklyn's most pet-friendly neighborhoods — and Petshiwu is here to keep those pets well-fed and happy without a single trip to the store. We deliver premium, natural, and organic pet food and supplies directly to your Park Slope brownstone or apartment. Free delivery on orders over $49."
     problemPoints={[
@@ -20,8 +20,8 @@ const PetSuppliesParkSlopeNY = () => (
     solutionPoints={[
       "Delivery throughout Park Slope, Gowanus, Windsor Terrace, and Prospect Heights",
       "Organic, natural, and premium brands at competitive prices",
-      "10,000+ products: raw diets, grain-free, prescription food, natural treats",
-      "Top brands: Orijen, Wellness, Blue Buffalo, Royal Canin, Hill's Science Diet",
+      "4,000+ products: raw diets, grain-free, prescription food, natural treats",
+      "Top brands: Wellness, Blue Buffalo, Royal Canin, Hill's Science Diet",
       "Free delivery on orders over $49 — no boutique markup",
       "Dogs, cats, birds, fish, and small animals all covered"
     ]}
@@ -32,11 +32,11 @@ const PetSuppliesParkSlopeNY = () => (
       },
       {
         question: "Do you carry organic or natural pet food for Park Slope?",
-        answer: "Yes — we stock a wide range of organic, natural, and holistic pet food brands. Orijen, Acana, Wellness, Merrick, and many more. Perfect for health-conscious Park Slope pet parents."
+        answer: "Yes — we stock a wide range of organic, natural, and holistic pet food brands. Acana, Wellness, Merrick, and many more. Perfect for health-conscious Park Slope pet parents."
       },
       {
         question: "What dog food brands do you carry for delivery to Park Slope?",
-        answer: "We carry all major brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Orijen, Acana, Wellness, Merrick, Nutro, and many more. Over 10,000 products total."
+        answer: "We carry all major brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Acana, Wellness, Merrick, Nutro, and many more. Thousands of products total."
       },
       {
         question: "Can I get prescription pet food delivered to Park Slope?",

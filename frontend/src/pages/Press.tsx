@@ -66,9 +66,9 @@ const Press = () => {
               <div><strong>Founded:</strong> 2025</div>
               <div><strong>Headquarters:</strong> Jackson Heights, Queens, NY</div>
               <div><strong>Founder:</strong> Pet Chiwu</div>
-              <div><strong>Service Area:</strong> NYC all 5 boroughs + nationwide shipping</div>
-              <div><strong>Products:</strong> 10,000+ SKUs, premium brands including Hill&apos;s, Royal Canin, Purina</div>
-              <div><strong>Delivery:</strong> Same-day NYC, nationwide shipping</div>
+              <div><strong>Service Area:</strong> NYC all 5 boroughs</div>
+              <div><strong>Products:</strong> 4,000+ SKUs, premium brands including Hill&apos;s, Royal Canin, Purina</div>
+              <div><strong>Delivery:</strong> Same-day NYC</div>
               <div><strong>Discount Code:</strong> FREEDOM20 (20% off first order, max $10, no autoship)</div>
               <div><strong>Phone:</strong> +1 (800) 259-2605 (call center 24/7)</div>
             </div>
@@ -106,11 +106,11 @@ const Press = () => {
                 <li>No Autoship subscription required</li>
                 <li>Optional Autoship available for customer convenience (same price)</li>
                 <li>Same-day NYC delivery (order by 3 PM EST, delivered by 11 PM)</li>
-                <li>Applies to 10,000+ vet-curated products</li>
+                <li>Applies to 4,000+ vet-curated products</li>
               </ul>
 
               <h4 className="text-base font-bold mt-6">About Petshiwu</h4>
-              <p>Petshiwu is a Jackson Heights, Queens-based pet supply delivery service founded in 2025 by Pet Chiwu, a NYC native. The company delivers premium pet food, supplies, and prescription veterinary diets same-day across all five NYC boroughs from a warehouse at 37-68 74th Street. Petshiwu carries 10,000+ products from brands including Hill's, Royal Canin, Purina, Orijen, Acana, Stella & Chewy's, and many more.</p>
+              <p>Petshiwu is a Jackson Heights, Queens-based pet supply delivery service founded in 2025 by Pet Chiwu, a NYC native. The company delivers premium pet food, supplies, and prescription veterinary diets same-day across all five NYC boroughs from a warehouse at 37-68 74th Street. Petshiwu carries 4,000+ products from brands including Hill's, Royal Canin, Purina, Blue Buffalo, Wellness, and many more.</p>
 
               <h4 className="text-base font-bold mt-6">Media inquiries</h4>
               <p>Press contact: <a href="mailto:press@petshiwu.com" className="text-[#1E3A8A] underline">press@petshiwu.com</a> | <a href="tel:+18002592605" className="text-[#1E3A8A] underline">+1 (800) 259-2605</a></p>

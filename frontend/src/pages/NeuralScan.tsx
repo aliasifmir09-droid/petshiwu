@@ -116,7 +116,7 @@ const NeuralScan = () => {
     <div className="relative min-h-screen overflow-hidden bg-[#030712] text-cyan-50">
       <SEO
         title="Neural Twin Scan | Petshiwu"
-        description="Scan your pet’s photo. Petshiwu Neural builds a live biometric twin — breed, life stage, calorie protocol — and matches a same-day product kit from 10,000+ SKUs."
+        description="Scan your pet’s photo. Petshiwu Neural builds a live biometric twin — breed, life stage, calorie protocol — and matches a same-day product kit from 4,000+ SKUs."
         url="/neural"
         noindex={true}
       />
@@ -243,7 +243,7 @@ const NeuralScan = () => {
                   <li>• Life stage, size class, coat, estimated mass</li>
                   <li>• Daily calorie protocol (dogs & cats)</li>
                   <li>• Breed-typical watch-outs — not a diagnosis</li>
-                  <li>• A live kit pulled from 10,000+ in-stock SKUs</li>
+                  <li>• A live kit pulled from 4,000+ in-stock SKUs</li>
                 </ul>
                 <p className="mt-6 text-xs text-cyan-200/50 leading-relaxed">
                   Neural Twin is a shopping intelligence layer. It does not replace a veterinarian. For symptoms, use the{' '}

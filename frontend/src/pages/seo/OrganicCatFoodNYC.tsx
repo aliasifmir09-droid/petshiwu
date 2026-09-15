@@ -9,7 +9,7 @@ const OrganicCatFoodNYC = () => {
     <SEOLandingPage
       keyword="organic-cat-food-nyc"
       title="Organic Cat Food NYC — Natural & Non-GMO Delivery | Petshiwu"
-      description="Organic and natural cat food delivered to all NYC boroughs. No artificial preservatives, no by-products, no fillers. Shop Wellness, Blue Buffalo, Orijen and more. Free delivery over $49."
+      description="Organic and natural cat food delivered to all NYC boroughs. No artificial preservatives, no by-products, no fillers. Shop Wellness, Blue Buffalo and more. Free delivery over $49."
       h1="Organic & Natural Cat Food Delivered in New York City"
       introContent="More NYC cat owners are reading ingredient labels — and not liking what they find in conventional cat food. Artificial colors, vague 'meat meal' sources, carrageenan, synthetic preservatives. If you want cleaner food for your cat, Petshiwu stocks natural and organic-certified cat food brands and delivers them to every NYC neighborhood. Free shipping on orders over $49."
       problemPoints={[
@@ -22,7 +22,7 @@ const OrganicCatFoodNYC = () => {
       solutionPoints={[
         "Curated selection of natural and organic-grade cat food brands",
         "Clear ingredient standards — named proteins, no artificial colors or preservatives",
-        "Blue Buffalo, Wellness, and Orijen — all available for NYC delivery",
+        "Blue Buffalo, Wellness, and Wellness — all available for NYC delivery",
         "Free delivery to all 5 boroughs on orders over $49",
         "No membership fees — just quality cat food at competitive prices",
         "Fast delivery from our Queens-based operation — no long national shipping waits"
@@ -34,7 +34,7 @@ const OrganicCatFoodNYC = () => {
         },
         {
           question: "What natural cat food brands do you carry?",
-          answer: "We carry Wellness Complete Health, Blue Buffalo True Solutions, Orijen Cat & Kitten, and other premium natural cat food brands. These formulas use named animal proteins as first ingredients with no artificial additives."
+          answer: "We carry Wellness Complete Health, Blue Buffalo True Solutions, Wellness Kitten, and other premium natural cat food brands. These formulas use named animal proteins as first ingredients with no artificial additives."
         },
         {
           question: "Is grain-free cat food the same as organic cat food?",

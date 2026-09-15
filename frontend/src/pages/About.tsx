@@ -8,7 +8,7 @@ const About = () => {
     <>
       <SEO
       title="About Petshiwu | Your Trusted Partner in Pet Care"
-      description="Learn about Petshiwu's 15+ years of pet care experience, our passion for pets, and our commitment to quality, community, and convenient online shopping across the USA."
+      description="Learn about Petshiwu's pet care experience, our passion for pets, and same-day delivery across all five NYC boroughs."
       keywords="about Petshiwu, pet delivery NYC, Jackson Heights warehouse, premium pet products"
       url="/about"
       />
@@ -61,7 +61,7 @@ const About = () => {
                 </h1>
                 <p className="text-base sm:text-lg text-blue-100 max-w-xl mb-6">
                   Rooted in a deep love for animals and over a decade of hands-on pet care experience,
-                  Petshiwu brings premium products and expert guidance to pet parents across the USA.
+                  Petshiwu brings premium products and expert guidance to pet parents across New York City.
                 </p>
                 <p className="text-sm sm:text-base text-blue-100/90 max-w-xl">
                   We&apos;re here to support the special bond you share with your furry, feathered, or scaly
@@ -78,7 +78,7 @@ const About = () => {
                       <p className="text-xs uppercase tracking-wide text-blue-100/80 font-semibold">
                         Our Story
                       </p>
-                      <p className="text-lg font-bold">A Passion for Pets, Now Online in the USA</p>
+                      <p className="text-lg font-bold">A Passion for Pets, Now Online in NYC</p>
                     </div>
                   </div>
                   <p className="text-sm sm:text-base text-blue-50 mb-4">
@@ -153,7 +153,7 @@ const About = () => {
                   Convenience & Reliability
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Enjoy easy online shopping, fast shipping across the USA, and a smooth experience from
+                  Enjoy easy online shopping, same-day delivery across NYC, and a smooth experience from
                   browsing to delivery—so your pet never has to wait long for their favorites.
                 </p>
               </div>
@@ -218,7 +218,7 @@ const About = () => {
                       </h3>
                       <p className="text-sm text-gray-600">
                         We&apos;re dedicated to building lasting relationships with our customers and
-                        their pets, fostering a vibrant, supportive pet-loving community across the USA.
+                        their pets, fostering a vibrant, supportive pet-loving community across New York City.
                       </p>
                     </div>
                   </div>

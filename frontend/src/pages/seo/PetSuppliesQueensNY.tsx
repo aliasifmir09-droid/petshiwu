@@ -20,7 +20,7 @@ const PetSuppliesQueensNY = () => (
     ]}
     solutionPoints={[
       "Delivery to all Queens neighborhoods — Flushing, Astoria, Jackson Heights, Forest Hills, Jamaica, Bayside, Woodside, Elmhurst, Ridgewood, Howard Beach, and more",
-      "10,000+ products for dogs, cats, birds, fish, reptiles, and small animals",
+      "4,000+ products for dogs, cats, birds, fish, reptiles, and small animals",
       "Top brands at fair prices — Purina, Blue Buffalo, Royal Canin, Hill's, Wellness, Iams, and more",
       "Free delivery on orders over $49 — no membership required",
       "Same-day: order by 3 PM weekdays (1 PM weekends), before 11 PM",
@@ -37,7 +37,7 @@ const PetSuppliesQueensNY = () => (
       },
       {
         question: "What pet brands do you carry for Queens customers?",
-        answer: "We stock all the top brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Orijen, Iams, Pedigree, Nutro, Nature's Recipe, and hundreds more. Over 10,000 products in total."
+        answer: "We stock all the top brands: Purina Pro Plan, Blue Buffalo, Royal Canin, Hill's Science Diet, Wellness, Iams, Pedigree, Nutro, Nature's Recipe, and hundreds more. Thousands of products in total."
       },
       {
         question: "Can I get cat food delivered in Queens?",

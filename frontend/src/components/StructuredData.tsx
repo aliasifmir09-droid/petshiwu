@@ -180,7 +180,7 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
         '@type': 'WebSite',
         name: 'Petshiwu',
         url: 'https://www.petshiwu.com',
-        description: 'Premium pet food, toys and supplies delivered to Queens, Brooklyn and all of NYC. 10,000+ products, free shipping over $49.',
+        description: 'Premium pet food, toys and supplies delivered to Queens, Brooklyn and all of NYC. 4,000+ products, free shipping over $49.',
         potentialAction: {
           '@type': 'SearchAction',
           target: 'https://www.petshiwu.com/products?search={search_term_string}',

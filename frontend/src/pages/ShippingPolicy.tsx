@@ -6,7 +6,7 @@ const ShippingPolicy = () => {
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <SEO
         title="Shipping Information | Petshiwu — Same-Day NYC Delivery"
-        description="Petshiwu ships pet supplies across all 50 US states. Same-day delivery available across NYC: order before 3 PM EST, delivered before 11 PM. Free shipping over $49. Store launches August 28, 2026."
+        description="Petshiwu delivers pet supplies same-day across all five NYC boroughs. Order before 3 PM EST, delivered before 11 PM. Free shipping over $49."
         url="/shipping"
       />
 
@@ -20,18 +20,12 @@ const ShippingPolicy = () => {
         <p className="text-sm mt-2 opacity-90">All 5 NYC boroughs. Free shipping on orders $49+.</p>
       </div>
 
-      {/* Launch countdown banner */}
-      <div className="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-5 mb-10 text-center">
-        <div className="text-xl font-black text-yellow-900 mb-1">🚀 Petshiwu Launches August 28, 2026</div>
-        <p className="text-yellow-800">Be the first to order. Sign up for early access + launch-day discounts.</p>
-      </div>
-
       {/* Quick summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
         {[
           { icon: '⚡', title: 'Same-Day NYC', desc: 'Order before 3 PM → delivered by 11 PM' },
           { icon: '🚚', title: 'Free Shipping', desc: 'On all orders over $49' },
-          { icon: '📦', title: 'Standard Delivery', desc: '2 business days nationwide' },
+          { icon: '📦', title: 'After cutoff', desc: 'Next-day across the five boroughs' },
         ].map((item, i) => (
           <div key={i} className="bg-blue-50 rounded-xl p-5 text-center border border-blue-100">
             <div className="text-3xl mb-2">{item.icon}</div>
@@ -67,23 +61,17 @@ const ShippingPolicy = () => {
               <thead>
                 <tr className="bg-gray-100">
                   <th className="text-left p-3 border border-gray-200 font-semibold">Order Total</th>
-                  <th className="text-left p-3 border border-gray-200 font-semibold">Same-Day NYC</th>
-                  <th className="text-left p-3 border border-gray-200 font-semibold">Standard Shipping</th>
-                  <th className="text-left p-3 border border-gray-200 font-semibold">Express Shipping</th>
+                  <th className="text-left p-3 border border-gray-200 font-semibold">NYC Delivery</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td className="p-3 border border-gray-200">Under $49</td>
                   <td className="p-3 border border-gray-200 font-semibold text-blue-700">$6</td>
-                  <td className="p-3 border border-gray-200">$5.99</td>
-                  <td className="p-3 border border-gray-200">$14.99</td>
                 </tr>
                 <tr className="bg-green-50">
                   <td className="p-3 border border-gray-200 font-semibold">$49 and over</td>
                   <td className="p-3 border border-gray-200 font-bold text-green-700">FREE</td>
-                  <td className="p-3 border border-gray-200 font-semibold text-green-700">FREE</td>
-                  <td className="p-3 border border-gray-200">$9.99</td>
                 </tr>
               </tbody>
             </table>
@@ -94,23 +82,22 @@ const ShippingPolicy = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-3">Delivery Times</h2>
           <ul className="list-disc pl-6 space-y-2">
             <li><strong>Same-Day NYC:</strong> Order before 3 PM EST → delivered before 11 PM same day. Order before 1 PM EST on weekends/holidays.</li>
-            <li><strong>Standard Shipping:</strong> 2 business days nationwide after order confirmation (improved from 5 days).</li>
-            <li><strong>Express Shipping:</strong> 1-2 business days nationwide after order confirmation.</li>
+            <li><strong>After cutoff:</strong> Next-day delivery across all five NYC boroughs.</li>
             <li>All orders placed before 2 PM EST on business days are processed the same day.</li>
             <li>Orders placed after 2 PM EST, on weekends, or holidays are processed the next business day.</li>
           </ul>
           <p className="mt-3 text-sm text-gray-500">
-            Note: Delivery times are estimates and not guaranteed. Same-day NYC orders placed before the 3 PM cutoff are guaranteed to arrive before 11 PM. Nationwide shipping times may vary due to carrier delays, weather, or high order volumes.
+            Note: Delivery times are estimates and not guaranteed. Same-day NYC orders placed before the 3 PM cutoff are guaranteed to arrive before 11 PM. Times may vary due to weather or high order volumes.
           </p>
         </section>
 
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-3">Where We Ship</h2>
           <p>
-            <strong>Same-day delivery:</strong> All 5 NYC boroughs (Manhattan, Brooklyn, Queens, Bronx, Staten Island), plus Jersey City, Hoboken, Long Island City, and select Westchester addresses.
+            <strong>Same-day delivery:</strong> All 5 NYC boroughs (Manhattan, Brooklyn, Queens, Bronx, Staten Island). Long Island City is included as part of Queens.
           </p>
           <p className="mt-2">
-            <strong>Standard + Express nationwide:</strong> All 50 US states and Washington D.C. We are based in Jackson Heights, NY and offer particularly fast delivery across the New York City metro area.
+            <strong>Delivery area:</strong> All 5 NYC boroughs (Manhattan, Brooklyn, Queens, Bronx, Staten Island). We are based in Jackson Heights, NY. Nationwide shipping is not available yet.
           </p>
           <p className="mt-2">
             International shipping is not available at this time.
