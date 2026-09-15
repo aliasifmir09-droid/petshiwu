@@ -11,7 +11,7 @@ import { canonicalPetSlug, classifyRoute, INDEXABLE_LANDING_PATHS } from '../seo
 /**
  * Escape XML special characters
  */
-const escapeXml = (unsafe: string): string => {
+export const escapeXml = (unsafe: string): string => {
   return unsafe
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -19,6 +19,10 @@ const escapeXml = (unsafe: string): string => {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;');
 };
+
+/** Scene7 image URLs put raw & in query strings. That is invalid XML and GSC reports 0 sitemap URLs. */
+export const escapeBareXmlAmpersands = (xml: string): string =>
+  String(xml || '').replace(/&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9A-Fa-f]+);)/g, '&amp;');
 
 /**
  * Generate XML sitemap dynamically
@@ -195,7 +199,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
                     const imageUrl = typeof image === 'string' ? image : (image.url || image);
                     if (imageUrl && imageUrl.trim() !== '') {
                       xml += '    <image:image>\n';
-                      xml += `      <image:loc>${imageUrl}</image:loc>\n`;
+                      xml += `      <image:loc>${escapeXml(String(imageUrl))}</image:loc>\n`;
                       if (product.name) {
                         xml += `      <image:title>${escapeXml(product.name)}</image:title>\n`;
                       }
@@ -345,7 +349,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
     });
 
     xml += '</urlset>';
-    xml = filterSitemapXml(xml);
+    xml = escapeBareXmlAmpersands(filterSitemapXml(xml));
 
     // Set proper content type with charset for XML
     res.setHeader('Content-Type', 'application/xml; charset=utf-8');
