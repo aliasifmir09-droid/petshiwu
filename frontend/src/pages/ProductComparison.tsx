@@ -466,7 +466,7 @@ const ProductComparison = () => {
               {products.map((product) => (
                 <td key={product._id} className="p-4 text-center">
                   <span className={product.inStock ? 'text-green-600' : 'text-red-600'}>
-                    {product.inStock ? 'In Stock' : 'Out of Stock'}
+                    {product.inStock ? 'Ready to ship' : 'Out of stock'}
                   </span>
                 </td>
               ))}
