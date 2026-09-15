@@ -214,7 +214,10 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
 
                 {/* Stock Status — no unit counts until inventory is maintained */}
                 {isReadyToShip ? (
-                  <p className="text-green-700 font-medium">Ready to ship</p>
+                  <>
+                    <p className="text-green-700 font-medium">Ready to ship</p>
+                    <p className="text-xs text-slate-500">Tonight in NYC · packed in Queens · adds 1</p>
+                  </>
                 ) : (
                   <p className="text-red-600 font-medium">Out of stock</p>
                 )}

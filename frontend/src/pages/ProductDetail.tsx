@@ -26,6 +26,7 @@ import ProductSchema from '@/components/ProductSchema';
 import { safeError } from '@/utils/safeLogger';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import ProductVariantPicker from '@/components/ProductVariantPicker';
+import TonightPromiseCard from '@/components/TonightPromiseCard';
 
 // Lazy load heavy dependencies
 const RecentlyViewed = lazy(() => import('@/components/RecentlyViewed'));
@@ -825,7 +826,7 @@ const ProductDetail = () => {
           />
 
           {/* Stock Availability — no unit counts until inventory is maintained */}
-          <div className="mb-6">
+          <div className="mb-4">
             {isReadyToShip ? (
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 bg-green-500 rounded-full"></span>
@@ -838,6 +839,8 @@ const ProductDetail = () => {
               </div>
             )}
           </div>
+
+          {isReadyToShip ? <TonightPromiseCard variant="pdp" /> : null}
 
           {/* Actions */}
           <div className="mb-8">
@@ -852,8 +855,13 @@ const ProductDetail = () => {
               }`}
             >
               <ShoppingCart size={22} />
-              {isReadyToShip ? 'Add to Cart' : 'Out of Stock'}
+              {isReadyToShip ? 'Add to cart' : 'Out of Stock'}
             </button>
+            {isReadyToShip ? (
+              <p className="text-xs text-slate-500 text-center mt-2">
+                Adds 1 bag. Change quantity in your cart.
+              </p>
+            ) : null}
             {/* Secondary row — wishlist + share */}
             <div className="flex gap-3 mt-3">
               <button
@@ -1359,8 +1367,11 @@ const ProductDetail = () => {
             }`}
           >
             <ShoppingCart size={20} />
-            {isReadyToShip ? 'Add to Cart' : 'Out of Stock'}
+            {isReadyToShip ? 'Add to cart' : 'Out of Stock'}
           </button>
+          {isReadyToShip ? (
+            <p className="text-[11px] text-slate-500 text-center mt-1.5">Tonight in NYC · packed in Queens</p>
+          ) : null}
         </div>
       )}
     </div>
