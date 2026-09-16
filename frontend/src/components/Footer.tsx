@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
+import { Facebook, Instagram } from 'lucide-react';
 import api from '@/services/api';
 import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
 import { ORDERING_PAUSED, ORDERING_PAUSED_HEADLINE } from '@/config/ordering';
+import { FOOTER_SOCIAL } from '@/config/social';
 
 const Footer = () => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -53,42 +54,21 @@ const Footer = () => {
             </p>
             {/* Social media links */}
             <div className="flex gap-4">
-              <a
-                href="https://www.facebook.com/petshiwu"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white transition-colors"
-                aria-label="Petshiwu on Facebook"
-              >
-                <Facebook size={20} />
-              </a>
-              <a
-                href="https://twitter.com/petshiwu"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white transition-colors"
-                aria-label="Petshiwu on Twitter / X"
-              >
-                <Twitter size={20} />
-              </a>
-              <a
-                href="https://www.instagram.com/petshiwu"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white transition-colors"
-                aria-label="Petshiwu on Instagram"
-              >
-                <Instagram size={20} />
-              </a>
-              <a
-                href="https://www.youtube.com/@petshiwu"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white transition-colors"
-                aria-label="Petshiwu on YouTube"
-              >
-                <Youtube size={20} />
-              </a>
+              {FOOTER_SOCIAL.map((item) => {
+                const Icon = item.network === 'facebook' ? Facebook : Instagram;
+                return (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-white transition-colors"
+                    aria-label={`Petshiwu on ${item.name}`}
+                  >
+                    <Icon size={20} />
+                  </a>
+                );
+              })}
             </div>
           </div>
 

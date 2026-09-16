@@ -17,8 +17,8 @@ export const MAX_QUANTITY_PER_ITEM = 99;
 export const MAX_PRODUCT_IMAGES = 10;
 export const MAX_PRODUCT_DESCRIPTION_LENGTH = 5000;
 // Order configuration
-export const ORDER_CANCELLATION_WINDOW_HOURS = 24; // Hours after order creation
-export const RETURN_WINDOW_DAYS = 30; // Days after delivery
+export const ORDER_CANCELLATION_WINDOW_HOURS = 2; // Hours after order creation, if unshipped
+export const RETURN_WINDOW_DAYS = 365; // Days after delivery
 // Review configuration
 export const MIN_REVIEW_LENGTH = 10;
 export const MAX_REVIEW_LENGTH = 1000;

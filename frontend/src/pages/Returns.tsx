@@ -6,13 +6,17 @@ import { Package, RotateCcw, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { Link } from 'react-router-dom';
+import SEO from '@/components/SEO';
+import { useAuthStore } from '@/stores/authStore';
 
 const Returns = () => {
   const { toast, hideToast } = useToast();
+  const { isAuthenticated, isLoading: authLoading } = useAuthStore();
 
   const { data: returns, isLoading } = useQuery({
     queryKey: ['returns'],
-    queryFn: () => returnService.getMyReturns()
+    queryFn: () => returnService.getMyReturns(),
+    enabled: isAuthenticated,
   });
 
   const getStatusIcon = (status: string) => {
@@ -58,6 +62,47 @@ const Returns = () => {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <LoadingSpinner size="lg" ariaLabel="Loading returns" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <>
+        <SEO
+          title="Start a Return | Petshiwu"
+          description="Sign in to start a Petshiwu return. Unused items can be returned within 365 days of delivery."
+          url="/returns"
+          noindex={true}
+        />
+        <div className="container mx-auto px-4 py-12 max-w-xl">
+          <h1 className="text-3xl font-bold mb-4">Start a return</h1>
+          <p className="text-gray-700 mb-6">
+            Sign in to request a return on an order. Unused items in original packaging can be returned within 365 days of delivery.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link
+              to="/login?redirect=/returns"
+              className="inline-flex justify-center px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700"
+            >
+              Sign in
+            </Link>
+            <Link
+              to="/return-policy"
+              className="inline-flex justify-center px-6 py-3 border border-primary-600 text-primary-600 rounded-lg font-semibold hover:bg-primary-50"
+            >
+              Read the 365-day return policy
+            </Link>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-12">
@@ -68,7 +113,9 @@ const Returns = () => {
 
   if (!returns || returns.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-12">
+      <>
+        <SEO title="My Returns | Petshiwu" description="Track your Petshiwu return requests." url="/returns" noindex={true} />
+        <div className="container mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold mb-6">My Returns</h1>
         <EmptyState
           icon={Package}
@@ -82,11 +129,14 @@ const Returns = () => {
         </p>
         {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
       </div>
+      </>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <>
+      <SEO title="My Returns | Petshiwu" description="Track your Petshiwu return requests." url="/returns" noindex={true} />
+      <div className="container mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold mb-6">My Returns</h1>
 
       <div className="space-y-6">
@@ -186,6 +236,7 @@ const Returns = () => {
 
       {toast.isVisible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
     </div>
+    </>
   );
 };
 

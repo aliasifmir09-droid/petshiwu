@@ -14,6 +14,7 @@ import { initAnalytics, trackPageView } from './utils/analytics';
 import BottomNav from './components/BottomNav';
 import CookieConsent from './components/CookieConsent';
 import StructuredData from './components/StructuredData';
+import { SOCIAL_PROFILES } from './config/social';
 import RequireAuth from './components/RequireAuth';
 import Home from './pages/Home';
 import { hashAuthRedirect } from './utils/hashAuthRedirect';
@@ -319,11 +320,7 @@ function App() {
             areaServed: ['Queens', 'Brooklyn', 'Manhattan', 'Bronx', 'Staten Island', 'New York City'],
             paymentAccepted: 'Cash, Credit Card, Debit Card',
             currenciesAccepted: 'USD',
-            sameAs: [
-              'https://www.facebook.com/petshiwu',
-              'https://www.instagram.com/petshiwu',
-              'https://twitter.com/petshiwu',
-            ],
+            sameAs: [...SOCIAL_PROFILES],
           }}
         />
         <StoreFrame>

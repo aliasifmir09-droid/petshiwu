@@ -891,8 +891,8 @@ const Checkout = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Checkout Form */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Shipping Information */}
-              <CheckoutStep step="1" title="Delivery" subtitle="Where should this care package land tonight?">
+              {!ORDERING_PAUSED && (
+              <CheckoutStep step="1" title="Delivery" subtitle="Where should this order land?">
 
                 {/* Logged-in user info display */}
                 {isAuthenticated && user && (
@@ -1079,6 +1079,7 @@ const Checkout = () => {
                   </div>
                 )}
               </CheckoutStep>
+              )}
 
               {/* Payment Method */}
               <CheckoutStep
@@ -1383,7 +1384,9 @@ const Checkout = () => {
                     </div>
                   )}
                   <div className="pt-1">
-                    {!couponCode ? (
+                    {ORDERING_PAUSED ? (
+                      <p className="text-xs text-stone-500">Promo codes unlock when checkout opens.</p>
+                    ) : !couponCode ? (
                       <div className="flex gap-2">
                         <input
                           type="text"
@@ -1408,7 +1411,7 @@ const Checkout = () => {
                         <button type="button" onClick={handleRemoveCoupon} className="text-stone-400 hover:text-stone-700 text-xs ml-2">Remove</button>
                       </div>
                     )}
-                    {!couponCode && !couponMessage && (
+                    {!ORDERING_PAUSED && !couponCode && !couponMessage && (
                       <p className="text-xs text-stone-500 mt-1.5">
                         First order: FREEDOM20 · 20% off, max $10. Reorder {ASK_COUPON} · {ASK_DISCOUNT_COPY}. Autoship {AUTOSHIP_COUPON} · {AUTOSHIP_DISCOUNT_COPY}.
                       </p>
@@ -1417,7 +1420,9 @@ const Checkout = () => {
                       <p className={`text-xs mt-1.5 ${couponValid ? 'text-emerald-600' : 'text-red-500'}`}>{couponMessage}</p>
                     )}
                   </div>
-                  <CheckoutCharityCard amount={donationAmount} onChange={setDonationAmount} />
+                  {!ORDERING_PAUSED && (
+                    <CheckoutCharityCard amount={donationAmount} onChange={setDonationAmount} />
+                  )}
                   {donationAmount > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-rose-600 font-medium">Shelter donation</span>

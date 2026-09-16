@@ -369,7 +369,6 @@ export const generateOrganizationSchema = (): object => {
     sameAs: [
       'https://www.facebook.com/petshiwu',
       'https://www.instagram.com/petshiwu',
-      'https://twitter.com/petshiwu'
     ]
   };
 };

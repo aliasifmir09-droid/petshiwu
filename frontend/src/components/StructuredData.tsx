@@ -169,7 +169,6 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
         sameAs: [
           'https://www.facebook.com/petshiwu',
           'https://www.instagram.com/petshiwu',
-          'https://twitter.com/petshiwu'
         ]
       };
       break;
@@ -332,7 +331,6 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
       (schema as any).sameAs = business.sameAs || [
         'https://www.facebook.com/petshiwu',
         'https://www.instagram.com/petshiwu',
-        'https://twitter.com/petshiwu'
       ];
       break;
 

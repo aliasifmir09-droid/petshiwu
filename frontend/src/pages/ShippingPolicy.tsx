@@ -1,34 +1,47 @@
 import SEO from '@/components/SEO';
 import { Link } from 'react-router-dom';
+import { ORDERING_PAUSED, ORDERING_PAUSED_HEADLINE } from '@/config/ordering';
+import {
+  DAMAGED_ITEM_REPORT_DAYS,
+  DELIVERY_STATEMENT,
+  POLICY_EFFECTIVE_DATE,
+  RETURN_WINDOW_DAYS,
+} from '@/config/storePolicies';
+import { TONIGHT } from '@/data/tonightDelivery';
 
 const ShippingPolicy = () => {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <SEO
         title="Shipping Information | Petshiwu — Same-Day NYC Delivery"
-        description="Petshiwu delivers pet supplies same-day across all five NYC boroughs. Order before 3 PM EST, delivered before 11 PM. Free shipping over $49."
+        description="Petshiwu same-day NYC delivery: order by 3 PM ET weekdays or 1 PM ET weekends, delivered before 11 PM. Free over $49. After cutoff, next-day in all five boroughs."
         url="/shipping"
       />
 
       <h1 className="text-4xl font-black mb-2 text-gray-900">Shipping Information</h1>
-      <p className="text-gray-500 mb-8">Last updated: June 24, 2026</p>
+      <p className="text-gray-500 mb-8">Effective {POLICY_EFFECTIVE_DATE}</p>
 
-      {/* Hero launch banner */}
-      <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-2xl p-6 mb-8 text-center shadow-lg">
-        <div className="text-2xl font-black mb-1">⚡ Same-Day NYC Delivery</div>
-        <p className="text-lg">Order before 3 PM EST — Delivered before 11 PM, today.</p>
-        <p className="text-sm mt-2 opacity-90">All 5 NYC boroughs. Free shipping on orders $49+.</p>
+      {ORDERING_PAUSED && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-8">
+          <p className="font-bold text-[#1E3A8A] mb-1">{ORDERING_PAUSED_HEADLINE}</p>
+          <p className="text-sm text-stone-700">
+            Checkout is paused, so nothing ships today. The times below are the delivery rules that apply when we start accepting orders.
+          </p>
+        </div>
+      )}
+
+      <div className="bg-[#0B1F4A] text-white rounded-2xl p-6 mb-8">
+        <p className="text-sm uppercase tracking-widest text-amber-200 font-semibold mb-2">One delivery statement</p>
+        <p className="text-lg font-semibold leading-relaxed">{DELIVERY_STATEMENT}</p>
       </div>
 
-      {/* Quick summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
         {[
-          { icon: '⚡', title: 'Same-Day NYC', desc: 'Order before 3 PM → delivered by 11 PM' },
-          { icon: '🚚', title: 'Free Shipping', desc: 'On all orders over $49' },
-          { icon: '📦', title: 'After cutoff', desc: 'Next-day across the five boroughs' },
-        ].map((item, i) => (
-          <div key={i} className="bg-blue-50 rounded-xl p-5 text-center border border-blue-100">
-            <div className="text-3xl mb-2">{item.icon}</div>
+          { title: 'Weekdays', desc: `Order by ${TONIGHT.weekdayCutoff} ET → before ${TONIGHT.deliverBy}` },
+          { title: 'Weekends', desc: `Order by ${TONIGHT.weekendCutoff} ET → before ${TONIGHT.deliverBy}` },
+          { title: 'After cutoff', desc: 'Next-day across the five boroughs' },
+        ].map((item) => (
+          <div key={item.title} className="bg-blue-50 rounded-xl p-5 text-center border border-blue-100">
             <h3 className="font-bold text-gray-900">{item.title}</h3>
             <p className="text-sm text-gray-600 mt-1">{item.desc}</p>
           </div>
@@ -36,42 +49,32 @@ const ShippingPolicy = () => {
       </div>
 
       <div className="prose prose-gray max-w-none space-y-8 text-gray-700 leading-relaxed">
-
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Same-Day NYC Delivery</h2>
-          <div className="bg-green-50 border-l-4 border-green-600 p-5 rounded">
-            <p className="font-bold text-gray-900 mb-2">Our promise to NYC pet owners:</p>
-            <ul className="list-disc pl-6 space-y-2">
-              <li><strong>Order before 3:00 PM EST</strong> on any business day.</li>
-              <li><strong>Delivery before 11:00 PM</strong> the same day.</li>
-              <li>Available across <strong>all 5 NYC boroughs</strong>: Manhattan, Brooklyn, Queens, Bronx, Staten Island.</li>
-              <li>Plus Jersey City, Hoboken, Long Island City, and select Westchester addresses.</li>
-              <li>Same-day delivery included free on orders $49+. Just $6 on smaller orders.</li>
-            </ul>
-          </div>
-          <p className="mt-3 text-sm text-gray-600">
-            Place your order at petshiwu.com before 3 PM EST on weekdays (or 1 PM on weekends) and receive your pet supplies the same evening. Our Jackson Heights fulfillment team hand-picks, packs, and dispatches every order for the day's delivery routes.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Shipping Rates</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Cutoff matrix</h2>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm mt-3">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="text-left p-3 border border-gray-200 font-semibold">Order Total</th>
-                  <th className="text-left p-3 border border-gray-200 font-semibold">NYC Delivery</th>
+                  <th className="text-left p-3 border border-gray-200 font-semibold">When you order</th>
+                  <th className="text-left p-3 border border-gray-200 font-semibold">Cutoff (ET)</th>
+                  <th className="text-left p-3 border border-gray-200 font-semibold">What happens</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="p-3 border border-gray-200">Under $49</td>
-                  <td className="p-3 border border-gray-200 font-semibold text-blue-700">$6</td>
+                  <td className="p-3 border border-gray-200">Monday–Friday</td>
+                  <td className="p-3 border border-gray-200 font-semibold">{TONIGHT.weekdayCutoff}</td>
+                  <td className="p-3 border border-gray-200">We aim to deliver before {TONIGHT.deliverBy} the same day</td>
                 </tr>
-                <tr className="bg-green-50">
-                  <td className="p-3 border border-gray-200 font-semibold">$49 and over</td>
-                  <td className="p-3 border border-gray-200 font-bold text-green-700">FREE</td>
+                <tr className="bg-gray-50">
+                  <td className="p-3 border border-gray-200">Saturday–Sunday</td>
+                  <td className="p-3 border border-gray-200 font-semibold">{TONIGHT.weekendCutoff}</td>
+                  <td className="p-3 border border-gray-200">We aim to deliver before {TONIGHT.deliverBy} the same day</td>
+                </tr>
+                <tr>
+                  <td className="p-3 border border-gray-200">After cutoff, any day</td>
+                  <td className="p-3 border border-gray-200">—</td>
+                  <td className="p-3 border border-gray-200">Next-day delivery in the five boroughs</td>
                 </tr>
               </tbody>
             </table>
@@ -79,73 +82,68 @@ const ShippingPolicy = () => {
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Delivery Times</h2>
-          <ul className="list-disc pl-6 space-y-2">
-            <li><strong>Same-Day NYC:</strong> Order before 3 PM EST → delivered before 11 PM same day. Order before 1 PM EST on weekends/holidays.</li>
-            <li><strong>After cutoff:</strong> Next-day delivery across all five NYC boroughs.</li>
-            <li>All orders placed before 2 PM EST on business days are processed the same day.</li>
-            <li>Orders placed after 2 PM EST, on weekends, or holidays are processed the next business day.</li>
-          </ul>
-          <p className="mt-3 text-sm text-gray-500">
-            Note: Delivery times are estimates and not guaranteed. Same-day NYC orders placed before the 3 PM cutoff are guaranteed to arrive before 11 PM. Times may vary due to weather or high order volumes.
-          </p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Rates</h2>
+          <table className="w-full border-collapse text-sm mt-3">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="text-left p-3 border border-gray-200 font-semibold">Order total</th>
+                <th className="text-left p-3 border border-gray-200 font-semibold">NYC delivery</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="p-3 border border-gray-200">Under ${TONIGHT.freeOver}</td>
+                <td className="p-3 border border-gray-200 font-semibold">${TONIGHT.underFee}</td>
+              </tr>
+              <tr className="bg-green-50">
+                <td className="p-3 border border-gray-200 font-semibold">${TONIGHT.freeOver} and over</td>
+                <td className="p-3 border border-gray-200 font-bold text-green-700">FREE</td>
+              </tr>
+            </tbody>
+          </table>
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Where We Ship</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Where we deliver</h2>
           <p>
-            <strong>Same-day delivery:</strong> All 5 NYC boroughs (Manhattan, Brooklyn, Queens, Bronx, Staten Island). Long Island City is included as part of Queens.
+            <strong>Same-day and next-day:</strong> Manhattan, Brooklyn, Queens, the Bronx, and Staten Island.
+            Long Island City is Queens. We pack in Jackson Heights, NY.
           </p>
           <p className="mt-2">
-            <strong>Delivery area:</strong> All 5 NYC boroughs (Manhattan, Brooklyn, Queens, Bronx, Staten Island). We are based in Jackson Heights, NY. Nationwide shipping is not available yet.
-          </p>
-          <p className="mt-2">
-            International shipping is not available at this time.
+            Nearby New Jersey and Westchester ZIPs may be offered as next-day only. Nationwide and international shipping are not available yet.
           </p>
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Order Tracking</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Same-day is a target, not a guarantee</h2>
           <p>
-            Once your order ships, you will receive a confirmation email with your tracking number. Same-day NYC orders receive real-time tracking with delivery ETA updates via SMS and email. You can also track your order on our{' '}
-            <Link to="/track-order" className="text-blue-600 hover:underline">Order Tracking page</Link>.
+            Weather, traffic, and volume can delay a route. We still try to arrive before {TONIGHT.deliverBy} when you order before cutoff.
+            If we miss that window, email{' '}
+            <a href="mailto:support@petshiwu.com" className="text-blue-600 hover:underline">support@petshiwu.com</a>
+            {' '}and we will reship the next day free or refund the order.
           </p>
         </section>
 
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Damaged or Missing Orders</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Damaged or missing orders</h2>
           <p>
-            If your order arrives damaged or is lost in transit, please contact us within 7 days of
-            the expected delivery date. We will work with the carrier to resolve the issue and
-            ship a replacement or issue a refund.
+            Tell us within {DAMAGED_ITEM_REPORT_DAYS} days of the expected delivery date. We will replace the item or refund it.
+            Photos help for damage claims.
           </p>
           <p className="mt-2">
             Contact:{' '}
-            <a href="mailto:support@petshiwu.com" className="text-blue-600 hover:underline">
-              support@petshiwu.com
-            </a>{' '}
-            or <a href="tel:+18002592605" className="text-blue-600 hover:underline">+1 (800) 259-2605</a> (call center 24/7).
+            <a href="mailto:support@petshiwu.com" className="text-blue-600 hover:underline">support@petshiwu.com</a>
+            {' '}or <a href="tel:+18002592605" className="text-blue-600 hover:underline">+1 (800) 259-2605</a> (24/7).
           </p>
         </section>
 
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-3">Returns</h2>
           <p>
-            Not satisfied with your order? You have <strong>365 days</strong> from delivery to return eligible items. Visit our{' '}
-            <Link to="/return-policy" className="text-blue-600 hover:underline">Return & Exchange Policy</Link>{' '}
-            for full details on how to return items.
+            Unused items can be returned within <strong>{RETURN_WINDOW_DAYS} days</strong> of delivery. See the{' '}
+            <Link to="/return-policy" className="text-blue-600 hover:underline">Return & Exchange Policy</Link>.
           </p>
         </section>
-
-        <section className="bg-gradient-to-r from-blue-50 to-green-50 border-2 border-blue-200 rounded-2xl p-6 text-center">
-          <h2 className="text-2xl font-black text-gray-900 mb-2">🚀 Launching August 28, 2026</h2>
-          <p className="text-gray-700 mb-3">Petshiwu officially opens to the public on August 28, 2026.</p>
-          <p className="text-gray-700">Be the first to order and lock in launch-day pricing + exclusive early-access discounts.</p>
-          <Link to="/products" className="inline-block mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-full transition-colors">
-            Shop Pet Supplies
-          </Link>
-        </section>
-
       </div>
     </div>
   );

@@ -33,6 +33,33 @@ describe('classifyRoute', () => {
     });
   });
 
+  test('policy aliases 301 to the canonical legal URLs', () => {
+    expect(classifyRoute('/privacy-policy')).toMatchObject({
+      status: 'redirect',
+      redirectTo: '/privacy',
+      routeType: 'alias-redirect',
+    });
+    expect(classifyRoute('/cookie-policy')).toMatchObject({
+      status: 'redirect',
+      redirectTo: '/privacy',
+    });
+    expect(classifyRoute('/terms-of-service').redirectTo).toBe('/terms');
+    expect(classifyRoute('/shipping-policy').redirectTo).toBe('/shipping');
+    expect(classifyRoute('/shop').redirectTo).toBe('/products');
+  });
+
+  test('/returns is a noindex account utility, not a public policy page', () => {
+    expect(classifyRoute('/returns')).toMatchObject({
+      indexable: false,
+      status: 'noindex',
+      routeType: 'utility',
+    });
+    expect(classifyRoute('/return-policy')).toMatchObject({
+      indexable: true,
+      status: 'indexable',
+    });
+  });
+
   test('legacy /blog consolidates onto /learning', () => {
     expect(classifyRoute('/blog')).toMatchObject({
       status: 'redirect',

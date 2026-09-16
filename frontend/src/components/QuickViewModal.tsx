@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { availableCartStock } from '@/utils/cartStock';
+import { inStockLabel, ORDERING_PAUSED } from '@/config/ordering';
 
 interface QuickViewModalProps {
   productSlug: string;
@@ -215,8 +216,10 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
                 {/* Stock Status — no unit counts until inventory is maintained */}
                 {isReadyToShip ? (
                   <>
-                    <p className="text-green-700 font-medium">Ready to ship</p>
-                    <p className="text-xs text-slate-500">Tonight in NYC · packed in Queens · adds 1</p>
+                    <p className="text-green-700 font-medium">{inStockLabel(true)}</p>
+                    <p className="text-xs text-slate-500">
+                      {ORDERING_PAUSED ? 'Packed in Queens · adds 1' : 'Tonight in NYC · packed in Queens · adds 1'}
+                    </p>
                   </>
                 ) : (
                   <p className="text-red-600 font-medium">Out of stock</p>

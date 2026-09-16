@@ -186,14 +186,15 @@ const FAQ = () => {
             <div className="flex flex-col md:flex-row gap-4">
               {/* Search */}
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="text"
-                  placeholder="Search FAQs..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                                <input
+                                  type="text"
+                                  placeholder="Search FAQs..."
+                                  value={searchQuery}
+                                  onChange={(e) => setSearchQuery(e.target.value)}
+                                  aria-label="Search FAQs"
+                                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                />
               </div>
 
               {/* Category Filter */}
@@ -201,6 +202,7 @@ const FAQ = () => {
                                 <select
                                   value={selectedCategory}
                                   onChange={(e) => setSelectedCategory(e.target.value)}
+                                  aria-label="Filter FAQs by category"
                                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                 >
                                   <option value="">All Categories</option>
@@ -268,13 +270,18 @@ const FAQ = () => {
                               {decodeHtmlEntities(faq.question)}
                             </h3>
                             {isExpanded ? (
-                              <ChevronUp size={24} className="text-gray-400 flex-shrink-0" />
+                              <ChevronUp size={24} className="text-gray-400 flex-shrink-0" aria-hidden />
                             ) : (
-                              <ChevronDown size={24} className="text-gray-400 flex-shrink-0" />
+                              <ChevronDown size={24} className="text-gray-400 flex-shrink-0" aria-hidden />
                             )}
                           </button>
-                          {isExpanded && (
-                            <div id={`faq-answer-${faq._id}`} className="mt-4 space-y-4" itemScope itemType="https://schema.org/Answer">
+                          <div
+                            id={`faq-answer-${faq._id}`}
+                            hidden={!isExpanded}
+                            className="mt-4 space-y-4"
+                            itemScope
+                            itemType="https://schema.org/Answer"
+                          >
                               <div className="prose max-w-none text-gray-700">
                                 <p className="whitespace-pre-line" itemProp="text">{decodeHtmlEntities(faq.answer)}</p>
                               </div>
@@ -283,28 +290,31 @@ const FAQ = () => {
                                   Was this helpful?
                                 </span>
                                 <button
+                                  type="button"
                                   onClick={() => handleMarkHelpful(faq._id)}
+                                  aria-label="Mark this answer as helpful"
                                   className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
                                 >
-                                  <ThumbsUp size={18} />
+                                  <ThumbsUp size={18} aria-hidden />
                                   <span className="text-sm">Yes</span>
                                   {faq.helpfulCount > 0 && (
                                     <span className="text-xs text-gray-500">({faq.helpfulCount})</span>
                                   )}
                                 </button>
                                 <button
+                                  type="button"
                                   onClick={() => handleMarkNotHelpful(faq._id)}
+                                  aria-label="Mark this answer as not helpful"
                                   className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
                                 >
-                                  <ThumbsDown size={18} />
+                                  <ThumbsDown size={18} aria-hidden />
                                   <span className="text-sm">No</span>
                                   {faq.notHelpfulCount > 0 && (
                                     <span className="text-xs text-gray-500">({faq.notHelpfulCount})</span>
                                   )}
                                 </button>
                               </div>
-                            </div>
-                          )}
+                          </div>
                         </div>
                       );
                     })}

@@ -6,8 +6,9 @@ const ReturnPolicy = () => {
     <>
       <SEO
         title="Return & Exchange Policy | Petshiwu"
-        description="Petshiwu's 365-day return and exchange policy. Learn about eligible returns, non-returnable items, refunds, and how to process returns or exchanges for your pet products."
+        description="Petshiwu's 365-day return and exchange policy. Unused items in original packaging. Opened food only if damaged, defective, or incorrect."
         keywords="return policy, exchange policy, refund policy, pet product returns, 365-day guarantee"
+        url="/return-policy"
       />
 
       <div className="bg-gray-50">
@@ -22,8 +23,9 @@ const ReturnPolicy = () => {
                 Return & Exchange Policy
               </h1>
               <p className="text-base sm:text-lg text-blue-100 max-w-2xl mx-auto">
-                At Petshiwu, your pet&apos;s happiness and your satisfaction come first. We proudly stand behind the quality of our products and strive to make every purchase worry-free.
+                At Petshiwu, your pet&apos;s happiness and your satisfaction come first. We stand behind the products we sell.
               </p>
+              <p className="text-sm text-blue-200 mt-3">Effective September 16, 2026</p>
             </div>
           </div>
         </section>
@@ -116,7 +118,7 @@ const ReturnPolicy = () => {
                     </ul>
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <p className="text-sm text-gray-700">
-                        These exclusions follow standard U.S. pet industry safety and hygiene regulations.
+                        Unopened food, treats, and supplements in original packaging can be returned within 365 days. Opened food, treats, or supplements can only be returned if they arrived damaged, defective, or incorrect.
                       </p>
                     </div>
                   </div>
@@ -238,7 +240,7 @@ const ReturnPolicy = () => {
                     <ul className="space-y-3 text-gray-700">
                       <li className="flex items-start gap-3">
                         <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
-                        <span>Notify us within <strong>48 hours of delivery</strong></span>
+                        <span>Notify us within <strong>7 days of delivery</strong>. Photos help.</span>
                       </li>
                       <li className="flex items-start gap-3">
                         <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
@@ -247,6 +249,15 @@ const ReturnPolicy = () => {
                     </ul>
                   </div>
                 </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:p-8 mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">Missed same-day delivery</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  If we miss the same-day window after you ordered before cutoff, email{' '}
+                  <a href="mailto:support@petshiwu.com" className="text-primary-600 hover:underline">support@petshiwu.com</a>
+                  {' '}and we will reship the next day free or refund the order.
+                </p>
               </div>
 
               {/* Commitment Section */}
@@ -287,7 +298,7 @@ const ReturnPolicy = () => {
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-gray-600 mt-0.5 flex-shrink-0" />
                   <p className="text-sm text-gray-700">
-                    <strong>⚠️ Policy Updates:</strong> Petshiwu reserves the right to update this policy at any time. Changes will be posted on this page.
+                    <strong>Policy updates:</strong> This policy is effective September 16, 2026. Changes will be posted on this page with a new effective date.
                   </p>
                 </div>
               </div>

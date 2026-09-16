@@ -285,7 +285,6 @@ export const generateSitemap = async (req: Request, res: Response) => {
     let staticPages = [
       { path: '/about', priority: '0.7', changefreq: 'monthly' },
       { path: '/faq', priority: '0.6', changefreq: 'monthly' },
-      { path: '/returns', priority: '0.5', changefreq: 'monthly' },
       { path: '/donate', priority: '0.4', changefreq: 'monthly' },
       { path: '/contact', priority: '0.6', changefreq: 'monthly' },
       { path: '/press', priority: '0.5', changefreq: 'monthly' },

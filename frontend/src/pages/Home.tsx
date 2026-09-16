@@ -15,6 +15,7 @@ import OrdersOpenBanner from '@/components/OrdersOpenBanner';
 import RestockDashboard from '@/components/RestockDashboard';
 import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
 import { ORDERING_PAUSED, ORDERING_PAUSED_HEADLINE } from '@/config/ordering';
+import { SOCIAL_PROFILES } from '@/config/social';
 import { CATALOG_BRANDS_FAQ, CATALOG_BRANDS_SHORT, CATALOG_PRODUCT_COUNT_LABEL } from '@/config/catalog';
 import { NEWSLETTER_CODE, NEWSLETTER_CODE_COPY } from '@/config/constants';
 import { ChevronRight } from 'lucide-react';
@@ -240,11 +241,7 @@ const Home = () => {
           areaServed: ['Queens', 'Brooklyn', 'Manhattan', 'Bronx', 'Staten Island', 'New York City'],
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
-          sameAs: [
-            'https://www.facebook.com/petshiwu',
-            'https://www.instagram.com/petshiwu',
-            'https://twitter.com/petshiwu',
-          ],
+          sameAs: [...SOCIAL_PROFILES],
         }}
       />
       {filteredFeaturedProducts && filteredFeaturedProducts.length > 0 && (

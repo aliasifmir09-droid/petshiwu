@@ -41,8 +41,7 @@ const About = () => {
           currenciesAccepted: 'USD',
           sameAs: [
             'https://www.facebook.com/petshiwu',
-            'https://www.instagram.com/petshiwu',
-            'https://twitter.com/petshiwu'
+            'https://www.instagram.com/petshiwu'
           ]
         }}
       />

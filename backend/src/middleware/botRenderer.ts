@@ -1467,7 +1467,6 @@ export const buildHomepageHtml = (template: string): string => {
     sameAs: [
       'https://www.facebook.com/petshiwu',
       'https://www.instagram.com/petshiwu',
-      'https://twitter.com/petshiwu',
     ],
     foundingDate: '2024',
     foundingLocation: {

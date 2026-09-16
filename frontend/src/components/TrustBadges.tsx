@@ -1,4 +1,5 @@
 import { Star, Truck, MapPin, HeadphonesIcon, Package, RotateCcw } from 'lucide-react';
+import { ORDERING_PAUSED } from '@/config/ordering';
 
 const TrustBadges = () => {
   const badges = [
@@ -10,8 +11,8 @@ const TrustBadges = () => {
     },
     {
       icon: Truck,
-      title: 'Tonight delivery',
-      description: 'Order by 3 PM weekdays',
+      title: ORDERING_PAUSED ? 'Same-day NYC' : 'Tonight delivery',
+      description: ORDERING_PAUSED ? 'When checkout opens' : 'Order by 3 PM weekdays',
       color: 'bg-[#1E3A8A]',
     },
     {

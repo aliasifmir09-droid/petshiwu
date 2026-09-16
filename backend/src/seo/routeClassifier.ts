@@ -45,10 +45,10 @@ export const INDEXABLE_LANDING_PATHS = new Set([
 ]);
 
 const INDEXABLE_ROOT_PATHS = new Set([
-  '/', '/products', '/learning', '/care-guides', '/about', '/faq', '/returns',
-  '/return-policy', '/donate', '/contact', '/shipping', '/shipping-policy', '/other-animals',
-  '/privacy', '/privacy-policy', '/terms', '/terms-of-service', '/accessibility',
-  '/shop', '/fish-tanks', '/press', '/investors', '/sell-with-us', '/vendors', '/partners',
+  '/', '/products', '/learning', '/care-guides', '/about', '/faq',
+  '/return-policy', '/donate', '/contact', '/shipping', '/other-animals',
+  '/privacy', '/terms', '/accessibility',
+  '/fish-tanks', '/press', '/investors', '/sell-with-us', '/vendors', '/partners',
   '/innovation',
   ...INDEXABLE_LANDING_PATHS,
 ]);
@@ -70,7 +70,6 @@ export const CRAWLABLE_STOREFRONT_PATHS: string[] = [
   '/faq',
   '/contact',
   '/press',
-  '/returns',
   '/return-policy',
   '/shipping',
   '/privacy',
@@ -87,9 +86,18 @@ export function canonicalPetSlug(slug: string): string {
   return slug === 'small-pet' ? 'small-animal' : slug;
 }
 
+const ALIAS_REDIRECTS: Record<string, string> = {
+  '/privacy-policy': '/privacy',
+  '/terms-of-service': '/terms',
+  '/shipping-policy': '/shipping',
+  '/cookie-policy': '/privacy',
+  '/shop': '/products',
+};
+
 const NOINDEX_ROOT_PATHS = new Set([
   '/search', '/checkout', '/cart', '/login', '/register', '/forgot-password',
   '/dashboard', '/driver', '/symptom-checker', '/deals', '/tech', '/scan', '/neural',
+  '/returns',
 ]);
 
 const normalizePath = (rawPath: string): string => {
@@ -145,6 +153,17 @@ export const classifyRoute = (rawPath: string): RouteClassification => {
       canonicalPath: '/checkout',
       redirectTo: '/checkout',
       routeType: 'legacy-pay',
+    };
+  }
+
+  if (ALIAS_REDIRECTS[canonicalPath]) {
+    const redirectTo = ALIAS_REDIRECTS[canonicalPath];
+    return {
+      status: 'redirect',
+      indexable: false,
+      canonicalPath: redirectTo,
+      redirectTo,
+      routeType: 'alias-redirect',
     };
   }
 

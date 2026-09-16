@@ -901,6 +901,16 @@ const PLURAL_TO_SINGULAR: Record<string, string> = {
   // but server-side 301 is needed for bots and SEO consolidation)
   '/blog': '/learning',
   '/blog/': '/learning',
+  '/privacy-policy': '/privacy',
+  '/privacy-policy/': '/privacy',
+  '/terms-of-service': '/terms',
+  '/terms-of-service/': '/terms',
+  '/shipping-policy': '/shipping',
+  '/shipping-policy/': '/shipping',
+  '/cookie-policy': '/privacy',
+  '/cookie-policy/': '/privacy',
+  '/shop': '/products',
+  '/shop/': '/products',
 };
 app.use((req: Request, res: Response, next: NextFunction) => {
   const target = PLURAL_TO_SINGULAR[req.path];

@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import EmptyState from '@/components/EmptyState';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
+import { inStockLabel } from '@/config/ordering';
 
 const ProductComparison = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -466,7 +467,7 @@ const ProductComparison = () => {
               {products.map((product) => (
                 <td key={product._id} className="p-4 text-center">
                   <span className={product.inStock ? 'text-green-600' : 'text-red-600'}>
-                    {product.inStock ? 'Ready to ship' : 'Out of stock'}
+                    {product.inStock ? inStockLabel(true) : 'Out of stock'}
                   </span>
                 </td>
               ))}
