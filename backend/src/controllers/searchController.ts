@@ -30,7 +30,8 @@ const rankedProductPage = async (
   limitNum: number
 ) => {
   const hits = await Product.find(query)
-    .select('_id name brand isFeatured totalReviews')
+    .select('_id name brand isFeatured totalReviews category petType')
+    .populate('category', 'slug name')
     .limit(SEARCH_RANK_SCAN)
     .lean();
   const pageIds = rankSearchHits(hits, searchText)
@@ -250,7 +251,7 @@ export const searchAutocomplete = async (req: Request, res: Response, next: Next
     const searchText = q.trim();
     
     // Cache autocomplete results for 1-2 minutes (popular searches)
-    const autocompleteCacheKey = `autocomplete:v6:${searchText}:${limit}`;
+    const autocompleteCacheKey = `autocomplete:v7:${searchText}:${limit}`;
     let products = await cache.get<any[]>(autocompleteCacheKey);
     
     if (!products) {
@@ -267,7 +268,8 @@ export const searchAutocomplete = async (req: Request, res: Response, next: Next
       // Rank the full match window (not the first 40 inserts). Otherwise
       // "blue buffalo" keeps returning Baby BLUE treats and the bag never appears.
       const hits = await Product.find(regexProductQuery)
-        .select('_id name brand isFeatured totalReviews')
+        .select('_id name brand isFeatured totalReviews category petType')
+        .populate('category', 'slug name')
         .limit(SEARCH_RANK_SCAN)
         .lean();
       const pageIds = rankSearchHits(hits, searchText)

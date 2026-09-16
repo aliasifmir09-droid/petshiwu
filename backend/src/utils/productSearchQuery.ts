@@ -120,7 +120,26 @@ export type SearchHit = {
   brand?: string;
   isFeatured?: boolean;
   totalReviews?: number;
+  categorySlug?: string;
+  petType?: string;
+  category?: unknown;
 };
+
+function hitCategorySlug(product: SearchHit): string {
+  if (product.categorySlug) return foldSearchText(product.categorySlug);
+  const category = product.category;
+  if (category && typeof category === 'object' && 'slug' in category) {
+    const slug = (category as { slug?: unknown }).slug;
+    return foldSearchText(String(slug || ''));
+  }
+  return '';
+}
+
+const TREAT_SIGNAL = /\b(treat|treats|chew|chews|biscuit|bits|topper|beggin|rawhide)\b/;
+const BABY_SIGNAL = /\b(baby|kitten|kittens|puppy|puppies)\b/;
+const RX_SIGNAL = /\b(prescription|veterinary|k d|i d|c d|a d)\b/;
+const FLAGSHIP_LINE = /\b(life protection|science diet|pro plan|wilderness)\b/;
+const DRY_FOOD_SIGNAL = /\b(dry food|dry dog|dry cat|kibble)\b/;
 
 /** Fold apostrophes so "Hill's" and "hills" score the same. */
 export function foldSearchText(raw: string): string {
@@ -153,6 +172,7 @@ export function scoreSearchHit(product: SearchHit, rawQuery: string): number {
   if (!query) return 1000;
   const name = foldSearchText(product.name || '');
   const brand = foldSearchText(product.brand || '');
+  const category = hitCategorySlug(product);
   let score = 80;
   if (name === query) score = 0;
   else if (name.startsWith(query)) score = 10;
@@ -160,9 +180,28 @@ export function scoreSearchHit(product: SearchHit, rawQuery: string): number {
   else if (brand.startsWith(query)) score = 18;
   else if (containsQuery(name, query)) score = 28;
   else if (containsQuery(brand, query)) score = 40;
-  const queryWantsTreats = /\b(treat|treats|chew|chews|biscuit|bits)\b/.test(query);
-  if (!queryWantsTreats && /\b(treat|treats|chew|chews|biscuit|bits|topper)\b/.test(name)) {
+
+  const queryWantsTreats = TREAT_SIGNAL.test(query);
+  const queryWantsBaby = BABY_SIGNAL.test(query);
+  const queryWantsRx = RX_SIGNAL.test(query) || /\b(prescription|veterinary|rx)\b/.test(query);
+
+  if (!queryWantsTreats && (TREAT_SIGNAL.test(name) || /treat|chew/.test(category))) {
     score += 22;
+  }
+  if (!queryWantsBaby && BABY_SIGNAL.test(name)) {
+    score += 16;
+  }
+  if (queryWantsBaby && BABY_SIGNAL.test(name)) {
+    score -= 18;
+  }
+  if (!queryWantsRx && (RX_SIGNAL.test(name) || /veterinary|prescription/.test(category))) {
+    score += 14;
+  }
+  if (queryWantsRx && (RX_SIGNAL.test(name) || /veterinary|prescription/.test(category))) {
+    score -= 12;
+  }
+  if (FLAGSHIP_LINE.test(name) || DRY_FOOD_SIGNAL.test(name) || category === 'dry-food') {
+    score -= 6;
   }
   if (product.isFeatured) score -= 3;
   score -= Math.min(8, Math.log10((product.totalReviews || 0) + 1) * 3);
@@ -172,7 +211,9 @@ export function scoreSearchHit(product: SearchHit, rawQuery: string): number {
 export function compareSearchHits(a: SearchHit, b: SearchHit, query: string): number {
   const delta = scoreSearchHit(a, query) - scoreSearchHit(b, query);
   if (delta !== 0) return delta;
-  return decodeHtmlEntities(a.name || '').localeCompare(decodeHtmlEntities(b.name || ''));
+  const reviewDelta = (b.totalReviews || 0) - (a.totalReviews || 0);
+  if (reviewDelta !== 0) return reviewDelta;
+  return foldSearchText(a.name || '').localeCompare(foldSearchText(b.name || ''));
 }
 
 export function rankSearchHits<T extends SearchHit>(hits: T[], query: string): T[] {
