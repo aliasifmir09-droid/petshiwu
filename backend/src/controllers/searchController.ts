@@ -250,14 +250,18 @@ export const searchAutocomplete = async (req: Request, res: Response, next: Next
     const searchText = q.trim();
     
     // Cache autocomplete results for 1-2 minutes (popular searches)
-    const autocompleteCacheKey = `autocomplete:v5:${searchText}:${limit}`;
+    const autocompleteCacheKey = `autocomplete:v6:${searchText}:${limit}`;
     let products = await cache.get<any[]>(autocompleteCacheKey);
     
     if (!products) {
+      // Non-empty q always builds a query. Do not spread singleTermNameMatch()
+      // next to another $or — tsc TS2783 failed yesterday's main deploy.
       const regexProductQuery = buildProductSearchQuery(searchText) || {
         isActive: true,
-        $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
-        ...singleTermNameMatch(searchText),
+        $and: [
+          { $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] },
+          singleTermNameMatch(searchText),
+        ],
       };
 
       // Rank the full match window (not the first 40 inserts). Otherwise
