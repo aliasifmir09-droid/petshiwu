@@ -90,4 +90,38 @@ describe('productSearchQuery', () => {
     );
     expect(ranked[0].name).toMatch(/Life Protection/i);
   });
+
+  test('brand search puts Life Protection ahead of Baby BLUE kitten food', () => {
+    const ranked = rankSearchHits(
+      [
+        { name: 'Blue Buffalo Baby BLUE Kitten Dry Food - Chicken & Pea' },
+        { name: 'Blue Buffalo Baby BLUE Healthy Growth Formula Puppy Wet Dog Food' },
+        { name: 'Blue Buffalo Life Protection Formula Adult Dry Dog Food', totalReviews: 12 },
+      ],
+      'blue buffalo'
+    );
+    expect(ranked[0].name).toMatch(/Life Protection/i);
+  });
+
+  test('hills without prescription prefers Science Diet over Rx k/d', () => {
+    const ranked = rankSearchHits(
+      [
+        { name: "Hill's Prescription Diet Kidney Care k/d Early Support Dry Cat Food" },
+        { name: "Hill's Science Diet Adult Dry Dog Food - Chicken & Barley", totalReviews: 8 },
+      ],
+      'hills'
+    );
+    expect(ranked[0].name).toMatch(/Science Diet/i);
+  });
+
+  test('puppy food query still keeps puppy formulas first', () => {
+    const ranked = rankSearchHits(
+      [
+        { name: 'Blue Buffalo Life Protection Formula Adult Dry Dog Food' },
+        { name: 'Blue Buffalo Baby BLUE Natural Healthy Growth Formula Puppy Dry Food' },
+      ],
+      'blue buffalo puppy'
+    );
+    expect(ranked[0].name).toMatch(/Puppy/i);
+  });
 });
