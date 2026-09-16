@@ -96,7 +96,7 @@ const AdvancedSearch = () => {
     return () => document.removeEventListener('click', close, { capture: true });
   }, [showPhotoMenu]);
   const [filters, setFilters] = useState({
-    sort: searchParams.get('sort') || 'newest',
+    sort: searchParams.get('sort') || 'relevance',
     inStock: searchParams.get('inStock') === 'true',
     petType: searchParams.get('petType') || '',
     brand: searchParams.get('brand') || '',
@@ -345,6 +345,7 @@ const AdvancedSearch = () => {
                   onChange={(e) => setFilters({ ...filters, sort: e.target.value })}
                   className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
+                  <option value="relevance">Best match</option>
                   <option value="newest">Newest</option>
                   <option value="price-asc">Price: Low to High</option>
                   <option value="price-desc">Price: High to Low</option>
@@ -398,9 +399,9 @@ const AdvancedSearch = () => {
                 </div>
 
                 {/* Clear filters */}
-                {(filters.petType || filters.inStock || filters.minPrice || filters.maxPrice || filters.sort !== 'newest') && (
+                {(filters.petType || filters.inStock || filters.minPrice || filters.maxPrice || filters.sort !== 'relevance') && (
                   <button
-                    onClick={() => setFilters({ sort: 'newest', inStock: false, petType: '', brand: '', minPrice: '', maxPrice: '' })}
+                    onClick={() => setFilters({ sort: 'relevance', inStock: false, petType: '', brand: '', minPrice: '', maxPrice: '' })}
                     className="text-sm text-red-500 hover:text-red-600 px-2 py-1.5"
                   >
                     Clear filters

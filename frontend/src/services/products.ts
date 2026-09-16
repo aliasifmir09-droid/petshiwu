@@ -64,10 +64,14 @@ export const productService = {
     limit?: number;
   }) => {
     const q = query.trim();
+    const { sort, ...rest } = filters || {};
     const response = await api.get<PaginatedResponse<Product>>('/products/search', {
       params: {
         ...(q ? { q } : {}),
-        ...filters
+        ...rest,
+        // Live API 400s on sort=relevance. Omit it so best-match uses the
+        // server default; after deploy that default is ranked relevance.
+        ...(sort && sort !== 'relevance' ? { sort } : {}),
       }
     });
     return response.data;

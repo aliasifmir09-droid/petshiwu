@@ -56,8 +56,7 @@ describe('Product URL Utility', () => {
       } as Product;
 
       const url = generateProductUrl(productWithoutCategory);
-      expect(url).toBeDefined();
-      expect(typeof url).toBe('string');
+      expect(url).toBe('/products/test-product');
     });
 
     test('should handle products with string category', () => {
