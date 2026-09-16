@@ -63,6 +63,20 @@ describe('productSearchQuery', () => {
     );
   });
 
+  test('ranks Hill\'s ahead of Thrills when the query is hills', () => {
+    const ranked = rankSearchHits(
+      [
+        { name: 'Thrills & Chills Terrified Rawhide Pumpkin Flavored Dog Chew' },
+        { name: "Hill's Science Diet Adult Dry Dog Food", brand: "Hill's", isFeatured: true, totalReviews: 40 },
+      ],
+      'hills'
+    );
+    expect(ranked[0].name).toMatch(/Science Diet/i);
+    expect(scoreSearchHit(ranked[0], 'hills')).toBeLessThan(
+      scoreSearchHit(ranked[1], 'hills')
+    );
+  });
+
   test('still surfaces the bag when it is the last of many treat hits', () => {
     const treats = Array.from({ length: 39 }, (_, index) => ({
       name: `Blue Buffalo Baby BLUE Training Treats ${index + 1}`,

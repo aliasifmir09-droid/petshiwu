@@ -122,19 +122,44 @@ export type SearchHit = {
   totalReviews?: number;
 };
 
+/** Fold apostrophes so "Hill's" and "hills" score the same. */
+export function foldSearchText(raw: string): string {
+  return decodeHtmlEntities(raw)
+    .toLowerCase()
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function containsQuery(haystack: string, query: string): boolean {
+  if (!query || !haystack) return false;
+  if (
+    haystack === query ||
+    haystack.startsWith(`${query} `) ||
+    haystack.endsWith(` ${query}`) ||
+    haystack.includes(` ${query} `)
+  ) {
+    return true;
+  }
+  const queryTokens = query.split(/\s+/).filter(Boolean);
+  if (queryTokens.length !== 1) return haystack.includes(query);
+  const needle = queryTokens[0];
+  return haystack.split(/\s+/).some((token) => token === needle || token.startsWith(needle));
+}
+
 /** Lower is a better match. Phrase / prefix beats a newest-treat dump. */
 export function scoreSearchHit(product: SearchHit, rawQuery: string): number {
-  const query = decodeHtmlEntities(rawQuery).trim().toLowerCase();
+  const query = foldSearchText(rawQuery);
   if (!query) return 1000;
-  const name = decodeHtmlEntities(product.name || '').toLowerCase();
-  const brand = decodeHtmlEntities(product.brand || '').toLowerCase();
+  const name = foldSearchText(product.name || '');
+  const brand = foldSearchText(product.brand || '');
   let score = 80;
   if (name === query) score = 0;
   else if (name.startsWith(query)) score = 10;
   else if (brand === query) score = 16;
   else if (brand.startsWith(query)) score = 18;
-  else if (name.includes(query)) score = 28;
-  else if (brand.includes(query)) score = 40;
+  else if (containsQuery(name, query)) score = 28;
+  else if (containsQuery(brand, query)) score = 40;
   const queryWantsTreats = /\b(treat|treats|chew|chews|biscuit|bits)\b/.test(query);
   if (!queryWantsTreats && /\b(treat|treats|chew|chews|biscuit|bits|topper)\b/.test(name)) {
     score += 22;
