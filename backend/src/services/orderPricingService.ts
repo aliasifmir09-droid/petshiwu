@@ -1,6 +1,7 @@
 import Product from '../models/Product';
 import { getCouponDiscount } from './couponService';
 import type { NormalizedOrderItem } from '../types/common';
+import { decodeHtmlEntities } from '../utils/catalogText';
 
 export const TAX_RATE = 0.08;
 export const FREE_SHIPPING_THRESHOLD = 49;
@@ -79,7 +80,7 @@ export const calculateTrustedOrderPricing = async (
 
     trustedItems.push({
       product: String(product._id),
-      name: product.name,
+      name: decodeHtmlEntities(product.name),
       image: product.images?.[0] || item.image || '',
       price,
       quantity,

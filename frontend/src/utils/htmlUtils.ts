@@ -9,16 +9,35 @@
  * @param text The text that may contain HTML entities
  * @returns The decoded text
  */
+const decodeHtmlEntitiesOnce = (text: string): string =>
+  text
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;/gi, "'")
+    .replace(/&#0*39;/g, "'")
+    .replace(/&#x0*27;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+
 export const decodeHtmlEntities = (text: string | null | undefined): string => {
   if (!text || typeof text !== 'string') {
     return '';
   }
 
-  // Create a temporary textarea element to decode HTML entities
-  // This is the safest way to decode HTML entities in the browser
+  // One textarea pass handles named entities. Extra regex passes undo catalog
+  // double-encoding (McLovin&amp;#039;s) without re-parsing decoded < as HTML.
   const textarea = document.createElement('textarea');
   textarea.innerHTML = text;
-  return textarea.value;
+  let current = textarea.value;
+  for (let i = 0; i < 4; i += 1) {
+    const next = decodeHtmlEntitiesOnce(current);
+    if (next === current) break;
+    current = next;
+  }
+  return current.trim();
 };
 
 /**

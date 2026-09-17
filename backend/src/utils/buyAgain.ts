@@ -1,3 +1,5 @@
+import { decodeHtmlEntities } from './catalogText';
+
 export const RESTOCK_CADENCE = [
   { intervalDays: 1, label: 'Every day' },
   { intervalDays: 7, label: 'Every week' },
@@ -94,7 +96,7 @@ export const sanitizeRestockItems = (raw: unknown): RestockPick[] => {
     if (!row || typeof row !== 'object') continue;
     const rec = row as RestockPick & { product?: unknown };
     const product = productIdOf(rec.product);
-    const name = String(rec.name || '').trim().slice(0, 200);
+    const name = decodeHtmlEntities(String(rec.name || '')).slice(0, 200);
     const quantity = Math.min(12, Math.max(1, Math.round(Number(rec.quantity) || 1)));
     if (!product || product === 'undefined' || !name) continue;
     if (!isRestockConsumable(name)) continue;
@@ -118,7 +120,7 @@ export const usualFromOrderItems = (items: BuyAgainOrderItem[] | undefined): Res
   const seen = new Set<string>();
   for (const item of items || []) {
     const product = productIdOf(item.product);
-    const name = String(item.name || '').trim();
+    const name = decodeHtmlEntities(String(item.name || ''));
     if (!product || !name || !isRestockConsumable(name)) continue;
     const sku = item.variant?.sku;
     const key = `${product}::${sku || ''}`;
@@ -228,7 +230,7 @@ export const aggregateBuyAgainItems = (orders: BuyAgainOrder[]): BuyAgainRegular
         map.set(key, {
           productId,
           sku,
-          name: item.name || 'Pet supply',
+          name: decodeHtmlEntities(item.name || 'Pet supply'),
           image: item.image || '',
           lastPrice: Number(item.price) || 0,
           lastQuantity: Math.max(1, Number(item.quantity) || 1),
@@ -240,7 +242,7 @@ export const aggregateBuyAgainItems = (orders: BuyAgainOrder[]): BuyAgainRegular
       existing.timesOrdered += 1;
       existing.lastQuantity = Math.max(1, Number(item.quantity) || existing.lastQuantity);
       existing.lastPrice = Number(item.price) || existing.lastPrice;
-      existing.name = item.name || existing.name;
+      existing.name = decodeHtmlEntities(item.name || existing.name);
       existing.image = item.image || existing.image;
       if (orderedAt > existing.lastOrderedAt) existing.lastOrderedAt = orderedAt;
     }

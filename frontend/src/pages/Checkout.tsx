@@ -22,6 +22,7 @@ import SEO from '@/components/SEO';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import OrdersHoldNotice from '@/components/OrdersHoldNotice';
 import { ORDERING_PAUSED } from '@/config/ordering';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { MapPin, Plus, Check, User, UserCheck, Banknote, ShieldCheck, RotateCcw, Headphones, Lock, Truck, CreditCard } from 'lucide-react';
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
 import { paypalClientId } from '@/config/paypal';
@@ -1349,11 +1350,11 @@ const Checkout = () => {
                     const price = item.variant?.price || item.product.basePrice;
                     return (
                       <div key={`${item.product._id}-${item.variant?.sku}`} className="flex gap-3">
-                        <img src={normalizeImageUrl(item.product.images?.[0])} alt={item.product.name}
-                          onError={(e) => handleImageError(e, item.product.name)}
+                        <img src={normalizeImageUrl(item.product.images?.[0])} alt={decodeHtmlEntities(item.product.name)}
+                          onError={(e) => handleImageError(e, decodeHtmlEntities(item.product.name))}
                           className="h-[4.5rem] w-[4.5rem] rounded-2xl object-cover ring-1 ring-stone-200" />
                         <div className="flex-1">
-                          <p className="font-semibold text-sm text-stone-900 leading-snug">{item.product.name}</p>
+                          <p className="font-semibold text-sm text-stone-900 leading-snug">{decodeHtmlEntities(item.product.name)}</p>
                           <p className="text-xs text-stone-500 mt-1">Qty {item.quantity}</p>
                           {item.variant && <p className="text-xs text-stone-500">{item.variant.size || item.variant.weight}</p>}
                         </div>

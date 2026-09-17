@@ -156,7 +156,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-primary-600 font-semibold uppercase mb-1">{decodeHtmlEntities(product.brand)}</p>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">{decodeHtmlEntities(product.name)}</h2>
                   
                   {/* Rating */}
                   {product.averageRating > 0 && (

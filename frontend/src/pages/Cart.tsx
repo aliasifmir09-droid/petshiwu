@@ -16,6 +16,7 @@ import cartService from '@/services/cart';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { useQuery } from '@tanstack/react-query';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const safePrice = (item: any): number => {
   try {
@@ -33,13 +34,13 @@ const safeImage = (item: any): string => {
 
 const safeName = (item: any): string => {
   try {
-    return item?.product?.name || item?.name || 'Product';
+    return decodeHtmlEntities(item?.product?.name || item?.name || 'Product') || 'Product';
   } catch { return 'Product'; }
 };
 
 const safeBrand = (item: any): string => {
   try {
-    return item?.product?.brand || item?.brand || '';
+    return decodeHtmlEntities(item?.product?.brand || item?.brand || '');
   } catch { return ''; }
 };
 

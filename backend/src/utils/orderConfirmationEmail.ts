@@ -1,3 +1,5 @@
+import { decodeHtmlEntities } from './catalogText';
+
 const SITE_ORIGIN = 'https://www.petshiwu.com';
 const BRAND_NAVY = '#1E3A8A';
 const BRAND_GOLD = '#F59E0B';
@@ -126,7 +128,7 @@ export function buildOrderConfirmationEmail(
             <tr>
               <td width="76" valign="top" style="padding-right:12px;">${thumb}</td>
               <td valign="middle">
-                <div style="font-size:15px;line-height:1.4;color:#111827;font-weight:700;">${escapeHtml(item.name)}</div>
+                <div style="font-size:15px;line-height:1.4;color:#111827;font-weight:700;">${escapeHtml(decodeHtmlEntities(item.name))}</div>
                 <div style="font-size:13px;color:#6B7280;margin-top:4px;">${formatUsd(Number(item.price))} each</div>
               </td>
               <td width="54" valign="middle" align="center" style="font-size:15px;font-weight:700;color:#111827;">${escapeHtml(item.quantity)}</td>
@@ -382,7 +384,7 @@ export function buildOrderConfirmationEmail(
 </html>`;
 
   const itemLines = (orderData.items || [])
-    .map((item) => `- ${item.name} x${item.quantity} — ${formatUsd(Number(item.price) * Number(item.quantity))}`)
+    .map((item) => `- ${decodeHtmlEntities(item.name)} x${item.quantity} — ${formatUsd(Number(item.price) * Number(item.quantity))}`)
     .join('\n');
 
   const text = [

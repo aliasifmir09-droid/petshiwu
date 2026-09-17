@@ -10,6 +10,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { authService } from '@/services/auth';
 import { guestSetPasswordPath, readGuestCheckoutAccount } from '@/utils/guestCheckoutAccount';
 import { trackLogin } from '@/utils/analytics';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const TrackOrder = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -272,7 +273,7 @@ const TrackOrder = () => {
                 {order.items.map((item, index) => (
                   <div key={index} className="flex justify-between items-center py-4 border-b border-gray-200 last:border-0">
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900">{item.name}</p>
+                      <p className="font-semibold text-gray-900">{decodeHtmlEntities(item.name)}</p>
                       <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                     </div>
                     <p className="text-lg font-bold text-gray-900">${(item.price * item.quantity).toFixed(2)}</p>

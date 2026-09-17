@@ -130,6 +130,20 @@ describe('order confirmation email', () => {
     expect(hostile.html).toContain('a@b.com&lt;script&gt;');
   });
 
+  test('decodes catalog apostrophes in packing-slip item names', () => {
+    const encoded = buildOrderConfirmationEmail('jawed', 'ORD-APOS-1', {
+      ...sample,
+      items: [{
+        name: "McLovin&#039;s Pet Premium Dog Meal Topper",
+        quantity: 2,
+        price: 18,
+      }],
+    });
+    expect(encoded.html).toContain('McLovin&#39;s Pet Premium Dog Meal Topper');
+    expect(encoded.html).not.toContain('&amp;#039;');
+    expect(encoded.text).toContain("McLovin's Pet Premium Dog Meal Topper");
+  });
+
   test('keeps a plain-text receipt for inbox filters', () => {
     expect(email.text).toContain('Whisker City® 2-Door Pet Carrier');
     expect(email.text).toContain('Call support 24/7: +1 (800) 259-2605');

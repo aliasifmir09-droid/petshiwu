@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/useToast';
 import { trackOrderCancel } from '@/utils/analytics';
 import { useCartStore } from '@/stores/cartStore';
 import { productsForReorder } from '@/utils/reorderFromOrder';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const OrderDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -350,11 +351,11 @@ const OrderDetail = () => {
                     <div className="flex items-center gap-4">
                       <img
                         src={item.image}
-                        alt={item.name}
+                        alt={decodeHtmlEntities(item.name)}
                         className="w-20 h-20 object-cover rounded"
                       />
                       <div className="flex-1">
-                        <h3 className="font-semibold">{item.name}</h3>
+                        <h3 className="font-semibold">{decodeHtmlEntities(item.name)}</h3>
                         {item.variant && (
                           <p className="text-sm text-gray-600">
                             {item.variant.size || item.variant.weight}
