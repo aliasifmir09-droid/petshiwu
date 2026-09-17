@@ -13,7 +13,7 @@ import { highlightSearchTerm } from '@/utils/searchHighlight';
 import QuickViewModal from './QuickViewModal';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { getListingPrice, getListingVariant, getProductImage, getValidCompareAtPrice } from '@/utils/productPrice';
-import { inStockLabel } from '@/config/ordering';
+import { addToCartLabel, inStockLabel } from '@/config/ordering';
 
 interface ProductCardProps {
   product: Product;
@@ -270,7 +270,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
               type="button"
               onClick={handleAddToCart}
               disabled={!product.inStock}
-              aria-label={product.inStock ? `Add ${product.name} to cart` : `${product.name} is out of stock`}
+              aria-label={product.inStock ? `${addToCartLabel(true)} ${product.name}` : `${product.name} is out of stock`}
               className={`w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-lg font-semibold text-sm ${
                 cartAdded
                   ? 'bg-emerald-600 text-white'
@@ -288,7 +288,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
                 <>
                   <ShoppingCart size={20} strokeWidth={2.5} />
                   <span>
-                    {product.inStock ? 'Add to Cart' : 'Out of Stock'}
+                    {addToCartLabel(Boolean(product.inStock))}
                   </span>
                 </>
               )}

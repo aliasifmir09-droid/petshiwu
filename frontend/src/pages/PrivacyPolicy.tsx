@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import SEO from '@/components/SEO';
 
 const PrivacyPolicy = () => {
@@ -60,9 +61,11 @@ const PrivacyPolicy = () => {
         <section id="cookies">
           <h2 className="text-2xl font-bold text-gray-900 mb-3">4. Cookies and Tracking</h2>
           <p>
-            We use cookies and similar technologies to improve your experience, remember your preferences,
-            analyze traffic, and support our marketing. You can control cookies through your browser settings.
-            Disabling cookies may affect some site features.
+            We use cookies and similar technologies to run the shop, remember your cart, and — only
+            after you tap Accept — measure traffic with Google Analytics. See the full inventory,
+            providers, durations, and how to change consent on our{' '}
+            <Link to="/cookie-policy" className="text-blue-600 hover:underline">Cookie Policy</Link>.
+            Disabling essential cookies may prevent checkout and sign-in.
           </p>
           <p className="mt-2">We use the following types of cookies:</p>
           <ul className="list-disc pl-6 mt-3 space-y-2">

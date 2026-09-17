@@ -260,11 +260,15 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/returns': {
     title: 'Start a Return | Petshiwu',
-    description: 'Start a return or exchange for your Petshiwu order. Our simple process makes it easy to return pet food, toys, and supplies.',
+    description: 'Start a Petshiwu return with your order number and email. Unused items can be returned within 365 days of delivery.',
   },
   '/privacy': {
     title: 'Privacy Policy | Petshiwu',
     description: 'Read Petshiwu\'s privacy policy to understand how we collect, use, and protect your personal information.',
+  },
+  '/cookie-policy': {
+    title: 'Cookie Policy | Petshiwu',
+    description: 'Petshiwu cookie policy: which cookies we use, who provides them, why, how long they last, and how to change your consent.',
   },
   '/terms': {
     title: 'Terms of Service | Petshiwu',

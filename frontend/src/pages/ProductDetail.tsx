@@ -27,7 +27,7 @@ import { safeError } from '@/utils/safeLogger';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import ProductVariantPicker from '@/components/ProductVariantPicker';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
-import { inStockLabel, ORDERING_PAUSED } from '@/config/ordering';
+import { addToCartLabel, inStockLabel, ORDERING_PAUSED } from '@/config/ordering';
 
 // Lazy load heavy dependencies
 const RecentlyViewed = lazy(() => import('@/components/RecentlyViewed'));
@@ -856,7 +856,7 @@ const ProductDetail = () => {
               }`}
             >
               <ShoppingCart size={22} />
-              {isReadyToShip ? 'Add to cart' : 'Out of Stock'}
+              {addToCartLabel(isReadyToShip)}
             </button>
             {isReadyToShip ? (
               <p className="text-xs text-slate-500 text-center mt-2">
@@ -1368,7 +1368,7 @@ const ProductDetail = () => {
             }`}
           >
             <ShoppingCart size={20} />
-            {isReadyToShip ? 'Add to cart' : 'Out of Stock'}
+            {addToCartLabel(isReadyToShip)}
           </button>
           {isReadyToShip ? (
             <p className="text-[11px] text-slate-500 text-center mt-1.5">

@@ -3,12 +3,16 @@
  * Supports Google Analytics 4 (GA4) and custom event tracking
  */
 
+import { hasAnalyticsConsent } from '@/config/cookies';
+
 declare global {
   interface Window {
     gtag?: (...args: any[]) => void;
     dataLayer?: any[];
   }
 }
+
+import { hasAnalyticsConsent } from '@/config/cookies';
 
 // Google Analytics Measurement ID (set via environment variable)
 const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || '';
@@ -18,6 +22,9 @@ const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || '';
  */
 export const initAnalytics = () => {
   if (!GA_MEASUREMENT_ID || typeof window === 'undefined') {
+    return;
+  }
+  if (!hasAnalyticsConsent()) {
     return;
   }
 

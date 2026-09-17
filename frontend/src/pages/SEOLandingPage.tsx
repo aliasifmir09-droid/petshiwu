@@ -10,6 +10,7 @@ import StructuredData from '@/components/StructuredData';
 import { ChevronRight, Home, CheckCircle, AlertCircle } from 'lucide-react';
 import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
 import { TONIGHT, withTonightFaq } from '@/data/tonightDelivery';
+import { ORDERING_PAUSED } from '@/config/ordering';
 import { landingProductQuery } from '@/utils/landingProducts';
 
 interface SEOLandingPageProps {
@@ -261,17 +262,19 @@ const SEOLandingPage = ({
         {/* CTA Section */}
         <div className="bg-slate-50 border border-slate-200 rounded-lg p-8 text-center">
           <h2 className="text-2xl font-bold mb-4 text-[#1E3A8A]">
-            Need it tonight?
+            {ORDERING_PAUSED ? 'Same-day NYC when checkout opens' : 'Need it tonight?'}
           </h2>
           <p className="text-gray-700 mb-6">
-            {TONIGHT.shortPromise}. Call {TONIGHT.phone} if you have a question.
+            {ORDERING_PAUSED
+              ? 'Browse the catalog now. When checkout opens: order by 3 PM weekdays (1 PM weekends). Call if you have a question.'
+              : `${TONIGHT.shortPromise}. Call ${TONIGHT.phone} if you have a question.`}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/products"
               className="inline-block bg-[#1E3A8A] text-white px-8 py-3 rounded-lg hover:bg-[#1e40af] transition-colors font-semibold"
             >
-              Shop tonight
+              {ORDERING_PAUSED ? 'Browse products' : 'Shop tonight'}
             </Link>
             <Link
               to="/faq"

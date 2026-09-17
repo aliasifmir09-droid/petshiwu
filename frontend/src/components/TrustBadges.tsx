@@ -17,8 +17,8 @@ const TrustBadges = () => {
     },
     {
       icon: Package,
-      title: 'One-tap cart',
-      description: 'Add 1, then checkout',
+      title: 'Save a cart',
+      description: ORDERING_PAUSED ? 'Checkout opens soon' : 'Add 1, then checkout',
       color: 'bg-[#1E3A8A]',
     },
     {

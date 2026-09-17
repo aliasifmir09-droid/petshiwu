@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
-
-const STORAGE_KEY = 'petshiwu_cookie_consent';
+import { COOKIE_CONSENT_STORAGE_KEY } from '@/config/cookies';
+import { initAnalytics } from '@/utils/analytics';
 
 const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
@@ -10,19 +10,20 @@ const CookieConsent = () => {
   useEffect(() => {
     // Delay slightly so it doesn't flash on first paint
     const timer = setTimeout(() => {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY);
       if (!stored) setVisible(true);
     }, 800);
     return () => clearTimeout(timer);
   }, []);
 
   const accept = () => {
-    localStorage.setItem(STORAGE_KEY, 'accepted');
+    localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, 'accepted');
+    initAnalytics();
     setVisible(false);
   };
 
   const decline = () => {
-    localStorage.setItem(STORAGE_KEY, 'declined');
+    localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, 'declined');
     setVisible(false);
   };
 
@@ -40,8 +41,8 @@ const CookieConsent = () => {
           <span className="font-semibold text-white">🍪 We use cookies</span> to improve your experience,
           analyze site traffic, and serve personalized content. By clicking "Accept", you agree to our use
           of cookies.{' '}
-          <Link to="/privacy#cookies" className="text-blue-400 hover:text-blue-300 underline whitespace-nowrap">
-            Learn more
+          <Link to="/cookie-policy" className="text-blue-400 hover:text-blue-300 underline whitespace-nowrap">
+            Cookie Policy
           </Link>
         </div>
         <div className="flex items-center gap-3 shrink-0">

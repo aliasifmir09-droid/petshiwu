@@ -907,8 +907,6 @@ const PLURAL_TO_SINGULAR: Record<string, string> = {
   '/terms-of-service/': '/terms',
   '/shipping-policy': '/shipping',
   '/shipping-policy/': '/shipping',
-  '/cookie-policy': '/privacy',
-  '/cookie-policy/': '/privacy',
   '/shop': '/products',
   '/shop/': '/products',
 };

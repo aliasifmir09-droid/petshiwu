@@ -14,5 +14,11 @@ export const ORDERING_PAUSED_SHORT =
 /** Inventory badge. "Ready to ship" only after we actually take orders. */
 export function inStockLabel(inStock: boolean): string {
   if (!inStock) return 'Out of stock';
-  return ORDERING_PAUSED ? 'In stock' : 'Ready to ship';
+  return ORDERING_PAUSED ? 'In catalog' : 'Ready to ship';
+}
+
+/** Cart still saves items while paused; the label must not sound like checkout is live. */
+export function addToCartLabel(inStock: boolean): string {
+  if (!inStock) return 'Out of stock';
+  return ORDERING_PAUSED ? 'Save for checkout' : 'Add to cart';
 }
