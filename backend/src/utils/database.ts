@@ -95,7 +95,9 @@ export const connectDatabase = async () => {
     await Promise.all([Order.createIndexes(), PendingPayPalCheckout.createIndexes()]);
     logger.info('✅ Payment idempotency indexes verified');
     const { repairLaunchCatalog } = await import('../services/launchCatalogRepair');
+    const { repairFaqPolicies } = await import('../services/faqPolicyRepair');
     void repairLaunchCatalog();
+    void repairFaqPolicies();
     
     // Optimize Mongoose settings for high concurrency
     optimizeMongooseSettings();

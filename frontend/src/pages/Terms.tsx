@@ -10,7 +10,7 @@ const Terms = () => {
       />
 
       <h1 className="text-4xl font-black mb-2 text-gray-900">Terms of Service</h1>
-      <p className="text-gray-500 mb-8">Last updated: May 20, 2026</p>
+      <p className="text-gray-500 mb-8">Last updated: September 16, 2026</p>
 
       <div className="prose prose-gray max-w-none space-y-8 text-gray-700 leading-relaxed">
 
@@ -22,7 +22,8 @@ const Terms = () => {
             visitors, customers, and anyone who accesses or uses our services.
           </p>
           <p className="mt-2">
-            Petshiwu is operated by Petshiwu, located at 37-68 74th St, Jackson Heights, NY 11372. Contact us
+            Petshiwu is the seller of record for purchases on this site. We pack orders from
+            37-68 74th St, Jackson Heights, NY 11372 (office and warehouse only — not a walk-in store). Contact us
             at{' '}
             <a href="mailto:support@petshiwu.com" className="text-blue-600 hover:underline">
               support@petshiwu.com
@@ -50,7 +51,7 @@ const Terms = () => {
             <li>Payment is processed securely through our payment partners (Stripe, PayPal). By providing
               payment information, you authorize us to charge the total amount of your order.</li>
             <li>You are responsible for providing accurate shipping and billing information.</li>
-            <li>Orders cannot be modified or cancelled once submitted. Please review your order carefully.</li>
+            <li>You can cancel an unshipped order within 2 hours by emailing support@petshiwu.com. After it ships, use the 365-day return policy.</li>
           </ul>
         </section>
 
@@ -58,7 +59,7 @@ const Terms = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-3">4. Shipping</h2>
           <ul className="list-disc pl-6 space-y-2">
             <li>We offer free standard shipping on orders over $49.</li>
-            <li>Estimated delivery times are provided at checkout and are not guaranteed.</li>
+            <li>Estimated delivery times are provided at checkout and are a target, not a guarantee. If we miss a same-day window after a before-cutoff NYC order, we reship the next day free or refund the order.</li>
             <li>Risk of loss and title for products pass to you upon delivery to the carrier.</li>
             <li>We are not responsible for delays caused by the carrier or circumstances beyond our control.</li>
           </ul>
@@ -72,7 +73,7 @@ const Terms = () => {
           </p>
           <ul className="list-disc pl-6 mt-3 space-y-2">
             <li>Items must be unused, in original packaging, and in the same condition as received.</li>
-            <li>Perishable items (food, treats) are final sale and cannot be returned unless defective.</li>
+            <li>Unopened food, treats, and supplements in original packaging can be returned within 365 days. Opened food, treats, or supplements can only be returned if they arrived damaged, defective, or incorrect.</li>
             <li>Refunds are issued to the original payment method within 5-10 business days of receiving
               the return.</li>
             <li>Return shipping costs are the customer's responsibility unless the item was defective or
@@ -159,7 +160,7 @@ const Terms = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-3">13. Contact Us</h2>
           <p>If you have any questions about these Terms, please contact us:</p>
           <div className="mt-3 bg-gray-50 rounded-xl p-5 space-y-1">
-            <p><strong>Petshiwu</strong></p>
+            <p><strong>Petshiwu</strong> (seller of record)</p>
             <p>37-68 74th St, Jackson Heights, NY 11372</p>
             <p>Email: <a href="mailto:support@petshiwu.com" className="text-blue-600 hover:underline">support@petshiwu.com</a></p>
             <p>Phone: <a href="tel:+18002592605" className="text-blue-600 hover:underline">+1 (800) 259-2605</a> (call center 24/7)</p>

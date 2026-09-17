@@ -61,12 +61,14 @@ const TonightPromiseCard = ({ variant = 'hero' }: TonightPromiseCardProps) => {
     }
   }, [zip]);
 
-  const cutoffLine = countdown.passed
-    ? `Same-day cutoff passed · next-day NYC`
-    : `Order by ${countdown.isWeekend ? TONIGHT.weekendCutoff : TONIGHT.weekdayCutoff} · ${formatCountdownShort(countdown)}`;
+  const cutoffLine = ORDERING_PAUSED
+    ? `When checkout opens: ${TONIGHT.weekdayCutoff} weekdays · ${TONIGHT.weekendCutoff} weekends · before ${TONIGHT.deliverBy}`
+    : countdown.passed
+      ? `Same-day cutoff passed · next-day NYC`
+      : `Order by ${countdown.isWeekend ? TONIGHT.weekendCutoff : TONIGHT.weekdayCutoff} · ${formatCountdownShort(countdown)}`;
 
   const status = result
-    ? result.speed === 'same-day' && !countdown.passed
+    ? result.speed === 'same-day' && !countdown.passed && !ORDERING_PAUSED
       ? `${result.headline}. ${result.detail}`
       : result.headline
     : `Enter your ZIP. We pack in Queens and bring it to your door.`;
@@ -75,9 +77,13 @@ const TonightPromiseCard = ({ variant = 'hero' }: TonightPromiseCardProps) => {
     return (
       <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
         <p className="text-sm font-semibold text-[#1E3A8A]">
-          {result?.speed === 'same-day' && !countdown.passed
-            ? `Tonight in ${result.area}`
-            : 'Tonight in NYC'}
+          {ORDERING_PAUSED
+            ? result?.area
+              ? `Same-day in ${result.area} when checkout opens`
+              : 'Same-day NYC when checkout opens'
+            : result?.speed === 'same-day' && !countdown.passed
+              ? `Tonight in ${result.area}`
+              : 'Tonight in NYC'}
         </p>
         <p className="text-xs text-slate-600 mt-0.5">{cutoffLine}</p>
         <p className="text-xs text-slate-500 mt-1">{status}</p>
@@ -108,7 +114,7 @@ const TonightPromiseCard = ({ variant = 'hero' }: TonightPromiseCardProps) => {
             Jackson Heights warehouse · five boroughs
           </p>
           <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-3">
-            Tonight at your door.
+            {ORDERING_PAUSED ? 'Same-day NYC when checkout opens.' : 'Tonight at your door.'}
           </h2>
           <p className="text-base md:text-lg text-blue-100 mb-6 max-w-xl">
             {ORDERING_PAUSED

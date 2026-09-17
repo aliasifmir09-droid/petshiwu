@@ -10,15 +10,16 @@ const PrivacyPolicy = () => {
       />
 
       <h1 className="text-4xl font-black mb-2 text-gray-900">Privacy Policy</h1>
-      <p className="text-gray-500 mb-8">Last updated: May 20, 2026</p>
+      <p className="text-gray-500 mb-8">Last updated: September 16, 2026</p>
 
       <div className="prose prose-gray max-w-none space-y-8 text-gray-700 leading-relaxed">
 
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-3">1. Who We Are</h2>
           <p>
-            Petshiwu ("we," "our," or "us") is an online pet supply store located at 37-68 74th St,
-            Jackson Heights, NY 11372. We operate the website <strong>petshiwu.com</strong> and are
+            Petshiwu (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is the seller of record for pet supplies
+            sold at petshiwu.com. Our office and warehouse is 37-68 74th St,
+            Jackson Heights, NY 11372 (not a walk-in store). We operate the website <strong>petshiwu.com</strong> and are
             committed to protecting the privacy of every customer and visitor.
           </p>
           <p className="mt-2">
@@ -56,7 +57,7 @@ const PrivacyPolicy = () => {
           </ul>
         </section>
 
-        <section>
+        <section id="cookies">
           <h2 className="text-2xl font-bold text-gray-900 mb-3">4. Cookies and Tracking</h2>
           <p>
             We use cookies and similar technologies to improve your experience, remember your preferences,
@@ -109,8 +110,10 @@ const PrivacyPolicy = () => {
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-3">8. Data Retention</h2>
           <p>
-            We retain your personal information for as long as your account is active or as needed to provide
-            services, comply with legal obligations, resolve disputes, and enforce our agreements.
+            Account data is kept while your account is open and for up to 12 months after you ask us to delete it,
+            unless a longer period is required by law. Order, tax, and payment records are kept for 7 years.
+            Contact-form messages are kept for up to 2 years so we can follow up on your request, then deleted
+            unless they are part of an order or legal file.
           </p>
         </section>
 
@@ -136,7 +139,7 @@ const PrivacyPolicy = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-3">11. Contact Us</h2>
           <p>If you have any questions about this Privacy Policy, please contact us:</p>
           <div className="mt-3 bg-gray-50 rounded-xl p-5 space-y-1">
-            <p><strong>Petshiwu</strong></p>
+            <p><strong>Petshiwu</strong> (seller of record)</p>
             <p>37-68 74th St, Jackson Heights, NY 11372</p>
             <p>Email: <a href="mailto:support@petshiwu.com" className="text-blue-600 hover:underline">support@petshiwu.com</a></p>
             <p>Phone: <a href="tel:+18002592605" className="text-blue-600 hover:underline">+1 (800) 259-2605</a> (call center 24/7)</p>

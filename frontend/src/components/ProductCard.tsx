@@ -13,6 +13,7 @@ import { highlightSearchTerm } from '@/utils/searchHighlight';
 import QuickViewModal from './QuickViewModal';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { getListingPrice, getListingVariant, getProductImage, getValidCompareAtPrice } from '@/utils/productPrice';
+import { inStockLabel } from '@/config/ordering';
 
 interface ProductCardProps {
   product: Product;
@@ -251,7 +252,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
             {isReadyToShip ? (
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
-                <span className="text-xs text-slate-600">Ready to ship</span>
+                <span className="text-xs text-slate-600">{inStockLabel(true)}</span>
               </div>
             ) : (
               <div className="bg-gray-100 border border-gray-300 rounded-lg p-2 flex items-center gap-2">

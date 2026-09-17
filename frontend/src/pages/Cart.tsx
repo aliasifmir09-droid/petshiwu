@@ -134,7 +134,7 @@ const Cart = () => {
       try { return await cartService.getDeliveryEstimate('standard'); }
       catch { return null; }
     },
-    enabled: items.length > 0,
+    enabled: items.length > 0 && !ORDERING_PAUSED,
     staleTime: 5 * 60 * 1000,
     retry: false,
   });
@@ -392,7 +392,12 @@ const Cart = () => {
                   <span className="text-gray-600">Tax</span>
                   <span className="font-medium">${tax.toFixed(2)}</span>
                 </div>
-                {estimatedDelivery && (
+                {ORDERING_PAUSED ? (
+                  <div className="flex justify-between text-sm text-gray-600 pt-2 border-t">
+                    <span>Estimated delivery</span>
+                    <span className="font-medium">Shown when checkout opens</span>
+                  </div>
+                ) : estimatedDelivery && (
                   <div className="flex justify-between text-sm text-gray-600 pt-2 border-t">
                     <span>Estimated Delivery</span>
                     <span className="font-medium">
@@ -442,7 +447,9 @@ const Cart = () => {
               <div>
                 <span className="text-sm text-gray-600 block">Total</span>
                 <span className="text-2xl font-bold text-gray-900">${total.toFixed(2)}</span>
-                {estimatedDelivery && (
+                {ORDERING_PAUSED ? (
+                  <span className="text-xs text-gray-500 block mt-1">Delivery dates when checkout opens</span>
+                ) : estimatedDelivery && (
                   <span className="text-xs text-gray-500 block mt-1">
                     Est. delivery: {estimatedDelivery.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </span>

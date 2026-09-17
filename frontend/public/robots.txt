@@ -15,6 +15,7 @@ Disallow: /addresses
 Disallow: /stock-alerts
 Disallow: /favorites
 Disallow: /compare
+Disallow: /returns
 Disallow: /admin
 Disallow: /dashboard
 Disallow: /login
@@ -55,7 +56,6 @@ Allow: /about
 Allow: /contact
 Allow: /press
 Allow: /return-policy
-Allow: /returns
 Allow: /track-order
 Allow: /shipping
 Allow: /privacy

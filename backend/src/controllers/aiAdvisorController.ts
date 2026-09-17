@@ -459,7 +459,7 @@ PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
 === RETURNS & REFUNDS ===
 - 365-day return window from delivery date
 - Pet food guarantee: Return refused food, no questions asked
-- How to return: petshiwu.com/returns — enter order number, select items
+- How to return: petshiwu.com/return-policy — unused items within 365 days. Opened food only if damaged, defective, or incorrect.
 - Refund: Back to original payment method within 5–7 business days
 - Return shipping: FREE for damaged, defective, or wrong items; customer pays for change-of-mind returns
 - Exchanges: Available — note preferred exchange item when starting a return
@@ -503,10 +503,10 @@ Q: Do you offer free shipping?
 A: Yes — all orders over $49 ship free automatically, no code needed. Same-day delivery is available across all five NYC boroughs for orders before 3 PM weekdays (1 PM weekends).
 
 Q: How do I return something?
-A: Go to petshiwu.com/returns within 365 days of delivery, enter your order number, and select the items to return. Refunds go back to your original payment method in 5–7 business days. If your pet simply refuses to eat a food — return it, no questions asked.
+A: Go to petshiwu.com/return-policy or email support@petshiwu.com within 365 days of delivery. Unused items in original packaging can be returned. Opened food, treats, or supplements can only be returned if they arrived damaged, defective, or incorrect. Refunds go back to your original payment method in 5–10 business days.
 
 Q: My pet refuses to eat the food I ordered. Can I return it?
-A: Absolutely yes. Our pet food satisfaction guarantee covers refused food. Go to petshiwu.com/returns, pick "My pet won't eat it" as the reason, and we'll refund you in full. We stand completely behind our products.
+A: Unopened food can be returned within 365 days. If the bag was opened, we can only take it back if it arrived damaged, defective, or incorrect. Email support@petshiwu.com or start at petshiwu.com/return-policy.
 
 Q: How do I cancel or change my order?
 A: Contact us within 1 hour of placing your order — call +1 (800) 259-2605 or email support@petshiwu.com. After 1 hour the order may already be in processing, but you can always return it for free after delivery.

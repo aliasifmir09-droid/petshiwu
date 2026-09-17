@@ -6,7 +6,7 @@ export const TONIGHT = {
   weekdayCutoff: '3 PM',
   weekendCutoff: '1 PM',
   deliverBy: '11 PM',
-  timezone: 'EST',
+  timezone: 'ET',
   freeOver: 49,
   underFee: 6,
   phone: '(800) 259-2605',
@@ -37,7 +37,7 @@ export const TONIGHT_STEPS = [
 export const TONIGHT_FAQ = {
   question: 'Do you deliver same-day pet supplies in NYC?',
   answer:
-    'Yes. Order by 3 PM EST on weekdays (1 PM EST on weekends) and we deliver before 11 PM the same day across Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. After cutoff, we deliver the next day. No autoship. Free delivery over $49 ($6 under that). We are delivery only — Jackson Heights is office and warehouse, not a walk-in store.',
+    'Yes. Order by 3 PM ET on weekdays (1 PM ET on weekends) and we aim to deliver before 11 PM the same day across Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. After cutoff, we deliver the next day. Same-day is our target, not a guarantee — if we miss the window we reship the next day free or refund the order. No autoship. Free delivery over $49 ($6 under that). We are delivery only — Jackson Heights is office and warehouse, not a walk-in store.',
 };
 
 /** Google Business Profile description — must stay at or under 750 characters. */

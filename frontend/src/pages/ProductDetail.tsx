@@ -27,6 +27,7 @@ import { safeError } from '@/utils/safeLogger';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import ProductVariantPicker from '@/components/ProductVariantPicker';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
+import { inStockLabel, ORDERING_PAUSED } from '@/config/ordering';
 
 // Lazy load heavy dependencies
 const RecentlyViewed = lazy(() => import('@/components/RecentlyViewed'));
@@ -830,7 +831,7 @@ const ProductDetail = () => {
             {isReadyToShip ? (
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-                <span className="text-green-700 font-medium">Ready to ship</span>
+                <span className="text-green-700 font-medium">{inStockLabel(true)}</span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
@@ -1370,7 +1371,9 @@ const ProductDetail = () => {
             {isReadyToShip ? 'Add to cart' : 'Out of Stock'}
           </button>
           {isReadyToShip ? (
-            <p className="text-[11px] text-slate-500 text-center mt-1.5">Tonight in NYC · packed in Queens</p>
+            <p className="text-[11px] text-slate-500 text-center mt-1.5">
+              {ORDERING_PAUSED ? 'Packed in Queens · same-day NYC when checkout opens' : 'Tonight in NYC · packed in Queens'}
+            </p>
           ) : null}
         </div>
       )}

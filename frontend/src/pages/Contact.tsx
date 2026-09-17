@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from 'lucide-react';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
@@ -69,8 +70,7 @@ const Contact = () => {
           currenciesAccepted: 'USD',
           sameAs: [
             'https://www.facebook.com/petshiwu',
-            'https://www.instagram.com/petshiwu',
-            'https://twitter.com/petshiwu'
+            'https://www.instagram.com/petshiwu'
           ]
         }}
       />
@@ -236,6 +236,12 @@ const Contact = () => {
                     </div>
 
                     {error && <p className="text-red-600 text-sm">{error}</p>}
+
+                    <p className="text-xs text-gray-500 leading-relaxed">
+                      We use your name, email, and message only to reply to this request. We do not sell it.
+                      Messages are kept up to 2 years. See our{' '}
+                      <Link to="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>.
+                    </p>
 
                     <button
                       type="submit"
