@@ -47,7 +47,7 @@ export const INDEXABLE_LANDING_PATHS = new Set([
 const INDEXABLE_ROOT_PATHS = new Set([
   '/', '/products', '/learning', '/care-guides', '/about', '/faq',
   '/return-policy', '/donate', '/contact', '/shipping', '/other-animals',
-  '/privacy', '/terms', '/accessibility',
+  '/privacy', '/terms', '/accessibility', '/cookie-policy',
   '/fish-tanks', '/press', '/investors', '/sell-with-us', '/vendors', '/partners',
   '/innovation',
   ...INDEXABLE_LANDING_PATHS,
@@ -73,6 +73,7 @@ export const CRAWLABLE_STOREFRONT_PATHS: string[] = [
   '/return-policy',
   '/shipping',
   '/privacy',
+  '/cookie-policy',
   '/terms',
   '/accessibility',
   '/donate',
@@ -90,7 +91,6 @@ const ALIAS_REDIRECTS: Record<string, string> = {
   '/privacy-policy': '/privacy',
   '/terms-of-service': '/terms',
   '/shipping-policy': '/shipping',
-  '/cookie-policy': '/privacy',
   '/shop': '/products',
 };
 

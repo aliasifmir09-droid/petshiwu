@@ -59,6 +59,7 @@ Allow: /return-policy
 Allow: /track-order
 Allow: /shipping
 Allow: /privacy
+Allow: /cookie-policy
 Allow: /terms
 Allow: /accessibility
 Allow: /donate

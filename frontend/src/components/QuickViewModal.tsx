@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { availableCartStock } from '@/utils/cartStock';
-import { inStockLabel, ORDERING_PAUSED } from '@/config/ordering';
+import { addToCartLabel, inStockLabel, ORDERING_PAUSED } from '@/config/ordering';
 
 interface QuickViewModalProps {
   productSlug: string;
@@ -233,7 +233,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
                     className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
                   >
                     <ShoppingCart size={20} />
-                    {isReadyToShip ? 'Add to Cart' : 'Out of Stock'}
+                    {addToCartLabel(isReadyToShip)}
                   </button>
                   <button
                     onClick={handleWishlistToggle}

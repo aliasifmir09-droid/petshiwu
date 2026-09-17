@@ -40,8 +40,9 @@ describe('classifyRoute', () => {
       routeType: 'alias-redirect',
     });
     expect(classifyRoute('/cookie-policy')).toMatchObject({
-      status: 'redirect',
-      redirectTo: '/privacy',
+      status: 'indexable',
+      indexable: true,
+      canonicalPath: '/cookie-policy',
     });
     expect(classifyRoute('/terms-of-service').redirectTo).toBe('/terms');
     expect(classifyRoute('/shipping-policy').redirectTo).toBe('/shipping');

@@ -89,7 +89,7 @@ const Investors = lazy(() => import('./pages/Investors'));
 const Innovation = lazy(() => import('./pages/Innovation'));
 const SellWithUs = lazy(() => import('./pages/SellWithUs'));
 const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
-const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const CookiePolicy = lazy(() => import('./pages/CookiePolicy'));
 
 // Neighborhood × Category programmatic pages (200 pages) — see top of file for imports
 const Terms = lazy(() => import('./pages/Terms'));
@@ -421,7 +421,7 @@ function App() {
                   <Route path="/shipping-policy" element={<ShippingPolicy />} />
                   <Route path="/accessibility" element={<Accessibility />} />
                   <Route path="/unsubscribe" element={<Unsubscribe />} />
-                  <Route path="/cookie-policy" element={<Navigate to="/privacy#cookies" replace />} />
+                  <Route path="/cookie-policy" element={<CookiePolicy />} />
 
                   {/* Explicit routes that must NOT be caught by /:petType */}
                   <Route path="/shop" element={<Products />} />

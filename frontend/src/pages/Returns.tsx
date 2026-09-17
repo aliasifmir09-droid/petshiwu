@@ -8,6 +8,7 @@ import Toast from '@/components/Toast';
 import { Link } from 'react-router-dom';
 import SEO from '@/components/SEO';
 import { useAuthStore } from '@/stores/authStore';
+import ReturnRequestForm from '@/components/ReturnRequestForm';
 
 const Returns = () => {
   const { toast, hideToast } = useToast();
@@ -75,29 +76,17 @@ const Returns = () => {
       <>
         <SEO
           title="Start a Return | Petshiwu"
-          description="Sign in to start a Petshiwu return. Unused items can be returned within 365 days of delivery."
+          description="Start a Petshiwu return with your order number and email. Unused items can be returned within 365 days of delivery."
           url="/returns"
           noindex={true}
         />
-        <div className="container mx-auto px-4 py-12 max-w-xl">
+        <div className="container mx-auto px-4 py-12 max-w-2xl">
           <h1 className="text-3xl font-bold mb-4">Start a return</h1>
           <p className="text-gray-700 mb-6">
-            Sign in to request a return on an order. Unused items in original packaging can be returned within 365 days of delivery.
+            Enter your order number and email. You get a reference number immediately. Unused items
+            in original packaging can be returned within 365 days of delivery.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Link
-              to="/login?redirect=/returns"
-              className="inline-flex justify-center px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700"
-            >
-              Sign in
-            </Link>
-            <Link
-              to="/return-policy"
-              className="inline-flex justify-center px-6 py-3 border border-primary-600 text-primary-600 rounded-lg font-semibold hover:bg-primary-50"
-            >
-              Read the 365-day return policy
-            </Link>
-          </div>
+          <ReturnRequestForm />
         </div>
       </>
     );
@@ -116,7 +105,10 @@ const Returns = () => {
       <>
         <SEO title="My Returns | Petshiwu" description="Track your Petshiwu return requests." url="/returns" noindex={true} />
         <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold mb-6">My Returns</h1>
+        <h1 className="text-3xl font-bold mb-6">Start a return</h1>
+        <div className="max-w-2xl mb-10">
+          <ReturnRequestForm />
+        </div>
         <EmptyState
           icon={Package}
           title="No Returns Yet"
@@ -137,7 +129,11 @@ const Returns = () => {
     <>
       <SEO title="My Returns | Petshiwu" description="Track your Petshiwu return requests." url="/returns" noindex={true} />
       <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-6">My Returns</h1>
+      <h1 className="text-3xl font-bold mb-6">Start a return</h1>
+      <div className="max-w-2xl mb-10">
+        <ReturnRequestForm />
+      </div>
+      <h2 className="text-xl font-bold mb-4">Your return requests</h2>
 
       <div className="space-y-6">
         {returns.map((returnItem) => (

@@ -277,8 +277,7 @@ const FAQ = () => {
                           </button>
                           <div
                             id={`faq-answer-${faq._id}`}
-                            hidden={!isExpanded}
-                            className="mt-4 space-y-4"
+                            className={`mt-4 space-y-4 ${isExpanded ? '' : 'sr-only'}`}
                             itemScope
                             itemType="https://schema.org/Answer"
                           >

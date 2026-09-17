@@ -340,9 +340,9 @@ const Home = () => {
           <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-8">Why Petshiwu</h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { title: 'Same-day NYC', desc: 'Order by 3 PM · before 11 PM' },
+              { title: 'Same-day NYC', desc: ORDERING_PAUSED ? 'When checkout opens · before 11 PM' : 'Order by 3 PM · before 11 PM' },
               { title: 'No lock-in', desc: 'No required subscription. Order when you want.' },
-              { title: 'Free over $49', desc: 'Flat $6 under that' },
+              { title: 'Free over $49', desc: ORDERING_PAUSED ? 'When checkout opens · $6 under that' : 'Flat $6 under that' },
               { title: '365-day returns', desc: 'Unused items · no hassle' },
             ].map((item) => (
               <div key={item.title} className="bg-white rounded-xl p-5 border border-slate-100">
