@@ -12,8 +12,6 @@ declare global {
   }
 }
 
-import { hasAnalyticsConsent } from '@/config/cookies';
-
 // Google Analytics Measurement ID (set via environment variable)
 const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || '';
 

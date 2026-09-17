@@ -89,6 +89,7 @@ const Investors = lazy(() => import('./pages/Investors'));
 const Innovation = lazy(() => import('./pages/Innovation'));
 const SellWithUs = lazy(() => import('./pages/SellWithUs'));
 const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const CookiePolicy = lazy(() => import('./pages/CookiePolicy'));
 
 // Neighborhood × Category programmatic pages (200 pages) — see top of file for imports
