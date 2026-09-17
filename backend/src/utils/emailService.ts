@@ -2,7 +2,8 @@ import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 import logger from './logger';
 import EmailTemplate from '../models/EmailTemplate';
-import { buildOrderConfirmationEmail, type OrderConfirmationData } from './orderConfirmationEmail';
+import { buildOrderConfirmationEmail, escapeHtml, type OrderConfirmationData } from './orderConfirmationEmail';
+import { decodeHtmlEntities, escapeCatalogHtml } from './catalogText';
 
 // Helper to get a clean frontend base URL (handles comma-separated env values)
 const getFrontendBaseUrl = (): string => {
@@ -113,7 +114,7 @@ const isSmtpConfigured = (): boolean =>
 const isEmailProviderConfigured = (): boolean => Boolean(resendClient) || isSmtpConfigured();
 
 const htmlToText = (html: string): string =>
-  html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  decodeHtmlEntities(html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim());
 
 async function sendHtmlEmail(options: {
   to: string;
@@ -420,9 +421,9 @@ export const buildReorderReminderEmail = (
   }`;
   const itemLines = (reminder.items || [])
     .slice(0, 8)
-    .map((item) => `<li>${item.quantity} × ${item.name}</li>`)
+    .map((item) => `<li>${escapeHtml(item.quantity)} × ${escapeCatalogHtml(item.name)}</li>`)
     .join('');
-  const safeName = firstName || 'there';
+  const safeName = escapeCatalogHtml(firstName || 'there');
 
   if (mode === 'autoship') {
     return {
@@ -438,7 +439,7 @@ export const buildReorderReminderEmail = (
       <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background-color: #1E3A8A; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
           <h1 style="margin: 0;">Autoship is due</h1>
-          <p style="margin: 10px 0 0 0;">Order #${orderNumber}</p>
+          <p style="margin: 10px 0 0 0;">Order #${escapeHtml(orderNumber)}</p>
         </div>
         <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px;">
           <p>Hi ${safeName},</p>
@@ -471,7 +472,7 @@ export const buildReorderReminderEmail = (
       <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background-color: #1E3A8A; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
           <h1 style="margin: 0;">Confirm now. Get 5% off.</h1>
-          <p style="margin: 10px 0 0 0;">Max $10 · Order #${orderNumber}</p>
+          <p style="margin: 10px 0 0 0;">Max $10 · Order #${escapeHtml(orderNumber)}</p>
         </div>
         <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px;">
           <p>Hi ${safeName},</p>
@@ -1108,9 +1109,9 @@ export const sendCartAbandonmentEmail = async (
               <h2 style="margin-top: 0;">Your Cart Items:</h2>
               ${cartItems.map(item => `
                 <div style="display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #eee;">
-                  ${item.image ? `<img src="${item.image}" alt="${item.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 15px;">` : ''}
+                  ${item.image ? `<img src="${escapeCatalogHtml(item.image)}" alt="${escapeCatalogHtml(item.name)}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 15px;">` : ''}
                   <div style="flex: 1;">
-                    <p style="margin: 0; font-weight: bold;">${item.name}</p>
+                    <p style="margin: 0; font-weight: bold;">${escapeCatalogHtml(item.name)}</p>
                     <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Quantity: ${item.quantity} × $${item.price.toFixed(2)}</p>
                   </div>
                   <div style="font-weight: bold; color: #667eea;">$${(item.price * item.quantity).toFixed(2)}</div>
@@ -1149,7 +1150,7 @@ export const sendCartAbandonmentEmail = async (
         We noticed you left some items in your cart. Don't miss out on these great products!
         
         Your Cart Items:
-        ${cartItems.map(item => `- ${item.name} (${item.quantity} × $${item.price.toFixed(2)}) = $${(item.price * item.quantity).toFixed(2)}`).join('\n')}
+        ${cartItems.map(item => `- ${decodeHtmlEntities(item.name)} (${item.quantity} × $${item.price.toFixed(2)}) = $${(item.price * item.quantity).toFixed(2)}`).join('\n')}
         
         Total: $${total.toFixed(2)}
         

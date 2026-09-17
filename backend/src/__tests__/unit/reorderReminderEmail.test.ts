@@ -44,4 +44,22 @@ describe('reorder reminder emails', () => {
     expect(email.html).toMatch(/will not charge your card/i);
     expect(email.html).toMatch(/restock cart/i);
   });
+
+  test('decodes catalog apostrophes so Gmail does not show &#039;', () => {
+    const email = buildReorderReminderEmail('jawed', 'ORD-1787843707561-4371', {
+      weeks: 4,
+      items: [
+        {
+          name: "McLovin&amp;#039;s Pet Premium Dog Meal Topper - Freeze-Dried Raw, Salmon",
+          quantity: 2,
+        },
+      ],
+      mode: 'autoship',
+      buyAgainUrlPath: '/restock?coupon=RESTOCK7&mode=autoship',
+    });
+
+    expect(email.html).toContain('McLovin&#39;s Pet Premium Dog Meal Topper');
+    expect(email.html).not.toContain('&amp;#');
+    expect(email.html).not.toContain('&#039;');
+  });
 });

@@ -62,9 +62,8 @@ describe('buyAgain helpers', () => {
       '2026-08-22T00:00:00.000Z'
     );
     const fallback = new Date('2026-09-03T13:00:00.000Z');
-    expect(parseRemindAt('2026-09-10T09:00:00.000Z', fallback).toISOString()).toBe(
-      '2026-09-10T09:00:00.000Z'
-    );
+    const future = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    expect(parseRemindAt(future, fallback).toISOString()).toBe(future);
     expect(parseRemindAt('2020-01-01T00:00:00.000Z', fallback).toISOString()).toBe(fallback.toISOString());
     expect(parseRemindAt('not-a-date', fallback).toISOString()).toBe(fallback.toISOString());
   });
@@ -117,6 +116,12 @@ describe('buyAgain helpers', () => {
       { product: 'food1', name: 'Royal Canin wet food', quantity: 3 },
     ])).toEqual([
       expect.objectContaining({ product: 'food1', quantity: 3 }),
+    ]);
+
+    expect(sanitizeRestockItems([
+      { product: 'food2', name: "McLovin&amp;#039;s Pet Premium Dog Meal Topper", quantity: 2 },
+    ])).toEqual([
+      expect.objectContaining({ name: "McLovin's Pet Premium Dog Meal Topper", quantity: 2 }),
     ]);
   });
 });

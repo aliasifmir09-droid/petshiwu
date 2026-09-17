@@ -60,6 +60,9 @@ import {
 } from 'lucide-react';
 import { areOrdersOpen } from '@/config/launch';
 import type { Product } from '@/types';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
+
+const catalogName = (value: unknown) => decodeHtmlEntities(String(value || ''));
 
 const categoryHaystack = (product: Product): string => {
   const category = product.category;
@@ -140,7 +143,7 @@ const RestockDashboard = () => {
 
   useEffect(() => {
     if (!data || hydrated) return;
-    setSelected(data.usual || []);
+    setSelected((data.usual || []).map((item) => ({ ...item, name: catalogName(item.name) })));
     const days = Number(data.reminder?.intervalDays) || (data.reminder?.weeks ? data.reminder.weeks * 7 : DEFAULT_INTERVAL_DAYS);
     const cadence = isValidIntervalDays(days) ? days : DEFAULT_INTERVAL_DAYS;
     setIntervalDays(cadence);
@@ -177,7 +180,9 @@ const RestockDashboard = () => {
       try {
         const response = await productService.search(term, { limit: 8, inStock: true });
         if (cancelled) return;
-        const products = (response.data || []).filter((product) => isRestockConsumable(categoryHaystack(product)));
+        const products = (response.data || [])
+          .filter((product) => isRestockConsumable(categoryHaystack(product)))
+          .map((product) => ({ ...product, name: catalogName(product.name) }));
         setHits(products);
       } catch {
         if (!cancelled) setHits([]);
@@ -292,7 +297,7 @@ const RestockDashboard = () => {
   const addRegular = (item: BuyAgainRegular) => {
     addPick({
       product: item.productId,
-      name: item.name,
+      name: catalogName(item.name),
       image: item.image,
       quantity: Math.max(1, item.lastQuantity || 1),
       sku: item.sku,
@@ -305,7 +310,7 @@ const RestockDashboard = () => {
       (product.variants || []).find((row) => availableCartStock(product, row) > 0) || product.variants?.[0];
     addPick({
       product: product._id,
-      name: product.name,
+      name: catalogName(product.name),
       image: product.images?.[0] || '',
       quantity: 1,
       sku: variant?.sku,
@@ -537,7 +542,7 @@ const RestockDashboard = () => {
                               onClick={() => addRegular(item)}
                               className="rounded-full bg-white px-3 py-1.5 text-sm font-semibold ring-1 ring-stone-200 hover:ring-[#1E3A8A]"
                             >
-                              + {item.name}
+                              + {catalogName(item.name)}
                             </button>
                           ))}
                         </div>

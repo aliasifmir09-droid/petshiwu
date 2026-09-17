@@ -122,7 +122,7 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
                         {product.images?.[0] ? (
                           <img
                             src={normalizeImageUrl(product.images[0])}
-                            alt={product.name}
+                            alt={decodeHtmlEntities(product.name)}
                             className="w-full h-full object-cover"
                           />
                         ) : (
@@ -133,11 +133,11 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600 truncate">
-                          {product.name}
+                          {decodeHtmlEntities(product.name)}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
                           {product.brand && (
-                            <span className="text-xs text-gray-500">{product.brand}</span>
+                            <span className="text-xs text-gray-500">{decodeHtmlEntities(product.brand)}</span>
                           )}
                           {product.basePrice && (
                             <span className="text-xs font-semibold text-green-600">

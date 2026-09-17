@@ -1,5 +1,13 @@
 import { describe, expect, test } from 'vitest';
-import { extractFaqPairs } from '../htmlUtils';
+import { decodeHtmlEntities, extractFaqPairs } from '../htmlUtils';
+
+describe('decodeHtmlEntities', () => {
+  test('turns catalog apostrophes into a real apostrophe', () => {
+    expect(decodeHtmlEntities("McLovin&#039;s Pet Premium")).toBe("McLovin's Pet Premium");
+    expect(decodeHtmlEntities("McLovin&amp;#039;s Pet Premium")).toBe("McLovin's Pet Premium");
+    expect(decodeHtmlEntities("Hill's Science Diet")).toBe("Hill's Science Diet");
+  });
+});
 
 describe('extractFaqPairs', () => {
   test('pulls H2 questions and following paragraphs for FAQPage schema', () => {

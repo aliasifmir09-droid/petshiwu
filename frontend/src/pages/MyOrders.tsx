@@ -8,6 +8,7 @@ import { useCartStore } from '@/stores/cartStore';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { productsForReorder } from '@/utils/reorderFromOrder';
+import { decodeHtmlEntities } from '@/utils/htmlUtils';
 
 const extractOrderId = (id: any): string => {
   if (!id) return '';
@@ -209,9 +210,9 @@ const MyOrders = () => {
                     <div className="space-y-3">
                       {order.items.slice(0, 2).map((item: any, index: number) => (
                         <div key={index} className="flex items-center gap-4">
-                          <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
+                          <img src={item.image} alt={decodeHtmlEntities(item.name)} className="w-16 h-16 object-cover rounded" />
                           <div className="flex-1">
-                            <p className="font-medium">{item.name}</p>
+                            <p className="font-medium">{decodeHtmlEntities(item.name)}</p>
                             <p className="text-sm text-gray-600">Qty: {item.quantity} × ${item.price.toFixed(2)}</p>
                             {item.variant && <p className="text-xs text-gray-500">{item.variant.size || item.variant.weight}</p>}
                           </div>

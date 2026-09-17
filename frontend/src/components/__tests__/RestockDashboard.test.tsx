@@ -58,7 +58,7 @@ const payload = {
     items: [
       {
         product: 'p1',
-        name: "McLovin's Salmon freeze-dried topper",
+      name: "McLovin&#039;s Salmon freeze-dried topper",
         quantity: 1,
         image: 'https://example.com/topper.jpg',
       },
@@ -67,7 +67,7 @@ const payload = {
   usual: [
     {
       product: 'p1',
-      name: "McLovin's Salmon freeze-dried topper",
+      name: "McLovin&amp;#039;s Salmon freeze-dried topper",
       quantity: 1,
       image: 'https://example.com/topper.jpg',
     },
@@ -75,7 +75,7 @@ const payload = {
   regulars: [
     {
       productId: 'p2',
-      name: "Hill's Science Diet",
+      name: "Hill&#039;s Science Diet",
       image: '',
       lastPrice: 18,
       lastQuantity: 1,

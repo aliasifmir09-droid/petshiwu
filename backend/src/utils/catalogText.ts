@@ -7,7 +7,7 @@ export function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-export function decodeHtmlEntities(text: string): string {
+function decodeHtmlEntitiesOnce(text: string): string {
   return String(text || '')
     .replace(/&nbsp;/gi, ' ')
     .replace(/&amp;/gi, '&')
@@ -18,7 +18,31 @@ export function decodeHtmlEntities(text: string): string {
     .replace(/&lt;/gi, '<')
     .replace(/&gt;/gi, '>')
     .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
-    .trim();
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+}
+
+export function decodeHtmlEntities(text: string): string {
+  let current = String(text || '');
+  for (let i = 0; i < 5; i += 1) {
+    const next = decodeHtmlEntitiesOnce(current);
+    if (next === current) return next.trim();
+    current = next;
+  }
+  return current.trim();
+}
+
+export function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/** Decode catalog entities (Hill&#039;s) then escape so HTML emails show an apostrophe, not #039. */
+export function escapeCatalogHtml(value: unknown): string {
+  return escapeHtml(decodeHtmlEntities(String(value ?? '')));
 }
 
 /** Optional apostrophe or HTML entity between characters. */
