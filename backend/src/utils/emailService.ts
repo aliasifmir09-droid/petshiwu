@@ -116,7 +116,7 @@ const isEmailProviderConfigured = (): boolean => Boolean(resendClient) || isSmtp
 const htmlToText = (html: string): string =>
   decodeHtmlEntities(html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim());
 
-async function sendHtmlEmail(options: {
+export async function sendHtmlEmail(options: {
   to: string;
   subject: string;
   html: string;

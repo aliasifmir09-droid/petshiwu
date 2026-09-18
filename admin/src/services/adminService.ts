@@ -749,6 +749,20 @@ Cat Scratching Post,Tall scratching post with multiple levels. Includes hanging 
     return response.data;
   },
 
+  getRepeat10PromoPreview: async () => {
+    const response = await api.get('/promo/repeat-10');
+    return response.data.data;
+  },
+
+  sendRepeat10Promo: async () => {
+    const response = await api.post(
+      '/promo/repeat-10',
+      { confirm: 'SEND_REPEAT_10' },
+      { timeout: 10 * 60 * 1000 }
+    );
+    return response.data.data;
+  },
+
   // Slideshow Management
   getSlides: async () => {
     const response = await api.get('/slideshow');
