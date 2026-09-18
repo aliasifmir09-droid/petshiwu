@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { useCartStore } from '@/stores/cartStore';
+import { useCartStore, useCartHasHydrated } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useAuthStore } from '@/stores/authStore';
 import { Trash2, ShoppingBag, AlertTriangle, Heart, Share2, Check, Zap } from 'lucide-react';
@@ -11,7 +11,9 @@ import { generateProductUrl } from '@/utils/productUrl';
 import SEO from '@/components/SEO';
 import OrdersHoldNotice from '@/components/OrdersHoldNotice';
 import { ORDERING_PAUSED } from '@/config/ordering';
-import { TAX_RATE, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST } from '@/config/constants';
+import { TAX_RATE } from '@/config/constants';
+import { amountUntilFreeShipping, shippingCostForSubtotal } from '@/utils/orderTotals';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import cartService from '@/services/cart';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
@@ -60,6 +62,7 @@ const safeQuantity = (item: any): number => {
 const Cart = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const cartReady = useCartHasHydrated();
 
   let storeItems: any[] = [];
   let removeFromCart: Function = () => {};
@@ -222,9 +225,10 @@ const Cart = () => {
     }
   })();
 
-  const shipping = subtotal > (FREE_SHIPPING_THRESHOLD || 49) ? 0 : (STANDARD_SHIPPING_COST || 9.99);
+  const shipping = shippingCostForSubtotal(subtotal);
   const tax = subtotal * (TAX_RATE || 0.08);
   const total = subtotal + shipping + tax;
+  const remainingForFreeShipping = amountUntilFreeShipping(subtotal);
 
   const handleConfirmAction = () => {
     try {
@@ -240,6 +244,17 @@ const Cart = () => {
     }
     setConfirmModal({ isOpen: false, action: null });
   };
+
+  if (!cartReady) {
+    return (
+      <>
+        <SEO title="Shopping Cart | petshiwu" description="Your shopping cart at petshiwu" noindex={true} />
+        <div className="container mx-auto flex min-h-[40vh] items-center justify-center px-4">
+          <LoadingSpinner size="lg" />
+        </div>
+      </>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -411,9 +426,9 @@ const Cart = () => {
                   <span>${total.toFixed(2)}</span>
                 </div>
               </div>
-              {subtotal < (FREE_SHIPPING_THRESHOLD || 49) && (
+              {remainingForFreeShipping > 0 && (
                 <p className="text-sm text-gray-600 mb-6">
-                  Add ${((FREE_SHIPPING_THRESHOLD || 49) - subtotal).toFixed(2)} more for FREE shipping!
+                  Add ${remainingForFreeShipping.toFixed(2)} more for FREE shipping!
                 </p>
               )}
               {isAuthenticated && !ORDERING_PAUSED && (
@@ -456,9 +471,9 @@ const Cart = () => {
                   </span>
                 )}
               </div>
-              {subtotal < (FREE_SHIPPING_THRESHOLD || 49) && (
+              {remainingForFreeShipping > 0 && (
                 <span className="text-xs text-blue-600 font-semibold text-right max-w-[120px]">
-                  Add ${((FREE_SHIPPING_THRESHOLD || 49) - subtotal).toFixed(2)} for FREE shipping
+                  Add ${remainingForFreeShipping.toFixed(2)} for FREE shipping
                 </span>
               )}
             </div>

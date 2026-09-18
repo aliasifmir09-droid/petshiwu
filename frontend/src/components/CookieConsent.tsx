@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { COOKIE_CONSENT_STORAGE_KEY } from '@/config/cookies';
 import { initAnalytics } from '@/utils/analytics';
 
 const CookieConsent = () => {
+  const { pathname } = useLocation();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -29,9 +30,17 @@ const CookieConsent = () => {
 
   if (!visible) return null;
 
+  const onCart = pathname === '/cart';
+  const onCheckout = pathname === '/checkout';
+  const positionClass = onCheckout
+    ? 'top-16 bottom-auto'
+    : onCart
+      ? 'bottom-44 lg:bottom-0'
+      : 'bottom-0';
+
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-[9999] bg-gray-900 text-white shadow-2xl border-t-2 border-blue-500"
+      className={`fixed left-0 right-0 z-[9999] bg-gray-900 text-white shadow-2xl border-t-2 border-blue-500 ${positionClass}`}
       role="dialog"
       aria-label="Cookie consent"
       aria-live="polite"

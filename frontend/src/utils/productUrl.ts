@@ -7,7 +7,7 @@ const isValidSlug = (val: unknown): val is string => {
   const s = String(val).trim();
   if (s === '') return false;
   const lower = s.toLowerCase();
-  return lower !== 'undefined' && lower !== 'null';
+  return lower !== 'undefined' && lower !== 'null' && s !== '[Circular Reference]' && s !== '[Max Depth Reached]';
 };
 
 /**

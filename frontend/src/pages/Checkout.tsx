@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, lazy, Suspense, type ReactNode } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { useCartStore } from '@/stores/cartStore';
+import { useCartStore, useCartHasHydrated } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { orderService } from '@/services/orders';
 import { productService } from '@/services/products';
@@ -24,9 +24,11 @@ import OrdersHoldNotice from '@/components/OrdersHoldNotice';
 import { ORDERING_PAUSED } from '@/config/ordering';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { MapPin, Plus, Check, User, UserCheck, Banknote, ShieldCheck, RotateCcw, Headphones, Lock, Truck, CreditCard } from 'lucide-react';
-import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, TAX_RATE } from '@/config/constants';
+import { TAX_RATE } from '@/config/constants';
 import { paypalClientId } from '@/config/paypal';
 import { isNycDeliveryZip, isNewYorkState, normalizeShippingState } from '@/utils/deliveryZip';
+import { shippingCostForSubtotal } from '@/utils/orderTotals';
+import { isCheckoutDeliveryReady, shouldHoldCheckoutOnEmptyCart } from '@/utils/checkoutFlow';
 import { clearRestockCoupon, clearRestockPay, readRestockCoupon, readRestockPay, isRestockPayMethod, ASK_COUPON, ASK_DISCOUNT_COPY, AUTOSHIP_COUPON, AUTOSHIP_DISCOUNT_COPY } from '@/utils/restock';
 import {
   formatCardExpiry,
@@ -187,6 +189,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { items, getTotalPrice, clearCart } = useCartStore();
+  const cartReady = useCartHasHydrated();
   const { isAuthenticated, user } = useAuthStore();
   const { toast, showToast, hideToast } = useToast();
 
@@ -236,6 +239,7 @@ const Checkout = () => {
   const [emailError, setEmailError] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const paypalSuccessHandledRef = useRef(false);
+  const placingOrderRef = useRef(false);
   const restockCouponAttempted = useRef(false);
   const [pendingOrderData, setPendingOrderData] = useState<CreateOrderData | null>(null);
   const [orderNotes, setOrderNotes] = useState('');
@@ -368,10 +372,11 @@ const Checkout = () => {
   };
 
   const subtotal = getTotalPrice();
-  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
+  const shipping = shippingCostForSubtotal(subtotal);
   const tax = subtotal * TAX_RATE;
   const onlineTotal = Math.max(0, subtotal + shipping + tax - couponDiscount);
   const total = Math.max(0, onlineTotal + donationAmount);
+  const deliveryReady = isCheckoutDeliveryReady(shippingInfo, isAuthenticated);
 
   const applyCoupon = async (codeToApply?: string) => {
     const raw = (codeToApply ?? couponInput).trim();
@@ -435,7 +440,11 @@ const Checkout = () => {
 
   const createOrderMutation = useMutation({
     mutationFn: orderService.createOrder,
+    onMutate: () => {
+      placingOrderRef.current = true;
+    },
     onSuccess: async (order) => {
+      placingOrderRef.current = true;
       clearCart();
       clearRestockCoupon();
       clearRestockPay();
@@ -484,6 +493,7 @@ const Checkout = () => {
       }
     },
     onError: (error: any) => {
+      placingOrderRef.current = false;
       const errorMessage = error.response?.data?.message || 'Failed to create order';
       const errorDetails = error.response?.data?.errors;
       if (errorDetails && Array.isArray(errorDetails)) {
@@ -703,6 +713,7 @@ const Checkout = () => {
   const handlePayPalSuccess = async (order: Order) => {
     if (paypalSuccessHandledRef.current) return;
     paypalSuccessHandledRef.current = true;
+    placingOrderRef.current = true;
 
     clearCart();
     const orderId = String(order._id || '');
@@ -817,9 +828,38 @@ const Checkout = () => {
     createOrderMutation.mutate(orderData);
   };
 
-  if (items.length === 0) {
+  useEffect(() => {
+    if (
+      shouldHoldCheckoutOnEmptyCart({
+        hydrated: cartReady,
+        placingOrder: placingOrderRef.current || paypalSuccessHandledRef.current,
+        itemCount: items.length,
+      })
+    ) {
+      return;
+    }
     navigate('/cart');
+  }, [cartReady, items.length, navigate]);
+
+  if (
+    !shouldHoldCheckoutOnEmptyCart({
+      hydrated: cartReady,
+      placingOrder: placingOrderRef.current || paypalSuccessHandledRef.current,
+      itemCount: items.length,
+    })
+  ) {
     return null;
+  }
+
+  if (!cartReady || items.length === 0) {
+    return (
+      <>
+        <SEO title="Checkout | petshiwu" description="Complete your purchase at petshiwu" noindex={true} />
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <LoadingSpinner size="lg" />
+        </div>
+      </>
+    );
   }
 
   return (
@@ -1149,6 +1189,7 @@ const Checkout = () => {
 
                 {!ORDERING_PAUSED && showPayPalButton && (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay') && paypalClientId && !usingSavedCard ? (
                   <div id="paypal-payment" className="paypal-wallet-slot relative overflow-hidden">
+                    {deliveryReady ? (
                     <Suspense fallback={
                       <div className="flex items-center justify-center py-8">
                         <LoadingSpinner size="md" />
@@ -1186,6 +1227,11 @@ const Checkout = () => {
                         onCancel={handlePayPalCancel}
                       />
                     </Suspense>
+                    ) : (
+                      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+                        Enter your NYC delivery name, phone, address, and ZIP above. Apple Pay, Google Pay, and PayPal unlock after that so the order can actually ship.
+                      </div>
+                    )}
                   </div>
                 ) : !ORDERING_PAUSED && !paypalClientId && paymentMethod !== 'cod' ? (
                   <div className="p-4 border-2 border-gray-200 rounded-lg bg-gray-50">
@@ -1196,6 +1242,7 @@ const Checkout = () => {
 
                 {!ORDERING_PAUSED && paymentMethod === 'credit_card' && !usingSavedCard && paypalClientId ? (
                   <div id="card-payment" className="relative overflow-visible rounded-2xl border-2 border-[#1E3A8A] bg-blue-50/40 p-4">
+                    {deliveryReady ? (
                     <Suspense fallback={
                       <div className="flex items-center justify-center py-8">
                         <LoadingSpinner size="md" />
@@ -1234,6 +1281,11 @@ const Checkout = () => {
                         onSwitchToWallet={() => { setPaymentMethod('paypal'); setSelectedSavedPaymentMethod(null); }}
                       />
                     </Suspense>
+                    ) : (
+                      <p className="text-sm text-[#1E3A8A]">
+                        Enter your NYC delivery details above, then your card fields will open here.
+                      </p>
+                    )}
                   </div>
                 ) : null}
 

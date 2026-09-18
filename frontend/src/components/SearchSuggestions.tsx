@@ -12,6 +12,7 @@ import { generateProductUrl } from '@/utils/productUrl';
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import { generateCategoryUrl } from '@/utils/productUrl';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
+import { getListingPrice } from '@/utils/productPrice';
 
 interface SearchSuggestionsProps {
   query: string;
@@ -107,6 +108,7 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
               <ul className="mt-1">
                 {products.map((product: any) => {
                   const href = generateProductUrl(product);
+                  const listingPrice = getListingPrice(product);
                   return (
                   <li key={product._id || product.slug}>
                     <Link
@@ -139,9 +141,9 @@ const SearchSuggestions = ({ query, isOpen, onClose, onSelect }: SearchSuggestio
                           {product.brand && (
                             <span className="text-xs text-gray-500">{decodeHtmlEntities(product.brand)}</span>
                           )}
-                          {product.basePrice && (
+                          {listingPrice > 0 && (
                             <span className="text-xs font-semibold text-green-600">
-                              ${product.basePrice.toFixed(2)}
+                              ${listingPrice.toFixed(2)}
                             </span>
                           )}
                         </div>

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { CartItem, Product, ProductVariant } from '@/types';
@@ -150,3 +151,26 @@ export const useCartStore = create<CartState>()(
     }
   )
 );
+
+/** False until zustand persist has read cart-storage. Avoids empty-cart flashes. */
+export const useCartHasHydrated = (): boolean => {
+  const [hydrated, setHydrated] = useState(() => {
+    if (typeof useCartStore.persist?.hasHydrated === 'function') {
+      return useCartStore.persist.hasHydrated();
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    const persistApi = useCartStore.persist;
+    if (!persistApi?.onFinishHydration) {
+      setHydrated(true);
+      return;
+    }
+    const unsub = persistApi.onFinishHydration(() => setHydrated(true));
+    if (persistApi.hasHydrated()) setHydrated(true);
+    return unsub;
+  }, []);
+
+  return hydrated;
+};
