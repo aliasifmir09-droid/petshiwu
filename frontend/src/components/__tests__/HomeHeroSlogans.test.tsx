@@ -13,6 +13,7 @@ describe('HomeHeroSlogans', () => {
     );
 
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(HOME_SLOGAN);
+    expect(screen.getByText('Petshiwu')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: /dog, cat, and macaw/i })).toHaveAttribute(
       'src',
       '/hero-wide-family.jpg'

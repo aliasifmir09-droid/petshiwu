@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram } from 'lucide-react';
+import { Facebook, Instagram, Mail, MapPin, Phone } from 'lucide-react';
 import api from '@/services/api';
 import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
 import { ORDERING_PAUSED, ORDERING_PAUSED_HEADLINE } from '@/config/ordering';
 import { FOOTER_SOCIAL } from '@/config/social';
+import BrandLogo from './BrandLogo';
 
 const Footer = () => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -29,30 +30,18 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-[#0B1F4A] text-white">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
 
           {/* Brand */}
           <div className="lg:col-span-1">
-            <div className="flex items-center gap-3 mb-4">
-              <img
-                src="/logo-square-192.png"
-                alt="Petshiwu"
-                width={80}
-                height={80}
-                className="h-16 w-16 object-contain rounded-2xl"
-                loading="lazy"
-                decoding="async"
-              />
-              <h3 className="text-xl font-black bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent" style={{ fontFamily: "'Nunito', sans-serif" }}>
-                Petshiwu
-              </h3>
-            </div>
-            <p className="text-gray-400 text-sm mb-4">
+            <Link to="/" className="inline-flex mb-4" aria-label="Petshiwu home">
+              <BrandLogo variant="on-navy" />
+            </Link>
+            <p className="text-blue-100 text-sm mb-4 leading-relaxed">
               Food, treats, and supplies for every pet. Free shipping over $49. No autoship.
             </p>
-            {/* Social media links */}
             <div className="flex gap-4">
               {FOOTER_SOCIAL.map((item) => {
                 const Icon = item.network === 'facebook' ? Facebook : Instagram;
@@ -62,7 +51,7 @@ const Footer = () => {
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-white transition-colors"
+                    className="text-blue-200 hover:text-white transition-colors"
                     aria-label={`Petshiwu on ${item.name}`}
                   >
                     <Icon size={20} />
@@ -74,21 +63,21 @@ const Footer = () => {
 
           {/* Shop by Pet */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Shop by Pet</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li><Link to="/dog" className="hover:text-white transition-colors">🐕 Dogs</Link></li>
-              <li><Link to="/cat" className="hover:text-white transition-colors">🐱 Cats</Link></li>
-              <li><Link to="/bird" className="hover:text-white transition-colors">🐦 Birds</Link></li>
-              <li><Link to="/reptile" className="hover:text-white transition-colors">🦎 Reptiles</Link></li>
-              <li><Link to="/fish" className="hover:text-white transition-colors">🐟 Fish</Link></li>
-              <li><Link to="/small-animal" className="hover:text-white transition-colors">🐹 Small Pets</Link></li>
+            <h3 className="text-sm font-bold tracking-wide uppercase text-white mb-4">Shop by Pet</h3>
+            <ul className="space-y-2 text-sm text-blue-100">
+              <li><Link to="/dog" className="hover:text-white transition-colors">Dogs</Link></li>
+              <li><Link to="/cat" className="hover:text-white transition-colors">Cats</Link></li>
+              <li><Link to="/bird" className="hover:text-white transition-colors">Birds</Link></li>
+              <li><Link to="/reptile" className="hover:text-white transition-colors">Reptiles</Link></li>
+              <li><Link to="/fish" className="hover:text-white transition-colors">Fish</Link></li>
+              <li><Link to="/small-animal" className="hover:text-white transition-colors">Small Pets</Link></li>
             </ul>
           </div>
 
           {/* Customer Service */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Help</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
+            <h3 className="text-sm font-bold tracking-wide uppercase text-white mb-4">Help</h3>
+            <ul className="space-y-2 text-sm text-blue-100">
               <li><Link to="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
               <li><Link to="/shipping" className="hover:text-white transition-colors">Shipping Information</Link></li>
               <li><Link to="/return-policy" className="hover:text-white transition-colors">365-Day Return Policy</Link></li>
@@ -101,8 +90,8 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
+            <h3 className="text-sm font-bold tracking-wide uppercase text-white mb-4">Quick Links</h3>
+            <ul className="space-y-2 text-sm text-blue-100">
               <li><Link to="/products" className="hover:text-white transition-colors">Shop All Products</Link></li>
               <li><Link to="/products?featured=true" className="hover:text-white transition-colors">Featured</Link></li>
               <li><Link to="/learning" className="hover:text-white transition-colors">Pet Care Blog</Link></li>
@@ -119,8 +108,8 @@ const Footer = () => {
 
           {/* Popular pages */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Popular pages</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
+            <h3 className="text-sm font-bold tracking-wide uppercase text-white mb-4">Popular pages</h3>
+            <ul className="space-y-2 text-sm text-blue-100">
               <li><Link to="/pet-supplies-delivery-nyc" className="hover:text-white transition-colors">Pet Supplies Delivery NYC</Link></li>
               <li><Link to="/pet-supplies-jackson-heights-ny" className="hover:text-white transition-colors">Jackson Heights</Link></li>
               <li><Link to="/pet-store-queens-ny" className="hover:text-white transition-colors">Queens</Link></li>
@@ -135,21 +124,29 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
+            <h3 className="text-sm font-bold tracking-wide uppercase text-white mb-4">Contact Us</h3>
+            <ul className="space-y-3 text-sm text-blue-100">
               <li>
-                <a href="tel:+18002592605" className="hover:text-white transition-colors">
-                  📞 +1 (800) 259-2605
+                <a href="tel:+18002592605" className="hover:text-white transition-colors inline-flex items-start gap-2">
+                  <Phone size={16} className="mt-0.5 flex-shrink-0" aria-hidden />
+                  <span>+1 (800) 259-2605<br /><span className="text-blue-200/80">24/7 phone support</span></span>
                 </a>
               </li>
-              <li className="text-gray-500">24/7 phone support</li>
               <li>
-                <a href="mailto:support@petshiwu.com" className="hover:text-white transition-colors">
-                  📧 support@petshiwu.com
+                <a href="mailto:support@petshiwu.com" className="hover:text-white transition-colors inline-flex items-center gap-2">
+                  <Mail size={16} className="flex-shrink-0" aria-hidden />
+                  support@petshiwu.com
                 </a>
               </li>
-              <li className="mt-3 leading-relaxed">📍 Office & warehouse<br />37-68 74th St<br />Jackson Heights, NY 11372<br /><span className="text-gray-500">Not a walk-in store — delivery only</span></li>
-              <li className="mt-1">🕐 Phone support 24/7</li>
+              <li className="inline-flex items-start gap-2 leading-relaxed">
+                <MapPin size={16} className="mt-0.5 flex-shrink-0" aria-hidden />
+                <span>
+                  Office & warehouse<br />
+                  37-68 74th St<br />
+                  Jackson Heights, NY 11372<br />
+                  <span className="text-blue-200/80">Not a walk-in store — delivery only</span>
+                </span>
+              </li>
             </ul>
             <div className="mt-4">
               <h4 className="font-semibold text-white mb-2 text-sm">Newsletter</h4>
@@ -166,7 +163,7 @@ const Footer = () => {
                 <button
                   type="submit"
                   disabled={newsletterStatus === 'loading'}
-                  className="bg-blue-600 px-4 py-2 rounded text-sm text-white font-semibold hover:bg-blue-700 transition-colors shrink-0 disabled:opacity-60"
+                  className="bg-[#F59E0B] px-4 py-2 rounded text-sm text-[#1E3A8A] font-extrabold hover:bg-[#D97706] hover:text-white transition-colors shrink-0 disabled:opacity-60"
                 >
                   {newsletterStatus === 'loading' ? '...' : 'Subscribe'}
                 </button>
@@ -185,9 +182,9 @@ const Footer = () => {
         </div>
 
         {/* Legal row */}
-        <div className="border-t border-gray-800 mt-10 pt-8">
+        <div className="border-t border-white/10 mt-10 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-blue-100">
               &copy; {new Date().getFullYear()} Petshiwu. All rights reserved. All prices in USD.
               {ORDERING_PAUSED ? (
                 <span className="block mt-1 text-amber-300">
@@ -199,15 +196,15 @@ const Footer = () => {
                 </span>
               ) : null}
             </p>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-400">
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-blue-100">
               <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-              <span className="text-gray-700">|</span>
+              <span className="text-white/20">|</span>
               <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-              <span className="text-gray-700">|</span>
+              <span className="text-white/20">|</span>
               <Link to="/shipping" className="hover:text-white transition-colors">Shipping Policy</Link>
-              <span className="text-gray-700">|</span>
+              <span className="text-white/20">|</span>
               <Link to="/accessibility" className="hover:text-white transition-colors">Accessibility</Link>
-              <span className="text-gray-700">|</span>
+              <span className="text-white/20">|</span>
               <Link to="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link>
             </div>
           </div>

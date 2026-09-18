@@ -261,11 +261,11 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
               onClick={handleAddToCart}
               disabled={!product.inStock}
               aria-label={product.inStock ? `${addToCartLabel(true)} ${product.name}` : `${product.name} is out of stock`}
-              className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-full font-semibold text-sm ${
+              className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg font-extrabold text-sm ${
                 cartAdded
                   ? 'bg-emerald-600 text-white'
                   : product.inStock
-                  ? 'bg-[#1E3A8A] text-white hover:bg-[#1e40af]'
+                  ? 'bg-[#F59E0B] text-[#1E3A8A] hover:bg-[#D97706] hover:text-white'
                   : 'bg-stone-200 text-stone-400 cursor-not-allowed'
               }`}
             >

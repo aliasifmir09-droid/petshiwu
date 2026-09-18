@@ -81,7 +81,7 @@ const TonightBar = () => {
             onChange={(e) => setZip(normalizeZip(e.target.value))}
             placeholder="ZIP"
             aria-label="Check delivery by ZIP code"
-            className="w-[4.5rem] sm:w-20 h-7 px-2 rounded-md text-gray-900 text-xs font-semibold tracking-widest placeholder:tracking-normal placeholder:font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+            className="w-[4.5rem] sm:w-20 h-7 px-2 rounded-md text-gray-900 text-xs font-semibold tracking-widest placeholder:tracking-normal placeholder:font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F59E0B]"
           />
         </div>
       </div>
@@ -122,14 +122,14 @@ const TonightBar = () => {
   }
 
   return (
-    <div className="bg-[#0F766E] text-white">
+    <div className="bg-[#F59E0B] text-[#1E3A8A]">
       <div className="container mx-auto px-3 lg:px-4 py-1.5 flex items-center gap-2">
-        <MapPin size={14} className="flex-shrink-0 text-teal-100 hidden sm:block" aria-hidden />
+        <MapPin size={14} className="flex-shrink-0 text-[#1E3A8A] hidden sm:block" aria-hidden />
         <div className="flex-1 min-w-0">
-          <p className="text-[11px] sm:text-xs font-semibold leading-tight truncate">
+          <p className="text-[11px] sm:text-xs font-bold leading-tight truncate">
             Free shipping over $49 · no autoship · nationwide shipping opens soon
           </p>
-          <p className="text-[10px] sm:text-[11px] text-teal-100 leading-tight truncate">{statusLine}</p>
+          <p className="text-[10px] sm:text-[11px] text-[#1E3A8A]/80 leading-tight truncate">{statusLine}</p>
         </div>
         <label className="sr-only" htmlFor="tonight-zip">
           Check delivery ZIP
@@ -144,7 +144,7 @@ const TonightBar = () => {
             onChange={(e) => setZip(normalizeZip(e.target.value))}
             placeholder="ZIP"
             aria-label="Check delivery by ZIP code"
-            className="w-[4.5rem] sm:w-20 h-7 px-2 rounded-md text-gray-900 text-xs font-semibold tracking-widest placeholder:tracking-normal placeholder:font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+            className="w-[4.5rem] sm:w-20 h-7 px-2 rounded-md text-gray-900 text-xs font-semibold tracking-widest placeholder:tracking-normal placeholder:font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
           />
       </div>
     </div>

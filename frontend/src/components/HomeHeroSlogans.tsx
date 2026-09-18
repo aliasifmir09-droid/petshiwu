@@ -16,8 +16,8 @@ const HomeHeroSlogans = () => {
     <section className="bg-white">
       <div className="grid lg:grid-cols-2 bg-[#1E3A8A] items-stretch">
         <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-12 lg:py-16">
-          <p className="text-[11px] md:text-xs font-bold tracking-[0.22em] uppercase text-amber-200 mb-4">
-            Online pet store
+          <p className="text-[11px] md:text-xs font-bold tracking-[0.22em] uppercase text-[#F59E0B] mb-4">
+            Petshiwu
           </p>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.08] text-white max-w-xl">
             {HOME_SLOGAN}
@@ -27,19 +27,19 @@ const HomeHeroSlogans = () => {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               to="/dog"
-              className="inline-flex items-center justify-center h-12 px-7 rounded-full bg-amber-300 text-[#1E3A8A] font-bold hover:bg-amber-200"
+              className="inline-flex items-center justify-center h-12 px-7 rounded-xl bg-[#F59E0B] text-[#1E3A8A] font-extrabold hover:bg-[#D97706] hover:text-white"
             >
               Shop dogs
             </Link>
             <Link
               to="/cat"
-              className="inline-flex items-center justify-center h-12 px-7 rounded-full bg-white text-[#1E3A8A] font-bold hover:bg-blue-50"
+              className="inline-flex items-center justify-center h-12 px-7 rounded-xl bg-white text-[#1E3A8A] font-extrabold hover:bg-blue-50"
             >
               Shop cats
             </Link>
             <Link
               to="/products"
-              className="inline-flex items-center justify-center h-12 px-7 rounded-full border border-white/30 text-white font-semibold hover:bg-white/10"
+              className="inline-flex items-center justify-center h-12 px-7 rounded-xl border border-white/30 text-white font-semibold hover:bg-white/10"
             >
               Shop all
             </Link>
@@ -69,22 +69,24 @@ const HomeHeroSlogans = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 lg:px-8 py-6">
-        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {BRAND_STORY_LIST.map((story) => (
-            <li key={story.path}>
-              <Link
-                to={story.path}
-                className="block h-full rounded-2xl bg-white border border-slate-200 p-6 shadow-lg shadow-slate-900/10 hover:-translate-y-1 hover:border-[#1E3A8A]/30 transition-all"
-              >
-                <p className="text-[11px] font-bold tracking-[0.16em] uppercase text-[#D97706] mb-2">
-                  {story.kicker}
-                </p>
-                <p className="text-xl font-bold text-[#1E3A8A] leading-snug">{story.slogan}</p>
-              </Link>
-            </li>
-          ))}
-        </ul>
+      <div className="border-b border-slate-200 bg-white">
+        <div className="container mx-auto px-4 lg:px-8">
+          <ul className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-200">
+            {BRAND_STORY_LIST.map((story) => (
+              <li key={story.path}>
+                <Link
+                  to={story.path}
+                  className="block px-2 md:px-8 py-5 hover:bg-slate-50 transition-colors"
+                >
+                  <p className="text-[11px] font-bold tracking-[0.16em] uppercase text-[#D97706] mb-1">
+                    {story.kicker}
+                  </p>
+                  <p className="text-base font-bold text-[#1E3A8A] leading-snug">{story.slogan}</p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </section>
   );

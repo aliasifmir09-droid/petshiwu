@@ -40,17 +40,17 @@ const CookieConsent = () => {
 
   return (
     <div
-      className={`fixed left-0 right-0 z-[9999] bg-gray-900 text-white shadow-2xl border-t-2 border-blue-500 ${positionClass}`}
+      className={`fixed left-0 right-0 z-[9999] bg-[#0B1F4A] text-white shadow-2xl border-t-2 border-[#F59E0B] ${positionClass}`}
       role="dialog"
       aria-label="Cookie consent"
       aria-live="polite"
     >
       <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
         <div className="flex-1 text-sm text-gray-200 leading-relaxed">
-          <span className="font-semibold text-white">🍪 We use cookies</span> to improve your experience,
-          analyze site traffic, and serve personalized content. By clicking "Accept", you agree to our use
+          <span className="font-semibold text-white">We use cookies</span> to improve your experience,
+          analyze site traffic, and serve personalized content. By clicking Accept, you agree to our use
           of cookies.{' '}
-          <Link to="/cookie-policy" className="text-blue-400 hover:text-blue-300 underline whitespace-nowrap">
+          <Link to="/cookie-policy" className="text-[#F59E0B] hover:text-amber-200 underline whitespace-nowrap">
             Cookie Policy
           </Link>
         </div>
@@ -63,7 +63,7 @@ const CookieConsent = () => {
           </button>
           <button
             onClick={accept}
-            className="px-5 py-2 text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
+            className="px-5 py-2 text-sm font-extrabold bg-[#F59E0B] hover:bg-[#D97706] text-[#1E3A8A] hover:text-white rounded-lg transition-colors"
           >
             Accept All
           </button>

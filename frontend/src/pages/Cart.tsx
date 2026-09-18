@@ -434,7 +434,7 @@ const Cart = () => {
               {isAuthenticated && !ORDERING_PAUSED && (
                 <button
                   onClick={handleOneClickCheckout}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 mb-3 flex items-center justify-center gap-2 transition-all"
+                  className="w-full bg-[#1E3A8A] text-white py-3 rounded-lg font-semibold hover:bg-[#163074] mb-3 flex items-center justify-center gap-2"
                 >
                   <Zap size={18} />
                   One-Click Checkout
@@ -480,7 +480,7 @@ const Cart = () => {
             {isAuthenticated && !ORDERING_PAUSED && (
               <button
                 onClick={handleOneClickCheckout}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 rounded-lg font-semibold mb-2 flex items-center justify-center gap-2 text-sm"
+                className="w-full bg-[#1E3A8A] text-white py-2 rounded-lg font-semibold mb-2 flex items-center justify-center gap-2 text-sm hover:bg-[#163074]"
               >
                 <Zap size={16} />
                 One-Click Checkout
@@ -488,7 +488,7 @@ const Cart = () => {
             )}
             <button
               onClick={() => navigate('/checkout')}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform min-h-[56px]"
+              className="w-full bg-[#F59E0B] text-[#1E3A8A] py-4 rounded-xl font-extrabold text-lg hover:bg-[#D97706] hover:text-white transition-colors min-h-[56px]"
               aria-label={ORDERING_PAUSED ? 'See checkout status' : 'Proceed to checkout'}
             >
               {ORDERING_PAUSED ? 'See checkout status' : 'Proceed to Checkout'}

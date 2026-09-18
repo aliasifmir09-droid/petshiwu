@@ -312,7 +312,7 @@ const Home = () => {
             </div>
             <Link
               to="/products"
-              className="hidden md:flex items-center gap-1 text-blue-600 hover:text-blue-700 font-semibold text-sm border border-blue-200 rounded-full px-4 py-1.5 hover:bg-blue-50 transition-colors"
+              className="hidden md:flex items-center gap-1 text-[#1E3A8A] hover:text-[#163074] font-semibold text-sm border border-[#1E3A8A]/20 rounded-lg px-4 py-1.5 hover:bg-blue-50 transition-colors"
             >
               All brands →
             </Link>
@@ -328,7 +328,7 @@ const Home = () => {
                 aria-label={`Shop ${brand.name} products`}
               >
                 <div
-                  className={`w-36 h-24 flex items-center justify-center rounded-2xl border-2 border-transparent shadow-sm group-hover:border-blue-400 group-hover:shadow-lg transition-all duration-200 overflow-hidden ${
+                  className={`w-36 h-24 flex items-center justify-center rounded-2xl border-2 border-transparent shadow-sm group-hover:border-[#1E3A8A] group-hover:shadow-lg transition-all duration-200 overflow-hidden ${
                     brand.dark ? 'bg-zinc-900' : 'bg-white'
                   }`}
                 >
@@ -348,7 +348,7 @@ const Home = () => {
                     }}
                   />
                 </div>
-                <p className="text-center text-xs text-gray-500 mt-2 font-semibold group-hover:text-blue-600 transition-colors truncate w-36">
+                <p className="text-center text-xs text-gray-500 mt-2 font-semibold group-hover:text-[#1E3A8A] transition-colors truncate w-36">
                   {brand.name}
                 </p>
               </button>
@@ -356,7 +356,7 @@ const Home = () => {
           </div>
 
           <div className="text-center mt-6 md:hidden">
-            <Link to="/products" className="text-blue-600 font-semibold text-sm">
+            <Link to="/products" className="text-[#1E3A8A] font-semibold text-sm">
               View all brands →
             </Link>
           </div>
@@ -467,7 +467,7 @@ const NewsletterSection = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-white text-[#1E3A8A] font-semibold px-7 py-3 rounded-lg whitespace-nowrap disabled:opacity-60"
+                  className="bg-[#F59E0B] text-[#1E3A8A] font-extrabold px-7 py-3 rounded-lg whitespace-nowrap disabled:opacity-60 hover:bg-[#D97706] hover:text-white"
                 >
                   {loading ? 'Sending...' : 'Subscribe'}
                 </button>

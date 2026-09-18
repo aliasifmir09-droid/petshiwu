@@ -230,7 +230,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
                   <button
                     onClick={handleAddToCart}
                     disabled={!isReadyToShip}
-                    className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+                    className="flex-1 bg-[#F59E0B] text-[#1E3A8A] px-6 py-3 rounded-lg font-extrabold hover:bg-[#D97706] hover:text-white disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
                   >
                     <ShoppingCart size={20} />
                     {addToCartLabel(isReadyToShip)}

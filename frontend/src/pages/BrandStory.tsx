@@ -19,7 +19,7 @@ const BrandStory = ({ slug }: BrandStoryProps) => {
           <p className="text-base sm:text-lg text-blue-100 max-w-xl leading-relaxed">{story.intro}</p>
           <Link
             to="/products"
-            className="mt-8 inline-flex items-center justify-center h-12 px-8 rounded-full bg-amber-300 text-[#0B1F4A] font-bold hover:bg-amber-200 w-fit"
+            className="mt-8 inline-flex items-center justify-center h-12 px-8 rounded-xl bg-[#F59E0B] text-[#1E3A8A] font-extrabold hover:bg-[#D97706] hover:text-white w-fit"
           >
             {story.ctaLabel}
           </Link>

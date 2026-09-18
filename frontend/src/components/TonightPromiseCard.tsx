@@ -138,7 +138,7 @@ const TonightPromiseCard = ({ variant = 'hero' }: TonightPromiseCardProps) => {
             </div>
             <Link
               to="/products"
-              className="inline-flex items-center justify-center h-12 px-6 rounded-xl bg-[#1E3A8A] text-white font-bold hover:bg-[#1e40af]"
+              className="inline-flex items-center justify-center h-12 px-6 rounded-xl bg-[#F59E0B] text-[#1E3A8A] font-extrabold hover:bg-[#D97706] hover:text-white"
             >
               Shop now
             </Link>

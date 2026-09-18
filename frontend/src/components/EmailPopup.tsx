@@ -91,13 +91,13 @@ const EmailPopup = () => {
         </button>
 
         {/* Header */}
-        <div className="bg-gradient-to-br from-blue-900 via-indigo-800 to-purple-800 px-8 py-8 text-center">
-          <div className="text-5xl mb-3">🐾</div>
+        <div className="bg-[#1E3A8A] px-8 py-8 text-center">
+          <p className="text-[#F59E0B] text-[11px] font-bold tracking-[0.18em] uppercase mb-3">Petshiwu</p>
           <h2 className="text-white text-2xl font-black leading-tight">
-            Get <span className="text-yellow-300">FREEDOM20</span> on Your First Order
+            Get FREEDOM20 on your first order
           </h2>
           <p className="text-white/80 text-sm mt-2">
-            20% off, max $10. No autoship. NYC same-day notes.
+            20% off, max $10. No autoship.
           </p>
         </div>
 
@@ -108,11 +108,11 @@ const EmailPopup = () => {
               {/* Trust signals */}
               <div className="grid grid-cols-3 gap-3 mb-6">
                 <div className="text-center">
-                  <Truck size={18} className="mx-auto text-blue-600 mb-1" />
+                  <Truck size={18} className="mx-auto text-[#1E3A8A] mb-1" />
                   <p className="text-xs text-gray-600 font-medium">Free delivery over $49</p>
                 </div>
                 <div className="text-center">
-                  <Gift size={18} className="mx-auto text-purple-600 mb-1" />
+                  <Gift size={18} className="mx-auto text-[#D97706] mb-1" />
                   <p className="text-xs text-gray-600 font-medium">Exclusive deals</p>
                 </div>
                 <div className="text-center">
@@ -128,34 +128,33 @@ const EmailPopup = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#F59E0B] focus:border-transparent"
                 />
                 {error && <p className="text-red-500 text-sm">{error}</p>}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-blue-700 to-purple-700 hover:from-blue-800 hover:to-purple-800 text-white font-bold py-3 rounded-xl transition-all hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed text-base"
+                  className="w-full bg-[#F59E0B] hover:bg-[#D97706] text-[#1E3A8A] hover:text-white font-extrabold py-3 rounded-xl disabled:opacity-60 disabled:cursor-not-allowed text-base"
                 >
                   {loading ? 'Sending...' : 'Get My FREEDOM20 Code →'}
                 </button>
               </form>
               <p className="text-center text-gray-400 text-xs mt-3">
-                No spam. Unsubscribe anytime. NYC pet parents only 🗽
+                No spam. Unsubscribe anytime.
               </p>
             </>
           ) : (
             <div className="text-center py-4">
-              <div className="text-5xl mb-4">🎉</div>
-              <h3 className="text-xl font-black text-gray-900 mb-2">You're in!</h3>
+              <h3 className="text-xl font-black text-gray-900 mb-2">You're in</h3>
               <p className="text-gray-600 text-sm mb-4">Check your inbox. Your code:</p>
-              <div className="bg-blue-50 border-2 border-dashed border-blue-400 rounded-xl py-4 px-6 mb-4">
-                <p className="text-3xl font-black text-blue-800 tracking-widest">{code}</p>
+              <div className="bg-blue-50 border-2 border-dashed border-[#1E3A8A] rounded-xl py-4 px-6 mb-4">
+                <p className="text-3xl font-black text-[#1E3A8A] tracking-widest">{code}</p>
                 <p className="text-sm text-gray-500 mt-1">{NEWSLETTER_CODE_COPY}</p>
               </div>
               <a
                 href="/products"
                 onClick={dismiss}
-                className="inline-block w-full bg-gradient-to-r from-blue-700 to-purple-700 text-white font-bold py-3 rounded-xl text-base hover:opacity-90 transition-opacity"
+                className="inline-block w-full bg-[#F59E0B] text-[#1E3A8A] font-extrabold py-3 rounded-xl text-base hover:bg-[#D97706] hover:text-white"
               >
                 Shop Now →
               </a>
@@ -172,7 +171,7 @@ const EmailPopup = () => {
               <Star size={14} fill="currentColor" />
               <Star size={14} fill="currentColor" />
               <Star size={14} fill="currentColor" />
-              <span className="text-gray-500 text-xs ml-2">Loved by NYC pet parents</span>
+              <span className="text-gray-500 text-xs ml-2">Trusted by pet parents</span>
             </div>
           </div>
         )}

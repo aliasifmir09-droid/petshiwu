@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/services/api';
 import { blogService } from '@/services/blogs';
+import BrandLogo from './BrandLogo';
 import ConfirmationModal from './ConfirmationModal';
 import { useToast } from '@/hooks/useToast';
 import Toast from './Toast';
@@ -273,10 +274,7 @@ const Header = () => {
                     onClick={() => toggleMobilePetType(petType.slug)}
                     className={`w-full flex items-center justify-between gap-3 ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors overflow-hidden`}
                   >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <span className="text-xl flex-shrink-0">{petType.icon}</span>
-                      <span className="truncate">{petType.name}</span>
-                    </div>
+                    <span className="truncate">{petType.name}</span>
                     <ChevronRight size={18} className={`transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                   </button>
                   {isExpanded && (
@@ -345,8 +343,7 @@ const Header = () => {
                   )}
                 </>
               ) : (
-                <Link to={`/${petType.slug}`} onClick={onLinkClick} className={`flex items-center gap-3 ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors overflow-hidden`}>
-                  <span className="text-xl flex-shrink-0">{petType.icon}</span>
+                <Link to={`/${petType.slug}`} onClick={onLinkClick} className={`flex items-center ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors overflow-hidden`}>
                   <span className="truncate">{petType.name}</span>
                 </Link>
               )}
@@ -362,10 +359,7 @@ const Header = () => {
 
         <li>
           <button onClick={toggleLearningMenu} className={`w-full flex items-center justify-between gap-3 ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors`}>
-            <div className="flex items-center gap-3">
-              <span className="text-xl">📚</span>
-              <span>Learning</span>
-            </div>
+            <span>Learning</span>
             <ChevronRight size={18} className={`transition-transform ${isLearningExpanded ? 'rotate-90' : ''}`} />
           </button>
           {isLearningExpanded && (
@@ -381,14 +375,12 @@ const Header = () => {
         </li>
 
         <li>
-          <Link to="/about" onClick={onLinkClick} className={`flex items-center gap-3 ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors`}>
-            <span className="text-xl">ℹ️</span>
+          <Link to="/about" onClick={onLinkClick} className={`flex items-center ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors`}>
             <span>About Us</span>
           </Link>
         </li>
         <li>
-          <Link to="/our-promise" onClick={onLinkClick} className={`flex items-center gap-3 ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors`}>
-            <span className="text-xl">💛</span>
+          <Link to="/our-promise" onClick={onLinkClick} className={`flex items-center ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors`}>
             <span>Our Promise</span>
           </Link>
         </li>
@@ -398,9 +390,9 @@ const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 shadow-xl w-full">
+      <header className="sticky top-0 z-50 shadow-sm w-full">
         <TonightBar />
-        <div className="bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] w-full">
+        <div className="bg-[#1E3A8A] w-full">
           <div className="container mx-auto px-3 lg:px-4 py-1.5 lg:py-3">
             <div className="flex items-center justify-between gap-2 lg:gap-4">
 
@@ -411,21 +403,8 @@ const Header = () => {
                 </button>
               )}
 
-              <Link to="/" className="flex items-center flex-shrink-0 group">
-                <div className="relative">
-                  <picture>
-                    <source srcSet="/logo.webp" type="image/webp" />
-                    <img
-                      src="/logo.png"
-                      alt="Petshiwu Logo"
-                      className="h-10 lg:h-16 w-auto object-contain transform group-hover:scale-105 transition-transform duration-500 relative z-10 max-h-10 lg:max-h-16"
-                      loading="eager"
-                      width={195}
-                      height={40}
-                    />
-                  </picture>
-                  <div className="absolute inset-0 bg-white/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                </div>
+              <Link to="/" className="flex items-center flex-shrink-0" aria-label="Petshiwu home">
+                <BrandLogo variant="on-navy" />
               </Link>
 
               {/* Search Bar - Desktop */}
@@ -437,7 +416,7 @@ const Header = () => {
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
                     onFocus={() => { if (searchQuery.length >= 1) { setShowSuggestions(true); } }}
-                    className="w-full h-12 pl-4 pr-[8.5rem] rounded-xl border-2 border-white/20 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:border-yellow-300 shadow-lg placeholder:text-gray-500 font-medium"
+                    className="w-full h-12 pl-4 pr-[8.5rem] rounded-lg border-0 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#F59E0B] shadow-sm placeholder:text-gray-500 font-medium"
                   />
                   <div className="absolute inset-y-0 right-1.5 flex items-center gap-0.5">
                     <Link
@@ -451,7 +430,7 @@ const Header = () => {
                     <VoiceSearchButton onResult={handleVoiceResult} variant="dark" />
                     <button
                       type="submit"
-                      className="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
+                      className="flex items-center justify-center w-9 h-9 rounded-lg bg-[#F59E0B] text-[#1E3A8A] hover:bg-[#D97706] hover:text-white"
                       aria-label="Search"
                     >
                       <Search size={18} />
@@ -504,7 +483,7 @@ const Header = () => {
                   <div className="relative">
                     <Heart size={18} className="lg:w-5 lg:h-5" fill={wishlistItems.length > 0 ? 'currentColor' : 'none'} />
                     {wishlistItems.length > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      <span className="absolute -top-2 -right-2 bg-[#F59E0B] text-[#1E3A8A] text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
                         {wishlistItems.length > 9 ? '9+' : wishlistItems.length}
                       </span>
                     )}
@@ -532,11 +511,11 @@ const Header = () => {
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all text-gray-900 z-[100]">
                       <Link to="/profile" className="block px-4 py-2.5 hover:bg-gray-100 font-medium">My Profile</Link>
                       {user?.role === 'admin' && (
-                        <a href="https://dashboard.petshiwu.com" className="block px-4 py-2.5 hover:bg-blue-50 text-[#1E3A8A] font-semibold border-b border-gray-100">📦 Orders Dashboard</a>
+                        <a href="https://dashboard.petshiwu.com" className="block px-4 py-2.5 hover:bg-blue-50 text-[#1E3A8A] font-semibold border-b border-gray-100">Orders Dashboard</a>
                       )}
-                      <Link to="/favorites" className="block px-4 py-2.5 hover:bg-pink-50 hover:text-pink-600 font-medium">
+                      <Link to="/favorites" className="block px-4 py-2.5 hover:bg-blue-50 hover:text-[#1E3A8A] font-medium">
                         <div className="flex items-center gap-2">
-                          <Heart size={18} className="text-pink-500" fill="currentColor" />
+                          <Heart size={18} className="text-[#1E3A8A]" fill="currentColor" />
                           My Favorites
                         </div>
                       </Link>
@@ -561,10 +540,10 @@ const Header = () => {
 
                 {/* Cart */}
                 <div className="relative group">
-                  <Link to="/cart" className="relative px-1.5 lg:px-2.5 py-1.5 lg:py-2 rounded-xl hover:bg-white/15 transition-all hover:scale-110 flex items-center justify-center">
-                    <ShoppingCart size={20} className="lg:w-6 lg:h-6 group-hover:animate-wiggle" />
+                  <Link to="/cart" className="relative px-1.5 lg:px-2.5 py-1.5 lg:py-2 rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center">
+                    <ShoppingCart size={20} className="lg:w-6 lg:h-6" />
                     {totalItems > 0 && (
-                      <span className="absolute -top-1 -right-1 lg:-top-2 lg:-right-2 bg-gradient-to-r from-red-500 to-pink-600 text-white text-[10px] lg:text-xs rounded-full min-w-[18px] lg:min-w-[22px] h-[18px] lg:h-[22px] flex items-center justify-center font-black shadow-lg animate-pulse-slow border-2 border-white leading-none">
+                      <span className="absolute -top-1 -right-1 lg:-top-2 lg:-right-2 bg-[#F59E0B] text-[#1E3A8A] text-[10px] lg:text-xs rounded-full min-w-[18px] lg:min-w-[22px] h-[18px] lg:h-[22px] flex items-center justify-center font-black border-2 border-white leading-none">
                         {totalItems}
                       </span>
                     )}
@@ -595,7 +574,7 @@ const Header = () => {
                   value={searchQuery}
                   onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
                   onFocus={() => { if (searchQuery.length >= 1) { setShowSuggestions(true); } }}
-                  className="w-full h-10 pl-3 pr-[7.5rem] rounded-lg border-2 border-white/20 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300 placeholder:text-gray-500"
+                  className="w-full h-10 pl-3 pr-[7.5rem] rounded-lg border-0 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#F59E0B] placeholder:text-gray-500"
                   aria-label="Search products"
                 />
                 <div className="absolute inset-y-0 right-1 flex items-center gap-0.5">
@@ -607,7 +586,7 @@ const Header = () => {
                     <Camera size={18} />
                   </Link>
                   <VoiceSearchButton onResult={handleVoiceResult} variant="dark" />
-                  <button type="submit" className="flex items-center justify-center w-8 h-8 rounded-md bg-[#1E3A8A] text-white" aria-label="Search">
+                  <button type="submit" className="flex items-center justify-center w-8 h-8 rounded-md bg-[#F59E0B] text-[#1E3A8A]" aria-label="Search">
                     <Search size={16} />
                   </button>
                 </div>
@@ -624,7 +603,7 @@ const Header = () => {
       </header>
 
       {/* Navigation - Desktop Only */}
-      <nav className="hidden lg:block bg-white w-full z-30">
+      <nav className="hidden lg:block bg-white w-full z-30 border-b border-slate-200">
         <div className="relative w-full">
           <div className="container mx-auto px-2 lg:px-3">
             <div className="flex items-center justify-start py-2 lg:py-2.5">
@@ -635,7 +614,6 @@ const Header = () => {
                   return (
                     <li key={petType.slug} className="relative group flex-shrink-0">
                       <Link to={`/${petType.slug}`} className="flex items-center gap-0.5 lg:gap-1 hover:text-[#1E3A8A] transition-colors py-1.5 lg:py-2 px-1 lg:px-1.5 whitespace-nowrap">
-                        <span className="text-sm lg:text-base flex-shrink-0 leading-none">{petType.icon}</span>
                         <span className="text-xs lg:text-sm whitespace-nowrap">{petType.name}</span>
                         {petCategories.length > 0 && <ChevronDown size={14} className="opacity-60 group-hover:opacity-100 transition-opacity" />}
                       </Link>
@@ -748,11 +726,7 @@ const Header = () => {
           <div className="fixed inset-0 bg-black/50 z-[45] lg:hidden" onClick={() => { setMobileMenuOpen(false); setIsLearningExpanded(false); }} />
           <div className="fixed top-0 right-0 h-full w-[85vw] max-w-sm bg-white shadow-2xl z-[50] lg:hidden overflow-y-auto">
             <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between z-10">
-              {/* ✅ FIXED - Same logo in mobile menu */}
-              <picture>
-                <source srcSet="/logo.webp" type="image/webp" />
-                <img src="/logo.png" alt="Petshiwu" className="h-10 w-auto object-contain" width={195} height={40} />
-              </picture>
+              <BrandLogo variant="on-light" />
               <button onClick={() => { setMobileMenuOpen(false); setIsLearningExpanded(false); }} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Close Menu">
                 <X size={24} className="text-gray-700" />
               </button>
@@ -788,15 +762,15 @@ const Header = () => {
                   <>
                     <li><Link to="/profile" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><User size={20} /><span>My Profile</span></Link></li>
                     {user?.role === 'admin' && (
-                      <li><a href="https://dashboard.petshiwu.com" className="flex items-center gap-3 py-3 px-3 font-semibold bg-blue-50 text-[#1E3A8A] rounded-lg"><span>📦</span><span>Orders Dashboard</span></a></li>
+                      <li><a href="https://dashboard.petshiwu.com" className="flex items-center gap-3 py-3 px-3 font-semibold bg-blue-50 text-[#1E3A8A] rounded-lg"><span>Orders Dashboard</span></a></li>
                     )}
-                    <li><Link to="/favorites" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><Heart size={20} className="text-pink-500" fill="currentColor" /><span>My Favorites</span></Link></li>
+                    <li><Link to="/favorites" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><Heart size={20} className="text-[#1E3A8A]" fill="currentColor" /><span>My Favorites</span></Link></li>
                     <li><Link to="/orders" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><ShoppingCart size={20} /><span>My Orders</span></Link></li>
-                    <li><Link to="/#restock" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><span className="text-xl">🔁</span><span>Restock</span></Link></li>
-                    <li><button onClick={() => { setShowLogoutModal(true); setMobileMenuOpen(false); }} className="flex items-center gap-3 w-full text-left py-3 px-3 font-semibold hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"><span className="text-xl">🚪</span><span>Logout</span></button></li>
+                    <li><Link to="/#restock" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><span>Restock</span></Link></li>
+                    <li><button onClick={() => { setShowLogoutModal(true); setMobileMenuOpen(false); }} className="flex items-center gap-3 w-full text-left py-3 px-3 font-semibold hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"><LogOut size={20} /><span>Logout</span></button></li>
                   </>
                 ) : (
-                  <li><Link to="/login" className="flex items-center gap-3 py-3 px-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold" onClick={() => setMobileMenuOpen(false)}><User size={20} /><span>Sign In / Register</span></Link></li>
+                  <li><Link to="/login" className="flex items-center gap-3 py-3 px-3 bg-[#1E3A8A] text-white rounded-lg hover:bg-[#163074] transition-colors font-semibold" onClick={() => setMobileMenuOpen(false)}><User size={20} /><span>Sign In / Register</span></Link></li>
                 )}
               </ul>
             </div>
