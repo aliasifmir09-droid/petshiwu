@@ -8,6 +8,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import SEO from '@/components/SEO';
 import { normalizeImageUrl } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
+import { getListingPrice } from '@/utils/productPrice';
 import api from '@/services/api';
 import { compressImageFile, fileToDataUrl, photoSearchErrorMessage } from '@/utils/compressImage';
 import { useCartStore } from '@/stores/cartStore';
@@ -631,7 +632,9 @@ const AdvancedSearch = () => {
           {/* Autocomplete suggestions (while typing, before debounce fires) */}
           {inputValue.length >= 2 && !debouncedQuery && suggestionProducts.length > 0 && (
             <div className="space-y-1">
-              {suggestionProducts.map((p: any) => (
+              {suggestionProducts.map((p: any) => {
+                const listingPrice = getListingPrice(p);
+                return (
                 <Link
                   key={p._id || p.slug}
                   to={generateProductUrl(p as any)}
@@ -648,13 +651,14 @@ const AdvancedSearch = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">{p.name}</p>
-                    {p.basePrice && (
-                      <p className="text-sm font-bold text-blue-600">${p.basePrice.toFixed(2)}</p>
+                    {listingPrice > 0 && (
+                      <p className="text-sm font-bold text-blue-600">${listingPrice.toFixed(2)}</p>
                     )}
                   </div>
                   <Search size={15} className="text-gray-400 flex-shrink-0" />
                 </Link>
-              ))}
+                );
+              })}
             </div>
           )}
 

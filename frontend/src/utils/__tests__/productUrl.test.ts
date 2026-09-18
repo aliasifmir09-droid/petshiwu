@@ -91,6 +91,14 @@ describe('Product URL Utility', () => {
     expect(generateProductUrl(smallPet)).toBe('/small-animal/hutches/test-product');
   });
 
+    test('skips sanitizer circular-category placeholders so search still opens the product', () => {
+      const circular = {
+        ...mockProduct,
+        category: '[Circular Reference]' as any,
+      } as Product;
+      expect(generateProductUrl(circular)).toBe('/products/test-product');
+    });
+
     test('should generate valid URL format', () => {
       const url = generateProductUrl(mockProduct);
       

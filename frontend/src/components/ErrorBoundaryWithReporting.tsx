@@ -84,7 +84,7 @@ class ErrorBoundaryWithReporting extends Component<Props, State> {
               We're sorry, but something unexpected happened. Our team has been notified.
             </p>
             
-            {this.state.error && (
+            {this.state.error && import.meta.env.DEV && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-left">
                 <p className="text-sm font-semibold text-red-800 mb-2">Error Details:</p>
                 <p className="text-sm text-red-700 font-mono break-all">

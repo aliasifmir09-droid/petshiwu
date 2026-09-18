@@ -1,14 +1,12 @@
-import { Suspense, lazy } from 'react';
 import { PayPalScriptProvider, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { paypalCheckoutScriptOptions, paypalClientId } from '@/config/paypal';
+import PayPalButton from '@/components/PayPalButton';
+import PayPalApplePay from '@/components/PayPalApplePay';
+import PayPalGooglePay from '@/components/PayPalGooglePay';
 import type { PayPalButtonProps } from '@/components/PayPalButton';
 import type { PayPalApplePayProps } from '@/components/PayPalApplePay';
 import type { PayPalGooglePayProps } from '@/components/PayPalGooglePay';
-
-const PayPalButton = lazy(() => import('@/components/PayPalButton'));
-const PayPalApplePay = lazy(() => import('@/components/PayPalApplePay'));
-const PayPalGooglePay = lazy(() => import('@/components/PayPalGooglePay'));
 
 type CheckoutBrandedPaymentsProps = PayPalButtonProps &
   Pick<PayPalApplePayProps, 'total'> &
@@ -40,22 +38,9 @@ const BrandedPaymentButtons = (props: CheckoutBrandedPaymentsProps) => {
 
   return (
     <div className="space-y-3">
-      <Suspense fallback={null}>
-        <PayPalApplePay {...walletProps} total={props.total} />
-      </Suspense>
-      <Suspense fallback={null}>
-        <PayPalGooglePay {...walletProps} total={props.total} />
-      </Suspense>
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center py-6">
-            <LoadingSpinner size="md" />
-            <span className="ml-3 text-gray-600">Loading PayPal...</span>
-          </div>
-        }
-      >
-        <PayPalButton {...walletProps} onCancel={props.onCancel} skipProvider />
-      </Suspense>
+      <PayPalApplePay {...walletProps} total={props.total} />
+      <PayPalGooglePay {...walletProps} total={props.total} />
+      <PayPalButton {...walletProps} onCancel={props.onCancel} skipProvider />
     </div>
   );
 };
