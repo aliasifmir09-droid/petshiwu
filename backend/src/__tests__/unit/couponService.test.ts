@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { COUPONS, getCouponDiscount, isReusableCoupon } from '../../services/couponService';
+import { COUPONS, getCouponDiscount, isFreeShippingCoupon, isReusableCoupon } from '../../services/couponService';
 
 describe('couponService', () => {
   test('FREEDOM20 is 20% off capped at $10', () => {
@@ -72,6 +72,19 @@ describe('couponService', () => {
     expect(getCouponDiscount('FAMILY15', 200)).toBe(30);
   });
 
+  test('TESTSHIP is a hidden reusable free-delivery code with no item discount', () => {
+    expect(COUPONS.TESTSHIP).toMatchObject({
+      type: 'free_shipping',
+      reusable: true,
+      hidden: true,
+    });
+    expect(isReusableCoupon('testship')).toBe(true);
+    expect(isFreeShippingCoupon('TESTSHIP')).toBe(true);
+    expect(isFreeShippingCoupon('FREEDOM20')).toBe(false);
+    expect(getCouponDiscount('TESTSHIP', 19.99)).toBe(0);
+    expect(getCouponDiscount('TESTSHIP', 200)).toBe(0);
+  });
+
   test('FAMILY15 is not advertised in public storefront or marketing copy', () => {
     const repoRoot = path.resolve(__dirname, '../../../..');
     const publicRoots = [
@@ -108,6 +121,47 @@ describe('couponService', () => {
       if (!fs.existsSync(file)) continue;
       const text = fs.readFileSync(file, 'utf8');
       if (/FAMILY15/i.test(text)) hits.push(path.relative(repoRoot, file));
+    }
+
+    expect(hits).toEqual([]);
+  });
+
+  test('TESTSHIP is not advertised in public storefront or marketing copy', () => {
+    const repoRoot = path.resolve(__dirname, '../../../..');
+    const publicRoots = [
+      path.join(repoRoot, 'frontend/src'),
+      path.join(repoRoot, 'frontend/public'),
+    ];
+    const publicFiles = [
+      path.join(repoRoot, 'backend/src/controllers/aiAdvisorController.ts'),
+      path.join(repoRoot, 'backend/src/workers/birthdayWorker.ts'),
+      path.join(repoRoot, 'backend/src/middleware/botRenderer.ts'),
+      path.join(repoRoot, 'backend/src/routes/newsletter.ts'),
+      path.join(repoRoot, 'GBP_COPY.md'),
+    ];
+
+    const hits: string[] = [];
+    const walk = (dir: string) => {
+      if (!fs.existsSync(dir)) return;
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          if (entry.name === 'node_modules' || entry.name === 'dist' || entry.name === '__tests__') continue;
+          walk(full);
+          continue;
+        }
+        if (/\.(test|spec)\.(ts|tsx|js)$/.test(entry.name)) continue;
+        if (!/\.(ts|tsx|js|jsx|html|xml|txt|md)$/.test(entry.name)) continue;
+        const text = fs.readFileSync(full, 'utf8');
+        if (/TESTSHIP/i.test(text)) hits.push(path.relative(repoRoot, full));
+      }
+    };
+
+    publicRoots.forEach(walk);
+    for (const file of publicFiles) {
+      if (!fs.existsSync(file)) continue;
+      const text = fs.readFileSync(file, 'utf8');
+      if (/TESTSHIP/i.test(text)) hits.push(path.relative(repoRoot, file));
     }
 
     expect(hits).toEqual([]);

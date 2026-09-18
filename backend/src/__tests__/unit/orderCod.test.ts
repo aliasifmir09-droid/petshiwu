@@ -9,13 +9,12 @@ describe('createOrder cash on delivery', () => {
     'utf8'
   );
 
-  it('no longer blocks Cash on Delivery', () => {
-    expect(src).not.toContain('Cash on Delivery is no longer available');
+  it('rejects Cash on Delivery on createOrder', () => {
+    expect(src).toContain('Cash on delivery is not available');
   });
 
-  it('keeps COD orders unpaid until delivery', () => {
+  it('still keeps historical COD rows unpaid until delivery', () => {
     expect(src).toContain("paymentMethod === 'cod' ? 'pending'");
-    expect(src).toContain('collect cash on delivery');
   });
 
   it('cancels and updates status without Mongoose document validation', () => {
@@ -26,18 +25,18 @@ describe('createOrder cash on delivery', () => {
   });
 });
 
-describe('createOrder validation allows cash on delivery', () => {
+describe('createOrder validation rejects cash on delivery', () => {
   const src = fs.readFileSync(
     path.resolve(__dirname, '../../middleware/validation.ts'),
     'utf8'
   );
 
-  it('accepts cod on createOrderValidation', () => {
+  it('does not accept cod on createOrderValidation', () => {
     const createOrderBlock = src.slice(
       src.indexOf('export const createOrderValidation'),
       src.indexOf('export const createReviewValidation')
     );
-    expect(createOrderBlock).toContain("'cod'");
+    expect(createOrderBlock).not.toContain("'cod'");
   });
 
   it('does not require Stripe for COD payment intents', () => {

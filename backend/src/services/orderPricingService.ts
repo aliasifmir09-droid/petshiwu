@@ -1,5 +1,5 @@
 import Product from '../models/Product';
-import { getCouponDiscount } from './couponService';
+import { getCouponDiscount, isFreeShippingCoupon } from './couponService';
 import type { NormalizedOrderItem } from '../types/common';
 import { decodeHtmlEntities } from '../utils/catalogText';
 
@@ -94,7 +94,9 @@ export const calculateTrustedOrderPricing = async (
   }
 
   const itemsPrice = Number(trustedItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2));
-  const shippingPrice = itemsPrice >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
+  const shippingPrice = itemsPrice >= FREE_SHIPPING_THRESHOLD || isFreeShippingCoupon(couponCode)
+    ? 0
+    : STANDARD_SHIPPING_COST;
   const taxPrice = Number((itemsPrice * TAX_RATE).toFixed(2));
   const discountAmount = getCouponDiscount(couponCode, itemsPrice);
   const safeDonationAmount = Number.isFinite(Number(donationAmount)) && Number(donationAmount) > 0
