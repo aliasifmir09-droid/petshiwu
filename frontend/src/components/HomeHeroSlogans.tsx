@@ -52,12 +52,15 @@ const HomeHeroSlogans = () => {
             ))}
           </ul>
         </div>
-        <div className="relative min-h-[260px] lg:min-h-full">
-          <img
-            src={HOME_HERO_IMAGE}
-            alt="Dog, cat, and bird — food, treats, and supplies for every pet"
-            className="absolute inset-0 h-full w-full object-cover object-[78%_center]"
-          />
+        <div className="relative min-h-[340px] sm:min-h-[420px] lg:min-h-full overflow-hidden bg-[#f4f1ea]">
+          <picture>
+            <source srcSet={HOME_HERO_IMAGE} type="image/webp" />
+            <img
+              src="/hero-side-family.jpg"
+              alt="Dog, cat, and macaw — food, treats, and supplies for every pet"
+              className="absolute inset-0 h-full w-full object-cover object-center"
+            />
+          </picture>
         </div>
       </div>
 

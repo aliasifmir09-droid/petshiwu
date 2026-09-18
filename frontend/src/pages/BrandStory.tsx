@@ -34,11 +34,11 @@ const BrandStory = ({ slug }: BrandStoryProps) => {
             ))}
           </ul>
         </div>
-        <div className="relative min-h-[260px] lg:min-h-full">
+        <div className="relative min-h-[340px] sm:min-h-[420px] lg:min-h-full overflow-hidden bg-[#f4f1ea]">
           <img
             src={story.image}
             alt={story.imageAlt}
-            className="absolute inset-0 h-full w-full object-cover object-[78%_center]"
+            className="absolute inset-0 h-full w-full object-cover object-center"
           />
         </div>
       </section>

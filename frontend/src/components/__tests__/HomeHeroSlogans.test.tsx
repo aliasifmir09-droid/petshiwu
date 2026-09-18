@@ -12,7 +12,10 @@ describe('HomeHeroSlogans', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(HOME_SLOGAN);
+    expect(screen.getByRole('img', { name: /dog, cat, and macaw/i })).toHaveAttribute(
+      'src',
+      '/hero-side-family.jpg'
+    );
     expect(screen.getByText(NATIONWIDE_SOON_NOTE)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /shop dogs/i })).toHaveAttribute('href', '/dog');
     expect(screen.getByRole('link', { name: /shop cats/i })).toHaveAttribute('href', '/cat');

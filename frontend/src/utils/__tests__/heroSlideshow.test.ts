@@ -11,8 +11,8 @@ describe('hero slideshow assets', () => {
 
   test('prefers webp for catalog campaign banners', () => {
     expect(
-      slideDisplaySrc({ src: '/banner-premium-care.jpg', webp: '/banner-premium-care.webp' })
-    ).toBe('/banner-premium-care.webp');
+      slideDisplaySrc({ src: '/hero-wide-family.jpg', webp: '/hero-wide-family.webp' })
+    ).toBe('/hero-wide-family.webp');
   });
 
   test('keeps jpg when no real webp exists', () => {
@@ -28,7 +28,7 @@ describe('hero slideshow assets', () => {
     expect(ids).not.toContain('slide-neural');
     expect(ids).not.toContain('slide-2');
     expect(ids).not.toContain('slide-nyc-tonight');
-    expect(HERO_SLIDES[0].id).toBe('slide-premium-care');
+    expect(HERO_SLIDES[0].id).toBe('slide-hero-family');
   });
 
   test('homepage promo carousel uses catalog banners, not NYC slogans', () => {

@@ -6,24 +6,24 @@ import { slideDisplaySrc } from '@/utils/slideImage';
 /** One store promise on the first screen — big brands pick one line. */
 export const HERO_SLIDES = [
   {
-    id: 'slide-premium-care',
-    src: '/banner-premium-care.jpg',
-    webp: '/banner-premium-care.webp',
-    alt: 'Premium pet food, treats, and supplies for dogs and cats',
+    id: 'slide-hero-family',
+    src: '/hero-wide-family.jpg',
+    webp: '/hero-wide-family.webp',
+    alt: 'Golden retriever, cat, and macaw in a bright home — shop food and supplies',
     link: '/products',
   },
   {
-    id: 'slide-one-stop',
-    src: '/banner-one-stop.jpg',
-    webp: '/banner-one-stop.webp',
-    alt: 'Shop food, treats, litter, and toys in one online pet store',
+    id: 'slide-hero-play',
+    src: '/hero-wide-play.jpg',
+    webp: '/hero-wide-play.webp',
+    alt: 'Puppy, kitten, hamster, and rabbit with toys and food',
     link: '/products',
   },
   {
-    id: 'slide-fall-bowl',
-    src: '/banner-fall-bowl.jpg',
-    webp: '/banner-fall-bowl.webp',
-    alt: 'Seasonal pet food and treats from top brands',
+    id: 'slide-hero-delivery',
+    src: '/hero-wide-delivery.jpg',
+    webp: '/hero-wide-delivery.webp',
+    alt: 'Dog and cat at the door with a pet food delivery',
     link: '/products',
   },
 ];

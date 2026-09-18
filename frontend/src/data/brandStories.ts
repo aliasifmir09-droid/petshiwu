@@ -17,7 +17,7 @@ export type BrandStory = {
 export const HOME_SLOGAN = 'Everything your pet needs.';
 export const HOME_SLOGAN_SUPPORT =
   'Shop 4,000+ foods, treats, and supplies from Hill’s, Royal Canin, Purina, and more. Free shipping over $49. No autoship.';
-export const HOME_HERO_IMAGE = '/banner-premium-care.webp';
+export const HOME_HERO_IMAGE = '/hero-side-family.webp';
 export const NATIONWIDE_SOON_NOTE =
   'Currently delivering in NYC. Nationwide shipping opens in a few days.';
 
@@ -40,8 +40,8 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
       'Petshiwu is an online pet store for food, treats, and supplies. Free shipping over $49. No autoship. 365-day returns. Currently delivering in NYC, with nationwide shipping opening soon.',
     intro:
       'Shop the brands you already buy, at a fair price, without a subscription. Free shipping over $49. Unused items come back for 365 days. We are delivering in NYC now, and nationwide shipping opens in a few days.',
-    image: '/banner-premium-care.webp',
-    imageAlt: 'Premium pet food and supplies for dogs and cats',
+    image: '/hero-side-family.webp',
+    imageAlt: 'Golden retriever, cat, and macaw — food and care for every pet',
     sections: [
       {
         heading: 'The brands you already trust',
@@ -68,8 +68,8 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
       'Petshiwu is for pet parents who want vet-quality food and supplies at the door — without a subscription lock-in. Free shipping over $49. No autoship.',
     intro:
       'You already remember breakfast, dinner, and the late-night water bowl. We remember the bag, the litter, and the chew that lasts past Tuesday. Shop like a national pet store: by pet, by brand, and by what they eat every day.',
-    image: '/banner-one-stop.webp',
-    imageAlt: 'Pet parents shopping food, treats, and everyday supplies',
+    image: '/hero-side-play.webp',
+    imageAlt: 'Puppy, kitten, hamster, and rabbit with toys and food',
     sections: [
       {
         heading: 'Shop by pet, then by aisle',
@@ -96,8 +96,8 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
       'Petshiwu is an online pet store. Currently delivering in NYC, with nationwide shipping opening in a few days. Office and warehouse only — not a walk-in store. Free shipping over $49. No autoship.',
     intro:
       'Every order is packed at our warehouse and sent to your door. We are delivering in NYC today. Nationwide shipping opens in a few days — same brands, same 24/7 phone line, same 365-day returns.',
-    image: '/banner-one-stop.webp',
-    imageAlt: 'Pet supplies packed for delivery to your door',
+    image: '/hero-side-delivery.webp',
+    imageAlt: 'Dog and cat at the door with a pet food delivery',
     sections: [
       {
         heading: 'Warehouse, not a shop floor',
