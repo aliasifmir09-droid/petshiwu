@@ -43,8 +43,8 @@ describe('PayPal checkout', () => {
     expect(checkout).not.toContain('Pay with Google Pay through PayPal');
     expect(checkout).not.toContain('Pay securely by card through PayPal');
     expect(checkout).not.toContain('PayPal Wallet');
-    expect(checkout).toContain('Cash on Delivery');
-    expect(checkout).toContain("setPaymentMethod('cod')");
+    expect(checkout).not.toContain('Cash on Delivery');
+    expect(checkout).not.toContain("setPaymentMethod('cod')");
 
     expect(branded).toContain('PayPalApplePay');
     expect(branded).toContain('PayPalGooglePay');

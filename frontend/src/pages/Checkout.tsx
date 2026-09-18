@@ -23,7 +23,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import OrdersHoldNotice from '@/components/OrdersHoldNotice';
 import { ORDERING_PAUSED } from '@/config/ordering';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
-import { MapPin, Plus, Check, User, UserCheck, Banknote, ShieldCheck, RotateCcw, Headphones, Lock, Truck, CreditCard } from 'lucide-react';
+import { MapPin, Plus, Check, User, UserCheck, ShieldCheck, RotateCcw, Headphones, Lock, Truck, CreditCard } from 'lucide-react';
 import { TAX_RATE } from '@/config/constants';
 import { paypalClientId } from '@/config/paypal';
 import { isNycDeliveryZip, isNewYorkState, normalizeShippingState } from '@/utils/deliveryZip';
@@ -45,7 +45,7 @@ const PaymentForm = lazy(() => import('@/components/PaymentForm'));
 const shopperPaymentError = (raw?: string) => {
   const message = String(raw || '');
   if (/STRIPE|environment variable|not configured/i.test(message)) {
-    return 'Card payment is not available that way. Enter the card below, or use PayPal, Apple Pay, or cash on delivery.';
+    return 'Card payment is not available that way. Enter the card below, or use PayPal, Apple Pay, or Google Pay.';
   }
   return message || 'Payment failed. Please try again.';
 };
@@ -107,7 +107,7 @@ interface CreateOrderData {
     country: string;
     phone: string;
   };
-  paymentMethod: 'credit_card' | 'paypal' | 'apple_pay' | 'google_pay' | 'cod';
+  paymentMethod: 'credit_card' | 'paypal' | 'apple_pay' | 'google_pay';
   paymentIntentId?: string;
   itemsPrice: number;
   shippingPrice: number;
@@ -230,7 +230,7 @@ const Checkout = () => {
     retry: 1
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'paypal' | 'apple_pay' | 'google_pay' | 'cod'>('paypal');
+  const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'paypal' | 'apple_pay' | 'google_pay'>('paypal');
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -251,6 +251,7 @@ const Checkout = () => {
   const [couponMessage, setCouponMessage] = useState('');
   const [couponValid, setCouponValid] = useState<boolean | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
+  const [couponWaivesShipping, setCouponWaivesShipping] = useState(false);
   const [savePaymentMethod, setSavePaymentMethod] = useState(true);
 
   const { data: savedPaymentMethods = [], isFetched: paymentMethodsFetched } = useQuery({
@@ -373,7 +374,7 @@ const Checkout = () => {
   };
 
   const subtotal = getTotalPrice();
-  const shipping = shippingCostForSubtotal(subtotal);
+  const shipping = shippingCostForSubtotal(subtotal, couponWaivesShipping);
   const tax = subtotal * TAX_RATE;
   const onlineTotal = Math.max(0, subtotal + shipping + tax - couponDiscount);
   const total = Math.max(0, onlineTotal + donationAmount);
@@ -400,13 +401,15 @@ const Checkout = () => {
       if (data.valid) {
         setCouponCode(raw.toUpperCase());
         setCouponInput(raw.toUpperCase());
-        setCouponDiscount(data.discountAmount);
+        setCouponDiscount(Number(data.discountAmount) || 0);
+        setCouponWaivesShipping(Boolean(data.freeShipping));
         setCouponValid(true);
         setCouponMessage(data.message);
       } else {
         setCouponValid(false);
         setCouponMessage(data.message);
         setCouponDiscount(0);
+        setCouponWaivesShipping(false);
         setCouponCode('');
       }
     } catch {
@@ -437,6 +440,7 @@ const Checkout = () => {
     setCouponDiscount(0);
     setCouponMessage('');
     setCouponValid(null);
+    setCouponWaivesShipping(false);
   };
 
   const createOrderMutation = useMutation({
@@ -519,8 +523,8 @@ const Checkout = () => {
       return;
     }
 
-    if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay' || paymentMethod === 'cod' || paymentMethod === 'credit_card') {
-      setShowPayPalButton(paymentMethod !== 'cod' && paymentMethod !== 'credit_card');
+    if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay' || paymentMethod === 'credit_card') {
+      setShowPayPalButton(paymentMethod !== 'credit_card');
       setShowPaymentForm(false);
       setClientSecret(null);
       setPaymentIntentId(null);
@@ -610,11 +614,6 @@ const Checkout = () => {
       }
     }
     setEmailError(false);
-
-    if (paymentMethod === 'cod') {
-      await prepareAndSubmitOrder();
-      return;
-    }
 
     if (usingSavedCard) {
       setIsProcessingPayment(true);
@@ -1195,16 +1194,16 @@ const Checkout = () => {
                       fallback={
                         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
                           <p className="font-semibold">PayPal could not load on this browser.</p>
-                          <p className="mt-1">You can still pay cash when the order arrives.</p>
+                          <p className="mt-1">Reload the page, or pay with a card below.</p>
                           <button
                             type="button"
                             className="mt-3 text-sm font-semibold text-[#1E3A8A] underline"
                             onClick={() => {
-                              setPaymentMethod('cod');
+                              setPaymentMethod('credit_card');
                               setSelectedSavedPaymentMethod(null);
                             }}
                           >
-                            Use cash on delivery
+                            Use a card instead
                           </button>
                         </div>
                       }
@@ -1246,10 +1245,10 @@ const Checkout = () => {
                       </div>
                     )}
                   </div>
-                ) : !ORDERING_PAUSED && !paypalClientId && paymentMethod !== 'cod' ? (
+                ) : !ORDERING_PAUSED && !paypalClientId ? (
                   <div className="p-4 border-2 border-gray-200 rounded-lg bg-gray-50">
                     <p className="font-semibold text-gray-700">PayPal is temporarily unavailable</p>
-                    <p className="text-sm text-gray-500 mt-1">You can still pay cash when your order arrives.</p>
+                    <p className="text-sm text-gray-500 mt-1">Use a credit or debit card below to complete this order.</p>
                   </div>
                 ) : null}
 
@@ -1259,16 +1258,16 @@ const Checkout = () => {
                     <ErrorBoundary
                       fallback={
                         <div className="text-sm text-[#1E3A8A]">
-                          Card fields could not load. Use cash on delivery, or PayPal if it appears above.
+                          Card fields could not load. Reload the page, or use PayPal if it appears above.
                           <button
                             type="button"
                             className="mt-3 block font-semibold underline"
                             onClick={() => {
-                              setPaymentMethod('cod');
+                              setPaymentMethod('paypal');
                               setSelectedSavedPaymentMethod(null);
                             }}
                           >
-                            Use cash on delivery
+                            Use PayPal instead
                           </button>
                         </div>
                       }
@@ -1313,21 +1312,7 @@ const Checkout = () => {
                   </div>
                 ) : null}
 
-                {!ORDERING_PAUSED && paymentMethod === 'cod' && (
-                  <div className="mb-4 p-4 rounded-lg border-2 border-primary-600 bg-primary-50">
-                    <p className="font-semibold text-gray-900">Cash on Delivery selected</p>
-                    <p className="text-sm text-gray-600 mt-1">Pay cash when your order arrives. No card needed.</p>
-                    <button
-                      type="button"
-                      onClick={() => { setPaymentMethod('paypal'); setSelectedSavedPaymentMethod(null); }}
-                      className="mt-3 text-sm font-semibold text-primary-700 hover:text-primary-800"
-                    >
-                      Use Apple Pay, Google Pay, or PayPal instead
-                    </button>
-                  </div>
-                )}
-
-                {!ORDERING_PAUSED && paymentMethod !== 'cod' && !usingSavedCard && (
+                {!ORDERING_PAUSED && !usingSavedCard && (
                   <>
                     <div className="flex items-center gap-3 my-6">
                       <div className="flex-1 h-px bg-gray-200" />
@@ -1349,20 +1334,6 @@ const Checkout = () => {
                         </div>
                       </button>
                     ) : null}
-                    <button type="button" onClick={() => {
-                      setPaymentMethod('cod');
-                      setSelectedSavedPaymentMethod(null);
-                      setSavePaymentMethod(false);
-                    }}
-                      className="w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all border-gray-300 bg-white hover:border-gray-400">
-                      <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
-                        <Banknote className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1 text-left">
-                        <span className="font-semibold text-gray-900">Cash on Delivery</span>
-                        <p className="text-sm text-gray-600 mt-1">Pay cash when your order arrives. No card needed.</p>
-                      </div>
-                    </button>
                   </>
                 )}
 
@@ -1375,7 +1346,7 @@ const Checkout = () => {
                   </div>
                 ) : null}
 
-                {isAuthenticated && !selectedSavedPaymentMethod && paymentMethod !== 'cod' && showPaymentForm && (
+                {isAuthenticated && !selectedSavedPaymentMethod && showPaymentForm && (
                   <div className="mt-4 flex items-center gap-2">
                     <input type="checkbox" id="savePaymentMethod" checked={savePaymentMethod}
                       onChange={(e) => setSavePaymentMethod(e.target.checked)}
@@ -1386,7 +1357,7 @@ const Checkout = () => {
                   </div>
                 )}
 
-                {isProcessingPayment && !clientSecret && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && paymentMethod !== 'cod' && paymentMethod !== 'credit_card' && (
+                {isProcessingPayment && !clientSecret && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && paymentMethod !== 'credit_card' && (
 
                   <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <p className="text-sm text-yellow-800">
@@ -1397,7 +1368,7 @@ const Checkout = () => {
               </CheckoutStep>
 
               {/* Stripe Payment Form */}
-              {showPaymentForm && clientSecret && !usingSavedCard && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && paymentMethod !== 'cod' && (
+              {showPaymentForm && clientSecret && !usingSavedCard && paymentMethod !== 'paypal' && paymentMethod !== 'apple_pay' && paymentMethod !== 'google_pay' && (
                 <StripePaymentWrapper clientSecret={clientSecret} total={total}
                   onSuccess={handlePaymentSuccess} onError={handlePaymentError} onCancel={handlePaymentCancel} />
               )}
@@ -1460,6 +1431,12 @@ const Checkout = () => {
                       <span className="font-semibold">-${couponDiscount.toFixed(2)}</span>
                     </div>
                   )}
+                  {couponWaivesShipping && couponDiscount <= 0 && (
+                    <div className="flex justify-between text-sm text-emerald-600">
+                      <span>Delivery coupon</span>
+                      <span className="font-semibold">$0 shipping</span>
+                    </div>
+                  )}
                   <div className="pt-1">
                     {ORDERING_PAUSED ? (
                       <p className="text-xs text-stone-500">Promo codes unlock when checkout opens.</p>
@@ -1512,12 +1489,10 @@ const Checkout = () => {
                   </div>
                 </div>
                 <button type="submit"
-                  disabled={ORDERING_PAUSED || createOrderMutation.isPending || (isProcessingPayment && paymentMethod !== 'cod')}
+                  disabled={ORDERING_PAUSED || createOrderMutation.isPending || isProcessingPayment}
                   className="w-full rounded-2xl bg-[#1E3A8A] py-4 text-lg font-black text-white shadow-lg shadow-blue-900/25 hover:bg-[#16307a] disabled:opacity-50">
                   {ORDERING_PAUSED
                     ? 'We will start accepting orders soon'
-                    : paymentMethod === 'cod'
-                    ? (createOrderMutation.isPending ? 'Placing order...' : 'Place cash on delivery order')
                     : usingSavedCard && selectedSaved
                       ? (createOrderMutation.isPending || isProcessingPayment ? 'Paying…' : `Pay with ${savedCardLabel(selectedSaved)}`)
                     : paymentMethod === 'credit_card'

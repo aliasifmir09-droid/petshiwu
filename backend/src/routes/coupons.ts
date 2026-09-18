@@ -1,7 +1,8 @@
 import express, { Request, Response } from 'express';
 import CouponUsage from '../models/CouponUsage';
 import logger from '../utils/logger';
-import { COUPONS, getCouponDiscount, isReusableCoupon, normalizeCouponCode } from '../services/couponService';
+import { COUPONS, getCouponDiscount, isFreeShippingCoupon, isReusableCoupon, normalizeCouponCode } from '../services/couponService';
+import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST } from '../services/orderPricingService';
 
 const router = express.Router();
 
@@ -37,8 +38,16 @@ router.post('/validate', async (req: Request, res: Response) => {
 
     const numericSubtotal = Number(subtotal) || 0;
     const discountAmount = getCouponDiscount(normalized, numericSubtotal);
+    const freeShipping = isFreeShippingCoupon(normalized);
+    const shippingWouldHaveBeen = numericSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
+    const shippingSaved = freeShipping ? shippingWouldHaveBeen : 0;
+    const message = freeShipping
+      ? (shippingSaved > 0
+        ? `✓ Delivery fee waived — $0 shipping (saving $${shippingSaved.toFixed(2)})`
+        : '✓ Delivery fee waived — shipping is already free on this order')
+      : `✓ ${coupon.description} — saving $${discountAmount.toFixed(2)}`;
 
-    logger.info(`[coupons] Code ${normalized} validated for ${email || 'unknown'} — discount: $${discountAmount}`);
+    logger.info(`[coupons] Code ${normalized} validated for ${email || 'unknown'} — discount: $${discountAmount} freeShipping: ${freeShipping}`);
 
     return res.json({
       valid: true,
@@ -46,8 +55,9 @@ router.post('/validate', async (req: Request, res: Response) => {
       type: coupon.type,
       value: coupon.value,
       discountAmount,
+      freeShipping,
       description: coupon.description,
-      message: `✓ ${coupon.description} — saving $${discountAmount.toFixed(2)}`,
+      message,
     });
 
   } catch (err: any) {
