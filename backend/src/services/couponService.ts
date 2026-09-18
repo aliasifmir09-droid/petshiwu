@@ -1,5 +1,5 @@
 export type Coupon = {
-  type: 'percent' | 'fixed';
+  type: 'percent' | 'fixed' | 'free_shipping';
   value: number;
   /** Optional dollar cap for percent codes (FREEDOM20 is 20% off, max $10). */
   maxDiscount?: number;
@@ -41,6 +41,14 @@ export const COUPONS: Record<string, Coupon> = {
     description: '7% off Autoship restock (max $10)',
     reusable: true,
   },
+  // Private test code: $0 delivery. Reusable, never advertised on the storefront.
+  TESTSHIP: {
+    type: 'free_shipping',
+    value: 0,
+    description: 'Delivery fee waived',
+    reusable: true,
+    hidden: true,
+  },
 };
 
 export const ASK_COUPON_CODE = 'RESTOCK5';
@@ -55,10 +63,15 @@ export const isReusableCoupon = (code: string | undefined): boolean => {
   return Boolean(coupon?.reusable);
 };
 
+export const isFreeShippingCoupon = (code: string | undefined): boolean => {
+  const coupon = COUPONS[normalizeCouponCode(code)];
+  return coupon?.type === 'free_shipping';
+};
+
 export const getCouponDiscount = (code: string | undefined, subtotal: number): number => {
   if (!code) return 0;
   const coupon = COUPONS[normalizeCouponCode(code)];
-  if (!coupon) return 0;
+  if (!coupon || coupon.type === 'free_shipping') return 0;
 
   const amount = Number(subtotal) || 0;
   if (amount <= 0) return 0;

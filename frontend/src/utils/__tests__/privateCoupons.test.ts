@@ -26,9 +26,19 @@ describe('private family coupon', () => {
     expect(hits).toEqual([]);
   });
 
+  test('private free-delivery test code is never shown on public storefront pages', () => {
+    const src = path.resolve(__dirname, '../..');
+    const hits = walk(src)
+      .filter((file) => /TESTSHIP/i.test(fs.readFileSync(file, 'utf8')))
+      .map((file) => path.relative(src, file));
+
+    expect(hits).toEqual([]);
+  });
+
   test('checkout only hints at the public first-order code', () => {
     const checkout = fs.readFileSync(path.resolve(__dirname, '../../pages/Checkout.tsx'), 'utf8');
     expect(checkout).toContain('FREEDOM20');
     expect(checkout).not.toMatch(/FAMILY15/i);
+    expect(checkout).not.toMatch(/TESTSHIP/i);
   });
 });

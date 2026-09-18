@@ -231,7 +231,7 @@ export const createOrderValidation = [
     .matches(/^\+?[1-9]\d{1,14}$/)
     .withMessage('Invalid phone number format'),
   body('paymentMethod')
-    .isIn(['credit_card', 'paypal', 'apple_pay', 'google_pay', 'cod'])
+    .isIn(['credit_card', 'paypal', 'apple_pay', 'google_pay'])
     .withMessage('Invalid payment method'),
   body('itemsPrice')
     .isFloat({ min: 0 })

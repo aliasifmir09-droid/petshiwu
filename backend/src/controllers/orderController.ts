@@ -80,6 +80,13 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       return res.status(400).json({ success: false, message: 'No order items' });
     }
 
+    if (paymentMethod === 'cod') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cash on delivery is not available. Please pay with PayPal, Apple Pay, Google Pay, or card.',
+      });
+    }
+
     if (!shippingAddress || !shippingAddress.street || !shippingAddress.city || !shippingAddress.state || !shippingAddress.zipCode) {
       return res.status(400).json({
         success: false,

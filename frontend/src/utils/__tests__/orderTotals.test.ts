@@ -8,6 +8,11 @@ describe('orderTotals', () => {
     expect(shippingCostForSubtotal(49.01)).toBe(0);
   });
 
+  test('a private free-shipping coupon zeros delivery below $49', () => {
+    expect(shippingCostForSubtotal(19.99, true)).toBe(0);
+    expect(shippingCostForSubtotal(48.99, true)).toBe(0);
+  });
+
   test('shows remaining dollars until free shipping, including $49 even', () => {
     expect(amountUntilFreeShipping(40)).toBe(9);
     expect(amountUntilFreeShipping(49)).toBe(0);

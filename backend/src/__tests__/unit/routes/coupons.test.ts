@@ -137,4 +137,36 @@ describe('coupon routes', () => {
     expect(res.body).toEqual({ success: true, reusable: true });
     expect(usages).toHaveLength(0);
   });
+
+  it('waives delivery on the private free-shipping code without an item discount', async () => {
+    const res = await request(app).post('/api/v1/coupons/validate').send({
+      code: 'testship',
+      subtotal: 19.99,
+      email: 'ops@example.com',
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      valid: true,
+      code: 'TESTSHIP',
+      type: 'free_shipping',
+      discountAmount: 0,
+      freeShipping: true,
+    });
+    expect(res.body.message).toMatch(/delivery fee waived/i);
+  });
+
+  it('lets the private free-shipping code be reused', async () => {
+    usages.push({ email: 'ops@example.com', code: 'TESTSHIP', orderId: 'order-1' });
+
+    const res = await request(app).post('/api/v1/coupons/validate').send({
+      code: 'TESTSHIP',
+      subtotal: 12.99,
+      email: 'ops@example.com',
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.valid).toBe(true);
+    expect(res.body.freeShipping).toBe(true);
+  });
 });
