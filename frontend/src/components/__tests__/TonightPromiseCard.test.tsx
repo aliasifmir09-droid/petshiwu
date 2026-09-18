@@ -1,11 +1,17 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, test, beforeEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import TonightPromiseCard from '../TonightPromiseCard';
 
 describe('TonightPromiseCard', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-13T14:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   test('hero asks for a ZIP and confirms Queens same-day coverage', () => {
