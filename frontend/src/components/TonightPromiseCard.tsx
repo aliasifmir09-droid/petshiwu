@@ -112,18 +112,19 @@ const TonightPromiseCard = ({ variant = 'hero' }: TonightPromiseCardProps) => {
       <div className="container mx-auto px-4 lg:px-8 py-10 md:py-14">
         <div className="max-w-3xl">
           <p className="text-amber-200 text-xs font-semibold tracking-widest uppercase mb-3">
-            Jackson Heights warehouse · five boroughs
+            Packed in New York · ships nationwide
           </p>
           <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-3">
-            {ORDERING_PAUSED ? 'Same-day NYC when checkout opens.' : 'Tonight at your door.'}
+            {ORDERING_PAUSED ? 'Same-day NYC when checkout opens.' : 'Tonight in NYC. Two days anywhere.'}
           </h2>
           <p className="text-base md:text-lg text-blue-100 mb-6 max-w-xl">
             {ORDERING_PAUSED
               ? 'Check your ZIP, add a bag in one tap, and save the cart. Checkout opens as soon as we are ready.'
-              : 'Check your ZIP, add a bag in one tap, and we pack it in Queens.'}
+              : 'Check your ZIP. Same-day in the five boroughs. Two-day shipping to every other U.S. state.'}
           </p>
           <p className="text-sm font-medium text-white mb-1">{cutoffLine}</p>
           <p className="text-sm text-blue-100 mb-5">{status}</p>
+          <p className="text-sm text-amber-100/90 mb-5">Outside NYC? Two-day shipping to every U.S. state.</p>
           <div className="flex flex-wrap items-center gap-3">
             <label className="sr-only" htmlFor={zipId}>
               Check same-day delivery ZIP

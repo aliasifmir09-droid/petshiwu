@@ -8,28 +8,42 @@ export type BrandStory = {
   title: string;
   description: string;
   intro: string;
+  image: string;
+  imageAlt: string;
   sections: { heading: string; body: string }[];
   ctaLabel: string;
 };
 
-export const HOME_SLOGAN = 'Packed in Queens. At their bowl tonight.';
-export const HOME_SLOGAN_SUPPORT = 'Thank you for trusting us with their dinner.';
+export const HOME_SLOGAN = 'Their bowl, wherever you call home.';
+export const HOME_SLOGAN_SUPPORT =
+  'Vet-quality food and everyday care for every pet parent in America. Same-day in NYC. Two-day to every state. No autoship.';
+export const HOME_HERO_IMAGE = '/banner-premium-care.webp';
+
+export const NATIONWIDE_CHIPS = [
+  'Same-day NYC',
+  '2-day U.S. shipping',
+  'Free over $49',
+  'No autoship',
+  '365-day returns',
+];
 
 export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
   'our-promise': {
     slug: 'our-promise',
     path: '/our-promise',
     kicker: 'Our promise',
-    slogan: 'Packed in Queens. At their bowl tonight.',
+    slogan: 'Fair prices. Fast to the door. Anywhere you live.',
     title: 'Our Promise | Petshiwu',
     description:
-      'Petshiwu packs pet food and supplies in Jackson Heights and delivers same-day across NYC’s five boroughs. No autoship. 365-day returns.',
+      'Petshiwu ships vet-quality pet food and supplies nationwide. Same-day in NYC, two-day across the U.S. No autoship. 365-day returns.',
     intro:
-      'We pack in Jackson Heights, not a walk-in store. Order by 3 PM on weekdays (1 PM weekends) and we bring food, litter, and everyday care to the door — before 11 PM, across all five boroughs.',
+      'We pack in New York and ship to every state. NYC pet parents can order by cutoff for same-day. Everyone else gets two-day shipping, free over $49. No subscription required — ever.',
+    image: '/banner-premium-care.webp',
+    imageAlt: 'Premium pet care products packed for delivery',
     sections: [
       {
-        heading: 'Same-day, said plainly',
-        body: 'Weekdays 3 PM. Weekends 1 PM. We pack on 74th Street and deliver before 11 PM in Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. After cutoff, it is next-day NYC.',
+        heading: 'America first, New York close',
+        body: 'Two-day shipping to homes across the United States. Same-day in all five NYC boroughs when you order by 3 PM weekdays (1 PM weekends). Next-day to select nearby metro ZIPs.',
       },
       {
         heading: 'No subscription trap',
@@ -37,7 +51,7 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
       },
       {
         heading: 'A return you can trust',
-        body: 'Unused items come back for 365 days. Call +1 (800) 259-2605 any time. The Jackson Heights address is warehouse and office only.',
+        body: 'Unused items come back for 365 days, wherever we delivered. Call +1 (800) 259-2605 any time. Our Jackson Heights address is warehouse and office only — not a walk-in store.',
       },
     ],
     ctaLabel: 'Shop the promise',
@@ -49,13 +63,15 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
     slogan: 'For the humans who never skip a meal.',
     title: 'For Pet Parents | Petshiwu',
     description:
-      'Petshiwu is for NYC pet parents who want vet-quality food and supplies at the door — without a subscription lock-in.',
+      'Petshiwu is for pet parents across America who want vet-quality food and supplies at the door — without a subscription lock-in.',
     intro:
-      'You already remember breakfast, dinner, and the late-night water bowl. We remember the bag, the litter, and the chew that lasts past Tuesday. Built for people who take pet care seriously.',
+      'You already remember breakfast, dinner, and the late-night water bowl. We remember the bag, the litter, and the chew that lasts past Tuesday. Built for people who take pet care seriously, from coast to coast.',
+    image: '/banner-one-stop.webp',
+    imageAlt: 'Pet parents shopping food, treats, and everyday supplies',
     sections: [
       {
         heading: 'Their bowl, your evening',
-        body: 'Hill’s, Royal Canin, Purina, and everyday supplies packed in Queens. Same-day when you order by cutoff. Free delivery over $49.',
+        body: 'Hill’s, Royal Canin, Purina, and everyday supplies. Same-day in NYC when you order by cutoff. Two-day to the rest of the country. Free delivery over $49.',
       },
       {
         heading: 'Dogs, cats, and the rest of the family',
@@ -63,7 +79,7 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
       },
       {
         heading: 'Quiet on the upsell',
-        body: 'We will not enroll you in autoship to get a fair price. Order once, or set a reminder you confirm. That is the whole offer.',
+        body: 'We will not enroll you in autoship to get a fair price. Order once, or set a reminder you confirm. That is the whole offer — in every state we ship to.',
       },
     ],
     ctaLabel: 'Shop for them',
@@ -71,28 +87,30 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
   'from-queens': {
     slug: 'from-queens',
     path: '/from-queens',
-    kicker: 'From Queens',
-    slogan: 'A Jackson Heights pack. A New York City door.',
-    title: 'From Queens | Petshiwu',
+    kicker: 'From New York',
+    slogan: 'Born in New York. Built for the whole country.',
+    title: 'From New York | Petshiwu',
     description:
-      'Petshiwu packs every order in Jackson Heights, Queens and delivers across NYC. Office and warehouse only — not a walk-in store.',
+      'Petshiwu packs in Jackson Heights, New York and ships nationwide. Same-day in NYC. Two-day across the U.S. Office and warehouse only — not a walk-in store.',
     intro:
-      'Every bag leaves 37-68 74th Street. Neighbors in Jackson Heights, Astoria, Williamsburg, and the rest of the five boroughs get the same pack, the same cutoff, the same 24/7 phone line.',
+      'Every order still leaves 37-68 74th Street. From that New York pack we now reach pet parents in every state — same brands, same 24/7 phone line, same 365-day returns.',
+    image: '/banner-nyc-tonight.webp',
+    imageAlt: 'Petshiwu packing pet supplies in New York for nationwide delivery',
     sections: [
       {
         heading: 'Warehouse, not a shop floor',
-        body: 'You cannot walk in. That keeps the line for packing, not browsing. Order online. We bring it to your door.',
+        body: 'You cannot walk in. That keeps the line for packing, not browsing. Order online. We bring it to your door — in New York tonight, or across America in two days.',
       },
       {
-        heading: 'Five boroughs, one standard',
-        body: 'Same-day in Manhattan, Brooklyn, Queens, the Bronx, and Staten Island when you order by cutoff. Free over $49. Flat $6 under that.',
+        heading: 'One standard, fifty states',
+        body: 'Same-day in Manhattan, Brooklyn, Queens, the Bronx, and Staten Island when you order by cutoff. Two-day shipping everywhere else in the U.S. Free over $49. Flat $6 under that.',
       },
       {
-        heading: 'A local pack with national brands',
-        body: 'Vet-quality food and everyday care, packed here, delivered tonight. If something is unused, you have 365 days to send it back.',
+        heading: 'A New York pack with national brands',
+        body: 'Vet-quality food and everyday care, packed here, delivered to you. If something is unused, you have 365 days to send it back.',
       },
     ],
-    ctaLabel: 'Shop from Queens',
+    ctaLabel: 'Shop nationwide',
   },
 };
 

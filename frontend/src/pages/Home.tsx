@@ -108,13 +108,13 @@ const Home = () => {
   return (
     <div className="relative bg-[#faf7f1]">
       <SEO
-        title="Packed in Queens. At their bowl tonight. | Petshiwu"
+        title="Petshiwu — Premium Pet Food & Supplies Nationwide"
         description={
           ORDERING_PAUSED
-            ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products delivered to Queens, Brooklyn & all of NYC. ${ORDERING_PAUSED_HEADLINE}. Free shipping over $49.`
+            ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products for homes across America. ${ORDERING_PAUSED_HEADLINE}. Free shipping over $49.`
             : areOrdersOpen()
-            ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products delivered to Queens, Brooklyn & all of NYC. Top brands — ${CATALOG_BRANDS_SHORT}. Free shipping over $49. Dog food, cat food, toys & more.`
-            : `${CATALOG_PRODUCT_COUNT_LABEL} pet products delivered to Queens, Brooklyn & all of NYC. We start taking orders ${ORDERS_OPEN_LABEL}. Free shipping over $49.`
+            ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products shipped nationwide. Same-day in NYC. Two-day to every state. Top brands — ${CATALOG_BRANDS_SHORT}. Free shipping over $49.`
+            : `${CATALOG_PRODUCT_COUNT_LABEL} pet products for homes across America. We start taking orders ${ORDERS_OPEN_LABEL}. Free shipping over $49.`
         }
       />
       <StructuredData type="website" data={{}} />
@@ -281,9 +281,9 @@ const Home = () => {
 
       <section className="py-14 bg-[#faf7f1] text-center">
         <div className="container mx-auto px-4 lg:px-8">
-          <p className="text-[11px] font-bold tracking-[0.16em] uppercase text-[#D97706] mb-2">This week in the pack</p>
+          <p className="text-[11px] font-bold tracking-[0.16em] uppercase text-[#D97706] mb-2">Featured nationwide</p>
           <h2 className="font-serif text-3xl md:text-4xl text-[#1E3A8A] mb-8">
-            Loved on the first screen. Ready at the door.
+            The pantry they already love, at any U.S. door.
           </h2>
           {isLoading ? (
             <LoadingSpinner size="lg" />
@@ -316,12 +316,12 @@ const Home = () => {
         <div className="h-1.5 w-full bg-[#D97706]" />
         <div className="container mx-auto px-4 lg:px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
-            <h2 className="font-serif text-2xl md:text-3xl mb-1">Same city. Same-day. All five boroughs.</h2>
+            <h2 className="font-serif text-2xl md:text-3xl mb-1">NYC tonight. America in two days.</h2>
             <p className="text-white/80">
               {ORDERING_PAUSED
                 ? `${ORDERING_PAUSED_HEADLINE}. Browse now — your cart stays saved.`
                 : areOrdersOpen()
-                ? 'Order by 3 PM weekdays (1 PM weekends). No subscription required. Free over $49.'
+                ? 'Same-day in NYC by 3 PM weekdays. Two-day shipping nationwide. Free over $49. No subscription.'
                 : `We start taking orders ${ORDERS_OPEN_LABEL}. Browse now — checkout opens that day.`}
             </p>
           </div>
@@ -329,7 +329,7 @@ const Home = () => {
             to="/products"
             className="bg-white text-[#1E3A8A] px-6 py-3 rounded-lg font-semibold hover:bg-slate-100 transition-colors"
           >
-            {ORDERING_PAUSED || !areOrdersOpen() ? 'Browse products' : 'Shop tonight'}
+            {ORDERING_PAUSED || !areOrdersOpen() ? 'Browse products' : 'Shop now'}
           </Link>
         </div>
       </section>
@@ -343,8 +343,8 @@ const Home = () => {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { title: 'Same-day NYC', desc: ORDERING_PAUSED ? 'When checkout opens · before 11 PM' : 'Order by 3 PM · before 11 PM' },
+              { title: '2-day nationwide', desc: 'Ships to every U.S. state' },
               { title: 'No lock-in', desc: 'No required subscription. Order when you want.' },
-              { title: 'Free over $49', desc: ORDERING_PAUSED ? 'When checkout opens · $6 under that' : 'Flat $6 under that' },
               { title: '365-day returns', desc: 'Unused items · no hassle' },
             ].map((item) => (
               <div key={item.title} className="bg-white rounded-2xl p-5 border border-[#e7e0d4] shadow-sm">
@@ -420,17 +420,17 @@ const Home = () => {
       <section className="py-14 bg-[#faf7f1]">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-10">
-            <p className="text-[11px] font-bold tracking-[0.16em] uppercase text-[#D97706] mb-2">Built for NYC pet parents</p>
+            <p className="text-[11px] font-bold tracking-[0.16em] uppercase text-[#D97706] mb-2">For pet parents nationwide</p>
             <h2 className="font-serif text-3xl md:text-4xl text-[#1E3A8A] mb-2">
-              Queens packing. Every borough. No walk-in store.
+              Packed in New York. Delivered across America.
             </h2>
-            <p className="text-slate-500">A neighbor who takes pet care seriously — packed on 74th Street.</p>
+            <p className="text-slate-500">Same brands. Same support. Same 365-day returns — in every state we ship to.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
               {
-                title: 'Same-day when you order by cutoff',
-                text: 'Weekdays 3 PM, weekends 1 PM. We pack in Jackson Heights and deliver before 11 PM across Manhattan, Brooklyn, Queens, the Bronx, and Staten Island.',
+                title: 'Same-day in NYC, two-day nationwide',
+                text: 'Weekdays 3 PM, weekends 1 PM for NYC same-day. All other U.S. addresses ship in two days. Free over $49.',
               },
               {
                 title: 'Vet-quality brands, no subscription trap',
@@ -438,7 +438,7 @@ const Home = () => {
               },
               {
                 title: '365-day returns and 24/7 support',
-                text: 'Unused items come back easy. Call +1 (800) 259-2605 any time. The 74th Street address is warehouse only — not a shop you can walk into.',
+                text: 'Unused items come back easy, wherever we delivered. Call +1 (800) 259-2605 any time. Jackson Heights is warehouse only — not a shop you can walk into.',
               },
             ].map((item) => (
               <div key={item.title} className="bg-white rounded-2xl p-6 border border-[#e7e0d4] shadow-sm">

@@ -15,7 +15,7 @@ describe('TonightPromiseCard', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/tonight at your door/i)).toBeInTheDocument();
+    expect(screen.getByText(/tonight in nyc/i)).toBeInTheDocument();
     expect(screen.getByText(/packed in jackson heights/i)).toBeInTheDocument();
     expect(screen.getByText(/no autoship/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /shop now/i })).toHaveAttribute('href', '/products');

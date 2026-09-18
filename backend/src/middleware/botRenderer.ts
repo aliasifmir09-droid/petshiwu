@@ -250,15 +250,15 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/our-promise': {
     title: 'Our Promise | Petshiwu',
-    description: 'Packed in Queens. At their bowl tonight. Same-day NYC pet delivery, no autoship, 365-day returns. Jackson Heights is warehouse only.',
+    description: 'Fair prices and fast delivery for pet parents nationwide. Same-day in NYC, two-day across the U.S. No autoship. 365-day returns.',
   },
   '/for-pet-parents': {
     title: 'For Pet Parents | Petshiwu',
-    description: 'For the humans who never skip a meal. Petshiwu brings vet-quality food and supplies to NYC doors without a subscription lock-in.',
+    description: 'For the humans who never skip a meal. Petshiwu brings vet-quality food and supplies to doors across America without a subscription lock-in.',
   },
   '/from-queens': {
-    title: 'From Queens | Petshiwu',
-    description: 'A Jackson Heights pack. A New York City door. Petshiwu packs every order in Queens and delivers across all five boroughs.',
+    title: 'From New York | Petshiwu',
+    description: 'Born in New York. Built for the whole country. Petshiwu packs in Queens and ships nationwide — same-day in NYC, two-day to every state.',
   },
   '/contact': {
     title: 'Contact Us | Petshiwu',

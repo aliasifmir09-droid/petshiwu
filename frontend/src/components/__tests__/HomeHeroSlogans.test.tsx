@@ -13,7 +13,7 @@ describe('HomeHeroSlogans', () => {
     );
 
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(HOME_SLOGAN);
-    expect(screen.getByRole('link', { name: /shop tonight/i })).toHaveAttribute('href', '/products');
+    expect(screen.getByRole('link', { name: /shop now/i })).toHaveAttribute('href', '/products');
     for (const story of BRAND_STORY_LIST) {
       expect(screen.getByRole('link', { name: new RegExp(story.slogan, 'i') })).toHaveAttribute(
         'href',

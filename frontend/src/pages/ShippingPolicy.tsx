@@ -110,7 +110,9 @@ const ShippingPolicy = () => {
             Long Island City is Queens. We pack in Jackson Heights, NY.
           </p>
           <p className="mt-2">
-            Nearby New Jersey and Westchester ZIPs may be offered as next-day only. Nationwide and international shipping are not available yet.
+            Nearby New Jersey and Westchester ZIPs may be offered as next-day only.
+            All other U.S. addresses receive <strong>2-day nationwide shipping</strong>, free over $49.
+            International shipping is not available yet.
           </p>
         </section>
 
