@@ -34,7 +34,7 @@ const BrandStory = ({ slug }: BrandStoryProps) => {
             ))}
           </ul>
         </div>
-        <div className="relative min-h-[340px] sm:min-h-[420px] lg:min-h-full overflow-hidden bg-[#f4f1ea]">
+        <div className="relative min-h-[280px] sm:min-h-[360px] lg:min-h-full overflow-hidden bg-[#f7f4ee]">
           <img
             src={story.image}
             alt={story.imageAlt}

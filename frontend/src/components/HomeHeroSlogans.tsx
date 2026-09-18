@@ -52,11 +52,11 @@ const HomeHeroSlogans = () => {
             ))}
           </ul>
         </div>
-        <div className="relative min-h-[340px] sm:min-h-[420px] lg:min-h-full overflow-hidden bg-[#f4f1ea]">
+        <div className="relative min-h-[280px] sm:min-h-[360px] lg:min-h-full overflow-hidden bg-[#f7f4ee]">
           <picture>
             <source srcSet={HOME_HERO_IMAGE} type="image/webp" />
             <img
-              src="/hero-side-family.jpg"
+              src="/hero-wide-family.jpg"
               alt="Dog, cat, and macaw — food, treats, and supplies for every pet"
               className="absolute inset-0 h-full w-full object-cover object-center"
             />
@@ -64,8 +64,8 @@ const HomeHeroSlogans = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 lg:px-8">
-        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 -mt-8 md:-mt-10 relative z-10 pb-2">
+      <div className="container mx-auto px-4 lg:px-8 py-6">
+        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {BRAND_STORY_LIST.map((story) => (
             <li key={story.path}>
               <Link
