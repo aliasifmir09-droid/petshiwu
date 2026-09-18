@@ -2,13 +2,12 @@ import { useState, useEffect } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const MESSAGES = [
-  { text: '✨ We will start accepting orders soon — browse the shop now' },
-  { text: '⚡ Same-Day Delivery NYC — Order before 3 PM, get it before 11 PM' },
-  { text: '🚚 Free shipping on all orders over $49 — no code needed' },
-  { text: '🎁 FREEDOM20 — 20% off first order, max $10. Subscribe below.' },
-  { text: '⭐ Thousands of products for dogs, cats, birds, reptiles & more' },
-  { text: '🎂 Save your pet\'s birthday — get 15% off on their special day!' },
-  { text: '📞 Call support 24/7 — +1 (800) 259-2605' },
+  { text: 'Same-day NYC — order by 3 PM, packed in Queens' },
+  { text: 'Free delivery on orders $49+' },
+  { text: 'FREEDOM20 — 20% off first order, max $10. No autoship.' },
+  { text: 'Repeat orders: 10% off, max $10. No subscription.' },
+  { text: 'Thousands of products for dogs, cats, birds, reptiles & more' },
+  { text: 'Call support 24/7 — +1 (800) 259-2605' },
 ]
 
 export default function AnnouncementBar() {

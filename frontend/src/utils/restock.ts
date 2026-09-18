@@ -1,3 +1,5 @@
+import { REPEAT_ORDER_COPY } from '@/config/publicPromos';
+
 export const ASK_COUPON = 'RESTOCK5';
 export const AUTOSHIP_COUPON = 'RESTOCK7';
 export const RESTOCK_COUPON = ASK_COUPON;
@@ -10,7 +12,7 @@ export const RESTOCK_PAY_OPTIONS = [
   { id: 'credit_card', label: 'Credit or debit card', hint: 'Visa, Mastercard, Amex' },
 ] as const;
 export type RestockPayMethod = (typeof RESTOCK_PAY_OPTIONS)[number]['id'];
-export const ASK_DISCOUNT_COPY = '5% off, max $10';
+export const ASK_DISCOUNT_COPY = REPEAT_ORDER_COPY;
 export const AUTOSHIP_DISCOUNT_COPY = '7% off, max $10';
 export const RESTOCK_DISCOUNT_COPY = ASK_DISCOUNT_COPY;
 export const RESTOCK_CADENCE = [

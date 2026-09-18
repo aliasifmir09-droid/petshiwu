@@ -21,7 +21,7 @@ describe('reorder reminder emails', () => {
       buyAgainUrlPath: '/restock?coupon=RESTOCK5',
     });
 
-    expect(email.subject).toMatch(/5% off/i);
+    expect(email.subject).toMatch(/10% off/i);
     expect(email.html).toContain('Confirm now');
     expect(email.html).toContain('/restock?coupon=RESTOCK5');
     expect(email.html).toMatch(/will not charge your card/i);

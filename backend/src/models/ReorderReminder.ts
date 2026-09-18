@@ -8,7 +8,7 @@ export interface IReorderReminder extends Document {
   firstName: string;
   weeks: number;
   intervalDays: number;
-  /** ask = email then confirm/pay for 5% off. autoship = email on schedule, 7% off. Still no charge until they pay. */
+  /** ask = email then confirm/pay for 10% off. autoship = email on schedule, 7% off. Still no charge until they pay. */
   mode: 'ask' | 'autoship';
   remindAt: Date;
   status: 'scheduled' | 'sent' | 'cancelled';

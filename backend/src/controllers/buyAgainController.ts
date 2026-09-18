@@ -128,7 +128,7 @@ export const createReorderReminder = async (req: AuthRequest, res: Response, nex
     if (intervalDays == null) {
       return res.status(400).json({
         success: false,
-        message: `Choose ${RESTOCK_CADENCE.map((row) => row.label.toLowerCase()).join(', ')}, then pick Ask first (5% off, max $10) or Autoship (7% off, max $10).`,
+        message: `Choose ${RESTOCK_CADENCE.map((row) => row.label.toLowerCase()).join(', ')}, then pick Ask first (10% off, max $10) or Autoship (7% off, max $10).`,
       });
     }
     const weeks = weeksFromInterval(intervalDays);
@@ -137,7 +137,7 @@ export const createReorderReminder = async (req: AuthRequest, res: Response, nex
     if (!isValidRestockMode(mode)) {
       return res.status(400).json({
         success: false,
-        message: 'Choose Ask first (5% off when you confirm) or Autoship (7% off on schedule). We never charge unless you pay.',
+        message: 'Choose Ask first (10% off when you confirm) or Autoship (7% off on schedule). We never charge unless you pay.',
       });
     }
 
@@ -194,7 +194,7 @@ export const createReorderReminder = async (req: AuthRequest, res: Response, nex
     const every = cadenceLabel(intervalDays).toLowerCase();
     const message =
       mode === 'ask'
-        ? `Ask first is on. ${every.charAt(0).toUpperCase()}${every.slice(1)}. Next email ${when}. Confirm then for 5% off (max $10). We never charge unless you confirm and pay.`
+        ? `Ask first is on. ${every.charAt(0).toUpperCase()}${every.slice(1)}. Next email ${when}. Confirm then for 10% off (max $10). We never charge unless you confirm and pay.`
         : `Autoship is on. ${every.charAt(0).toUpperCase()}${every.slice(1)}. Next email ${when}. Ship then for 7% off (max $10). We still never charge unless you pay.`;
 
     res.status(200).json({

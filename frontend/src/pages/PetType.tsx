@@ -259,7 +259,7 @@ const PetType = () => {
         {/* Products */}
         <div className="flex-1">
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden animate-pulse">
                   <div className="bg-gray-200 h-52 w-full" />
@@ -274,7 +274,7 @@ const PetType = () => {
             </div>
           ) : products && products.data.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch">
                 {products.data
                   .filter((product) => {
                     const productId = product._id ? String(product._id) : null;

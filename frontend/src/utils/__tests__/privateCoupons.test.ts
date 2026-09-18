@@ -35,10 +35,12 @@ describe('private family coupon', () => {
     expect(hits).toEqual([]);
   });
 
-  test('checkout only hints at the public first-order code', () => {
+  test('checkout only hints at the two public codes', () => {
     const checkout = fs.readFileSync(path.resolve(__dirname, '../../pages/Checkout.tsx'), 'utf8');
-    expect(checkout).toContain('FREEDOM20');
+    expect(checkout).toContain('FIRST_ORDER_CODE');
+    expect(checkout).toContain('REPEAT_ORDER_CODE');
     expect(checkout).not.toMatch(/FAMILY15/i);
     expect(checkout).not.toMatch(/TESTSHIP/i);
+    expect(checkout).not.toMatch(/AUTOSHIP_COUPON/);
   });
 });

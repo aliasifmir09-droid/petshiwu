@@ -24,9 +24,9 @@ describe('restock coupon helpers', () => {
     sessionStorage.clear();
   });
 
-  test('Ask first / reorder is RESTOCK5 at 5% off max $10', () => {
+  test('Ask first / reorder is RESTOCK5 at 10% off max $10', () => {
     expect(ASK_COUPON).toBe('RESTOCK5');
-    expect(ASK_DISCOUNT_COPY).toMatch(/5%/);
+    expect(ASK_DISCOUNT_COPY).toMatch(/10%/);
     expect(ASK_DISCOUNT_COPY).toMatch(/\$10/);
   });
 
