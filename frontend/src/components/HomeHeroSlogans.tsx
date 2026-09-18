@@ -52,7 +52,7 @@ const HomeHeroSlogans = () => {
             <source srcSet={HOME_HERO_IMAGE_WIDE} type="image/webp" />
             <img
               src={HOME_HERO_IMAGE_WIDE_JPG}
-              alt="Dog, cat, and macaw — food, treats, and supplies for every pet"
+              alt="Dog, cat, and macaw with Petshiwü food and bags"
               className="w-full h-auto object-contain object-center"
             />
           </picture>

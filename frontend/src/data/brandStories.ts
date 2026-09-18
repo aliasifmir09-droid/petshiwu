@@ -50,7 +50,7 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
     imageJpg: '/hero-side-family.jpg',
     imageWide: '/hero-wide-family.webp',
     imageWideJpg: '/hero-wide-family.jpg',
-    imageAlt: 'Golden retriever, cat, and macaw — food and care for every pet',
+    imageAlt: 'Golden retriever, cat, and macaw with Petshiwü food and bags',
     sections: [
       {
         heading: 'The brands you already trust',
@@ -81,7 +81,7 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
     imageJpg: '/hero-side-play.jpg',
     imageWide: '/hero-wide-play.webp',
     imageWideJpg: '/hero-wide-play.jpg',
-    imageAlt: 'Puppy, kitten, hamster, and rabbit with toys and food',
+    imageAlt: 'Puppy, kitten, hamster, and rabbit with Petshiwü toys and treats',
     sections: [
       {
         heading: 'Shop by pet, then by aisle',
@@ -112,7 +112,7 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
     imageJpg: '/hero-side-delivery.jpg',
     imageWide: '/hero-wide-delivery.webp',
     imageWideJpg: '/hero-wide-delivery.jpg',
-    imageAlt: 'Dog and cat at the door with a pet food delivery',
+    imageAlt: 'Dog and cat at the door with a Petshiwü delivery',
     sections: [
       {
         heading: 'Warehouse, not a shop floor',
