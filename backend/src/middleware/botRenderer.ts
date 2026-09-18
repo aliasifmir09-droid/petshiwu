@@ -248,6 +248,18 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     title: 'About Petshiwu — NYC Pet Supply Delivery',
     description: 'Petshiwu is NYC same-day pet supply delivery. Jackson Heights is office and warehouse only — not a walk-in store. We deliver to all five boroughs.',
   },
+  '/our-promise': {
+    title: 'Our Promise | Petshiwu',
+    description: 'Packed in Queens. At their bowl tonight. Same-day NYC pet delivery, no autoship, 365-day returns. Jackson Heights is warehouse only.',
+  },
+  '/for-pet-parents': {
+    title: 'For Pet Parents | Petshiwu',
+    description: 'For the humans who never skip a meal. Petshiwu brings vet-quality food and supplies to NYC doors without a subscription lock-in.',
+  },
+  '/from-queens': {
+    title: 'From Queens | Petshiwu',
+    description: 'A Jackson Heights pack. A New York City door. Petshiwu packs every order in Queens and delivers across all five boroughs.',
+  },
   '/contact': {
     title: 'Contact Us | Petshiwu',
     description: 'Contact Petshiwu for NYC pet delivery orders and questions. Jackson Heights is office and warehouse only — not a walk-in store.',
@@ -1899,6 +1911,7 @@ const VALID_SPA_PATHS = new Set([
   '/profile', '/orders', '/track-order', '/donate', '/favorites', '/compare',
   '/returns', '/return-policy', '/addresses', '/stock-alerts', '/search',
   '/learning', '/care-guides', '/faq', '/symptom-checker', '/about', '/press',
+  '/our-promise', '/for-pet-parents', '/from-queens',
   '/contact', '/403', '/404', '/privacy', '/privacy-policy', '/terms',
   '/terms-of-service', '/shipping', '/shipping-policy', '/accessibility',
   '/shop', '/deals', '/sell-with-us', '/vendors', '/partners', '/investors',

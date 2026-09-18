@@ -55,6 +55,7 @@ const CareGuideDetail = lazy(() => import('./pages/CareGuideDetail'));
 const FAQ = lazy(() => import('./pages/FAQ'));
 const SymptomChecker = lazy(() => import('./pages/SymptomChecker'));
 const About = lazy(() => import('./pages/About'));
+const BrandStory = lazy(() => import('./pages/BrandStory'));
 const Press = lazy(() => import('./pages/Press'));
 const Contact = lazy(() => import('./pages/Contact'));
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -358,6 +359,9 @@ function App() {
                   <Route path="/faq" element={<FAQ />} />
                   <Route path="/symptom-checker" element={<SymptomChecker />} />
                   <Route path="/about" element={<About />} />
+                  <Route path="/our-promise" element={<BrandStory slug="our-promise" />} />
+                  <Route path="/for-pet-parents" element={<BrandStory slug="for-pet-parents" />} />
+                  <Route path="/from-queens" element={<BrandStory slug="from-queens" />} />
                   <Route path="/press" element={<Press />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/cart" element={<Cart />} />

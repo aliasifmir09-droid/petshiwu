@@ -108,6 +108,7 @@ const TonightPromiseCard = ({ variant = 'hero' }: TonightPromiseCardProps) => {
 
   return (
     <section className="bg-[#0B1F4A] text-white">
+      <div className="h-1.5 w-full bg-[#D97706]" />
       <div className="container mx-auto px-4 lg:px-8 py-10 md:py-14">
         <div className="max-w-3xl">
           <p className="text-amber-200 text-xs font-semibold tracking-widest uppercase mb-3">

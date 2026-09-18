@@ -58,7 +58,7 @@ const ShopByPet = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-[#1E3A8A] mb-2">
             Shop by pet
           </h2>
-          <p className="text-gray-500 text-base max-w-2xl mx-auto">Food and supplies for every pet</p>
+          <p className="text-gray-500 text-base max-w-2xl mx-auto">Every pet. Every borough. One pack from Queens.</p>
         </div>
 
         {/* Mobile: all six pets on the first screen */}

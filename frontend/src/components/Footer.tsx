@@ -50,7 +50,7 @@ const Footer = () => {
               </h3>
             </div>
             <p className="text-gray-400 text-sm mb-4">
-              Your one-stop shop for premium pet products. Committed to providing the best for your furry, feathered, and scaly friends.
+              Packed in Queens. At their bowl tonight. Same-day pet food and supplies for NYC — no autoship, no walk-in store.
             </p>
             {/* Social media links */}
             <div className="flex gap-4">
@@ -108,6 +108,9 @@ const Footer = () => {
               <li><Link to="/learning" className="hover:text-white transition-colors">Pet Care Blog</Link></li>
               <li><Link to="/care-guides" className="hover:text-white transition-colors">Care Guides</Link></li>
               <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
+              <li><Link to="/our-promise" className="hover:text-white transition-colors">Our Promise</Link></li>
+              <li><Link to="/for-pet-parents" className="hover:text-white transition-colors">For Pet Parents</Link></li>
+              <li><Link to="/from-queens" className="hover:text-white transition-colors">From Queens</Link></li>
               <li><Link to="/sell-with-us" className="hover:text-white transition-colors">Sell With Us</Link></li>
               <li><Link to="/investors" className="hover:text-white transition-colors">Investors</Link></li>
               <li><Link to="/donate" className="hover:text-white transition-colors">Donate to Shelters</Link></li>

@@ -11,6 +11,7 @@ import CategoryIcons from '@/components/CategoryIcons';
 import ShopByPet from '@/components/ShopByPet';
 import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
+import HomeHeroSlogans from '@/components/HomeHeroSlogans';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
 import RestockDashboard from '@/components/RestockDashboard';
 import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
@@ -105,13 +106,9 @@ const Home = () => {
   }, [featuredProducts?.data]);
 
   return (
-    <div className="relative">
-      {/* Single semantic H1 for the homepage (visually hidden — the hero is a
-          designed image slideshow). Gives browsers a real H1 that matches the
-          page title/description without altering the visual layout. */}
-      <h1 className="sr-only">Petshiwu — Premium Pet Food, Toys & Supplies Delivered to NYC</h1>
+    <div className="relative bg-[#faf7f1]">
       <SEO
-        title="Petshiwu — Premium Pet Food, Toys & Supplies Delivered to NYC"
+        title="Packed in Queens. At their bowl tonight. | Petshiwu"
         description={
           ORDERING_PAUSED
             ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products delivered to Queens, Brooklyn & all of NYC. ${ORDERING_PAUSED_HEADLINE}. Free shipping over $49.`
@@ -264,6 +261,8 @@ const Home = () => {
 
       {!authLoading && isAuthenticated ? <RestockDashboard /> : null}
 
+      <HomeHeroSlogans />
+
       <ShopByPet />
 
       <TonightPromiseCard />
@@ -280,10 +279,11 @@ const Home = () => {
 
       <TodaysDeals />
 
-      <section className="py-14 bg-white text-center">
+      <section className="py-14 bg-[#faf7f1] text-center">
         <div className="container mx-auto px-4 lg:px-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-8">
-            Featured this week
+          <p className="text-[11px] font-bold tracking-[0.16em] uppercase text-[#D97706] mb-2">This week in the pack</p>
+          <h2 className="font-serif text-3xl md:text-4xl text-[#1E3A8A] mb-8">
+            Loved on the first screen. Ready at the door.
           </h2>
           {isLoading ? (
             <LoadingSpinner size="lg" />
@@ -312,10 +312,11 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-10 bg-[#1E3A8A] text-white">
-        <div className="container mx-auto px-4 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+      <section className="bg-[#1E3A8A] text-white">
+        <div className="h-1.5 w-full bg-[#D97706]" />
+        <div className="container mx-auto px-4 lg:px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-1">Same-day NYC delivery</h2>
+            <h2 className="font-serif text-2xl md:text-3xl mb-1">Same city. Same-day. All five boroughs.</h2>
             <p className="text-white/80">
               {ORDERING_PAUSED
                 ? `${ORDERING_PAUSED_HEADLINE}. Browse now — your cart stays saved.`
@@ -335,9 +336,10 @@ const Home = () => {
 
       <TrustBadges />
 
-      <section className="py-14 bg-slate-50 text-center">
+      <section className="py-14 bg-[#f4f1ea] text-center">
         <div className="container mx-auto px-4 lg:px-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-8">Why Petshiwu</h2>
+          <p className="text-[11px] font-bold tracking-[0.16em] uppercase text-[#D97706] mb-2">Why Petshiwu</p>
+          <h2 className="font-serif text-3xl md:text-4xl text-[#1E3A8A] mb-8">No lock-in. Just dinner, on time.</h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { title: 'Same-day NYC', desc: ORDERING_PAUSED ? 'When checkout opens · before 11 PM' : 'Order by 3 PM · before 11 PM' },
@@ -345,7 +347,7 @@ const Home = () => {
               { title: 'Free over $49', desc: ORDERING_PAUSED ? 'When checkout opens · $6 under that' : 'Flat $6 under that' },
               { title: '365-day returns', desc: 'Unused items · no hassle' },
             ].map((item) => (
-              <div key={item.title} className="bg-white rounded-xl p-5 border border-slate-100">
+              <div key={item.title} className="bg-white rounded-2xl p-5 border border-[#e7e0d4] shadow-sm">
                 <h3 className="text-base font-semibold text-[#1E3A8A] mb-1">{item.title}</h3>
                 <p className="text-slate-500 text-sm">{item.desc}</p>
               </div>
@@ -359,8 +361,8 @@ const Home = () => {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A]">Shop by brand</h2>
-              <p className="text-gray-500 text-sm mt-1">Click a brand to browse their products</p>
+              <h2 className="font-serif text-2xl md:text-3xl text-[#1E3A8A]">The bags they already love</h2>
+              <p className="text-gray-500 text-sm mt-1">Hill’s, Royal Canin, Purina, and the rest of the pantry</p>
             </div>
             <Link
               to="/products"
@@ -415,13 +417,14 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-14 bg-white">
+      <section className="py-14 bg-[#faf7f1]">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-2">
-              Built for NYC pet parents
+            <p className="text-[11px] font-bold tracking-[0.16em] uppercase text-[#D97706] mb-2">Built for NYC pet parents</p>
+            <h2 className="font-serif text-3xl md:text-4xl text-[#1E3A8A] mb-2">
+              Queens packing. Every borough. No walk-in store.
             </h2>
-            <p className="text-slate-500">Queens packing · all five boroughs · no walk-in store</p>
+            <p className="text-slate-500">A neighbor who takes pet care seriously — packed on 74th Street.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
@@ -438,7 +441,7 @@ const Home = () => {
                 text: 'Unused items come back easy. Call +1 (800) 259-2605 any time. The 74th Street address is warehouse only — not a shop you can walk into.',
               },
             ].map((item) => (
-              <div key={item.title} className="bg-slate-50 rounded-xl p-6 border border-slate-100">
+              <div key={item.title} className="bg-white rounded-2xl p-6 border border-[#e7e0d4] shadow-sm">
                 <h3 className="font-semibold text-[#1E3A8A] mb-2">{item.title}</h3>
                 <p className="text-slate-700 text-sm leading-relaxed">{item.text}</p>
               </div>
@@ -492,12 +495,13 @@ const NewsletterSection = () => {
   };
 
   return (
-    <section className="py-14 bg-[#1E3A8A] text-white">
-      <div className="container mx-auto px-4 lg:px-8 text-center">
+    <section className="bg-[#1E3A8A] text-white">
+      <div className="h-1.5 w-full bg-[#D97706]" />
+      <div className="container mx-auto px-4 lg:px-8 py-14 text-center">
         <div className="max-w-2xl mx-auto">
           {!submitted ? (
             <>
-              <h2 className="text-2xl md:text-3xl font-bold mb-3">Get delivery updates</h2>
+              <h2 className="font-serif text-2xl md:text-3xl mb-3">Save a little for the next bowl</h2>
               <p className="text-white/80 mb-8">
                 NYC same-day notes. First order: FREEDOM20 (20% off, max $10). Repeat: 10% off, max $10. No autoship.
               </p>

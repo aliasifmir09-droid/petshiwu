@@ -14,6 +14,12 @@ describe('classifyRoute', () => {
     expect(classifyRoute('/products').indexable).toBe(true);
   });
 
+  test('brand story pages are indexable storefront URLs', () => {
+    expect(classifyRoute('/our-promise')).toMatchObject({ indexable: true, status: 'indexable', routeType: 'static' });
+    expect(classifyRoute('/for-pet-parents')).toMatchObject({ indexable: true, routeType: 'static' });
+    expect(classifyRoute('/from-queens')).toMatchObject({ indexable: true, routeType: 'static' });
+  });
+
   test('NYC landing pages are indexable, not doorways', () => {
     expect(classifyRoute('/dog-food-delivery-nyc')).toMatchObject({
       indexable: true,

@@ -386,6 +386,12 @@ const Header = () => {
             <span>About Us</span>
           </Link>
         </li>
+        <li>
+          <Link to="/our-promise" onClick={onLinkClick} className={`flex items-center gap-3 ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors`}>
+            <span className="text-xl">💛</span>
+            <span>Our Promise</span>
+          </Link>
+        </li>
       </>
     );
   };
@@ -726,6 +732,9 @@ const Header = () => {
 
                 <li className="flex-shrink-0">
                   <Link to="/about" className="hover:text-[#1E3A8A] transition-colors py-1.5 lg:py-2 px-1 lg:px-1.5 whitespace-nowrap text-xs lg:text-sm">About</Link>
+                </li>
+                <li className="flex-shrink-0">
+                  <Link to="/our-promise" className="hover:text-[#1E3A8A] transition-colors py-1.5 lg:py-2 px-1 lg:px-1.5 whitespace-nowrap text-xs lg:text-sm">Our Promise</Link>
                 </li>
               </ul>
             </div>
