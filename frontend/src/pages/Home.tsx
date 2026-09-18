@@ -271,7 +271,7 @@ const Home = () => {
 
       <section className="py-14 bg-white text-center">
         <div className="container mx-auto px-4 lg:px-8">
-          <p className="text-[11px] font-bold tracking-[0.16em] uppercase text-[#D97706] mb-2">Featured</p>
+          <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-2">Featured</p>
           <h2 className="text-3xl md:text-4xl font-extrabold text-[#1E3A8A] mb-8">
             Top picks for dogs and cats
           </h2>
@@ -370,7 +370,7 @@ const Home = () => {
       <section className="py-14 bg-white">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-10">
-            <p className="text-[11px] font-bold tracking-[0.16em] uppercase text-[#D97706] mb-2">Why Petshiwu</p>
+            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-2">Why Petshiwu</p>
             <h2 className="text-3xl md:text-4xl font-extrabold text-[#1E3A8A] mb-2">
               A national pet store, online
             </h2>
@@ -446,7 +446,7 @@ const NewsletterSection = () => {
 
   return (
     <section className="bg-[#1E3A8A] text-white">
-      <div className="h-1.5 w-full bg-[#D97706]" />
+      <div className="h-px w-full bg-white/20" />
       <div className="container mx-auto px-4 lg:px-8 py-14 text-center">
         <div className="max-w-2xl mx-auto">
           {!submitted ? (
@@ -467,7 +467,7 @@ const NewsletterSection = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-[#F59E0B] text-[#1E3A8A] font-extrabold px-7 py-3 rounded-lg whitespace-nowrap disabled:opacity-60 hover:bg-[#D97706] hover:text-white"
+                  className="bg-white text-[#1E3A8A] font-semibold px-7 py-3 rounded-md whitespace-nowrap disabled:opacity-60 hover:bg-slate-100"
                 >
                   {loading ? 'Sending...' : 'Subscribe'}
                 </button>

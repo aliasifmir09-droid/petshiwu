@@ -9,7 +9,7 @@ describe('BrandLogo', () => {
     expect(img).toHaveAttribute('src', '/logo.png');
   });
 
-  test('sits on a white plate on navy so the lockup stays readable', () => {
+  test('keeps a white plate on dark backgrounds so the navy lockup stays readable', () => {
     const { container } = render(<BrandLogo variant="on-navy" />);
     expect(container.firstChild).toHaveClass('bg-white');
     expect(screen.getByRole('img', { name: /petshiwu/i })).toBeInTheDocument();

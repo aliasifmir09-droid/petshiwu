@@ -14,46 +14,36 @@ import {
 const HomeHeroSlogans = () => {
   return (
     <section className="bg-white">
-      <div className="grid lg:grid-cols-2 bg-[#1E3A8A] items-stretch">
-        <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-12 lg:py-16">
-          <p className="text-[11px] md:text-xs font-bold tracking-[0.22em] uppercase text-[#F59E0B] mb-4">
-            Petshiwu
-          </p>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.08] text-white max-w-xl">
+      <div className="grid lg:grid-cols-2 items-stretch border-b border-slate-200">
+        <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-12 lg:py-16 bg-white">
+          <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-bold leading-[1.12] tracking-tight text-[#1E3A8A] max-w-xl">
             {HOME_SLOGAN}
           </h1>
-          <p className="mt-5 text-lg text-blue-100 max-w-xl leading-relaxed">{HOME_SLOGAN_SUPPORT}</p>
-          <p className="mt-3 text-sm text-amber-100/90 max-w-xl">{NATIONWIDE_SOON_NOTE}</p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <p className="mt-5 text-base lg:text-lg text-slate-600 max-w-xl leading-relaxed">{HOME_SLOGAN_SUPPORT}</p>
+          <p className="mt-3 text-sm text-slate-500 max-w-xl">{NATIONWIDE_SOON_NOTE}</p>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
               to="/dog"
-              className="inline-flex items-center justify-center h-12 px-7 rounded-xl bg-[#F59E0B] text-[#1E3A8A] font-extrabold hover:bg-[#D97706] hover:text-white"
+              className="inline-flex items-center justify-center h-11 px-6 rounded-md bg-[#1E3A8A] text-white font-semibold hover:bg-[#163074]"
             >
               Shop dogs
             </Link>
             <Link
               to="/cat"
-              className="inline-flex items-center justify-center h-12 px-7 rounded-xl bg-white text-[#1E3A8A] font-extrabold hover:bg-blue-50"
+              className="inline-flex items-center justify-center h-11 px-6 rounded-md border border-slate-300 text-[#1E3A8A] font-semibold hover:border-[#1E3A8A] hover:bg-slate-50"
             >
               Shop cats
             </Link>
             <Link
               to="/products"
-              className="inline-flex items-center justify-center h-12 px-7 rounded-xl border border-white/30 text-white font-semibold hover:bg-white/10"
+              className="inline-flex items-center justify-center h-11 px-2 text-[#1E3A8A] font-semibold hover:underline"
             >
               Shop all
             </Link>
           </div>
-          <ul className="mt-8 flex flex-wrap gap-2">
-            {NATIONWIDE_CHIPS.map((chip) => (
-              <li
-                key={chip}
-                className="text-xs font-semibold tracking-wide bg-white/10 border border-white/15 rounded-full px-3.5 py-1.5 text-blue-50"
-              >
-                {chip}
-              </li>
-            ))}
-          </ul>
+          <p className="mt-8 text-sm text-slate-500">
+            {NATIONWIDE_CHIPS.join('  ·  ')}
+          </p>
         </div>
         <div className="bg-[#f7f4ee] overflow-hidden">
           <picture>
@@ -69,19 +59,19 @@ const HomeHeroSlogans = () => {
         </div>
       </div>
 
-      <div className="border-b border-slate-200 bg-white">
+      <div className="bg-slate-50 border-b border-slate-200">
         <div className="container mx-auto px-4 lg:px-8">
           <ul className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-200">
             {BRAND_STORY_LIST.map((story) => (
               <li key={story.path}>
                 <Link
                   to={story.path}
-                  className="block px-2 md:px-8 py-5 hover:bg-slate-50 transition-colors"
+                  className="block px-2 md:px-8 py-4 hover:bg-white transition-colors"
                 >
-                  <p className="text-[11px] font-bold tracking-[0.16em] uppercase text-[#D97706] mb-1">
+                  <p className="text-[11px] font-semibold tracking-wide uppercase text-slate-500 mb-1">
                     {story.kicker}
                   </p>
-                  <p className="text-base font-bold text-[#1E3A8A] leading-snug">{story.slogan}</p>
+                  <p className="text-sm font-semibold text-slate-900 leading-snug">{story.slogan}</p>
                 </Link>
               </li>
             ))}

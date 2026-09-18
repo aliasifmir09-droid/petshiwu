@@ -92,7 +92,7 @@ const EmailPopup = () => {
 
         {/* Header */}
         <div className="bg-[#1E3A8A] px-8 py-8 text-center">
-          <p className="text-[#F59E0B] text-[11px] font-bold tracking-[0.18em] uppercase mb-3">Petshiwu</p>
+          <p className="text-white/80 text-[11px] font-semibold tracking-wide uppercase mb-3">Petshiwu</p>
           <h2 className="text-white text-2xl font-black leading-tight">
             Get FREEDOM20 on your first order
           </h2>
@@ -112,7 +112,7 @@ const EmailPopup = () => {
                   <p className="text-xs text-gray-600 font-medium">Free delivery over $49</p>
                 </div>
                 <div className="text-center">
-                  <Gift size={18} className="mx-auto text-[#D97706] mb-1" />
+                  <Gift size={18} className="mx-auto text-[#1E3A8A] mb-1" />
                   <p className="text-xs text-gray-600 font-medium">Exclusive deals</p>
                 </div>
                 <div className="text-center">
@@ -128,13 +128,13 @@ const EmailPopup = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-[#F59E0B] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-[#1E3A8A] focus:border-transparent"
                 />
                 {error && <p className="text-red-500 text-sm">{error}</p>}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-[#F59E0B] hover:bg-[#D97706] text-[#1E3A8A] hover:text-white font-extrabold py-3 rounded-xl disabled:opacity-60 disabled:cursor-not-allowed text-base"
+                  className="w-full bg-[#1E3A8A] hover:bg-[#163074] text-white font-semibold py-3 rounded-md disabled:opacity-60 disabled:cursor-not-allowed text-base"
                 >
                   {loading ? 'Sending...' : 'Get My FREEDOM20 Code →'}
                 </button>
@@ -154,7 +154,7 @@ const EmailPopup = () => {
               <a
                 href="/products"
                 onClick={dismiss}
-                className="inline-block w-full bg-[#F59E0B] text-[#1E3A8A] font-extrabold py-3 rounded-xl text-base hover:bg-[#D97706] hover:text-white"
+                className="inline-block w-full bg-[#1E3A8A] text-white font-semibold py-3 rounded-md text-base hover:bg-[#163074]"
               >
                 Shop Now →
               </a>

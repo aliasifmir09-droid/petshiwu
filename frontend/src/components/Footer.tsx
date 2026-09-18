@@ -163,7 +163,7 @@ const Footer = () => {
                 <button
                   type="submit"
                   disabled={newsletterStatus === 'loading'}
-                  className="bg-[#F59E0B] px-4 py-2 rounded text-sm text-[#1E3A8A] font-extrabold hover:bg-[#D97706] hover:text-white transition-colors shrink-0 disabled:opacity-60"
+                  className="bg-white px-4 py-2 rounded text-sm text-[#1E3A8A] font-semibold hover:bg-slate-100 transition-colors shrink-0 disabled:opacity-60"
                 >
                   {newsletterStatus === 'loading' ? '...' : 'Subscribe'}
                 </button>

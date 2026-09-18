@@ -106,7 +106,7 @@ const TonightPromiseCard = ({ variant = 'hero' }: TonightPromiseCardProps) => {
     <section className="bg-white border-y border-slate-100">
       <div className="container mx-auto px-4 lg:px-8 py-10 md:py-12">
         <div className="max-w-3xl">
-          <p className="text-[#D97706] text-xs font-semibold tracking-widest uppercase mb-3">
+          <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-3">
             Delivery
           </p>
           <h2 className="text-3xl md:text-4xl font-extrabold leading-tight mb-3 text-[#1E3A8A]">
@@ -138,7 +138,7 @@ const TonightPromiseCard = ({ variant = 'hero' }: TonightPromiseCardProps) => {
             </div>
             <Link
               to="/products"
-              className="inline-flex items-center justify-center h-12 px-6 rounded-xl bg-[#F59E0B] text-[#1E3A8A] font-extrabold hover:bg-[#D97706] hover:text-white"
+              className="inline-flex items-center justify-center h-12 px-6 rounded-md bg-[#1E3A8A] text-white font-semibold hover:bg-[#163074]"
             >
               Shop now
             </Link>

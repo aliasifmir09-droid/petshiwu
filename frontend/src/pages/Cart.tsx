@@ -488,7 +488,7 @@ const Cart = () => {
             )}
             <button
               onClick={() => navigate('/checkout')}
-              className="w-full bg-[#F59E0B] text-[#1E3A8A] py-4 rounded-xl font-extrabold text-lg hover:bg-[#D97706] hover:text-white transition-colors min-h-[56px]"
+              className="w-full bg-[#1E3A8A] text-white py-4 rounded-md font-semibold text-lg hover:bg-[#163074] transition-colors min-h-[56px]"
               aria-label={ORDERING_PAUSED ? 'See checkout status' : 'Proceed to checkout'}
             >
               {ORDERING_PAUSED ? 'See checkout status' : 'Proceed to Checkout'}
