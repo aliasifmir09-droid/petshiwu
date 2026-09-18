@@ -12,17 +12,15 @@ const BrandStory = ({ slug }: BrandStoryProps) => {
   return (
     <div className="bg-[#f4f1ea] min-h-[70vh]">
       <SEO title={story.title} description={story.description} url={story.path} />
-      <section className="relative overflow-hidden min-h-[420px] md:min-h-[480px] text-white">
-        <img src={story.image} alt={story.imageAlt} className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0B1F4A] via-[#0B1F4A]/88 to-[#0B1F4A]/40" />
-        <div className="absolute top-0 inset-x-0 h-1.5 bg-[#D97706]" />
-        <div className="relative container mx-auto px-4 lg:px-8 py-16 lg:py-24">
+      <div className="h-1.5 w-full bg-[#D97706]" />
+      <section className="grid lg:grid-cols-2 min-h-[480px] bg-[#0B1F4A] text-white">
+        <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-14 lg:py-20">
           <p className="text-xs font-bold tracking-[0.22em] uppercase text-amber-200 mb-4">{story.kicker}</p>
-          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl leading-tight max-w-4xl mb-5">{story.slogan}</h1>
-          <p className="text-base sm:text-lg text-blue-100 max-w-3xl leading-relaxed">{story.intro}</p>
+          <h1 className="font-serif text-4xl sm:text-5xl leading-tight max-w-xl mb-5">{story.slogan}</h1>
+          <p className="text-base sm:text-lg text-blue-100 max-w-xl leading-relaxed">{story.intro}</p>
           <Link
             to="/products"
-            className="mt-8 inline-flex items-center justify-center h-12 px-8 rounded-full bg-amber-300 text-[#0B1F4A] font-bold hover:bg-amber-200"
+            className="mt-8 inline-flex items-center justify-center h-12 px-8 rounded-full bg-amber-300 text-[#0B1F4A] font-bold hover:bg-amber-200 w-fit"
           >
             {story.ctaLabel}
           </Link>
@@ -36,6 +34,13 @@ const BrandStory = ({ slug }: BrandStoryProps) => {
               </li>
             ))}
           </ul>
+        </div>
+        <div className="relative min-h-[260px] lg:min-h-full">
+          <img
+            src={story.image}
+            alt={story.imageAlt}
+            className="absolute inset-0 h-full w-full object-cover object-[78%_center]"
+          />
         </div>
       </section>
 
