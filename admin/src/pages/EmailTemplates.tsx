@@ -59,6 +59,25 @@ const EmailTemplates = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; templateId?: string; templateName?: string }>({ isOpen: false });
+  const [sendPromoConfirm, setSendPromoConfirm] = useState(false);
+
+  const { data: promoPreview, refetch: refetchPromo } = useQuery({
+    queryKey: ['repeat10PromoPreview'],
+    queryFn: adminService.getRepeat10PromoPreview,
+    staleTime: 0,
+  });
+
+  const sendPromoMutation = useMutation({
+    mutationFn: adminService.sendRepeat10Promo,
+    onSuccess: (data) => {
+      setSendPromoConfirm(false);
+      showToast(`Sent ${data.sent} thank-you emails (${data.failed} failed).`, data.failed ? 'error' : 'success');
+      refetchPromo();
+    },
+    onError: (error: any) => {
+      showToast(error.response?.data?.message || 'Failed to send thank-you emails', 'error');
+    }
+  });
   
   const [formData, setFormData] = useState({
     name: '',
@@ -185,6 +204,43 @@ const EmailTemplates = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-amber-200 shadow-lg p-6">
+        <h2 className="text-2xl font-black text-[#1E3A8A] mb-2">Thank-you 10% off — past customers</h2>
+        <p className="text-stone-600 mb-4 max-w-3xl">
+          Emails everyone who placed a non-cancelled order (including guest checkout). Code{' '}
+          <span className="font-mono font-bold">RESTOCK5</span> is 10% off, max $10, no autoship.
+          Unsubscribed addresses and people already sent this campaign are skipped.
+        </p>
+        <p className="text-sm text-stone-500 mb-4">
+          Ready to send: <strong>{promoPreview?.toSend ?? '—'}</strong>
+          {' · '}Already sent: <strong>{promoPreview?.alreadySent ?? '—'}</strong>
+          {' · '}Unsubscribed: <strong>{promoPreview?.unsubscribed ?? '—'}</strong>
+        </p>
+        {promoPreview?.sampleSubject ? (
+          <p className="text-sm text-stone-600 mb-4">
+            Subject: <span className="font-medium">{promoPreview.sampleSubject}</span>
+          </p>
+        ) : null}
+        {promoPreview?.sampleHtml ? (
+          <div className="mb-6 overflow-hidden rounded-xl border border-amber-200 bg-[#f4f1ea]">
+            <iframe
+              title="Thank-you email preview"
+              srcDoc={promoPreview.sampleHtml}
+              className="h-[720px] w-full bg-[#f4f1ea]"
+            />
+          </div>
+        ) : null}
+        <button
+          type="button"
+          onClick={() => setSendPromoConfirm(true)}
+          disabled={sendPromoMutation.isPending || !promoPreview?.toSend}
+          className="inline-flex items-center gap-2 bg-[#1E3A8A] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#16307a] disabled:opacity-50"
+        >
+          <Mail size={18} />
+          {sendPromoMutation.isPending ? 'Sending…' : 'Send thank-you emails now'}
+        </button>
       </div>
 
       {/* Templates List */}
@@ -375,6 +431,18 @@ const EmailTemplates = () => {
         cancelText="Cancel"
         confirmButtonClass="bg-red-600 hover:bg-red-700"
         isLoading={deleteMutation.isPending}
+      />
+
+      <ConfirmationModal
+        isOpen={sendPromoConfirm}
+        onClose={() => setSendPromoConfirm(false)}
+        onConfirm={() => sendPromoMutation.mutate()}
+        title="Send 10% thank-you emails?"
+        message={`This emails ${promoPreview?.toSend ?? 0} past customers with RESTOCK5 (10% off, max $10). People who unsubscribed or already received this campaign are skipped. Do not send twice.`}
+        confirmText="Send emails"
+        cancelText="Cancel"
+        confirmButtonClass="bg-[#1E3A8A] hover:bg-[#16307a]"
+        isLoading={sendPromoMutation.isPending}
       />
 
       <Toast toast={toast} onClose={hideToast} />

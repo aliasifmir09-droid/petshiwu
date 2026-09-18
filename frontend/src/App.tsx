@@ -18,6 +18,7 @@ import { SOCIAL_PROFILES } from './config/social';
 import RequireAuth from './components/RequireAuth';
 import Home from './pages/Home';
 import { hashAuthRedirect } from './utils/hashAuthRedirect';
+import { isRestockCoupon, rememberRestockCoupon } from './utils/restock';
 import { useCustomerSessionTimeout } from './hooks/useCustomerSessionTimeout';
 import { readLastActiveAt, shouldExpireCustomerSession } from './utils/sessionTimeout';
 import './index.css';
@@ -157,6 +158,15 @@ const PageViewTracker = () => {
   return null;
 };
 
+const CouponFromUrl = () => {
+  const location = useLocation();
+  useEffect(() => {
+    const coupon = (new URLSearchParams(location.search).get('coupon') || '').trim().toUpperCase();
+    if (isRestockCoupon(coupon)) rememberRestockCoupon(coupon);
+  }, [location.search]);
+  return null;
+};
+
 // Scroll to top on every page navigation — fixes SPA behaviour where
 // clicking a link keeps the previous page's scroll position
 const ScrollToTop = () => {
@@ -287,6 +297,7 @@ function App() {
         }}
       >
         <PageViewTracker />
+        <CouponFromUrl />
         <ScrollToTop />
         <LegacyHashAuthRedirect />
         {/* Delivery business schema — OnlineStore, not a walk-in PetStore */}
