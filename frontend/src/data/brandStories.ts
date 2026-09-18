@@ -9,6 +9,9 @@ export type BrandStory = {
   description: string;
   intro: string;
   image: string;
+  imageJpg: string;
+  imageWide: string;
+  imageWideJpg: string;
   imageAlt: string;
   sections: { heading: string; body: string }[];
   ctaLabel: string;
@@ -17,7 +20,10 @@ export type BrandStory = {
 export const HOME_SLOGAN = 'Everything your pet needs.';
 export const HOME_SLOGAN_SUPPORT =
   'Shop 4,000+ foods, treats, and supplies from Hill’s, Royal Canin, Purina, and more. Free shipping over $49. No autoship.';
-export const HOME_HERO_IMAGE = '/hero-wide-family.webp';
+export const HOME_HERO_IMAGE = '/hero-side-family.webp';
+export const HOME_HERO_IMAGE_JPG = '/hero-side-family.jpg';
+export const HOME_HERO_IMAGE_WIDE = '/hero-wide-family.webp';
+export const HOME_HERO_IMAGE_WIDE_JPG = '/hero-wide-family.jpg';
 export const NATIONWIDE_SOON_NOTE =
   'Currently delivering in NYC. Nationwide shipping opens in a few days.';
 
@@ -40,7 +46,10 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
       'Petshiwu is an online pet store for food, treats, and supplies. Free shipping over $49. No autoship. 365-day returns. Currently delivering in NYC, with nationwide shipping opening soon.',
     intro:
       'Shop the brands you already buy, at a fair price, without a subscription. Free shipping over $49. Unused items come back for 365 days. We are delivering in NYC now, and nationwide shipping opens in a few days.',
-    image: '/hero-wide-family.webp',
+    image: '/hero-side-family.webp',
+    imageJpg: '/hero-side-family.jpg',
+    imageWide: '/hero-wide-family.webp',
+    imageWideJpg: '/hero-wide-family.jpg',
     imageAlt: 'Golden retriever, cat, and macaw — food and care for every pet',
     sections: [
       {
@@ -68,7 +77,10 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
       'Petshiwu is for pet parents who want vet-quality food and supplies at the door — without a subscription lock-in. Free shipping over $49. No autoship.',
     intro:
       'You already remember breakfast, dinner, and the late-night water bowl. We remember the bag, the litter, and the chew that lasts past Tuesday. Shop like a national pet store: by pet, by brand, and by what they eat every day.',
-    image: '/hero-wide-play.webp',
+    image: '/hero-side-play.webp',
+    imageJpg: '/hero-side-play.jpg',
+    imageWide: '/hero-wide-play.webp',
+    imageWideJpg: '/hero-wide-play.jpg',
     imageAlt: 'Puppy, kitten, hamster, and rabbit with toys and food',
     sections: [
       {
@@ -96,7 +108,10 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
       'Petshiwu is an online pet store. Currently delivering in NYC, with nationwide shipping opening in a few days. Office and warehouse only — not a walk-in store. Free shipping over $49. No autoship.',
     intro:
       'Every order is packed at our warehouse and sent to your door. We are delivering in NYC today. Nationwide shipping opens in a few days — same brands, same 24/7 phone line, same 365-day returns.',
-    image: '/hero-wide-delivery.webp',
+    image: '/hero-side-delivery.webp',
+    imageJpg: '/hero-side-delivery.jpg',
+    imageWide: '/hero-wide-delivery.webp',
+    imageWideJpg: '/hero-wide-delivery.jpg',
     imageAlt: 'Dog and cat at the door with a pet food delivery',
     sections: [
       {

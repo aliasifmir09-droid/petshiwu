@@ -12,8 +12,8 @@ const BrandStory = ({ slug }: BrandStoryProps) => {
   return (
     <div className="bg-white min-h-[70vh]">
       <SEO title={story.title} description={story.description} url={story.path} />
-      <section className="grid lg:grid-cols-2 min-h-[480px] bg-[#1E3A8A] text-white">
-        <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-14 lg:py-20">
+      <section className="grid lg:grid-cols-2 bg-[#1E3A8A] text-white items-stretch">
+        <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-14 lg:py-16">
           <p className="text-xs font-bold tracking-[0.22em] uppercase text-amber-200 mb-4">{story.kicker}</p>
           <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight max-w-xl mb-5">{story.slogan}</h1>
           <p className="text-base sm:text-lg text-blue-100 max-w-xl leading-relaxed">{story.intro}</p>
@@ -34,12 +34,17 @@ const BrandStory = ({ slug }: BrandStoryProps) => {
             ))}
           </ul>
         </div>
-        <div className="relative min-h-[280px] sm:min-h-[360px] lg:min-h-full overflow-hidden bg-[#f7f4ee]">
-          <img
-            src={story.image}
-            alt={story.imageAlt}
-            className="absolute inset-0 h-full w-full object-cover object-center"
-          />
+        <div className="bg-[#f7f4ee] overflow-hidden">
+          <picture>
+            <source media="(min-width: 1024px)" srcSet={story.image} type="image/webp" />
+            <source media="(min-width: 1024px)" srcSet={story.imageJpg} />
+            <source srcSet={story.imageWide} type="image/webp" />
+            <img
+              src={story.imageWideJpg}
+              alt={story.imageAlt}
+              className="w-full h-auto object-contain object-center"
+            />
+          </picture>
         </div>
       </section>
 

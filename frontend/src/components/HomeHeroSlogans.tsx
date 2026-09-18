@@ -2,6 +2,9 @@ import { Link } from 'react-router-dom';
 import {
   BRAND_STORY_LIST,
   HOME_HERO_IMAGE,
+  HOME_HERO_IMAGE_JPG,
+  HOME_HERO_IMAGE_WIDE,
+  HOME_HERO_IMAGE_WIDE_JPG,
   HOME_SLOGAN,
   HOME_SLOGAN_SUPPORT,
   NATIONWIDE_CHIPS,
@@ -11,8 +14,8 @@ import {
 const HomeHeroSlogans = () => {
   return (
     <section className="bg-white">
-      <div className="grid lg:grid-cols-2 min-h-[520px] bg-[#1E3A8A]">
-        <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-12 lg:py-20">
+      <div className="grid lg:grid-cols-2 bg-[#1E3A8A] items-stretch">
+        <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-12 lg:py-16">
           <p className="text-[11px] md:text-xs font-bold tracking-[0.22em] uppercase text-amber-200 mb-4">
             Online pet store
           </p>
@@ -52,13 +55,15 @@ const HomeHeroSlogans = () => {
             ))}
           </ul>
         </div>
-        <div className="relative min-h-[280px] sm:min-h-[360px] lg:min-h-full overflow-hidden bg-[#f7f4ee]">
+        <div className="bg-[#f7f4ee] overflow-hidden">
           <picture>
-            <source srcSet={HOME_HERO_IMAGE} type="image/webp" />
+            <source media="(min-width: 1024px)" srcSet={HOME_HERO_IMAGE} type="image/webp" />
+            <source media="(min-width: 1024px)" srcSet={HOME_HERO_IMAGE_JPG} />
+            <source srcSet={HOME_HERO_IMAGE_WIDE} type="image/webp" />
             <img
-              src="/hero-wide-family.jpg"
+              src={HOME_HERO_IMAGE_WIDE_JPG}
               alt="Dog, cat, and macaw — food, treats, and supplies for every pet"
-              className="absolute inset-0 h-full w-full object-cover object-center"
+              className="w-full h-auto object-contain object-center"
             />
           </picture>
         </div>
