@@ -495,6 +495,7 @@ app.use(`${API_PREFIX}/feed`, feedRoutes);
 app.use('/api/feed', feedRoutes);
 app.use('/feeds', feedRoutes);
 app.use(`${API_PREFIX}/newsletter`, newsletterRoutes);
+app.use(`${API_PREFIX}/checkout/code`, couponRoutes);
 app.use(`${API_PREFIX}/coupons`, couponRoutes);
 
 const legacyRouteDeprecation = (req: Request, res: Response, next: NextFunction) => { next(); };

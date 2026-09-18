@@ -80,6 +80,7 @@ api.interceptors.response.use(
     const isCartEndpoint = url.includes('/cart');
     const isDeliveryEndpoint = url.includes('/delivery');
     const isOrderEndpoint = url.includes('/orders/');
+    const isCheckoutCodeEndpoint = url.includes('/checkout/code') || url.includes('/coupons');
     const isSearchEndpoint = url.includes('/search');
     const isRecommendationEndpoint = url.includes('/recommendations');
     const isReorderEndpoint = url.includes('/reorder');
@@ -137,7 +138,12 @@ api.interceptors.response.use(
       const requiresVerification = error.response?.data?.requiresVerification;
       const isProductOrSearch =
         url.includes('/products') || url.includes('/search') || url.includes('/neural');
-      if (!isOrderEndpoint && !isProductOrSearch && !(isAuthLogin && requiresVerification)) {
+      if (
+        !isOrderEndpoint &&
+        !isProductOrSearch &&
+        !isCheckoutCodeEndpoint &&
+        !(isAuthLogin && requiresVerification)
+      ) {
         window.location.href = '/403';
       }
     } else if (error.response?.status === 404) {

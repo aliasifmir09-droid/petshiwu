@@ -31,6 +31,7 @@ import couponRoutes from '../../../routes/coupons';
 const app = express();
 app.use(express.json());
 app.use('/api/v1/coupons', couponRoutes);
+app.use('/api/v1/checkout/code', couponRoutes);
 
 describe('coupon routes', () => {
   beforeEach(() => {
@@ -154,6 +155,21 @@ describe('coupon routes', () => {
       freeShipping: true,
     });
     expect(res.body.message).toMatch(/delivery fee waived/i);
+  });
+
+  it('serves the same free-shipping validation on the checkout code path', async () => {
+    const res = await request(app).post('/api/v1/checkout/code/validate').send({
+      code: 'TESTSHIP',
+      subtotal: 0.51,
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      valid: true,
+      code: 'TESTSHIP',
+      discountAmount: 0,
+      freeShipping: true,
+    });
   });
 
   it('lets the private free-shipping code be reused', async () => {
