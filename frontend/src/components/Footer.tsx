@@ -50,7 +50,7 @@ const Footer = () => {
               </h3>
             </div>
             <p className="text-gray-400 text-sm mb-4">
-              Their bowl, wherever you call home. Same-day in NYC. Two-day nationwide. No autoship.
+              Food, treats, and supplies for every pet. Free shipping over $49. No autoship.
             </p>
             {/* Social media links */}
             <div className="flex gap-4">
@@ -110,16 +110,16 @@ const Footer = () => {
               <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
               <li><Link to="/our-promise" className="hover:text-white transition-colors">Our Promise</Link></li>
               <li><Link to="/for-pet-parents" className="hover:text-white transition-colors">For Pet Parents</Link></li>
-              <li><Link to="/from-queens" className="hover:text-white transition-colors">From New York</Link></li>
+              <li><Link to="/from-queens" className="hover:text-white transition-colors">How we ship</Link></li>
               <li><Link to="/sell-with-us" className="hover:text-white transition-colors">Sell With Us</Link></li>
               <li><Link to="/investors" className="hover:text-white transition-colors">Investors</Link></li>
               <li><Link to="/donate" className="hover:text-white transition-colors">Donate to Shelters</Link></li>
             </ul>
           </div>
 
-          {/* NYC Delivery */}
+          {/* Popular pages */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">NYC Delivery</h3>
+            <h3 className="text-lg font-semibold mb-4">Popular pages</h3>
             <ul className="space-y-2 text-sm text-gray-400">
               <li><Link to="/pet-supplies-delivery-nyc" className="hover:text-white transition-colors">Pet Supplies Delivery NYC</Link></li>
               <li><Link to="/pet-supplies-jackson-heights-ny" className="hover:text-white transition-colors">Jackson Heights</Link></li>

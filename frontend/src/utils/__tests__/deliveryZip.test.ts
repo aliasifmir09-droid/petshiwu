@@ -55,9 +55,10 @@ describe('deliveryZip', () => {
     expect(result?.speed).toBe('next-day');
   });
 
-  test('lookupZip offers nationwide standard shipping outside the metro', () => {
+  test('lookupZip offers nationwide shipping-soon outside the metro', () => {
     const result = lookupZip('94105', new Date('2026-08-13T14:00:00Z'));
     expect(result?.speed).toBe('standard');
+    expect(result?.headline).toMatch(/nationwide shipping opens soon/i);
   });
 
   test('lookupZip returns null for incomplete input', () => {
@@ -111,7 +112,7 @@ describe('deliveryZip', () => {
   test('tonightStatusLine uses ZIP for same-day before cutoff', () => {
     const morning = new Date('2026-08-13T14:00:00Z');
     expect(tonightStatusLine('11372', morning)).toMatch(/Same-day delivery in Queens/);
-    expect(tonightStatusLine(null, morning)).toMatch(/Same-day NYC/);
+    expect(tonightStatusLine(null, morning)).toMatch(/Enter ZIP to check delivery/);
     expect(tonightStatusLine('11372', new Date('2026-08-13T20:30:00Z'))).toMatch(/next-day/i);
   });
 });

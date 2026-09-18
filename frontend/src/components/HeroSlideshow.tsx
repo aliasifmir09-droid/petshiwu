@@ -6,10 +6,24 @@ import { slideDisplaySrc } from '@/utils/slideImage';
 /** One store promise on the first screen — big brands pick one line. */
 export const HERO_SLIDES = [
   {
-    id: 'slide-nyc-tonight',
-    src: '/banner-nyc-tonight.jpg',
-    webp: '/banner-nyc-tonight.webp',
-    alt: 'Same-day NYC pet delivery — order by 3 PM, delivered tonight',
+    id: 'slide-premium-care',
+    src: '/banner-premium-care.jpg',
+    webp: '/banner-premium-care.webp',
+    alt: 'Premium pet food, treats, and supplies for dogs and cats',
+    link: '/products',
+  },
+  {
+    id: 'slide-one-stop',
+    src: '/banner-one-stop.jpg',
+    webp: '/banner-one-stop.webp',
+    alt: 'Shop food, treats, litter, and toys in one online pet store',
+    link: '/products',
+  },
+  {
+    id: 'slide-fall-bowl',
+    src: '/banner-fall-bowl.jpg',
+    webp: '/banner-fall-bowl.webp',
+    alt: 'Seasonal pet food and treats from top brands',
     link: '/products',
   },
 ];

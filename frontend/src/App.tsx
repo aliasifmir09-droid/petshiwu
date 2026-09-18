@@ -311,7 +311,7 @@ function App() {
             logo: 'https://www.petshiwu.com/logo-square-512.png',
             image: 'https://www.petshiwu.com/logo-square-512.png',
             description:
-              `Same-day pet food and supplies delivery in New York City. Jackson Heights is office and warehouse only — not a walk-in store. 4,000+ products. Free delivery on orders over $49.`,
+              `Petshiwu is an online pet store for food, treats, and supplies. Currently delivering in NYC, with nationwide shipping opening soon. Warehouse only — not a walk-in store. 4,000+ products. Free delivery on orders over $49.`,
             telephone: '+1-800-259-2605',
             email: 'support@petshiwu.com',
             address: {
@@ -330,7 +330,7 @@ function App() {
               },
             ],
             priceRange: '$$',
-            areaServed: ['Queens', 'Brooklyn', 'Manhattan', 'Bronx', 'Staten Island', 'New York City'],
+            areaServed: ['United States', 'New York City'],
             paymentAccepted: 'Cash, Credit Card, Debit Card',
             currenciesAccepted: 'USD',
             sameAs: [...SOCIAL_PROFILES],

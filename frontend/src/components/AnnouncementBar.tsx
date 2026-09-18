@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const MESSAGES = [
-  { text: 'Same-day NYC — order by 3 PM, packed in Queens' },
-  { text: 'Free delivery on orders $49+' },
+  { text: 'Free shipping on orders $49+' },
+  { text: 'Thousands of products for dogs, cats, birds, reptiles & more' },
   { text: 'FREEDOM20 — 20% off first order, max $10. No autoship.' },
   { text: 'Repeat orders: 10% off, max $10. No subscription.' },
-  { text: 'Thousands of products for dogs, cats, birds, reptiles & more' },
+  { text: 'Currently delivering in NYC · nationwide shipping opens soon' },
   { text: 'Call support 24/7 — +1 (800) 259-2605' },
 ]
 
@@ -30,7 +30,7 @@ export default function AnnouncementBar() {
 
   return (
     <div
-      className="bg-green-600 text-white text-center text-sm font-medium relative flex items-center justify-center py-2 px-10"
+      className="bg-[#1E3A8A] text-white text-center text-sm font-medium relative flex items-center justify-center py-2 px-10"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >

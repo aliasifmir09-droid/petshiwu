@@ -183,7 +183,7 @@ const CategoryIcons = () => {
             Shop essentials
           </h2>
           <p className="text-slate-500 text-sm sm:text-base max-w-2xl mx-auto px-2">
-            Food, treats, litter, and more — delivered in NYC
+            Food, treats, litter, and more — shop like a national pet store
           </p>
         </div>
         

@@ -10,13 +10,12 @@ const BrandStory = ({ slug }: BrandStoryProps) => {
   const story = BRAND_STORIES[slug];
 
   return (
-    <div className="bg-[#f4f1ea] min-h-[70vh]">
+    <div className="bg-white min-h-[70vh]">
       <SEO title={story.title} description={story.description} url={story.path} />
-      <div className="h-1.5 w-full bg-[#D97706]" />
-      <section className="grid lg:grid-cols-2 min-h-[480px] bg-[#0B1F4A] text-white">
+      <section className="grid lg:grid-cols-2 min-h-[480px] bg-[#1E3A8A] text-white">
         <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-14 lg:py-20">
           <p className="text-xs font-bold tracking-[0.22em] uppercase text-amber-200 mb-4">{story.kicker}</p>
-          <h1 className="font-serif text-4xl sm:text-5xl leading-tight max-w-xl mb-5">{story.slogan}</h1>
+          <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight max-w-xl mb-5">{story.slogan}</h1>
           <p className="text-base sm:text-lg text-blue-100 max-w-xl leading-relaxed">{story.intro}</p>
           <Link
             to="/products"
@@ -47,8 +46,8 @@ const BrandStory = ({ slug }: BrandStoryProps) => {
       <section className="container mx-auto px-4 lg:px-8 py-14">
         <div className="grid md:grid-cols-3 gap-5">
           {story.sections.map((section) => (
-            <article key={section.heading} className="bg-white rounded-2xl border border-[#e7e0d4] p-7 shadow-sm">
-              <h2 className="font-serif text-2xl text-[#1E3A8A] mb-3">{section.heading}</h2>
+            <article key={section.heading} className="bg-white rounded-2xl border border-slate-200 p-7 shadow-sm">
+              <h2 className="text-2xl font-bold text-[#1E3A8A] mb-3">{section.heading}</h2>
               <p className="text-[#44403c] leading-relaxed">{section.body}</p>
             </article>
           ))}
@@ -62,10 +61,10 @@ const BrandStory = ({ slug }: BrandStoryProps) => {
             <Link
               key={item.path}
               to={item.path}
-              className="rounded-2xl bg-white border border-[#e7e0d4] p-6 hover:border-[#D97706]/50 hover:shadow-md transition-all"
+              className="rounded-2xl bg-white border border-slate-200 p-6 hover:border-[#1E3A8A]/40 hover:shadow-md transition-all"
             >
               <p className="text-[11px] font-bold tracking-[0.14em] uppercase text-[#D97706] mb-2">{item.kicker}</p>
-              <p className="font-serif text-2xl text-[#1E3A8A]">{item.slogan}</p>
+              <p className="text-2xl font-bold text-[#1E3A8A]">{item.slogan}</p>
             </Link>
           ))}
         </div>

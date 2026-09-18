@@ -13,8 +13,8 @@ const ShippingPolicy = () => {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <SEO
-        title="Shipping Information | Petshiwu — Same-Day NYC Delivery"
-        description="Petshiwu same-day NYC delivery: order by 3 PM ET weekdays or 1 PM ET weekends, delivered before 11 PM. Free over $49. After cutoff, next-day in all five boroughs."
+        title="Shipping Information | Petshiwu"
+        description="Petshiwu shipping: currently delivering in NYC. Nationwide shipping opens in a few days. Free over $49. No autoship."
         url="/shipping"
       />
 
@@ -87,7 +87,7 @@ const ShippingPolicy = () => {
             <thead>
               <tr className="bg-gray-100">
                 <th className="text-left p-3 border border-gray-200 font-semibold">Order total</th>
-                <th className="text-left p-3 border border-gray-200 font-semibold">NYC delivery</th>
+                <th className="text-left p-3 border border-gray-200 font-semibold">Shipping</th>
               </tr>
             </thead>
             <tbody>
@@ -106,13 +106,12 @@ const ShippingPolicy = () => {
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-3">Where we deliver</h2>
           <p>
-            <strong>Same-day and next-day:</strong> Manhattan, Brooklyn, Queens, the Bronx, and Staten Island.
-            Long Island City is Queens. We pack in Jackson Heights, NY.
+            <strong>Currently delivering:</strong> Manhattan, Brooklyn, Queens, the Bronx, and Staten Island,
+            with same-day when you order by cutoff. Nearby New Jersey and Westchester ZIPs may be next-day.
           </p>
           <p className="mt-2">
-            Nearby New Jersey and Westchester ZIPs may be offered as next-day only.
-            All other U.S. addresses receive <strong>2-day nationwide shipping</strong>, free over $49.
-            International shipping is not available yet.
+            <strong>Nationwide shipping opens in a few days</strong> for other U.S. addresses, free over $49.
+            International shipping is not available yet. We pack from our warehouse — it is not a walk-in store.
           </p>
         </section>
 

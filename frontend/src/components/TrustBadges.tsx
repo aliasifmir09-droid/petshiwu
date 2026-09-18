@@ -1,24 +1,24 @@
-import { Star, Truck, MapPin, HeadphonesIcon, Package, RotateCcw } from 'lucide-react';
+import { Star, Truck, HeadphonesIcon, Package, RotateCcw, Tag } from 'lucide-react';
 import { ORDERING_PAUSED } from '@/config/ordering';
 
 const TrustBadges = () => {
   const badges = [
     {
-      icon: MapPin,
-      title: 'Packed in Queens',
-      description: 'Jackson Heights warehouse',
+      icon: Truck,
+      title: 'Free over $49',
+      description: ORDERING_PAUSED ? 'When checkout opens' : 'On qualifying orders',
       color: 'bg-[#1E3A8A]',
     },
     {
-      icon: Truck,
-      title: ORDERING_PAUSED ? 'Same-day NYC' : 'Tonight delivery',
-      description: ORDERING_PAUSED ? 'When checkout opens' : 'Order by 3 PM weekdays',
+      icon: Tag,
+      title: 'Top brands',
+      description: "Hill's, Royal Canin, Purina",
       color: 'bg-[#1E3A8A]',
     },
     {
       icon: Package,
-      title: 'Save a cart',
-      description: ORDERING_PAUSED ? 'Checkout opens soon' : 'Add 1, then checkout',
+      title: 'Shop by pet',
+      description: 'Dogs, cats, and more',
       color: 'bg-[#1E3A8A]',
     },
     {

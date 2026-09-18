@@ -34,9 +34,9 @@ describe('productSearchDescription', () => {
       petType: 'dog',
     });
     expect(snippet.length).toBeLessThanOrEqual(160);
-    expect(snippet).toMatch(/Same-day NYC delivery/);
     expect(snippet).toMatch(/Free shipping over \$49/);
-    const body = snippet.replace(/\s*Same-day NYC delivery\. Free shipping over \$49\.?$/, '').trim();
+    expect(snippet).toMatch(/No autoship/);
+    const body = snippet.replace(/\s*Free shipping over \$49\. No autoship\.?$/, '').trim();
     const lastWord = body.split(/\s+/).pop()?.replace(/[.,;:]+$/, '') ?? '';
     expect(lastWord.length).toBeGreaterThan(2);
     expect(description.split(/\s+/).map((w) => w.replace(/[.,;:]+$/, ''))).toContain(lastWord);
@@ -50,7 +50,7 @@ describe('productSearchDescription', () => {
     });
     expect(snippet.length).toBeLessThanOrEqual(160);
     expect(snippet).toMatch(/Royal Canin Indoor Adult Cat Food/);
-    expect(snippet).toMatch(/Same-day NYC delivery/);
+    expect(snippet).toMatch(/Free shipping over \$49/);
   });
 });
 

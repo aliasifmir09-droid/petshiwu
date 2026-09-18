@@ -21,12 +21,12 @@ describe('TonightPromiseCard', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/tonight in nyc/i)).toBeInTheDocument();
-    expect(screen.getByText(/packed in jackson heights/i)).toBeInTheDocument();
-    expect(screen.getByText(/no autoship/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(/check delivery for your zip/i);
+    expect(screen.getByText(/nationwide shipping opens in a few days/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/no autoship/i).length).toBeGreaterThan(0);
     expect(screen.getByRole('link', { name: /shop now/i })).toHaveAttribute('href', '/products');
 
-    fireEvent.change(screen.getByLabelText(/check same-day delivery by zip code/i), {
+    fireEvent.change(screen.getByLabelText(/check delivery by zip code/i), {
       target: { value: '11372' },
     });
     expect(screen.getByText(/same-day delivery in queens/i)).toBeInTheDocument();
@@ -39,8 +39,8 @@ describe('TonightPromiseCard', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/tonight in nyc/i)).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText(/check same-day delivery by zip code/i), {
+    expect(screen.getByText(/check delivery for your zip/i)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/check delivery by zip code/i), {
       target: { value: '11201' },
     });
     expect(screen.getAllByText(/brooklyn/i).length).toBeGreaterThan(0);

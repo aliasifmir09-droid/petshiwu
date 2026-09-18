@@ -245,20 +245,20 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     description: 'Shop food, cages, bedding, and toys for hamsters, rabbits, guinea pigs, and more. Fast NYC delivery. Free shipping over $49.',
   },
   '/about': {
-    title: 'About Petshiwu — NYC Pet Supply Delivery',
-    description: 'Petshiwu is NYC same-day pet supply delivery. Jackson Heights is office and warehouse only — not a walk-in store. We deliver to all five boroughs.',
+    title: 'About Petshiwu — Online Pet Store',
+    description: 'Petshiwu is an online pet store for food, treats, and supplies. Currently delivering in NYC, with nationwide shipping opening soon. Warehouse only — not a walk-in store.',
   },
   '/our-promise': {
     title: 'Our Promise | Petshiwu',
-    description: 'Fair prices and fast delivery for pet parents nationwide. Same-day in NYC, two-day across the U.S. No autoship. 365-day returns.',
+    description: 'Fair prices, fast delivery, and no autoship. Free shipping over $49. 365-day returns. Currently delivering in NYC, with nationwide shipping opening soon.',
   },
   '/for-pet-parents': {
     title: 'For Pet Parents | Petshiwu',
-    description: 'For the humans who never skip a meal. Petshiwu brings vet-quality food and supplies to doors across America without a subscription lock-in.',
+    description: 'Food, treats, and care without a subscription. Shop Hill\'s, Royal Canin, Purina, and more. Free shipping over $49. No autoship.',
   },
   '/from-queens': {
-    title: 'From New York | Petshiwu',
-    description: 'Born in New York. Built for the whole country. Petshiwu packs in Queens and ships nationwide — same-day in NYC, two-day to every state.',
+    title: 'How We Ship | Petshiwu',
+    description: 'Petshiwu is an online pet store. Currently delivering in NYC, with nationwide shipping opening in a few days. Warehouse only — not a walk-in store.',
   },
   '/contact': {
     title: 'Contact Us | Petshiwu',

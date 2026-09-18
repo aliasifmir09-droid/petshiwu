@@ -27,7 +27,7 @@ import { safeError } from '@/utils/safeLogger';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import ProductVariantPicker from '@/components/ProductVariantPicker';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
-import { addToCartLabel, inStockLabel, ORDERING_PAUSED } from '@/config/ordering';
+import { addToCartLabel, inStockLabel } from '@/config/ordering';
 
 // Lazy load heavy dependencies
 const RecentlyViewed = lazy(() => import('@/components/RecentlyViewed'));
@@ -1372,7 +1372,7 @@ const ProductDetail = () => {
           </button>
           {isReadyToShip ? (
             <p className="text-[11px] text-slate-500 text-center mt-1.5">
-              {ORDERING_PAUSED ? 'Packed in Queens · same-day NYC when checkout opens' : 'Tonight in NYC · packed in Queens'}
+              Free shipping over $49 · no autoship
             </p>
           ) : null}
         </div>

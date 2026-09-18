@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { availableCartStock } from '@/utils/cartStock';
-import { addToCartLabel, inStockLabel, ORDERING_PAUSED } from '@/config/ordering';
+import { addToCartLabel, inStockLabel } from '@/config/ordering';
 
 interface QuickViewModalProps {
   productSlug: string;
@@ -218,7 +218,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
                   <>
                     <p className="text-green-700 font-medium">{inStockLabel(true)}</p>
                     <p className="text-xs text-slate-500">
-                      {ORDERING_PAUSED ? 'Packed in Queens · adds 1' : 'Tonight in NYC · packed in Queens · adds 1'}
+                      Free shipping over $49 · no autoship
                     </p>
                   </>
                 ) : (

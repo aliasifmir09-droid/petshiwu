@@ -10,12 +10,10 @@ const TonightDeliveryHowItWorks = ({ compact = false }: TonightDeliveryHowItWork
   const heading = (
     <div className={`max-w-3xl ${compact ? '' : 'mx-auto text-center'} mb-8`}>
       <h2 id="tonight-how-heading" className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-2">
-        {ORDERING_PAUSED ? 'How same-day delivery works' : 'How tonight delivery works'}
+        How shipping works
       </h2>
       <p className="text-slate-600">
-        {ORDERING_PAUSED
-          ? 'When checkout opens: order by 3 PM weekdays (1 PM weekends). We aim to deliver before 11 PM. No autoship.'
-          : TONIGHT.promise}
+        Currently delivering in NYC. Nationwide shipping opens in a few days. Free over ${TONIGHT.freeOver}. No autoship.
       </p>
     </div>
   );
@@ -26,7 +24,7 @@ const TonightDeliveryHowItWorks = ({ compact = false }: TonightDeliveryHowItWork
         <li key={step.title} className="bg-white rounded-xl border border-slate-100 p-5 text-left">
           <p className="text-xs font-semibold text-[#1E3A8A] mb-2">Step {index + 1}</p>
           <h3 className="font-semibold text-gray-900 mb-1">
-            {ORDERING_PAUSED && step.title === 'At your door tonight' ? 'At your door same-day' : step.title}
+            {step.title}
           </h3>
           <p className="text-sm text-slate-500 leading-relaxed">{step.text}</p>
         </li>
@@ -53,7 +51,7 @@ const TonightDeliveryHowItWorks = ({ compact = false }: TonightDeliveryHowItWork
             to="/products"
             className="inline-flex items-center bg-[#1E3A8A] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#1e40af]"
           >
-            {ORDERING_PAUSED ? 'Browse products' : 'Shop tonight'}
+            {ORDERING_PAUSED ? 'Browse products' : 'Shop now'}
           </Link>
         </p>
       </div>

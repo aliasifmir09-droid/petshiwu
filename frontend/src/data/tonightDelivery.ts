@@ -18,19 +18,19 @@ export const TONIGHT = {
 export const TONIGHT_STEPS = [
   {
     title: 'Enter your ZIP',
-    text: 'We confirm same-day for your neighborhood in all 5 boroughs.',
+    text: 'See if we deliver to you now. Nationwide shipping opens in a few days.',
   },
   {
     title: 'Order before cutoff',
-    text: '3 PM weekdays, 1 PM weekends. After that, we deliver tomorrow.',
+    text: 'NYC same-day: 3 PM weekdays, 1 PM weekends. After that, we deliver the next day.',
   },
   {
-    title: 'We pack in Queens',
-    text: 'Jackson Heights is office and warehouse only — not a walk-in store.',
+    title: 'We pack your order',
+    text: 'Orders leave our warehouse. It is not a walk-in store.',
   },
   {
-    title: 'At your door tonight',
-    text: 'Before 11 PM. No autoship. Free delivery over $49.',
+    title: 'At your door',
+    text: 'NYC same-day before 11 PM when you order by cutoff. Free delivery over $49.',
   },
 ] as const;
 

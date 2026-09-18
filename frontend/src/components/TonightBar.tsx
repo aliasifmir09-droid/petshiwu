@@ -52,8 +52,8 @@ const TonightBar = () => {
       ? `${result.headline} · ${formatCountdownShort(countdown)}`
       : result.headline
     : countdown.passed
-      ? `Cutoff passed · next-day NYC · no autoship`
-      : `Order by ${countdown.cutoffLabel} · ${formatCountdownShort(countdown)}`;
+      ? `Enter ZIP to check delivery · free over $49 · no autoship`
+      : `Free shipping over $49 · enter ZIP to check delivery`;
 
   if (ORDERING_PAUSED) {
     return (
@@ -65,11 +65,11 @@ const TonightBar = () => {
               {ORDERING_PAUSED_HEADLINE}
             </p>
             <p className="text-[10px] sm:text-[11px] text-blue-100 leading-tight truncate">
-              {result ? result.headline : 'Browse now · same-day NYC when checkout opens'}
+              {result ? result.headline : 'Browse now · enter ZIP to check delivery'}
             </p>
           </div>
           <label className="sr-only" htmlFor="tonight-zip">
-            Check same-day delivery ZIP
+            Check delivery ZIP
           </label>
           <input
             id="tonight-zip"
@@ -80,7 +80,7 @@ const TonightBar = () => {
             value={zip}
             onChange={(e) => setZip(normalizeZip(e.target.value))}
             placeholder="ZIP"
-            aria-label="Check same-day delivery by ZIP code"
+            aria-label="Check delivery by ZIP code"
             className="w-[4.5rem] sm:w-20 h-7 px-2 rounded-md text-gray-900 text-xs font-semibold tracking-widest placeholder:tracking-normal placeholder:font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-300"
           />
         </div>
@@ -102,7 +102,7 @@ const TonightBar = () => {
             </p>
           </div>
           <label className="sr-only" htmlFor="tonight-zip">
-            Check same-day delivery ZIP
+            Check delivery ZIP
           </label>
           <input
             id="tonight-zip"
@@ -113,7 +113,7 @@ const TonightBar = () => {
             value={zip}
             onChange={(e) => setZip(normalizeZip(e.target.value))}
             placeholder="ZIP"
-            aria-label="Check same-day delivery by ZIP code"
+            aria-label="Check delivery by ZIP code"
             className="w-[4.5rem] sm:w-20 h-7 px-2 rounded-md text-gray-900 text-xs font-semibold tracking-widest placeholder:tracking-normal placeholder:font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
           />
         </div>
@@ -127,25 +127,25 @@ const TonightBar = () => {
         <MapPin size={14} className="flex-shrink-0 text-teal-100 hidden sm:block" aria-hidden />
         <div className="flex-1 min-w-0">
           <p className="text-[11px] sm:text-xs font-semibold leading-tight truncate">
-            Same-day NYC · order by {countdown.isWeekend ? '1 PM' : '3 PM'} · no autoship
+            Free shipping over $49 · no autoship · nationwide shipping opens soon
           </p>
           <p className="text-[10px] sm:text-[11px] text-teal-100 leading-tight truncate">{statusLine}</p>
         </div>
         <label className="sr-only" htmlFor="tonight-zip">
-          Check same-day delivery ZIP
+          Check delivery ZIP
         </label>
-        <input
-          id="tonight-zip"
-          type="text"
-          inputMode="numeric"
-          autoComplete="postal-code"
-          maxLength={5}
-          value={zip}
-          onChange={(e) => setZip(normalizeZip(e.target.value))}
-          placeholder="ZIP"
-          aria-label="Check same-day delivery by ZIP code"
-          className="w-[4.5rem] sm:w-20 h-7 px-2 rounded-md text-gray-900 text-xs font-semibold tracking-widest placeholder:tracking-normal placeholder:font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-300"
-        />
+          <input
+            id="tonight-zip"
+            type="text"
+            inputMode="numeric"
+            autoComplete="postal-code"
+            maxLength={5}
+            value={zip}
+            onChange={(e) => setZip(normalizeZip(e.target.value))}
+            placeholder="ZIP"
+            aria-label="Check delivery by ZIP code"
+            className="w-[4.5rem] sm:w-20 h-7 px-2 rounded-md text-gray-900 text-xs font-semibold tracking-widest placeholder:tracking-normal placeholder:font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+          />
       </div>
     </div>
   );
