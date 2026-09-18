@@ -36,10 +36,11 @@ import {
   pickDefaultSavedCard,
   savedCardLabel,
 } from '@/utils/savedCheckout';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import CheckoutBrandedPayments from '@/components/CheckoutBrandedPayments';
+import PayPalCardFields from '@/components/PayPalCardFields';
 
 const PaymentForm = lazy(() => import('@/components/PaymentForm'));
-const CheckoutBrandedPayments = lazy(() => import('@/components/CheckoutBrandedPayments'));
-const PayPalCardFields = lazy(() => import('@/components/PayPalCardFields'));
 
 const shopperPaymentError = (raw?: string) => {
   const message = String(raw || '');
@@ -1190,12 +1191,24 @@ const Checkout = () => {
                 {!ORDERING_PAUSED && showPayPalButton && (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay') && paypalClientId && !usingSavedCard ? (
                   <div id="paypal-payment" className="paypal-wallet-slot relative overflow-hidden">
                     {deliveryReady ? (
-                    <Suspense fallback={
-                      <div className="flex items-center justify-center py-8">
-                        <LoadingSpinner size="md" />
-                        <span className="ml-3 text-gray-600">Loading secure payment...</span>
-                      </div>
-                    }>
+                    <ErrorBoundary
+                      fallback={
+                        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+                          <p className="font-semibold">PayPal could not load on this browser.</p>
+                          <p className="mt-1">You can still pay cash when the order arrives.</p>
+                          <button
+                            type="button"
+                            className="mt-3 text-sm font-semibold text-[#1E3A8A] underline"
+                            onClick={() => {
+                              setPaymentMethod('cod');
+                              setSelectedSavedPaymentMethod(null);
+                            }}
+                          >
+                            Use cash on delivery
+                          </button>
+                        </div>
+                      }
+                    >
                       <CheckoutBrandedPayments
                         items={items.map((item: any) => ({
                           product: normalizeId(item.product._id) || String(item.product._id),
@@ -1226,7 +1239,7 @@ const Checkout = () => {
                         onError={handlePayPalError}
                         onCancel={handlePayPalCancel}
                       />
-                    </Suspense>
+                    </ErrorBoundary>
                     ) : (
                       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
                         Enter your NYC delivery name, phone, address, and ZIP above. Apple Pay, Google Pay, and PayPal unlock after that so the order can actually ship.
@@ -1243,12 +1256,23 @@ const Checkout = () => {
                 {!ORDERING_PAUSED && paymentMethod === 'credit_card' && !usingSavedCard && paypalClientId ? (
                   <div id="card-payment" className="relative overflow-visible rounded-2xl border-2 border-[#1E3A8A] bg-blue-50/40 p-4">
                     {deliveryReady ? (
-                    <Suspense fallback={
-                      <div className="flex items-center justify-center py-8">
-                        <LoadingSpinner size="md" />
-                        <span className="ml-3 text-gray-600">Loading secure card fields...</span>
-                      </div>
-                    }>
+                    <ErrorBoundary
+                      fallback={
+                        <div className="text-sm text-[#1E3A8A]">
+                          Card fields could not load. Use cash on delivery, or PayPal if it appears above.
+                          <button
+                            type="button"
+                            className="mt-3 block font-semibold underline"
+                            onClick={() => {
+                              setPaymentMethod('cod');
+                              setSelectedSavedPaymentMethod(null);
+                            }}
+                          >
+                            Use cash on delivery
+                          </button>
+                        </div>
+                      }
+                    >
                       <PayPalCardFields
                         items={items.map((item: any) => ({
                           product: normalizeId(item.product._id) || String(item.product._id),
@@ -1280,7 +1304,7 @@ const Checkout = () => {
                         onCancel={() => { setPaymentMethod('paypal'); setSelectedSavedPaymentMethod(null); }}
                         onSwitchToWallet={() => { setPaymentMethod('paypal'); setSelectedSavedPaymentMethod(null); }}
                       />
-                    </Suspense>
+                    </ErrorBoundary>
                     ) : (
                       <p className="text-sm text-[#1E3A8A]">
                         Enter your NYC delivery details above, then your card fields will open here.

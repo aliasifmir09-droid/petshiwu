@@ -72,8 +72,8 @@ export default defineConfig({
             '@stripe/stripe-js',
             '@paypal/react-paypal-js'
           ],
-          // Feature chunks - split by feature/page
-          'checkout': ['./src/pages/Checkout', './src/pages/Cart'],
+          // Keep Cart and Checkout out of one shared chunk. Grouping them made
+          // payment widgets import checkout-*.js, and Chrome failed that cycle.
           'product': ['./src/pages/ProductDetail', './src/pages/Products'],
           'order': ['./src/pages/MyOrders', './src/pages/OrderDetail', './src/pages/TrackOrder'],
         },
@@ -89,7 +89,10 @@ export default defineConfig({
           }
           return `assets/[name]-[hash][extname]`;
         },
-        chunkFileNames: 'assets/js/[name]-[hash].js',
+        chunkFileNames: (chunkInfo) => {
+          const name = String(chunkInfo.name || 'chunk').replace(/paypal/gi, 'wallet');
+          return `assets/js/${name}-[hash].js`;
+        },
         entryFileNames: 'assets/js/[name]-[hash].js'
       }
     },
