@@ -1,4 +1,6 @@
 import { getNeighborhoodRoute, neighborhoodLandingPath } from './neighborhoodRegistry';
+import { redirectedBlogHubPath } from './blogRedirects';
+import { isStaticLearningSlug } from './staticLearningPages';
 
 export type RouteIndexingStatus = 'indexable' | 'noindex' | 'notFound' | 'redirect';
 
@@ -197,7 +199,22 @@ export const classifyRoute = (rawPath: string): RouteClassification => {
   }
 
   if (segments[0] === 'learning' && segments.length === 2 && segments[1]) {
-    return { status: 'indexable', indexable: true, canonicalPath, routeType: 'learning' };
+    const hubPath = redirectedBlogHubPath(segments[1]);
+    if (hubPath) {
+      return {
+        status: 'redirect',
+        indexable: false,
+        canonicalPath: hubPath,
+        redirectTo: hubPath,
+        routeType: 'blog-redirect',
+      };
+    }
+    return {
+      status: 'indexable',
+      indexable: true,
+      canonicalPath,
+      routeType: isStaticLearningSlug(segments[1]) ? 'static-learning' : 'learning',
+    };
   }
 
   if (segments[0] === 'care-guides' && segments.length === 2 && segments[1]) {

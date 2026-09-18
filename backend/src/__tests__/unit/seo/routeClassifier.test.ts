@@ -88,6 +88,27 @@ describe('classifyRoute', () => {
     });
   });
 
+  test('neighborhood blog copies redirect onto borough hubs', () => {
+    expect(classifyRoute('/learning/pet-food-delivery-in-east-flatbush-brooklyn-ny-petshiwu')).toMatchObject({
+      status: 'redirect',
+      indexable: false,
+      redirectTo: '/learning/pet-food-delivery-brooklyn-ny-petshiwu',
+      routeType: 'blog-redirect',
+    });
+  });
+
+  test('static education guides stay indexable on their own URLs', () => {
+    expect(classifyRoute('/learning/best-dog-food-sensitive-stomach')).toMatchObject({
+      status: 'indexable',
+      indexable: true,
+      routeType: 'static-learning',
+    });
+    expect(classifyRoute('/care-guides')).toMatchObject({
+      status: 'indexable',
+      routeType: 'static',
+    });
+  });
+
   test('search and neural are noindex utility pages', () => {
     expect(classifyRoute('/search')).toMatchObject({ indexable: false, status: 'noindex' });
     expect(classifyRoute('/neural')).toMatchObject({ indexable: false, status: 'noindex' });
