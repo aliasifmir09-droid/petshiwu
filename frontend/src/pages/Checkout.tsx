@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { orderService } from '@/services/orders';
 import { productService } from '@/services/products';
 import { addressService } from '@/services/addresses';
+import { applyCheckoutCode, recordCheckoutCodeUse } from '@/services/coupons';
 import paymentMethodService from '@/services/paymentMethods';
 import { Address, Order } from '@/types';
 import Toast from '@/components/Toast';
@@ -28,6 +29,7 @@ import { TAX_RATE } from '@/config/constants';
 import { paypalClientId } from '@/config/paypal';
 import { isNycDeliveryZip, isNewYorkState, normalizeShippingState } from '@/utils/deliveryZip';
 import { shippingCostForSubtotal } from '@/utils/orderTotals';
+import { checkoutCodeFromError, checkoutCodeFromResponse } from '@/utils/checkoutCoupon';
 import { isCheckoutDeliveryReady, shouldHoldCheckoutOnEmptyCart } from '@/utils/checkoutFlow';
 import { clearRestockCoupon, clearRestockPay, readRestockCoupon, readRestockPay, isRestockPayMethod, ASK_COUPON, ASK_DISCOUNT_COPY, AUTOSHIP_COUPON, AUTOSHIP_DISCOUNT_COPY } from '@/utils/restock';
 import {
@@ -383,38 +385,27 @@ const Checkout = () => {
   const applyCoupon = async (codeToApply?: string) => {
     const raw = (codeToApply ?? couponInput).trim();
     if (!raw) return;
-    if (!shippingInfo.email?.trim()) {
-      setCouponValid(false);
-      setCouponMessage('Please enter your email address above before applying a coupon.');
-      return;
-    }
     setCouponLoading(true);
     setCouponMessage('');
     try {
-      const API_URL = import.meta.env.VITE_API_URL || '/api';
-      const res = await fetch(`${API_URL}/v1/coupons/validate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: raw, subtotal, email: shippingInfo.email }),
+      const data = await applyCheckoutCode({
+        code: raw,
+        subtotal,
+        email: shippingInfo.email?.trim() || undefined,
       });
-      const data = await res.json();
-      if (data.valid) {
-        setCouponCode(raw.toUpperCase());
-        setCouponInput(raw.toUpperCase());
-        setCouponDiscount(Number(data.discountAmount) || 0);
-        setCouponWaivesShipping(Boolean(data.freeShipping));
-        setCouponValid(true);
-        setCouponMessage(data.message);
-      } else {
-        setCouponValid(false);
-        setCouponMessage(data.message);
-        setCouponDiscount(0);
-        setCouponWaivesShipping(false);
-        setCouponCode('');
-      }
-    } catch {
+      const applied = checkoutCodeFromResponse(raw, data);
+      setCouponValid(applied.ok);
+      setCouponMessage(applied.message);
+      setCouponCode(applied.code);
+      setCouponInput(applied.ok ? applied.code : raw.toUpperCase());
+      setCouponDiscount(applied.discountAmount);
+      setCouponWaivesShipping(applied.waivesShipping);
+    } catch (error) {
       setCouponValid(false);
-      setCouponMessage('Could not apply coupon. Please try again.');
+      setCouponMessage(checkoutCodeFromError(error));
+      setCouponDiscount(0);
+      setCouponWaivesShipping(false);
+      setCouponCode('');
     } finally {
       setCouponLoading(false);
     }
@@ -427,10 +418,10 @@ const Checkout = () => {
   useEffect(() => {
     const pending = readRestockCoupon();
     if (!pending || couponCode || couponLoading || subtotal <= 0) return;
-    if (!shippingInfo.email?.trim() || restockCouponAttempted.current) return;
+    if (restockCouponAttempted.current) return;
     restockCouponAttempted.current = true;
     void applyCoupon(pending);
-  }, [couponCode, couponLoading, shippingInfo.email, subtotal]);
+  }, [couponCode, couponLoading, subtotal]);
 
   const handleRemoveCoupon = () => {
     restockCouponAttempted.current = true;
@@ -457,11 +448,10 @@ const Checkout = () => {
       // Record coupon usage so it can't be reused
       if (couponCode && shippingInfo.email) {
         try {
-          const API_URL = import.meta.env.VITE_API_URL || '/api';
-          await fetch(`${API_URL}/v1/coupons/use`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code: couponCode, email: shippingInfo.email, orderId }),
+          await recordCheckoutCodeUse({
+            code: couponCode,
+            email: shippingInfo.email,
+            orderId,
           });
         } catch {
           // Non-critical — don't block order success flow
