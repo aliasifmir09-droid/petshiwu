@@ -1,8 +1,7 @@
 /**
- * Emergency hold: checkout stays paused until storefront polish is live.
- * Set to false (and restore order routes) when Petshiwu is ready to take payment.
+ * Checkout is live. Set back to true to stop new payment without taking the shop down.
  */
-export const ORDERING_PAUSED = true;
+export const ORDERING_PAUSED = false;
 
 export const ORDERING_PAUSED_EYEBROW = 'A short pause';
 export const ORDERING_PAUSED_HEADLINE = 'We will start accepting orders soon';
