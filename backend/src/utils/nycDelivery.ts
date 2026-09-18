@@ -43,3 +43,15 @@ export function normalizeShippingState(state: string): string {
 export function isNycShippingAddress(state: string, zipCode: string): boolean {
   return isNewYorkState(state) && isNycDeliveryZip(zipCode);
 }
+
+export const NYC_BOROUGHS_LABEL = 'Manhattan, Brooklyn, Queens, the Bronx, and Staten Island';
+
+export const OUTSIDE_DELIVERY_RANGE_MESSAGE =
+  `We currently deliver only in New York City's 5 boroughs (${NYC_BOROUGHS_LABEL}). New York State and nationwide shipping are coming soon — we can't complete checkout for this address yet.`;
+
+export function outsideDeliveryRangeMessage(state?: string, zipCode?: string): string {
+  if (state && isNewYorkState(state) && zipCode && !isNycDeliveryZip(zipCode) && /^\d{5}$/.test(normalizeZip(zipCode))) {
+    return `This ZIP is in New York State, but outside New York City. We currently deliver only in NYC's 5 boroughs (${NYC_BOROUGHS_LABEL}). New York State and nationwide shipping are coming soon — we can't complete checkout for this address yet.`;
+  }
+  return OUTSIDE_DELIVERY_RANGE_MESSAGE;
+}
