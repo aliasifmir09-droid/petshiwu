@@ -75,7 +75,7 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
         </div>
       </div>
       {/* Label - Matching Home page text style */}
-      <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300 text-center leading-tight px-2 max-w-[120px] sm:max-w-[140px] md:max-w-[160px]">
+      <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-gray-800 group-hover:text-[#1E3A8A] transition-colors duration-300 text-center leading-tight px-2 max-w-[120px] sm:max-w-[140px] md:max-w-[160px]">
         {category.title}
       </p>
     </Link>
@@ -183,7 +183,7 @@ const CategoryIcons = () => {
             Shop essentials
           </h2>
           <p className="text-slate-500 text-sm sm:text-base max-w-2xl mx-auto px-2">
-            Food, treats, litter, and more — delivered in NYC
+            Food, treats, litter, and more — shop like a national pet store
           </p>
         </div>
         

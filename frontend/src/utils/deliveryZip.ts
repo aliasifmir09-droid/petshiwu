@@ -194,8 +194,8 @@ export function lookupZip(input: string, now: Date = new Date()): ZipLookupResul
     zip,
     area: 'the US',
     speed: 'standard',
-    headline: '2-day nationwide shipping',
-    detail: 'Free shipping on orders over $49. Same-day is currently NYC + nearby metro.',
+    headline: 'Nationwide shipping opens soon',
+    detail: 'We are delivering in NYC now. U.S. shipping launches in a few days. Free over $49 when it opens.',
     cutoffPassed: countdown.passed,
   };
 }
@@ -235,7 +235,7 @@ export function tonightStatusLine(zip: string | null, now: Date = new Date()): s
     if (result) return result.headline;
   }
   if (!countdown.passed) {
-    return `Same-day NYC · ${formatCountdownShort(countdown)} · enter ZIP above`;
+    return `Enter ZIP to check delivery · ${formatCountdownShort(countdown)}`;
   }
-  return 'Same-day cutoff passed · next-day NYC';
+  return 'Enter ZIP to check delivery';
 }

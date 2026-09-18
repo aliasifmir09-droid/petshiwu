@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Phone } from 'lucide-react';
 import { ORDERING_PAUSED } from '@/config/ordering';
+import { NATIONWIDE_SOON_NOTE } from '@/data/brandStories';
 import { TONIGHT } from '@/data/tonightDelivery';
 import {
   LAST_ZIP_STORAGE_KEY,
@@ -17,11 +18,10 @@ interface TonightPromiseCardProps {
 }
 
 const TRUST_CHIPS = [
-  'Packed in Jackson Heights',
-  `Before ${TONIGHT.deliverBy}`,
-  `Free over $${TONIGHT.freeOver}`,
-  '365-day unused returns',
+  'Free over $49',
   'No autoship',
+  '365-day unused returns',
+  '24/7 support',
 ];
 
 const loadSavedZip = (): string => {
@@ -62,33 +62,29 @@ const TonightPromiseCard = ({ variant = 'hero' }: TonightPromiseCardProps) => {
   }, [zip]);
 
   const cutoffLine = ORDERING_PAUSED
-    ? `When checkout opens: ${TONIGHT.weekdayCutoff} weekdays · ${TONIGHT.weekendCutoff} weekends · before ${TONIGHT.deliverBy}`
-    : countdown.passed
-      ? `Same-day cutoff passed · next-day NYC`
-      : `Order by ${countdown.isWeekend ? TONIGHT.weekendCutoff : TONIGHT.weekdayCutoff} · ${formatCountdownShort(countdown)}`;
+    ? `When checkout opens: ${TONIGHT.weekdayCutoff} weekdays · ${TONIGHT.weekendCutoff} weekends`
+    : result?.speed === 'same-day' && !countdown.passed
+      ? `Order by ${countdown.isWeekend ? TONIGHT.weekendCutoff : TONIGHT.weekdayCutoff} · ${formatCountdownShort(countdown)}`
+      : result
+        ? result.detail
+        : '';
 
   const status = result
     ? result.speed === 'same-day' && !countdown.passed && !ORDERING_PAUSED
       ? `${result.headline}. ${result.detail}`
       : result.headline
-    : `Enter your ZIP. We pack in Queens and bring it to your door.`;
+    : 'Enter your ZIP to check delivery.';
 
   if (variant === 'pdp') {
     return (
       <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
         <p className="text-sm font-semibold text-[#1E3A8A]">
-          {ORDERING_PAUSED
-            ? result?.area
-              ? `Same-day in ${result.area} when checkout opens`
-              : 'Same-day NYC when checkout opens'
-            : result?.speed === 'same-day' && !countdown.passed
-              ? `Tonight in ${result.area}`
-              : 'Tonight in NYC'}
+          {result?.headline || 'Check delivery for your ZIP'}
         </p>
         <p className="text-xs text-slate-600 mt-0.5">{cutoffLine}</p>
         <p className="text-xs text-slate-500 mt-1">{status}</p>
         <label className="sr-only" htmlFor={zipId}>
-          Check same-day delivery ZIP
+          Check delivery ZIP
         </label>
         <input
           id={zipId}
@@ -99,7 +95,7 @@ const TonightPromiseCard = ({ variant = 'hero' }: TonightPromiseCardProps) => {
           value={zip}
           onChange={(e) => setZip(normalizeZip(e.target.value))}
           placeholder="ZIP"
-          aria-label="Check same-day delivery by ZIP code"
+          aria-label="Check delivery by ZIP code"
           className="mt-2 w-24 h-9 px-2 rounded-lg border border-slate-300 text-sm font-semibold tracking-widest text-gray-900 placeholder:tracking-normal placeholder:font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
         />
       </div>
@@ -107,27 +103,25 @@ const TonightPromiseCard = ({ variant = 'hero' }: TonightPromiseCardProps) => {
   }
 
   return (
-    <section className="bg-[#0B1F4A] text-white">
-      <div className="container mx-auto px-4 lg:px-8 py-10 md:py-14">
+    <section className="bg-white border-y border-slate-100">
+      <div className="container mx-auto px-4 lg:px-8 py-10 md:py-12">
         <div className="max-w-3xl">
-          <p className="text-amber-200 text-xs font-semibold tracking-widest uppercase mb-3">
-            Jackson Heights warehouse · five boroughs
+          <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-3">
+            Delivery
           </p>
-          <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-3">
-            {ORDERING_PAUSED ? 'Same-day NYC when checkout opens.' : 'Tonight at your door.'}
+          <h2 className="text-3xl md:text-4xl font-extrabold leading-tight mb-3 text-[#1E3A8A]">
+            Check delivery for your ZIP
           </h2>
-          <p className="text-base md:text-lg text-blue-100 mb-6 max-w-xl">
-            {ORDERING_PAUSED
-              ? 'Check your ZIP, add a bag in one tap, and save the cart. Checkout opens as soon as we are ready.'
-              : 'Check your ZIP, add a bag in one tap, and we pack it in Queens.'}
+          <p className="text-base md:text-lg text-slate-600 mb-6 max-w-xl">
+            {NATIONWIDE_SOON_NOTE} Free shipping over ${TONIGHT.freeOver}. No autoship.
           </p>
-          <p className="text-sm font-medium text-white mb-1">{cutoffLine}</p>
-          <p className="text-sm text-blue-100 mb-5">{status}</p>
+          {cutoffLine ? <p className="text-sm font-medium text-slate-800 mb-1">{cutoffLine}</p> : null}
+          <p className="text-sm text-slate-600 mb-5">{status}</p>
           <div className="flex flex-wrap items-center gap-3">
             <label className="sr-only" htmlFor={zipId}>
-              Check same-day delivery ZIP
+              Check delivery ZIP
             </label>
-            <div className="flex items-center gap-2 bg-white rounded-xl px-3 h-12">
+            <div className="flex items-center gap-2 bg-white rounded-xl px-3 h-12 border border-slate-200">
               <MapPin size={16} className="text-[#1E3A8A]" aria-hidden />
               <input
                 id={zipId}
@@ -138,19 +132,19 @@ const TonightPromiseCard = ({ variant = 'hero' }: TonightPromiseCardProps) => {
                 value={zip}
                 onChange={(e) => setZip(normalizeZip(e.target.value))}
                 placeholder="ZIP"
-                aria-label="Check same-day delivery by ZIP code"
+                aria-label="Check delivery by ZIP code"
                 className="w-24 text-gray-900 text-base font-semibold tracking-widest placeholder:tracking-normal placeholder:font-medium placeholder:text-gray-400 focus:outline-none"
               />
             </div>
             <Link
               to="/products"
-              className="inline-flex items-center justify-center h-12 px-6 rounded-xl bg-amber-300 text-[#0B1F4A] font-bold hover:bg-amber-200"
+              className="inline-flex items-center justify-center h-12 px-6 rounded-md bg-[#1E3A8A] text-white font-semibold hover:bg-[#163074]"
             >
               Shop now
             </Link>
             <a
               href={`tel:+18002592605`}
-              className="inline-flex items-center gap-2 h-12 px-4 text-sm font-semibold text-blue-100 hover:text-white"
+              className="inline-flex items-center gap-2 h-12 px-4 text-sm font-semibold text-slate-600 hover:text-[#1E3A8A]"
             >
               <Phone size={16} aria-hidden />
               {TONIGHT.phone}
@@ -160,7 +154,7 @@ const TonightPromiseCard = ({ variant = 'hero' }: TonightPromiseCardProps) => {
             {TRUST_CHIPS.map((chip) => (
               <li
                 key={chip}
-                className="text-xs font-medium bg-white/10 border border-white/15 rounded-full px-3 py-1.5 text-blue-50"
+                className="text-xs font-medium bg-slate-50 border border-slate-200 rounded-full px-3 py-1.5 text-slate-700"
               >
                 {chip}
               </li>

@@ -27,7 +27,7 @@ import { safeError } from '@/utils/safeLogger';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import ProductVariantPicker from '@/components/ProductVariantPicker';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
-import { addToCartLabel, inStockLabel, ORDERING_PAUSED } from '@/config/ordering';
+import { addToCartLabel, inStockLabel } from '@/config/ordering';
 
 // Lazy load heavy dependencies
 const RecentlyViewed = lazy(() => import('@/components/RecentlyViewed'));
@@ -851,7 +851,7 @@ const ProductDetail = () => {
               disabled={!isReadyToShip}
               className={`w-full flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-bold text-lg transition-all active:scale-[0.98] ${
                 isReadyToShip
-                  ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg'
+                  ? 'bg-[#1E3A8A] text-white hover:bg-[#163074]'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
@@ -1363,7 +1363,7 @@ const ProductDetail = () => {
             disabled={!isReadyToShip}
             className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-base transition-all active:scale-[0.98] ${
               isReadyToShip
-                ? 'bg-blue-600 text-white shadow-md'
+                ? 'bg-[#1E3A8A] text-white'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >
@@ -1372,7 +1372,7 @@ const ProductDetail = () => {
           </button>
           {isReadyToShip ? (
             <p className="text-[11px] text-slate-500 text-center mt-1.5">
-              {ORDERING_PAUSED ? 'Packed in Queens · same-day NYC when checkout opens' : 'Tonight in NYC · packed in Queens'}
+              Free shipping over $49 · no autoship
             </p>
           ) : null}
         </div>

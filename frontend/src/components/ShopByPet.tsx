@@ -58,7 +58,7 @@ const ShopByPet = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-[#1E3A8A] mb-2">
             Shop by pet
           </h2>
-          <p className="text-gray-500 text-base max-w-2xl mx-auto">Food and supplies for every pet</p>
+          <p className="text-gray-500 text-base max-w-2xl mx-auto">Food, treats, and supplies for every pet.</p>
         </div>
 
         {/* Mobile: all six pets on the first screen */}
@@ -128,7 +128,7 @@ const ShopByPet = () => {
                       <img src={category.image} alt={category.name} className="w-full h-full object-cover" loading="lazy" />
                     </div>
                   </div>
-                  <p className="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{category.name}</p>
+                  <p className="text-lg font-bold text-gray-800 group-hover:text-[#1E3A8A] transition-colors">{category.name}</p>
                 </div>
               </button>
             ))}

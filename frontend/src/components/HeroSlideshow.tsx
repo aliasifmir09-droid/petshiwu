@@ -6,10 +6,24 @@ import { slideDisplaySrc } from '@/utils/slideImage';
 /** One store promise on the first screen — big brands pick one line. */
 export const HERO_SLIDES = [
   {
-    id: 'slide-nyc-tonight',
-    src: '/banner-nyc-tonight.jpg',
-    webp: '/banner-nyc-tonight.webp',
-    alt: 'Same-day NYC pet delivery — order by 3 PM, delivered tonight',
+    id: 'slide-hero-family',
+    src: '/hero-wide-family.jpg',
+    webp: '/hero-wide-family.webp',
+    alt: 'Golden retriever, cat, and macaw in a bright home with Petshiwü bags',
+    link: '/products',
+  },
+  {
+    id: 'slide-hero-play',
+    src: '/hero-wide-play.jpg',
+    webp: '/hero-wide-play.webp',
+    alt: 'Puppy, kitten, hamster, and rabbit with Petshiwü toys and treats',
+    link: '/products',
+  },
+  {
+    id: 'slide-hero-delivery',
+    src: '/hero-wide-delivery.jpg',
+    webp: '/hero-wide-delivery.webp',
+    alt: 'Dog and cat at the door with a Petshiwü delivery',
     link: '/products',
   },
 ];

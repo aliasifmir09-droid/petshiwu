@@ -55,6 +55,7 @@ const CareGuideDetail = lazy(() => import('./pages/CareGuideDetail'));
 const FAQ = lazy(() => import('./pages/FAQ'));
 const SymptomChecker = lazy(() => import('./pages/SymptomChecker'));
 const About = lazy(() => import('./pages/About'));
+const BrandStory = lazy(() => import('./pages/BrandStory'));
 const Press = lazy(() => import('./pages/Press'));
 const Contact = lazy(() => import('./pages/Contact'));
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -310,7 +311,7 @@ function App() {
             logo: 'https://www.petshiwu.com/logo-square-512.png',
             image: 'https://www.petshiwu.com/logo-square-512.png',
             description:
-              `Same-day pet food and supplies delivery in New York City. Jackson Heights is office and warehouse only — not a walk-in store. 4,000+ products. Free delivery on orders over $49.`,
+              `Petshiwu is an online pet store for food, treats, and supplies. Currently delivering in NYC, with nationwide shipping opening soon. Warehouse only — not a walk-in store. 4,000+ products. Free delivery on orders over $49.`,
             telephone: '+1-800-259-2605',
             email: 'support@petshiwu.com',
             address: {
@@ -329,7 +330,7 @@ function App() {
               },
             ],
             priceRange: '$$',
-            areaServed: ['Queens', 'Brooklyn', 'Manhattan', 'Bronx', 'Staten Island', 'New York City'],
+            areaServed: ['United States', 'New York City'],
             paymentAccepted: 'Cash, Credit Card, Debit Card',
             currenciesAccepted: 'USD',
             sameAs: [...SOCIAL_PROFILES],
@@ -358,6 +359,9 @@ function App() {
                   <Route path="/faq" element={<FAQ />} />
                   <Route path="/symptom-checker" element={<SymptomChecker />} />
                   <Route path="/about" element={<About />} />
+                  <Route path="/our-promise" element={<BrandStory slug="our-promise" />} />
+                  <Route path="/for-pet-parents" element={<BrandStory slug="for-pet-parents" />} />
+                  <Route path="/from-queens" element={<BrandStory slug="from-queens" />} />
                   <Route path="/press" element={<Press />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/cart" element={<Cart />} />

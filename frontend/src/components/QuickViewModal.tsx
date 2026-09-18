@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { availableCartStock } from '@/utils/cartStock';
-import { addToCartLabel, inStockLabel, ORDERING_PAUSED } from '@/config/ordering';
+import { addToCartLabel, inStockLabel } from '@/config/ordering';
 
 interface QuickViewModalProps {
   productSlug: string;
@@ -218,7 +218,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
                   <>
                     <p className="text-green-700 font-medium">{inStockLabel(true)}</p>
                     <p className="text-xs text-slate-500">
-                      {ORDERING_PAUSED ? 'Packed in Queens · adds 1' : 'Tonight in NYC · packed in Queens · adds 1'}
+                      Free shipping over $49 · no autoship
                     </p>
                   </>
                 ) : (
@@ -230,7 +230,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
                   <button
                     onClick={handleAddToCart}
                     disabled={!isReadyToShip}
-                    className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+                    className="flex-1 bg-[#1E3A8A] text-white px-6 py-3 rounded-md font-semibold hover:bg-[#163074] disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
                   >
                     <ShoppingCart size={20} />
                     {addToCartLabel(isReadyToShip)}

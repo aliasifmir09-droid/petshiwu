@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/services/api';
 import { blogService } from '@/services/blogs';
+import BrandLogo from './BrandLogo';
 import ConfirmationModal from './ConfirmationModal';
 import { useToast } from '@/hooks/useToast';
 import Toast from './Toast';
@@ -273,10 +274,7 @@ const Header = () => {
                     onClick={() => toggleMobilePetType(petType.slug)}
                     className={`w-full flex items-center justify-between gap-3 ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors overflow-hidden`}
                   >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <span className="text-xl flex-shrink-0">{petType.icon}</span>
-                      <span className="truncate">{petType.name}</span>
-                    </div>
+                    <span className="truncate">{petType.name}</span>
                     <ChevronRight size={18} className={`transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                   </button>
                   {isExpanded && (
@@ -345,8 +343,7 @@ const Header = () => {
                   )}
                 </>
               ) : (
-                <Link to={`/${petType.slug}`} onClick={onLinkClick} className={`flex items-center gap-3 ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors overflow-hidden`}>
-                  <span className="text-xl flex-shrink-0">{petType.icon}</span>
+                <Link to={`/${petType.slug}`} onClick={onLinkClick} className={`flex items-center ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors overflow-hidden`}>
                   <span className="truncate">{petType.name}</span>
                 </Link>
               )}
@@ -362,10 +359,7 @@ const Header = () => {
 
         <li>
           <button onClick={toggleLearningMenu} className={`w-full flex items-center justify-between gap-3 ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors`}>
-            <div className="flex items-center gap-3">
-              <span className="text-xl">📚</span>
-              <span>Learning</span>
-            </div>
+            <span>Learning</span>
             <ChevronRight size={18} className={`transition-transform ${isLearningExpanded ? 'rotate-90' : ''}`} />
           </button>
           {isLearningExpanded && (
@@ -381,9 +375,13 @@ const Header = () => {
         </li>
 
         <li>
-          <Link to="/about" onClick={onLinkClick} className={`flex items-center gap-3 ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors`}>
-            <span className="text-xl">ℹ️</span>
+          <Link to="/about" onClick={onLinkClick} className={`flex items-center ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors`}>
             <span>About Us</span>
+          </Link>
+        </li>
+        <li>
+          <Link to="/our-promise" onClick={onLinkClick} className={`flex items-center ${py} ${px} font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors`}>
+            <span>Our Promise</span>
           </Link>
         </li>
       </>
@@ -392,34 +390,21 @@ const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 shadow-xl w-full">
+      <header className="sticky top-0 z-50 bg-white border-b border-slate-200 w-full">
         <TonightBar />
-        <div className="bg-gradient-to-r from-[#1E3A8A] via-[#2563EB] to-[#1E3A8A] w-full">
-          <div className="container mx-auto px-3 lg:px-4 py-1.5 lg:py-3">
+        <div className="bg-white w-full">
+          <div className="container mx-auto px-3 lg:px-4 py-2 lg:py-3">
             <div className="flex items-center justify-between gap-2 lg:gap-4">
 
               {/* Hamburger - Desktop Only, Visible When Scrolled */}
               {isScrolled && (
-                <button onClick={() => setIsLeftSidebarOpen(true)} className="hidden lg:flex items-center justify-center p-2 hover:bg-white/10 rounded-lg transition-colors" aria-label="Open Menu">
-                  <Menu size={28} className="text-white" />
+                <button onClick={() => setIsLeftSidebarOpen(true)} className="hidden lg:flex items-center justify-center p-2 hover:bg-slate-100 rounded-md transition-colors" aria-label="Open Menu">
+                  <Menu size={24} className="text-[#1E3A8A]" />
                 </button>
               )}
 
-              <Link to="/" className="flex items-center flex-shrink-0 group">
-                <div className="relative">
-                  <picture>
-                    <source srcSet="/logo.webp" type="image/webp" />
-                    <img
-                      src="/logo.png"
-                      alt="Petshiwu Logo"
-                      className="h-10 lg:h-16 w-auto object-contain transform group-hover:scale-105 transition-transform duration-500 relative z-10 max-h-10 lg:max-h-16"
-                      loading="eager"
-                      width={195}
-                      height={40}
-                    />
-                  </picture>
-                  <div className="absolute inset-0 bg-white/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                </div>
+              <Link to="/" className="flex items-center flex-shrink-0" aria-label="Petshiwu home">
+                <BrandLogo variant="on-light" />
               </Link>
 
               {/* Search Bar - Desktop */}
@@ -431,7 +416,7 @@ const Header = () => {
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
                     onFocus={() => { if (searchQuery.length >= 1) { setShowSuggestions(true); } }}
-                    className="w-full h-12 pl-4 pr-[8.5rem] rounded-xl border-2 border-white/20 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:border-yellow-300 shadow-lg placeholder:text-gray-500 font-medium"
+                    className="w-full h-11 pl-4 pr-[8.5rem] rounded-md border border-slate-300 bg-slate-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] focus:bg-white placeholder:text-gray-500"
                   />
                   <div className="absolute inset-y-0 right-1.5 flex items-center gap-0.5">
                     <Link
@@ -445,7 +430,7 @@ const Header = () => {
                     <VoiceSearchButton onResult={handleVoiceResult} variant="dark" />
                     <button
                       type="submit"
-                      className="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
+                      className="flex items-center justify-center w-9 h-9 rounded-md bg-[#1E3A8A] text-white hover:bg-[#163074]"
                       aria-label="Search"
                     >
                       <Search size={18} />
@@ -461,21 +446,13 @@ const Header = () => {
               </form>
 
               {/* Right Side Actions */}
-              <div className="flex items-center gap-1.5 lg:gap-3 text-white flex-shrink-0">
-
-                {/* USA Flag - Desktop */}
-                <div className="hidden lg:flex items-center gap-2 px-2 lg:px-3 py-1.5 rounded-md hover:bg-white/10 transition-colors cursor-pointer">
-                  <img src="https://flagcdn.com/w40/us.png" alt="USA Flag" className="w-5 h-4 lg:w-6 lg:h-4 object-cover rounded-sm" />
-                  <span className="text-xs lg:text-sm font-semibold">USA</span>
-                  <ChevronDown size={12} className="opacity-80" />
-                </div>
+              <div className="flex items-center gap-1 lg:gap-2 text-[#1E3A8A] flex-shrink-0">
 
                 {/* Customer Support - Desktop */}
                 <div className="hidden lg:block relative group z-[100]">
-                  <div className="flex items-center gap-1.5 lg:gap-2 px-2 lg:px-3 py-1.5 rounded-md hover:bg-white/10 transition-colors cursor-pointer">
+                  <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-slate-100 transition-colors cursor-pointer">
                     <Phone size={16} className="lg:w-[18px] lg:h-[18px]" />
                     <span className="text-xs lg:text-sm font-semibold">Support</span>
-                    <ChevronDown size={12} className="opacity-80" />
                   </div>
                   <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg py-4 px-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all text-gray-900 z-[100]">
                     <div className="space-y-3">
@@ -494,11 +471,11 @@ const Header = () => {
                 </div>
 
                 {/* Favorites — desktop; Account tab covers this on mobile */}
-                <Link to="/favorites" className="hidden lg:flex items-center gap-1 lg:gap-1.5 hover:opacity-80 px-1.5 lg:px-2.5 py-1.5 rounded-md hover:bg-white/10 transition-colors">
+                <Link to="/favorites" className="hidden lg:flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-slate-100 transition-colors">
                   <div className="relative">
                     <Heart size={18} className="lg:w-5 lg:h-5" fill={wishlistItems.length > 0 ? 'currentColor' : 'none'} />
                     {wishlistItems.length > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      <span className="absolute -top-2 -right-2 bg-[#1E3A8A] text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
                         {wishlistItems.length > 9 ? '9+' : wishlistItems.length}
                       </span>
                     )}
@@ -509,7 +486,7 @@ const Header = () => {
                 {/* Mobile Sign In / Account — tap, not hover */}
                 <Link
                   to={isAuthenticated ? '/profile' : '/login'}
-                  className="lg:hidden flex items-center p-1.5 rounded-md hover:bg-white/10 transition-colors"
+                  className="lg:hidden flex items-center p-1.5 rounded-md hover:bg-slate-100 transition-colors"
                   aria-label={isAuthenticated ? 'My account' : 'Sign in'}
                 >
                   <User size={18} />
@@ -518,7 +495,7 @@ const Header = () => {
                 {/* Sign In / User Dropdown — desktop hover menu */}
                 {isAuthenticated ? (
                   <div className="hidden lg:block relative group z-[100]">
-                    <button className="flex items-center gap-1 lg:gap-1.5 hover:opacity-80 px-1.5 lg:px-2.5 py-1.5 rounded-md hover:bg-white/10 transition-colors">
+                    <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-slate-100 transition-colors">
                       <User size={18} className="lg:w-5 lg:h-5" />
                       <span className="hidden xl:block text-xs lg:text-sm font-semibold">{user?.firstName}</span>
                       <ChevronDown size={14} className="hidden xl:block" />
@@ -526,11 +503,11 @@ const Header = () => {
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all text-gray-900 z-[100]">
                       <Link to="/profile" className="block px-4 py-2.5 hover:bg-gray-100 font-medium">My Profile</Link>
                       {user?.role === 'admin' && (
-                        <a href="https://dashboard.petshiwu.com" className="block px-4 py-2.5 hover:bg-blue-50 text-[#1E3A8A] font-semibold border-b border-gray-100">📦 Orders Dashboard</a>
+                        <a href="https://dashboard.petshiwu.com" className="block px-4 py-2.5 hover:bg-blue-50 text-[#1E3A8A] font-semibold border-b border-gray-100">Orders Dashboard</a>
                       )}
-                      <Link to="/favorites" className="block px-4 py-2.5 hover:bg-pink-50 hover:text-pink-600 font-medium">
+                      <Link to="/favorites" className="block px-4 py-2.5 hover:bg-blue-50 hover:text-[#1E3A8A] font-medium">
                         <div className="flex items-center gap-2">
-                          <Heart size={18} className="text-pink-500" fill="currentColor" />
+                          <Heart size={18} className="text-[#1E3A8A]" fill="currentColor" />
                           My Favorites
                         </div>
                       </Link>
@@ -541,7 +518,7 @@ const Header = () => {
                   </div>
                 ) : (
                   <div className="hidden lg:block relative group z-[100]">
-                    <button className="flex items-center gap-1 lg:gap-1.5 hover:opacity-80 px-1.5 lg:px-2.5 py-1.5 rounded-md hover:bg-white/10 transition-colors">
+                    <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-slate-100 transition-colors">
                       <User size={18} className="lg:w-5 lg:h-5" />
                       <span className="hidden xl:block text-xs lg:text-sm font-semibold">Sign In</span>
                       <ChevronDown size={14} className="hidden xl:block" />
@@ -555,10 +532,10 @@ const Header = () => {
 
                 {/* Cart */}
                 <div className="relative group">
-                  <Link to="/cart" className="relative px-1.5 lg:px-2.5 py-1.5 lg:py-2 rounded-xl hover:bg-white/15 transition-all hover:scale-110 flex items-center justify-center">
-                    <ShoppingCart size={20} className="lg:w-6 lg:h-6 group-hover:animate-wiggle" />
+                  <Link to="/cart" className="relative px-2 py-1.5 rounded-md hover:bg-slate-100 transition-colors flex items-center justify-center">
+                    <ShoppingCart size={20} className="lg:w-6 lg:h-6" />
                     {totalItems > 0 && (
-                      <span className="absolute -top-1 -right-1 lg:-top-2 lg:-right-2 bg-gradient-to-r from-red-500 to-pink-600 text-white text-[10px] lg:text-xs rounded-full min-w-[18px] lg:min-w-[22px] h-[18px] lg:h-[22px] flex items-center justify-center font-black shadow-lg animate-pulse-slow border-2 border-white leading-none">
+                      <span className="absolute -top-1 -right-1 bg-[#1E3A8A] text-white text-[10px] lg:text-xs rounded-full min-w-[18px] lg:min-w-[20px] h-[18px] lg:h-[20px] flex items-center justify-center font-bold leading-none">
                         {totalItems}
                       </span>
                     )}
@@ -574,7 +551,7 @@ const Header = () => {
                 </div>
 
                 {/* Mobile Menu Toggle */}
-                <button className="lg:hidden p-1.5 rounded-md hover:bg-white/10 transition-colors" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Open menu">
+                <button className="lg:hidden p-1.5 rounded-md hover:bg-slate-100 transition-colors" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Open menu">
                   {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
                 </button>
               </div>
@@ -589,7 +566,7 @@ const Header = () => {
                   value={searchQuery}
                   onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
                   onFocus={() => { if (searchQuery.length >= 1) { setShowSuggestions(true); } }}
-                  className="w-full h-10 pl-3 pr-[7.5rem] rounded-lg border-2 border-white/20 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300 placeholder:text-gray-500"
+                  className="w-full h-10 pl-3 pr-[7.5rem] rounded-md border border-slate-300 bg-slate-50 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A8A] placeholder:text-gray-500"
                   aria-label="Search products"
                 />
                 <div className="absolute inset-y-0 right-1 flex items-center gap-0.5">
@@ -618,19 +595,18 @@ const Header = () => {
       </header>
 
       {/* Navigation - Desktop Only */}
-      <nav className="hidden lg:block bg-white w-full z-30">
+      <nav className="hidden lg:block bg-[#1E3A8A] w-full z-30">
         <div className="relative w-full">
           <div className="container mx-auto px-2 lg:px-3">
-            <div className="flex items-center justify-start py-2 lg:py-2.5">
-              <ul className="flex items-center gap-1.5 lg:gap-2.5 text-xs lg:text-sm font-semibold text-gray-700 flex-nowrap">
+            <div className="flex items-center justify-start py-0">
+              <ul className="flex items-center gap-0.5 lg:gap-1 text-sm font-medium text-white flex-nowrap">
                 {petTypes.map((petType: any) => {
                   const petCategories = getCategoriesForPetType(petType.slug);
                   const megaMenu = Array.isArray(categories) && categories.length > 0 ? buildDynamicMegaMenu(petType.slug) : [];
                   return (
                     <li key={petType.slug} className="relative group flex-shrink-0">
-                      <Link to={`/${petType.slug}`} className="flex items-center gap-0.5 lg:gap-1 hover:text-[#1E3A8A] transition-colors py-1.5 lg:py-2 px-1 lg:px-1.5 whitespace-nowrap">
-                        <span className="text-sm lg:text-base flex-shrink-0 leading-none">{petType.icon}</span>
-                        <span className="text-xs lg:text-sm whitespace-nowrap">{petType.name}</span>
+                      <Link to={`/${petType.slug}`} className="flex items-center gap-1 hover:bg-white/10 transition-colors py-2.5 px-3 whitespace-nowrap">
+                        <span className="whitespace-nowrap">{petType.name}</span>
                         {petCategories.length > 0 && <ChevronDown size={14} className="opacity-60 group-hover:opacity-100 transition-opacity" />}
                       </Link>
                       {petCategories.length > 0 && (
@@ -706,15 +682,15 @@ const Header = () => {
                 })}
 
                 <li className="flex-shrink-0">
-                  <Link to="/products?featured=true" className="flex items-center gap-0.5 lg:gap-1 text-[#1E3A8A] hover:underline py-1.5 lg:py-2 px-1 lg:px-1.5 font-semibold whitespace-nowrap text-[10px] lg:text-xs">
-                    <span>Featured</span>
+                  <Link to="/products?featured=true" className="flex items-center py-2.5 px-3 font-semibold whitespace-nowrap hover:bg-white/10">
+                    Featured
                   </Link>
                 </li>
 
                 <li className="relative group flex-shrink-0">
-                  <Link to="/learning" className="flex items-center gap-0.5 lg:gap-1 hover:text-[#1E3A8A] transition-colors py-1.5 lg:py-2 px-1 lg:px-1.5 whitespace-nowrap">
-                    <span className="text-xs lg:text-sm">Learning</span>
-                    <ChevronDown size={14} className="opacity-60 group-hover:opacity-100 transition-opacity" />
+                  <Link to="/learning" className="flex items-center gap-1 hover:bg-white/10 transition-colors py-2.5 px-3 whitespace-nowrap">
+                    <span>Learning</span>
+                    <ChevronDown size={14} className="opacity-70" />
                   </Link>
                   <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 px-5 w-[90vw] max-w-[600px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                     <div className="space-y-2">
@@ -725,7 +701,10 @@ const Header = () => {
                 </li>
 
                 <li className="flex-shrink-0">
-                  <Link to="/about" className="hover:text-[#1E3A8A] transition-colors py-1.5 lg:py-2 px-1 lg:px-1.5 whitespace-nowrap text-xs lg:text-sm">About</Link>
+                  <Link to="/about" className="hover:bg-white/10 transition-colors py-2.5 px-3 whitespace-nowrap">About</Link>
+                </li>
+                <li className="flex-shrink-0">
+                  <Link to="/our-promise" className="hover:bg-white/10 transition-colors py-2.5 px-3 whitespace-nowrap">Our Promise</Link>
                 </li>
               </ul>
             </div>
@@ -739,11 +718,7 @@ const Header = () => {
           <div className="fixed inset-0 bg-black/50 z-[45] lg:hidden" onClick={() => { setMobileMenuOpen(false); setIsLearningExpanded(false); }} />
           <div className="fixed top-0 right-0 h-full w-[85vw] max-w-sm bg-white shadow-2xl z-[50] lg:hidden overflow-y-auto">
             <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between z-10">
-              {/* ✅ FIXED - Same logo in mobile menu */}
-              <picture>
-                <source srcSet="/logo.webp" type="image/webp" />
-                <img src="/logo.png" alt="Petshiwu" className="h-10 w-auto object-contain" width={195} height={40} />
-              </picture>
+              <BrandLogo variant="on-light" />
               <button onClick={() => { setMobileMenuOpen(false); setIsLearningExpanded(false); }} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Close Menu">
                 <X size={24} className="text-gray-700" />
               </button>
@@ -779,15 +754,15 @@ const Header = () => {
                   <>
                     <li><Link to="/profile" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><User size={20} /><span>My Profile</span></Link></li>
                     {user?.role === 'admin' && (
-                      <li><a href="https://dashboard.petshiwu.com" className="flex items-center gap-3 py-3 px-3 font-semibold bg-blue-50 text-[#1E3A8A] rounded-lg"><span>📦</span><span>Orders Dashboard</span></a></li>
+                      <li><a href="https://dashboard.petshiwu.com" className="flex items-center gap-3 py-3 px-3 font-semibold bg-blue-50 text-[#1E3A8A] rounded-lg"><span>Orders Dashboard</span></a></li>
                     )}
-                    <li><Link to="/favorites" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><Heart size={20} className="text-pink-500" fill="currentColor" /><span>My Favorites</span></Link></li>
+                    <li><Link to="/favorites" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><Heart size={20} className="text-[#1E3A8A]" fill="currentColor" /><span>My Favorites</span></Link></li>
                     <li><Link to="/orders" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><ShoppingCart size={20} /><span>My Orders</span></Link></li>
-                    <li><Link to="/#restock" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><span className="text-xl">🔁</span><span>Restock</span></Link></li>
-                    <li><button onClick={() => { setShowLogoutModal(true); setMobileMenuOpen(false); }} className="flex items-center gap-3 w-full text-left py-3 px-3 font-semibold hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"><span className="text-xl">🚪</span><span>Logout</span></button></li>
+                    <li><Link to="/#restock" className="flex items-center gap-3 py-3 px-3 font-semibold hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}><span>Restock</span></Link></li>
+                    <li><button onClick={() => { setShowLogoutModal(true); setMobileMenuOpen(false); }} className="flex items-center gap-3 w-full text-left py-3 px-3 font-semibold hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"><LogOut size={20} /><span>Logout</span></button></li>
                   </>
                 ) : (
-                  <li><Link to="/login" className="flex items-center gap-3 py-3 px-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold" onClick={() => setMobileMenuOpen(false)}><User size={20} /><span>Sign In / Register</span></Link></li>
+                  <li><Link to="/login" className="flex items-center gap-3 py-3 px-3 bg-[#1E3A8A] text-white rounded-lg hover:bg-[#163074] transition-colors font-semibold" onClick={() => setMobileMenuOpen(false)}><User size={20} /><span>Sign In / Register</span></Link></li>
                 )}
               </ul>
             </div>

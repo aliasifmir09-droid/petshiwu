@@ -245,8 +245,20 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     description: 'Shop food, cages, bedding, and toys for hamsters, rabbits, guinea pigs, and more. Fast NYC delivery. Free shipping over $49.',
   },
   '/about': {
-    title: 'About Petshiwu — NYC Pet Supply Delivery',
-    description: 'Petshiwu is NYC same-day pet supply delivery. Jackson Heights is office and warehouse only — not a walk-in store. We deliver to all five boroughs.',
+    title: 'About Petshiwu — Online Pet Store',
+    description: 'Petshiwu is an online pet store for food, treats, and supplies. Currently delivering in NYC, with nationwide shipping opening soon. Warehouse only — not a walk-in store.',
+  },
+  '/our-promise': {
+    title: 'Our Promise | Petshiwu',
+    description: 'Fair prices, fast delivery, and no autoship. Free shipping over $49. 365-day returns. Currently delivering in NYC, with nationwide shipping opening soon.',
+  },
+  '/for-pet-parents': {
+    title: 'For Pet Parents | Petshiwu',
+    description: 'Food, treats, and care without a subscription. Shop Hill\'s, Royal Canin, Purina, and more. Free shipping over $49. No autoship.',
+  },
+  '/from-queens': {
+    title: 'How We Ship | Petshiwu',
+    description: 'Petshiwu is an online pet store. Currently delivering in NYC, with nationwide shipping opening in a few days. Warehouse only — not a walk-in store.',
   },
   '/contact': {
     title: 'Contact Us | Petshiwu',
@@ -1899,6 +1911,7 @@ const VALID_SPA_PATHS = new Set([
   '/profile', '/orders', '/track-order', '/donate', '/favorites', '/compare',
   '/returns', '/return-policy', '/addresses', '/stock-alerts', '/search',
   '/learning', '/care-guides', '/faq', '/symptom-checker', '/about', '/press',
+  '/our-promise', '/for-pet-parents', '/from-queens',
   '/contact', '/403', '/404', '/privacy', '/privacy-policy', '/terms',
   '/terms-of-service', '/shipping', '/shipping-policy', '/accessibility',
   '/shop', '/deals', '/sell-with-us', '/vendors', '/partners', '/investors',

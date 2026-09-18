@@ -7,9 +7,9 @@ const About = () => {
   return (
     <>
       <SEO
-      title="About Petshiwu | Your Trusted Partner in Pet Care"
-      description="Learn about Petshiwu's pet care experience, our passion for pets, and same-day delivery across all five NYC boroughs."
-      keywords="about Petshiwu, pet delivery NYC, Jackson Heights warehouse, premium pet products"
+      title="About Petshiwu | Online Pet Food & Supplies"
+      description="Petshiwu is an online pet store for food, treats, and supplies. Currently delivering in NYC, with nationwide shipping opening soon. No autoship. Free shipping over $49."
+      keywords="about Petshiwu, online pet store, pet food, pet supplies, no autoship"
       url="/about"
       />
       <StructuredData
@@ -35,7 +35,7 @@ const About = () => {
             closes: '23:59',
           }],
           priceRange: '$$',
-          description: 'NYC same-day pet supply delivery. Jackson Heights is office and warehouse only — not a walk-in store. We deliver premium brands to all 5 boroughs.',
+          description: 'Online pet store for food, treats, and supplies. Currently delivering in NYC, with nationwide shipping opening soon. Warehouse and office only — not a walk-in store.',
           areaServed: ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'],
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
@@ -56,7 +56,7 @@ const About = () => {
                   About Petshiwu
                 </p>
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4">
-                  Your Trusted Partner in Pet Care
+                  Your online pet store
                 </h1>
                 <p className="text-base sm:text-lg text-blue-100 max-w-xl mb-6">
                   Rooted in a deep love for animals and over a decade of hands-on pet care experience,
@@ -77,14 +77,13 @@ const About = () => {
                       <p className="text-xs uppercase tracking-wide text-blue-100/80 font-semibold">
                         Our Story
                       </p>
-                      <p className="text-lg font-bold">A Passion for Pets, Now Online in NYC</p>
+                      <p className="text-lg font-bold">A nationwide pet store, online</p>
                     </div>
                   </div>
                   <p className="text-sm sm:text-base text-blue-50 mb-4">
-                    Petshiwu was born from a deep love for animals and a passion for helping pets thrive.
-                    Based in Jackson Heights, NY, we deliver premium food, toys, and accessories to
-                    pet parents across New York City. Our Jackson Heights location is office and
-                    warehouse only — not a walk-in store.
+                    Petshiwu is an online pet store for food, treats, toys, and everyday care.
+                    We currently deliver in New York City, and nationwide shipping opens in a few days.
+                    Our warehouse packs orders — it is not a walk-in store.
                   </p>
                   <p className="text-xs sm:text-sm text-blue-100/90">
                     We continuously listen to American pet owners to better understand their unique needs
@@ -152,8 +151,8 @@ const About = () => {
                   Convenience & Reliability
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Enjoy easy online shopping, same-day delivery across NYC, and a smooth experience from
-                  browsing to delivery—so your pet never has to wait long for their favorites.
+                  Enjoy easy online shopping, free shipping over $49, and a smooth experience from
+                  browsing to delivery. Currently delivering in NYC, with nationwide shipping opening soon.
                 </p>
               </div>
             </div>

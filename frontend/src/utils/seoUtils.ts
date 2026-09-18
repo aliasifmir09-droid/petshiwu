@@ -68,7 +68,7 @@ export function productSearchDescription(opts: {
     .replace(/<[^>]*>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-  const suffix = ' Same-day NYC delivery. Free shipping over $49.';
+  const suffix = ' Free shipping over $49. No autoship.';
   const budget = Math.max(80, 160 - suffix.length);
   if (stripped) {
     return clipAtWord(`${clipAtWord(stripped, budget)}${suffix}`, 160);

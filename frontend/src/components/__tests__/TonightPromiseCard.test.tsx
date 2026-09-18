@@ -1,11 +1,17 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, test, beforeEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import TonightPromiseCard from '../TonightPromiseCard';
 
 describe('TonightPromiseCard', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-13T14:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   test('hero asks for a ZIP and confirms Queens same-day coverage', () => {
@@ -15,12 +21,12 @@ describe('TonightPromiseCard', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/tonight at your door/i)).toBeInTheDocument();
-    expect(screen.getByText(/packed in jackson heights/i)).toBeInTheDocument();
-    expect(screen.getByText(/no autoship/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(/check delivery for your zip/i);
+    expect(screen.getByText(/nationwide shipping opens in a few days/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/no autoship/i).length).toBeGreaterThan(0);
     expect(screen.getByRole('link', { name: /shop now/i })).toHaveAttribute('href', '/products');
 
-    fireEvent.change(screen.getByLabelText(/check same-day delivery by zip code/i), {
+    fireEvent.change(screen.getByLabelText(/check delivery by zip code/i), {
       target: { value: '11372' },
     });
     expect(screen.getByText(/same-day delivery in queens/i)).toBeInTheDocument();
@@ -33,8 +39,8 @@ describe('TonightPromiseCard', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/tonight in nyc/i)).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText(/check same-day delivery by zip code/i), {
+    expect(screen.getByText(/check delivery for your zip/i)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/check delivery by zip code/i), {
       target: { value: '11201' },
     });
     expect(screen.getAllByText(/brooklyn/i).length).toBeGreaterThan(0);

@@ -9,10 +9,10 @@ describe('hero slideshow assets', () => {
     ).toBe('/banner-birthday.webp');
   });
 
-  test('prefers webp for the new 16:9 campaign banners', () => {
+  test('prefers webp for catalog campaign banners', () => {
     expect(
-      slideDisplaySrc({ src: '/banner-nyc-tonight.jpg', webp: '/banner-nyc-tonight.webp' })
-    ).toBe('/banner-nyc-tonight.webp');
+      slideDisplaySrc({ src: '/hero-wide-family.jpg', webp: '/hero-wide-family.webp' })
+    ).toBe('/hero-wide-family.webp');
   });
 
   test('keeps jpg when no real webp exists', () => {
@@ -27,11 +27,14 @@ describe('hero slideshow assets', () => {
     expect(links.every((link) => link === '/products')).toBe(true);
     expect(ids).not.toContain('slide-neural');
     expect(ids).not.toContain('slide-2');
-    expect(HERO_SLIDES[0].id).toBe('slide-nyc-tonight');
+    expect(ids).not.toContain('slide-nyc-tonight');
+    expect(HERO_SLIDES[0].id).toBe('slide-hero-family');
   });
 
-  test('homepage keeps one hero line so the first screen stays calm', () => {
-    expect(HERO_SLIDES).toHaveLength(1);
-    expect(HERO_SLIDES[0].alt).toMatch(/same-day nyc/i);
+  test('homepage promo carousel uses catalog banners, not NYC slogans', () => {
+    expect(HERO_SLIDES.length).toBeGreaterThanOrEqual(1);
+    expect(HERO_SLIDES.every((slide) => !/nyc|queens|tonight/i.test(`${slide.id} ${slide.alt}`))).toBe(
+      true
+    );
   });
 });

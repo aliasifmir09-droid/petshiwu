@@ -51,7 +51,7 @@ const INDEXABLE_ROOT_PATHS = new Set([
   '/return-policy', '/donate', '/contact', '/shipping', '/other-animals',
   '/privacy', '/terms', '/accessibility', '/cookie-policy',
   '/fish-tanks', '/press', '/investors', '/sell-with-us', '/vendors', '/partners',
-  '/innovation',
+  '/innovation', '/our-promise', '/for-pet-parents', '/from-queens',
   ...INDEXABLE_LANDING_PATHS,
 ]);
 
@@ -69,6 +69,9 @@ export const CRAWLABLE_STOREFRONT_PATHS: string[] = [
   '/learning',
   '/care-guides',
   '/about',
+  '/our-promise',
+  '/for-pet-parents',
+  '/from-queens',
   '/faq',
   '/contact',
   '/press',

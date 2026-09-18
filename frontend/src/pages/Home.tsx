@@ -11,6 +11,7 @@ import CategoryIcons from '@/components/CategoryIcons';
 import ShopByPet from '@/components/ShopByPet';
 import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
+import HomeHeroSlogans from '@/components/HomeHeroSlogans';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
 import RestockDashboard from '@/components/RestockDashboard';
 import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
@@ -55,7 +56,7 @@ const TodaysDeals = () => {
               Hill's Science Diet
             </h2>
             <p className="text-sm text-slate-500 mt-1">
-              Vet-recommended nutrition, delivered in NYC
+              Vet-recommended nutrition
             </p>
           </div>
           <Link
@@ -105,19 +106,15 @@ const Home = () => {
   }, [featuredProducts?.data]);
 
   return (
-    <div className="relative">
-      {/* Single semantic H1 for the homepage (visually hidden — the hero is a
-          designed image slideshow). Gives browsers a real H1 that matches the
-          page title/description without altering the visual layout. */}
-      <h1 className="sr-only">Petshiwu — Premium Pet Food, Toys & Supplies Delivered to NYC</h1>
+    <div className="relative bg-white">
       <SEO
-        title="Petshiwu — Premium Pet Food, Toys & Supplies Delivered to NYC"
+        title="Petshiwu — Pet Food, Treats & Supplies"
         description={
           ORDERING_PAUSED
-            ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products delivered to Queens, Brooklyn & all of NYC. ${ORDERING_PAUSED_HEADLINE}. Free shipping over $49.`
+            ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products from ${CATALOG_BRANDS_SHORT}. ${ORDERING_PAUSED_HEADLINE}. Free shipping over $49. No autoship.`
             : areOrdersOpen()
-            ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products delivered to Queens, Brooklyn & all of NYC. Top brands — ${CATALOG_BRANDS_SHORT}. Free shipping over $49. Dog food, cat food, toys & more.`
-            : `${CATALOG_PRODUCT_COUNT_LABEL} pet products delivered to Queens, Brooklyn & all of NYC. We start taking orders ${ORDERS_OPEN_LABEL}. Free shipping over $49.`
+            ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products from ${CATALOG_BRANDS_SHORT}. Free shipping over $49. No autoship. Currently delivering in NYC. Nationwide shipping opens in a few days.`
+            : `${CATALOG_PRODUCT_COUNT_LABEL} pet products from ${CATALOG_BRANDS_SHORT}. We start taking orders ${ORDERS_OPEN_LABEL}. Free shipping over $49.`
         }
       />
       <StructuredData type="website" data={{}} />
@@ -125,14 +122,6 @@ const Home = () => {
         type="faq"
         data={{
           mainEntity: [
-            {
-              '@type': 'Question',
-              name: 'Does Petshiwu deliver same-day pet supplies in NYC?',
-              acceptedAnswer: {
-                '@type': 'Answer',
-                text: 'Yes. Petshiwu offers same-day pet supply delivery across all five NYC boroughs — Manhattan, Brooklyn, Queens, Bronx, and Staten Island. Order by 3 PM EST on weekdays (1 PM EST on weekends) for same-day delivery before 11 PM. We are based in Jackson Heights, Queens and ship from our warehouse at 37-68 74th Street.'
-              }
-            },
             {
               '@type': 'Question',
               name: 'What brands does Petshiwu carry?',
@@ -151,34 +140,34 @@ const Home = () => {
             },
             {
               '@type': 'Question',
+              name: 'How much does Petshiwu shipping cost?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Shipping is free on orders over $49. Orders under $49 have a flat $6 shipping fee. We are currently delivering in NYC, with nationwide shipping opening in a few days.'
+              }
+            },
+            {
+              '@type': 'Question',
               name: 'Can I get prescription veterinary diets from Petshiwu?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Yes. We carry Hill\'s Prescription Diet, Royal Canin Veterinary Diet, and Purina Pro Plan Veterinary Diets. Your vet can upload or fax the prescription at checkout, and we ship same-day for most prescription orders.'
+                text: 'Yes. We carry Hill\'s Prescription Diet, Royal Canin Veterinary Diet, and Purina Pro Plan Veterinary Diets. Your vet can upload or fax the prescription at checkout.'
               }
             },
             {
               '@type': 'Question',
-              name: 'How much does Petshiwu delivery cost?',
+              name: 'Where does Petshiwu deliver right now?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Delivery is free on orders over $49 across all five NYC boroughs. Orders under $49 have a flat $6 shipping fee. Same-day delivery is available for orders placed before 3 PM EST on weekdays (1 PM EST on weekends).'
+                text: 'We currently deliver in New York City — all five boroughs — with same-day when you order by 3 PM EST weekdays (1 PM EST weekends). Nationwide shipping opens in a few days. We are an online store only; the Jackson Heights address is warehouse and office, not a walk-in shop.'
               }
             },
             {
               '@type': 'Question',
-              name: 'Is Petshiwu a walk-in store in Jackson Heights?',
+              name: 'Does Petshiwu carry cat supplies too?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'No. Petshiwu is delivery only. The office and warehouse at 37-68 74th Street, Jackson Heights, NY 11372 is for packing orders, not walk-in shopping. Order online and we deliver same-day across all five NYC boroughs when you order before cutoff.'
-              }
-            },
-            {
-              '@type': 'Question',
-              name: 'Does Petshiwu deliver cat supplies too?',
-              acceptedAnswer: {
-                '@type': 'Answer',
-                text: `Yes. We carry full cat supply lines — food (${CATALOG_BRANDS_SHORT}), litter, toys, scratching posts, and prescription diets. Same delivery speeds as dog supplies.`
+                text: `Yes. We carry full cat supply lines — food (${CATALOG_BRANDS_SHORT}), litter, toys, scratching posts, and prescription diets.`
               }
             },
             {
@@ -186,7 +175,7 @@ const Home = () => {
               name: 'How do I contact Petshiwu customer service?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Call +1 (800) 259-2605 anytime — support is 24/7. You can also email support@petshiwu.com or use the contact form on our /contact page. The Jackson Heights address is office and warehouse only — not open for walk-in shopping.'
+                text: 'Call +1 (800) 259-2605 anytime — support is 24/7. You can also email support@petshiwu.com or use the contact form on our /contact page.'
               }
             }
           ]
@@ -199,7 +188,7 @@ const Home = () => {
           url: 'https://www.petshiwu.com',
           logo: 'https://www.petshiwu.com/logo-square-512.png',
           description:
-            `Petshiwu — premium pet food, toys, and supplies delivered to Queens, Brooklyn, Manhattan, and all of NYC. ${CATALOG_PRODUCT_COUNT_LABEL} products, free shipping over $49.`,
+            `Petshiwu is an online pet store for food, treats, toys, and supplies. ${CATALOG_PRODUCT_COUNT_LABEL} products, free shipping over $49. No autoship.`,
           contactPoint: { telephone: '+1-800-259-2605', contactType: 'customer service' },
           address: {
             streetAddress: '37-68 74th St',
@@ -219,7 +208,7 @@ const Home = () => {
           logo: 'https://www.petshiwu.com/logo-square-512.png',
           image: 'https://www.petshiwu.com/logo-square-512.png',
           description:
-            `Same-day pet food and supplies delivery in New York City. Jackson Heights is office and warehouse only — not a walk-in store. ${CATALOG_PRODUCT_COUNT_LABEL} products from top brands. Free delivery on orders over $49.`,
+            `Online pet store for food, treats, and supplies. Currently delivering in NYC, with nationwide shipping opening soon. Warehouse and office only — not a walk-in store. ${CATALOG_PRODUCT_COUNT_LABEL} products from top brands. Free delivery on orders over $49.`,
           telephone: '+1-800-259-2605',
           email: 'support@petshiwu.com',
           address: {
@@ -238,7 +227,7 @@ const Home = () => {
             },
           ],
           priceRange: '$$',
-          areaServed: ['Queens', 'Brooklyn', 'Manhattan', 'Bronx', 'Staten Island', 'New York City'],
+          areaServed: ['United States', 'New York City'],
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
           sameAs: [...SOCIAL_PROFILES],
@@ -264,9 +253,13 @@ const Home = () => {
 
       {!authLoading && isAuthenticated ? <RestockDashboard /> : null}
 
+      <HomeHeroSlogans />
+
       <ShopByPet />
 
-      <TonightPromiseCard />
+      <CategoryIcons />
+
+      <TrustBadges />
 
       <OrdersOpenBanner />
 
@@ -274,16 +267,13 @@ const Home = () => {
         <HeroSlideshow />
       </div>
 
-      <TonightDeliveryHowItWorks />
-
-      <CategoryIcons />
-
       <TodaysDeals />
 
       <section className="py-14 bg-white text-center">
         <div className="container mx-auto px-4 lg:px-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-8">
-            Featured this week
+          <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-2">Featured</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-[#1E3A8A] mb-8">
+            Top picks for dogs and cats
           </h2>
           {isLoading ? (
             <LoadingSpinner size="lg" />
@@ -305,66 +295,24 @@ const Home = () => {
               to="/products?featured=true"
               className="inline-flex items-center gap-2 bg-[#1E3A8A] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors"
             >
-              <span>View all products</span>
+              <span>Shop all products</span>
               <ChevronRight size={20} />
             </Link>
           </div>
         </div>
       </section>
 
-      <section className="py-10 bg-[#1E3A8A] text-white">
-        <div className="container mx-auto px-4 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-1">Same-day NYC delivery</h2>
-            <p className="text-white/80">
-              {ORDERING_PAUSED
-                ? `${ORDERING_PAUSED_HEADLINE}. Browse now — your cart stays saved.`
-                : areOrdersOpen()
-                ? 'Order by 3 PM weekdays (1 PM weekends). No subscription required. Free over $49.'
-                : `We start taking orders ${ORDERS_OPEN_LABEL}. Browse now — checkout opens that day.`}
-            </p>
-          </div>
-          <Link
-            to="/products"
-            className="bg-white text-[#1E3A8A] px-6 py-3 rounded-lg font-semibold hover:bg-slate-100 transition-colors"
-          >
-            {ORDERING_PAUSED || !areOrdersOpen() ? 'Browse products' : 'Shop tonight'}
-          </Link>
-        </div>
-      </section>
-
-      <TrustBadges />
-
-      <section className="py-14 bg-slate-50 text-center">
-        <div className="container mx-auto px-4 lg:px-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-8">Why Petshiwu</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { title: 'Same-day NYC', desc: ORDERING_PAUSED ? 'When checkout opens · before 11 PM' : 'Order by 3 PM · before 11 PM' },
-              { title: 'No lock-in', desc: 'No required subscription. Order when you want.' },
-              { title: 'Free over $49', desc: ORDERING_PAUSED ? 'When checkout opens · $6 under that' : 'Flat $6 under that' },
-              { title: '365-day returns', desc: 'Unused items · no hassle' },
-            ].map((item) => (
-              <div key={item.title} className="bg-white rounded-xl p-5 border border-slate-100">
-                <h3 className="text-base font-semibold text-[#1E3A8A] mb-1">{item.title}</h3>
-                <p className="text-slate-500 text-sm">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Brands We Carry */}
-      <section className="py-14 bg-gray-50 border-t border-gray-100">
+      <section className="py-14 bg-gray-50 border-y border-gray-100">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A]">Shop by brand</h2>
-              <p className="text-gray-500 text-sm mt-1">Click a brand to browse their products</p>
+              <h2 className="text-2xl md:text-3xl font-extrabold text-[#1E3A8A]">Shop top brands</h2>
+              <p className="text-gray-500 text-sm mt-1">Hill’s, Royal Canin, Purina, Blue Buffalo, and more</p>
             </div>
             <Link
               to="/products"
-              className="hidden md:flex items-center gap-1 text-blue-600 hover:text-blue-700 font-semibold text-sm border border-blue-200 rounded-full px-4 py-1.5 hover:bg-blue-50 transition-colors"
+              className="hidden md:flex items-center gap-1 text-[#1E3A8A] hover:text-[#163074] font-semibold text-sm border border-[#1E3A8A]/20 rounded-lg px-4 py-1.5 hover:bg-blue-50 transition-colors"
             >
               All brands →
             </Link>
@@ -380,7 +328,7 @@ const Home = () => {
                 aria-label={`Shop ${brand.name} products`}
               >
                 <div
-                  className={`w-36 h-24 flex items-center justify-center rounded-2xl border-2 border-transparent shadow-sm group-hover:border-blue-400 group-hover:shadow-lg transition-all duration-200 overflow-hidden ${
+                  className={`w-36 h-24 flex items-center justify-center rounded-2xl border-2 border-transparent shadow-sm group-hover:border-[#1E3A8A] group-hover:shadow-lg transition-all duration-200 overflow-hidden ${
                     brand.dark ? 'bg-zinc-900' : 'bg-white'
                   }`}
                 >
@@ -400,7 +348,7 @@ const Home = () => {
                     }}
                   />
                 </div>
-                <p className="text-center text-xs text-gray-500 mt-2 font-semibold group-hover:text-blue-600 transition-colors truncate w-36">
+                <p className="text-center text-xs text-gray-500 mt-2 font-semibold group-hover:text-[#1E3A8A] transition-colors truncate w-36">
                   {brand.name}
                 </p>
               </button>
@@ -408,26 +356,31 @@ const Home = () => {
           </div>
 
           <div className="text-center mt-6 md:hidden">
-            <Link to="/products" className="text-blue-600 font-semibold text-sm">
+            <Link to="/products" className="text-[#1E3A8A] font-semibold text-sm">
               View all brands →
             </Link>
           </div>
         </div>
       </section>
 
+      <TonightPromiseCard />
+
+      <TonightDeliveryHowItWorks />
+
       <section className="py-14 bg-white">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-2">
-              Built for NYC pet parents
+            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-2">Why Petshiwu</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-[#1E3A8A] mb-2">
+              A national pet store, online
             </h2>
-            <p className="text-slate-500">Queens packing · all five boroughs · no walk-in store</p>
+            <p className="text-slate-500">Shop by pet. Shop by brand. No autoship. 365-day returns.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
               {
-                title: 'Same-day when you order by cutoff',
-                text: 'Weekdays 3 PM, weekends 1 PM. We pack in Jackson Heights and deliver before 11 PM across Manhattan, Brooklyn, Queens, the Bronx, and Staten Island.',
+                title: 'Shop by pet, then by aisle',
+                text: 'Dogs, cats, birds, fish, reptiles, and small pets. Food, treats, litter, toys, and prescription diets — the aisles you expect from a national pet retailer.',
               },
               {
                 title: 'Vet-quality brands, no subscription trap',
@@ -435,10 +388,10 @@ const Home = () => {
               },
               {
                 title: '365-day returns and 24/7 support',
-                text: 'Unused items come back easy. Call +1 (800) 259-2605 any time. The 74th Street address is warehouse only — not a shop you can walk into.',
+                text: 'Unused items come back easy. Call +1 (800) 259-2605 any time. Currently delivering in NYC. Nationwide shipping opens in a few days.',
               },
             ].map((item) => (
-              <div key={item.title} className="bg-slate-50 rounded-xl p-6 border border-slate-100">
+              <div key={item.title} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                 <h3 className="font-semibold text-[#1E3A8A] mb-2">{item.title}</h3>
                 <p className="text-slate-700 text-sm leading-relaxed">{item.text}</p>
               </div>
@@ -492,14 +445,15 @@ const NewsletterSection = () => {
   };
 
   return (
-    <section className="py-14 bg-[#1E3A8A] text-white">
-      <div className="container mx-auto px-4 lg:px-8 text-center">
+    <section className="bg-[#1E3A8A] text-white">
+      <div className="h-px w-full bg-white/20" />
+      <div className="container mx-auto px-4 lg:px-8 py-14 text-center">
         <div className="max-w-2xl mx-auto">
           {!submitted ? (
             <>
-              <h2 className="text-2xl md:text-3xl font-bold mb-3">Get delivery updates</h2>
+              <h2 className="text-2xl md:text-3xl font-extrabold mb-3">Save on your next order</h2>
               <p className="text-white/80 mb-8">
-                NYC same-day notes. First order: FREEDOM20 (20% off, max $10). Repeat: 10% off, max $10. No autoship.
+                First order: FREEDOM20 (20% off, max $10). Repeat: 10% off, max $10. No autoship.
               </p>
               <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={handleSubmit}>
                 <input
@@ -513,7 +467,7 @@ const NewsletterSection = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-white text-[#1E3A8A] font-semibold px-7 py-3 rounded-lg whitespace-nowrap disabled:opacity-60"
+                  className="bg-white text-[#1E3A8A] font-semibold px-7 py-3 rounded-md whitespace-nowrap disabled:opacity-60 hover:bg-slate-100"
                 >
                   {loading ? 'Sending...' : 'Subscribe'}
                 </button>

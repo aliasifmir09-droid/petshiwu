@@ -53,6 +53,9 @@ Allow: /learning
 Allow: /care-guides
 Allow: /faq
 Allow: /about
+Allow: /our-promise
+Allow: /for-pet-parents
+Allow: /from-queens
 Allow: /contact
 Allow: /press
 Allow: /return-policy
