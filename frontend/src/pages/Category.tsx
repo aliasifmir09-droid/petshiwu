@@ -423,7 +423,7 @@ const Category = () => {
                 </div>
               ) : filteredProducts.length > 0 ? (
                 <>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch">
                                       {filteredProducts.map((product, index) => (
                                         <div key={product._id} className="flex">
                                           <ProductCard

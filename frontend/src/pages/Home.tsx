@@ -146,7 +146,7 @@ const Home = () => {
               name: 'Does Petshiwu require an autoship subscription?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'No. There is no required subscription. Optional restock reminders (ask first or a schedule you choose) only charge when you confirm. First order: FREEDOM20, 20% off max $10.'
+                text: 'No. There is no required subscription. First order: FREEDOM20, 20% off max $10. Repeat: 10% off max $10, no autoship. Optional restock reminders only charge when you confirm.'
               }
             },
             {
@@ -499,7 +499,7 @@ const NewsletterSection = () => {
             <>
               <h2 className="text-2xl md:text-3xl font-bold mb-3">Get delivery updates</h2>
               <p className="text-white/80 mb-8">
-                NYC same-day notes. First order: FREEDOM20 (20% off, max $10). No required subscription.
+                NYC same-day notes. First order: FREEDOM20 (20% off, max $10). Repeat: 10% off, max $10. No autoship.
               </p>
               <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={handleSubmit}>
                 <input

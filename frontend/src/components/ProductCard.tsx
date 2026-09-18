@@ -14,6 +14,7 @@ import QuickViewModal from './QuickViewModal';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { getListingPrice, getListingVariant, getProductImage, getValidCompareAtPrice } from '@/utils/productPrice';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
+import { FIRST_ORDER_CARD_LINE, REPEAT_ORDER_CARD_LINE } from '@/config/publicPromos';
 
 interface ProductCardProps {
   product: Product;
@@ -112,7 +113,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
       to={generateProductUrl(product)}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
-      className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-slate-100 hover:border-slate-200 relative flex flex-col h-full w-full"
+      className="group bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-stone-200 hover:border-stone-300 relative flex flex-col h-full w-full"
     >
       {/* Trending Badge - Top Right Corner */}
       {product.totalReviews > 50 && (
@@ -188,114 +189,100 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
         </button>
       </div>
 
-      {/* Content */}
-      <div className="p-5 flex flex-col flex-grow">
-        <div className="space-y-3 flex-grow">
-          {/* Brand */}
-          <p className="text-xs text-blue-600 font-extrabold uppercase tracking-widest mb-1 group-hover:text-blue-700 transition-colors">
-            {decodeHtmlEntities(product.brand)}
-          </p>
+      <div className="px-3.5 pt-3 pb-3.5 flex flex-col flex-grow">
+        <div className="flex-grow">
+          {product.brand ? (
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-stone-500 mb-1">
+              {decodeHtmlEntities(product.brand)}
+            </p>
+          ) : null}
 
-          {/* Name */}
-          <h3 className="font-bold text-gray-900 mb-2 line-clamp-3 min-h-[4rem] text-sm group-hover:text-blue-700 transition-colors leading-snug">
+          <h3 className="font-semibold text-stone-900 line-clamp-2 min-h-[2.5rem] text-sm leading-snug group-hover:text-[#1E3A8A]">
             {searchTerm ? highlightSearchTerm(decodeHtmlEntities(product.name), searchTerm) : decodeHtmlEntities(product.name)}
           </h3>
 
-          {/* Rating - Only render if there are reviews */}
-          {product.totalReviews > 0 ? (
-            <div className="space-y-1.5 min-h-[24px]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <div className="flex items-center">
-                    {starIndices.map((i) => (
-                      <Star 
-                        key={i} 
-                        size={14} 
-                        className={`${
-                          i < Math.floor(product.averageRating) 
-                            ? 'text-amber-400 fill-amber-400' 
-                            : 'text-gray-300'
-                        }`} 
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm font-bold text-gray-800">{Number(product.averageRating || 0).toFixed(1)}</span>
-                </div>
-                <span className="text-xs text-gray-500">({product.totalReviews} reviews)</span>
-              </div>
+          <div className="mt-1.5 flex items-center gap-1.5 min-h-[1.25rem]">
+            <div className="flex items-center">
+              {starIndices.map((i) => (
+                <Star
+                  key={i}
+                  size={13}
+                  className={
+                    product.totalReviews > 0 && i < Math.round(Number(product.averageRating) || 0)
+                      ? 'text-amber-400 fill-amber-400'
+                      : 'text-stone-200'
+                  }
+                />
+              ))}
             </div>
-          ) : (
-            <div className="min-h-[24px]"></div>
-          )}
-
-          {/* Price Section with Enhanced Design */}
-          <div className="bg-slate-50 p-3 rounded-lg">
-            <div className="flex items-baseline gap-2 mb-1">
-              <span className="text-2xl font-black text-gray-900 tracking-tight">
-                ${listingPrice.toFixed(2)}
-              </span>
-              {compareAtPrice && (
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 line-through">
-                    ${compareAtPrice.toFixed(2)}
-                  </span>
-                  <span className="text-[10px] text-green-600 font-bold">
-                    YOU SAVE ${(compareAtPrice - listingPrice).toFixed(2)}
-                  </span>
-                </div>
-              )}
-            </div>
-
+            {product.totalReviews > 0 ? (
+              <>
+                <span className="text-xs font-semibold text-stone-800">
+                  {Number(product.averageRating || 0).toFixed(1)}
+                </span>
+                <span className="text-xs text-stone-500">({product.totalReviews})</span>
+              </>
+            ) : (
+              <span className="text-xs text-stone-400">New</span>
+            )}
           </div>
 
-          <div className="mb-2 min-h-[2rem]">
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-xl font-black text-stone-900 tracking-tight">
+              ${listingPrice.toFixed(2)}
+            </span>
+            {compareAtPrice ? (
+              <span className="text-sm text-stone-400 line-through">${compareAtPrice.toFixed(2)}</span>
+            ) : null}
+          </div>
+
+          <p className="mt-2 text-xs font-semibold text-emerald-700">{FIRST_ORDER_CARD_LINE}</p>
+          <p className="text-[11px] font-medium text-stone-500">{REPEAT_ORDER_CARD_LINE}</p>
+
+          <div className="mt-2 min-h-[1.25rem]">
             {isReadyToShip ? (
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
-                <span className="text-xs text-slate-600">{inStockLabel(true)}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                <span className="text-xs text-stone-500">{inStockLabel(true)}</span>
               </div>
             ) : (
-              <div className="bg-gray-100 border border-gray-300 rounded-lg p-2 flex items-center gap-2">
-                <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                <span className="text-xs text-red-600 font-bold">Out of stock</span>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                <span className="text-xs font-semibold text-red-600">Out of stock</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Add to Cart Button with Enhanced Design - Always at bottom */}
         {!hideCartButton && (
-          <div className="mt-auto pt-3">
+          <div className="mt-3">
             <button
               type="button"
               onClick={handleAddToCart}
               disabled={!product.inStock}
               aria-label={product.inStock ? `${addToCartLabel(true)} ${product.name}` : `${product.name} is out of stock`}
-              className={`w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-lg font-semibold text-sm ${
+              className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-full font-semibold text-sm ${
                 cartAdded
                   ? 'bg-emerald-600 text-white'
                   : product.inStock
                   ? 'bg-[#1E3A8A] text-white hover:bg-[#1e40af]'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-stone-200 text-stone-400 cursor-not-allowed'
               }`}
             >
               {cartAdded ? (
                 <>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                   <span>Added</span>
                 </>
               ) : (
                 <>
-                  <ShoppingCart size={20} strokeWidth={2.5} />
-                  <span>
-                    {addToCartLabel(Boolean(product.inStock))}
-                  </span>
+                  <ShoppingCart size={18} strokeWidth={2.5} />
+                  <span>{addToCartLabel(Boolean(product.inStock))}</span>
                 </>
               )}
             </button>
           </div>
         )}
-
       </div>
 
       {/* Quick View Modal */}

@@ -31,7 +31,8 @@ import { isNycDeliveryZip, isNewYorkState, normalizeShippingState } from '@/util
 import { shippingCostForSubtotal } from '@/utils/orderTotals';
 import { checkoutCodeFromError, checkoutCodeFromResponse } from '@/utils/checkoutCoupon';
 import { isCheckoutDeliveryReady, shouldHoldCheckoutOnEmptyCart } from '@/utils/checkoutFlow';
-import { clearRestockCoupon, clearRestockPay, readRestockCoupon, readRestockPay, isRestockPayMethod, ASK_COUPON, ASK_DISCOUNT_COPY, AUTOSHIP_COUPON, AUTOSHIP_DISCOUNT_COPY } from '@/utils/restock';
+import { clearRestockCoupon, clearRestockPay, readRestockCoupon, readRestockPay, isRestockPayMethod } from '@/utils/restock';
+import { FIRST_ORDER_CODE, FIRST_ORDER_COPY, REPEAT_ORDER_CODE, REPEAT_ORDER_COPY } from '@/config/publicPromos';
 import {
   formatCardExpiry,
   isReusableSavedCard,
@@ -1456,8 +1457,10 @@ const Checkout = () => {
                       </div>
                     )}
                     {!ORDERING_PAUSED && !couponCode && !couponMessage && (
-                      <p className="text-xs text-stone-500 mt-1.5">
-                        First order: FREEDOM20 · 20% off, max $10. Reorder {ASK_COUPON} · {ASK_DISCOUNT_COPY}. Autoship {AUTOSHIP_COUPON} · {AUTOSHIP_DISCOUNT_COPY}.
+                      <p className="text-xs text-stone-500 mt-1.5 leading-relaxed">
+                        First order: {FIRST_ORDER_CODE} · {FIRST_ORDER_COPY}
+                        <br />
+                        Repeat: {REPEAT_ORDER_CODE} · {REPEAT_ORDER_COPY}
                       </p>
                     )}
                     {couponMessage && (

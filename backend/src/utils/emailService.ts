@@ -451,7 +451,7 @@ export const buildReorderReminderEmail = (
           <p style="text-align:center;margin:28px 0;">
             <a href="${buyAgainUrl}" style="background:#1E3A8A;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;">Ship now — 7% off (max $10)</a>
           </p>
-          <p style="color:#666;font-size:12px;">Not a silent charge. Ask first is 5% off if you'd rather confirm each time. Add or remove items in your restock cart on the dashboard.</p>
+          <p style="color:#666;font-size:12px;">Not a silent charge. Ask first is 10% off, max $10, if you'd rather confirm each time. Add or remove items in your restock cart on the dashboard.</p>
         </div>
       </body>
       </html>
@@ -460,29 +460,29 @@ export const buildReorderReminderEmail = (
   }
 
   return {
-    subject: `Confirm now for 5% off (max $10) — restock #${orderNumber}`,
-    html: `
+      subject: `Confirm now for 10% off (max $10) — restock #${orderNumber}`,
+      html: `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Confirm now — 5% off your restock</title>
+        <title>Confirm now — 10% off your restock</title>
       </head>
       <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background-color: #1E3A8A; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
-          <h1 style="margin: 0;">Confirm now. Get 5% off.</h1>
+          <h1 style="margin: 0;">Confirm now. Get 10% off.</h1>
           <p style="margin: 10px 0 0 0;">Max $10 · Order #${escapeHtml(orderNumber)}</p>
         </div>
         <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px;">
           <p>Hi ${safeName},</p>
-          <p>Your usual is ready. Confirm now and we take <strong>5% off (max $10)</strong> at checkout. Autoship is 7% off if you'd rather we ping you on a schedule.</p>
+          <p>Your usual is ready. Confirm now and we take <strong>10% off (max $10)</strong> at checkout. No subscription. No autoship required.</p>
           ${itemLines ? `<ul>${itemLines}</ul>` : ''}
           <p style="background:#ecfdf5;border-left:4px solid #059669;padding:12px 16px;">
             <strong>We will not charge your card unless you tap Confirm now and pay.</strong> Ignore this email and nothing ships.
           </p>
           <p style="text-align:center;margin:28px 0;">
-            <a href="${buyAgainUrl}" style="background:#1E3A8A;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;">Confirm now — 5% off (max $10)</a>
+            <a href="${buyAgainUrl}" style="background:#1E3A8A;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;">Confirm now — 10% off (max $10)</a>
           </p>
           <p style="color:#666;font-size:12px;">Add or remove items in your restock cart any time. Toys skip restock — add what they actually run out of.</p>
         </div>

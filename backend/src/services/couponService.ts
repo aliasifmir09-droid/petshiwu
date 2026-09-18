@@ -26,12 +26,12 @@ export const COUPONS: Record<string, Coupon> = {
     reusable: true,
     hidden: true,
   },
-  // Ask first / reorder: 5% off, max $10. Autoship: 7% off, max $10. Reusable.
+  // Ask first / reorder: 10% off, max $10. Autoship stays 7% off, max $10, unadvertised on checkout.
   RESTOCK5: {
     type: 'percent',
-    value: 5,
+    value: 10,
     maxDiscount: 10,
-    description: '5% off when you confirm a reorder (max $10)',
+    description: '10% off a reorder (max $10, no autoship)',
     reusable: true,
   },
   RESTOCK7: {
