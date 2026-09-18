@@ -15,7 +15,7 @@ describe('TonightPromiseCard', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/same-day nyc when checkout opens/i)).toBeInTheDocument();
+    expect(screen.getByText(/tonight at your door/i)).toBeInTheDocument();
     expect(screen.getByText(/packed in jackson heights/i)).toBeInTheDocument();
     expect(screen.getByText(/no autoship/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /shop now/i })).toHaveAttribute('href', '/products');
@@ -23,7 +23,7 @@ describe('TonightPromiseCard', () => {
     fireEvent.change(screen.getByLabelText(/check same-day delivery by zip code/i), {
       target: { value: '11372' },
     });
-    expect(screen.getByText(/queens/i)).toBeInTheDocument();
+    expect(screen.getByText(/same-day delivery in queens/i)).toBeInTheDocument();
   });
 
   test('product card keeps the ZIP check next to add to cart', () => {
@@ -33,7 +33,7 @@ describe('TonightPromiseCard', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getAllByText(/when checkout opens/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/tonight in nyc/i)).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText(/check same-day delivery by zip code/i), {
       target: { value: '11201' },
     });
