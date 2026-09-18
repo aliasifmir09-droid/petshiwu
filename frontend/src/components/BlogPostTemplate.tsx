@@ -14,6 +14,7 @@ interface BlogPostTemplateProps {
   tags?: string[];
   keywords: string[];
   category?: string;
+  slug?: string;
   relatedPosts?: Array<{ title: string; slug: string; excerpt?: string }>;
   breadcrumbs?: Array<{ label: string; path: string }>;
 }
@@ -23,6 +24,14 @@ interface BlogPostTemplateProps {
  * Reusable template for SEO-optimized blog posts
  * Includes structured data, breadcrumbs, and related content
  */
+export const learningArticleCanonical = (slug?: string, title?: string): string => {
+  const slugFromTitle = String(title || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+  return `https://www.petshiwu.com/learning/${slug || slugFromTitle}`;
+};
+
 const BlogPostTemplate = ({
   title,
   description,
@@ -33,13 +42,14 @@ const BlogPostTemplate = ({
   tags = [],
   keywords,
   category,
+  slug,
   relatedPosts = [],
   breadcrumbs = [
     { label: 'Home', path: '/' },
     { label: 'Learning', path: '/learning' }
   ]
 }: BlogPostTemplateProps) => {
-  const canonicalUrl = `https://www.petshiwu.com/learning/${title.toLowerCase().replace(/\s+/g, '-')}`;
+  const canonicalUrl = learningArticleCanonical(slug, title);
 
   // Generate article schema
   const articleSchema = {
@@ -61,6 +71,7 @@ const BlogPostTemplate = ({
     },
     datePublished: publishDate,
     dateModified: publishDate,
+    url: canonicalUrl,
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': canonicalUrl
@@ -80,7 +91,7 @@ const BlogPostTemplate = ({
         publishedTime={publishDate}
         category={category}
       />
-      <StructuredData type="review" data={articleSchema} />
+      <StructuredData type="article" data={articleSchema} />
 
       <div className="container mx-auto px-4 lg:px-8 py-8">
         {/* Breadcrumbs */}

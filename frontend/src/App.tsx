@@ -339,6 +339,8 @@ function App() {
                   <Route path="/blog" element={<Navigate to="/learning" replace />} />
                   <Route path="/blog/:slug" element={<LegacyBlogRedirect />} />
                   <Route path="/learning" element={<Learning />} />
+                  <Route path="/learning/best-dog-food-sensitive-stomach" element={<SensitiveStomachGuide />} />
+                  <Route path="/learning/best-dog-foods-sensitive-stomachs" element={<BestFoodSensitiveStomach />} />
                   <Route path="/learning/:slug" element={<BlogDetail />} />
                   <Route path="/care-guides" element={<CareGuides />} />
                   <Route path="/care-guides/:slug" element={<CareGuideDetail />} />
@@ -408,10 +410,6 @@ function App() {
                   <Route path="/sell-with-us" element={<SellWithUs />} />
                   <Route path="/vendors" element={<SellWithUs />} />
                   <Route path="/partners" element={<SellWithUs />} />
-                  
-                  {/* NEW LEARNING CENTER GUIDES */}
-                  <Route path="/learning/best-dog-food-sensitive-stomach" element={<SensitiveStomachGuide />} />
-                  <Route path="/learning/best-dog-foods-sensitive-stomachs" element={<BestFoodSensitiveStomach />} />
                   
                   {/* Legal & Policy pages */}
                   <Route path="/privacy" element={<PrivacyPolicy />} />

@@ -2,10 +2,12 @@ import {
   buildBlogHtml,
   buildCanonicalProductPath,
   buildCareGuideHtml,
+  buildEducationHubHtml,
   buildHomepageHtml,
   buildProductHtml,
   buildReturnPolicyHtml,
   buildSeoLandingHtmlFromProducts,
+  buildStaticLearningHtml,
   extractFaqPairs,
   landingTaxonomyForPath,
   normalizeReqPath,
@@ -347,6 +349,45 @@ describe('blog and care-guide bot HTML', () => {
     expect(html).toContain('"@type":"FAQPage"');
     expect(html).toContain('How often should I feed a puppy?');
     expect(html).toContain('https://www.petshiwu.com/care-guides/puppy-feeding-schedule');
+    expect(html).toContain('twitter:title');
+    expect(html).toContain('og:type');
+  });
+});
+
+describe('education hub and static learning HTML', () => {
+  it('puts article links in first-wave /learning HTML', () => {
+    const html = buildEducationHubHtml(ARTICLE_TEMPLATE, {
+      path: '/learning',
+      heading: 'Pet Care Blog, Guides & Tips',
+      intro: 'Expert pet care guides from Petshiwu.',
+      items: [
+        { title: 'How to Groom a Cat', slug: 'how-to-groom-a-cat', excerpt: 'Brush weekly.' },
+        { title: 'Best Dog Food for Sensitive Stomachs: A 2026 Expert Guide', slug: 'best-dog-food-sensitive-stomach' },
+      ],
+    });
+    expect(html).toContain('https://www.petshiwu.com/learning/how-to-groom-a-cat');
+    expect(html).toContain('https://www.petshiwu.com/learning/best-dog-food-sensitive-stomach');
+    expect(html).toContain('"@type":"CollectionPage"');
+    expect(html).toContain('rel="canonical" href="https://www.petshiwu.com/learning"');
+  });
+
+  it('puts care-guide links in first-wave /care-guides HTML', () => {
+    const html = buildEducationHubHtml(ARTICLE_TEMPLATE, {
+      path: '/care-guides',
+      heading: 'Pet Care Guides',
+      intro: 'Species care from Petshiwu.',
+      items: [{ title: 'Reptile Care Basics', slug: 'reptile-care-basics-beginners-guide' }],
+    });
+    expect(html).toContain('https://www.petshiwu.com/care-guides/reptile-care-basics-beginners-guide');
+    expect(html).toContain('rel="canonical" href="https://www.petshiwu.com/care-guides"');
+  });
+
+  it('serves static education guides as crawlable articles instead of a 404', () => {
+    const html = buildStaticLearningHtml(ARTICLE_TEMPLATE, 'best-dog-food-sensitive-stomach');
+    expect(html).toContain('https://www.petshiwu.com/learning/best-dog-food-sensitive-stomach');
+    expect(html).toContain('Transition slowly over 7');
+    expect(html).toContain('"@type":"Article"');
+    expect(html).not.toContain('Read Full Article');
   });
 });
 

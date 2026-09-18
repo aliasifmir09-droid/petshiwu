@@ -8,6 +8,7 @@ const BestFoodSensitiveStomach = () => {
   return (
     <BlogPostTemplate
       title="10 Best Dog Foods for Sensitive Stomachs [2024 Guide]"
+      slug="best-dog-foods-sensitive-stomachs"
       description="Discover the best dog foods for sensitive stomachs. Expert-reviewed formulas with easily digestible ingredients, probiotics, and limited ingredients. Complete buying guide with recommendations."
       keywords={[
         'best dog food sensitive stomach',

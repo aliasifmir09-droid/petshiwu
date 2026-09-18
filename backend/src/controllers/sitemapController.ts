@@ -7,6 +7,8 @@ import FAQ from '../models/FAQ';
 import PetType from '../models/PetType';
 import logger from '../utils/logger';
 import { canonicalPetSlug, classifyRoute, INDEXABLE_LANDING_PATHS } from '../seo/routeClassifier';
+import { BLOG_REDIRECTS } from '../seo/blogRedirects';
+import { STATIC_LEARNING_PATHS } from '../seo/staticLearningPages';
 
 /**
  * Escape XML special characters
@@ -235,6 +237,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
             // Blog/Learning pages — skip broken slugs (soft-404 trap)
             blogs.forEach(blog => {
               if (!isCleanSlug(blog.slug)) return;
+              if (BLOG_REDIRECTS[blog.slug]) return;
               const lastmod = blog.updatedAt
                 ? new Date(blog.updatedAt).toISOString().split('T')[0]
                 : currentDate;
@@ -330,6 +333,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
       { path: '/investors', priority: '0.7', changefreq: 'monthly' },
       { path: '/innovation', priority: '0.8', changefreq: 'weekly' },
       { path: '/sell-with-us', priority: '0.8', changefreq: 'monthly' },
+      ...STATIC_LEARNING_PATHS.map((path) => ({ path, priority: '0.8', changefreq: 'monthly' })),
     ];
 
     const listedStatic = new Set(staticPages.map(page => page.path));

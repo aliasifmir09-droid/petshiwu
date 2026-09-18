@@ -30,6 +30,8 @@ import {
   NEIGHBORHOOD_PAGE_REGISTRY,
   getNeighborhoodRoute,
 } from '../seo/neighborhoodRegistry';
+import { BLOG_REDIRECTS } from '../seo/blogRedirects';
+import { isStaticLearningSlug, STATIC_LEARNING_PAGES } from '../seo/staticLearningPages';
 import { DEFAULT_OG_IMAGE, injectOgTags, resolveShareImage } from '../seo/ogTags';
 import { merchantMpn } from '../utils/googleMerchantFeed';
 
@@ -306,6 +308,16 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   '/care-guides': {
     title: 'Pet Care Guides | Petshiwu',
     description: 'Comprehensive pet care guides for dogs, cats, birds, fish, reptiles, and small animals. Expert advice from the Petshiwu team.',
+  },
+  '/learning/best-dog-food-sensitive-stomach': {
+    title: 'Best Dog Food for Sensitive Stomachs: A 2026 Expert Guide | Petshiwu Learning',
+    description:
+      "Is your dog struggling with digestive issues? Discover the best dog food for sensitive stomachs, including grain-free and limited ingredient diets at Petshiwu.",
+  },
+  '/learning/best-dog-foods-sensitive-stomachs': {
+    title: '10 Best Dog Foods for Sensitive Stomachs [Guide] | Petshiwu Learning',
+    description:
+      'Discover the best dog foods for sensitive stomachs. Expert-reviewed formulas with easily digestible ingredients, probiotics, and limited ingredients.',
   },
 
   // ── High-value SEO landing pages ──────────────────────────────────────────
@@ -609,6 +621,7 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
 type PageType =
   | { type: 'product'; slug: string }
   | { type: 'blog'; slug: string }
+  | { type: 'static-learning'; slug: string }
   | { type: 'care-guide'; slug: string }
   | { type: 'category'; slug: string }
   | { type: 'neighborhood'; slug: string; categorySlug: string; neighborhoodName: string; borough: string; nearbyAreas: string }
@@ -625,9 +638,11 @@ const matchRoute = (pathname: string): PageType => {
 
   if (segments.length === 0) return null;
 
-  // /learning/:slug
-  if (segments[0] === 'learning' && segments.length === 2)
+  // /learning/:slug — static React guides are not CMS blogs
+  if (segments[0] === 'learning' && segments.length === 2) {
+    if (isStaticLearningSlug(segments[1])) return { type: 'static-learning', slug: segments[1] };
     return { type: 'blog', slug: segments[1] };
+  }
 
   // /care-guides/:slug
   if (segments[0] === 'care-guides' && segments.length === 2)
@@ -1143,6 +1158,10 @@ export const buildCareGuideHtml = (template: string, guide: any): string => {
   <meta property="og:description" content="${esc(description)}" />
   <meta property="og:image" content="${esc(image)}" />
   <meta property="og:url" content="${esc(url)}" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:title" content="${esc(title)}" />
+  <meta name="twitter:description" content="${esc(description)}" />
+  <meta name="twitter:image" content="${esc(image)}" />
   <script type="application/ld+json">${JSON.stringify(schema)}</script>
   <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
   ${faqSchema ? `<script type="application/ld+json">${JSON.stringify(faqSchema)}</script>` : ''}`;
@@ -1643,6 +1662,118 @@ const buildProductListHtml = async (template: string): Promise<string> => {
   return html;
 };
 
+export type EducationHubItem = {
+  title: string;
+  slug: string;
+  excerpt?: string;
+};
+
+/** First-wave HTML for /learning and /care-guides so Google can follow article links. */
+export const buildEducationHubHtml = (
+  template: string,
+  options: {
+    path: '/learning' | '/care-guides';
+    heading: string;
+    intro: string;
+    items: EducationHubItem[];
+  }
+): string => {
+  const canonicalUrl = `${BASE}${options.path}`;
+  const meta = STATIC_PAGES[options.path] ?? {
+    title: options.heading,
+    description: options.intro,
+  };
+  const itemLinks = options.items
+    .filter((item) => item.slug && item.title)
+    .map((item) => {
+      const url = `${BASE}${options.path}/${esc(item.slug)}`;
+      const excerpt = item.excerpt ? ` — ${esc(truncate(stripTags(String(item.excerpt)), 110))}` : '';
+      return `<li><a href="${url}">${esc(item.title)}</a>${excerpt}</li>`;
+    })
+    .join('\n');
+
+  const collectionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: meta.title,
+    description: meta.description,
+    url: canonicalUrl,
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: options.items.slice(0, 60).map((item, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        url: `${BASE}${options.path}/${item.slug}`,
+        name: item.title,
+      })),
+    },
+  };
+
+  const bodyContent = `
+<div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
+  <h2>${esc(options.heading)}</h2>
+  <p>${esc(options.intro)}</p>
+  <ul style="list-style:none;padding:0;line-height:1.8">
+    ${itemLinks}
+  </ul>
+  <p><a href="${BASE}">← Back to Petshiwu</a></p>
+</div>`;
+
+  let html = template;
+  html = injectTitle(html, meta.title);
+  html = injectDescription(html, meta.description);
+  html = injectCanonical(html, canonicalUrl);
+  html = injectHreflang(html, canonicalUrl);
+  html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
+  html = injectH1(html, options.heading);
+  html = injectBeforeHeadClose(html, `<script type="application/ld+json">${JSON.stringify(collectionSchema)}</script>`);
+  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${bodyContent}</div>`);
+  if (!html.includes(bodyContent)) {
+    html = html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+  }
+  return html;
+};
+
+const fetchLearningHubItems = async (): Promise<EducationHubItem[]> => {
+  const staticItems: EducationHubItem[] = Object.values(STATIC_LEARNING_PAGES).map((page) => ({
+    title: page.title,
+    slug: page.slug,
+    excerpt: page.description,
+  }));
+  const blogs = await Blog.find({ isPublished: true })
+    .select('title slug excerpt')
+    .sort({ publishedAt: -1 })
+    .limit(80)
+    .lean();
+  const cmsItems = (blogs as EducationHubItem[]).filter(
+    (blog) => blog.slug && !BLOG_REDIRECTS[blog.slug] && !isStaticLearningSlug(blog.slug)
+  );
+  return [...staticItems, ...cmsItems].slice(0, 80);
+};
+
+const fetchCareGuideHubItems = async (): Promise<EducationHubItem[]> => {
+  const guides = await CareGuide.find({ isPublished: true })
+    .select('title slug excerpt')
+    .sort({ publishedAt: -1 })
+    .limit(80)
+    .lean();
+  return guides as EducationHubItem[];
+};
+
+export const buildStaticLearningHtml = (template: string, slug: string): string => {
+  const page = STATIC_LEARNING_PAGES[slug];
+  if (!page) return template;
+  return buildBlogHtml(template, {
+    title: page.title,
+    slug: page.slug,
+    content: page.html,
+    excerpt: page.description,
+    metaDescription: page.description,
+    publishedAt: page.publishedAt,
+    author: { name: 'Petshiwu Team' },
+  });
+};
+
 /** Pet-type filter for SEO landings — matches frontend/src/pages/seo/*.tsx. */
 export const landingTaxonomyForPath = (pathname: string): { petType?: string } => {
   const path = pathname.split('?')[0].replace(/\/$/, '') || '/';
@@ -1935,6 +2066,8 @@ export const createBotRenderer = (distPath: string) => {
       if (page?.type === 'blog') {
         const exists = await Blog.exists({ slug: page.slug, isPublished: true });
         if (!exists) notFound = true;
+      } else if (page?.type === 'static-learning') {
+        notFound = !isStaticLearningSlug(page.slug);
       } else if (page?.type === 'care-guide') {
         const exists = await CareGuide.exists({ slug: page.slug, isPublished: true });
         if (!exists) notFound = true;
@@ -1974,6 +2107,8 @@ export const createBotRenderer = (distPath: string) => {
           } else {
             notFound = true;
           }
+        } else if (page?.type === 'static-learning') {
+          html = buildStaticLearningHtml(template, page.slug);
         } else if (page?.type === 'care-guide') {
           const guide = await fetchCareGuide(page.slug);
           if (guide) {
@@ -1998,6 +2133,38 @@ export const createBotRenderer = (distPath: string) => {
         } else if (req.path === '/products' || req.path === '/products/') {
           // SSR product listing for Google — inject real product links
           html = await buildProductListHtml(template);
+        } else if (reqPathClean === '/learning') {
+          try {
+            const items = await fetchLearningHubItems();
+            html = buildEducationHubHtml(template, {
+              path: '/learning',
+              heading: 'Pet Care Blog, Guides & Tips',
+              intro:
+                "Expert pet care guides, nutrition tips, and training advice for dogs, cats, birds, fish, and reptiles from the Petshiwu team.",
+              items,
+            });
+          } catch (err) {
+            logger.warn(
+              'Learning hub article fetch failed:',
+              err instanceof Error ? err.message : err
+            );
+          }
+        } else if (reqPathClean === '/care-guides') {
+          try {
+            const items = await fetchCareGuideHubItems();
+            html = buildEducationHubHtml(template, {
+              path: '/care-guides',
+              heading: 'Pet Care Guides',
+              intro:
+                'Comprehensive pet care guides for dogs, cats, birds, fish, reptiles, and small animals.',
+              items,
+            });
+          } catch (err) {
+            logger.warn(
+              'Care-guide hub fetch failed:',
+              err instanceof Error ? err.message : err
+            );
+          }
         } else if (INDEXABLE_LANDING_PATHS.has(reqPathClean)) {
           try {
             const landingProducts = await fetchSeoLandingProducts(reqPathClean);

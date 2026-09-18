@@ -15,6 +15,7 @@ const SensitiveStomachGuide = () => {
         title="Best Dog Food for Sensitive Stomachs: A 2026 Expert Guide"
         description="Is your dog struggling with digestive issues? Discover the best dog food for sensitive stomachs, including top-rated grain-free and limited ingredient diets at Petshiwu."
         type="article"
+        url="https://www.petshiwu.com/learning/best-dog-food-sensitive-stomach"
         image="https://www.petshiwu.com/og-image.jpg"
         category="Dog Health & Nutrition"
       />
