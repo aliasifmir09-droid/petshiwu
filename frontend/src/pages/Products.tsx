@@ -13,6 +13,7 @@ import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import { useSEO } from '@/hooks/useSEO';
+import { CATALOG_META_PROOF } from '@/config/publicSeo';
 import HealthBehavioralFilters from '@/components/HealthBehavioralFilters';
 import { generateProductUrl } from '@/utils/productUrl';
 
@@ -198,17 +199,17 @@ const Products = () => {
 
   const getProductsDescription = () => {
     if (featured) {
-      return 'Shop featured pet products at petshiwu. Premium dog food, cat food, toys, and supplies. Quality products, fast shipping, great prices.';
+      return `Shop featured pet products at Petshiwu. Premium dog food, cat food, toys, and supplies. ${CATALOG_META_PROOF}`;
     }
     if (search) {
-      return `Find ${search} at petshiwu. Quality pet supplies, fast shipping, great prices.`;
+      return `Find ${search} at Petshiwu. Quality pet supplies. ${CATALOG_META_PROOF}`;
     }
     if (petType) {
       const petTypeDisplay = petType.charAt(0).toUpperCase() + petType.slice(1);
       const foodKeyword = petType === 'dog' ? 'dog food' : petType === 'cat' ? 'cat food' : '';
-      return `Shop ${petTypeDisplay} products at petshiwu. Premium ${foodKeyword ? foodKeyword + ', ' : ''}toys, and supplies. Quality products, fast shipping, great prices.`;
+      return `Shop ${petTypeDisplay} products at Petshiwu. Premium ${foodKeyword ? foodKeyword + ', ' : ''}toys, and supplies. ${CATALOG_META_PROOF}`;
     }
-    return 'Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, birds, and more. Quality products, fast shipping, great prices.';
+    return `Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, birds, and more. ${CATALOG_META_PROOF}`;
   };
 
   const getProductsKeywords = () => {

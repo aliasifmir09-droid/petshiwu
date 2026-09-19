@@ -16,6 +16,7 @@ import BottomNav from './components/BottomNav';
 import CookieConsent from './components/CookieConsent';
 import StructuredData from './components/StructuredData';
 import { SOCIAL_PROFILES } from './config/social';
+import { AREA_SERVED_NOW, ORGANIZATION_DESCRIPTION, PAYMENT_ACCEPTED } from './config/publicSeo';
 import RequireAuth from './components/RequireAuth';
 import Home from './pages/Home';
 import { hashAuthRedirect } from './utils/hashAuthRedirect';
@@ -319,8 +320,7 @@ function App() {
             url: 'https://www.petshiwu.com',
             logo: 'https://www.petshiwu.com/logo-square-512.png',
             image: 'https://www.petshiwu.com/logo-square-512.png',
-            description:
-              `Petshiwu is an online pet store for food, treats, and supplies. Currently delivering in NYC, with nationwide shipping opening soon. Warehouse only — not a walk-in store. 4,000+ products. Free delivery on orders over $49.`,
+            description: ORGANIZATION_DESCRIPTION,
             telephone: '+1-800-259-2605',
             email: 'support@petshiwu.com',
             address: {
@@ -339,8 +339,8 @@ function App() {
               },
             ],
             priceRange: '$$',
-            areaServed: ['United States', 'New York City'],
-            paymentAccepted: 'Cash, Credit Card, Debit Card',
+            areaServed: [...AREA_SERVED_NOW],
+            paymentAccepted: PAYMENT_ACCEPTED,
             currenciesAccepted: 'USD',
             sameAs: [...SOCIAL_PROFILES],
           }}

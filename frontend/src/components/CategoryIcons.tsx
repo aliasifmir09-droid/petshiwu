@@ -47,7 +47,7 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
                   )}
                   <img 
                     src={category.image} 
-                    alt=""
+                    alt={category.title}
                     width={170}
                     height={170}
                     className={`w-full h-full object-cover object-center ${imageError ? 'opacity-0 absolute' : 'opacity-100 relative'} transition-transform duration-300`}
@@ -60,7 +60,6 @@ const CategoryItemComponent = ({ category }: { category: CategoryItem }) => {
                     loading="eager"
                     decoding="async"
                     style={{ display: imageError ? 'none' : 'block' }}
-                    aria-hidden="true"
                   />
                 </picture>
                 <div className="absolute inset-0 rounded-full bg-[#1E3A8A]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>

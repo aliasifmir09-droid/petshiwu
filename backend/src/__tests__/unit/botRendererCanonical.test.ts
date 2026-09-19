@@ -107,6 +107,8 @@ describe('buildHomepageHtml delivery-only schema', () => {
         expect.objectContaining({ name: 'Queens' }),
       ])
     );
+    expect(localBusiness.aggregateRating).toBeUndefined();
+    expect(JSON.stringify(localBusiness.sameAs || [])).not.toContain('twitter.com');
   });
 
   it('points Googlebot at the four NYC hubs without claiming same-day nationwide', () => {

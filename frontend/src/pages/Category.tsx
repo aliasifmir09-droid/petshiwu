@@ -11,6 +11,7 @@ import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import { useSEO } from '@/hooks/useSEO';
+import { CATALOG_META_PROOF } from '@/config/publicSeo';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { generateCategoryUrl, generateProductUrl } from '@/utils/productUrl';
 
@@ -184,9 +185,9 @@ const Category = () => {
       : 'Category',
     description: category
       ? (petTypeDisplay
-        ? `Shop ${categoryName} for ${petTypeDisplay} at petshiwu. Quality products, great prices, fast shipping.`
-        : `Shop ${categoryName} at petshiwu. Quality pet supplies, great prices, fast shipping.`)
-      : 'Shop pet supplies at petshiwu.',
+        ? `Shop ${categoryName} for ${petTypeDisplay} at Petshiwu. ${CATALOG_META_PROOF}`
+        : `Shop ${categoryName} at Petshiwu. ${CATALOG_META_PROOF}`)
+      : `Shop pet supplies at Petshiwu. ${CATALOG_META_PROOF}`,
     keywords: [
       category?.name || '',
       petTypeDisplay,
@@ -281,6 +282,11 @@ const Category = () => {
     );
   }
 
+  const hasFilteredParams =
+    Boolean(brand || minRating || inStock || searchParams.get('petType')) ||
+    page > 1 ||
+    (sort && sort !== 'newest');
+
   return (
     <>
       <SEO
@@ -289,6 +295,7 @@ const Category = () => {
         keywords={seoData.keywords}
         url={seoData.canonicalUrl}
         type="website"
+        noindex={hasFilteredParams}
       />
       {seoData.collectionPageSchema && (
         <StructuredData type="collectionPage" data={seoData.collectionPageSchema} />

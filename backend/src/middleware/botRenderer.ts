@@ -1579,7 +1579,7 @@ export const buildHomepageHtml = (template: string): string => {
     ],
     priceRange: '$$',
     currenciesAccepted: 'USD',
-    paymentAccepted: 'Cash, Credit Card, Debit Card',
+    paymentAccepted: 'Credit Card, Debit Card, PayPal',
     areaServed: [
       { '@type': 'City', name: 'New York City' },
       { '@type': 'Borough', name: 'Queens' },
@@ -1588,12 +1588,6 @@ export const buildHomepageHtml = (template: string): string => {
       { '@type': 'Borough', name: 'Bronx' },
       { '@type': 'Borough', name: 'Staten Island' },
     ],
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      reviewCount: '47',
-      bestRating: '5',
-    },
     sameAs: [
       'https://www.facebook.com/petshiwu',
       'https://www.instagram.com/petshiwu',

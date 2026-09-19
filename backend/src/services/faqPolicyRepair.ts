@@ -62,8 +62,18 @@ export async function repairFaqPolicies(): Promise<void> {
       changed += 1;
     }
 
+    const seenQuestions = new Set<string>();
     for (const faq of published) {
       if (faq.isPublished === false) continue;
+      const key = String(faq.question || '').replace(/\s+/g, ' ').trim().toLowerCase();
+      if (!key) continue;
+      if (seenQuestions.has(key)) {
+        faq.isPublished = false;
+        await faq.save();
+        changed += 1;
+        continue;
+      }
+      seenQuestions.add(key);
       const plan = planFaqRepair(faq.question || '', faq.answer || '');
       if (!plan) continue;
       let dirty = false;
