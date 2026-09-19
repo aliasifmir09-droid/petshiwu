@@ -110,12 +110,12 @@ const Home = () => {
   return (
     <div className="relative bg-white">
       <SEO
-        title="Petshiwu — Pet Food, Treats & Supplies"
+        title="Petshiwu | Pet Food & Supplies – Free Shipping $49+, No Autoship"
         description={
           ORDERING_PAUSED
             ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products from ${CATALOG_BRANDS_SHORT}. ${ORDERING_PAUSED_HEADLINE}. Free shipping over $49. No autoship.`
             : areOrdersOpen()
-            ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products from ${CATALOG_BRANDS_SHORT}. Free shipping over $49. No autoship. Currently delivering in NYC. Nationwide shipping opens in a few days.`
+            ? `${CATALOG_PRODUCT_COUNT_LABEL} products from Hill's, Purina, Blue Buffalo, Royal Canin. Same-day NYC. Next-day within 50 miles of Queens. Free shipping over $49. No autoship. Nationwide shipping soon.`
             : `${CATALOG_PRODUCT_COUNT_LABEL} pet products from ${CATALOG_BRANDS_SHORT}. We start taking orders ${ORDERS_OPEN_LABEL}. Free shipping over $49.`
         }
       />

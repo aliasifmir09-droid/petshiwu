@@ -292,6 +292,8 @@ describe('product offer price in first-wave HTML', () => {
     expect(html).toContain('product:price:amount" content="14.39"');
     expect(html).toContain('"price":"14.39"');
     expect(html).toContain('"@type":"Offer"');
+    expect(html).toContain('In stock · free ship $49+');
+    expect(html).not.toContain('... | Petshiwu');
   });
 });
 

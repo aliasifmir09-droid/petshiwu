@@ -34,6 +34,7 @@ import { BLOG_REDIRECTS } from '../seo/blogRedirects';
 import { isStaticLearningSlug, STATIC_LEARNING_PAGES } from '../seo/staticLearningPages';
 import { FEATURED_LEARNING_SLUGS, LEARNING_AUTHOR } from '../seo/featuredLearning';
 import { DEFAULT_OG_IMAGE, injectOgTags, resolveShareImage } from '../seo/ogTags';
+import { productSearchDescription, productSearchTitle } from '../seo/productSearchSnippet';
 import { merchantMpn } from '../utils/googleMerchantFeed';
 import { buildNycHubLinkHtml, buildNycHubShopHtml, isNycShoppableHub } from '../seo/nycShopHub';
 import { buildNextDayZipDirectoryHtml } from '../seo/nextDayZipDirectory';
@@ -212,8 +213,8 @@ const removeStaticHero = (html: string): string => {
 
 const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   '/': {
-    title: 'Premium Pet Food & Supplies Delivered to NYC | Petshiwu',
-    description: 'Shop 4,000+ premium pet products for dogs, cats, birds, fish, and reptiles. Free delivery in Queens, Brooklyn & all NYC boroughs. Free shipping on orders over $49.',
+    title: 'Petshiwu | Pet Food & Supplies – Free Shipping $49+, No Autoship',
+    description: '4,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. Same-day NYC. Next-day within 50 miles of Queens. Free shipping over $49. No autoship. Nationwide shipping soon.',
   },
   '/products': {
     title: 'All Pet Products — Dog, Cat, Bird, Fish & More | Petshiwu',
@@ -541,10 +542,9 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
     const productSlug = segments[segments.length - 1];
     const productName = slugToTitle(productSlug);
     const petType = segments[0];
-    const petLabel = petType === 'cat' ? 'cat' : petType === 'dog' ? 'dog' : 'pet';
     meta = {
-      title: `${productName} | Petshiwu`,
-      description: `Shop ${productName} — premium ${petLabel} supplies delivered across NYC. Free shipping on orders over $49 at Petshiwu.`,
+      title: productSearchTitle({ name: productName }),
+      description: productSearchDescription({ name: productName, petType }),
     };
   }
 
@@ -849,7 +849,6 @@ export const buildProductHtml = (template: string, product: any, slug: string): 
   const cleanedDbDesc: string = product.description ? clean(product.description).trim() : '';
   const rawDesc: string =
     cleanedDbDesc || `${productName} — premium pet supplies at Petshiwu.`;
-  const description = truncate(rawDesc, 160);
 
   const categoryName = typeof product.category === 'object' ? product.category?.name : product.category;
   const categorySlug = typeof product.category === 'object' ? product.category?.slug : undefined;
@@ -858,7 +857,14 @@ export const buildProductHtml = (template: string, product: any, slug: string): 
 
   const productUrl = `${BASE}/${petType}${categorySlug ? `/${categorySlug}` : ''}/${slug}`;
 
-  const title = `${productName} | Petshiwu`;
+  const title = productSearchTitle({ name: productName, brand: brandName, inStock });
+  const description = productSearchDescription({
+    description: rawDesc,
+    brand: brandName,
+    name: productName,
+    petType,
+    inStock,
+  });
   const mpn = merchantMpn(product.variants?.[0]?.sku);
 
   // JSON-LD Product schema

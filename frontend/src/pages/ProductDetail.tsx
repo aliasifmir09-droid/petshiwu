@@ -13,7 +13,7 @@ import ProductCard from '@/components/ProductCard';
 import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home, Share2, Facebook, Twitter, Mail, Copy, Check } from 'lucide-react';
 import { normalizeImageUrl, handleImageError, getOptimizedImageUrl, generateSrcSet } from '@/utils/imageUtils';
 import { generateProductUrl, generateCategoryUrl } from '@/utils/productUrl';
-import { productSearchDescription } from '@/utils/seoUtils';
+import { productSearchDescription, productSearchTitle } from '@/utils/seoUtils';
 import { getProductImages, getValidCompareAtPrice } from '@/utils/productPrice';
 import { availableCartStock } from '@/utils/cartStock';
 import { FREE_SHIPPING_THRESHOLD } from '@/config/constants';
@@ -407,6 +407,7 @@ const ProductDetail = () => {
           brand: product.brand,
           name: product.name,
           petType: product.petType,
+          inStock: isReadyToShip,
         }));
       }).catch(() => {
         setProductDescription(productSearchDescription({
@@ -414,6 +415,7 @@ const ProductDetail = () => {
           brand: product.brand,
           name: product.name,
           petType: product.petType,
+          inStock: isReadyToShip,
         }));
       });
     } else {
@@ -421,9 +423,10 @@ const ProductDetail = () => {
         brand: product?.brand,
         name: product?.name,
         petType: product?.petType,
+        inStock: isReadyToShip,
       }));
     }
-  }, [product?.description, product?.name, product?.petType, product?.brand]);
+  }, [product?.description, product?.name, product?.petType, product?.brand, isReadyToShip]);
 
   if (isLoading) {
     return (
@@ -584,13 +587,12 @@ const ProductDetail = () => {
 
   const breadcrumbs = buildBreadcrumbs();
 
-  // Build SEO data — include brand in title for brand keyword targeting
-  const brandPrefix = product.brand && !product.name.toLowerCase().includes(product.brand.toLowerCase())
-    ? `${product.brand} ` : '';
-  const fullProductName = `${brandPrefix}${product.name}`;
-  const productTitle = fullProductName.length > 55
-    ? `${fullProductName.substring(0, 52)}... | Petshiwu`
-    : `${fullProductName} | Petshiwu`;
+  // Build SEO data — brand in the name, in-stock reason to click, no mid-word ellipsis.
+  const productTitle = productSearchTitle({
+    name: product.name,
+    brand: product.brand,
+    inStock: isReadyToShip,
+  });
   
   // Build keywords
   const categoryName = typeof product.category === 'object' && product.category?.name 

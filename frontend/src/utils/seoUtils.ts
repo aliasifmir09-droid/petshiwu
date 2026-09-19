@@ -63,12 +63,14 @@ export function productSearchDescription(opts: {
   brand?: string;
   name?: string;
   petType?: string;
+  inStock?: boolean;
 }): string {
   const stripped = String(opts.description || '')
     .replace(/<[^>]*>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-  const suffix = ' Free shipping over $49. No autoship.';
+  const stockPhrase = opts.inStock === false ? 'Check stock.' : 'In stock.';
+  const suffix = ` ${stockPhrase} Free shipping over $49. No autoship.`;
   const budget = Math.max(80, 160 - suffix.length);
   if (stripped) {
     return clipAtWord(`${clipAtWord(stripped, budget)}${suffix}`, 160);
@@ -79,6 +81,24 @@ export function productSearchDescription(opts: {
     `Buy ${brand}${opts.name || 'this product'} for your ${pet} at Petshiwu.${suffix}`,
     160
   );
+}
+
+/**
+ * Organic title Google can show instead of a mid-word "Name... | Petshiwu" cut.
+ * Keep the product name intact; add a reason to click.
+ */
+export function productSearchTitle(opts: {
+  name: string;
+  brand?: string;
+  inStock?: boolean;
+}): string {
+  let name = String(opts.name || 'Pet supplies').replace(/\s+/g, ' ').trim();
+  const brand = String(opts.brand || '').trim();
+  if (brand && !name.toLowerCase().includes(brand.toLowerCase())) {
+    name = `${brand} ${name}`;
+  }
+  const stock = opts.inStock === false ? 'Out of stock' : 'In stock';
+  return `${name} | ${stock} · free ship $49+ | Petshiwu`;
 }
 
 /**

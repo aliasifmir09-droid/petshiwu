@@ -4,6 +4,7 @@ import {
   generateFAQSchema,
   generateOGImage,
   productSearchDescription,
+  productSearchTitle,
 } from '../seoUtils';
 
 describe('generateOGImage', () => {
@@ -34,9 +35,10 @@ describe('productSearchDescription', () => {
       petType: 'dog',
     });
     expect(snippet.length).toBeLessThanOrEqual(160);
+    expect(snippet).toMatch(/In stock/);
     expect(snippet).toMatch(/Free shipping over \$49/);
     expect(snippet).toMatch(/No autoship/);
-    const body = snippet.replace(/\s*Free shipping over \$49\. No autoship\.?$/, '').trim();
+    const body = snippet.replace(/\s*In stock\.\s*Free shipping over \$49\. No autoship\.?$/, '').trim();
     const lastWord = body.split(/\s+/).pop()?.replace(/[.,;:]+$/, '') ?? '';
     expect(lastWord.length).toBeGreaterThan(2);
     expect(description.split(/\s+/).map((w) => w.replace(/[.,;:]+$/, ''))).toContain(lastWord);
@@ -50,7 +52,31 @@ describe('productSearchDescription', () => {
     });
     expect(snippet.length).toBeLessThanOrEqual(160);
     expect(snippet).toMatch(/Royal Canin Indoor Adult Cat Food/);
+    expect(snippet).toMatch(/In stock/);
     expect(snippet).toMatch(/Free shipping over \$49/);
+  });
+});
+
+describe('productSearchTitle', () => {
+  test('keeps the Hill\'s product name and adds in-stock free shipping instead of ellipsis', () => {
+    const title = productSearchTitle({
+      name: "Hill's Science Diet Sensitive Stomach & Skin Adult Dry Dog Food Chicken and Barley",
+      brand: "Hill's Science Diet",
+      inStock: true,
+    });
+    expect(title).not.toContain('...');
+    expect(title).toContain("Hill's Science Diet Sensitive Stomach");
+    expect(title).toMatch(/In stock/);
+    expect(title).toMatch(/free ship \$49\+/);
+    expect(title).toMatch(/Petshiwu/);
+  });
+
+  test('prefixes brand when the name does not already include it', () => {
+    const title = productSearchTitle({
+      name: 'Sensitive Stomach & Skin Adult Dry Dog Food',
+      brand: "Hill's Science Diet",
+    });
+    expect(title.startsWith("Hill's Science Diet Sensitive Stomach")).toBe(true);
   });
 });
 
