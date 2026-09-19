@@ -6,6 +6,7 @@ import {
   getSameDayCutoffHour,
   isCoordinateInNyc,
   isDeliverableShippingAddress,
+  isConnecticutState,
   isNewJerseyState,
   isNewYorkState,
   isNextDayDeliveryZip,
@@ -19,6 +20,7 @@ import {
   tonightStatusLine,
   LAST_ZIP_EVENT,
 } from '../deliveryZip';
+import { NEXT_DAY_ZIPS, NEXT_DAY_RADIUS_MILES } from '../../data/nextDayMetroZips';
 
 describe('deliveryZip', () => {
   test('normalizeZip keeps only the first five digits', () => {
@@ -70,7 +72,7 @@ describe('deliveryZip', () => {
     expect(isNextDayDeliveryZip('11801')).toBe(true);
   });
 
-  test('Queens Hillside is NYC same-day and Hillside NJ is not a delivery ZIP', () => {
+  test('Queens Hillside stays NYC same-day; nearby 50-mile ZIPs are next-day', () => {
     const morning = new Date('2026-08-13T14:00:00Z');
     const jamaicaHillside = lookupZip('11432', morning);
     expect(jamaicaHillside?.area).toBe('Queens');
@@ -80,10 +82,28 @@ describe('deliveryZip', () => {
     expect(isNextDayDeliveryZip('11432')).toBe(false);
 
     const hillsideNj = lookupZip('07205', morning);
-    expect(hillsideNj?.speed).toBe('standard');
-    expect(hillsideNj?.headline).toMatch(/nationwide shipping opens soon/i);
-    expect(isNextDayDeliveryZip('07205')).toBe(false);
-    expect(isDeliverableShippingAddress('NJ', '07205')).toBe(false);
+    expect(hillsideNj?.speed).toBe('next-day');
+    expect(hillsideNj?.area).toBe('Hillside');
+    expect(isNextDayDeliveryZip('07205')).toBe(true);
+    expect(isDeliverableShippingAddress('NJ', '07205')).toBe(true);
+  });
+
+  test('opens every ZIP within 50 miles of Queens and keeps far ZIPs blocked', () => {
+    expect(NEXT_DAY_RADIUS_MILES).toBe(50);
+    expect(Object.keys(NEXT_DAY_ZIPS).length).toBeGreaterThan(500);
+    expect(isNextDayDeliveryZip('11801')).toBe(true);
+    expect(isNextDayDeliveryZip('11706')).toBe(true);
+    expect(isNextDayDeliveryZip('06830')).toBe(true);
+    expect(isNextDayDeliveryZip('07701')).toBe(true);
+    expect(isDeliverableShippingAddress('CT', '06830')).toBe(true);
+    expect(isDeliverableShippingAddress('Connecticut', '06830')).toBe(true);
+    expect(isConnecticutState('c.t.')).toBe(true);
+    expect(normalizeShippingState('Connecticut')).toBe('CT');
+    expect(isNextDayDeliveryZip('06511')).toBe(false);
+    expect(isNextDayDeliveryZip('12601')).toBe(false);
+    expect(isDeliverableShippingAddress('CT', '06511')).toBe(false);
+    expect(isDeliverableShippingAddress('NY', '12207')).toBe(false);
+    expect(isDeliverableShippingAddress('CA', '94105')).toBe(false);
   });
 
   test('isDeliverableShippingAddress accepts Hicksville NY and Queens Hillside', () => {

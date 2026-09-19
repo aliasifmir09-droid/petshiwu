@@ -109,7 +109,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       });
     }
 
-    // NYC same-day (includes Queens Hillside) plus next-day metro (Hicksville, Hoboken, Westchester)
+    // NYC same-day plus next-day to every ZIP within 50 miles of Queens
     if (!isDeliverableShippingAddress(shippingAddress.state, shippingAddress.zipCode)) {
       return res.status(400).json({
         success: false,

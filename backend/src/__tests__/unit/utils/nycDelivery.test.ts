@@ -1,4 +1,5 @@
 import {
+  isConnecticutState,
   isDeliverableShippingAddress,
   isNewJerseyState,
   isNewYorkState,
@@ -9,6 +10,7 @@ import {
   normalizeZip,
   OUT_OF_AREA_DELIVERY_MESSAGE,
 } from '../../../utils/nycDelivery';
+import { NEXT_DAY_ZIPS, NEXT_DAY_RADIUS_MILES } from '../../../data/nextDayMetroZips';
 
 describe('nycDelivery', () => {
   test('normalizeZip keeps the first five digits', () => {
@@ -45,24 +47,28 @@ describe('nycDelivery', () => {
     expect(isNycShippingAddress('New York', '11372')).toBe(true);
   });
 
-  test('Hicksville NY is next-day metro; Hillside NJ is not a delivery ZIP', () => {
+  test('next-day covers every ZIP within 50 miles of Queens', () => {
+    expect(NEXT_DAY_RADIUS_MILES).toBe(50);
+    expect(Object.keys(NEXT_DAY_ZIPS).length).toBeGreaterThan(500);
     expect(isNycDeliveryZip('11801')).toBe(false);
-    expect(isNycDeliveryZip('07205')).toBe(false);
     expect(isNextDayDeliveryZip('11801')).toBe(true);
     expect(isNextDayDeliveryZip('11803')).toBe(true);
-    expect(isNextDayDeliveryZip('07205')).toBe(false);
+    expect(isNextDayDeliveryZip('07205')).toBe(true);
+    expect(isNextDayDeliveryZip('06830')).toBe(true);
+    expect(isNextDayDeliveryZip('11706')).toBe(true);
     expect(isNycShippingAddress('NY', '11801')).toBe(false);
     expect(isDeliverableShippingAddress('NY', '11801')).toBe(true);
     expect(isDeliverableShippingAddress('New York', '11804')).toBe(true);
-    expect(isDeliverableShippingAddress('NJ', '07205')).toBe(false);
-    expect(isDeliverableShippingAddress('New Jersey', '07205')).toBe(false);
+    expect(isDeliverableShippingAddress('NJ', '07205')).toBe(true);
+    expect(isDeliverableShippingAddress('New Jersey', '07030')).toBe(true);
+    expect(isDeliverableShippingAddress('CT', '06830')).toBe(true);
+    expect(isConnecticutState('Connecticut')).toBe(true);
+    expect(normalizeShippingState('connecticut')).toBe('CT');
     expect(isNewJerseyState('NJ')).toBe(true);
-    expect(normalizeShippingState('new jersey')).toBe('NJ');
     expect(isDeliverableShippingAddress('NJ', '11801')).toBe(false);
+    expect(isDeliverableShippingAddress('CT', '06511')).toBe(false);
     expect(isDeliverableShippingAddress('CA', '94105')).toBe(false);
-    expect(OUT_OF_AREA_DELIVERY_MESSAGE).toMatch(/Hicksville/);
-    expect(OUT_OF_AREA_DELIVERY_MESSAGE).toMatch(/Queens Hillside/);
-    expect(OUT_OF_AREA_DELIVERY_MESSAGE).not.toMatch(/Hicksville and Hillside/);
+    expect(OUT_OF_AREA_DELIVERY_MESSAGE).toMatch(/50 miles of Queens/);
   });
 
   test('Queens Hillside 11432 stays NYC same-day', () => {

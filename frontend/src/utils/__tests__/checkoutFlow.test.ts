@@ -20,7 +20,7 @@ describe('checkoutFlow', () => {
     expect(isCheckoutDeliveryReady({ ...nycAddress, street: '' }, true)).toBe(false);
   });
 
-  test('Hicksville NY and Queens Hillside unlock checkout; Hillside NJ does not', () => {
+  test('50-mile metro ZIPs unlock checkout; far ZIPs stay blocked', () => {
     expect(
       isCheckoutDeliveryReady(
         { ...nycAddress, city: 'Hicksville', zipCode: '11801' },
@@ -35,7 +35,19 @@ describe('checkoutFlow', () => {
     ).toBe(true);
     expect(
       isCheckoutDeliveryReady(
-        { ...nycAddress, city: 'Hillside', state: 'NJ', zipCode: '07205' },
+        { ...nycAddress, city: 'Hoboken', state: 'NJ', zipCode: '07030' },
+        false
+      )
+    ).toBe(true);
+    expect(
+      isCheckoutDeliveryReady(
+        { ...nycAddress, city: 'Greenwich', state: 'CT', zipCode: '06830' },
+        false
+      )
+    ).toBe(true);
+    expect(
+      isCheckoutDeliveryReady(
+        { ...nycAddress, city: 'New Haven', state: 'CT', zipCode: '06511' },
         false
       )
     ).toBe(false);
