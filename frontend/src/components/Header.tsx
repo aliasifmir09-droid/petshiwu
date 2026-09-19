@@ -123,14 +123,13 @@ const Header = () => {
       ? "block py-1.5 px-3 text-xs text-gray-600 hover:bg-blue-50 hover:text-[#1E3A8A] rounded-lg transition-colors"
       : "text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5";
 
-    if (!categoriesByPetType || categoriesByPetType.length === 0) {
-      return (
-        <p className="text-xs text-gray-500 px-3 py-2">No blogs yet. Add blogs in admin to see pet types here.</p>
-      );
-    }
+    const staticPetTypes = ['dog', 'cat', 'fish', 'bird', 'reptile', 'small-pet'];
+    const source = categoriesByPetType && categoriesByPetType.length > 0
+      ? categoriesByPetType
+      : staticPetTypes.map((petType) => ({ petType, categories: [{ name: 'Care', count: 1 }] }));
 
     const uniquePetTypes = [...new Map(
-      categoriesByPetType
+      source
         .filter(({ categories }: { categories: unknown[] }) => categories.length > 0)
         .map(({ petType }: { petType: string }) => [petType.toLowerCase(), petType])
     ).values()];

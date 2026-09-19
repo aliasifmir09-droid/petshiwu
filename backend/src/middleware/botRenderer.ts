@@ -1760,7 +1760,7 @@ const fetchLearningHubItems = async (): Promise<EducationHubItem[]> => {
   const cmsItems = (blogs as EducationHubItem[]).filter(
     (blog) => blog.slug && !BLOG_REDIRECTS[blog.slug] && !isStaticLearningSlug(blog.slug)
   );
-  return [...staticItems, ...cmsItems].slice(0, 80);
+  return [...staticItems, ...cmsItems].slice(0, 160);
 };
 
 const fetchCareGuideHubItems = async (): Promise<EducationHubItem[]> => {
@@ -1781,6 +1781,7 @@ export const buildStaticLearningHtml = (template: string, slug: string): string 
     content: page.html,
     excerpt: page.description,
     metaDescription: page.description,
+    featuredImage: page.featuredImage,
     publishedAt: page.publishedAt,
     author: { name: 'Petshiwu Team' },
   });

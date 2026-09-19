@@ -109,6 +109,11 @@ describe('classifyRoute', () => {
       indexable: true,
       routeType: 'static-learning',
     });
+    expect(classifyRoute('/learning/best-fresh-dog-food-2026')).toMatchObject({
+      status: 'indexable',
+      indexable: true,
+      routeType: 'static-learning',
+    });
     expect(classifyRoute('/care-guides')).toMatchObject({
       status: 'indexable',
       routeType: 'static',
