@@ -46,7 +46,9 @@ export function productSearchDescription(opts: {
   const suffix = ` ${stockPhrase} Free shipping over $49. No autoship.`;
   const budget = Math.max(80, 160 - suffix.length);
   if (stripped) {
-    return clipAtWord(`${clipAtWord(stripped, budget)}${suffix}`, 160);
+    let body = clipAtWord(stripped, budget);
+    if (body && !/[.!?]$/.test(body)) body += '.';
+    return clipAtWord(`${body}${suffix}`, 160);
   }
   const brand = opts.brand ? `${opts.brand} ` : '';
   const pet = opts.petType && opts.petType !== 'other-animals' ? opts.petType : 'pet';

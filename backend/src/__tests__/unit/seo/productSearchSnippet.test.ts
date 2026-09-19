@@ -20,7 +20,7 @@ describe('product search snippets', () => {
     });
     expect(snippet.length).toBeLessThanOrEqual(160);
     expect(snippet).not.toMatch(/Front and In stock/);
-    expect(snippet).toMatch(/multiple sizes/);
+    expect(snippet).toMatch(/multiple sizes\. In stock/);
     expect(snippet).toMatch(/In stock/);
   });
 
