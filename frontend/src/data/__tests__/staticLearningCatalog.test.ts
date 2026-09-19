@@ -1,4 +1,5 @@
-import { STATIC_LEARNING_POSTS, getStaticLearningBlog, listStaticLearningBlogs } from '../staticLearningCatalog';
+import { STATIC_LEARNING_POSTS, listStaticLearningBlogs } from '../staticLearningCatalog';
+import { getStaticLearningBlog } from '../staticLearningArticle';
 
 describe('frontend static learning catalog', () => {
   test('lists 100+ guides with images', () => {

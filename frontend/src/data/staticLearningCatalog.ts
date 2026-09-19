@@ -1,16 +1,15 @@
 import { Blog } from '@/services/blogs';
-import { TRENDING_LEARNING_POSTS, TRENDING_LEARNING_BY_SLUG, TrendingLearningPost } from './trendingLearningPosts';
+import { TRENDING_LEARNING_META, TrendingLearningMeta } from './trendingLearningMeta';
 
-export type StaticLearningPage = TrendingLearningPost;
+export type StaticLearningCard = TrendingLearningMeta;
 
-const CLASSIC_POSTS: TrendingLearningPost[] = [
+const CLASSIC_POSTS: TrendingLearningMeta[] = [
   {
     slug: 'best-dog-food-sensitive-stomach',
     title: 'Best Dog Food for Sensitive Stomachs: A 2026 Expert Guide',
     description:
       "Is your dog struggling with digestive issues? Discover the best dog food for sensitive stomachs, including grain-free and limited ingredient diets at Petshiwu.",
     publishedAt: '2026-01-15T00:00:00.000Z',
-    html: '',
     featuredImage: '/blog/kibble-bowl.jpg',
     featuredImageWebp: '/blog/kibble-bowl.webp',
     imageAlt: 'A Labrador eating from a bowl of easily digestible dog food',
@@ -27,7 +26,6 @@ const CLASSIC_POSTS: TrendingLearningPost[] = [
     description:
       'Discover the best dog foods for sensitive stomachs. Expert-reviewed formulas with easily digestible ingredients, probiotics, and limited ingredients.',
     publishedAt: '2024-01-15T00:00:00.000Z',
-    html: '',
     featuredImage: '/blog/kibble-bowl.jpg',
     featuredImageWebp: '/blog/kibble-bowl.webp',
     imageAlt: 'Dog food in a bowl for sensitive stomachs',
@@ -40,16 +38,16 @@ const CLASSIC_POSTS: TrendingLearningPost[] = [
   },
 ];
 
-export const STATIC_LEARNING_POSTS: TrendingLearningPost[] = [
+export const STATIC_LEARNING_POSTS: TrendingLearningMeta[] = [
   ...CLASSIC_POSTS,
-  ...TRENDING_LEARNING_POSTS,
+  ...TRENDING_LEARNING_META,
 ];
 
-const toBlog = (post: TrendingLearningPost): Blog => ({
+const toBlog = (post: TrendingLearningMeta, html = ''): Blog => ({
   _id: `static-${post.slug}`,
   title: post.title,
   slug: post.slug,
-  content: post.html,
+  content: html,
   excerpt: post.excerpt || post.description,
   featuredImage: post.featuredImage,
   petType: post.petType,
@@ -83,7 +81,7 @@ const matchesQuery = (blog: Blog, query: StaticBlogQuery): boolean => {
     return false;
   }
   if (query.search) {
-    const haystack = `${blog.title} ${blog.excerpt || ''} ${blog.tags.join(' ')} ${blog.content}`.toLowerCase();
+    const haystack = `${blog.title} ${blog.excerpt || ''} ${blog.tags.join(' ')}`.toLowerCase();
     if (!haystack.includes(query.search.toLowerCase())) return false;
   }
   return true;
@@ -91,14 +89,9 @@ const matchesQuery = (blog: Blog, query: StaticBlogQuery): boolean => {
 
 export const listStaticLearningBlogs = (query: StaticBlogQuery = {}): Blog[] =>
   STATIC_LEARNING_POSTS
-    .map(toBlog)
+    .map((post) => toBlog(post))
     .filter((blog) => matchesQuery(blog, query))
     .sort((a, b) => String(b.publishedAt || '').localeCompare(String(a.publishedAt || '')));
-
-export const getStaticLearningBlog = (slug: string): Blog | null => {
-  const post = TRENDING_LEARNING_BY_SLUG[slug];
-  return post?.html ? toBlog(post) : null;
-};
 
 export const listStaticLearningCategories = (petType?: string): Array<{ name: string; count: number }> => {
   const counts = new Map<string, number>();
@@ -122,3 +115,5 @@ export const mergeBlogLists = (staticBlogs: Blog[], cmsBlogs: Blog[] = []): Blog
     String(b.publishedAt || b.createdAt || '').localeCompare(String(a.publishedAt || a.createdAt || ''))
   );
 };
+
+export { toBlog, CLASSIC_POSTS };

@@ -10,7 +10,7 @@ import StructuredData from '@/components/StructuredData';
 import AdSense from '@/components/AdSense';
 import StickySidebarAd from '@/components/StickySidebarAd';
 import { generateBreadcrumbSchema, generateFAQSchema } from '@/utils/seoUtils';
-import { getStaticLearningBlog } from '@/data/staticLearningCatalog';
+import { getStaticLearningBlog } from '@/data/staticLearningArticle';
 
 const BlogDetail = () => {
   const { slug } = useParams<{ slug: string }>();
