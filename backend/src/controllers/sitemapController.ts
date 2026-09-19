@@ -234,7 +234,9 @@ export const generateSitemap = async (req: Request, res: Response) => {
                     xml += '  </url>\n';
                   });
 
-            // Blog/Learning pages — skip broken slugs (soft-404 trap)
+            // Keep every published CMS learning URL in the sitemap. Only skip
+            // broken slugs and the small set that already 301 via BLOG_REDIRECTS.
+            // Do not drop the indexed education library.
             blogs.forEach(blog => {
               if (!isCleanSlug(blog.slug)) return;
               if (BLOG_REDIRECTS[blog.slug]) return;

@@ -201,6 +201,8 @@ export const classifyRoute = (rawPath: string): RouteClassification => {
     return { status: 'noindex', indexable: false, canonicalPath, routeType: 'doorway' };
   }
 
+  // Published /learning/:slug CMS articles stay indexable. Do not noindex or
+  // 301 the education library — those URLs already took a long time to index.
   if (segments[0] === 'learning' && segments.length === 2 && segments[1]) {
     const hubPath = redirectedBlogHubPath(segments[1]);
     if (hubPath) {

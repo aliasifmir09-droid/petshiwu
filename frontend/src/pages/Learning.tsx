@@ -12,8 +12,9 @@ import AdSense from '@/components/AdSense';
 import {
   listStaticLearningBlogs,
   listStaticLearningCategories,
-  mergeBlogLists,
 } from '@/data/staticLearningCatalog';
+
+const PAGE_SIZE = 12;
 
 const Learning = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,14 +29,13 @@ const Learning = () => {
     category: category || undefined,
     search: searchQuery || undefined,
   });
-  const pageSize = 12;
 
   // Fetch blogs
   const { data: blogsData, isLoading } = useQuery({
     queryKey: ['blogs', page, petType, category, searchQuery],
     queryFn: () => blogService.getBlogs({
       page,
-      limit: 50,
+      limit: PAGE_SIZE,
       petType: petType || undefined,
       category: category || undefined,
       search: searchQuery || undefined
@@ -54,12 +54,19 @@ const Learning = () => {
     throwOnError: false,
   });
 
-  const cmsArticles = Array.isArray(blogsData?.data) ? blogsData.data : [];
-  const mergedArticles = mergeBlogLists(staticMatches, cmsArticles);
-  const totalArticles = mergedArticles.length;
-  const totalPages = Math.max(1, Math.ceil(totalArticles / pageSize));
-  const pageArticles = mergedArticles.slice((page - 1) * pageSize, page * pageSize);
+  const apiArticles = Array.isArray(blogsData?.data) ? blogsData.data : [];
+  const usingStaticFallback = !blogsData && !isLoading;
+  const pageArticles = usingStaticFallback
+    ? staticMatches.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+    : apiArticles;
+  const totalArticles = usingStaticFallback
+    ? staticMatches.length
+    : (blogsData?.pagination?.total ?? pageArticles.length);
+  const totalPages = Math.max(1, usingStaticFallback
+    ? Math.ceil(staticMatches.length / PAGE_SIZE)
+    : (blogsData?.pagination?.pages ?? Math.ceil(totalArticles / PAGE_SIZE)));
   const categoryOptions = categories?.length ? categories : listStaticLearningCategories(petType || undefined);
+  const schemaArticles = staticMatches.slice(0, 40);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,18 +115,18 @@ const Learning = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <SEO
         title={`Learning Center${petTypeLabel}${categoryLabel} | Pet Care Tips & Guides`}
-        description="100+ trending pet care guides with photos: fresh dog food, cat litter, training, fleas, small-pet care, and more from Petshiwü. Free shipping over $49."
+        description="Pet care guides from Petshiwü — photo explainers plus the full education library on food, training, health, and species care. Free shipping over $49."
         url={seoUrl}
         noindex={hasFilteredParams}
       />
-      {!hasFilteredParams && mergedArticles.length > 0 && (
+      {!hasFilteredParams && schemaArticles.length > 0 && (
         <StructuredData
           type="collectionPage"
           data={generateCollectionPageSchema(
             'Petshiwu Learning Center',
             'Expert pet care advice, tips, and guides for dogs, cats, fish, and more.',
             '/learning',
-            mergedArticles.slice(0, 40).map((blog: Blog) => ({
+            schemaArticles.map((blog: Blog) => ({
               name: blog.title,
               url: `/learning/${blog.slug}`,
             }))
@@ -133,7 +140,7 @@ const Learning = () => {
             Learning Center
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            100+ photo guides on the topics pet parents search for most — food, training, health, and species care.
+            Photo guides first, then the full education library. Use Next to browse every published article.
           </p>
         </div>
 
@@ -146,7 +153,10 @@ const Learning = () => {
                 type="text"
                 placeholder="Search articles..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </form>
@@ -167,7 +177,7 @@ const Learning = () => {
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <BookOpen size={18} />
               <span>
-                {totalArticles} {totalArticles === 1 ? 'article' : 'articles'}
+                {totalArticles.toLocaleString()} {totalArticles === 1 ? 'article' : 'articles'}
               </span>
             </div>
           </div>

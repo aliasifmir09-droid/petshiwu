@@ -103,6 +103,22 @@ describe('classifyRoute', () => {
     });
   });
 
+  test('indexed CMS education articles stay on their own URLs', () => {
+    const keepIndexed = [
+      '/learning/how-to-create-a-dog-grooming-schedule-at-home',
+      '/learning/best-golden-retriever-food-delivery-in-jackson-heights-queens-nyc-2026-guide',
+      '/learning/pet-supplies-bishan-singapore-2026-same-day-delivery-guide',
+    ];
+    for (const pathName of keepIndexed) {
+      expect(classifyRoute(pathName)).toMatchObject({
+        status: 'indexable',
+        indexable: true,
+        canonicalPath: pathName,
+        routeType: 'learning',
+      });
+    }
+  });
+
   test('static education guides stay indexable on their own URLs', () => {
     expect(classifyRoute('/learning/best-dog-food-sensitive-stomach')).toMatchObject({
       status: 'indexable',
