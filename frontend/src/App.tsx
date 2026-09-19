@@ -1,4 +1,5 @@
-import { useEffect, lazy, Suspense } from 'react';
+import { useEffect, Suspense } from 'react';
+import { lazyWithRetry } from './utils/lazyWithRetry';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ALL_NEIGHBORHOOD_PAGES } from './data/neighborhoodPages';
 import NeighborhoodCategoryPage from './pages/seo/NeighborhoodCategoryPage';
@@ -23,88 +24,88 @@ import { useCustomerSessionTimeout } from './hooks/useCustomerSessionTimeout';
 import { readLastActiveAt, shouldExpireCustomerSession } from './utils/sessionTimeout';
 import './index.css';
 
-const Products = lazy(() => import('./pages/Products'));
-const ProductDetail = lazy(() => import('./pages/ProductDetail'));
-const Category = lazy(() => import('./pages/Category'));
-const PetType = lazy(() => import('./pages/PetType'));
-const Cart = lazy(() => import('./pages/Cart'));
-const Checkout = lazy(() => import('./pages/Checkout'));
-const Login = lazy(() => import('./pages/Login'));
-const Register = lazy(() => import('./pages/Register'));
-const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
-const ResendVerification = lazy(() => import('./pages/ResendVerification'));
-const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
-const ResetPassword = lazy(() => import('./pages/ResetPassword'));
-const Profile = lazy(() => import('./pages/Profile'));
-const ProductComparison = lazy(() => import('./pages/ProductComparison'));
-const Returns = lazy(() => import('./pages/Returns'));
-const ReturnPolicy = lazy(() => import('./pages/ReturnPolicy'));
-const AddressManagement = lazy(() => import('./pages/AddressManagement'));
-const StockAlerts = lazy(() => import('./pages/StockAlerts'));
-const AdvancedSearch = lazy(() => import('./pages/AdvancedSearch'));
-const MyOrders = lazy(() => import('./pages/MyOrders'));
-const Restock = lazy(() => import('./pages/Restock'));
-const OrderDetail = lazy(() => import('./pages/OrderDetail'));
-const TrackOrder = lazy(() => import('./pages/TrackOrder'));
-const Donate = lazy(() => import('./pages/Donate'));
-const Favorites = lazy(() => import('./pages/Favorites'));
-const Learning = lazy(() => import('./pages/Learning'));
-const BlogDetail = lazy(() => import('./pages/BlogDetail'));
-const CareGuides = lazy(() => import('./pages/CareGuides'));
-const CareGuideDetail = lazy(() => import('./pages/CareGuideDetail'));
-const FAQ = lazy(() => import('./pages/FAQ'));
-const SymptomChecker = lazy(() => import('./pages/SymptomChecker'));
-const About = lazy(() => import('./pages/About'));
-const BrandStory = lazy(() => import('./pages/BrandStory'));
-const Press = lazy(() => import('./pages/Press'));
-const Contact = lazy(() => import('./pages/Contact'));
-const NotFound = lazy(() => import('./pages/NotFound'));
-const Forbidden = lazy(() => import('./pages/Forbidden'));
-const SensitiveStomachDogs = lazy(() => import('./pages/seo/SensitiveStomachDogs'));
-const PickyEaters = lazy(() => import('./pages/seo/PickyEaters'));
-const AggressiveChewers = lazy(() => import('./pages/seo/AggressiveChewers'));
-const PetSuppliesDeliveryNYC = lazy(() => import('./pages/seo/PetSuppliesDeliveryNYC'));
-const DogFoodDeliveryNYC = lazy(() => import('./pages/seo/DogFoodDeliveryNYC'));
-const CatFoodDeliveryNYC = lazy(() => import('./pages/seo/CatFoodDeliveryNYC'));
-const PetStoreQueensNY = lazy(() => import('./pages/seo/PetStoreQueensNY'));
-const OnlinePetStoreNYC = lazy(() => import('./pages/seo/OnlinePetStoreNYC'));
-const PetSuppliesNearMeNYC = lazy(() => import('./pages/seo/PetSuppliesNearMeNYC'));
-const AffordablePetFoodNYC = lazy(() => import('./pages/seo/AffordablePetFoodNYC'));
-const PetFoodSubscriptionNYC = lazy(() => import('./pages/seo/PetFoodSubscriptionNYC'));
-const RawDogFoodNYC = lazy(() => import('./pages/seo/RawDogFoodNYC'));
-const OrganicCatFoodNYC = lazy(() => import('./pages/seo/OrganicCatFoodNYC'));
-const LuxuryPetAccessoriesNYC = lazy(() => import('./pages/seo/LuxuryPetAccessoriesNYC'));
-const PetSuppliesQueensNY = lazy(() => import('./pages/seo/PetSuppliesQueensNY'));
-const PetSuppliesBrooklynNY = lazy(() => import('./pages/seo/PetSuppliesBrooklynNY'));
-const PetSuppliesManhattanNY = lazy(() => import('./pages/seo/PetSuppliesManhattanNY'));
-const PetSuppliesBronxNY = lazy(() => import('./pages/seo/PetSuppliesBronxNY'));
-const PetSuppliesStatenIslandNY = lazy(() => import('./pages/seo/PetSuppliesStatenIslandNY'));
-const PetSuppliesJacksonHeightsNY = lazy(() => import('./pages/seo/PetSuppliesJacksonHeightsNY'));
-const PetSuppliesWilliamsburgNY = lazy(() => import('./pages/seo/PetSuppliesWilliamsburgNY'));
-const PetSuppliesParkSlopeNY = lazy(() => import('./pages/seo/PetSuppliesParkSlopeNY'));
-const PetSuppliesUpperWestSideNYC = lazy(() => import('./pages/seo/PetSuppliesUpperWestSideNYC'));
-const PetSuppliesDUMBONY = lazy(() => import('./pages/seo/PetSuppliesDUMBONY'));
-const PetSuppliesLongIslandCityNY = lazy(() => import('./pages/seo/PetSuppliesLongIslandCityNY'));
-const PetSuppliesSoHoNYC = lazy(() => import('./pages/seo/PetSuppliesSoHoNYC'));
-const PetSuppliesAstoriaNY = lazy(() => import('./pages/seo/PetSuppliesAstoriaNY'));
-const Investors = lazy(() => import('./pages/Investors'));
-const Innovation = lazy(() => import('./pages/Innovation'));
-const SellWithUs = lazy(() => import('./pages/SellWithUs'));
-const BestFoodSensitiveStomach = lazy(() => import('./pages/blog/BestFoodSensitiveStomach'));
-const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
-const CookiePolicy = lazy(() => import('./pages/CookiePolicy'));
+const Products = lazyWithRetry(() => import('./pages/Products'));
+const ProductDetail = lazyWithRetry(() => import('./pages/ProductDetail'));
+const Category = lazyWithRetry(() => import('./pages/Category'));
+const PetType = lazyWithRetry(() => import('./pages/PetType'));
+const Cart = lazyWithRetry(() => import('./pages/Cart'));
+const Checkout = lazyWithRetry(() => import('./pages/Checkout'));
+const Login = lazyWithRetry(() => import('./pages/Login'));
+const Register = lazyWithRetry(() => import('./pages/Register'));
+const VerifyEmail = lazyWithRetry(() => import('./pages/VerifyEmail'));
+const ResendVerification = lazyWithRetry(() => import('./pages/ResendVerification'));
+const ForgotPassword = lazyWithRetry(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazyWithRetry(() => import('./pages/ResetPassword'));
+const Profile = lazyWithRetry(() => import('./pages/Profile'));
+const ProductComparison = lazyWithRetry(() => import('./pages/ProductComparison'));
+const Returns = lazyWithRetry(() => import('./pages/Returns'));
+const ReturnPolicy = lazyWithRetry(() => import('./pages/ReturnPolicy'));
+const AddressManagement = lazyWithRetry(() => import('./pages/AddressManagement'));
+const StockAlerts = lazyWithRetry(() => import('./pages/StockAlerts'));
+const AdvancedSearch = lazyWithRetry(() => import('./pages/AdvancedSearch'));
+const MyOrders = lazyWithRetry(() => import('./pages/MyOrders'));
+const Restock = lazyWithRetry(() => import('./pages/Restock'));
+const OrderDetail = lazyWithRetry(() => import('./pages/OrderDetail'));
+const TrackOrder = lazyWithRetry(() => import('./pages/TrackOrder'));
+const Donate = lazyWithRetry(() => import('./pages/Donate'));
+const Favorites = lazyWithRetry(() => import('./pages/Favorites'));
+const Learning = lazyWithRetry(() => import('./pages/Learning'));
+const BlogDetail = lazyWithRetry(() => import('./pages/BlogDetail'));
+const CareGuides = lazyWithRetry(() => import('./pages/CareGuides'));
+const CareGuideDetail = lazyWithRetry(() => import('./pages/CareGuideDetail'));
+const FAQ = lazyWithRetry(() => import('./pages/FAQ'));
+const SymptomChecker = lazyWithRetry(() => import('./pages/SymptomChecker'));
+const About = lazyWithRetry(() => import('./pages/About'));
+const BrandStory = lazyWithRetry(() => import('./pages/BrandStory'));
+const Press = lazyWithRetry(() => import('./pages/Press'));
+const Contact = lazyWithRetry(() => import('./pages/Contact'));
+const NotFound = lazyWithRetry(() => import('./pages/NotFound'));
+const Forbidden = lazyWithRetry(() => import('./pages/Forbidden'));
+const SensitiveStomachDogs = lazyWithRetry(() => import('./pages/seo/SensitiveStomachDogs'));
+const PickyEaters = lazyWithRetry(() => import('./pages/seo/PickyEaters'));
+const AggressiveChewers = lazyWithRetry(() => import('./pages/seo/AggressiveChewers'));
+const PetSuppliesDeliveryNYC = lazyWithRetry(() => import('./pages/seo/PetSuppliesDeliveryNYC'));
+const DogFoodDeliveryNYC = lazyWithRetry(() => import('./pages/seo/DogFoodDeliveryNYC'));
+const CatFoodDeliveryNYC = lazyWithRetry(() => import('./pages/seo/CatFoodDeliveryNYC'));
+const PetStoreQueensNY = lazyWithRetry(() => import('./pages/seo/PetStoreQueensNY'));
+const OnlinePetStoreNYC = lazyWithRetry(() => import('./pages/seo/OnlinePetStoreNYC'));
+const PetSuppliesNearMeNYC = lazyWithRetry(() => import('./pages/seo/PetSuppliesNearMeNYC'));
+const AffordablePetFoodNYC = lazyWithRetry(() => import('./pages/seo/AffordablePetFoodNYC'));
+const PetFoodSubscriptionNYC = lazyWithRetry(() => import('./pages/seo/PetFoodSubscriptionNYC'));
+const RawDogFoodNYC = lazyWithRetry(() => import('./pages/seo/RawDogFoodNYC'));
+const OrganicCatFoodNYC = lazyWithRetry(() => import('./pages/seo/OrganicCatFoodNYC'));
+const LuxuryPetAccessoriesNYC = lazyWithRetry(() => import('./pages/seo/LuxuryPetAccessoriesNYC'));
+const PetSuppliesQueensNY = lazyWithRetry(() => import('./pages/seo/PetSuppliesQueensNY'));
+const PetSuppliesBrooklynNY = lazyWithRetry(() => import('./pages/seo/PetSuppliesBrooklynNY'));
+const PetSuppliesManhattanNY = lazyWithRetry(() => import('./pages/seo/PetSuppliesManhattanNY'));
+const PetSuppliesBronxNY = lazyWithRetry(() => import('./pages/seo/PetSuppliesBronxNY'));
+const PetSuppliesStatenIslandNY = lazyWithRetry(() => import('./pages/seo/PetSuppliesStatenIslandNY'));
+const PetSuppliesJacksonHeightsNY = lazyWithRetry(() => import('./pages/seo/PetSuppliesJacksonHeightsNY'));
+const PetSuppliesWilliamsburgNY = lazyWithRetry(() => import('./pages/seo/PetSuppliesWilliamsburgNY'));
+const PetSuppliesParkSlopeNY = lazyWithRetry(() => import('./pages/seo/PetSuppliesParkSlopeNY'));
+const PetSuppliesUpperWestSideNYC = lazyWithRetry(() => import('./pages/seo/PetSuppliesUpperWestSideNYC'));
+const PetSuppliesDUMBONY = lazyWithRetry(() => import('./pages/seo/PetSuppliesDUMBONY'));
+const PetSuppliesLongIslandCityNY = lazyWithRetry(() => import('./pages/seo/PetSuppliesLongIslandCityNY'));
+const PetSuppliesSoHoNYC = lazyWithRetry(() => import('./pages/seo/PetSuppliesSoHoNYC'));
+const PetSuppliesAstoriaNY = lazyWithRetry(() => import('./pages/seo/PetSuppliesAstoriaNY'));
+const Investors = lazyWithRetry(() => import('./pages/Investors'));
+const Innovation = lazyWithRetry(() => import('./pages/Innovation'));
+const SellWithUs = lazyWithRetry(() => import('./pages/SellWithUs'));
+const BestFoodSensitiveStomach = lazyWithRetry(() => import('./pages/blog/BestFoodSensitiveStomach'));
+const PrivacyPolicy = lazyWithRetry(() => import('./pages/PrivacyPolicy'));
+const CookiePolicy = lazyWithRetry(() => import('./pages/CookiePolicy'));
 
 // Neighborhood × Category programmatic pages (200 pages) — see top of file for imports
-const Terms = lazy(() => import('./pages/Terms'));
-const ShippingPolicy = lazy(() => import('./pages/ShippingPolicy'));
-const Accessibility = lazy(() => import('./pages/Accessibility'));
-const Unsubscribe = lazy(() => import('./pages/Unsubscribe'));
+const Terms = lazyWithRetry(() => import('./pages/Terms'));
+const ShippingPolicy = lazyWithRetry(() => import('./pages/ShippingPolicy'));
+const Accessibility = lazyWithRetry(() => import('./pages/Accessibility'));
+const Unsubscribe = lazyWithRetry(() => import('./pages/Unsubscribe'));
 
 /**
  * FIXED SEO ROUTE
  * Matches your file at: frontend/src/pages/SensitiveStomachGuide.tsx
  */
-const SensitiveStomachGuide = lazy(() => import('./pages/SensitiveStomachGuide'));
+const SensitiveStomachGuide = lazyWithRetry(() => import('./pages/SensitiveStomachGuide'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -219,6 +220,10 @@ function App() {
     import('./utils/suppressNetworkErrors').then(({ suppressNetworkErrors }) => {
       suppressNetworkErrors();
     });
+    const prefetchLearning = window.setTimeout(() => {
+      void import('./pages/Learning');
+      void import('./pages/BlogDetail');
+    }, 1200);
     const handleGlobalError = (event: ErrorEvent) => {
       const target = event.target as HTMLElement;
       if (target && target.tagName === 'IMG') {
@@ -260,6 +265,7 @@ function App() {
     }
 
     return () => {
+      window.clearTimeout(prefetchLearning);
       window.removeEventListener('error', handleGlobalError, true);
     };
   }, []);

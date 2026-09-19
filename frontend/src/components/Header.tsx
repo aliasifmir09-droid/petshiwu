@@ -116,6 +116,7 @@ const Header = () => {
       queryKey: ['blog-categories-by-pet-type'],
       queryFn: () => blogService.getBlogCategoriesByPetType(),
       retry: false,
+      throwOnError: false,
       staleTime: 10 * 60 * 1000
     });
 
@@ -124,14 +125,17 @@ const Header = () => {
       : "text-xs text-gray-600 hover:text-[#1E3A8A] block transition-colors py-0.5";
 
     const staticPetTypes = ['dog', 'cat', 'fish', 'bird', 'reptile', 'small-pet'];
-    const source = categoriesByPetType && categoriesByPetType.length > 0
+    const source = Array.isArray(categoriesByPetType) && categoriesByPetType.length > 0
       ? categoriesByPetType
       : staticPetTypes.map((petType) => ({ petType, categories: [{ name: 'Care', count: 1 }] }));
 
     const uniquePetTypes = [...new Map(
       source
-        .filter(({ categories }: { categories: unknown[] }) => categories.length > 0)
-        .map(({ petType }: { petType: string }) => [petType.toLowerCase(), petType])
+        .filter((row) => Array.isArray((row as { categories?: unknown[] }).categories) && (row as { categories: unknown[] }).categories.length > 0)
+        .map((row) => {
+          const petType = String((row as { petType?: string }).petType || 'all');
+          return [petType.toLowerCase(), petType] as const;
+        })
     ).values()];
 
     return (
@@ -687,7 +691,13 @@ const Header = () => {
                 </li>
 
                 <li className="relative group flex-shrink-0">
-                  <Link to="/learning" className="flex items-center gap-1 hover:bg-white/10 transition-colors py-2.5 px-3 whitespace-nowrap">
+                  <Link
+                    to="/learning"
+                    className="flex items-center gap-1 hover:bg-white/10 transition-colors py-2.5 px-3 whitespace-nowrap"
+                    onMouseEnter={() => {
+                      void import('@/pages/Learning');
+                    }}
+                  >
                     <span>Learning</span>
                     <ChevronDown size={14} className="opacity-70" />
                   </Link>

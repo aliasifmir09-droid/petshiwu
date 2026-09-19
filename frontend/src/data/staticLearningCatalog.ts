@@ -105,11 +105,11 @@ export const listStaticLearningCategories = (petType?: string): Array<{ name: st
 
 export const mergeBlogLists = (staticBlogs: Blog[], cmsBlogs: Blog[] = []): Blog[] => {
   const bySlug = new Map<string, Blog>();
-  staticBlogs.forEach((blog) => {
-    if (blog.slug) bySlug.set(blog.slug, blog);
+  (Array.isArray(staticBlogs) ? staticBlogs : []).forEach((blog) => {
+    if (blog?.slug) bySlug.set(blog.slug, blog);
   });
-  cmsBlogs.forEach((blog) => {
-    if (blog.slug) bySlug.set(blog.slug, blog);
+  (Array.isArray(cmsBlogs) ? cmsBlogs : []).forEach((blog) => {
+    if (blog?.slug) bySlug.set(blog.slug, blog);
   });
   return [...bySlug.values()].sort((a, b) =>
     String(b.publishedAt || b.createdAt || '').localeCompare(String(a.publishedAt || a.createdAt || ''))

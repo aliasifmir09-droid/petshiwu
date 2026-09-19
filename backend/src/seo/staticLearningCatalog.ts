@@ -96,11 +96,11 @@ export const mergeBlogLists = (
   cmsBlogs: IBlogResponse[]
 ): IBlogResponse[] => {
   const bySlug = new Map<string, IBlogResponse>();
-  staticBlogs.forEach((blog) => {
-    if (blog.slug) bySlug.set(blog.slug, blog);
+  (Array.isArray(staticBlogs) ? staticBlogs : []).forEach((blog) => {
+    if (blog?.slug) bySlug.set(blog.slug, blog);
   });
-  cmsBlogs.forEach((blog) => {
-    if (blog.slug) bySlug.set(blog.slug, blog);
+  (Array.isArray(cmsBlogs) ? cmsBlogs : []).forEach((blog) => {
+    if (blog?.slug) bySlug.set(blog.slug, blog);
   });
   return [...bySlug.values()].sort((a, b) =>
     String(b.publishedAt || b.createdAt || '').localeCompare(String(a.publishedAt || a.createdAt || ''))
