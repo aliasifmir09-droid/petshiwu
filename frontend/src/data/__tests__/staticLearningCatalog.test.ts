@@ -1,4 +1,4 @@
-import { STATIC_LEARNING_POSTS, listStaticLearningBlogs } from '../staticLearningCatalog';
+import { STATIC_LEARNING_POSTS, listStaticLearningBlogs, mergeBlogLists } from '../staticLearningCatalog';
 import { getStaticLearningBlog } from '../staticLearningArticle';
 
 describe('frontend static learning catalog', () => {
@@ -13,5 +13,11 @@ describe('frontend static learning catalog', () => {
     const dogs = listStaticLearningBlogs({ petType: 'dog' });
     expect(dogs.length).toBeGreaterThan(20);
     expect(getStaticLearningBlog('best-fresh-dog-food-2026')?.title).toMatch(/fresh dog food/i);
+  });
+
+  test('merge ignores a broken CMS payload instead of crashing the hub', () => {
+    const posts = listStaticLearningBlogs();
+    expect(mergeBlogLists(posts, undefined as never).length).toBe(posts.length);
+    expect(mergeBlogLists(posts, { data: [] } as never).length).toBe(posts.length);
   });
 });

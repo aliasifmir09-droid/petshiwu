@@ -153,20 +153,26 @@ export const getPublishedBlogs = async (req: Request, res: Response, next: NextF
       });
     }
 
-    // Execute query. Fetch matching CMS posts, then merge the static
-    // education catalog so /learning lists 100+ indexable guides even
-    // when Mongo has no published Blog documents.
-    const blogs = await Blog.find(query)
-      .populate('author', 'name email')
-      .sort({ publishedAt: -1, createdAt: -1 })
-      .lean();
-
     const staticBlogs = listStaticLearningBlogs({
       petType: typeof petType === 'string' ? petType : undefined,
       category: typeof category === 'string' ? category : undefined,
       search: typeof search === 'string' ? search : undefined,
     });
-    const merged = mergeBlogLists(staticBlogs, normalizeBlogs(blogs));
+
+    let cmsBlogs: IBlogResponse[] = [];
+    try {
+      const blogs = await Blog.find(query)
+        .select('title slug content excerpt featuredImage petType category tags isPublished publishedAt views metaTitle metaDescription speakable authorByline authorProfileUrl createdAt updatedAt author')
+        .populate('author', 'name email')
+        .sort({ publishedAt: -1, createdAt: -1 })
+        .limit(80)
+        .lean();
+      cmsBlogs = normalizeBlogs(blogs);
+    } catch (cmsError: unknown) {
+      logger.error('CMS blog lookup failed; returning static learning guides only:', cmsError);
+    }
+
+    const merged = mergeBlogLists(staticBlogs, cmsBlogs);
     const total = merged.length;
     const normalizedBlogs = merged.slice(skip, skip + limitNum);
 
@@ -189,7 +195,28 @@ export const getPublishedBlogs = async (req: Request, res: Response, next: NextF
     });
   } catch (error: unknown) {
     logger.error('Error fetching published blogs:', error);
-    next(error);
+    try {
+      const staticBlogs = listStaticLearningBlogs({
+        petType: typeof req.query.petType === 'string' ? req.query.petType : undefined,
+        category: typeof req.query.category === 'string' ? req.query.category : undefined,
+        search: typeof req.query.search === 'string' ? req.query.search : undefined,
+      });
+      const pageNum = parseInt(String(req.query.page || 1));
+      const limitNum = parseInt(String(req.query.limit || 10));
+      const skip = (pageNum - 1) * limitNum;
+      return res.json({
+        success: true,
+        data: staticBlogs.slice(skip, skip + limitNum),
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total: staticBlogs.length,
+          pages: Math.ceil(staticBlogs.length / limitNum) || 1,
+        },
+      });
+    } catch {
+      next(error);
+    }
   }
 };
 
@@ -525,19 +552,24 @@ export const getBlogCategoriesByPetType = async (req: Request, res: Response, ne
       });
     }
 
-    const petTypesInBlogs = await Blog.distinct('petType', { isPublished: true });
-    const cmsResult = await Promise.all(
-      petTypesInBlogs.map(async (petType) => {
-        const categories = await Blog.distinct('category', { isPublished: true, petType });
-        const categoriesWithCounts = await Promise.all(
-          categories.map(async (category) => {
-            const count = await Blog.countDocuments({ isPublished: true, petType, category });
-            return { name: category, count };
-          })
-        );
-        return { petType, categories: categoriesWithCounts };
-      })
-    );
+    let cmsResult: Array<{ petType: string; categories: Array<{ name: string; count: number }> }> = [];
+    try {
+      const petTypesInBlogs = await Blog.distinct('petType', { isPublished: true });
+      cmsResult = await Promise.all(
+        petTypesInBlogs.map(async (petType) => {
+          const categories = await Blog.distinct('category', { isPublished: true, petType });
+          const categoriesWithCounts = await Promise.all(
+            categories.map(async (category) => {
+              const count = await Blog.countDocuments({ isPublished: true, petType, category });
+              return { name: category, count };
+            })
+          );
+          return { petType, categories: categoriesWithCounts };
+        })
+      );
+    } catch (cmsError: unknown) {
+      logger.error('CMS blog categories-by-pet-type failed; using static catalog:', cmsError);
+    }
     const staticResult = staticLearningCategoriesByPetType();
     const byPet = new Map<string, Map<string, number>>();
     [...cmsResult, ...staticResult].forEach((group) => {
@@ -589,13 +621,18 @@ export const getBlogCategories = async (req: Request, res: Response, next: NextF
       query.petType = petType;
     }
 
-    const categories = await Blog.distinct('category', query);
-    const cmsCounts = await Promise.all(
-      categories.map(async (category) => {
-        const count = await Blog.countDocuments({ ...query, category });
-        return { name: category, count };
-      })
-    );
+    let cmsCounts: Array<{ name: string; count: number }> = [];
+    try {
+      const categories = await Blog.distinct('category', query);
+      cmsCounts = await Promise.all(
+        categories.map(async (category) => {
+          const count = await Blog.countDocuments({ ...query, category });
+          return { name: category, count };
+        })
+      );
+    } catch (cmsError: unknown) {
+      logger.error('CMS blog categories failed; using static catalog:', cmsError);
+    }
     const staticCounts = staticLearningCategoryCounts(
       typeof petType === 'string' ? petType : undefined
     );

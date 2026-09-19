@@ -1,6 +1,7 @@
 import { Component, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { isChunkLoadError, reloadOnceForStaleChunk } from '@/utils/lazyWithRetry';
 
 interface Props {
   children: ReactNode;
@@ -24,10 +25,16 @@ class ErrorBoundaryWithReporting extends Component<Props, State> {
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
+    if (isChunkLoadError(error) && reloadOnceForStaleChunk()) {
+      return { hasError: false, error: null };
+    }
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
+    if (isChunkLoadError(error) && reloadOnceForStaleChunk()) {
+      return;
+    }
     // Log error without sensitive data - only in development
     if (import.meta.env.DEV) {
       console.error('ErrorBoundary caught an error:', error.message);

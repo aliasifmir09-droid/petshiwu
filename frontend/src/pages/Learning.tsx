@@ -40,17 +40,22 @@ const Learning = () => {
       category: category || undefined,
       search: searchQuery || undefined
     }),
-    staleTime: 30 * 1000
+    staleTime: 30 * 1000,
+    retry: false,
+    throwOnError: false,
   });
 
   // Fetch blog categories
   const { data: categories } = useQuery({
     queryKey: ['blog-categories', petType],
     queryFn: () => blogService.getBlogCategories(petType || undefined),
-    staleTime: 10 * 60 * 1000
+    staleTime: 10 * 60 * 1000,
+    retry: false,
+    throwOnError: false,
   });
 
-  const mergedArticles = mergeBlogLists(staticMatches, blogsData?.data || []);
+  const cmsArticles = Array.isArray(blogsData?.data) ? blogsData.data : [];
+  const mergedArticles = mergeBlogLists(staticMatches, cmsArticles);
   const totalArticles = mergedArticles.length;
   const totalPages = Math.max(1, Math.ceil(totalArticles / pageSize));
   const pageArticles = mergedArticles.slice((page - 1) * pageSize, page * pageSize);
