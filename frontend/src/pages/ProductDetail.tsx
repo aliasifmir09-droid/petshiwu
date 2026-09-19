@@ -428,40 +428,68 @@ const ProductDetail = () => {
     }
   }, [product?.description, product?.name, product?.petType, product?.brand, isReadyToShip]);
 
+  const slugFallbackName = (actualProductSlug || '')
+    .split('-')
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+  const productTitle = productSearchTitle({
+    name: product?.name || slugFallbackName || 'Pet supplies',
+    brand: product?.brand,
+    inStock: product ? isReadyToShip : undefined,
+  });
+  const searchDescription =
+    productDescription ||
+    productSearchDescription({
+      brand: product?.brand,
+      name: product?.name || slugFallbackName,
+      petType: product?.petType,
+      inStock: product ? isReadyToShip : undefined,
+    });
+
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 lg:px-8 py-12">
-        <LoadingSpinner size="lg" ariaLabel="Loading product details" />
-      </div>
+      <>
+        <SEO title={productTitle} description={searchDescription} type="product" />
+        <div className="container mx-auto px-4 lg:px-8 py-12">
+          <LoadingSpinner size="lg" ariaLabel="Loading product details" />
+        </div>
+      </>
     );
   }
 
   if (productError) {
     return (
-      <div className="container mx-auto px-4 lg:px-8 py-12 text-center">
-        <h1 className="text-2xl font-bold mb-4">Error loading product</h1>
-        <p className="text-gray-600 mb-4">There was an error loading this product. Please try again.</p>
-        <button
-          onClick={() => navigate('/products')}
-          className="text-primary-600 hover:text-primary-700"
-        >
-          Browse All Products
-        </button>
-      </div>
+      <>
+        <SEO title={productTitle} description={searchDescription} type="product" />
+        <div className="container mx-auto px-4 lg:px-8 py-12 text-center">
+          <h1 className="text-2xl font-bold mb-4">Error loading product</h1>
+          <p className="text-gray-600 mb-4">There was an error loading this product. Please try again.</p>
+          <button
+            onClick={() => navigate('/products')}
+            className="text-primary-600 hover:text-primary-700"
+          >
+            Browse All Products
+          </button>
+        </div>
+      </>
     );
   }
 
   if (!product) {
     return (
-      <div className="container mx-auto px-4 lg:px-8 py-12 text-center">
-        <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
-        <button
-          onClick={() => navigate('/products')}
-          className="text-primary-600 hover:text-primary-700"
-        >
-          Browse All Products
-        </button>
-      </div>
+      <>
+        <SEO title={productTitle} description={searchDescription} type="product" />
+        <div className="container mx-auto px-4 lg:px-8 py-12 text-center">
+          <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
+          <button
+            onClick={() => navigate('/products')}
+            className="text-primary-600 hover:text-primary-700"
+          >
+            Browse All Products
+          </button>
+        </div>
+      </>
     );
   }
 
@@ -587,13 +615,6 @@ const ProductDetail = () => {
 
   const breadcrumbs = buildBreadcrumbs();
 
-  // Build SEO data — brand in the name, in-stock reason to click, no mid-word ellipsis.
-  const productTitle = productSearchTitle({
-    name: product.name,
-    brand: product.brand,
-    inStock: isReadyToShip,
-  });
-  
   // Build keywords
   const categoryName = typeof product.category === 'object' && product.category?.name 
     ? product.category.name 
@@ -622,7 +643,7 @@ const ProductDetail = () => {
     <>
       <SEO
         title={productTitle}
-        description={productDescription}
+        description={searchDescription}
         keywords={keywords}
         image={productImage}
         url={productUrl}
