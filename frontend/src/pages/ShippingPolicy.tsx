@@ -107,7 +107,8 @@ const ShippingPolicy = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-3">Where we deliver</h2>
           <p>
             <strong>Currently delivering:</strong> Manhattan, Brooklyn, Queens, the Bronx, and Staten Island,
-            with same-day when you order by cutoff. Nearby New Jersey and Westchester ZIPs may be next-day.
+            with same-day when you order by cutoff. Next-day metro includes Hicksville, Hillside, Hoboken,
+            Jersey City, and select Westchester ZIPs. Same-day stays the five boroughs only.
           </p>
           <p className="mt-2">
             <strong>Nationwide shipping opens in a few days</strong> for other U.S. addresses, free over $49.

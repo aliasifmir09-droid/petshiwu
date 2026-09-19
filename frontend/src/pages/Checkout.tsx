@@ -27,7 +27,7 @@ import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { MapPin, Plus, Check, User, UserCheck, ShieldCheck, RotateCcw, Headphones, Lock, Truck, CreditCard } from 'lucide-react';
 import { TAX_RATE } from '@/config/constants';
 import { paypalClientId } from '@/config/paypal';
-import { isNycDeliveryZip, isNewYorkState, normalizeShippingState } from '@/utils/deliveryZip';
+import { isDeliverableShippingAddress, normalizeShippingState, OUT_OF_AREA_DELIVERY_MESSAGE } from '@/utils/deliveryZip';
 import { shippingCostForSubtotal } from '@/utils/orderTotals';
 import { checkoutCodeFromError, checkoutCodeFromResponse } from '@/utils/checkoutCoupon';
 import { isCheckoutDeliveryReady, shouldHoldCheckoutOnEmptyCart } from '@/utils/checkoutFlow';
@@ -577,10 +577,8 @@ const Checkout = () => {
       return;
     }
 
-    // NYC-only delivery check (includes Queens 111xx Astoria/LIC, which the old range skipped)
-    const _isNY = isNewYorkState(shippingInfo.state);
-    if (!_isNY || !isNycDeliveryZip(shippingInfo.zipCode)) {
-      showToast('Sorry, we currently deliver only within New York City (all 5 boroughs).', 'error');
+    if (!isDeliverableShippingAddress(shippingInfo.state, shippingInfo.zipCode)) {
+      showToast(OUT_OF_AREA_DELIVERY_MESSAGE, 'error');
       return;
     }
 
@@ -1232,7 +1230,7 @@ const Checkout = () => {
                     </ErrorBoundary>
                     ) : (
                       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
-                        Enter your NYC delivery name, phone, address, and ZIP above. Apple Pay, Google Pay, and PayPal unlock after that so the order can actually ship.
+                        Enter your delivery name, phone, address, and ZIP above. Apple Pay, Google Pay, and PayPal unlock after that so the order can actually ship.
                       </div>
                     )}
                   </div>
@@ -1297,7 +1295,7 @@ const Checkout = () => {
                     </ErrorBoundary>
                     ) : (
                       <p className="text-sm text-[#1E3A8A]">
-                        Enter your NYC delivery details above, then your card fields will open here.
+                        Enter your delivery details above, then your card fields will open here.
                       </p>
                     )}
                   </div>

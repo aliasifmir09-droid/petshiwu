@@ -34,32 +34,40 @@ const NYC_RANGES: Array<{ start: number; end: number; area: string }> = [
   { start: 11351, end: 11697, area: 'Queens' },
 ];
 
-const NEXT_DAY_ZIPS: Record<string, string> = {
-  '07030': 'Hoboken',
-  '07086': 'Weehawken',
-  '07302': 'Jersey City',
-  '07304': 'Jersey City',
-  '07305': 'Jersey City',
-  '07306': 'Jersey City',
-  '07307': 'Jersey City',
-  '07310': 'Jersey City',
-  '07311': 'Jersey City',
-  '10528': 'Harrison',
-  '10550': 'Mount Vernon',
-  '10552': 'Mount Vernon',
-  '10553': 'Mount Vernon',
-  '10583': 'Scarsdale',
-  '10601': 'White Plains',
-  '10603': 'White Plains',
-  '10604': 'White Plains',
-  '10605': 'White Plains',
-  '10606': 'White Plains',
-  '10701': 'Yonkers',
-  '10703': 'Yonkers',
-  '10704': 'Yonkers',
-  '10705': 'Yonkers',
-  '10708': 'Bronxville',
-  '10801': 'New Rochelle',
+type NextDayZone = { area: string; state: 'NY' | 'NJ' };
+
+const NEXT_DAY_ZIPS: Record<string, NextDayZone> = {
+  '07030': { area: 'Hoboken', state: 'NJ' },
+  '07086': { area: 'Weehawken', state: 'NJ' },
+  '07205': { area: 'Hillside', state: 'NJ' },
+  '07302': { area: 'Jersey City', state: 'NJ' },
+  '07304': { area: 'Jersey City', state: 'NJ' },
+  '07305': { area: 'Jersey City', state: 'NJ' },
+  '07306': { area: 'Jersey City', state: 'NJ' },
+  '07307': { area: 'Jersey City', state: 'NJ' },
+  '07310': { area: 'Jersey City', state: 'NJ' },
+  '07311': { area: 'Jersey City', state: 'NJ' },
+  '10528': { area: 'Harrison', state: 'NY' },
+  '10550': { area: 'Mount Vernon', state: 'NY' },
+  '10552': { area: 'Mount Vernon', state: 'NY' },
+  '10553': { area: 'Mount Vernon', state: 'NY' },
+  '10583': { area: 'Scarsdale', state: 'NY' },
+  '10601': { area: 'White Plains', state: 'NY' },
+  '10603': { area: 'White Plains', state: 'NY' },
+  '10604': { area: 'White Plains', state: 'NY' },
+  '10605': { area: 'White Plains', state: 'NY' },
+  '10606': { area: 'White Plains', state: 'NY' },
+  '10701': { area: 'Yonkers', state: 'NY' },
+  '10703': { area: 'Yonkers', state: 'NY' },
+  '10704': { area: 'Yonkers', state: 'NY' },
+  '10705': { area: 'Yonkers', state: 'NY' },
+  '10708': { area: 'Bronxville', state: 'NY' },
+  '10801': { area: 'New Rochelle', state: 'NY' },
+  // Hicksville, Nassau — next-day metro, not five-borough same-day
+  '11801': { area: 'Hicksville', state: 'NY' },
+  '11802': { area: 'Hicksville', state: 'NY' },
+  '11803': { area: 'Plainview', state: 'NY' },
+  '11804': { area: 'Old Bethpage', state: 'NY' },
 };
 
 const NYC_BOUNDS = {
@@ -135,6 +143,30 @@ export function isNycDeliveryZip(input: string): boolean {
   return findNycArea(Number(zip)) !== null;
 }
 
+/** Accept NJ, N.J., New Jersey. */
+export function isNewJerseyState(state: string): boolean {
+  const normalized = String(state || '')
+    .trim()
+    .toUpperCase()
+    .replace(/\./g, '')
+    .replace(/\s+/g, ' ');
+  return normalized === 'NJ' || normalized === 'NEW JERSEY';
+}
+
+export function isNextDayDeliveryZip(input: string): boolean {
+  const zip = normalizeZip(input);
+  return isValidZip(zip) && Boolean(NEXT_DAY_ZIPS[zip]);
+}
+
+/** NYC same-day or next-day metro (Hicksville, Hillside, Hoboken, Westchester). */
+export function isDeliverableShippingAddress(state: string, zipCode: string): boolean {
+  const zip = normalizeZip(zipCode);
+  if (isNycDeliveryZip(zip)) return isNewYorkState(state);
+  const zone = NEXT_DAY_ZIPS[zip];
+  if (!zone) return false;
+  return zone.state === 'NY' ? isNewYorkState(state) : isNewJerseyState(state);
+}
+
 /** Accept NY, N.Y., New York, and New York State. */
 export function isNewYorkState(state: string): boolean {
   const normalized = String(state || '')
@@ -147,7 +179,9 @@ export function isNewYorkState(state: string): boolean {
 
 export function normalizeShippingState(state: string): string {
   const trimmed = String(state || '').trim();
-  return isNewYorkState(trimmed) ? 'NY' : trimmed;
+  if (isNewYorkState(trimmed)) return 'NY';
+  if (isNewJerseyState(trimmed)) return 'NJ';
+  return trimmed;
 }
 
 export function lookupZip(input: string, now: Date = new Date()): ZipLookupResult | null {
@@ -182,10 +216,11 @@ export function lookupZip(input: string, now: Date = new Date()): ZipLookupResul
   if (nearby) {
     return {
       zip,
-      area: nearby,
+      area: nearby.area,
       speed: 'next-day',
-      headline: `Next-day delivery to ${nearby}`,
-      detail: 'We deliver to Jersey City, Hoboken, and select Westchester addresses the next business day.',
+      headline: `Next-day delivery to ${nearby.area}`,
+      detail:
+        'Next-day metro delivery — Hicksville, Hillside, Jersey City, Hoboken, and select Westchester addresses. Same-day is NYC only (all 5 boroughs).',
       cutoffPassed: countdown.passed,
     };
   }
@@ -208,6 +243,9 @@ export function isCoordinateInNyc(lat: number, lng: number): boolean {
     lng <= NYC_BOUNDS.maxLng
   );
 }
+
+export const OUT_OF_AREA_DELIVERY_MESSAGE =
+  'We currently deliver same-day in NYC and next-day to nearby metro ZIPs including Hicksville and Hillside. Nationwide shipping opens in a few days.';
 
 export const LAST_ZIP_STORAGE_KEY = 'petshiwu_last_zip';
 export const LAST_ZIP_EVENT = 'petshiwu:zip';

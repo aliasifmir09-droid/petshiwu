@@ -32,7 +32,7 @@ import {
 } from '../services/paypalService';
 import { calculateTrustedOrderPricing } from '../services/orderPricingService';
 import { isReusableCoupon, normalizeCouponCode } from '../services/couponService';
-import { isNycShippingAddress } from '../utils/nycDelivery';
+import { isDeliverableShippingAddress, OUT_OF_AREA_DELIVERY_MESSAGE } from '../utils/nycDelivery';
 import {
   getOrCreateStripeCustomer,
   rememberPaidCardForUser,
@@ -109,12 +109,12 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       });
     }
 
-    // NYC-only delivery restriction — all 5 boroughs, including Queens 111xx
-    if (!isNycShippingAddress(shippingAddress.state, shippingAddress.zipCode)) {
+    // NYC same-day plus next-day metro (Hicksville, Hillside, Hoboken, Westchester)
+    if (!isDeliverableShippingAddress(shippingAddress.state, shippingAddress.zipCode)) {
       return res.status(400).json({
         success: false,
-        message: 'We currently deliver only within New York City (all 5 boroughs). Please enter a valid NYC address.',
-        errors: ['Delivery is only available within the 5 boroughs of New York City.']
+        message: OUT_OF_AREA_DELIVERY_MESSAGE,
+        errors: [OUT_OF_AREA_DELIVERY_MESSAGE],
       });
     }
 
@@ -1615,8 +1615,8 @@ export const createPayPalCheckoutOrder = async (req: AuthRequest, res: Response,
     if (!isCompleteShippingAddress(shippingAddress)) {
       return res.status(400).json({ success: false, message: 'A complete shipping address is required before starting PayPal checkout.' });
     }
-    if (!isNycShippingAddress(shippingAddress.state, shippingAddress.zipCode)) {
-      return res.status(400).json({ success: false, message: 'We currently deliver only within New York City (all 5 boroughs). Please enter a valid NYC address.' });
+    if (!isDeliverableShippingAddress(shippingAddress.state, shippingAddress.zipCode)) {
+      return res.status(400).json({ success: false, message: OUT_OF_AREA_DELIVERY_MESSAGE });
     }
     const isGuest = !req.user?._id;
     const customerEmail = isGuest ? (guestEmail || '').trim() : undefined;

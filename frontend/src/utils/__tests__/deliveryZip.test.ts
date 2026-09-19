@@ -5,7 +5,10 @@ import {
   getNyDateParts,
   getSameDayCutoffHour,
   isCoordinateInNyc,
+  isDeliverableShippingAddress,
+  isNewJerseyState,
   isNewYorkState,
+  isNextDayDeliveryZip,
   isNycDeliveryZip,
   normalizeShippingState,
   isValidZip,
@@ -55,6 +58,45 @@ describe('deliveryZip', () => {
     const result = lookupZip('07030', new Date('2026-08-13T14:00:00Z'));
     expect(result?.area).toBe('Hoboken');
     expect(result?.speed).toBe('next-day');
+  });
+
+  test('lookupZip marks Hicksville and Hillside as next-day metro', () => {
+    const morning = new Date('2026-08-13T14:00:00Z');
+    const hicksville = lookupZip('11801', morning);
+    expect(hicksville?.area).toBe('Hicksville');
+    expect(hicksville?.speed).toBe('next-day');
+    expect(hicksville?.headline).toMatch(/Next-day delivery to Hicksville/);
+
+    const hillside = lookupZip('07205', morning);
+    expect(hillside?.area).toBe('Hillside');
+    expect(hillside?.speed).toBe('next-day');
+
+    expect(lookupZip('11803', morning)?.area).toBe('Plainview');
+    expect(isNextDayDeliveryZip('11801')).toBe(true);
+    expect(isNextDayDeliveryZip('07205')).toBe(true);
+  });
+
+  test('Queens Hillside Avenue stays NYC same-day, not the NJ Hillside ZIP', () => {
+    const morning = new Date('2026-08-13T14:00:00Z');
+    const jamaicaHillside = lookupZip('11432', morning);
+    expect(jamaicaHillside?.area).toBe('Queens');
+    expect(jamaicaHillside?.speed).toBe('same-day');
+    expect(isNycDeliveryZip('11432')).toBe(true);
+    expect(isNextDayDeliveryZip('11432')).toBe(false);
+  });
+
+  test('isDeliverableShippingAddress accepts Hicksville NY and Hillside NJ', () => {
+    expect(isDeliverableShippingAddress('NY', '11801')).toBe(true);
+    expect(isDeliverableShippingAddress('New York', '11802')).toBe(true);
+    expect(isDeliverableShippingAddress('NJ', '07205')).toBe(true);
+    expect(isDeliverableShippingAddress('New Jersey', '07205')).toBe(true);
+    expect(isNewJerseyState('n.j.')).toBe(true);
+    expect(normalizeShippingState('New Jersey')).toBe('NJ');
+    expect(isDeliverableShippingAddress('NY', '07205')).toBe(false);
+    expect(isDeliverableShippingAddress('NJ', '11801')).toBe(false);
+    expect(isDeliverableShippingAddress('NY', '94105')).toBe(false);
+    expect(isDeliverableShippingAddress('CA', '94105')).toBe(false);
+    expect(isDeliverableShippingAddress('NY', '11372')).toBe(true);
   });
 
   test('lookupZip offers nationwide shipping-soon outside the metro', () => {

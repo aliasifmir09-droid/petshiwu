@@ -1,4 +1,4 @@
-import { isNewYorkState, isNycDeliveryZip } from '@/utils/deliveryZip';
+import { isDeliverableShippingAddress } from '@/utils/deliveryZip';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -27,7 +27,7 @@ export const isCheckoutDeliveryReady = (
   ) {
     return false;
   }
-  if (!isNewYorkState(shipping.state) || !isNycDeliveryZip(shipping.zipCode)) return false;
+  if (!isDeliverableShippingAddress(shipping.state, shipping.zipCode)) return false;
   if (!isAuthenticated && !EMAIL_PATTERN.test(shipping.email?.trim() || '')) return false;
   return true;
 };

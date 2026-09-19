@@ -20,6 +20,22 @@ describe('checkoutFlow', () => {
     expect(isCheckoutDeliveryReady({ ...nycAddress, street: '' }, true)).toBe(false);
   });
 
+  test('Hicksville NY and Hillside NJ unlock checkout as next-day metro', () => {
+    expect(
+      isCheckoutDeliveryReady(
+        { ...nycAddress, city: 'Hicksville', zipCode: '11801' },
+        false
+      )
+    ).toBe(true);
+    expect(
+      isCheckoutDeliveryReady(
+        { ...nycAddress, city: 'Hillside', state: 'NJ', zipCode: '07205' },
+        false
+      )
+    ).toBe(true);
+    expect(isCheckoutDeliveryReady({ ...nycAddress, zipCode: '94105' }, false)).toBe(false);
+  });
+
   test('logged-in shoppers can skip email on the form', () => {
     expect(isCheckoutDeliveryReady({ ...nycAddress, email: '' }, true)).toBe(true);
   });

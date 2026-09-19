@@ -1,4 +1,14 @@
-import { isNycDeliveryZip, isNycShippingAddress, isNewYorkState, normalizeShippingState, normalizeZip } from '../../../utils/nycDelivery';
+import {
+  isDeliverableShippingAddress,
+  isNewJerseyState,
+  isNewYorkState,
+  isNextDayDeliveryZip,
+  isNycDeliveryZip,
+  isNycShippingAddress,
+  normalizeShippingState,
+  normalizeZip,
+  OUT_OF_AREA_DELIVERY_MESSAGE,
+} from '../../../utils/nycDelivery';
 
 describe('nycDelivery', () => {
   test('normalizeZip keeps the first five digits', () => {
@@ -33,5 +43,30 @@ describe('nycDelivery', () => {
     expect(normalizeShippingState('new york')).toBe('NY');
     expect(isNycShippingAddress('new york', '11372')).toBe(true);
     expect(isNycShippingAddress('New York', '11372')).toBe(true);
+  });
+
+  test('Hicksville NY and Hillside NJ are next-day metro, not NYC same-day', () => {
+    expect(isNycDeliveryZip('11801')).toBe(false);
+    expect(isNycDeliveryZip('07205')).toBe(false);
+    expect(isNextDayDeliveryZip('11801')).toBe(true);
+    expect(isNextDayDeliveryZip('11803')).toBe(true);
+    expect(isNextDayDeliveryZip('07205')).toBe(true);
+    expect(isNycShippingAddress('NY', '11801')).toBe(false);
+    expect(isDeliverableShippingAddress('NY', '11801')).toBe(true);
+    expect(isDeliverableShippingAddress('New York', '11804')).toBe(true);
+    expect(isDeliverableShippingAddress('NJ', '07205')).toBe(true);
+    expect(isDeliverableShippingAddress('New Jersey', '07205')).toBe(true);
+    expect(isNewJerseyState('NJ')).toBe(true);
+    expect(normalizeShippingState('new jersey')).toBe('NJ');
+    expect(isDeliverableShippingAddress('NY', '07205')).toBe(false);
+    expect(isDeliverableShippingAddress('NJ', '11801')).toBe(false);
+    expect(isDeliverableShippingAddress('CA', '94105')).toBe(false);
+    expect(OUT_OF_AREA_DELIVERY_MESSAGE).toMatch(/Hicksville/);
+  });
+
+  test('Queens Hillside Avenue 11432 stays NYC same-day', () => {
+    expect(isNycDeliveryZip('11432')).toBe(true);
+    expect(isDeliverableShippingAddress('NY', '11432')).toBe(true);
+    expect(isNextDayDeliveryZip('11432')).toBe(false);
   });
 });
