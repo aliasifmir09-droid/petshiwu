@@ -4,13 +4,16 @@ import { paypalCheckoutScriptOptions, paypalClientId } from '@/config/paypal';
 import PayPalButton from '@/components/PayPalButton';
 import PayPalApplePay from '@/components/PayPalApplePay';
 import PayPalGooglePay from '@/components/PayPalGooglePay';
+import PayPalCardFields from '@/components/PayPalCardFields';
 import type { PayPalButtonProps } from '@/components/PayPalButton';
 import type { PayPalApplePayProps } from '@/components/PayPalApplePay';
 import type { PayPalGooglePayProps } from '@/components/PayPalGooglePay';
 
 type CheckoutBrandedPaymentsProps = PayPalButtonProps &
   Pick<PayPalApplePayProps, 'total'> &
-  Pick<PayPalGooglePayProps, 'total'>;
+  Pick<PayPalGooglePayProps, 'total'> & {
+    onSwitchToWallet?: () => void;
+  };
 
 const BrandedPaymentButtons = (props: CheckoutBrandedPaymentsProps) => {
   const [{ isPending }] = usePayPalScriptReducer();
@@ -41,6 +44,20 @@ const BrandedPaymentButtons = (props: CheckoutBrandedPaymentsProps) => {
       <PayPalApplePay {...walletProps} total={props.total} />
       <PayPalGooglePay {...walletProps} total={props.total} />
       <PayPalButton {...walletProps} onCancel={props.onCancel} skipProvider />
+      <div className="flex items-center gap-3 py-2">
+        <div className="flex-1 h-px bg-gray-200" />
+        <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">or</span>
+        <div className="flex-1 h-px bg-gray-200" />
+      </div>
+      <div id="card-payment" className="relative overflow-visible rounded-2xl border-2 border-[#1E3A8A] bg-blue-50/40 p-4">
+        <PayPalCardFields
+          {...walletProps}
+          currency={props.currency || 'USD'}
+          skipProvider
+          onCancel={props.onCancel}
+          onSwitchToWallet={props.onSwitchToWallet}
+        />
+      </div>
     </div>
   );
 };

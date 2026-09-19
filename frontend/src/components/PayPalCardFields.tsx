@@ -30,6 +30,7 @@ interface PayPalCardFieldsProps {
   onCancel?: () => void;
   onSwitchToWallet?: () => void;
   currency?: string;
+  skipProvider?: boolean;
 }
 
 interface CardFieldsContentProps extends PayPalCardFieldsProps {
@@ -183,7 +184,7 @@ const CardFieldsContent = ({
   );
 };
 
-const PayPalCardFields = (props: PayPalCardFieldsProps) => {
+const PayPalCardFields = ({ skipProvider = false, ...props }: PayPalCardFieldsProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isEligible, setIsEligible] = useState<boolean | null>(null);
@@ -282,6 +283,22 @@ const PayPalCardFields = (props: PayPalCardFieldsProps) => {
     setIsProcessing(false);
   };
 
+  const fields = (
+    <PayPalCardFieldsProvider createOrder={createOrder} onApprove={onApprove} onError={onError}>
+      <CardFieldsContent
+        {...props}
+        error={error}
+        isProcessing={isProcessing}
+        isEligible={isEligible}
+        onSetError={setError}
+        onSetProcessing={setIsProcessing}
+      />
+      <EligibilityBridge onEligibilityChange={setIsEligible} />
+    </PayPalCardFieldsProvider>
+  );
+
+  if (skipProvider) return fields;
+
   return (
     <PayPalScriptProvider
       options={{
@@ -292,17 +309,7 @@ const PayPalCardFields = (props: PayPalCardFieldsProps) => {
         components: 'card-fields'
       }}
     >
-      <PayPalCardFieldsProvider createOrder={createOrder} onApprove={onApprove} onError={onError}>
-        <CardFieldsContent
-          {...props}
-          error={error}
-          isProcessing={isProcessing}
-          isEligible={isEligible}
-          onSetError={setError}
-          onSetProcessing={setIsProcessing}
-        />
-        <EligibilityBridge onEligibilityChange={setIsEligible} />
-      </PayPalCardFieldsProvider>
+      {fields}
     </PayPalScriptProvider>
   );
 };

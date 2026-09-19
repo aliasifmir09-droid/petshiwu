@@ -13,7 +13,7 @@ const nycAddress = {
 };
 
 describe('checkoutFlow', () => {
-  test('guest checkout needs a valid NYC address and email before PayPal unlocks', () => {
+  test('guest checkout needs a valid NYC address and email to be delivery-ready', () => {
     expect(isCheckoutDeliveryReady(nycAddress, false)).toBe(true);
     expect(isCheckoutDeliveryReady({ ...nycAddress, email: '' }, false)).toBe(false);
     expect(isCheckoutDeliveryReady({ ...nycAddress, zipCode: '07030' }, false)).toBe(false);

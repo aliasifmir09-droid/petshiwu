@@ -16,7 +16,7 @@ export const paypalCheckoutScriptOptions = (currency = 'USD') => ({
   currency,
   intent: 'capture' as const,
   environment: paypalSdkEnvironment,
-  components: 'buttons,applepay,googlepay',
+  components: 'buttons,applepay,googlepay,card-fields',
   // PayPal's extra funding bars (card, Venmo, Pay Later) expand hosted
   // iframes that jump to position:fixed and cover the store header.
   // Card uses PayPal Card Fields on this page. Venmo / Pay Later stay

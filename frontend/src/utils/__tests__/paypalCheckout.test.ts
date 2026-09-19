@@ -24,7 +24,7 @@ describe('PayPal checkout', () => {
     const checkout = read('../../pages/Checkout.tsx');
     expect(checkout).toContain("getElementById('paypal-payment')");
     expect(checkout).toContain('Click Apple Pay, Google Pay, or a PayPal button to complete your payment.');
-    expect(checkout).toContain('Continue to PayPal');
+    expect(checkout).toContain('Pay with Apple Pay, Google Pay, PayPal, or card below');
     expect(checkout).not.toMatch(
       /if \(paymentMethod === 'paypal' \|\| paymentMethod === 'apple_pay' \|\| paymentMethod === 'google_pay'\) return;/
     );
@@ -48,19 +48,23 @@ describe('PayPal checkout', () => {
 
     expect(branded).toContain('PayPalApplePay');
     expect(branded).toContain('PayPalGooglePay');
+    expect(branded).toContain('PayPalCardFields');
     expect(branded).toContain('skipProvider');
-    expect(paypalConfig).toContain("components: 'buttons,applepay,googlepay'");
+    expect(branded).toContain('id="card-payment"');
+    expect(branded).toContain('overflow-visible');
+    expect(paypalConfig).toContain("components: 'buttons,applepay,googlepay,card-fields'");
     expect(paypalConfig).toContain("disableFunding: ['card', 'venmo', 'paylater']");
     expect(paypalConfig).not.toContain('enableFunding');
     expect(checkout).toContain("setPaymentMethod('credit_card')");
-    expect(checkout).toContain('PayPalCardFields');
-    expect(checkout).toContain('currency="USD"');
-    expect(checkout).toContain('id="card-payment"');
     expect(checkout).not.toContain('STRIPE_SECRET_KEY');
-    expect(checkout).toContain('PayPal charges the card on this page, same as your last payment.');
     expect(checkout).toContain('overflow-visible');
     expect(checkout).toContain('paypal-wallet-slot');
     expect(checkout).toContain("paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay'");
+    expect(checkout).toContain('paypalClientId && !usingSavedCard');
+    expect(checkout).not.toContain('showPayPalButton');
+    expect(checkout).not.toContain('deliveryReady');
+    expect(checkout).not.toContain('Enter your delivery details above');
+    expect(checkout).not.toContain('card fields will open here');
     expect(checkout).not.toContain('PayPal, Venmo, or card');
   });
 
