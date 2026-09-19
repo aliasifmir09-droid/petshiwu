@@ -12,6 +12,7 @@ const detail = readFileSync(join(dir, '../BlogDetail.tsx'), 'utf8');
 describe('Google attention surfaces', () => {
   test('home and routes publish the new playbook and editorial page', () => {
     expect(home).toContain('HomeFeaturedLearning');
+    expect(home).toContain('NycHubLinkGrid');
     expect(app).toContain('/editorial-standards');
     expect(editorial).toContain('Fall 2026 pet care playbook');
     expect(editorial).toMatch(/do not delete/i);

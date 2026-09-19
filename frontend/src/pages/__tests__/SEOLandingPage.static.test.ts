@@ -26,6 +26,7 @@ describe('NYC shoppable hubs keep every indexed URL', () => {
     expect(landing).toContain('HubBuyerRatings');
     expect(landing).toContain('id="in-stock"');
     expect(landing).toContain('NYC_HUB_NATIONWIDE_HEADING');
+    expect(landing).toContain('NycHubLinkGrid');
   });
 
   test('hubs do not noindex the page or send shoppers to a search dead-end', () => {

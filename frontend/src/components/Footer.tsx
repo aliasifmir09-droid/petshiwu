@@ -114,7 +114,8 @@ const Footer = () => {
             <ul className="space-y-2 text-sm text-blue-100">
               <li><Link to="/pet-supplies-delivery-nyc" className="hover:text-white transition-colors">Pet Supplies Delivery NYC</Link></li>
               <li><Link to="/pet-supplies-jackson-heights-ny" className="hover:text-white transition-colors">Jackson Heights</Link></li>
-              <li><Link to="/pet-store-queens-ny" className="hover:text-white transition-colors">Queens</Link></li>
+              <li><Link to="/pet-supplies-queens-ny" className="hover:text-white transition-colors">Pet Supplies Queens</Link></li>
+              <li><Link to="/pet-store-queens-ny" className="hover:text-white transition-colors">Queens delivery, not a walk-in</Link></li>
               <li><Link to="/pet-supplies-brooklyn-ny" className="hover:text-white transition-colors">Brooklyn</Link></li>
               <li><Link to="/pet-supplies-manhattan-ny" className="hover:text-white transition-colors">Manhattan</Link></li>
               <li><Link to="/pet-supplies-bronx-ny" className="hover:text-white transition-colors">The Bronx</Link></li>

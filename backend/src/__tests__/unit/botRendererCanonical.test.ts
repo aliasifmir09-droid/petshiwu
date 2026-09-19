@@ -108,6 +108,14 @@ describe('buildHomepageHtml delivery-only schema', () => {
     );
   });
 
+  it('points Googlebot at the four NYC hubs without claiming same-day nationwide', () => {
+    expect(html).toContain('href="https://www.petshiwu.com/dog-food-delivery-nyc"');
+    expect(html).toContain('href="https://www.petshiwu.com/cat-food-delivery-nyc"');
+    expect(html).toContain('href="https://www.petshiwu.com/pet-supplies-delivery-nyc"');
+    expect(html).toContain('href="https://www.petshiwu.com/pet-supplies-queens-ny"');
+    expect(html).toMatch(/nationwide shipping next/i);
+  });
+
   it('marks the call center as 24/7', () => {
     expect(localBusiness.openingHoursSpecification).toEqual([
       expect.objectContaining({
@@ -245,6 +253,8 @@ describe('SEO landing first-wave HTML', () => {
     expect(html).toContain('Same-day is NYC only');
     expect(html).toContain('<h2>Recommended Products</h2>');
     expect(html).toContain('hills-science-diet-adult-dry-dog-food');
+    expect(html).toContain('/cat-food-delivery-nyc');
+    expect(html).toContain('/pet-supplies-queens-ny');
   });
 });
 
