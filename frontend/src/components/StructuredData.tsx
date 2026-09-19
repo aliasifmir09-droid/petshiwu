@@ -1,4 +1,6 @@
 import { Helmet } from 'react-helmet-async';
+import { SOCIAL_PROFILES } from '@/config/social';
+import { WEBSITE_DESCRIPTION } from '@/config/publicSeo';
 
 interface ProductSchema {
   name: string;
@@ -166,10 +168,7 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
           postalCode: org.address.postalCode,
           addressCountry: org.address.addressCountry
         } : undefined,
-        sameAs: [
-          'https://www.facebook.com/petshiwu',
-          'https://www.instagram.com/petshiwu',
-        ]
+        sameAs: [...SOCIAL_PROFILES]
       };
       break;
 
@@ -179,7 +178,7 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
         '@type': 'WebSite',
         name: 'Petshiwu',
         url: 'https://www.petshiwu.com',
-        description: 'Premium pet food, toys and supplies delivered to Queens, Brooklyn and all of NYC. 4,000+ products, free shipping over $49.',
+        description: WEBSITE_DESCRIPTION,
         potentialAction: {
           '@type': 'SearchAction',
           target: 'https://www.petshiwu.com/products?search={search_term_string}',
@@ -328,10 +327,7 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
       if (business.priceRange) (schema as any).priceRange = business.priceRange;
       if (business.areaServed) (schema as any).areaServed = business.areaServed;
 
-      (schema as any).sameAs = business.sameAs || [
-        'https://www.facebook.com/petshiwu',
-        'https://www.instagram.com/petshiwu',
-      ];
+      (schema as any).sameAs = business.sameAs || [...SOCIAL_PROFILES];
       break;
 
     default:
@@ -339,7 +335,7 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
   }
 
   return (
-    <Helmet>
+    <Helmet prioritizeSeoTags>
       <script type="application/ld+json">
         {JSON.stringify(schema)}
       </script>

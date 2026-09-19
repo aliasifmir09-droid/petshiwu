@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { HOMEPAGE_DESCRIPTION, HOMEPAGE_TITLE } from '@/config/publicSeo';
 
 interface SEOProps {
   title?: string;
@@ -25,8 +26,8 @@ const SITE_URL = 'https://www.petshiwu.com';
 const SITE_NAME = 'Petshiwu';
 
 const SEO = ({
-  title = 'Petshiwu | Premium Pet Food, Toys & Accessories in USA',
-  description = 'Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, birds, fish, reptiles, and small pets. Quality products, fast shipping, great prices. Free shipping on orders over $49.',
+  title = HOMEPAGE_TITLE,
+  description = HOMEPAGE_DESCRIPTION,
   keywords = 'pet supplies, dog food, cat food, pet toys, pet accessories, pet care, online pet store, premium pet food, dog treats, cat treats, pet bedding, pet grooming, pet health, pet nutrition, pet shop online, buy pet food online, pet supplies near me',
   image = `${SITE_URL}/og-image.jpg`,
   url,
@@ -67,7 +68,7 @@ const SEO = ({
     : `${title} | ${SITE_NAME}`;
 
   return (
-    <Helmet>
+    <Helmet prioritizeSeoTags>
       {/* Primary Meta Tags */}
       <title>{fullTitle}</title>
       <meta name="title" content={fullTitle} />
@@ -109,8 +110,6 @@ const SEO = ({
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
       <meta name="twitter:image:alt" content={title} />
-      <meta name="twitter:site" content="@petshiwu" />
-      <meta name="twitter:creator" content="@petshiwu" />
 
       {/* Product-specific meta tags */}
       {type === 'product' && (
@@ -156,41 +155,6 @@ const SEO = ({
       <meta name="format-detection" content="telephone=no" />
       <meta name="mobile-web-app-capable" content="yes" />
       <meta name="application-name" content={SITE_NAME} />
-
-      {/* Product JSON-LD schema (Google rich snippets: price, availability, star ratings) */}
-      {type === 'product' && price && (
-        <script type="application/ld+json">
-          {JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Product',
-            name: title,
-            description,
-            image: ogImage,
-            brand: brand ? { '@type': 'Brand', name: brand } : { '@type': 'Brand', name: SITE_NAME },
-            sku: sku || '',
-            category: category || '',
-            offers: {
-              '@type': 'Offer',
-              url: resolvedUrl,
-              priceCurrency: currency || 'USD',
-              price: price.toFixed(2),
-              priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-              availability: availability === 'instock' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-              itemCondition: 'https://schema.org/NewCondition',
-              seller: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
-            },
-            ...(rating && ratingCount ? {
-              aggregateRating: {
-                '@type': 'AggregateRating',
-                ratingValue: rating.toFixed(1),
-                reviewCount: ratingCount,
-                bestRating: 5,
-                worstRating: 1,
-              }
-            } : {}),
-          })}
-        </script>
-      )}
     </Helmet>
   );
 };

@@ -203,7 +203,7 @@ const ProductSchema = ({ product, selectedVariant }: ProductSchemaProps) => {
   };
 
   return (
-    <Helmet>
+    <Helmet prioritizeSeoTags>
       <script type="application/ld+json">{JSON.stringify(schema)}</script>
       <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
     </Helmet>

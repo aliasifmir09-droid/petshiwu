@@ -416,6 +416,7 @@ const Header = () => {
                   <input
                     type="text"
                     placeholder="Search or snap a photo of the bag..."
+                    aria-label="Search products or identify a product from a bag photo"
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
                     onFocus={() => { if (searchQuery.length >= 1) { setShowSuggestions(true); } }}
@@ -570,7 +571,7 @@ const Header = () => {
                   onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
                   onFocus={() => { if (searchQuery.length >= 1) { setShowSuggestions(true); } }}
                   className="w-full h-10 pl-3 pr-[7.5rem] rounded-md border border-slate-300 bg-slate-50 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A8A] placeholder:text-gray-500"
-                  aria-label="Search products"
+                  aria-label="Search products or identify a product from a bag photo"
                 />
                 <div className="absolute inset-y-0 right-1 flex items-center gap-0.5">
                   <Link

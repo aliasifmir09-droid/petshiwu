@@ -79,14 +79,21 @@ const FAQ = () => {
     return {
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
-      mainEntity: faqs.map((faq) => ({
-        '@type': 'Question',
-        name: faq.question,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: faq.answer
-        }
-      }))
+      mainEntity: faqs.reduce((unique, faq) => {
+        const name = decodeHtmlEntities(faq.question).replace(/\s+/g, ' ').trim();
+        if (!name) return unique;
+        const key = name.toLowerCase();
+        if (unique.some((item) => String(item.name).toLowerCase() === key)) return unique;
+        unique.push({
+          '@type': 'Question',
+          name,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: decodeHtmlEntities(faq.answer)
+          }
+        });
+        return unique;
+      }, [] as Array<{ '@type': string; name: string; acceptedAnswer: { '@type': string; text: string } }>)
     };
   }, [faqs]);
 
@@ -192,7 +199,7 @@ const FAQ = () => {
                                   placeholder="Search FAQs..."
                                   value={searchQuery}
                                   onChange={(e) => setSearchQuery(e.target.value)}
-                                  aria-label="Search FAQs"
+                                  aria-label="Search frequently asked questions"
                                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                 />
               </div>
@@ -202,7 +209,7 @@ const FAQ = () => {
                                 <select
                                   value={selectedCategory}
                                   onChange={(e) => setSelectedCategory(e.target.value)}
-                                  aria-label="Filter FAQs by category"
+                                  aria-label="FAQ category"
                                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                 >
                                   <option value="">All Categories</option>

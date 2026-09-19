@@ -16,9 +16,8 @@ import HomeFeaturedLearning from '@/components/HomeFeaturedLearning';
 import NycHubLinkGrid from '@/components/NycHubLinkGrid';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
 import RestockDashboard from '@/components/RestockDashboard';
-import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
 import { ORDERING_PAUSED, ORDERING_PAUSED_HEADLINE } from '@/config/ordering';
-import { SOCIAL_PROFILES } from '@/config/social';
+import { HOMEPAGE_DESCRIPTION, HOMEPAGE_TITLE } from '@/config/publicSeo';
 import { CATALOG_BRANDS_FAQ, CATALOG_BRANDS_SHORT, CATALOG_PRODUCT_COUNT_LABEL } from '@/config/catalog';
 import { NEWSLETTER_CODE, NEWSLETTER_CODE_COPY } from '@/config/constants';
 import { HOME_STRIP_BRANDS } from '@/data/shopBrands';
@@ -98,16 +97,13 @@ const Home = () => {
   return (
     <div className="relative bg-white">
       <SEO
-        title="Petshiwu | Pet Food & Supplies – Free Shipping $49+, No Autoship"
+        title={HOMEPAGE_TITLE}
         description={
           ORDERING_PAUSED
             ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products from ${CATALOG_BRANDS_SHORT}. ${ORDERING_PAUSED_HEADLINE}. Free shipping over $49. No autoship.`
-            : areOrdersOpen()
-            ? `${CATALOG_PRODUCT_COUNT_LABEL} products from Hill's, Purina, Blue Buffalo, Royal Canin. Same-day NYC. Free shipping over $49. No autoship. Nationwide shipping soon.`
-            : `${CATALOG_PRODUCT_COUNT_LABEL} pet products from ${CATALOG_BRANDS_SHORT}. We start taking orders ${ORDERS_OPEN_LABEL}. Free shipping over $49.`
+            : HOMEPAGE_DESCRIPTION
         }
       />
-      <StructuredData type="website" data={{}} />
       <StructuredData
         type="faq"
         data={{
@@ -169,58 +165,6 @@ const Home = () => {
               }
             }
           ]
-        }}
-      />
-      <StructuredData
-        type="organization"
-        data={{
-          name: 'Petshiwu',
-          url: 'https://www.petshiwu.com',
-          logo: 'https://www.petshiwu.com/logo-square-512.png',
-          description:
-            `Petshiwu is an online pet store for food, treats, toys, and supplies. ${CATALOG_PRODUCT_COUNT_LABEL} products, free shipping over $49. No autoship.`,
-          contactPoint: { telephone: '+1-800-259-2605', contactType: 'customer service' },
-          address: {
-            streetAddress: '37-68 74th St',
-            addressLocality: 'Jackson Heights',
-            addressRegion: 'NY',
-            postalCode: '11372',
-            addressCountry: 'US',
-          },
-        }}
-      />
-      <StructuredData
-        type="localBusiness"
-        data={{
-          businessType: ['OnlineStore', 'LocalBusiness'],
-          name: 'Petshiwu',
-          url: 'https://www.petshiwu.com',
-          logo: 'https://www.petshiwu.com/logo-square-512.png',
-          image: 'https://www.petshiwu.com/logo-square-512.png',
-          description:
-            `Online pet store for food, treats, and supplies. Currently delivering in NYC, with nationwide shipping opening soon. Warehouse and office only — not a walk-in store. ${CATALOG_PRODUCT_COUNT_LABEL} products from top brands. Free delivery on orders over $49.`,
-          telephone: '+1-800-259-2605',
-          email: 'support@petshiwu.com',
-          address: {
-            streetAddress: '37-68 74th St',
-            addressLocality: 'Jackson Heights',
-            addressRegion: 'NY',
-            postalCode: '11372',
-            addressCountry: 'US',
-          },
-          geo: { latitude: 40.7489, longitude: -73.885 },
-          openingHoursSpecification: [
-            {
-              dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-              opens: '00:00',
-              closes: '23:59',
-            },
-          ],
-          priceRange: '$$',
-          areaServed: ['United States', 'New York City'],
-          paymentAccepted: 'Cash, Credit Card, Debit Card',
-          currenciesAccepted: 'USD',
-          sameAs: [...SOCIAL_PROFILES],
         }}
       />
       {filteredFeaturedProducts && filteredFeaturedProducts.length > 0 && (

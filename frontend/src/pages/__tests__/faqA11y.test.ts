@@ -16,4 +16,9 @@ describe('FAQ answers stay in the document', () => {
     expect(src).toContain('aria-expanded');
     expect(src).toContain('aria-controls');
   });
+
+  test('FAQPage JSON-LD drops duplicate questions', () => {
+    expect(src).toContain('unique.some');
+    expect(src).toContain('toLowerCase()');
+  });
 });

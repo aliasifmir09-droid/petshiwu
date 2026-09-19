@@ -652,6 +652,7 @@ const ProductDetail = () => {
         currency="USD"
         availability={selectedVariantData?.stock && selectedVariantData.stock > 0 ? 'instock' : 'outofstock'}
         brand={product.brand}
+        sku={selectedVariantData?.sku}
         category={categoryName}
         rating={product.averageRating}
         ratingCount={product.totalReviews}

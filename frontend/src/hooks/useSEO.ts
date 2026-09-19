@@ -5,6 +5,7 @@
 
 import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import { HOMEPAGE_DESCRIPTION, HOMEPAGE_TITLE } from '@/config/publicSeo';
 import {
   generateCanonicalUrl,
   generateTitle,
@@ -60,7 +61,7 @@ export const useSEO = (options: UseSEOOptions = {}) => {
   );
 
   const seoTitle = useMemo(
-    () => (title ? generateTitle(title) : 'Petshiwu | Premium Pet Food, Toys & Accessories in USA'),
+    () => (title ? generateTitle(title) : HOMEPAGE_TITLE),
     [title]
   );
 
@@ -68,7 +69,7 @@ export const useSEO = (options: UseSEOOptions = {}) => {
     if (description) {
       return generateDescription(description);
     }
-    return 'Shop premium pet food, dog food, cat food, toys, and supplies for dogs, cats, birds, fish, reptiles, and small pets. Quality products, fast shipping, great prices.';
+    return HOMEPAGE_DESCRIPTION;
   }, [description]);
 
   const seoKeywords = useMemo(() => {

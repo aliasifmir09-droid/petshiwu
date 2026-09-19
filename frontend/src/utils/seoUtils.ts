@@ -3,6 +3,9 @@
  * Centralized utilities for generating SEO-friendly metadata, URLs, and content
  */
 
+import { AREA_SERVED_NOW, ORGANIZATION_DESCRIPTION } from '@/config/publicSeo';
+import { SOCIAL_PROFILES } from '@/config/social';
+
 const BASE_URL = 'https://www.petshiwu.com';
 
 /**
@@ -370,11 +373,11 @@ export const generateOrganizationSchema = (): object => {
   return {
     '@context': 'https://schema.org/',
     '@type': 'Organization',
-    name: 'petshiwu',
+    name: 'Petshiwu',
     url: BASE_URL,
     logo: `${BASE_URL}/logo.png`,
-    description:
-      'Everything Your Pet Needs - Quality Pet Supplies Online',
+    description: ORGANIZATION_DESCRIPTION,
+    areaServed: [...AREA_SERVED_NOW],
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: '+1-800-259-2605',
@@ -394,10 +397,7 @@ export const generateOrganizationSchema = (): object => {
       addressRegion: 'NY',
       addressCountry: 'US'
     },
-    sameAs: [
-      'https://www.facebook.com/petshiwu',
-      'https://www.instagram.com/petshiwu',
-    ]
+    sameAs: [...SOCIAL_PROFILES]
   };
 };
 

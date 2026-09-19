@@ -10,6 +10,7 @@ import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import { useSEO } from '@/hooks/useSEO';
+import { CATALOG_META_PROOF } from '@/config/publicSeo';
 import { generateProductUrl } from '@/utils/productUrl';
 import { catalogPetType, canonicalPetTypeSlug } from '@/utils/productPrice';
 
@@ -86,7 +87,7 @@ const PetType = () => {
   // Generate SEO metadata
   const seoData = useSEO({
     title: `${petTypeDisplay} Products - Premium Pet Supplies`,
-    description: `Shop premium ${petTypeDisplay.toLowerCase()} products including food, treats, toys, and accessories. Quality products, fast shipping, great prices at petshiwu.`,
+    description: `Shop premium ${petTypeDisplay.toLowerCase()} products including food, treats, toys, and accessories at Petshiwu. ${CATALOG_META_PROOF}`,
     keywords: [
       `${petTypeDisplay.toLowerCase()} products`,
       `${petTypeDisplay.toLowerCase()} food`,
