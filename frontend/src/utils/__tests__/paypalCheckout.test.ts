@@ -51,7 +51,12 @@ describe('PayPal checkout', () => {
     expect(branded).toContain('PayPalCardFields');
     expect(branded).toContain('skipProvider');
     expect(branded).toContain('id="card-payment"');
+    expect(branded).toContain('Credit or debit card');
     expect(branded).toContain('overflow-visible');
+    const apple = read('../../components/PayPalApplePay.tsx');
+    const google = read('../../components/PayPalGooglePay.tsx');
+    expect(apple).not.toContain('components=applepay');
+    expect(google).not.toContain('components=googlepay');
     expect(paypalConfig).toContain("components: 'buttons,applepay,googlepay,card-fields'");
     expect(paypalConfig).toContain("disableFunding: ['card', 'venmo', 'paylater']");
     expect(paypalConfig).not.toContain('enableFunding');

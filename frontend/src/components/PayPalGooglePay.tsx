@@ -84,7 +84,6 @@ declare global {
 }
 
 const GOOGLE_PAY_URL = 'https://pay.google.com/gp/p/js/pay.js';
-const PAYPAL_SDK_ID = 'petshiwu-paypal-google-pay-sdk';
 const GOOGLE_PAY_SCRIPT_ID = 'petshiwu-google-pay-sdk';
 const PAYPAL_ENVIRONMENT = isPayPalLive ? 'PRODUCTION' : 'TEST';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -162,13 +161,12 @@ const PayPalGooglePay = ({
       }
 
       try {
-        const paypalSdkUrl = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD&buyer-country=US&intent=capture&components=googlepay`;
-        await Promise.all([
-          loadScript(GOOGLE_PAY_URL, GOOGLE_PAY_SCRIPT_ID),
-          window.paypal?.Googlepay
-            ? Promise.resolve()
-            : loadScript(paypalSdkUrl, PAYPAL_SDK_ID),
-        ]);
+        await loadScript(GOOGLE_PAY_URL, GOOGLE_PAY_SCRIPT_ID);
+        const started = Date.now();
+        while (!window.paypal?.Googlepay && Date.now() - started < 8000) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          if (cancelled) return;
+        }
 
         const googleApi = window.google?.payments?.api;
         const googlePay = window.paypal?.Googlepay?.();

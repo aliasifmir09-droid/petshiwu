@@ -127,7 +127,6 @@ const getPayPalWithApplePay = (): PayPalWithApplePay | null =>
 
 const APPLE_PAY_SDK_URL = 'https://applepay.cdn-apple.com/jsapi/1.latest/apple-pay-sdk.js';
 const APPLE_PAY_SDK_ID = 'petshiwu-apple-pay-sdk';
-const PAYPAL_SDK_ID = 'petshiwu-paypal-apple-pay-sdk';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const scriptPromises = new Map<string, Promise<void>>();
@@ -207,16 +206,13 @@ const PayPalApplePay = ({
       }
 
       try {
-        const paypalSdkUrl = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
-          clientId,
-        )}&currency=USD&buyer-country=US&intent=capture&components=applepay`;
+        await loadScript(APPLE_PAY_SDK_URL, APPLE_PAY_SDK_ID);
 
-        await Promise.all([
-          loadScript(APPLE_PAY_SDK_URL, APPLE_PAY_SDK_ID),
-          getPayPalWithApplePay()?.Applepay
-            ? Promise.resolve()
-            : loadScript(paypalSdkUrl, PAYPAL_SDK_ID),
-        ]);
+        const started = Date.now();
+        while (!getPayPalWithApplePay()?.Applepay && Date.now() - started < 8000) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          if (cancelled) return;
+        }
 
         const ApplePaySessionCtor = window.ApplePaySession;
         const paypalGlobal = getPayPalWithApplePay();

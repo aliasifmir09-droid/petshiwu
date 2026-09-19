@@ -49,7 +49,8 @@ const BrandedPaymentButtons = (props: CheckoutBrandedPaymentsProps) => {
         <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">or</span>
         <div className="flex-1 h-px bg-gray-200" />
       </div>
-      <div id="card-payment" className="relative overflow-visible rounded-2xl border-2 border-[#1E3A8A] bg-blue-50/40 p-4">
+      <div id="card-payment" className="relative min-h-[12rem] overflow-visible rounded-2xl border-2 border-[#1E3A8A] bg-blue-50/40 p-4">
+        <p className="mb-3 text-base font-bold text-stone-900">Credit or debit card</p>
         <PayPalCardFields
           {...walletProps}
           currency={props.currency || 'USD'}
