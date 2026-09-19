@@ -31,7 +31,7 @@ const NYC_RANGES: Array<{ start: number; end: number; area: string }> = [
   { start: 11004, end: 11005, area: 'Queens' },
   { start: 11101, end: 11109, area: 'Queens' },
   { start: 11201, end: 11256, area: 'Brooklyn' },
-  { start: 11351, end: 11697, area: 'Queens' },
+  { start: 11351, end: 11697, area: 'Queens' }, // includes Hillside / Jamaica 11432, Hollis 11423
 ];
 
 type NextDayZone = { area: string; state: 'NY' | 'NJ' };
@@ -39,7 +39,6 @@ type NextDayZone = { area: string; state: 'NY' | 'NJ' };
 const NEXT_DAY_ZIPS: Record<string, NextDayZone> = {
   '07030': { area: 'Hoboken', state: 'NJ' },
   '07086': { area: 'Weehawken', state: 'NJ' },
-  '07205': { area: 'Hillside', state: 'NJ' },
   '07302': { area: 'Jersey City', state: 'NJ' },
   '07304': { area: 'Jersey City', state: 'NJ' },
   '07305': { area: 'Jersey City', state: 'NJ' },
@@ -158,7 +157,7 @@ export function isNextDayDeliveryZip(input: string): boolean {
   return isValidZip(zip) && Boolean(NEXT_DAY_ZIPS[zip]);
 }
 
-/** NYC same-day or next-day metro (Hicksville, Hillside, Hoboken, Westchester). */
+/** NYC same-day (includes Queens Hillside) or next-day metro (Hicksville, Hoboken, Westchester). */
 export function isDeliverableShippingAddress(state: string, zipCode: string): boolean {
   const zip = normalizeZip(zipCode);
   if (isNycDeliveryZip(zip)) return isNewYorkState(state);
@@ -220,7 +219,7 @@ export function lookupZip(input: string, now: Date = new Date()): ZipLookupResul
       speed: 'next-day',
       headline: `Next-day delivery to ${nearby.area}`,
       detail:
-        'Next-day metro delivery — Hicksville, Hillside, Jersey City, Hoboken, and select Westchester addresses. Same-day is NYC only (all 5 boroughs).',
+        'Next-day metro delivery — Hicksville, Jersey City, Hoboken, and select Westchester addresses. Same-day is NYC only (all 5 boroughs, including Queens Hillside).',
       cutoffPassed: countdown.passed,
     };
   }
@@ -245,7 +244,7 @@ export function isCoordinateInNyc(lat: number, lng: number): boolean {
 }
 
 export const OUT_OF_AREA_DELIVERY_MESSAGE =
-  'We currently deliver same-day in NYC and next-day to nearby metro ZIPs including Hicksville and Hillside. Nationwide shipping opens in a few days.';
+  'We currently deliver same-day in NYC (including Queens Hillside) and next-day to nearby metro ZIPs including Hicksville. Nationwide shipping opens in a few days.';
 
 export const LAST_ZIP_STORAGE_KEY = 'petshiwu_last_zip';
 export const LAST_ZIP_EVENT = 'petshiwu:zip';

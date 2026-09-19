@@ -1,5 +1,5 @@
 /**
- * NYC same-day ZIPs plus next-day metro ZIPs (Hicksville, Hillside, Hoboken, Westchester).
+ * NYC same-day ZIPs (includes Queens Hillside) plus next-day metro ZIPs (Hicksville, Hoboken, Westchester).
  */
 
 const NYC_RANGES: Array<{ start: number; end: number }> = [
@@ -9,7 +9,7 @@ const NYC_RANGES: Array<{ start: number; end: number }> = [
   { start: 11004, end: 11005 }, // Queens (Glen Oaks)
   { start: 11101, end: 11109 }, // Queens (Astoria / LIC)
   { start: 11201, end: 11256 }, // Brooklyn
-  { start: 11351, end: 11697 }, // Queens (includes Jamaica / Hillside Ave 11432)
+  { start: 11351, end: 11697 }, // Queens (includes Hillside / Jamaica 11432, Hollis 11423)
 ];
 
 type NextDayZone = { area: string; state: 'NY' | 'NJ' };
@@ -17,7 +17,6 @@ type NextDayZone = { area: string; state: 'NY' | 'NJ' };
 const NEXT_DAY_ZIPS: Record<string, NextDayZone> = {
   '07030': { area: 'Hoboken', state: 'NJ' },
   '07086': { area: 'Weehawken', state: 'NJ' },
-  '07205': { area: 'Hillside', state: 'NJ' },
   '07302': { area: 'Jersey City', state: 'NJ' },
   '07304': { area: 'Jersey City', state: 'NJ' },
   '07305': { area: 'Jersey City', state: 'NJ' },
@@ -103,5 +102,5 @@ export function isDeliverableShippingAddress(state: string, zipCode: string): bo
 }
 
 export const OUT_OF_AREA_DELIVERY_MESSAGE =
-  'We currently deliver same-day in NYC and next-day to nearby metro ZIPs including Hicksville and Hillside. Nationwide shipping opens in a few days.';
+  'We currently deliver same-day in NYC (including Queens Hillside) and next-day to nearby metro ZIPs including Hicksville. Nationwide shipping opens in a few days.';
 

@@ -109,7 +109,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       });
     }
 
-    // NYC same-day plus next-day metro (Hicksville, Hillside, Hoboken, Westchester)
+    // NYC same-day (includes Queens Hillside) plus next-day metro (Hicksville, Hoboken, Westchester)
     if (!isDeliverableShippingAddress(shippingAddress.state, shippingAddress.zipCode)) {
       return res.status(400).json({
         success: false,
