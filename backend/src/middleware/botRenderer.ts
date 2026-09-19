@@ -38,6 +38,15 @@ import { productSearchDescription, productSearchTitle } from '../seo/productSear
 import { merchantMpn } from '../utils/googleMerchantFeed';
 import { buildNycHubLinkHtml, buildNycHubShopHtml, isNycShoppableHub } from '../seo/nycShopHub';
 import { buildNextDayZipDirectoryHtml } from '../seo/nextDayZipDirectory';
+import {
+  BRAND_INDEX_META,
+  SHOP_BRANDS,
+  getShopBrand,
+  isShopBrandSlug,
+  shopBrandForPath,
+  shopBrandStaticPages,
+} from '../seo/shopBrands';
+import { brandMatchQuery } from '../utils/catalogText';
 
 // ---------------------------------------------------------------------------
 // Bot detection
@@ -505,6 +514,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     title: "Pet Supplies Astoria Queens NY — Local Delivery | Petshiwu",
     description: "Pet supply delivery to Astoria, Queens. Dog food, cat food, and pet accessories delivered to Astoria, Long Island City, Ditmars, and Steinway. Queens-based service. 4,000+ products, free shipping over $49.",
   },
+  ...shopBrandStaticPages(),
 };
 
 /**
@@ -628,7 +638,7 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
   const isLegitimateSingle = ['products', 'learning', 'care-guides', 'about',
       'faq', 'returns', 'return-policy', 'donate', 'search', 'symptom-checker', 'press',
       'investors', 'sell-with-us', 'vendors', 'partners', 'other-animals', 'shop',
-      'privacy', 'privacy-policy', 'terms', 'terms-of-service', 'shipping', 'shipping-policy', 'delivery-zips', 'contact'].includes(segments[0] || '')
+      'privacy', 'privacy-policy', 'terms', 'terms-of-service', 'shipping', 'shipping-policy', 'delivery-zips', 'contact', 'brand'].includes(segments[0] || '')
     || PET_TYPES.has(segments[0] || '')
     || INDEXABLE_LANDING_PATHS.has(cleanPath);
   const isDoorway = isSingleSegment && !isLegitimateSingle && !isProductPath;
@@ -1946,6 +1956,117 @@ const fetchSeoLandingProducts = async (pathname: string): Promise<SeoLandingProd
   ) as Promise<SeoLandingProduct[]>;
 };
 
+const fetchBrandProducts = async (brandQuery: string): Promise<SeoLandingProduct[]> => {
+  return withTimeout(
+    Product.find({ isActive: true, inStock: true, ...brandMatchQuery(brandQuery) })
+      .select('name slug basePrice brand petType description category')
+      .populate({ path: 'category', select: 'name slug' })
+      .sort({ averageRating: -1, createdAt: -1 })
+      .limit(20)
+      .lean()
+      .exec()
+  ) as Promise<SeoLandingProduct[]>;
+};
+
+/** First-wave HTML for allowlisted /brand and /brand/:slug collection pages. */
+export const buildBrandCollectionHtml = (
+  template: string,
+  pathname: string,
+  products: SeoLandingProduct[] = []
+): string => {
+  const cleanPath = pathname.split('?')[0].replace(/\/$/, '') || '/';
+  const brand = shopBrandForPath(cleanPath);
+  const canonicalUrl = `${BASE}${cleanPath}`;
+  const meta = brand
+    ? { title: brand.title, description: brand.description, h1: brand.h1, intro: brand.intro }
+    : {
+        title: BRAND_INDEX_META.title,
+        description: BRAND_INDEX_META.description,
+        h1: BRAND_INDEX_META.h1,
+        intro: BRAND_INDEX_META.intro,
+      };
+
+  const items = products.filter((p) => p.slug && p.name);
+  const productLinks = items
+    .map((p) => {
+      const path = buildCanonicalProductPath(p) || `/products/${p.slug}`;
+      const url = `${BASE}${path}`;
+      const price = typeof p.basePrice === 'number' ? ` — $${Number(p.basePrice).toFixed(2)}` : '';
+      const productBrand = p.brand ? ` by ${esc(String(p.brand))}` : '';
+      return `<li><a href="${url}">${esc(String(p.name))}${productBrand}${price}</a></li>`;
+    })
+    .join('\n');
+
+  const related = (brand?.relatedSlugs || [])
+    .map((slug) => getShopBrand(slug))
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+  const relatedHtml = related.length
+    ? `<h2>Related brands</h2>
+  <ul>${related.map((item) => `<li><a href="${BASE}/brand/${item.slug}">${esc(item.name)}</a></li>`).join('\n')}</ul>`
+    : '';
+
+  const brandDirectory = SHOP_BRANDS.map(
+    (item) => `<li><a href="${BASE}/brand/${item.slug}">${esc(item.name)}</a></li>`
+  ).join('\n');
+
+  const itemListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: meta.h1,
+    numberOfItems: brand ? items.length : SHOP_BRANDS.length,
+    itemListElement: brand
+      ? items.map((p, i) => {
+          const path = buildCanonicalProductPath(p) || `/products/${p.slug}`;
+          return {
+            '@type': 'ListItem',
+            position: i + 1,
+            url: `${BASE}${path}`,
+            name: p.name,
+          };
+        })
+      : SHOP_BRANDS.map((item, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          url: `${BASE}/brand/${item.slug}`,
+          name: item.name,
+        })),
+  };
+
+  const productsBlock = brand
+    ? `<h2>In stock now</h2>
+  ${items.length > 0
+    ? `<ul style="list-style:none;padding:0;columns:2">\n    ${productLinks}\n  </ul>`
+    : '<p>Browse our catalog for this brand.</p>'}`
+    : `<h2>Shop by brand</h2>
+  <ul style="list-style:none;padding:0;columns:2">
+    ${brandDirectory}
+  </ul>`;
+
+  const bodyContent = `
+<div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
+  <p>${esc(meta.intro)}</p>
+  ${productsBlock}
+  ${relatedHtml}
+  <p>In stock. Free shipping over $49. No autoship. Nationwide shipping soon.</p>
+  <p><a href="${BASE}/brand">All brands</a> · <a href="${BASE}/products">Browse all products</a></p>
+</div>`;
+
+  let html = template;
+  html = injectTitle(html, meta.title);
+  html = injectDescription(html, meta.description);
+  html = injectCanonical(html, canonicalUrl);
+  html = injectHreflang(html, canonicalUrl);
+  html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
+  html = injectH1(html, meta.h1);
+  html = injectBeforeHeadClose(
+    html,
+    `<script type="application/ld+json">${JSON.stringify(itemListSchema)}</script>`
+  );
+  html = html.replace(/<div id="root">.*?<\/div>/s, `<div id="root">${bodyContent}</div>`) ||
+         html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+  return html;
+};
+
 /**
  * List of URL paths that are valid SPA routes — used to detect unknown URLs
  * (soft 404 candidates) and return real 404 status instead of generic shell.
@@ -1961,7 +2082,7 @@ const VALID_SPA_PATHS = new Set([
   '/contact', '/403', '/404', '/privacy', '/privacy-policy', '/terms',
   '/terms-of-service', '/shipping', '/shipping-policy', '/delivery-zips', '/accessibility',
   '/shop', '/deals', '/sell-with-us', '/vendors', '/partners', '/investors',
-  '/innovation', '/tech', '/neural', '/scan',
+  '/innovation', '/tech', '/neural', '/scan', '/brand',
 ]);
 
 /**
@@ -1988,8 +2109,11 @@ const isKnownRoute = (pathname: string): boolean => {
   }
   if (segments.length === 2) {
     // /learning/:slug, /care-guides/:slug, /category/:slug, /products/:slug
-    const validPrefixes = ['learning', 'care-guides', 'category', 'products', 'blog'];
-    if (validPrefixes.includes(segments[0])) return true;
+    const validPrefixes = ['learning', 'care-guides', 'category', 'products', 'blog', 'brand'];
+    if (validPrefixes.includes(segments[0])) {
+      if (segments[0] === 'brand') return isShopBrandSlug(segments[1]);
+      return true;
+    }
     // /:petType/:category — e.g. /dog/food
     const petTypes = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet', 'small-animal', 'other-animals']);
     if (petTypes.has(segments[0])) return true;
@@ -2231,6 +2355,19 @@ export const createBotRenderer = (distPath: string) => {
           } catch (err) {
             logger.warn(
               'SEO landing product fetch failed:',
+              err instanceof Error ? err.message : err
+            );
+          }
+        } else if (reqPathClean === '/brand') {
+          html = buildBrandCollectionHtml(template, reqPathClean);
+        } else if (shopBrandForPath(reqPathClean)) {
+          try {
+            const brand = shopBrandForPath(reqPathClean)!;
+            const brandProducts = await fetchBrandProducts(brand.query);
+            html = buildBrandCollectionHtml(template, reqPathClean, brandProducts);
+          } catch (err) {
+            logger.warn(
+              'Brand collection product fetch failed:',
               err instanceof Error ? err.message : err
             );
           }

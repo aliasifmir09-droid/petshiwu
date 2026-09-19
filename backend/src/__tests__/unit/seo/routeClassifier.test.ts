@@ -190,6 +190,45 @@ describe('classifyRoute', () => {
     expect(classifyRoute('/dog?sort=price-asc').indexable).toBe(false);
   });
 
+  test('allowlisted brand collections are indexable shop URLs', () => {
+    expect(classifyRoute('/brand')).toMatchObject({
+      indexable: true,
+      status: 'indexable',
+      routeType: 'brand-index',
+    });
+    expect(classifyRoute('/brand/merrick')).toMatchObject({
+      indexable: true,
+      status: 'indexable',
+      routeType: 'brand',
+    });
+    expect(classifyRoute('/brand/hills-science-diet')).toMatchObject({
+      indexable: true,
+      routeType: 'brand',
+    });
+    expect(classifyRoute('/brand/purina-pro-plan').indexable).toBe(true);
+    expect(classifyRoute('/brand/purina-cat-chow').indexable).toBe(true);
+  });
+
+  test('unknown brand slugs are 404, not thin doorways', () => {
+    expect(classifyRoute('/brand/not-a-real-brand')).toMatchObject({
+      indexable: false,
+      status: 'notFound',
+      routeType: 'unknown-brand',
+    });
+    expect(classifyRoute('/brand/merrick/extra')).toMatchObject({
+      status: 'notFound',
+      routeType: 'unknown-brand',
+    });
+  });
+
+  test('filtered brand query pages stay noindex', () => {
+    expect(classifyRoute('/products?brand=Merrick')).toMatchObject({
+      indexable: false,
+      status: 'noindex',
+      routeType: 'query-variant',
+    });
+  });
+
   test('thin neighborhood copies redirect to a real landing page', () => {
     expect(classifyRoute('/dog-food-delivery-flushing-queens')).toMatchObject({
       indexable: false,

@@ -6,6 +6,7 @@ import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
 import { ORDERING_PAUSED, ORDERING_PAUSED_HEADLINE } from '@/config/ordering';
 import { FOOTER_SOCIAL } from '@/config/social';
 import BrandLogo from './BrandLogo';
+import { FOOTER_SHOP_BRANDS } from '@/data/shopBrands';
 
 const Footer = () => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -32,7 +33,7 @@ const Footer = () => {
   return (
     <footer className="bg-[#0B1F4A] text-white">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-8">
 
           {/* Brand */}
           <div className="lg:col-span-1">
@@ -71,6 +72,21 @@ const Footer = () => {
               <li><Link to="/reptile" className="hover:text-white transition-colors">Reptiles</Link></li>
               <li><Link to="/fish" className="hover:text-white transition-colors">Fish</Link></li>
               <li><Link to="/small-animal" className="hover:text-white transition-colors">Small Pets</Link></li>
+            </ul>
+          </div>
+
+          {/* Shop by brand */}
+          <div>
+            <h3 className="text-sm font-bold tracking-wide uppercase text-white mb-4">Shop by brand</h3>
+            <ul className="space-y-2 text-sm text-blue-100">
+              {FOOTER_SHOP_BRANDS.map((brand) => (
+                <li key={brand.slug}>
+                  <Link to={`/brand/${brand.slug}`} className="hover:text-white transition-colors">
+                    {brand.name}
+                  </Link>
+                </li>
+              ))}
+              <li><Link to="/brand" className="hover:text-white transition-colors">All brands</Link></li>
             </ul>
           </div>
 

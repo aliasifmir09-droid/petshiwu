@@ -19,7 +19,7 @@ describe('App route elements', () => {
       ...[...appSource.matchAll(/^import\s+\{\s*([^}]+)\s*\}/gm)]
         .flatMap((m) => m[1].split(',').map((s) => s.trim().split(/\s+as\s+/).pop() || ''))
         .filter((s) => /^[A-Z]/.test(s)),
-      ...[...appSource.matchAll(/^const\s+(\w+)\s+=\s+lazy\(/gm)].map((m) => m[1]),
+      ...[...appSource.matchAll(/^const\s+(\w+)\s+=\s+lazy(?:WithRetry)?\(/gm)].map((m) => m[1]),
       ...[...appSource.matchAll(/^function\s+(\w+)/gm)].map((m) => m[1]),
     ]);
 
