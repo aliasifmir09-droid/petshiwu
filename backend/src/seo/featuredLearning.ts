@@ -1,5 +1,6 @@
 /** Keep in sync with frontend/src/data/featuredLearning.ts */
 export const FEATURED_LEARNING_SLUGS = [
+  'next-day-pet-delivery-within-50-miles-of-queens',
   'fall-2026-pet-care-playbook',
   'best-fresh-dog-food-2026',
   'is-grain-free-dog-food-safe-2026',

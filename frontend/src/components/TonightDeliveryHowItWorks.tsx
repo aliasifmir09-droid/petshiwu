@@ -13,7 +13,18 @@ const TonightDeliveryHowItWorks = ({ compact = false }: TonightDeliveryHowItWork
         How shipping works
       </h2>
       <p className="text-slate-600">
-        Currently delivering in NYC. Nationwide shipping opens in a few days. Free over ${TONIGHT.freeOver}. No autoship.
+        Same-day in NYC. Next-day within 50 miles of Queens.{' '}
+        <Link to="/delivery-zips" className="text-[#1E3A8A] font-semibold hover:underline">
+          Check your ZIP
+        </Link>
+        {' · '}
+        <Link
+          to="/learning/next-day-pet-delivery-within-50-miles-of-queens"
+          className="text-[#1E3A8A] font-semibold hover:underline"
+        >
+          Next-day guide
+        </Link>
+        . Nationwide shipping opens in a few days. Free over ${TONIGHT.freeOver}. No autoship.
       </p>
     </div>
   );

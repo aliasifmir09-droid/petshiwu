@@ -24,6 +24,16 @@ describe('trending static learning catalog', () => {
     expect(isStaticLearningSlug('best-dog-foods-sensitive-stomachs')).toBe(true);
   });
 
+  test('publishes a next-day delivery guide that stays indexable', () => {
+    expect(isStaticLearningSlug('next-day-pet-delivery-within-50-miles-of-queens')).toBe(true);
+    expect(STATIC_LEARNING_PAGES['next-day-pet-delivery-within-50-miles-of-queens'].html).toContain('/delivery-zips');
+    expect(STATIC_LEARNING_PAGES['next-day-pet-delivery-within-50-miles-of-queens'].html).toMatch(/do not claim same-day nationwide/i);
+    expect(classifyRoute('/learning/next-day-pet-delivery-within-50-miles-of-queens')).toMatchObject({
+      indexable: true,
+      status: 'indexable',
+    });
+  });
+
   test('publishes a new Fall 2026 playbook that stays indexable', () => {
     expect(isStaticLearningSlug('fall-2026-pet-care-playbook')).toBe(true);
     expect(STATIC_LEARNING_PAGES['fall-2026-pet-care-playbook'].html).toContain('/learning/best-fresh-dog-food-2026');

@@ -71,7 +71,14 @@ const NextDayDeliveryZips = () => {
           We accept orders for next-day delivery to {NEXT_DAY_ZIP_COUNT} ZIP codes around Queens.
           Same-day stays New York City — all five boroughs — when you order by {TONIGHT.weekdayCutoff} weekdays
           or {TONIGHT.weekendCutoff} weekends. Nationwide shipping opens in a few days. We do not claim
-          same-day nationwide.
+          same-day nationwide.{' '}
+          <Link
+            to="/learning/next-day-pet-delivery-within-50-miles-of-queens"
+            className="text-[#1E3A8A] font-semibold hover:underline"
+          >
+            Read the next-day delivery guide
+          </Link>
+          .
         </p>
         <p className="text-sm text-gray-600 mb-8">
           Packed from Jackson Heights. Not a walk-in store.{' '}

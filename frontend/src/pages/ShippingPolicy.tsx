@@ -112,6 +112,13 @@ const ShippingPolicy = () => {
             <Link to="/delivery-zips" className="text-blue-600 hover:underline">
               See the full next-day ZIP list
             </Link>
+            {' '}or read the{' '}
+            <Link
+              to="/learning/next-day-pet-delivery-within-50-miles-of-queens"
+              className="text-blue-600 hover:underline"
+            >
+              next-day delivery guide
+            </Link>
             . Same-day stays the five boroughs only.
           </p>
           <p className="mt-2">

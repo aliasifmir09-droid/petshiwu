@@ -145,7 +145,7 @@ const Home = () => {
               name: 'How much does Petshiwu shipping cost?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Shipping is free on orders over $49. Orders under $49 have a flat $6 shipping fee. We are currently delivering in NYC, with nationwide shipping opening in a few days.'
+                text: 'Shipping is free on orders over $49. Orders under $49 have a flat $6 shipping fee. Same-day is NYC only. Next-day covers ZIPs within 50 miles of Queens. Nationwide shipping opens in a few days.'
               }
             },
             {
@@ -161,7 +161,7 @@ const Home = () => {
               name: 'Where does Petshiwu deliver right now?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'We currently deliver in New York City — all five boroughs — with same-day when you order by 3 PM EST weekdays (1 PM EST weekends). Nationwide shipping opens in a few days. We are an online store only; the Jackson Heights address is warehouse and office, not a walk-in shop.'
+                text: 'We currently deliver same-day in New York City — all five boroughs — when you order by 3 PM EST weekdays (1 PM EST weekends). Next-day covers every ZIP within 50 miles of Queens. Nationwide shipping opens in a few days. We do not claim same-day nationwide. The Jackson Heights address is warehouse and office, not a walk-in shop.'
               }
             },
             {

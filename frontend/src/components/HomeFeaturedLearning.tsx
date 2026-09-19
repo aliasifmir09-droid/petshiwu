@@ -26,7 +26,7 @@ const HomeFeaturedLearning = () => {
               Pet care guides Google can use — and you can shop from
             </h2>
             <p className="text-sm text-slate-500 mt-2 max-w-2xl">
-              A new playbook plus the high-intent guides pet parents search most. The rest of the
+              A next-day ZIP guide plus the high-intent guides pet parents search most. The rest of the
               indexed library stays at every old URL.
             </p>
           </div>

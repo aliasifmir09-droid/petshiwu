@@ -18,7 +18,18 @@ const NycHubLinkGrid = ({ excludePath }: NycHubLinkGridProps) => {
           NYC same-day now · nationwide shipping next
         </h2>
         <p className="text-slate-600 mb-6 max-w-2xl">
-          Same-day is the five boroughs only. Check your ZIP. We do not claim same-day nationwide.
+          Same-day is the five boroughs only. Next-day is every ZIP within 50 miles of Queens.{' '}
+          <Link to="/delivery-zips" className="text-[#1E3A8A] font-semibold hover:underline">
+            Full ZIP list
+          </Link>
+          {' · '}
+          <Link
+            to="/learning/next-day-pet-delivery-within-50-miles-of-queens"
+            className="text-[#1E3A8A] font-semibold hover:underline"
+          >
+            How next-day works
+          </Link>
+          . We do not claim same-day nationwide.
         </p>
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {links.map((item) => (

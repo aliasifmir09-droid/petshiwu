@@ -16,6 +16,6 @@ describe('featured learning slugs', () => {
       expect(FEATURED_LEARNING_SLUGS.length).toBeGreaterThan(0);
       expect(slug.length).toBeGreaterThan(5);
     }
-    expect(FEATURED_LEARNING_SLUGS[0]).toBe('fall-2026-pet-care-playbook');
+    expect(FEATURED_LEARNING_SLUGS[0]).toBe('next-day-pet-delivery-within-50-miles-of-queens');
   });
 });

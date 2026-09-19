@@ -5,6 +5,7 @@
  */
 import { TRENDING_LEARNING_POSTS } from './trendingLearningPosts';
 import { FALL_2026_PLAYBOOK } from './fall2026Playbook';
+import { NEXT_DAY_DELIVERY_GUIDE } from './nextDayDeliveryGuide';
 
 export type StaticLearningPage = {
   slug: string;
@@ -23,6 +24,7 @@ export type StaticLearningPage = {
 };
 
 const CLASSIC_LEARNING_PAGES: Record<string, StaticLearningPage> = {
+  [NEXT_DAY_DELIVERY_GUIDE.slug]: NEXT_DAY_DELIVERY_GUIDE,
   [FALL_2026_PLAYBOOK.slug]: FALL_2026_PLAYBOOK,
   'best-dog-food-sensitive-stomach': {
     slug: 'best-dog-food-sensitive-stomach',

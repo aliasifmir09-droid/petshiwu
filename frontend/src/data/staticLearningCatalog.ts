@@ -1,11 +1,13 @@
 import { Blog } from '@/services/blogs';
 import { TRENDING_LEARNING_META, TrendingLearningMeta } from './trendingLearningMeta';
 import { FALL_2026_PLAYBOOK_META } from './fall2026Playbook';
+import { NEXT_DAY_DELIVERY_GUIDE_META } from './nextDayDeliveryGuide';
 import { LEARNING_AUTHOR, LEARNING_REVIEWED_AT } from './featuredLearning';
 
 export type StaticLearningCard = TrendingLearningMeta;
 
 const CLASSIC_POSTS: TrendingLearningMeta[] = [
+  NEXT_DAY_DELIVERY_GUIDE_META,
   FALL_2026_PLAYBOOK_META,
   {
     slug: 'best-dog-food-sensitive-stomach',
