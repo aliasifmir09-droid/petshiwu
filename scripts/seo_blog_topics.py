@@ -1,0 +1,7057 @@
+"""Petshiwü SEO blog topic catalog for petshiwu.com learning guides.
+
+National retailer education voice. Not a diagnosis. Health and diet articles
+include veterinary caveats. NYC delivery is available now; nationwide shipping
+opens soon. Free shipping over $49. No autoship.
+"""
+from __future__ import annotations
+
+from typing import Any
+
+TOPICS: list[dict[str, Any]] = [{'slug': 'best-fresh-dog-food-2026',
+  'title': 'Best Fresh Dog Food 2026: How to Compare Gently Cooked Meals',
+  'description': 'Best fresh dog food 2026: how gently cooked meals are made, what AAFCO '
+                 'statements mean, calorie math, and when to stay on kibble. Vet-first tips from '
+                 'Petshiwü.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['best fresh dog food 2026',
+           'gently cooked dog food',
+           'human grade dog meals',
+           'fresh dog food delivery',
+           'AAFCO complete and balanced'],
+  'img': 'fresh-dog-food',
+  'alt': 'Stainless tray of gently cooked fresh dog food beside a measuring cup, illustrating how '
+         'to compare 2026 fresh meals',
+  'publishedAt': '2026-01-08T08:00:00.000Z',
+  'intro': 'Fresh dog food is no longer a boutique extra. In 2026, gently cooked recipes sit next '
+           'to kibble in a lot of shopping carts, and the marketing can outrun the label. This '
+           'Petshiwü guide shows how to compare those meals like a retailer buyer: process, '
+           'calories, AAFCO statement, and whether your dog actually needs the switch.',
+  'sections': [{'h': 'What “fresh” means on a 2026 dog-food label',
+                'p': ['Most national fresh brands cook meat and vegetables at lower temperatures '
+                      'than extruded kibble, then refrigerate or freeze the finished meals. That '
+                      'process can keep aroma high and may help picky dogs finish the bowl, but it '
+                      'is not a magic nutrient upgrade by itself. You still need a '
+                      'complete-and-balanced AAFCO statement for the right life stage, not a '
+                      '“topper” or “complementary” line sold as a full diet.',
+                      'Read the storage line before you fall for the photos. Some recipes are '
+                      'truly fresh and last days in the fridge. Others are frozen cooked food that '
+                      'thaws like a human leftover. Both can be fine. What is not fine is treating '
+                      'a refrigerated topper as a complete meal for a growing puppy. If you are '
+                      'comparing subscription brands, start with <a '
+                      'href="/learning/farmers-dog-vs-ollie-vs-nom-nom-2026">The Farmer’s Dog vs '
+                      'Ollie vs Nom Nom</a> after you know your dog’s calories.']},
+               {'h': 'Calories, moisture, and why cups lie',
+                'p': ['Fresh food is heavy with water. A cup of gently cooked beef can look '
+                      'generous and still underfeed a 60-pound active dog, or overfeed a '
+                      'couch-loving spaniel if you match kibble cup-for-cup. Always convert to '
+                      'kcal per package, then divide by your dog’s daily energy need. If the brand '
+                      'will not publish kcal per ounce, treat that as a yellow flag.'],
+                'ul': ['Find kcal per package on the back or the brand’s feeding calculator, then '
+                       'weigh a typical portion once on a kitchen scale.',
+                       'If you mix fresh with kibble, add the calories; do not assume “half a '
+                       'scoop” of each is automatically balanced.',
+                       'Watch stool quality for 10–14 days. Soft stools after a fast switch are '
+                       'common; blood, repeated vomiting, or refusing water is a vet visit.',
+                       'Growing puppies and dogs with medical diets need a veterinarian to sign '
+                       'off before any homemade-style or fresh plan.']},
+               {'h': 'Ingredients that matter more than the lifestyle photos',
+                'p': ['Named animal protein should lead, and the mineral package should be '
+                      'designed by someone who understands calcium-to-phosphorus ratios. Fancy '
+                      'superfood lists do not replace that math. If a recipe leans on liver every '
+                      'day, ask how copper and vitamin A stay in a safe range. If it leans on lean '
+                      'muscle meat only, ask how they hit calcium without a packet you might '
+                      'forget.',
+                      'Grain-inclusive fresh recipes are a reasonable default for many dogs. '
+                      'Grain-free fresh food is not automatically “cleaner.” If you are '
+                      'considering a pulse-heavy recipe, read our careful notes in <a '
+                      'href="/learning/is-grain-free-dog-food-safe-2026">Is Grain-Free Dog Food '
+                      'Safe in 2026</a> and talk with your veterinarian, especially for '
+                      'large-breed dogs.']},
+               {'h': 'When fresh food is a smart upgrade — and when it is not',
+                'p': ['Fresh meals help when a dog ignores kibble, needs a measured calorie cut, '
+                      'or does better with higher moisture. They are a weak choice when your '
+                      'budget will force inconsistent feeding, when you cannot keep food cold, or '
+                      'when your dog is on a prescription hydrolyzed or renal diet. A complete '
+                      'kibble from a company that employs veterinary nutritionists can be a better '
+                      'daily bowl than an incomplete “human-grade” stew.']},
+               {'h': 'How Petshiwü buyers should trial a new fresh recipe',
+                'p': ['Transition over 7–10 days unless your veterinarian gives a different plan. '
+                      'Keep treats boring during the trial so you can see what the food itself '
+                      'does. Photograph the label lot code and keep the receipt. If itching, ear '
+                      'gunk, or diarrhea shows up, stop guessing and call the clinic — this '
+                      'article cannot diagnose an allergy or GI disease. Browse complete diets in '
+                      'our <a href="/dog">dog food aisle</a> and skip any plan that cannot show an '
+                      'AAFCO statement.']}],
+  'faqs': [{'q': 'Is fresh dog food healthier than kibble in 2026?',
+            'a': 'Not automatically. Fresh food can be more aromatic and moisture-rich, which '
+                 'helps some dogs eat and stay hydrated. Health depends on a complete nutrient '
+                 'profile, calories, and your dog’s medical history. A well-made kibble can '
+                 'outperform an unbalanced fresh recipe.'},
+           {'q': 'Does fresh dog food need to be human-grade?',
+            'a': 'Human-grade describes ingredient sourcing and facility rules, not a guaranteed '
+                 'better amino-acid balance. It can be worth paying for if the recipe is complete, '
+                 'the company publishes feeding calories, and you can store it safely. It is not a '
+                 'substitute for veterinary advice.'},
+           {'q': 'Can I mix fresh food with my dog’s current kibble?',
+            'a': 'Yes, if you count calories from both and keep the mix complete. Many households '
+                 'use fresh as a measured topper. If the fresh product is labeled complementary '
+                 'only, do not let it replace most of the bowl without a nutrition consult.'}],
+  'shopPath': '/dog',
+  'shop': 'Shop gently cooked and refrigerated dog meals at Petshiwü, a nationwide online pet '
+          'store with free shipping over $49 and no autoship. NYC delivery is available now, and '
+          'nationwide shipping opens soon.',
+  'related': ['farmers-dog-vs-ollie-vs-nom-nom-2026',
+              'human-grade-dog-food-worth-it',
+              'how-much-to-feed-a-dog']},
+ {'slug': 'farmers-dog-vs-ollie-vs-nom-nom-2026',
+  'title': 'The Farmer’s Dog vs Ollie vs Nom Nom 2026: Which Fresh Plan Fits?',
+  'description': 'Farmer’s Dog vs Ollie vs Nom Nom 2026: recipes, storage, customization, and how '
+                 'to compare fresh subscription meals without hype. A Petshiwü buyer’s checklist.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['farmers dog vs ollie',
+           'nom nom dog food',
+           'fresh dog food comparison 2026',
+           'dog food subscription',
+           'gently cooked dog meals'],
+  'img': 'fresh-dog-food',
+  'alt': 'Three refrigerated fresh dog-food packs on a kitchen counter for a Farmer’s Dog vs Ollie '
+         'vs Nom Nom 2026 comparison',
+  'publishedAt': '2026-01-10T09:00:00.000Z',
+  'intro': 'The Farmer’s Dog, Ollie, and Nom Nom all sell pre-portioned, gently cooked meals, and '
+           'they all sound similar in ads. They are not interchangeable once you look at proteins, '
+           'storage, and how each company handles a picky or medically complicated dog. Use this '
+           'side-by-side as a shopping brief, then confirm any diet change with your veterinarian.',
+  'sections': [{'h': 'What the three brands actually sell',
+                'p': ['All three ship cooked recipes meant to be refrigerated after arrival. The '
+                      'Farmer’s Dog is known for simple named proteins and a strong subscription '
+                      'cadence. Ollie often mixes fresh recipes with optional baked or mix-in '
+                      'formats depending on the plan year. Nom Nom has historically published more '
+                      'recipe-level detail and offers a few proteins that help households rotating '
+                      'away from chicken.',
+                      'None of these brands is a veterinary prescription line. If your dog needs a '
+                      'hydrolyzed protein or a kidney-controlled phosphorus diet, stop comparison '
+                      'shopping and call the clinic first. For a broader view of cooked fresh '
+                      'food, see <a href="/learning/best-fresh-dog-food-2026">best fresh dog food '
+                      '2026</a>.']},
+               {'h': 'Customization claims versus the label',
+                'p': ['Online quizzes feel personal. The legally important part is still the AAFCO '
+                      'nutritional adequacy statement and the kcal your dog will eat. A “plan '
+                      'built for your pup” that underestimates activity can still fatten a dog. A '
+                      'plan that overestimates a senior’s need can leave them hungry and '
+                      'scavenging. Ask for kcal per pack in writing and compare it to a '
+                      'vet-approved calorie target.'],
+                'ul': ['Write down your dog’s current weight, body-condition score, and typical '
+                       'daily treats before you start a trial box.',
+                       'Check whether recipes are complete meals or whether some SKUs are toppers '
+                       'sold in the same checkout flow.',
+                       'Confirm you can pause or skip without a restocking maze — Petshiwü does '
+                       'not lock you into autoship on our own catalog.',
+                       'If chicken is a suspected itch trigger, look at turkey, beef, or pork '
+                       'recipes and keep a simple food diary.']},
+               {'h': 'Storage, travel, and apartment logistics',
+                'p': ['Fresh subscriptions fail when freezer space fails. Count the packs against '
+                      'a real fridge shelf, not the lifestyle photo. If you travel, you need a '
+                      'backup complete food that does not spoil in a hotel mini-fridge. '
+                      'Freeze-dried or a sealed kibble from <a href="/dog">our dog aisle</a> is a '
+                      'safer weekend plan than hoping a thawed pack stays safe in a warm car.']},
+               {'h': 'How to run a fair two-week comparison',
+                'p': ['Do not rotate all three brands in the same week. Pick one recipe, '
+                      'transition slowly, and score stool, itch, energy, and leftover food. If you '
+                      'later try a second brand, keep the protein similar so you are not testing '
+                      'three variables at once. Photograph lot codes. This is shopping diligence, '
+                      'not a diagnosis.']},
+               {'h': 'Price honesty without fake “limited” timers',
+                'p': ['Introductory boxes are often cheaper than the reorder. Compare the '
+                      'regular-price kcal cost, not the first-box headline. Add shipping cold-pack '
+                      'fees if they appear at checkout. A mid-tier kibble plus a measured fresh '
+                      'topper can hit the same palatability goal for less. We will not invent a '
+                      'clinical study that crowns a winner — your dog’s stool chart is the study '
+                      'that matters.']}],
+  'faqs': [{'q': 'Which is better in 2026: The Farmer’s Dog, Ollie, or Nom Nom?',
+            'a': 'There is no single winner. Compare complete-and-balanced statements, kcal per '
+                 'pack, proteins you can actually buy consistently, and whether you can store the '
+                 'food cold. Choose the plan you can feed correctly every day.'},
+           {'q': 'Can I use these fresh brands for a puppy?',
+            'a': 'Only if the specific recipe is approved for growth or all life stages and your '
+                 'veterinarian agrees. Large-breed puppies are especially sensitive to calcium and '
+                 'calorie excess. Do not feed an adult maintenance recipe to a growing puppy.'},
+           {'q': 'What if my dog refuses the first recipe?',
+            'a': 'Warm the portion slightly, mix a spoon into familiar food, and avoid '
+                 'free-feeding treats that compete with the trial. If a dog refuses food for more '
+                 'than 24 hours, or if a puppy or senior skips a meal and acts dull, contact a '
+                 'veterinarian.'}],
+  'shopPath': '/dog',
+  'shop': 'Compare complete dog foods at Petshiwü without an autoship contract. Free shipping over '
+          '$49, NYC delivery is available now, and nationwide shipping opens soon from our online '
+          'pet store.',
+  'related': ['best-fresh-dog-food-2026',
+              'best-dog-food-for-picky-eaters',
+              'human-grade-dog-food-worth-it']},
+ {'slug': 'is-grain-free-dog-food-safe-2026',
+  'title': 'Is Grain-Free Dog Food Safe in 2026? FDA DCM Notes Without Panic',
+  'description': 'Is grain-free dog food safe in 2026? What the FDA DCM investigation actually '
+                 'said, how to read pulse-heavy labels, and when to ask your veterinarian.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['is grain-free dog food safe 2026',
+           'dog food DCM',
+           'FDA grain-free investigation',
+           'lentils in dog food',
+           'grain inclusive dog food'],
+  'img': 'kibble-bowl',
+  'alt': 'Bowl of grain-inclusive kibble next to a grain-free bag, used to explain 2026 DCM label '
+         'reading',
+  'intro': 'Grain-free dog food is still easy to buy in 2026, and the internet still treats it '
+           'like either a miracle or a poison. Neither story is honest. The U.S. FDA investigated '
+           'a possible association between certain diets — many of them grain-free and rich in '
+           'peas, lentils, or potatoes — and dilated cardiomyopathy (DCM) in dogs. That '
+           'investigation did not prove every grain-free bag is dangerous, and it did not clear '
+           'every pulse-heavy recipe. This guide is for shoppers who want a calm, label-first '
+           'decision with their veterinarian.',
+  'sections': [{'h': 'What the FDA investigation did — and did not — conclude',
+                'p': ['Starting in 2018, the FDA collected reports of DCM in dogs eating various '
+                      'commercial diets. Many reported diets were labeled grain-free and listed '
+                      'peas, lentils, or potatoes high in the ingredient panel. The agency later '
+                      'said the issue is complex, that it had not established a simple cause, and '
+                      'that it would continue to work with researchers. That is not the same as a '
+                      'nationwide ban, and it is not a green light to ignore the reports.',
+                      'Petshiwü will not invent a clinical trial that “settles” this. If your dog '
+                      'is a golden retriever, Doberman, or another breed already at higher DCM '
+                      'risk, or if a cardiologist is already involved, diet changes belong in the '
+                      'clinic — not in a comments section. For everyday shoppers, the useful move '
+                      'is to read the first eight ingredients and ask whether the recipe is a '
+                      'complete diet from a company that employs veterinary nutritionists.']},
+               {'h': 'How to read a pulse-heavy dog food label',
+                'p': ['Flip the bag. If peas, pea protein, lentils, chickpeas, or potatoes occupy '
+                      'several of the top slots, you are looking at a pulse-forward formula even '
+                      'when the front says “ancestral.” Grain-free does not mean low-carb. It '
+                      'often means the starch came from legumes instead of rice or oats. That swap '
+                      'can be fine for some dogs and a poor fit for others.'],
+                'ul': ['Prefer named animal protein high on the list, not a stack of fractionated '
+                       'pea proteins.',
+                       'Look for an AAFCO nutritional adequacy statement for your dog’s life '
+                       'stage.',
+                       'Ask whether the company has feeding trials or a boarded nutritionist on '
+                       'staff — marketing adjectives are not a trial.',
+                       'If a veterinarian already flagged taurine or heart screening, do not '
+                       'self-supplement and hope.']},
+               {'h': 'When grain-inclusive food is the calmer default',
+                'p': ['Most dogs digest cooked rice, barley, or oatmeal without drama. Unless your '
+                      'veterinarian has documented a grain allergy — which is less common than '
+                      'chicken or beef sensitivities — a grain-inclusive adult food is a '
+                      'reasonable starting point. Dogs with itchy skin are more often reacting to '
+                      'a protein than to “grain” as a category. See <a '
+                      'href="/learning/best-dog-food-for-itchy-skin">best dog food for itchy '
+                      'skin</a> before you throw out every grain.']},
+               {'h': 'Medical exceptions that override internet rules',
+                'p': ['Some prescription GI or elimination diets happen to be grain-free because '
+                      'the protein is hydrolyzed or novel, not because grain is the villain. Do '
+                      'not “fix” a veterinary diet by adding grain toppers that wreck the trial. '
+                      'Conversely, do not put a dog with a diagnosed grain-related issue back on '
+                      'wheat because a stranger on a forum is scared of DCM. Bring the bag photo '
+                      'to your appointment.']},
+               {'h': 'A practical 2026 shopping path',
+                'p': ['If your dog is healthy, pick a complete food from a transparent company, '
+                      'feed to a body-condition score, and schedule routine vet exams. If you '
+                      'already feed grain-free and your dog is thriving, do not panic-switch '
+                      'overnight — sudden diet chaos causes its own GI trouble. Discuss whether a '
+                      'grain-inclusive or mixed rotation makes sense. Browse options in our <a '
+                      'href="/dog">dog food collection</a> and keep the receipt plus lot code.']}],
+  'faqs': [{'q': 'Did the FDA ban grain-free dog food?',
+            'a': 'No. The FDA investigated a possible link between certain diets and DCM reports. '
+                 'It did not ban grain-free food. Talk with your veterinarian about your dog’s '
+                 'breed risk and current diet.'},
+           {'q': 'Is grain-free better for allergies?',
+            'a': 'Usually not. True grain allergies are less common than protein allergies. An '
+                 'elimination diet designed with a veterinarian is more useful than a grain-free '
+                 'marketing claim.'},
+           {'q': 'Should I add taurine to grain-free food?',
+            'a': 'Do not start heart supplements as a DIY fix. Taurine status and DCM workups '
+                 'belong with a veterinarian. Extra taurine does not make an incomplete or poorly '
+                 'formulated diet safe.'}],
+  'shopPath': '/dog',
+  'shop': 'Shop grain-inclusive and specialty dog foods at Petshiwü with free shipping over $49 '
+          'and no autoship. We are a nationwide online pet store: NYC delivery is available now, '
+          'and nationwide shipping opens soon.',
+  'related': ['best-limited-ingredient-dog-food',
+              'hydrolyzed-dog-food-for-allergies',
+              'best-high-protein-dog-food'],
+  'publishedAt': '2026-01-13T10:00:00.000Z'},
+ {'slug': 'best-raw-dog-food-for-beginners',
+  'title': 'Best Raw Dog Food for Beginners: A Safety-First Starter Plan',
+  'description': 'Best raw dog food for beginners: frozen vs freeze-dried, safe handling, AAFCO '
+                 'complete meals, and when raw is a bad idea. Vet-first guidance from Petshiwü.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['best raw dog food for beginners',
+           'raw feeding dogs safety',
+           'frozen raw dog food',
+           'BARF diet dogs',
+           'complete raw dog meals'],
+  'img': 'raw-feeding',
+  'alt': 'Frozen raw dog-food patties on a sanitized tray showing a beginner-safe thaw and handle '
+         'setup',
+  'intro': 'Raw feeding looks simple in videos and complicated on your kitchen counter. Beginners '
+           'usually need a commercially complete raw meal, not a DIY prey-model experiment. This '
+           'Petshiwü walkthrough covers thawing, sanitation, AAFCO statements, and the households '
+           'that should skip raw entirely.',
+  'sections': [{'h': 'Start with a complete commercial raw, not a boneless stew you invented',
+                'p': ['A nutritionally complete raw product is formulated so calcium, phosphorus, '
+                      'trace minerals, and vitamins land in a safe range. A package of '
+                      'grocery-store chicken thighs is not a diet. Unbalanced homemade raw is a '
+                      'common way puppies develop bone problems and adults slowly accumulate '
+                      'deficiencies. If the pouch says “complementary” or “topper,” it is not a '
+                      'full bowl.',
+                      'Look for an AAFCO statement for adult maintenance or growth, a kcal '
+                      'listing, and handling instructions that assume you own a refrigerator. '
+                      'Compare formats in <a '
+                      'href="/learning/freeze-dried-vs-kibble-dog-food">freeze-dried vs kibble</a> '
+                      'if you want raw-style nutrition without a freezer drawer.']},
+               {'h': 'Kitchen habits that keep people and dogs safer',
+                'p': ['Raw meat can carry Salmonella and Listeria. That risk is why households '
+                      'with toddlers, pregnant people, older adults, or immunocompromised members '
+                      'should ask a veterinarian before opening the first patty. Treat raw dog '
+                      'food like you would raw chicken for dinner — except your dog will lick the '
+                      'bowl and then lick your hand.'],
+                'ul': ['Thaw in the refrigerator, not on the counter, and discard food that sat '
+                       'out longer than the brand’s safe window.',
+                       'Wash bowls, knives, and the sink in hot soapy water after every meal; skip '
+                       'porous wood boards for raw pet food.',
+                       'Keep raw packs away from human produce drawers.',
+                       'Do not let raw juices drip onto kibble bags or treat jars.',
+                       'Wash your hands before you touch a phone, a baby, or a cat fountain.']},
+               {'h': 'Bones, grind size, and dental myths',
+                'p': ['Some raw diets include ground bone for calcium. That is not the same as '
+                      'tossing a weight-bearing cooked bone into the crate. Cooked bones splinter. '
+                      'Recreational raw bones still break teeth. If your goal is cleaner teeth, a '
+                      'complete dental plan beats hoping a femur does the work — see <a '
+                      'href="/learning/best-dental-dog-food-and-chews">dental foods and '
+                      'chews</a>.']},
+               {'h': 'Who should not start raw at home',
+                'p': ['Dogs on immunosuppressive drugs, dogs with pancreatitis history, and dogs '
+                      'that gulp without chewing are poor DIY raw candidates. Puppies need '
+                      'growth-appropriate calcium, not “a little extra meat.” If your veterinarian '
+                      'has prescribed a hydrolyzed or novel-protein diet for a diagnosed disease, '
+                      'do not overlay raw “to boost immunity.” That phrase is marketing, not a '
+                      'treatment plan.']},
+               {'h': 'A two-week beginner protocol',
+                'p': ['Pick one complete protein, transition over 7–10 days, and keep a stool '
+                      'photo log. Weigh portions. If you see blood, black stool, repeated '
+                      'vomiting, or lethargy, stop the trial and call the clinic. Shop '
+                      'commercially prepared raw and freeze-dried options in our <a '
+                      'href="/dog">dog aisle</a> rather than assembling a prey model from '
+                      'supermarket scraps.']}],
+  'faqs': [{'q': 'Is raw dog food safe for beginners?',
+            'a': 'It can be, if you use a complete commercial product, handle it like raw poultry, '
+                 'and get veterinary approval — especially in homes with high-risk people. '
+                 'Homemade unbalanced raw is not a beginner project.'},
+           {'q': 'Frozen raw or freeze-dried for the first month?',
+            'a': 'Freeze-dried is often easier to store and travel with. Frozen patties need '
+                 'reliable freezer space. Both still require clean bowls and correct calories. '
+                 'Choose the format you will handle consistently.'},
+           {'q': 'Can raw food replace vaccines or heartworm prevention?',
+            'a': 'No. Diet does not replace core vaccines, parasite prevention, or diagnostic '
+                 'care. Those claims are unsafe. Keep preventive care on your veterinarian’s '
+                 'schedule.'}],
+  'shopPath': '/dog',
+  'shop': 'Find complete raw and freeze-dried dog meals at Petshiwü, a nationwide online pet store '
+          'with free shipping over $49 and no autoship. NYC delivery is available now; nationwide '
+          'shipping opens soon.',
+  'related': ['freeze-dried-vs-kibble-dog-food',
+              'homemade-dog-food-safety',
+              'best-fresh-dog-food-2026'],
+  'publishedAt': '2026-01-15T11:00:00.000Z'},
+ {'slug': 'freeze-dried-vs-kibble-dog-food',
+  'title': 'Freeze-Dried vs Kibble Dog Food: Texture, Calories, and When to Mix',
+  'description': 'Freeze-dried vs kibble dog food: calorie density, rehydration, complete-meal '
+                 'labels, and a smart way to mix formats without unbalancing the bowl.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['freeze-dried vs kibble',
+           'freeze dried dog food',
+           'kibble vs raw',
+           'rehydrate freeze-dried dog food',
+           'dog food texture'],
+  'img': 'freeze-dried',
+  'alt': 'Freeze-dried dog nuggets in a bowl beside brown kibble to compare moisture and feeding '
+         'math',
+  'intro': 'Freeze-dried dog food looks like kibble until you read the calorie line. It is usually '
+           'meat-dense, light in the bag, and easy to overfeed by the cup. Kibble is cooked, '
+           'shelf-stable, and still the workhorse complete diet for most households. Here is how '
+           'Petshiwü shoppers should compare the two without turning dinner into a chemistry '
+           'project.',
+  'sections': [{'h': 'How each format is made',
+                'p': ['Kibble is mixed, cooked under pressure, and dried into a shelf-stable '
+                      'piece. Freeze-dried food starts as raw or gently cooked ingredients, then '
+                      'moisture is removed under vacuum so the pieces stay light and aromatic. '
+                      'That aroma is why picky dogs often dive in. It is also why a “handful” of '
+                      'freeze-dried nuggets can be a full meal’s calories.',
+                      'Neither format is automatically more digestible. Digestibility depends on '
+                      'the recipe, the dog, and how fast you switch. If you want a middle path, '
+                      'some brands sell kibble with freeze-dried inclusions — still read the AAFCO '
+                      'statement on that specific bag.']},
+               {'h': 'Rehydration is optional for some products — calories are not',
+                'p': ['Some freeze-dried meals are designed to be fed dry; others tell you to add '
+                      'water. Adding water changes volume, not kcal. Weigh the dry food first. If '
+                      'you rehydrate, use clean water and discard leftovers on the same schedule '
+                      'the label lists. Warm water can boost aroma for picky eaters; boiling water '
+                      'can damage some coatings and is rarely required.'],
+                'ul': ['Compare kcal per ounce, not cups, when a bag says “cup” sizes vary by '
+                       'nugget size.',
+                       'If you mix formats, calculate both halves so the day is not 130% of '
+                       'maintenance.',
+                       'Use freeze-dried as a training treat only if you subtract those calories '
+                       'from dinner.',
+                       'Store opened freeze-dried food sealed and dry; humidity turns it into an '
+                       'expensive brick.']},
+               {'h': 'Safety and sanitation differences',
+                'p': ['Kibble is cooked, which reduces — but does not erase — pathogen risk. '
+                      'Freeze-dried raw-style recipes should be handled more like raw food, '
+                      'especially if the label says raw. High-risk households should discuss this '
+                      'with a veterinarian. See <a '
+                      'href="/learning/best-raw-dog-food-for-beginners">raw food for beginners</a> '
+                      'for thaw-and-clean habits that also apply to rehydrated raw pieces.']},
+               {'h': 'Which dogs do well on a mix',
+                'p': ['A measured freeze-dried topper on a complete kibble can help picky dogs '
+                      'without a full subscription. Dogs with a history of pancreatitis may need a '
+                      'lower-fat choice in either format — fat percentage matters more than the '
+                      'drying method. Growing puppies need a growth-approved recipe, not adult '
+                      'freeze-dried “bites” as the main diet.']},
+               {'h': 'Shopping the Petshiwü aisle without hype',
+                'p': ['Ignore front-of-bag words like “ancestral” until you see a life-stage '
+                      'statement and a feeding guide you can convert to a scale. If you travel, '
+                      'freeze-dried wins a suitcase; if you feed a giant breed on a budget, kibble '
+                      'usually wins the math. Browse both in <a href="/dog">dog food</a> and keep '
+                      'lot codes when you trial a new bag.']}],
+  'faqs': [{'q': 'Is freeze-dried dog food better than kibble?',
+            'a': 'It is different, not automatically better. Freeze-dried food is often more '
+                 'calorie-dense and aromatic. Kibble is typically easier on the budget and simpler '
+                 'to store. Completeness and calories decide the winner for your dog.'},
+           {'q': 'Do I have to add water to freeze-dried food?',
+            'a': 'Follow the specific product. Some complete meals can be fed dry; others are '
+                 'meant to be rehydrated. Water changes texture and hydration, not the calorie '
+                 'count of the dry pieces.'},
+           {'q': 'Can freeze-dried food cause diarrhea?',
+            'a': 'A sudden jump in fat or a same-day full switch can loosen stools. Transition '
+                 'slowly and call your veterinarian if you see blood, repeated vomiting, or a '
+                 'puppy that will not eat.'}],
+  'shopPath': '/dog',
+  'shop': 'Shop kibble and freeze-dried dog food at Petshiwü with free shipping over $49 and no '
+          'autoship. NYC delivery is available now, and nationwide shipping opens soon from our '
+          'online pet store.',
+  'related': ['best-raw-dog-food-for-beginners',
+              'best-air-dried-dog-food-2026',
+              'best-high-protein-dog-food'],
+  'publishedAt': '2026-01-18T12:00:00.000Z'},
+ {'slug': 'best-air-dried-dog-food-2026',
+  'title': 'Best Air-Dried Dog Food 2026: How Low-and-Slow Meals Differ From Kibble',
+  'description': 'Best air-dried dog food 2026: how the process differs from kibble and '
+                 'freeze-dried, what to check on labels, and which dogs should skip it safely.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['best air dried dog food 2026',
+           'air dried vs kibble',
+           'Ziwi style dog food',
+           'low temperature dog food',
+           'air dried dog meals'],
+  'img': 'kibble-bowl',
+  'alt': 'Dark air-dried dog morsels in a ceramic bowl, photographed for a 2026 air-dried food '
+         'buying guide',
+  'intro': 'Air-dried dog food sits in a confusing middle: denser than freeze-dried, less '
+           'processed-looking than extruded kibble, and priced like a specialty. In 2026 the '
+           'category is crowded with “gently dried” claims that do not all mean the same factory '
+           'process. This Petshiwü guide explains how to read those bags before you pay '
+           'steak-dinner money for a bowl that still has to be complete and balanced.',
+  'sections': [{'h': 'What air-drying actually does to the recipe',
+                'p': ['True air-dried foods spend a long time in warm, dry air so moisture drops '
+                      'without the short, high-heat puff of extrusion. The pieces stay meaty and '
+                      'the calorie count per cup is often high. That is useful for small dogs that '
+                      'nibble and dangerous for label-skimmers who scoop like kibble. If a brand '
+                      'cannot explain its water activity or storage rules, treat the front-of-bag '
+                      'poetry as decoration.',
+                      'Air-dried is not automatically raw and it is not automatically cooked to a '
+                      'human-meal kill step. Read the manufacturer’s safety statement. High-risk '
+                      'households should ask a veterinarian before feeding any meat-dense dried '
+                      'food that is marketed as raw-adjacent.']},
+               {'h': 'Label checks that matter more than the rustic bag art',
+                'p': ['You want a named animal protein, an AAFCO life-stage statement, and kcal '
+                      'you can convert to grams. “Air-dried” next to a long pea-protein list is '
+                      'still a pulse-heavy diet. If you already read <a '
+                      'href="/learning/is-grain-free-dog-food-safe-2026">our grain-free DCM '
+                      'notes</a>, apply the same first-eight-ingredient discipline here.'],
+                'ul': ['Weigh the first week of portions; cup markings on air-dried bags are often '
+                       'optimistic.',
+                       'Confirm whether the product is a complete meal or a mixer sold in the same '
+                       'aisle.',
+                       'Check the fat percentage if your dog has a pancreatitis history.',
+                       'Keep opened bags sealed — dried meat picks up pantry humidity fast.']},
+               {'h': 'Air-dried versus freeze-dried versus kibble',
+                'p': ['Freeze-dried food is lighter and usually rehydrates faster. Kibble is '
+                      'cheaper per calorie and simpler for multi-dog households. Air-dried often '
+                      'wins on aroma and travel without a freezer, which is why hikers like it. '
+                      'None of those traits replace a growth recipe for a puppy or a '
+                      'phosphorus-controlled plan for kidney disease. See <a '
+                      'href="/learning/freeze-dried-vs-kibble-dog-food">freeze-dried vs kibble</a> '
+                      'if you are still choosing a format.']},
+               {'h': 'Dogs that should skip a full air-dried bowl',
+                'p': ['Dogs that inhale food can choke on dense cubes — use a slow feeder and an '
+                      'appropriate piece size. Dogs on prescription elimination diets should not '
+                      '“upgrade” to air-dried beef because it smells fancier. Seniors with dental '
+                      'disease may still do better on a moist complete food. When in doubt, '
+                      'photograph the label and ask the clinic.']},
+               {'h': 'How to trial air-dried food without wasting a $40 bag',
+                'p': ['Transition over 7–10 days, keep treats bland, and score stool. If you only '
+                      'want the aroma, a measured mixer on a complete kibble can be enough. Shop '
+                      'air-dried and other complete diets in our <a href="/dog">dog '
+                      'collection</a>. Petshiwü will not invent a 2026 “clinical ranking” of '
+                      'brands — your dog’s body-condition score is the ranking that counts.']}],
+  'faqs': [{'q': 'Is air-dried dog food healthier than kibble?',
+            'a': 'Not automatically. Air-drying changes texture and moisture, not the need for a '
+                 'complete nutrient profile. A well-formulated kibble can be a better daily diet '
+                 'than an incomplete dried meat mix.'},
+           {'q': 'Can I feed air-dried food on a hike?',
+            'a': 'Many complete air-dried foods travel well if you can keep the bag dry and '
+                 'portion by weight. Bring extra water for your dog. Do not leave meat-dense food '
+                 'in a hot car.'},
+           {'q': 'Does air-dried food clean teeth?',
+            'a': 'Dense pieces are not a dental cleaning. Some dogs chew more, which may reduce '
+                 'some tartar mechanically, but you still need a home dental plan and veterinary '
+                 'oral exams.'}],
+  'shopPath': '/dog',
+  'shop': 'Browse air-dried and other complete dog foods at Petshiwü. Free shipping over $49, no '
+          'autoship, NYC delivery available now, and nationwide shipping opening soon.',
+  'related': ['freeze-dried-vs-kibble-dog-food',
+              'best-high-protein-dog-food',
+              'best-fresh-dog-food-2026'],
+  'publishedAt': '2026-01-20T13:00:00.000Z'},
+ {'slug': 'best-high-protein-dog-food',
+  'title': 'Best High-Protein Dog Food: How Much Is Enough for Real Dogs',
+  'description': 'Best high-protein dog food guide: how to read guaranteed analysis, who needs '
+                 'extra protein, and when high protein is the wrong lever. Vet-first tips.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['best high protein dog food',
+           'high protein kibble',
+           'dog food protein percentage',
+           'active dog food',
+           'working dog nutrition'],
+  'img': 'kibble-bowl',
+  'alt': 'Measuring scoop of high-protein kibble beside a working dog harness, illustrating '
+         'protein versus calorie needs',
+  'intro': '“High protein” is printed on bags that range from sensible sport formulas to marketing '
+           'that simply removed grain and added pea isolate. Dogs need enough complete protein to '
+           'maintain muscle — they do not need a bodybuilder’s shake. This Petshiwü article shows '
+           'how to read the guaranteed analysis, convert dry-matter protein, and decide whether '
+           'your dog is actually under-muscled or just under-exercised.',
+  'sections': [{'h': 'Guaranteed analysis is as-fed — do the dry-matter math',
+                'p': ['A canned food that lists 9% protein can beat a kibble that lists 26% once '
+                      'you remove water. Divide the protein percentage by the dry-matter fraction '
+                      '(100 minus moisture) to compare formats. If a brand will not list moisture, '
+                      'you cannot compare honestly. High protein on a wet-food label is not a '
+                      'personality trait; it is a percentage.',
+                      'Amino-acid quality matters more than a single big number. Named animal '
+                      'proteins generally bring a more complete amino-acid pattern than a stack of '
+                      'plant isolates. That does not make plants evil — it means you should not '
+                      'buy “42% protein” if the first three ingredients are pea protein, potato '
+                      'protein, and a token chicken meal.']},
+               {'h': 'Who actually benefits from a higher-protein recipe',
+                'p': ['Intact working dogs, dogs rebuilding muscle after an approved weight-loss '
+                      'plan, and some seniors who lose lean mass can benefit from a higher '
+                      'protein-to-calorie ratio. Growing large-breed puppies still need controlled '
+                      'calcium and calories, not an adult sport kibble. See <a '
+                      'href="/learning/best-puppy-food-2026">best puppy food 2026</a> before you '
+                      '“protein up” a four-month-old mastiff.'],
+                'ul': ['Ask your veterinarian before raising protein if your dog has diagnosed '
+                       'kidney disease — this article cannot choose a renal diet.',
+                       'Pair higher protein with enough total calories; protein cannot replace '
+                       'energy from fat in a sled-dog winter.',
+                       'Watch stool volume and gas for two weeks after a switch.',
+                       'If the dog is overweight, protein is not a free pass — see <a '
+                       'href="/learning/best-dog-food-for-weight-loss">weight-loss feeding</a>.']},
+               {'h': 'High protein is the wrong fix for these problems',
+                'p': ['Itchy skin is more often a protein source problem than a protein quantity '
+                      'problem. A dog that begs at 8 p.m. may need a puzzle feeder and a calorie '
+                      'check, not 40% protein. Hyperactivity is not cured by swapping bags. If a '
+                      'trainer or veterinary behaviorist is already on the case, do not add a new '
+                      '“energy” food in the same week you change the walking plan.']},
+               {'h': 'Sport formulas versus all-life-stage bags',
+                'p': ['Performance lines are often higher in fat as well as protein. That is '
+                      'appropriate for dogs that run. It is a fast way to add a pound a month on a '
+                      'suburban weekend warrior. All-life-stage foods can be high protein and '
+                      'still be too rich in calcium for giant-breed growth. Match the AAFCO '
+                      'statement to the dog in front of you, not the athlete on the bag.']},
+               {'h': 'How Petshiwü shoppers should compare two high-protein bags',
+                'p': ['Write the dry-matter protein, fat, fiber, and kcal per cup on a note. Check '
+                      'the first animal meal or fresh meat. Confirm the company employs qualified '
+                      'nutrition people. Then feed to a body-condition score of 4–5/9 and re-weigh '
+                      'in two weeks. Browse complete diets in <a href="/dog">our dog aisle</a> '
+                      'rather than chasing the biggest number on the shelf.']}],
+  'faqs': [{'q': 'What protein percentage is best for dogs?',
+            'a': 'There is no single best number. Adult maintenance can be met by many complete '
+                 'foods in a moderate range once you compare dry matter. Working dogs and some '
+                 'seniors need a different protein-to-calorie ratio. Ask your veterinarian if your '
+                 'dog has organ disease.'},
+           {'q': 'Is high-protein dog food bad for kidneys?',
+            'a': 'Healthy dogs generally tolerate complete high-protein diets. Dogs with diagnosed '
+                 'kidney disease need a veterinary diet plan. Do not start a renal food or a sport '
+                 'food as a guess.'},
+           {'q': 'Does high protein make dogs aggressive?',
+            'a': 'No reliable evidence says extra dietary protein turns dogs aggressive. Behavior '
+                 'changes need a behavior and medical workup, not a protein scapegoat.'}],
+  'shopPath': '/dog',
+  'shop': 'Compare complete high-protein and everyday dog foods at Petshiwü. Free shipping over '
+          '$49, no autoship, NYC delivery now, nationwide shipping soon.',
+  'related': ['best-dog-food-for-weight-loss',
+              'best-large-breed-dog-food',
+              'insect-protein-dog-food-2026'],
+  'publishedAt': '2026-01-22T14:00:00.000Z'},
+ {'slug': 'best-dog-food-for-weight-loss',
+  'title': 'Best Dog Food for Weight Loss: Calorie Cuts That Do Not Starve Muscle',
+  'description': 'Best dog food for weight loss: how to use weight-management formulas, treat '
+                 'budgets, and body-condition scoring without crash diets. Call your vet first.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['best dog food for weight loss',
+           'dog weight management food',
+           'low calorie dog food',
+           'how to slim down a dog',
+           'dog body condition score'],
+  'img': 'dog-walk',
+  'alt': 'Leash and measuring cup beside a slightly overweight dog, illustrating a '
+         'calorie-controlled weight-loss plan',
+  'intro': 'Most dogs lose weight when calories drop and movement rises — not when a bag promises '
+           'a “metabolic miracle.” The best dog food for weight loss is a complete diet you can '
+           'measure, a treat budget you actually follow, and a veterinarian confirming the dog is '
+           'not sick. This Petshiwü guide covers weight-management formulas, how to cut without '
+           'stripping muscle, and the red flags that mean you stop DIY dieting.',
+  'sections': [{'h': 'Get a target before you buy a “light” bag',
+                'p': ['Ask your veterinarian for a current weight, a body-condition score, and a '
+                      'safe weekly loss rate. Crash cuts cause scavenger behavior and can trigger '
+                      'hepatic lipidosis-level problems in some pets — dogs are more resilient '
+                      'than cats, but they still should not be starved. If the dog drinks '
+                      'constantly, has a pot belly, or loses weight without you trying, that is a '
+                      'medical visit, not a new kibble.',
+                      'A weight-management food is usually lower in calories per cup and higher in '
+                      'fiber so the bowl still looks full. That only works if you use the '
+                      'weight-loss feeding guide, not the maintenance guide, and if you count '
+                      'chews. See <a href="/learning/how-to-help-an-overweight-dog">how to help an '
+                      'overweight dog</a> for walking and enrichment that support the bowl math.']},
+               {'h': 'How to read a weight-management label',
+                'p': ['Find kcal per cup or per can. Compare that to your dog’s current food. A '
+                      '“light” bag that you scoop extra generously is not light. L-carnitine shows '
+                      'up on many labels; it is not a license to keep the pizza crusts. Protein '
+                      'should stay adequate so the dog burns fat instead of muscle — another '
+                      'reason not to slash an already modest food in half overnight.'],
+                'ul': ['Weigh food on a kitchen scale for 14 days; cups lie.',
+                       'Keep treats at or under 10% of daily calories, including training bits and '
+                       'dental chews.',
+                       'Use a slow feeder if the dog finishes in seconds and demands a second '
+                       'dinner.',
+                       'Re-weigh the dog every two weeks and adjust 5–10% if the trend is flat.']},
+               {'h': 'Wet food, fresh food, and volume tricks',
+                'p': ['Higher-moisture foods can help some dogs feel finished. They can also hide '
+                      'a lot of fat if you pick pâté by smell. If you use fresh food, you must '
+                      'still hit a calorie target — see <a '
+                      'href="/learning/best-fresh-dog-food-2026">fresh dog food 2026</a>. Pumpkin '
+                      'can add volume for some dogs; it is not a weight-loss drug. Read <a '
+                      'href="/learning/pumpkin-for-dogs-benefits">pumpkin for dogs</a> before you '
+                      'add a cup “because internet.”']},
+               {'h': 'Exercise is not optional, and it is not a substitute for math',
+                'p': ['A twenty-minute sniff walk is better than a weekend hero run on an '
+                      'overweight dog’s joints. Build duration slowly. Joint supplements do not '
+                      'cancel extra pounds — they may support comfort as part of a vet plan. If '
+                      'the dog is lame, panting at rest, or collapsing, stop the fitness program '
+                      'and call the clinic.']},
+               {'h': 'When a prescription weight diet belongs in the cart',
+                'p': ['Veterinary weight diets exist for dogs that need tighter calorie density or '
+                      'concurrent disease management. They are not a flex. If your veterinarian '
+                      'prescribes one, do not “boost” it with oily toppers. Shop complete everyday '
+                      'and weight-management foods in <a href="/dog">the dog aisle</a>, and skip '
+                      'any plan that cannot show calories.']}],
+  'faqs': [{'q': 'How fast should a dog lose weight?',
+            'a': 'Many veterinarians aim for roughly 1% of body weight per week, but your dog’s '
+                 'target should come from the clinic. Faster loss is not better if it costs muscle '
+                 'or triggers scavenger panic.'},
+           {'q': 'Can I just feed less of the current food?',
+            'a': 'Sometimes, if the current food stays complete at the lower portion and the dog '
+                 'is not hunting the trash. Purpose-made weight foods can help satiety. Do not cut '
+                 'a puppy food or a medical diet without veterinary guidance.'},
+           {'q': 'Are diet dog treats necessary?',
+            'a': 'Low-calorie training treats help if you already use food for manners. Vegetables '
+                 'like green beans work for some dogs. Any add-in still counts. Skip greasy chews '
+                 'during the loss phase.'}],
+  'shopPath': '/dog',
+  'shop': 'Shop measured dog meals, slow feeders, and low-calorie training treats at Petshiwü. '
+          'Free shipping over $49, no autoship, NYC delivery now and nationwide shipping soon.',
+  'related': ['how-to-help-an-overweight-dog',
+              'how-much-to-feed-a-dog',
+              'slow-feeder-bowl-benefits'],
+  'publishedAt': '2026-01-25T08:00:00.000Z'},
+ {'slug': 'best-puppy-food-2026',
+  'title': 'Best Puppy Food 2026: Growth Recipes, Calcium, and Transition Timing',
+  'description': 'Best puppy food 2026: DHA, calcium limits for large breeds, AAFCO growth '
+                 'statements, and when to switch to adult food. Vet-first Petshiwü advice.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['best puppy food 2026',
+           'large breed puppy food',
+           'AAFCO growth',
+           'puppy feeding schedule',
+           'DHA puppy diet'],
+  'img': 'puppy',
+  'alt': 'Young puppy eating growth-formula kibble from a shallow bowl during a 2026 puppy-food '
+         'comparison',
+  'intro': 'Puppy food is not adult food plus extra love. Growth formulas are built for faster '
+           'bone and brain development, and the wrong calcium load can hurt a large-breed puppy '
+           'more than a slightly boring bag. This 2026 Petshiwü guide shows what must be on the '
+           'label, how often to feed, and when a veterinarian should override the internet.',
+  'shopPath': '/dog',
+  'shop': 'Shop complete puppy foods and measured scoops at Petshiwü. Free shipping over $49, no '
+          'autoship, NYC delivery now, nationwide shipping soon.',
+  'related': ['puppy-vs-adult-dog-food', 'best-large-breed-dog-food', 'how-much-to-feed-a-dog'],
+  'sections': [{'h': 'Why “all life stages” is not automatically a puppy plan',
+                'p': ['An all-life-stages food can be used for growth if it meets AAFCO growth '
+                      'profiles, but large-breed puppies often need a formula that specifically '
+                      'controls calcium and calorie density. A food designed for a ten-pound adult '
+                      'terrier can push a Great Dane puppy to grow too fast. Read the statement on '
+                      'the bag, not the cartoon puppy on the front.',
+                      'DHA appears on many puppy labels because it supports neural and retinal '
+                      'development. It is useful, not magical. Skip any plan that treats fish oil '
+                      'as a reason to ignore complete mineral balance. If a breed club recommends '
+                      'a specific growth food, bring that printout to your veterinarian.'],
+                'ul': ['Confirm the AAFCO statement says growth, gestation/lactation, or all life '
+                       'stages — not adult maintenance only.',
+                       'For expected adult weight over about 50 pounds, prefer a large-breed puppy '
+                       'recipe unless your veterinarian says otherwise.',
+                       'Weigh the puppy weekly for the first months; growth charts beat “he looks '
+                       'hungry.”',
+                       'Keep the same food through vaccine visits so GI upset is not blamed on '
+                       'every new bag.']},
+               {'h': 'Feeding frequency and the leftover rule',
+                'p': ['Most young puppies do better on three to four meals than one giant bowl. '
+                      'Free-feeding dry food makes it hard to notice a skipped meal, often the '
+                      'first sign a puppy is ill. Measure each meal, pick up leftovers after about '
+                      'ten minutes, and use the same bowl location so house-training cues stay '
+                      'consistent.',
+                      'Treats for crate training should come out of the daily calorie budget. See '
+                      '<a href="/learning/how-much-to-feed-a-dog">how much to feed a dog</a> once '
+                      'the clinic writes down an adult weight estimate.']},
+               {'h': 'When to switch toward adult food',
+                'p': ['Small breeds may be ready closer to 9–12 months. Large and giant breeds '
+                      'often stay on growth food until 12–18 months because growth plates close '
+                      'later. Switching early to a calorie-dense adult performance food is a '
+                      'common way to load extra weight on immature joints.',
+                      'Do the transition over a week unless the veterinarian wants a faster '
+                      'medical change. Pair this with <a '
+                      'href="/learning/puppy-vs-adult-dog-food">puppy vs adult dog food</a> so you '
+                      'are not guessing from a forum poll.']},
+               {'h': 'Red flags that are not picky-puppy behavior',
+                'p': ['A puppy that vomits repeatedly, has bloody stool, a bloated belly, or will '
+                      'not stand to eat needs a veterinarian the same day. Do not keep rotating '
+                      'proteins hoping the next brand fixes a parasite. Food trials happen after '
+                      'medical causes are considered.']},
+               {'h': 'Shopping a first bag at Petshiwü',
+                'p': ['Choose one complete growth food you can buy consistently. Photograph the '
+                      'lot code. If you later add a fresh topper, keep it measured so the puppy '
+                      'food remains the nutrient backbone. Browse puppy diets in our <a '
+                      'href="/dog">dog aisle</a> and ask your clinic before any homemade growth '
+                      'stew.']}],
+  'faqs': [{'q': 'Can I feed a puppy adult dog food in 2026?',
+            'a': 'Only if the specific product is approved for growth or all life stages and your '
+                 'veterinarian agrees. Adult-maintenance-only foods can undershoot nutrients '
+                 'puppies need. Large-breed puppies have extra calcium constraints.'},
+           {'q': 'How many cups should my puppy eat?',
+            'a': 'Start from the bag’s growth guide, then adjust to body condition with your '
+                 'veterinarian. Cups vary by kibble size. A scale is more honest than the scoop in '
+                 'the bag.'},
+           {'q': 'Is grain-free puppy food safer?',
+            'a': 'Not by default. Discuss grain-free growth diets with your veterinarian, '
+                 'especially for large breeds. Read our grain-free 2026 notes before you switch.'}],
+  'publishedAt': '2026-01-27T09:00:00.000Z'},
+ {'slug': 'best-senior-dog-food-2026',
+  'title': 'Best Senior Dog Food 2026: Protein, Joints, and When Senior Is Marketing',
+  'description': 'Best senior dog food 2026: when to switch, how much protein seniors still need, '
+                 'joint-support claims, and kidney caveats. Educational only — ask your vet.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['best senior dog food 2026',
+           'senior dog nutrition',
+           '7+ dog food',
+           'senior dog protein',
+           'dog food for older dogs'],
+  'img': 'senior-dog',
+  'alt': 'Gray-muzzled dog eating a measured senior meal from a raised bowl for a 2026 senior-food '
+         'guide',
+  'intro': 'A 7+ banner does not diagnose your dog. Some seniors need fewer calories because they '
+           'nap more; others need more protein to protect muscle. Kidney values, dental pain, and '
+           'arthritis change the bowl more than a birthday. This Petshiwü 2026 guide explains what '
+           'senior formulas usually change — and which decisions belong to your veterinarian.',
+  'shopPath': '/dog',
+  'shop': 'Find senior-complete dog foods and raised bowls at Petshiwü. Free shipping over $49, no '
+          'autoship. NYC delivery is available now; nationwide shipping opens soon.',
+  'related': ['best-joint-supplements-for-dogs', 'glucosamine-for-dogs', 'how-much-to-feed-a-dog'],
+  'sections': [{'h': 'Age is a clue, bloodwork is a plan',
+                'p': ['Many brands define senior around seven years, which is early for a fit '
+                      'spaniel and late for a giant breed already slowing down. Before you put '
+                      'them on senior, ask for a senior wellness panel. Unexplained weight loss, '
+                      'extra thirst, or new nighttime accidents are medical signs, not proof the '
+                      'kibble is too rich.',
+                      'If creatinine or urine concentration already worry your veterinarian, do '
+                      'not pick a grocery senior bag as a homemade kidney diet. Prescription renal '
+                      'foods are a different category. This article cannot interpret lab work.']},
+               {'h': 'Protein: do not starve an old dog’s muscles',
+                'p': ['Healthy seniors often do better with generous high-quality protein and '
+                      'fewer empty calories, not a vague low-protein gentle recipe. Low protein is '
+                      'a medical tool for some kidney patients, not a birthday gift. Watch the '
+                      'waist and the muscle over the spine.'],
+                'ul': ['Compare kcal per cup — many seniors simply need a smaller portion of adult '
+                       'food.',
+                       'Choose a kibble size or wet texture the dog can chew; dental pain looks '
+                       'like pickiness.',
+                       'If joints are stiff, pair diet with a vet-guided activity plan — see <a '
+                       'href="/learning/best-joint-supplements-for-dogs">joint supplements</a>.',
+                       'Weigh the dog every two weeks after a switch.']},
+               {'h': 'Joint claims on the bag are not a diagnosis',
+                'p': ['Glucosamine and green-lipped mussel appear on many senior bags at doses '
+                      'that may be lower than a dedicated supplement. That is a bonus, not '
+                      'arthritis treatment. If your dog is limping, you need an exam before you '
+                      'stack every joint chew in the aisle. Read <a '
+                      'href="/learning/glucosamine-for-dogs">glucosamine for dogs</a> for label '
+                      'math.']},
+               {'h': 'When wet food or a raised bowl helps more than a new brand',
+                'p': ['Seniors with missing teeth often finish a complete wet food or soaked '
+                      'kibble more comfortably. Raised bowls help some dogs with neck pain and '
+                      'make reflux worse for others — ask the clinic if your dog regurgitates. '
+                      'Fresh food can work if it is complete and calorie-counted; see <a '
+                      'href="/learning/best-fresh-dog-food-2026">fresh food 2026</a>.']},
+               {'h': 'A calm switch, not a pantry purge',
+                'p': ['Transition over 7–10 days. Keep a bland backup if the senior has a '
+                      'sensitive gut. Shop senior and adult complete foods in <a href="/dog">our '
+                      'dog collection</a>. Bring the bag to the next appointment so the '
+                      'veterinarian can see phosphorus and calorie details.']}],
+  'faqs': [{'q': 'At what age should I switch to senior dog food?',
+            'a': 'There is no universal age. Use body condition, activity, dental comfort, and '
+                 'senior bloodwork. Some dogs stay on adult food with a smaller scoop.'},
+           {'q': 'Do senior dogs need less protein?',
+            'a': 'Healthy seniors often need enough protein to keep muscle. Reduced protein is a '
+                 'veterinary decision, usually tied to diagnosed kidney disease, not gray fur.'},
+           {'q': 'Can I add a joint supplement on top of senior food?',
+            'a': 'Often yes, but tell your veterinarian so you do not double-dose. Supplements do '
+                 'not replace pain control or weight loss.'}],
+  'publishedAt': '2026-01-30T10:00:00.000Z'},
+ {'slug': 'best-large-breed-dog-food',
+  'title': 'Best Large Breed Dog Food: Joint-Safe Calories and Kibble Size',
+  'description': 'Best large breed dog food: controlled growth for puppies, adult calorie density, '
+                 'hip-joint realities, and how to read large-breed labels without the hype.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['best large breed dog food',
+           'large breed puppy food',
+           'German Shepherd dog food',
+           'hip dysplasia diet dogs',
+           'large breed kibble'],
+  'img': 'large-breed',
+  'alt': 'Large mixed-breed dog standing beside a bag of large-breed kibble and a kitchen scale',
+  'intro': 'Large-breed bags exist because a 70-pound dog is not a scaled-up terrier. Extra body '
+           'weight on growing hips, a deeper chest, and a bigger daily calorie bill all change '
+           'what “complete” should look like. This Petshiwü guide covers growth control, adult '
+           'maintenance, and the joint claims that still need a veterinarian.',
+  'shopPath': '/dog',
+  'shop': 'Shop large-breed puppy and adult foods at Petshiwü, a nationwide online pet store with '
+          'free shipping over $49 and no autoship. NYC delivery now; nationwide shipping soon.',
+  'related': ['best-puppy-food-2026', 'best-joint-supplements-for-dogs', 'best-orthopedic-dog-bed'],
+  'sections': [{'h': 'Growth control is the puppy story',
+                'p': ['Large-breed puppy foods typically moderate calcium and calorie density so '
+                      'bones do not race ahead of the joints. Free-choice feeding a calorie-rich '
+                      'all-life-stages food is a classic way to create a plump, lame adolescent. '
+                      'Ask your veterinarian for a growth-curve target, not a “keep the bowl full” '
+                      'plan.',
+                      'If you adopted a teenage mix and do not know adult size, use ribs-and-waist '
+                      'scoring every two weeks and err toward a large-breed puppy formula until '
+                      'the clinic says adult food is appropriate. See <a '
+                      'href="/learning/best-puppy-food-2026">best puppy food 2026</a>.']},
+               {'h': 'Adult large-breed foods: calories first, cartilage second',
+                'p': ['Adult large-breed recipes are often slightly lower in calories per cup and '
+                      'may add glucosamine. The calorie cut matters more than the joint dusting if '
+                      'your dog already carries extra weight. An orthopedic bed and controlled '
+                      'walks help more than a bag that promises “hip support” while you feed 20% '
+                      'over maintenance.'],
+                'ul': ['Weigh food; a cup of large kibble can hide an extra 50–80 kcal versus a '
+                       'small-breed piece.',
+                       'Split meals if your breed is deep-chested and your veterinarian has '
+                       'discussed bloat-risk habits.',
+                       'Use a raised bowl only if the clinic agrees — evidence on bloat and bowl '
+                       'height is mixed.',
+                       'Keep treats under 10% of calories, including “just one” pizza crust.']},
+               {'h': 'Bloat-aware mealtime habits',
+                'p': ['No food prevents gastric dilatation-volvulus. What you can do is avoid '
+                      'vigorous play right after a large meal, consider more frequent smaller '
+                      'meals, and know the emergency signs: unproductive retching, a tight belly, '
+                      'restlessness. That is a race to emergency care, not a diet tweak. This is '
+                      'education, not a surgical opinion.']},
+               {'h': 'When a regular adult food is enough',
+                'p': ['A fit 55-pound dog on a well-made adult food does not automatically need '
+                      'the large-breed SKU. Choose large-breed when kibble size helps chewing, '
+                      'when you need the calorie density, or when your veterinarian wants the '
+                      'growth profile. Do not pay extra solely for a wolf on the bag.']},
+               {'h': 'Shopping without breed-myth extras',
+                'p': ['Ignore claims that German Shepherds must eat only one secret protein. Shop '
+                      'complete large-breed diets in <a href="/dog">our dog aisle</a> and pair '
+                      'food with a bed that actually fits — see <a '
+                      'href="/learning/best-orthopedic-dog-bed">orthopedic dog beds</a> if elbows '
+                      'and hips are already noisy.']}],
+  'faqs': [{'q': 'Do all dogs over 50 pounds need large-breed food?',
+            'a': 'Not automatically. Use body condition, age, and your veterinarian’s advice. '
+                 'Large-breed puppy formulas matter more during growth than a marketing line on an '
+                 'adult bag.'},
+           {'q': 'Does large-breed food prevent hip dysplasia?',
+            'a': 'No diet prevents a genetic joint disease. Controlled growth and a lean body can '
+                 'reduce stress on joints. Screening and activity plans belong with your '
+                 'veterinarian.'},
+           {'q': 'Is grain-free better for large breeds?',
+            'a': 'Not as a default. Discuss pulse-heavy diets with your veterinarian, especially '
+                 'in DCM-risk breeds. Read our grain-free 2026 article before you switch.'}],
+  'publishedAt': '2026-02-01T11:00:00.000Z'},
+ {'slug': 'best-small-breed-dog-food',
+  'title': 'Best Small Breed Dog Food: Tiny Kibble, Fast Metabolisms, Dental Reality',
+  'description': 'Best small breed dog food: calorie-dense kibble, dental care, hypoglycemia in '
+                 'toy puppies, and how to avoid treating the bowl like a snack tray.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['best small breed dog food',
+           'toy breed puppy food',
+           'small breed kibble',
+           'Yorkie dog food',
+           'tiny dog calories'],
+  'img': 'small-breed',
+  'alt': 'Small terrier eating tiny-kibble pieces from a shallow dish on a kitchen scale',
+  'intro': 'Small-breed foods exist because a 6-pound dog can lose heat fast, skip a meal into low '
+           'blood sugar as a puppy, and still become obese on “just a few” treats. Tiny kibble is '
+           'a chewing convenience, not a complete nutrition philosophy. Here is how Petshiwü '
+           'shoppers should match calories, dental care, and life stage.',
+  'shopPath': '/dog',
+  'shop': 'Shop small-breed and toy-breed foods at Petshiwü with free shipping over $49 and no '
+          'autoship. NYC delivery is available now; nationwide shipping opens soon.',
+  'related': ['best-dental-dog-food-and-chews', 'how-to-brush-dog-teeth', 'best-dog-treats-2026'],
+  'sections': [{'h': 'Calorie density is the real small-breed feature',
+                'p': ['Many small-breed kibbles pack more kcal into a smaller piece so a Chihuahua '
+                      'can finish a nutritionally complete meal without a mountain of volume. That '
+                      'is helpful until someone free-feeds the bag. A tablespoon of cheese can be '
+                      'a huge percent of a toy dog’s day. Write the kcal of every chew.',
+                      'Toy-breed puppies may need more frequent meals to reduce hypoglycemia risk. '
+                      'If a puppy becomes wobbly, dull, or cannot stand, that is urgent veterinary '
+                      'care — rub honey only if your veterinarian has already taught you that '
+                      'emergency step for a known at-risk puppy.']},
+               {'h': 'Dental disease is the small-dog tax',
+                'p': ['Crowded teeth collect plaque early. A “dental” small-breed kibble can help '
+                      'a little; it does not replace brushing. See <a '
+                      'href="/learning/how-to-brush-dog-teeth">how to brush dog teeth</a> and <a '
+                      'href="/learning/best-dental-dog-food-and-chews">dental foods and chews</a>. '
+                      'Bad breath plus dropping food is a dental exam, not a flavor problem.'],
+                'ul': ['Choose a kibble size the dog can actually crunch, not swallow whole.',
+                       'Skip cooked bones and antlers that fracture tiny teeth.',
+                       'Schedule professional cleanings when your veterinarian recommends them — '
+                       'anesthesia-free scraping is not the same job.',
+                       'Count dental chews in the calorie budget.']},
+               {'h': 'When a regular adult food is fine',
+                'p': ['If your small dog maintains a waist on a complete all-sizes adult food and '
+                      'can chew it, you do not owe the small-breed surcharge. Switch to '
+                      'small-breed when pieces are too large, when you need higher calorie density '
+                      'for a picky underweight senior, or when you want a growth recipe sized for '
+                      'toy puppies.']},
+               {'h': 'Treat culture in apartment kitchens',
+                'p': ['Small dogs live closer to snacks. Use a measured daily treat cup. Training '
+                      'bits should be pea-sized. If the dog is gaining, cut the cheese before you '
+                      'buy a “light” bag and keep overfeeding. See <a '
+                      'href="/learning/best-dog-food-for-weight-loss">weight-loss feeding</a>.']},
+               {'h': 'Shopping the tiny-bag aisle',
+                'p': ['Small bags go stale if you buy a three-month supply for a 5-pound eater. '
+                      'Buy a size you will finish in about a month after opening, store it sealed, '
+                      'and keep the lot code. Browse small-breed diets in <a href="/dog">the dog '
+                      'collection</a>.']}],
+  'faqs': [{'q': 'Do small dogs need small-breed food?',
+            'a': 'They need complete calories they can chew. Small-breed recipes help with piece '
+                 'size and energy density. Many small dogs thrive on other complete foods if '
+                 'portions are honest.'},
+           {'q': 'Why is my toy puppy shaky between meals?',
+            'a': 'Low blood sugar is a veterinary emergency pattern in some toy puppies. Call your '
+                 'clinic. Do not invent a homemade sugar protocol from a video.'},
+           {'q': 'Are grain-free small-breed foods better for allergies?',
+            'a': 'Usually not. Itch is more often a protein issue. Work with your veterinarian '
+                 'before you chase grain-free labels.'}],
+  'publishedAt': '2026-02-04T12:00:00.000Z'},
+ {'slug': 'hydrolyzed-dog-food-for-allergies',
+  'title': 'Hydrolyzed Dog Food for Allergies: What the Prescription Label Means',
+  'description': 'Hydrolyzed dog food for allergies: how protein is broken down, why these diets '
+                 'are prescription, and how to run a real elimination trial with your '
+                 'veterinarian.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['hydrolyzed dog food',
+           'dog food allergies',
+           'prescription allergy diet',
+           'elimination diet dogs',
+           'hydrolyzed protein kibble'],
+  'img': 'kibble-bowl',
+  'alt': 'Prescription hydrolyzed kibble poured into a bowl next to an empty treat jar during an '
+         'allergy trial',
+  'intro': 'Hydrolyzed diets are not a fancier chicken recipe. The protein is broken into pieces '
+           'small enough that many immune systems stop recognizing it as the old allergen. These '
+           'foods are typically sold through veterinarians because the trial only works if nothing '
+           'else enters the mouth. This Petshiwü explainer is educational — it cannot diagnose a '
+           'food allergy or replace an elimination diet designed by your clinic.',
+  'shopPath': '/dog',
+  'shop': 'Petshiwü carries everyday limited-ingredient foods; hydrolyzed diets are veterinary '
+          'products. Shop related dog nutrition with free shipping over $49, no autoship. NYC '
+          'delivery now; nationwide shipping soon.',
+  'related': ['best-limited-ingredient-dog-food',
+              'best-dog-food-for-itchy-skin',
+              'best-probiotics-for-dogs'],
+  'sections': [{'h': 'Hydrolysis is chemistry, not a flavor story',
+                'p': ['In a hydrolyzed diet, intact proteins are enzymatically chopped into '
+                      'peptides. The goal is to reduce immune recognition, not to make the kibble '
+                      'taste “cleaner.” Some dogs still react. Some dogs need a different '
+                      'hydrolysate or a truly novel intact protein. Only a veterinarian can decide '
+                      'which trial fits the history and the skin or gut signs you are seeing.',
+                      'These diets are complete foods when labeled that way. Do not add cheese, '
+                      'flavored medicines, or dental chews during a trial unless the veterinarian '
+                      'approves a hydrolyzed-compatible list. One bacon bit can ruin eight weeks '
+                      'of work.']},
+               {'h': 'Why the trial is longer than a weekend',
+                'p': ['Skin food trials often run 8–12 weeks because the itch cycle is slow. GI '
+                      'trials may show stool changes sooner. If you switch bags every five days, '
+                      'you will never know what worked. Keep a simple diary: stool, ear gunk, '
+                      'belly redness, and every item the dog ate, including stolen sandwich '
+                      'crusts.'],
+                'ul': ['Ask the clinic for a written “yes” list of treats and flavored '
+                       'preventives.',
+                       'Wash food bowls and stop sharing the cat’s bowl.',
+                       'If the dog is on steroids or apoquel, ask how those drugs affect how you '
+                       'read the trial.',
+                       'Call the vet if you see facial swelling, collapse, or nonstop vomiting — '
+                       'that is not a “give it time” moment.']},
+               {'h': 'Limited ingredient versus hydrolyzed',
+                'p': ['A limited-ingredient diet uses fewer intact proteins, often a novel meat. '
+                      'It is a different tool. Some dogs do well on a carefully chosen LID from <a '
+                      'href="/learning/best-limited-ingredient-dog-food">our LID guide</a>. Dogs '
+                      'with a long history of many proteins, or with severe GI disease, are more '
+                      'often steered toward hydrolyzed food. Do not self-prescribe either path '
+                      'from a social post.']},
+               {'h': 'What hydrolyzed food will not fix',
+                'p': ['Environmental allergies, ear mites, scabies, and yeast overgrowth can look '
+                      'like “food issues.” Hydrolyzed kibble will not treat a flea infestation. If '
+                      'itch exploded in August, read <a '
+                      'href="/learning/seasonal-allergies-in-dogs">seasonal allergies in dogs</a> '
+                      'and book the clinic. Food is one chapter, not the whole book.']},
+               {'h': 'Shopping after the clinic writes the plan',
+                'p': ['Follow the prescription brand your veterinarian names. If they also want a '
+                      'non-prescription LID for a milder case, compare complete statements in our '
+                      '<a href="/dog">dog aisle</a>. Keep lot codes. This article does not sell a '
+                      'diagnosis and will not invent a study that ranks every hydrolysate.']}],
+  'faqs': [{'q': 'Can I buy hydrolyzed dog food without a veterinarian?',
+            'a': 'Most true hydrolyzed therapeutic diets are dispensed through a clinic. That is '
+                 'because the trial and the differential diagnosis matter. Over-the-counter '
+                 '“sensitive” foods are not the same product.'},
+           {'q': 'How long before hydrolyzed food helps an itchy dog?',
+            'a': 'Skin trials often need many weeks. Some gut signs improve faster. If nothing '
+                 'changes, the veterinarian may look for other causes rather than blaming you for '
+                 '“not waiting long enough.”'},
+           {'q': 'Can I use hydrolyzed treats during the trial?',
+            'a': 'Only if they match the diet chemistry your veterinarian approved. Random '
+                 'boutique treats are the usual trial-breaker.'}],
+  'publishedAt': '2026-02-06T13:00:00.000Z'},
+ {'slug': 'best-limited-ingredient-dog-food',
+  'title': 'Best Limited Ingredient Dog Food: How to Run a Cleaner Bowl Trial',
+  'description': 'Best limited ingredient dog food: single-protein labels, hidden flavorings, how '
+                 'to trial LID kibble, and when you actually need a veterinary hydrolyzed diet.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['best limited ingredient dog food',
+           'LID dog food',
+           'single protein dog food',
+           'novel protein dog diet',
+           'limited ingredient kibble'],
+  'img': 'kibble-bowl',
+  'alt': 'Single-protein limited-ingredient kibble beside a short ingredient list card for a '
+         'cleaner bowl trial',
+  'intro': 'Limited ingredient dog food is a shorter shopping list, not a spell against itch. The '
+           'idea is to feed one named animal protein and a simple carb so you can see whether a '
+           'common meat is the problem. It only works if the rest of the house stops leaking '
+           'chicken fat into the experiment. Petshiwü’s guide is for shoppers who want a '
+           'disciplined trial — and a reminder that many itchy dogs need a veterinarian, not a new '
+           'bag.',
+  'shopPath': '/dog',
+  'shop': 'Browse limited-ingredient dog foods at Petshiwü. Free shipping over $49, no autoship, '
+          'NYC delivery available now, nationwide shipping opening soon.',
+  'related': ['hydrolyzed-dog-food-for-allergies',
+              'best-dog-food-for-itchy-skin',
+              'is-grain-free-dog-food-safe-2026'],
+  'sections': [{'h': 'What “limited” should mean on the panel',
+                'p': ['You want one primary animal protein you can name, a carbohydrate source, '
+                      'and a vitamin-mineral premix. You do not want “meat flavor,” mixed animal '
+                      'fat, or a treat recipe that reintroduces the old protein. Grain-free LID is '
+                      'still LID; it is not automatically better. If pulses sit high on the list, '
+                      'read <a href="/learning/is-grain-free-dog-food-safe-2026">our grain-free '
+                      'notes</a> and talk with your veterinarian.',
+                      'Novel does not mean exotic forever. Rabbit is only novel if your dog has '
+                      'never eaten it in a stew, a chew, or a previous food. Duck is not novel in '
+                      'a house that already fed “duck and sweet potato” for two years.']},
+               {'h': 'How to trial without sabotaging yourself',
+                'p': ['Pick one complete LID and feed it for the interval your veterinarian sets — '
+                      'often 8 weeks for skin. No table scraps, no flavored toothpaste, no '
+                      'rawhide, no “just this once” pizza. Use a dedicated treat from the same '
+                      'protein or a clinic-approved hydrolyzed treat.'],
+                'ul': ['Photograph the full ingredient list on day one.',
+                       'Wash bowls and stop free-roaming the cat’s poultry pâté.',
+                       'Log itch scores and stool quality twice a week.',
+                       'If ears, belly, or paws worsen suddenly, call the clinic instead of adding '
+                       'a second LID.',
+                       'Keep flea prevention current so you are not trialing food during a flea '
+                       'bite allergy flare.']},
+               {'h': 'When LID is the wrong first move',
+                'p': ['Dogs with chronic vomiting, weight loss, or bloody diarrhea need a workup '
+                      'before a grocery-aisle experiment. Dogs that have already failed six '
+                      'proteins may need <a '
+                      'href="/learning/hydrolyzed-dog-food-for-allergies">hydrolyzed food</a>. '
+                      'Puppies with poor growth should not live on a random novel protein without '
+                      'a growth-approved recipe.']},
+               {'h': 'Itch is not always food',
+                'p': ['Paws that stain, seasonal face rubbing, and ear flares can be '
+                      'environmental. See <a href="/learning/best-dog-food-for-itchy-skin">itchy '
+                      'skin and food</a> and <a '
+                      'href="/learning/seasonal-allergies-in-dogs">seasonal allergies</a>. A '
+                      'perfect LID cannot replace flea control or a cytopoint conversation when '
+                      'the diagnosis is atopic dermatitis.']},
+               {'h': 'Shopping an LID you can actually repurchase',
+                'p': ['Choose a protein you can find for months. Switching from kangaroo to '
+                      'venison mid-trial resets the clock. Browse complete LID options in <a '
+                      'href="/dog">our dog aisle</a> and keep the lot code if a recall check later '
+                      'matters.']}],
+  'faqs': [{'q': 'Is limited ingredient the same as grain-free?',
+            'a': 'No. LID refers to fewer ingredients, usually one protein. Grain-free refers to '
+                 'the carb source. You can have grain-inclusive LID and grain-free recipes that '
+                 'are ingredient-heavy.'},
+           {'q': 'Can I homemade a limited ingredient diet?',
+            'a': 'Not safely without a veterinary nutritionist. Homemade “just turkey and rice” '
+                 'becomes deficient fast. See our homemade safety guide before you try.'},
+           {'q': 'Why did my dog itch more after starting LID?',
+            'a': 'The new protein may still be a problem, the trial may be contaminated, or the '
+                 'itch may not be food. Call your veterinarian rather than rotating weekly.'}],
+  'publishedAt': '2026-02-08T14:00:00.000Z'},
+ {'slug': 'best-dog-food-for-itchy-skin',
+  'title': 'Best Dog Food for Itchy Skin: Food Versus Environment Versus Fleas',
+  'description': 'Best dog food for itchy skin: how to tell food from fleas and pollen, what '
+                 'labels to read, and when an elimination diet needs a veterinarian first.',
+  'petType': 'dog',
+  'category': 'Health',
+  'tags': ['best dog food for itchy skin',
+           'dog food allergies itching',
+           'itchy dog diet',
+           'dog yeast skin food',
+           'elimination diet itchy dog'],
+  'img': 'dog-grooming',
+  'alt': 'Dog scratching its shoulder beside a food bowl and a flea comb, illustrating itch causes '
+         'beyond kibble',
+  'intro': 'Itchy dogs get new food faster than they get a flea comb. That is backwards. Most itch '
+           'is fleas, environment, infection, or a mix — food is real but less common. This '
+           'Petshiwü article helps you sort the bowl from the yard, read labels without buying a '
+           'miracle, and know when the veterinarian should start the trial.',
+  'shopPath': '/dog',
+  'shop': 'Shop gentle complete foods, omega-3s, and grooming tools at Petshiwü. Free shipping '
+          'over $49, no autoship. NYC delivery now; nationwide shipping soon.',
+  'related': ['best-limited-ingredient-dog-food',
+              'seasonal-allergies-in-dogs',
+              'best-flea-and-tick-prevention-for-dogs-2026'],
+  'sections': [{'h': 'Rule out the cheap causes before the expensive bag',
+                'p': ['Look at the rump and tail base. Flea dirt is not optional trivia. '
+                      'Year-round prevention matters even in apartments. Then look at ears, paws, '
+                      'and armpits for yeast or bacteria that need medication, not kale. If the '
+                      'dog is losing hair in circles or has open sores, skip the blog hop and book '
+                      'the clinic.',
+                      'Seasonal face and paw itch that explodes in spring is a classic '
+                      'environmental pattern. Read <a '
+                      'href="/learning/seasonal-allergies-in-dogs">seasonal allergies in dogs</a> '
+                      'before you throw out a perfectly good adult food.']},
+               {'h': 'What food-related itch often looks like',
+                'p': ['Food-triggered itch can be year-round. Some dogs have concurrent GI signs: '
+                      'soft stool, extra gas, or vomiting. Some have only skin. None of those '
+                      'patterns is a diagnosis. Your veterinarian may recommend a strict '
+                      'elimination diet using a <a '
+                      'href="/learning/best-limited-ingredient-dog-food">limited ingredient '
+                      'food</a> or a <a '
+                      'href="/learning/hydrolyzed-dog-food-for-allergies">hydrolyzed diet</a>.'],
+                'ul': ['Keep flea prevention on schedule during any food trial.',
+                       'Photograph the belly and paws weekly — memory is a bad itch score.',
+                       'Stop flavored chewables unless the veterinarian says they are compatible.',
+                       'Do not add coconut oil “for the coat” during a trial; it is still an extra '
+                       'fat and a new variable.']},
+               {'h': 'Label claims that do not mean hypoallergenic',
+                'p': ['“Sensitive skin” often means added omega-6/omega-3 and a pretty fish on the '
+                      'bag. That can support the skin barrier; it does not prove the protein is '
+                      'safe. “Grain-free for allergies” is usually the wrong lever. Omega-3 '
+                      'supplements may help some allergic dogs as part of a vet plan — they are '
+                      'not a food-allergy cure.']},
+               {'h': 'Grooming that supports the diet work',
+                'p': ['A weekly bath with a veterinarian-recommended shampoo can reduce allergen '
+                      'load on the coat. Over-bathing with dish soap wrecks the barrier and makes '
+                      'itch worse. See <a href="/learning/how-often-to-bathe-a-dog">how often to '
+                      'bathe a dog</a>. Keep nails short so scratch damage is milder.']},
+               {'h': 'When to stop shopping and start medicine',
+                'p': ['Facial swelling, hives after a meal, or trouble breathing is emergency '
+                      'care. Open hot spots need a plan — see <a '
+                      'href="/learning/dog-hot-spots-treatment">hot spots</a>. Shop complete foods '
+                      'and omega-3s in <a href="/dog">the dog aisle</a> after the clinic tells you '
+                      'whether you are treating food, fleas, or atopy.']}],
+  'faqs': [{'q': 'What is the best dog food for itchy skin?',
+            'a': 'The best food is the one that is complete and matches a veterinarian-guided '
+                 'trial if food is suspected. There is no single brand that fixes every itchy '
+                 'dog.'},
+           {'q': 'Should I switch to fish for itching?',
+            'a': 'Fish can be a novel protein for some dogs and a fat source of omega-3s. It is '
+                 'not automatically hypoallergenic. Dogs already eating salmon treats are not on a '
+                 'novel fish diet.'},
+           {'q': 'Can probiotics cure itchy skin?',
+            'a': 'Some dogs with gut-skin overlap improve on a quality probiotic as an adjunct. '
+                 'Probiotics are not a diagnosis or a steroid replacement. See our probiotics '
+                 'guide and ask your veterinarian.'}],
+  'publishedAt': '2026-02-11T08:00:00.000Z'},
+ {'slug': 'pumpkin-for-dogs-benefits',
+  'title': 'Pumpkin for Dogs Benefits: Fiber, Diarrhea, and How Much Is Too Much',
+  'description': 'Pumpkin for dogs benefits: how plain canned pumpkin helps stool, how to dose it, '
+                 'what to avoid in pies, and when diarrhea needs a veterinarian today.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['pumpkin for dogs benefits',
+           'pumpkin for dog diarrhea',
+           'canned pumpkin dogs',
+           'pumpkin fiber dogs',
+           'how much pumpkin for dogs'],
+  'img': 'kibble-bowl',
+  'alt': 'Plain canned pumpkin measured into a spoon beside dog kibble for a stool-support portion',
+  'intro': 'Plain pumpkin is a useful fiber tool, not a personality-changing superfood. The right '
+           'amount can firm loose stool or add gentle bulk for some constipated dogs. The wrong '
+           'can — pie filling, huge scoops, or pumpkin instead of a vet visit — makes a mess. Here '
+           'is how Petshiwü recommends using pumpkin as a measured add-in.',
+  'shopPath': '/dog',
+  'shop': 'Find plain pumpkin, digestive supplements, and complete dog foods at Petshiwü. Free '
+          'shipping over $49, no autoship. NYC delivery now; nationwide shipping soon.',
+  'related': ['best-probiotics-for-dogs',
+              'best-dog-food-for-weight-loss',
+              'how-much-to-feed-a-dog'],
+  'sections': [{'h': 'Plain canned pumpkin, not dessert',
+                'p': ['Buy 100% pumpkin. Pie filling has sugar and spices that do not belong in a '
+                      'GI plan. Fresh cooked pumpkin is fine if it is plain and mashed. Skip '
+                      'nutmeg. The fiber is mostly soluble, which can soak water in the colon and '
+                      'change stool form. That is mechanics, not a diagnosis of “sensitive '
+                      'stomach.”',
+                      'If diarrhea lasts more than a day in a puppy, or if any dog has blood, '
+                      'black stool, vomiting, or lethargy, skip the pantry and call the '
+                      'veterinarian. Pumpkin does not treat parvovirus, a foreign body, or '
+                      'Addison’s disease.']},
+               {'h': 'Starting amounts that will not turn dinner orange',
+                'p': ['A common starting range is about a teaspoon for toy dogs and up to a '
+                      'tablespoon or two for large dogs, mixed into food, once or twice a day. '
+                      'That is a starting conversation with your veterinarian, not a prescription. '
+                      'Too much fiber causes gas and more diarrhea. Count the calories if the dog '
+                      'is on a weight plan — pumpkin is not zero.'],
+                'ul': ['Introduce over two days; do not dump half a can on night one.',
+                       'Use the same meal time so you can judge stool the next morning.',
+                       'If you use a food topper already, do not stack three fibers at once.',
+                       'Store leftover canned pumpkin in the fridge and discard it on a human-food '
+                       'leftover schedule.']},
+               {'h': 'Constipation is a different problem',
+                'p': ['People online use pumpkin for both diarrhea and constipation because fiber '
+                      'can go either way depending on water intake. A dog that is straining, '
+                      'crying, or has not passed stool should be examined. Senior dogs with sudden '
+                      'constipation may have pain, a mass, or a neurologic issue. Hydration '
+                      'matters as much as fiber.']},
+               {'h': 'Pumpkin versus a real GI diet',
+                'p': ['Chronic soft stool needs a plan: parasite check, diet trial, maybe a '
+                      'veterinary GI food. Pumpkin can sit beside <a '
+                      'href="/learning/best-probiotics-for-dogs">probiotics</a> as support. It '
+                      'does not replace those steps. If you are also changing protein, change one '
+                      'variable at a time.']},
+               {'h': 'Shopping without the latte-spice aisle',
+                'p': ['Look for canned pumpkin with one ingredient. Some pet toppers are pumpkin '
+                      'plus extras — read them. Browse fiber helpers and complete foods in <a '
+                      'href="/dog">our dog collection</a>. We will not sell you a “clinical '
+                      'pumpkin protocol” with a fake study attached.']}],
+  'faqs': [{'q': 'Can dogs eat pumpkin every day?',
+            'a': 'Many dogs can eat a small daily amount of plain pumpkin if calories fit and '
+                 'stool stays normal. Ask your veterinarian if your dog has diabetes, a history of '
+                 'pancreatitis, or is on a prescription GI diet.'},
+           {'q': 'Is pumpkin better than rice for diarrhea?',
+            'a': 'They do different jobs. Bland rice mixes are sometimes used short term under '
+                 'veterinary guidance. Pumpkin adds fiber. Neither is a workup for serious '
+                 'diarrhea.'},
+           {'q': 'Can I use pumpkin seeds instead?',
+            'a': 'Plain cooked pumpkin flesh is the usual stool tool. Seeds are fatty and can be a '
+                 'choking risk. Do not use them as a dewormer.'}],
+  'publishedAt': '2026-02-13T09:00:00.000Z'},
+ {'slug': 'best-probiotics-for-dogs',
+  'title': 'Best Probiotics for Dogs: Strains, CFU Claims, and When to Skip the Powder',
+  'description': 'Best probiotics for dogs: how to read CFU labels, when a probiotic helps stool, '
+                 'and when diarrhea needs a veterinarian instead of another powder.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['best probiotics for dogs',
+           'dog probiotic strains',
+           'CFU dog supplement',
+           'probiotics for dog diarrhea',
+           'gut health dogs'],
+  'img': 'supplements',
+  'alt': 'Dog probiotic capsules and a labeled CFU bottle beside a food bowl for a gut-support '
+         'explainer',
+  'intro': 'A probiotic is a live microbe product, not a personality reset. Some dogs have firmer '
+           'stool after a course; others need a fecal test, a diet change, or medication. This '
+           'Petshiwü guide covers how to read CFU claims, how to store live cultures, and the '
+           'situations where powder is a delay, not a plan.',
+  'shopPath': '/dog',
+  'shop': 'Shop dog probiotics and digestive-care items at Petshiwü. Free shipping over $49, no '
+          'autoship. NYC delivery is available now; nationwide shipping opens soon.',
+  'related': ['pumpkin-for-dogs-benefits', 'best-dog-food-for-itchy-skin', 'bone-broth-for-dogs'],
+  'sections': [{'h': 'CFU numbers are not a scoreboard',
+                'p': ['Colony-forming units estimate live organisms at manufacture — and sometimes '
+                      'at expiration if the brand tests that way. A huge number with no strain '
+                      'names is weaker evidence than a modest number with Enterococcus faecium or '
+                      'a researched Bacillus coagulans listed. Look for a guaranteed analysis and '
+                      'a lot number you can photograph.',
+                      'Species matter. A yogurt cup is not a canine probiotic dose, and many human '
+                      'blends include xylitol-sweetened delivery systems you must never use. If '
+                      'the chew smells like candy, read the full ingredient list twice.'],
+                'ul': ['Match the product to the problem your veterinarian named: acute stress '
+                       'stool, antibiotic recovery, or chronic GI disease.',
+                       'Store as labeled — some need the fridge; heat-killed “postbiotics” are a '
+                       'different category.',
+                       'Give the course time (often 5–14 days) unless the dog worsens.',
+                       'Stop and call the clinic if you see bloody stool, repeated vomiting, or a '
+                       'painful belly.']},
+               {'h': 'When a probiotic is a reasonable add-on',
+                'p': ['Short-term loose stool after boarding, a new food transition, or a round of '
+                      'antibiotics is the usual use case. Pair it with a bland, complete feeding '
+                      'plan your veterinarian approves. Pumpkin can sit beside it — see <a '
+                      'href="/learning/pumpkin-for-dogs-benefits">pumpkin for dogs</a> — but do '
+                      'not stack five GI products on day one.']},
+               {'h': 'When the powder is the wrong first move',
+                'p': ['Puppies with diarrhea, dogs that ate a sock, and dogs that are dull or '
+                      'febrile need diagnostics. Chronic itching plus soft stool may be food or '
+                      'parasites, not a missing capsule. A probiotic will not treat giardia. If '
+                      'you have been rotating powders for a month, book the appointment and bring '
+                      'stool photos.']},
+               {'h': 'Foods that already include probiotics',
+                'p': ['Some kibbles add a dried fermentation product. That can be a bonus, not a '
+                      'therapeutic dose. If you need a measured course, use a supplement with a '
+                      'stated CFU and keep the food consistent. Browse options in <a '
+                      'href="/dog">our dog aisle</a> after you know whether you are shopping a '
+                      'complete food or a short course.']},
+               {'h': 'Quality habits Petshiwü shoppers should keep',
+                'p': ['Buy from a seller that stores inventory indoors, not a dashboard. Check the '
+                      'expiration date. If the brand publishes a Certificate of Analysis, even '
+                      'better. We will not invent a ranking study that crowns one strain king of '
+                      'all guts.']}],
+  'faqs': [{'q': 'Can I give my dog human probiotics?',
+            'a': 'Only if a veterinarian confirms the product is xylitol-free and appropriate. '
+                 'Most human gummies and drinks are a bad idea. Canine products list strains and '
+                 'storage more clearly for pets.'},
+           {'q': 'How long should a dog stay on probiotics?',
+            'a': 'Many healthy dogs use them short term around a stressor. Chronic GI disease '
+                 'needs a veterinary plan. Do not treat a daily capsule as a diagnosis.'},
+           {'q': 'Do probiotics help itchy skin?',
+            'a': 'Sometimes as an adjunct when the gut and skin are both involved. They are not a '
+                 'flea treatment or an allergy cure. See our itchy-skin guide and ask your '
+                 'veterinarian.'}],
+  'publishedAt': '2026-02-16T10:00:00.000Z'},
+ {'slug': 'human-grade-dog-food-worth-it',
+  'title': 'Is Human-Grade Dog Food Worth It? Facilities, Cost, and Completeness',
+  'description': 'Is human-grade dog food worth it? What the term means in USDA facilities, what '
+                 'it does not guarantee, and how to compare cost per calorie in 2026.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['human grade dog food worth it',
+           'human grade vs feed grade',
+           'USDA dog food',
+           'human grade dog meals',
+           'dog food facility standards'],
+  'img': 'fresh-dog-food',
+  'alt': 'Human-grade fresh dog meals packed in a clean kitchen-style tray with a calorie label '
+         'visible',
+  'intro': 'Human-grade sounds like a moral upgrade. Legally, it is mostly about ingredient '
+           'sourcing and the human-food facility rules used to make the product — not a promise '
+           'that the amino-acid math is better than a well-made kibble. This Petshiwü article '
+           'translates the term so you can decide if the extra cost buys safety and palatability, '
+           'or just nicer photos.',
+  'shopPath': '/dog',
+  'shop': 'Compare complete dog meals at Petshiwü without an autoship lock-in. Free shipping over '
+          '$49. NYC delivery now; nationwide shipping soon.',
+  'related': ['best-fresh-dog-food-2026',
+              'farmers-dog-vs-ollie-vs-nom-nom-2026',
+              'homemade-dog-food-safety'],
+  'sections': [{'h': 'What human-grade actually refers to',
+                'p': ['In U.S. marketing, human-grade typically means every ingredient and the '
+                      'finished product are stored, handled, and processed in ways that would be '
+                      'acceptable for human food, often in USDA-inspected plants. Feed-grade '
+                      'ingredients can still be nutritious. They are produced under a different '
+                      'regulatory path. Neither word replaces an AAFCO completeness statement.',
+                      'A human-grade stew that is labeled complementary is still an incomplete '
+                      'diet. A feed-grade kibble with feeding trials can be a complete daily food. '
+                      'Pay for the facility story only after the label works.']},
+               {'h': 'Cost per calorie, not cost per pretty pouch',
+                'p': ['Convert the package price to kcal. Fresh human-grade meals often cost '
+                      'several times a mid-tier kibble per 1,000 kcal. That can be worth it if '
+                      'your dog finally eats, if you need tight portions, or if you value the '
+                      'supply chain. It is a poor trade if you will stretch meals with leftover '
+                      'pasta and unbalance the recipe.'],
+                'ul': ['Ask for kcal per ounce in writing.',
+                       'Include freezer space and leftover waste in the true cost.',
+                       'If you mix with kibble, calculate both halves.',
+                       'Do not assume human-grade means lower fat — read the analysis.']},
+               {'h': 'Safety is still a kitchen job',
+                'p': ['Human-grade cooked food still spoils. Follow the use-by window. Raw '
+                      'human-grade meat for dogs still carries pathogen risk for the household. '
+                      'See <a href="/learning/best-raw-dog-food-for-beginners">raw beginner '
+                      'safety</a> and <a href="/learning/homemade-dog-food-safety">homemade '
+                      'safety</a>.']},
+               {'h': 'When the upgrade is reasonable',
+                'p': ['Picky dogs, dogs that need moisture, and owners who will actually follow '
+                      'the feeding guide are the usual wins. Dogs on prescription renal or '
+                      'hydrolyzed diets should not be “upgraded” off those plans because a brand '
+                      'said human-grade. Ask the prescribing veterinarian first.']},
+               {'h': 'How Petshiwü would shop it',
+                'p': ['Compare two complete foods side by side: statement, calories, protein '
+                      'quality, and whether you can buy it consistently. Browse cooked and kibble '
+                      'options in <a href="/dog">the dog aisle</a>. We will not invent a lab '
+                      'ranking that says human-grade always wins.']}],
+  'faqs': [{'q': 'Is human-grade dog food safer than kibble?',
+            'a': 'It can mean tighter facility controls. It does not automatically mean fewer '
+                 'recalls or a better nutrient profile. Handling and completeness still decide '
+                 'safety.'},
+           {'q': 'Does human-grade mean I can share my dinner?',
+            'a': 'No. Onions, garlic, xylitol, and fatty trimmings still do not belong in the '
+                 'bowl. Human-grade pet food is formulated as pet food, not leftover night.'},
+           {'q': 'Is it worth it for a healthy easy keeper?',
+            'a': 'Often not, if a complete kibble keeps a lean body and good stool. Spend the '
+                 'difference on dental care, parasite prevention, or a vet visit instead.'}],
+  'publishedAt': '2026-02-18T11:00:00.000Z'},
+ {'slug': 'insect-protein-dog-food-2026',
+  'title': 'Insect Protein Dog Food 2026: Black Soldier Fly, Allergies, and Labels',
+  'description': 'Insect protein dog food 2026: how black soldier fly meal is used, who it may '
+                 'help, sustainability claims, and what to check before you switch the bowl.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['insect protein dog food 2026',
+           'black soldier fly dog food',
+           'sustainable dog food',
+           'novel protein insects',
+           'BSF meal dogs'],
+  'img': 'kibble-bowl',
+  'alt': 'Kibble made with insect protein in a bowl next to a black soldier fly meal ingredient '
+         'label for 2026 shoppers',
+  'intro': 'Insect protein moved from a novelty to a real shelf in 2026. Black soldier fly larvae '
+           'meal can be a complete-food protein when a company formulates it that way. It is not '
+           'automatically hypoallergenic, cheap, or “the planet in a bag.” Here is how Petshiwü '
+           'shoppers should read those labels.',
+  'shopPath': '/dog',
+  'shop': 'Explore novel-protein and everyday dog foods at Petshiwü. Free shipping over $49, no '
+          'autoship. NYC delivery now; nationwide shipping soon.',
+  'related': ['best-limited-ingredient-dog-food',
+              'best-high-protein-dog-food',
+              'is-grain-free-dog-food-safe-2026'],
+  'sections': [{'h': 'Why brands are using black soldier fly meal',
+                'p': ['Black soldier fly larvae convert waste streams into a protein-and-fat meal '
+                      'with a different amino-acid pattern than chicken. That novelty is useful '
+                      'for some elimination-diet conversations when the dog has never eaten '
+                      'insects. It is still an animal protein, not a vegetable. Completeness '
+                      'depends on the rest of the recipe, including calcium from the larvae’s '
+                      'natural mineral content or an added premix.',
+                      'Sustainability claims vary. Look for a company that publishes sourcing and '
+                      'a feeding guide, not just a leaf icon. We will not invent a carbon number '
+                      'we cannot show.']},
+               {'h': 'Allergy hopes versus allergy reality',
+                'p': ['A dog that itches on chicken may do better on a true novel protein. Insect '
+                      'meal is only novel if the dog has not already eaten insect-based treats. '
+                      'Cross-reactivity is possible. Run a proper trial — see <a '
+                      'href="/learning/best-limited-ingredient-dog-food">limited ingredient '
+                      'trials</a> — and involve your veterinarian if the skin disease is serious.'],
+                'ul': ['Confirm the AAFCO statement for your dog’s life stage.',
+                       'Check fat level if pancreatitis is in the history.',
+                       'Transition slowly; insect kibbles can smell different and cause a one-week '
+                       'stool change.',
+                       'Keep other proteins out of the trial window.']},
+               {'h': 'Palatability and the “bug” conversation',
+                'p': ['Many dogs eat insect kibble without drama because it is processed and '
+                      'aromatic. People hesitate more than dogs. If the household cannot stand the '
+                      'idea, do not buy a 24-pound bag to make a point. A novel poultry-free LID '
+                      'may be an easier compliance win.']},
+               {'h': 'Puppies, seniors, and medical diets',
+                'p': ['Use insect food for a growing puppy only if that exact product is approved '
+                      'for growth. Do not replace a prescription hydrolyzed diet with an insect '
+                      'bag because a blog called it hypoallergenic. Seniors with kidney disease '
+                      'need veterinary diet advice, not a sustainability lecture.']},
+               {'h': 'Shopping the 2026 insect aisle',
+                'p': ['Compare protein quality, kcal, and whether insect meal is the first '
+                      'ingredient or a sprinkle. Browse novel proteins in <a href="/dog">our dog '
+                      'collection</a> and keep a backup complete food if your dog refuses the '
+                      'first bowl.']}],
+  'faqs': [{'q': 'Is insect protein safe for dogs in 2026?',
+            'a': 'Commercially complete insect-protein foods from reputable makers can be safe for '
+                 'healthy dogs. Ask your veterinarian if your dog has allergies, organ disease, or '
+                 'is growing.'},
+           {'q': 'Will insect food fix environmental allergies?',
+            'a': 'No. It may help if the dog has a food trigger and insect is truly novel. Pollen '
+                 'and fleas still need their own plans.'},
+           {'q': 'Does insect kibble smell like a bait shop?',
+            'a': 'Quality products are usually mild once in the bowl. If a bag smells rancid or '
+                 'sour, do not feed it — contact the seller and keep the lot code.'}],
+  'publishedAt': '2026-02-20T12:00:00.000Z'},
+ {'slug': 'best-wet-dog-food-2026',
+  'title': 'Best Wet Dog Food 2026: Pâté vs Stew, Moisture, and Complete Cans',
+  'description': 'Best wet dog food 2026: how to read complete-and-balanced cans, pâté versus '
+                 'stew, dental myths, and when wet food helps picky or senior dogs.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['best wet dog food 2026',
+           'canned dog food complete',
+           'pate vs stew dogs',
+           'wet food for picky dogs',
+           'dog food moisture'],
+  'img': 'kibble-bowl',
+  'alt': 'Open can of complete wet dog food pâté next to a stew-style can for a 2026 texture '
+         'comparison',
+  'intro': 'Wet dog food is the moisture play: useful for seniors, picky eaters, and dogs that '
+           'drink poorly. It is also easy to overfeed because a can looks like “just one meal” '
+           'while hiding a lot of fat. This 2026 Petshiwü guide shows how to tell a complete can '
+           'from a garnish, and how to mix wet with kibble without guessing.',
+  'shopPath': '/dog',
+  'shop': 'Shop complete wet and mixed-feeding dog foods at Petshiwü. Free shipping over $49, no '
+          'autoship. NYC delivery available now; nationwide shipping opens soon.',
+  'related': ['best-dog-food-for-picky-eaters',
+              'best-senior-dog-food-2026',
+              'how-much-to-feed-a-dog'],
+  'sections': [{'h': 'Complete can versus complementary stew',
+                'p': ['The AAFCO statement is the first line. “Complete and balanced” for a life '
+                      'stage means it can be the whole bowl. “Intended for intermittent or '
+                      'supplemental feeding” means it is a topper. Gravy-forward stews are often '
+                      'the complementary ones. If you feed those as dinner, you are running a '
+                      'homemade-style deficiency in slow motion.',
+                      'Named meats should lead. A broth that lists water, liver, and a vitamin '
+                      'pack can still be complete — liver is a nutrient-dense ingredient when the '
+                      'formulator did the math. A can that leads with sugar or unnamed by-products '
+                      'and no statement is a pass.']},
+               {'h': 'Pâté, chunks, and the dental myth',
+                'p': ['Pâté is easier for dogs with few teeth. Chunks-in-gravy can be more '
+                      'aromatic for picky dogs and messier on the white rug. Wet food does not '
+                      'clean teeth. If anything, sticky pâtés can cling. Keep <a '
+                      'href="/learning/how-to-brush-dog-teeth">brushing</a> on the calendar.'],
+                'ul': ['Compare kcal per can, not can size — 13 oz cans vary wildly in energy.',
+                       'Refrigerate leftovers and discard within the label window, usually 2–3 '
+                       'days.',
+                       'Warm a spoonful to boost aroma; do not microwave metal or create hot '
+                       'spots.',
+                       'If you mix with kibble, weigh both. See <a '
+                       'href="/learning/how-much-to-feed-a-dog">feeding math</a>.']},
+               {'h': 'Who benefits most from a wet plan',
+                'p': ['Seniors that quit crunching, dogs recovering from dental extractions, and '
+                      'picky eaters often do better with wet food. Dogs prone to tartar still need '
+                      'dental care. Dogs with a history of pancreatitis need a veterinarian to '
+                      'approve the fat level before you pick the richest stew on the shelf.']},
+               {'h': 'Sodium, phosphorus, and medical cans',
+                'p': ['Some therapeutic wet foods restrict minerals. Do not put a healthy dog on a '
+                      'renal can because a neighbor’s dog is on one. Do not take a kidney patient '
+                      'off a prescription wet food for a “natural” grocery pâté. Ask the clinic.']},
+               {'h': 'Shopping wet food without the endcap theater',
+                'p': ['Buy a case of one complete recipe for a two-week trial. If the dog refuses, '
+                      'you have not opened twelve flavors. Browse wet foods in <a href="/dog">the '
+                      'dog aisle</a> and keep lot codes for <a '
+                      'href="/learning/how-to-check-dog-food-recalls">recall checks</a>.']}],
+  'faqs': [{'q': 'Is wet dog food better than kibble in 2026?',
+            'a': 'It is wetter and often more aromatic. It is not automatically more complete. '
+                 'Many dogs thrive on kibble, wet, or a calorie-counted mix.'},
+           {'q': 'Can wet food cause diarrhea?',
+            'a': 'A sudden rich switch can. Transition slowly. Persistent diarrhea needs a '
+                 'veterinarian, not a third flavor.'},
+           {'q': 'Does canned food go bad after opening?',
+            'a': 'Yes. Refrigerate it, cover it, and follow the brand’s leftover window. When in '
+                 'doubt, throw it out.'}],
+  'publishedAt': '2026-02-23T13:00:00.000Z'},
+ {'slug': 'how-much-to-feed-a-dog',
+  'title': 'How Much to Feed a Dog: Calories, Body Condition, and the Lying Cup',
+  'description': 'How much to feed a dog: use kcal and a 1–9 body-condition score, not the bag’s '
+                 'wide range. Treat math, puppy vs adult, and when to call your veterinarian.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['how much to feed a dog',
+           'dog calorie calculator',
+           'body condition score dogs',
+           'dog feeding chart',
+           'how many cups to feed a dog'],
+  'img': 'kibble-bowl',
+  'alt': 'Kitchen scale weighing dog kibble next to a body-condition score chart for portion '
+         'planning',
+  'intro': 'Bag charts are starting guesses for an average dog that does not exist in your house. '
+           'The honest method is calories in, body-condition score out, and a scale that does not '
+           'lie. This Petshiwü walkthrough shows how to find kcal, adjust for treats, and know '
+           'when weight change is a medical issue rather than a scoop issue.',
+  'shopPath': '/dog',
+  'shop': 'Shop measured dog foods, slow feeders, and kitchen-safe scoops at Petshiwü. Free '
+          'shipping over $49, no autoship. NYC delivery now; nationwide shipping soon.',
+  'related': ['best-dog-food-for-weight-loss',
+              'how-to-help-an-overweight-dog',
+              'puppy-vs-adult-dog-food'],
+  'sections': [{'h': 'Find kcal, then ignore the cup for a week',
+                'p': ['Look for kcal per cup or per can on the label. Weigh a “cup” of your actual '
+                      'kibble once; piece size changes the gram weight. Multiply grams by kcal per '
+                      'gram if the brand lists energy that way. Write the daily target on a note '
+                      'on the bin.',
+                      'Resting needs vary with age, intact status, and whether the dog is a couch '
+                      'statue or a sport partner. Online calculators are estimates. Your '
+                      'veterinarian can set a target after a hands-on body-condition score on the '
+                      '1–9 scale.'],
+                'ul': ['Ribs should be easy to feel under a thin fat cover for most pets.',
+                       'A waist should be visible from above on short-coated dogs.',
+                       'Treats, chews, and training bits count — keep them near 10% of calories.',
+                       'Re-weigh every two weeks and change the daily total by about 5–10% if the '
+                       'trend is wrong.']},
+               {'h': 'Puppies, seniors, and intact dogs are not the same math',
+                'p': ['Growing puppies eat more frequently and need growth-approved food — see <a '
+                      'href="/learning/best-puppy-food-2026">puppy food 2026</a>. Seniors may need '
+                      'fewer calories or more protein per calorie. Intact dogs and winter outdoor '
+                      'workers often need more energy. Neutered indoor adults often need less than '
+                      'the bag’s midpoint.']},
+               {'h': 'When “he’s hungry” is not a feeding error',
+                'p': ['Sudden ravenous appetite plus weight loss, or extra thirst, needs lab work. '
+                      'A dog that gulps and begs may be bored — a <a '
+                      'href="/learning/slow-feeder-bowl-benefits">slow feeder</a> and a walk can '
+                      'help. Do not keep adding cups because the eyes are convincing.']},
+               {'h': 'Mixed feeding without double dinner',
+                'p': ['If you add wet, fresh, or oil, subtract those kcal from the kibble. A '
+                      '“splash” of wet food can be 80–150 kcal. See <a '
+                      'href="/learning/best-wet-dog-food-2026">wet food 2026</a> for can math.']},
+               {'h': 'Tools that make portions boring in a good way',
+                'p': ['A $15 kitchen scale beats a decorative scoop. Automatic feeders help '
+                      'schedules but still need the right grams in the hopper — see <a '
+                      'href="/learning/best-automatic-dog-feeder">automatic feeders</a>. Shop '
+                      'complete foods in <a href="/dog">the dog aisle</a>.']}],
+  'faqs': [{'q': 'How many cups should a 50-pound dog eat?',
+            'a': 'There is no universal cup count. A 50-pound dog might need 800–1,200+ kcal '
+                 'depending on food energy density and lifestyle. Use the label’s kcal and your '
+                 'veterinarian’s body-condition target.'},
+           {'q': 'Should I feed once or twice a day?',
+            'a': 'Most adult dogs do well on two meals. Deep-chested breeds are often fed smaller, '
+                 'more frequent meals if your veterinarian is concerned about bloat-risk habits. '
+                 'Puppies need more frequent meals.'},
+           {'q': 'Why did my dog gain weight on the bag’s amount?',
+            'a': 'Bag ranges assume an average metabolism and ignore treats. Many pets need the '
+                 'low end or below. Measure treats and re-score the body every two weeks.'}],
+  'publishedAt': '2026-02-25T14:00:00.000Z'},
+ {'slug': 'how-to-check-dog-food-recalls',
+  'title': 'How to Check Dog Food Recalls: FDA, Lot Codes, and What to Do Tonight',
+  'description': 'How to check dog food recalls: FDA pages, lot codes on bags, brand alerts, and '
+                 'the exact steps to take if your dog already ate a recalled lot.',
+  'petType': 'dog',
+  'category': 'Care',
+  'tags': ['how to check dog food recalls',
+           'FDA dog food recall',
+           'dog food lot code',
+           'recalled dog food what to do',
+           'pet food recall list'],
+  'img': 'kibble-bowl',
+  'alt': 'Dog food bag turned to show a lot code and best-by date for a recall-check walkthrough',
+  'intro': 'Recalls are how the system admits a batch went wrong. They are not proof that a brand '
+           'is evil, and the absence of a headline is not proof a bag is perfect. Checking recalls '
+           'is a five-minute habit: lot code, FDA list, brand site. This Petshiwü guide is the '
+           'checklist, not a panic siren.',
+  'shopPath': '/dog',
+  'shop': 'Petshiwü is a nationwide online pet store. If a product you bought is recalled, keep '
+          'the bag and contact us plus your veterinarian. Free shipping over $49, no autoship. NYC '
+          'delivery now; nationwide shipping soon.',
+  'related': ['homemade-dog-food-safety', 'best-fresh-dog-food-2026', 'how-much-to-feed-a-dog'],
+  'sections': [{'h': 'Where official information lives',
+                'p': ['Start with the FDA’s animal-food recall and withdrawal pages. Brand sites '
+                      'and retailer notices should match those lot ranges. Social screenshots '
+                      'without a lot code are rumors. If a friend forwards a blurry list from '
+                      '2019, check the date before you throw out a current bag.',
+                      'Save a photo of the bag’s lot code, best-by date, and UPC the day you open '
+                      'it. That photo is what you will need at 10 p.m. when a notice drops.']},
+               {'h': 'What a lot code looks like',
+                'p': ['Lot or batch codes are usually ink-jetted on the back or bottom seal. They '
+                      'are not the same as the UPC. Some brands also print a plant code. If you '
+                      'cannot find it, photograph the entire back panel and ask the manufacturer’s '
+                      'customer line the next morning.'],
+                'ul': ['Write the code on a tape strip on the food bin when you decant kibble.',
+                       'Keep the empty bag until the bin is finished.',
+                       'Check treats and toppers too — recalls are not only kibble.',
+                       'If you buy fresh food, keep the pack sleeve until the box is eaten.']},
+               {'h': 'If the lot matches a recall',
+                'p': ['Stop feeding that lot. Bag it, keep the receipt, and follow the brand’s '
+                      'return or disposal instructions. Call your veterinarian if your dog has '
+                      'vomiting, diarrhea, refusal to eat, or neurologic signs — especially after '
+                      'a Salmonella or aflatoxin-type notice. Do not induce vomiting unless a '
+                      'veterinarian tells you to.']},
+               {'h': 'How to think about brand risk without superstition',
+                'p': ['One recall handled transparently can be better than a quiet company. '
+                      'Repeated pathogen problems are a different story. Feed-grade and '
+                      'human-grade brands have both issued recalls. Completeness and handling '
+                      'still matter more than a slogan. See <a '
+                      'href="/learning/human-grade-dog-food-worth-it">human-grade explained</a>.']},
+               {'h': 'Everyday prevention that is not a recall search',
+                'p': ['Store food sealed and dry. Do not feed food that smells rancid, looks '
+                      'moldy, or arrived with a torn bag. Report problems to the FDA and the '
+                      'brand. Shop replacements in <a href="/dog">our dog aisle</a> only after you '
+                      'know which SKU is safe.']}],
+  'faqs': [{'q': 'How often should I check for dog food recalls?',
+            'a': 'Check when you open a new bag and whenever a headline mentions your brand. A '
+                 'monthly FDA glance is plenty for most households.'},
+           {'q': 'What if I already threw the bag away?',
+            'a': 'You may still have a receipt, order email, or photo. Contact the retailer and '
+                 'brand with the product name and purchase date. Watch your dog and call the vet '
+                 'if signs appear.'},
+           {'q': 'Are homemade diets safer from recalls?',
+            'a': 'They avoid commercial lots and introduce recipe and pathogen risks of their own. '
+                 'See our homemade safety guide. There is no zero-risk bowl.'}],
+  'publishedAt': '2026-02-28T08:00:00.000Z'},
+ {'slug': 'best-dental-dog-food-and-chews',
+  'title': 'Best Dental Dog Food and Chews: VOHC Seals Versus Pretty Breath Mints',
+  'description': 'Best dental dog food and chews: what the VOHC seal means, how kibble texture '
+                 'helps, chew safety by size, and why brushing still wins at home.',
+  'petType': 'dog',
+  'category': 'Health',
+  'tags': ['best dental dog food',
+           'VOHC dog chews',
+           'dental sticks for dogs',
+           'dog tartar food',
+           'dog dental treats'],
+  'img': 'dog-dental',
+  'alt': 'VOHC-style dental chew next to a toothbrush and kibble, showing a layered dog dental '
+         'plan',
+  'intro': 'Dental foods and chews can reduce plaque when they are designed and tested for that '
+           'job. They cannot scrape under the gumline the way a veterinary cleaning can. This '
+           'Petshiwü guide explains the VOHC idea, how to size a chew so it is work and not a '
+           'swallow, and why “freshens breath” is not a medical claim you should trust alone.',
+  'shopPath': '/dog',
+  'shop': 'Shop VOHC-minded dental chews, toothbrushes, and complete foods at Petshiwü. Free '
+          'shipping over $49, no autoship. NYC delivery now; nationwide shipping soon.',
+  'related': ['how-to-brush-dog-teeth', 'best-dog-treats-2026', 'best-small-breed-dog-food'],
+  'sections': [{'h': 'Look for the seal, not the mint illustration',
+                'p': ['The Veterinary Oral Health Council accepts products that meet specific '
+                      'plaque or tartar reduction criteria. A seal is not a lifetime guarantee, '
+                      'and not every useful product has applied. It is still a better filter than '
+                      '“dentist recommended” in decorative font.',
+                      'Dental kibble is often larger or has a texture meant to scrape as the dog '
+                      'bites. It only works if the dog actually chews. Gulpers need a slow feeder '
+                      'and a different plan — see <a '
+                      'href="/learning/how-to-brush-dog-teeth">brushing</a>.']},
+               {'h': 'Chew safety is a size-and-supervision rule',
+                'p': ['Pick a chew longer than the muzzle and tough enough to last minutes, not '
+                      'one gulp. Skip cooked bones, super-hard antlers for power chewers if your '
+                      'veterinarian has flagged tooth fractures, and any chew that becomes a sharp '
+                      'shard. Watch the first session.'],
+                'ul': ['Match chew calories to the day’s food — dental sticks are still treats.',
+                       'Toy breeds need tiny, appropriate products; giant breeds need length.',
+                       'Dogs with missing teeth may do better with a water additive your vet likes '
+                       'plus brushing.',
+                       'If gums bleed easily, stop the chew and book a dental exam.']},
+               {'h': 'Breath is a clue, not a cologne problem',
+                'p': ['Sudden rotten breath, drooling, or a swelling under the eye can be a tooth '
+                      'root abscess. No chew treats that. Senior dogs that drop kibble may be in '
+                      'pain. See <a href="/learning/best-senior-dog-food-2026">senior food '
+                      'textures</a> while you schedule dentistry.']},
+               {'h': 'How dental food fits a whole-home plan',
+                'p': ['Daily brushing remains the gold standard at home. Chews and dental diets '
+                      'are the Tuesday-Thursday helpers. Water additives vary; ask your '
+                      'veterinarian which ones are worth the bottle. Professional cleanings under '
+                      'anesthesia are still how we treat established periodontal disease.']},
+               {'h': 'Shopping without the endcap mint aisle',
+                'p': ['Choose one VOHC chew or a complete dental diet, not five overlapping '
+                      'products. Browse dental care in <a href="/dog">the dog aisle</a> and <a '
+                      'href="/products">products</a>. Keep the receipt if a chew causes GI '
+                      'upset.']}],
+  'faqs': [{'q': 'Do Greenies-style chews replace brushing?',
+            'a': 'They can help reduce plaque if sized and used as directed. They do not replace '
+                 'daily brushing or veterinary dental care.'},
+           {'q': 'Is hard kibble enough to clean teeth?',
+            'a': 'Ordinary kibble is a mild mechanical help at best. Many dogs still develop '
+                 'tartar. Dental-specific kibble is more targeted but still not a cleaning.'},
+           {'q': 'Can dental chews break teeth?',
+            'a': 'Very hard objects can. Choose chews that give slightly and supervise. Ask your '
+                 'veterinarian if your dog is a fracture-risk chewer.'}],
+  'publishedAt': '2026-03-02T09:00:00.000Z'},
+ {'slug': 'bone-broth-for-dogs',
+  'title': 'Bone Broth for Dogs: Hydration Topper Rules and Onion-Free Recipes',
+  'description': 'Bone broth for dogs: how to pick an onion-free broth, how much to pour, when it '
+                 'helps picky drinkers, and why broth is not a joint cure or a meal.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['bone broth for dogs',
+           'dog bone broth topper',
+           'homemade dog broth',
+           'low sodium broth dogs',
+           'bone broth hydration dogs'],
+  'img': 'fresh-dog-food',
+  'alt': 'Onion-free bone broth being poured as a measured topper over a bowl of dog food',
+  'intro': 'Bone broth is flavored water with a little protein and collagen, useful when you need '
+           'a dog to drink or to moisten kibble. It is not a stew that replaces dinner, and it is '
+           'not a proven arthritis drug. This Petshiwü article covers store broths, homemade '
+           'pitfalls, and the onion-garlic line you cannot cross.',
+  'shopPath': '/dog',
+  'shop': 'Find dog-safe broths and hydrating toppers at Petshiwü. Free shipping over $49, no '
+          'autoship. NYC delivery now; nationwide shipping soon.',
+  'related': ['best-probiotics-for-dogs',
+              'best-dog-food-for-picky-eaters',
+              'best-joint-supplements-for-dogs'],
+  'sections': [{'h': 'The only broth rule that is not negotiable',
+                'p': ['No onion, no garlic, no leek, no excessive salt, no xylitol. Human '
+                      'restaurant broth is a common poisoning path. Buy a pet broth with a short '
+                      'ingredient list or make a plain simmered bone broth you skim and cool. If '
+                      'you would not feed the seasoning mix to a toddler with a sodium limit, do '
+                      'not pour it on kibble.',
+                      'Fatty broths can trigger pancreatitis-prone dogs. Chill and lift the fat '
+                      'cap if your veterinarian wants a leaner topper. When in doubt, use warm '
+                      'water.']},
+               {'h': 'How much to use as a topper',
+                'p': ['Start with a tablespoon for small dogs and up to a quarter cup for large '
+                      'dogs, not a soup bowl. Count the calories if the brand lists them. Broth is '
+                      'a sauce, not a meal. Dogs with heart or kidney disease may need a '
+                      'low-sodium product your veterinarian approves — do not guess.'],
+                'ul': ['Offer broth in a separate cup if you are testing thirst.',
+                       'Discard uneaten wet kibble on a safe leftover schedule.',
+                       'Do not leave broth out to grow a bacterial film.',
+                       'If diarrhea starts, stop the new liquid and call the clinic if it '
+                       'persists.']},
+               {'h': 'Joints, skin, and the marketing glow',
+                'p': ['Collagen and gelatin sound like joint care. They are not a substitute for '
+                      'weight control, <a href="/learning/best-joint-supplements-for-dogs">joint '
+                      'supplements</a> your vet likes, or pain management. Enjoy broth as '
+                      'palatability and hydration. See <a '
+                      'href="/learning/glucosamine-for-dogs">glucosamine</a> for label math on '
+                      'actual joint products.']},
+               {'h': 'Picky eaters and post-illness appetite',
+                'p': ['Warm broth on bland complete food can help some dogs start eating after a '
+                      'mild GI night — if your veterinarian said home care is appropriate. A dog '
+                      'that will not eat for 24 hours, or a puppy that skips a meal and acts dull, '
+                      'needs the clinic, not a second broth flavor. See <a '
+                      'href="/learning/best-dog-food-for-picky-eaters">picky eaters</a>.']},
+               {'h': 'Shopping a carton that is actually for dogs',
+                'p': ['Read every line. “Natural flavors” can hide onion powder. Browse pet broths '
+                      'in <a href="/dog">the dog aisle</a>. Freeze leftovers in ice-cube trays for '
+                      'measured cubes.']}],
+  'faqs': [{'q': 'Can dogs drink bone broth every day?',
+            'a': 'Many healthy dogs can have a small daily splash if sodium and fat fit the '
+                 'medical history. Ask your veterinarian for dogs with heart, kidney, or '
+                 'pancreatitis issues.'},
+           {'q': 'Is store-bought human bone broth OK?',
+            'a': 'Only if the ingredient list is truly onion- and garlic-free and not heavily '
+                 'salted. Most grocery broths fail that test. Pet-formulated broths are the safer '
+                 'default.'},
+           {'q': 'Does bone broth replace water?',
+            'a': 'No. Keep fresh water available. Broth is a flavor helper. Extra thirst still '
+                 'deserves a veterinary conversation.'}],
+  'publishedAt': '2026-03-04T10:00:00.000Z'},
+ {'slug': 'homemade-dog-food-safety',
+  'title': 'Homemade Dog Food Safety: Why Turkey-and-Rice Is Not a Diet',
+  'description': 'Homemade dog food safety: calcium balance, toxic leftovers, safe cooking, and '
+                 'when a veterinary nutritionist — not a blog recipe — should write the menu.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['homemade dog food safety',
+           'balanced homemade dog diet',
+           'vet nutritionist dog food',
+           'calcium homemade dog food',
+           'toxic leftovers dogs'],
+  'img': 'fresh-dog-food',
+  'alt': 'Kitchen scale, cooked meat, and a calcium supplement weighed for a homemade dog-food '
+         'safety lesson',
+  'intro': 'Home cooking feels caring. Unbalanced home cooking is a slow deficiency. '
+           'Calcium-to-phosphorus errors show up in growing puppies as crooked bones and in adults '
+           'as quiet mineral problems. This Petshiwü safety brief is here to stop the '
+           'turkey-and-rice forever plan unless a veterinary nutritionist wrote the recipe.',
+  'shopPath': '/dog',
+  'shop': 'If homemade is not a fit, shop complete commercial dog foods at Petshiwü. Free shipping '
+          'over $49, no autoship. NYC delivery now; nationwide shipping soon.',
+  'related': ['best-fresh-dog-food-2026', 'foods-toxic-to-dogs', 'human-grade-dog-food-worth-it'],
+  'sections': [{'h': 'The nutrient holes people cannot see',
+                'p': ['Muscle meat is rich in phosphorus and poor in calcium. Without a proper '
+                      'calcium source and a complete vitamin-mineral mix designed for that recipe, '
+                      'the diet fails. Random bone meal from a garden shop is not a precision '
+                      'supplement. Online “add a multivitamin” advice is how dogs get too much '
+                      'vitamin D or not enough zinc.',
+                      'A board-certified veterinary nutritionist can formulate a recipe you can '
+                      'actually cook. Some tele-nutrition services exist. A screenshot from a '
+                      'stranger is not a formulation. If you want cooked food without the '
+                      'chemistry set, a complete commercial fresh diet is the safer shortcut — see '
+                      '<a href="/learning/best-fresh-dog-food-2026">fresh food 2026</a>.']},
+               {'h': 'Kitchen hazards beyond the math',
+                'p': ['Onions, garlic, grapes, xylitol, macadamia nuts, and raw yeast dough are '
+                      'not “a little flavor.” Read <a href="/learning/foods-toxic-to-dogs">foods '
+                      'toxic to dogs</a>. Raw homemade diets add pathogen risk for the household. '
+                      'Cooked bones splinter. Fat trimmings trigger pancreatitis in susceptible '
+                      'dogs.'],
+                'ul': ['Wash boards and knives after raw meat.',
+                       'Cool food quickly and refrigerate leftovers like human leftovers.',
+                       'Do not add extra liver every day — vitamin A accumulates.',
+                       'Weigh ingredients. “A handful” is not a gram.',
+                       'Keep a complete commercial backup if you travel or get sick.']},
+               {'h': 'Puppies and medical dogs are not DIY weeknights',
+                'p': ['Growth and disease diets have tighter targets. A homemade renal or allergy '
+                      'diet without a nutritionist is how trials fail and puppies limp. If your '
+                      'veterinarian prescribed a therapeutic food, do not “improve” it with a pot '
+                      'roast.']},
+               {'h': 'When homemade is reasonable',
+                'p': ['It is reasonable when you have a written recipe, a scale, a supplement '
+                      'list, and a plan to recheck weight and labs. It is also reasonable as a '
+                      'short bland diet if your veterinarian asked for one. It is not reasonable '
+                      'as a TikTok challenge.']},
+               {'h': 'Commercial complete food is still allowed to be the hero',
+                'p': ['There is no moral prize for cooking every night. Browse complete foods in '
+                      '<a href="/dog">the dog aisle</a>. If you cook, photograph the recipe and '
+                      'the supplement labels for your next appointment.']}],
+  'faqs': [{'q': 'Is homemade dog food healthier?',
+            'a': 'It can be, if a veterinary nutritionist balances it and you cook it as written. '
+                 'Most ad-hoc homemade bowls are less complete than a well-made commercial food.'},
+           {'q': 'Can I feed rice and boiled chicken long term?',
+            'a': 'Not as a sole diet. It is sometimes used short term under veterinary guidance '
+                 'for GI rest. Long term it lacks calcium and many micronutrients.'},
+           {'q': 'Do I need bone in homemade food?',
+            'a': 'You need a correct calcium source. Ground bone in a formulated recipe can work. '
+                 'Random cooked bones are a fracture and splinter risk.'}],
+  'publishedAt': '2026-03-07T11:00:00.000Z'},
+ {'slug': 'best-dog-food-for-picky-eaters',
+  'title': 'Best Dog Food for Picky Eaters: Aroma, Routine, and Medical Rule-Outs',
+  'description': 'Best dog food for picky eaters: when picky is pain or nausea, how to use toppers '
+                 'without creating a monster, and which textures usually win at dinner.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['best dog food for picky eaters',
+           'picky dog not eating',
+           'dog food toppers',
+           'picky eater kibble',
+           'dog appetite tips'],
+  'img': 'kibble-bowl',
+  'alt': 'Picky dog turning away from kibble while a measured wet topper sits ready on a scale',
+  'intro': 'Picky is a behavior until it is a toothache, nausea, or a learned strike. The worst '
+           'fix is a new flavor every night. The better fix is a medical check, one complete food, '
+           'and toppers that do not become the whole bowl. This Petshiwü guide is for households '
+           'tired of negotiating dinner.',
+  'shopPath': '/dog',
+  'shop': 'Shop aromatic complete foods and measured toppers at Petshiwü. Free shipping over $49, '
+          'no autoship. NYC delivery now; nationwide shipping soon.',
+  'related': ['best-wet-dog-food-2026', 'bone-broth-for-dogs', 'picky-cat-not-eating'],
+  'sections': [{'h': 'Rule out pain before you shop another brand',
+                'p': ['Dogs drop food when teeth hurt. They sniff and walk away when they feel '
+                      'nauseated. They stop eating when a foreign body is brewing. A puppy that '
+                      'skips meals, a senior that suddenly turns picky, or any dog that is dull, '
+                      'vomiting, or losing weight needs a veterinarian before a flavor tour.',
+                      'If the exam is clear, ask whether dental disease, acid reflux, or a '
+                      'medication side effect is in play. Then you can talk texture.']},
+               {'h': 'One food, a schedule, and the 20-minute pickup',
+                'p': ['Put down a measured complete meal. Pick it up after about 20 minutes. No '
+                      'all-day buffet. No cheese after the protest. Most healthy dogs eat when the '
+                      'next meal is reliably the same. Free-feeding and random leftovers train a '
+                      'critic.'],
+                'ul': ['Warm wet food slightly to raise aroma.',
+                       'Add a spoon of the same complete wet food or a pet-safe broth — see <a '
+                       'href="/learning/bone-broth-for-dogs">bone broth</a>.',
+                       'Hand-feed a few pieces only if you are rebuilding after illness, then fade '
+                       'it.',
+                       'Keep treats for training, not as a second dinner.']},
+               {'h': 'Textures that often win',
+                'p': ['Many picky dogs prefer <a href="/learning/best-wet-dog-food-2026">complete '
+                      'wet food</a> or a kibble mix-in. Freeze-dried toppers work if you count '
+                      'calories. Fresh gently cooked food is aromatic — see <a '
+                      'href="/learning/best-fresh-dog-food-2026">fresh 2026</a>. Rotate proteins '
+                      'only after the dog is reliably eating one complete recipe.']},
+               {'h': 'Do not create a topper monster',
+                'p': ['If toppers become 80% of the bowl, the “complete” kibble is no longer the '
+                      'diet. Measure. If you need a topper forever, switch to a complete wet or '
+                      'fresh food and stop pretending the kibble is the meal.']},
+               {'h': 'Shopping a two-week trial',
+                'p': ['Buy one complete food you can repurchase. If the dog refuses, you have not '
+                      'opened six bags. Browse options in <a href="/dog">the dog aisle</a>. Call '
+                      'the clinic if a healthy-looking dog still will not eat for 24 hours.']}],
+  'faqs': [{'q': 'Why is my dog suddenly picky?',
+            'a': 'Dental pain, nausea, stress, and learned waiting for better food are common. '
+                 'Sudden pickiness with other signs is a veterinary visit, not a new brand.'},
+           {'q': 'Will adding people food help?',
+            'a': 'It often trains the dog to hold out. Safe, measured toppers can help short term. '
+                 'Onions, grapes, and xylitol never help. See our toxic-foods list.'},
+           {'q': 'Is a picky dog underfed?',
+            'a': 'Sometimes. Weigh the dog and score the body. A lean, bright dog that skips a '
+                 'meal and eats the next may be fine. Weight loss is not fine.'}],
+  'publishedAt': '2026-03-09T12:00:00.000Z'},
+ {'slug': 'puppy-vs-adult-dog-food',
+  'title': 'Puppy vs Adult Dog Food: Growth Statements, Calcium, and Switch Day',
+  'description': 'Puppy vs adult dog food: how AAFCO growth differs from adult maintenance, when '
+                 'to switch, and why large-breed puppies should not share the adult bin.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['puppy vs adult dog food',
+           'when to switch puppy food',
+           'AAFCO growth vs adult',
+           'large breed puppy vs adult',
+           'all life stages dog food'],
+  'img': 'puppy',
+  'alt': 'Puppy bowl and adult dog bowl side by side with different kibble sizes and feeding notes',
+  'intro': 'Puppy food and adult food are different nutrient profiles, not just smaller kibble. '
+           'Growth recipes carry more energy and a mineral pattern meant for building bone. Adult '
+           'maintenance assumes that job is done. Switching on the wrong calendar — or sharing a '
+           'giant-breed adult bag with a four-month-old — is how joints and waistlines suffer.',
+  'shopPath': '/dog',
+  'shop': 'Shop growth and adult-complete dog foods at Petshiwü. Free shipping over $49, no '
+          'autoship. NYC delivery now; nationwide shipping soon.',
+  'related': ['best-puppy-food-2026', 'best-senior-dog-food-2026', 'how-much-to-feed-a-dog'],
+  'sections': [{'h': 'What the AAFCO lines are telling you',
+                'p': ['“Growth” or “gestation/lactation” means the food is intended for puppies or '
+                      'reproducing dogs. “Adult maintenance” is for grown dogs. “All life stages” '
+                      'meets the growth profile and can be used for puppies, but it may be too '
+                      'rich or too high in calcium for a large-breed puppy unless the brand also '
+                      'addresses that. Read the whole statement, not the cartoon.',
+                      'See <a href="/learning/best-puppy-food-2026">best puppy food 2026</a> for '
+                      'DHA and feeding frequency. See <a '
+                      'href="/learning/best-large-breed-dog-food">large-breed food</a> if adult '
+                      'size will exceed about 50 pounds.']},
+               {'h': 'When to switch',
+                'p': ['Toy and small breeds often move toward adult food around 9–12 months. '
+                      'Medium breeds closer to 12 months. Large and giant breeds may stay on '
+                      'growth food until 12–18 months. Your veterinarian can use growth plates, '
+                      'body condition, and breed to pick a month — not a social-media age chart.'],
+                'ul': ['Transition over 7 days unless the clinic wants a medical change.',
+                       'Recalculate calories; adult food is often less energy-dense per cup.',
+                       'Keep treating training calories in the budget.',
+                       'If the adolescent looks ribby or pudgy, adjust food before you blame the '
+                       'life-stage label alone.']},
+               {'h': 'Can adults eat puppy food?',
+                'p': ['They can, and they often get fat. Puppy food is built for growth. An adult '
+                      'on puppy food is a common “he just likes it” path to extra pounds. Pregnant '
+                      'or nursing dogs are the usual adult exception when a veterinarian wants a '
+                      'growth/lactation formula.']},
+               {'h': 'Can puppies eat adult food?',
+                'p': ['Only if that exact product is approved for growth or all life stages and '
+                      'your veterinarian agrees. Adult-maintenance-only food can undershoot what a '
+                      'puppy needs. Do not split a bag of adult performance kibble with a growing '
+                      'puppy to save money.']},
+               {'h': 'Shopping two life stages in one house',
+                'p': ['Feed separately. Color the bins. Browse both lines in <a href="/dog">the '
+                      'dog aisle</a>. A senior in the same home may need a third plan — see <a '
+                      'href="/learning/best-senior-dog-food-2026">senior food 2026</a>.']}],
+  'faqs': [{'q': 'Is all-life-stages food OK for everyone?',
+            'a': 'It can be, if the product matches the puppy’s growth needs and the adult’s '
+                 'calorie needs. Large-breed puppies still deserve a growth conversation with your '
+                 'veterinarian.'},
+           {'q': 'What happens if I switch to adult food too early?',
+            'a': 'A puppy may miss nutrients needed for growth, or — if the adult food is '
+                 'calorie-heavy — may still gain poorly structured weight. Ask your veterinarian '
+                 'before you switch early.'},
+           {'q': 'Do I switch on the birthday?',
+            'a': 'No. Switch based on growth, body condition, and veterinary advice. Birthdays are '
+                 'for photos, not calcium math.'}],
+  'publishedAt': '2026-03-12T13:00:00.000Z'},
+ {'slug': 'best-dog-treats-2026',
+  'title': 'Best Dog Treats 2026: Training Bits, Chews, and the 10% Rule',
+  'description': 'Best dog treats 2026: how to pick training treats, safe chews, single-ingredient '
+                 'options, and how to keep extras under 10% of daily calories.',
+  'petType': 'dog',
+  'category': 'Nutrition',
+  'tags': ['best dog treats 2026',
+           'training treats for dogs',
+           'single ingredient dog treats',
+           'low calorie dog treats',
+           'safe dog chews'],
+  'img': 'dog-toys',
+  'alt': 'Assorted training treats and a single-ingredient chew arranged by calorie size for a '
+         '2026 treat guide',
+  'intro': 'Treats are a training tool and a relationship. They are also how lean dogs quietly '
+           'become round. In 2026 the treat aisle is louder than ever — freeze-dried, “human '
+           'grade,” dental, stuffed. This Petshiwü guide ranks jobs, not vibes: tiny training '
+           'bits, safer chews, and the calorie math that keeps dinner honest.',
+  'shopPath': '/dog',
+  'shop': 'Shop training treats and chews at Petshiwü with free shipping over $49 and no autoship. '
+          'NYC delivery is available now; nationwide shipping opens soon.',
+  'related': ['best-dental-dog-food-and-chews',
+              'best-toys-for-aggressive-chewers',
+              'how-much-to-feed-a-dog'],
+  'sections': [{'h': 'Name the job before you name the brand',
+                'p': ['Training needs pea-sized, smelly, soft bits you can fire quickly. Occupying '
+                      'a crate needs a longer-lasting chew that is still safe. Dental needs a '
+                      'product actually designed for teeth — see <a '
+                      'href="/learning/best-dental-dog-food-and-chews">dental chews</a>. Allergy '
+                      'trials need treats that match the diet chemistry. One bag cannot do all '
+                      'four jobs well.',
+                      'Single-ingredient freeze-dried meats are easy to break and easy to overfeed '
+                      'because they are calorie-dense. Count them.']},
+               {'h': 'The 10% rule is a ceiling, not a target',
+                'p': ['Keep treats at or under about 10% of daily calories unless your '
+                      'veterinarian set a different plan. Subtract them from the meal. If you used '
+                      '80 training bits in class, dinner shrinks. See <a '
+                      'href="/learning/how-much-to-feed-a-dog">how much to feed</a>.'],
+                'ul': ['Skip xylitol, raisins, macadamia, and “sugar-free” people candy.',
+                       'Read every jerky label for onion or garlic powder.',
+                       'Size chews longer than the muzzle and supervise.',
+                       'Power chewers need tougher toys, not necessarily harder bones — see <a '
+                       'href="/learning/best-toys-for-aggressive-chewers">aggressive '
+                       'chewers</a>.']},
+               {'h': 'Chew hardness versus tooth enamel',
+                'p': ['If you cannot dent the chew with a fingernail, think twice for a dog with a '
+                      'fracture history. Antlers and nylon bricks break teeth. Rubber toys and '
+                      'stuffed lick mats are often kinder. Match the product to the dog in front '
+                      'of you, not the toughest dog on the internet.']},
+               {'h': 'Training class logistics',
+                'p': ['Carry treats in a pouch, not a crumby pocket. Soft treats that do not '
+                      'crumble in heat travel better. If you use a clicker, the treat still has to '
+                      'land fast — see <a href="/learning/clicker-training-for-dogs">clicker '
+                      'training</a>.']},
+               {'h': 'Shopping a treat drawer that will not explode',
+                'p': ['Pick one training treat, one chew, and one “jackpot.” Browse the treat '
+                      'aisle in <a href="/dog">dog</a> and keep lot codes like you would for food. '
+                      'We will not invent a 2026 clinical ranking of jerky brands.']}],
+  'faqs': [{'q': 'What treats are best for training in 2026?',
+            'a': 'Soft, pea-sized, high-aroma bits your dog will work for. Low-calorie options '
+                 'help if you train a lot. Avoid hard biscuits you have to break mid-session.'},
+           {'q': 'Are homemade treats safer?',
+            'a': 'They can be if you control ingredients. They still count as calories and can '
+                 'include toxic foods by accident. Store them like human leftovers.'},
+           {'q': 'Can treats cause pancreatitis?',
+            'a': 'Fatty chews and table scraps can trigger susceptible dogs. Choose leaner '
+                 'training bits and ask your veterinarian if your dog has a history of '
+                 'pancreatitis.'}],
+  'publishedAt': '2026-03-14T14:00:00.000Z'},
+ {'slug': 'best-wet-cat-food-2026',
+  'title': 'Best Wet Cat Food 2026: Moisture, Complete Pâtés, and Picky Cans',
+  'description': 'Best wet cat food 2026: why moisture matters, how to read complete-and-balanced '
+                 'cans, pâté versus shreds, and when a picky cat needs a veterinarian.',
+  'petType': 'cat',
+  'category': 'Nutrition',
+  'tags': ['best wet cat food 2026',
+           'canned cat food complete',
+           'pate vs shreds cats',
+           'high moisture cat food',
+           'wet food for picky cats'],
+  'img': 'wet-cat-food',
+  'alt': 'Two complete wet cat-food cans opened to show pâté and shreds for a 2026 texture '
+         'comparison',
+  'intro': 'Cats evolved as meat eaters that took in a lot of water with prey. A complete wet food '
+           'is one of the easiest ways to put moisture back in the bowl. It is not automatically '
+           '“better protein,” and a gravy can can still be a topper, not a meal. This 2026 '
+           'Petshiwü guide is how we read cans like buyers, not like commercial voiceover.',
+  'shopPath': '/cat',
+  'shop': 'Shop complete wet cat foods at Petshiwü. Free shipping over $49, no autoship. NYC '
+          'delivery is available now; nationwide shipping opens soon.',
+  'related': ['wet-vs-dry-cat-food', 'how-much-to-feed-a-cat', 'picky-cat-not-eating'],
+  'sections': [{'h': 'Complete cans versus gravy garnish',
+                'p': ['The AAFCO statement has to say complete and balanced for the cat’s life '
+                      'stage if the can is dinner. “Complementary” shreds in extra broth are a '
+                      'garnish. Water is often the first ingredient — that is normal for wet food. '
+                      'What matters is whether the nutrient profile was designed as a full diet '
+                      'after the water is accounted for.',
+                      'Named animal proteins should be obvious. Liver in a formula is common and '
+                      'useful when the math is done. Sugar, unnamed by-products as the whole '
+                      'story, and a missing life-stage line are reasons to put the can back.']},
+               {'h': 'Pâté, shreds, and the picky-cat trap',
+                'p': ['Pâté is easier to measure and often higher in actual food per gram. Shreds '
+                      'and flakes can win aroma contests and lose on calories per can because you '
+                      'are buying more gravy. If your cat is a texture extremist, change one '
+                      'variable at a time. See <a href="/learning/picky-cat-not-eating">picky cat '
+                      'not eating</a> if meals are being refused.'],
+                'ul': ['Compare kcal per can, not just ounce size.',
+                       'Refrigerate leftovers and discard within the label window.',
+                       'Warm a spoonful to increase smell; avoid hot spots.',
+                       'If you mix with kibble, count both — see <a '
+                       'href="/learning/wet-vs-dry-cat-food">wet vs dry</a>.']},
+               {'h': 'Urinary and kidney caveats',
+                'p': ['Extra moisture can support cats prone to concentrated urine, but it does '
+                      'not treat a blockage. Male cats that strain are an emergency. Prescription '
+                      'urinary or renal cans are veterinary diets — see <a '
+                      'href="/learning/best-cat-food-for-urinary-health">urinary health</a> and <a '
+                      'href="/learning/best-cat-food-for-kidney-support">kidney support</a>. Do '
+                      'not self-prescribe them because a neighbor’s cat is on one.']},
+               {'h': 'Kittens and seniors need their own lines',
+                'p': ['Kittens need growth-approved wet food and more frequent meals — see <a '
+                      'href="/learning/best-kitten-food-2026">kitten food 2026</a>. Seniors with '
+                      'missing teeth often prefer pâté. A senior that suddenly loves only gravy '
+                      'may be nauseated; that is a clinic question.']},
+               {'h': 'Shopping a case you can finish',
+                'p': ['Buy one complete recipe for a week before you commit to a mixed case. '
+                      'Browse wet foods in <a href="/cat">the cat aisle</a>. Keep lot codes. We '
+                      'will not invent a 2026 lab ranking of every pâté.']}],
+  'faqs': [{'q': 'Is wet cat food better than dry?',
+            'a': 'Wet food delivers more moisture and is often easier for picky or '
+                 'dental-compromised cats. Many cats do well on a complete mix. The label and the '
+                 'cat’s medical history decide.'},
+           {'q': 'How many cans should a cat eat per day?',
+            'a': 'It depends on kcal per can and the cat’s weight target. A 10-pound indoor cat '
+                 'might need around 180–220 kcal, but your veterinarian should confirm. Cans vary '
+                 'from 70 to 200+ kcal.'},
+           {'q': 'Can I leave wet food out all day?',
+            'a': 'Not safely. Wet food spoils. Offer a meal, pick up leftovers after 20–30 '
+                 'minutes, and refrigerate unused can portions.'}],
+  'publishedAt': '2026-03-16T08:00:00.000Z'},
+ {'slug': 'wet-vs-dry-cat-food',
+  'title': 'Wet vs Dry Cat Food: Moisture, Teeth, Cost, and a Sane Mix',
+  'description': 'Wet vs dry cat food: moisture and urinary habits, dental myths, cost per '
+                 'calorie, and how to mix formats without unbalancing a complete diet.',
+  'petType': 'cat',
+  'category': 'Nutrition',
+  'tags': ['wet vs dry cat food',
+           'canned vs kibble cats',
+           'cat food moisture',
+           'mixed feeding cats',
+           'dry food teeth cats'],
+  'img': 'wet-cat-food',
+  'alt': 'Cat bowl split between complete wet food and kibble to illustrate mixed feeding math',
+  'intro': 'The wet-versus-dry argument is usually a moisture argument wearing a protein costume. '
+           'Dry food is convenient and cheaper per calorie. Wet food helps many cats take in water '
+           'they will not drink. Both can be complete. This Petshiwü comparison is about matching '
+           'format to the cat in your house, not winning a forum fight.',
+  'shopPath': '/cat',
+  'shop': 'Shop wet, dry, and mixed-feeding cat foods at Petshiwü. Free shipping over $49, no '
+          'autoship. NYC delivery now; nationwide shipping soon.',
+  'related': ['best-wet-cat-food-2026',
+              'best-cat-food-for-urinary-health',
+              'how-much-to-feed-a-cat'],
+  'sections': [{'h': 'Moisture is the difference you can measure',
+                'p': ['Wet food is typically 70–80% water. Dry food is about 10%. Cats with a '
+                      'history of concentrated urine or crystals often do better when more of the '
+                      'day’s food is wet — as part of a veterinary plan, not as a DIY hospital. '
+                      'Keep a fountain in the mix anyway; see <a '
+                      'href="/learning/cat-water-fountain-benefits">fountain benefits</a>.',
+                      'Dry food is not “dehydrating poison.” It is a dry complete food. Some cats '
+                      'drink enough. Many indoor cats do not. Watch the litter clumps and the '
+                      'clinic’s urine specific gravity, not a meme.']},
+               {'h': 'Dental myths about crunch',
+                'p': ['Kibble does not reliably clean teeth. Sticky wet food does not '
+                      'automatically rot them either. Brushing and veterinary dentistry matter '
+                      'more than format. See <a href="/learning/cat-dental-care-at-home">cat '
+                      'dental care</a>. If a cat stops crunching, think pain.'],
+                'ul': ['Compare dry-matter protein if you are format-shopping on percentages.',
+                       'Weigh both halves of a mixed bowl.',
+                       'Do not free-feed dry all day and also serve two mystery cans.',
+                       'Prescription urinary dry foods exist; do not swap them for grocery wet '
+                       'without the clinic.']},
+               {'h': 'Cost and logistics',
+                'p': ['Dry food wins the budget and the weekend trip. Wet food wins for picky '
+                      'seniors and moisture. A 50/50 mix is fine if both products are complete and '
+                      'calories add up. See <a href="/learning/how-much-to-feed-a-cat">how much to '
+                      'feed a cat</a>.']},
+               {'h': 'When one format is required',
+                'p': ['Some dental patients need wet only after extractions. Some veterinary diets '
+                      'only come in one format your cat will eat. Follow the prescription. '
+                      'Hairball and indoor formulas are marketing layers on top of completeness — '
+                      'see <a href="/learning/best-cat-food-for-indoor-cats">indoor cat '
+                      'food</a>.']},
+               {'h': 'Shopping a mix that stays complete',
+                'p': ['Do not dilute a complete dry food with complementary gravy cups as the main '
+                      'wet half. Browse complete options in <a href="/cat">the cat aisle</a>.']}],
+  'faqs': [{'q': 'Is dry food bad for cats?',
+            'a': 'No. Complete dry food is a valid diet for many cats. The common issue is extra '
+                 'calories plus low water intake. Your veterinarian can help you decide if more '
+                 'wet food is wise.'},
+           {'q': 'Can I feed only wet food?',
+            'a': 'Yes, if it is complete and balanced and you can keep portions and dental care '
+                 'honest. Many cats thrive on all-wet plans.'},
+           {'q': 'Does dry food cause diabetes?',
+            'a': 'Obesity and other factors are more clearly tied to diabetes risk than kibble '
+                 'itself. Portion control and body condition matter. This is not a diagnosis.'}],
+  'publishedAt': '2026-03-19T09:00:00.000Z'},
+ {'slug': 'best-kitten-food-2026',
+  'title': 'Best Kitten Food 2026: Growth Calories, DHA, and Weaning Off Queen’s Milk',
+  'description': 'Best kitten food 2026: growth-approved wet and dry, feeding frequency, DHA, and '
+                 'when to switch toward adult food. Vet-first notes from Petshiwü.',
+  'petType': 'cat',
+  'category': 'Nutrition',
+  'tags': ['best kitten food 2026',
+           'kitten wet food',
+           'AAFCO growth cats',
+           'how often to feed a kitten',
+           'DHA kitten diet'],
+  'img': 'kitten',
+  'alt': 'Kitten eating growth-formula wet food from a shallow saucer during a 2026 kitten-food '
+         'guide',
+  'intro': 'Kittens are not small adult cats. They need more calories per pound, more frequent '
+           'meals, and a growth-approved nutrient profile. A cute “all ages” can that is '
+           'adult-only on the back panel is a miss. This 2026 Petshiwü guide covers weaning '
+           'through the first year and the red flags that are not picky eating.',
+  'shopPath': '/cat',
+  'shop': 'Shop complete kitten foods and shallow dishes at Petshiwü. Free shipping over $49, no '
+          'autoship. NYC delivery now; nationwide shipping soon.',
+  'related': ['best-wet-cat-food-2026', 'how-much-to-feed-a-cat', 'litter-box-training-a-kitten'],
+  'sections': [{'h': 'Growth statement first, texture second',
+                'p': ['Look for AAFCO growth or all-life-stages wording. Kittens often do best on '
+                      'wet food they can lap, with optional kitten kibble as they learn to crunch. '
+                      'DHA is a common add for brain and vision support. It does not replace '
+                      'complete minerals or parasite control.',
+                      'Orphan or early-weaned kittens may need a milk replacer designed for '
+                      'kittens — never cow’s milk as the plan. If a kitten is fading, that is '
+                      'urgent veterinary care, not a new can.']},
+               {'h': 'How often to put food down',
+                'p': ['Young kittens may eat four or more times a day. Free-choice dry can work '
+                      'for some growing kittens if body condition stays lean; wet meals should '
+                      'still be picked up so you notice a skipped bowl. See <a '
+                      'href="/learning/how-much-to-feed-a-cat">feeding math</a> as they approach '
+                      'adult size.'],
+                'ul': ['Keep fresh water in a low bowl or fountain.',
+                       'Weigh the kitten weekly.',
+                       'Do not feed dog food as a shortcut.',
+                       'Ask about deworming on the same schedule as vaccines.']},
+               {'h': 'When to switch toward adult food',
+                'p': ['Many cats move toward adult food around 12 months. Large-breed cats and '
+                      'some indoor cats that are already overweight at ten months may need an '
+                      'earlier calorie conversation. Transition over a week. See <a '
+                      'href="/learning/best-wet-cat-food-2026">wet food 2026</a> if you are '
+                      'staying on cans.']},
+               {'h': 'GI and appetite emergencies in kittens',
+                'p': ['Repeated vomiting, silent straining in the litter box, a bloated belly, or '
+                      'a kitten too weak to eat is same-day care. Do not rotate five proteins '
+                      'hoping a flavor fixes panleukopenia or a foreign string.']},
+               {'h': 'Shopping the first case',
+                'p': ['Pick one complete kitten food you can buy again. Browse <a href="/cat">the '
+                      'cat aisle</a> and keep a shallow dish that does not bump whiskers raw. Pair '
+                      'feeding with <a href="/learning/litter-box-training-a-kitten">litter '
+                      'training</a> so mealtime and box time stay predictable.']}],
+  'faqs': [{'q': 'Can kittens eat adult cat food?',
+            'a': 'Only if the product is approved for growth or all life stages. '
+                 'Adult-maintenance-only food can undershoot a kitten’s needs. Ask your '
+                 'veterinarian.'},
+           {'q': 'Is dry kitten food OK?',
+            'a': 'Complete kitten kibble can be part of the plan. Wet food helps moisture and is '
+                 'easier for tiny mouths. Many households mix.'},
+           {'q': 'How long do I feed kitten food?',
+            'a': 'Often until about 12 months, then transition. Your veterinarian may adjust for '
+                 'body condition or a medical issue.'}],
+  'publishedAt': '2026-03-21T10:00:00.000Z'},
+ {'slug': 'best-senior-cat-food',
+  'title': 'Best Senior Cat Food: Protein, Phosphorus, and the 11-Year Check',
+  'description': 'Best senior cat food: when to switch, why many seniors still need protein, '
+                 'phosphorus caveats, and how dental pain masquerades as pickiness. Ask your vet.',
+  'petType': 'cat',
+  'category': 'Nutrition',
+  'tags': ['best senior cat food',
+           'senior cat nutrition',
+           'cat food phosphorus',
+           '11+ cat food',
+           'senior cat wet food'],
+  'img': 'senior-cat',
+  'alt': 'Older cat with a raised wet-food dish and a senior wellness checklist in the background',
+  'intro': 'Cats hide illness, then get called picky. A senior formula can help if it matches real '
+           'labs and real teeth. It can harm if you slashed protein because a bag said 11+ and the '
+           'kidneys were never checked. This Petshiwü guide is educational. Bloodwork and a dental '
+           'look belong to your veterinarian.',
+  'shopPath': '/cat',
+  'shop': 'Find senior-complete cat foods and easy-to-lap pâtés at Petshiwü. Free shipping over '
+          '$49, no autoship. NYC delivery now; nationwide shipping soon.',
+  'related': ['best-cat-food-for-kidney-support',
+              'best-wet-cat-food-2026',
+              'how-much-to-feed-a-cat'],
+  'sections': [{'h': 'Do not guess at kidneys from the birthday',
+                'p': ['Many senior bags lower phosphorus and calories. That can be appropriate '
+                      'after a diagnosis. It is a poor default for a muscled 12-year-old with '
+                      'normal labs. Unexplained weight loss, more water in the bowl, or peeing '
+                      'outside the box are clinic signs. See <a '
+                      'href="/learning/best-cat-food-for-kidney-support">kidney support</a> for '
+                      'how prescription diets differ from grocery senior cans.',
+                      'Healthy seniors often need enough protein to protect muscle. Ask for a '
+                      'senior panel before you “put them on senior.”']},
+               {'h': 'Texture is half the senior bowl',
+                'p': ['Missing teeth and sore mouths make dry food a bluff. Warm pâté, smaller '
+                      'meals, and a wide dish help. If the cat sniffs and leaves, think nausea or '
+                      'pain before you think snobbery. See <a '
+                      'href="/learning/picky-cat-not-eating">picky cat not eating</a>.'],
+                'ul': ['Weigh the cat every two weeks after a switch.',
+                       'Count treats — tuna juice is not free.',
+                       'Keep a fountain; seniors still dehydrate — <a '
+                       'href="/learning/cat-water-fountain-benefits">fountains</a>.',
+                       'Ask before adding fish-oil or phosphate binders on your own.']},
+               {'h': 'Hyperthyroidism and diabetes change the menu',
+                'p': ['A skinny senior with a huge appetite is not a success story until the '
+                      'clinic rules out hyperthyroidism. A fat senior with extra thirst may be '
+                      'diabetic. Food is part of those plans only after diagnosis. This article '
+                      'will not pick a prescription for you.']},
+               {'h': 'Indoor senior extras',
+                'p': ['Joint stiffness and litter-box avoidance often travel together. A '
+                      'lower-sided box and a nearby meal station can matter more than a new '
+                      'slogan. Pair food with <a '
+                      'href="/learning/best-cat-food-for-indoor-cats">indoor feeding</a> if '
+                      'calories crept up over years of free-fed kibble.']},
+               {'h': 'Shopping after the appointment',
+                'p': ['Bring the current can to the vet. Then shop the complete food they agree '
+                      'with in <a href="/cat">our cat aisle</a>. Transition slowly unless they '
+                      'want a faster medical change.']}],
+  'faqs': [{'q': 'At what age should a cat eat senior food?',
+            'a': 'There is no single age. Use labs, body condition, and dental comfort. Some cats '
+                 'stay on adult food with a smaller portion.'},
+           {'q': 'Do senior cats need less protein?',
+            'a': 'Not automatically. Muscle loss is common in older cats. Reduced protein is a '
+                 'veterinary decision, often tied to diagnosed kidney disease.'},
+           {'q': 'Is wet food better for senior cats?',
+            'a': 'Often, because of moisture and chew comfort. It still must be complete and '
+                 'calorie-appropriate.'}],
+  'publishedAt': '2026-03-24T11:00:00.000Z'},
+ {'slug': 'best-cat-food-for-urinary-health',
+  'title': 'Best Cat Food for Urinary Health: Moisture First, Prescription Second',
+  'description': 'Best cat food for urinary health: moisture, litter-box clues, and why straining '
+                 'is an emergency. Educational only — urinary diets start with your veterinarian.',
+  'petType': 'cat',
+  'category': 'Health',
+  'tags': ['best cat food for urinary health',
+           'cat urinary crystals diet',
+           'prescription urinary cat food',
+           'cat cystitis food',
+           'high moisture cat urine'],
+  'img': 'wet-cat-food',
+  'alt': 'Wet cat food and a water fountain beside a litter box, illustrating urinary-support '
+         'feeding',
+  'intro': 'Urinary “support” on a grocery can is not a diagnosis and it will not unblock a '
+           'urethra. Male cats that strain in the box can die the same day. This Petshiwü article '
+           'explains how moisture and veterinary diets fit after an exam — and why we will not '
+           'sell you a crystal protocol from a comment section.',
+  'shopPath': '/cat',
+  'shop': 'Shop complete wet foods and fountains at Petshiwü. Prescription urinary diets come from '
+          'your veterinarian. Free shipping over $49, no autoship. NYC delivery now; nationwide '
+          'shipping soon.',
+  'related': ['cat-uti-symptoms', 'wet-vs-dry-cat-food', 'cat-water-fountain-benefits'],
+  'sections': [{'h': 'Straining is an emergency, not a food swap',
+                'p': ['If a cat visits the box, produces little or no urine, cries, or hides with '
+                      'a hard belly, go to emergency care. Do not offer a new urinary kibble and '
+                      'wait. Blockages are mechanical and medical. Food conversations happen after '
+                      'the cat can pee.',
+                      'Blood in urine, frequent tiny clumps, and licking the rear also need a '
+                      'veterinarian. Infection, stones, and feline idiopathic cystitis can look '
+                      'similar at home. See <a href="/learning/cat-uti-symptoms">cat UTI '
+                      'symptoms</a>.']},
+               {'h': 'Moisture is the over-the-counter lever that is actually honest',
+                'p': ['Many indoor cats run concentrated urine on an all-dry plan. A complete wet '
+                      'food and a fountain can increase water intake for some cats. That is '
+                      'supportive, not a stone-dissolving treatment. Your veterinarian may still '
+                      'prescribe a therapeutic urinary diet with controlled minerals and a target '
+                      'urine pH.'],
+                'ul': ['Measure urine clumps for a few days so you have a baseline.',
+                       'Add wet meals before you add three grocery “urinary care” bags.',
+                       'Keep the box clean — dirty boxes make cats hold urine.',
+                       'Do not acidify urine with home vinegar tricks.']},
+               {'h': 'What prescription urinary foods are for',
+                'p': ['Therapeutic diets are formulated for specific stone types or for reducing '
+                      'recurrence after a blockage. They are not generic “clean bladder” snacks. '
+                      'Feeding them to a healthy kitten or a kidney patient without guidance can '
+                      'be the wrong mineral pattern. Ask which stone, if any, was identified.']},
+               {'h': 'Stress and cystitis',
+                'p': ['Idiopathic cystitis is often a pain-and-stress disease. More boxes, '
+                      'predictable feeding, and a fountain can help as part of a vet plan. Food '
+                      'alone will not fix a one-box apartment war. See <a '
+                      'href="/learning/best-cat-litter-2026">litter 2026</a> and <a '
+                      'href="/learning/cat-water-fountain-benefits">fountains</a>.']},
+               {'h': 'Shopping after the clinic writes the plan',
+                'p': ['Follow the prescribed diet. For moisture support on a healthy cat, browse '
+                      'complete wet foods in <a href="/cat">the cat aisle</a>. We will not invent '
+                      'a pH chart for your tap water.']}],
+  'faqs': [{'q': 'Can grocery urinary cat food replace a prescription?',
+            'a': 'Usually no. Over-the-counter “urinary care” lines are not the same as '
+                 'therapeutic diets used after crystals or obstruction. Ask your veterinarian '
+                 'which product they mean.'},
+           {'q': 'Does cranberry treat a cat UTI?',
+            'a': 'Do not use cranberry products as treatment. Cats need an exam. Some “UTIs” are '
+                 'sterile cystitis. Wrong delay can be fatal in males.'},
+           {'q': 'Is wet food enough to prevent crystals?',
+            'a': 'Moisture helps many cats. It does not guarantee a crystal-free life. Genetics, '
+                 'water, box habits, and medical diets all play roles.'}],
+  'publishedAt': '2026-03-26T12:00:00.000Z'},
+ {'slug': 'best-cat-food-for-kidney-support',
+  'title': 'Best Cat Food for Kidney Support: Prescription Diets and What OTC Cannot Do',
+  'description': 'Best cat food for kidney support: why phosphorus and protein changes are '
+                 'veterinary decisions, how to tempt a nauseated senior, and OTC limits. Not a '
+                 'diagnosis.',
+  'petType': 'cat',
+  'category': 'Health',
+  'tags': ['best cat food for kidney support',
+           'renal cat food',
+           'CKD cat diet',
+           'prescription kidney cat food',
+           'low phosphorus cat food'],
+  'img': 'senior-cat',
+  'alt': 'Senior cat beside a prescription-style renal wet food and a water fountain for '
+         'kidney-support education',
+  'intro': 'Chronic kidney disease is diagnosed with labs and urine tests, not with a “renal '
+           'support” banner in the grocery aisle. Once your veterinarian stages the disease, a '
+           'therapeutic kidney diet can slow progression for many cats. This Petshiwü page is '
+           'education. It will not interpret SDMA or pick a phosphorus number for you.',
+  'shopPath': '/cat',
+  'shop': 'Petshiwü carries complete senior and wet cat foods. Kidney diets are prescribed by your '
+          'veterinarian. Free shipping over $49, no autoship. NYC delivery now; nationwide '
+          'shipping soon.',
+  'related': ['best-senior-cat-food', 'how-much-to-feed-a-cat', 'cat-water-fountain-benefits'],
+  'sections': [{'h': 'Why kidney diets are not grocery senior food',
+                'p': ['Therapeutic renal foods typically moderate phosphorus and adjust protein '
+                      'quality and calories for a cat that may feel nauseated. A 11+ senior can '
+                      'may be slightly different from adult food and still not be a kidney diet. '
+                      'Swapping a healthy adult onto a renal food “just in case” can strip muscle '
+                      'they still need.',
+                      'If your cat was just diagnosed, ask which stage and whether a prescription '
+                      'wet or dry is preferred. Many kidney cats drink more; a fountain still '
+                      'helps. See <a href="/learning/best-senior-cat-food">senior cat food</a> for '
+                      'the pre-diagnosis conversation.']},
+               {'h': 'Appetite is a medical vital sign',
+                'p': ['Kidney cats that stop eating can crash. Warm food, a different texture, and '
+                      'anti-nausea medication from the clinic matter more than a new brand you '
+                      'found at midnight. If the cat has not eaten for 24 hours, call the '
+                      'veterinarian. Do not force-syringe a random broth.'],
+                'ul': ['Weigh the cat twice a week and log it.',
+                       'Offer several small meals rather than one ignored buffet.',
+                       'Ask before adding tuna water — sodium and phosphorus add up.',
+                       'Keep fresh water in more than one room.']},
+               {'h': 'Phosphate binders and extras',
+                'p': ['Binders are drugs or supplements used when diet is not enough. They are '
+                      'dosed by a veterinarian. Do not add human calcium tablets. Fish-oil, '
+                      'potassium, and subcutaneous fluids are also clinic-directed, not '
+                      'cart-directed.']},
+               {'h': 'What over-the-counter “kidney support” usually means',
+                'p': ['Some OTC bags hint at kidney care with modest mineral tweaks. They are not '
+                      'a substitute for a prescribed renal food after diagnosis. If cost is the '
+                      'barrier, tell the clinic — they would rather problem-solve than watch a cat '
+                      'eat leftover chicken and rice for months.']},
+               {'h': 'Shopping the support around the prescription',
+                'p': ['Buy the food your veterinarian named when you can. For hydration tools and '
+                      'complete senior meals before diagnosis, browse <a href="/cat">the cat '
+                      'aisle</a>. Transition as directed; sudden swaps can make a nauseated cat '
+                      'quit entirely.']}],
+  'faqs': [{'q': 'Can I homemade a kidney diet?',
+            'a': 'Not safely without a veterinary nutritionist. Phosphorus and potassium are easy '
+                 'to get wrong. Use the prescribed food or a formulated recipe.'},
+           {'q': 'Is low protein always better for kidneys?',
+            'a': 'Kidney diets adjust protein; they do not mean “as little protein as possible.” '
+                 'Too little protein costs muscle. Follow the product your veterinarian chose.'},
+           {'q': 'My cat hates renal food. What now?',
+            'a': 'Call the clinic. There are multiple textures and brands. Appetite stimulants and '
+                 'nausea control may be needed. Do not just give up and feed leftover pizza.'}],
+  'publishedAt': '2026-03-29T13:00:00.000Z'},
+ {'slug': 'grain-free-cat-food-guide',
+  'title': 'Grain-Free Cat Food Guide: Cats, Carbs, and What Grain-Free Does Not Fix',
+  'description': 'Grain-free cat food guide: cats are carnivores, but grain-free is not a medical '
+                 'plan. How to read carbs, proteins, and when to keep grain-inclusive food.',
+  'petType': 'cat',
+  'category': 'Nutrition',
+  'tags': ['grain free cat food guide',
+           'grain-free vs grain-inclusive cats',
+           'cat food carbohydrates',
+           'is grain free better for cats',
+           'cat food allergies grain'],
+  'img': 'wet-cat-food',
+  'alt': 'Grain-inclusive and grain-free cat-food labels side by side for a calm carb-and-protein '
+         'comparison',
+  'intro': 'Cats need complete animal-based nutrition. They do not need a grain-free slogan to be '
+           '“true carnivores.” Many grain-free cat foods simply swap grains for peas, potatoes, or '
+           'more starch from another plant. This Petshiwü guide keeps the DCM dog conversation in '
+           'its lane and focuses on what actually changes in a cat bowl.',
+  'shopPath': '/cat',
+  'shop': 'Shop grain-inclusive and specialty cat foods at Petshiwü. Free shipping over $49, no '
+          'autoship. NYC delivery now; nationwide shipping soon.',
+  'related': ['best-wet-cat-food-2026',
+              'best-limited-ingredient-dog-food',
+              'best-cat-food-for-indoor-cats'],
+  'sections': [{'h': 'Carnivore biology is not a marketing brief',
+                'p': ['Cats have higher protein and certain amino-acid needs (taurine is the '
+                      'famous one). A complete cat food — grain-inclusive or not — is formulated '
+                      'to meet those needs. A grain-free bag that is light on animal protein and '
+                      'heavy on plant starch is not more ancestral. Read the first ingredients and '
+                      'the AAFCO statement.',
+                      'The FDA’s DCM investigation primarily involved dogs. Do not copy-paste '
+                      'dog-forum panic onto cats. If you want the dog context, see <a '
+                      'href="/learning/is-grain-free-dog-food-safe-2026">grain-free dog food '
+                      '2026</a>. For cats, talk to your veterinarian about this cat.']},
+               {'h': 'True grain issues are uncommon',
+                'p': ['Most itchy cats are not allergic to rice. They may have environmental '
+                      'allergies, fleas, or a food reaction to a protein. An elimination diet is a '
+                      'protein trial, not a grain-free shopping spree. See <a '
+                      'href="/learning/picky-cat-not-eating">appetite changes</a> if food refusal '
+                      'is the real issue.'],
+                'ul': ['Prefer named meats high on the list.',
+                       'Compare dry-matter protein if you are switching formats.',
+                       'Watch calories — grain-free indoor foods can still fatten a cat.',
+                       'If the cat has GI disease, ask before any swap.']},
+               {'h': 'Carbs in wet versus dry',
+                'p': ['Wet foods are often lower in starch because meat and water take up the can. '
+                      'Dry foods need starch to make a kibble. Grain-free dry is still a starch '
+                      'kibble. If you want fewer carbs, a complete wet food is usually the more '
+                      'direct path — see <a href="/learning/wet-vs-dry-cat-food">wet vs dry</a>.']},
+               {'h': 'When grain-inclusive is the calmer default',
+                'p': ['If the cat is healthy, has good stool, and a lean body, there is no prize '
+                      'for removing rice. Indoor formulas, hairball formulas, and grain-free '
+                      'formulas can stack marketing on the same complete food. Pick completeness '
+                      'and calories first.']},
+               {'h': 'Shopping without the wolf-on-the-label energy',
+                'p': ['Compare two complete foods your cat will eat. Browse <a href="/cat">the cat '
+                      'aisle</a>. We will not invent a study that says grain-free cats live '
+                      'longer.']}],
+  'faqs': [{'q': 'Is grain-free cat food healthier?',
+            'a': 'Not automatically. Completeness, protein quality, and calories matter more. '
+                 'Grain-free dry food still contains plant starch.'},
+           {'q': 'Do cats need grains?',
+            'a': 'Cats do not have a grain requirement. They have nutrient requirements. Grains '
+                 'can be part of a complete food. Removing them is optional, not a virtue.'},
+           {'q': 'Can grain-free food help a vomiting cat?',
+            'a': 'Sometimes a new recipe helps if the old protein was a problem. Vomiting also has '
+                 'many medical causes. See your veterinarian before you keep rotating bags.'}],
+  'publishedAt': '2026-03-31T14:00:00.000Z'},
+ {'slug': 'raw-cat-food-safety',
+  'title': 'Raw Cat Food Safety: Pathogens, Completeness, and High-Risk Homes',
+  'description': 'Raw cat food safety: Salmonella risk, complete commercial raw vs DIY, kitchen '
+                 'hygiene, and which households should skip raw entirely. Vet-first guidance.',
+  'petType': 'cat',
+  'category': 'Nutrition',
+  'tags': ['raw cat food safety',
+           'raw feeding cats',
+           'commercial raw cat food',
+           'Salmonella cat food',
+           'complete raw cat meals'],
+  'img': 'wet-cat-food',
+  'alt': 'Frozen raw cat-food patties on a sanitized tray with a separate cutting board for safe '
+         'handling',
+  'intro': 'Cats eat prey in nature. Your kitchen is not nature, and your sink is connected to a '
+           'person who touches a phone. Raw cat food can be commercially complete, and it can also '
+           'shed Salmonella onto a counter a toddler uses. This Petshiwü safety guide is for '
+           'people who want the risks in daylight before they thaw the first patty.',
+  'shopPath': '/cat',
+  'shop': 'Shop complete commercial cat foods at Petshiwü. Free shipping over $49, no autoship. '
+          'NYC delivery now; nationwide shipping soon. Ask your veterinarian before raw.',
+  'related': ['best-wet-cat-food-2026',
+              'homemade-dog-food-safety',
+              'best-raw-dog-food-for-beginners'],
+  'sections': [{'h': 'Commercial complete raw versus a chopped chicken breast',
+                'p': ['A formulated raw diet includes calcium, taurine, and vitamins in a planned '
+                      'range. A grocery chicken breast is not a cat diet. DIY raw is a common way '
+                      'cats develop taurine-related heart disease and bone problems. If you still '
+                      'want raw-style nutrition with less freezer drama, some freeze-dried '
+                      'complete foods exist — handle them like raw if the label says raw.',
+                      'High-pressure processing reduces some pathogens; it is not a magic '
+                      'sterilizer. Read the manufacturer’s safety statement.']},
+               {'h': 'People get sick from pet food too',
+                'p': ['Households with young children, pregnant people, older adults, or '
+                      'immunocompromised members should ask a veterinarian before feeding raw. '
+                      'Cats walk on counters. They groom paws that stood in a raw bowl. Wash bowls '
+                      'in hot soapy water. Keep raw packs away from human produce.'],
+                'ul': ['Thaw in the refrigerator, not on the counter.',
+                       'Discard leftovers on the brand’s schedule.',
+                       'Do not let raw juices drip into the kibble bin.',
+                       'Wash hands before you touch a baby or a laptop.',
+                       'Keep the cat’s raw diet away from the dog if the dog is a '
+                       'counter-surfer.']},
+               {'h': 'Who should not start raw',
+                'p': ['Cats on immunosuppressive drugs, cats with pancreatitis history, and cats '
+                      'that live with high-risk people are poor DIY raw candidates. Cats already '
+                      'on a prescription urinary or renal diet should not be “upgraded” to raw '
+                      'without the prescribing veterinarian.']},
+               {'h': 'A calmer moisture alternative',
+                'p': ['If your goal is moisture and aroma, a complete wet food often gets you '
+                      'there with a cooked kill step. See <a '
+                      'href="/learning/best-wet-cat-food-2026">wet food 2026</a>. That is not '
+                      'anti-raw morality. It is risk matching.']},
+               {'h': 'If you still choose commercial raw',
+                'p': ['Transition slowly, keep lot codes, and watch stool. Shop complete foods in '
+                      '<a href="/cat">the cat aisle</a>. Call the clinic for blood in stool, '
+                      'vomiting, or a cat that hides and will not eat.']}],
+  'faqs': [{'q': 'Is raw cat food safe?',
+            'a': 'It can be fed more safely as a complete commercial product with strict hygiene. '
+                 'It is never zero-risk. High-risk homes should usually skip it.'},
+           {'q': 'Does raw food clean cats’ teeth?',
+            'a': 'Chewing meat is not a dental cleaning. Cats still need home care and veterinary '
+                 'oral exams. See our cat dental guide.'},
+           {'q': 'Can I feed raw eggs or raw fish daily?',
+            'a': 'Do not invent extras. Raw fish can interfere with thiamine. Completeness comes '
+                 'from the formulated product, not a garnish pile.'}],
+  'publishedAt': '2026-04-02T08:00:00.000Z'},
+ {'slug': 'best-cat-food-for-indoor-cats',
+  'title': 'Best Cat Food for Indoor Cats: Calories, Boredom, and Hairball Reality',
+  'description': 'Best cat food for indoor cats: lower-calorie indoor formulas, wet-food moisture, '
+                 'play that burns energy, and why “indoor” on the bag is not a lifestyle plan.',
+  'petType': 'cat',
+  'category': 'Nutrition',
+  'tags': ['best cat food for indoor cats',
+           'indoor cat calories',
+           'indoor cat wet food',
+           'hairball indoor formula',
+           'how to feed an indoor cat'],
+  'img': 'indoor-cat',
+  'alt': 'Indoor cat sitting by a window with a measured food bowl and a wand toy nearby',
+  'intro': 'Indoor cats live longer on average and gain weight faster on the same scoop that kept '
+           'an outdoor hunter lean. “Indoor formula” usually means fewer calories and a little '
+           'extra fiber. That only works if you also measure, play, and clean the box. This '
+           'Petshiwü guide is the indoor-cat bowl plus the living-room plan.',
+  'shopPath': '/cat',
+  'shop': 'Shop indoor-complete cat foods, fountains, and wand toys at Petshiwü. Free shipping '
+          'over $49, no autoship. NYC delivery now; nationwide shipping soon.',
+  'related': ['how-much-to-feed-a-cat',
+              'overweight-cat-weight-loss',
+              'best-cat-food-for-hairballs'],
+  'sections': [{'h': 'What indoor formulas actually change',
+                'p': ['Most indoor recipes trim fat and calories and add fiber for hairballs or '
+                      'stool. They are still complete foods when labeled that way. They are not a '
+                      'license to leave a full bowl out for 18 hours of napping. If your indoor '
+                      'cat is already round, see <a '
+                      'href="/learning/overweight-cat-weight-loss">overweight cat weight loss</a> '
+                      'before you buy a prettier indoor bag and keep free-feeding.',
+                      'Moisture still matters in a climate-controlled apartment. A complete wet '
+                      'meal plus a fountain often helps more than a fiber slogan. See <a '
+                      'href="/learning/wet-vs-dry-cat-food">wet vs dry</a> and <a '
+                      'href="/learning/cat-water-fountain-benefits">fountains</a>.'],
+                'ul': ['Weigh food; indoor kcal guides are often lower than “adult” guides on the '
+                       'same brand.',
+                       'Schedule two or three meals instead of an all-day buffet.',
+                       'Use a puzzle feeder for part of the dry ration.',
+                       'Play with a wand toy before dinner so hunting happens before eating.']},
+               {'h': 'Hairball lines versus brushing',
+                'p': ['Indoor cats groom a lot. Fiber can help some hair pass. Brushing removes '
+                      'more hair before it is swallowed. See <a '
+                      'href="/learning/best-cat-food-for-hairballs">hairball food</a> and <a '
+                      'href="/learning/how-to-reduce-cat-shedding">shedding</a>. Frequent vomiting '
+                      'of hair is still a veterinary conversation — it can be IBD or a thyroid '
+                      'issue, not a food flavor.']},
+               {'h': 'Boredom looks like hunger',
+                'p': ['A cat that follows you to the kitchen at 5 a.m. may be asking for a hunt, '
+                      'not a third breakfast. Rotate toys. Open a window perch. A second litter '
+                      'box reduces stress that can look like snack begging.']},
+               {'h': 'Multi-cat indoor math',
+                'p': ['Free-fed community bowls make one cat fat and one cat skinny. Feed '
+                      'separately. The indoor formula cannot referee. See <a '
+                      'href="/learning/how-much-to-feed-a-cat">how much to feed a cat</a>.']},
+               {'h': 'Shopping an indoor plan you will follow',
+                'p': ['Pick one complete indoor or adult food, a fountain, and a wand toy. Browse '
+                      '<a href="/cat">the cat aisle</a>. We will not invent a study that says '
+                      'indoor kibble replaces play.']}],
+  'faqs': [{'q': 'Do indoor cats need special food?',
+            'a': 'They need complete calories that match a low-activity life. Indoor formulas can '
+                 'help. Measuring and play help more.'},
+           {'q': 'Is grain-free better for indoor cats?',
+            'a': 'Not as a default. See our grain-free cat guide. Calories and moisture usually '
+                 'matter more than grain.'},
+           {'q': 'Can indoor cats eat only dry food?',
+            'a': 'Many do. If urine is concentrated or the cat is overweight, your veterinarian '
+                 'may want more wet food.'}],
+  'publishedAt': '2026-04-05T09:00:00.000Z'},
+ {'slug': 'how-much-to-feed-a-cat',
+  'title': 'How Much to Feed a Cat: Kcal, Body Condition, and the Bottomless Bowl',
+  'description': 'How much to feed a cat: use kcal and a body-condition score, not the can’s wide '
+                 'range. Treats, wet-dry mixes, and when weight change is medical.',
+  'petType': 'cat',
+  'category': 'Nutrition',
+  'tags': ['how much to feed a cat',
+           'cat calorie needs',
+           'cat body condition score',
+           'how many cans to feed a cat',
+           'cat feeding chart'],
+  'img': 'indoor-cat',
+  'alt': 'Measuring cup and kitchen scale beside a cat food can and a body-condition diagram',
+  'intro': 'Cat feeding charts assume an average cat that does not steal the dog’s food. The '
+           'honest method is calories, a 1–9 body-condition score, and a scale. This Petshiwü '
+           'walkthrough shows how to find kcal on a can, mix wet and dry without double dinner, '
+           'and know when weight loss is a thyroid problem rather than a victory.',
+  'shopPath': '/cat',
+  'shop': 'Shop cat supplies at Petshiwü, a nationwide online pet store. Free shipping over $49, '
+          'no autoship. NYC delivery is available now; nationwide shipping opens soon.',
+  'related': ['best-wet-cat-food-2026',
+              'overweight-cat-weight-loss',
+              'best-cat-food-for-indoor-cats'],
+  'sections': [{'h': 'Find the kcal line before you trust the “cats 8–12 lb” row',
+                'p': ['Cans hide huge energy differences. A 3-ounce pâté might be 70 kcal or 120. '
+                      'Dry cups vary by kibble size. Write the daily target on the pantry door. '
+                      'Indoor cats often need the low end. Kittens need growth food and more '
+                      'frequent meals — see <a href="/learning/best-kitten-food-2026">kitten '
+                      'food</a>.',
+                      'Your veterinarian can set a target after feeling the ribs. Online '
+                      'calculators are starting points. Neutered indoor adults often need fewer '
+                      'calories than people expect.'],
+                'ul': ['Feel for ribs under a slight fat cover.',
+                       'A waist should appear behind the ribs from above.',
+                       'Treats and tuna water count.',
+                       'Re-weigh every two weeks and adjust 5–10% if the trend is wrong.']},
+               {'h': 'Mixed feeding without guessing',
+                'p': ['If you feed wet and dry, add the calories. Do not use the full dry guide '
+                      'plus two cans. See <a href="/learning/wet-vs-dry-cat-food">wet vs dry</a>. '
+                      'Puzzle feeders can stretch a dry ration — they do not erase kcal.']},
+               {'h': 'When appetite is a vital sign',
+                'p': ['A cat that stops eating is a medical clock, especially overweight cats at '
+                      'risk of hepatic lipidosis. A cat that eats constantly and still loses '
+                      'weight needs labs. Do not keep adding food because the meow is convincing. '
+                      'See <a href="/learning/picky-cat-not-eating">picky cat not eating</a>.']},
+               {'h': 'Multi-cat households',
+                'p': ['Microchip feeders or separate rooms beat a community bowl. The skinny cat '
+                      'cannot “even out” the fat cat’s intake. Shop measured meals in <a '
+                      'href="/cat">the cat aisle</a>.']},
+               {'h': 'Tools that keep portions boring',
+                'p': ['A kitchen scale, timed meals, and a fountain for water. Automatic feeders '
+                      'help schedules if the grams are right — see the dog feeder guide for the '
+                      'same math idea.']}],
+  'faqs': [{'q': 'How many calories does a 10-pound cat need?',
+            'a': 'Many indoor neutered cats land around 180–220 kcal per day, but the range is '
+                 'wide. Use body condition and your veterinarian, not a single internet number.'},
+           {'q': 'Should I leave dry food out all day?',
+            'a': 'Free-feeding makes it hard to notice a skipped meal and easy to overfeed. Timed '
+                 'meals are clearer. Some grazers do fine if weight stays stable.'},
+           {'q': 'Why is my cat hungry after a measured meal?',
+            'a': 'Boredom, a calorie target that is too low, hyperthyroidism, or a habit of being '
+                 'rewarded for begging. Recheck the plan with your veterinarian.'}],
+  'publishedAt': '2026-04-07T10:00:00.000Z'},
+ {'slug': 'best-cat-food-for-hairballs',
+  'title': 'Best Cat Food for Hairball Control: Fiber, Brushing, and When Vomiting Is Not Hair',
+  'description': 'Best cat food for hairballs: how fiber formulas work, why brushing beats a '
+                 'slogan, and when frequent vomiting needs a veterinarian instead of a new kibble.',
+  'petType': 'cat',
+  'category': 'Nutrition',
+  'tags': ['best cat food for hairballs',
+           'hairball control cat food',
+           'cat vomiting hair',
+           'hairball remedy diet',
+           'indoor cat hairballs'],
+  'img': 'indoor-cat',
+  'alt': 'Longhaired cat being brushed beside a hairball-control food bowl and a litter of shed '
+         'fur',
+  'intro': 'Hairball food adds fiber so swallowed fur moves through the gut instead of coming back '
+           'up on the rug. That helps some cats. It does not explain every vomit, and it does not '
+           'replace a comb. This Petshiwü guide separates a grooming problem from a medical one.',
+  'shopPath': '/cat',
+  'shop': 'Shop cat supplies at Petshiwü. Free shipping over $49, no autoship. NYC delivery now; '
+          'nationwide shipping soon.',
+  'related': ['how-to-reduce-cat-shedding',
+              'best-cat-food-for-indoor-cats',
+              'picky-cat-not-eating'],
+  'sections': [{'h': 'Fiber can help transit — it cannot diagnose IBD',
+                'p': ['Hairball-control recipes often use cellulose or other fibers to bulk the '
+                      'stool and move hair. If your cat passes nicer stools and vomits less after '
+                      'a slow switch, you found a useful tool. If the cat still retches daily, '
+                      'think nausea, food intolerance, or inflammatory bowel disease — clinic '
+                      'work, not a third bag.',
+                      'Longhaired indoor cats swallow more fur. Daily brushing removes the load '
+                      'before it is swallowed. See <a '
+                      'href="/learning/how-to-reduce-cat-shedding">reducing shedding</a>.'],
+                'ul': ['Brush before you buy another gel.',
+                       'Count vomits per week so you have a number for the veterinarian.',
+                       'Hairball treats still have calories.',
+                       'A cat that hides after vomiting needs an appointment, not a new flavor.']},
+               {'h': 'Petroleum gels and treats',
+                'p': ['Lubricant gels can help some cats pass hair. Use cat-labeled products and '
+                      'your veterinarian’s OK if the cat has a history of aspiration or diarrhea. '
+                      'Human mineral-oil tricks are a bad idea. Treats labeled hairball are still '
+                      'treats.']},
+               {'h': 'When “hairball” is a foreign body',
+                'p': ['String, ribbon, and rubber bands cause linear foreign bodies. Repeated '
+                      'unproductive retching with a painful belly is emergency care. Do not wait '
+                      'for a hairball food to work.']},
+               {'h': 'Indoor formulas overlap',
+                'p': ['Many indoor foods already add fiber. You may not need a separate hairball '
+                      'SKU. See <a href="/learning/best-cat-food-for-indoor-cats">indoor cat '
+                      'food</a> and measure calories so the fiber plan does not become a weight '
+                      'plan gone wrong.']},
+               {'h': 'Shopping a calmer coat-and-bowl kit',
+                'p': ['Pick one complete food, a slicker or comb, and a fountain. Browse <a '
+                      'href="/cat">the cat aisle</a>. We will not invent a clinical ranking of '
+                      'hairball kibbles.']}],
+  'faqs': [{'q': 'Does hairball food stop all vomiting?',
+            'a': 'No. It may reduce hair-related vomiting. Daily vomiting has other causes. See '
+                 'your veterinarian.'},
+           {'q': 'Is malt paste safe every day?',
+            'a': 'Ask your veterinarian. Some cats get diarrhea. Calories add up. Brushing is the '
+                 'safer daily habit.'},
+           {'q': 'Should I shave my cat to stop hairballs?',
+            'a': 'A lion cut is a grooming choice some longhairs need. It is not required for '
+                 'every cat. Ask a professional groomer or the clinic if mats are the issue.'}],
+  'publishedAt': '2026-04-10T11:00:00.000Z'},
+ {'slug': 'best-cat-treats-2026',
+  'title': 'Best Cat Treats 2026: Training Bits, Lickables, and the Tiny Calorie Bomb',
+  'description': 'Best cat treats 2026: how to pick lickable tubes, freeze-dried bits, and dental '
+                 'treats without blowing the daily calorie budget or a food trial.',
+  'petType': 'cat',
+  'category': 'Nutrition',
+  'tags': ['best cat treats 2026',
+           'lickable cat treats',
+           'low calorie cat treats',
+           'freeze dried cat treats',
+           'cat treat calories'],
+  'img': 'kitten',
+  'alt': 'Lickable cat treat tube and freeze-dried bits arranged by calorie size for a 2026 treat '
+         'guide',
+  'intro': 'Cat treats are tiny and dense. A few lickable tubes can be a meal. In 2026 the aisle '
+           'is full of mousse sticks, crunchy pillows, and freeze-dried fish. This Petshiwü guide '
+           'assigns jobs: training, medication wrapping, and dental — then keeps extras under '
+           'about 10% of daily calories.',
+  'shopPath': '/cat',
+  'shop': 'Petshiwü can send the bowls, foods, and extras this best cat treats article points to. '
+          'Free shipping over $49 and no autoship. NYC delivery is available now; nationwide '
+          'shipping opens soon.',
+  'related': ['how-much-to-feed-a-cat', 'picky-cat-not-eating', 'best-wet-cat-food-2026'],
+  'sections': [{'h': 'Name the job',
+                'p': ['Lickable tubes help pill time and lazy bonding. Freeze-dried '
+                      'single-ingredient bits help clicker-style training. Crunchy treats are '
+                      'optional and easy to overfeed. Dental treats only help if the cat actually '
+                      'chews them. Allergy trials need treats that match the diet.',
+                      'Read for onion, garlic, and xylitol. People “sugar-free” snacks are not cat '
+                      'snacks.']},
+               {'h': 'Calorie math for a 10-pound cat',
+                'p': ['If dinner is 200 kcal, treats should stay near 20 kcal unless your '
+                      'veterinarian set a different plan. One tube can be 10–30 kcal. Subtract '
+                      'from the can. See <a href="/learning/how-much-to-feed-a-cat">how much to '
+                      'feed a cat</a>.'],
+                'ul': ['Use pea-sized pieces for training.',
+                       'Do not leave a pouch out to spoil.',
+                       'Skip tuna-in-oil as a daily treat.',
+                       'If the cat is on a urinary or renal diet, ask before adding grocery '
+                       'fish.']},
+               {'h': 'Picky cats and treat monsters',
+                'p': ['If dinner is ignored until the tube appears, you trained a strike. Use '
+                      'treats after a real meal or as a measured topper on complete food. See <a '
+                      'href="/learning/picky-cat-not-eating">picky cat not eating</a>.']},
+               {'h': 'Dental and hairball treat claims',
+                'p': ['Crunchy dental snacks are a maybe. Brushing wins. Hairball treats are fiber '
+                      'plus flavor. Neither replaces veterinary dentistry or a comb.']},
+               {'h': 'Shopping a two-treat drawer',
+                'p': ['Pick one training bit and one lickable. Browse <a href="/cat">the cat '
+                      'aisle</a>. Keep lot codes like food.']}],
+  'faqs': [{'q': 'Are lickable cat treats complete food?',
+            'a': 'Most are complementary. They are not dinner. Check the label. A few brands sell '
+                 'complete mousse meals — those are different products.'},
+           {'q': 'Can kittens have treats?',
+            'a': 'Tiny amounts of complete-food-compatible treats are fine. Milk is not a treat '
+                 'plan. Keep calories in the growth budget.'},
+           {'q': 'What treats are safest for a food trial?',
+            'a': 'Only what your veterinarian approved. Many trials fail because of flavored '
+                 'treats and toothpaste.'}],
+  'publishedAt': '2026-04-12T12:00:00.000Z'},
+ {'slug': 'picky-cat-not-eating',
+  'title': 'Picky Cat Not Eating: Nausea, Texture, and the 24-Hour Rule',
+  'description': 'Picky cat not eating: when to call a vet, how to warm food, why rotating flavors '
+                 'backfires, and how hepatic lipidosis risk changes the timeline.',
+  'petType': 'cat',
+  'category': 'Health',
+  'tags': ['picky cat not eating',
+           'cat not eating but acting normal',
+           'how to get a cat to eat',
+           'cat appetite loss',
+           'cat food aversion'],
+  'img': 'wet-cat-food',
+  'alt': 'Cat sniffing and turning away from a bowl of wet food while a thermometer checks warmth',
+  'intro': 'Cats that skip meals get sick faster than dogs. An overweight cat that stops eating '
+           'can slide toward hepatic lipidosis in days. “Picky” is allowed after a veterinarian '
+           'says the mouth, gut, and labs look okay. This Petshiwü page is the triage and the bowl '
+           'strategy — not a flavor parade.',
+  'shopPath': '/cat',
+  'shop': 'Ready to restock after reading about picky cat not eating? Petshiwü ships as a '
+          'nationwide online pet store with free shipping over $49 and no autoship. NYC delivery '
+          'is available now; nationwide shipping opens soon.',
+  'related': ['best-wet-cat-food-2026', 'best-senior-cat-food', 'how-much-to-feed-a-cat'],
+  'sections': [{'h': 'The 24-hour rule is shorter for some cats',
+                'p': ['A kitten, a senior, a diabetic, or a cat that already looks dull should not '
+                      'wait a full day. Any cat with vomiting, hiding, or a painful belly needs '
+                      'the clinic now. Do not syringe random milk. Do not wait for a new brand to '
+                      'arrive overnight.',
+                      'Dental pain, constipation, kidney disease, pancreatitis, and nausea from '
+                      'vaccines or meds all look like snobbery.']},
+               {'h': 'If the exam is clear, stop the buffet',
+                'p': ['Offer a measured complete meal. Warm wet food to just above room '
+                      'temperature. Pick it up after 20–30 minutes. Do not follow with roast '
+                      'chicken at 9 p.m. See <a href="/learning/best-wet-cat-food-2026">wet food '
+                      'textures</a>.'],
+                'ul': ['Try pâté if shreds fail, or the reverse — one change at a time.',
+                       'Use a wide, shallow dish so whiskers are not crammed.',
+                       'Sit nearby without looming; some cats eat after you leave.',
+                       'Ask the clinic about appetite stimulants if medical nausea is still '
+                       'suspected.']},
+               {'h': 'Food aversion is real',
+                'p': ['Cats that were sick in the hospital may refuse the prescription food they '
+                      'smelled while nauseated. The veterinarian can switch textures or brands. Do '
+                      'not punish. Do not starve a “trial” at home.']},
+               {'h': 'Toppers without wrecking a complete diet',
+                'p': ['A teaspoon of a complete mousse or a veterinarian-approved topper can help. '
+                      'If toppers become the meal, switch to a complete wet food and stop '
+                      'pretending the ignored kibble counts. See <a '
+                      'href="/learning/how-much-to-feed-a-cat">feeding math</a>.']},
+               {'h': 'Shopping after the all-clear',
+                'p': ['Buy one complete food the cat already liked when healthy. Browse <a '
+                      'href="/cat">the cat aisle</a>. Call back if the cat still will not eat.']}],
+  'faqs': [{'q': 'Why is my cat suddenly picky?',
+            'a': 'Pain, nausea, stress, and learned waiting for better food are common. Sudden '
+                 'change plus other signs is medical until proven otherwise.'},
+           {'q': 'Can I force-feed at home?',
+            'a': 'Do not invent a syringe plan. You can cause aspiration or food aversion. Ask the '
+                 'clinic for a technique or a feeding tube if needed.'},
+           {'q': 'Is tuna a good appetite fix?',
+            'a': 'A tiny amount of water-packed tuna is sometimes used short term under veterinary '
+                 'guidance. Daily tuna is a thiamine and mercury problem and trains a tuna-only '
+                 'cat.'}],
+  'publishedAt': '2026-04-14T13:00:00.000Z'},
+ {'slug': 'cat-water-fountain-benefits',
+  'title': 'Cat Water Fountain Benefits: Why Running Water Beats a Stale Bowl',
+  'description': 'Cat water fountain benefits: how moving water encourages drinking, cleaning '
+                 'schedules, filter types, and when extra thirst still needs a veterinarian.',
+  'petType': 'cat',
+  'category': 'Care',
+  'tags': ['cat water fountain benefits',
+           'best cat fountain',
+           'how to clean a cat fountain',
+           'cat not drinking water',
+           'cat hydration fountain'],
+  'img': 'cat-fountain',
+  'alt': 'Stainless cat water fountain running beside a still bowl to show why moving water helps '
+         'drinking',
+  'intro': 'Many cats ignore a dusty bowl and will lap a stream. A fountain is a hydration tool, '
+           'not a kidney treatment. This Petshiwü guide covers why moving water helps, how often '
+           'to clean so the gadget does not become a germ spa, and when extra drinking is a '
+           'lab-work clue.',
+  'shopPath': '/cat',
+  'shop': 'Build the cat water fountain benefits shopping list in our cat collection. Petshiwü '
+          'offers free shipping over $49, no autoship, NYC delivery now, and nationwide shipping '
+          'opening soon.',
+  'related': ['best-cat-food-for-urinary-health',
+              'how-much-to-feed-a-cat',
+              'best-wet-cat-food-2026'],
+  'sections': [{'h': 'Why movement and freshness matter',
+                'p': ['Cats notice stale taste and whisker-cramped dishes. A fountain circulates '
+                      'water and often uses a carbon or foam filter that improves smell. Some cats '
+                      'that “never drink” will use a fountain within a week. Keep a still bowl too '
+                      'during the introduction so you do not remove the only water they know.',
+                      'Wet food still counts as water. A fountain plus wet meals is a solid indoor '
+                      'hydration pair. See <a href="/learning/wet-vs-dry-cat-food">wet vs '
+                      'dry</a>.']},
+               {'h': 'Cleaning is the product',
+                'p': ['A dirty fountain grows slime. Wash the pump, impeller, and bowl on the '
+                      'schedule the brand lists — often weekly, with filter changes every two to '
+                      'four weeks. Stainless and ceramic clean easier than stained plastic.'],
+                'ul': ['Use pet-safe soap and rinse well.',
+                       'Keep a spare filter so you actually change it.',
+                       'Place the fountain away from the litter box.',
+                       'If the motor screams, clean the impeller before you replace the unit.']},
+               {'h': 'When thirst is a medical sign',
+                'p': ['A fountain that suddenly empties twice as fast, or a cat that camps at the '
+                      'drip, needs a veterinary visit. Kidney disease, diabetes, and '
+                      'hyperthyroidism make cats drink more. Do not celebrate “great hydration” '
+                      'without asking why it changed. See <a '
+                      'href="/learning/best-cat-food-for-kidney-support">kidney support</a>.']},
+               {'h': 'Multi-cat and dog houses',
+                'p': ['Get a fountain with enough flow that two cats are not arguing. Dogs will '
+                      'drink from it — that is fine if you clean more often. Cordless travel '
+                      'fountains exist for hotels; they still need cleaning.']},
+               {'h': 'Shopping a fountain you will maintain',
+                'p': ['Buy the one you will take apart. Browse fountains in <a href="/cat">the cat '
+                      'aisle</a>. A $15 bowl you wash daily beats a fountain you never open.']}],
+  'faqs': [{'q': 'Do cats need a fountain?',
+            'a': 'Need is a strong word. Many drink more with one. All cats need clean water. A '
+                 'fountain is a useful upgrade for indoor cats on dry food.'},
+           {'q': 'Are plastic fountains bad?',
+            'a': 'They can scratch and hold biofilm. Stainless or ceramic is easier to keep truly '
+                 'clean. Replace plastic that stays cloudy.'},
+           {'q': 'Can a fountain replace wet food?',
+            'a': 'No. It adds drinking water. Wet food still adds moisture in the meal.'}],
+  'publishedAt': '2026-04-17T14:00:00.000Z'},
+ {'slug': 'best-cat-litter-2026',
+  'title': 'Best Cat Litter 2026: Clump, Dust, and the Two-Box Rule',
+  'description': 'Best cat litter 2026: clumping clay vs silica vs plant, dust and tracking, how '
+                 'many boxes you need, and when a litter change causes accidents.',
+  'petType': 'cat',
+  'category': 'Care',
+  'tags': ['best cat litter 2026',
+           'clumping cat litter',
+           'low dust cat litter',
+           'tofu cat litter',
+           'how many litter boxes'],
+  'img': 'cat-litter',
+  'alt': 'Three litter types in open pans showing clump, crystal, and plant pellets for a 2026 '
+         'litter comparison',
+  'intro': 'Litter is the product your cat votes on every day. In 2026 the aisle is clay, silica '
+           'crystals, tofu, pine, and mixed blends. The best litter is the one your cat uses, that '
+           'you will scoop, with dust you can live with. This Petshiwü guide is the buyer’s '
+           'filter, not a brand coronation.',
+  'shopPath': '/cat',
+  'shop': 'When you are ready to put this best cat litter article into the cart, Petshiwü is a '
+          'nationwide online pet store with free shipping over $49 and no autoship. NYC delivery '
+          'is available now; nationwide shipping opens soon.',
+  'related': ['self-cleaning-litter-box-guide', 'cat-uti-symptoms', 'litter-box-training-a-kitten'],
+  'sections': [{'h': 'Clumping clay is still the control group',
+                'p': ['Sodium bentonite clay forms scoopable clumps so you can remove urine daily '
+                      'and keep the box livable. It is heavy and can be dusty. If someone in the '
+                      'house has asthma, look at low-dust formulas or switch materials. Scented '
+                      'clay is a common reason cats start peeing on the bathmat.',
+                      'Silica crystals absorb urine and control odor with less scooping of liquid, '
+                      'but some cats dislike the texture. Plant litters (tofu, corn, wood) vary in '
+                      'clump strength and can mold if you leave wet clumps in a humid bathroom.'],
+                'ul': ['Plan one box per cat plus one extra.',
+                       'Scoop clay at least once daily.',
+                       'Change the type gradually — mix old and new over a week.',
+                       'If accidents start after a litter swap, go back to the old type and call '
+                       'the vet if straining is involved.']},
+               {'h': 'Tracking and floor reality',
+                'p': ['Fine granules track. Larger pellets track less and may not clump as well. A '
+                      'mat and a high-sided box help. Covered boxes trap odor and can feel like a '
+                      'trap to a nervous cat. See <a '
+                      'href="/learning/self-cleaning-litter-box-guide">self-cleaning boxes</a> if '
+                      'scooping is the failure point.']},
+               {'h': 'Medical clues in the box',
+                'p': ['Tiny clumps, blood, or crying in the box is a veterinary visit — see <a '
+                      'href="/learning/cat-uti-symptoms">UTI symptoms</a>. Do not “try a new '
+                      'litter” while a male cat strains.']},
+               {'h': 'Kittens and eaten litter',
+                'p': ['Some kittens eat clumping litter. Use a non-clumping or clinic-approved '
+                      'option until they stop grazing. See <a '
+                      'href="/learning/litter-box-training-a-kitten">litter training</a>.']},
+               {'h': 'Shopping a litter you will actually buy again',
+                'p': ['Buy the smallest bag of a new type first. Browse litter in <a '
+                      'href="/cat">the cat aisle</a>. Keep a backup of the known-good litter '
+                      'during any trial.']}],
+  'faqs': [{'q': 'How often should I dump the whole box?',
+            'a': 'With daily scooping, many clay boxes get a full change every 2–4 weeks, sooner '
+                 'if odor wins. Follow the litter type’s instructions and your nose.'},
+           {'q': 'Is unscented better?',
+            'a': 'Usually. Cats have stronger noses than marketing departments. If you need scent, '
+                 'scent the room, not the box.'},
+           {'q': 'Do I need expensive litter for multiple cats?',
+            'a': 'You need enough boxes and daily scooping more than a luxury granule. A cheap '
+                 'litter you scoop beats a premium litter you ignore.'}],
+  'publishedAt': '2026-04-19T08:00:00.000Z'},
+ {'slug': 'self-cleaning-litter-box-guide',
+  'title': 'Self-Cleaning Litter Box Guide: Rakes, Sensors, and Cats That Hate Motors',
+  'description': 'Self-cleaning litter box guide: how automatic rakes work, noise and safety, '
+                 'litter compatibility, and when a simple scoop is still the better box.',
+  'petType': 'cat',
+  'category': 'Care',
+  'tags': ['self cleaning litter box guide',
+           'automatic litter box',
+           'litter robot alternative',
+           'automatic litter box safety',
+           'best automatic cat box'],
+  'img': 'cat-litter',
+  'alt': 'Automatic self-cleaning litter box mid-rake next to a standard scooped box for a buyer’s '
+         'comparison',
+  'intro': 'A self-cleaning box is a time machine for people who will still empty a waste drawer. '
+           'It is not a medical monitor, even when an app counts visits. This Petshiwü guide '
+           'covers rake-style and rotating units, which cats refuse them, and the safety checks '
+           'that matter more than the Wi-Fi badge.',
+  'shopPath': '/cat',
+  'shop': 'Petshiwü stocks everyday supplies that pair with self cleaning litter box, without an '
+          'autoship contract. Free shipping over $49. NYC delivery is available now, and '
+          'nationwide shipping opens soon — start in our cat collection.',
+  'related': ['best-cat-litter-2026', 'cat-uti-symptoms', 'how-to-stop-cats-scratching-furniture'],
+  'sections': [{'h': 'What the machine actually does',
+                'p': ['Most units wait a few minutes after the cat leaves, then rake or rotate so '
+                      'waste drops into a sealed bin. That delay matters — a cat still in the box '
+                      'should never be scooped by a motor. Weight sensors and pinch guards are why '
+                      'you buy a reputable unit, not a no-name gadget with a blade.',
+                      'You still buy litter that the unit accepts. Many automatics want a specific '
+                      'clump size. The wrong crystal litter jams rakes. See <a '
+                      'href="/learning/best-cat-litter-2026">litter 2026</a>.'],
+                'ul': ['Read the weight minimum — kittens and tiny cats can be invisible to '
+                       'sensors.',
+                       'Place the unit where a startled cat has an exit.',
+                       'Empty the waste drawer on the schedule, not when it overflows.',
+                       'Keep a backup open box during the first two weeks.']},
+               {'h': 'Cats that vote no',
+                'p': ['Nervous cats, seniors with arthritis, and cats that hide in boxes may hate '
+                      'the rumble. Multi-cat homes still need more than one box. If a cat starts '
+                      'peeing beside the unit, the machine lost the election. Go back to an open '
+                      'box and check for pain — see <a href="/learning/cat-uti-symptoms">UTI '
+                      'signs</a>.']},
+               {'h': 'Apps are not a diagnosis',
+                'p': ['Visit counts can hint that something changed. They cannot tell cystitis '
+                      'from a dirty drawer. If visits spike and clumps shrink, call the '
+                      'veterinarian.']},
+               {'h': 'Cost versus scooping five years',
+                'p': ['Add litter compatibility, liners, and filters to the sticker price. If you '
+                      'travel, an automatic box plus a sitter who knows the reset button is a real '
+                      'benefit. If you are home and scoop twice a day, a $20 pan may be enough.']},
+               {'h': 'Shopping without the infomercial',
+                'p': ['Buy the unit you will clean. Browse boxes and litter in <a href="/cat">the '
+                      'cat aisle</a>. We will not invent a 2026 lab test that ranks every '
+                      'robot.']}],
+  'faqs': [{'q': 'Are self-cleaning boxes safe?',
+            'a': 'Reputable units with sensors are used safely by many cats. Supervise '
+                 'introductions. Skip units without clear pinch protection. Kittens need extra '
+                 'caution.'},
+           {'q': 'Can I use any litter in an automatic box?',
+            'a': 'No. Follow the manufacturer. Wrong litter breaks rakes and voids warranties.'},
+           {'q': 'Do I still need a second box?',
+            'a': 'Yes in multi-cat homes, and yes as a backup when the motor fails. The plus-one '
+                 'rule still applies.'}],
+  'publishedAt': '2026-04-22T09:00:00.000Z'},
+ {'slug': 'how-to-brush-dog-teeth',
+  'title': 'How to Brush Dog Teeth: A Two-Week Training Plan That Sticks',
+  'description': 'How to brush dog teeth: dog-safe toothpaste, finger brushes, a two-week '
+                 'desensitization plan, and when brushing is not enough without a veterinary '
+                 'cleaning.',
+  'petType': 'dog',
+  'category': 'Health',
+  'tags': ['how to brush dog teeth',
+           'dog toothpaste xylitol',
+           'finger brush dogs',
+           'dog dental care at home',
+           'puppy tooth brushing'],
+  'img': 'dog-dental',
+  'alt': 'Person brushing a dog’s canine teeth with a pet toothbrush and enzymatic toothpaste',
+  'intro': 'Brushing is the only home habit that reliably reaches the gumline. Chews help. Water '
+           'additives might help. Nothing replaces a soft brush and a dog toothpaste that does not '
+           'contain xylitol. This Petshiwü plan is two weeks of training, not a wrestling match on '
+           'night one.',
+  'shopPath': '/dog',
+  'shop': 'Shop dog supplies at Petshiwü. Free shipping over $49, no autoship. NYC delivery now; '
+          'nationwide shipping soon.',
+  'related': ['best-dental-dog-food-and-chews', 'cat-dental-care-at-home', 'best-dog-treats-2026'],
+  'sections': [{'h': 'Buy the right paste before you touch a fang',
+                'p': ['Human toothpaste is not for dogs. Xylitol is toxic. Fluoride pastes are for '
+                      'people. Get an enzymatic dog toothpaste and a soft finger brush or a '
+                      'small-headed pet brush. Let the dog lick paste off your finger for three '
+                      'days so the flavor is a jackpot, not a surprise.',
+                      'If the mouth smells like infection, the face is swollen, or the dog will '
+                      'not let you near the muzzle, stop and book dentistry. Brushing an abscess '
+                      'is cruelty.']},
+               {'h': 'The two-week ladder',
+                'p': ['Days 1–3: paste on a finger, lips only, treat after. Days 4–7: finger on '
+                      'the big canine teeth for two seconds. Days 8–10: brush those four teeth. '
+                      'Days 11–14: add a few premolars. You do not need a perfect 30-second set on '
+                      'day one. Daily short sessions beat a weekly battle.'],
+                'ul': ['Lift the lip; you do not need to pry the mouth open like a crocodile.',
+                       'Focus on the outside surfaces — that is where plaque likes to sit.',
+                       'Stop if you see fresh blood that is more than a pink smear; call the vet.',
+                       'Count dental chews as calories — see <a '
+                       'href="/learning/best-dental-dog-food-and-chews">dental chews</a>.']},
+               {'h': 'Puppies and seniors',
+                'p': ['Puppies learn faster. Make it a game before adult tartar arrives. Seniors '
+                      'with loose teeth need a veterinary look before you scrub. Anesthesia-free '
+                      '“cleanings” that only polish what you can see are not a substitute for a '
+                      'true dental with radiographs.']},
+               {'h': 'When brushing is not enough',
+                'p': ['Established tartar and pocketing need a professional cleaning. Home care '
+                      'keeps the next year kinder. Pair brushing with a food the dog can actually '
+                      'chew — see <a href="/learning/best-senior-dog-food-2026">senior '
+                      'textures</a>.']},
+               {'h': 'Shopping a kit you will use',
+                'p': ['Toothpaste, a brush, and a treat pouch. Browse dental care in <a '
+                      'href="/dog">the dog aisle</a>. We will not sell you a miracle wipe as a '
+                      'brush replacement.']}],
+  'faqs': [{'q': 'How often should I brush my dog’s teeth?',
+            'a': 'Daily is the goal. Three times a week is better than never. Consistency matters '
+                 'more than a perfect two-minute routine.'},
+           {'q': 'What if my dog hates the brush?',
+            'a': 'Stay on the finger-brush step longer. Try a different paste flavor. Do not pin '
+                 'the dog down. Ask a trainer or vet tech for a demo.'},
+           {'q': 'Can I use baking soda?',
+            'a': 'Skip kitchen chemistry. Use a veterinary toothpaste designed for dogs. Baking '
+                 'soda tastes bad and is easy to overdo.'}],
+  'publishedAt': '2026-04-24T10:00:00.000Z'},
+ {'slug': 'cat-dental-care-at-home',
+  'title': 'Cat Dental Care at Home: Finger Brushes, Gels, and the Cat Who Will Not Open',
+  'description': 'Cat dental care at home: how to introduce a finger brush, which gels help, why '
+                 'crunchy kibble is not a cleaning, and when the mouth needs a veterinarian.',
+  'petType': 'cat',
+  'category': 'Health',
+  'tags': ['cat dental care at home',
+           'how to brush cat teeth',
+           'cat dental gel',
+           'cat bad breath',
+           'feline tooth resorption'],
+  'img': 'kitten',
+  'alt': 'Cat lip lifted for a gentle finger-brush session with pet toothpaste on a towel',
+  'intro': 'Cats get tooth resorption and painful stomatitis that no kibble can crunch away. Home '
+           'care is a gentle delay tactic and a way to spot problems early. This Petshiwü guide is '
+           'how to try a finger brush without losing blood — yours or theirs — and when to stop '
+           'and book dentistry.',
+  'shopPath': '/cat',
+  'shop': 'Use our cat collection to continue from cat dental care at home with brands you can '
+          'repurchase. Petshiwü is a nationwide online pet store: free shipping over $49, no '
+          'autoship, NYC delivery now, nationwide shipping soon.',
+  'related': ['how-to-brush-dog-teeth', 'best-wet-cat-food-2026', 'picky-cat-not-eating'],
+  'sections': [{'h': 'Look before you scrub',
+                'p': ['Red gums, brown line lesions on the teeth, drooling, and dropping food are '
+                      'pain signs. Tooth resorption is common and excruciating. If you see a hole '
+                      'in a tooth or the cat paws at the mouth, skip the tutorial and call the '
+                      'clinic. Home brushing does not treat resorption.',
+                      'Bad breath is a clue, not a cologne issue. A tooth root problem can look '
+                      'like a picky eater — see <a href="/learning/picky-cat-not-eating">picky cat '
+                      'not eating</a>.']},
+               {'h': 'A slower ladder than the dog version',
+                'p': ['Week 1: let the cat lick pet toothpaste from a finger while you rest a hand '
+                      'on the cheek. Week 2: wipe the canine with a gauze square. Week 3: a soft '
+                      'finger brush for two seconds. Many cats never accept a full human-style '
+                      'brushing. Partial care is still better than a war.'],
+                'ul': ['Use only cat-safe or pet-safe enzymatic products.',
+                       'Wrap the cat in a towel if they like burrito restraint — stop if they '
+                       'panic.',
+                       'Do the session before play, not after a scare.',
+                       'Never use human toothpaste or xylitol products.']},
+               {'h': 'Gels, water additives, and dental diets',
+                'p': ['Some veterinary gels reduce plaque when applied as labeled. Water additives '
+                      'vary. Dental diets may help a little if the cat chews them. None of these '
+                      'replace an anesthetized cleaning with dental x-rays when disease is '
+                      'present. Wet food is fine — it does not cause the disease by itself. See <a '
+                      'href="/learning/best-wet-cat-food-2026">wet food</a>.']},
+               {'h': 'Anesthesia fears',
+                'p': ['Modern feline dentistry uses monitoring and pain control. Leaving rotten '
+                      'teeth in place is also a risk. Ask the clinic how they monitor seniors. Do '
+                      'not choose a non-anesthetic scraping as a full treatment.']},
+               {'h': 'Shopping a low-drama kit',
+                'p': ['Finger brush, pet toothpaste, and a treat the cat already loves. Browse <a '
+                      'href="/cat">the cat aisle</a>.']}],
+  'faqs': [{'q': 'Can I brush a cat’s teeth every day?',
+            'a': 'If the cat allows it, daily is ideal. A few times a week plus veterinary exams '
+                 'is a realistic plan for many households.'},
+           {'q': 'Does dry food clean cat teeth?',
+            'a': 'Not reliably. Many dry-food cats still need extractions. Format is not '
+                 'dentistry.'},
+           {'q': 'Why does my cat drool when I touch the mouth?',
+            'a': 'Pain or nausea until proven otherwise. Book an oral exam.'}],
+  'publishedAt': '2026-04-26T11:00:00.000Z'},
+ {'slug': 'dog-ear-infection-signs',
+  'title': 'Dog Ear Infection Signs: Smell, Head Shakes, and When to Stop Cleaning',
+  'description': 'Dog ear infection signs: odor, discharge colors, head tilting, and why cotton '
+                 'swabs make things worse. Educational only — infections need a veterinarian.',
+  'petType': 'dog',
+  'category': 'Health',
+  'tags': ['dog ear infection signs',
+           'dog ear smell',
+           'dog shaking head',
+           'otitis externa dogs',
+           'how to clean dog ears'],
+  'img': 'dog-grooming',
+  'alt': 'Person examining a dog’s ear flap without inserting a swab, showing safe at-home '
+         'inspection',
+  'intro': 'Ear infections announce themselves with smell, shake, and a dog that slaps a paw at '
+           'the flap. They do not announce which yeast or bacterium is growing. This Petshiwü '
+           'guide is how to recognize the problem and what not to pour in the canal. Diagnosis and '
+           'medication belong to your veterinarian.',
+  'shopPath': '/dog',
+  'shop': 'Petshiwü can send the bowls, foods, and extras this dog ear infection signs article '
+          'points to. Free shipping over $49 and no autoship. NYC delivery is available now; '
+          'nationwide shipping opens soon.',
+  'related': ['how-often-to-bathe-a-dog',
+              'seasonal-allergies-in-dogs',
+              'best-flea-and-tick-prevention-for-dogs-2026'],
+  'sections': [{'h': 'What you can see and smell at home',
+                'p': ['A healthy ear canal is pale pink and barely scented. Brown gunk, yellow '
+                      'pus, a sweet or yeasty smell, redness, and heat are reasons to book an '
+                      'appointment. Head tilting, circling, or loss of balance can mean the middle '
+                      'ear is involved — that is urgent, not a weekend cleaner project.',
+                      'Floppy ears, swimming, and allergies are common setups. If itch is '
+                      'seasonal, read <a href="/learning/seasonal-allergies-in-dogs">seasonal '
+                      'allergies</a> after the current infection is treated.'],
+                'ul': ['Do not jam cotton swabs down the canal.',
+                       'Do not use hydrogen peroxide or alcohol as a home brew.',
+                       'Do not share another dog’s leftover ear drops.',
+                       'Stop swimming until the veterinarian clears it.']},
+               {'h': 'Cleaning is maintenance, not treatment',
+                'p': ['A vet-approved cleaner can help after the canal is diagnosed as safe to '
+                      'flush. Cleaning an infected, ruptured, or foreign-body ear can push debris '
+                      'deeper. If the dog screams when you lift the flap, put the bottle down.']},
+               {'h': 'Allergies and food are the sequel',
+                'p': ['Recurrent ear infections often sit on allergic skin disease. Treating the '
+                      'yeast once and ignoring fleas or food trials is how you buy drops three '
+                      'times a year. See <a href="/learning/best-dog-food-for-itchy-skin">itchy '
+                      'skin</a> and keep <a '
+                      'href="/learning/best-flea-and-tick-prevention-for-dogs-2026">flea '
+                      'prevention</a> current.']},
+               {'h': 'Hematoma and the shake cycle',
+                'p': ['Violent shaking can burst a blood vessel in the flap (aural hematoma). That '
+                      'needs a veterinary plan. An e-collar can protect the repair. The underlying '
+                      'itch still has to be found.']},
+               {'h': 'What to bring to the appointment',
+                'p': ['A photo of the discharge, a list of swims, and any cleaner you already '
+                      'used. Shop gentle cleaners only after the exam, in <a href="/dog">the dog '
+                      'aisle</a>.']}],
+  'faqs': [{'q': 'Why does my dog’s ear smell like corn chips?',
+            'a': 'A mild odor can be normal yeast on the skin. A strong smell plus redness or pain '
+                 'is an infection until a veterinarian says otherwise.'},
+           {'q': 'Can I use apple cider vinegar in dog ears?',
+            'a': 'No. Home acids can burn inflamed skin and delay real treatment.'},
+           {'q': 'Are upright-eared dogs safe from infections?',
+            'a': 'They get fewer moisture traps, not immunity. Allergies and mites still happen.'}],
+  'publishedAt': '2026-04-29T12:00:00.000Z'},
+ {'slug': 'cat-uti-symptoms',
+  'title': 'Cat UTI Symptoms: Straining, Tiny Clumps, and the Male-Cat Emergency',
+  'description': 'Cat UTI symptoms: frequent box trips, blood, crying, and why a blocked male cat '
+                 'cannot wait. Educational only — this is not a diagnosis or a home protocol.',
+  'petType': 'cat',
+  'category': 'Health',
+  'tags': ['cat UTI symptoms',
+           'cat straining to pee',
+           'blood in cat urine',
+           'blocked cat emergency',
+           'feline cystitis signs'],
+  'img': 'cat-litter',
+  'alt': 'Cat in a litter box with a small urine clump, illustrating straining and urinary warning '
+         'signs',
+  'intro': 'Cats do not send a text that they have a urinary problem. They visit the box, produce '
+           'a bead of urine, or pee on the sink. In males, a blockage can be fatal within hours. '
+           'This Petshiwü page is recognition and urgency — not a cranberry protocol.',
+  'shopPath': '/cat',
+  'shop': 'Ready to restock after reading about cat uti symptoms? Petshiwü ships as a nationwide '
+          'online pet store with free shipping over $49 and no autoship. NYC delivery is available '
+          'now; nationwide shipping opens soon.',
+  'related': ['best-cat-food-for-urinary-health',
+              'best-cat-litter-2026',
+              'cat-water-fountain-benefits'],
+  'sections': [{'h': 'Signs that mean you call today',
+                'p': ['Frequent trips, crying in the box, licking the penis or vulva, blood-tinged '
+                      'urine, and peeing outside the box are all veterinary signs. A male cat that '
+                      'strains with little or no urine, hides, or has a firm painful belly needs '
+                      'emergency care now. Do not wait to see if a new litter helps.',
+                      'Not every “UTI” is infection. Feline idiopathic cystitis is often sterile '
+                      'inflammation. Stones and crystals are another path. Only a clinic can sort '
+                      'them. See <a href="/learning/best-cat-food-for-urinary-health">urinary '
+                      'food</a> after the cat can pee.']},
+               {'h': 'What you should not do at home',
+                'p': ['Do not squeeze the bladder. Do not give leftover antibiotics. Do not offer '
+                      'cranberry chews as treatment. Do not bathe the cat instead of driving. Keep '
+                      'the box scooped so you can see clump size — see <a '
+                      'href="/learning/best-cat-litter-2026">litter</a>.'],
+                'ul': ['Note last seen normal urination time.',
+                       'Bring a urine sample only if you can catch it without delaying care.',
+                       'List any new food, guests, or box changes.',
+                       'If you have two cats, say so — the sample might not be from the sick '
+                       'one.']},
+               {'h': 'Stress and the apartment box',
+                'p': ['Dirty boxes, one box for three cats, and construction noise can trigger '
+                      'cystitis flares. Add boxes and a fountain — <a '
+                      'href="/learning/cat-water-fountain-benefits">fountains</a> — as support '
+                      'after medical care, not instead of it.']},
+               {'h': 'After the ER',
+                'p': ['Follow the pain medication and diet the veterinarian prescribed. A grocery '
+                      '“urinary care” bag is not automatically the same. Recheck appointments '
+                      'exist because blockages recur.']},
+               {'h': 'Shopping support products, not treatments',
+                'p': ['Fountains, extra boxes, and complete wet food live in <a href="/cat">the '
+                      'cat aisle</a>. Prescription diets come from the clinic.']}],
+  'faqs': [{'q': 'Can a cat UTI go away on its own?',
+            'a': 'Do not wait to find out, especially with a male cat. Pain and blockage are '
+                 'emergencies. Some cystitis cases are self-limiting, but you cannot tell from the '
+                 'couch.'},
+           {'q': 'Why is my cat peeing on the bed?',
+            'a': 'Pain, box aversion, and marking are different problems. Rule out medical causes '
+                 'first.'},
+           {'q': 'Does dry food cause UTIs?',
+            'a': 'Low moisture can contribute to concentrated urine in some cats. It is not the '
+                 'only factor. Format changes happen after the exam.'}],
+  'publishedAt': '2026-05-01T13:00:00.000Z'},
+ {'slug': 'best-flea-and-tick-prevention-for-dogs-2026',
+  'title': 'Best Flea and Tick Prevention for Dogs 2026: Oral vs Topical vs Collar',
+  'description': 'Best flea and tick prevention for dogs 2026: how to compare oral chews, '
+                 'topicals, and collars, year-round use, and why yard sprays are not a standalone '
+                 'plan.',
+  'petType': 'dog',
+  'category': 'Health',
+  'tags': ['best flea and tick prevention for dogs 2026',
+           'oral flea chew dogs',
+           'tick collar vs topical',
+           'year round flea prevention',
+           'dog tick prevention'],
+  'img': 'flea-tick',
+  'alt': 'Flea-and-tick chew, topical pipette, and collar laid out for a 2026 prevention '
+         'comparison',
+  'intro': 'Fleas do not honor winter in many U.S. homes, and ticks do not honor a “just the '
+           'backyard” story. In 2026 you can choose an oral isoxazoline chew, a topical, or a '
+           'collar — sometimes more than one job at once. This Petshiwü guide is how to compare '
+           'those tools with your veterinarian, not how to diagnose Lyme disease from a '
+           'screenshot.',
+  'shopPath': '/dog',
+  'shop': 'Build the best flea and tick prevention for dogs shopping list in our dog collection. '
+          'Petshiwü offers free shipping over $49, no autoship, NYC delivery now, and nationwide '
+          'shipping opening soon.',
+  'related': ['flea-prevention-for-cats',
+              'seasonal-allergies-in-dogs',
+              'heartworm-prevention-for-dogs'],
+  'sections': [{'h': 'Start with the dog and the map, not the ad',
+                'p': ['Ask your veterinarian which parasites are active where you hike and whether '
+                      'your dog has a seizure history. Some oral preventives carry labeled '
+                      'cautions for dogs with neurologic disease. Topicals fail when you bathe too '
+                      'soon or the dog swims daily. Collars fail when they sit in the fur like a '
+                      'necklace and never contact skin.',
+                      'Year-round prevention is the default in most of the country because homes '
+                      'stay warm. “I have not seen a flea” is how infestations start in April.'],
+                'ul': ['Give oral preventives with the food your vet recommends if the label says '
+                       'so.',
+                       'Record the date — missing a month is how a tick attaches.',
+                       'Treat all pets in the house. See <a '
+                       'href="/learning/flea-prevention-for-cats">cat flea prevention</a>.',
+                       'Wash bedding when you find fleas; the environment is part of the life '
+                       'cycle.']},
+               {'h': 'Oral versus topical versus collar',
+                'p': ['Orals are tidy and hard to wash off. Topicals can add mite or mosquito '
+                      'claims depending on the product. Collars can last months if fitted '
+                      'correctly — two fingers under the strap, not loose like jewelry. None of '
+                      'these is a vaccine. None replaces checking the dog after tall grass.']},
+               {'h': 'Yard sprays and essential oils',
+                'p': ['Yard treatment can reduce the load. Essential-oil “natural” spot-ons have '
+                      'poisoned dogs. If a bottle smells like a candle shop, ask the clinic before '
+                      'you apply it. We will not sell a garlic-and-vinegar protocol as '
+                      'prevention.']},
+               {'h': 'Itch after you started prevention',
+                'p': ['Dying fleas bite. Allergies continue. If itch explodes, you may have '
+                      'flea-allergy dermatitis plus something else — see <a '
+                      'href="/learning/seasonal-allergies-in-dogs">seasonal allergies</a>. Do not '
+                      'stack three preventives without the veterinarian.']},
+               {'h': 'Shopping a product you will actually give',
+                'p': ['The best preventive is the one that goes on calendar. Browse '
+                      'parasite-control items your vet agrees with in <a href="/dog">the dog '
+                      'aisle</a>. Prescription products may require the clinic.']}],
+  'faqs': [{'q': 'Do indoor dogs need flea prevention in 2026?',
+            'a': 'Usually yes. Fleas hitchhike on people and other pets. Ticks arrive on clothing. '
+                 'Ask your veterinarian about local risk.'},
+           {'q': 'Can I use a dog flea product on a cat?',
+            'a': 'Never. Some dog pyrethroids are deadly to cats. Keep treated dogs from grooming '
+                 'cats until the product is dry if the label says so.'},
+           {'q': 'What if I find a tick already attached?',
+            'a': 'Remove it with fine tweezers close to the skin, pull steadily, and clean the '
+                 'spot. Save the tick if your vet wants it. Watch for lethargy or joint pain and '
+                 'call the clinic.'}],
+  'publishedAt': '2026-05-04T14:00:00.000Z'},
+ {'slug': 'flea-prevention-for-cats',
+  'title': 'Flea Prevention for Cats: Species-Safe Products and the Dog-Product Trap',
+  'description': 'Flea prevention for cats: why dog topicals can kill cats, how to treat the home, '
+                 'and which signs mean anemia in kittens. Vet-guided product choice.',
+  'petType': 'cat',
+  'category': 'Health',
+  'tags': ['flea prevention for cats',
+           'cat flea treatment safe',
+           'dog flea medicine on cats',
+           'kitten flea anemia',
+           'fleas in apartment cats'],
+  'img': 'flea-tick',
+  'alt': 'Cat being checked with a flea comb over a white towel, showing dirt and safe prevention '
+         'tools',
+  'intro': 'Indoor cats get fleas. They get them from buildings, visitors, and the dog. The '
+           'fastest way to a tragedy is putting a dog permethrin product on a cat. This Petshiwü '
+           'guide is species-safe thinking, comb technique, and when a kitten’s flea load is an '
+           'emergency.',
+  'shopPath': '/cat',
+  'shop': 'When you are ready to put this flea prevention for cats article into the cart, Petshiwü '
+          'is a nationwide online pet store with free shipping over $49 and no autoship. NYC '
+          'delivery is available now; nationwide shipping opens soon.',
+  'related': ['wet-vs-dry-cat-food', 'best-kitten-food-2026', 'best-senior-cat-food'],
+  'sections': [{'h': 'Dog products are not “a little strong” — some are lethal',
+                'p': ['Read the species line. If it says dog only, it stays in the dog cabinet. '
+                      'Cats groom themselves and any roommate they sleep on. If a dog topical is '
+                      'still wet, keep the cat away until the label’s dry time passes.',
+                      'Your veterinarian can match a cat-licensed oral, topical, or collar to age '
+                      'and weight. Kittens have minimum age and weight cutoffs. Do not split a '
+                      'large dog chew.']},
+               {'h': 'The comb is data',
+                'p': ['A flea comb over a wet white paper towel shows flea dirt blooming red. Comb '
+                      'daily while you treat. Wash the cat’s preferred blanket. Vacuum the sofa '
+                      'edges. See <a href="/learning/how-to-reduce-cat-shedding">shedding</a> for '
+                      'coat tools that also lift debris.'],
+                'ul': ['Treat every cat and dog in the home on the same weekend.',
+                       'Set a monthly reminder.',
+                       'If the cat drools after a topical, call the clinic — it may be taste, or '
+                       'it may be a reaction.',
+                       'Do not bathe immediately after a topical unless the label says you can.']},
+               {'h': 'Kittens and anemia',
+                'p': ['A kitten covered in fleas can crash. Pale gums, extreme sleepiness, and a '
+                      'pot belly of parasites are same-day care. Do not dunk a weak kitten in a '
+                      'flea dip you invented.']},
+               {'h': 'Itch that stays after fleas die',
+                'p': ['Flea-allergy cats itch from saliva. They may need extra clinic care. Food '
+                      'and environment can pile on. Do not keep rotating grocery “calming” foods '
+                      'as flea control.']},
+               {'h': 'Shopping only cat-labeled prevention',
+                'p': ['Browse cat preventives in <a href="/cat">the cat aisle</a> after your '
+                      'veterinarian names a class. Pair with the dog plan in <a '
+                      'href="/learning/best-flea-and-tick-prevention-for-dogs-2026">dog prevention '
+                      '2026</a>.']}],
+  'faqs': [{'q': 'Can indoor-only cats skip flea prevention?',
+            'a': 'Many should not. Fleas enter buildings. Ask your veterinarian about local risk '
+                 'and your building’s pets.'},
+           {'q': 'Is a flea collar enough?',
+            'a': 'Some veterinary collars work well if fitted correctly. Hardware-store collars '
+                 'vary. Ask which active ingredient they want.'},
+           {'q': 'Why is my cat still scratching after treatment?',
+            'a': 'Dying fleas, allergy, mites, or a missed pet in the house. Recheck with the '
+                 'clinic rather than adding a second product the same day.'}],
+  'publishedAt': '2026-05-06T08:00:00.000Z'},
+ {'slug': 'heartworm-prevention-for-dogs',
+  'title': 'Heartworm Prevention for Dogs: Year-Round Chews and the Test First Rule',
+  'description': 'Heartworm prevention for dogs: why mosquitoes still matter inland, why you test '
+                 'before restarting a chew, and what prevention does not treat. Vet-first guide.',
+  'petType': 'dog',
+  'category': 'Health',
+  'tags': ['heartworm prevention for dogs',
+           'heartworm test dogs',
+           'monthly heartworm chew',
+           'year round heartworm',
+           'dog heartworm symptoms'],
+  'img': 'supplements',
+  'alt': 'Monthly heartworm preventive chew next to a calendar reminder and a mosquito-season map '
+         'note',
+  'intro': 'Heartworm disease is a worm in the heart and lungs that starts with a mosquito bite. '
+           'Prevention is a monthly (or longer-acting) medication your veterinarian prescribes. '
+           'Treatment after infection is harder and riskier than the chew you skipped. This '
+           'Petshiwü explainer is why we do not treat heartworm like a summer-only beach product.',
+  'shopPath': '/dog',
+  'shop': 'Petshiwü stocks everyday supplies that pair with heartworm prevention for dogs, without '
+          'an autoship contract. Free shipping over $49. NYC delivery is available now, and '
+          'nationwide shipping opens soon — start in our dog collection.',
+  'related': ['best-flea-and-tick-prevention-for-dogs-2026',
+              'is-pet-insurance-worth-it-2026',
+              'traveling-with-a-dog'],
+  'sections': [{'h': 'Prevention is not a vaccine and not optional in most of the U.S.',
+                'p': ['Mosquitoes live in cities, courtyards, and inland suburbs. A dog that '
+                      '“never goes to the lake” still needs a plan your veterinarian sets. Most '
+                      'preventives also cover some intestinal parasites — read the label you were '
+                      'given, not a generic blog list.',
+                      'If you missed months, do not just restart a leftover box. Dogs can become '
+                      'heartworm-positive and then suffer a dangerous reaction if a preventive '
+                      'kills circulating microfilariae the wrong way. Test first.'],
+                'ul': ['Give the chew on a repeating calendar date.',
+                       'Watch the dog for a few hours after a new product.',
+                       'Tell the clinic if the dog vomits the chew.',
+                       'Ask about travel — see <a href="/learning/traveling-with-a-dog">traveling '
+                       'with a dog</a> — because risk maps change.']},
+               {'h': 'What prevention does not do',
+                'p': ['It does not treat an adult heartworm infection by itself. It does not '
+                      'replace flea control. It does not mean you skip the annual test. Coughing, '
+                      'fainting, and a swollen belly are reasons to go in now, not to buy a '
+                      'different chew online.']},
+               {'h': 'Cats and ferrets are a different conversation',
+                'p': ['This article is for dogs. Cats can get heartworm too, with fewer treatment '
+                      'options. Ask the clinic about your other pets. Do not share a dog chew with '
+                      'a cat.']},
+               {'h': 'Cost versus treatment',
+                'p': ['A year of prevention is usually cheaper than adulticide treatment, rest, '
+                      'and complications. Pet insurance may or may not cover heartworm — see <a '
+                      'href="/learning/is-pet-insurance-worth-it-2026">insurance 2026</a>. '
+                      'Skipping preventives to “save” money is a bad loan.']},
+               {'h': 'Shopping the reminder, not a mystery import',
+                'p': ['Use the product your veterinarian prescribed. Browse related wellness items '
+                      'in <a href="/dog">the dog aisle</a>. Be wary of unlabeled imports.']}],
+  'faqs': [{'q': 'Do indoor dogs need heartworm prevention?',
+            'a': 'In most regions, yes. Mosquitoes enter homes. Your veterinarian knows the local '
+                 'risk.'},
+           {'q': 'Can I buy heartworm chews without a test?',
+            'a': 'Many clinics require a negative test at intervals, especially if doses were '
+                 'missed. That is safety, not upselling.'},
+           {'q': 'What if I saw a mosquito in December?',
+            'a': 'That is why many vets recommend year-round prevention. Ask about your ZIP code, '
+                 'not a national average.'}],
+  'publishedAt': '2026-05-08T09:00:00.000Z'},
+ {'slug': 'dog-separation-anxiety-help',
+  'title': 'Dog Separation Anxiety Help: Panic Versus Boredom and a Real Exit Plan',
+  'description': 'Dog separation anxiety help: panic vs boredom, crate-exit drills, enrichment, '
+                 'and when to call a veterinary behaviorist. Educational, not a diagnosis.',
+  'petType': 'dog',
+  'category': 'Training',
+  'tags': ['dog separation anxiety help',
+           'dog panic when left alone',
+           'separation anxiety crate',
+           'dog barking when left',
+           'alone training dogs'],
+  'img': 'dog-anxiety',
+  'alt': 'Dog watching a door from a prepared crate with a stuffed toy, illustrating a calm '
+         'departure drill',
+  'intro': 'Separation anxiety is a panic disorder, not a dog being spiteful. Boredom looks '
+           'similar on a chewed couch and feels different to the dog. This Petshiwü guide helps '
+           'you sort the two, start safer departures, and know when medication and a behaviorist '
+           'belong in the plan. We cannot diagnose your dog from a paragraph.',
+  'shopPath': '/dog',
+  'shop': 'Skip the subscription trap and shop dog separation anxiety help gear at Petshiwü. Free '
+          'shipping over $49, no autoship. NYC delivery is available now; nationwide shipping '
+          'opens soon.',
+  'related': ['crate-training-an-adult-dog',
+              'how-to-stop-dog-barking',
+              'lick-mat-benefits-for-dogs'],
+  'sections': [{'h': 'Panic has a signature',
+                'p': ['True separation distress often starts at departure cues: keys, shoes, the '
+                      'elevator chime. Dogs may drool, howl the entire absence, eliminate despite '
+                      'being house-trained, or injure themselves on the door. A dog that sleeps '
+                      'three hours and then shreds a pillow out of boredom is a different project '
+                      '— more exercise and <a href="/learning/best-puzzle-toys-for-dogs">puzzle '
+                      'toys</a>.',
+                      'Video the first 20 minutes alone. That clip is what a veterinary '
+                      'behaviorist wants. Neighbors yelling “quiet” is not a treatment.']},
+               {'h': 'Do not use the crate as a panic chamber',
+                'p': ['If the dog demolishes the crate or breaks teeth on bars, the crate is not '
+                      'the fix today. See <a href="/learning/crate-training-an-adult-dog">adult '
+                      'crate training</a> only if the crate is already a rest place. For panic, '
+                      'you need graduated absences that stay under the threshold where panic '
+                      'starts — often seconds at first.'],
+                'ul': ['Practice picking up keys and sitting back down.',
+                       'Feed a stuffed <a href="/learning/lick-mat-benefits-for-dogs">lick mat</a> '
+                       'as you step out and right back in.',
+                       'Avoid marathon goodbyes.',
+                       'If the dog is injuring itself, call the veterinarian the same day.']},
+               {'h': 'Medication is not giving up',
+                'p': ['Some dogs need anti-anxiety medication to learn. That decision is medical. '
+                      'CBD is not a validated replacement — see <a '
+                      'href="/learning/cbd-for-dogs-what-to-know">CBD for dogs</a>. Do not stack '
+                      'human Xanax from your cabinet.']},
+               {'h': 'Barking when left is not always SA',
+                'p': ['Alert barking, boredom barking, and panic howling get different plans. See '
+                      '<a href="/learning/how-to-stop-dog-barking">barking</a>. A trainer who only '
+                      'sells shock collars is the wrong hire for panic.']},
+               {'h': 'Shopping support, not a cure-in-a-box',
+                'p': ['Cameras, puzzle feeders, and a properly sized crate live in <a '
+                      'href="/dog">the dog aisle</a>. The behavior plan lives with '
+                      'professionals.']}],
+  'faqs': [{'q': 'Can I just get a second dog?',
+            'a': 'A second dog does not treat separation anxiety and can double the welfare '
+                 'problem. Fix the panic plan first.'},
+           {'q': 'Is crate training the same as treating SA?',
+            'a': 'No. A crate can be a tool if it is already relaxing. For a panicked dog it can '
+                 'worsen the experience.'},
+           {'q': 'How long does training take?',
+            'a': 'Weeks to months, with tiny absences at first. Anyone promising a two-day cure is '
+                 'selling something else.'}],
+  'publishedAt': '2026-05-11T10:00:00.000Z'},
+ {'slug': 'fireworks-anxiety-in-dogs',
+  'title': 'Fireworks Anxiety in Dogs: A July Plan That Starts Before Dusk',
+  'description': 'Fireworks anxiety in dogs: how to build a sound-safe room, what not to give from '
+                 'your medicine cabinet, and why Fourth of July training starts in June.',
+  'petType': 'dog',
+  'category': 'Lifestyle',
+  'tags': ['fireworks anxiety in dogs',
+           'fourth of july dog anxiety',
+           'dog scared of fireworks',
+           'thunder shirt fireworks',
+           'dog noise phobia'],
+  'img': 'dog-anxiety',
+  'alt': 'Dog resting in a padded interior room with white noise and drawn blinds during a '
+         'fireworks-prep setup',
+  'intro': 'Fireworks are unpredictable, bass-heavy, and often illegal in the alley anyway. Dogs '
+           'do not understand a holiday. This Petshiwü plan is environmental management, a June '
+           'sound-desensitization start, and a hard no on leftover human sedatives. Pair it with '
+           '<a href="/learning/fourth-of-july-dog-safety">Fourth of July safety</a> for escape '
+           'risks.',
+  'shopPath': '/dog',
+  'shop': 'Use our dog collection to continue from fireworks anxiety in dogs with brands you can '
+          'repurchase. Petshiwü is a nationwide online pet store: free shipping over $49, no '
+          'autoship, NYC delivery now, nationwide shipping soon.',
+  'related': ['fourth-of-july-dog-safety',
+              'dog-separation-anxiety-help',
+              'cbd-for-dogs-what-to-know'],
+  'sections': [{'h': 'Build the room before the first boom',
+                'p': ['Pick an interior room. Close curtains. Run a fan or a playlist so the sound '
+                      'floor rises before the show. Take the dog out early to toilet. Do not wait '
+                      'until 9 p.m. to “tire them out” in a park that is already popping.',
+                      'A pressure wrap helps some dogs and overheats others. Try it on a quiet '
+                      'night first. Stuff a <a href="/learning/lick-mat-benefits-for-dogs">lick '
+                      'mat</a> so the mouth has a job.'],
+                'ul': ['Update ID tags and microchip info in June.',
+                       'Do not tie a dog in a yard during fireworks.',
+                       'Skip the rooftop party with the dog.',
+                       'If the dog is already panting and pacing in the afternoon, call the vet '
+                       'about event medication — do not wait for nightfall.']},
+               {'h': 'Training is a June project',
+                'p': ['Play low-volume firework recordings with food, then stop while the dog is '
+                      'still fine. Raise volume over weeks, not over one afternoon. If the dog '
+                      'shuts down, you went too fast. This is slower than a social video.']},
+               {'h': 'Drugs and supplements',
+                'p': ['Event medication from your veterinarian can be appropriate. Diphenhydramine '
+                      'makes some dogs groggy and few dogs truly calm. CBD is not a fireworks cure '
+                      '— see <a href="/learning/cbd-for-dogs-what-to-know">CBD</a>. Never give '
+                      'your own Xanax, Ambien, or edible.']},
+               {'h': 'After the holiday',
+                'p': ['Check fences and gates. A missing dog on July 5 is common. Keep the safe '
+                      'room available for New Year’s. If noise fear is year-round, ask about a '
+                      'behavior workup, not just a once-a-year wrap.']},
+               {'h': 'Shopping a calm kit',
+                'p': ['White-noise machine, lick mats, a well-fitting wrap if it helps, and a '
+                      'secure leash. Browse <a href="/dog">the dog aisle</a>.']}],
+  'faqs': [{'q': 'Should I take my dog to the fireworks show?',
+            'a': 'No. Leave them in a prepared quiet room. Shows are for people.'},
+           {'q': 'Do thunder shirts work?',
+            'a': 'Some dogs settle; some do not. It is management, not a personality change. Fit '
+                 'it correctly and watch for overheating.'},
+           {'q': 'Can I crate a terrified dog during fireworks?',
+            'a': 'Only if the crate is already a rest place. A panicked dog in a crate can break '
+                 'teeth. See our crate and anxiety guides.'}],
+  'publishedAt': '2026-05-13T11:00:00.000Z'},
+ {'slug': 'best-joint-supplements-for-dogs',
+  'title': 'Best Joint Supplements for Dogs: What Labels Can Promise and What They Cannot',
+  'description': 'Best joint supplements for dogs: glucosamine math, omega-3s, green-lipped '
+                 'mussel, and why supplements do not replace weight loss or pain exams. Vet-first.',
+  'petType': 'dog',
+  'category': 'Health',
+  'tags': ['best joint supplements for dogs',
+           'dog hip supplement',
+           'green lipped mussel dogs',
+           'omega-3 dog joints',
+           'dog arthritis supplement'],
+  'img': 'supplements',
+  'alt': 'Joint supplement chew beside a measuring tape and a senior dog on an orthopedic bed',
+  'intro': 'Joint chews are a crowded shelf. Some have useful ingredients at honest doses. Many '
+           'are candy with a cartoon femur. This Petshiwü guide explains how to read a joint '
+           'product, why weight is the first supplement, and when lameness is an x-ray '
+           'conversation. We will not invent a clinical ranking of every chew.',
+  'shopPath': '/dog',
+  'shop': 'Petshiwü can send the bowls, foods, and extras this best joint supplements for dogs '
+          'article points to. Free shipping over $49 and no autoship. NYC delivery is available '
+          'now; nationwide shipping opens soon.',
+  'related': ['glucosamine-for-dogs', 'best-orthopedic-dog-bed', 'how-to-help-an-overweight-dog'],
+  'sections': [{'h': 'Weight and pain control beat a bottle',
+                'p': ['Every extra pound loads hips and elbows. If the dog is overweight, start '
+                      'with <a href="/learning/how-to-help-an-overweight-dog">weight loss</a> and '
+                      'a veterinary exam. A supplement will not straighten a cruciate tear. Sudden '
+                      'three-legged lameness is not a “start glucosamine” moment.',
+                      'Ask whether NSAIDs, physical therapy, or a referral are already indicated. '
+                      'Then you can add a supplement as an adjunct.']},
+               {'h': 'Ingredients that at least have a rationale',
+                'p': ['Glucosamine and chondroitin are the usual pair — see <a '
+                      'href="/learning/glucosamine-for-dogs">glucosamine</a> for milligram math. '
+                      'EPA/DHA fish oil can support comfort for some dogs as part of a plan. '
+                      'Green-lipped mussel appears in many blends. UC-II and other extras vary. '
+                      'Look for a lot number and a company that answers dose questions.'],
+                'ul': ['Match the dose to the dog’s current weight, not the weight you wish.',
+                       'Tell the vet about every chew — some stack with medications.',
+                       'Give it 6–8 weeks before you declare failure, unless the dog worsens.',
+                       'Stop and call if you see vomiting, black stool, or yellow gums.']},
+               {'h': 'Beds and floors are joint care too',
+                'p': ['A slip-free rug and an <a '
+                      'href="/learning/best-orthopedic-dog-bed">orthopedic bed</a> change daily '
+                      'comfort more than a micro-dose on a grocery bag. Stairs may need a ramp. '
+                      'Keep nails short so gait stays honest — <a '
+                      'href="/learning/how-to-trim-dog-nails">nail trims</a>.']},
+               {'h': 'Young dogs and “prevention”',
+                'p': ['Large-breed puppies need controlled growth, not a joint chew as a '
+                      'substitute for the right food. See <a '
+                      'href="/learning/best-large-breed-dog-food">large-breed food</a>. Do not '
+                      'mega-dose calcium.']},
+               {'h': 'Shopping a chew you can keep giving',
+                'p': ['Palatability matters because missed days are missed doses. Browse '
+                      'supplements in <a href="/dog">the dog aisle</a> after you have a veterinary '
+                      'plan.']}],
+  'faqs': [{'q': 'Do joint supplements work?',
+            'a': 'Some dogs seem more comfortable as part of a broader plan. They are not a cure '
+                 'for arthritis or a replacement for pain medication when it is needed.'},
+           {'q': 'Can I give my dog human glucosamine?',
+            'a': 'Only if your veterinarian confirms the dose and that the product has no xylitol '
+                 'or harmful extras. Pet products are usually simpler.'},
+           {'q': 'How long until I see a change?',
+            'a': 'Often many weeks. If the dog is worse in days, you are not looking at a slow '
+                 'supplement effect — call the clinic.'}],
+  'publishedAt': '2026-05-16T12:00:00.000Z'},
+ {'slug': 'glucosamine-for-dogs',
+  'title': 'Glucosamine for Dogs: Milligrams, Combos, and What the Chew Cannot Fix',
+  'description': 'Glucosamine for dogs: how to read milligram doses, chondroitin combos, safety '
+                 'caveats, and why a limp still needs a veterinarian before you buy a bottle.',
+  'petType': 'dog',
+  'category': 'Health',
+  'tags': ['glucosamine for dogs',
+           'glucosamine chondroitin dogs',
+           'dog glucosamine dosage',
+           'MSM dog joints',
+           'glucosamine chew dogs'],
+  'img': 'supplements',
+  'alt': 'Glucosamine chew broken to show a dose table next to a senior dog’s scale weight',
+  'intro': 'Glucosamine is a building-block molecule sold as a comfort adjunct. It is not a cast, '
+           'not an NSAID, and not a reason to skip radiographs. This Petshiwü article is how to '
+           'read the milligrams on a chew and when the bottle is a delay. Your veterinarian still '
+           'owns the limp.',
+  'shopPath': '/dog',
+  'shop': 'Ready to restock after reading about glucosamine for dogs? Petshiwü ships as a '
+          'nationwide online pet store with free shipping over $49 and no autoship. NYC delivery '
+          'is available now; nationwide shipping opens soon.',
+  'related': ['best-joint-supplements-for-dogs',
+              'how-to-help-an-overweight-dog',
+              'best-senior-dog-food-2026'],
+  'sections': [{'h': 'Dose is weight math, not “one chew regardless”',
+                'p': ['Products list glucosamine HCl or sulfate in milligrams per chew. A 15-pound '
+                      'dog and an 80-pound dog should not share the same “adult dog” marketing '
+                      'line. Write the dog’s current weight and compare it to the chart. If the '
+                      'chart is missing, pick another brand.',
+                      'Many chews add chondroitin, MSM, or a dusting of green-lipped mussel. More '
+                      'names are not more science. See <a '
+                      'href="/learning/best-joint-supplements-for-dogs">joint supplements</a> for '
+                      'how this fits a broader plan.'],
+                'ul': ['Tell the clinic if the dog is on NSAIDs or a blood thinner.',
+                       'Watch stool — some dogs get diarrhea on a new chew.',
+                       'Give it weeks, not 48 hours, unless pain worsens.',
+                       'Count the chew in the calorie budget.']},
+               {'h': 'Shellfish and quality',
+                'p': ['Many glucosamine sources start as shellfish. Ask about allergies. Look for '
+                      'a lot number. We will not invent a 2026 trial that crowns one drugstore '
+                      'bottle.']},
+               {'h': 'When glucosamine is the wrong first purchase',
+                'p': ['Non-weight-bearing lameness, a hot swollen joint, fever, or a puppy that '
+                      'suddenly limps needs an exam. Large-breed growth pain is not a chew '
+                      'project. Extra pounds need <a '
+                      'href="/learning/how-to-help-an-overweight-dog">weight loss</a> more than '
+                      'another milligram.']},
+               {'h': 'Foods that already sprinkle it in',
+                'p': ['Senior kibbles often include a token amount. That is a bonus, not a '
+                      'therapeutic dose. See <a href="/learning/best-senior-dog-food-2026">senior '
+                      'food</a>.']},
+               {'h': 'Shopping after the exam',
+                'p': ['Buy the product your veterinarian is fine with. Browse chews in <a '
+                      'href="/dog">the dog aisle</a>.']}],
+  'faqs': [{'q': 'How much glucosamine should my dog get?',
+            'a': 'Follow the product chart for your dog’s weight and confirm with your '
+                 'veterinarian. There is no universal internet milligram that fits every dog.'},
+           {'q': 'Can puppies take glucosamine?',
+            'a': 'Ask the clinic. Growing large-breed puppies need the right food more than a '
+                 'joint chew. Do not add calcium on your own.'},
+           {'q': 'Is liquid glucosamine better than a chew?',
+            'a': 'The form that the dog will take every day is better. Liquids can be easier to '
+                 'dose by weight. Chews are easier for many owners.'}],
+  'publishedAt': '2026-05-18T13:00:00.000Z'},
+ {'slug': 'cbd-for-dogs-what-to-know',
+  'title': 'CBD for Dogs: What to Know About Legality, Quality, and False Cures',
+  'description': 'CBD for dogs: legal caution, why quality varies, what it is not a cure for, and '
+                 'why you talk to a veterinarian before opening a tincture. Not a treatment plan.',
+  'petType': 'dog',
+  'category': 'Health',
+  'tags': ['CBD for dogs what to know',
+           'CBD oil dogs legal',
+           'CBD dog anxiety',
+           'hemp extract dogs',
+           'CBD dog side effects'],
+  'img': 'supplements',
+  'alt': 'Unopened CBD tincture beside a veterinarian appointment card, emphasizing caution over '
+         'cure claims',
+  'intro': 'CBD is a hemp-derived compound sold in oils, chews, and “calming” treats. It is not '
+           'FDA-approved to diagnose, treat, or cure disease in dogs. Quality varies from '
+           'lab-tested bottles to mystery oils. This Petshiwü briefing is cautious on purpose. '
+           'Talk to your veterinarian first — especially if your dog is already on seizure, pain, '
+           'or liver medications.',
+  'shopPath': '/dog',
+  'shop': 'Build the cbd for dogs what to know shopping list in our dog collection. Petshiwü '
+          'offers free shipping over $49, no autoship, NYC delivery now, and nationwide shipping '
+          'opening soon.',
+  'related': ['dog-separation-anxiety-help',
+              'fireworks-anxiety-in-dogs',
+              'best-joint-supplements-for-dogs'],
+  'sections': [{'h': 'Legal and label reality',
+                'p': ['Hemp-derived CBD products occupy a messy regulatory space. THC '
+                      'contamination happens. A product legal to ship in one state may still be a '
+                      'problem for a working dog or a travel kennel. Ask your veterinarian and, if '
+                      'relevant, your insurer or trainer, before you start.',
+                      'If the bottle promises to cure cancer, arthritis, or epilepsy, put it down. '
+                      'Those claims are not honest. We will not invent a study that says '
+                      'otherwise.'],
+                'ul': ['Look for a recent certificate of analysis from a third-party lab.',
+                       'Avoid products that hide milligrams per milliliter.',
+                       'Skip anything with xylitol, chocolate, or essential-oil overload.',
+                       'Start only with your veterinarian’s knowledge — drug interactions are '
+                       'real.']},
+               {'h': 'Anxiety and noise are not automatic CBD cases',
+                'p': ['Behavior change needs a plan. See <a '
+                      'href="/learning/dog-separation-anxiety-help">separation anxiety</a> and <a '
+                      'href="/learning/fireworks-anxiety-in-dogs">fireworks</a>. A tincture is not '
+                      'a substitute for graduated training or prescribed event medication.']},
+               {'h': 'Joints and the marketing glow',
+                'p': ['Some owners report comfort. That is anecdote, not a reason to skip pain '
+                      'control. See <a href="/learning/best-joint-supplements-for-dogs">joint '
+                      'supplements</a> for adjuncts that at least have conventional dose '
+                      'conversations.']},
+               {'h': 'Side effects to take seriously',
+                'p': ['Sleepiness, GI upset, and liver-value changes have been reported in pets on '
+                      'cannabinoid products. If the dog is wobbly, vomiting, or unusually still, '
+                      'stop the product and call the clinic. Bring the bottle.']},
+               {'h': 'Shopping without the wellness-cult voice',
+                'p': ['If your veterinarian is comfortable with a specific product, buy that one '
+                      'from a seller that stores it properly. Browse other wellness items in <a '
+                      'href="/dog">the dog aisle</a>. Petshiwü will not tell you CBD is a '
+                      'miracle.']}],
+  'faqs': [{'q': 'Is CBD legal for dogs?',
+            'a': 'Rules vary and change. Hemp-derived products are widely sold, but they are not '
+                 'FDA-approved drugs for pets. Ask your veterinarian about your location and your '
+                 'dog.'},
+           {'q': 'Will CBD get my dog high?',
+            'a': 'Properly made hemp CBD should be very low in THC, but contamination happens. Any '
+                 'wobbliness or agitation is a reason to stop and call the vet.'},
+           {'q': 'Can I use my own CBD gummies?',
+            'a': 'No. Human gummies often contain xylitol, chocolate, or doses meant for people. '
+                 'Use only a product your veterinarian has reviewed.'}],
+  'publishedAt': '2026-05-21T14:00:00.000Z'},
+ {'slug': 'how-to-help-an-overweight-dog',
+  'title': 'How to Help an Overweight Dog: Walks, Portions, and Joints That Cannot Wait',
+  'description': 'How to help an overweight dog: body-condition scoring, treat audits, safer '
+                 'exercise, and when weight gain is a thyroid or medication issue. Call your vet '
+                 'first.',
+  'petType': 'dog',
+  'category': 'Health',
+  'tags': ['how to help an overweight dog',
+           'dog weight loss plan',
+           'obese dog exercise',
+           'dog treat audit',
+           'overweight dog joints'],
+  'img': 'dog-walk',
+  'alt': 'Overweight dog on a short leash walk with a handler holding a measured treat pouch',
+  'intro': 'Helping an overweight dog is mostly honest calories and kinder movement. It is also a '
+           'medical screen. Hypothyroidism, steroids, and arthritis change the plan. This Petshiwü '
+           'article is the household playbook that sits next to <a '
+           'href="/learning/best-dog-food-for-weight-loss">weight-loss food</a> — not a 30-day '
+           'challenge with a fake before-and-after.',
+  'shopPath': '/dog',
+  'shop': 'When you are ready to put this how to help an overweight dog article into the cart, '
+          'Petshiwü is a nationwide online pet store with free shipping over $49 and no autoship. '
+          'NYC delivery is available now; nationwide shipping opens soon.',
+  'related': ['best-dog-food-for-weight-loss',
+              'how-much-to-feed-a-dog',
+              'best-joint-supplements-for-dogs'],
+  'sections': [{'h': 'Get the number and the score',
+                'p': ['Weigh the dog. Ask for a body-condition score. Photograph the waist from '
+                      'above. If the dog is already lame, panting at rest, or collapsing, you are '
+                      'in clinic territory, not a new hiking hobby.',
+                      'A safe loss rate often lands near 1% of body weight per week, but your '
+                      'veterinarian sets the target. Crash diets create scavenger panic and can '
+                      'cost muscle.']},
+               {'h': 'Audit the extras',
+                'p': ['Write every chew, training bit, and stolen crust for three days. Keep '
+                      'extras near 10% of calories or less. Switch to pea-sized training treats. '
+                      'Use vegetables only if your veterinarian says they fit — grapes never do. '
+                      'See <a href="/learning/foods-toxic-to-dogs">toxic foods</a>.'],
+                'ul': ['Weigh meals on a scale.',
+                       'Use a <a href="/learning/slow-feeder-bowl-benefits">slow feeder</a> if '
+                       'gulping leads to begging.',
+                       'Walk on soft ground if joints complain; add minutes slowly.',
+                       'Weigh every two weeks and adjust food 5–10% if the line is flat.']},
+               {'h': 'Exercise that does not wreck the dog',
+                'p': ['Sniff walks beat weekend hero runs. Swimming helps some dogs and overheats '
+                      'others. Stairs may need to wait. An <a '
+                      'href="/learning/best-orthopedic-dog-bed">orthopedic bed</a> and nail care '
+                      'support the new mileage.']},
+               {'h': 'Household saboteurs',
+                'p': ['Kids and partners who “just share” are the usual leak. Put a note on the '
+                      'treat jar. Feed the dog in a separate room if the table is a battlefield.']},
+               {'h': 'Shopping the support kit',
+                'p': ['Measured food, a slow feeder, a treat pouch. Browse <a href="/dog">the dog '
+                      'aisle</a>. Skip fat-heavy chews during the loss phase.']}],
+  'faqs': [{'q': 'How long until my dog looks slimmer?',
+            'a': 'Weeks to months. The scale and the rib check matter more than a week of guilt.'},
+           {'q': 'Can I exercise the weight off without changing food?',
+            'a': 'Almost never. Exercise helps. Math still wins. Joint-safe movement plus portions '
+                 'is the pair.'},
+           {'q': 'Is a fat dog just happy?',
+            'a': 'Extra weight is linked to shorter, less comfortable lives. Kindness is a leaner '
+                 'body, not a second dinner.'}],
+  'publishedAt': '2026-05-23T08:00:00.000Z'},
+ {'slug': 'overweight-cat-weight-loss',
+  'title': 'Overweight Cat Weight Loss: Why Crash Diets Can Be Dangerous',
+  'description': 'Overweight cat weight loss: hepatic lipidosis risk, how to cut calories slowly, '
+                 'puzzle feeding, and when extra thirst means you stop DIY dieting. Vet-first.',
+  'petType': 'cat',
+  'category': 'Health',
+  'tags': ['overweight cat weight loss',
+           'obese cat diet',
+           'cat hepatic lipidosis',
+           'how to put a cat on a diet',
+           'indoor cat weight loss'],
+  'img': 'indoor-cat',
+  'alt': 'Overweight cat on a scale next to a measured wet-food portion and a puzzle feeder',
+  'intro': 'Cats that stop eating can develop hepatic lipidosis — a serious liver crisis — '
+           'especially if they were already overweight. That is why cat weight loss is slow, '
+           'measured, and veterinary-supervised when the cat is obese. This Petshiwü guide is the '
+           'safe-household version, not a challenge that slashes food in half overnight.',
+  'shopPath': '/cat',
+  'shop': 'Petshiwü stocks everyday supplies that pair with overweight cat weight loss, without an '
+          'autoship contract. Free shipping over $49. NYC delivery is available now, and '
+          'nationwide shipping opens soon — start in our cat collection.',
+  'related': ['how-much-to-feed-a-cat', 'best-cat-food-for-indoor-cats', 'picky-cat-not-eating'],
+  'sections': [{'h': 'Get a target before you hide the bowl',
+                'p': ['Ask your veterinarian for a current weight, a body-condition score, and a '
+                      'weekly loss rate. Many indoor cats need surprisingly few calories. A sudden '
+                      'appetite strike during a diet is a phone call, not “he’ll eat when he’s '
+                      'hungry.” See <a href="/learning/picky-cat-not-eating">picky cat not '
+                      'eating</a>.',
+                      'Rule out diabetes and other thirst-and-weight patterns before you celebrate '
+                      'a shrinking waist that came with a bigger water bowl.']},
+               {'h': 'Cut slowly and feed on a clock',
+                'p': ['Reduce daily calories in small steps your veterinarian approves. Offer '
+                      'several small wet meals so the cat actually eats. Free-fed dry food is the '
+                      'usual failure mode — see <a href="/learning/how-much-to-feed-a-cat">feeding '
+                      'math</a> and <a href="/learning/best-cat-food-for-indoor-cats">indoor '
+                      'food</a>.'],
+                'ul': ['Weigh the cat weekly on the same scale.',
+                       'Use a puzzle feeder for part of the ration so hunting happens.',
+                       'Keep treats tiny or stop them during the loss phase.',
+                       'In multi-cat homes, feed separately so the diet cat cannot raid the '
+                       'kitten.']},
+               {'h': 'Play is the other half',
+                'p': ['Wand toys before meals scratch the hunt-eat-groom sequence. Five minutes '
+                      'twice a day beats a laser that never ends in a catch. If the cat is lame, '
+                      'ask about joints before you invent a cardio plan.']},
+               {'h': 'When DIY stops',
+                'p': ['Obese cats, cats that already have liver values, and cats that refuse food '
+                      'for 24 hours belong to the clinic. Do not syringe a random diet. Do not use '
+                      'dog weight-loss food.']},
+               {'h': 'Shopping a measured indoor plan',
+                'p': ['Complete indoor or weight-management food your vet agrees with, a puzzle '
+                      'feeder, a fountain. Browse <a href="/cat">the cat aisle</a>.']}],
+  'faqs': [{'q': 'How fast should a cat lose weight?',
+            'a': 'Slowly. Your veterinarian sets the rate. Faster is not safer in cats.'},
+           {'q': 'Can I feed only tuna to make my cat lose weight?',
+            'a': 'No. Tuna is incomplete and trains a tuna-only cat. Use a complete diet at the '
+                 'right calories.'},
+           {'q': 'Why is my cat screaming at 5 a.m. on a diet?',
+            'a': 'Hunger, habit, and hunt drive. Timed meals and play help. If weight is dropping '
+                 'too fast or the cat stops eating, call the clinic.'}],
+  'publishedAt': '2026-05-25T09:00:00.000Z'},
+ {'slug': 'how-often-to-bathe-a-dog',
+  'title': 'How Often to Bathe a Dog: Coat Type, Skin Barrier, and the Dish-Soap Mistake',
+  'description': 'How often to bathe a dog: by coat and lifestyle, which shampoos protect the skin '
+                 'barrier, and when odor means infection instead of a bath night.',
+  'petType': 'dog',
+  'category': 'Care',
+  'tags': ['how often to bathe a dog',
+           'dog bath schedule',
+           'dog shampoo sensitive skin',
+           'over bathing dogs',
+           'dog smell after bath'],
+  'img': 'dog-grooming',
+  'alt': 'Dog standing in a tub with a measuring cup of pet shampoo, illustrating a coat-safe bath '
+         'interval',
+  'intro': 'Dogs do not need a human shower schedule. The skin barrier has oils that cheap daily '
+           'baths strip, which then makes the dog smell worse and itch more. This Petshiwü '
+           'schedule is by coat and job, plus the odors that are medical, not dirty.',
+  'shopPath': '/dog',
+  'shop': 'Skip the subscription trap and shop how often to bathe a dog gear at Petshiwü. Free '
+          'shipping over $49, no autoship. NYC delivery is available now; nationwide shipping '
+          'opens soon.',
+  'related': ['how-to-deshed-a-dog', 'dog-hot-spots-treatment', 'seasonal-allergies-in-dogs'],
+  'sections': [{'h': 'A starting interval, not a commandment',
+                'p': ['Many short-coated pets do well every 4–8 weeks, or when they roll in '
+                      'something specific. Double-coated breeds often need fewer full baths and '
+                      'more drying and brushing so the undercoat does not felt. Hair-coat breeds '
+                      '(poodles and mixes) follow the groomer’s clip calendar. Puppies can be '
+                      'wiped more than soaked if they get chilled.',
+                      'If the veterinarian prescribed a medicated shampoo, follow that interval — '
+                      'it overrides the lifestyle guess. See <a '
+                      'href="/learning/seasonal-allergies-in-dogs">allergies</a> if you are '
+                      'bathing because of itch.'],
+                'ul': ['Use lukewarm water and a dog shampoo, not dish soap.',
+                       'Rinse until the coat squeaks — leftover soap itches.',
+                       'Dry double coats fully to avoid hot spots — <a '
+                       'href="/learning/dog-hot-spots-treatment">hot spots</a>.',
+                       'Clean ears only if your vet showed you how; do not flood the canal.']},
+               {'h': 'Odor that baths will not fix',
+                'p': ['Anal-gland smell, dental infection, and yeast ears come back an hour after '
+                      'the towel. Book the clinic. A “funky” paw lick pattern is often allergy, '
+                      'not mud.']},
+               {'h': 'Between baths',
+                'p': ['Rinse muddy legs. Use a pet wipe on the belly after wet grass. Brush. That '
+                      'is 80% of clean. See <a '
+                      'href="/learning/how-to-deshed-a-dog">deshedding</a>.']},
+               {'h': 'Skin conditions change the product',
+                'p': ['Oatmeal, chlorhexidine, and antifungal shampoos are different tools. Do not '
+                      'stack three leftover bottles. Ask which contact time the clinic wants.']},
+               {'h': 'Shopping a bath kit',
+                'p': ['Dog shampoo, a slicker or comb, and towels. Browse <a href="/dog">the dog '
+                      'aisle</a>. Skip essential-oil “natural” blends unless your vet likes that '
+                      'exact bottle.']}],
+  'faqs': [{'q': 'Can I bathe my dog every week?',
+            'a': 'Some medicated plans say weekly. Most healthy dogs do not need it. If you must, '
+                 'use a gentle dog shampoo and watch for dryness.'},
+           {'q': 'Is human shampoo OK once?',
+            'a': 'It is a poor pH match and often too harsh. Keep a pet bottle on the shelf.'},
+           {'q': 'Why does my dog smell worse after a bath?',
+            'a': 'Incomplete rinse, trapped undercoat, or a skin infection. Dry thoroughly and '
+                 'call the vet if redness or odor stays.'}],
+  'publishedAt': '2026-05-28T10:00:00.000Z'},
+ {'slug': 'how-to-deshed-a-dog',
+  'title': 'How to Deshed a Dog: Tools, Timing, and Why Shaving a Double Coat Backfires',
+  'description': 'How to deshed a dog: undercoat rakes versus slickers, bath-and-dry technique, '
+                 'seasonal blowouts, and why shaving many double coats makes shedding worse.',
+  'petType': 'dog',
+  'category': 'Care',
+  'tags': ['how to deshed a dog',
+           'undercoat rake dogs',
+           'deshedding tool',
+           'double coat shedding',
+           'dog shedding season'],
+  'img': 'dog-grooming',
+  'alt': 'Undercoat rake lifting loose fur from a double-coated dog onto a sheet for a deshedding '
+         'lesson',
+  'intro': 'Shedding is a season and a tool problem. The fur already dead in the undercoat will '
+           'end up on the sofa unless you pull it out on purpose. This Petshiwü method is bath, '
+           'dry, rake — and a warning about shaving a husky into a sunburn.',
+  'shopPath': '/dog',
+  'shop': 'Use our dog collection to continue from how to deshed a dog with brands you can '
+          'repurchase. Petshiwü is a nationwide online pet store: free shipping over $49, no '
+          'autoship, NYC delivery now, nationwide shipping soon.',
+  'related': ['how-often-to-bathe-a-dog',
+              'how-to-reduce-cat-shedding',
+              'seasonal-allergies-in-dogs'],
+  'sections': [{'h': 'Know the coat you are holding',
+                'p': ['Double-coated dogs (huskies, shepherds, many retrievers) blow undercoat in '
+                      'spring and fall. A slicker on the surface barely touches it. An undercoat '
+                      'rake or a well-used deshedding tool, used in the direction of growth, lifts '
+                      'the loose stuff. Stop if you see pink skin — you are scraping, not '
+                      'grooming.',
+                      'Hair-coat dogs do not “blow coat” the same way; they need trims. Do not '
+                      'rake a poodle like a malamute.']},
+               {'h': 'Bath, dry, then rake',
+                'p': ['Loose coat releases easier from a clean, fully dry dog. A high-velocity '
+                      'dryer at a groomer can do in 30 minutes what a week of sofa lint rollers '
+                      'cannot. At home, towel well and finish dry so you do not leave a damp mat '
+                      'that becomes a hot spot. See <a '
+                      'href="/learning/how-often-to-bathe-a-dog">bathing intervals</a>.'],
+                'ul': ['Work in sections: neck, shoulders, hips, tail.',
+                       'Keep sessions short if the dog hates standing.',
+                       'Vacuum the tool, not the dog’s face.',
+                       'If shedding is sudden and patchy, think medical — thyroid, allergy, '
+                       'fleas.']},
+               {'h': 'Why a summer shave is often a bad trade',
+                'p': ['The outer coat insulates against heat and sun. Shaving many double coats '
+                      'can ruin texture and increase sunburn risk. A sanitary trim and belly tidy '
+                      'are different from a full peel. Ask a groomer who knows the breed.']},
+               {'h': 'Indoor air and your lungs',
+                'p': ['A HEPA vacuum and a designated grooming towel save the rest of the house. '
+                      'If people in the home have allergies, deshed outside or in a bathroom you '
+                      'can rinse.']},
+               {'h': 'Shopping tools that match the coat',
+                'p': ['Rake, slicker, and a decent shampoo. Browse <a href="/dog">the dog '
+                      'aisle</a>. We will not sell you a $12 miracle comb as a substitute for '
+                      'drying.']}],
+  'faqs': [{'q': 'How often should I deshed?',
+            'a': 'During blowouts, several times a week. Off-season, weekly may be enough. The '
+                 'tool should come away with dead fur, not living coat.'},
+           {'q': 'Do deshedding shampoos work?',
+            'a': 'They can help loosen undercoat when followed by a real dry and rake. They are '
+                 'not a stand-alone solution.'},
+           {'q': 'Is shedding a sign of poor food?',
+            'a': 'Sometimes coat quality improves with a complete diet and parasite control. '
+                 'Sudden bald patches still need a veterinarian.'}],
+  'publishedAt': '2026-05-30T11:00:00.000Z'},
+ {'slug': 'how-to-reduce-cat-shedding',
+  'title': 'How to Reduce Cat Shedding: Brushing, Humidity, and Diet Honesty',
+  'description': 'How to reduce cat shedding: brush types by coat, why indoor heat worsens '
+                 'tumbleweeds, and when sudden hair loss is a veterinary problem, not a vacuum '
+                 'problem.',
+  'petType': 'cat',
+  'category': 'Care',
+  'tags': ['how to reduce cat shedding',
+           'best cat brush',
+           'cat shedding indoor',
+           'cat hair everywhere',
+           'deshed a cat'],
+  'img': 'indoor-cat',
+  'alt': 'Cat being brushed with a steel comb over a towel, showing collected seasonal shed',
+  'intro': 'Cats shed on a cycle and on a thermostat. You will not get to zero fur. You can get to '
+           'less vomit, fewer tumbleweeds, and earlier notice of bald patches. This Petshiwü guide '
+           'is brushing technique, indoor humidity, and the medical sheds that a lint roller '
+           'cannot fix.',
+  'shopPath': '/cat',
+  'shop': 'Petshiwü can send the bowls, foods, and extras this how to reduce cat shedding article '
+          'points to. Free shipping over $49 and no autoship. NYC delivery is available now; '
+          'nationwide shipping opens soon.',
+  'related': ['best-cat-food-for-hairballs',
+              'best-cat-food-for-indoor-cats',
+              'how-to-deshed-a-dog'],
+  'sections': [{'h': 'Match the tool to the coat',
+                'p': ['Shorthaired cats often do well with a rubber curry or a fine comb. '
+                      'Longhairs need a steel comb that reaches the skin without ripping mats. '
+                      'Start at the ends of a mat; do not yank a dread toward the skin. If the cat '
+                      'is a wrestler, do two minutes and pay well.',
+                      'A lion cut is a last resort for severe matting, done by a professional. '
+                      'Home scissors next to skin are how we see ER lacerations.']},
+               {'h': 'Heat, daylight, and indoor living',
+                'p': ['Indoor cats can shed year-round because lights and heat confuse seasons. A '
+                      'little humidity helps static and skin. Daily brushing during a blowout '
+                      'beats a monthly marathon. Pair with <a '
+                      'href="/learning/best-cat-food-for-hairballs">hairball food</a> if vomited '
+                      'hair is the complaint.'],
+                'ul': ['Brush before play so the session ends on a win.',
+                       'Wipe furniture with a damp rubber glove.',
+                       'If the cat overgrooms the belly, think itch or pain — not vanity.',
+                       'Keep flea prevention current; flea itch looks like shedding.']},
+               {'h': 'Diet is completeness, not a magic oil',
+                'p': ['A complete food with adequate fat and protein supports the coat. Dumping '
+                      'fish oil without a plan can upset the gut. Ask your veterinarian before you '
+                      'add oils. Indoor calorie control still matters — see <a '
+                      'href="/learning/best-cat-food-for-indoor-cats">indoor food</a>.']},
+               {'h': 'When shedding is disease',
+                'p': ['Symmetric hair loss, scabs, and a moth-eaten coat can be allergy, mites, '
+                      'ringworm, or endocrine disease. Ringworm is contagious to people. Book the '
+                      'clinic instead of buying a third brush.']},
+               {'h': 'Shopping a two-tool kit',
+                'p': ['Comb plus a rubber brush. Browse <a href="/cat">the cat aisle</a>.']}],
+  'faqs': [{'q': 'How often should I brush my cat?',
+            'a': 'Shorthairs: a few times a week. Longhairs: daily is kinder than a monthly '
+                 'detangle war.'},
+           {'q': 'Does a raw diet stop shedding?',
+            'a': 'No honest diet stops normal shed. Completeness and parasite control matter. See '
+                 'our raw-safety article before you change food.'},
+           {'q': 'Why is there more hair in spring?',
+            'a': 'Many cats blow coat as daylight changes. Increase brushing. Sudden bald spots '
+                 'are still a vet question.'}],
+  'publishedAt': '2026-06-02T12:00:00.000Z'},
+ {'slug': 'how-to-trim-dog-nails',
+  'title': 'How to Trim Dog Nails: Quick Anatomy, Clippers vs Grinders, and Styptic Calm',
+  'description': 'How to trim dog nails: how to see the quick, clipper versus grinder, a two-week '
+                 'paw plan, and what to do if you cut too short. Stay calm — they read you.',
+  'petType': 'dog',
+  'category': 'Care',
+  'tags': ['how to trim dog nails',
+           'dog nail quick',
+           'dog nail grinder',
+           'cut dog nail bleeding',
+           'puppy nail trimming'],
+  'img': 'dog-grooming',
+  'alt': 'Dog paw held for a nail trim with the quick visible on a light nail and a grinder nearby',
+  'intro': 'Long nails change gait and click on every floor. Trimming is a skill, not a '
+           'personality test. This Petshiwü lesson is how to find the quick, how to train the paw, '
+           'and how to stop bleeding without turning the kitchen into a panic room.',
+  'shopPath': '/dog',
+  'shop': 'Ready to restock after reading about how to trim dog nails? Petshiwü ships as a '
+          'nationwide online pet store with free shipping over $49 and no autoship. NYC delivery '
+          'is available now; nationwide shipping opens soon.',
+  'related': ['how-often-to-bathe-a-dog', 'crate-training-a-puppy', 'best-dog-beds-2026'],
+  'sections': [{'h': 'See the quick before you squeeze',
+                'p': ['On white nails the pink quick is visible — cut just in front of it. On '
+                      'black nails, take thin slices and look at the cut surface. A gray-pink oval '
+                      'means you are close; stop. Cutting into the quick hurts and bleeds. That is '
+                      'why tiny bites beat one brave chop.',
+                      'Dewclaws hide in fur and curl into skin if ignored. Check them every '
+                      'session.']},
+               {'h': 'Clippers versus grinders',
+                'p': ['Scissor or guillotine clippers are fast if they are sharp. Dull tools '
+                      'crush. Grinders smooth the nail and scare some dogs with vibration. Let the '
+                      'dog sniff the turned-off grinder for days. Do one nail a night if you '
+                      'must.'],
+                'ul': ['Pair each paw touch with a treat.',
+                       'Keep styptic powder on the counter before you start.',
+                       'If you hit the quick: apply powder, hold pressure, stay boring.',
+                       'Do not chase the dog around the house as a training method.']},
+               {'h': 'How short is short enough',
+                'p': ['Nails should not click on a hard floor when the dog stands square. If they '
+                      'already curl sideways, you may need a groomer or vet to start, then you '
+                      'maintain. Senior dogs with thick nails may need more frequent tiny trims.']},
+               {'h': 'When to hand it to a professional',
+                'p': ['Aggression, screaming, or a dog that bites when a paw is held is a '
+                      'trainer-plus-groomer project. Sedated trims at the clinic exist for a '
+                      'reason. Do not “dominate” a nail session.']},
+               {'h': 'Shopping a kit',
+                'p': ['Sharp clippers or a grinder, styptic, treats. Browse <a href="/dog">the dog '
+                      'aisle</a>.']}],
+  'faqs': [{'q': 'How often should I trim dog nails?',
+            'a': 'Often every 3–6 weeks. City sidewalks wear some nails; others still grow like '
+                 'weeds. Listen for the click.'},
+           {'q': 'What if I cut the quick?',
+            'a': 'Apply styptic or cornstarch, hold pressure, and stop the session. The dog will '
+                 'remember your calm more than the nick. Call the vet if bleeding soaks towels.'},
+           {'q': 'Can I file instead of clip?',
+            'a': 'Yes, with a grinder or file, especially for black nails. Go slowly so you do not '
+                 'cook the nail with heat.'}],
+  'publishedAt': '2026-06-04T13:00:00.000Z'},
+ {'slug': 'dog-hot-spots-treatment',
+  'title': 'Dog Hot Spots: What You Can Clean at Home and When It Is a Vet Day',
+  'description': 'Dog hot spots: how moist dermatitis starts, what you can clip and clean, and the '
+                 'signs that mean infection needs a veterinarian — not a kitchen cream.',
+  'petType': 'dog',
+  'category': 'Health',
+  'tags': ['dog hot spots treatment',
+           'acute moist dermatitis dogs',
+           'hot spot on dog cheek',
+           'dog licking sore patch',
+           'hot spot infection dogs'],
+  'img': 'dog-grooming',
+  'alt': 'Close-up of a clipped circle around a dog hot spot with a vet-approved cleanser nearby',
+  'intro': 'A hot spot is a suddenly wet, painful, expanding patch of skin infection — often on '
+           'the cheek, hip, or tail base. It can double overnight. This Petshiwü page is first aid '
+           'and triage. It is not a prescription for steroids or antibiotics.',
+  'shopPath': '/dog',
+  'shop': 'Build the dog hot spots treatment shopping list in our dog collection. Petshiwü offers '
+          'free shipping over $49, no autoship, NYC delivery now, and nationwide shipping opening '
+          'soon.',
+  'related': ['how-often-to-bathe-a-dog', 'seasonal-allergies-in-dogs', 'how-to-deshed-a-dog'],
+  'sections': [{'h': 'Why they explode',
+                'p': ['Moisture plus itch plus bacteria is the usual recipe. Allergies, fleas, a '
+                      'mat after a swim, or an anal-gland itch can start the lick cycle. Thick '
+                      'coats hide the first quarter-sized lesion until it is a saucer. See <a '
+                      'href="/learning/seasonal-allergies-in-dogs">allergies</a> and <a '
+                      'href="/learning/how-to-deshed-a-dog">deshedding</a> so the next one is '
+                      'easier to find.',
+                      'A hot spot on the face after swimming is common. So is one under a dirty '
+                      'collar.']},
+               {'h': 'What you may do at home if the dog allows it',
+                'p': ['Clip fur around the lesion so it can dry — only if you can do it without '
+                      'cutting skin. Clean with a vet-recommended chlorhexidine wipe or rinse. An '
+                      'e-collar stops the tongue. That is first aid, not a cure.'],
+                'ul': ['Do not smear antibiotic ointment meant for people unless the clinic said '
+                       'so.',
+                       'Do not use hydrogen peroxide as a daily burn.',
+                       'Do not wrap the spot in a wet bandage.',
+                       'Call the vet if the area spreads, smells like rot, or the dog is '
+                       'miserable.']},
+               {'h': 'When it is a same-day visit',
+                'p': ['Fever, lethargy, a hot spot near the eye, or a dog that will not let you '
+                      'look needs the clinic. Many hot spots need prescription anti-inflammatories '
+                      'and sometimes antibiotics. Home “coconut oil” is food for bacteria.']},
+               {'h': 'Stop the next one',
+                'p': ['Dry the coat after water. Keep flea prevention on. Treat the allergy if '
+                      'there is one. A damp undercoat after a lazy bath is a setup — see <a '
+                      'href="/learning/how-often-to-bathe-a-dog">bathing</a>.']},
+               {'h': 'Shopping the prevention kit',
+                'p': ['E-collar, clipper or a groomer appointment, a vet-approved cleanser. Browse '
+                      '<a href="/dog">the dog aisle</a> after you have a plan.']}],
+  'faqs': [{'q': 'Can hot spots heal without a vet?',
+            'a': 'Tiny, early spots sometimes dry with clipping and an e-collar. Spreading, '
+                 'painful, or facial lesions need a veterinarian. When unsure, go in.'},
+           {'q': 'Are hot spots contagious?',
+            'a': 'The bacteria are ordinary skin germs, not a reason to quarantine the household. '
+                 'The underlying itch can still be fleas, which do spread.'},
+           {'q': 'Should I bathe a dog with a hot spot?',
+            'a': 'Ask the clinic. A targeted clean is different from a full soak that keeps the '
+                 'area wet.'}],
+  'publishedAt': '2026-06-06T14:00:00.000Z'},
+ {'slug': 'seasonal-allergies-in-dogs',
+  'title': 'Seasonal Allergies in Dogs: Pollen, Paws, and the Calendar Itch',
+  'description': 'Seasonal allergies in dogs: how to spot pollen-season itch, paw-licking '
+                 'patterns, home rinse habits, and when you need allergy meds from a veterinarian.',
+  'petType': 'dog',
+  'category': 'Health',
+  'tags': ['seasonal allergies in dogs',
+           'dog pollen itch',
+           'dog licking paws spring',
+           'atopic dermatitis dogs',
+           'dog allergy season'],
+  'img': 'dog-walk',
+  'alt': 'Dog licking a front paw after a spring walk, with a towel rinse station by the door',
+  'intro': 'Seasonal allergy in dogs is often environmental: pollen, mold, dust mites. It looks '
+           'like face-rubbing, armpit itch, and stained paws when the trees let go. Food can '
+           'overlap but does not follow a maple calendar. This Petshiwü guide is pattern '
+           'recognition and home rinses — diagnosis and drugs stay with your veterinarian.',
+  'shopPath': '/dog',
+  'shop': 'When you are ready to put this seasonal allergies in dogs article into the cart, '
+          'Petshiwü is a nationwide online pet store with free shipping over $49 and no autoship. '
+          'NYC delivery is available now; nationwide shipping opens soon.',
+  'related': ['best-dog-food-for-itchy-skin',
+              'dog-ear-infection-signs',
+              'best-flea-and-tick-prevention-for-dogs-2026'],
+  'sections': [{'h': 'The calendar is a clue',
+                'p': ['If itch explodes the same month every year, think environment. If itch is '
+                      'year-round with ear gunk, think food, fleas, or mite plus atopy. Keep flea '
+                      'prevention on anyway — flea saliva is an allergen. See <a '
+                      'href="/learning/best-flea-and-tick-prevention-for-dogs-2026">flea '
+                      'prevention</a> and <a href="/learning/best-dog-food-for-itchy-skin">itchy '
+                      'skin and food</a>.',
+                      'Ears are part of the same skin. Recurrent <a '
+                      'href="/learning/dog-ear-infection-signs">ear infections</a> in August are '
+                      'not bad luck.']},
+               {'h': 'Home habits that lower the load',
+                'p': ['Wipe paws and bellies after grassy walks. A weekly vet-approved shampoo can '
+                      'reduce allergen on the coat. Do not invent daily dish-soap baths. Change '
+                      'the air filter. Keep the dog off the freshly mowed lawn if that is the '
+                      'trigger week.'],
+                'ul': ['Rinse paws in plain water; dry well between toes.',
+                       'Wash bedding on a hot cycle during peak weeks.',
+                       'Watch for hot spots after swims.',
+                       'Log itch scores so the clinic can see the season.']},
+               {'h': 'Medications are not a personality failure',
+                'p': ['Antihistamines help some dogs and disappoint many. Prescription medications '
+                      'and immunotherapy exist. Do not borrow a neighbor’s Apoquel. Do not start '
+                      'steroids from an old bottle without a current exam.']},
+               {'h': 'Food trials still have a place',
+                'p': ['Year-round itch plus GI signs may justify an elimination diet. '
+                      'Seasonal-only itch is a weaker food story. Do not rotate proteins every '
+                      'week “to keep it interesting.”']},
+               {'h': 'Shopping the rinse-and-wipe kit',
+                'p': ['Paw towels, a gentle shampoo your vet likes, flea prevention. Browse <a '
+                      'href="/dog">the dog aisle</a>.']}],
+  'faqs': [{'q': 'How do I know it is allergies and not fleas?',
+            'a': 'You may have both. Comb for fleas and keep prevention on. A veterinarian can '
+                 'look at the skin and ears. This article cannot diagnose atopy.'},
+           {'q': 'Do grain-free diets fix seasonal allergies?',
+            'a': 'No. Pollen is not a grain. See our grain-free dog article for the separate DCM '
+                 'conversation.'},
+           {'q': 'Can I use human allergy pills?',
+            'a': 'Only if your veterinarian gives a dose and a product. Some human meds are '
+                 'unsafe. Do not guess.'}],
+  'publishedAt': '2026-06-09T08:00:00.000Z'},
+ {'slug': 'crate-training-a-puppy',
+  'title': 'Crate Training a Puppy: A Nap Den, Not a Punishment Box',
+  'description': 'Crate training a puppy: how to pick a size, a daytime nap schedule, overnight '
+                 'setups, and why the crate fails if it is only used when you leave.',
+  'petType': 'dog',
+  'category': 'Training',
+  'tags': ['crate training a puppy',
+           'puppy crate size',
+           'puppy crate schedule',
+           'crate training at night',
+           'puppy crying in crate'],
+  'img': 'puppy',
+  'alt': 'Puppy resting on a bed inside an open crate with a stuffed toy and a cover over the back '
+         'half',
+  'intro': 'A crate is a bedroom you can take on the road. It is not a holding cell for a puppy '
+           'you have not exercised. This Petshiwü plan is size, schedule, and how to survive the '
+           'first nights without teaching the puppy that screaming opens doors every time — or '
+           'that crying is always ignored when they need to pee.',
+  'shopPath': '/dog',
+  'shop': 'Petshiwü stocks everyday supplies that pair with crate training a puppy, without an '
+          'autoship contract. Free shipping over $49. NYC delivery is available now, and '
+          'nationwide shipping opens soon — start in our dog collection.',
+  'related': ['potty-training-a-puppy', 'how-to-stop-puppy-biting', 'crate-training-an-adult-dog'],
+  'sections': [{'h': 'Size for the dog they are this month',
+                'p': ['The puppy should stand, turn, and lie down. Too much extra floor becomes a '
+                      'bathroom. Use a divider. A wire crate with a washable pan is easy to clean; '
+                      'a plastic flight crate feels den-like for some pups. Soft-sided crates are '
+                      'for already-reliable dogs, not shredders.',
+                      'Feed meals in the crate with the door open first. The crate must predict '
+                      'food and rest, not only your departure. See <a '
+                      'href="/learning/crate-training-an-adult-dog">adult crate training</a> if '
+                      'you adopted a grown dog.']},
+               {'h': 'A daytime rhythm that makes nights possible',
+                'p': ['Young puppies sleep a lot. They also explode if you skip a nap. Alternate '
+                      'short play with crate naps. After play, toilet, then crate. A stuffed '
+                      'frozen toy can help — count those calories. See <a '
+                      'href="/learning/potty-training-a-puppy">potty training</a> so the crate is '
+                      'not competing with an accident on the rug.'],
+                'ul': ['Cover three sides if it helps the pup settle.',
+                       'Park the crate near you at first, not in exile.',
+                       'If crying starts right after you know they peed, wait a minute, then '
+                       'reward quiet.',
+                       'If crying is a two-hour panic, you went too fast — sit nearby and shorten '
+                       'the session.']},
+               {'h': 'Overnight',
+                'p': ['Set an alarm to toilet a young puppy. Do not do a play party at 2 a.m. '
+                      'Carry them out, wait, return to the crate. A water plan depends on age and '
+                      'your veterinarian; do not withhold water as a training hack in heat.']},
+               {'h': 'What the crate will not fix',
+                'p': ['Separation panic, boredom, and a puppy left eight hours. See <a '
+                      'href="/learning/dog-separation-anxiety-help">separation anxiety</a>. A '
+                      'crate is a tool inside a life, not a babysitter.']},
+               {'h': 'Shopping a first crate',
+                'p': ['Divider crate, washable bed, safe chew. Browse <a href="/dog">the dog '
+                      'aisle</a>.']}],
+  'faqs': [{'q': 'How long can a puppy stay in a crate?',
+            'a': 'A rough household guide is about one hour per month of age during the day, plus '
+                 'overnight stretches that still include toilet breaks for young pups. Individuals '
+                 'vary. If accidents pile up, you asked for too long.'},
+           {'q': 'Should I let the puppy cry it out?',
+            'a': 'Not as a blanket rule. Some fussing is normal. Panic and a full bladder are not '
+                 '“training.” Use short sessions and a toilet schedule.'},
+           {'q': 'When do I remove the crate?',
+            'a': 'Many dogs keep a crate as a bed for life. Others graduate to a gated room. There '
+                 'is no prize for retiring it on a birthday.'}],
+  'publishedAt': '2026-06-11T09:00:00.000Z'},
+ {'slug': 'potty-training-a-puppy',
+  'title': 'Potty Training a Puppy: Doors, Clocks, and the Accident Cleanup That Matters',
+  'description': 'Potty training a puppy: a take-out schedule, marker words, enzyme cleanup, and '
+                 'why punishment after the fact teaches hiding, not housetraining.',
+  'petType': 'dog',
+  'category': 'Training',
+  'tags': ['potty training a puppy',
+           'housebreak a puppy',
+           'puppy pee schedule',
+           'puppy pad training',
+           'enzyme cleaner puppy'],
+  'img': 'puppy',
+  'alt': 'Puppy on a leash at a designated outdoor potty spot with a treat pouch ready',
+  'intro': 'Housetraining is a schedule you run, not a moral lesson the puppy fails. Puppies pee '
+           'after sleep, play, and meals. Your job is to be there, mark the success, and clean the '
+           'miss so the smell does not become a neon sign. This Petshiwü protocol is boring on '
+           'purpose.',
+  'shopPath': '/dog',
+  'shop': 'Skip the subscription trap and shop potty training a puppy gear at Petshiwü. Free '
+          'shipping over $49, no autoship. NYC delivery is available now; nationwide shipping '
+          'opens soon.',
+  'related': ['crate-training-a-puppy', 'leash-training-a-puppy', 'how-to-stop-puppy-biting'],
+  'sections': [{'h': 'The clock is the trainer',
+                'p': ['Take the puppy out after every nap, every meal, every play burst, and every '
+                      '30–60 minutes when they are awake as a baby. Carry them if the door is a '
+                      'long hallway of temptation. Stand still in one potty spot. When they go, '
+                      'say a quiet word and pay. Then you can play.',
+                      'A crate helps because most puppies will not soil their bed if the space is '
+                      'sized right — see <a href="/learning/crate-training-a-puppy">crate '
+                      'training</a>.'],
+                'ul': ['Use an enzyme cleaner, not just lemon soap.',
+                       'Do not rub the puppy’s nose in urine.',
+                       'If you did not see it happen, you missed the teaching moment — clean and '
+                       'move on.',
+                       'Log accidents; patterns show the gap in your schedule.']},
+               {'h': 'Pads versus outside',
+                'p': ['Pads can work in high-rises if you are consistent. They also teach that '
+                      'indoor absorbent surfaces are legal. If your goal is 100% outside, skip '
+                      'pads or use them as a short bridge you fade. Elevator trips need a leash '
+                      'plan — <a href="/learning/leash-training-a-puppy">leash training</a>.']},
+               {'h': 'Regression is information',
+                'p': ['A suddenly un-housetrained puppy may have a UTI, giardia, or too much '
+                      'freedom. See a veterinarian if accidents come with straining or blood. Do '
+                      'not add more square footage as a reward for confusion.']},
+               {'h': 'Overnight',
+                'p': ['Limit water-and-play chaos right before bed. Set an alarm for young pups. '
+                      'Keep the trip boring.']},
+               {'h': 'Shopping the cleanup kit',
+                'p': ['Enzyme cleaner, leash, treats, crate. Browse <a href="/dog">the dog '
+                      'aisle</a>.']}],
+  'faqs': [{'q': 'How long does potty training take?',
+            'a': 'Many puppies get reliable over months, not four days. Small bladders and new '
+                 'homes reset the clock. Consistency beats a viral “24-hour” method.'},
+           {'q': 'Should I use a bell on the door?',
+            'a': 'Bells can help once the puppy understands going outside. Teach them after you '
+                 'already have a schedule, or you will hear bells for fun.'},
+           {'q': 'Why does my puppy pee when they greet me?',
+            'a': 'Excitement urination is different from not being housetrained. Keep greetings '
+                 'low-key and toilet first. Ask a trainer if it persists.'}],
+  'publishedAt': '2026-06-14T10:00:00.000Z'},
+ {'slug': 'leash-training-a-puppy',
+  'title': 'Leash Training a Puppy: Slack, Sniff Breaks, and Equipment That Does Not Choke',
+  'description': 'Leash training a puppy: how to introduce a harness, reward slack, skip '
+                 'retractable reels at first, and keep walks shorter than the puppy’s brain.',
+  'petType': 'dog',
+  'category': 'Training',
+  'tags': ['leash training a puppy',
+           'puppy harness vs collar',
+           'puppy pulling leash',
+           'how to walk a puppy',
+           'loose leash puppy'],
+  'img': 'dog-walk',
+  'alt': 'Puppy walking on a loose leash in a well-fitted harness with a handler holding treats',
+  'intro': 'A puppy on a leash is a baby exploring physics. Pulling is not dominance. It is “the '
+           'world is out there.” This Petshiwü lesson is equipment, slack rewards, and why a '
+           '5-mile first walk creates a screamer. Reactivity later has its own page — start here '
+           'so you do not teach a tight-leash fight.',
+  'shopPath': '/dog',
+  'shop': 'Use our dog collection to continue from leash training a puppy with brands you can '
+          'repurchase. Petshiwü is a nationwide online pet store: free shipping over $49, no '
+          'autoship, NYC delivery now, nationwide shipping soon.',
+  'related': ['potty-training-a-puppy', 'dog-leash-reactivity', 'how-to-teach-a-dog-recall'],
+  'sections': [{'h': 'Harness first for most puppies',
+                'p': ['A well-fitted Y-harness protects a growing throat better than a puppy '
+                      'hanging on a collar. Collars still hold ID. Introduce the harness in the '
+                      'kitchen with food. If the puppy freezes like a statue, you went too fast — '
+                      'feed for one buckle at a time.',
+                      'Skip retractable leashes until the puppy has a brain. Six-foot flat leashes '
+                      'teach a distance you can actually manage.']},
+               {'h': 'Pay the slack',
+                'p': ['When the leash makes a J, mark and treat at your side. When it tightens, '
+                      'stop walking. Wait for a glance or a step back. Then go. This is slower '
+                      'than being dragged to the park and faster than a year of neck-pulling. See '
+                      '<a href="/learning/dog-leash-reactivity">leash reactivity</a> if lunging at '
+                      'dogs is already starting.'],
+                'ul': ['Keep sessions to a few minutes for young pups.',
+                       'Let them sniff as a reward, not as a 20-minute plant survey every three '
+                       'feet if you are late — mix “let’s go” with sniff breaks.',
+                       'Treats should be tiny — <a href="/learning/best-dog-treats-2026">treats '
+                       '2026</a>.',
+                       'If the puppy bites the leash, trade for a toy; do not play tug-of-war with '
+                       'the lead as the game.']},
+               {'h': 'Surfaces and stairs',
+                'p': ['Practice on quiet grass before a busy sidewalk. Carry the puppy down steep '
+                      'stairs if they are tiny. City grates scare some pups — treat for looking, '
+                      'not for being dragged across.']},
+               {'h': 'Socialization is not a dog pile',
+                'p': ['Watch the world. Do not let every stranger maul the puppy. One rude '
+                      'greeting can teach leash fear. Pair new sights with food.']},
+               {'h': 'Shopping a first walk kit',
+                'p': ['Y-harness, 6-foot leash, treat pouch. Browse <a href="/dog">the dog '
+                      'aisle</a>.']}],
+  'faqs': [{'q': 'When can a puppy start walking?',
+            'a': 'Short, gentle walks after your veterinarian clears socialization risk. '
+                 'Vaccination timing is a clinic question. Hallway and yard practice can start '
+                 'earlier.'},
+           {'q': 'Should I use a prong collar on a puppy?',
+            'a': 'No. Teach slack with food and a harness. Aversive collars belong in a serious '
+                 'conversation with a qualified professional, not a first-week puppy kit.'},
+           {'q': 'Why does my puppy bite the leash?',
+            'a': 'It is a toy and a teething object. Keep a real toy, keep moving, and do not jerk '
+                 'the puppy off their feet.'}],
+  'publishedAt': '2026-06-16T11:00:00.000Z'},
+ {'slug': 'how-to-stop-puppy-biting',
+  'title': 'How to Stop Puppy Biting: Play Rules, Teething, and the Ouch Game',
+  'description': 'How to stop puppy biting: how to end the game, what toys to trade, when biting '
+                 'is overtired, and the rare times a bite is a veterinary or behavior red flag.',
+  'petType': 'dog',
+  'category': 'Training',
+  'tags': ['how to stop puppy biting',
+           'puppy nipping hands',
+           'teething puppy biting',
+           'puppy bite inhibition',
+           'puppy mouthing'],
+  'img': 'puppy',
+  'alt': 'Puppy redirected from a hand onto a knotted toy during a play-training session',
+  'intro': 'Puppy teeth are needles and puppy brains are experimental. Biting hands is usually '
+           'play and teething, not a campaign for household leadership. This Petshiwü plan is how '
+           'to stop being the toy without scaring the puppy into silence — and when a bite is not '
+           '“just a puppy.”',
+  'shopPath': '/dog',
+  'shop': 'Petshiwü can send the bowls, foods, and extras this how to stop puppy biting article '
+          'points to. Free shipping over $49 and no autoship. NYC delivery is available now; '
+          'nationwide shipping opens soon.',
+  'related': ['crate-training-a-puppy', 'best-dog-treats-2026', 'how-to-stop-dog-barking'],
+  'sections': [{'h': 'You are either a toy or a person',
+                'p': ['When teeth hit skin, make a short yelp or a calm “too bad,” freeze, and end '
+                      'the game for 10–20 seconds. Then offer a toy. If you wrestle with your '
+                      'hands, you hired the puppy as a land shark. Kids should not run screaming; '
+                      'they should stand like trees and hand the puppy to an adult.',
+                      'Overtired puppies bite more. A crate nap is training — see <a '
+                      'href="/learning/crate-training-a-puppy">crate training</a>.']},
+               {'h': 'Trade, do not punish',
+                'p': ['Keep chew toys in every room. Frozen wet washcloths (supervised) can soothe '
+                      'gums. Do not use your shoe as a chew and then act shocked. Count treat '
+                      'calories — <a href="/learning/best-dog-treats-2026">treats</a>.'],
+                'ul': ['If the puppy latches, do not yank the hand out — that tears skin and makes '
+                       'a tug game.',
+                       'Offer a toy against the teeth and wait.',
+                       'Skip alpha rolls and holding the mouth shut.',
+                       'If play escalates to hard bites and a stiff body, stop and call a trainer '
+                       'or behaviorist.']},
+               {'h': 'Teething timeline',
+                'p': ['Adult teeth arrive over months. Biting should soften as you teach. A '
+                      'six-month-old still shredding wrists needs a tighter plan, not a bigger '
+                      'lecture.']},
+               {'h': 'Red flags',
+                'p': ['Growling over food, biting to keep people away from a toy, or a bite that '
+                      'breaks skin on a child is professional-help territory the same week. Do not '
+                      'wait for “the puppy to grow out of it.”']},
+               {'h': 'Shopping a chew circuit',
+                'p': ['Soft toys, a firmer chew, a crate. Browse <a href="/dog">the dog '
+                      'aisle</a>.']}],
+  'faqs': [{'q': 'Will my puppy stop biting on their own?',
+            'a': 'Intensity usually drops with age and teaching. It drops faster if you stop '
+                 'playing with your hands and keep a nap schedule.'},
+           {'q': 'Should I use bitter spray on my hands?',
+            'a': 'It is a weak plan. Teach an off-switch and a toy. Sprays on skin can be licked '
+                 'off and taste terrible for everyone.'},
+           {'q': 'Is biting a sign of aggression in an 8-week-old?',
+            'a': 'Usually not. Context matters. Hard, frozen, silent bites are different from '
+                 'floppy play. When unsure, film it and show a professional.'}],
+  'publishedAt': '2026-06-18T12:00:00.000Z'},
+ {'slug': 'how-to-stop-dog-barking',
+  'title': 'How to Stop Dog Barking: Name the Job, Then Change the Payoff',
+  'description': 'How to stop dog barking: alarm, boredom, barrier, and panic barking need '
+                 'different plans. What to reinforce, what to ignore, and when to call a pro.',
+  'petType': 'dog',
+  'category': 'Training',
+  'tags': ['how to stop dog barking',
+           'dog barking at window',
+           'dog barking when left alone',
+           'quiet command dogs',
+           'excessive dog barking'],
+  'img': 'dog-training',
+  'alt': 'Dog at a window with blinds half drawn, illustrating management of alarm barking',
+  'intro': 'Barking is communication. “Stop barking” without naming why is like unplugging a smoke '
+           'alarm because you dislike the sound. This Petshiwü guide sorts alarm, boredom, demand, '
+           'and panic barking so you can change the payoff. Shock collars are not the first '
+           'chapter.',
+  'shopPath': '/dog',
+  'shop': 'Ready to restock after reading about how to stop dog barking? Petshiwü ships as a '
+          'nationwide online pet store with free shipping over $49 and no autoship. NYC delivery '
+          'is available now; nationwide shipping opens soon.',
+  'related': ['dog-separation-anxiety-help', 'dog-leash-reactivity', 'best-puzzle-toys-for-dogs'],
+  'sections': [{'h': 'Diagnose the bark before you buy a gadget',
+                'p': ['Window patrol is alarm barking — management is frosted film and a leave-it '
+                      'game. A dog that barks the moment you pick up a sandwich is demand barking '
+                      '— the sandwich stopped being a vending machine. A dog that barks the entire '
+                      'absence may be panicked — see <a '
+                      'href="/learning/dog-separation-anxiety-help">separation anxiety</a>, not a '
+                      '“quiet” lecture on the phone.',
+                      'Leash screaming at other dogs is reactivity — <a '
+                      'href="/learning/dog-leash-reactivity">leash reactivity</a>.']},
+               {'h': 'Teach a quiet that you actually pay',
+                'p': ['Mark the first second of silence and pay. Do not wait for a minute of quiet '
+                      'you will never get on day one. A “thank you” plus a treat for looking at '
+                      'you after an alarm bark can replace a 40-bark aria. Consistency from every '
+                      'human in the house matters more than a fancy word.'],
+                'ul': ['Block the trigger when you cannot train.',
+                       'Give a job: a <a href="/learning/best-puzzle-toys-for-dogs">puzzle toy</a> '
+                       'after the doorbell drill.',
+                       'Do not yell — you are barking along.',
+                       'If neighbors are involved, train at hours you can be kind, not at 11 p.m. '
+                       'on night one.']},
+               {'h': 'Exercise is not a full personality transplant',
+                'p': ['An under-walked adolescent will bark at leaves. Walks help. They do not '
+                      'treat panic. Mental work counts — sniffaris, training, chew time.']},
+               {'h': 'When to hire help',
+                'p': ['Barks that come with lunging, fence fighting, or self-injury need a '
+                      'qualified trainer or veterinary behaviorist. Anyone whose only tool is pain '
+                      'is the wrong hire.']},
+               {'h': 'Shopping management, not a mute button',
+                'p': ['Window film, puzzles, a white-noise machine. Browse <a href="/dog">the dog '
+                      'aisle</a>.']}],
+  'faqs': [{'q': 'Will my dog go hoarse and stop?',
+            'a': 'Do not wait for that. Hoarse barking is miserable and can mean a medical issue. '
+                 'Change the plan.'},
+           {'q': 'Do bark collars work?',
+            'a': 'They can suppress sound without fixing the reason. For panic or pain, they can '
+                 'make things worse. Ask a professional before you go there.'},
+           {'q': 'Is barking just a breed thing?',
+            'a': 'Some breeds were built to alarm. They still need an off-switch and a job. '
+                 'Genetics is a starting point, not a life sentence of 2 a.m. arias.'}],
+  'publishedAt': '2026-06-21T13:00:00.000Z'},
+ {'slug': 'dog-leash-reactivity',
+  'title': 'Dog Leash Reactivity: Why the Sidewalk Fight Starts on a Tight Line',
+  'description': 'Dog leash reactivity: how barrier frustration works, distance as the first tool, '
+                 'and a treat-and-turn drill that does not require a perfect “look at me.”',
+  'petType': 'dog',
+  'category': 'Training',
+  'tags': ['dog leash reactivity',
+           'dog lunging on leash',
+           'reactive dog training',
+           'dog barking at other dogs',
+           'leash frustration dogs'],
+  'img': 'dog-walk',
+  'alt': 'Handler turning a reactive dog away from a distant trigger with a treat, showing a '
+         'treat-and-turn',
+  'intro': 'Leash reactivity is the explosion at the end of a six-foot leash when another dog, '
+           'bike, or skateboard appears. It is often frustration, fear, or both — not a dog who '
+           '“wants to dominate the block.” This Petshiwü drill set is distance, a U-turn, and '
+           'equipment that does not add pain to an already loud moment.',
+  'shopPath': '/dog',
+  'shop': 'Build the dog leash reactivity shopping list in our dog collection. Petshiwü offers '
+          'free shipping over $49, no autoship, NYC delivery now, and nationwide shipping opening '
+          'soon.',
+  'related': ['leash-training-a-puppy', 'how-to-teach-a-dog-recall', 'how-to-stop-dog-barking'],
+  'sections': [{'h': 'The leash is part of the problem',
+                'p': ['Off-leash, many of these dogs can greet or leave. On-leash they cannot '
+                      'finish the conversation, so they shout. A tight leash also raises emotion. '
+                      'Teach slack on quiet days — <a '
+                      'href="/learning/leash-training-a-puppy">leash skills</a> — before you pick '
+                      'a busy path.',
+                      'Prong-and-jerk “corrections” can suppress the bark and store more fear. If '
+                      'you already went down that road, a professional can help you rebuild.']},
+               {'h': 'Distance is the first treat',
+                'p': ['Work at a range where the dog can still eat. That might be across the '
+                      'street. Mark looking at the trigger, then turn and pay as you leave. You '
+                      'are buying the opinion “that dog makes chicken appear,” not forcing a '
+                      'stare-down.'],
+                'ul': ['Skip narrow sidewalks at rush hour while you train.',
+                       'Use a well-fitted harness, not a slip that chokes.',
+                       'Carry better food than the environment — stinky, tiny bits.',
+                       'If the dog is over threshold (screaming, unable to eat), you are too '
+                       'close. Increase space.']},
+               {'h': 'Management is not cheating',
+                'p': ['Cross the street. Park the car farther away. Ask people not to let their '
+                      'off-leash dog “say hi.” A yellow ribbon or a “give us space” vest is '
+                      'communication, not drama.']},
+               {'h': 'When it is medical or panic',
+                'p': ['Pain makes dogs shorter-fused. So does true isolation distress. See <a '
+                      'href="/learning/how-to-stop-dog-barking">barking types</a> and get a vet '
+                      'exam if reactivity appeared overnight.']},
+               {'h': 'Shopping a training-walk kit',
+                'p': ['Harness, 6-foot leash, treat pouch. Browse <a href="/dog">the dog '
+                      'aisle</a>. Hire a force-free trainer if you are stuck.']}],
+  'faqs': [{'q': 'Will my reactive dog ever be friendly?',
+            'a': 'Some become socially easy. Some become polite at a distance. Both are wins. '
+                 '“Friendly with every dog” is not required for a good life.'},
+           {'q': 'Should I let them play to burn it off?',
+            'a': 'A bad greeting can worsen leash frustration. Use structured training and '
+                 'carefully chosen playmates, not a free-for-all as therapy.'},
+           {'q': 'Are retractable leashes OK for reactive dogs?',
+            'a': 'Usually no. You need a consistent, short, predictable line. Retractables add '
+                 'slap and surprise.'}],
+  'publishedAt': '2026-06-23T14:00:00.000Z'},
+ {'slug': 'clicker-training-for-dogs',
+  'title': 'Clicker Training for Dogs: A Marker You Can Trust More Than “Good Boy”',
+  'description': 'Clicker training for dogs: how to charge the clicker, when to switch to a word '
+                 'mark, and why timing matters more than the plastic gadget itself.',
+  'petType': 'dog',
+  'category': 'Training',
+  'tags': ['clicker training for dogs',
+           'how to use a clicker',
+           'marker training dogs',
+           'clicker training puppy',
+           'charge a clicker'],
+  'img': 'dog-training',
+  'alt': 'Hand holding a clicker above a sitting dog waiting for a mark and treat',
+  'intro': 'A clicker is a tiny promise: that sound means a treat is coming. It is clearer than a '
+           'paragraph of praise said late. You do not need a clicker to train — you need a marker. '
+           'This Petshiwü lesson is how to charge the sound, how not to click like a machine gun, '
+           'and when a word is more practical on a windy sidewalk.',
+  'shopPath': '/dog',
+  'shop': 'When you are ready to put this clicker training for dogs article into the cart, '
+          'Petshiwü is a nationwide online pet store with free shipping over $49 and no autoship. '
+          'NYC delivery is available now; nationwide shipping opens soon.',
+  'related': ['how-to-teach-a-dog-recall', 'best-dog-treats-2026', 'leash-training-a-puppy'],
+  'sections': [{'h': 'Charge it like a vending beep',
+                'p': ['Click, treat. Repeat 10–20 times in a quiet room. The dog should look for '
+                      'food after the click, not after your hand twitch. Then click a behavior you '
+                      'like — a glance, a sit — and treat. The click ends the behavior. Do not '
+                      'click and then ask for five more tricks before you pay.',
+                      'If you forgot the clicker, use a short word like “yes.” Keep it consistent. '
+                      'See <a href="/learning/best-dog-treats-2026">treats</a> so the pay is fast '
+                      'and small.']},
+               {'h': 'Timing is the skill',
+                'p': ['Click as the rear hits the floor, not two seconds later when the dog '
+                      'already stood up. Film yourself. Most people click late. Late clicks train '
+                      'a different dog than you think you own.'],
+                'ul': ['One click, one treat — do not double-click to mean “more.”',
+                       'Keep the clicker hidden from kids who will click for fun and wreck the '
+                       'meaning.',
+                       'Pair with real-life rewards: door opens, sniff happens.',
+                       'If the dog is scared of the click, muffle it or switch to a tongue-click '
+                       'or word.']},
+               {'h': 'What clicker training is not',
+                'p': ['It is not bribery if the food comes after the mark. It is not only for '
+                      'puppies. It will not replace medical care for pain that looks like '
+                      'stubbornness.']},
+               {'h': 'Moving to the real world',
+                'p': ['Practice recall and leash skills with the marker — <a '
+                      'href="/learning/how-to-teach-a-dog-recall">recall</a>. Fade food to a '
+                      'variable schedule after the behavior is fluent, not on day two.']},
+               {'h': 'Shopping a marker kit',
+                'p': ['Clicker or two, treat pouch. Browse <a href="/dog">the dog aisle</a>.']}],
+  'faqs': [{'q': 'Do I have to use a clicker forever?',
+            'a': 'No. Many people switch to a word once timing is good. The clicker is a training '
+                 'wheel for precision.'},
+           {'q': 'Can I clicker-train a stubborn breed?',
+            'a': 'Yes. “Stubborn” is often “not paid clearly.” Adjust the reward and the '
+                 'difficulty.'},
+           {'q': 'Why does my dog ignore the clicker outside?',
+            'a': 'The environment is paying better than you are. Raise treat value, lower '
+                 'distraction, and get closer to success.'}],
+  'publishedAt': '2026-06-26T08:00:00.000Z'},
+ {'slug': 'litter-box-training-a-kitten',
+  'title': 'Litter Box Training a Kitten: Location, Sides, and the One-Litter Rule',
+  'description': 'Litter box training a kitten: how many boxes, unscented litter, low sides, and '
+                 'why accidents are usually a box problem — or a medical one — not spite.',
+  'petType': 'cat',
+  'category': 'Training',
+  'tags': ['litter box training a kitten',
+           'kitten not using litter box',
+           'best litter for kittens',
+           'how many litter boxes',
+           'kitten peeing outside box'],
+  'img': 'kitten',
+  'alt': 'Kitten stepping into a low-sided litter box with unscented clumping litter',
+  'intro': 'Most kittens already know what a box is for. Your job is to make the box easier than '
+           'the rug. This Petshiwü setup is location, litter type, and the medical exceptions. '
+           'Punishment after an accident teaches the kitten to hide from you, not to aim better.',
+  'shopPath': '/cat',
+  'shop': 'Petshiwü stocks everyday supplies that pair with litter box training a kitten, without '
+          'an autoship contract. Free shipping over $49. NYC delivery is available now, and '
+          'nationwide shipping opens soon — start in our cat collection.',
+  'related': ['best-cat-litter-2026',
+              'how-to-stop-cats-scratching-furniture',
+              'best-kitten-food-2026'],
+  'sections': [{'h': 'Put the box where a kitten can win',
+                'p': ['Low sides for short legs. One box on each floor. Quiet corner, not next to '
+                      'a booming dryer. After meals and naps, set the kitten in the box and praise '
+                      'a success. If you adopted a weanling who never saw a box, show them once — '
+                      'do not scrub their paws in it.',
+                      'Unscented clumping litter is a common win if the kitten is not eating it. '
+                      'If they graze, use a non-clumping or clinic-approved type until that stops. '
+                      'See <a href="/learning/best-cat-litter-2026">litter 2026</a>.']},
+               {'h': 'Scoop like the kitten is a food critic',
+                'p': ['Dirty boxes get rejected. Scoop daily. If accidents start, clean with an '
+                      'enzyme product and add a box rather than a lecture.'],
+                'ul': ['Keep food away from the box.',
+                       'Do not use a covered box as the only option for a tiny kitten.',
+                       'If they cry in the box, think pain — <a '
+                       'href="/learning/cat-uti-symptoms">urinary signs</a>.',
+                       'Play after a successful pee so the box predicts good things, not exile.']},
+               {'h': 'Self-cleaning units and kittens',
+                'p': ['Weight sensors may miss a 2-pound kitten. Keep a simple open box until they '
+                      'are heavier. See <a '
+                      'href="/learning/self-cleaning-litter-box-guide">automatic boxes</a>.']},
+               {'h': 'When it is not training',
+                'p': ['Diarrhea, straining, and blood are veterinary. So is a kitten who suddenly '
+                      'stops using a box they already understood.']},
+               {'h': 'Shopping a first box kit',
+                'p': ['Low box, unscented litter, enzyme cleaner. Browse <a href="/cat">the cat '
+                      'aisle</a>.']}],
+  'faqs': [{'q': 'How long does litter training take?',
+            'a': 'Many kittens are reliable in days if the box is easy. Accidents mean you change '
+                 'the setup, not the kitten’s morals.'},
+           {'q': 'Can I use the same box for two kittens?',
+            'a': 'You can, and you should still have more than one box. The plus-one rule prevents '
+                 'bullying at the bathroom.'},
+           {'q': 'Should I use puppy pads for a kitten?',
+            'a': 'They teach indoor peeing on fabric. A real box is clearer unless a veterinarian '
+                 'asked for a temporary pad.'}],
+  'publishedAt': '2026-06-28T09:00:00.000Z'},
+ {'slug': 'how-to-stop-cats-scratching-furniture',
+  'title': 'How to Stop Cats Scratching Furniture: Redirect, Don’t Declaw the Problem',
+  'description': 'How to stop cats scratching furniture: post placement, sisal versus cardboard, '
+                 'nail caps, and why punishment makes marking worse. No declaw advice here.',
+  'petType': 'cat',
+  'category': 'Training',
+  'tags': ['how to stop cats scratching furniture',
+           'cat scratching sofa',
+           'best scratching post',
+           'soft paws nail caps',
+           'cat scratch furniture'],
+  'img': 'cat-tree',
+  'alt': 'Tall sisal scratching post placed beside a sofa arm with a cat stretching on the post',
+  'intro': 'Scratching is how cats stretch, shed nail sheaths, and leave a billboard. You cannot '
+           'delete the behavior. You can buy a better billboard and make the sofa boring. This '
+           'Petshiwü plan is placement, texture, and nail caps. Declawing is not a training tip we '
+           'will offer.',
+  'shopPath': '/cat',
+  'shop': 'Skip the subscription trap and shop how to stop cats scratching furniture gear at '
+          'Petshiwü. Free shipping over $49, no autoship. NYC delivery is available now; '
+          'nationwide shipping opens soon.',
+  'related': ['litter-box-training-a-kitten',
+              'how-to-introduce-a-dog-and-cat',
+              'best-cat-litter-2026'],
+  'sections': [{'h': 'Put the post where the crime already happens',
+                'p': ['Cats scratch the sofa corner because it is in the traffic path. Park a '
+                      'tall, stable sisal post right there — not across the room by the unused '
+                      'guest chair. The post should let the cat fully stretch. Wobbly '
+                      'carpet-wrapped sticks teach cats that furniture is sturdier.',
+                      'Offer a horizontal cardboard scratcher too. Some cats vote horizontal. '
+                      'Catnip or a wand toy on the post helps the first week.']},
+               {'h': 'Make the sofa a worse gym',
+                'p': ['Double-sided tape, a throw, or a temporary runner on the exact spot. '
+                      'Feliway-type facial pheromone sprays can reduce marking on some sofas. Foil '
+                      'is a short-term hack. Remove deterrents once the post wins.'],
+                'ul': ['Trim nails or use vinyl caps if your veterinarian or groomer shows you '
+                       'how.',
+                       'Do not yell or spray the cat with water — anxiety increases marking.',
+                       'Give every cat a scratcher; one post for three cats is a queue.',
+                       'If scratching exploded overnight, think stress or pain, not spite.']},
+               {'h': 'Nail caps and trims',
+                'p': ['Caps last weeks and protect fabric if applied correctly. They are not a '
+                      'forever substitute for a post. Trims reduce damage. Neither is declawing.']},
+               {'h': 'Trees versus posts',
+                'p': ['A <a href="/cat">cat tree</a> with sisal columns can be the whole '
+                      'living-room gym. Place it by a window. See <a '
+                      'href="/learning/how-to-introduce-a-dog-and-cat">dog-cat intros</a> if a new '
+                      'dog is why the cat is remarking the couch.']},
+               {'h': 'Shopping a redirect kit',
+                'p': ['Tall sisal post, cardboard scratcher, tape. Browse the cat aisle. We will '
+                      'not sell you a spray as a complete plan.']}],
+  'faqs': [{'q': 'Will a scratching post stop all furniture damage?',
+            'a': 'If it is tall, stable, and in the right place, often yes. You still need to make '
+                 'the old spot less fun for a while.'},
+           {'q': 'Are cardboard scratchers enough?',
+            'a': 'For some cats. Others need vertical sisal. Offer both before you give up.'},
+           {'q': 'Is declawing a solution?',
+            'a': 'Declawing is a surgery that removes toe bones and is banned or restricted in '
+                 'many places. We recommend training, posts, caps, and veterinary behavior help '
+                 'instead.'}],
+  'publishedAt': '2026-06-30T10:00:00.000Z'},
+ {'slug': 'how-to-introduce-a-dog-and-cat',
+  'title': 'How to Introduce a Dog and a Cat: Scent, Doors, and No “Let Them Work It Out”',
+  'description': 'How to introduce a dog and a cat: a scent-swap week, leash greetings, escape '
+                 'routes for the cat, and the signs you should slow down or call a professional.',
+  'petType': 'all',
+  'category': 'Training',
+  'tags': ['how to introduce a dog and a cat',
+           'dog cat introduction',
+           'new dog and resident cat',
+           'cat dog slow introduction',
+           'dog chasing cat'],
+  'img': 'indoor-cat',
+  'alt': 'Baby gate separating a leashed dog from a cat on a high perch during a calm introduction',
+  'intro': 'A good dog-cat introduction is a week of boring, not a viral first-day video. The cat '
+           'needs vertical escape. The dog needs a leash and a brain. This Petshiwü protocol is '
+           'scent, sight, then short meetings. “They will work it out” is how cats get chased into '
+           'not using the box.',
+  'shopPath': '/products',
+  'shop': 'Browse Petshiwü. Free shipping over $49, no autoship. NYC delivery now; nationwide '
+          'shipping soon.',
+  'related': ['crate-training-an-adult-dog',
+              'how-to-stop-cats-scratching-furniture',
+              'litter-box-training-a-kitten'],
+  'sections': [{'h': 'Scent first, faces later',
+                'p': ['Swap blankets for several days. Feed on opposite sides of a closed door. If '
+                      'either animal stops eating, you are too fast. The cat’s litter box and food '
+                      'must stay where the dog cannot throw a party — use a baby gate with a '
+                      'cat-sized opening.',
+                      'A resident cat who suddenly scratches the sofa or pees outside the box is '
+                      'voting on the new roommate. See <a '
+                      'href="/learning/how-to-stop-cats-scratching-furniture">scratching</a> and '
+                      'box setup.']},
+               {'h': 'First sight on a leash',
+                'p': ['Dog on leash, cat free to leave to a high perch. Pay the dog for looking at '
+                      'you, not for staring a hole in the cat. End while everyone is still polite. '
+                      'Thirty seconds of calm beats five minutes of a lunge.'],
+                'ul': ['Keep the dog’s recall and crate as safety tools — <a '
+                       'href="/learning/crate-training-an-adult-dog">adult crate</a>.',
+                       'Never hold the cat in the dog’s face.',
+                       'If the dog screams at the gate, increase distance and hire help.',
+                       'Watch for a cat that freezes and stops grooming — that is not “fine.”']},
+               {'h': 'Prey drive is a real limiter',
+                'p': ['Some sighthounds and terriers need management for life: gates, never '
+                      'unsupervised. That is responsible, not a failure. A trainer who shrugs at a '
+                      'hard stare is the wrong trainer.']},
+               {'h': 'The other direction: cat into a dog house',
+                'p': ['Same rules. The dog should not lose their bed and routine on the same day. '
+                      'Extra walks help the dog settle. Extra vertical space helps the cat.']},
+               {'h': 'Shopping the intro kit',
+                'p': ['Baby gate, leash, cat tree, extra box. Browse <a '
+                      'href="/products">products</a>, <a href="/dog">dog</a>, and <a '
+                      'href="/cat">cat</a> aisles.']}],
+  'faqs': [{'q': 'How long should a dog-cat introduction take?',
+            'a': 'Days to weeks. Some pairs need months of management. Anyone who says “an hour” '
+                 'is guessing with your pets’ bodies.'},
+           {'q': 'Can I leave them alone after one good meeting?',
+            'a': 'No. Unsupervised time comes after many calm, boring sessions and a plan for '
+                 'doors.'},
+           {'q': 'What if the cat hisses?',
+            'a': 'A hiss is information. Give more space. A chase or a bite is a bigger reset. Do '
+                 'not punish the cat for saying no.'}],
+  'publishedAt': '2026-07-03T11:00:00.000Z'},
+ {'slug': 'crate-training-an-adult-dog',
+  'title': 'Crate Training an Adult Dog: Repairing a Bad History Without Forcing the Door',
+  'description': 'Crate training an adult dog: how to rebuild the crate as a rest place, when to '
+                 'skip the crate, and why shutting a panicked adult in is not “being consistent.”',
+  'petType': 'dog',
+  'category': 'Training',
+  'tags': ['crate training an adult dog',
+           'adult dog hates crate',
+           'rescue crate training',
+           'crate anxiety adult dog',
+           'how to crate a rescue dog'],
+  'img': 'dog-bed',
+  'alt': 'Adult dog choosing to lie in an open crate beside a couch, showing a voluntary den',
+  'intro': 'Adult dogs arrive with opinions. Some love crates. Some have been locked in one for '
+           'punishment or for ten-hour days. This Petshiwü rebuild is optional-door training, not '
+           'a weekend of crying it out. If the dog injures themselves, the crate is the wrong tool '
+           'today — see <a href="/learning/dog-separation-anxiety-help">separation anxiety</a>.',
+  'shopPath': '/dog',
+  'shop': 'Petshiwü can send the bowls, foods, and extras this crate training an adult dog article '
+          'points to. Free shipping over $49 and no autoship. NYC delivery is available now; '
+          'nationwide shipping opens soon.',
+  'related': ['crate-training-a-puppy', 'dog-separation-anxiety-help', 'best-dog-beds-2026'],
+  'sections': [{'h': 'Make the crate a cafe, not a jail',
+                'p': ['Park it in the living room with the door tied open. Toss meals toward, then '
+                      'inside. Sit nearby and ignore. When the dog lies in the crate, pay. You are '
+                      'buying the choice. A comfortable bed helps — <a '
+                      'href="/learning/best-dog-beds-2026">dog beds</a> — as long as it cannot be '
+                      'shredded into a blockage.',
+                      'If the dog will not enter, feed at the threshold for a week. There is no '
+                      'prize for slamming the latch on night one.']},
+               {'h': 'Close the door in tiny slices',
+                'p': ['Close it, feed through the wires, open it. Build to a minute while you sit '
+                      'there, then while you stand, then while you leave the room for five '
+                      'seconds. Video the dog. Pacing and drooling mean you jumped ahead.'],
+                'ul': ['Never use the crate as punishment after a mess.',
+                       'Give a chew only if it is safe and calorie-counted.',
+                       'A cover can help some dogs and scare others — test.',
+                       'If teeth hit metal, stop and call a professional.']},
+               {'h': 'When to use a room instead',
+                'p': ['A gated kitchen with a <a href="/learning/best-dog-beds-2026">bed</a> is a '
+                      'valid adult plan. Not every dog needs a crate to be a good housemate. '
+                      'Travel crates can be trained later for vet visits.']},
+               {'h': 'Rescues and unknown histories',
+                'p': ['Go slower. Pair the crate with the best food. If the history includes '
+                      'hoarding in a crate, you may never use one at home, and that can still be a '
+                      'good life.']},
+               {'h': 'Shopping a rebuild kit',
+                'p': ['Right-size crate, washable bed, treats. Browse <a href="/dog">the dog '
+                      'aisle</a>.']}],
+  'faqs': [{'q': 'How long to crate-train an adult?',
+            'a': 'Days to months depending on history. Faster is not kinder.'},
+           {'q': 'Should I crate at night from day one?',
+            'a': 'Only if the dog already rests there. Otherwise start with the crate as a day den '
+                 'and use a gated room at night.'},
+           {'q': 'Can a crate fix chewing?',
+            'a': 'It can prevent chewing while you are gone if the dog is already comfortable. It '
+                 'does not teach what to chew. Provide legal outlets and exercise.'}],
+  'publishedAt': '2026-07-05T12:00:00.000Z'},
+ {'slug': 'how-to-teach-a-dog-recall',
+  'title': 'How to Teach a Dog Recall: A Name That Means “Jackpot,” Not “The Fun Ended”',
+  'description': 'How to teach a dog recall: how to charge a cue, long-line practice, the mistakes '
+                 'that poison “come,” and when a recall is not ready for off-leash parks.',
+  'petType': 'dog',
+  'category': 'Training',
+  'tags': ['how to teach a dog recall',
+           'dog come when called',
+           'reliable recall training',
+           'long line recall',
+           'puppy recall training'],
+  'img': 'dog-training',
+  'alt': 'Dog running toward a handler on a long line in an open field for a recall drill',
+  'intro': 'Recall is a life jacket. It is also the cue people poison by calling the dog to end '
+           'the park, clip nails, or scold. This Petshiwü method is a new word if “come” is '
+           'already junk, a long line, and payments that beat the squirrel. Off-leash freedom is '
+           'earned, not assumed.',
+  'shopPath': '/dog',
+  'shop': 'Ready to restock after reading about how to teach a dog recall? Petshiwü ships as a '
+          'nationwide online pet store with free shipping over $49 and no autoship. NYC delivery '
+          'is available now; nationwide shipping opens soon.',
+  'related': ['clicker-training-for-dogs', 'leash-training-a-puppy', 'best-dog-treats-2026'],
+  'sections': [{'h': 'Charge a word that has no baggage',
+                'p': ['Pick “here” or a whistle. Say it once, then show a handful of excellent '
+                      'food. Repeat in the house. Never attach it to a bath you have not trained. '
+                      'Use a marker if you like — <a '
+                      'href="/learning/clicker-training-for-dogs">clicker training</a>.',
+                      'If the dog ignores you, you are not being disrespected. You are being '
+                      'outbid. Raise the pay or lower the distraction.']},
+               {'h': 'Long line before off leash',
+                'p': ['A 20–30 foot line in a quiet field lets you practice without losing the '
+                      'dog. Call once. Cheer. Pay like you won the lottery. Then release them back '
+                      'to sniff so recall does not mean “party over.” See <a '
+                      'href="/learning/best-dog-treats-2026">treats</a> for pocket food that '
+                      'travels.'],
+                'ul': ['Do not call if you cannot enforce kindly on the line.',
+                       'Practice when the dog is already coming toward you sometimes — catch '
+                       'success.',
+                       'Kids should not chant the cue 15 times.',
+                       'A failed off-leash recall is information: go back to the line.']},
+               {'h': 'Poisoned cues',
+                'p': ['If “come” means nail trim, start a new cue. Do the trim with a different '
+                      'word and a lot of cheese after. Recall should predict good news more often '
+                      'than not.']},
+               {'h': 'When off-leash is a no',
+                'p': ['Recall is not ready around livestock, playgrounds, or a dog with prey drive '
+                      'you have not tested. Leash laws still apply. A GPS tag is backup, not a '
+                      'training plan — <a href="/learning/best-gps-dog-tracker-2026">GPS '
+                      'trackers</a>.']},
+               {'h': 'Shopping a recall kit',
+                'p': ['Long line, harness, treat pouch. Browse <a href="/dog">the dog '
+                      'aisle</a>.']}],
+  'faqs': [{'q': 'How long until recall is reliable?',
+            'a': 'Reliable in the kitchen can be days. Reliable at the park can be months. '
+                 'Distraction is the exam.'},
+           {'q': 'Should I use a shock collar for recall?',
+            'a': 'We recommend skilled positive training and a long line first. Pain can suppress '
+                 'and also create fallout. Talk to a qualified professional if you are considering '
+                 'aversive tools.'},
+           {'q': 'Why does my dog come at home but not at the park?',
+            'a': 'The park pays better. Practice closer, use better food, and add distance slowly. '
+                 'Do not test a new recall next to a soccer game.'}],
+  'publishedAt': '2026-07-08T13:00:00.000Z'},
+ {'slug': 'best-dog-beds-2026',
+  'title': 'Best Dog Beds 2026: Fill, Covers, and a Size That Fits the Curl',
+  'description': 'Best dog beds 2026: how to measure for a curl or a sprawl, bolus vs orthopedic '
+                 'foam, washable covers, and when a crate pad is the better bed.',
+  'petType': 'dog',
+  'category': 'Lifestyle',
+  'tags': ['best dog beds 2026',
+           'washable dog bed',
+           'how to size a dog bed',
+           'bolster dog bed',
+           'cooling dog bed'],
+  'img': 'dog-bed',
+  'alt': 'Medium dog curled in a bolster bed next to a tape measure showing correct bed diameter',
+  'intro': 'A dog bed is furniture that will be drooled on. In 2026 the options are memory foam, '
+           'shredded fill, cooling mats, and designer pillows that flatten in a month. This '
+           'Petshiwü buyer’s guide is measurement, washability, and matching the bed to joints and '
+           'chewing — not a color story.',
+  'shopPath': '/dog',
+  'shop': 'Build the best dog beds shopping list in our dog collection. Petshiwü offers free '
+          'shipping over $49, no autoship, NYC delivery now, and nationwide shipping opening soon.',
+  'related': ['best-orthopedic-dog-bed', 'crate-training-a-puppy', 'best-dogs-for-apartments'],
+  'sections': [{'h': 'Measure the dog, not the Instagram corner',
+                'p': ['Have the dog lie in their usual sleep shape. Measure nose to tail base and '
+                      'add room if they sprawl. A bolster bed suits curlers who like a chin rest. '
+                      'A flat mat suits belly-sleepers and crates. If the bed is for a crate, it '
+                      'must fit without bunching — see <a '
+                      'href="/learning/crate-training-a-puppy">crate sizing</a>.',
+                      'Seniors and heavy breeds should look at <a '
+                      'href="/learning/best-orthopedic-dog-bed">orthopedic foam</a> rather than a '
+                      'cute doughnut that bottoms out.']},
+               {'h': 'Fill and covers decide the second year',
+                'p': ['Shredded fill lumps. Solid foam keeps shape if the density is real. A zip '
+                      'cover you can wash is not optional in a real house. Waterproof liners help '
+                      'puppies and incontinent seniors.'],
+                'ul': ['Skip beds the dog can unzip and eat.',
+                       'Cooling mats help some dogs in summer and feel awful to others — offer a '
+                       'choice.',
+                       'Elevated cots keep air under a hot dog and can be slick for seniors.',
+                       'If the dog ignores the bed, try moving it to where they already sleep.']},
+               {'h': 'Chewers and the expensive snack',
+                'p': ['A stuffed bed is a blockage risk for shredders. Use a cot, a rubber mat, or '
+                      'a bed you can afford to replace while you train. See <a '
+                      'href="/learning/best-toys-for-aggressive-chewers">chewer toys</a> so the '
+                      'bed is not the toy.']},
+               {'h': 'Apartment realities',
+                'p': ['One bed by the couch and one crate pad reduce roaming accidents at night. '
+                      'See <a href="/learning/best-dogs-for-apartments">apartment dogs</a> for the '
+                      'rest of the lifestyle fit.']},
+               {'h': 'Shopping a bed you will wash',
+                'p': ['Measure twice. Browse beds in <a href="/dog">the dog aisle</a>. We will not '
+                      'invent a 2026 lab comfort score.']}],
+  'faqs': [{'q': 'How often should I replace a dog bed?',
+            'a': 'When it smells through a wash, sags so joints hit the floor, or is unsafe to '
+                 'chew. Foam lasts longer than cheap fiberfill.'},
+           {'q': 'Do dogs need a bed if they sleep on the couch?',
+            'a': 'They need a legal, washable place that is theirs. A bed can also be the '
+                 'off-switch spot you train.'},
+           {'q': 'Are orthopedic beds only for old dogs?',
+            'a': 'They help any dog on hard floors, especially large and giant breeds. Age is not '
+                 'the only reason.'}],
+  'publishedAt': '2026-07-10T14:00:00.000Z'},
+ {'slug': 'best-orthopedic-dog-bed',
+  'title': 'Best Orthopedic Dog Bed: Foam Density, Joints, and a Cover You Can Wash',
+  'description': 'Best orthopedic dog bed: what “memory foam” should mean, how thick is enough for '
+                 'large dogs, waterproof liners, and when a bed cannot replace pain care.',
+  'petType': 'dog',
+  'category': 'Lifestyle',
+  'tags': ['best orthopedic dog bed',
+           'memory foam dog bed',
+           'dog bed for arthritis',
+           'orthopedic bed large dog',
+           'waterproof dog bed'],
+  'img': 'dog-bed',
+  'alt': 'Large senior dog stretched on a thick foam orthopedic bed with a zip-off washable cover',
+  'intro': 'Orthopedic is a foam story. If the dog’s hip still hits the floor, it is a pillow with '
+           'a medical adjective. This Petshiwü guide is thickness, density, and washability for '
+           'dogs with arthritis — plus the reminder that a bed does not replace a pain exam. See '
+           '<a href="/learning/best-dog-beds-2026">dog beds 2026</a> for general sizing.',
+  'shopPath': '/dog',
+  'shop': 'When you are ready to put this best orthopedic dog bed article into the cart, Petshiwü '
+          'is a nationwide online pet store with free shipping over $49 and no autoship. NYC '
+          'delivery is available now; nationwide shipping opens soon.',
+  'related': ['best-dog-beds-2026',
+              'best-joint-supplements-for-dogs',
+              'how-to-help-an-overweight-dog'],
+  'sections': [{'h': 'Foam that does not pancake',
+                'p': ['Look for a stated foam thickness — often 3–5 inches for large dogs — and a '
+                      'density the brand will discuss. Egg-crate toppers feel nice and compress '
+                      'fast under a 90-pound body. Memory foam should rebound slowly, not feel '
+                      'like a camping pad.',
+                      'A waterproof liner under a washable cover saves the foam from urine and '
+                      'drool. Zippers should not be a chew toy.']},
+               {'h': 'Get the dog on and off safely',
+                'p': ['Low-entry beds help seniors. Bolsters can block a stiff dog from stepping '
+                      'in. Place the bed away from slick hardwood or add a rug. Weight loss helps '
+                      'joints more than foam — <a '
+                      'href="/learning/how-to-help-an-overweight-dog">overweight dogs</a>.'],
+                'ul': ['Measure the sleep stretch, not just the standing length.',
+                       'If the dog circles and leaves, the bed may be too small or too tall.',
+                       'Give a choice: orthopedic plus a familiar old blanket on top at first.',
+                       'Call the vet for new nighttime panting or crying — that is pain, not a '
+                       'picky sleeper.']},
+               {'h': 'Supplements and beds are teammates',
+                'p': ['A chew does not replace a mattress, and a mattress does not replace an '
+                      'NSAID when prescribed. See <a '
+                      'href="/learning/best-joint-supplements-for-dogs">joint supplements</a>.']},
+               {'h': 'Chewers and orthopedic beds',
+                'p': ['Shredded memory foam is a surgical emergency. Use a cot or a covered bed '
+                      'you supervise until chewing is trained.']},
+               {'h': 'Shopping a bed that survives year two',
+                'p': ['Thickness, liner, cover. Browse <a href="/dog">the dog aisle</a>.']}],
+  'faqs': [{'q': 'Do orthopedic beds work?',
+            'a': 'They can reduce pressure on joints on hard floors. They do not heal dysplasia. '
+                 'Pair with veterinary pain control and weight management.'},
+           {'q': 'Can a puppy use an orthopedic bed?',
+            'a': 'Yes, if they will not eat it. Puppies need washable covers more than medical '
+                 'foam.'},
+           {'q': 'How do I clean memory foam?',
+            'a': 'Usually you do not wash the foam. Wash the cover, wipe the liner, and air the '
+                 'foam if the brand allows. Follow the tag.'}],
+  'publishedAt': '2026-07-13T08:00:00.000Z'},
+ {'slug': 'best-automatic-dog-feeder',
+  'title': 'Best Automatic Dog Feeder: Portions, Backup Power, and Multi-Dog Chaos',
+  'description': 'Best automatic dog feeder: how to set grams not “cups,” backup batteries, camera '
+                 'extras, and why a feeder is not a substitute for body-condition checks.',
+  'petType': 'dog',
+  'category': 'Lifestyle',
+  'tags': ['best automatic dog feeder',
+           'timed dog feeder',
+           'automatic feeder portions',
+           'wifi dog feeder',
+           'automatic feeder two dogs'],
+  'img': 'kibble-bowl',
+  'alt': 'Timed automatic dog feeder dispensing a weighed kibble portion into a bowl',
+  'intro': 'An automatic feeder is a clock with a hopper. It shines for shift workers and measured '
+           'meals. It fails when “one portion” is an uncalibrated cup and a second dog raids the '
+           'bowl. This Petshiwü buyer’s note is grams, power, and the jobs a feeder cannot do — '
+           'like notice a dog who stopped eating.',
+  'shopPath': '/dog',
+  'shop': 'Petshiwü stocks everyday supplies that pair with best automatic dog feeder, without an '
+          'autoship contract. Free shipping over $49. NYC delivery is available now, and '
+          'nationwide shipping opens soon — start in our dog collection.',
+  'related': ['how-much-to-feed-a-dog',
+              'slow-feeder-bowl-benefits',
+              'best-dog-food-for-picky-eaters'],
+  'sections': [{'h': 'Calibrate like a grocer',
+                'p': ['Weigh what the machine actually drops. Hopper “cup” settings lie. Set the '
+                      'daily total from <a href="/learning/how-much-to-feed-a-dog">feeding '
+                      'math</a>, then split meals. If you use a weight-loss food, the feeder still '
+                      'needs the new grams.',
+                      'Wet food feeders exist and need stricter cleaning. Most hoppers are for dry '
+                      'food only. Do not leave fresh food in a room-temp carousel unless the '
+                      'product is designed for it.']},
+               {'h': 'Power and Wi-Fi are not magic',
+                'p': ['A battery backup matters when the outage hits at dinner. Apps that film the '
+                      'bowl are cute and still miss a dog who ate then vomited. If the app fails, '
+                      'the mechanical timer should still drop food.'],
+                'ul': ['Keep a lid the dog cannot open.',
+                       'In two-dog homes, use a gate or a microchip feeder so portions stay '
+                       'personal.',
+                       'Clean the hopper so fat does not go rancid.',
+                       'If the dog is suddenly leaving kibble, look at the dog, not the app — <a '
+                       'href="/learning/best-dog-food-for-picky-eaters">picky eaters</a>.']},
+               {'h': 'A slow feeder bowl can sit under the chute',
+                'p': ['Gulpers still gulp from a timed drop. Pair with a <a '
+                      'href="/learning/slow-feeder-bowl-benefits">slow feeder</a> if the machine '
+                      'dumps a pile.']},
+               {'h': 'What not to outsource',
+                'p': ['Medication, raw food safety, and a puppy’s potty schedule. A feeder does '
+                      'not walk the dog. It does not replace you if the hopper jams while you are '
+                      'away for a weekend.']},
+               {'h': 'Shopping a hopper you trust',
+                'p': ['Simple timer plus backup power beats a fragile gadget. Browse <a '
+                      'href="/dog">the dog aisle</a>.']}],
+  'faqs': [{'q': 'Are automatic feeders good for picky dogs?',
+            'a': 'They can remove the all-day buffet. They cannot fix nausea. If food sits, call '
+                 'the vet.'},
+           {'q': 'Can I use one feeder for two dogs?',
+            'a': 'Only with a real separation plan. Free access means the fast eater wins.'},
+           {'q': 'Do I still need to weigh my dog?',
+            'a': 'Yes. Feeders drift, treats happen, and bodies change. Recheck every two weeks.'}],
+  'publishedAt': '2026-07-15T09:00:00.000Z'},
+ {'slug': 'slow-feeder-bowl-benefits',
+  'title': 'Slow Feeder Bowl Benefits: Gulping, Gas, and a Maze That Is Not Frustrating',
+  'description': 'Slow feeder bowl benefits: how maze bowls slow eating, bloat-aware habits, '
+                 'puzzle difficulty, and when a slow feeder is the wrong tool for a flat-faced '
+                 'dog.',
+  'petType': 'dog',
+  'category': 'Lifestyle',
+  'tags': ['slow feeder bowl benefits',
+           'slow feed dog bowl',
+           'dog eats too fast',
+           'maze bowl dogs',
+           'slow feeder bloat'],
+  'img': 'kibble-bowl',
+  'alt': 'Dog eating kibble from a maze slow-feeder bowl instead of a deep open dish',
+  'intro': 'A slow feeder is a bowl with a maze so the dog cannot inhale dinner in eight seconds. '
+           'That can mean less gulping, less begging for a second illusion meal, and a job for a '
+           'busy brain. It is not proven bloat insurance. This Petshiwü guide is how to pick a '
+           'maze that works, not one that makes a brachycephalic dog give up.',
+  'shopPath': '/dog',
+  'shop': 'Skip the subscription trap and shop slow feeder bowl benefits gear at Petshiwü. Free '
+          'shipping over $49, no autoship. NYC delivery is available now; nationwide shipping '
+          'opens soon.',
+  'related': ['how-much-to-feed-a-dog', 'best-puzzle-toys-for-dogs', 'best-automatic-dog-feeder'],
+  'sections': [{'h': 'Why speed is a household problem',
+                'p': ['Fast eaters swallow air, ask for more, and sometimes regurgitate. Spreading '
+                      'kibble in a muffin tin or a maze bowl stretches the meal. You still feed '
+                      'the same grams — see <a href="/learning/how-much-to-feed-a-dog">how much to '
+                      'feed</a>. If two dogs compete, feed them apart. Competition is a common '
+                      'reason for speed.',
+                      'Deep-chested breeds should still avoid a huge meal plus hard play. A maze '
+                      'is an extra habit, not a surgical opinion.']},
+               {'h': 'Pick a difficulty the dog can finish',
+                'p': ['Start with a shallow maze. If the dog flips the bowl, get a heavier one or '
+                      'a silicone mat that grips. Flat-faced dogs need wider, shallower patterns '
+                      'so they can breathe while they work. Frustration that lasts 40 minutes is '
+                      'not enrichment — it is skipped dinner.'],
+                'ul': ['Wash mazes well; grease hides in ridges.',
+                       'Count wet food in a lick mat if the maze is for kibble only — <a '
+                       'href="/learning/lick-mat-benefits-for-dogs">lick mats</a>.',
+                       'If the dog paws so hard they injure a nail, lower the difficulty.',
+                       'A <a href="/learning/best-puzzle-toys-for-dogs">puzzle toy</a> can replace '
+                       'a meal bowl some days.']},
+               {'h': 'What slow feeders do not do',
+                'p': ['They do not replace a veterinary visit for chronic vomiting. They do not '
+                      'treat food aggression by themselves — that needs a behavior plan and '
+                      'separate feeding.']},
+               {'h': 'DIY versions',
+                'p': ['A baking tray with scattered kibble works on a travel day. Tennis balls in '
+                      'a bowl are a hack if they cannot be swallowed. Supervise any DIY.']},
+               {'h': 'Shopping a maze you will wash',
+                'p': ['Dishwasher-safe if possible. Browse <a href="/dog">the dog aisle</a>.']}],
+  'faqs': [{'q': 'Do slow feeders prevent bloat?',
+            'a': 'They may reduce gulping. They are not a guarantee against GDV. Ask your '
+                 'veterinarian about meal size, exercise timing, and breed risk.'},
+           {'q': 'Can puppies use slow feeders?',
+            'a': 'Yes, with an easy pattern and a watchful eye. Very young pups may need a simple '
+                 'dish.'},
+           {'q': 'My dog won’t eat from the maze. Now what?',
+            'a': 'Too hard, or the food is not worth it. Go easier, add a topper your vet is fine '
+                 'with, or scatter-feed on a mat.'}],
+  'publishedAt': '2026-07-17T10:00:00.000Z'},
+ {'slug': 'best-puzzle-toys-for-dogs',
+  'title': 'Best Puzzle Toys for Dogs: Difficulty Levels That Do Not Create a Genius Criminal',
+  'description': 'Best puzzle toys for dogs: how to raise difficulty, food-safe stuffing, and when '
+                 'a puzzle is frustration instead of enrichment. Match the toy to the chewer.',
+  'petType': 'dog',
+  'category': 'Lifestyle',
+  'tags': ['best puzzle toys for dogs',
+           'dog food puzzle',
+           'enrichment toys dogs',
+           'snuffle vs puzzle',
+           'interactive dog toy'],
+  'img': 'dog-toys',
+  'alt': 'Dog working a sliding-tile food puzzle on a mat, showing a beginner enrichment setup',
+  'intro': 'Puzzle toys turn calories into a project. They help bored barkers and rainy days. They '
+           'also create dogs who learn to throw the puzzle off the counter if you jump to expert '
+           'on Tuesday. This Petshiwü ladder is difficulty, stuffing, and matching the toy to a '
+           'mouth that destroys plastic.',
+  'shopPath': '/dog',
+  'shop': 'Use our dog collection to continue from best puzzle toys for dogs with brands you can '
+          'repurchase. Petshiwü is a nationwide online pet store: free shipping over $49, no '
+          'autoship, NYC delivery now, nationwide shipping soon.',
+  'related': ['snuffle-mat-guide',
+              'lick-mat-benefits-for-dogs',
+              'best-toys-for-aggressive-chewers'],
+  'sections': [{'h': 'Start embarrassingly easy',
+                'p': ['A muffin tin with kibble and tennis balls is a first puzzle. Sliding-tile '
+                      'boards come next. If the dog walks away, you skipped a step. Success is the '
+                      'dog emptying the toy and looking happier, not a 45-minute tantrum.',
+                      'Snuffle mats are the nose version — <a '
+                      'href="/learning/snuffle-mat-guide">snuffle guide</a>. Lick mats are the '
+                      'calming version — <a href="/learning/lick-mat-benefits-for-dogs">lick '
+                      'mats</a>.']},
+               {'h': 'Calories still count',
+                'p': ['Use part of dinner, not a third meal. Frozen stuffing lasts longer. Avoid '
+                      'xylitol, raisins, and onion. If the dog is on a food trial, the puzzle '
+                      'filling has to match.'],
+                'ul': ['Supervise until you know the dog will not eat the toy.',
+                       'Power chewers need rubber, not brittle plastic — <a '
+                       'href="/learning/best-toys-for-aggressive-chewers">chewer toys</a>.',
+                       'Wash toys so yesterday’s fat is not today’s bacteria.',
+                       'Rotate two or three puzzles so they stay interesting.']},
+               {'h': 'When puzzles backfire',
+                'p': ['Resource guarding can appear if another pet approaches. Work separately. '
+                      'Anxious dogs may need a simpler lick mat, not a brain-teaser, during '
+                      'fireworks.']},
+               {'h': 'Electronic gadgets',
+                'p': ['Treat-tossing cameras are fun and still require you to count calories and '
+                      'check cords. They are not a babysitter for a panicked dog.']},
+               {'h': 'Shopping a first puzzle shelf',
+                'p': ['One easy, one medium, one lick mat. Browse <a href="/dog">the dog '
+                      'aisle</a>.']}],
+  'faqs': [{'q': 'How long should a puzzle take?',
+            'a': 'Often 5–20 minutes. Longer is not better if the dog is stressed.'},
+           {'q': 'Are puzzles OK for puppies?',
+            'a': 'Yes, easy ones, supervised. Skip small parts they can swallow.'},
+           {'q': 'Can puzzles replace walks?',
+            'a': 'No. They supplement. Noses and brains still need the world — and joints still '
+                 'need movement your vet is happy with.'}],
+  'publishedAt': '2026-07-20T11:00:00.000Z'},
+ {'slug': 'lick-mat-benefits-for-dogs',
+  'title': 'Lick Mat Benefits for Dogs: Calm, Baths, and a Frozen Job for the Mouth',
+  'description': 'Lick mat benefits for dogs: how licking can lower arousal, how to freeze '
+                 'toppers, bath-time use, and hygiene so the mat does not become a bacteria tray.',
+  'petType': 'dog',
+  'category': 'Lifestyle',
+  'tags': ['lick mat benefits for dogs',
+           'frozen lick mat',
+           'lick mat for baths',
+           'lick mat anxiety dogs',
+           'how to use a lick mat'],
+  'img': 'dog-toys',
+  'alt': 'Frozen lick mat smeared with yogurt-safe topping stuck to a bathtub wall during a bath',
+  'intro': 'A lick mat is a textured rubber sheet you smear with food. The repetitive licking can '
+           'occupy a mouth that would otherwise bark, bite a hose, or pace. This Petshiwü guide is '
+           'how to use one for baths, crates, and fireworks prep — and how to wash it so you are '
+           'not serving last week’s fat.',
+  'shopPath': '/dog',
+  'shop': 'Petshiwü can send the bowls, foods, and extras this lick mat benefits for dogs article '
+          'points to. Free shipping over $49 and no autoship. NYC delivery is available now; '
+          'nationwide shipping opens soon.',
+  'related': ['best-puzzle-toys-for-dogs', 'fireworks-anxiety-in-dogs', 'how-often-to-bathe-a-dog'],
+  'sections': [{'h': 'Why licking is a useful behavior',
+                'p': ['Licking is a natural self-soothing action for many dogs. A mat gives that '
+                      'action a legal target. It is not sedation and it is not a treatment for '
+                      'separation panic. It can be a piece of <a '
+                      'href="/learning/fireworks-anxiety-in-dogs">fireworks planning</a> or a bath '
+                      'distraction — <a href="/learning/how-often-to-bathe-a-dog">bathing</a>.',
+                      'Suction cups on a tub wall keep the mat still. If they fail, the mat '
+                      'becomes a skateboard. Supervise.']},
+               {'h': 'What to smear — and what not to',
+                'p': ['Plain yogurt without xylitol, a bit of complete wet food, or a pet-safe '
+                      'spread. Peanut butter only if it is xylitol-free and calorie-counted. '
+                      'Freeze the mat to make it last. A puppy can use a thinner smear so they do '
+                      'not eat a day’s calories in one bath.'],
+                'ul': ['Wash in hot soapy water after every use.',
+                       'Replace mats that crack and harbor gunk.',
+                       'Do not leave a guarding dog alone with a high-value mat if another pet can '
+                       'approach.',
+                       'If diarrhea starts, the topping was too rich.']},
+               {'h': 'Crate and travel',
+                'p': ['A frozen mat can help a crate session if the crate is already a rest place. '
+                      'It can also create a mess. Use a tray. See crate guides if the dog is '
+                      'panicked, not bored.']},
+               {'h': 'Puzzles versus mats',
+                'p': ['Mats are low-frustration. Sliding puzzles are higher-frustration. Choose '
+                      'based on the dog’s state that day — <a '
+                      'href="/learning/best-puzzle-toys-for-dogs">puzzles</a>.']},
+               {'h': 'Shopping a mat that sticks',
+                'p': ['Deep texture, suction if you need it. Browse <a href="/dog">the dog '
+                      'aisle</a>.']}],
+  'faqs': [{'q': 'Are lick mats good for anxious dogs?',
+            'a': 'They can help some dogs settle in a managed setting. They do not treat a panic '
+                 'disorder. Pair with a behavior plan when needed.'},
+           {'q': 'Can I use human leftovers?',
+            'a': 'Only if every ingredient is dog-safe. No onion, no xylitol, no grapes. When '
+                 'unsure, use the dog’s own wet food.'},
+           {'q': 'How often can I offer a lick mat?',
+            'a': 'As often as the calories fit. Daily is fine for many dogs if dinner shrinks to '
+                 'match.'}],
+  'publishedAt': '2026-07-22T12:00:00.000Z'},
+ {'slug': 'snuffle-mat-guide',
+  'title': 'Snuffle Mat Guide: Hide-and-Seek for Noses, Not a Vacuum Attachment',
+  'description': 'Snuffle mat guide: how to hide kibble in fleece, difficulty levels, washing, and '
+                 'when a snuffle mat is too easy — or a choking mess — for your dog.',
+  'petType': 'dog',
+  'category': 'Lifestyle',
+  'tags': ['snuffle mat guide',
+           'how to use a snuffle mat',
+           'snuffle mat for dogs',
+           'nose work at home',
+           'snuffle mat washing'],
+  'img': 'dog-toys',
+  'alt': 'Dog sniffing kibble hidden in a fleece snuffle mat on the floor',
+  'intro': 'A snuffle mat is fleece strips on a rubber base where you hide kibble. It turns dinner '
+           'into a forage. Tired noses are often quieter dogs. This Petshiwü guide is how to '
+           'start, how to wash the fleece, and when a shredder should not own one unsupervised.',
+  'shopPath': '/dog',
+  'shop': 'Ready to restock after reading about snuffle mat? Petshiwü ships as a nationwide online '
+          'pet store with free shipping over $49 and no autoship. NYC delivery is available now; '
+          'nationwide shipping opens soon.',
+  'related': ['best-puzzle-toys-for-dogs', 'how-much-to-feed-a-dog', 'lick-mat-benefits-for-dogs'],
+  'sections': [{'h': 'Forage is the point',
+                'p': ['Scatter kibble on top first so the dog wins immediately. Then tuck pieces '
+                      'deeper. Use part of the daily ration — <a '
+                      'href="/learning/how-much-to-feed-a-dog">feeding math</a>. A five-minute '
+                      'snuffle can take the edge off a rainy afternoon better than a second walk '
+                      'you do not have time for.',
+                      'If the dog rips the fleece out, you have a chewer, not a snuffler. Switch '
+                      'to a rubber puzzle or supervise tightly — <a '
+                      'href="/learning/best-toys-for-aggressive-chewers">chewer toys</a>.']},
+               {'h': 'Difficulty without cruelty',
+                'p': ['Fold the mat. Use smaller bits. Hide in only one corner. Do not bury food '
+                      'so deep the dog gives up. Pair with other enrichment — <a '
+                      'href="/learning/best-puzzle-toys-for-dogs">puzzles</a> and <a '
+                      'href="/learning/lick-mat-benefits-for-dogs">lick mats</a> — so the week has '
+                      'variety.'],
+                'ul': ['Shake the mat out after each use.',
+                       'Wash when it smells like a pantry.',
+                       'Keep it away from cats who will steal the kibble and leave the dog a '
+                       'mystery.',
+                       'Skip the mat if the dog has a history of eating fabric.']},
+               {'h': 'Puppies and seniors',
+                'p': ['Puppies need larger, easy pieces and supervision. Seniors with sore necks '
+                      'may prefer a raised puzzle. Adjust height and time.']},
+               {'h': 'Scent games beyond the mat',
+                'p': ['Hide a few pieces in a room. That is amateur nose work. Keep it fun. Do not '
+                      'hide food in houseplants the dog will destroy.']},
+               {'h': 'Shopping a mat that can be washed',
+                'p': ['Machine-washable if possible. Browse <a href="/dog">the dog aisle</a>.']}],
+  'faqs': [{'q': 'How much food goes in a snuffle mat?',
+            'a': 'Start with a meal portion or a measured handful. If the dog finishes in 30 '
+                 'seconds, hide deeper or use a bigger mat.'},
+           {'q': 'Can snuffle mats replace a bowl forever?',
+            'a': 'Some dogs eat every meal this way. Others need a bowl for wet food. Variety is '
+                 'fine if calories stay honest.'},
+           {'q': 'Why does my dog sneeze in the mat?',
+            'a': 'Fleece dust or too-vigorous sniffing. Shake it out. If sneezing persists, ask '
+                 'your veterinarian.'}],
+  'publishedAt': '2026-07-25T13:00:00.000Z'},
+ {'slug': 'best-gps-dog-tracker-2026',
+  'title': 'Best GPS Dog Tracker 2026: Coverage, Battery, and What a Tag Cannot Do',
+  'description': 'Best GPS dog tracker 2026: cellular versus Bluetooth, battery life, collar fit, '
+                 'and why a tracker is backup for a recall — not a substitute for a leash.',
+  'petType': 'dog',
+  'category': 'Lifestyle',
+  'tags': ['best GPS dog tracker 2026',
+           'dog GPS collar',
+           'airtag dog collar',
+           'cellular dog tracker',
+           'dog tracker battery'],
+  'img': 'pet-travel',
+  'alt': 'GPS tracker mounted on a dog collar next to a phone map showing a last-known location',
+  'intro': 'A GPS tag is a search tool. It is not a fence, not a recall, and not permission to let '
+           'a dog roam a highway. In 2026 you can pick Bluetooth discs that need you nearby or '
+           'cellular trackers that need a subscription. This Petshiwü buyer’s brief is coverage, '
+           'battery, and the escape days — fireworks, camping — when a tag earns its keep.',
+  'shopPath': '/dog',
+  'shop': 'Build the best gps dog tracker shopping list in our dog collection. Petshiwü offers '
+          'free shipping over $49, no autoship, NYC delivery now, and nationwide shipping opening '
+          'soon.',
+  'related': ['how-to-teach-a-dog-recall', 'traveling-with-a-dog', 'fourth-of-july-dog-safety'],
+  'sections': [{'h': 'Bluetooth is a lost-in-the-park tool',
+                'p': ['Disc-style Bluetooth tags help when the dog is in a neighbor’s yard and '
+                      'your phone can ping them. They do not follow a dog across a county. '
+                      'Cellular or dedicated GPS collars with a data plan do that job. Read the '
+                      'coverage map for the places you actually hike, not a national ad.',
+                      'A tracker does not teach <a '
+                      'href="/learning/how-to-teach-a-dog-recall">recall</a>. It helps you start '
+                      'the search faster when recall already failed.']},
+               {'h': 'Fit, chew, and battery',
+                'p': ['The unit must sit so it cannot slip off or choke. Chewers need a case you '
+                      'inspect. Live batteries die on the day you need them — charge on a '
+                      'schedule. Waterproof claims vary; swimming dogs need a model that states '
+                      'it.',
+                      'Update the microchip and tag phone numbers. A tracker with a dead chip '
+                      'registry is half a plan. See <a '
+                      'href="/learning/fourth-of-july-dog-safety">holiday escape</a> season.'],
+                'ul': ['Test the app in your house before a trip.',
+                       'Share location access with a second person.',
+                       'Do not rely on a tracker in a metal crate or a basement with no signal.',
+                       'If the dog is stolen, call authorities — a map is evidence, not a DIY '
+                       'raid.']},
+               {'h': 'Travel',
+                'p': ['Airlines and hotels have gadget rules. A tracker can help at a rest stop. '
+                      'See <a href="/learning/traveling-with-a-dog">traveling with a dog</a>.']},
+               {'h': 'Privacy and subscriptions',
+                'p': ['Cellular units bill monthly. Read the contract. We will not invent a 2026 '
+                      'ranking of every brand’s ping speed.']},
+               {'h': 'Shopping a tracker you will charge',
+                'p': ['Match tech to your terrain. Browse collars and tags in <a href="/dog">the '
+                      'dog aisle</a>.']}],
+  'faqs': [{'q': 'Is an AirTag enough for a dog?',
+            'a': 'It can help locally if someone with a compatible phone is nearby. It is not a '
+                 'true wide-area GPS for a runner in the woods.'},
+           {'q': 'Do GPS collars replace training?',
+            'a': 'No. They are a backup. Training and leashes prevent the lost-dog event.'},
+           {'q': 'Can I track my dog without a subscription?',
+            'a': 'Bluetooth and some radio systems work without a monthly fee at short range. '
+                 'Wide-area live tracking usually needs a plan.'}],
+  'publishedAt': '2026-07-27T14:00:00.000Z'},
+ {'slug': 'traveling-with-a-dog',
+  'title': 'Traveling with a Dog: Cars, Hotels, and a Packing List That Includes the Vet',
+  'description': 'Traveling with a dog: crate training for the car, hotel etiquette, health '
+                 'certificates, and how to pack food so a stomach does not ruin the trip.',
+  'petType': 'dog',
+  'category': 'Lifestyle',
+  'tags': ['traveling with a dog',
+           'road trip with a dog',
+           'hotel with dogs',
+           'dog car crate',
+           'traveling dog checklist'],
+  'img': 'pet-travel',
+  'alt': 'Packed dog travel kit with collapsible bowls, a leash, records, and a crate by a car '
+         'door',
+  'intro': 'A good dog trip is logistics, not a vibe. Cars overheat. Hotels have leftover chicken '
+           'on the carpet. This Petshiwü checklist is records, restraint, food, and the stops that '
+           'keep a bladder and a brain intact. Flying has extra rules — cats get their own page, '
+           'and dogs in cargo need a conversation you start weeks early.',
+  'shopPath': '/dog',
+  'shop': 'When you are ready to put this traveling with a dog article into the cart, Petshiwü is '
+          'a nationwide online pet store with free shipping over $49 and no autoship. NYC delivery '
+          'is available now; nationwide shipping opens soon.',
+  'related': ['flying-with-a-cat', 'best-gps-dog-tracker-2026', 'how-to-check-dog-food-recalls'],
+  'sections': [{'h': 'The car is a climate and a seat belt',
+                'p': ['Never leave a dog in a closed car. Restrain with a crash-tested crate or '
+                      'harness; an unrestrained dog is a projectile. Practice crate-in-car on a '
+                      '10-minute drive before a six-hour one. Crack windows are not air '
+                      'conditioning.',
+                      'Stop every few hours for water and a potty. A <a '
+                      'href="/learning/best-gps-dog-tracker-2026">tracker</a> helps at chaotic '
+                      'rest areas. Keep the leash on before the door opens.']},
+               {'h': 'Hotels and rentals',
+                'p': ['Book pet-friendly on purpose. Bring a bed that smells like home, a lint '
+                      'roller, and a crate for when you go to dinner. Do not leave a barking dog '
+                      'to meet the manager. Wipe muddy paws. Tip for extra cleanup if you made '
+                      'extra cleanup.'],
+                'ul': ['Pack the usual food — new food plus stress is diarrhea.',
+                       'Bring a copy of vaccines and your vet’s number.',
+                       'Know an emergency clinic along the route.',
+                       'Ask about breed or weight rules before you arrive.']},
+               {'h': 'Crossing borders and flying',
+                'p': ['Health certificates have expiration windows. Start early. Cabin versus '
+                      'cargo is a size and airline policy question. If you fly, train the carrier '
+                      'like a den. Cats: <a href="/learning/flying-with-a-cat">flying with a '
+                      'cat</a>.']},
+               {'h': 'Food safety on the road',
+                'p': ['Keep kibble sealed. Keep raw food cold or leave it at home — see recall and '
+                      'raw-safety habits. A backup bag matters if you spill the only food at a '
+                      'rest stop.']},
+               {'h': 'Shopping a travel kit',
+                'p': ['Collapsible bowls, leash, waste bags, familiar bed. Browse <a '
+                      'href="/dog">the dog aisle</a>.']}],
+  'faqs': [{'q': 'Can I take my dog on a road trip the first week I have them?',
+            'a': 'Short trips yes, epic trips no. Build the car as a calm place first.'},
+           {'q': 'Do I need a muzzle for travel?',
+            'a': 'Only if your veterinarian or trainer recommended one and the dog is trained to '
+                 'wear it comfortably. It is not a substitute for a crate plan.'},
+           {'q': 'What if my dog gets carsick?',
+            'a': 'Ask the clinic. Withhold a huge meal right before driving, keep the crate '
+                 'secure, and do not let the dog be a dashboard ornament.'}],
+  'publishedAt': '2026-07-29T08:00:00.000Z'},
+ {'slug': 'flying-with-a-cat',
+  'title': 'Flying with a Cat: Carrier Training, Airline Rules, and Sedation Myths',
+  'description': 'Flying with a cat: how to train a carrier, cabin versus cargo realities, health '
+                 'certificates, and why you should not sedate a cat without a veterinarian.',
+  'petType': 'cat',
+  'category': 'Lifestyle',
+  'tags': ['flying with a cat',
+           'airline cat carrier',
+           'cat in cabin flight',
+           'cat cargo flight',
+           'how to fly with a cat'],
+  'img': 'pet-travel',
+  'alt': 'Cat sitting calmly in an airline-compliant soft carrier during a living-room practice '
+         'session',
+  'intro': 'Cats do not owe us adventure. If you must fly, the carrier has to be a bedroom months '
+           'before the TSA line. This Petshiwü guide is airline homework, carrier training, and a '
+           'hard no on leftover human calming pills. Cargo is a last resort for most house cats, '
+           'not a convenience upgrade.',
+  'shopPath': '/cat',
+  'shop': 'Petshiwü stocks everyday supplies that pair with flying with a cat, without an autoship '
+          'contract. Free shipping over $49. NYC delivery is available now, and nationwide '
+          'shipping opens soon — start in our cat collection.',
+  'related': ['traveling-with-a-dog', 'picky-cat-not-eating', 'cat-water-fountain-benefits'],
+  'sections': [{'h': 'Train the box like it is a bed',
+                'p': ['Leave the carrier out for weeks. Feed in it. Close the door for seconds, '
+                      'then minutes. Drape a familiar shirt over it. A cat stuffed into a dusty '
+                      'carrier on the morning of the flight will scream from the driveway to the '
+                      'gate.',
+                      'If the cat stops eating around travel, see <a '
+                      'href="/learning/picky-cat-not-eating">picky cat not eating</a> — an empty '
+                      'overnight cat is a medical concern.']},
+               {'h': 'Cabin beats cargo for most cats',
+                'p': ['Confirm the airline’s size limits, health certificate window, and '
+                      'pet-in-cabin cap. Book early. The carrier must fit under the seat and still '
+                      'let the cat stand and turn. Cargo holds have temperature and handling '
+                      'risks. Some breeds and weather windows are banned. Read the current policy, '
+                      'not a 2019 blog.'],
+                'ul': ['Clip nails so they do not snag mesh.',
+                       'Use absorbent pads, not a full litter box, unless the airline allows a '
+                       'specific setup.',
+                       'A familiar toy is fine if it cannot be ingested.',
+                       'Do not open the carrier in the terminal “to comfort them.”']},
+               {'h': 'Sedation is a veterinary decision',
+                'p': ['Unprescribed sedation in a pressurized cabin can be dangerous. Ask the '
+                      'clinic. Pheromone wipes help some cats and are not a knockout. We will not '
+                      'recommend a home cocktail.']},
+               {'h': 'After you land',
+                'p': ['Keep the cat in the carrier until you are in a closed hotel room. Check '
+                      'windows and balconies. Offer water and a box before you offer a tour. A '
+                      'fountain can wait — a bowl will do on night one.']},
+               {'h': 'Shopping a flight carrier',
+                'p': ['Airline-compliant soft carrier, pads, ID. Browse <a href="/cat">the cat '
+                      'aisle</a>.']}],
+  'faqs': [{'q': 'Can I fly a cat in cargo to save money?',
+            'a': 'We generally advise against cargo for pet cats when cabin is an option. If cargo '
+                 'is required, follow airline and veterinary guidance exactly and consider whether '
+                 'the trip is necessary.'},
+           {'q': 'How early should I start carrier training?',
+            'a': 'Weeks to months. The night before is too late.'},
+           {'q': 'Do cats need a passport?',
+            'a': 'International travel has specific documents and sometimes titers. Start with '
+                 'your veterinarian and the destination country’s rules months ahead.'}],
+  'publishedAt': '2026-08-01T09:00:00.000Z'},
+ {'slug': 'is-pet-insurance-worth-it-2026',
+  'title': 'Is Pet Insurance Worth It in 2026? Deductibles, Waiting Periods, and What Is Excluded',
+  'description': 'Is pet insurance worth it in 2026? How to compare accident-only vs wellness, '
+                 'waiting periods, exclusions, and when a savings account is the honest '
+                 'alternative.',
+  'petType': 'all',
+  'category': 'Lifestyle',
+  'tags': ['is pet insurance worth it 2026',
+           'pet insurance deductible',
+           'accident only pet insurance',
+           'pet insurance waiting period',
+           'pet insurance exclusions'],
+  'img': 'pet-travel',
+  'alt': 'Pet medical invoice and an insurance policy summary side by side on a kitchen table',
+  'intro': 'Pet insurance is a financial product, not a wellness spell. In 2026 policies still '
+           'hinge on waiting periods, pre-existing exclusions, and whether you want accident-only '
+           'or a broader medical plan. This Petshiwü explainer is how to read a sample policy. We '
+           'do not sell insurance and we will not invent a company ranking.',
+  'shopPath': '/products',
+  'shop': 'Skip the subscription trap and shop is pet insurance worth it gear at Petshiwü. Free '
+          'shipping over $49, no autoship. NYC delivery is available now; nationwide shipping '
+          'opens soon.',
+  'related': ['heartworm-prevention-for-dogs',
+              'foods-toxic-to-dogs',
+              'best-flea-and-tick-prevention-for-dogs-2026'],
+  'sections': [{'h': 'Know what you are buying',
+                'p': ['Accident-only is cheaper and ignores chronic disease. Comprehensive medical '
+                      'may reimburse a percentage after a deductible. Wellness riders are prepaid '
+                      'routine care — run the math against your actual vaccine and dental bills. A '
+                      'cute app does not change the contract.',
+                      'Waiting periods mean a limp that starts in week one may be excluded forever '
+                      'as pre-existing. Enroll when the pet is healthy if you enroll at all.']},
+               {'h': 'The exclusions people miss',
+                'p': ['Breed-specific conditions, dental disease, behavior, and preventive meds '
+                      'are often limited. Read the list. If your dog already has ear infections '
+                      'every summer, that pattern may be excluded. Prevention still matters — '
+                      'heartworm and fleas are cheaper than claims fights. See <a '
+                      'href="/learning/heartworm-prevention-for-dogs">heartworm</a>.'],
+                'ul': ['Compare annual caps and per-incident caps.',
+                       'Ask how reimbursement works — you usually pay the vet first.',
+                       'Check whether your clinic is fine with the paperwork load.',
+                       'A dedicated savings account is a valid alternative if you will actually '
+                       'fund it.']},
+               {'h': 'Emergencies that wreck uninsured budgets',
+                'p': ['Foreign bodies, toxin ingestions — <a '
+                      'href="/learning/foods-toxic-to-dogs">toxic foods</a> — and hit-by-car bills '
+                      'are why some people sleep better with a policy. Others prefer a '
+                      'high-interest savings buffer. Both are adult plans. Neither is a reason to '
+                      'skip basic prevention.']},
+               {'h': 'Puppies, seniors, and switching',
+                'p': ['Young pets are easier to enroll. Seniors cost more and carry more '
+                      'exclusions. Switching companies can reset waiting periods. Read before you '
+                      'cancel.']},
+               {'h': 'Shopping is reading, not clicking an ad',
+                'p': ['Download sample policies. We will not name a “best 2026” carrier. Use the '
+                      'money you would have spent on a mystery wellness plan to fund a real exam '
+                      'if you stay uninsured.']}],
+  'faqs': [{'q': 'Is pet insurance worth it?',
+            'a': 'It is worth it if a large unexpected bill would change your pet’s outcome and '
+                 'you understand the exclusions. It is not worth it if you will not read the '
+                 'policy or cannot pay the vet up front.'},
+           {'q': 'Does insurance cover pre-existing conditions?',
+            'a': 'Usually not. Some policies have waiting-period lookbacks. Honesty on the '
+                 'application matters.'},
+           {'q': 'Accident-only or full coverage?',
+            'a': 'Accident-only is a narrower safety net. Full coverage costs more and still has '
+                 'exclusions. Match the product to your risk tolerance and cash buffer.'}],
+  'publishedAt': '2026-08-03T10:00:00.000Z'},
+ {'slug': 'best-dogs-for-apartments',
+  'title': 'Best Dogs for Apartments: Energy, Voice, and the Elevator Reality',
+  'description': 'Best dogs for apartments: why size is a weak filter, how to score energy and '
+                 'barking, and the management that matters more than a “apartment breed” list.',
+  'petType': 'dog',
+  'category': 'Lifestyle',
+  'tags': ['best dogs for apartments',
+           'apartment dog breeds',
+           'quiet dogs for apartments',
+           'small dog apartment',
+           'high energy dog apartment'],
+  'img': 'small-breed',
+  'alt': 'Calm dog on a mat in a studio apartment with a leash and poop-bag station by the door',
+  'intro': 'The best apartment dog is the one whose exercise and voice match your building and '
+           'your calendar. A sleepy mastiff can be quieter than a tiny terrier who alarms at every '
+           'hallway click. This Petshiwü guide is a scorecard, not a breed coronation. Landlords '
+           'still set the rules.',
+  'shopPath': '/dog',
+  'shop': 'Use our dog collection to continue from best dogs for apartments with brands you can '
+          'repurchase. Petshiwü is a nationwide online pet store: free shipping over $49, no '
+          'autoship, NYC delivery now, nationwide shipping soon.',
+  'related': ['how-to-stop-dog-barking', 'best-dog-beds-2026', 'potty-training-a-puppy'],
+  'sections': [{'h': 'Size is not the whole lease',
+                'p': ['Weight limits exist. So do bark clauses. A high-energy herding dog in a '
+                      'studio is a project: two real walks, training, and enrichment, or the sofa '
+                      'pays. A lower-energy adult from a rescue can be a better fit than a cute '
+                      'puppy who needs <a '
+                      'href="/learning/potty-training-a-puppy">housetraining</a> and elevator '
+                      'manners.',
+                      'Meet the individual. Breed lists are starting points. Ask about barking, '
+                      'alone time, and whether they have lived with thin walls.']},
+               {'h': 'The building is a training environment',
+                'p': ['Practice elevator sits. Teach a quiet settle when neighbors pass — <a '
+                      'href="/learning/how-to-stop-dog-barking">barking</a>. Pick potty spots that '
+                      'do not start a war with landscaping. A bed that is an off-switch helps — <a '
+                      'href="/learning/best-dog-beds-2026">beds</a>.'],
+                'ul': ['Budget for daycare or a walker if your workday is long.',
+                       'A crate or gate plan for when you cannot supervise.',
+                       'Smell and hair: deshed and vacuum like a roommate.',
+                       'If the dog is reactive in hallways, train at off-hours — <a '
+                       'href="/learning/dog-leash-reactivity">reactivity</a>.']},
+               {'h': 'Puppies versus adults',
+                'p': ['Puppies are cute and loud and not housetrained. Adults show the real voice. '
+                      'If your lease is strict, an adult may be kinder to everyone.']},
+               {'h': 'City heat and paws',
+                'p': ['Sidewalks burn. Walk early. Carry water. Apartment dogs still need sniff '
+                      'time, not just a balcony.']},
+               {'h': 'Shopping an apartment kit',
+                'p': ['Leash, waste bags, a bed, enrichment. Browse <a href="/dog">the dog '
+                      'aisle</a>.']}],
+  'faqs': [{'q': 'What is the best dog breed for apartments?',
+            'a': 'There is no single best. Look for a dog whose exercise and barking match your '
+                 'life. Many mixed-breed adults do brilliantly.'},
+           {'q': 'Can high-energy dogs live in apartments?',
+            'a': 'Yes, if you honestly provide outlets. No, if the plan is a 10-minute walk and a '
+                 'guilt chew.'},
+           {'q': 'Are small dogs easier in apartments?',
+            'a': 'They are easier on space and sometimes harder on noise. Evaluate the dog, not '
+                 'the marketing.'}],
+  'publishedAt': '2026-08-06T11:00:00.000Z'},
+ {'slug': 'best-toys-for-aggressive-chewers',
+  'title': 'Best Toys for Aggressive Chewers: Tough Does Not Mean Unbreakable',
+  'description': 'Best toys for aggressive chewers: how to pick rubber and rope that fail safely, '
+                 'when “indestructible” is a lie, and how to stop the bed from becoming the toy.',
+  'petType': 'dog',
+  'category': 'Lifestyle',
+  'tags': ['best toys for aggressive chewers',
+           'tough dog toys',
+           'indestructible dog toy',
+           'power chewer toys',
+           'safe chew toys dogs'],
+  'img': 'dog-toys',
+  'alt': 'Thick rubber chew toy beside a destroyed plush, showing a safer choice for a power '
+         'chewer',
+  'intro': 'Aggressive chewers are not villains. They have jobs for their jaws. “Indestructible” '
+           'is a marketing word that has sent many dogs to surgery. This Petshiwü guide is how to '
+           'pick toys that fail in large, obvious pieces — and how to retire a toy before it '
+           'becomes a blockage.',
+  'shopPath': '/dog',
+  'shop': 'Petshiwü can send the bowls, foods, and extras this best toys for aggressive chewers '
+          'article points to. Free shipping over $49 and no autoship. NYC delivery is available '
+          'now; nationwide shipping opens soon.',
+  'related': ['best-dog-treats-2026', 'best-dog-beds-2026', 'how-to-stop-puppy-biting'],
+  'sections': [{'h': 'Watch the first ten minutes',
+                'p': ['Give a new toy in front of you. If the dog is shaving shards or swallowing '
+                      'chunks, take it. Rubber toys meant for power chewers should flex a little. '
+                      'Nylon bricks and antlers break teeth — ask your veterinarian if your dog '
+                      'already has a slab fracture history.',
+                      'Plush is a dissection project, not a chew. Save it for supervised tug if '
+                      'you use it at all.']},
+               {'h': 'Rotate and size up',
+                'p': ['A toy that is too small is a swallow. Size for the dog in front of you. '
+                      'Rotate so boredom does not send them to the orthopedic bed — <a '
+                      'href="/learning/best-dog-beds-2026">beds</a>. Pair chews with calorie math '
+                      '— <a href="/learning/best-dog-treats-2026">treats</a>.'],
+                'ul': ['Inspect for sharp edges daily.',
+                       'Skip cooked bones and super-hard hooves if your vet has flagged teeth.',
+                       'Use a long-lasting rubber toy with food inside for crate time if the dog '
+                       'is already crate-comfortable.',
+                       'If you find stuffing in stool, the toy lost.']},
+               {'h': 'The bed is not a chew',
+                'p': ['Shredders need cots or beds they cannot unzip. Training an “off” and '
+                      'providing legal chews is cheaper than a foreign-body surgery.']},
+               {'h': 'Puppies versus adults',
+                'p': ['Puppy teeth need softer options. Adult power chewers need tougher rubber. '
+                      'See <a href="/learning/how-to-stop-puppy-biting">puppy biting</a> so hands '
+                      'are not the toy.']},
+               {'h': 'Shopping a chew that can fail safely',
+                'p': ['One rubber, one edible chew your vet likes, one supervised tug. Browse <a '
+                      'href="/dog">the dog aisle</a>.']}],
+  'faqs': [{'q': 'What is the safest toy for a power chewer?',
+            'a': 'The one you supervise and retire when it shrinks or shards. There is no '
+                 'forever-safe object.'},
+           {'q': 'Are antlers OK?',
+            'a': 'They are very hard and fracture teeth in some dogs. Ask your veterinarian. Many '
+                 'clinics would rather you pick a slightly giving rubber toy.'},
+           {'q': 'Why does my dog destroy toys so fast?',
+            'a': 'Genetics, boredom, and a toy that is too easy. Add exercise, rotate, and raise '
+                 'the toughness — without going into tooth-breaking territory.'}],
+  'publishedAt': '2026-08-08T12:00:00.000Z'},
+ {'slug': 'fourth-of-july-dog-safety',
+  'title': 'Fourth of July Dog Safety: Escapes, Burns, and a Quiet Room Plan',
+  'description': 'Fourth of July dog safety: how to prevent holiday runaways, keep dogs off hot '
+                 'grills, and build a sound-safe room before the first firework. IDs first.',
+  'petType': 'dog',
+  'category': 'Lifestyle',
+  'tags': ['fourth of july dog safety',
+           'dog runaway fireworks',
+           'july 4 dog tips',
+           'grill safety dogs',
+           'dog lost on fourth of july'],
+  'img': 'dog-anxiety',
+  'alt': 'Dog wearing updated ID tags in a quiet interior room with blinds closed on the Fourth of '
+         'July',
+  'intro': 'The Fourth loses more dogs than any other week. Gates open, fireworks boom, and a dog '
+           'who never bolts discovers a new sport. This Petshiwü safety page is ID, containment, '
+           'and food hazards on the picnic table. For the sound plan, use <a '
+           'href="/learning/fireworks-anxiety-in-dogs">fireworks anxiety</a> as the companion '
+           'piece.',
+  'shopPath': '/dog',
+  'shop': 'Ready to restock after reading about fourth of july dog safety? Petshiwü ships as a '
+          'nationwide online pet store with free shipping over $49 and no autoship. NYC delivery '
+          'is available now; nationwide shipping opens soon.',
+  'related': ['fireworks-anxiety-in-dogs', 'best-gps-dog-tracker-2026', 'foods-toxic-to-dogs'],
+  'sections': [{'h': 'Assume the dog will try the gate',
+                'p': ['Update tags and the microchip app in June. Check fence lines. Do not use a '
+                      'backyard tie-out during a party. A <a '
+                      'href="/learning/best-gps-dog-tracker-2026">GPS tag</a> is backup, not a '
+                      'fence. Keep the leash on when guests come and go — doors are the usual '
+                      'exit.',
+                      'If the dog is already sound-sensitive, skip the parade and the rooftop. A '
+                      'quiet interior room beats a “he’ll get used to it” experiment.']},
+               {'h': 'Grills, grease, and people food',
+                'p': ['Grease burns paws and guts. Corn cobs, leftover ribs, and xylitol desserts '
+                      'belong on a high table. Read <a href="/learning/foods-toxic-to-dogs">toxic '
+                      'foods</a>. A stuffed toy in the safe room is cheaper than an ER foreign '
+                      'body.'],
+                'ul': ['Walk and toilet before dusk.',
+                       'Close curtains and run a fan before the first boom.',
+                       'Do not leave citronella candles where they can be knocked over.',
+                       'If the dog goes missing, call local shelters the same night and post a '
+                       'clear photo.']},
+               {'h': 'Sparklers are not toys for dogs',
+                'p': ['They burn. They get stepped on. Skip the cute photo. Kids with sparklers '
+                      'and a loose dog is a trip to urgent care.']},
+               {'h': 'The morning after',
+                'p': ['Check yards for spent shells the dog could chew. Keep the safe room '
+                      'available for late stragglers. If the dog is still hiding on July 5, call '
+                      'the veterinarian about lingering panic.']},
+               {'h': 'Shopping a holiday kit',
+                'p': ['ID tags, a secure leash, lick mats. Browse <a href="/dog">the dog '
+                      'aisle</a>.']}],
+  'faqs': [{'q': 'Should I take my dog to a fireworks show?',
+            'a': 'No. Leave them home in a prepared room.'},
+           {'q': 'Why do so many dogs go missing on the Fourth?',
+            'a': 'Fear plus open gates plus guests. Prevention is ID and closed doors.'},
+           {'q': 'Can I crate my dog during fireworks?',
+            'a': 'Only if the crate is already a rest place. A panicked dog can break teeth on '
+                 'bars. See our fireworks and crate guides.'}],
+  'publishedAt': '2026-08-10T13:00:00.000Z'},
+ {'slug': 'foods-toxic-to-dogs',
+  'title': 'Foods Toxic to Dogs: The Kitchen List You Should Actually Tape Up',
+  'description': 'Foods toxic to dogs: xylitol, grapes, onions, chocolate, and the leftovers that '
+                 'send dogs to emergency care. What to do while you call the vet or poison line.',
+  'petType': 'dog',
+  'category': 'Health',
+  'tags': ['foods toxic to dogs',
+           'xylitol dogs',
+           'grapes toxic dogs',
+           'chocolate toxicity dogs',
+           'onion garlic dogs'],
+  'img': 'kibble-bowl',
+  'alt': 'Kitchen counter with labeled no-go foods — xylitol gum, grapes, dark chocolate — kept '
+         'out of a dog’s reach',
+  'intro': 'Most kitchen emergencies are boring: gum, raisins, a trash chicken bone. This Petshiwü '
+           'list is the foods that reliably cause trouble and the first call you make. It is not a '
+           'complete toxicology textbook. When in doubt, call your veterinarian or a pet poison '
+           'hotline with the product in your hand.',
+  'shopPath': '/dog',
+  'shop': 'Build the foods toxic to dogs shopping list in our dog collection. Petshiwü offers free '
+          'shipping over $49, no autoship, NYC delivery now, and nationwide shipping opening soon.',
+  'related': ['foods-toxic-to-cats', 'homemade-dog-food-safety', 'how-to-help-an-overweight-dog'],
+  'sections': [{'h': 'The usual villains',
+                'p': ['Xylitol (many gums, some peanut butters, “sugar-free” products) can drop '
+                      'blood sugar and damage livers. Grapes and raisins can cause kidney failure '
+                      'in some dogs — there is no known safe amount. Onions and garlic wreck red '
+                      'blood cells. Chocolate, especially dark, is a dose-and-weight problem. '
+                      'Macadamia nuts, raw yeast dough, and high-fat scraps have their own '
+                      'disasters.',
+                      'Cooked bones splinter. Corn cobs block. See <a '
+                      'href="/learning/homemade-dog-food-safety">homemade safety</a> before you '
+                      'share dinner.']},
+               {'h': 'What to do in the first ten minutes',
+                'p': ['Remove access. Estimate how much and when. Call the clinic or a poison '
+                      'hotline before you induce vomiting — some substances burn coming back up, '
+                      'and some dogs should not vomit. Bring the wrapper.',
+                      'Do not wait for symptoms if the item is on this list. Waiting is how grape '
+                      'cases present late.'],
+                'ul': ['Keep gum and bakeware off coffee tables.',
+                       'Close the pantry and the compost.',
+                       'Teach guests not to feed the dog.',
+                       'If the dog is already collapsing or seizing, go to emergency now.']},
+               {'h': 'People “healthy” foods that are not dog-safe',
+                'p': ['Avocado varies by part and product. Alcohol is a no. Caffeine is a no. '
+                      'Nutmeg in quantity is a no. A tiny accidental crumb is different from a '
+                      'stolen bar of baker’s chocolate — still call.']},
+               {'h': 'Cats have a different list',
+                'p': ['Do not assume the lists match. See <a '
+                      'href="/learning/foods-toxic-to-cats">foods toxic to cats</a>. Lilies are a '
+                      'cat emergency that barely registers for dogs.']},
+               {'h': 'Shopping prevention, not a mythic antidote',
+                'p': ['Lidded trash, a baby gate, xylitol-free peanut butter if you use it. Browse '
+                      '<a href="/dog">the dog aisle</a> for storage-friendly treats.']}],
+  'faqs': [{'q': 'What if my dog ate a grape?',
+            'a': 'Call your veterinarian or a poison hotline immediately. Do not wait to see if '
+                 'they get lucky.'},
+           {'q': 'Is dark chocolate worse than milk chocolate?',
+            'a': 'Usually yes, per ounce. The dose still depends on the dog’s weight and how much '
+                 'was eaten. Call anyway.'},
+           {'q': 'Can I make my dog vomit at home?',
+            'a': 'Only if a veterinarian tells you to and tells you how. Some toxins and some dogs '
+                 'make that dangerous.'}],
+  'publishedAt': '2026-08-13T14:00:00.000Z'},
+ {'slug': 'foods-toxic-to-cats',
+  'title': 'Foods Toxic to Cats: Lilies, Onions, and the Tuna Habit That Backfires',
+  'description': 'Foods toxic to cats: lilies, xylitol, onions, grapes, and why “just a little” '
+                 'people food plus string is an ER story. Call a vet or poison line — do not wait.',
+  'petType': 'cat',
+  'category': 'Health',
+  'tags': ['foods toxic to cats',
+           'lilies toxic cats',
+           'onion garlic cats',
+           'xylitol cats',
+           'cat ate chocolate'],
+  'img': 'indoor-cat',
+  'alt': 'Bouquet of lilies kept far from a cat, with a note that lilies are a feline emergency',
+  'intro': 'Cats investigate with their mouths and then hide the consequences. Lilies can shut '
+           'down kidneys from pollen on fur. Onions in baby food have wrecked red cells. This '
+           'Petshiwü list is household plants and leftovers. It is not every toxin on earth. Call '
+           'a veterinarian or poison hotline with the plant or wrapper in hand.',
+  'shopPath': '/cat',
+  'shop': 'When you are ready to put this foods toxic to cats article into the cart, Petshiwü is a '
+          'nationwide online pet store with free shipping over $49 and no autoship. NYC delivery '
+          'is available now; nationwide shipping opens soon.',
+  'related': ['foods-toxic-to-dogs', 'picky-cat-not-eating', 'best-cat-treats-2026'],
+  'sections': [{'h': 'Lilies are not a decoration in a cat house',
+                'p': ['True lilies (Lilium and Hemerocallis) are a feline emergency. A nibble or a '
+                      'pollen lick can be enough. If you even think a lily was ingested, go to '
+                      'care — do not wait for vomiting to “confirm.” Choose cat-safe bouquets or '
+                      'skip cut flowers.',
+                      'Other plants (sago, some philodendrons) have their own risks. Photograph '
+                      'the plant for the clinic.']},
+               {'h': 'Kitchen leftovers',
+                'p': ['Onions, garlic, chives — including in broth and jarred sauces. Grapes and '
+                      'raisins. Xylitol in gums and some nut butters. Chocolate. Alcohol. Raw '
+                      'dough. Dog NSAIDs left on a nightstand. A “tiny” onion crumb in leftovers '
+                      'is still a reason to call if a small cat ate a lot of stew.',
+                      'String, ribbon, and rubber bands are linear foreign bodies. Tinsel season '
+                      'is predictable. See <a href="/learning/picky-cat-not-eating">appetite '
+                      'changes</a> after a possible string incident.'],
+                'ul': ['Do not give dogs’ treats unless they are known cat-safe.',
+                       'Skip milk as a treat plan — many cats are lactose intolerant.',
+                       'Daily tuna is not a complete diet and can create a tuna-only monster.',
+                       'If the cat is already wobbly or not producing urine, that is emergency '
+                       'care.']},
+               {'h': 'Essential oils and “natural” cleaners',
+                'p': ['Tea tree and many concentrated oils are dangerous. Diffusers in a closed '
+                      'room with a cat are a common mistake. Ask before you “purify the air.”']},
+               {'h': 'Dogs and cats share a kitchen, not a toxin list',
+                'p': ['Grapes worry both. Lilies are the cat-specific headline. Keep both lists '
+                      'taped up — <a href="/learning/foods-toxic-to-dogs">dog toxins</a>.']},
+               {'h': 'Shopping safer habits',
+                'p': ['Lidded trash, cat-safe plants, treats from <a href="/cat">the cat aisle</a> '
+                      'instead of the table.']}],
+  'faqs': [{'q': 'My cat bit a lily. What now?',
+            'a': 'This is urgent. Contact a veterinarian or emergency clinic immediately. Do not '
+                 'wait for symptoms.'},
+           {'q': 'Is chocolate as bad for cats as dogs?',
+            'a': 'It is still toxic. Cats often eat less of it, but you should still call with the '
+                 'amount and type.'},
+           {'q': 'Can cats have a little onion in broth?',
+            'a': 'No. Onion and garlic are not a seasoning for cats. Use a pet-formulated broth if '
+                 'you use broth at all.'}],
+  'publishedAt': '2026-08-15T08:00:00.000Z'},
+ {'slug': 'betta-fish-tank-setup',
+  'title': 'Betta Fish Tank Setup: Heat, Filter, and Why a Vase Is Not a Home',
+  'description': 'Betta fish tank setup: minimum tank size, heater and filter basics, water '
+                 'conditioner, and how to cycle before the fish pays for a pretty bowl.',
+  'petType': 'fish',
+  'category': 'Species Care',
+  'tags': ['betta fish tank setup',
+           'betta tank size',
+           'betta heater filter',
+           'how to set up a betta tank',
+           'betta bowl harmful'],
+  'img': 'fish-tank',
+  'alt': 'Heated, filtered 5-gallon betta tank with silk plants and a thermometer, not a tiny vase',
+  'intro': 'Bettas are labyrinth fish, not desk toys. A vase or a half-pint unheated bowl is a '
+           'short, stressful life. This Petshiwü setup is a real tank, a heater, a gentle filter, '
+           'and a cycle so ammonia does not do the decorating. Pair it with <a '
+           'href="/learning/how-to-cycle-a-fish-tank">how to cycle a tank</a>.',
+  'shopPath': '/fish',
+  'shop': 'Shop fish supplies at Petshiwü. Free shipping over $49, no autoship. NYC delivery now; '
+          'nationwide shipping soon.',
+  'related': ['how-to-cycle-a-fish-tank', 'goldfish-tank-size-truth', 'turtle-tank-setup'],
+  'sections': [{'h': 'Give them water they can live in',
+                'p': ['A 5-gallon tank is a common minimum for one male betta in a heated home. '
+                      'Bigger is easier to keep stable. They need tropical temperatures — usually '
+                      'around the mid-70s to low-80s °F — so a heater and a thermometer are not '
+                      'extras. A sponge or gentle filter keeps water moving without turning the '
+                      'fish into a leaf in a storm.',
+                      'Condition tap water to remove chlorine. Do not use unfiltered tap as a '
+                      '“fresh start” every day. That resets the good bacteria.']},
+               {'h': 'Decor that will not shred fins',
+                'p': ['Silk or live plants beat glitter gravel with sharp plastic leaves. A lid '
+                      'helps jumpers. Leave space at the surface — bettas gulp air. Hide spots '
+                      'reduce stress.'],
+                'ul': ['Cycle the tank before the betta arrives when you can.',
+                       'Test ammonia, nitrite, and nitrate — see cycling.',
+                       'Do not house two males together.',
+                       'Community tankmates are a maybe; many bettas do better alone.']},
+               {'h': 'Feeding without a cloudy tank',
+                'p': ['A few pellets once or twice a day, only what they eat in a couple of '
+                      'minutes. Frozen or freeze-dried extras are treats. Overfeeding is the usual '
+                      'cloudy-water story.']},
+               {'h': 'Bowls and “betta kits”',
+                'p': ['If the kit is a cup with a plant, it is a gift box, not a habitat. Skip it. '
+                      'Goldfish have their own size myths — <a '
+                      'href="/learning/goldfish-tank-size-truth">goldfish tank size</a>.']},
+               {'h': 'Shopping a first betta kit that is actually a kit',
+                'p': ['Tank, heater, gentle filter, conditioner, test kit, silk plants. Browse <a '
+                      'href="/fish">the fish aisle</a>.']}],
+  'faqs': [{'q': 'Can a betta live in a bowl?',
+            'a': 'A tiny unheated bowl is a poor home. Use a heated, filtered tank with enough '
+                 'water to stay stable.'},
+           {'q': 'Do bettas need a filter if they have a labyrinth organ?',
+            'a': 'They can gulp air and still need clean water. Filters and water changes handle '
+                 'waste the labyrinth organ does not.'},
+           {'q': 'How long should I cycle before adding a betta?',
+            'a': 'Until ammonia and nitrite read zero and you understand a water-change schedule. '
+                 'Fish-in cycles are harder on the fish. See our cycling guide.'}],
+  'publishedAt': '2026-08-18T09:00:00.000Z'},
+ {'slug': 'how-to-cycle-a-fish-tank',
+  'title': 'How to Cycle a Fish Tank: Bacteria, Test Kits, and Why “Just Add Fish” Fails',
+  'description': 'How to cycle a fish tank: ammonia to nitrite to nitrate, how long a cycle takes, '
+                 'fishless versus fish-in, and the water-change habits that keep it stable.',
+  'petType': 'fish',
+  'category': 'Species Care',
+  'tags': ['how to cycle a fish tank',
+           'aquarium nitrogen cycle',
+           'fishless cycle',
+           'aquarium test kit ammonia',
+           'new tank syndrome'],
+  'img': 'fish-tank',
+  'alt': 'Aquarium test kit vials beside a new filtered tank during a fishless nitrogen cycle',
+  'intro': 'Cycling is growing the bacteria that turn toxic ammonia into less toxic compounds. A '
+           'pretty tank without that workforce is a poison factory. This Petshiwü walkthrough is '
+           'the nitrogen story, how to test, and why a bottle of “instant cycle” is a helper at '
+           'best, not a skip button.',
+  'shopPath': '/fish',
+  'shop': 'Skip the subscription trap and shop how to cycle a fish tank gear at Petshiwü. Free '
+          'shipping over $49, no autoship. NYC delivery is available now; nationwide shipping '
+          'opens soon.',
+  'related': ['betta-fish-tank-setup', 'goldfish-tank-size-truth', 'turtle-tank-setup'],
+  'sections': [{'h': 'The three numbers you will live with',
+                'p': ['Fish waste and leftover food become ammonia. Bacteria convert ammonia to '
+                      'nitrite, then other bacteria convert nitrite to nitrate. Ammonia and '
+                      'nitrite should read zero in an established tank. Nitrate is removed with '
+                      'water changes and plants. A liquid test kit beats most strips when you are '
+                      'learning.',
+                      'A cycle is done when you can add an ammonia source and see it convert to '
+                      'nitrate with ammonia and nitrite staying at zero. That can take 2–6 weeks, '
+                      'sometimes longer. Heat and a seeded filter sponge from a healthy tank can '
+                      'speed it.']},
+               {'h': 'Fishless is kinder than fish-in',
+                'p': ['Add a dose of pure ammonia or a bit of fish food and wait, testing every '
+                      'day or two. Do not dump a community of livestock into raw tap water and '
+                      'hope. If you already have fish in an uncycled tank, do frequent water '
+                      'changes to keep ammonia and nitrite down and accept that you are doing the '
+                      'hard version.',
+                      'Always condition chlorine out of tap water. Chlorine kills the bacteria you '
+                      'are trying to grow.'],
+                'ul': ['Write the test results on a notepad so you see the trend.',
+                       'Do not rinse filter media under tap water.',
+                       'Do not replace all the water because it looks slightly cloudy — cloudy can '
+                       'be a bacterial bloom.',
+                       'Bettas and goldfish still need a cycle — <a '
+                       'href="/learning/betta-fish-tank-setup">betta setup</a>, <a '
+                       'href="/learning/goldfish-tank-size-truth">goldfish size</a>.']},
+               {'h': 'What bottled bacteria can and cannot do',
+                'p': ['Live nitrifying bacteria products can help if they were stored correctly. '
+                      'They do not replace testing. If the bottle sat hot in a warehouse, assume '
+                      'it is weaker than the label.']},
+               {'h': 'After the cycle',
+                'p': ['Add fish slowly. A sudden crowd creates a mini-cycle. Keep a water-change '
+                      'habit based on nitrate and stocking, not a calendar superstition alone.']},
+               {'h': 'Shopping a first test kit',
+                'p': ['Liquid master test kit, conditioner, a notebook. Browse <a href="/fish">the '
+                      'fish aisle</a>.']}],
+  'faqs': [{'q': 'How do I know the tank is cycled?',
+            'a': 'Ammonia and nitrite stay at zero while nitrate appears after an ammonia '
+                 'challenge. One lucky zero reading is not a cycle.'},
+           {'q': 'Can I cycle with a betta in the tank?',
+            'a': 'You can, and it is harder on the fish. Prefer fishless. If fish-in, test daily '
+                 'and change water to protect them.'},
+           {'q': 'Why did my cycle crash after I cleaned?',
+            'a': 'You likely killed the bacteria by washing media in chlorinated water or '
+                 'replacing too much of the system at once.'}],
+  'publishedAt': '2026-08-20T10:00:00.000Z'},
+ {'slug': 'what-to-feed-a-rabbit',
+  'title': 'What to Feed a Rabbit: Hay First, Pellets Second, and the Treat Trap',
+  'description': 'What to feed a rabbit: unlimited grass hay, measured pellets, safe greens, and '
+                 'why a colorful seed mix is a dental and GI problem waiting to happen.',
+  'petType': 'small-pet',
+  'category': 'Species Care',
+  'tags': ['what to feed a rabbit',
+           'rabbit hay diet',
+           'rabbit pellets how much',
+           'safe greens for rabbits',
+           'rabbit digestive health'],
+  'img': 'rabbit',
+  'alt': 'Rabbit eating timothy hay from a rack with a small measured pellet portion nearby',
+  'intro': 'A rabbit’s gut is a hay-powered conveyor belt. Pellets are a supplement. Fruit is '
+           'candy. This Petshiwü diet is timothy (or other grass) hay all day, a measured pellet, '
+           'and leafy greens that do not come from a mystery seed blend. A quiet rabbit who stops '
+           'eating is an emergency — they cannot “wait and see.”',
+  'shopPath': '/small-animal',
+  'shop': 'Shop small-pet supplies at Petshiwü. Free shipping over $49, no autoship. NYC delivery '
+          'now; nationwide shipping soon.',
+  'related': ['guinea-pig-diet-and-vitamin-c', 'chinchilla-dust-bath', 'foods-toxic-to-dogs'],
+  'sections': [{'h': 'Hay is the job',
+                'p': ['Adults do well on timothy, orchard, or meadow hay in unlimited amounts. '
+                      'Alfalfa is richer and is more often for growing or underweight rabbits '
+                      'under guidance. The hay wears teeth and keeps the gut moving. If the hay '
+                      'rack is empty and the pellet bowl is full, you have the house upside down.',
+                      'A sudden stop in poops or a hunched rabbit is GI stasis territory. Call an '
+                      'exotics veterinarian the same day. Do not wait for a new treat to “perk '
+                      'them up.”']},
+               {'h': 'Pellets and greens',
+                'p': ['Use a plain timothy-based pellet, not a mix with colorful bits they will '
+                      'sort. Measure — many adults need only a small daily scoop. Introduce greens '
+                      'slowly: romaine, cilantro, and similar leaves. Iceberg is a skip. Carrots '
+                      'are treats, not a salad identity.',
+                      'Guinea pigs have an extra vitamin C need — do not copy-paste this diet onto '
+                      'a pig. See <a href="/learning/guinea-pig-diet-and-vitamin-c">guinea pig '
+                      'diet</a>.'],
+                'ul': ['Keep fresh water in a bowl they will actually use.',
+                       'Change hay daily so it smells like food, not dust.',
+                       'Avoid chocolate, avocado, and the same xylitol rules you use for dogs.',
+                       'If you found a “muesli” mix in the cage, phase it out toward hay and plain '
+                       'pellets.']},
+               {'h': 'Cecotropes are not a mess to punish',
+                'p': ['Rabbits eat some of their droppings to recover nutrients. If you see a '
+                      'messy rear, think diet, dental pain, or obesity — not spite. An exotics vet '
+                      'can check teeth.']},
+               {'h': 'Housing touches diet',
+                'p': ['They need space to hop. A tiny hutch and a seed diet is a poor pair. Litter '
+                      'habits can be trained with hay in the box.']},
+               {'h': 'Shopping a hay-first pantry',
+                'p': ['Grass hay, plain pellets, a heavy crock. Browse <a '
+                      'href="/small-animal">small animals</a>.']}],
+  'faqs': [{'q': 'How much hay should a rabbit eat?',
+            'a': 'They should have hay available at all times and eat a pile about their own body '
+                 'size per day as a rough visual. The gut should stay moving.'},
+           {'q': 'Can rabbits eat only pellets?',
+            'a': 'They should not. Pellets-only diets fail teeth and guts. Hay is the foundation.'},
+           {'q': 'Is fruit OK every day?',
+            'a': 'Think of fruit as a rare teaspoon, not a bowl. Sugar upsets the gut.'}],
+  'publishedAt': '2026-08-22T11:00:00.000Z'},
+ {'slug': 'guinea-pig-diet-and-vitamin-c',
+  'title': 'Guinea Pig Diet and Vitamin C: Why They Cannot Make Their Own',
+  'description': 'Guinea pig diet and vitamin C: hay, pellets, and how to offer vitamin C without '
+                 'sugary drops that go stale. Scurvy signs that mean a vet visit.',
+  'petType': 'small-pet',
+  'category': 'Species Care',
+  'tags': ['guinea pig diet and vitamin C',
+           'guinea pig scurvy',
+           'vitamin C for guinea pigs',
+           'guinea pig hay',
+           'guinea pig pellets'],
+  'img': 'guinea-pig',
+  'alt': 'Guinea pig eating bell pepper and timothy hay next to a vitamin-C pellet bag',
+  'intro': 'Guinea pigs, like people, cannot synthesize vitamin C. A hay-and-pellet diet that '
+           'forgets C becomes scurvy: sore joints, rough coat, picky eating. This Petshiwü diet is '
+           'grass hay, a C-stabilized pellet, and fresh veg that actually still has vitamin C in '
+           'it — not a bottle of drops that oxidized on a sunny shelf.',
+  'shopPath': '/small-animal',
+  'shop': 'Petshiwü can send the bowls, foods, and extras this guinea pig diet and vitamin c '
+          'article points to. Free shipping over $49 and no autoship. NYC delivery is available '
+          'now; nationwide shipping opens soon.',
+  'related': ['what-to-feed-a-rabbit', 'chinchilla-dust-bath', 'hamster-cage-size-guide'],
+  'sections': [{'h': 'Hay plus a pellet that still has C',
+                'p': ['Unlimited timothy or orchard hay. A guinea-pig-specific pellet (not a '
+                      'rabbit mix) in a measured amount. Vitamin C in pellets degrades with time '
+                      'and heat — buy smaller bags and check dates. Do not use a rabbit pellet and '
+                      '“add a drop.”',
+                      'Rabbits do not have the same C requirement. See <a '
+                      'href="/learning/what-to-feed-a-rabbit">rabbit diet</a> if you have both '
+                      'species; feed them as their own animals.']},
+               {'h': 'Vegetables that do the vitamin job',
+                'p': ['Bell pepper is a reliable C source many pigs enjoy. Leafy greens can '
+                      'rotate. Introduce slowly to avoid diarrhea. Sugary fruit is a treat. '
+                      'Water-bottle vitamin drops often lose potency and taste; food sources are '
+                      'more honest.'],
+                'ul': ['Offer C-rich veg daily, not “when you remember.”',
+                       'If a pig stops eating, that is urgent — they crash fast.',
+                       'Watch for a painful, hunched walk — possible scurvy or dental pain.',
+                       'Keep pairs or groups; they are social, but introduce carefully.']},
+               {'h': 'What scurvy can look like',
+                'p': ['Reluctance to move, swollen joints, a rough coat, and bleeding gums. This '
+                      'is a veterinary diagnosis. Do not megadose human tablets without an exotics '
+                      'vet’s math.']},
+               {'h': 'Housing and chewing',
+                'p': ['They need space to run and hay to wear teeth. A hamster cage is not a pig '
+                      'palace — see <a href="/learning/hamster-cage-size-guide">hamster size</a> '
+                      'for why small cages fail other species too.']},
+               {'h': 'Shopping a C-aware pantry',
+                'p': ['Fresh hay, dated pig pellets, a pepper habit. Browse <a '
+                      'href="/small-animal">small animals</a>.']}],
+  'faqs': [{'q': 'How much vitamin C does a guinea pig need?',
+            'a': 'Needs vary by age and pregnancy. Your exotics veterinarian can confirm a daily '
+                 'target. Food sources plus a proper pellet are the usual path.'},
+           {'q': 'Can I give orange juice every day?',
+            'a': 'Sugar and acidity make juice a poor daily plan. Use hay, pellets, and '
+                 'vegetables.'},
+           {'q': 'Why is my guinea pig chewing the cage?',
+            'a': 'Boredom, teeth, or a hay shortage. Fix the diet and space before you buy a '
+                 'louder toy.'}],
+  'publishedAt': '2026-08-25T12:00:00.000Z'},
+ {'slug': 'hamster-cage-size-guide',
+  'title': 'Hamster Cage Size Guide: Floor Space, Wheels, and Why a Critter Tank Beats a Tiny '
+           'Castle',
+  'description': 'Hamster cage size guide: minimum floor space, deep bedding for burrows, wheel '
+                 'diameter, and why colorful tubes are not a substitute for a footprint.',
+  'petType': 'small-pet',
+  'category': 'Species Care',
+  'tags': ['hamster cage size guide',
+           'minimum hamster cage',
+           'hamster wheel size',
+           'syrian hamster cage',
+           'deep bedding hamster'],
+  'img': 'hamster',
+  'alt': 'Spacious hamster enclosure with deep bedding and a large upright wheel, not a tiny '
+         'modular cage',
+  'intro': 'Hamsters are sold in cages that would make a shoe box look honest. They need a wide '
+           'floor, deep bedding to dig, and a wheel that does not bend their back. This Petshiwü '
+           'size guide is about footprint and welfare, not how many plastic rooms you can clip '
+           'together.',
+  'shopPath': '/small-animal',
+  'shop': 'Ready to restock after reading about hamster cage size? Petshiwü ships as a nationwide '
+          'online pet store with free shipping over $49 and no autoship. NYC delivery is available '
+          'now; nationwide shipping opens soon.',
+  'related': ['what-to-feed-a-rabbit',
+              'hedgehog-care-for-beginners',
+              'guinea-pig-diet-and-vitamin-c'],
+  'sections': [{'h': 'Think floor, not towers',
+                'p': ['Syrians in particular need a large unbroken floor. Tubes and stacked rooms '
+                      'look busy and steal running space. Many welfare groups now talk in terms of '
+                      'hundreds of square inches of floor — bigger is easier to keep interesting. '
+                      'A glass tank or a large bin setup with a mesh lid can beat a retail '
+                      '“hamster home.”',
+                      'Dwarf hamsters still need more space than the box they came in. Do your '
+                      'species homework; some dwarfs have different social rules than Syrians.']},
+               {'h': 'Bedding depth and a wheel that fits',
+                'p': ['Many hamsters burrow. A few inches of bedding is a carpet, not a tunnel. Go '
+                      'deep with a safe paper or aspen-type bedding your vet is comfortable with — '
+                      'skip scented dusty fluff.',
+                      'The wheel should let the hamster run with a straight back. A too-small '
+                      'wheel is a spine-bender. No wire rungs that trap legs.'],
+                'ul': ['Place the cage out of drafts and direct sun.',
+                       'Provide a hide and a sand bath area if appropriate for the species.',
+                       'If the hamster is chewing bars constantly, the cage is too small or too '
+                       'boring.',
+                       'Night activity is normal — do not wake them for handling all day.']},
+               {'h': 'Diet is not a seed-only buffet',
+                'p': ['A balanced hamster mix plus some fresh bits your exotics source recommends. '
+                      'Avoid a candy-colored mix they hoard and leave the healthy bits. Fresh '
+                      'water daily.']},
+               {'h': 'Escape artists',
+                'p': ['Lids must actually latch. A missing hamster is a common story. Check the '
+                      'room before you run the vacuum.']},
+               {'h': 'Shopping a real enclosure',
+                'p': ['Large footprint, deep bedding, correct wheel. Browse <a '
+                      'href="/small-animal">small animals</a>.']}],
+  'faqs': [{'q': 'What size cage does a hamster need?',
+            'a': 'Larger than most starter kits. Prioritize a wide floor and deep bedding. When in '
+                 'doubt, go bigger.'},
+           {'q': 'Can two Syrians share a cage?',
+            'a': 'Adult Syrians are typically housed alone. Dwarf species vary. Do not experiment '
+                 'with a fight.'},
+           {'q': 'Is a ball for exercise enough?',
+            'a': 'A ball is not a habitat and can be stressful or unsafe if used wrong. A proper '
+                 'wheel inside a large cage is the daily runner.'}],
+  'publishedAt': '2026-08-27T13:00:00.000Z'},
+ {'slug': 'bearded-dragon-lighting-guide',
+  'title': 'Bearded Dragon Lighting Guide: UVB, Heat, and the Gradient That Makes Vitamin D',
+  'description': 'Bearded dragon lighting guide: UVB tube placement, basking temps, night drops, '
+                 'and why a coil bulb in the wrong spot gives metabolic bone disease a head start.',
+  'petType': 'reptile',
+  'category': 'Species Care',
+  'tags': ['bearded dragon lighting guide',
+           'bearded dragon UVB',
+           'basking temperature beardie',
+           'metabolic bone disease beardie',
+           'reptile heat lamp'],
+  'img': 'reptile',
+  'alt': 'Bearded dragon basking under a measured heat lamp with a long UVB tube mounted overhead',
+  'intro': 'Bearded dragons are daylight lizards. They need a heat gradient and UVB that actually '
+           'reaches them, or calcium sits in the bowl unused. This Petshiwü lighting guide is '
+           'placement and replacement schedules — not a “cute coil in the corner” setup. An '
+           'exotics veterinarian should see a dragon that is shaky or not eating.',
+  'shopPath': '/reptile',
+  'shop': 'Shop reptile supplies at Petshiwü. Free shipping over $49, no autoship. NYC delivery '
+          'now; nationwide shipping soon.',
+  'related': ['crested-gecko-care', 'turtle-tank-setup', 'hedgehog-care-for-beginners'],
+  'sections': [{'h': 'Two lights, two jobs',
+                'p': ['Heat creates a basking zone (often around the low-to-mid 100s °F for many '
+                      'inland dragons — confirm your locality and age with a current care sheet '
+                      'and your vet). The cool side must still be a real cool side so they can '
+                      'thermoregulate. UVB is a separate fixture. A mercury-vapor bulb can combine '
+                      'heat and UV in some setups; most keepers use a halogen or basking lamp plus '
+                      'a long linear UVB tube.',
+                      'Tubes need to be the right distance, unfiltered by glass, and replaced on '
+                      'the manufacturer’s UV-output schedule — months, not “when it still glows.” '
+                      'Glow is not UV.']},
+               {'h': 'Measure, do not guess',
+                'p': ['Use an infrared temp gun on the basking surface and a digital probe on the '
+                      'cool side. Guessing from your own hand is how we cook or chill dragons. '
+                      'Night heat is a maybe; many rooms are fine without a bright light at night. '
+                      'Ask about ceramic heat emitters if your house is cold.'],
+                'ul': ['Provide a diet with gut-loaded insects and greens your vet agrees with.',
+                       'Dust with calcium as directed — lighting and dust work together.',
+                       'If the jaw looks soft or the dragon is tremoring, that is a same-week '
+                       'exotics visit.',
+                       'Crested geckos have different light needs — <a '
+                       'href="/learning/crested-gecko-care">crested gecko care</a>.']},
+               {'h': 'Enclosure size and hides',
+                'p': ['A cramped tank makes a perfect gradient impossible. Give a hide on the cool '
+                      'side and a basking platform that does not burn the belly.']},
+               {'h': 'Fire safety',
+                'p': ['Lamps need fixtures rated for the wattage. No draping towels on hot domes. '
+                      'This is a house fire topic, not just a pet topic.']},
+               {'h': 'Shopping a lighting kit',
+                'p': ['Linear UVB, basking lamp, thermometers. Browse <a '
+                      'href="/reptile">reptiles</a>.']}],
+  'faqs': [{'q': 'Can I use a window instead of UVB?',
+            'a': 'Window glass blocks most UVB. Dragons need a proper fixture. Supervised outdoor '
+                 'time has its own predator and temperature risks.'},
+           {'q': 'How often do I replace UVB bulbs?',
+            'a': 'Follow the bulb’s UV-output life, often 6–12 months, even if it still looks '
+                 'bright. Write the install date on the fixture.'},
+           {'q': 'Is a red night bulb a good idea?',
+            'a': 'Many keepers avoid colored night lights that disturb sleep. If you need night '
+                 'heat, ask about a non-light heat source.'}],
+  'publishedAt': '2026-08-30T14:00:00.000Z'},
+ {'slug': 'bird-enrichment-ideas',
+  'title': 'Bird Enrichment Ideas: Foraging, Flight Time, and Toys That Are Not Mirrors Only',
+  'description': 'Bird enrichment ideas: foraging wraps, rotation schedules, supervised '
+                 'out-of-cage time, and why a single bell is not a life. Species-safe materials '
+                 'only.',
+  'petType': 'bird',
+  'category': 'Species Care',
+  'tags': ['bird enrichment ideas',
+           'parrot foraging toys',
+           'bird out of cage time',
+           'safe bird toys',
+           'bored parrot behavior'],
+  'img': 'bird',
+  'alt': 'Parrot shredding a foraging toy on a play stand away from the kitchen, showing '
+         'enrichment outside the cage',
+  'intro': 'Birds are not decorations. A bored parrot screams, plucks, or both. Enrichment is '
+           'foraging, chewing, bathing, and social time — rotated so Tuesday is not identical to '
+           'November. This Petshiwü idea list is a starting menu. An avian veterinarian should see '
+           'a bird that suddenly stops talking, fluffs all day, or cannot perch.',
+  'shopPath': '/bird',
+  'shop': 'Shop bird supplies at Petshiwü. Free shipping over $49, no autoship. NYC delivery now; '
+          'nationwide shipping soon.',
+  'related': ['parakeet-diet-guide', 'flying-with-a-cat', 'best-puzzle-toys-for-dogs'],
+  'sections': [{'h': 'Foraging is the main job',
+                'p': ['Wrap pellets in paper, hide them in a cardboard cup, or use a foraging toy '
+                      'that makes the bird work. Seed-only bowls are a snack bar that ends in '
+                      'fatty liver. See <a href="/learning/parakeet-diet-guide">parakeet diet</a> '
+                      'for the bowl half of the day.',
+                      'Rotate toys weekly. A toy that has been ignored for a month can become new '
+                      'again after a rest in the closet.']},
+               {'h': 'Out-of-cage time that is actually safe',
+                'p': ['Closed toilets, no Teflon fumes, no open pots of water, no ceiling fans. '
+                      'Windows closed. Birds fly into glass. Supervised play stands beat a '
+                      'free-roam kitchen during dinner. Dogs and birds need a plan — curiosity is '
+                      'not cute when it is a grab.'],
+                'ul': ['Offer a shallow bath or a mist if the species enjoys it.',
+                       'Chew toys should be bird-safe wood and leather, not zinc-heavy jewelry.',
+                       'Mirrors can become a social obsession for some birds — limit if behavior '
+                       'goes odd.',
+                       'If screaming is new and constant, think medical plus boredom, not '
+                       '“spite.”']},
+               {'h': 'Training is enrichment',
+                'p': ['Target training and a step-up cue give the bird a conversation with you '
+                      'that is not “stop screaming.” Keep sessions short. Pay with a reserved '
+                      'favorite food, not the whole diet.']},
+               {'h': 'Species differences',
+                'p': ['A budgie, a cockatiel, and a macaw do not share a toy size. What is a foot '
+                      'toy for one is a swallow for another. When unsure, go larger and simpler.']},
+               {'h': 'Shopping a rotation box',
+                'p': ['Foraging toys, shreddables, a play stand. Browse <a '
+                      'href="/bird">birds</a>.']}],
+  'faqs': [{'q': 'How many hours out of the cage does a parrot need?',
+            'a': 'Many companion parrots do better with several supervised hours, but the exact '
+                 'number depends on species and your home’s safety. The cage still has to be a '
+                 'rich place when they are inside.'},
+           {'q': 'Why is my bird screaming at dawn?',
+            'a': 'Flock-call timing is normal-ish. A sudden change in voice or energy is a vet '
+                 'question. Enrichment helps the rest of the day.'},
+           {'q': 'Are essential-oil diffusers OK near birds?',
+            'a': 'Generally a bad idea. Bird lungs are sensitive. Skip the spa mist.'}],
+  'publishedAt': '2026-09-01T08:00:00.000Z'},
+ {'slug': 'ferret-diet-guide',
+  'title': 'Ferret Diet Guide: Obligate Carnivores, Not a Hamster Mix',
+  'description': 'Ferret diet guide: high-animal-protein foods, why fruit and grain mixes fail, '
+                 'treat rules, and GI signs that need an exotics veterinarian the same day.',
+  'petType': 'small-pet',
+  'category': 'Species Care',
+  'tags': ['ferret diet guide',
+           'what to feed a ferret',
+           'ferret kibble protein',
+           'ferret treats',
+           'ferret digestive blockage'],
+  'img': 'hamster',
+  'alt': 'Ferret eating a high-protein carnivore diet from a heavy bowl, with rubber toys kept out '
+         'of reach',
+  'intro': 'Ferrets are obligate carnivores with a short gut. They need animal protein and fat, '
+           'not a colorful hamster mix and a raisin. This Petshiwü diet is commercial ferret food '
+           'or a plan an exotics veterinarian wrote — plus the rubber and foam they should never '
+           'swallow. A ferret that stops pooping or vomits is not a “picky phase.”',
+  'shopPath': '/small-animal',
+  'shop': 'Petshiwü stocks everyday supplies that pair with ferret diet, without an autoship '
+          'contract. Free shipping over $49. NYC delivery is available now, and nationwide '
+          'shipping opens soon — start in our small-animal collection.',
+  'related': ['hedgehog-care-for-beginners', 'what-to-feed-a-rabbit', 'foods-toxic-to-dogs'],
+  'sections': [{'h': 'Read the first ingredients like a hawk',
+                'p': ['Look for named meats high on the list and a protein percentage built for '
+                      'carnivores. Cat food is sometimes used as a discussion point with vets; it '
+                      'is not a free pass to grab any grocery kitten kibble. Dog food is the wrong '
+                      'shape of diet. Skip fruit, dairy, and sugary ferret “treats” as a '
+                      'lifestyle.',
+                      'Raw diets have the same pathogen conversation as other raw pets. If you go '
+                      'there, it is with an exotics vet, not a forum PDF.']},
+               {'h': 'They eat often and steal everything',
+                'p': ['Ferrets graze. Keep food available unless your vet said otherwise for a '
+                      'medical fast. They also stash. Check under furniture for rotting caches. '
+                      'Soft rubber toys and memory foam are foreign-body classics — they chew and '
+                      'swallow.'],
+                'ul': ['Keep grapes, xylitol, and chocolate off the floor — <a '
+                       'href="/learning/foods-toxic-to-dogs">kitchen toxins</a> still apply.',
+                       'Hairball-type blockages and swallowed foam need a vet, not oil from the '
+                       'pantry.',
+                       'If you have rabbits, do not share a herbivore menu — <a '
+                       'href="/learning/what-to-feed-a-rabbit">rabbit diet</a>.',
+                       'Insulinoma is common in older ferrets; a suddenly weak ferret is a clinic '
+                       'trip.']},
+               {'h': 'Treats that do not wreck the gut',
+                'p': ['A tiny bit of meat-based treat beats yogurt drops. Count them. A ferret on '
+                      'a medical diet should not get the party mix.']},
+               {'h': 'Housing touches diet',
+                'p': ['They need space to slinky-run and sleep in a dark hide. A bored ferret '
+                      'invents snacks. Enrichment is part of feeding success.']},
+               {'h': 'Shopping a carnivore pantry',
+                'p': ['Ferret-appropriate food, heavy bowls, safe toys. Browse <a '
+                      'href="/small-animal">small animals</a>.']}],
+  'faqs': [{'q': 'Can ferrets eat cat food?',
+            'a': 'Some veterinarians accept certain high-meat cat foods as part of a discussion. '
+                 'Ask yours. Do not assume any cat food is a ferret diet.'},
+           {'q': 'Why is my ferret throwing up foam?',
+            'a': 'This can be an obstruction emergency. Call an exotics veterinarian. Do not wait '
+                 'it out.'},
+           {'q': 'Do ferrets need fruits for vitamins?',
+            'a': 'No. They are not fruit eaters by design. Use a complete carnivore diet.'}],
+  'publishedAt': '2026-09-04T09:00:00.000Z'},
+ {'slug': 'hedgehog-care-for-beginners',
+  'title': 'Hedgehog Care for Beginners: Heat, Wheels, and Hands-Off Nights',
+  'description': 'Hedgehog care for beginners: cage warmth, a solid wheel, insect-and-kibble '
+                 'feeding, and why a cold, rolled-up hedgehog is a veterinary emergency.',
+  'petType': 'small-pet',
+  'category': 'Species Care',
+  'tags': ['hedgehog care for beginners',
+           'hedgehog cage temperature',
+           'hedgehog wheel',
+           'what do pet hedgehogs eat',
+           'hedgehog hibernation danger'],
+  'img': 'hamster',
+  'alt': 'Pet hedgehog on a solid-surface exercise wheel in a warm enclosure with a hide box',
+  'intro': 'African pygmy hedgehogs sold as pets are nocturnal insectivores who need steady '
+           'warmth. A cold house can push them toward a dangerous hibernation attempt. This '
+           'Petshiwü beginner guide is heat, a safe wheel, and handling that does not turn every '
+           'pickup into a ball of grump. An exotics vet should be on file before you need one.',
+  'shopPath': '/small-animal',
+  'shop': 'Skip the subscription trap and shop hedgehog care for beginners gear at Petshiwü. Free '
+          'shipping over $49, no autoship. NYC delivery is available now; nationwide shipping '
+          'opens soon.',
+  'related': ['ferret-diet-guide', 'hamster-cage-size-guide', 'crested-gecko-care'],
+  'sections': [{'h': 'Temperature is not optional',
+                'p': ['Most keepers aim for a warm room in the mid-70s °F and watch for too-hot as '
+                      'well as too-cold. A ceramic heat emitter or a carefully placed heat source '
+                      'with a thermostat beats a heating pad the hedgehog can burn on. If they are '
+                      'cool to the touch, wobbly, or stuck rolled up, warm them gently and call '
+                      'the vet — do not put them on a blasting space heater.',
+                      'They are solitary. One hedgehog per enclosure unless a specialist said '
+                      'otherwise.']},
+               {'h': 'Wheels and flooring',
+                'p': ['A solid wheel (no wire rungs) lets them run without a broken leg. Deep, '
+                      'dusty bedding can irritate. Provide a hide. Cage size should let them trot, '
+                      'not just turn around — the same spirit as <a '
+                      'href="/learning/hamster-cage-size-guide">hamster space</a>.'],
+                'ul': ['Offer a shallow dish of water they cannot drown in.',
+                       'Diet is typically a high-quality hedgehog or specified cat kibble plus '
+                       'insects your vet agrees with — not a bowl of grapes.',
+                       'Handle low to the ground so a fall is short.',
+                       'Salmonellosis is a real hygiene topic: wash hands, keep them out of the '
+                       'kitchen sink.']},
+               {'h': 'Quilling and attitude',
+                'p': ['Young hogs quill and can be extra prickly. That is not a reason to squeeze. '
+                      'Let them explore your lap with a towel. If they never unball and lose '
+                      'weight, book the vet.']},
+               {'h': 'Legal and vet access',
+                'p': ['Some places restrict hedgehog ownership. Confirm the law. Confirm you have '
+                      'an exotics clinic before you buy the animal.']},
+               {'h': 'Shopping a warm, simple setup',
+                'p': ['Thermostat heat, solid wheel, hide, appropriate food. Browse <a '
+                      'href="/small-animal">small animals</a>.']}],
+  'faqs': [{'q': 'Why is my hedgehog not coming out?',
+            'a': 'They are nocturnal. Daytime hiding can be normal. Daytime lethargy plus cold is '
+                 'not. Check temperature and call a vet if you are unsure.'},
+           {'q': 'Can hedgehogs eat mealworms only?',
+            'a': 'Insects are part of a diet, not the whole diet, unless an exotics veterinarian '
+                 'designed it. Fatty worm-only menus create problems.'},
+           {'q': 'Do they need a friend?',
+            'a': 'Usually no. They can fight. Enrichment and correct heat beat a forced '
+                 'roommate.'}],
+  'publishedAt': '2026-09-06T10:00:00.000Z'},
+ {'slug': 'goldfish-tank-size-truth',
+  'title': 'Goldfish Tank Size Truth: Why a Bowl Is a Myth and Filters Are Not Optional',
+  'description': 'Goldfish tank size truth: how much water common and fancy goldfish actually '
+                 'need, why they are coldwater messy fish, and how to cycle before you add more.',
+  'petType': 'fish',
+  'category': 'Species Care',
+  'tags': ['goldfish tank size truth',
+           'goldfish bowl myth',
+           'how big a tank for goldfish',
+           'fancy goldfish tank',
+           'goldfish filter'],
+  'img': 'fish-tank',
+  'alt': 'Long stocked goldfish aquarium with a canister filter, not a small round bowl',
+  'intro': 'Goldfish are coldwater carp that eat and poop like they have a job. A bowl is a '
+           'Victorian myth, not a habitat. This Petshiwü size brief is gallons, filtration, and '
+           'why “just one more feeder goldfish” is how tanks crash. Cycle first — <a '
+           'href="/learning/how-to-cycle-a-fish-tank">cycling</a>.',
+  'shopPath': '/fish',
+  'shop': 'Use our fish collection to continue from goldfish tank size truth with brands you can '
+          'repurchase. Petshiwü is a nationwide online pet store: free shipping over $49, no '
+          'autoship, NYC delivery now, nationwide shipping soon.',
+  'related': ['how-to-cycle-a-fish-tank', 'betta-fish-tank-setup', 'turtle-tank-setup'],
+  'sections': [{'h': 'Think long, not round',
+                'p': ['A single fancy goldfish is often discussed in the 20-gallon-plus range, '
+                      'with more length than height so they can swim. Commons and comets get '
+                      'larger and need ponds or very large tanks. The inch-per-gallon slogan fails '
+                      'because goldfish are messy, not because math is cute.',
+                      'They prefer cooler water than a betta. Do not stack a heater for a tropical '
+                      'community and then add goldfish as decoration.']},
+               {'h': 'Filtration has to be oversized',
+                'p': ['They produce waste. A filter rated above the tank size, plus water changes, '
+                      'keeps ammonia from winning. Gravel vacuums matter. Overfeeding is the usual '
+                      'cloud.',
+                      'Bettas have different heat needs — <a '
+                      'href="/learning/betta-fish-tank-setup">betta setup</a>. Turtles need even '
+                      'more water engineering — <a href="/learning/turtle-tank-setup">turtle '
+                      'tanks</a>.'],
+                'ul': ['Cycle before you add a crowd.',
+                       'Do not use a bowl “just for a month.”',
+                       'Quarantine new fish if you can.',
+                       'If they gasp at the surface, test the water the same hour.']},
+               {'h': 'Fancy goldfish health',
+                'p': ['Bubble-eye and other fancy types bump into décor. Use smooth silk plants. '
+                      'Swim-bladder issues often trace to diet and body shape — an aquatic vet is '
+                      'the right call, not a pea-only internet cure you repeat for months.']},
+               {'h': 'Outdoor ponds',
+                'p': ['Ponds can be great for commons if predators, ice, and filtration are '
+                      'planned. A kiddie pool in July is not a pond.']},
+               {'h': 'Shopping a goldfish system',
+                'p': ['Long tank, oversized filter, test kit. Browse <a href="/fish">fish</a>.']}],
+  'faqs': [{'q': 'How many gallons per goldfish?',
+            'a': 'More than a bowl and more than a 5-gallon “kit.” Fancies need tens of gallons '
+                 'each as a planning conversation; commons often need pond-scale space. When in '
+                 'doubt, go larger and filter harder.'},
+           {'q': 'Can goldfish live with tropical fish?',
+            'a': 'Usually a bad mix. Temperature and speed differences cause stress and injuries.'},
+           {'q': 'Do goldfish grow to the size of the tank?',
+            'a': 'They stunt and suffer in small water. That is not a cute trick. Give them room '
+                 'and clean water.'}],
+  'publishedAt': '2026-09-08T11:00:00.000Z'},
+ {'slug': 'crested-gecko-care',
+  'title': 'Crested Gecko Care: Humidity, Heights, and a Diet That Is Not Just Crickets',
+  'description': 'Crested gecko care: vertical enclosure, humidity swings, commercial gecko diet, '
+                 'and why a dry screen cage in Arizona is a different problem than a swamp box.',
+  'petType': 'reptile',
+  'category': 'Species Care',
+  'tags': ['crested gecko care',
+           'crested gecko humidity',
+           'crested gecko diet',
+           'crested gecko enclosure',
+           'crested gecko shedding'],
+  'img': 'reptile',
+  'alt': 'Crested gecko on a vertical branch in a planted humid enclosure with a diet cup on the '
+         'wall',
+  'intro': 'Crested geckos are nocturnal climbers from humid forests. They need height, hides, and '
+           'a humidity cycle that lets them shed. They do not need a desert basking rock. This '
+           'Petshiwü care sheet is enclosure and diet. A gecko that drops tail weight or has stuck '
+           'shed around toes needs an exotics veterinarian.',
+  'shopPath': '/reptile',
+  'shop': 'Petshiwü can send the bowls, foods, and extras this crested gecko care article points '
+          'to. Free shipping over $49 and no autoship. NYC delivery is available now; nationwide '
+          'shipping opens soon.',
+  'related': ['bearded-dragon-lighting-guide',
+              'chinchilla-dust-bath',
+              'hedgehog-care-for-beginners'],
+  'sections': [{'h': 'Go vertical',
+                'p': ['A tall enclosure with branches, leaves, and at least one moist hide beats a '
+                      'long low tank. Screen cages dry out in arid homes; glass holds humidity but '
+                      'can grow mold if you never air it. Provide a day/night light cycle. They do '
+                      'not use UVB the way a bearded dragon does, though some keepers offer '
+                      'low-level UV — ask your vet. See <a '
+                      'href="/learning/bearded-dragon-lighting-guide">beardie lighting</a> for the '
+                      'opposite lighting philosophy.',
+                      'Temps are moderate. Overheating is easy on a sunny windowsill.']},
+               {'h': 'Diet is mostly a complete powder',
+                'p': ['A commercial crested gecko diet mixed to the right consistency is the usual '
+                      'staple. Insects can be an extra if your vet agrees, not a random cricket '
+                      'free-for-all. Fruit baby food as the only diet is a deficiency plan. Remove '
+                      'uneaten diet before it spoils.'],
+                'ul': ['Mist to create a humidity spike, then let it drop — a constant swamp '
+                       'invites mold.',
+                       'Watch sheds; stuck eye caps and toe rings are emergencies.',
+                       'Handle low and less if the gecko is new — they jump.',
+                       'If they stop licking diet and lose weight, book the vet.']},
+               {'h': 'Supplements and calcium',
+                'p': ['Follow the diet maker and your veterinarian. Do not invent a dusting '
+                      'schedule from three forums.']},
+               {'h': 'Cohabitation',
+                'p': ['Adults can fight. Housing together is a specialist decision, not a default. '
+                      'One gecko, one enclosure is the beginner path.']},
+               {'h': 'Shopping a tall, humid setup',
+                'p': ['Vertical tank, complete diet, hygrometer. Browse <a '
+                      'href="/reptile">reptiles</a>.']}],
+  'faqs': [{'q': 'How often do I mist a crested gecko?',
+            'a': 'Often nightly or as needed to spike humidity, then allow a dry-out. Use a '
+                 'hygrometer. Constant dripping wet is not the goal.'},
+           {'q': 'Do they need a heat lamp?',
+            'a': 'They need a safe ambient range, not a dragon basking lamp. Overheating kills. '
+                 'Measure, do not guess.'},
+           {'q': 'Why did my gecko drop its tail?',
+            'a': 'Stress, a grab, or a scare. The tail does not grow back like some lizards. '
+                 'Reduce handling and check husbandry.'}],
+  'publishedAt': '2026-09-11T12:00:00.000Z'},
+ {'slug': 'chinchilla-dust-bath',
+  'title': 'Chinchilla Dust Bath: How Often, Which Dust, and Why Water Baths Are a No',
+  'description': 'Chinchilla dust bath: how many times a week, volcanic dust versus sand, '
+                 'bath-house setup, and why a wet bath can chill and mat a chinchilla’s coat.',
+  'petType': 'small-pet',
+  'category': 'Species Care',
+  'tags': ['chinchilla dust bath',
+           'chinchilla sand bath',
+           'how often chinchilla dust',
+           'chinchilla grooming',
+           'chinchilla humidity'],
+  'img': 'hamster',
+  'alt': 'Chinchilla rolling in a dust-bath house filled with fine chinchilla dust, not water',
+  'intro': 'Chinchillas clean with dust, not shampoo. Their dense fur holds moisture and can grow '
+           'fungus if you invent a spa day. This Petshiwü bath guide is a dust house, a timer, and '
+           'the humidity habits that keep the coat from matting. A chin that stops eating or sits '
+           'fluffed in a corner needs an exotics veterinarian.',
+  'shopPath': '/small-animal',
+  'shop': 'Ready to restock after reading about chinchilla dust bath? Petshiwü ships as a '
+          'nationwide online pet store with free shipping over $49 and no autoship. NYC delivery '
+          'is available now; nationwide shipping opens soon.',
+  'related': ['what-to-feed-a-rabbit', 'guinea-pig-diet-and-vitamin-c', 'crested-gecko-care'],
+  'sections': [{'h': 'Dust, not playground sand',
+                'p': ['Use dust sold for chinchillas — often a fine volcanic or adakitic dust. '
+                      'Reptile calcium sand and children’s play sand are the wrong particle and '
+                      'the wrong chemistry. Pour a few inches into a sturdy bath house they can '
+                      'roll in without tipping. After they finish, remove the house so they do not '
+                      'live in a dust bowl 24/7.',
+                      'Many keepers offer a bath several times a week, not constantly. If the fur '
+                      'looks greasy, you may need a bath sooner. If the eyes look irritated, the '
+                      'dust is too dusty or too frequent — ask your vet.']},
+               {'h': 'Never a water bath unless a vet said so',
+                'p': ['Water soaks the coat, chills them, and is hard to dry. They are Andes '
+                      'animals who prefer cool, dry rooms. High household humidity is a coat '
+                      'problem. A damp basement is a poor chin room.',
+                      'Diet is hay-heavy like other herbivores — see <a '
+                      'href="/learning/what-to-feed-a-rabbit">rabbit hay logic</a> for the spirit, '
+                      'but use chinchilla-appropriate pellets and an exotics-vetted list. Guinea '
+                      'pigs still need extra C — <a '
+                      'href="/learning/guinea-pig-diet-and-vitamin-c">pig diet</a>.'],
+                'ul': ['Keep the cage out of direct sun and away from radiators.',
+                       'Provide a hide and a safe wheel if your vet likes the model.',
+                       'They chew everything — no mystery wood or electrical cords.',
+                       'If you see fur slip or bald patches, book the vet; do not just add more '
+                       'dust.']},
+               {'h': 'Cleaning the dust',
+                'p': ['Sift out poops. Replace dust when it looks dirty. A covered bath house '
+                      'keeps the room from looking like a volcano.']},
+               {'h': 'Handling after a bath',
+                'p': ['Let them finish the roll. Do not immediately squeeze a dusty chin into your '
+                      'sweater if you have asthma — they fog the air. Wash your hands.']},
+               {'h': 'Shopping a bath kit',
+                'p': ['Chinchilla dust, a bath house, hay. Browse <a href="/small-animal">small '
+                      'animals</a>.']}],
+  'faqs': [{'q': 'How often should a chinchilla take a dust bath?',
+            'a': 'Commonly several times a week for 10–15 minutes, then remove the dust. Adjust if '
+                 'the coat looks oily or the eyes look irritated.'},
+           {'q': 'Can I use sand instead of dust?',
+            'a': 'Play sand is too coarse and dusty in the wrong way. Use chinchilla-specific '
+                 'dust.'},
+           {'q': 'Why is my chinchilla chewing the cage?',
+            'a': 'Boredom, teeth, or a diet short on hay. Fix space and chew options. Dental pain '
+                 'needs a vet.'}],
+  'publishedAt': '2026-09-13T13:00:00.000Z'},
+ {'slug': 'turtle-tank-setup',
+  'title': 'Turtle Tank Setup: Water Volume, Basking Dock, and a Filter That Can Keep Up',
+  'description': 'Turtle tank setup: gallons for sliders, a dry basking dock with UVB and heat, '
+                 'strong filtration, and why a 10-gallon kit is a short, dirty life.',
+  'petType': 'reptile',
+  'category': 'Species Care',
+  'tags': ['turtle tank setup',
+           'red eared slider tank size',
+           'turtle basking dock',
+           'turtle filter',
+           'turtle UVB heat'],
+  'img': 'reptile',
+  'alt': 'Aquatic turtle tank with a dry basking dock, heat lamp, UVB, and a large canister filter',
+  'intro': 'Aquatic turtles are messy, long-lived predators with a need for a dry, hot, UVB-lit '
+           'dock. A 10-gallon “turtle kit” is a dirty puddle. This Petshiwü setup is water volume, '
+           'filtration, and lighting. Salmonella hygiene is part of the deal — wash hands, keep '
+           'turtles out of the kitchen sink.',
+  'shopPath': '/reptile',
+  'shop': 'Build the turtle tank setup shopping list in our reptile collection. Petshiwü offers '
+          'free shipping over $49, no autoship, NYC delivery now, and nationwide shipping opening '
+          'soon.',
+  'related': ['how-to-cycle-a-fish-tank',
+              'bearded-dragon-lighting-guide',
+              'goldfish-tank-size-truth'],
+  'sections': [{'h': 'Water they can actually swim in',
+                'p': ['A common planning phrase is 10 gallons per inch of shell as a starting '
+                      'conversation for sliders, with a tank that gets larger as they grow. Depth '
+                      'should let them flip upright. They need a filter rated for more waste than '
+                      'a fish-only tank of the same size. Cycle the water the same way you would a '
+                      'messy fish tank — <a href="/learning/how-to-cycle-a-fish-tank">cycling</a>.',
+                      'A haul-out dock must be fully dry. Turtles with no dry land get shell and '
+                      'skin disease.']},
+               {'h': 'Basking light plus UVB',
+                'p': ['A heat lamp on the dock and a UVB source are the usual pair, similar in '
+                      'spirit to <a href="/learning/bearded-dragon-lighting-guide">beardie '
+                      'lighting</a> but aimed at a dock over water. Measure dock temperature. '
+                      'Replace UVB on schedule. Glass lids block UV.',
+                      'Goldfish do not belong as feeder entertainment in a tiny shared bowl — <a '
+                      'href="/learning/goldfish-tank-size-truth">goldfish size</a>.'],
+                'ul': ['Use a water conditioner if your tap needs it.',
+                       'Do partial water changes; do not “start over” weekly unless you enjoy '
+                       'new-tank syndrome.',
+                       'Feed in a separate tub if you want the display tank cleaner.',
+                       'A turtle that sits in the water and never basks may be too cold, sick, or '
+                       'unable to climb — call an exotics vet.']},
+               {'h': 'Diet',
+                'p': ['Species differ. Many sliders shift toward more plant matter as they age. '
+                      'Commercial turtle pellets plus greens beat a goldfish-only menu. Calcium '
+                      'and UVB work together. Ask an exotics vet before you invent a supplement '
+                      'pile.']},
+               {'h': 'Legal and lifespan',
+                'p': ['Some sliders are restricted. They can live decades. Do not buy a '
+                      'quarter-sized turtle for a child without a decades plan.']},
+               {'h': 'Shopping a real turtle system',
+                'p': ['Large tank, canister filter, dock, heat, UVB. Browse <a '
+                      'href="/reptile">reptiles</a> and <a href="/fish">fish</a> filtration.']}],
+  'faqs': [{'q': 'How big of a tank does a red-eared slider need?',
+            'a': 'Much larger than a 10-gallon kit. Plan for growth and strong filtration. When in '
+                 'doubt, go bigger.'},
+           {'q': 'Do turtles need UVB if they eat pellets?',
+            'a': 'Yes. UVB helps them use calcium. Pellets are not a sunlight substitute.'},
+           {'q': 'Why does the tank always smell?',
+            'a': 'Underfiltration, overfeeding, and not enough water changes. Turtles are messy. '
+                 'Size up the filter and the water.'}],
+  'publishedAt': '2026-09-16T14:00:00.000Z'},
+ {'slug': 'parakeet-diet-guide',
+  'title': 'Parakeet Diet Guide: Pellets, Seed, and the Chop That Is Not a Suggestion',
+  'description': 'Parakeet diet guide: why a seed-only cup causes deficiencies, how to convert to '
+                 'pellets, safe vegetables, and cuttlebone versus mineral blocks.',
+  'petType': 'bird',
+  'category': 'Species Care',
+  'tags': ['parakeet diet guide',
+           'budgie pellet diet',
+           'seed vs pellets budgie',
+           'what to feed a parakeet',
+           'budgie vegetables'],
+  'img': 'bird',
+  'alt': 'Budgie eating pellets and chopped greens from a clean cup, with a small seed portion on '
+         'the side',
+  'intro': 'A parakeet (budgerigar) on an all-seed diet is on a sunflower-and-deficiency plan. '
+           'Seeds are tasty and incomplete as a sole food. This Petshiwü diet is a pellet base, '
+           'daily vegetables, and seed as a training extra. An avian veterinarian should see a '
+           'bird that sits fluffed, stops singing, or has overgrown beak changes.',
+  'shopPath': '/bird',
+  'shop': 'When you are ready to put this parakeet diet article into the cart, Petshiwü is a '
+          'nationwide online pet store with free shipping over $49 and no autoship. NYC delivery '
+          'is available now; nationwide shipping opens soon.',
+  'related': ['bird-enrichment-ideas', 'flying-with-a-cat', 'what-to-feed-a-rabbit'],
+  'sections': [{'h': 'Pellets first, seed as a paycheck',
+                'p': ['Choose a pellet sized for budgies. Convert slowly: mix, then shift ratios '
+                      'over weeks so the bird does not starve out of stubbornness. Weigh the bird '
+                      'if you can. A converting bird that loses weight too fast needs a vet, not a '
+                      'harder fast.',
+                      'Seed cups should not be a hill of millet the bird sorts. Millet spray is a '
+                      'training event — see <a '
+                      'href="/learning/bird-enrichment-ideas">enrichment</a> — not breakfast, '
+                      'lunch, and dinner.']},
+               {'h': 'Chop and clean water',
+                'p': ['Offer dark leafy greens and other bird-safe vegetables in small pieces. '
+                      'Introduce one at a time. Avocado is toxic. Chocolate and caffeine are '
+                      'toxic. Replace water daily; they soil cups.',
+                      'Cuttlebone or a mineral block can support beak and calcium habits. They are '
+                      'not a complete diet.'],
+                'ul': ['Skip salty people snacks.',
+                       'If the bird only eats seed, ask an avian vet for a conversion plan.',
+                       'Iodine issues and tumors appear in this species — diet is not the only '
+                       'chapter.',
+                       'Keep them out of the kitchen when you use nonstick pans; fumes kill '
+                       'birds.']},
+               {'h': 'How many birds, how many cups',
+                'p': ['Pairs need enough stations so the boss bird cannot guard all the pellets. '
+                      'Watch weights individually if you can.']},
+               {'h': 'Foraging beats a bored bowl',
+                'p': ['Hide pellets in paper. Rotate toys. A perfect diet in an empty cage is '
+                      'still a poor life.']},
+               {'h': 'Shopping a budgie pantry',
+                'p': ['Pellets, millet for training, a cuttlebone, greens. Browse <a '
+                      'href="/bird">birds</a>.']}],
+  'faqs': [{'q': 'Can parakeets live on seed only?',
+            'a': 'They can survive a while and still be deficient. Pellets plus vegetables are the '
+                 'modern baseline. Convert with veterinary help if the bird is already thin.'},
+           {'q': 'How much should a budgie eat per day?',
+            'a': 'They eat small amounts often. Follow the pellet brand as a start and watch the '
+                 'keel (breastbone) condition. Your avian vet can show you a body-condition '
+                 'check.'},
+           {'q': 'Is lettuce a good daily green?',
+            'a': 'Iceberg is mostly water. Use more nutritious greens. Wash produce and skip '
+                 'anything from the toxic list.'}],
+  'publishedAt': '2026-09-18T08:00:00.000Z'}]
+
+if __name__ == "__main__":
+    slugs = [t["slug"] for t in TOPICS]
+    unique = set(slugs)
+    print("len(TOPICS) =", len(TOPICS))
+    print("unique slugs =", len(unique))
+    errors: list[str] = []
+    if len(TOPICS) < 106:
+        errors.append("fewer than 106 topics")
+    if len(unique) != len(slugs):
+        seen: set[str] = set()
+        dups: list[str] = []
+        for s in slugs:
+            if s in seen:
+                dups.append(s)
+            seen.add(s)
+        errors.append("duplicate slugs: " + ", ".join(sorted(set(dups))))
+    blocked = {"best-dog-food-sensitive-stomach", "best-dog-foods-sensitive-stomachs"}
+    hit = blocked.intersection(unique)
+    if hit:
+        errors.append("blocked slugs present: " + ", ".join(sorted(hit)))
+    if errors:
+        raise SystemExit("ERROR: " + "; ".join(errors))
+    print("ok")
