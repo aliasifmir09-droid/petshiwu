@@ -52,7 +52,7 @@ const INDEXABLE_ROOT_PATHS = new Set([
   '/privacy', '/terms', '/accessibility', '/cookie-policy',
   '/fish-tanks', '/press', '/investors', '/sell-with-us', '/vendors', '/partners',
   '/innovation', '/our-promise', '/for-pet-parents', '/from-queens',
-  '/editorial-standards',
+  '/editorial-standards', '/delivery-zips',
   ...INDEXABLE_LANDING_PATHS,
 ]);
 
@@ -74,6 +74,7 @@ export const CRAWLABLE_STOREFRONT_PATHS: string[] = [
   '/for-pet-parents',
   '/from-queens',
   '/editorial-standards',
+  '/delivery-zips',
   '/faq',
   '/contact',
   '/press',

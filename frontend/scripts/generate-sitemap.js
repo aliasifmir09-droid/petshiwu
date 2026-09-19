@@ -26,7 +26,7 @@ const XML_NAME = '[A-Za-z_][A-Za-z0-9_.:-]*';
 const XML_ENTITY = '&(?:amp|lt|gt|quot|apos|#[0-9]+|#x[0-9A-Fa-f]+);';
 const INDEXABLE_ROOTS = new Set([
   '', 'products', 'learning', 'care-guides', 'about', 'faq', 'returns',
-  'return-policy', 'donate', 'contact', 'shipping', 'shipping-policy',
+  'return-policy', 'donate', 'contact', 'shipping', 'shipping-policy', 'delivery-zips',
   'other-animals', 'privacy', 'privacy-policy', 'terms', 'terms-of-service',
   'accessibility', 'shop', 'fish-tanks', 'press', 'investors', 'sell-with-us',
   'vendors', 'partners', 'innovation', 'tech', 'symptom-checker', 'neural', 'scan',

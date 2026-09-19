@@ -62,6 +62,7 @@ Allow: /press
 Allow: /return-policy
 Allow: /track-order
 Allow: /shipping
+Allow: /delivery-zips
 Allow: /privacy
 Allow: /cookie-policy
 Allow: /terms
