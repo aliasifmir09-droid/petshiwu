@@ -26,7 +26,8 @@ describe('next-day ZIP directory', () => {
     expect(page).toContain('url="/delivery-zips"');
     expect(page).toContain('{NEXT_DAY_RADIUS_MILES} miles of Queens');
     expect(page).toContain('50 Miles of Queens');
-    expect(page).toMatch(/do not claim\s+same-day nationwide/i);
+    expect(page).toMatch(/Nationwide shipping soon/);
+    expect(page).not.toMatch(/do not claim/i);
     expect(page).toContain('NEXT_DAY_ZIP_COUNT');
     expect(sitemapScript).toContain("'delivery-zips'");
   });

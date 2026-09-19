@@ -12,10 +12,10 @@ export const NYC_HUB_PATHS = new Set([
 
 export const NYC_HUB_ZIP_HEADING = 'Check your ZIP — same-day NYC or nationwide soon';
 export const NYC_HUB_COMPARE_HEADING = 'Why NYC shoppers pick Petshiwü first';
-export const NYC_HUB_NATIONWIDE_HEADING = 'Nationwide next — not same-day outside NYC';
+export const NYC_HUB_NATIONWIDE_HEADING = 'Nationwide shipping soon';
 
 export const NYC_HUB_ZIP_INTRO =
-  'NYC same-day: order by 3 PM weekdays or 1 PM weekends, at your door before 11 PM. Same-day is NYC only. Nationwide shipping opens in a few days as standard delivery, never same-day outside the five boroughs.';
+  'NYC same-day: order by 3 PM weekdays or 1 PM weekends, at your door before 11 PM. Nationwide shipping soon.';
 
 export const NYC_HUB_NATIONWIDE_BODY =
   'Currently delivering in NYC. Nationwide shipping opens in a few days. Free shipping over $49. No autoship. Jackson Heights is warehouse and office, not a walk-in store.';

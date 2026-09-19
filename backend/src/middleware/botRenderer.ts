@@ -1500,7 +1500,7 @@ export const buildHomepageHtml = (template: string): string => {
       width: 512,
       height: 512,
     },
-    description: 'Premium pet food, toys, and supplies delivered to Queens, Brooklyn, Manhattan, Bronx, and all of New York City. 4,000+ products from top brands.',
+    description: 'Premium pet food, toys, and supplies. Same-day in NYC. Nationwide shipping soon. 4,000+ products from top brands.',
     telephone: '+18002592605',
     email: 'support@petshiwu.com',
     address: {
@@ -1543,7 +1543,7 @@ export const buildHomepageHtml = (template: string): string => {
     url: BASE,
     image: `${BASE}/og-image.jpg`,
     logo: `${BASE}/logo-square-512.png`,
-    description: 'Same-day pet food and supplies delivery in New York City. Jackson Heights is office and warehouse only — not a walk-in store. 4,000+ products, free shipping over $49.',
+    description: 'Same-day pet food and supplies in New York City. Nationwide shipping soon. Jackson Heights is office and warehouse only — not a walk-in store. 4,000+ products, free shipping over $49.',
     telephone: '+18002592605',
     email: 'support@petshiwu.com',
     address: {
