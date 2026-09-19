@@ -30,6 +30,7 @@ interface PayPalCardFieldsProps {
   onCancel?: () => void;
   onSwitchToWallet?: () => void;
   currency?: string;
+  skipProvider?: boolean;
 }
 
 interface CardFieldsContentProps extends PayPalCardFieldsProps {
@@ -38,6 +39,7 @@ interface CardFieldsContentProps extends PayPalCardFieldsProps {
   isEligible: boolean | null;
   onSetError: (error: string | null) => void;
   onSetProcessing: (processing: boolean) => void;
+  hideHeader?: boolean;
 }
 
 const CardFieldsContent = ({
@@ -48,7 +50,8 @@ const CardFieldsContent = ({
   onSetProcessing,
   onError,
   onCancel,
-  onSwitchToWallet
+  onSwitchToWallet,
+  hideHeader
 }: CardFieldsContentProps) => {
   const [{ isPending }] = usePayPalScriptReducer();
   const { cardFieldsForm } = usePayPalCardFields();
@@ -130,6 +133,7 @@ const CardFieldsContent = ({
         </div>
       )}
 
+      {!hideHeader && (
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
           <CreditCard className="text-blue-600" size={24} />
@@ -139,6 +143,7 @@ const CardFieldsContent = ({
           <p className="text-sm text-gray-600">Securely processed by PayPal</p>
         </div>
       </div>
+      )}
 
       <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 space-y-4">
         <PayPalCardFieldsForm />
@@ -183,7 +188,7 @@ const CardFieldsContent = ({
   );
 };
 
-const PayPalCardFields = (props: PayPalCardFieldsProps) => {
+const PayPalCardFields = ({ skipProvider = false, ...props }: PayPalCardFieldsProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isEligible, setIsEligible] = useState<boolean | null>(null);
@@ -282,6 +287,23 @@ const PayPalCardFields = (props: PayPalCardFieldsProps) => {
     setIsProcessing(false);
   };
 
+  const fields = (
+    <PayPalCardFieldsProvider createOrder={createOrder} onApprove={onApprove} onError={onError}>
+      <CardFieldsContent
+        {...props}
+        hideHeader={skipProvider}
+        error={error}
+        isProcessing={isProcessing}
+        isEligible={isEligible}
+        onSetError={setError}
+        onSetProcessing={setIsProcessing}
+      />
+      <EligibilityBridge onEligibilityChange={setIsEligible} />
+    </PayPalCardFieldsProvider>
+  );
+
+  if (skipProvider) return fields;
+
   return (
     <PayPalScriptProvider
       options={{
@@ -292,17 +314,7 @@ const PayPalCardFields = (props: PayPalCardFieldsProps) => {
         components: 'card-fields'
       }}
     >
-      <PayPalCardFieldsProvider createOrder={createOrder} onApprove={onApprove} onError={onError}>
-        <CardFieldsContent
-          {...props}
-          error={error}
-          isProcessing={isProcessing}
-          isEligible={isEligible}
-          onSetError={setError}
-          onSetProcessing={setIsProcessing}
-        />
-        <EligibilityBridge onEligibilityChange={setIsEligible} />
-      </PayPalCardFieldsProvider>
+      {fields}
     </PayPalScriptProvider>
   );
 };

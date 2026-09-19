@@ -24,13 +24,13 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import OrdersHoldNotice from '@/components/OrdersHoldNotice';
 import { ORDERING_PAUSED } from '@/config/ordering';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
-import { MapPin, Plus, Check, User, UserCheck, ShieldCheck, RotateCcw, Headphones, Lock, Truck, CreditCard } from 'lucide-react';
+import { MapPin, Plus, Check, User, UserCheck, ShieldCheck, RotateCcw, Headphones, Lock, Truck } from 'lucide-react';
 import { TAX_RATE } from '@/config/constants';
 import { paypalClientId } from '@/config/paypal';
 import { isDeliverableShippingAddress, normalizeShippingState, OUT_OF_AREA_DELIVERY_MESSAGE } from '@/utils/deliveryZip';
 import { shippingCostForSubtotal } from '@/utils/orderTotals';
 import { checkoutCodeFromError, checkoutCodeFromResponse } from '@/utils/checkoutCoupon';
-import { isCheckoutDeliveryReady, shouldHoldCheckoutOnEmptyCart } from '@/utils/checkoutFlow';
+import { shouldHoldCheckoutOnEmptyCart } from '@/utils/checkoutFlow';
 import { clearRestockCoupon, clearRestockPay, readRestockCoupon, readRestockPay, isRestockPayMethod } from '@/utils/restock';
 import { FIRST_ORDER_CODE, FIRST_ORDER_COPY, REPEAT_ORDER_CODE, REPEAT_ORDER_COPY } from '@/config/publicPromos';
 import {
@@ -41,7 +41,6 @@ import {
 } from '@/utils/savedCheckout';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import CheckoutBrandedPayments from '@/components/CheckoutBrandedPayments';
-import PayPalCardFields from '@/components/PayPalCardFields';
 
 const PaymentForm = lazy(() => import('@/components/PaymentForm'));
 
@@ -238,7 +237,6 @@ const Checkout = () => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [showPayPalButton, setShowPayPalButton] = useState(true);
   const [donationAmount, setDonationAmount] = useState<number>(0);
   const [emailError, setEmailError] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
@@ -381,7 +379,6 @@ const Checkout = () => {
   const tax = subtotal * TAX_RATE;
   const onlineTotal = Math.max(0, subtotal + shipping + tax - couponDiscount);
   const total = Math.max(0, onlineTotal + donationAmount);
-  const deliveryReady = isCheckoutDeliveryReady(shippingInfo, isAuthenticated);
 
   const applyCoupon = async (codeToApply?: string) => {
     const raw = (codeToApply ?? couponInput).trim();
@@ -502,20 +499,17 @@ const Checkout = () => {
 
   useEffect(() => {
     if (ORDERING_PAUSED) {
-      setShowPayPalButton(false);
       setShowPaymentForm(false);
       setIsProcessingPayment(false);
       return;
     }
 
     if (usingSavedCard) {
-      setShowPayPalButton(false);
       setShowPaymentForm(false);
       return;
     }
 
     if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay' || paymentMethod === 'credit_card') {
-      setShowPayPalButton(paymentMethod !== 'credit_card');
       setShowPaymentForm(false);
       setClientSecret(null);
       setPaymentIntentId(null);
@@ -539,7 +533,6 @@ const Checkout = () => {
           setClientSecret(paymentIntentResponse.data.clientSecret);
           setPaymentIntentId(paymentIntentResponse.data.paymentIntentId);
           setShowPaymentForm(true);
-          setShowPayPalButton(false);
         } else {
           showToast('Could not start card payment. Enter the card below or use PayPal.', 'error');
           setPaymentMethod('credit_card');
@@ -740,7 +733,6 @@ const Checkout = () => {
   };
 
   const handlePayPalCancel = () => {
-    setShowPayPalButton(true);
     setPaymentMethod('paypal');
   };
 
@@ -1166,7 +1158,6 @@ const Checkout = () => {
                       onClick={() => {
                         setSelectedSavedPaymentMethod(null);
                         setPaymentMethod('paypal');
-                        setShowPayPalButton(true);
                       }}
                       className="mt-3 text-sm font-semibold text-primary-700 hover:text-primary-800"
                     >
@@ -1176,24 +1167,13 @@ const Checkout = () => {
                   </div>
                 )}
 
-                {!ORDERING_PAUSED && showPayPalButton && (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay') && paypalClientId && !usingSavedCard ? (
-                  <div id="paypal-payment" className="paypal-wallet-slot relative overflow-hidden">
-                    {deliveryReady ? (
+                {!ORDERING_PAUSED && paypalClientId && !usingSavedCard ? (
+                  <div id="paypal-payment" className="paypal-wallet-slot relative overflow-visible">
                     <ErrorBoundary
                       fallback={
                         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
                           <p className="font-semibold">PayPal could not load on this browser.</p>
-                          <p className="mt-1">Reload the page, or pay with a card below.</p>
-                          <button
-                            type="button"
-                            className="mt-3 text-sm font-semibold text-[#1E3A8A] underline"
-                            onClick={() => {
-                              setPaymentMethod('credit_card');
-                              setSelectedSavedPaymentMethod(null);
-                            }}
-                          >
-                            Use a card instead
-                          </button>
+                          <p className="mt-1">Reload the page, then try Apple Pay, Google Pay, PayPal, or card again.</p>
                         </div>
                       }
                     >
@@ -1226,105 +1206,20 @@ const Checkout = () => {
                         onSuccess={handlePayPalSuccess}
                         onError={handlePayPalError}
                         onCancel={handlePayPalCancel}
+                        onSwitchToWallet={() => {
+                          setPaymentMethod('paypal');
+                          setSelectedSavedPaymentMethod(null);
+                          document.getElementById('paypal-payment')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }}
                       />
                     </ErrorBoundary>
-                    ) : (
-                      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
-                        Enter your delivery name, phone, address, and ZIP above. Apple Pay, Google Pay, and PayPal unlock after that so the order can actually ship.
-                      </div>
-                    )}
                   </div>
                 ) : !ORDERING_PAUSED && !paypalClientId ? (
                   <div className="p-4 border-2 border-gray-200 rounded-lg bg-gray-50">
                     <p className="font-semibold text-gray-700">PayPal is temporarily unavailable</p>
-                    <p className="text-sm text-gray-500 mt-1">Use a credit or debit card below to complete this order.</p>
+                    <p className="text-sm text-gray-500 mt-1">Reload the page, or try again in a moment.</p>
                   </div>
                 ) : null}
-
-                {!ORDERING_PAUSED && paymentMethod === 'credit_card' && !usingSavedCard && paypalClientId ? (
-                  <div id="card-payment" className="relative overflow-visible rounded-2xl border-2 border-[#1E3A8A] bg-blue-50/40 p-4">
-                    {deliveryReady ? (
-                    <ErrorBoundary
-                      fallback={
-                        <div className="text-sm text-[#1E3A8A]">
-                          Card fields could not load. Reload the page, or use PayPal if it appears above.
-                          <button
-                            type="button"
-                            className="mt-3 block font-semibold underline"
-                            onClick={() => {
-                              setPaymentMethod('paypal');
-                              setSelectedSavedPaymentMethod(null);
-                            }}
-                          >
-                            Use PayPal instead
-                          </button>
-                        </div>
-                      }
-                    >
-                      <PayPalCardFields
-                        items={items.map((item: any) => ({
-                          product: normalizeId(item.product._id) || String(item.product._id),
-                          quantity: item.quantity,
-                          ...(item.variant?.sku ? { variant: { sku: item.variant.sku } } : {})
-                        }))}
-                        shippingAddress={{
-                          firstName: shippingInfo.firstName,
-                          lastName: shippingInfo.lastName,
-                          street: shippingInfo.street,
-                          city: shippingInfo.city,
-                          state: normalizeShippingState(shippingInfo.state),
-                          zipCode: shippingInfo.zipCode,
-                          country: shippingInfo.country,
-                          phone: shippingInfo.phone
-                        }}
-                        guestEmail={!isAuthenticated ? shippingInfo.email.trim() : undefined}
-                        onGuestEmailInvalid={() => {
-                          setEmailError(true);
-                          emailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                          emailInputRef.current?.focus();
-                        }}
-                        notes={orderNotes.trim() || undefined}
-                        couponCode={couponCode || undefined}
-                        donationAmount={donationAmount}
-                        onSuccess={handlePayPalSuccess}
-                        onError={handlePayPalError}
-                        currency="USD"
-                        onCancel={() => { setPaymentMethod('paypal'); setSelectedSavedPaymentMethod(null); }}
-                        onSwitchToWallet={() => { setPaymentMethod('paypal'); setSelectedSavedPaymentMethod(null); }}
-                      />
-                    </ErrorBoundary>
-                    ) : (
-                      <p className="text-sm text-[#1E3A8A]">
-                        Enter your delivery details above, then your card fields will open here.
-                      </p>
-                    )}
-                  </div>
-                ) : null}
-
-                {!ORDERING_PAUSED && !usingSavedCard && (
-                  <>
-                    <div className="flex items-center gap-3 my-6">
-                      <div className="flex-1 h-px bg-gray-200" />
-                      <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">or</span>
-                      <div className="flex-1 h-px bg-gray-200" />
-                    </div>
-                    {paymentMethod !== 'credit_card' ? (
-                      <button type="button" onClick={() => {
-                        setPaymentMethod('credit_card');
-                        setSelectedSavedPaymentMethod(null);
-                      }}
-                        className="mb-3 w-full flex items-center gap-3 p-4 border-2 rounded-lg transition-all border-gray-300 bg-white hover:border-gray-400">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 text-[#1E3A8A] flex items-center justify-center flex-shrink-0">
-                          <CreditCard className="w-5 h-5" />
-                        </div>
-                        <div className="flex-1 text-left">
-                          <span className="font-semibold text-gray-900">Credit or debit card</span>
-                          <p className="text-sm text-gray-600 mt-1">Visa, Mastercard, Amex — PayPal charges the card on this page, same as your last payment.</p>
-                        </div>
-                      </button>
-                    ) : null}
-                  </>
-                )}
 
                 {usingSavedCard && selectedSaved ? (
                   <div className="mt-4 rounded-2xl border-2 border-[#1E3A8A] bg-blue-50 p-4">
@@ -1486,10 +1381,8 @@ const Checkout = () => {
                     ? 'We will start accepting orders soon'
                     : usingSavedCard && selectedSaved
                       ? (createOrderMutation.isPending || isProcessingPayment ? 'Paying…' : `Pay with ${savedCardLabel(selectedSaved)}`)
-                    : paymentMethod === 'credit_card'
-                      ? 'Enter your card below'
-                    : paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay'
-                      ? 'Continue to PayPal'
+                    : paymentMethod === 'credit_card' || paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay'
+                      ? 'Pay with Apple Pay, Google Pay, PayPal, or card below'
                     : isProcessingPayment ? 'Initializing Payment...' : createOrderMutation.isPending ? 'Processing...' : 'Place Order'}
                 </button>
                 <div className="mt-5 rounded-2xl bg-[#FBF9F5] p-4 ring-1 ring-stone-200">
