@@ -4,6 +4,7 @@
  * required a published Blog document.
  */
 import { TRENDING_LEARNING_POSTS } from './trendingLearningPosts';
+import { FALL_2026_PLAYBOOK } from './fall2026Playbook';
 
 export type StaticLearningPage = {
   slug: string;
@@ -22,6 +23,7 @@ export type StaticLearningPage = {
 };
 
 const CLASSIC_LEARNING_PAGES: Record<string, StaticLearningPage> = {
+  [FALL_2026_PLAYBOOK.slug]: FALL_2026_PLAYBOOK,
   'best-dog-food-sensitive-stomach': {
     slug: 'best-dog-food-sensitive-stomach',
     title: 'Best Dog Food for Sensitive Stomachs: A 2026 Expert Guide',

@@ -32,6 +32,7 @@ import {
 } from '../seo/neighborhoodRegistry';
 import { BLOG_REDIRECTS } from '../seo/blogRedirects';
 import { isStaticLearningSlug, STATIC_LEARNING_PAGES } from '../seo/staticLearningPages';
+import { FEATURED_LEARNING_SLUGS, LEARNING_AUTHOR } from '../seo/featuredLearning';
 import { DEFAULT_OG_IMAGE, injectOgTags, resolveShareImage } from '../seo/ogTags';
 import { merchantMpn } from '../utils/googleMerchantFeed';
 
@@ -259,6 +260,10 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   '/from-queens': {
     title: 'How We Ship | Petshiwu',
     description: 'Petshiwu is an online pet store. Currently delivering in NYC, with nationwide shipping opening in a few days. Warehouse only — not a walk-in store.',
+  },
+  '/editorial-standards': {
+    title: 'How We Write Pet Care Guides | Petshiwu',
+    description: 'Petshiwü Care Desk standards: people-first education, veterinarian-first health advice, and we keep indexed guide URLs live.',
   },
   '/contact': {
     title: 'Contact Us | Petshiwu',
@@ -1747,11 +1752,18 @@ export const buildEducationHubHtml = (
 };
 
 const fetchLearningHubItems = async (): Promise<EducationHubItem[]> => {
-  const staticItems: EducationHubItem[] = Object.values(STATIC_LEARNING_PAGES).map((page) => ({
-    title: page.title,
-    slug: page.slug,
-    excerpt: page.description,
-  }));
+  const featuredRank = new Map(FEATURED_LEARNING_SLUGS.map((slug, index) => [slug, index]));
+  const staticItems: EducationHubItem[] = Object.values(STATIC_LEARNING_PAGES)
+    .map((page) => ({
+      title: page.title,
+      slug: page.slug,
+      excerpt: page.description,
+    }))
+    .sort((a, b) => {
+      const aRank = featuredRank.has(a.slug) ? featuredRank.get(a.slug)! : 1000;
+      const bRank = featuredRank.has(b.slug) ? featuredRank.get(b.slug)! : 1000;
+      return aRank - bRank;
+    });
   const blogs = await Blog.find({ isPublished: true })
     .select('title slug excerpt')
     .sort({ publishedAt: -1 })
@@ -1783,7 +1795,7 @@ export const buildStaticLearningHtml = (template: string, slug: string): string 
     metaDescription: page.description,
     featuredImage: page.featuredImage,
     publishedAt: page.publishedAt,
-    author: { name: 'Petshiwu Team' },
+    author: { name: LEARNING_AUTHOR },
   });
 };
 
@@ -1912,7 +1924,7 @@ const VALID_SPA_PATHS = new Set([
   '/profile', '/orders', '/track-order', '/donate', '/favorites', '/compare',
   '/returns', '/return-policy', '/addresses', '/stock-alerts', '/search',
   '/learning', '/care-guides', '/faq', '/symptom-checker', '/about', '/press',
-  '/our-promise', '/for-pet-parents', '/from-queens',
+  '/our-promise', '/for-pet-parents', '/from-queens', '/editorial-standards',
   '/contact', '/403', '/404', '/privacy', '/privacy-policy', '/terms',
   '/terms-of-service', '/shipping', '/shipping-policy', '/accessibility',
   '/shop', '/deals', '/sell-with-us', '/vendors', '/partners', '/investors',

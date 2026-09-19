@@ -11,6 +11,8 @@ import AdSense from '@/components/AdSense';
 import StickySidebarAd from '@/components/StickySidebarAd';
 import { generateBreadcrumbSchema, generateFAQSchema } from '@/utils/seoUtils';
 import { getStaticLearningBlog } from '@/data/staticLearningArticle';
+import { relatedLearningPosts } from '@/data/relatedLearning';
+import { LEARNING_AUTHOR, LEARNING_AUTHOR_URL } from '@/data/featuredLearning';
 
 const BlogDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -89,6 +91,8 @@ const BlogDetail = () => {
 
   const blogUrl = `https://www.petshiwu.com/learning/${blog.slug}`;
   const faqPairs = extractFaqPairs(blog.content || '');
+  const relatedPosts = relatedLearningPosts(blog.slug, blog.petType);
+  const authorName = blog.author?.name || LEARNING_AUTHOR;
 
   return (
     <div className="min-h-screen bg-white">
@@ -97,7 +101,7 @@ const BlogDetail = () => {
         description={blog.metaDescription || blog.excerpt || blog.title}
         url={blogUrl}
         type="article"
-        author={blog.author?.name}
+        author={authorName}
         publishedTime={blog.publishedAt}
         modifiedTime={blog.updatedAt}
         category={blog.category}
@@ -109,10 +113,10 @@ const BlogDetail = () => {
           headline: blog.title,
           description: blog.metaDescription || blog.excerpt || blog.title,
           image: blog.featuredImage,
-          author: blog.author?.name ? {
-            name: blog.author.name,
-            byline: blog.authorByline,
-            profileUrl: blog.authorProfileUrl,
+          author: authorName ? {
+            name: authorName,
+            byline: LEARNING_AUTHOR,
+            profileUrl: LEARNING_AUTHOR_URL,
             jobTitle: 'Pet Care Specialist',
             knowsAbout: [
               'Dog nutrition',
@@ -163,12 +167,14 @@ const BlogDetail = () => {
               </h1>
               
               {/* Meta Information */}
-              {(blog.author?.name || blog.publishedAt || blog.views) && (
+              {(authorName || blog.publishedAt || blog.views) && (
                 <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-6">
-                  {blog.author?.name && (
+                  {authorName && (
                     <div className="flex items-center gap-2">
                       <User size={14} />
-                      <span>{blog.author.name}</span>
+                      <Link to="/editorial-standards" className="hover:text-[#1E3A8A] hover:underline">
+                        {authorName}
+                      </Link>
                     </div>
                   )}
                   {blog.publishedAt && (
@@ -238,14 +244,31 @@ const BlogDetail = () => {
               <div className="flex flex-wrap items-center gap-2 mb-10 pt-8 border-t border-gray-200">
                 <Tag size={16} className="text-gray-400" />
                 {blog.tags.map((tag, index) => (
-                  <Link
+                  <span
                     key={index}
-                    to={`/learning?search=${encodeURIComponent(tag)}`}
-                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors"
+                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
                   >
                     {tag}
-                  </Link>
+                  </span>
                 ))}
+              </div>
+            )}
+
+            {relatedPosts.length > 0 && (
+              <div className="mb-10 pt-8 border-t border-gray-200">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Keep reading</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {relatedPosts.map((post) => (
+                    <Link
+                      key={post.slug}
+                      to={`/learning/${post.slug}`}
+                      className="block p-4 rounded-lg border border-gray-200 hover:border-[#1E3A8A] hover:shadow-sm transition-all"
+                    >
+                      <p className="text-xs font-semibold uppercase text-[#D97706] mb-1">{post.category}</p>
+                      <p className="font-semibold text-gray-900 leading-snug">{post.title}</p>
+                    </Link>
+                  ))}
+                </div>
               </div>
             )}
 

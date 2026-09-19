@@ -1,9 +1,12 @@
 import { Blog } from '@/services/blogs';
 import { TRENDING_LEARNING_META, TrendingLearningMeta } from './trendingLearningMeta';
+import { FALL_2026_PLAYBOOK_META } from './fall2026Playbook';
+import { LEARNING_AUTHOR, LEARNING_REVIEWED_AT } from './featuredLearning';
 
 export type StaticLearningCard = TrendingLearningMeta;
 
 const CLASSIC_POSTS: TrendingLearningMeta[] = [
+  FALL_2026_PLAYBOOK_META,
   {
     slug: 'best-dog-food-sensitive-stomach',
     title: 'Best Dog Food for Sensitive Stomachs: A 2026 Expert Guide',
@@ -53,8 +56,8 @@ const toBlog = (post: TrendingLearningMeta, html = ''): Blog => ({
   petType: post.petType,
   category: post.category,
   author: {
-    _id: 'petshiwu-team',
-    name: 'Petshiwu Team',
+    _id: 'petshiwu-care-desk',
+    name: LEARNING_AUTHOR,
     email: 'hello@petshiwu.com',
   },
   tags: post.tags,
@@ -64,7 +67,7 @@ const toBlog = (post: TrendingLearningMeta, html = ''): Blog => ({
   metaTitle: post.title,
   metaDescription: post.description,
   createdAt: post.publishedAt,
-  updatedAt: post.publishedAt,
+  updatedAt: LEARNING_REVIEWED_AT,
 });
 
 export type StaticBlogQuery = {

@@ -292,6 +292,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
       { path: '/our-promise', priority: '0.7', changefreq: 'monthly' },
       { path: '/for-pet-parents', priority: '0.7', changefreq: 'monthly' },
       { path: '/from-queens', priority: '0.7', changefreq: 'monthly' },
+      { path: '/editorial-standards', priority: '0.6', changefreq: 'monthly' },
       { path: '/faq', priority: '0.6', changefreq: 'monthly' },
       { path: '/donate', priority: '0.4', changefreq: 'monthly' },
       { path: '/contact', priority: '0.6', changefreq: 'monthly' },
