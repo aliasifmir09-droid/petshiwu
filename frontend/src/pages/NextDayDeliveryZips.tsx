@@ -5,7 +5,7 @@ import StructuredData from '@/components/StructuredData';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
 import { generateBreadcrumbSchema } from '@/utils/seoUtils';
 import { NEXT_DAY_RADIUS_MILES } from '@/data/nextDayMetroZips';
-import { groupNextDayZipsByState, NEXT_DAY_ZIP_COUNT } from '@/data/nextDayMetroDirectory';
+import { filterNextDayGroups, groupNextDayZipsByState, NEXT_DAY_ZIP_COUNT } from '@/data/nextDayMetroDirectory';
 import { TONIGHT } from '@/data/tonightDelivery';
 
 const NextDayDeliveryZips = () => {
@@ -37,25 +37,10 @@ const NextDayDeliveryZips = () => {
   const [query, setQuery] = useState('');
   const needle = query.trim().toLowerCase();
 
-  const visible = useMemo(() => {
-    if (!needle) return groups;
-    return groups
-      .map((group) => ({
-        ...group,
-        cities: group.cities
-          .map((city) => ({
-            ...city,
-            zips: city.zips.filter(
-              (zip) =>
-                zip.includes(needle) ||
-                city.city.toLowerCase().includes(needle) ||
-                group.label.toLowerCase().includes(needle)
-            ),
-          }))
-          .filter((city) => city.zips.length > 0),
-      }))
-      .filter((group) => group.cities.length > 0);
-  }, [groups, needle]);
+  const visible = useMemo(
+    () => filterNextDayGroups(groups, query),
+    [groups, query]
+  );
 
   return (
     <div className="min-h-screen bg-white">

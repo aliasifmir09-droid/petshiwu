@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { groupNextDayZipsByState, NEXT_DAY_ZIP_COUNT } from '../nextDayMetroDirectory';
+import { filterNextDayGroups, groupNextDayZipsByState, NEXT_DAY_ZIP_COUNT } from '../nextDayMetroDirectory';
 
 const dir = dirname(fileURLToPath(import.meta.url));
 
@@ -29,5 +29,21 @@ describe('next-day ZIP directory', () => {
     expect(page).toMatch(/do not claim\s+same-day nationwide/i);
     expect(page).toContain('NEXT_DAY_ZIP_COUNT');
     expect(sitemapScript).toContain("'delivery-zips'");
+  });
+
+  test('search finds Hicksville, Greenwich, and Bay Shore and skips Queens Hillside', () => {
+    const groups = groupNextDayZipsByState();
+    const hicksville = filterNextDayGroups(groups, '11801');
+    expect(hicksville).toHaveLength(1);
+    expect(hicksville[0].cities[0]).toMatchObject({ city: 'Hicksville', zips: expect.arrayContaining(['11801']) });
+
+    const greenwich = filterNextDayGroups(groups, '06830');
+    expect(greenwich.some((group) => group.cities.some((city) => city.city === 'Greenwich' && city.zips.includes('06830')))).toBe(true);
+
+    const bayShore = filterNextDayGroups(groups, '11706');
+    expect(bayShore.some((group) => group.cities.some((city) => city.city === 'Bay Shore' && city.zips.includes('11706')))).toBe(true);
+
+    expect(filterNextDayGroups(groups, '11432')).toEqual([]);
+    expect(filterNextDayGroups(groups, 'Greenwich')[0]?.cities.some((city) => city.city === 'Greenwich')).toBe(true);
   });
 });
