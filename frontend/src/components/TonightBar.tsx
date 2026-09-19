@@ -3,11 +3,14 @@ import { MapPin } from 'lucide-react';
 import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
 import { ORDERING_PAUSED, ORDERING_PAUSED_HEADLINE } from '@/config/ordering';
 import {
+  LAST_ZIP_EVENT,
   LAST_ZIP_STORAGE_KEY,
   formatCountdownShort,
   getCutoffCountdown,
+  isValidZip,
   lookupZip,
   normalizeZip,
+  saveLastZip,
   type ZipLookupResult,
 } from '@/utils/deliveryZip';
 
@@ -40,14 +43,19 @@ const TonightBar = () => {
     if (zip.length === 5) {
       const next = lookupZip(zip);
       setResult(next);
-      try {
-        if (next) localStorage.setItem(LAST_ZIP_STORAGE_KEY, zip);
-      } catch {
-        // Ignore
-      }
+      if (next) saveLastZip(zip);
     } else {
       setResult(null);
     }
+  }, [zip]);
+
+  useEffect(() => {
+    const onZip = (event: Event) => {
+      const next = String((event as CustomEvent<string>).detail || '');
+      if (isValidZip(next) && next !== zip) setZip(next);
+    };
+    window.addEventListener(LAST_ZIP_EVENT, onZip);
+    return () => window.removeEventListener(LAST_ZIP_EVENT, onZip);
   }, [zip]);
 
   const statusLine = result

@@ -167,50 +167,6 @@ const SEOLandingPage = ({
 
         {isShoppableHub ? <NycHubCompare /> : null}
 
-        {/* Problem Section */}
-        {problemPoints.length > 0 && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-6 mb-8 rounded-r-lg">
-            <div className="flex items-start">
-              <AlertCircle className="text-red-500 mr-3 mt-1 flex-shrink-0" size={24} />
-              <div>
-                <h2 className="text-xl font-semibold text-red-900 mb-3">
-                  Common Problems Pet Owners Face
-                </h2>
-                <ul className="space-y-2 text-red-800">
-                  {problemPoints.map((point, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="mr-2">•</span>
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Solution Section */}
-        {solutionPoints.length > 0 && (
-          <div className="bg-green-50 border-l-4 border-green-500 p-6 mb-8 rounded-r-lg">
-            <div className="flex items-start">
-              <CheckCircle className="text-green-500 mr-3 mt-1 flex-shrink-0" size={24} />
-              <div>
-                <h2 className="text-xl font-semibold text-green-900 mb-3">
-                  How We Can Help
-                </h2>
-                <ul className="space-y-2 text-green-800">
-                  {solutionPoints.map((point, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="mr-2">•</span>
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Products Section */}
         <div id="in-stock" className="mb-12 scroll-mt-24">
           {isLoading ? (
@@ -277,6 +233,48 @@ const SEOLandingPage = ({
             <p className="text-slate-700 leading-relaxed">{NYC_HUB_NATIONWIDE_BODY}</p>
           </section>
         ) : null}
+
+        {problemPoints.length > 0 && (
+          <div className="bg-red-50 border-l-4 border-red-500 p-6 mb-8 rounded-r-lg">
+            <div className="flex items-start">
+              <AlertCircle className="text-red-500 mr-3 mt-1 flex-shrink-0" size={24} />
+              <div>
+                <h2 className="text-xl font-semibold text-red-900 mb-3">
+                  Common Problems Pet Owners Face
+                </h2>
+                <ul className="space-y-2 text-red-800">
+                  {problemPoints.map((point, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {solutionPoints.length > 0 && (
+          <div className="bg-green-50 border-l-4 border-green-500 p-6 mb-8 rounded-r-lg">
+            <div className="flex items-start">
+              <CheckCircle className="text-green-500 mr-3 mt-1 flex-shrink-0" size={24} />
+              <div>
+                <h2 className="text-xl font-semibold text-green-900 mb-3">
+                  How We Can Help
+                </h2>
+                <ul className="space-y-2 text-green-800">
+                  {solutionPoints.map((point, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* FAQ Section */}
         {faqItems.length > 0 && (

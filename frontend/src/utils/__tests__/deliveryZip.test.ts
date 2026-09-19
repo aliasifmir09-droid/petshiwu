@@ -12,7 +12,9 @@ import {
   lookupZip,
   normalizeZip,
   padTime,
+  saveLastZip,
   tonightStatusLine,
+  LAST_ZIP_EVENT,
 } from '../deliveryZip';
 
 describe('deliveryZip', () => {
@@ -107,6 +109,16 @@ describe('deliveryZip', () => {
 
     const afterCutoff = getCutoffCountdown(new Date('2026-08-13T20:30:00Z'));
     expect(formatCountdownShort(afterCutoff)).toBe('cutoff passed');
+  });
+
+  test('saveLastZip broadcasts so hub and header stay in sync', () => {
+    const seen: string[] = [];
+    const handler = (event: Event) => seen.push(String((event as CustomEvent<string>).detail));
+    window.addEventListener(LAST_ZIP_EVENT, handler);
+    saveLastZip('11372');
+    window.removeEventListener(LAST_ZIP_EVENT, handler);
+    expect(seen).toEqual(['11372']);
+    expect(window.localStorage.getItem('petshiwu_last_zip')).toBe('11372');
   });
 
   test('tonightStatusLine uses ZIP for same-day before cutoff', () => {

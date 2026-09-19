@@ -5,11 +5,14 @@ import { ORDERING_PAUSED } from '@/config/ordering';
 import { NATIONWIDE_SOON_NOTE } from '@/data/brandStories';
 import { TONIGHT } from '@/data/tonightDelivery';
 import {
+  LAST_ZIP_EVENT,
   LAST_ZIP_STORAGE_KEY,
   formatCountdownShort,
   getCutoffCountdown,
+  isValidZip,
   lookupZip,
   normalizeZip,
+  saveLastZip,
   type ZipLookupResult,
 } from '@/utils/deliveryZip';
 
@@ -52,14 +55,19 @@ const TonightPromiseCard = ({ variant = 'hero', shopHref = '/products' }: Tonigh
     if (zip.length === 5) {
       const next = lookupZip(zip);
       setResult(next);
-      try {
-        if (next) localStorage.setItem(LAST_ZIP_STORAGE_KEY, zip);
-      } catch {
-        // Ignore private-mode storage failures
-      }
+      if (next) saveLastZip(zip);
     } else {
       setResult(null);
     }
+  }, [zip]);
+
+  useEffect(() => {
+    const onZip = (event: Event) => {
+      const next = String((event as CustomEvent<string>).detail || '');
+      if (isValidZip(next) && next !== zip) setZip(next);
+    };
+    window.addEventListener(LAST_ZIP_EVENT, onZip);
+    return () => window.removeEventListener(LAST_ZIP_EVENT, onZip);
   }, [zip]);
 
   const cutoffLine = ORDERING_PAUSED
@@ -112,7 +120,7 @@ const TonightPromiseCard = ({ variant = 'hero', shopHref = '/products' }: Tonigh
               value={zip}
               onChange={(e) => setZip(normalizeZip(e.target.value))}
               placeholder="Enter ZIP"
-              aria-label="Check delivery by ZIP code"
+              aria-label="Check hub delivery ZIP"
               className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 bg-white text-gray-900 font-semibold tracking-widest placeholder:tracking-normal placeholder:font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
             />
           </div>
