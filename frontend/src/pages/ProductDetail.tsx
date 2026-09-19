@@ -13,7 +13,7 @@ import ProductCard from '@/components/ProductCard';
 import { Heart, Star, ShoppingCart, Truck, RotateCcw, Shield, Sparkles, ChevronRight, Home, Share2, Facebook, Twitter, Mail, Copy, Check } from 'lucide-react';
 import { normalizeImageUrl, handleImageError, getOptimizedImageUrl, generateSrcSet } from '@/utils/imageUtils';
 import { generateProductUrl, generateCategoryUrl } from '@/utils/productUrl';
-import { productSearchDescription } from '@/utils/seoUtils';
+import { productSearchDescription, productSearchTitle } from '@/utils/seoUtils';
 import { getProductImages, getValidCompareAtPrice } from '@/utils/productPrice';
 import { availableCartStock } from '@/utils/cartStock';
 import { FREE_SHIPPING_THRESHOLD } from '@/config/constants';
@@ -407,6 +407,7 @@ const ProductDetail = () => {
           brand: product.brand,
           name: product.name,
           petType: product.petType,
+          inStock: isReadyToShip,
         }));
       }).catch(() => {
         setProductDescription(productSearchDescription({
@@ -414,6 +415,7 @@ const ProductDetail = () => {
           brand: product.brand,
           name: product.name,
           petType: product.petType,
+          inStock: isReadyToShip,
         }));
       });
     } else {
@@ -421,44 +423,73 @@ const ProductDetail = () => {
         brand: product?.brand,
         name: product?.name,
         petType: product?.petType,
+        inStock: isReadyToShip,
       }));
     }
-  }, [product?.description, product?.name, product?.petType, product?.brand]);
+  }, [product?.description, product?.name, product?.petType, product?.brand, isReadyToShip]);
+
+  const slugFallbackName = (actualProductSlug || '')
+    .split('-')
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+  const productTitle = productSearchTitle({
+    name: product?.name || slugFallbackName || 'Pet supplies',
+    brand: product?.brand,
+    inStock: product ? isReadyToShip : undefined,
+  });
+  const searchDescription =
+    productDescription ||
+    productSearchDescription({
+      brand: product?.brand,
+      name: product?.name || slugFallbackName,
+      petType: product?.petType,
+      inStock: product ? isReadyToShip : undefined,
+    });
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 lg:px-8 py-12">
-        <LoadingSpinner size="lg" ariaLabel="Loading product details" />
-      </div>
+      <>
+        <SEO title={productTitle} description={searchDescription} type="product" />
+        <div className="container mx-auto px-4 lg:px-8 py-12">
+          <LoadingSpinner size="lg" ariaLabel="Loading product details" />
+        </div>
+      </>
     );
   }
 
   if (productError) {
     return (
-      <div className="container mx-auto px-4 lg:px-8 py-12 text-center">
-        <h1 className="text-2xl font-bold mb-4">Error loading product</h1>
-        <p className="text-gray-600 mb-4">There was an error loading this product. Please try again.</p>
-        <button
-          onClick={() => navigate('/products')}
-          className="text-primary-600 hover:text-primary-700"
-        >
-          Browse All Products
-        </button>
-      </div>
+      <>
+        <SEO title={productTitle} description={searchDescription} type="product" />
+        <div className="container mx-auto px-4 lg:px-8 py-12 text-center">
+          <h1 className="text-2xl font-bold mb-4">Error loading product</h1>
+          <p className="text-gray-600 mb-4">There was an error loading this product. Please try again.</p>
+          <button
+            onClick={() => navigate('/products')}
+            className="text-primary-600 hover:text-primary-700"
+          >
+            Browse All Products
+          </button>
+        </div>
+      </>
     );
   }
 
   if (!product) {
     return (
-      <div className="container mx-auto px-4 lg:px-8 py-12 text-center">
-        <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
-        <button
-          onClick={() => navigate('/products')}
-          className="text-primary-600 hover:text-primary-700"
-        >
-          Browse All Products
-        </button>
-      </div>
+      <>
+        <SEO title={productTitle} description={searchDescription} type="product" />
+        <div className="container mx-auto px-4 lg:px-8 py-12 text-center">
+          <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
+          <button
+            onClick={() => navigate('/products')}
+            className="text-primary-600 hover:text-primary-700"
+          >
+            Browse All Products
+          </button>
+        </div>
+      </>
     );
   }
 
@@ -584,14 +615,6 @@ const ProductDetail = () => {
 
   const breadcrumbs = buildBreadcrumbs();
 
-  // Build SEO data — include brand in title for brand keyword targeting
-  const brandPrefix = product.brand && !product.name.toLowerCase().includes(product.brand.toLowerCase())
-    ? `${product.brand} ` : '';
-  const fullProductName = `${brandPrefix}${product.name}`;
-  const productTitle = fullProductName.length > 55
-    ? `${fullProductName.substring(0, 52)}... | Petshiwu`
-    : `${fullProductName} | Petshiwu`;
-  
   // Build keywords
   const categoryName = typeof product.category === 'object' && product.category?.name 
     ? product.category.name 
@@ -620,7 +643,7 @@ const ProductDetail = () => {
     <>
       <SEO
         title={productTitle}
-        description={productDescription}
+        description={searchDescription}
         keywords={keywords}
         image={productImage}
         url={productUrl}
