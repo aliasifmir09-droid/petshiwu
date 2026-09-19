@@ -8,10 +8,11 @@ import { IBlogResponse, IBlogQuery, IBlogCreateData, IBlogUpdateData, IBlogDocum
 import {
   getStaticLearningBlog,
   listStaticLearningBlogs,
-  mergeBlogLists,
   staticLearningCategoriesByPetType,
   staticLearningCategoryCounts,
 } from '../seo/staticLearningCatalog';
+import { BLOG_REDIRECTS } from '../seo/blogRedirects';
+import { LEARNING_PAGE_SIZE, planLearningPage } from '../seo/learningPagination';
 
 // Helper function to normalize blog _id to string
 const normalizeBlogId = (blog: IBlogDocument | IBlog | IBlogResponse | Record<string, unknown>): IBlogResponse => {
@@ -103,14 +104,20 @@ const normalizeBlogs = (blogs: (IBlogDocument | IBlog | Record<string, unknown>)
   return blogs.map(normalizeBlogId);
 };
 
+const toLearningCard = (blog: IBlogResponse): IBlogResponse => ({
+  ...blog,
+  content: '',
+});
+
+const LIST_CARD_SELECT =
+  'title slug excerpt featuredImage petType category tags isPublished publishedAt views metaTitle metaDescription speakable authorByline authorProfileUrl createdAt updatedAt author';
+
 // Get all published blogs (public)
 export const getPublishedBlogs = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { petType, category, page = 1, limit = 10, search } = req.query;
-    
-    const pageNum = parseInt(page as string);
-    const limitNum = parseInt(limit as string);
-    const skip = (pageNum - 1) * limitNum;
+    const { petType, category, page = 1, limit = LEARNING_PAGE_SIZE, search } = req.query;
+    const parsedPage = parseInt(String(page), 10);
+    const parsedLimit = parseInt(String(limit), 10);
 
     // Build query
     const query: IBlogQuery = { isPublished: true };
@@ -126,14 +133,30 @@ export const getPublishedBlogs = async (req: Request, res: Response, next: NextF
     if (search) {
       query.$or = [
         { title: { $regex: search as string, $options: 'i' } },
-        { content: { $regex: search as string, $options: 'i' } },
         { excerpt: { $regex: search as string, $options: 'i' } },
+        { tags: { $regex: search as string, $options: 'i' } },
       ];
     }
 
-    // Cache key
-    const cacheKey = cacheKeys.blogs(petType as string, category as string, pageNum, limitNum, search as string) || 
-      `blogs:${petType || 'all'}:${category || 'all'}:${pageNum}:${limitNum}:${search || ''}`;
+    const staticBlogs = listStaticLearningBlogs({
+      petType: typeof petType === 'string' ? petType : undefined,
+      category: typeof category === 'string' ? category : undefined,
+      search: typeof search === 'string' ? search : undefined,
+    });
+    const excludedSlugs = [
+      ...new Set([
+        ...staticBlogs.map((blog) => blog.slug),
+        ...Object.keys(BLOG_REDIRECTS),
+      ]),
+    ];
+    const cmsQuery: IBlogQuery & { slug: { $nin: string[] } } = {
+      ...query,
+      slug: { $nin: excludedSlugs },
+    };
+
+    const probePlan = planLearningPage(staticBlogs.length, 0, parsedPage, parsedLimit);
+    const cacheKey = cacheKeys.blogs(petType as string, category as string, probePlan.page, probePlan.limit, search as string) || 
+      `blogs:${petType || 'all'}:${category || 'all'}:${probePlan.page}:${probePlan.limit}:${search || ''}`;
     interface CachedBlogs {
       data: IBlogResponse[];
       pagination: {
@@ -153,36 +176,38 @@ export const getPublishedBlogs = async (req: Request, res: Response, next: NextF
       });
     }
 
-    const staticBlogs = listStaticLearningBlogs({
-      petType: typeof petType === 'string' ? petType : undefined,
-      category: typeof category === 'string' ? category : undefined,
-      search: typeof search === 'string' ? search : undefined,
-    });
-
-    let cmsBlogs: IBlogResponse[] = [];
+    let cmsTotal = 0;
+    let cmsPage: IBlogResponse[] = [];
     try {
-      const blogs = await Blog.find(query)
-        .select('title slug content excerpt featuredImage petType category tags isPublished publishedAt views metaTitle metaDescription speakable authorByline authorProfileUrl createdAt updatedAt author')
-        .populate('author', 'name email')
-        .sort({ publishedAt: -1, createdAt: -1 })
-        .limit(80)
-        .lean();
-      cmsBlogs = normalizeBlogs(blogs);
+      cmsTotal = await Blog.countDocuments(cmsQuery);
+      const cmsPlan = planLearningPage(staticBlogs.length, cmsTotal, parsedPage, parsedLimit);
+      if (cmsPlan.cmsLimit > 0) {
+        const blogs = await Blog.find(cmsQuery)
+          .select(LIST_CARD_SELECT)
+          .populate('author', 'name email')
+          .sort({ publishedAt: -1, createdAt: -1 })
+          .skip(cmsPlan.cmsSkip)
+          .limit(cmsPlan.cmsLimit)
+          .lean();
+        cmsPage = normalizeBlogs(blogs);
+      }
     } catch (cmsError: unknown) {
       logger.error('CMS blog lookup failed; returning static learning guides only:', cmsError);
     }
 
-    const merged = mergeBlogLists(staticBlogs, cmsBlogs);
-    const total = merged.length;
-    const normalizedBlogs = merged.slice(skip, skip + limitNum);
+    const plan = planLearningPage(staticBlogs.length, cmsTotal, parsedPage, parsedLimit);
+    const data = [
+      ...staticBlogs.slice(plan.staticStart, plan.staticStart + plan.staticLimit).map(toLearningCard),
+      ...cmsPage.map(toLearningCard),
+    ];
 
     const result = {
-      data: normalizedBlogs,
+      data,
       pagination: {
-        page: pageNum,
-        limit: limitNum,
-        total,
-        pages: Math.ceil(total / limitNum) || 1
+        page: plan.page,
+        limit: plan.limit,
+        total: plan.total,
+        pages: Math.ceil(plan.total / plan.limit) || 1
       }
     };
 
@@ -201,17 +226,22 @@ export const getPublishedBlogs = async (req: Request, res: Response, next: NextF
         category: typeof req.query.category === 'string' ? req.query.category : undefined,
         search: typeof req.query.search === 'string' ? req.query.search : undefined,
       });
-      const pageNum = parseInt(String(req.query.page || 1));
-      const limitNum = parseInt(String(req.query.limit || 10));
-      const skip = (pageNum - 1) * limitNum;
+      const plan = planLearningPage(
+        staticBlogs.length,
+        0,
+        parseInt(String(req.query.page || 1), 10),
+        parseInt(String(req.query.limit || LEARNING_PAGE_SIZE), 10)
+      );
       return res.json({
         success: true,
-        data: staticBlogs.slice(skip, skip + limitNum),
+        data: staticBlogs
+          .slice(plan.staticStart, plan.staticStart + plan.staticLimit)
+          .map(toLearningCard),
         pagination: {
-          page: pageNum,
-          limit: limitNum,
+          page: plan.page,
+          limit: plan.limit,
           total: staticBlogs.length,
-          pages: Math.ceil(staticBlogs.length / limitNum) || 1,
+          pages: Math.ceil(staticBlogs.length / plan.limit) || 1,
         },
       });
     } catch {
