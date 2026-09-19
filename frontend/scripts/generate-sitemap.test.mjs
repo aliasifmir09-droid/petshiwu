@@ -33,4 +33,15 @@ describe('generate-sitemap sanitizer', () => {
     const { xml: sanitized } = sanitizeLegacySitemapEntries(xml);
     expect(() => validateSitemapXml(sanitized)).not.toThrow();
   });
+
+  test('keeps the next-day ZIP directory in the sitemap', () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://www.petshiwu.com/delivery-zips</loc></url>
+</urlset>
+`;
+    const { xml: sanitized, removed } = sanitizeLegacySitemapEntries(xml);
+    expect(removed).toBe(0);
+    expect(sanitized).toContain('https://www.petshiwu.com/delivery-zips');
+  });
 });

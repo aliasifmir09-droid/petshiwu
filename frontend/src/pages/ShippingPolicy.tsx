@@ -108,7 +108,11 @@ const ShippingPolicy = () => {
           <p>
             <strong>Currently delivering:</strong> Manhattan, Brooklyn, Queens, the Bronx, and Staten Island,
             with same-day when you order by cutoff — including Queens Hillside. Next-day covers every ZIP
-            within 50 miles of Queens. Same-day stays the five boroughs only.
+            within 50 miles of Queens.{' '}
+            <Link to="/delivery-zips" className="text-blue-600 hover:underline">
+              See the full next-day ZIP list
+            </Link>
+            . Same-day stays the five boroughs only.
           </p>
           <p className="mt-2">
             <strong>Nationwide shipping opens in a few days</strong> for other U.S. addresses, free over $49.

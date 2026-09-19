@@ -36,6 +36,7 @@ import { FEATURED_LEARNING_SLUGS, LEARNING_AUTHOR } from '../seo/featuredLearnin
 import { DEFAULT_OG_IMAGE, injectOgTags, resolveShareImage } from '../seo/ogTags';
 import { merchantMpn } from '../utils/googleMerchantFeed';
 import { buildNycHubLinkHtml, buildNycHubShopHtml, isNycShoppableHub } from '../seo/nycShopHub';
+import { buildNextDayZipDirectoryHtml } from '../seo/nextDayZipDirectory';
 
 // ---------------------------------------------------------------------------
 // Bot detection
@@ -296,7 +297,11 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/shipping': {
     title: 'Shipping Policy | Petshiwu',
-    description: 'Petshiwu ships nationwide with free shipping on orders over $49. Same-day delivery available in select NYC neighborhoods.',
+    description: 'Petshiwu same-day NYC delivery and next-day to every ZIP within 50 miles of Queens. Free shipping over $49. Nationwide shipping opens in a few days.',
+  },
+  '/delivery-zips': {
+    title: 'Next-Day Delivery ZIP Codes Within 50 Miles of Queens | Petshiwu',
+    description: 'Full list of Petshiwü next-day delivery ZIP codes within 50 miles of Queens. Same-day is NYC only. Check your ZIP. Nationwide shipping opens in a few days.',
   },
   // FIX: Plural pet-type entries REMOVED. These (/dogs, /cats, /birds, /reptiles,
   // /small-animals) used to self-canonicalize with duplicate content vs. the real
@@ -576,6 +581,14 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
     if (cleanPath !== '/') {
       html = injectH1(html, h1Text);
     }
+  if (cleanPath === '/delivery-zips') {
+    const zipHtml = buildNextDayZipDirectoryHtml();
+    if (html.includes('<div id="root"></div>')) {
+      html = html.replace('<div id="root"></div>', `<div id="root">${zipHtml}</div>`);
+    } else {
+      html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${zipHtml}</div>`);
+    }
+  }
   // FIX: Inject X-Robots-Tag noindex for any URL with query string. Filter/pagination/sort
   // variants are duplicates of the base URL — by stripping them from canonical we
   // consolidate, but Google also needs to know NOT to index them. The frontend
@@ -615,7 +628,7 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
   const isLegitimateSingle = ['products', 'learning', 'care-guides', 'about',
       'faq', 'returns', 'return-policy', 'donate', 'search', 'symptom-checker', 'press',
       'investors', 'sell-with-us', 'vendors', 'partners', 'other-animals', 'shop',
-      'privacy', 'privacy-policy', 'terms', 'terms-of-service', 'shipping', 'shipping-policy', 'contact'].includes(segments[0] || '')
+      'privacy', 'privacy-policy', 'terms', 'terms-of-service', 'shipping', 'shipping-policy', 'delivery-zips', 'contact'].includes(segments[0] || '')
     || PET_TYPES.has(segments[0] || '')
     || INDEXABLE_LANDING_PATHS.has(cleanPath);
   const isDoorway = isSingleSegment && !isLegitimateSingle && !isProductPath;
@@ -1940,7 +1953,7 @@ const VALID_SPA_PATHS = new Set([
   '/learning', '/care-guides', '/faq', '/symptom-checker', '/about', '/press',
   '/our-promise', '/for-pet-parents', '/from-queens', '/editorial-standards',
   '/contact', '/403', '/404', '/privacy', '/privacy-policy', '/terms',
-  '/terms-of-service', '/shipping', '/shipping-policy', '/accessibility',
+  '/terms-of-service', '/shipping', '/shipping-policy', '/delivery-zips', '/accessibility',
   '/shop', '/deals', '/sell-with-us', '/vendors', '/partners', '/investors',
   '/innovation', '/tech', '/neural', '/scan',
 ]);

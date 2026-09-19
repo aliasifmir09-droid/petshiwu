@@ -301,6 +301,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
       { path: '/cookie-policy', priority: '0.3', changefreq: 'yearly' },
       { path: '/terms', priority: '0.3', changefreq: 'yearly' },
       { path: '/shipping', priority: '0.5', changefreq: 'monthly' },
+      { path: '/delivery-zips', priority: '0.7', changefreq: 'weekly' },
       { path: '/accessibility', priority: '0.3', changefreq: 'yearly' },
       { path: '/return-policy', priority: '0.4', changefreq: 'monthly' },
       // SEO landing pages — existing

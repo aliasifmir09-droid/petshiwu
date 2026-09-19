@@ -98,6 +98,7 @@ const CookiePolicy = lazyWithRetry(() => import('./pages/CookiePolicy'));
 // Neighborhood × Category programmatic pages (200 pages) — see top of file for imports
 const Terms = lazyWithRetry(() => import('./pages/Terms'));
 const ShippingPolicy = lazyWithRetry(() => import('./pages/ShippingPolicy'));
+const NextDayDeliveryZips = lazyWithRetry(() => import('./pages/NextDayDeliveryZips'));
 const Accessibility = lazyWithRetry(() => import('./pages/Accessibility'));
 const Unsubscribe = lazyWithRetry(() => import('./pages/Unsubscribe'));
 
@@ -441,6 +442,7 @@ function App() {
                   <Route path="/terms-of-service" element={<Terms />} />
                   <Route path="/shipping" element={<ShippingPolicy />} />
                   <Route path="/shipping-policy" element={<ShippingPolicy />} />
+                  <Route path="/delivery-zips" element={<NextDayDeliveryZips />} />
                   <Route path="/accessibility" element={<Accessibility />} />
                   <Route path="/unsubscribe" element={<Unsubscribe />} />
                   <Route path="/cookie-policy" element={<CookiePolicy />} />
