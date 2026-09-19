@@ -10,7 +10,8 @@ const PetSuppliesQueensNY = () => (
     title="Same-Day Pet Supplies Queens — Order by 3 PM | Petshiwu"
     description="Same-day pet delivery in Queens from our Jackson Heights warehouse. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Not a walk-in store. No autoship. Free over $49."
     h1="Same-Day Pet Supplies Across Queens, NY"
-    introContent="Petshiwu packs in Jackson Heights and delivers tonight across Queens — Flushing, Astoria, Forest Hills, Jamaica. We are not a walk-in store. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No autoship. Free over $49."
+    introContent="Petshiwu packs in Jackson Heights and delivers tonight across Queens — Flushing, Astoria, Forest Hills, Jamaica. We are not a walk-in store. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No autoship. Free over $49. Enter your Queens ZIP to confirm same-day. Same-day stays NYC; nationwide shipping opens in a few days as standard delivery."
+    shoppableHub
     problemPoints={[
       "Lugging heavy bags of pet food on the 7 train or the Q",
       "Local Queens pet stores with limited brand selection",

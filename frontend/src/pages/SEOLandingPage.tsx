@@ -9,7 +9,16 @@ import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import { ChevronRight, Home, CheckCircle, AlertCircle } from 'lucide-react';
 import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
+import TonightPromiseCard from '@/components/TonightPromiseCard';
+import NycHubCompare from '@/components/NycHubCompare';
+import HubBuyerRatings from '@/components/HubBuyerRatings';
 import { TONIGHT, withTonightFaq } from '@/data/tonightDelivery';
+import {
+  NYC_HUB_NATIONWIDE_BODY,
+  NYC_HUB_NATIONWIDE_HEADING,
+  NYC_HUB_PATHS,
+  withHubFaqs,
+} from '@/data/nycShopHub';
 import { ORDERING_PAUSED } from '@/config/ordering';
 import { landingProductQuery } from '@/utils/landingProducts';
 
@@ -25,6 +34,8 @@ interface SEOLandingPageProps {
   searchTerms: string[];
   petType?: 'dog' | 'cat' | 'other-animals';
   category?: string;
+  /** ZIP + compare + ratings + nationwide. Default on for the four NYC #1 hubs. */
+  shoppableHub?: boolean;
 }
 
 /**
@@ -43,7 +54,8 @@ const SEOLandingPage = ({
   faqItems: faqItemsProp = [],
   searchTerms,
   petType,
-  category
+  category,
+  shoppableHub
 }: SEOLandingPageProps) => {
   const [searchParams] = useSearchParams();
   const page = parseInt(searchParams.get('page') || '1');
@@ -52,7 +64,12 @@ const SEOLandingPage = ({
   // Paginated/sorted/filtered variants (e.g. ?page=2, ?sort=price) must not be
   // indexed as separate pages — they canonicalize to the clean landing URL.
   const hasQueryVariant = searchParams.toString().length > 0;
-  const faqItems = useMemo(() => withTonightFaq(faqItemsProp), [faqItemsProp]);
+  const landingPath = `/${keyword.replace(/\s+/g, '-').toLowerCase()}`;
+  const isShoppableHub = shoppableHub ?? NYC_HUB_PATHS.includes(landingPath as (typeof NYC_HUB_PATHS)[number]);
+  const faqItems = useMemo(
+    () => (isShoppableHub ? withHubFaqs(withTonightFaq(faqItemsProp)) : withTonightFaq(faqItemsProp)),
+    [faqItemsProp, isShoppableHub]
+  );
 
   const { data: products, isLoading } = useQuery({
     queryKey: ['products', 'seo-landing', keyword, page, sort, petType, category],
@@ -144,7 +161,11 @@ const SEOLandingPage = ({
           <p className="text-[#1E3A8A] font-semibold">{TONIGHT.promise}</p>
         </div>
 
+        {isShoppableHub ? <TonightPromiseCard variant="landing" shopHref="#in-stock" /> : null}
+
         <TonightDeliveryHowItWorks compact />
+
+        {isShoppableHub ? <NycHubCompare /> : null}
 
         {/* Problem Section */}
         {problemPoints.length > 0 && (
@@ -191,19 +212,25 @@ const SEOLandingPage = ({
         )}
 
         {/* Products Section */}
-        <div className="mb-12">
+        <div id="in-stock" className="mb-12 scroll-mt-24">
           {isLoading ? (
             <>
-              <h2 className="text-3xl font-bold mb-6 text-gray-900">
-                Recommended Products
+              <h2 className="text-3xl font-bold mb-2 text-gray-900">
+                {isShoppableHub ? 'In stock now — add to cart' : 'Recommended Products'}
               </h2>
+              {isShoppableHub ? (
+                <p className="text-slate-600 mb-6">Live catalog with price and add to cart. Same products Googlebot sees on this URL.</p>
+              ) : null}
               <LoadingSpinner size="lg" />
             </>
           ) : products && products.data && products.data.length > 0 ? (
             <>
-              <h2 className="text-3xl font-bold mb-6 text-gray-900">
-                Recommended Products
+              <h2 className="text-3xl font-bold mb-2 text-gray-900">
+                {isShoppableHub ? 'In stock now — add to cart' : 'Recommended Products'}
               </h2>
+              {isShoppableHub ? (
+                <p className="text-slate-600 mb-6">Live catalog with price and add to cart. Same products Googlebot sees on this URL.</p>
+              ) : null}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
                 {products.data.map((product) => (
                   <ProductCard key={product._id} product={product} />
@@ -239,6 +266,17 @@ const SEOLandingPage = ({
             </div>
           )}
         </div>
+
+        {isShoppableHub ? <HubBuyerRatings products={products?.data || []} /> : null}
+
+        {isShoppableHub ? (
+          <section className="mb-12 rounded-2xl border border-slate-200 bg-slate-50 p-6 md:p-8" aria-labelledby="hub-nationwide-heading">
+            <h2 id="hub-nationwide-heading" className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-3">
+              {NYC_HUB_NATIONWIDE_HEADING}
+            </h2>
+            <p className="text-slate-700 leading-relaxed">{NYC_HUB_NATIONWIDE_BODY}</p>
+          </section>
+        ) : null}
 
         {/* FAQ Section */}
         {faqItems.length > 0 && (
