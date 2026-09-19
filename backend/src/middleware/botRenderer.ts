@@ -35,6 +35,7 @@ import { isStaticLearningSlug, STATIC_LEARNING_PAGES } from '../seo/staticLearni
 import { FEATURED_LEARNING_SLUGS, LEARNING_AUTHOR } from '../seo/featuredLearning';
 import { DEFAULT_OG_IMAGE, injectOgTags, resolveShareImage } from '../seo/ogTags';
 import { merchantMpn } from '../utils/googleMerchantFeed';
+import { buildNycHubShopHtml, isNycShoppableHub } from '../seo/nycShopHub';
 
 // ---------------------------------------------------------------------------
 // Bot detection
@@ -1752,7 +1753,7 @@ export const buildEducationHubHtml = (
 };
 
 const fetchLearningHubItems = async (): Promise<EducationHubItem[]> => {
-  const featuredRank = new Map(FEATURED_LEARNING_SLUGS.map((slug, index) => [slug, index]));
+  const featuredRank = new Map<string, number>(FEATURED_LEARNING_SLUGS.map((slug, index) => [slug, index]));
   const staticItems: EducationHubItem[] = Object.values(STATIC_LEARNING_PAGES)
     .map((page) => ({
       title: page.title,
@@ -1870,9 +1871,12 @@ export const buildSeoLandingHtmlFromProducts = (
     }),
   };
 
+  const hubShopHtml = isNycShoppableHub(cleanPath) ? buildNycHubShopHtml() : '';
+
   const bodyContent = `
 <div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
   <p>${esc(meta.description)}</p>
+  ${hubShopHtml}
   <h2>Recommended Products</h2>
   ${items.length > 0
     ? `<ul style="list-style:none;padding:0;columns:2">\n    ${productLinks}\n  </ul>`

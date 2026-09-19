@@ -210,6 +210,19 @@ export function isCoordinateInNyc(lat: number, lng: number): boolean {
 }
 
 export const LAST_ZIP_STORAGE_KEY = 'petshiwu_last_zip';
+export const LAST_ZIP_EVENT = 'petshiwu:zip';
+
+export function saveLastZip(zip: string): void {
+  if (!isValidZip(zip)) return;
+  try {
+    localStorage.setItem(LAST_ZIP_STORAGE_KEY, zip);
+  } catch {
+    // Ignore private-mode storage failures
+  }
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(LAST_ZIP_EVENT, { detail: zip }));
+  }
+}
 
 export function padTime(value: number): string {
   return String(value).padStart(2, '0');

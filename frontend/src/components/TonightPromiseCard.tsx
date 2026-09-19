@@ -5,16 +5,20 @@ import { ORDERING_PAUSED } from '@/config/ordering';
 import { NATIONWIDE_SOON_NOTE } from '@/data/brandStories';
 import { TONIGHT } from '@/data/tonightDelivery';
 import {
+  LAST_ZIP_EVENT,
   LAST_ZIP_STORAGE_KEY,
   formatCountdownShort,
   getCutoffCountdown,
+  isValidZip,
   lookupZip,
   normalizeZip,
+  saveLastZip,
   type ZipLookupResult,
 } from '@/utils/deliveryZip';
 
 interface TonightPromiseCardProps {
-  variant?: 'hero' | 'pdp';
+  variant?: 'hero' | 'pdp' | 'landing';
+  shopHref?: string;
 }
 
 const TRUST_CHIPS = [
@@ -33,7 +37,7 @@ const loadSavedZip = (): string => {
   }
 };
 
-const TonightPromiseCard = ({ variant = 'hero' }: TonightPromiseCardProps) => {
+const TonightPromiseCard = ({ variant = 'hero', shopHref = '/products' }: TonightPromiseCardProps) => {
   const zipId = useId();
   const [zip, setZip] = useState(loadSavedZip);
   const [result, setResult] = useState<ZipLookupResult | null>(() => {
@@ -51,14 +55,19 @@ const TonightPromiseCard = ({ variant = 'hero' }: TonightPromiseCardProps) => {
     if (zip.length === 5) {
       const next = lookupZip(zip);
       setResult(next);
-      try {
-        if (next) localStorage.setItem(LAST_ZIP_STORAGE_KEY, zip);
-      } catch {
-        // Ignore private-mode storage failures
-      }
+      if (next) saveLastZip(zip);
     } else {
       setResult(null);
     }
+  }, [zip]);
+
+  useEffect(() => {
+    const onZip = (event: Event) => {
+      const next = String((event as CustomEvent<string>).detail || '');
+      if (isValidZip(next) && next !== zip) setZip(next);
+    };
+    window.addEventListener(LAST_ZIP_EVENT, onZip);
+    return () => window.removeEventListener(LAST_ZIP_EVENT, onZip);
   }, [zip]);
 
   const cutoffLine = ORDERING_PAUSED
@@ -74,6 +83,71 @@ const TonightPromiseCard = ({ variant = 'hero' }: TonightPromiseCardProps) => {
       ? `${result.headline}. ${result.detail}`
       : result.headline
     : 'Enter your ZIP to check delivery.';
+
+  if (variant === 'landing') {
+    const tone =
+      result?.speed === 'same-day'
+        ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+        : result?.speed === 'next-day'
+          ? 'border-amber-200 bg-amber-50 text-amber-900'
+          : result
+            ? 'border-blue-200 bg-blue-50 text-blue-900'
+            : 'border-slate-200 bg-white text-slate-800';
+
+    return (
+      <section
+        className="mb-10 rounded-2xl border-2 border-[#1E3A8A]/20 bg-[#1E3A8A]/[0.04] p-6 md:p-8"
+        aria-labelledby="hub-zip-heading"
+      >
+        <h2 id="hub-zip-heading" className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-2">
+          Check your ZIP — same-day NYC or nationwide soon
+        </h2>
+        <p className="text-slate-600 mb-5">
+          {NATIONWIDE_SOON_NOTE} Same-day is the five boroughs only. Free over ${TONIGHT.freeOver}. No autoship.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <label className="sr-only" htmlFor={zipId}>
+            Check delivery ZIP
+          </label>
+          <div className="relative flex-1">
+            <MapPin size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#1E3A8A]" aria-hidden />
+            <input
+              id={zipId}
+              type="text"
+              inputMode="numeric"
+              autoComplete="postal-code"
+              maxLength={5}
+              value={zip}
+              onChange={(e) => setZip(normalizeZip(e.target.value))}
+              placeholder="Enter ZIP"
+              aria-label="Check hub delivery ZIP"
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 bg-white text-gray-900 font-semibold tracking-widest placeholder:tracking-normal placeholder:font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
+            />
+          </div>
+          {shopHref.startsWith('#') ? (
+            <a
+              href={shopHref}
+              className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-[#1E3A8A] text-white font-semibold hover:bg-[#163074]"
+            >
+              {ORDERING_PAUSED ? 'Browse in-stock' : 'Shop in-stock'}
+            </a>
+          ) : (
+            <Link
+              to={shopHref}
+              className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-[#1E3A8A] text-white font-semibold hover:bg-[#163074]"
+            >
+              {ORDERING_PAUSED ? 'Browse in-stock' : 'Shop in-stock'}
+            </Link>
+          )}
+        </div>
+        {cutoffLine ? <p className="text-sm font-medium text-slate-800 mt-4">{cutoffLine}</p> : null}
+        <div className={`mt-4 rounded-xl border px-4 py-3 ${tone}`}>
+          <p className="font-bold">{status}</p>
+          {result ? <p className="text-sm mt-1 opacity-90">{result.detail}</p> : null}
+        </div>
+      </section>
+    );
+  }
 
   if (variant === 'pdp') {
     return (

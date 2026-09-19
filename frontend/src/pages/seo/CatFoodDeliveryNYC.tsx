@@ -10,7 +10,8 @@ const CatFoodDeliveryNYC = () => {
       title="Same-Day Cat Food Delivery NYC — Order by 3 PM | Petshiwu"
       description="Same-day cat food delivery in NYC. Order by 3 PM weekdays (1 PM weekends), before 11 PM. No autoship. Free over $49. Dry, wet, and specialty diets. All 5 boroughs."
       h1="Same-Day Cat Food Delivery in New York City"
-      introContent="Get your cat's food delivered tonight — no hauling bags up the stairs. Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM. Dry, wet, grain-free, indoor, kitten, and senior from Purina, Blue Buffalo, Royal Canin, Hill's, and Fancy Feast. No autoship. Free over $49."
+      introContent="Get your cat's food delivered tonight — no hauling bags up the stairs. Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM. Dry, wet, grain-free, indoor, kitten, and senior from Purina, Blue Buffalo, Royal Canin, Hill's, and Fancy Feast. No autoship. Free over $49. Enter your ZIP below to confirm same-day. Same-day is NYC only; nationwide shipping opens in a few days as standard delivery."
+      shoppableHub
       problemPoints={[
         "Carrying heavy litter and cat food up multiple flights of stairs",
         "Your cat is picky and the local store doesn't have their preferred food",
