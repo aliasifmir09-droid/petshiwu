@@ -214,7 +214,7 @@ const removeStaticHero = (html: string): string => {
 const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   '/': {
     title: 'Petshiwu | Pet Food & Supplies – Free Shipping $49+, No Autoship',
-    description: '4,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. Same-day NYC. Next-day within 50 miles of Queens. Free shipping over $49. No autoship. Nationwide shipping soon.',
+    description: '4,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. Same-day NYC. Free shipping over $49. No autoship. Nationwide shipping soon.',
   },
   '/products': {
     title: 'All Pet Products — Dog, Cat, Bird, Fish & More | Petshiwu',
