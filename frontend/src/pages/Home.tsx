@@ -12,6 +12,7 @@ import ShopByPet from '@/components/ShopByPet';
 import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
 import HomeHeroSlogans from '@/components/HomeHeroSlogans';
+import HomeFeaturedLearning from '@/components/HomeFeaturedLearning';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
 import RestockDashboard from '@/components/RestockDashboard';
 import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
@@ -260,6 +261,8 @@ const Home = () => {
       <CategoryIcons />
 
       <TrustBadges />
+
+      <HomeFeaturedLearning />
 
       <OrdersOpenBanner />
 

@@ -106,6 +106,7 @@ const Unsubscribe = lazyWithRetry(() => import('./pages/Unsubscribe'));
  * Matches your file at: frontend/src/pages/SensitiveStomachGuide.tsx
  */
 const SensitiveStomachGuide = lazyWithRetry(() => import('./pages/SensitiveStomachGuide'));
+const EditorialStandards = lazyWithRetry(() => import('./pages/EditorialStandards'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -357,6 +358,7 @@ function App() {
                   <Route path="/blog" element={<Navigate to="/learning" replace />} />
                   <Route path="/blog/:slug" element={<LegacyBlogRedirect />} />
                   <Route path="/learning" element={<Learning />} />
+                  <Route path="/editorial-standards" element={<EditorialStandards />} />
                   <Route path="/learning/best-dog-food-sensitive-stomach" element={<SensitiveStomachGuide />} />
                   <Route path="/learning/best-dog-foods-sensitive-stomachs" element={<BestFoodSensitiveStomach />} />
                   <Route path="/learning/:slug" element={<BlogDetail />} />

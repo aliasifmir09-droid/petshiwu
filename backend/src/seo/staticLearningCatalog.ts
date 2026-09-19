@@ -1,9 +1,10 @@
 import { IBlogResponse } from '../types/blog';
 import { STATIC_LEARNING_PAGES, StaticLearningPage } from './staticLearningPages';
+import { LEARNING_AUTHOR, LEARNING_AUTHOR_URL, LEARNING_REVIEWED_AT } from './featuredLearning';
 
 export const STATIC_LEARNING_AUTHOR = {
-  _id: 'petshiwu-team',
-  name: 'Petshiwu Team',
+  _id: 'petshiwu-care-desk',
+  name: LEARNING_AUTHOR,
   email: 'hello@petshiwu.com',
 };
 
@@ -24,8 +25,10 @@ export const staticPageToBlog = (page: StaticLearningPage): IBlogResponse => ({
   metaTitle: page.title,
   metaDescription: page.description,
   speakable: false,
+  authorByline: LEARNING_AUTHOR,
+  authorProfileUrl: LEARNING_AUTHOR_URL,
   createdAt: page.publishedAt,
-  updatedAt: page.publishedAt,
+  updatedAt: LEARNING_REVIEWED_AT,
 });
 
 export type StaticBlogQuery = {

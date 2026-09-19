@@ -95,6 +95,8 @@ const Footer = () => {
               <li><Link to="/products" className="hover:text-white transition-colors">Shop All Products</Link></li>
               <li><Link to="/products?featured=true" className="hover:text-white transition-colors">Featured</Link></li>
               <li><Link to="/learning" className="hover:text-white transition-colors">Pet Care Blog</Link></li>
+              <li><Link to="/learning/fall-2026-pet-care-playbook" className="hover:text-white transition-colors">Fall 2026 Playbook</Link></li>
+              <li><Link to="/editorial-standards" className="hover:text-white transition-colors">How we write guides</Link></li>
               <li><Link to="/care-guides" className="hover:text-white transition-colors">Care Guides</Link></li>
               <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
               <li><Link to="/our-promise" className="hover:text-white transition-colors">Our Promise</Link></li>

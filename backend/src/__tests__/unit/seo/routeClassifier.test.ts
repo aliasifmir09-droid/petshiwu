@@ -18,6 +18,11 @@ describe('classifyRoute', () => {
     expect(classifyRoute('/our-promise')).toMatchObject({ indexable: true, status: 'indexable', routeType: 'static' });
     expect(classifyRoute('/for-pet-parents')).toMatchObject({ indexable: true, routeType: 'static' });
     expect(classifyRoute('/from-queens')).toMatchObject({ indexable: true, routeType: 'static' });
+    expect(classifyRoute('/editorial-standards')).toMatchObject({
+      indexable: true,
+      status: 'indexable',
+      routeType: 'static',
+    });
   });
 
   test('NYC landing pages are indexable, not doorways', () => {

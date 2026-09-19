@@ -24,6 +24,15 @@ describe('trending static learning catalog', () => {
     expect(isStaticLearningSlug('best-dog-foods-sensitive-stomachs')).toBe(true);
   });
 
+  test('publishes a new Fall 2026 playbook that stays indexable', () => {
+    expect(isStaticLearningSlug('fall-2026-pet-care-playbook')).toBe(true);
+    expect(STATIC_LEARNING_PAGES['fall-2026-pet-care-playbook'].html).toContain('/learning/best-fresh-dog-food-2026');
+    expect(classifyRoute('/learning/fall-2026-pet-care-playbook')).toMatchObject({
+      indexable: true,
+      status: 'indexable',
+    });
+  });
+
   test('every guide has a unique title, description, image, and HTML body', () => {
     const titles = new Set<string>();
     const descriptions = new Set<string>();
