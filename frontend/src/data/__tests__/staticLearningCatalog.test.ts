@@ -15,6 +15,14 @@ describe('frontend static learning catalog', () => {
     expect(getStaticLearningBlog('best-fresh-dog-food-2026')?.title).toMatch(/fresh dog food/i);
   });
 
+  test('publishes the next-day ZIP guide with crawlable HTML', () => {
+    const blog = getStaticLearningBlog('next-day-pet-delivery-within-50-miles-of-queens');
+    expect(blog?.title).toMatch(/50 Miles of Queens/i);
+    expect(blog?.content).toContain('/delivery-zips');
+    expect(blog?.content).toMatch(/do not claim same-day nationwide/i);
+    expect(blog?.content).toContain('11801');
+  });
+
   test('merge ignores a broken CMS payload instead of crashing the hub', () => {
     const posts = listStaticLearningBlogs();
     expect(mergeBlogLists(posts, undefined as never).length).toBe(posts.length);

@@ -75,6 +75,7 @@ export const CRAWLABLE_STOREFRONT_PATHS: string[] = [
   '/from-queens',
   '/editorial-standards',
   '/delivery-zips',
+  '/learning/next-day-pet-delivery-within-50-miles-of-queens',
   '/faq',
   '/contact',
   '/press',

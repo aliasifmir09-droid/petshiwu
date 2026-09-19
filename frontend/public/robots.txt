@@ -63,6 +63,7 @@ Allow: /return-policy
 Allow: /track-order
 Allow: /shipping
 Allow: /delivery-zips
+Allow: /learning/next-day-pet-delivery-within-50-miles-of-queens
 Allow: /privacy
 Allow: /cookie-policy
 Allow: /terms

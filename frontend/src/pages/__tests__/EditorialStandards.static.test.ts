@@ -15,6 +15,7 @@ describe('Google attention surfaces', () => {
     expect(home).toContain('NycHubLinkGrid');
     expect(app).toContain('/editorial-standards');
     expect(editorial).toContain('Fall 2026 pet care playbook');
+    expect(editorial).toContain('next-day delivery guide');
     expect(editorial).toMatch(/do not delete/i);
   });
 
