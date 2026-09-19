@@ -58,6 +58,36 @@ export const NYC_HUB_COMPARE_ROWS: Array<{
   },
 ];
 
+export const NYC_HUB_LINKS: Array<{ path: string; title: string; text: string }> = [
+  {
+    path: '/dog-food-delivery-nyc',
+    title: 'Dog food delivery NYC',
+    text: 'Same-day in all 5 boroughs when you order by cutoff.',
+  },
+  {
+    path: '/cat-food-delivery-nyc',
+    title: 'Cat food delivery NYC',
+    text: 'Wet, dry, litter, and specialty diets to the door.',
+  },
+  {
+    path: '/pet-supplies-delivery-nyc',
+    title: 'Pet supplies delivery NYC',
+    text: '4,000+ SKUs. Free over $49.',
+  },
+  {
+    path: '/pet-supplies-queens-ny',
+    title: 'Pet supplies Queens',
+    text: 'Packed in Jackson Heights. Delivery only — not a walk-in.',
+  },
+];
+
+export function buildNycHubLinkHtml(excludePath = ''): string {
+  const links = NYC_HUB_LINKS.filter((item) => item.path !== excludePath)
+    .map((item) => `<li><a href="https://www.petshiwu.com${item.path}">${item.title}</a> — ${item.text}</li>`)
+    .join('');
+  return `<h2>NYC same-day now · nationwide shipping next</h2><ul>${links}</ul>`;
+}
+
 export function isNycShoppableHub(pathname: string): boolean {
   const path = pathname.split('?')[0].replace(/\/$/, '') || '/';
   return NYC_HUB_PATHS.has(path);

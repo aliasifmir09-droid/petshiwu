@@ -13,6 +13,33 @@ export const NYC_HUB_PATHS = [
   '/pet-supplies-queens-ny',
 ] as const;
 
+export const NYC_HUB_LINKS: Array<{
+  path: (typeof NYC_HUB_PATHS)[number];
+  title: string;
+  text: string;
+}> = [
+  {
+    path: '/dog-food-delivery-nyc',
+    title: 'Dog food delivery NYC',
+    text: 'Same-day in all 5 boroughs when you order by cutoff. Nationwide next as standard shipping.',
+  },
+  {
+    path: '/cat-food-delivery-nyc',
+    title: 'Cat food delivery NYC',
+    text: 'Wet, dry, litter, and specialty diets to the door. Same-day NYC only.',
+  },
+  {
+    path: '/pet-supplies-delivery-nyc',
+    title: 'Pet supplies delivery NYC',
+    text: '4,000+ SKUs. Free over $49. Check your ZIP for tonight vs nationwide soon.',
+  },
+  {
+    path: '/pet-supplies-queens-ny',
+    title: 'Pet supplies Queens',
+    text: 'Packed in Jackson Heights. Delivery only — not a walk-in store.',
+  },
+];
+
 export const NYC_HUB_ZIP_HEADING = 'Check your ZIP — same-day NYC or nationwide soon';
 
 export const NYC_HUB_ZIP_INTRO =

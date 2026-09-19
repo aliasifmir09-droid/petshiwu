@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import {
+  NYC_HUB_LINKS,
   NYC_HUB_PATHS,
   ratedHubProducts,
   withHubFaqs,
@@ -7,6 +8,7 @@ import {
 
 describe('nycShopHub', () => {
   test('locks the four NYC #1 URLs and does not drop extras when merging FAQs', () => {
+    expect(NYC_HUB_LINKS.map((item) => item.path)).toEqual([...NYC_HUB_PATHS]);
     expect([...NYC_HUB_PATHS]).toEqual([
       '/dog-food-delivery-nyc',
       '/cat-food-delivery-nyc',

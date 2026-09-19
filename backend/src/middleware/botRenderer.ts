@@ -35,7 +35,7 @@ import { isStaticLearningSlug, STATIC_LEARNING_PAGES } from '../seo/staticLearni
 import { FEATURED_LEARNING_SLUGS, LEARNING_AUTHOR } from '../seo/featuredLearning';
 import { DEFAULT_OG_IMAGE, injectOgTags, resolveShareImage } from '../seo/ogTags';
 import { merchantMpn } from '../utils/googleMerchantFeed';
-import { buildNycHubShopHtml, isNycShoppableHub } from '../seo/nycShopHub';
+import { buildNycHubLinkHtml, buildNycHubShopHtml, isNycShoppableHub } from '../seo/nycShopHub';
 
 // ---------------------------------------------------------------------------
 // Bot detection
@@ -1602,6 +1602,8 @@ export const buildHomepageHtml = (template: string): string => {
       'Pet Care Blog',
       'Dog Food Delivery NYC',
       'Cat Food Delivery NYC',
+      'Pet Supplies Delivery NYC',
+      'Pet Supplies Queens NY',
     ],
     url: [
       `${BASE}/`,
@@ -1613,6 +1615,8 @@ export const buildHomepageHtml = (template: string): string => {
       `${BASE}/learning`,
       `${BASE}/dog-food-delivery-nyc`,
       `${BASE}/cat-food-delivery-nyc`,
+      `${BASE}/pet-supplies-delivery-nyc`,
+      `${BASE}/pet-supplies-queens-ny`,
     ],
   };
 
@@ -1630,6 +1634,10 @@ export const buildHomepageHtml = (template: string): string => {
   html = injectHreflang(html, pageUrl);
   html = injectOgTags(html, meta.title, meta.description, pageUrl);
   html = injectBeforeHeadClose(html, injectedTags);
+  const hubNav = `<div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">${buildNycHubLinkHtml()}</div>`;
+  if (html.includes('<div id="root"></div>')) {
+    html = html.replace('<div id="root"></div>', `<div id="root">${hubNav}</div>`);
+  }
   return html;
 };
 
@@ -1871,7 +1879,9 @@ export const buildSeoLandingHtmlFromProducts = (
     }),
   };
 
-  const hubShopHtml = isNycShoppableHub(cleanPath) ? buildNycHubShopHtml() : '';
+  const hubShopHtml = isNycShoppableHub(cleanPath)
+    ? `${buildNycHubShopHtml()}${buildNycHubLinkHtml(cleanPath)}`
+    : '';
 
   const bodyContent = `
 <div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">

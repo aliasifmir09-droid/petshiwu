@@ -11,6 +11,7 @@ import { ChevronRight, Home, CheckCircle, AlertCircle } from 'lucide-react';
 import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
 import NycHubCompare from '@/components/NycHubCompare';
+import NycHubLinkGrid from '@/components/NycHubLinkGrid';
 import HubBuyerRatings from '@/components/HubBuyerRatings';
 import { TONIGHT, withTonightFaq } from '@/data/tonightDelivery';
 import {
@@ -166,6 +167,8 @@ const SEOLandingPage = ({
         <TonightDeliveryHowItWorks compact />
 
         {isShoppableHub ? <NycHubCompare /> : null}
+
+        {isShoppableHub ? <NycHubLinkGrid excludePath={landingPath} /> : null}
 
         {/* Products Section */}
         <div id="in-stock" className="mb-12 scroll-mt-24">

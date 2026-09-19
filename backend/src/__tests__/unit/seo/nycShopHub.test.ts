@@ -1,5 +1,5 @@
 import { INDEXABLE_LANDING_PATHS, classifyRoute } from '../../../seo/routeClassifier';
-import { buildNycHubShopHtml, isNycShoppableHub, NYC_HUB_PATHS } from '../../../seo/nycShopHub';
+import { buildNycHubLinkHtml, buildNycHubShopHtml, isNycShoppableHub, NYC_HUB_PATHS } from '../../../seo/nycShopHub';
 
 describe('nycShopHub first-wave extras', () => {
   it('marks only the four NYC #1 hubs and keeps them indexable', () => {
@@ -20,5 +20,14 @@ describe('nycShopHub first-wave extras', () => {
     expect(html).toContain('All 5 boroughs');
     expect(html).toMatch(/never same-day outside the five boroughs/i);
     expect(html).not.toMatch(/same-day nationwide/i);
+  });
+
+  it('cross-links the other NYC hubs and keeps nationwide off same-day', () => {
+    const html = buildNycHubLinkHtml('/dog-food-delivery-nyc');
+    expect(html).toContain('/cat-food-delivery-nyc');
+    expect(html).toContain('/pet-supplies-delivery-nyc');
+    expect(html).toContain('/pet-supplies-queens-ny');
+    expect(html).not.toContain('href="https://www.petshiwu.com/dog-food-delivery-nyc"');
+    expect(html).toMatch(/nationwide shipping next/i);
   });
 });
