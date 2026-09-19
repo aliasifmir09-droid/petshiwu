@@ -43,15 +43,21 @@ export const generateDescription = (
     : `${truncated}...`;
 };
 
-/** Clip at a word boundary without mid-word cuts or trailing ellipsis. */
+/** Clip at a sentence or word boundary without mid-word cuts or trailing ellipsis. */
 const clipAtWord = (content: string, maxLength: number): string => {
   const trimmed = content.trim();
   if (trimmed.length <= maxLength) return trimmed;
   const truncated = trimmed.substring(0, maxLength);
   const lastSpace = truncated.lastIndexOf(' ');
-  const cut = lastSpace > Math.floor(maxLength * 0.5)
+  let cut = lastSpace > Math.floor(maxLength * 0.5)
     ? truncated.substring(0, lastSpace)
     : truncated;
+  const lastPeriod = cut.lastIndexOf('.');
+  if (lastPeriod > Math.floor(maxLength * 0.45)) {
+    cut = cut.substring(0, lastPeriod + 1);
+  }
+  cut = cut.replace(/[.,;:]+$/, '').trim();
+  cut = cut.replace(/\s+(and|or|but|the|a|an|of|for|to|with|in|on|at|from)$/i, '').trim();
   return cut.replace(/[.,;:]+$/, '').trim();
 };
 

@@ -13,6 +13,17 @@ describe('product search snippets', () => {
     expect(title).toMatch(/Petshiwu$/);
   });
 
+  test('clips at a sentence instead of leaving a dangling and', () => {
+    const snippet = productSearchDescription({
+      description:
+        'Comfortable no-pull harness with reflective strips for safety. Adjustable straps fit multiple sizes. Front and back attachment points for training.',
+    });
+    expect(snippet.length).toBeLessThanOrEqual(160);
+    expect(snippet).not.toMatch(/Front and In stock/);
+    expect(snippet).toMatch(/multiple sizes/);
+    expect(snippet).toMatch(/In stock/);
+  });
+
   test('descriptions stay at or under 160 characters and include in stock', () => {
     const snippet = productSearchDescription({
       description:
