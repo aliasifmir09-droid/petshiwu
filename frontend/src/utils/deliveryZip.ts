@@ -3,6 +3,8 @@
  * Same-day cutoff matches ShippingPolicy: 3 PM EST weekdays, 1 PM EST weekends.
  */
 
+import { NEXT_DAY_ZIPS, type MetroState } from '@/data/nextDayMetroZips';
+
 export type DeliverySpeed = 'same-day' | 'next-day' | 'standard';
 
 export interface ZipLookupResult {
@@ -31,36 +33,8 @@ const NYC_RANGES: Array<{ start: number; end: number; area: string }> = [
   { start: 11004, end: 11005, area: 'Queens' },
   { start: 11101, end: 11109, area: 'Queens' },
   { start: 11201, end: 11256, area: 'Brooklyn' },
-  { start: 11351, end: 11697, area: 'Queens' },
+  { start: 11351, end: 11697, area: 'Queens' }, // includes Hillside / Jamaica 11432, Hollis 11423
 ];
-
-const NEXT_DAY_ZIPS: Record<string, string> = {
-  '07030': 'Hoboken',
-  '07086': 'Weehawken',
-  '07302': 'Jersey City',
-  '07304': 'Jersey City',
-  '07305': 'Jersey City',
-  '07306': 'Jersey City',
-  '07307': 'Jersey City',
-  '07310': 'Jersey City',
-  '07311': 'Jersey City',
-  '10528': 'Harrison',
-  '10550': 'Mount Vernon',
-  '10552': 'Mount Vernon',
-  '10553': 'Mount Vernon',
-  '10583': 'Scarsdale',
-  '10601': 'White Plains',
-  '10603': 'White Plains',
-  '10604': 'White Plains',
-  '10605': 'White Plains',
-  '10606': 'White Plains',
-  '10701': 'Yonkers',
-  '10703': 'Yonkers',
-  '10704': 'Yonkers',
-  '10705': 'Yonkers',
-  '10708': 'Bronxville',
-  '10801': 'New Rochelle',
-};
 
 const NYC_BOUNDS = {
   minLat: 40.49,
@@ -135,19 +109,58 @@ export function isNycDeliveryZip(input: string): boolean {
   return findNycArea(Number(zip)) !== null;
 }
 
-/** Accept NY, N.Y., New York, and New York State. */
-export function isNewYorkState(state: string): boolean {
-  const normalized = String(state || '')
+function normalizeStateName(state: string): string {
+  return String(state || '')
     .trim()
     .toUpperCase()
     .replace(/\./g, '')
     .replace(/\s+/g, ' ');
+}
+
+/** Accept NJ, N.J., New Jersey. */
+export function isNewJerseyState(state: string): boolean {
+  const normalized = normalizeStateName(state);
+  return normalized === 'NJ' || normalized === 'NEW JERSEY';
+}
+
+/** Accept CT, C.T., Connecticut. */
+export function isConnecticutState(state: string): boolean {
+  const normalized = normalizeStateName(state);
+  return normalized === 'CT' || normalized === 'CONNECTICUT';
+}
+
+function stateMatchesZone(state: string, zoneState: MetroState): boolean {
+  if (zoneState === 'NY') return isNewYorkState(state);
+  if (zoneState === 'NJ') return isNewJerseyState(state);
+  return isConnecticutState(state);
+}
+
+export function isNextDayDeliveryZip(input: string): boolean {
+  const zip = normalizeZip(input);
+  return isValidZip(zip) && Boolean(NEXT_DAY_ZIPS[zip]);
+}
+
+/** NYC same-day, or next-day to any ZIP within 50 miles of Queens. */
+export function isDeliverableShippingAddress(state: string, zipCode: string): boolean {
+  const zip = normalizeZip(zipCode);
+  if (isNycDeliveryZip(zip)) return isNewYorkState(state);
+  const zone = NEXT_DAY_ZIPS[zip];
+  if (!zone) return false;
+  return stateMatchesZone(state, zone.state);
+}
+
+/** Accept NY, N.Y., New York, and New York State. */
+export function isNewYorkState(state: string): boolean {
+  const normalized = normalizeStateName(state);
   return normalized === 'NY' || normalized === 'NEW YORK' || normalized === 'NEW YORK STATE';
 }
 
 export function normalizeShippingState(state: string): string {
   const trimmed = String(state || '').trim();
-  return isNewYorkState(trimmed) ? 'NY' : trimmed;
+  if (isNewYorkState(trimmed)) return 'NY';
+  if (isNewJerseyState(trimmed)) return 'NJ';
+  if (isConnecticutState(trimmed)) return 'CT';
+  return trimmed;
 }
 
 export function lookupZip(input: string, now: Date = new Date()): ZipLookupResult | null {
@@ -182,10 +195,11 @@ export function lookupZip(input: string, now: Date = new Date()): ZipLookupResul
   if (nearby) {
     return {
       zip,
-      area: nearby,
+      area: nearby.area,
       speed: 'next-day',
-      headline: `Next-day delivery to ${nearby}`,
-      detail: 'We deliver to Jersey City, Hoboken, and select Westchester addresses the next business day.',
+      headline: `Next-day delivery to ${nearby.area}`,
+      detail:
+        'Next-day delivery to every ZIP within 50 miles of Queens. Same-day is NYC only (all 5 boroughs).',
       cutoffPassed: countdown.passed,
     };
   }
@@ -208,6 +222,9 @@ export function isCoordinateInNyc(lat: number, lng: number): boolean {
     lng <= NYC_BOUNDS.maxLng
   );
 }
+
+export const OUT_OF_AREA_DELIVERY_MESSAGE =
+  'We currently deliver same-day in NYC and next-day to every ZIP within 50 miles of Queens. Nationwide shipping opens in a few days.';
 
 export const LAST_ZIP_STORAGE_KEY = 'petshiwu_last_zip';
 export const LAST_ZIP_EVENT = 'petshiwu:zip';
