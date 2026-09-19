@@ -9,6 +9,11 @@ import StructuredData from '@/components/StructuredData';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { generateCollectionPageSchema } from '@/utils/seoUtils';
 import AdSense from '@/components/AdSense';
+import {
+  listStaticLearningBlogs,
+  listStaticLearningCategories,
+  mergeBlogLists,
+} from '@/data/staticLearningCatalog';
 
 const Learning = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -18,12 +23,19 @@ const Learning = () => {
   const petType = searchParams.get('petType') || '';
   const category = searchParams.get('category') || '';
 
+  const staticMatches = listStaticLearningBlogs({
+    petType: petType || undefined,
+    category: category || undefined,
+    search: searchQuery || undefined,
+  });
+  const pageSize = 12;
+
   // Fetch blogs
   const { data: blogsData, isLoading } = useQuery({
     queryKey: ['blogs', page, petType, category, searchQuery],
     queryFn: () => blogService.getBlogs({
       page,
-      limit: 12,
+      limit: 50,
       petType: petType || undefined,
       category: category || undefined,
       search: searchQuery || undefined
@@ -37,6 +49,12 @@ const Learning = () => {
     queryFn: () => blogService.getBlogCategories(petType || undefined),
     staleTime: 10 * 60 * 1000
   });
+
+  const mergedArticles = mergeBlogLists(staticMatches, blogsData?.data || []);
+  const totalArticles = mergedArticles.length;
+  const totalPages = Math.max(1, Math.ceil(totalArticles / pageSize));
+  const pageArticles = mergedArticles.slice((page - 1) * pageSize, page * pageSize);
+  const categoryOptions = categories?.length ? categories : listStaticLearningCategories(petType || undefined);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,18 +103,18 @@ const Learning = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <SEO
         title={`Learning Center${petTypeLabel}${categoryLabel} | Pet Care Tips & Guides`}
-        description="Expert pet care advice, tips, and guides for dogs, cats, fish, and more. Learn how to care for your pets with our comprehensive articles."
+        description="100+ trending pet care guides with photos: fresh dog food, cat litter, training, fleas, small-pet care, and more from Petshiwü. Free shipping over $49."
         url={seoUrl}
         noindex={hasFilteredParams}
       />
-      {!hasFilteredParams && blogsData?.data && blogsData.data.length > 0 && (
+      {!hasFilteredParams && mergedArticles.length > 0 && (
         <StructuredData
           type="collectionPage"
           data={generateCollectionPageSchema(
             'Petshiwu Learning Center',
             'Expert pet care advice, tips, and guides for dogs, cats, fish, and more.',
             '/learning',
-            blogsData.data.map((blog: Blog) => ({
+            mergedArticles.slice(0, 40).map((blog: Blog) => ({
               name: blog.title,
               url: `/learning/${blog.slug}`,
             }))
@@ -110,7 +128,7 @@ const Learning = () => {
             Learning Center
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Expert advice, tips, and guides to help you care for your pets
+            100+ photo guides on the topics pet parents search for most — food, training, health, and species care.
           </p>
         </div>
 
@@ -131,7 +149,7 @@ const Learning = () => {
             <Dropdown
               options={[
                 { value: '', label: 'All Categories' },
-                ...(categories || []).map((cat: { name: string; count: number }) => ({
+                ...(categoryOptions || []).map((cat: { name: string; count: number }) => ({
                   value: cat.name,
                   label: `${cat.name} (${cat.count})`
                 }))
@@ -144,19 +162,19 @@ const Learning = () => {
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <BookOpen size={18} />
               <span>
-                {blogsData?.pagination?.total || 0} {blogsData?.pagination?.total === 1 ? 'article' : 'articles'}
+                {totalArticles} {totalArticles === 1 ? 'article' : 'articles'}
               </span>
             </div>
           </div>
         </div>
 
         {/* Blog List */}
-        {isLoading ? (
+        {isLoading && pageArticles.length === 0 ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading articles...</p>
           </div>
-        ) : !blogsData?.data || blogsData.data.length === 0 ? (
+        ) : pageArticles.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <BookOpen className="mx-auto text-gray-400 mb-4" size={48} />
             <p className="text-lg font-medium text-gray-600">No articles found</p>
@@ -169,7 +187,7 @@ const Learning = () => {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {blogsData.data.map((blog: Blog) => (
+              {pageArticles.map((blog: Blog) => (
                 <Link
                   key={blog._id}
                   to={`/learning/${blog.slug}`}
@@ -229,7 +247,7 @@ const Learning = () => {
                               <AdSense slot="9876543218" format="auto" responsive={true} className="my-8" />
 
                               {/* Pagination */}
-            {blogsData.pagination && blogsData.pagination.pages > 1 && (
+            {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2">
                 <button
                   onClick={() => {
@@ -242,14 +260,14 @@ const Learning = () => {
                   Previous
                 </button>
                 <span className="px-4 py-2 text-sm text-gray-600">
-                  Page {page} of {blogsData.pagination.pages}
+                  Page {page} of {totalPages}
                 </span>
                 <button
                   onClick={() => {
-                    setPage(p => Math.min(blogsData.pagination.pages, p + 1));
+                    setPage(p => Math.min(totalPages, p + 1));
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  disabled={page === blogsData.pagination.pages}
+                  disabled={page === totalPages}
                   className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
                 >
                   Next

@@ -5,6 +5,13 @@ import logger from '../utils/logger';
 import { cache, cacheKeys } from '../utils/cache';
 import mongoose from 'mongoose';
 import { IBlogResponse, IBlogQuery, IBlogCreateData, IBlogUpdateData, IBlogDocument } from '../types/blog';
+import {
+  getStaticLearningBlog,
+  listStaticLearningBlogs,
+  mergeBlogLists,
+  staticLearningCategoriesByPetType,
+  staticLearningCategoryCounts,
+} from '../seo/staticLearningCatalog';
 
 // Helper function to normalize blog _id to string
 const normalizeBlogId = (blog: IBlogDocument | IBlog | IBlogResponse | Record<string, unknown>): IBlogResponse => {
@@ -117,7 +124,11 @@ export const getPublishedBlogs = async (req: Request, res: Response, next: NextF
     }
     
     if (search) {
-      query.$text = { $search: search as string };
+      query.$or = [
+        { title: { $regex: search as string, $options: 'i' } },
+        { content: { $regex: search as string, $options: 'i' } },
+        { excerpt: { $regex: search as string, $options: 'i' } },
+      ];
     }
 
     // Cache key
@@ -142,17 +153,22 @@ export const getPublishedBlogs = async (req: Request, res: Response, next: NextF
       });
     }
 
-    // Execute query
+    // Execute query. Fetch matching CMS posts, then merge the static
+    // education catalog so /learning lists 100+ indexable guides even
+    // when Mongo has no published Blog documents.
     const blogs = await Blog.find(query)
       .populate('author', 'name email')
       .sort({ publishedAt: -1, createdAt: -1 })
-      .skip(skip)
-      .limit(limitNum)
       .lean();
 
-    const total = await Blog.countDocuments(query);
-
-    const normalizedBlogs = normalizeBlogs(blogs);
+    const staticBlogs = listStaticLearningBlogs({
+      petType: typeof petType === 'string' ? petType : undefined,
+      category: typeof category === 'string' ? category : undefined,
+      search: typeof search === 'string' ? search : undefined,
+    });
+    const merged = mergeBlogLists(staticBlogs, normalizeBlogs(blogs));
+    const total = merged.length;
+    const normalizedBlogs = merged.slice(skip, skip + limitNum);
 
     const result = {
       data: normalizedBlogs,
@@ -160,7 +176,7 @@ export const getPublishedBlogs = async (req: Request, res: Response, next: NextF
         page: pageNum,
         limit: limitNum,
         total,
-        pages: Math.ceil(total / limitNum)
+        pages: Math.ceil(total / limitNum) || 1
       }
     };
 
@@ -181,6 +197,14 @@ export const getPublishedBlogs = async (req: Request, res: Response, next: NextF
 export const getBlogBySlug = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { slug } = req.params;
+
+    const staticBlog = slug ? getStaticLearningBlog(slug) : null;
+    if (staticBlog) {
+      return res.json({
+        success: true,
+        data: staticBlog
+      });
+    }
 
     const cacheKey = `blog:${slug}`;
     const cached = await cache.get<IBlogResponse>(cacheKey);
@@ -502,7 +526,7 @@ export const getBlogCategoriesByPetType = async (req: Request, res: Response, ne
     }
 
     const petTypesInBlogs = await Blog.distinct('petType', { isPublished: true });
-    const result = await Promise.all(
+    const cmsResult = await Promise.all(
       petTypesInBlogs.map(async (petType) => {
         const categories = await Blog.distinct('category', { isPublished: true, petType });
         const categoriesWithCounts = await Promise.all(
@@ -514,6 +538,23 @@ export const getBlogCategoriesByPetType = async (req: Request, res: Response, ne
         return { petType, categories: categoriesWithCounts };
       })
     );
+    const staticResult = staticLearningCategoriesByPetType();
+    const byPet = new Map<string, Map<string, number>>();
+    [...cmsResult, ...staticResult].forEach((group) => {
+      const petMap = byPet.get(group.petType) || new Map<string, number>();
+      group.categories.forEach(({ name, count }) => {
+        petMap.set(name, (petMap.get(name) || 0) + count);
+      });
+      byPet.set(group.petType, petMap);
+    });
+    const result = [...byPet.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([petType, categories]) => ({
+        petType,
+        categories: [...categories.entries()]
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => a.name.localeCompare(b.name)),
+      }));
 
     // Cache for 10 minutes
     await cache.set(cacheKey, result, 600);
@@ -549,12 +590,22 @@ export const getBlogCategories = async (req: Request, res: Response, next: NextF
     }
 
     const categories = await Blog.distinct('category', query);
-    const categoriesWithCounts = await Promise.all(
+    const cmsCounts = await Promise.all(
       categories.map(async (category) => {
         const count = await Blog.countDocuments({ ...query, category });
         return { name: category, count };
       })
     );
+    const staticCounts = staticLearningCategoryCounts(
+      typeof petType === 'string' ? petType : undefined
+    );
+    const merged = new Map<string, number>();
+    [...cmsCounts, ...staticCounts].forEach(({ name, count }) => {
+      merged.set(name, (merged.get(name) || 0) + count);
+    });
+    const categoriesWithCounts = [...merged.entries()]
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => a.name.localeCompare(b.name));
 
     // Cache for 10 minutes
     await cache.set(cacheKey, categoriesWithCounts, 600);

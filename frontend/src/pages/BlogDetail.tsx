@@ -10,17 +10,20 @@ import StructuredData from '@/components/StructuredData';
 import AdSense from '@/components/AdSense';
 import StickySidebarAd from '@/components/StickySidebarAd';
 import { generateBreadcrumbSchema, generateFAQSchema } from '@/utils/seoUtils';
+import { getStaticLearningBlog } from '@/data/staticLearningCatalog';
 
 const BlogDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const staticBlog = slug ? getStaticLearningBlog(slug) : null;
 
-  const { data: blog, isLoading, error } = useQuery({
+  const { data: cmsBlog, isLoading, error } = useQuery({
     queryKey: ['blog', slug],
     queryFn: () => blogService.getBlog(slug!),
-    enabled: !!slug,
+    enabled: !!slug && !staticBlog,
     staleTime: 5 * 60 * 1000
   });
+  const blog = staticBlog || cmsBlog;
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -55,7 +58,7 @@ const BlogDetail = () => {
     };
   }, [blog?.content]);
 
-  if (isLoading) {
+  if (!blog && isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -187,14 +190,21 @@ const BlogDetail = () => {
             {/* Featured Image */}
             {blog.featuredImage && (
               <div className="mb-10">
-                <img
-                  src={blog.featuredImage}
-                  alt={blog.title}
-                  className="w-full h-auto object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
+                <picture>
+                  {blog.featuredImage.endsWith('.jpg') && (
+                    <source srcSet={blog.featuredImage.replace(/\.jpg$/, '.webp')} type="image/webp" />
+                  )}
+                  <img
+                    src={blog.featuredImage}
+                    alt={blog.title}
+                    className="w-full h-auto object-cover rounded-lg"
+                    width={1200}
+                    height={675}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                </picture>
               </div>
             )}
 

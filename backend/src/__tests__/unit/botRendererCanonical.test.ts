@@ -387,7 +387,16 @@ describe('education hub and static learning HTML', () => {
     expect(html).toContain('https://www.petshiwu.com/learning/best-dog-food-sensitive-stomach');
     expect(html).toContain('Transition slowly over 7');
     expect(html).toContain('"@type":"Article"');
+    expect(html).toContain('/blog/kibble-bowl.jpg');
     expect(html).not.toContain('Read Full Article');
+  });
+
+  it('serves trending photo guides as crawlable articles', () => {
+    const html = buildStaticLearningHtml(ARTICLE_TEMPLATE, 'best-fresh-dog-food-2026');
+    expect(html).toContain('https://www.petshiwu.com/learning/best-fresh-dog-food-2026');
+    expect(html).toContain('/blog/fresh-dog-food');
+    expect(html).toContain('"@type":"Article"');
+    expect(html).toContain('Frequently asked questions');
   });
 });
 

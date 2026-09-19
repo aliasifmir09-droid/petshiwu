@@ -8,7 +8,7 @@ import PetType from '../models/PetType';
 import logger from '../utils/logger';
 import { canonicalPetSlug, classifyRoute, INDEXABLE_LANDING_PATHS } from '../seo/routeClassifier';
 import { BLOG_REDIRECTS } from '../seo/blogRedirects';
-import { STATIC_LEARNING_PATHS } from '../seo/staticLearningPages';
+import { STATIC_LEARNING_PAGES, STATIC_LEARNING_PATHS } from '../seo/staticLearningPages';
 
 /**
  * Escape XML special characters
@@ -352,6 +352,17 @@ export const generateSitemap = async (req: Request, res: Response) => {
       xml += `    <lastmod>${currentDate}</lastmod>\n`;
       xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
       xml += `    <priority>${page.priority}</priority>\n`;
+      const learningSlug = page.path.startsWith('/learning/') ? page.path.slice('/learning/'.length) : '';
+      const learningPage = learningSlug ? STATIC_LEARNING_PAGES[learningSlug] : undefined;
+      if (learningPage?.featuredImage) {
+        const imagePath = learningPage.featuredImage.startsWith('http')
+          ? learningPage.featuredImage
+          : `${baseUrl}${learningPage.featuredImage}`;
+        xml += '    <image:image>\n';
+        xml += `      <image:loc>${escapeXml(imagePath)}</image:loc>\n`;
+        xml += `      <image:title>${escapeXml(learningPage.imageAlt || learningPage.title)}</image:title>\n`;
+        xml += '    </image:image>\n';
+      }
       xml += '  </url>\n';
     });
 
