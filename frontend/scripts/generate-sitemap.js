@@ -32,6 +32,7 @@ const INDEXABLE_ROOTS = new Set([
   'vendors', 'partners', 'innovation', 'tech', 'symptom-checker', 'neural', 'scan',
   'dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet',
   'small-animal',
+  'brand',
 ]);
 
 function decodeXml(value) {

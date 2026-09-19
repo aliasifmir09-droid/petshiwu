@@ -9,6 +9,7 @@ import logger from '../utils/logger';
 import { canonicalPetSlug, classifyRoute, INDEXABLE_LANDING_PATHS } from '../seo/routeClassifier';
 import { BLOG_REDIRECTS } from '../seo/blogRedirects';
 import { STATIC_LEARNING_PAGES, STATIC_LEARNING_PATHS } from '../seo/staticLearningPages';
+import { SHOP_BRAND_PATHS } from '../seo/shopBrands';
 
 /**
  * Escape XML special characters
@@ -302,6 +303,11 @@ export const generateSitemap = async (req: Request, res: Response) => {
       { path: '/terms', priority: '0.3', changefreq: 'yearly' },
       { path: '/shipping', priority: '0.5', changefreq: 'monthly' },
       { path: '/delivery-zips', priority: '0.7', changefreq: 'weekly' },
+      ...SHOP_BRAND_PATHS.map((path) => ({
+        path,
+        priority: path === '/brand' ? '0.8' : '0.85',
+        changefreq: 'weekly',
+      })),
       { path: '/accessibility', priority: '0.3', changefreq: 'yearly' },
       { path: '/return-policy', priority: '0.4', changefreq: 'monthly' },
       // SEO landing pages — existing

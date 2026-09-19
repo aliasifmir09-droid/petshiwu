@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { productService } from '@/services/products';
 import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -21,23 +21,12 @@ import { ORDERING_PAUSED, ORDERING_PAUSED_HEADLINE } from '@/config/ordering';
 import { SOCIAL_PROFILES } from '@/config/social';
 import { CATALOG_BRANDS_FAQ, CATALOG_BRANDS_SHORT, CATALOG_PRODUCT_COUNT_LABEL } from '@/config/catalog';
 import { NEWSLETTER_CODE, NEWSLETTER_CODE_COPY } from '@/config/constants';
+import { HOME_STRIP_BRANDS } from '@/data/shopBrands';
 import { ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import { generateProductUrl } from '@/utils/productUrl';
 import { useAuthStore } from '@/stores/authStore';
-
-const BRANDS: { name: string; query: string; logo: string; dark?: boolean }[] = [
-  { name: 'Purina',              query: 'Purina',              logo: '/brands/purina.svg' },
-  { name: 'Blue Buffalo',        query: 'Blue Buffalo',        logo: '/brands/bluebuffalo.png' },
-  { name: 'Royal Canin',         query: 'Royal Canin',         logo: '/brands/royalcanin.svg' },
-  { name: "Hill's Science Diet", query: "Hill's Science Diet", logo: '/brands/hills.png' },
-  { name: 'Wellness',            query: 'Wellness',            logo: '/brands/wellness.png' },
-  { name: 'Nutro',               query: 'NUTRO',               logo: '/brands/nutro.png' },
-  { name: 'Iams',                query: 'Iams',                logo: '/brands/iams.png' },
-  { name: 'Pedigree',            query: 'Pedigree',            logo: '/brands/pedigree.png', dark: true },
-  { name: "Nature's Recipe",     query: "Nature's Recipe",     logo: '/brands/natures.svg' },
-];
 
 const TodaysDeals = () => {
   const { data, isLoading } = useQuery({
@@ -62,7 +51,7 @@ const TodaysDeals = () => {
             </p>
           </div>
           <Link
-            to="/products?brand=Hill%27s+Science+Diet"
+            to="/brand/hills-science-diet"
             className="text-sm font-semibold text-[#1E3A8A] hover:underline"
           >
             Shop all Hill's
@@ -87,7 +76,6 @@ const TodaysDeals = () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const Home = () => {
-  const navigate = useNavigate();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const authLoading = useAuthStore((state) => state.isLoading);
   const { data: featuredProducts, isLoading } = useQuery({
@@ -315,7 +303,7 @@ const Home = () => {
               <p className="text-gray-500 text-sm mt-1">Hill’s, Royal Canin, Purina, Blue Buffalo, and more</p>
             </div>
             <Link
-              to="/products"
+              to="/brand"
               className="hidden md:flex items-center gap-1 text-[#1E3A8A] hover:text-[#163074] font-semibold text-sm border border-[#1E3A8A]/20 rounded-lg px-4 py-1.5 hover:bg-blue-50 transition-colors"
             >
               All brands →
@@ -324,10 +312,10 @@ const Home = () => {
 
           {/* Scrollable brand strip */}
           <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide snap-x snap-mandatory">
-            {BRANDS.map((brand, i) => (
-              <button
-                key={i}
-                onClick={() => navigate(`/products?brand=${encodeURIComponent(brand.query)}`)}
+            {HOME_STRIP_BRANDS.map((brand) => (
+              <Link
+                key={brand.slug}
+                to={`/brand/${brand.slug}`}
                 className="group flex-none snap-start focus:outline-none"
                 aria-label={`Shop ${brand.name} products`}
               >
@@ -336,31 +324,37 @@ const Home = () => {
                     brand.dark ? 'bg-zinc-900' : 'bg-white'
                   }`}
                 >
-                  <img
-                    src={brand.logo}
-                    alt={`${brand.name} official logo`}
-                    className="max-h-[4.5rem] max-w-[7.5rem] w-auto h-auto object-contain p-2 group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      target.style.display = 'none';
-                      const parent = target.parentElement;
-                      if (parent) {
-                        parent.style.background = '#f3f4f6';
-                        parent.innerHTML = `<span style="font-weight:800;font-size:13px;text-align:center;color:#374151;padding:8px;line-height:1.3">${brand.name}</span>`;
-                      }
-                    }}
-                  />
+                  {brand.logo ? (
+                    <img
+                      src={brand.logo}
+                      alt={`${brand.name} official logo`}
+                      className="max-h-[4.5rem] max-w-[7.5rem] w-auto h-auto object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.style.background = '#f3f4f6';
+                          parent.innerHTML = `<span style="font-weight:800;font-size:13px;text-align:center;color:#374151;padding:8px;line-height:1.3">${brand.name}</span>`;
+                        }
+                      }}
+                    />
+                  ) : (
+                    <span className="font-extrabold text-[13px] text-center text-[#374151] px-2 leading-tight">
+                      {brand.name}
+                    </span>
+                  )}
                 </div>
                 <p className="text-center text-xs text-gray-500 mt-2 font-semibold group-hover:text-[#1E3A8A] transition-colors truncate w-36">
                   {brand.name}
                 </p>
-              </button>
+              </Link>
             ))}
           </div>
 
           <div className="text-center mt-6 md:hidden">
-            <Link to="/products" className="text-[#1E3A8A] font-semibold text-sm">
+            <Link to="/brand" className="text-[#1E3A8A] font-semibold text-sm">
               View all brands →
             </Link>
           </div>

@@ -7,6 +7,7 @@ import {
   buildProductHtml,
   buildReturnPolicyHtml,
   buildSeoLandingHtmlFromProducts,
+  buildBrandCollectionHtml,
   buildStaticLearningHtml,
   extractFaqPairs,
   landingTaxonomyForPath,
@@ -256,6 +257,42 @@ describe('SEO landing first-wave HTML', () => {
     expect(html).toContain('hills-science-diet-adult-dry-dog-food');
     expect(html).toContain('/cat-food-delivery-nyc');
     expect(html).toContain('/pet-supplies-queens-ny');
+  });
+});
+
+describe('shoppable brand collection HTML', () => {
+  const template = `<!DOCTYPE html><html><head>
+<title>Petshiwu</title>
+<meta name="description" content="old" />
+</head><body><h1>Old</h1><div id="root"></div></body></html>`;
+
+  const products = [
+    {
+      name: 'Merrick Grain Free Real Texas Beef Dry Dog Food',
+      slug: 'merrick-grain-free-real-texas-beef-dry-dog-food',
+      brand: 'Merrick',
+      basePrice: 64.99,
+      petType: 'dog',
+      category: { slug: 'dry-food', name: 'Dry Food' },
+    },
+  ];
+
+  it('gives Merrick its own title, H1, and product links', () => {
+    const html = buildBrandCollectionHtml(template, '/brand/merrick', products);
+    expect(html).toContain('<title>Merrick | In stock · free ship $49+ | Petshiwu</title>');
+    expect(html).toContain('<h1>Shop Merrick</h1>');
+    expect(html).toContain('href="https://www.petshiwu.com/dog/dry-food/merrick-grain-free-real-texas-beef-dry-dog-food"');
+    expect(html).toContain('Nationwide shipping soon');
+    expect(html).not.toMatch(/do not claim/i);
+  });
+
+  it('lists every allowlisted brand on /brand', () => {
+    const html = buildBrandCollectionHtml(template, '/brand');
+    expect(html).toContain('<title>Shop Pet Food Brands | In stock · free ship $49+ | Petshiwu</title>');
+    expect(html).toContain('<h1>Shop pet food brands</h1>');
+    expect(html).toContain('href="https://www.petshiwu.com/brand/merrick"');
+    expect(html).toContain('href="https://www.petshiwu.com/brand/hills-science-diet"');
+    expect(html).toContain('href="https://www.petshiwu.com/brand/purina-cat-chow"');
   });
 });
 

@@ -99,6 +99,7 @@ const CookiePolicy = lazyWithRetry(() => import('./pages/CookiePolicy'));
 const Terms = lazyWithRetry(() => import('./pages/Terms'));
 const ShippingPolicy = lazyWithRetry(() => import('./pages/ShippingPolicy'));
 const NextDayDeliveryZips = lazyWithRetry(() => import('./pages/NextDayDeliveryZips'));
+const Brand = lazyWithRetry(() => import('./pages/Brand'));
 const Accessibility = lazyWithRetry(() => import('./pages/Accessibility'));
 const Unsubscribe = lazyWithRetry(() => import('./pages/Unsubscribe'));
 
@@ -354,6 +355,8 @@ function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/products" element={<Products />} />
                   <Route path="/products/:slug" element={<ProductDetail />} />
+                  <Route path="/brand" element={<Brand />} />
+                  <Route path="/brand/:slug" element={<Brand />} />
                   <Route path="/:petType/:categorySlug" element={<Category />} />
                   <Route path="/category/:slug" element={<Category />} />
                   <Route path="/blog" element={<Navigate to="/learning" replace />} />

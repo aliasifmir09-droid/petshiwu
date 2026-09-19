@@ -1,6 +1,7 @@
 import { getNeighborhoodRoute, neighborhoodLandingPath } from './neighborhoodRegistry';
 import { redirectedBlogHubPath } from './blogRedirects';
 import { isStaticLearningSlug } from './staticLearningPages';
+import { isShopBrandSlug, SHOP_BRAND_PATHS } from './shopBrands';
 
 export type RouteIndexingStatus = 'indexable' | 'noindex' | 'notFound' | 'redirect';
 
@@ -52,7 +53,7 @@ const INDEXABLE_ROOT_PATHS = new Set([
   '/privacy', '/terms', '/accessibility', '/cookie-policy',
   '/fish-tanks', '/press', '/investors', '/sell-with-us', '/vendors', '/partners',
   '/innovation', '/our-promise', '/for-pet-parents', '/from-queens',
-  '/editorial-standards', '/delivery-zips',
+  '/editorial-standards', '/delivery-zips', '/brand',
   ...INDEXABLE_LANDING_PATHS,
 ]);
 
@@ -75,6 +76,8 @@ export const CRAWLABLE_STOREFRONT_PATHS: string[] = [
   '/from-queens',
   '/editorial-standards',
   '/delivery-zips',
+  '/brand',
+  ...SHOP_BRAND_PATHS.filter((pagePath) => pagePath !== '/brand'),
   '/learning/next-day-pet-delivery-within-50-miles-of-queens',
   '/faq',
   '/contact',
@@ -178,6 +181,17 @@ export const classifyRoute = (rawPath: string): RouteClassification => {
 
   if (INDEXABLE_LANDING_PATHS.has(canonicalPath)) {
     return { status: 'indexable', indexable: true, canonicalPath, routeType: 'landing' };
+  }
+
+  if (segments[0] === 'brand' && segments.length === 1) {
+    return { status: 'indexable', indexable: true, canonicalPath, routeType: 'brand-index' };
+  }
+
+  if (segments[0] === 'brand') {
+    if (segments.length === 2 && isShopBrandSlug(segments[1])) {
+      return { status: 'indexable', indexable: true, canonicalPath, routeType: 'brand' };
+    }
+    return { status: 'notFound', indexable: false, canonicalPath, routeType: 'unknown-brand' };
   }
 
   if (INDEXABLE_ROOT_PATHS.has(canonicalPath)) {
