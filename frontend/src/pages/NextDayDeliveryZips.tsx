@@ -70,8 +70,7 @@ const NextDayDeliveryZips = () => {
         <p className="text-lg text-gray-700 mb-6 max-w-3xl">
           We accept orders for next-day delivery to {NEXT_DAY_ZIP_COUNT} ZIP codes around Queens.
           Same-day stays New York City — all five boroughs — when you order by {TONIGHT.weekdayCutoff} weekdays
-          or {TONIGHT.weekendCutoff} weekends. Nationwide shipping opens in a few days. We do not claim
-          same-day nationwide.{' '}
+          or {TONIGHT.weekendCutoff} weekends. Nationwide shipping soon.{' '}
           <Link
             to="/learning/next-day-pet-delivery-within-50-miles-of-queens"
             className="text-[#1E3A8A] font-semibold hover:underline"

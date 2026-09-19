@@ -19,7 +19,8 @@ describe('frontend static learning catalog', () => {
     const blog = getStaticLearningBlog('next-day-pet-delivery-within-50-miles-of-queens');
     expect(blog?.title).toMatch(/50 Miles of Queens/i);
     expect(blog?.content).toContain('/delivery-zips');
-    expect(blog?.content).toMatch(/do not claim same-day nationwide/i);
+    expect(blog?.content).toMatch(/Nationwide shipping/i);
+    expect(blog?.content).not.toMatch(/do not claim/i);
     expect(blog?.content).toContain('11801');
   });
 

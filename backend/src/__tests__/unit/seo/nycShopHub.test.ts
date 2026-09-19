@@ -18,8 +18,9 @@ describe('nycShopHub first-wave extras', () => {
     expect(html).toContain('Check your ZIP');
     expect(html).toContain('Petshiwü');
     expect(html).toContain('All 5 boroughs');
-    expect(html).toMatch(/never same-day outside the five boroughs/i);
+    expect(html).toMatch(/Nationwide shipping soon/i);
     expect(html).not.toMatch(/same-day nationwide/i);
+    expect(html).not.toMatch(/do not claim/i);
   });
 
   it('cross-links the other NYC hubs and keeps nationwide off same-day', () => {

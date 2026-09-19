@@ -110,12 +110,12 @@ const Home = () => {
   return (
     <div className="relative bg-white">
       <SEO
-        title="Petshiwu — Pet Food, Treats & Supplies"
+        title="Petshiwu | Pet Food & Supplies – Free Shipping $49+, No Autoship"
         description={
           ORDERING_PAUSED
             ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products from ${CATALOG_BRANDS_SHORT}. ${ORDERING_PAUSED_HEADLINE}. Free shipping over $49. No autoship.`
             : areOrdersOpen()
-            ? `${CATALOG_PRODUCT_COUNT_LABEL} pet products from ${CATALOG_BRANDS_SHORT}. Free shipping over $49. No autoship. Currently delivering in NYC. Nationwide shipping opens in a few days.`
+            ? `${CATALOG_PRODUCT_COUNT_LABEL} products from Hill's, Purina, Blue Buffalo, Royal Canin. Same-day NYC. Free shipping over $49. No autoship. Nationwide shipping soon.`
             : `${CATALOG_PRODUCT_COUNT_LABEL} pet products from ${CATALOG_BRANDS_SHORT}. We start taking orders ${ORDERS_OPEN_LABEL}. Free shipping over $49.`
         }
       />
@@ -145,7 +145,7 @@ const Home = () => {
               name: 'How much does Petshiwu shipping cost?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Shipping is free on orders over $49. Orders under $49 have a flat $6 shipping fee. Same-day is NYC only. Next-day covers ZIPs within 50 miles of Queens. Nationwide shipping opens in a few days.'
+                text: 'Shipping is free on orders over $49. Orders under $49 have a flat $6 shipping fee. Same-day in NYC. Nationwide shipping soon.'
               }
             },
             {
@@ -161,7 +161,7 @@ const Home = () => {
               name: 'Where does Petshiwu deliver right now?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'We currently deliver same-day in New York City — all five boroughs — when you order by 3 PM EST weekdays (1 PM EST weekends). Next-day covers every ZIP within 50 miles of Queens. Nationwide shipping opens in a few days. We do not claim same-day nationwide. The Jackson Heights address is warehouse and office, not a walk-in shop.'
+                text: 'Same-day in New York City. Nationwide shipping soon. The Jackson Heights address is warehouse and office, not a walk-in shop.'
               }
             },
             {

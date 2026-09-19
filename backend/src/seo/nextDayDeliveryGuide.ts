@@ -3,7 +3,7 @@ export const NEXT_DAY_DELIVERY_GUIDE = {
   slug: 'next-day-pet-delivery-within-50-miles-of-queens',
   title: 'Next-Day Pet Delivery Within 50 Miles of Queens: Check Your ZIP',
   description:
-    'Petshiwü next-day delivery covers 601 ZIP codes within 50 miles of Queens. Same-day stays New York City — all five boroughs. Read how to check your ZIP. Nationwide shipping opens in a few days. We do not claim same-day nationwide.',
+    'Petshiwü next-day delivery covers 601 ZIP codes within 50 miles of Queens. Same-day stays New York City — all five boroughs. Read how to check your ZIP. Nationwide shipping soon.',
   publishedAt: '2026-09-19T12:00:00.000Z',
   featuredImage: '/blog/kibble-bowl.jpg',
   featuredImageWebp: '/blog/kibble-bowl.webp',
@@ -31,7 +31,7 @@ export const NEXT_DAY_DELIVERY_GUIDE = {
       <h2>Same-day, next-day, and nationwide-soon</h2>
       <p><strong>Same-day</strong> is New York City only — Manhattan, Brooklyn, Queens, the Bronx, and Staten Island — when you order by 3 PM ET weekdays or 1 PM ET weekends. Queens Hillside (ZIP 11432) is inside that same-day map.</p>
       <p><strong>Next-day</strong> is every ZIP within 50 miles of the Queens warehouse. That is 601 ZIP codes across New York, New Jersey, and Connecticut. Hicksville 11801, Bay Shore 11706, Hoboken 07030, and Greenwich 06830 are on that list.</p>
-      <p><strong>Nationwide shipping</strong> opens in a few days for farther U.S. addresses. We do not claim same-day nationwide.</p>
+      <p><strong>Nationwide shipping</strong> soon for farther U.S. addresses.</p>
       <h2>How to check your ZIP</h2>
       <p>Open the <a href="/delivery-zips">next-day ZIP directory</a>. Type your city or five-digit ZIP. If it is on the list, checkout will accept that address when the state matches the ZIP (NY, NJ, or CT). If you are in the five boroughs, use the ZIP checker on that page for same-day instead of hunting the next-day grid.</p>
       <p>The directory is one crawlable page. We did not publish a thin page per ZIP.</p>

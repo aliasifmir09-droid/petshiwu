@@ -21,7 +21,8 @@ describe('next-day ZIP directory for Google', () => {
     expect(html).toContain('Greenwich');
     expect(html).toContain('11706');
     expect(html).toMatch(/50 miles of Queens/);
-    expect(html).toMatch(/We do not claim same-day nationwide/);
+    expect(html).toMatch(/Nationwide shipping soon/);
+    expect(html).not.toMatch(/do not claim/i);
     expect(html).not.toContain('11432');
   });
 

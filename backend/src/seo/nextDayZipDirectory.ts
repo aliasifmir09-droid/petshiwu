@@ -44,7 +44,7 @@ export function buildNextDayZipDirectoryHtml(): string {
 
   return `<div>
 <h1>Next-day delivery ZIPs within ${NEXT_DAY_RADIUS_MILES} miles of Queens</h1>
-<p>Petshiwü accepts orders for next-day delivery to ${NEXT_DAY_ZIP_COUNT} ZIP codes within ${NEXT_DAY_RADIUS_MILES} miles of our Jackson Heights, Queens warehouse. Same-day is New York City only — all five boroughs. Nationwide shipping opens in a few days. We do not claim same-day nationwide.</p>
+<p>Petshiwü accepts orders for next-day delivery to ${NEXT_DAY_ZIP_COUNT} ZIP codes within ${NEXT_DAY_RADIUS_MILES} miles of our Jackson Heights, Queens warehouse. Same-day is New York City — all five boroughs. Nationwide shipping soon.</p>
 <p><a href="https://www.petshiwu.com/shipping">Shipping information</a> · <a href="https://www.petshiwu.com/products">Shop in-stock</a></p>
 ${sections}
 </div>`;

@@ -249,8 +249,9 @@ describe('SEO landing first-wave HTML', () => {
   it('adds ZIP, compare, and nationwide copy without dropping products', () => {
     expect(html).toContain('Check your ZIP — same-day NYC or nationwide soon');
     expect(html).toContain('Why NYC shoppers pick Petshiwü first');
-    expect(html).toContain('Nationwide next — not same-day outside NYC');
-    expect(html).toContain('Same-day is NYC only');
+    expect(html).toContain('Nationwide shipping soon');
+    expect(html).not.toContain('not same-day outside NYC');
+    expect(html).not.toMatch(/do not claim/i);
     expect(html).toContain('<h2>Recommended Products</h2>');
     expect(html).toContain('hills-science-diet-adult-dry-dog-food');
     expect(html).toContain('/cat-food-delivery-nyc');
@@ -292,6 +293,8 @@ describe('product offer price in first-wave HTML', () => {
     expect(html).toContain('product:price:amount" content="14.39"');
     expect(html).toContain('"price":"14.39"');
     expect(html).toContain('"@type":"Offer"');
+    expect(html).toContain('In stock · free ship $49+');
+    expect(html).not.toContain('... | Petshiwu');
   });
 });
 
