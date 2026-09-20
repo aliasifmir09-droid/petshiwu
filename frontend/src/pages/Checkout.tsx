@@ -644,7 +644,7 @@ const Checkout = () => {
 
     if (paymentMethod === 'credit_card' && !usingSavedCard) {
       document.getElementById('card-payment')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      showToast('Enter your card below. PayPal charges it the same way as before — no popup over the header.', 'info');
+      showToast('Enter your card below to pay.', 'info');
       return;
     }
 
@@ -654,7 +654,7 @@ const Checkout = () => {
     }
     if (paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay') {
       document.getElementById('paypal-payment')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      showToast('Click Apple Pay, Google Pay, or a PayPal button to complete your payment.', 'info');
+      showToast('Choose Apple Pay, Google Pay, card, or PayPal to complete your payment.', 'info');
       return;
     }
 
@@ -1109,7 +1109,7 @@ const Checkout = () => {
                 title="Payment"
                 subtitle={ORDERING_PAUSED
                   ? 'Payment stays locked until we start accepting orders. Your bag is saved.'
-                  : 'Apple Pay, Google Pay, PayPal, or card — official buttons, the way a flagship store would do it.'}
+                  : 'Apple Pay, Google Pay, card, or PayPal.'}
               >
                 {ORDERING_PAUSED ? (
                   <div className="rounded-2xl bg-[radial-gradient(circle_at_top_left,_#fff8e8,_#ffffff_55%)] p-5 ring-1 ring-amber-200/80">
@@ -1167,17 +1167,27 @@ const Checkout = () => {
                   </div>
                 )}
 
-                {!ORDERING_PAUSED && paypalClientId && !usingSavedCard ? (
+                {usingSavedCard && selectedSaved ? (
+                  <div className="mb-4 rounded-2xl border border-stone-200 bg-white p-4">
+                    <p className="font-semibold text-stone-900">Paying with {savedCardLabel(selectedSaved)}</p>
+                    <p className="text-sm text-stone-600 mt-1">
+                      We’ll use this saved card. You still confirm on this page — we never charge in the background.
+                    </p>
+                  </div>
+                ) : null}
+
+                {!ORDERING_PAUSED && paypalClientId ? (
                   <div id="paypal-payment" className="paypal-wallet-slot relative overflow-visible">
                     <ErrorBoundary
                       fallback={
                         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
-                          <p className="font-semibold">PayPal could not load on this browser.</p>
-                          <p className="mt-1">Reload the page, then try Apple Pay, Google Pay, PayPal, or card again.</p>
+                          <p className="font-semibold">Payment could not load on this browser.</p>
+                          <p className="mt-1">Reload the page, then try Apple Pay, Google Pay, card, or PayPal again.</p>
                         </div>
                       }
                     >
                       <CheckoutBrandedPayments
+                        hideCardFields={usingSavedCard}
                         items={items.map((item: any) => ({
                           product: normalizeId(item.product._id) || String(item.product._id),
                           quantity: item.quantity,
@@ -1218,15 +1228,6 @@ const Checkout = () => {
                   <div className="p-4 border-2 border-gray-200 rounded-lg bg-gray-50">
                     <p className="font-semibold text-gray-700">PayPal is temporarily unavailable</p>
                     <p className="text-sm text-gray-500 mt-1">Reload the page, or try again in a moment.</p>
-                  </div>
-                ) : null}
-
-                {usingSavedCard && selectedSaved ? (
-                  <div className="mt-4 rounded-2xl border-2 border-[#1E3A8A] bg-blue-50 p-4">
-                    <p className="font-semibold text-stone-900">Paying with {savedCardLabel(selectedSaved)}</p>
-                    <p className="text-sm text-stone-600 mt-1">
-                      We’ll use this saved card. You still confirm on this page — we never charge in the background.
-                    </p>
                   </div>
                 ) : null}
 
@@ -1382,7 +1383,7 @@ const Checkout = () => {
                     : usingSavedCard && selectedSaved
                       ? (createOrderMutation.isPending || isProcessingPayment ? 'Paying…' : `Pay with ${savedCardLabel(selectedSaved)}`)
                     : paymentMethod === 'credit_card' || paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay'
-                      ? 'Pay with Apple Pay, Google Pay, PayPal, or card below'
+                      ? 'Pay with Apple Pay, Google Pay, card, or PayPal below'
                     : isProcessingPayment ? 'Initializing Payment...' : createOrderMutation.isPending ? 'Processing...' : 'Place Order'}
                 </button>
                 <div className="mt-5 rounded-2xl bg-[#FBF9F5] p-4 ring-1 ring-stone-200">

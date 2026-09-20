@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  PayPalCardFieldsForm,
   PayPalCardFieldsProvider,
+  PayPalCVVField,
+  PayPalExpiryField,
+  PayPalNameField,
+  PayPalNumberField,
   PayPalScriptProvider,
   usePayPalCardFields,
   usePayPalScriptReducer
 } from '@paypal/react-paypal-js';
-import { AlertCircle, CreditCard, Loader2, Lock } from 'lucide-react';
+import { AlertCircle, Loader2, Lock } from 'lucide-react';
 import { paypalClientId, paypalSdkEnvironment } from '@/config/paypal';
 import { orderService } from '@/services/orders';
-import type { ShippingAddress, Order } from '@/types';
 
 interface PayPalItemInput {
   product: string;
@@ -31,40 +33,84 @@ interface PayPalCardFieldsProps {
   onSwitchToWallet?: () => void;
   currency?: string;
   skipProvider?: boolean;
+  total?: number;
+  onFieldsReady?: () => void;
 }
 
 interface CardFieldsContentProps extends PayPalCardFieldsProps {
   error: string | null;
   isProcessing: boolean;
-  isEligible: boolean | null;
   onSetError: (error: string | null) => void;
   onSetProcessing: (processing: boolean) => void;
-  hideHeader?: boolean;
 }
+
+const CARD_FIELD_STYLE = {
+  input: {
+    'font-size': '16px',
+    'font-family': 'Nunito, ui-sans-serif, system-ui, sans-serif',
+    'font-weight': '600',
+    color: '#1c1917',
+    padding: '0 14px',
+  },
+};
+
+const fieldClass = 'petshiwu-card-field h-12 w-full overflow-hidden rounded-xl border border-stone-200 bg-white';
+
+export const CardFieldSkeletons = ({ total }: { total?: number }) => (
+  <div className="space-y-3" aria-hidden="true">
+    <label className="block">
+      <span className="mb-1.5 block text-sm font-semibold text-stone-700">Card number</span>
+      <div className={`${fieldClass} flex items-center px-3.5 text-sm font-medium text-stone-400`}>
+        ACCT-000028
+      </div>
+    </label>
+    <label className="block">
+      <span className="mb-1.5 block text-sm font-semibold text-stone-700">Name on card</span>
+      <div className={`${fieldClass} flex items-center px-3.5 text-sm font-medium text-stone-400`}>
+        Name on card
+      </div>
+    </label>
+    <div className="grid grid-cols-2 gap-3">
+      <label className="block">
+        <span className="mb-1.5 block text-sm font-semibold text-stone-700">Expiration</span>
+        <div className={`${fieldClass} flex items-center px-3.5 text-sm font-medium text-stone-400`}>
+          MM / YY
+        </div>
+      </label>
+      <label className="block">
+        <span className="mb-1.5 block text-sm font-semibold text-stone-700">Security code</span>
+        <div className={`${fieldClass} flex items-center px-3.5 text-sm font-medium text-stone-400`}>
+          CVV
+        </div>
+      </label>
+    </div>
+    <div className="flex h-12 items-center justify-center rounded-xl bg-[#1E3A8A] text-base font-bold text-white">
+      {typeof total === 'number' && Number.isFinite(total)
+        ? `Pay $${total.toFixed(2)}`
+        : 'Pay now'}
+    </div>
+  </div>
+);
 
 const CardFieldsContent = ({
   error,
   isProcessing,
-  isEligible,
   onSetError,
   onSetProcessing,
   onError,
-  onCancel,
-  onSwitchToWallet,
-  hideHeader
+  total,
+  onFieldsReady,
 }: CardFieldsContentProps) => {
   const [{ isPending }] = usePayPalScriptReducer();
   const { cardFieldsForm } = usePayPalCardFields();
 
   useEffect(() => {
-    if (!cardFieldsForm) return;
-    // The provider initializes the hosted fields and exposes merchant eligibility.
-    // The fields remain PayPal-hosted; card data never enters Petshiwu code.
-  }, [cardFieldsForm]);
+    if (cardFieldsForm) onFieldsReady?.();
+  }, [cardFieldsForm, onFieldsReady]);
 
   const submitCardPayment = async () => {
     if (!cardFieldsForm) {
-      const errorMsg = 'PayPal card fields are still loading. Please wait a moment and try again.';
+      const errorMsg = 'Card fields are still loading. Please wait a moment and try again.';
       onSetError(errorMsg);
       onError(errorMsg);
       return;
@@ -82,125 +128,98 @@ const CardFieldsContent = ({
     }
   };
 
-  if (isPending || isEligible === null) {
-    return (
-      <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg border border-gray-200">
-        <Loader2 className="animate-spin text-primary-600 mr-3" size={24} />
-        <span className="text-gray-700">Loading secure card fields...</span>
-      </div>
-    );
+  if (isPending) {
+    return <CardFieldSkeletons total={total} />;
   }
 
-  if (!isEligible) {
-    return (
-      <div className="p-5 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <p className="text-sm text-yellow-800">
-          PayPal card payments are not enabled for this account yet. Choose PayPal Wallet instead.
-        </p>
-        <div className="flex gap-3 mt-4">
-          {onSwitchToWallet && (
-            <button
-              type="button"
-              onClick={onSwitchToWallet}
-              className="flex-1 px-4 py-3 bg-[#0070ba] text-white font-semibold rounded-lg hover:bg-[#005ea6] transition-colors"
-            >
-              Use PayPal Wallet
-            </button>
-          )}
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      </div>
-    );
-  }
+  const payLabel = typeof total === 'number' && Number.isFinite(total)
+    ? `Pay $${total.toFixed(2)}`
+    : 'Pay now';
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       {error && (
-        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
-          <div className="flex-1">
-            <p className="text-sm font-medium text-red-800">Card Payment Error</p>
-            <p className="text-sm text-red-700 mt-1">{error}</p>
-          </div>
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-3">
+          <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
+          <p className="text-sm text-red-800">{error}</p>
         </div>
       )}
 
-      {!hideHeader && (
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-          <CreditCard className="text-blue-600" size={24} />
-        </div>
-        <div>
-          <h3 className="text-xl font-bold text-gray-900">Credit/Debit Card</h3>
-          <p className="text-sm text-gray-600">Securely processed by PayPal</p>
-        </div>
-      </div>
-      )}
-
-      <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 space-y-4">
-        <PayPalCardFieldsForm />
-      </div>
-
-      <div className="flex items-start gap-2 text-xs text-gray-500">
-        <Lock size={14} className="flex-shrink-0 mt-0.5" />
-        <p>Your card details are entered into secure PayPal-hosted fields. Petshiwu never receives or stores your card number or security code.</p>
+      <label className="block">
+        <span className="mb-1.5 block text-sm font-semibold text-stone-700">Card number</span>
+        <PayPalNumberField className={fieldClass} placeholder="ACCT-000028" />
+      </label>
+      <label className="block">
+        <span className="mb-1.5 block text-sm font-semibold text-stone-700">Name on card</span>
+        <PayPalNameField className={fieldClass} placeholder="Name on card" />
+      </label>
+      <div className="grid grid-cols-2 gap-3">
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-semibold text-stone-700">Expiration</span>
+          <PayPalExpiryField className={fieldClass} placeholder="MM / YY" />
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-semibold text-stone-700">Security code</span>
+          <PayPalCVVField className={fieldClass} placeholder="CVV" />
+        </label>
       </div>
 
-      <div className="flex gap-3">
-        {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={isProcessing}
-            className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Cancel
-          </button>
+      <p className="flex items-start gap-2 text-xs text-stone-500">
+        <Lock size={14} className="mt-0.5 flex-shrink-0" />
+        <span>Secured checkout. We never store your full card number.</span>
+      </p>
+
+      <button
+        type="button"
+        onClick={submitCardPayment}
+        disabled={!cardFieldsForm || isProcessing}
+        className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#1E3A8A] text-base font-bold text-white hover:bg-[#16307a] disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {isProcessing ? (
+          <>
+            <Loader2 className="animate-spin" size={18} />
+            Processing...
+          </>
+        ) : (
+          <>
+            <Lock size={16} />
+            {payLabel}
+          </>
         )}
-        <button
-          type="button"
-          onClick={submitCardPayment}
-          disabled={!cardFieldsForm || isProcessing}
-          className="flex-1 px-4 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-        >
-          {isProcessing ? (
-            <>
-              <Loader2 className="animate-spin" size={18} />
-              Processing...
-            </>
-          ) : (
-            <>
-              <Lock size={18} />
-              Pay securely with PayPal
-            </>
-          )}
-        </button>
-      </div>
+      </button>
     </div>
   );
 };
 
-const PayPalCardFields = ({ skipProvider = false, ...props }: PayPalCardFieldsProps) => {
+const PayPalCardFields = ({ skipProvider = false, onFieldsReady, ...props }: PayPalCardFieldsProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isEligible, setIsEligible] = useState<boolean | null>(null);
+  const [fieldsLive, setFieldsLive] = useState(false);
   const checkoutTokenRef = useRef<string>(crypto.randomUUID());
   const captureInFlightRef = useRef<string | null>(null);
   const donationAmountRef = useRef(props.donationAmount);
   donationAmountRef.current = props.donationAmount;
+  const hostRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    const sync = () => {
+      if (host.querySelector('iframe')) {
+        setFieldsLive(true);
+        onFieldsReady?.();
+      }
+    };
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(host, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [onFieldsReady]);
 
   if (!paypalClientId) {
     return (
-      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <p className="text-sm text-yellow-800">PayPal card payments are not configured.</p>
+      <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4">
+        <p className="text-sm text-yellow-800">Card payments are not configured.</p>
       </div>
     );
   }
@@ -209,7 +228,7 @@ const PayPalCardFields = ({ skipProvider = false, ...props }: PayPalCardFieldsPr
     setError(null);
     const normalizedGuestEmail = props.guestEmail?.trim();
     if (props.guestEmail !== undefined && (!normalizedGuestEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedGuestEmail))) {
-      const errorMsg = 'Please enter a valid email address to continue with PayPal.';
+      const errorMsg = 'Please enter a valid email address to continue with card checkout.';
       setError(errorMsg);
       props.onGuestEmailInvalid?.();
       props.onError(errorMsg);
@@ -228,16 +247,14 @@ const PayPalCardFields = ({ skipProvider = false, ...props }: PayPalCardFieldsPr
       const paypalOrderId = response.data?.paypalOrderId;
       const createdCheckoutToken = response.data?.checkoutToken;
       if (!response.success || !paypalOrderId || !createdCheckoutToken) {
-        throw new Error('PayPal could not initialize this card payment.');
+        throw new Error('Card payment could not start. Please try again.');
       }
       checkoutTokenRef.current = createdCheckoutToken;
       return paypalOrderId;
     } catch (err: any) {
-      const errorMsg = err.response?.data?.message || err.message || 'PayPal could not initialize this card payment.';
+      const errorMsg = err.response?.data?.message || err.message || 'Card payment could not start. Please try again.';
       setError(errorMsg);
       props.onError(errorMsg);
-      // Keep PayPal's follow-up onError callback from replacing the useful
-      // backend message with Axios's generic HTTP status error.
       throw new Error(errorMsg);
     }
   };
@@ -249,7 +266,7 @@ const PayPalCardFields = ({ skipProvider = false, ...props }: PayPalCardFieldsPr
     const checkoutToken = checkoutTokenRef.current;
     if (!checkoutToken) {
       captureInFlightRef.current = null;
-      const errorMsg = 'PayPal checkout session expired. Please try again.';
+      const errorMsg = 'Checkout session expired. Please try again.';
       setError(errorMsg);
       props.onError(errorMsg);
       return;
@@ -264,11 +281,11 @@ const PayPalCardFields = ({ skipProvider = false, ...props }: PayPalCardFieldsPr
       });
       const order = response.data?.order;
       if (!response.success || response.data?.paymentStatus !== 'paid' || !order?._id) {
-        throw new Error('PayPal card payment was not completed. Please try again.');
+        throw new Error('Card payment was not completed. Please try again.');
       }
       props.onSuccess(order);
     } catch (err: any) {
-      const errorMsg = err.response?.data?.message || err.message || 'PayPal card payment failed. Please try again.';
+      const errorMsg = err.response?.data?.message || err.message || 'Card payment failed. Please try again.';
       setError(errorMsg);
       props.onError(errorMsg);
     } finally {
@@ -280,26 +297,36 @@ const PayPalCardFields = ({ skipProvider = false, ...props }: PayPalCardFieldsPr
   const onError = (err: Record<string, unknown>) => {
     const errorMsg = typeof err?.message === 'string'
       ? err.message
-      : 'PayPal card payment could not be initialized. Please try PayPal Wallet.';
+      : 'Card payment could not start. Please use Apple Pay, Google Pay, or PayPal.';
     setError(errorMsg);
-    setIsEligible(false);
     props.onError(errorMsg);
     setIsProcessing(false);
   };
 
   const fields = (
-    <PayPalCardFieldsProvider createOrder={createOrder} onApprove={onApprove} onError={onError}>
-      <CardFieldsContent
-        {...props}
-        hideHeader={skipProvider}
-        error={error}
-        isProcessing={isProcessing}
-        isEligible={isEligible}
-        onSetError={setError}
-        onSetProcessing={setIsProcessing}
-      />
-      <EligibilityBridge onEligibilityChange={setIsEligible} />
-    </PayPalCardFieldsProvider>
+    <div ref={hostRef} className="relative min-h-[16rem]">
+      {!fieldsLive && <CardFieldSkeletons total={props.total} />}
+      <div className={fieldsLive ? 'relative' : 'pointer-events-none absolute inset-0 overflow-hidden opacity-0'}>
+        <PayPalCardFieldsProvider
+          createOrder={createOrder}
+          onApprove={onApprove}
+          onError={onError}
+          style={CARD_FIELD_STYLE}
+        >
+          <CardFieldsContent
+            {...props}
+            error={error}
+            isProcessing={isProcessing}
+            onSetError={setError}
+            onSetProcessing={setIsProcessing}
+            onFieldsReady={() => {
+              setFieldsLive(true);
+              onFieldsReady?.();
+            }}
+          />
+        </PayPalCardFieldsProvider>
+      </div>
+    </div>
   );
 
   if (skipProvider) return fields;
@@ -317,18 +344,6 @@ const PayPalCardFields = ({ skipProvider = false, ...props }: PayPalCardFieldsPr
       {fields}
     </PayPalScriptProvider>
   );
-};
-
-const EligibilityBridge = ({ onEligibilityChange }: { onEligibilityChange: (eligible: boolean) => void }) => {
-  const { cardFieldsForm } = usePayPalCardFields();
-
-  useEffect(() => {
-    if (cardFieldsForm) {
-      onEligibilityChange(cardFieldsForm.isEligible());
-    }
-  }, [cardFieldsForm, onEligibilityChange]);
-
-  return null;
 };
 
 export default PayPalCardFields;

@@ -17,10 +17,9 @@ export const paypalCheckoutScriptOptions = (currency = 'USD') => ({
   intent: 'capture' as const,
   environment: paypalSdkEnvironment,
   components: 'buttons,applepay,googlepay,card-fields',
-  // PayPal's extra funding bars (card, Venmo, Pay Later) expand hosted
-  // iframes that jump to position:fixed and cover the store header.
-  // Card uses PayPal Card Fields on this page. Venmo / Pay Later stay
-  // available inside the PayPal wallet, not as separate floating logos.
-  disableFunding: ['card', 'venmo', 'paylater'],
+  // Venmo / Pay Later bars jump to position:fixed and cover the header.
+  // Card stays available as inline Card Fields, with PayPal's debit/credit
+  // button as the fallback so checkout never shows an empty card box.
+  disableFunding: ['venmo', 'paylater'],
   ...(!isPayPalLive ? { buyerCountry: 'US' } : {}),
 });
