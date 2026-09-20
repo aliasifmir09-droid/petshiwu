@@ -83,7 +83,7 @@ const OrderShippingStatus = ({ order, orderNumber }: OrderShippingStatusProps) =
           {tracking.steps.map((step, index) => {
             const Icon = STEP_ICON[step.id];
             return (
-              <li key={step.id} className="relative flex gap-3 py-3 md:flex-col md:items-center md:text-center md:py-0">
+              <li key={step.id} className="relative flex min-w-0 gap-3 py-3 md:flex-col md:items-center md:px-2 md:text-center md:py-0">
                 {index < tracking.steps.length - 1 && (
                   <span
                     className={`absolute left-[1.15rem] top-12 hidden h-[calc(100%-1.5rem)] w-0.5 md:left-auto md:right-[-50%] md:top-5 md:block md:h-0.5 md:w-full ${
@@ -107,7 +107,7 @@ const OrderShippingStatus = ({ order, orderNumber }: OrderShippingStatusProps) =
                   <p className={`font-bold ${step.current || step.done ? 'text-stone-900' : 'text-stone-400'}`}>
                     {step.label}
                   </p>
-                  <p className="mt-0.5 text-sm leading-snug text-stone-500">{step.hint}</p>
+                  <p className="mt-0.5 text-sm leading-snug text-stone-500 break-words">{step.hint}</p>
                   {step.current && step.at ? (
                     <p className="mt-1 text-xs font-semibold text-[#1E3A8A]">{formatNyDateTime(step.at)}</p>
                   ) : null}

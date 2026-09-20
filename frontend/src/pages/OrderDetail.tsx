@@ -17,6 +17,7 @@ import { trackOrderCancel } from '@/utils/analytics';
 import { useCartStore } from '@/stores/cartStore';
 import { productsForReorder } from '@/utils/reorderFromOrder';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
+import { formatNyDateTime } from '@/utils/orderTracking';
 
 const OrderDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -213,10 +214,7 @@ const OrderDetail = () => {
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
               <h1 className="text-3xl font-bold mb-2">Order {order.orderNumber}</h1>
-              <p className="text-gray-600">
-                Placed on {new Date(order.createdAt).toLocaleDateString()} at{' '}
-                {new Date(order.createdAt).toLocaleTimeString()}
-              </p>
+              <p className="text-gray-600">Placed {formatNyDateTime(order.createdAt)}</p>
             </div>
             <div className="flex items-center gap-4">
               {order.orderStatus !== 'cancelled' && (

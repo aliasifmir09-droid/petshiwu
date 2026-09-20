@@ -165,14 +165,14 @@ export const describeOrderTracking = (order: TrackableOrder): OrderTrackingView 
     {
       id: 'packing',
       label: 'Packed in Queens',
-      hint: 'We pull the bag and check every item.',
+      hint: 'Pulled and checked at the warehouse.',
       done: currentIndex >= 1,
       current: currentId === 'packing',
     },
     {
       id: 'out',
       label: 'Out for delivery',
-      hint: 'A Petshiwü driver is bringing this to your door — not UPS or USPS.',
+      hint: 'Our driver to your door — not UPS.',
       done: currentIndex >= 2,
       current: currentId === 'out',
     },
