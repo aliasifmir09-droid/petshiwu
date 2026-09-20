@@ -501,5 +501,20 @@ body > iframe[title="PayPal Pay Later"] {
   display: none !important;
 }
 
+#card-payment .petshiwu-card-field,
+#card-payment .petshiwu-card-field iframe {
+  min-height: 48px !important;
+  height: 48px;
+  width: 100%;
+}
+
+#card-payment iframe[title="paypal_card_number"],
+#card-payment iframe[title="paypal_card_expiry"],
+#card-payment iframe[title="paypal_card_cvv"],
+#card-payment iframe[title="paypal_card_name"] {
+  display: block !important;
+  min-height: 48px !important;
+}
+
 
 

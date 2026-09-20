@@ -13,7 +13,9 @@ describe('PayPal checkout', () => {
     expect(button).toContain('checkoutTokenRef.current = createdCheckoutToken');
     expect(button).toContain('const checkoutToken = checkoutTokenRef.current');
     expect(button).not.toContain('setCheckoutToken(');
-    expect(button).toContain('fundingSource={FUNDING.PAYPAL}');
+    expect(button).toContain('fundingSource={fundingSource}');
+    expect(button).toContain('fundingSource = FUNDING.PAYPAL');
+    expect(button).toContain('FUNDING.CARD');
 
     expect(card).toContain('checkoutTokenRef.current = createdCheckoutToken');
     expect(card).toContain('const checkoutToken = checkoutTokenRef.current');
@@ -23,8 +25,8 @@ describe('PayPal checkout', () => {
   test('Place Order for PayPal scrolls to the PayPal button instead of doing nothing', () => {
     const checkout = read('../../pages/Checkout.tsx');
     expect(checkout).toContain("getElementById('paypal-payment')");
-    expect(checkout).toContain('Click Apple Pay, Google Pay, or a PayPal button to complete your payment.');
-    expect(checkout).toContain('Pay with Apple Pay, Google Pay, PayPal, or card below');
+    expect(checkout).toContain('Choose Apple Pay, Google Pay, card, or PayPal to complete your payment.');
+    expect(checkout).toContain('Pay with Apple Pay, Google Pay, card, or PayPal below');
     expect(checkout).not.toMatch(
       /if \(paymentMethod === 'paypal' \|\| paymentMethod === 'apple_pay' \|\| paymentMethod === 'google_pay'\) return;/
     );
@@ -58,14 +60,22 @@ describe('PayPal checkout', () => {
     expect(apple).not.toContain('components=applepay');
     expect(google).not.toContain('components=googlepay');
     expect(paypalConfig).toContain("components: 'buttons,applepay,googlepay,card-fields'");
-    expect(paypalConfig).toContain("disableFunding: ['card', 'venmo', 'paylater']");
+    expect(paypalConfig).toContain("disableFunding: ['venmo', 'paylater']");
+    expect(paypalConfig).not.toContain("disableFunding: ['card', 'venmo', 'paylater']");
     expect(paypalConfig).not.toContain('enableFunding');
     expect(checkout).toContain("setPaymentMethod('credit_card')");
     expect(checkout).not.toContain('STRIPE_SECRET_KEY');
     expect(checkout).toContain('overflow-visible');
     expect(checkout).toContain('paypal-wallet-slot');
     expect(checkout).toContain("paymentMethod === 'paypal' || paymentMethod === 'apple_pay' || paymentMethod === 'google_pay'");
-    expect(checkout).toContain('paypalClientId && !usingSavedCard');
+    expect(checkout).toContain('hideCardFields={usingSavedCard}');
+    const card = read('../../components/PayPalCardFields.tsx');
+    expect(card).toContain('PayPalNumberField');
+    expect(card).toContain('Card number');
+    expect(card).toContain('CardFieldSkeletons');
+    expect(branded).toContain('CardFieldSkeletons');
+    expect(branded).toContain('FUNDING.CARD');
+    expect(branded).not.toContain('min-h-[12rem]');
     expect(checkout).not.toContain('showPayPalButton');
     expect(checkout).not.toContain('deliveryReady');
     expect(checkout).not.toContain('Enter your delivery details above');
@@ -78,6 +88,7 @@ describe('PayPal checkout', () => {
     expect(css).toContain('iframe[title="Venmo"]');
     expect(css).toContain('iframe[title="PayPal Pay Later"]');
     expect(css).toContain('.paypal-wallet-slot');
+    expect(css).toContain('.petshiwu-card-field');
     expect(css).not.toContain('.paypal-checkout-sandbox {');
   });
 

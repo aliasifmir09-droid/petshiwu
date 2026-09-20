@@ -16,7 +16,7 @@ describe('checkout payment widgets stay on the page', () => {
   test('branded PayPal buttons are static imports, not extra PayPal-named chunks', () => {
     const source = readFileSync(join(dir, '../../components/CheckoutBrandedPayments.tsx'), 'utf8');
     expect(source).toMatch(/import PayPalButton from/);
-    expect(source).toMatch(/import PayPalCardFields from/);
+    expect(source).toMatch(/import PayPalCardFields, \{ CardFieldSkeletons \} from/);
     expect(source).not.toMatch(/lazy\(\(\) => import\('@\/components\/PayPal/);
   });
 });

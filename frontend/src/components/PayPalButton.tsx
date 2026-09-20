@@ -23,9 +23,10 @@ export interface PayPalButtonProps {
   onCancel?: () => void;
   currency?: string;
   skipProvider?: boolean;
+  fundingSource?: typeof FUNDING[keyof typeof FUNDING];
 }
 
-const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, couponCode, donationAmount = 0, onSuccess, onError, onGuestEmailInvalid, onCancel, currency = 'USD' }: PayPalButtonProps) => {
+const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, couponCode, donationAmount = 0, onSuccess, onError, onGuestEmailInvalid, onCancel, currency = 'USD', fundingSource = FUNDING.PAYPAL }: PayPalButtonProps) => {
   const [{ isPending }] = usePayPalScriptReducer();
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -144,12 +145,16 @@ const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, coupon
         </div>
       )}
       <PayPalButtons
-        fundingSource={FUNDING.PAYPAL}
+        fundingSource={fundingSource}
         createOrder={createOrder}
         onApprove={onApprove}
         onError={onErrorHandler}
         onCancel={onCancelHandler}
-        style={{ layout: 'vertical', color: 'blue', shape: 'rect', label: 'paypal', height: 48 }}
+        style={
+          fundingSource === FUNDING.CARD
+            ? { layout: 'vertical', color: 'black', shape: 'rect', label: 'pay', height: 48 }
+            : { layout: 'vertical', color: 'blue', shape: 'rect', label: 'paypal', height: 48 }
+        }
       />
     </div>
   );
