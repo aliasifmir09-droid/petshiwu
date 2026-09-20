@@ -497,7 +497,7 @@ Q: Do I need an account to order?
 A: No — guest checkout is available. But a free account at petshiwu.com gives you order tracking, saved pet profiles, wishlist access, personalized recommendations, and member deals. It takes 30 seconds to create.
 
 Q: How do I track my order?
-A: Check petshiwu.com/track-order or log in and go to My Orders. Your tracking number is emailed as soon as your order ships. NYC orders arrive same-day before 11 PM if you order by cutoff, otherwise the next day.
+A: Check petshiwu.com/track-order with your order number, or log in and go to My Orders. Petshiwü delivers with our own drivers from Queens — you will not get a UPS or FedEx tracking number. The page shows where the order is and when it should arrive. NYC orders arrive same-day before 11 PM if you order by cutoff, otherwise the next day. Call (800) 259-2605 anytime.
 
 Q: Do you offer free shipping?
 A: Yes — all orders over $49 ship free automatically, no code needed. Same-day delivery is available across all five NYC boroughs for orders before 3 PM weekdays (1 PM weekends).

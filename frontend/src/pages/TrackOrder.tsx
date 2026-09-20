@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { orderService } from '@/services/orders';
-import { Package, Truck, CheckCircle, Clock, XCircle, Search, Loader2, MapPin } from 'lucide-react';
+import { Search, Loader2, MapPin, Phone, XCircle } from 'lucide-react';
+import { TONIGHT } from '@/data/tonightDelivery';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import OrderFireworks from '@/components/OrderFireworks';
+import OrderShippingStatus from '@/components/OrderShippingStatus';
 import GoogleCustomerReviewsOptIn from '@/components/GoogleCustomerReviewsOptIn';
 import GoogleSignInButton from '@/components/GoogleSignInButton';
 import { useAuthStore } from '@/stores/authStore';
@@ -11,6 +13,7 @@ import { authService } from '@/services/auth';
 import { guestSetPasswordPath, readGuestCheckoutAccount } from '@/utils/guestCheckoutAccount';
 import { trackLogin } from '@/utils/analytics';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
+import { handleImageError, normalizeImageUrl } from '@/utils/imageUtils';
 
 const TrackOrder = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -41,7 +44,13 @@ const TrackOrder = () => {
     queryKey: ['trackOrder', searchOrderId],
     queryFn: () => orderService.trackOrder(searchOrderId),
     enabled: !!searchOrderId,
-    retry: false
+    retry: false,
+    refetchInterval: (query) => {
+      const current = query.state.data;
+      if (!current) return false;
+      if (current.orderStatus === 'delivered' || current.orderStatus === 'cancelled') return false;
+      return 30000;
+    },
   });
 
   const handleSearch = (e: React.FormEvent) => {
@@ -51,49 +60,7 @@ const TrackOrder = () => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Clock className="text-yellow-600" size={24} />;
-      case 'processing':
-        return <Package className="text-blue-600" size={24} />;
-      case 'shipped':
-        return <Truck className="text-indigo-600" size={24} />;
-      case 'delivered':
-        return <CheckCircle className="text-green-600" size={24} />;
-      case 'cancelled':
-        return <XCircle className="text-red-600" size={24} />;
-      default:
-        return <Package className="text-gray-600" size={24} />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'processing':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'shipped':
-        return 'bg-indigo-100 text-indigo-800 border-indigo-300';
-      case 'delivered':
-        return 'bg-green-100 text-green-800 border-green-300';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800 border-red-300';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
-    }
-  };
-
-  const formatDate = (date: string | Date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  const formatMoney = (value: number) => `$${Number(value || 0).toFixed(2)}`;
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -116,11 +83,11 @@ const TrackOrder = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-3">
-            Track Your Order
+          <h1 className="text-3xl md:text-4xl font-black text-stone-900 mb-3">
+            Track your delivery
           </h1>
-          <p className="text-gray-600">
-            Enter your order ID to check the status and tracking information
+          <p className="text-stone-600">
+            See where your order is, when it should arrive, and how to reach a person if you need one.
           </p>
         </div>
 
@@ -194,139 +161,73 @@ const TrackOrder = () => {
         {/* Order Details */}
         {order && !isLoading && (
           <div className="space-y-6">
-            {/* Order Status Card */}
-            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl shadow-xl p-6 md:p-8 text-white">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <p className="text-blue-200 text-sm mb-1">Order Number</p>
-                  <p className="text-2xl font-black">{order.orderNumber}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-blue-200 text-sm mb-1">Order Date</p>
-                  <p className="text-lg font-semibold">{formatDate(order.createdAt)}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-4 mb-4">
-                {getStatusIcon(order.orderStatus)}
-                <div>
-                  <p className="text-blue-200 text-sm mb-1">Current Status</p>
-                  <p className="text-2xl font-bold capitalize">{order.orderStatus}</p>
-                </div>
-              </div>
+            <OrderShippingStatus order={order} orderNumber={order.orderNumber} />
 
-              {order.trackingNumber && (
-                <div className="mt-4 pt-4 border-t border-blue-400">
-                  <p className="text-blue-200 text-sm mb-1">Tracking Number</p>
-                  <p className="text-xl font-semibold">{order.trackingNumber}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Order Timeline */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Order Timeline</h2>
-              <div className="relative">
-                <div className="flex justify-between items-center">
-                  {['pending', 'processing', 'shipped', 'delivered'].map((status, index) => {
-                    const isActive = ['pending', 'processing', 'shipped', 'delivered'].indexOf(order.orderStatus) >= index;
-                    const isCurrent = order.orderStatus === status;
-
-                    return (
-                      <div key={status} className="flex-1 relative">
-                        <div className="flex flex-col items-center">
-                          <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                              isActive ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'
-                            } ${isCurrent ? 'ring-4 ring-blue-200' : ''} z-10 relative`}
-                          >
-                            {status === 'pending' && <Clock size={20} />}
-                            {status === 'processing' && <Package size={20} />}
-                            {status === 'shipped' && <Truck size={20} />}
-                            {status === 'delivered' && <CheckCircle size={20} />}
-                          </div>
-                          <p className={`mt-2 text-sm font-medium ${isActive ? 'text-gray-900' : 'text-gray-500'}`}>
-                            {status.charAt(0).toUpperCase() + status.slice(1)}
-                          </p>
-                        </div>
-                        {index < 3 && (
-                          <div
-                            className={`absolute top-5 left-1/2 w-full h-1 ${
-                              isActive && ['pending', 'processing', 'shipped', 'delivered'].indexOf(order.orderStatus) > index
-                                ? 'bg-blue-600'
-                                : 'bg-gray-300'
-                            }`}
-                            style={{ zIndex: 0 }}
-                          ></div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Order Items */}
             <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
               <h2 className="text-xl font-bold text-gray-900 mb-6">Order Items</h2>
               <div className="space-y-4">
                 {order.items.map((item, index) => (
-                  <div key={index} className="flex justify-between items-center py-4 border-b border-gray-200 last:border-0">
-                    <div className="flex-1">
+                  <div key={index} className="flex items-center justify-between gap-4 py-4 border-b border-gray-200 last:border-0">
+                    {item.image ? (
+                      <img
+                        src={normalizeImageUrl(item.image)}
+                        alt=""
+                        className="h-16 w-16 flex-shrink-0 rounded-lg object-cover"
+                        onError={handleImageError}
+                      />
+                    ) : null}
+                    <div className="min-w-0 flex-1">
                       <p className="font-semibold text-gray-900">{decodeHtmlEntities(item.name)}</p>
                       <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                     </div>
-                    <p className="text-lg font-bold text-gray-900">${(item.price * item.quantity).toFixed(2)}</p>
+                    <p className="text-lg font-bold text-gray-900">{formatMoney(item.price * item.quantity)}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Shipping Address */}
             <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <MapPin className="text-blue-600" size={24} />
-                Shipping Address
+                Delivering to
               </h2>
               <div className="text-gray-700">
                 <p className="font-semibold">{order.shippingAddress.firstName} {order.shippingAddress.lastName}</p>
                 <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}</p>
+                <p className="mt-3 text-sm text-stone-500">
+                  The full street is on your receipt. This public page hides it so a shared link stays private.
+                </p>
               </div>
             </div>
 
-            {/* Order Summary */}
             <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
               <h2 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
               <div className="space-y-3">
                 <div className="flex justify-between text-gray-700">
                   <span>Items Total:</span>
-                  <span className="font-semibold">${order.itemsPrice.toFixed(2)}</span>
+                  <span className="font-semibold">{formatMoney(order.itemsPrice)}</span>
                 </div>
                 <div className="flex justify-between text-gray-700">
                   <span>Shipping:</span>
-                  <span className="font-semibold">${order.shippingPrice.toFixed(2)}</span>
+                  <span className="font-semibold">
+                    {order.shippingPrice === 0 ? <span className="text-emerald-700">FREE</span> : formatMoney(order.shippingPrice)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-gray-700">
                   <span>Tax:</span>
-                  <span className="font-semibold">${order.taxPrice.toFixed(2)}</span>
+                  <span className="font-semibold">{formatMoney(order.taxPrice)}</span>
                 </div>
                 <div className="border-t border-gray-300 pt-3 flex justify-between text-lg">
                   <span className="font-bold text-gray-900">Total:</span>
-                  <span className="font-black text-blue-600">${order.totalPrice.toFixed(2)}</span>
+                  <span className="font-black text-[#1E3A8A]">{formatMoney(order.totalPrice)}</span>
                 </div>
-              </div>
-            </div>
-
-            {/* Payment Status */}
-            <div className={`rounded-2xl shadow-lg p-6 md:p-8 border-2 ${getStatusColor(order.paymentStatus)}`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm opacity-75 mb-1">Payment Status</p>
-                  <p className="text-xl font-bold capitalize">{order.paymentStatus}</p>
-                </div>
-                {order.paymentStatus === 'paid' && (
-                  <CheckCircle size={32} className="opacity-75" />
-                )}
+                <p className="pt-1 text-sm text-stone-500">
+                  {order.paymentStatus === 'paid' || order.isPaid
+                    ? 'Payment received.'
+                    : order.paymentMethod === 'cod'
+                      ? 'Pay the driver when the order arrives.'
+                      : 'Payment is still clearing. We pack after it lands.'}
+                </p>
               </div>
             </div>
 
@@ -366,20 +267,27 @@ const TrackOrder = () => {
               </div>
             )}
             <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl shadow-lg p-6 md:p-8 text-center">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Need Help?</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Need a person?</h3>
               <p className="text-gray-600 mb-4">
-                If you have any questions about your order, please don't hesitate to contact us.
+                A Petshiwü teammate answers 24/7. This is our own delivery from Queens — not UPS or FedEx.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  href={`tel:${TONIGHT.phone.replace(/[^\d+]/g, '')}`}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#1E3A8A] text-white font-semibold rounded-lg hover:bg-[#163074] transition-colors"
+                >
+                  <Phone size={18} />
+                  Call {TONIGHT.phone}
+                </a>
                 <Link
                   to="/contact"
-                  className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-6 py-3 bg-white text-[#1E3A8A] font-semibold rounded-lg border-2 border-[#1E3A8A] hover:bg-blue-50 transition-colors"
                 >
                   Contact Support
                 </Link>
                 <Link
                   to={isAuthenticated ? '/orders' : '/login'}
-                  className="px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors"
+                  className="px-6 py-3 bg-white text-[#1E3A8A] font-semibold rounded-lg border-2 border-[#1E3A8A] hover:bg-blue-50 transition-colors"
                 >
                   {isAuthenticated ? 'View My Orders' : 'Sign in'}
                 </Link>

@@ -149,6 +149,12 @@ export interface ShippingAddress {
   phone: string;
 }
 
+export interface OrderDelivery {
+  status?: 'ready' | 'assigned' | 'out_for_delivery' | 'delivered' | 'failed' | 'cancelled';
+  distanceMeters?: number;
+  durationSeconds?: number;
+}
+
 export interface Order {
   _id: string;
   orderNumber: string;
@@ -173,6 +179,7 @@ export interface Order {
   notes?: string;
   createdAt: string;
   updatedAt: string;
+  delivery?: OrderDelivery;
 }
 
 export interface ApiResponse<T> {

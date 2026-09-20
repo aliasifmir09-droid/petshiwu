@@ -237,6 +237,53 @@ describe('Orders API', () => {
       // Order doesn't exist, but endpoint is accessible
       expect(response.status).toBe(404);
     });
+
+    it('returns a public shipping snapshot with payment and ZIP, without street', async () => {
+      const order = await Order.create({
+        items: [{
+          product: testProduct._id,
+          name: testProduct.name,
+          image: 'https://example.com/image.jpg',
+          quantity: 1,
+          price: testProduct.basePrice
+        }],
+        shippingAddress: {
+          firstName: 'Asif',
+          lastName: 'Ali',
+          street: '37-68 74th St',
+          city: 'Jackson Heights',
+          state: 'NY',
+          zipCode: '11372',
+          country: 'USA',
+          phone: '7185550199'
+        },
+        paymentMethod: 'paypal',
+        paymentStatus: 'paid',
+        isPaid: true,
+        paidAt: new Date('2026-09-20T18:24:00Z'),
+        orderStatus: 'pending',
+        itemsPrice: testProduct.basePrice,
+        shippingPrice: 0,
+        taxPrice: 0,
+        totalPrice: testProduct.basePrice,
+        guestEmail: `guest.track.${Date.now()}@petshiwu.com`
+      });
+
+      const response = await request(app)
+        .get(`/api/orders/track/${order.orderNumber}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.orderNumber).toBe(order.orderNumber);
+      expect(response.body.data.orderStatus).toBe('pending');
+      expect(response.body.data.paymentStatus).toBe('paid');
+      expect(response.body.data.isPaid).toBe(true);
+      expect(response.body.data.paymentMethod).toBe('paypal');
+      expect(response.body.data.shippingAddress.zipCode).toBe('11372');
+      expect(response.body.data.shippingAddress.street).toBeUndefined();
+      expect(response.body.data.billingAddress).toBeUndefined();
+      await Order.deleteOne({ _id: order._id });
+    });
   });
 
   describe('GET /api/orders/all', () => {
