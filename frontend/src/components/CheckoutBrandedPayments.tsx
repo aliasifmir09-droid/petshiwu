@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { FUNDING, PayPalScriptProvider, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { paypalCheckoutScriptOptions, paypalClientId } from '@/config/paypal';
@@ -154,6 +154,9 @@ const BrandedPaymentButtons = (props: CheckoutBrandedPaymentsProps) => {
 };
 
 const CheckoutBrandedPayments = (props: CheckoutBrandedPaymentsProps) => {
+  const currency = props.currency || 'USD';
+  const scriptOptions = useMemo(() => paypalCheckoutScriptOptions(currency), [currency]);
+
   if (!paypalClientId) {
     return (
       <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
@@ -163,7 +166,7 @@ const CheckoutBrandedPayments = (props: CheckoutBrandedPaymentsProps) => {
   }
 
   return (
-    <PayPalScriptProvider options={paypalCheckoutScriptOptions(props.currency || 'USD')}>
+    <PayPalScriptProvider options={scriptOptions}>
       <BrandedPaymentButtons {...props} />
     </PayPalScriptProvider>
   );

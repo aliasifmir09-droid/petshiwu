@@ -59,4 +59,24 @@ describe('cartStore addToCart', () => {
     expect(added).toBe(false);
     expect(useCartStore.getState().items).toHaveLength(0);
   });
+
+  test('does not mutate the existing cart line when increasing quantity', () => {
+    const product = inStockProduct();
+    const existing = { product, variant: product.variants[0], quantity: 1 };
+    useCartStore.setState({ items: [existing] });
+    const added = useCartStore.getState().addToCart(product, product.variants[0]);
+    expect(added).toBe(true);
+    expect(existing.quantity).toBe(1);
+    expect(useCartStore.getState().items[0].quantity).toBe(2);
+    expect(useCartStore.getState().items[0]).not.toBe(existing);
+    expect(useCartStore.getState().getTotalPrice()).toBe(40);
+  });
+
+  test('setItems does not replace state when the snapshot is already the same', () => {
+    const product = inStockProduct();
+    useCartStore.setState({ items: [{ product, variant: product.variants[0], quantity: 2 }] });
+    const before = useCartStore.getState().items;
+    useCartStore.getState().setItems([{ product, variant: product.variants[0], quantity: 2 }]);
+    expect(useCartStore.getState().items).toBe(before);
+  });
 });

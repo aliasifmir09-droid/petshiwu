@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense, type ReactNode } from 'react';
+import { useState, useEffect, useMemo, useRef, lazy, Suspense, type ReactNode } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useCartStore, useCartHasHydrated } from '@/stores/cartStore';
@@ -191,7 +191,18 @@ const StripePaymentWrapper = ({
 const Checkout = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { items, getTotalPrice, clearCart } = useCartStore();
+  const items = useCartStore((state) => state.items);
+  const clearCart = useCartStore((state) => state.clearCart);
+  const subtotal = useCartStore((state) => state.getTotalPrice());
+  const paypalItems = useMemo(
+    () =>
+      items.map((item) => ({
+        product: normalizeId(item.product._id) || String(item.product._id),
+        quantity: item.quantity,
+        ...(item.variant?.sku ? { variant: { sku: item.variant.sku } } : {}),
+      })),
+    [items]
+  );
   const cartReady = useCartHasHydrated();
   const { isAuthenticated, user } = useAuthStore();
   const { toast, showToast, hideToast } = useToast();
@@ -374,7 +385,6 @@ const Checkout = () => {
     }
   };
 
-  const subtotal = getTotalPrice();
   const shipping = shippingCostForSubtotal(subtotal, couponWaivesShipping);
   const tax = subtotal * TAX_RATE;
   const onlineTotal = Math.max(0, subtotal + shipping + tax - couponDiscount);
@@ -1188,11 +1198,7 @@ const Checkout = () => {
                     >
                       <CheckoutBrandedPayments
                         hideCardFields={usingSavedCard}
-                        items={items.map((item: any) => ({
-                          product: normalizeId(item.product._id) || String(item.product._id),
-                          quantity: item.quantity,
-                          ...(item.variant?.sku ? { variant: { sku: item.variant.sku } } : {})
-                        }))}
+                        items={paypalItems}
                         total={total}
                         shippingAddress={{
                           firstName: shippingInfo.firstName,
