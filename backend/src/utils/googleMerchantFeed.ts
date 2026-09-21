@@ -312,7 +312,21 @@ export function buildMerchantItemXml(opts: {
   return `${lines.filter(Boolean).join('\n')}\n`;
 }
 
+const LIVE_ANIMAL_RE =
+  /\blive\b.+\b(cricket|waxworm|superworm|mealworm|hornworm|dubia|roach|mice|mouse|rat|feeder fish|feeder insect)s?\b|\b(cricket|waxworm|superworm|mealworm|hornworm|dubia roach)s?\b.+\blive\b/i;
+const PRESERVED_FEEDER_RE = /\b(freeze[-\s]?dried|dehydrated|oven[-\s]?dried|canned|dried)\b/i;
+
+/** Google Shopping disallows live animals, including feeder insects. */
+export function isLiveAnimalOffer(product: FeedProduct, variantTitle?: string): boolean {
+  const haystack = [product.name, variantTitle, product.shortDescription, product.description]
+    .filter(Boolean)
+    .join(' ');
+  if (PRESERVED_FEEDER_RE.test(haystack) && !/\blive\b/i.test(product.name)) return false;
+  return LIVE_ANIMAL_RE.test(haystack);
+}
+
 export function feedItemsForProduct(product: FeedProduct): string {
+  if (isLiveAnimalOffer(product)) return '';
   const images = productImages(product);
   if (images.length === 0) return '';
 

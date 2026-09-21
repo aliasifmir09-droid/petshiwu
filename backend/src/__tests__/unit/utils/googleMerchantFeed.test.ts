@@ -5,6 +5,7 @@ import {
   cleanText,
   feedItemsForProduct,
   googleProductCategory,
+  isLiveAnimalOffer,
   looksLikeGtin,
   merchantMpn,
   parseUnitPricing,
@@ -264,6 +265,33 @@ describe('googleMerchantFeed helpers', () => {
         images: [],
       })
     ).toBe('');
+  });
+
+  test('omits live feeder insects so Shopping does not flag sale of live animals', () => {
+    expect(
+      isLiveAnimalOffer({
+        _id: '1',
+        name: 'Reptile Food - Live Crickets',
+        slug: 'reptile-food-live-crickets',
+      })
+    ).toBe(true);
+    expect(
+      feedItemsForProduct({
+        _id: '1',
+        name: 'Reptile Food - Live Superworms',
+        slug: 'reptile-food-live-superworms',
+        images: ['https://cdn.example.com/worms.jpg'],
+        basePrice: 8.99,
+        variants: [{ price: 8.99, sku: 'SW-50', stock: 4 }],
+      })
+    ).toBe('');
+    expect(
+      isLiveAnimalOffer({
+        _id: '2',
+        name: "Fluker's Freeze Dried Superworms",
+        slug: 'flukers-freeze-dried-superworms',
+      })
+    ).toBe(false);
   });
 
   test('strips illegal XML control characters so one product cannot break the file', () => {
