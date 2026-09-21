@@ -1,11 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Gift, Truck, Shield, Star } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { X } from 'lucide-react';
 import { NEWSLETTER_CODE, NEWSLETTER_CODE_COPY } from '@/config/constants';
+import { useAuthStore } from '@/stores/authStore';
+import {
+  EMAIL_POPUP_DELAY_MS,
+  EMAIL_POPUP_STORAGE_KEY,
+  shouldOfferEmailPopup,
+} from '@/utils/emailPopup';
 
-const STORAGE_KEY = 'petshiwu_popup_dismissed';
 const API_URL = import.meta.env.VITE_API_URL || 'https://www.petshiwu.com/api';
 
 const EmailPopup = () => {
+  const { pathname } = useLocation();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [visible, setVisible] = useState(false);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,33 +23,31 @@ const EmailPopup = () => {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // Don't show if already dismissed or submitted this session
-    const dismissed = localStorage.getItem(STORAGE_KEY);
-    if (dismissed) return;
+    const dismissed = localStorage.getItem(EMAIL_POPUP_STORAGE_KEY) === 'true';
+    const canOffer = shouldOfferEmailPopup({
+      pathname,
+      dismissed,
+      isAuthenticated,
+    });
 
-    // Show after 12 seconds on the page
+    if (!canOffer) {
+      setVisible(false);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      return;
+    }
+
     timerRef.current = setTimeout(() => {
       setVisible(true);
-    }, 12000);
-
-    // Also show on exit intent (mouse leaves top of window)
-    const handleMouseLeave = (e: MouseEvent) => {
-      if (e.clientY <= 5 && !localStorage.getItem(STORAGE_KEY)) {
-        if (timerRef.current) clearTimeout(timerRef.current);
-        setVisible(true);
-      }
-    };
-    document.addEventListener('mouseleave', handleMouseLeave);
+    }, EMAIL_POPUP_DELAY_MS);
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
-      document.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, []);
+  }, [pathname, isAuthenticated]);
 
   const dismiss = () => {
     setVisible(false);
-    localStorage.setItem(STORAGE_KEY, 'true');
+    localStorage.setItem(EMAIL_POPUP_STORAGE_KEY, 'true');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,7 +67,7 @@ const EmailPopup = () => {
       if (data.success || data.alreadySubscribed) {
         setSubmitted(true);
         setCode(data.code || NEWSLETTER_CODE);
-        localStorage.setItem(STORAGE_KEY, 'true');
+        localStorage.setItem(EMAIL_POPUP_STORAGE_KEY, 'true');
       } else {
         setError(data.message || 'Something went wrong. Please try again.');
       }
@@ -76,105 +82,93 @@ const EmailPopup = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
-      onClick={(e) => { if (e.target === e.currentTarget) dismiss(); }}
+      className="fixed inset-0 z-[10050] flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.55)' }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) dismiss();
+      }}
     >
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-[fadeInUp_0.3s_ease-out]">
-        {/* Close button */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="email-popup-title"
+        className="relative flex w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl"
+      >
         <button
+          type="button"
           onClick={dismiss}
-          className="absolute top-4 right-4 z-10 text-gray-400 hover:text-gray-600 transition-colors"
+          className="absolute right-4 top-4 z-10 rounded-full p-1 text-white/80 hover:text-white sm:text-stone-500 sm:hover:text-stone-800"
           aria-label="Close"
         >
           <X size={22} />
         </button>
 
-        {/* Header */}
-        <div className="bg-[#1E3A8A] px-8 py-8 text-center">
-          <p className="text-white/80 text-[11px] font-semibold tracking-wide uppercase mb-3">Petshiwu</p>
-          <h2 className="text-white text-2xl font-black leading-tight">
-            Get FREEDOM20 on your first order
-          </h2>
-          <p className="text-white/80 text-sm mt-2">
-            20% off, max $10. No autoship.
-          </p>
+        <div className="hidden w-1/2 bg-[#F4F1EA] sm:flex sm:items-center sm:justify-center">
+          <img
+            src="/pets/cat.jpg"
+            alt="Cat stretching toward a first-order offer"
+            className="h-full w-full object-cover"
+          />
         </div>
 
-        {/* Body */}
-        <div className="px-8 py-6">
+        <div className="w-full bg-[#0F3D2E] px-7 py-10 text-white sm:w-1/2 sm:px-8">
           {!submitted ? (
             <>
-              {/* Trust signals */}
-              <div className="grid grid-cols-3 gap-3 mb-6">
-                <div className="text-center">
-                  <Truck size={18} className="mx-auto text-[#1E3A8A] mb-1" />
-                  <p className="text-xs text-gray-600 font-medium">Free delivery over $49</p>
-                </div>
-                <div className="text-center">
-                  <Gift size={18} className="mx-auto text-[#1E3A8A] mb-1" />
-                  <p className="text-xs text-gray-600 font-medium">Exclusive deals</p>
-                </div>
-                <div className="text-center">
-                  <Shield size={18} className="mx-auto text-green-600 mb-1" />
-                  <p className="text-xs text-gray-600 font-medium">No spam, ever</p>
-                </div>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-3">
+              <h2 id="email-popup-title" className="text-3xl font-black leading-tight tracking-tight sm:text-4xl">
+                Unlock 20% off on your first order.
+              </h2>
+              <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+                <label className="block text-sm font-medium text-white/90" htmlFor="email-popup-input">
+                  Enter your email
+                </label>
                 <input
+                  id="email-popup-input"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
+                  placeholder="you@email.com"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-[#1E3A8A] focus:border-transparent"
+                  autoComplete="email"
+                  className="w-full rounded-md border-0 px-4 py-3 text-base text-stone-900 placeholder:text-stone-400 outline-none ring-2 ring-transparent focus:ring-[#F5C518]"
                 />
-                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {error ? <p className="text-sm text-amber-200">{error}</p> : null}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-[#1E3A8A] hover:bg-[#163074] text-white font-semibold py-3 rounded-md disabled:opacity-60 disabled:cursor-not-allowed text-base"
+                  className="w-full rounded-md bg-[#F5C518] py-3.5 text-base font-bold text-[#0F3D2E] hover:bg-[#ffd84a] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {loading ? 'Sending...' : 'Get My FREEDOM20 Code →'}
+                  {loading ? 'Sending…' : 'Email me 20% off'}
                 </button>
               </form>
-              <p className="text-center text-gray-400 text-xs mt-3">
-                No spam. Unsubscribe anytime.
+              <button
+                type="button"
+                onClick={dismiss}
+                className="mt-4 block w-full text-center text-sm text-white/80 underline-offset-2 hover:underline"
+              >
+                No, thank you
+              </button>
+              <p className="mt-6 text-xs leading-relaxed text-white/60">
+                We’ll email your FREEDOM20 code (20% off, max $10) and occasional offers. Unsubscribe anytime.
               </p>
             </>
           ) : (
-            <div className="text-center py-4">
-              <h3 className="text-xl font-black text-gray-900 mb-2">You're in</h3>
-              <p className="text-gray-600 text-sm mb-4">Check your inbox. Your code:</p>
-              <div className="bg-blue-50 border-2 border-dashed border-[#1E3A8A] rounded-xl py-4 px-6 mb-4">
-                <p className="text-3xl font-black text-[#1E3A8A] tracking-widest">{code}</p>
-                <p className="text-sm text-gray-500 mt-1">{NEWSLETTER_CODE_COPY}</p>
-              </div>
+            <div className="py-4 text-center">
+              <h2 id="email-popup-title" className="text-3xl font-black">
+                You’re in
+              </h2>
+              <p className="mt-2 text-sm text-white/80">Your first-order code:</p>
+              <p className="mt-4 text-4xl font-black tracking-widest text-[#F5C518]">{code}</p>
+              <p className="mt-1 text-sm text-white/70">{NEWSLETTER_CODE_COPY}</p>
               <a
                 href="/products"
                 onClick={dismiss}
-                className="inline-block w-full bg-[#1E3A8A] text-white font-semibold py-3 rounded-md text-base hover:bg-[#163074]"
+                className="mt-8 inline-block w-full rounded-md bg-[#F5C518] py-3.5 text-base font-bold text-[#0F3D2E] hover:bg-[#ffd84a]"
               >
-                Shop Now →
+                Shop now
               </a>
             </div>
           )}
         </div>
-
-        {/* Rating strip */}
-        {!submitted && (
-          <div className="px-8 pb-5">
-            <div className="flex items-center justify-center gap-1 text-yellow-400 text-sm">
-              <Star size={14} fill="currentColor" />
-              <Star size={14} fill="currentColor" />
-              <Star size={14} fill="currentColor" />
-              <Star size={14} fill="currentColor" />
-              <Star size={14} fill="currentColor" />
-              <span className="text-gray-500 text-xs ml-2">Trusted by pet parents</span>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
