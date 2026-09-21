@@ -46,10 +46,16 @@ describe('contact forms post to the real API', () => {
 
   test('email popup subscribe posts to the API and shows FREEDOM20', () => {
     const src = read(path.resolve(__dirname, '../../components/EmailPopup.tsx'));
+    const appSrc = read(path.resolve(__dirname, '../../App.tsx'));
     expect(src).toContain('/v1/newsletter/subscribe');
-    expect(src).toContain('source: \'popup\'');
+    expect(src).toContain("source: 'popup'");
     expect(src).toContain('FREEDOM20');
+    expect(src).toContain('EMAIL_POPUP_DELAY_MS');
+    expect(src).toContain('/hero-side-play.webp');
+    expect(src).toContain('/hero-side-play.jpg');
+    expect(src).not.toContain('/pets/cat.jpg');
     expect(src).not.toContain('WELCOME10');
+    expect(appSrc).toContain('<EmailPopup />');
   });
 
   test('unsubscribe page is wired to the newsletter API', () => {

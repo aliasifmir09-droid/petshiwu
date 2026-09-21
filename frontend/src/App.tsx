@@ -14,6 +14,7 @@ import ErrorBoundaryWithReporting from './components/ErrorBoundaryWithReporting'
 import { initAnalytics, trackPageView } from './utils/analytics';
 import BottomNav from './components/BottomNav';
 import CookieConsent from './components/CookieConsent';
+import EmailPopup from './components/EmailPopup';
 import StructuredData from './components/StructuredData';
 import { SOCIAL_PROFILES } from './config/social';
 import { AREA_SERVED_NOW, ORGANIZATION_DESCRIPTION, PAYMENT_ACCEPTED } from './config/publicSeo';
@@ -475,6 +476,7 @@ function App() {
               </Suspense>
         </StoreFrame>
         <CookieConsent />
+        <EmailPopup />
       </BrowserRouter>
     </QueryClientProvider>
   );
