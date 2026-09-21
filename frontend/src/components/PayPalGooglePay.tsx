@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { isPayPalLive } from '@/config/paypal';
 import type { Order, ShippingAddress } from '@/types';
 import { orderService } from '@/services/orders';
+import { paypalCheckoutBlocker } from '@/utils/paypalCheckoutReady';
 
 interface PayPalItemInput {
   product: string;
@@ -86,7 +87,6 @@ declare global {
 const GOOGLE_PAY_URL = 'https://pay.google.com/gp/p/js/pay.js';
 const GOOGLE_PAY_SCRIPT_ID = 'petshiwu-google-pay-sdk';
 const PAYPAL_ENVIRONMENT = isPayPalLive ? 'PRODUCTION' : 'TEST';
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const scriptPromises = new Map<string, Promise<void>>();
 
 const loadScript = (src: string, id: string) => {
@@ -235,22 +235,15 @@ const PayPalGooglePay = ({
     onError(message);
   };
 
-  const validateGuestEmail = () => {
-    const normalized = guestEmail?.trim();
-    if (guestEmail !== undefined && (!normalized || !EMAIL_PATTERN.test(normalized))) {
-      const message = 'Please enter a valid email address to continue with Google Pay.';
-      setError(message);
-      onGuestEmailInvalid?.();
-      onError(message);
-      return null;
-    }
-    return normalized;
-  };
-
   const handleGooglePayClick = async () => {
     if (isProcessing || !paymentsClientRef.current || !googlePayRef.current || !googleConfigRef.current) return;
-    const normalizedGuestEmail = validateGuestEmail();
-    if (guestEmail !== undefined && !normalizedGuestEmail) return;
+    const blocked = paypalCheckoutBlocker({ shippingAddress, guestEmail });
+    if (blocked) {
+      setError(blocked);
+      if (/email/i.test(blocked)) onGuestEmailInvalid?.();
+      onError(blocked);
+      return;
+    }
 
     try {
       setError(null);
@@ -283,12 +276,12 @@ const PayPalGooglePay = ({
         error: { intent: 'PAYMENT_AUTHORIZATION', message: 'Google Pay is already processing another payment.' }
       };
     }
-    if (guestEmail !== undefined && (!normalizedGuestEmail || !EMAIL_PATTERN.test(normalizedGuestEmail))) {
-      const message = 'Please enter a valid email address to continue with Google Pay.';
-      setError(message);
-      onGuestEmailInvalid?.();
-      onError(message);
-      return { transactionState: 'ERROR', error: { intent: 'PAYMENT_AUTHORIZATION', message } };
+    const blocked = paypalCheckoutBlocker({ shippingAddress, guestEmail });
+    if (blocked) {
+      setError(blocked);
+      if (/email/i.test(blocked)) onGuestEmailInvalid?.();
+      onError(blocked);
+      return { transactionState: 'ERROR', error: { intent: 'PAYMENT_AUTHORIZATION', message: blocked } };
     }
 
     captureInFlightRef.current = true;

@@ -1,6 +1,7 @@
 import { body, param, query, validationResult } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
+import { normalizePhoneForSms } from '../utils/smsService';
 
 // Validation error handler
 export const validate = (req: Request, res: Response, next: NextFunction) => {
@@ -228,6 +229,7 @@ export const createOrderValidation = [
     .withMessage('Country must be less than 100 characters'),
   body('shippingAddress.phone')
     .trim()
+    .customSanitizer((value) => normalizePhoneForSms(value) || String(value || '').trim())
     .matches(/^\+?[1-9]\d{1,14}$/)
     .withMessage('Invalid phone number format'),
   body('paymentMethod')

@@ -3,6 +3,7 @@ import { FUNDING, PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer } 
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { paypalCheckoutScriptOptions, paypalClientId } from '@/config/paypal';
 import { orderService } from '@/services/orders';
+import { paypalCheckoutBlocker } from '@/utils/paypalCheckoutReady';
 
 interface PayPalItemInput {
   product: string;
@@ -40,12 +41,15 @@ const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, coupon
   const createOrder = async () => {
     setError(null);
       const normalizedGuestEmail = guestEmail?.trim();
-      if (guestEmail !== undefined && (!normalizedGuestEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedGuestEmail))) {
-        const errorMsg = 'Please enter a valid email address to continue with PayPal.';
-        setError(errorMsg);
-        onGuestEmailInvalid?.();
-        onError(errorMsg);
-        throw new Error(errorMsg);
+      const blocked = paypalCheckoutBlocker({
+        shippingAddress,
+        guestEmail,
+      });
+      if (blocked) {
+        setError(blocked);
+        if (/email/i.test(blocked)) onGuestEmailInvalid?.();
+        onError(blocked);
+        throw new Error(blocked);
       }
       try {
         const response = await orderService.createPayPalOrder({

@@ -27,7 +27,14 @@ import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { MapPin, Plus, Check, User, UserCheck, ShieldCheck, RotateCcw, Headphones, Lock, Truck } from 'lucide-react';
 import { TAX_RATE } from '@/config/constants';
 import { paypalClientId } from '@/config/paypal';
-import { isDeliverableShippingAddress, normalizeShippingState, OUT_OF_AREA_DELIVERY_MESSAGE } from '@/utils/deliveryZip';
+import { normalizeCheckoutPhone } from '@/utils/checkoutPhone';
+import {
+  isDeliverableShippingAddress,
+  isValidZip,
+  lookupZip,
+  normalizeShippingState,
+  OUT_OF_AREA_DELIVERY_MESSAGE,
+} from '@/utils/deliveryZip';
 import { shippingCostForSubtotal } from '@/utils/orderTotals';
 import { checkoutCodeFromError, checkoutCodeFromResponse } from '@/utils/checkoutCoupon';
 import { shouldHoldCheckoutOnEmptyCart } from '@/utils/checkoutFlow';
@@ -222,6 +229,12 @@ const Checkout = () => {
     zipCode: '',
     country: 'USA'
   });
+
+  const zipLookup = isValidZip(shippingInfo.zipCode) ? lookupZip(shippingInfo.zipCode) : null;
+  const zipOutOfArea = Boolean(zipLookup && zipLookup.speed === 'standard');
+  const zipNeedsState =
+    Boolean(zipLookup && zipLookup.speed !== 'standard') &&
+    !isDeliverableShippingAddress(shippingInfo.state, shippingInfo.zipCode);
 
   const { inputRef: streetInputRef } = useGooglePlacesAutocomplete({
     onAddressSelect: (address) => {
@@ -799,7 +812,7 @@ const Checkout = () => {
         state: normalizeShippingState(shippingInfo.state),
         zipCode: shippingInfo.zipCode,
         country: shippingInfo.country,
-        phone: shippingInfo.phone
+        phone: normalizeCheckoutPhone(shippingInfo.phone) || shippingInfo.phone
       },
       paymentMethod,
       paymentIntentId: confirmedPaymentIntentId || paymentIntentId || undefined,
@@ -1091,6 +1104,19 @@ const Checkout = () => {
                           className={fieldClass} />
                       </div>
                     </div>
+                    {zipOutOfArea ? (
+                      <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+                        {OUT_OF_AREA_DELIVERY_MESSAGE}
+                      </p>
+                    ) : zipNeedsState ? (
+                      <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+                        Enter NY, NJ, or CT to match this delivery ZIP.
+                      </p>
+                    ) : zipLookup ? (
+                      <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                        {zipLookup.headline}. {zipLookup.detail}
+                      </p>
+                    ) : null}
                     {isAuthenticated && (showNewAddressForm || savedAddresses.length === 0) && (
                       <div className="flex items-center gap-2">
                         <input type="checkbox" id="saveAddress" checked={saveNewAddress}
@@ -1208,7 +1234,7 @@ const Checkout = () => {
                           state: normalizeShippingState(shippingInfo.state),
                           zipCode: shippingInfo.zipCode,
                           country: shippingInfo.country,
-                          phone: shippingInfo.phone
+                          phone: normalizeCheckoutPhone(shippingInfo.phone) || shippingInfo.phone
                         }}
                         guestEmail={!isAuthenticated ? shippingInfo.email.trim() : undefined}
                         onGuestEmailInvalid={() => {

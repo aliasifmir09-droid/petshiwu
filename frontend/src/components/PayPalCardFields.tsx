@@ -12,6 +12,7 @@ import {
 import { AlertCircle, Loader2, Lock } from 'lucide-react';
 import { paypalClientId, paypalSdkEnvironment } from '@/config/paypal';
 import { orderService } from '@/services/orders';
+import { paypalCheckoutBlocker } from '@/utils/paypalCheckoutReady';
 
 interface PayPalItemInput {
   product: string;
@@ -227,12 +228,15 @@ const PayPalCardFields = ({ skipProvider = false, onFieldsReady, ...props }: Pay
   const createOrder = async () => {
     setError(null);
     const normalizedGuestEmail = props.guestEmail?.trim();
-    if (props.guestEmail !== undefined && (!normalizedGuestEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedGuestEmail))) {
-      const errorMsg = 'Please enter a valid email address to continue with card checkout.';
-      setError(errorMsg);
-      props.onGuestEmailInvalid?.();
-      props.onError(errorMsg);
-      throw new Error(errorMsg);
+    const blocked = paypalCheckoutBlocker({
+      shippingAddress: props.shippingAddress,
+      guestEmail: props.guestEmail,
+    });
+    if (blocked) {
+      setError(blocked);
+      if (/email/i.test(blocked)) props.onGuestEmailInvalid?.();
+      props.onError(blocked);
+      throw new Error(blocked);
     }
     try {
       const response = await orderService.createPayPalOrder({

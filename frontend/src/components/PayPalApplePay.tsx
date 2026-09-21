@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Order, ShippingAddress } from '@/types';
 import { orderService } from '@/services/orders';
+import { paypalCheckoutBlocker } from '@/utils/paypalCheckoutReady';
 
 interface PayPalItemInput {
   product: string;
@@ -127,7 +128,6 @@ const getPayPalWithApplePay = (): PayPalWithApplePay | null =>
 
 const APPLE_PAY_SDK_URL = 'https://applepay.cdn-apple.com/jsapi/1.latest/apple-pay-sdk.js';
 const APPLE_PAY_SDK_ID = 'petshiwu-apple-pay-sdk';
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const scriptPromises = new Map<string, Promise<void>>();
 
@@ -253,26 +253,17 @@ const PayPalApplePay = ({
     onError(message);
   };
 
-  const validateGuestEmail = (): string | undefined => {
-    const normalizedGuestEmail = guestEmail?.trim();
-    if (
-      guestEmail !== undefined &&
-      (!normalizedGuestEmail || !EMAIL_PATTERN.test(normalizedGuestEmail))
-    ) {
-      const message = 'Please enter a valid email address to continue with Apple Pay.';
-      setError(message);
-      onGuestEmailInvalid?.();
-      onError(message);
-      return undefined;
-    }
-    return normalizedGuestEmail;
-  };
-
   const handleApplePayClick = () => {
     if (!applePay || !applePayConfig || !window.ApplePaySession || isProcessing) return;
 
-    const normalizedGuestEmail = validateGuestEmail();
-    if (guestEmail !== undefined && !normalizedGuestEmail) return;
+    const blocked = paypalCheckoutBlocker({ shippingAddress, guestEmail });
+    if (blocked) {
+      setError(blocked);
+      if (/email/i.test(blocked)) onGuestEmailInvalid?.();
+      onError(blocked);
+      return;
+    }
+    const normalizedGuestEmail = guestEmail?.trim();
 
     if (!Number.isFinite(total) || total <= 0) {
       reportError('Apple Pay could not start because the order total is invalid.');
