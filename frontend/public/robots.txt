@@ -33,8 +33,23 @@ Disallow: /security-test.html
 
 # Prevent indexing of paginated/filtered query strings
 # (canonical pages without params are still indexed)
+Disallow: /*?
+Disallow: /dog?
+Disallow: /cat?
+Disallow: /bird?
+Disallow: /fish?
+Disallow: /reptile?
+Disallow: /small-animal?
+Disallow: /small-pet?
+Disallow: /other-animals?
+Disallow: /products?
 Disallow: /products?page=
 Disallow: /products?sort=
+Disallow: /category?
+Disallow: /brand?
+Disallow: /learning?
+Disallow: /care-guides?
+Disallow: /search
 Disallow: /search?
 
 # Allow all high-value shop pages explicitly (Allow: / already covers them)

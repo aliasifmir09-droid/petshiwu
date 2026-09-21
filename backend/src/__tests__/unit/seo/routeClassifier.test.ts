@@ -265,6 +265,19 @@ describe('full-site crawl list', () => {
     }
   });
 
+  test('robots.txt blocks query-string crawl waste without blocking shop pages', () => {
+    const robots = fs.readFileSync(
+      path.join(__dirname, '../../../../../frontend/public/robots.txt'),
+      'utf8'
+    );
+    expect(robots).toContain('Disallow: /*?');
+    expect(robots).toContain('Disallow: /dog?');
+    expect(robots).toContain('Disallow: /products?');
+    expect(robots).toContain('Disallow: /search');
+    expect(robots).toContain('Allow: /dog');
+    expect(robots).toContain('Allow: /products');
+  });
+
   test('small-pet catalog URLs canonicalize to /small-animal', () => {
     expect(canonicalPetSlug('small-pet')).toBe('small-animal');
     expect(canonicalPetSlug('dog')).toBe('dog');
