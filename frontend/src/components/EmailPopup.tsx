@@ -103,7 +103,7 @@ const EmailPopup = () => {
           <X size={22} />
         </button>
 
-        <div className="relative hidden min-h-[420px] w-1/2 bg-[#F4F1EA] sm:block">
+        <div className="relative hidden min-h-[420px] w-1/2 shrink-0 bg-[#F4F1EA] sm:block">
           <picture>
             <source srcSet="/hero-side-play.webp" type="image/webp" />
             <img
@@ -114,7 +114,7 @@ const EmailPopup = () => {
           </picture>
         </div>
 
-        <div className="w-full bg-[#0F3D2E] px-7 py-10 text-white sm:w-1/2 sm:px-8">
+        <div className="flex-1 bg-[#0F3D2E] px-7 py-10 text-white sm:px-8">
           {!submitted ? (
             <>
               <h2 id="email-popup-title" className="text-3xl font-black leading-tight tracking-tight sm:text-4xl">
