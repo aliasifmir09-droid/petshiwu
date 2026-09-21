@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useCartStore, useCartHasHydrated } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
@@ -115,6 +115,7 @@ const Cart = () => {
   const [shareId, setShareId] = useState<string | null>(null);
   const [shareLinkCopied, setShareLinkCopied] = useState(false);
   const [estimatedDelivery, setEstimatedDelivery] = useState<Date | null>(null);
+  const lastSavedCartRef = useRef('');
 
   useEffect(() => {
     const shareParam = searchParams.get('share');
@@ -153,22 +154,24 @@ const Cart = () => {
 
   useEffect(() => {
     if (items.length === 0) return;
-    const saveCartToBackend = async () => {
+    const cartItems = items.map((item) => ({
+      product: safeProductId(item),
+      variant: item?.variant || null,
+      quantity: safeQuantity(item),
+      price: safePrice(item),
+      name: safeName(item),
+      image: safeImage(item),
+    })).filter((i) => i.product);
+    if (cartItems.length === 0) return;
+    const payload = JSON.stringify({ items: cartItems, shareId: shareId || null });
+    if (payload === lastSavedCartRef.current) return;
+    const timer = window.setTimeout(async () => {
+      lastSavedCartRef.current = payload;
       try {
-        const cartItems = items.map((item) => ({
-          product: safeProductId(item),
-          variant: item?.variant || null,
-          quantity: safeQuantity(item),
-          price: safePrice(item),
-          name: safeName(item),
-          image: safeImage(item),
-        })).filter((i) => i.product);
-        if (cartItems.length > 0) {
-          await cartService.saveCart(cartItems, shareId || undefined);
-        }
+        await cartService.saveCart(cartItems, shareId || undefined);
       } catch { }
-    };
-    saveCartToBackend();
+    }, 400);
+    return () => window.clearTimeout(timer);
   }, [items, shareId]);
 
   const generateShareLink = async () => {
