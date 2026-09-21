@@ -103,7 +103,7 @@ const EmailPopup = () => {
           <X size={22} />
         </button>
 
-        <div className="relative hidden min-h-[420px] w-[46%] bg-[#F4F1EA] sm:block">
+        <div className="relative hidden min-h-[420px] w-1/2 bg-[#F4F1EA] sm:block">
           <picture>
             <source srcSet="/hero-side-play.webp" type="image/webp" />
             <img
