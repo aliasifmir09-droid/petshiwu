@@ -51,8 +51,9 @@ describe('contact forms post to the real API', () => {
     expect(src).toContain("source: 'popup'");
     expect(src).toContain('FREEDOM20');
     expect(src).toContain('EMAIL_POPUP_DELAY_MS');
-    expect(src).toContain('Unlock 20% off on your first order');
-    expect(src).toContain('Email me 20% off');
+    expect(src).toContain('/hero-side-play.webp');
+    expect(src).toContain('/hero-side-play.jpg');
+    expect(src).not.toContain('/pets/cat.jpg');
     expect(src).not.toContain('WELCOME10');
     expect(appSrc).toContain('<EmailPopup />');
   });

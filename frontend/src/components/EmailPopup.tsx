@@ -92,7 +92,7 @@ const EmailPopup = () => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="email-popup-title"
-        className="relative flex w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl"
+        className="relative flex w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl min-h-[420px]"
       >
         <button
           type="button"
@@ -103,12 +103,15 @@ const EmailPopup = () => {
           <X size={22} />
         </button>
 
-        <div className="hidden w-1/2 bg-[#F4F1EA] sm:flex sm:items-center sm:justify-center">
-          <img
-            src="/pets/cat.jpg"
-            alt="Cat stretching toward a first-order offer"
-            className="h-full w-full object-cover"
-          />
+        <div className="relative hidden min-h-[420px] w-[46%] bg-[#F4F1EA] sm:block">
+          <picture>
+            <source srcSet="/hero-side-play.webp" type="image/webp" />
+            <img
+              src="/hero-side-play.jpg"
+              alt="Puppy, kitten, and friends with a Petshiwu shopping bag"
+              className="absolute inset-0 h-full w-full object-cover object-[center_22%]"
+            />
+          </picture>
         </div>
 
         <div className="w-full bg-[#0F3D2E] px-7 py-10 text-white sm:w-1/2 sm:px-8">
