@@ -25,7 +25,7 @@ import Blog from '../models/Blog';
 import CareGuide from '../models/CareGuide';
 import Category from '../models/Category';
 import logger from '../utils/logger';
-import { classifyRoute, INDEXABLE_LANDING_PATHS } from '../seo/routeClassifier';
+import { canonicalPetSlug, classifyRoute, INDEXABLE_LANDING_PATHS } from '../seo/routeClassifier';
 import {
   NEIGHBORHOOD_PAGE_REGISTRY,
   getNeighborhoodRoute,
@@ -746,7 +746,8 @@ const withTimeout = <T>(promise: Promise<T>, ms = 3000): Promise<T> => {
  */
 export const buildCanonicalProductPath = (product: any): string | null => {
   const slug = typeof product?.slug === 'string' ? product.slug.trim() : '';
-  const petType = typeof product?.petType === 'string' ? product.petType.trim() : '';
+  const rawPet = typeof product?.petType === 'string' ? product.petType.trim() : '';
+  const petType = rawPet ? canonicalPetSlug(rawPet) : '';
   const categorySlug = product?.category && typeof product.category === 'object'
     ? (typeof product.category.slug === 'string' ? product.category.slug.trim() : '')
     : '';
@@ -813,11 +814,123 @@ const fetchCategory = async (slug: string) => {
   );
 };
 
+const collectionProductQuery = (): Record<string, unknown> => ({
+  isActive: true,
+  $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+});
+
+const petTypeQueryValue = (petType?: string): unknown => {
+  if (!petType || petType === 'all' || petType === 'products') return undefined;
+  const canonical = canonicalPetSlug(petType);
+  if (canonical === 'small-animal' || petType === 'small-pet') {
+    return { $in: ['small-animal', 'small-pet'] };
+  }
+  return petType;
+};
+
+const fetchCollectionProducts = async (opts: {
+  petType?: string;
+  categoryId?: unknown;
+  limit?: number;
+}): Promise<any[]> => {
+  const query: Record<string, unknown> = collectionProductQuery();
+  const pet = petTypeQueryValue(opts.petType);
+  if (pet) query.petType = pet;
+  if (opts.categoryId) query.category = opts.categoryId;
+  return withTimeout(
+    Product.find(query)
+      .select('name slug basePrice brand petType description category')
+      .populate({ path: 'category', select: 'name slug' })
+      .sort({ averageRating: -1, inStock: -1, createdAt: -1 })
+      .limit(opts.limit ?? 40)
+      .lean()
+      .exec()
+  );
+};
+
+const fetchPetTypeCategories = async (petType: string): Promise<any[]> => {
+  const pet = petTypeQueryValue(petType);
+  const query: Record<string, unknown> = { isActive: true };
+  if (pet) query.petType = pet;
+  return withTimeout(
+    Category.find(query)
+      .select('name slug petType')
+      .sort({ position: 1, name: 1 })
+      .limit(40)
+      .lean()
+      .exec()
+  );
+};
+
 // ---------------------------------------------------------------------------
 // HTML builders
 // ---------------------------------------------------------------------------
 
 const BASE = 'https://www.petshiwu.com';
+
+const PET_HUB_PATHS = new Set([
+  '/dog',
+  '/cat',
+  '/bird',
+  '/fish',
+  '/reptile',
+  '/small-animal',
+  '/small-pet',
+  '/other-animals',
+]);
+
+export const SHOP_DEPARTMENT_LINKS: Array<{ path: string; name: string }> = [
+  { path: '/dog', name: 'Dog supplies' },
+  { path: '/cat', name: 'Cat supplies' },
+  { path: '/dog/food', name: 'Dog food' },
+  { path: '/cat/food', name: 'Cat food' },
+  { path: '/dog/dry-food', name: 'Dry dog food' },
+  { path: '/products', name: 'All products' },
+  { path: '/brand', name: 'Shop brands' },
+];
+
+/** Absolute canonical product URL, or null when the record cannot build one. Never /products/{slug}. */
+export const canonicalProductHref = (product: any): string | null => {
+  const path = buildCanonicalProductPath(product);
+  return path ? `${BASE}${path}` : null;
+};
+
+export const productAnchorHtml = (product: any): string => {
+  const href = canonicalProductHref(product);
+  const name = product?.name;
+  if (!href || !name) return '';
+  const price = typeof product.basePrice === 'number' && Number.isFinite(product.basePrice)
+    ? ` — $${Number(product.basePrice).toFixed(2)}`
+    : '';
+  const brand = product.brand ? ` by ${esc(String(product.brand))}` : '';
+  return `<li><a href="${href}">${esc(String(name))}${brand}${price}</a></li>`;
+};
+
+export const productAnchorsHtml = (products: any[]): string =>
+  (products || []).map(productAnchorHtml).filter(Boolean).join('\n');
+
+export const buildShopDepartmentLinkHtml = (): string => {
+  const links = SHOP_DEPARTMENT_LINKS.map(
+    (item) => `<li><a href="${BASE}${item.path}">${esc(item.name)}</a></li>`
+  ).join('');
+  return `<h2>Shop pet supplies</h2><ul>${links}</ul>`;
+};
+
+const productItemListSchema = (name: string, products: any[]) => {
+  const items = (products || []).filter((p) => canonicalProductHref(p) && p?.name);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name,
+    numberOfItems: items.length,
+    itemListElement: items.map((p: any, i: number) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: canonicalProductHref(p),
+      name: p.name,
+    })),
+  };
+};
 
 /** Price Google Shopping must see in first-wave HTML (not only after React hydrates). */
 export const productOfferPrice = (product: {
@@ -1244,9 +1357,16 @@ export const buildCareGuideHtml = (template: string, guide: any): string => {
   return html;
 };
 
-const buildCategoryHtml = (template: string, category: any, petType?: string, canonicalPath?: string): string => {
+export const buildCategoryHtml = (
+  template: string,
+  category: any,
+  petType?: string,
+  canonicalPath?: string,
+  products: any[] = [],
+): string => {
   const catName = category.name ?? '';
-  const petLabel = petType === 'dog' ? 'Dog' : petType === 'cat' ? 'Cat' : petType === 'bird' ? 'Bird' : petType === 'fish' ? 'Fish' : petType === 'reptile' ? 'Reptile' : petType === 'small-pet' ? 'Small Pet' : '';
+  const petSlug = petType && petType !== 'all' ? canonicalPetSlug(petType) : '';
+  const petLabel = petType === 'dog' ? 'Dog' : petType === 'cat' ? 'Cat' : petType === 'bird' ? 'Bird' : petType === 'fish' ? 'Fish' : petType === 'reptile' ? 'Reptile' : petType === 'small-pet' || petType === 'small-animal' ? 'Small Pet' : '';
   const title = petLabel
     ? `${catName} — ${petLabel} Supplies Delivered NYC | Petshiwu`
     : `${catName} | Petshiwu`;
@@ -1259,14 +1379,14 @@ const buildCategoryHtml = (template: string, category: any, petType?: string, ca
   // between nested URLs like /dog/food--treats/puppy-food and slug-only form)
   const url = canonicalPath
     ? `${BASE}${canonicalPath}`
-    : petType && petType !== 'all'
-      ? `${BASE}/${petType}/${category.slug}`
+    : petSlug
+      ? `${BASE}/${petSlug}/${category.slug}`
       : `${BASE}/category/${category.slug}`;
 
   const breadcrumbItems: unknown[] = [
     { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
-    ...(petLabel && petType ? [{ '@type': 'ListItem', position: 2, name: `${petLabel}s`, item: `${BASE}/${petType}` }] : []),
-    { '@type': 'ListItem', position: petType ? 3 : 2, name: catName, item: url },
+    ...(petLabel && petSlug ? [{ '@type': 'ListItem', position: 2, name: `${petLabel}s`, item: `${BASE}/${petSlug}` }] : []),
+    { '@type': 'ListItem', position: petSlug ? 3 : 2, name: catName, item: url },
   ];
 
   const breadcrumbSchema = {
@@ -1283,6 +1403,8 @@ const buildCategoryHtml = (template: string, category: any, petType?: string, ca
     url,
   };
 
+  const productList = productAnchorsHtml(products);
+  const itemList = productItemListSchema(catName, products);
   const injectedTags = `
   <!-- Bot renderer: category-specific meta -->
   <meta property="og:title" content="${esc(title)}" />
@@ -1290,7 +1412,18 @@ const buildCategoryHtml = (template: string, category: any, petType?: string, ca
   <meta property="og:url" content="${esc(url)}" />
   <meta property="og:type" content="website" />
   <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
-  <script type="application/ld+json">${JSON.stringify(collectionSchema)}</script>`;
+  <script type="application/ld+json">${JSON.stringify(collectionSchema)}</script>
+  ${itemList.numberOfItems > 0 ? `<script type="application/ld+json">${JSON.stringify(itemList)}</script>` : ''}`;
+
+  const bodyContent = `
+<div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
+  <p>${esc(description)}</p>
+  ${petSlug ? `<p><a href="${BASE}/${petSlug}">All ${esc(petLabel || petSlug)} products</a></p>` : ''}
+  ${productList
+    ? `<h2>Products</h2><ul style="list-style:none;padding:0;columns:2">${productList}</ul>`
+    : '<p>Browse this category on Petshiwu.</p>'}
+  <p><a href="${BASE}/products">Browse all products</a></p>
+</div>`;
 
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
@@ -1299,6 +1432,53 @@ const buildCategoryHtml = (template: string, category: any, petType?: string, ca
   html = injectOgTags(html, title, description, url);
   html = injectBeforeHeadClose(html, injectedTags);
   html = injectH1(html, catName);
+  html = html.replace(/<div id="root">.*?<\/div>/s, `<div id="root">${bodyContent}</div>`) ||
+         html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+  return html;
+};
+
+export const buildPetTypeCollectionHtml = (
+  template: string,
+  petPath: string,
+  products: any[] = [],
+  categories: Array<{ name?: string; slug?: string }> = [],
+): string => {
+  const cleanPath = petPath.split('?')[0].replace(/\/$/, '') || '/';
+  const petSlug = canonicalPetSlug(cleanPath.replace(/^\//, ''));
+  const meta = STATIC_PAGES[cleanPath] ?? STATIC_PAGES[`/${petSlug}`] ?? {
+    title: 'Pet Supplies | Petshiwu',
+    description: 'Shop pet supplies at Petshiwu. Free shipping over $49.',
+  };
+  const h1 = meta.title.replace(/\s*\|\s*Petshiwu\s*$/i, '').trim();
+  const canonicalUrl = `${BASE}/${petSlug}`;
+  const categoryList = categories
+    .filter((c) => c.slug && c.name)
+    .map((c) => `<li><a href="${BASE}/${petSlug}/${esc(String(c.slug))}">${esc(String(c.name))}</a></li>`)
+    .join('\n');
+  const productList = productAnchorsHtml(products);
+  const itemList = productItemListSchema(h1, products);
+  const bodyContent = `
+<div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
+  <p>${esc(meta.description)}</p>
+  ${categoryList ? `<h2>Shop by category</h2><ul>${categoryList}</ul>` : ''}
+  ${productList ? `<h2>Popular products</h2><ul style="list-style:none;padding:0;columns:2">${productList}</ul>` : ''}
+  <p><a href="${BASE}/products">Browse all products</a></p>
+</div>`;
+
+  let html = injectTitle(template, meta.title);
+  html = injectDescription(html, meta.description);
+  html = injectCanonical(html, canonicalUrl);
+  html = injectHreflang(html, canonicalUrl);
+  html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
+  html = injectH1(html, h1);
+  if (itemList.numberOfItems > 0) {
+    html = injectBeforeHeadClose(
+      html,
+      `<script type="application/ld+json">${JSON.stringify(itemList)}</script>`
+    );
+  }
+  html = html.replace(/<div id="root">.*?<\/div>/s, `<div id="root">${bodyContent}</div>`) ||
+         html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
   return html;
 };
 
@@ -1494,7 +1674,7 @@ export const buildReturnPolicyHtml = (template: string): string => {
   return html;
 };
 
-export const buildHomepageHtml = (template: string): string => {
+export const buildHomepageHtml = (template: string, products: any[] = []): string => {
   const meta = STATIC_PAGES['/'];
   const pageUrl = BASE;
 
@@ -1657,7 +1837,11 @@ export const buildHomepageHtml = (template: string): string => {
   html = injectHreflang(html, pageUrl);
   html = injectOgTags(html, meta.title, meta.description, pageUrl);
   html = injectBeforeHeadClose(html, injectedTags);
-  const hubNav = `<div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">${buildNycHubLinkHtml()}</div>`;
+  const productList = productAnchorsHtml(products);
+  const productBlock = productList
+    ? `<h2>Popular products</h2><ul style="list-style:none;padding:0;columns:2">${productList}</ul>`
+    : '';
+  const hubNav = `<div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">${buildShopDepartmentLinkHtml()}${buildNycHubLinkHtml()}${productBlock}</div>`;
   if (html.includes('<div id="root"></div>')) {
     html = html.replace('<div id="root"></div>', `<div id="root">${hubNav}</div>`);
   }
@@ -1665,36 +1849,19 @@ export const buildHomepageHtml = (template: string): string => {
 };
 
 const buildProductListHtml = async (template: string): Promise<string> => {
-  const BASE_URL = 'https://www.petshiwu.com';
-  const canonicalUrl = `${BASE_URL}/products`;
-
-  // Fetch up to 60 active products for Google to crawl
-  const products = await Product.find({ isActive: true })
-    .select('name slug basePrice brand petType description')
-    .sort({ createdAt: -1 })
-    .limit(60)
-    .lean();
-
-  const productLinks = products
-    .filter((p: any) => p.slug)
-    .map((p: any) => {
-      const url = `${BASE_URL}/products/${esc(p.slug)}`;
-      const price = p.basePrice ? ` — $${p.basePrice.toFixed(2)}` : '';
-      const brand = p.brand ? ` by ${esc(String(p.brand))}` : '';
-      const desc = p.description ? ` — ${esc(truncate(stripTags(String(p.description)), 80))}` : '';
-      return `<li><a href="${url}">${esc(p.name)}${brand}${price}</a>${desc}</li>`;
-    })
-    .join('\n');
+  const canonicalUrl = `${BASE}/products`;
+  const products = await fetchCollectionProducts({ limit: 80 });
+  const productLinks = productAnchorsHtml(products);
 
   const bodyContent = `
 <div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
   <h2>All Pet Products — Petshiwu</h2>
   <p>Browse 4,000+ premium pet products for dogs, cats, birds, fish, reptiles, and small animals.
      Free shipping on orders over $49. Based in Jackson Heights, NY.</p>
-  <ul style="list-style:none;padding:0;columns:2">
-    ${productLinks}
-  </ul>
-  <p><a href="${BASE_URL}">← Back to Petshiwu</a></p>
+  ${productLinks
+    ? `<ul style="list-style:none;padding:0;columns:2">${productLinks}</ul>`
+    : '<p>Browse the catalog on Petshiwu.</p>'}
+  <p><a href="${BASE}">← Back to Petshiwu</a> · <a href="${BASE}/dog">Dog</a> · <a href="${BASE}/cat">Cat</a></p>
 </div>`;
 
   const meta = STATIC_PAGES['/products'];
@@ -1875,32 +2042,9 @@ export const buildSeoLandingHtmlFromProducts = (
   };
   const h1 = meta.title.replace(/\s*\|\s*Petshiwu\s*$/i, '').trim();
 
-  const items = products.filter((p) => p.slug && p.name);
-  const productLinks = items
-    .map((p) => {
-      const path = buildCanonicalProductPath(p) || `/products/${p.slug}`;
-      const url = `${BASE}${path}`;
-      const price = typeof p.basePrice === 'number' ? ` — $${Number(p.basePrice).toFixed(2)}` : '';
-      const brand = p.brand ? ` by ${esc(String(p.brand))}` : '';
-      return `<li><a href="${url}">${esc(String(p.name))}${brand}${price}</a></li>`;
-    })
-    .join('\n');
-
-  const itemListSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    name: h1,
-    numberOfItems: items.length,
-    itemListElement: items.map((p, i) => {
-      const path = buildCanonicalProductPath(p) || `/products/${p.slug}`;
-      return {
-        '@type': 'ListItem',
-        position: i + 1,
-        url: `${BASE}${path}`,
-        name: p.name,
-      };
-    }),
-  };
+  const items = products.filter((p) => canonicalProductHref(p) && p.name);
+  const productLinks = productAnchorsHtml(items);
+  const itemListSchema = productItemListSchema(h1, items);
 
   const hubShopHtml = isNycShoppableHub(cleanPath)
     ? `${buildNycHubShopHtml()}${buildNycHubLinkHtml(cleanPath)}`
@@ -1980,16 +2124,8 @@ export const buildBrandCollectionHtml = (
         intro: BRAND_INDEX_META.intro,
       };
 
-  const items = products.filter((p) => p.slug && p.name);
-  const productLinks = items
-    .map((p) => {
-      const path = buildCanonicalProductPath(p) || `/products/${p.slug}`;
-      const url = `${BASE}${path}`;
-      const price = typeof p.basePrice === 'number' ? ` — $${Number(p.basePrice).toFixed(2)}` : '';
-      const productBrand = p.brand ? ` by ${esc(String(p.brand))}` : '';
-      return `<li><a href="${url}">${esc(String(p.name))}${productBrand}${price}</a></li>`;
-    })
-    .join('\n');
+  const items = products.filter((p) => canonicalProductHref(p) && p.name);
+  const productLinks = productAnchorsHtml(items);
 
   const related = (brand?.relatedSlugs || [])
     .map((slug) => getShopBrand(slug))
@@ -2009,15 +2145,12 @@ export const buildBrandCollectionHtml = (
     name: meta.h1,
     numberOfItems: brand ? items.length : SHOP_BRANDS.length,
     itemListElement: brand
-      ? items.map((p, i) => {
-          const path = buildCanonicalProductPath(p) || `/products/${p.slug}`;
-          return {
-            '@type': 'ListItem',
-            position: i + 1,
-            url: `${BASE}${path}`,
-            name: p.name,
-          };
-        })
+      ? items.map((p, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          url: canonicalProductHref(p),
+          name: p.name,
+        }))
       : SHOP_BRANDS.map((item, i) => ({
           '@type': 'ListItem',
           position: i + 1,
@@ -2272,7 +2405,20 @@ export const createBotRenderer = (distPath: string) => {
             if (category) {
               // Derive petType from first URL segment, pass actual path as canonical
               const petTypeFromPath = req.path.split('/').filter(Boolean)[0] ?? '';
-              html = buildCategoryHtml(template, category, petTypeFromPath, req.path);
+              let nestedProducts: any[] = [];
+              try {
+                nestedProducts = await fetchCollectionProducts({
+                  petType: petTypeFromPath,
+                  categoryId: category._id,
+                  limit: 40,
+                });
+              } catch (err) {
+                logger.warn(
+                  'Nested category product fetch failed:',
+                  err instanceof Error ? err.message : err
+                );
+              }
+              html = buildCategoryHtml(template, category, petTypeFromPath, req.path, nestedProducts);
             } else {
               notFound = true;
             }
@@ -2295,7 +2441,42 @@ export const createBotRenderer = (distPath: string) => {
           }
         } else if (page?.type === 'category') {
           const category = await fetchCategory(page.slug);
-          if (category) html = buildCategoryHtml(template, category, (page as any).petType);
+          if (category) {
+            let categoryProducts: any[] = [];
+            try {
+              categoryProducts = await fetchCollectionProducts({
+                petType: (page as any).petType,
+                categoryId: category._id,
+                limit: 40,
+              });
+            } catch (err) {
+              logger.warn(
+                'Category product fetch failed:',
+                err instanceof Error ? err.message : err
+              );
+            }
+            html = buildCategoryHtml(
+              template,
+              category,
+              (page as any).petType,
+              req.path,
+              categoryProducts
+            );
+          }
+        } else if (PET_HUB_PATHS.has(reqPathClean)) {
+          try {
+            const petType = reqPathClean.slice(1);
+            const [petProducts, petCategories] = await Promise.all([
+              fetchCollectionProducts({ petType, limit: 40 }),
+              fetchPetTypeCategories(petType),
+            ]);
+            html = buildPetTypeCollectionHtml(template, reqPathClean, petProducts, petCategories);
+          } catch (err) {
+            logger.warn(
+              'Pet type collection fetch failed:',
+              err instanceof Error ? err.message : err
+            );
+          }
         } else if (page?.type === 'neighborhood') {
           html = buildNeighborhoodHtml(
             template,
@@ -2306,7 +2487,16 @@ export const createBotRenderer = (distPath: string) => {
             page.nearbyAreas,
           );
         } else if (req.path === '/' || req.path === '') {
-          html = buildHomepageHtml(template);
+          let homeProducts: any[] = [];
+          try {
+            homeProducts = await fetchCollectionProducts({ limit: 24 });
+          } catch (err) {
+            logger.warn(
+              'Homepage product fetch failed:',
+              err instanceof Error ? err.message : err
+            );
+          }
+          html = buildHomepageHtml(template, homeProducts);
         } else if (req.path === '/products' || req.path === '/products/') {
           // SSR product listing for Google — inject real product links
           html = await buildProductListHtml(template);

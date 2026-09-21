@@ -2,16 +2,21 @@ import {
   buildBlogHtml,
   buildCanonicalProductPath,
   buildCareGuideHtml,
+  buildCategoryHtml,
   buildEducationHubHtml,
   buildHomepageHtml,
+  buildPetTypeCollectionHtml,
   buildProductHtml,
   buildReturnPolicyHtml,
   buildSeoLandingHtmlFromProducts,
   buildBrandCollectionHtml,
+  buildShopDepartmentLinkHtml,
   buildStaticLearningHtml,
+  canonicalProductHref,
   extractFaqPairs,
   landingTaxonomyForPath,
   normalizeReqPath,
+  productAnchorHtml,
   productOfferPrice,
   productRedirectTarget,
   sanitizeArticleHtml,
@@ -39,8 +44,12 @@ describe('botRenderer product canonical helpers', () => {
       expect(buildCanonicalProductPath({ slug: 'x', petType: 'cat', category: 'wet-food' })).toBeNull();
     });
 
-    it('returns null when slug is missing', () => {
-      expect(buildCanonicalProductPath({ petType: 'cat', category: { slug: 'wet-food' } })).toBeNull();
+    it('maps small-pet to the canonical /small-animal host', () => {
+      expect(buildCanonicalProductPath({
+        slug: 'oxbow-hay',
+        petType: 'small-pet',
+        category: { slug: 'hay' },
+      })).toBe('/small-animal/hay/oxbow-hay');
     });
   });
 
@@ -117,6 +126,9 @@ describe('buildHomepageHtml delivery-only schema', () => {
     expect(html).toContain('href="https://www.petshiwu.com/pet-supplies-delivery-nyc"');
     expect(html).toContain('href="https://www.petshiwu.com/pet-supplies-queens-ny"');
     expect(html).toMatch(/nationwide shipping next/i);
+    expect(html).toContain('href="https://www.petshiwu.com/dog/food"');
+    expect(html).toContain('href="https://www.petshiwu.com/dog"');
+    expect(html).toContain('href="https://www.petshiwu.com/products"');
   });
 
   it('marks the call center as 24/7', () => {
@@ -458,6 +470,69 @@ describe('education hub and static learning HTML', () => {
     expect(html).toContain('/blog/fresh-dog-food');
     expect(html).toContain('"@type":"Article"');
     expect(html).toContain('Frequently asked questions');
+  });
+});
+
+describe('first-wave shop collection links', () => {
+  const stella = {
+    name: "Stella & Chewy's Freeze-Dried Raw Dinner Patties",
+    slug: 'stella-and-chewys-freeze-dried-raw-dinner-patties-all-life-stages-dry-dog-food-super-beef',
+    brand: "Stella & Chewy's",
+    basePrice: 32.99,
+    petType: 'dog',
+    category: { slug: 'dry-food', name: 'Dry Food' },
+  };
+
+  it('never falls back to legacy /products/{slug} hrefs', () => {
+    expect(canonicalProductHref(stella)).toBe(
+      'https://www.petshiwu.com/dog/dry-food/stella-and-chewys-freeze-dried-raw-dinner-patties-all-life-stages-dry-dog-food-super-beef'
+    );
+    expect(canonicalProductHref({ slug: 'no-category', petType: 'dog' })).toBeNull();
+    expect(productAnchorHtml({ slug: 'no-category', petType: 'dog', name: 'Skip me' })).toBe('');
+    expect(productAnchorHtml(stella)).toContain('/dog/dry-food/stella-and-chewys-freeze-dried-raw-dinner-patties-all-life-stages-dry-dog-food-super-beef');
+    expect(productAnchorHtml(stella)).not.toContain('/products/stella');
+  });
+
+  it('puts canonical product and category links in /dog bot HTML', () => {
+    const html = buildPetTypeCollectionHtml(
+      ARTICLE_TEMPLATE,
+      '/dog',
+      [stella],
+      [{ name: 'Food', slug: 'food' }, { name: 'Dry Food', slug: 'dry-food' }]
+    );
+    expect(html).toContain('href="https://www.petshiwu.com/dog/food"');
+    expect(html).toContain('href="https://www.petshiwu.com/dog/dry-food"');
+    expect(html).toContain(
+      'href="https://www.petshiwu.com/dog/dry-food/stella-and-chewys-freeze-dried-raw-dinner-patties-all-life-stages-dry-dog-food-super-beef"'
+    );
+    expect(html).not.toContain('/products/stella-and-chewys');
+    expect(html).toContain('rel="canonical" href="https://www.petshiwu.com/dog"');
+    expect(html).toContain('"@type":"ItemList"');
+  });
+
+  it('puts canonical product links in /dog/food bot HTML', () => {
+    const html = buildCategoryHtml(
+      ARTICLE_TEMPLATE,
+      { name: 'Food', slug: 'food', description: 'Dog food from Petshiwu.' },
+      'dog',
+      '/dog/food',
+      [stella]
+    );
+    expect(html).toContain('rel="canonical" href="https://www.petshiwu.com/dog/food"');
+    expect(html).toContain(
+      'href="https://www.petshiwu.com/dog/dry-food/stella-and-chewys-freeze-dried-raw-dinner-patties-all-life-stages-dry-dog-food-super-beef"'
+    );
+    expect(html).toContain('href="https://www.petshiwu.com/dog"');
+    expect(html).not.toContain('/products/stella-and-chewys');
+  });
+
+  it('lists shop departments on the homepage even without a product fetch', () => {
+    expect(buildShopDepartmentLinkHtml()).toContain('href="https://www.petshiwu.com/dog/food"');
+    const html = buildHomepageHtml(ARTICLE_TEMPLATE, [stella]);
+    expect(html).toContain('href="https://www.petshiwu.com/dog/food"');
+    expect(html).toContain(
+      'href="https://www.petshiwu.com/dog/dry-food/stella-and-chewys-freeze-dried-raw-dinner-patties-all-life-stages-dry-dog-food-super-beef"'
+    );
   });
 });
 
