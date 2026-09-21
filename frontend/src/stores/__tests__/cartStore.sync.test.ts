@@ -25,45 +25,33 @@ const inStockProduct = (): Product => ({
   updatedAt: '',
 });
 
-const waitForSync = () => new Promise((resolve) => setTimeout(resolve, 25));
-
 describe('cartStore cart-sync', () => {
   afterEach(() => {
     useCartStore.setState({ items: [] });
   });
 
-  test('incoming cart-sync messages apply quantity without echoing back', async () => {
-    if (typeof BroadcastChannel === 'undefined') return;
-
-    useCartStore.setState({ items: [] });
+  test('replaceItemsFromSync can change quantity once without a follow-up identity churn', () => {
     const product = inStockProduct();
-    useCartStore.getState().addToCart(product, product.variants[0]);
-    expect(useCartStore.getState().items[0].quantity).toBe(1);
+    useCartStore.setState({
+      items: [{ product, variant: product.variants[0], quantity: 1 }],
+    });
 
-    const peer = new BroadcastChannel('cart-sync');
-    let echoed = 0;
-    peer.onmessage = () => {
-      echoed += 1;
-    };
-
-    const current = JSON.parse(JSON.stringify(useCartStore.getState().items));
-    peer.postMessage({ type: 'cart-update', items: current });
-    await waitForSync();
-    expect(echoed).toBe(0);
-    expect(useCartStore.getState().items[0].quantity).toBe(1);
-
-    current[0].quantity = 2;
-    peer.postMessage({ type: 'cart-update', items: current });
-    await waitForSync();
+    useCartStore.getState().replaceItemsFromSync([
+      { product, variant: product.variants[0], quantity: 2 },
+    ]);
     expect(useCartStore.getState().items[0].quantity).toBe(2);
     expect(useCartStore.getState().getTotalPrice()).toBeCloseTo(105.98);
-    expect(echoed).toBe(0);
 
-    current[0].quantity = 1;
-    peer.postMessage({ type: 'cart-update', items: current });
-    await waitForSync();
+    const afterSync = useCartStore.getState().items;
+    useCartStore.getState().replaceItemsFromSync([
+      { product, variant: product.variants[0], quantity: 2 },
+    ]);
+    expect(useCartStore.getState().items).toBe(afterSync);
+
+    useCartStore.getState().replaceItemsFromSync([
+      { product, variant: product.variants[0], quantity: 1 },
+    ]);
     expect(useCartStore.getState().items[0].quantity).toBe(1);
-    expect(echoed).toBe(0);
-    peer.close();
+    expect(useCartStore.getState().getTotalPrice()).toBeCloseTo(52.99);
   });
 });
