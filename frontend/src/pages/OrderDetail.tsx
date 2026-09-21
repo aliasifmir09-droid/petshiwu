@@ -2,7 +2,9 @@ import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orderService } from '@/services/orders';
 import ProductReviewForm from '@/components/ProductReviewForm';
-import { Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, ArrowLeft, RotateCcw } from 'lucide-react';
+import { CheckCircle, XCircle, MapPin, CreditCard, ArrowLeft, RotateCcw, Phone } from 'lucide-react';
+import OrderShippingStatus from '@/components/OrderShippingStatus';
+import { TONIGHT } from '@/data/tonightDelivery';
 import { useState, useEffect, useRef } from 'react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import DonationModal from '@/components/DonationModal';
@@ -15,6 +17,7 @@ import { trackOrderCancel } from '@/utils/analytics';
 import { useCartStore } from '@/stores/cartStore';
 import { productsForReorder } from '@/utils/reorderFromOrder';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
+import { formatNyDateTime } from '@/utils/orderTracking';
 
 const OrderDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -61,7 +64,13 @@ const OrderDetail = () => {
       return orderService.getOrder(orderId);
     },
     enabled: !!id && id !== '[object Object]',
-    retry: false // Don't retry on error
+    retry: false, // Don't retry on error
+    refetchInterval: (query) => {
+      const current = query.state.data;
+      if (!current) return false;
+      if (current.orderStatus === 'delivered' || current.orderStatus === 'cancelled') return false;
+      return 30000;
+    },
   });
 
   // After a fresh checkout, blast fireworks first so the shopper knows it landed.
@@ -121,40 +130,6 @@ const OrderDetail = () => {
       showToast('Could not add those items to your cart.', 'error');
     } finally {
       setReordering(false);
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Clock className="text-yellow-600" size={24} />;
-      case 'processing':
-        return <Package className="text-blue-600" size={24} />;
-      case 'shipped':
-        return <Truck className="text-purple-600" size={24} />;
-      case 'delivered':
-        return <CheckCircle className="text-green-600" size={24} />;
-      case 'cancelled':
-        return <XCircle className="text-red-600" size={24} />;
-      default:
-        return <Clock className="text-gray-600" size={24} />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'processing':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'shipped':
-        return 'bg-purple-100 text-purple-800 border-purple-300';
-      case 'delivered':
-        return 'bg-green-100 text-green-800 border-green-300';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800 border-red-300';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
 
@@ -239,16 +214,9 @@ const OrderDetail = () => {
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
               <h1 className="text-3xl font-bold mb-2">Order {order.orderNumber}</h1>
-              <p className="text-gray-600">
-                Placed on {new Date(order.createdAt).toLocaleDateString()} at{' '}
-                {new Date(order.createdAt).toLocaleTimeString()}
-              </p>
+              <p className="text-gray-600">Placed {formatNyDateTime(order.createdAt)}</p>
             </div>
             <div className="flex items-center gap-4">
-              <div className={`flex items-center gap-3 px-6 py-3 rounded-lg border-2 ${getStatusColor(order.orderStatus)}`}>
-                {getStatusIcon(order.orderStatus)}
-                <span className="font-bold text-lg capitalize">{order.orderStatus}</span>
-              </div>
               {order.orderStatus !== 'cancelled' && (
                 <button
                   type="button"
@@ -275,54 +243,9 @@ const OrderDetail = () => {
             </div>
           </div>
 
-          {/* Order Timeline */}
-          <div className="relative">
-            <div className="flex justify-between items-center">
-              {['pending', 'processing', 'shipped', 'delivered'].map((status, index) => {
-                const isActive = ['pending', 'processing', 'shipped', 'delivered'].indexOf(order.orderStatus) >= index;
-                const isCurrent = order.orderStatus === status;
-
-                return (
-                  <div key={status} className="flex-1 relative">
-                    <div className="flex flex-col items-center">
-                      <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          isActive ? 'bg-primary-600 text-white' : 'bg-gray-300 text-gray-600'
-                        } ${isCurrent ? 'ring-4 ring-primary-200' : ''} z-10 relative`}
-                      >
-                        {status === 'pending' && <Clock size={20} />}
-                        {status === 'processing' && <Package size={20} />}
-                        {status === 'shipped' && <Truck size={20} />}
-                        {status === 'delivered' && <CheckCircle size={20} />}
-                      </div>
-                      <p className={`mt-2 text-sm font-medium ${isActive ? 'text-gray-900' : 'text-gray-500'}`}>
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                      </p>
-                    </div>
-                    {index < 3 && (
-                      <div
-                        className={`absolute top-5 left-1/2 w-full h-1 ${
-                          isActive && ['pending', 'processing', 'shipped', 'delivered'].indexOf(order.orderStatus) > index
-                            ? 'bg-primary-600'
-                            : 'bg-gray-300'
-                        }`}
-                        style={{ zIndex: 0 }}
-                      ></div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+          <div className="mt-6">
+            <OrderShippingStatus order={order} orderNumber={order.orderNumber} />
           </div>
-
-          {/* Tracking Number */}
-          {order.trackingNumber && (
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800">
-                <span className="font-semibold">Tracking Number:</span> {order.trackingNumber}
-              </p>
-            </div>
-          )}
 
           {order.orderStatus === 'delivered' && (
             <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
@@ -491,10 +414,17 @@ const OrderDetail = () => {
 
         {/* Customer Support */}
         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="font-bold mb-2">Need Help?</h3>
-          <p className="text-sm text-gray-700">
-            If you have any questions about your order, please contact our customer support team.
+          <h3 className="font-bold mb-2">Need a person?</h3>
+          <p className="text-sm text-gray-700 mb-3">
+            A Petshiwü teammate answers 24/7. This is our own delivery from Queens — not UPS or FedEx.
           </p>
+          <a
+            href={`tel:${TONIGHT.phone.replace(/[^\d+]/g, '')}`}
+            className="inline-flex items-center gap-2 font-semibold text-[#1E3A8A]"
+          >
+            <Phone size={16} />
+            Call {TONIGHT.phone}
+          </a>
         </div>
       </div>
 

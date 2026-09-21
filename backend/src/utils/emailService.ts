@@ -519,31 +519,36 @@ export const sendReorderReminderEmail = async (
   }
 };
 
-const ORDER_STATUS_COPY: Record<string, { title: string; intro: string; headerColor: string }> = {
+const ORDER_STATUS_COPY: Record<string, { title: string; intro: string; headerColor: string; statusLabel: string }> = {
   pending: {
-    title: 'Order Pending',
-    intro: 'Your order is pending. We will start preparing it shortly.',
-    headerColor: '#64748b'
+    title: 'We have your order',
+    intro: 'Payment is in. We are lining this up to pack in Queens. A Petshiwü driver brings it to your door — you will not get a UPS tracking number.',
+    headerColor: '#1E3A8A',
+    statusLabel: 'Order received'
   },
   processing: {
-    title: 'We Are Preparing Your Order',
-    intro: "Great news — we're preparing your Petshiwu order now.",
-    headerColor: '#d97706'
+    title: 'Packing in Queens',
+    intro: 'Your items are being pulled and checked at our Queens warehouse. Next stop: a driver to your door.',
+    headerColor: '#1E3A8A',
+    statusLabel: 'Packed in Queens'
   },
   shipped: {
-    title: 'Your Order Is On The Way',
-    intro: 'Your order is on the way to you.',
-    headerColor: '#2563eb'
+    title: 'Out for delivery',
+    intro: 'A Petshiwü driver has your order. Stay near the door if you can. This is our own delivery, not a carrier shipment.',
+    headerColor: '#1E3A8A',
+    statusLabel: 'Out for delivery'
   },
   delivered: {
-    title: 'Order Delivered',
-    intro: 'Your order has been delivered.',
-    headerColor: '#16a34a'
+    title: 'Delivered',
+    intro: 'Your order is at your door. If something is missing, call us and we will make it right.',
+    headerColor: '#166534',
+    statusLabel: 'Delivered'
   },
   cancelled: {
-    title: 'Order Cancelled',
-    intro: 'Your order has been cancelled.',
-    headerColor: '#dc2626'
+    title: 'Order cancelled',
+    intro: 'This order was cancelled. If you were charged, the refund follows the original payment method.',
+    headerColor: '#dc2626',
+    statusLabel: 'Cancelled'
   }
 };
 
@@ -575,10 +580,12 @@ export const sendOrderStatusEmail = async (
     const copy = ORDER_STATUS_COPY[orderData.status] || {
       title: 'Order Update',
       intro: `Your order status is now ${orderData.status}.`,
-      headerColor: '#166534'
+      headerColor: '#166534',
+      statusLabel: orderData.status
     };
-    const statusLabel = orderData.status.charAt(0).toUpperCase() + orderData.status.slice(1);
+    const statusLabel = copy.statusLabel || orderData.status;
     const address = `${orderData.shippingAddress.firstName} ${orderData.shippingAddress.lastName}, ${orderData.shippingAddress.street}, ${orderData.shippingAddress.city}, ${orderData.shippingAddress.state} ${orderData.shippingAddress.zipCode}`;
+    const trackUrl = `https://www.petshiwu.com/track-order?order=${encodeURIComponent(orderNumber)}`;
 
     const defaultSubject = `${copy.title} #${orderNumber} - Petshiwu`;
     const defaultBody = `
@@ -596,13 +603,16 @@ export const sendOrderStatusEmail = async (
             <p><strong>Order Number:</strong> {{orderNumber}}</p>
             <p><strong>Status:</strong> {{statusLabel}}</p>
             {{#if trackingNumber}}
-            <p><strong>Tracking Number:</strong> {{trackingNumber}}</p>
+            <p><strong>Driver note:</strong> {{trackingNumber}}</p>
             {{/if}}
             <p><strong>Total:</strong> $${'{{totalPrice}}'}</p>
             <p><strong>Delivery Address:</strong><br>{{shippingAddress}}</p>
           </div>
+          <p style="text-align:center;margin:24px 0;">
+            <a href="{{trackUrl}}" style="display:inline-block;background:#1E3A8A;color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:10px;">See live shipping status</a>
+          </p>
           <p style="color: #666; font-size: 12px; margin-top: 20px;">
-            Best regards,<br>
+            Questions? Call (800) 259-2605 — a person answers 24/7.<br>
             The Petshiwu Team
           </p>
         </div>
@@ -619,7 +629,8 @@ export const sendOrderStatusEmail = async (
       statusLabel,
       trackingNumber: orderData.trackingNumber || '',
       totalPrice: orderData.totalPrice.toFixed(2),
-      shippingAddress: address
+      shippingAddress: address,
+      trackUrl
     };
 
     let subject = replaceTemplateVariables(template.subject, variables);
@@ -769,7 +780,7 @@ export const sendOrderDeliveredEmail = async (
             <p><strong>Order Number:</strong> {{orderNumber}}</p>
             <p><strong>Delivered On:</strong> {{deliveredDate}}</p>
             {{#if trackingNumber}}
-            <p><strong>Tracking Number:</strong> {{trackingNumber}}</p>
+            <p><strong>Driver note:</strong> {{trackingNumber}}</p>
             {{/if}}
             <p><strong>Delivery Address:</strong><br>
             {{shippingAddress}}

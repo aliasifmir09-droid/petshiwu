@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { orderService } from '@/services/orders';
-import { Package, Truck, CheckCircle, Clock, XCircle, Eye, ChevronRight, RotateCcw } from 'lucide-react';
+import { Package, CheckCircle, Clock, XCircle, Eye, ChevronRight, RotateCcw } from 'lucide-react';
+import { describeOrderTracking, trackingProgressPercent } from '@/utils/orderTracking';
 import SEO from '@/components/SEO';
 import { useCartStore } from '@/stores/cartStore';
 import { useToast } from '@/hooks/useToast';
@@ -63,26 +64,19 @@ const MyOrders = () => {
     queryFn: () => orderService.getMyOrders(page, 10)
   });
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pending':    return <Clock className="text-yellow-600" size={20} />;
-      case 'processing': return <Package className="text-blue-600" size={20} />;
-      case 'shipped':    return <Truck className="text-purple-600" size={20} />;
-      case 'delivered':  return <CheckCircle className="text-green-600" size={20} />;
-      case 'cancelled':  return <XCircle className="text-red-600" size={20} />;
-      default:           return <Clock className="text-gray-600" size={20} />;
-    }
+  const getStatusIcon = (headline: string, cancelled: boolean, failed: boolean) => {
+    if (cancelled) return <XCircle className="text-red-600" size={20} />;
+    if (failed) return <Clock className="text-amber-700" size={20} />;
+    if (headline === 'Delivered') return <CheckCircle className="text-emerald-600" size={20} />;
+    if (headline === 'Out for delivery') return <Package className="text-blue-700" size={20} />;
+    return <Clock className="text-[#1E3A8A]" size={20} />;
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':    return 'bg-yellow-100 text-yellow-800';
-      case 'processing': return 'bg-blue-100 text-blue-800';
-      case 'shipped':    return 'bg-purple-100 text-purple-800';
-      case 'delivered':  return 'bg-green-100 text-green-800';
-      case 'cancelled':  return 'bg-red-100 text-red-800';
-      default:           return 'bg-gray-100 text-gray-800';
-    }
+  const getStatusColor = (headline: string, cancelled: boolean, failed: boolean) => {
+    if (cancelled) return 'bg-red-100 text-red-800';
+    if (failed) return 'bg-amber-100 text-amber-900';
+    if (headline === 'Delivered') return 'bg-emerald-100 text-emerald-800';
+    return 'bg-blue-100 text-blue-800';
   };
 
   const getPaymentStatusColor = (status: string) => {
@@ -91,16 +85,6 @@ const MyOrders = () => {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'failed':  return 'bg-red-100 text-red-800';
       default:        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusProgress = (status: string) => {
-    switch (status) {
-      case 'pending':    return 25;
-      case 'processing': return 50;
-      case 'shipped':    return 75;
-      case 'delivered':  return 100;
-      default:           return 0;
     }
   };
 
@@ -146,6 +130,7 @@ const MyOrders = () => {
             {ordersData?.data.map((order: any) => {
               const orderId = extractOrderId(order._id);
               if (!orderId) return null;
+              const tracking = describeOrderTracking(order);
               return (
                 <div key={orderId} className="bg-white rounded-lg shadow overflow-hidden">
                   <div className="bg-gray-50 px-6 py-4 border-b">
@@ -175,34 +160,35 @@ const MyOrders = () => {
                   <div className="px-6 py-4">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        {getStatusIcon(order.orderStatus)}
+                        {getStatusIcon(tracking.headline, tracking.cancelled, tracking.failed)}
                         <div>
-                          <p className="font-semibold capitalize">{order.orderStatus}</p>
+                          <p className="font-semibold">{tracking.headline}</p>
                           <p className="text-sm text-gray-600">
-                            {order.orderStatus === 'delivered' && order.deliveredAt
-                              ? `Delivered on ${new Date(order.deliveredAt).toLocaleDateString()}`
-                              : order.orderStatus === 'shipped' && order.trackingNumber
-                              ? `Tracking: ${order.trackingNumber}`
-                              : 'Order is being processed'}
+                            {tracking.cancelled || tracking.failed
+                              ? tracking.nextStep
+                              : `Expected ${tracking.expectedLabel}`}
                           </p>
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.orderStatus)}`}>{order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}</span>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(order.paymentStatus)}`}>Payment: {order.paymentStatus}</span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(tracking.headline, tracking.cancelled, tracking.failed)}`}>{tracking.headline}</span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(order.paymentStatus)}`}>
+                          {order.paymentStatus === 'paid' ? 'Paid' : `Payment: ${order.paymentStatus}`}
+                        </span>
                       </div>
                     </div>
 
-                    {order.orderStatus !== 'cancelled' && (
+                    {!tracking.cancelled && (
                       <div className="mb-6">
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div className="bg-primary-600 h-2 rounded-full transition-all duration-500" style={{ width: `${getStatusProgress(order.orderStatus)}%` }}></div>
+                          <div className="bg-primary-600 h-2 rounded-full transition-all duration-500" style={{ width: `${trackingProgressPercent(tracking)}%` }}></div>
                         </div>
                         <div className="flex justify-between mt-2 text-xs text-gray-600">
-                          <span className={order.orderStatus === 'pending'    ? 'font-semibold text-primary-600' : ''}>Order Placed</span>
-                          <span className={order.orderStatus === 'processing' ? 'font-semibold text-primary-600' : ''}>Processing</span>
-                          <span className={order.orderStatus === 'shipped'    ? 'font-semibold text-primary-600' : ''}>Shipped</span>
-                          <span className={order.orderStatus === 'delivered'  ? 'font-semibold text-primary-600' : ''}>Delivered</span>
+                          {tracking.steps.map((step) => (
+                            <span key={step.id} className={step.current ? 'font-semibold text-primary-600' : ''}>
+                              {step.label}
+                            </span>
+                          ))}
                         </div>
                       </div>
                     )}

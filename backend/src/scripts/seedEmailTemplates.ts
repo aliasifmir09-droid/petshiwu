@@ -104,7 +104,7 @@ const defaultTemplates = [
             <p><strong>Order Number:</strong> {{orderNumber}}</p>
             <p><strong>Delivered On:</strong> {{deliveredDate}}</p>
             {{#if trackingNumber}}
-            <p><strong>Tracking Number:</strong> {{trackingNumber}}</p>
+            <p><strong>Driver note:</strong> {{trackingNumber}}</p>
             {{/if}}
             <p><strong>Delivery Address:</strong><br>
             {{shippingAddress}}
