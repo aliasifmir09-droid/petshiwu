@@ -57,6 +57,7 @@ describe('PayPal checkout', () => {
     expect(branded).toContain('overflow-visible');
     const apple = read('../../components/PayPalApplePay.tsx');
     const google = read('../../components/PayPalGooglePay.tsx');
+    const button = read('../../components/PayPalButton.tsx');
     expect(apple).not.toContain('components=applepay');
     expect(google).not.toContain('components=googlepay');
     expect(paypalConfig).toContain("components: 'buttons,applepay,googlepay,card-fields'");
@@ -81,6 +82,10 @@ describe('PayPal checkout', () => {
     expect(checkout).not.toContain('Enter your delivery details above');
     expect(checkout).not.toContain('card fields will open here');
     expect(checkout).not.toContain('PayPal, Venmo, or card');
+    expect(checkout).toContain('zipOutOfArea');
+    expect(checkout).toContain('OUT_OF_AREA_DELIVERY_MESSAGE');
+    expect(button).toContain('paypalCheckoutBlocker');
+    expect(card).toContain('paypalCheckoutBlocker');
   });
 
   test('checkout CSS hides stray Venmo and Pay Later bars that jump over the header', () => {
