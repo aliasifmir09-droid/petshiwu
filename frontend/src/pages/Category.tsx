@@ -14,6 +14,7 @@ import { useSEO } from '@/hooks/useSEO';
 import { CATALOG_META_PROOF } from '@/config/publicSeo';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { generateCategoryUrl, generateProductUrl } from '@/utils/productUrl';
+import { collectionSearchTitle } from '@/utils/seoUtils';
 
 const Category = () => {
   const queryClient = useQueryClient();
@@ -179,10 +180,11 @@ const Category = () => {
   const categoryName = category ? decodeHtmlEntities(category.name) : '';
   const seoData = useSEO({
     title: category
-      ? (petTypeDisplay
-        ? `${categoryName} for ${petTypeDisplay}`
-        : categoryName)
-      : 'Category',
+      ? collectionSearchTitle({
+          petType: category.petType,
+          categoryName,
+        })
+      : collectionSearchTitle({}),
     description: category
       ? (petTypeDisplay
         ? `Shop ${categoryName} for ${petTypeDisplay} at Petshiwu. ${CATALOG_META_PROOF}`

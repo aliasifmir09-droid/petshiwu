@@ -13,6 +13,7 @@ import { useSEO } from '@/hooks/useSEO';
 import { CATALOG_META_PROOF } from '@/config/publicSeo';
 import { generateProductUrl } from '@/utils/productUrl';
 import { catalogPetType, canonicalPetTypeSlug } from '@/utils/productPrice';
+import { collectionSearchTitle } from '@/utils/seoUtils';
 
 const PetType = () => {
   const { petType: petTypeParam } = useParams<{ petType: string }>();
@@ -86,8 +87,8 @@ const PetType = () => {
 
   // Generate SEO metadata
   const seoData = useSEO({
-    title: `${petTypeDisplay} Products - Premium Pet Supplies`,
-    description: `Shop premium ${petTypeDisplay.toLowerCase()} products including food, treats, toys, and accessories at Petshiwu. ${CATALOG_META_PROOF}`,
+    title: collectionSearchTitle({ petType }),
+    description: `Shop ${petTypeDisplay.toLowerCase()} food, treats, toys, and supplies at Petshiwu. ${CATALOG_META_PROOF}`,
     keywords: [
       `${petTypeDisplay.toLowerCase()} products`,
       `${petTypeDisplay.toLowerCase()} food`,
@@ -166,7 +167,7 @@ const PetType = () => {
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">{petTypeDisplay} Products</h1>
+        <h1 className="text-3xl font-bold mb-2">{petTypeDisplay} food & supplies</h1>
         {products && (
           <p className="text-gray-600">
             Showing {((page - 1) * (products.pagination.limit || 20)) + 1} - {Math.min(page * (products.pagination.limit || 20), products.pagination.total)} of {products.pagination.total} products

@@ -16,6 +16,7 @@ import { useSEO } from '@/hooks/useSEO';
 import { CATALOG_META_PROOF } from '@/config/publicSeo';
 import HealthBehavioralFilters from '@/components/HealthBehavioralFilters';
 import { generateProductUrl } from '@/utils/productUrl';
+import { collectionSearchTitle } from '@/utils/seoUtils';
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -188,13 +189,8 @@ const Products = () => {
 
   // Build dynamic SEO based on filters
   const getProductsTitle = () => {
-    if (featured) return 'Featured Pet Products | petshiwu';
-    if (search) return `Search Results for "${search}" | petshiwu`;
-    if (petType) {
-      const petTypeDisplay = petType.charAt(0).toUpperCase() + petType.slice(1);
-      return `${petTypeDisplay} Products | petshiwu`;
-    }
-    return 'Pet Supplies & Products | petshiwu';
+    if (search) return `${search} – Same-day NYC | Petshiwu`;
+    return collectionSearchTitle({ petType: petType || undefined, featured });
   };
 
   const getProductsDescription = () => {

@@ -226,16 +226,16 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     description: '4,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. Same-day NYC. Free shipping over $49. No autoship. Nationwide shipping soon.',
   },
   '/products': {
-    title: 'All Pet Products — Dog, Cat, Bird, Fish & More | Petshiwu',
-    description: 'Browse 4,000+ pet products for dogs, cats, birds, fish, reptiles, and small animals. Top brands, fast NYC delivery. Free shipping over $49.',
+    title: 'Pet food & supplies – Same-day NYC | Petshiwu',
+    description: 'Browse 4,000+ foods, treats, and supplies for dogs, cats, birds, fish, reptiles, and small animals. Top brands. Free shipping over $49.',
   },
   '/dog': {
-    title: 'Dog Food, Treats, Toys & Supplies | Petshiwu',
-    description: 'Shop premium dog food, treats, toys, and accessories. Top brands — Purina, Blue Buffalo, Royal Canin. Fast NYC delivery. Free shipping over $49.',
+    title: 'Dog food & supplies – Same-day NYC | Petshiwu',
+    description: 'Shop dog food, treats, toys, and accessories. Purina, Blue Buffalo, Royal Canin. Same-day NYC. Free shipping over $49. No autoship.',
   },
   '/cat': {
-    title: 'Cat Food, Litter, Toys & Accessories | Petshiwu',
-    description: 'Discover premium cat food, litter, toys, and accessories. Top brands delivered fast to Queens, Brooklyn, Manhattan & all of NYC. Free shipping over $49.',
+    title: 'Cat food & supplies – Same-day NYC | Petshiwu',
+    description: 'Shop cat food, litter, toys, and accessories. Same-day NYC. Free shipping over $49. No autoship.',
   },
   '/bird': {
     title: 'Bird Food, Cages & Accessories | Petshiwu',
@@ -1855,9 +1855,9 @@ const buildProductListHtml = async (template: string): Promise<string> => {
 
   const bodyContent = `
 <div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
-  <h2>All Pet Products — Petshiwu</h2>
-  <p>Browse 4,000+ premium pet products for dogs, cats, birds, fish, reptiles, and small animals.
-     Free shipping on orders over $49. Based in Jackson Heights, NY.</p>
+  <h2>Pet food & supplies – Same-day NYC</h2>
+  <p>Browse 4,000+ foods, treats, and supplies for dogs, cats, birds, fish, reptiles, and small animals.
+     Free shipping on orders over $49. Same-day NYC. No autoship.</p>
   ${productLinks
     ? `<ul style="list-style:none;padding:0;columns:2">${productLinks}</ul>`
     : '<p>Browse the catalog on Petshiwu.</p>'}
@@ -1871,7 +1871,7 @@ const buildProductListHtml = async (template: string): Promise<string> => {
   html = injectCanonical(html, canonicalUrl);
   html = injectHreflang(html, canonicalUrl);
   html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
-  html = injectH1(html, 'All Pet Products — Petshiwu');
+  html = injectH1(html, 'Pet food & supplies – Same-day NYC');
   // Inject product list into body for Google to crawl (H2 — H1 already replaced in noscript)
   html = html.replace(/<div id="root">.*?<\/div>/s, `<div id="root">${bodyContent}</div>`) ||
          html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
