@@ -931,6 +931,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // Frontend React components also add noindex via Helmet, but X-Robots-Tag is the
 // reliable first-wave signal Google uses when it doesn't render JS.
 app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.path.startsWith('/feeds') || req.path.startsWith('/api/feed') || req.path.includes('/feed/google')) {
+    return next();
+  }
   if (req.method === 'GET' && !req.path.startsWith('/api') && req.query && Object.keys(req.query).length > 0) {
     // Only set X-Robots-Tag — don't override other headers botRenderer might set.
     res.setHeader('X-Robots-Tag', 'noindex, follow, max-image-preview:large');

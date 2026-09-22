@@ -55,6 +55,8 @@ Disallow: /search?
 # Allow all high-value shop pages explicitly (Allow: / already covers them)
 Allow: /products
 Allow: /products$
+# Merchant Center scheduled fetch uses Googlebot / AdsBot-Google.
+# Do not block /feeds — a blocked file stays at 0 products.
 Allow: /feeds
 Allow: /feeds/google.xml
 Allow: /dog

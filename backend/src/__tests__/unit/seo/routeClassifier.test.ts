@@ -276,6 +276,8 @@ describe('full-site crawl list', () => {
     expect(robots).toContain('Disallow: /search');
     expect(robots).toContain('Allow: /dog');
     expect(robots).toContain('Allow: /products');
+    expect(robots).toContain('Allow: /feeds');
+    expect(robots).toContain('Allow: /feeds/google.xml');
   });
 
   test('small-pet catalog URLs canonicalize to /small-animal', () => {
