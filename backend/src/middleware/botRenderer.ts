@@ -1855,9 +1855,9 @@ const buildProductListHtml = async (template: string): Promise<string> => {
 
   const bodyContent = `
 <div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
-  <h2>All Pet Products — Petshiwu</h2>
-  <p>Browse 4,000+ premium pet products for dogs, cats, birds, fish, reptiles, and small animals.
-     Free shipping on orders over $49. Based in Jackson Heights, NY.</p>
+  <h2>Pet food & supplies – Same-day NYC</h2>
+  <p>Browse 4,000+ foods, treats, and supplies for dogs, cats, birds, fish, reptiles, and small animals.
+     Free shipping on orders over $49. Same-day NYC. No autoship.</p>
   ${productLinks
     ? `<ul style="list-style:none;padding:0;columns:2">${productLinks}</ul>`
     : '<p>Browse the catalog on Petshiwu.</p>'}
@@ -1871,7 +1871,7 @@ const buildProductListHtml = async (template: string): Promise<string> => {
   html = injectCanonical(html, canonicalUrl);
   html = injectHreflang(html, canonicalUrl);
   html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
-  html = injectH1(html, 'All Pet Products — Petshiwu');
+  html = injectH1(html, 'Pet food & supplies – Same-day NYC');
   // Inject product list into body for Google to crawl (H2 — H1 already replaced in noscript)
   html = html.replace(/<div id="root">.*?<\/div>/s, `<div id="root">${bodyContent}</div>`) ||
          html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
