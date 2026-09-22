@@ -15,7 +15,7 @@ const HomeHeroSlogans = () => {
   return (
     <section className="bg-[#F7F4EE]">
       <div className="grid lg:grid-cols-2 items-stretch">
-        <div className="flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-12 lg:py-20">
+        <div className="order-2 lg:order-1 flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-10 lg:py-20">
           <p className="mb-4 text-[11px] font-semibold tracking-[0.2em] uppercase text-[#1E3A8A]/70">
             NYC same-day delivery
           </p>
@@ -55,7 +55,7 @@ const HomeHeroSlogans = () => {
             ))}
           </div>
         </div>
-        <div className="relative h-64 sm:h-80 lg:h-auto lg:min-h-[560px] overflow-hidden bg-[#F4F1EA]">
+        <div className="order-1 lg:order-2 relative h-56 sm:h-80 lg:h-auto lg:min-h-[560px] overflow-hidden bg-[#F4F1EA]">
           <picture>
             <source media="(min-width: 1024px)" srcSet={HOME_HERO_IMAGE} type="image/webp" />
             <source media="(min-width: 1024px)" srcSet={HOME_HERO_IMAGE_JPG} />
