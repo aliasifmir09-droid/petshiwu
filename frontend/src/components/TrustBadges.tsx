@@ -42,7 +42,7 @@ const TrustBadges = () => {
   ];
 
   return (
-    <div className="bg-white py-6 border-y border-gray-100 shadow-sm">
+    <div className="bg-[#F7F4EE] py-8 border-y border-[#1E3A8A]/8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
           {badges.map((badge, index) => {
@@ -50,9 +50,9 @@ const TrustBadges = () => {
             return (
               <div
                 key={index}
-                className="flex flex-col items-center text-center p-3 md:p-4 rounded-xl hover:bg-gray-50 transition-colors duration-200"
+                className="flex flex-col items-center text-center p-3 md:p-4 rounded-2xl bg-white/70 hover:bg-white hover:shadow-sm transition-all duration-200"
               >
-                <div className={`w-10 h-10 md:w-12 md:h-12 ${badge.color} rounded-full flex items-center justify-center mb-2`}>
+                <div className={`w-10 h-10 md:w-12 md:h-12 ${badge.color} rounded-full flex items-center justify-center mb-2 shadow-sm`}>
                   <Icon size={20} className="text-white" />
                 </div>
                 <h3 className="font-bold text-xs md:text-sm text-gray-900 mb-0.5 leading-tight">{badge.title}</h3>

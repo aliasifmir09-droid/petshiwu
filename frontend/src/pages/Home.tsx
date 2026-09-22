@@ -38,7 +38,7 @@ const TodaysDeals = () => {
   if (!isLoading && products.length === 0) return null;
 
   return (
-    <section className="py-12 bg-white border-y border-slate-100">
+    <section className="py-14 bg-white">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8">
           <div>
@@ -205,9 +205,9 @@ const Home = () => {
 
       <TodaysDeals />
 
-      <section className="py-14 bg-white text-center">
+      <section className="py-16 bg-[#F7F4EE] text-center">
         <div className="container mx-auto px-4 lg:px-8">
-          <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-2">Featured</p>
+          <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-[#1E3A8A]/60 mb-2">Featured</p>
           <h2 className="text-3xl md:text-4xl font-extrabold text-[#1E3A8A] mb-8">
             Top picks for dogs and cats
           </h2>
@@ -229,7 +229,7 @@ const Home = () => {
           <div className="mt-8">
             <Link
               to="/products?featured=true"
-              className="inline-flex items-center gap-2 bg-[#1E3A8A] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors"
+              className="inline-flex items-center gap-2 bg-[#1E3A8A] text-white px-7 py-3 rounded-full font-semibold shadow-sm hover:bg-[#163074] hover:shadow-md transition-all"
             >
               <span>Shop all products</span>
               <ChevronRight size={20} />
@@ -239,7 +239,7 @@ const Home = () => {
       </section>
 
       {/* Brands We Carry */}
-      <section className="py-14 bg-gray-50 border-y border-gray-100">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -264,8 +264,8 @@ const Home = () => {
                 aria-label={`Shop ${brand.name} products`}
               >
                 <div
-                  className={`w-36 h-24 flex items-center justify-center rounded-2xl border-2 border-transparent shadow-sm group-hover:border-[#1E3A8A] group-hover:shadow-lg transition-all duration-200 overflow-hidden ${
-                    brand.dark ? 'bg-zinc-900' : 'bg-white'
+                  className={`w-36 h-24 flex items-center justify-center rounded-2xl border border-slate-200/80 shadow-sm group-hover:border-[#1E3A8A] group-hover:shadow-md transition-all duration-200 overflow-hidden ${
+                    brand.dark ? 'bg-zinc-900' : 'bg-[#F7F4EE]'
                   }`}
                 >
                   {brand.logo ? (
@@ -311,10 +311,10 @@ const Home = () => {
 
       <TonightDeliveryHowItWorks />
 
-      <section className="py-14 bg-white">
+      <section className="py-16 bg-[#F7F4EE]">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-10">
-            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-2">Why Petshiwu</p>
+            <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-[#1E3A8A]/60 mb-2">Why Petshiwu</p>
             <h2 className="text-3xl md:text-4xl font-extrabold text-[#1E3A8A] mb-2">
               A national pet store, online
             </h2>
@@ -335,7 +335,7 @@ const Home = () => {
                 text: 'Unused items come back easy. Call +1 (800) 259-2605 any time. Currently delivering in NYC. Nationwide shipping opens in a few days.',
               },
             ].map((item) => (
-              <div key={item.title} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <div key={item.title} className="bg-white rounded-3xl p-7 border border-[#1E3A8A]/8 shadow-sm hover:shadow-md transition-shadow">
                 <h3 className="font-semibold text-[#1E3A8A] mb-2">{item.title}</h3>
                 <p className="text-slate-700 text-sm leading-relaxed">{item.text}</p>
               </div>
@@ -390,11 +390,11 @@ const NewsletterSection = () => {
 
   return (
     <section className="bg-[#1E3A8A] text-white">
-      <div className="h-px w-full bg-white/20" />
-      <div className="container mx-auto px-4 lg:px-8 py-14 text-center">
+      <div className="container mx-auto px-4 lg:px-8 py-16 text-center">
         <div className="max-w-2xl mx-auto">
           {!submitted ? (
             <>
+              <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-white/60 mb-3">Welcome offer</p>
               <h2 className="text-2xl md:text-3xl font-extrabold mb-3">Save on your next order</h2>
               <p className="text-white/80 mb-8">
                 First order: FREEDOM20 (20% off, max $10). Repeat: 10% off, max $10. No autoship.
@@ -406,12 +406,12 @@ const NewsletterSection = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="flex-1 px-5 py-3 rounded-lg text-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-white/40"
+                  className="flex-1 px-5 py-3.5 rounded-full text-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-white/40"
                 />
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-white text-[#1E3A8A] font-semibold px-7 py-3 rounded-md whitespace-nowrap disabled:opacity-60 hover:bg-slate-100"
+                  className="bg-white text-[#1E3A8A] font-semibold px-8 py-3.5 rounded-full whitespace-nowrap disabled:opacity-60 hover:bg-slate-100 shadow-sm"
                 >
                   {loading ? 'Sending...' : 'Subscribe'}
                 </button>
@@ -425,12 +425,12 @@ const NewsletterSection = () => {
               <p className="text-white/80 mb-4">
                 {emailSent ? 'Check your inbox. Your code:' : 'Save this code and enter it at checkout:'}
               </p>
-              <div className="inline-block bg-white/10 border border-white/30 rounded-xl px-10 py-4 mb-6">
+              <div className="inline-block bg-white/10 border border-white/30 rounded-2xl px-10 py-4 mb-6">
                 <span className="text-3xl font-bold tracking-widest">{code}</span>
                 <p className="text-white/70 text-sm mt-1">{NEWSLETTER_CODE_COPY}</p>
               </div>
               <br />
-              <a href="/products" className="inline-block bg-white text-[#1E3A8A] font-semibold px-8 py-3 rounded-lg">
+              <a href="/products" className="inline-block bg-white text-[#1E3A8A] font-semibold px-8 py-3 rounded-full">
                 Shop now
               </a>
             </>

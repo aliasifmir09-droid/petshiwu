@@ -12,6 +12,7 @@ describe('HomeHeroSlogans', () => {
       </MemoryRouter>
     );
 
+    expect(screen.getByText(/nyc same-day delivery/i)).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(HOME_SLOGAN);
     expect(screen.getByRole('img', { name: /dog, cat, and macaw/i })).toHaveAttribute(
       'src',
