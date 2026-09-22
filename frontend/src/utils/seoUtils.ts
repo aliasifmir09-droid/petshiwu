@@ -112,6 +112,38 @@ export function productSearchTitle(opts: {
   return `${name} | ${stock} · free ship $49+ | Petshiwu`;
 }
 
+/** Shop/collection titles. Avoid the word "Products" — it ranks for the junk query "product". */
+export function collectionSearchTitle(opts: {
+  petType?: string;
+  categoryName?: string;
+  featured?: boolean;
+}): string {
+  const pet = String(opts.petType || '').trim().toLowerCase();
+  const category = String(opts.categoryName || '').replace(/\s+/g, ' ').trim();
+  const petLabel =
+    pet === 'dog' ? 'Dog' :
+    pet === 'cat' ? 'Cat' :
+    pet === 'bird' ? 'Bird' :
+    pet === 'fish' ? 'Fish' :
+    pet === 'reptile' ? 'Reptile' :
+    pet === 'small-animal' || pet === 'small-pet' ? 'Small pet' :
+    '';
+
+  if (opts.featured) {
+    return 'Featured pet food & supplies – Same-day NYC | Petshiwu';
+  }
+  if (category && petLabel) {
+    return `${category} for ${petLabel.toLowerCase()}s – Same-day NYC | Petshiwu`;
+  }
+  if (category) {
+    return `${category} – Same-day NYC | Petshiwu`;
+  }
+  if (pet === 'dog') return 'Dog food & supplies – Same-day NYC | Petshiwu';
+  if (pet === 'cat') return 'Cat food & supplies – Same-day NYC | Petshiwu';
+  if (petLabel) return `${petLabel} supplies – Same-day NYC | Petshiwu`;
+  return 'Pet food & supplies – Same-day NYC | Petshiwu';
+}
+
 /**
  * Generate keywords from array or string
  */

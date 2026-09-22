@@ -226,16 +226,16 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     description: '4,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. Same-day NYC. Free shipping over $49. No autoship. Nationwide shipping soon.',
   },
   '/products': {
-    title: 'All Pet Products — Dog, Cat, Bird, Fish & More | Petshiwu',
-    description: 'Browse 4,000+ pet products for dogs, cats, birds, fish, reptiles, and small animals. Top brands, fast NYC delivery. Free shipping over $49.',
+    title: 'Pet food & supplies – Same-day NYC | Petshiwu',
+    description: 'Browse 4,000+ foods, treats, and supplies for dogs, cats, birds, fish, reptiles, and small animals. Top brands. Free shipping over $49.',
   },
   '/dog': {
-    title: 'Dog Food, Treats, Toys & Supplies | Petshiwu',
-    description: 'Shop premium dog food, treats, toys, and accessories. Top brands — Purina, Blue Buffalo, Royal Canin. Fast NYC delivery. Free shipping over $49.',
+    title: 'Dog food & supplies – Same-day NYC | Petshiwu',
+    description: 'Shop dog food, treats, toys, and accessories. Purina, Blue Buffalo, Royal Canin. Same-day NYC. Free shipping over $49. No autoship.',
   },
   '/cat': {
-    title: 'Cat Food, Litter, Toys & Accessories | Petshiwu',
-    description: 'Discover premium cat food, litter, toys, and accessories. Top brands delivered fast to Queens, Brooklyn, Manhattan & all of NYC. Free shipping over $49.',
+    title: 'Cat food & supplies – Same-day NYC | Petshiwu',
+    description: 'Shop cat food, litter, toys, and accessories. Same-day NYC. Free shipping over $49. No autoship.',
   },
   '/bird': {
     title: 'Bird Food, Cages & Accessories | Petshiwu',
