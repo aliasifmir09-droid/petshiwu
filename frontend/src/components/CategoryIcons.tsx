@@ -175,7 +175,7 @@ const CategoryIcons = () => {
   ];
 
   return (
-    <section className="pt-8 sm:pt-12 md:pt-14 pb-4 sm:pb-6 md:pb-8 bg-white relative mb-0 sm:mb-2 md:mb-4">
+    <section className="pt-8 sm:pt-12 md:pt-14 pb-4 sm:pb-6 md:pb-8 bg-[#F7F4EE] relative mb-0 sm:mb-2 md:mb-4">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-8 sm:mb-10 relative z-30">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1E3A8A] mb-2">

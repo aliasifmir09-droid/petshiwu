@@ -57,7 +57,7 @@ const HeroSlideshow = () => {
   return (
     <div className="w-full">
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
-        <div className="relative w-full overflow-hidden rounded-xl shadow-md bg-slate-950">
+        <div className="relative w-full overflow-hidden rounded-2xl shadow-lg bg-slate-950">
           {/* 16:9 frame + object-contain: the full banner stays visible. object-cover was clipping sides. */}
           <div className="relative w-full aspect-[16/9]">
             <Link key={slide.id} to={slide.link} className="absolute inset-0 z-10 block">

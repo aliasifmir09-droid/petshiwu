@@ -49,8 +49,8 @@ const ShopByPet = () => {
   const goToPet = (slug: string) => navigate(`/products?petType=${slug}`);
 
   return (
-    <section className="bg-white border-b border-gray-100">
-      <div className="container mx-auto px-3 sm:px-6 lg:px-8 py-3 md:py-10">
+    <section className="bg-white">
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8 py-4 md:py-12">
         <p className="md:hidden text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
           Shop by pet
         </p>
@@ -123,7 +123,7 @@ const ShopByPet = () => {
                 onClick={() => goToPet(category.slug)}
               >
                 <div className="flex flex-col items-center gap-3">
-                  <div className="relative w-32 h-32 rounded-full bg-[#1E3A8A] p-[3px] group-hover:scale-[1.03] transition-transform shadow-sm">
+                  <div className="relative w-32 h-32 rounded-full bg-[#1E3A8A] p-[3px] group-hover:scale-[1.04] transition-transform shadow-md ring-4 ring-[#1E3A8A]/5">
                     <div className="w-full h-full rounded-full overflow-hidden bg-white">
                       <img src={category.image} alt={category.name} className="w-full h-full object-cover" loading="lazy" />
                     </div>
