@@ -944,9 +944,23 @@ export const productOfferPrice = (product: {
   return Number.isFinite(variantPrice) && variantPrice > 0 ? variantPrice : 0;
 };
 
+/** Prefer variant.stock. Missing totalStock used to emit OutOfStock to Googlebot. */
+export const productOfferInStock = (product: {
+  inStock?: boolean;
+  totalStock?: number;
+  variants?: Array<{ stock?: number }>;
+}): boolean => {
+  if (product.inStock === false) return false;
+  const variants = product.variants || [];
+  if (variants.length > 0) {
+    return variants.some((item) => Number(item.stock) > 0);
+  }
+  return (product.totalStock ?? 0) > 0;
+};
+
 export const buildProductHtml = (template: string, product: any, slug: string): string => {
   const price: number = productOfferPrice(product);
-  const inStock: boolean = (product.totalStock ?? 0) > 0 && product.inStock !== false;
+  const inStock: boolean = productOfferInStock(product);
   const image: string = resolveShareImage(product.images?.[0]);
   const images: string[] = (product.images ?? [])
     .slice(0, 10)

@@ -17,6 +17,7 @@ import {
   landingTaxonomyForPath,
   normalizeReqPath,
   productAnchorHtml,
+  productOfferInStock,
   productOfferPrice,
   productRedirectTarget,
   sanitizeArticleHtml,
@@ -315,6 +316,44 @@ describe('product offer price in first-wave HTML', () => {
 <title>Petshiwu</title>
 <meta name="description" content="old" />
 </head><body><div id="root"></div></body></html>`;
+
+  it('treats variant stock as in stock even when totalStock is missing', () => {
+    expect(
+      productOfferInStock({
+        variants: [{ stock: 30 }, { stock: 30 }],
+      })
+    ).toBe(true);
+    expect(
+      productOfferInStock({
+        totalStock: 0,
+        variants: [{ stock: 12 }],
+      })
+    ).toBe(true);
+    const html = buildProductHtml(
+      template,
+      {
+        name: 'Feline Pine Non-Clumping Pine Cat Litter',
+        slug: 'feline-pine-non-clumping-pine-cat-litter',
+        brand: 'Feline Pine',
+        basePrice: 11.19,
+        petType: 'cat',
+        category: { slug: 'litter-waste-disposal', name: 'Litter' },
+        images: ['https://petshiwu-cdn.b-cdn.net/products/pine.jpg'],
+        description: 'Pine litter.',
+        variants: [{ sku: '2621192', price: 11.19, stock: 30 }],
+      },
+      'feline-pine-non-clumping-pine-cat-litter'
+    );
+    expect(html).toContain('https://schema.org/InStock');
+    expect(html).toContain('product:availability" content="in stock"');
+    expect(html).not.toContain('OutOfStock');
+  });
+
+  it('stays out of stock when the product flag is false or every variant is empty', () => {
+    expect(productOfferInStock({ inStock: false, variants: [{ stock: 30 }] })).toBe(false);
+    expect(productOfferInStock({ variants: [{ stock: 0 }, { stock: 0 }] })).toBe(false);
+    expect(productOfferInStock({ totalStock: 0 })).toBe(false);
+  });
 
   it('uses basePrice, then the first variant price if basePrice is missing', () => {
     expect(productOfferPrice({ basePrice: 14.39 })).toBe(14.39);
