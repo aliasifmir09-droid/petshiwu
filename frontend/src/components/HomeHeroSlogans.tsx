@@ -20,8 +20,10 @@ const HomeHeroSlogans = () => {
               <p className="text-xs sm:text-sm font-semibold tracking-[0.22em] uppercase text-white/70">
                 {FIRST_ORDER_CODE}
               </p>
-              <h1 className="mt-3 text-[2.6rem] sm:text-6xl lg:text-[4.35rem] font-extrabold leading-[0.95] tracking-tight max-w-md">
-                {HOME_SLOGAN}
+              <h1 className="mt-3 text-[2.75rem] sm:text-6xl lg:text-[4.5rem] font-extrabold leading-[0.92] tracking-tight">
+                20% off{' '}
+                <br />
+                first order.
               </h1>
               <p className="mt-5 text-base sm:text-lg text-white/80 max-w-sm">{HOME_SLOGAN_SUPPORT}</p>
               <div className="mt-8">

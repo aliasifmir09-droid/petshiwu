@@ -17,8 +17,8 @@ export type BrandStory = {
   ctaLabel: string;
 };
 
-export const HOME_SLOGAN = '20% off your first order.';
-export const HOME_SLOGAN_SUPPORT = 'FREEDOM20 · max $10 · no autoship. Same-day NYC.';
+export const HOME_SLOGAN = '20% off first order.';
+export const HOME_SLOGAN_SUPPORT = 'Max $10 · no autoship. Same-day NYC.';
 export const HOME_HERO_IMAGE = '/hero-side-family.webp';
 export const HOME_HERO_IMAGE_JPG = '/hero-side-family.jpg';
 export const HOME_HERO_IMAGE_WIDE = '/hero-wide-family.webp';
