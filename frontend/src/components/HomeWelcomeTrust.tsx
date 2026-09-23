@@ -61,9 +61,9 @@ const HomeWelcomeTrust = () => {
               <Link
                 key={card.title}
                 to={card.to}
-                className="rounded-3xl border border-[#1E3A8A]/10 bg-[#F7F4EE] px-5 py-6 hover:bg-white hover:shadow-md hover:border-[#1E3A8A]/20 transition-all"
+                className="flex flex-col items-start rounded-3xl border border-[#1E3A8A]/10 bg-[#F7F4EE] px-5 py-6 hover:bg-white hover:shadow-md hover:border-[#1E3A8A]/20 transition-all"
               >
-                <div className="w-11 h-11 rounded-full bg-[#1E3A8A] text-white flex items-center justify-center mb-4">
+                <div className="w-11 h-11 rounded-full bg-[#1E3A8A] text-white flex items-center justify-center mb-4 shrink-0">
                   <Icon size={20} aria-hidden="true" />
                 </div>
                 <h3 className="font-extrabold text-[#1E3A8A] text-lg mb-2">{card.title}</h3>
