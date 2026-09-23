@@ -349,8 +349,8 @@ describe('product offer price in first-wave HTML', () => {
     expect(html).not.toContain('OutOfStock');
   });
 
-  it('stays out of stock when the product flag is false or every variant is empty', () => {
-    expect(productOfferInStock({ inStock: false, variants: [{ stock: 30 }] })).toBe(false);
+  it('trusts variant stock over a stale inStock flag', () => {
+    expect(productOfferInStock({ inStock: false, variants: [{ stock: 30 }] })).toBe(true);
     expect(productOfferInStock({ variants: [{ stock: 0 }, { stock: 0 }] })).toBe(false);
     expect(productOfferInStock({ totalStock: 0 })).toBe(false);
   });

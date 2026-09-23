@@ -36,6 +36,7 @@ import { FEATURED_LEARNING_SLUGS, LEARNING_AUTHOR } from '../seo/featuredLearnin
 import { DEFAULT_OG_IMAGE, injectOgTags, resolveShareImage } from '../seo/ogTags';
 import { productSearchDescription, productSearchTitle } from '../seo/productSearchSnippet';
 import { merchantMpn } from '../utils/googleMerchantFeed';
+import { plannedStock } from '../utils/productStock';
 import { buildNycHubLinkHtml, buildNycHubShopHtml, isNycShoppableHub } from '../seo/nycShopHub';
 import { buildNextDayZipDirectoryHtml } from '../seo/nextDayZipDirectory';
 import {
@@ -950,12 +951,7 @@ export const productOfferInStock = (product: {
   totalStock?: number;
   variants?: Array<{ stock?: number }>;
 }): boolean => {
-  if (product.inStock === false) return false;
-  const variants = product.variants || [];
-  if (variants.length > 0) {
-    return variants.some((item) => Number(item.stock) > 0);
-  }
-  return (product.totalStock ?? 0) > 0;
+  return plannedStock(product).inStock;
 };
 
 export const buildProductHtml = (template: string, product: any, slug: string): string => {

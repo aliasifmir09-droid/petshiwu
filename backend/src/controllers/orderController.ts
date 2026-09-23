@@ -33,6 +33,7 @@ import {
 import { calculateTrustedOrderPricing } from '../services/orderPricingService';
 import { isReusableCoupon, normalizeCouponCode } from '../services/couponService';
 import { isDeliverableShippingAddress, OUT_OF_AREA_DELIVERY_MESSAGE } from '../utils/nycDelivery';
+import { firstInStockVariantSku, plannedStock } from '../utils/productStock';
 import {
   getOrCreateStripeCustomer,
   rememberPaidCardForUser,
@@ -185,7 +186,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         const quantity = item.quantity || 1;
         const product = session ? await Product.findById(productId).session(session) : await Product.findById(productId);
         if (!product) throw new Error(`Product ${item.name || productId} not found`);
-        if (!product.inStock) throw new Error(`Product "${item.name}" is currently out of stock`);
+        const liveStock = plannedStock(product);
+        if (!liveStock.inStock) throw new Error(`Product "${item.name}" is currently out of stock`);
 
         if (item.variant && item.variant.sku) {
           const decodeSku = (s: string) => s
@@ -200,10 +202,11 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
             decodeSku(v.sku || '') === normalizedCartSku
           );
           if (!variant) {
-            if (product.totalStock < quantity) {
-              throw new Error(`Insufficient stock for product "${item.name}". Available: ${product.totalStock}, Requested: ${quantity}`);
+            if (liveStock.totalStock < quantity) {
+              throw new Error(`Insufficient stock for product "${item.name}". Available: ${liveStock.totalStock}, Requested: ${quantity}`);
             }
-            stockUpdates.push({ productId, quantity });
+            const fallbackSku = firstInStockVariantSku(product, quantity);
+            stockUpdates.push({ productId, quantity, variantSku: fallbackSku });
           } else {
             if (variant.stock < quantity) {
               throw new Error(`Insufficient stock for variant "${item.variant.sku}" of product "${item.name}". Available: ${variant.stock}, Requested: ${quantity}`);
@@ -211,10 +214,14 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
             stockUpdates.push({ productId, quantity, variantSku: variant.sku });
           }
         } else {
-          if (product.totalStock < quantity) {
-            throw new Error(`Insufficient stock for product "${item.name}". Available: ${product.totalStock}, Requested: ${quantity}`);
+          if (liveStock.totalStock < quantity) {
+            throw new Error(`Insufficient stock for product "${item.name}". Available: ${liveStock.totalStock}, Requested: ${quantity}`);
           }
-          stockUpdates.push({ productId, quantity });
+          stockUpdates.push({
+            productId,
+            quantity,
+            variantSku: firstInStockVariantSku(product, quantity),
+          });
         }
       }
 
