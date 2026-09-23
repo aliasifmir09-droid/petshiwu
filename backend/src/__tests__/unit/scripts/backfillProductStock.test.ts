@@ -1,4 +1,4 @@
-import { needsStockBackfill, plannedStock } from '../../../scripts/backfillProductStock';
+import { firstInStockVariantSku, needsStockBackfill, plannedStock } from '../../../utils/productStock';
 
 describe('product stock backfill planner', () => {
   test('sums variant stock when totalStock is missing or zero', () => {
@@ -28,5 +28,19 @@ describe('product stock backfill planner', () => {
         variants: [{ stock: 12 }],
       })
     ).toBe(false);
+  });
+
+  test('picks the first variant with enough stock', () => {
+    expect(
+      firstInStockVariantSku(
+        {
+          variants: [
+            { sku: 'A', stock: 0 },
+            { sku: 'B', stock: 8 },
+          ],
+        },
+        2
+      )
+    ).toBe('B');
   });
 });

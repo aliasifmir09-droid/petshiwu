@@ -96,8 +96,17 @@ export const connectDatabase = async () => {
     logger.info('✅ Payment idempotency indexes verified');
     const { repairLaunchCatalog } = await import('../services/launchCatalogRepair');
     const { repairFaqPolicies } = await import('../services/faqPolicyRepair');
+    const { applyProductStockSync } = await import('./productStock');
     void repairLaunchCatalog();
     void repairFaqPolicies();
+    if (isProduction && process.env.SKIP_STOCK_SYNC_ON_BOOT !== '1') {
+      void applyProductStockSync({ write: true }).catch((err) => {
+        logger.warn(
+          'Product stock sync on boot failed (non-fatal):',
+          err instanceof Error ? err.message : err
+        );
+      });
+    }
     
     // Optimize Mongoose settings for high concurrency
     optimizeMongooseSettings();
