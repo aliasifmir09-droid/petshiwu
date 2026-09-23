@@ -319,9 +319,9 @@ const Home = () => {
           <div className="text-center mb-10">
             <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-[#1E3A8A]/60 mb-2">Why Petshiwu</p>
             <h2 className="text-3xl md:text-4xl font-extrabold text-[#1E3A8A] mb-2">
-              A store you can trust
+              What you get
             </h2>
-            <p className="text-slate-500">Shop by pet. Pay with PayPal. No autoship. 365-day returns.</p>
+            <p className="text-slate-500">Hill’s, Royal Canin, Purina. No autoship. 365-day returns.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
