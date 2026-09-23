@@ -17,21 +17,23 @@ export type BrandStory = {
   ctaLabel: string;
 };
 
-export const HOME_SLOGAN = 'Everything your pet needs.';
+export const HOME_SLOGAN = 'Same-day food. Fair prices. No lock-in.';
 export const HOME_SLOGAN_SUPPORT =
-  'Shop 4,000+ foods, treats, and supplies from Hill’s, Royal Canin, Purina, and more. Free shipping over $49. No autoship.';
+  'Use FREEDOM20 for 20% off your first order, max $10. Shop 4,000+ foods from Hill’s, Royal Canin, and Purina. Free shipping over $49. PayPal or card. 365-day returns.';
 export const HOME_HERO_IMAGE = '/hero-side-family.webp';
 export const HOME_HERO_IMAGE_JPG = '/hero-side-family.jpg';
 export const HOME_HERO_IMAGE_WIDE = '/hero-wide-family.webp';
 export const HOME_HERO_IMAGE_WIDE_JPG = '/hero-wide-family.jpg';
 export const NATIONWIDE_SOON_NOTE =
   'Currently delivering in NYC. Nationwide shipping opens in a few days.';
+export const HOME_OFFER_STRIP =
+  'FREEDOM20 · 20% off first order, max $10 · No autoship · Free shipping over $49';
 
 export const NATIONWIDE_CHIPS = [
   'Free over $49',
   'No autoship',
   '365-day returns',
-  'Vet-quality brands',
+  'PayPal checkout',
   '24/7 support',
 ];
 

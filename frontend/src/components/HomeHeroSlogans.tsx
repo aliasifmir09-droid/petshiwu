@@ -5,15 +5,20 @@ import {
   HOME_HERO_IMAGE_JPG,
   HOME_HERO_IMAGE_WIDE,
   HOME_HERO_IMAGE_WIDE_JPG,
+  HOME_OFFER_STRIP,
   HOME_SLOGAN,
   HOME_SLOGAN_SUPPORT,
   NATIONWIDE_CHIPS,
   NATIONWIDE_SOON_NOTE,
 } from '@/data/brandStories';
+import { FIRST_ORDER_CODE, FIRST_ORDER_COPY } from '@/config/publicPromos';
 
 const HomeHeroSlogans = () => {
   return (
     <section className="bg-[#F7F4EE]">
+      <div className="bg-[#F3E8C8] text-[#1E3A8A] text-center text-sm font-semibold py-2.5 px-4 border-b border-[#1E3A8A]/10">
+        {HOME_OFFER_STRIP}
+      </div>
       <div className="grid lg:grid-cols-2 items-stretch">
         <div className="order-2 lg:order-1 flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-10 lg:py-20">
           <p className="mb-4 text-[11px] font-semibold tracking-[0.2em] uppercase text-[#1E3A8A]/70">
@@ -24,10 +29,25 @@ const HomeHeroSlogans = () => {
           </h1>
           <p className="mt-5 text-base lg:text-lg text-slate-600 max-w-xl leading-relaxed">{HOME_SLOGAN_SUPPORT}</p>
           <p className="mt-3 text-sm text-slate-500 max-w-xl">{NATIONWIDE_SOON_NOTE}</p>
+
+          <div className="mt-6 inline-flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 rounded-2xl border border-[#1E3A8A]/12 bg-white px-5 py-4 shadow-sm max-w-xl">
+            <span className="text-lg font-extrabold tracking-[0.18em] text-[#1E3A8A]">{FIRST_ORDER_CODE}</span>
+            <span className="hidden sm:block h-8 w-px bg-[#1E3A8A]/12" aria-hidden="true" />
+            <span className="text-sm text-slate-600 leading-snug">
+              {FIRST_ORDER_COPY}. No autoship. You confirm every charge.
+            </span>
+          </div>
+
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
+              to="/products"
+              className="inline-flex items-center justify-center h-12 px-8 rounded-full bg-[#1E3A8A] text-white font-semibold shadow-sm hover:bg-[#163074] hover:shadow-md transition-all"
+            >
+              Shop now
+            </Link>
+            <Link
               to="/dog"
-              className="inline-flex items-center justify-center h-12 px-7 rounded-full bg-[#1E3A8A] text-white font-semibold shadow-sm hover:bg-[#163074] hover:shadow-md transition-all"
+              className="inline-flex items-center justify-center h-12 px-7 rounded-full border border-[#1E3A8A]/25 bg-white text-[#1E3A8A] font-semibold hover:border-[#1E3A8A] hover:bg-white/80 transition-colors"
             >
               Shop dogs
             </Link>
@@ -36,12 +56,6 @@ const HomeHeroSlogans = () => {
               className="inline-flex items-center justify-center h-12 px-7 rounded-full border border-[#1E3A8A]/25 bg-white text-[#1E3A8A] font-semibold hover:border-[#1E3A8A] hover:bg-white/80 transition-colors"
             >
               Shop cats
-            </Link>
-            <Link
-              to="/products"
-              className="inline-flex items-center justify-center h-12 px-3 text-[#1E3A8A] font-semibold hover:underline underline-offset-4"
-            >
-              Shop all
             </Link>
           </div>
           <div className="mt-8 flex flex-wrap gap-2">
