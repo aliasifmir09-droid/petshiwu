@@ -68,16 +68,20 @@ export function xmlEscape(str: string): string {
 export function stripHtml(str: string): string {
   if (!str) return '';
   let s = str;
-  for (let i = 0; i < 3; i++) {
-    s = s
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#039;/g, "'")
-      .replace(/&apos;/g, "'")
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&#(\d+);/g, (_m, n) => String.fromCharCode(parseInt(n, 10)));
+  for (let i = 0; i < 4; i++) {
+    const next = s
+      .replace(/&amp;/gi, '&')
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>')
+      .replace(/&quot;/gi, '"')
+      .replace(/&#0*39;/g, "'")
+      .replace(/&#x0*27;/gi, "'")
+      .replace(/&apos;/gi, "'")
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/&#(\d+);/g, (_m, n) => String.fromCharCode(parseInt(n, 10)))
+      .replace(/&#x([0-9a-f]+);/gi, (_m, hex) => String.fromCharCode(parseInt(hex, 16)));
+    if (next === s) break;
+    s = next;
   }
   return s.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 }
@@ -130,6 +134,8 @@ export function productImages(product: FeedProduct): string[] {
     const resolved = resolveShareImage(value);
     if (!resolved || resolved === DEFAULT_OG_IMAGE) continue;
     if (!/^https?:\/\//i.test(resolved)) continue;
+    // Hotlinked PetSmart / Scene7 files get rejected and pull the offer down.
+    if (/s7d2\.scene7\.com/i.test(resolved) || /petsmart/i.test(resolved)) continue;
     if (/res\.cloudinary\.com/i.test(resolved)) continue;
     if (/\/dtmes0dha\//i.test(resolved) || /\/image\/upload\//i.test(resolved)) continue;
     if (seen.has(resolved)) continue;
@@ -232,18 +238,33 @@ export function merchantMpn(sku?: string): string | undefined {
   return value;
 }
 
-function shippingXml(price: number): string {
-  const shipPrice = price >= 49 ? '0.00' : '6.00';
+function shippingService(
+  region: string,
+  service: string,
+  minTransit: number,
+  maxTransit: number,
+  shipPrice: string
+): string {
   return `      <g:shipping>
         <g:country>US</g:country>
-        <g:region>NY</g:region>
-        <g:service>Same-day NYC</g:service>
+        <g:region>${region}</g:region>
+        <g:service>${service}</g:service>
         <g:price>${shipPrice} USD</g:price>
         <g:min_handling_time>0</g:min_handling_time>
         <g:max_handling_time>0</g:max_handling_time>
-        <g:min_transit_time>0</g:min_transit_time>
-        <g:max_transit_time>1</g:max_transit_time>
+        <g:min_transit_time>${minTransit}</g:min_transit_time>
+        <g:max_transit_time>${maxTransit}</g:max_transit_time>
       </g:shipping>`;
+}
+
+/** Checkout delivers NYC same-day plus the 50-mile NY/NJ/CT metro. Not nationwide. */
+function shippingXml(price: number): string {
+  const shipPrice = price >= 49 ? '0.00' : '6.00';
+  return [
+    shippingService('NY', 'Same-day NYC', 0, 1, shipPrice),
+    shippingService('NJ', 'Next-day metro', 1, 1, shipPrice),
+    shippingService('CT', 'Next-day metro', 1, 1, shipPrice),
+  ].join('\n');
 }
 
 export function buildMerchantItemXml(opts: {
@@ -301,6 +322,8 @@ export function buildMerchantItemXml(opts: {
     `      <g:custom_label_0>${xmlEscape(opts.petLabel)}</g:custom_label_0>`,
     `      <g:custom_label_1>${opts.featured ? 'Featured' : 'Catalog'}</g:custom_label_1>`,
     '      <g:custom_label_2>NYC same-day</g:custom_label_2>',
+    '      <g:included_destination>Free_listings</g:included_destination>',
+    '      <g:included_destination>Shopping_ads</g:included_destination>',
     opts.itemGroupId ? `      <g:item_group_id>${xmlEscape(opts.itemGroupId.slice(0, 50))}</g:item_group_id>` : '',
     opts.size ? `      <g:size>${xmlEscape(opts.size.slice(0, 100))}</g:size>` : '',
     unit ? `      <g:unit_pricing_measure>${unit.measure}</g:unit_pricing_measure>` : '',
@@ -312,7 +335,21 @@ export function buildMerchantItemXml(opts: {
   return `${lines.filter(Boolean).join('\n')}\n`;
 }
 
+const LIVE_ANIMAL_RE =
+  /\blive\b.+\b(cricket|waxworm|superworm|mealworm|hornworm|dubia|roach|mice|mouse|rat|feeder fish|feeder insect)s?\b|\b(cricket|waxworm|superworm|mealworm|hornworm|dubia roach)s?\b.+\blive\b/i;
+const PRESERVED_FEEDER_RE = /\b(freeze[-\s]?dried|dehydrated|oven[-\s]?dried|canned|dried)\b/i;
+
+/** Google Shopping disallows live animals, including feeder insects. */
+export function isLiveAnimalOffer(product: FeedProduct, variantTitle?: string): boolean {
+  const haystack = [product.name, variantTitle, product.shortDescription, product.description]
+    .filter(Boolean)
+    .join(' ');
+  if (PRESERVED_FEEDER_RE.test(haystack) && !/\blive\b/i.test(product.name)) return false;
+  return LIVE_ANIMAL_RE.test(haystack);
+}
+
 export function feedItemsForProduct(product: FeedProduct): string {
+  if (isLiveAnimalOffer(product)) return '';
   const images = productImages(product);
   if (images.length === 0) return '';
 

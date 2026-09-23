@@ -5,6 +5,7 @@ import {
   cleanText,
   feedItemsForProduct,
   googleProductCategory,
+  isLiveAnimalOffer,
   looksLikeGtin,
   merchantMpn,
   parseUnitPricing,
@@ -166,8 +167,14 @@ describe('googleMerchantFeed helpers', () => {
     expect(xml).toContain('<g:unit_pricing_measure>30 lb</g:unit_pricing_measure>');
     expect(xml).toContain('<g:service>Same-day NYC</g:service>');
     expect(xml).toContain('<g:region>NY</g:region>');
+    expect(xml).toContain('<g:region>NJ</g:region>');
+    expect(xml).toContain('<g:region>CT</g:region>');
+    expect(xml).toContain('<g:service>Next-day metro</g:service>');
+    expect(xml).toContain('<g:included_destination>Free_listings</g:included_destination>');
     expect(xml).toContain('<g:min_transit_time>0</g:min_transit_time>');
     expect(xml).not.toContain('<g:identifier_exists>no</g:identifier_exists>');
+    expect(xml).not.toContain('<g:region>CA</g:region>');
+    expect(xml).not.toMatch(/nationwide/i);
   });
 
   test('does not emit a truncated MPN when the SKU is longer than 70 characters', () => {
@@ -252,6 +259,67 @@ describe('googleMerchantFeed helpers', () => {
     expect(xml).toContain('<g:availability>in stock</g:availability>');
     expect(xml).toContain('<g:availability>out of stock</g:availability>');
     expect(xml).toContain('/dog/dry-food/purina-pro-plan-adult');
+  });
+
+  test('decodes catalog HTML entities so titles are not Fluker&amp;#x27;s', () => {
+    const xml = buildMerchantItemXml({
+      id: 'ps-fluker',
+      title: "Fluker&#x27;s Orange Cube",
+      description: cleanText("Fluker&amp;#x27;s cricket diet"),
+      link: 'https://www.petshiwu.com/reptile/food/flukers-orange-cube',
+      image: 'https://petshiwu-cdn.b-cdn.net/products/fluker.jpg',
+      price: 6.99,
+      availability: 'in stock',
+      brand: "Fluker's",
+      mpn: 'FL-12',
+      productType: 'Reptile Supplies > Food',
+      googleCategory: 'Animals & Pet Supplies > Pet Supplies > Reptile & Amphibian Supplies',
+      petLabel: 'Reptile',
+    });
+    expect(xml).toContain('<g:title>Fluker&apos;s Orange Cube</g:title>');
+    expect(xml).toContain('Fluker&apos;s cricket diet');
+    expect(xml).not.toContain('&amp;#x27;');
+  });
+
+  test('skips PetSmart Scene7 photos so Google is not sent a hotlinked retailer file', () => {
+    expect(
+      productImages({
+        _id: '1',
+        name: 'Treat',
+        slug: 'treat',
+        images: [
+          'https://s7d2.scene7.com/is/image/PetSmart/5377159',
+          'https://petshiwu-cdn.b-cdn.net/products/treat.jpg',
+        ],
+      })
+    ).toEqual(['https://petshiwu-cdn.b-cdn.net/products/treat.jpg']);
+  });
+
+  test('omits live feeder insects so Shopping does not flag sale of live animals', () => {
+    expect(
+      isLiveAnimalOffer({
+        _id: '1',
+        name: 'Reptile Food - Live Crickets',
+        slug: 'reptile-food-live-crickets',
+      })
+    ).toBe(true);
+    expect(
+      feedItemsForProduct({
+        _id: '1',
+        name: 'Reptile Food - Live Superworms',
+        slug: 'reptile-food-live-superworms',
+        images: ['https://cdn.example.com/worms.jpg'],
+        basePrice: 8.99,
+        variants: [{ price: 8.99, sku: 'SW-50', stock: 4 }],
+      })
+    ).toBe('');
+    expect(
+      isLiveAnimalOffer({
+        _id: '2',
+        name: "Fluker's Freeze Dried Superworms",
+        slug: 'flukers-freeze-dried-superworms',
+      })
+    ).toBe(false);
   });
 
   test('products without a real photo are omitted', () => {
