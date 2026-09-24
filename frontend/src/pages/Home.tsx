@@ -12,6 +12,7 @@ import ShopByPet from '@/components/ShopByPet';
 import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
 import HomeHeroSlogans from '@/components/HomeHeroSlogans';
+import HomeWelcomeTrust from '@/components/HomeWelcomeTrust';
 import HomeFeaturedLearning from '@/components/HomeFeaturedLearning';
 import NycHubLinkGrid from '@/components/NycHubLinkGrid';
 import OrdersOpenBanner from '@/components/OrdersOpenBanner';
@@ -189,6 +190,8 @@ const Home = () => {
 
       <HomeHeroSlogans />
 
+      <HomeWelcomeTrust />
+
       <ShopByPet />
 
       <CategoryIcons />
@@ -316,9 +319,9 @@ const Home = () => {
           <div className="text-center mb-10">
             <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-[#1E3A8A]/60 mb-2">Why Petshiwu</p>
             <h2 className="text-3xl md:text-4xl font-extrabold text-[#1E3A8A] mb-2">
-              A national pet store, online
+              What you get
             </h2>
-            <p className="text-slate-500">Shop by pet. Shop by brand. No autoship. 365-day returns.</p>
+            <p className="text-slate-500">Hill’s, Royal Canin, Purina. No autoship. 365-day returns.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
@@ -331,8 +334,8 @@ const Home = () => {
                 text: `${CATALOG_BRANDS_SHORT} — plus prescription diets. Order once or restock when you want. We never charge in the background.`,
               },
               {
-                title: '365-day returns and 24/7 support',
-                text: 'Unused items come back easy. Call +1 (800) 259-2605 any time. Currently delivering in NYC. Nationwide shipping opens in a few days.',
+                title: '365-day returns, PayPal, and 24/7 support',
+                text: 'Unused items come back easy. Pay with PayPal or card. Call +1 (800) 259-2605 any time. Currently delivering in NYC. Nationwide shipping opens in a few days.',
               },
             ].map((item) => (
               <div key={item.title} className="bg-white rounded-3xl p-7 border border-[#1E3A8A]/8 shadow-sm hover:shadow-md transition-shadow">
