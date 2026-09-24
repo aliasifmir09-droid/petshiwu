@@ -255,7 +255,7 @@ router.post('/callback', async (req: Request, res: Response) => {
     res.json({
       success: true,
       phone: displayPhone,
-      message: `We are calling ${displayPhone} now. Stay by the phone — a person will ring you within a minute.`,
+      message: `Don't wait. We're calling ${displayPhone} now. Stay close — a person will ring you within a minute.`,
     });
   } catch (error: any) {
     logger.error('Callback request error:', error);

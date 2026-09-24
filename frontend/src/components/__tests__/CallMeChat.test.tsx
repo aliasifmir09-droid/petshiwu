@@ -29,7 +29,7 @@ describe('CallMeChat', () => {
       data: {
         success: true,
         phone: '+1 (347) 555-0100',
-        message: 'We are calling +1 (347) 555-0100 now. Stay by the phone — a person will ring you within a minute.',
+        message: "Don't wait. We're calling +1 (347) 555-0100 now. Stay close — a person will ring you within a minute.",
       },
     });
   });
@@ -37,6 +37,12 @@ describe('CallMeChat', () => {
   test('is hidden on checkout', () => {
     renderChat('/checkout');
     expect(screen.queryByRole('button', { name: /open call me chat/i })).not.toBeInTheDocument();
+  });
+
+  test('shows why-wait copy on the launcher', () => {
+    renderChat('/');
+    expect(screen.getByRole('button', { name: /open call me chat/i })).toHaveTextContent(/why wait/i);
+    expect(screen.getByRole('button', { name: /open call me chat/i })).toHaveTextContent(/we'll call you/i);
   });
 
   test('sends a dropped number to the callback desk', async () => {
@@ -57,6 +63,7 @@ describe('CallMeChat', () => {
         { skipAuth: true }
       );
     });
-    expect(await screen.findByText(/we are calling \+1 \(347\) 555-0100 now/i)).toBeInTheDocument();
+    expect(await screen.findByText(/we're calling \+1 \(347\) 555-0100 now/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /why wait/i })).toBeInTheDocument();
   });
 });

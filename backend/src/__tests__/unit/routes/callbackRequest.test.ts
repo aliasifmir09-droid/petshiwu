@@ -74,6 +74,7 @@ describe('callback chat requests', () => {
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.phone).toBe('+1 (347) 555-0100');
+    expect(res.body.message).toMatch(/Don't wait/i);
     expect(res.body.message).toMatch(/within a minute/i);
     expect(sendCallbackEmail).toHaveBeenCalledWith(
       expect.objectContaining({

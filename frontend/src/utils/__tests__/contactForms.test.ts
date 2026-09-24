@@ -63,6 +63,8 @@ describe('contact forms post to the real API', () => {
     const src = read(path.resolve(__dirname, '../../components/CallMeChat.tsx'));
     expect(src).toContain('/v1/contact/callback');
     expect(src).toContain('Drop your number');
+    expect(src).toContain("Why wait?");
+    expect(src).toContain("We'll call you");
     expect(src).toContain('within a minute');
   });
 
