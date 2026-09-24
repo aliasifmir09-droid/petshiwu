@@ -62,4 +62,24 @@ describe('reorder reminder emails', () => {
     expect(email.html).not.toContain('&amp;#');
     expect(email.html).not.toContain('&#039;');
   });
+
+  test('uses the brand logo, hero photo, and product image', () => {
+    const email = buildReorderReminderEmail('Jawed', 'ORD-1', {
+      weeks: 4,
+      items: [
+        {
+          name: 'Hill\'s Science Diet',
+          quantity: 2,
+          image: '/product-images/hills.jpg',
+        },
+      ],
+      mode: 'autoship',
+    });
+
+    expect(email.html).toContain('https://www.petshiwu.com/logo.png');
+    expect(email.html).toContain('https://www.petshiwu.com/hero-wide-family.jpg');
+    expect(email.html).toContain('https://www.petshiwu.com/product-images/hills.jpg');
+    expect(email.html).toContain('role="presentation"');
+    expect(email.html).toContain('+1 (800) 259-2605');
+  });
 });
