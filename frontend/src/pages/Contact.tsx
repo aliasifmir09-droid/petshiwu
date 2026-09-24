@@ -128,6 +128,7 @@ const Contact = () => {
                       +1 (800) 259-2605
                     </a>
                     <p className="text-xs text-gray-500 mt-1">Call anytime. A real person answers day and night.</p>
+                    <p className="text-xs text-gray-500 mt-1">Or tap Call me on any page, drop your number, and we ring you within a minute.</p>
                   </div>
                 </div>
 

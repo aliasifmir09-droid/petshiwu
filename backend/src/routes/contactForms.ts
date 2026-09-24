@@ -1,8 +1,11 @@
 import express, { Request, Response } from 'express';
 import ContactSubmission, { ContactSubmissionType } from '../models/ContactSubmission';
+import CallbackRequest from '../models/CallbackRequest';
 import logger from '../utils/logger';
 import mongoose from 'mongoose';
 import { sendContactFormEmail, ContactMailType } from '../utils/contactMail';
+import { sendCallbackEmail } from '../utils/callbackMail';
+import { extractCallbackPhone, formatCallbackPhone } from '../utils/callbackPhone';
 
 const router = express.Router();
 
@@ -160,6 +163,108 @@ router.post('/press', (req, res) =>
     'Your press inquiry has been received. We will be in touch shortly.'
   )
 );
+
+router.post('/callback', async (req: Request, res: Response) => {
+  try {
+    const body = req.body || {};
+    const name = String(body.name || '').trim().slice(0, 80);
+    const pagePath = String(body.pagePath || '').trim().slice(0, 200);
+    const rawText = [body.phone, body.text, body.message].filter(Boolean).join(' ');
+    const message = String(body.message || body.text || '').trim().slice(0, 500);
+    const phone = extractCallbackPhone(String(body.phone || '')) || extractCallbackPhone(rawText);
+
+    if (!phone) {
+      return res.status(400).json({
+        success: false,
+        message: 'Drop a US phone number and we will call you in a minute.',
+      });
+    }
+
+    const displayPhone = formatCallbackPhone(phone);
+    const ipAddress = req.ip || req.headers['x-forwarded-for']?.toString();
+    let submission: any = null;
+
+    try {
+      if (mongoose.connection.readyState === 1) {
+        const recentFilter = {
+          createdAt: { $gt: new Date(Date.now() - 10 * 60 * 1000) },
+          $or: [{ phone }, ...(ipAddress ? [{ ipAddress }] : [])],
+        };
+        const recent = await CallbackRequest.countDocuments(recentFilter);
+        if (recent >= 3) {
+          return res.status(429).json({
+            success: false,
+            message: 'We already have your number. Stay by the phone — we are calling.',
+          });
+        }
+
+        submission = await CallbackRequest.create({
+          phone,
+          displayPhone,
+          name: name || undefined,
+          message: message || undefined,
+          pagePath: pagePath || undefined,
+          emailSent: false,
+          ipAddress,
+          userAgent: req.headers['user-agent']?.toString()?.slice(0, 500),
+        });
+      } else {
+        logger.error('MongoDB not connected — callback request NOT saved:', { phone });
+      }
+    } catch (dbErr: any) {
+      logger.error('Failed to save callback request:', dbErr.message);
+    }
+
+    try {
+      const sent = await sendCallbackEmail({
+        phone,
+        name: name || undefined,
+        message: message || undefined,
+        pagePath: pagePath || undefined,
+      });
+      const actuallySent = sent.messageId !== 'dev-not-sent';
+      if (submission) {
+        await CallbackRequest.updateOne(
+          { _id: submission._id },
+          { $set: { emailSent: actuallySent, emailError: actuallySent ? undefined : 'No email transport in this environment' } }
+        );
+      }
+    } catch (emailErr: any) {
+      if (submission) {
+        await CallbackRequest.updateOne(
+          { _id: submission._id },
+          { $set: { emailSent: false, emailError: emailErr.message?.slice(0, 500) } }
+        );
+      }
+      logger.error('Callback email send failed:', emailErr.message);
+      if (process.env.NODE_ENV === 'production') {
+        return res.status(500).json({
+          success: false,
+          message: 'Could not reach the call desk. Call +1 (800) 259-2605 and a person answers 24/7.',
+        });
+      }
+    }
+
+    if (!submission && process.env.NODE_ENV === 'production') {
+      return res.status(500).json({
+        success: false,
+        message: 'Could not reach the call desk. Call +1 (800) 259-2605 and a person answers 24/7.',
+      });
+    }
+
+    res.json({
+      success: true,
+      phone: displayPhone,
+      message: `We are calling ${displayPhone} now. Stay by the phone — a person will ring you within a minute.`,
+    });
+  } catch (error: any) {
+    logger.error('Callback request error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Could not reach the call desk. Call +1 (800) 259-2605 and a person answers 24/7.',
+    });
+  }
+});
 
 router.get('/submissions', async (req: Request, res: Response) => {
   try {

@@ -8,6 +8,19 @@ jest.mock('../../../utils/contactMail', () => ({
 }));
 
 const saved: any[] = [];
+jest.mock('../../../models/CallbackRequest', () => ({
+  __esModule: true,
+  default: {
+    countDocuments: jest.fn(async () => 0),
+    create: jest.fn(),
+    updateOne: jest.fn(),
+  },
+}));
+
+jest.mock('../../../utils/callbackMail', () => ({
+  sendCallbackEmail: jest.fn(),
+}));
+
 jest.mock('../../../models/ContactSubmission', () => ({
   __esModule: true,
   default: {
