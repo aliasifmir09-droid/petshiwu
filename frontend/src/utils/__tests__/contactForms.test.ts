@@ -56,6 +56,16 @@ describe('contact forms post to the real API', () => {
     expect(src).not.toContain('/pets/cat.jpg');
     expect(src).not.toContain('WELCOME10');
     expect(appSrc).toContain('<EmailPopup />');
+    expect(appSrc).toContain('<CallMeChat />');
+  });
+
+  test('call-me chat posts a dropped number to the callback desk', () => {
+    const src = read(path.resolve(__dirname, '../../components/CallMeChat.tsx'));
+    expect(src).toContain('/v1/contact/callback');
+    expect(src).toContain('Drop your number');
+    expect(src).toContain("Why wait?");
+    expect(src).toContain("We'll call you");
+    expect(src).toContain('within a minute');
   });
 
   test('unsubscribe page is wired to the newsletter API', () => {
