@@ -1014,6 +1014,7 @@ export const buildProductHtml = (template: string, product: any, slug: string): 
       url: productUrl,
       priceCurrency: 'USD',
       price: price.toFixed(2),
+      priceValidFrom: new Date(product.updatedAt || product.createdAt || Date.now()).toISOString().split('T')[0],
       priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',
