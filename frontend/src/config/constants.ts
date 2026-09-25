@@ -2,8 +2,17 @@
  * Application configuration constants
  * Centralized location for magic numbers and configuration values
  */
-// Tax configuration
-export const TAX_RATE = 0.08; // 8% tax rate
+// Tax configuration — destination-based: rate follows the shipping address state.
+// Matches backend orderPricingService.ts (NY 8.875% = 4% state + 4.5% city + 0.375% MCTD,
+// NJ 6.625% statewide, CT 6.35% statewide, 0% elsewhere).
+export const TAX_RATES_BY_STATE: Record<string, number> = {
+  NY: 0.08875,
+  NJ: 0.06625,
+  CT: 0.0635,
+};
+export const DEFAULT_TAX_RATE = 0;
+// Estimate shown in the cart (no address known yet) — exact rate applied at checkout.
+export const TAX_RATE = 0.08875;
 // Shipping configuration
 export const FREE_SHIPPING_THRESHOLD = 49; // Free shipping for orders over $49
 export const STANDARD_SHIPPING_COST = 6.00; // Standard shipping cost ($6 for orders less than $49)

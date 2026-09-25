@@ -2,8 +2,26 @@ import Product from '../models/Product';
 import { getCouponDiscount, isFreeShippingCoupon } from './couponService';
 import type { NormalizedOrderItem } from '../types/common';
 import { decodeHtmlEntities } from '../utils/catalogText';
+import { normalizeShippingState } from '../utils/nycDelivery';
 
-export const TAX_RATE = 0.08;
+/**
+ * Destination-based sales tax: the rate follows the SHIPPING address state.
+ * NY 8.875% (physical presence: Jackson Heights store — 4% state + 4.5% city + 0.375% MCTD).
+ * NJ 6.625% statewide. CT 6.35% statewide.
+ * States outside the delivery zone have no nexus and no sales — 0%.
+ */
+export const TAX_RATES_BY_STATE: Record<string, number> = {
+  NY: 0.08875,
+  NJ: 0.06625,
+  CT: 0.0635,
+};
+export const DEFAULT_TAX_RATE = 0;
+
+export function getTaxRateForState(state?: string): number {
+  if (!state) return DEFAULT_TAX_RATE;
+  return TAX_RATES_BY_STATE[normalizeShippingState(state)] ?? DEFAULT_TAX_RATE;
+}
+
 export const FREE_SHIPPING_THRESHOLD = 49;
 export const STANDARD_SHIPPING_COST = 6;
 
@@ -40,7 +58,8 @@ export const calculateTrustedOrderPricing = async (
   items: PricingItemInput[],
   couponCode?: string,
   donationAmount = 0,
-  session?: any
+  session?: any,
+  shippingState?: string
 ): Promise<TrustedOrderPricing> => {
   const trustedItems: NormalizedOrderItem[] = [];
 
@@ -97,7 +116,7 @@ export const calculateTrustedOrderPricing = async (
   const shippingPrice = itemsPrice >= FREE_SHIPPING_THRESHOLD || isFreeShippingCoupon(couponCode)
     ? 0
     : STANDARD_SHIPPING_COST;
-  const taxPrice = Number((itemsPrice * TAX_RATE).toFixed(2));
+  const taxPrice = Number((itemsPrice * getTaxRateForState(shippingState)).toFixed(2));
   const discountAmount = getCouponDiscount(couponCode, itemsPrice);
   const safeDonationAmount = Number.isFinite(Number(donationAmount)) && Number(donationAmount) > 0
     ? Number(Number(donationAmount).toFixed(2))

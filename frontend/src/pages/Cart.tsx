@@ -229,7 +229,7 @@ const Cart = () => {
   })();
 
   const shipping = shippingCostForSubtotal(subtotal);
-  const tax = subtotal * (TAX_RATE || 0.08);
+  const tax = subtotal * TAX_RATE; // Estimate only — exact state tax (NY 8.875% / NJ 6.625% / CT 6.35%) is applied at checkout.
   const total = subtotal + shipping + tax;
   const remainingForFreeShipping = amountUntilFreeShipping(subtotal);
 

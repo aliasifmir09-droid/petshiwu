@@ -171,7 +171,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         normalizedItemInputs,
         typeof couponCode === 'string' ? couponCode : undefined,
         Number(donationAmount) || 0,
-        session
+        session,
+        typeof shippingAddress?.state === 'string' ? shippingAddress.state : undefined
       );
       const normalizedItems = trustedPricing.items;
 
@@ -1637,7 +1638,9 @@ export const createPayPalCheckoutOrder = async (req: AuthRequest, res: Response,
     const pricing = await calculateTrustedOrderPricing(
       Array.isArray(items) ? items : [],
       typeof couponCode === 'string' ? couponCode : undefined,
-      Number(donationAmount) || 0
+      Number(donationAmount) || 0,
+      undefined,
+      typeof shippingAddress?.state === 'string' ? shippingAddress.state : undefined
     );
     if (pricing.totalPrice < 0.5) {
       return res.status(400).json({ success: false, message: 'Order total must be at least $0.50' });

@@ -4,6 +4,7 @@
  */
 
 import { NEXT_DAY_ZIPS, type MetroState } from '@/data/nextDayMetroZips';
+import { DEFAULT_TAX_RATE, TAX_RATES_BY_STATE } from '@/config/constants';
 
 export type DeliverySpeed = 'same-day' | 'next-day' | 'standard';
 
@@ -161,6 +162,16 @@ export function normalizeShippingState(state: string): string {
   if (isNewJerseyState(trimmed)) return 'NJ';
   if (isConnecticutState(trimmed)) return 'CT';
   return trimmed;
+}
+
+/**
+ * Destination-based sales tax: the rate follows the SHIPPING address state.
+ * Must stay in sync with backend orderPricingService.ts.
+ * NY 8.875% (4% state + 4.5% city + 0.375% MCTD), NJ 6.625%, CT 6.35%, 0% elsewhere.
+ */
+export function getTaxRateForState(state?: string): number {
+  if (!state) return DEFAULT_TAX_RATE;
+  return TAX_RATES_BY_STATE[normalizeShippingState(state)] ?? DEFAULT_TAX_RATE;
 }
 
 export function lookupZip(input: string, now: Date = new Date()): ZipLookupResult | null {

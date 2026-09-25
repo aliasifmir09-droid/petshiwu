@@ -25,11 +25,11 @@ import OrdersHoldNotice from '@/components/OrdersHoldNotice';
 import { ORDERING_PAUSED } from '@/config/ordering';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { MapPin, Plus, Check, User, UserCheck, ShieldCheck, RotateCcw, Headphones, Lock, Truck } from 'lucide-react';
-import { TAX_RATE } from '@/config/constants';
 import { paypalClientId } from '@/config/paypal';
 import { normalizeCheckoutPhone } from '@/utils/checkoutPhone';
 import {
   isDeliverableShippingAddress,
+  getTaxRateForState,
   isValidZip,
   lookupZip,
   normalizeShippingState,
@@ -399,7 +399,7 @@ const Checkout = () => {
   };
 
   const shipping = shippingCostForSubtotal(subtotal, couponWaivesShipping);
-  const tax = subtotal * TAX_RATE;
+  const tax = Number((subtotal * getTaxRateForState(shippingInfo.state)).toFixed(2));
   const onlineTotal = Math.max(0, subtotal + shipping + tax - couponDiscount);
   const total = Math.max(0, onlineTotal + donationAmount);
 
