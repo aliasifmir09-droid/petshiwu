@@ -152,7 +152,7 @@ const escRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
  * Replace <title> tag in the HTML template
  */
 const injectTitle = (html: string, title: string): string =>
-  html.replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`);
+  html.replace(/<title[^>]*>[^<]*<\/title>/, `<title>${esc(title)}</title>`);
 
 /**
  * Replace meta description content
@@ -2283,7 +2283,7 @@ const build404Html = (template: string): string => {
   const title = 'Page Not Found | Petshiwu';
   const description = 'The page you are looking for could not be found. Browse our pet supplies or use the search above.';
   let html = template;
-  html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`);
+  html = html.replace(/<title[^>]*>[^<]*<\/title>/, `<title>${esc(title)}</title>`);
   html = html.replace(
     /<meta[\s\S]*?name="description"[\s\S]*?content="[^"]*"/,
     `<meta name="description" content="${esc(description)}"`
@@ -2622,7 +2622,7 @@ export const createBotRenderer = (distPath: string) => {
       if (bot) res.setHeader('X-Bot-Rendered', 'error');
       let errorHtml = build404Html(template);
       errorHtml = errorHtml.replace(/<script[^>]+type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>\s*/gi, '');
-      errorHtml = errorHtml.replace(/<title>[^<]*<\/title>/i, '<title>Temporarily Unavailable | Petshiwu</title>');
+      errorHtml = errorHtml.replace(/<title[^>]*>[^<]*<\/title>/i, '<title>Temporarily Unavailable | Petshiwu</title>');
       res.send(errorHtml);
       return;
     }
