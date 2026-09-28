@@ -120,7 +120,7 @@ import couponRoutes from './routes/coupons';
 import { generateSitemap } from './controllers/sitemapController';
 import { createBotRenderer } from './middleware/botRenderer';
 import { looksLikeStaticAsset } from './seo/staticAssetPath';
-import { slugRedirectMiddleware } from './middleware/slugRedirect';
+import { slugRedirectMiddleware, slugRedirectOnMiss } from './middleware/slugRedirect';
 import { blogRedirectMiddleware } from './middleware/blogRedirect';
 import { neighborhoodRedirectMiddleware } from './middleware/neighborhoodRedirect';
 import { brokenSlugRedirectMiddleware } from './middleware/brokenSlugRedirect';
@@ -976,6 +976,10 @@ app.get('*', (req: Request, res: Response, next: NextFunction) => {
     }
   });
 });
+
+// Retired-product rescue: runs only if every real route above has already failed,
+// so a live page never pays a DB lookup. 301s legacy slugs Google still ranks.
+app.use(slugRedirectOnMiss);
 
 app.use(notFound);
 app.use(errorHandler);

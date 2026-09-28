@@ -48,6 +48,7 @@ import {
   shopBrandStaticPages,
 } from '../seo/shopBrands';
 import { brandMatchQuery } from '../utils/catalogText';
+import { resolveLegacyRedirect } from './slugRedirect';
 
 // ---------------------------------------------------------------------------
 // Bot detection
@@ -2366,6 +2367,22 @@ export const createBotRenderer = (distPath: string) => {
       // fallback below. This prevents malformed encoded product paths from becoming
       // 200 noindex shells merely because they have three URL segments.
       if (routeClassification.status === 'notFound' || !isKnownRoute(req.path)) {
+        // Retired-product rescue. When the catalog rebuild removes a product, the old
+        // URL 404s but Google keeps ranking it: 233 of the top 500 ranked pages were
+        // 404s at positions 1.3-2.9 (4,946 impressions / 269 clicks a month landing on
+        // a dead end). If the slug is a known legacy alias of a live product, 301 to
+        // it instead of 404ing. Only reached on a URL that would have 404'd anyway,
+        // so no serving page pays this lookup.
+        try {
+          const rescue = await resolveLegacyRedirect(req.path);
+          if (rescue) {
+            res.setHeader('Cache-Control', 'public, max-age=3600');
+            res.redirect(301, rescue);
+            return;
+          }
+        } catch (err) {
+          logger.warn('[botRenderer] legacy slug rescue failed:', err instanceof Error ? err.message : err);
+        }
         const notFoundHtml = build404Html(template);
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.status(404);
@@ -2583,6 +2600,22 @@ export const createBotRenderer = (distPath: string) => {
       // Soft 404 fix: return a clean 404 document when a DB-backed page was
       // expected but not found. Do not send the generic shell with a self-canonical.
       if (notFound) {
+        // Retired-product rescue. A catalog rebuild removes an old product, the URL
+        // 404s, but Google keeps ranking it — 233 of the top 500 ranked pages were
+        // 404s at positions 1.3-2.9 (4,946 impressions / 269 clicks a month landing
+        // on a dead end). If the slug is a known legacy alias of a live product,
+        // 301 to that product instead of serving a 404.
+        try {
+          const rescue = await resolveLegacyRedirect(req.path);
+          if (rescue) {
+            res.setHeader('Cache-Control', 'public, max-age=3600');
+            res.redirect(301, rescue);
+            return;
+          }
+        } catch (err) {
+          logger.warn('[botRenderer] legacy slug rescue failed:',
+            err instanceof Error ? err.message : err);
+        }
         res.status(404);
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
