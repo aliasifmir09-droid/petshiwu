@@ -49,6 +49,7 @@ import {
 } from '../seo/shopBrands';
 import { brandMatchQuery } from '../utils/catalogText';
 import { resolveLegacyRedirect } from './slugRedirect';
+import { RETIRED_URL_301 } from '../seo/retiredUrlMap';
 
 // ---------------------------------------------------------------------------
 // Bot detection
@@ -2391,6 +2392,20 @@ export const createBotRenderer = (distPath: string) => {
         res.setHeader('Cache-Control', 'public, max-age=3600');
         res.send(notFoundHtml);
         return;
+      }
+
+      // Decision-gated retired-URL map. These are retired products in aisles we
+      // STILL sell (verified live + in-sitemap inventory-backed targets), so a 301
+      // is a genuine move, not a soft-404. Handled before any DB enrichment: the
+      // path is dead by construction, so nothing that 200s ever pays this lookup.
+      // Paths NOT in the map keep whatever behaviour they already had.
+      {
+        const mapped = RETIRED_URL_301[req.path.replace(/\/+$/, '') || '/'];
+        if (mapped) {
+          res.setHeader('Cache-Control', 'public, max-age=3600');
+          res.redirect(301, mapped);
+          return;
+        }
       }
 
       // DB-backed page enrichment. Product pages must include a visible price and

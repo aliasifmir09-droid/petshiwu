@@ -17,6 +17,7 @@ import Product from '../models/Product';
 import Blog from '../models/Blog';
 import Category from '../models/Category';
 import logger from '../utils/logger';
+import { RETIRED_URL_301 } from '../seo/retiredUrlMap';
 
 // Fast in-process cache: old slug → new path (TTL 1hr)
 const redirectCache = new Map<string, { to: string; expires: number }>();
@@ -194,6 +195,12 @@ function looksLikeStaticAsset(p: string): boolean {
  * rescue a retired product URL. Returns null when the slug is not a known alias.
  */
 export async function resolveLegacyRedirect(pathname: string): Promise<string | null> {
+  // 1. Decision-gated retired-URL map (fast O(1), no DB). Covers retired products
+  //    in aisles we still sell, mapped to a verified inventory-backed subcategory.
+  const normalised = pathname.split('?')[0].replace(/\/+$/, '') || '/';
+  const mapped = RETIRED_URL_301[normalised] || RETIRED_URL_301[pathname];
+  if (mapped) return mapped;
+
   const segments = pathname.split('/').filter(Boolean);
   if (!segments.length) return null;
   const lastSlug = segments[segments.length - 1];
