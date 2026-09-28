@@ -2335,6 +2335,15 @@ export const createBotRenderer = (distPath: string) => {
               return;
             }
           } else if (isLegacyProductPath) {
+            // No live product matched. Fall back to the retired-URL map so a
+            // still-ranked dead product in an aisle we sell lands on a real
+            // aisle instead of a dead end (see backend/src/seo/retiredUrlMap.ts).
+            const retired = RETIRED_URL_301[req.path.replace(/\/+$/, '') || '/'];
+            if (retired) {
+              res.setHeader('Cache-Control', 'public, max-age=3600');
+              res.redirect(301, retired);
+              return;
+            }
             res.status(404);
             res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
