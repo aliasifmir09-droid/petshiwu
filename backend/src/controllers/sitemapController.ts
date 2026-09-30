@@ -163,7 +163,15 @@ export const generateSitemap = async (req: Request, res: Response) => {
 
             // Reject slugs with HTML-entity artifacts or repeated-dash artifacts.
             // Prevents 370+ broken URLs (soft-404s for Google) from being in sitemap.
-            const BROKEN_SLUG_RE = /039|ampamp|ampquot|--amp|^amp-|amp-|-amp-|--+/;
+            // NOTE: the trailing `--+` alternative was removed deliberately. It was meant to catch
+            // HTML-entity corruption, but our own taxonomy uses `--` as the "&" separator
+            // (e.g. dog/bones-bully-sticks--chews, dog/fresh--frozen-food). With `--+` in place
+            // NINE categories were silently dropped from the sitemap, 7 of them healthy and
+            // holding 721 live products whose canonical URLs therefore never appeared either.
+            // The remaining alternatives still reject every genuinely corrupted slug we have
+            // (...-amp-..., ...lil039-..., ampamp/ampquot/triple-encoded) — verified against the
+            // live category and product sets.
+            const BROKEN_SLUG_RE = /039|ampamp|ampquot|--amp|^amp-|amp-|-amp-/;
             const isCleanSlug = (slug: unknown): boolean => {
               if (!isValidSlug(slug)) return false;
               return !BROKEN_SLUG_RE.test(String(slug));
