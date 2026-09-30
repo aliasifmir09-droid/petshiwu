@@ -930,13 +930,26 @@ export const canonicalProductHref = (product: any): string | null => {
   return path ? `${BASE}${path}` : null;
 };
 
+/** Price Google Shopping must see in first-wave HTML (not only after React hydrates). */
+export const productOfferPrice = (product: {
+  basePrice?: number;
+  variants?: Array<{ price?: number }>;
+}): number => {
+  const base = Number(product.basePrice);
+  if (Number.isFinite(base) && base > 0) return base;
+  const variant = (product.variants || []).find((item) => Number(item.price) > 0);
+  const variantPrice = Number(variant?.price);
+  return Number.isFinite(variantPrice) && variantPrice > 0 ? variantPrice : 0;
+};
+
 export const productAnchorHtml = (product: any): string => {
   const href = canonicalProductHref(product);
   const name = product?.name;
   if (!href || !name) return '';
-  const price = typeof product.basePrice === 'number' && Number.isFinite(product.basePrice)
-    ? ` — $${Number(product.basePrice).toFixed(2)}`
-    : '';
+  // Use the shared resolver so a product whose basePrice is 0 but whose variants
+  // carry real prices (the majority of the catalog) never renders "$0.00".
+  const resolved = productOfferPrice(product);
+  const price = resolved > 0 ? ` — $${resolved.toFixed(2)}` : '';
   const brand = product.brand ? ` by ${esc(String(product.brand))}` : '';
   return `<li><a href="${href}">${esc(String(name))}${brand}${price}</a></li>`;
 };
@@ -967,17 +980,6 @@ const productItemListSchema = (name: string, products: any[]) => {
   };
 };
 
-/** Price Google Shopping must see in first-wave HTML (not only after React hydrates). */
-export const productOfferPrice = (product: {
-  basePrice?: number;
-  variants?: Array<{ price?: number }>;
-}): number => {
-  const base = Number(product.basePrice);
-  if (Number.isFinite(base) && base > 0) return base;
-  const variant = (product.variants || []).find((item) => Number(item.price) > 0);
-  const variantPrice = Number(variant?.price);
-  return Number.isFinite(variantPrice) && variantPrice > 0 ? variantPrice : 0;
-};
 
 /** Prefer variant.stock. Missing totalStock used to emit OutOfStock to Googlebot. */
 export const productOfferInStock = (product: {
