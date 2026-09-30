@@ -808,13 +808,45 @@ const fetchCareGuide = async (slug: string) => {
   );
 };
 
-const fetchCategory = async (slug: string) => {
-  return withTimeout(
-    Category.findOne({ slug, isActive: true })
+const fetchCategory = async (slug: string, petType?: string, categoryId?: unknown) => {
+  const base: Record<string, unknown> = categoryId
+    ? { _id: categoryId, isActive: true }
+    : { slug, isActive: true };
+  const withPet = petType ? { ...base, petType: canonicalPetSlug(petType) } : base;
+
+  // Category slugs are only unique per petType (e.g. "dry-food" exists for both
+  // dog and cat), so always resolve with petType first. Falling back to the
+  // petType-agnostic query is what served the CAT "Dry Food" category on
+  // /dog/dry-food, hiding the 637-product dog category from crawlers.
+  const exact = await withTimeout(
+    Category.findOne(withPet)
       .select('name slug description petType')
       .lean()
       .exec()
   );
+  if (exact || !petType) return exact;
+
+  const canonicalOnly = await withTimeout(
+    Category.findOne({ ...withPet, petType: petType.toLowerCase().trim() })
+      .select('name slug description petType')
+      .lean()
+      .exec()
+  );
+  if (canonicalOnly) return canonicalOnly;
+
+  const fallback = await withTimeout(
+    Category.findOne(base)
+      .select('name slug description petType')
+      .lean()
+      .exec()
+  );
+  if (fallback) {
+    logger.warn(
+      `[BOT RENDER] Category "${slug}" has no record for petType "${petType}" ` +
+        `(resolved ${fallback.petType} instead). Serving the petType-agnostic match.`
+    );
+  }
+  return fallback;
 };
 
 const collectionProductQuery = (): Record<string, unknown> => ({
@@ -2453,10 +2485,10 @@ export const createBotRenderer = (distPath: string) => {
           } else {
             // URL had 3+ segments but no product matched — likely a nested category URL
             // e.g. /dog/food--treats/puppy-food where "puppy-food" is a category slug
-            const category = await fetchCategory(page.slug);
+            const petTypeFromPath = req.path.split('/').filter(Boolean)[0] ?? '';
+            const category = await fetchCategory(page.slug, petTypeFromPath);
             if (category) {
-              // Derive petType from first URL segment, pass actual path as canonical
-              const petTypeFromPath = req.path.split('/').filter(Boolean)[0] ?? '';
+              // petType derived from the first URL segment; actual path as canonical
               let nestedProducts: any[] = [];
               try {
                 nestedProducts = await fetchCollectionProducts({
@@ -2492,7 +2524,7 @@ export const createBotRenderer = (distPath: string) => {
             notFound = true;
           }
         } else if (page?.type === 'category') {
-          const category = await fetchCategory(page.slug);
+          const category = await fetchCategory(page.slug, (page as any).petType);
           if (category) {
             let categoryProducts: any[] = [];
             try {
