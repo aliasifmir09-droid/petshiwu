@@ -874,7 +874,7 @@ const fetchCollectionProducts = async (opts: {
   if (opts.categoryId) query.category = opts.categoryId;
   return withTimeout(
     Product.find(query)
-      .select('name slug basePrice brand petType description category')
+      .select('name slug basePrice variants.price brand petType description category')
       .populate({ path: 'category', select: 'name slug' })
       .sort({ averageRating: -1, inStock: -1, createdAt: -1 })
       .limit(opts.limit ?? 40)
@@ -2067,6 +2067,8 @@ export type SeoLandingProduct = {
   slug?: string;
   brand?: string;
   basePrice?: number;
+  /** Needed so anchors can fall back to a variant price when basePrice is 0. */
+  variants?: Array<{ price?: number }>;
   petType?: string;
   description?: string;
   category?: { slug?: string; name?: string } | null;
@@ -2132,7 +2134,7 @@ const fetchSeoLandingProducts = async (pathname: string): Promise<SeoLandingProd
   if (petType) query.petType = petType;
   return withTimeout(
     Product.find(query)
-      .select('name slug basePrice brand petType description category')
+      .select('name slug basePrice variants.price brand petType description category')
       .populate({ path: 'category', select: 'name slug' })
       .sort({ averageRating: -1, createdAt: -1 })
       .limit(20)
@@ -2144,7 +2146,7 @@ const fetchSeoLandingProducts = async (pathname: string): Promise<SeoLandingProd
 const fetchBrandProducts = async (brandQuery: string): Promise<SeoLandingProduct[]> => {
   return withTimeout(
     Product.find({ isActive: true, inStock: true, ...brandMatchQuery(brandQuery) })
-      .select('name slug basePrice brand petType description category')
+      .select('name slug basePrice variants.price brand petType description category')
       .populate({ path: 'category', select: 'name slug' })
       .sort({ averageRating: -1, createdAt: -1 })
       .limit(20)
