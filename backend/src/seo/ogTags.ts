@@ -56,18 +56,26 @@ function upsertMeta(html: string, attr: 'property' | 'name', key: string, conten
     'i'
   );
   if (re.test(html)) {
-    return html.replace(re, `$1${esc(content)}$2`);
+    // Use the function form of replace. A string replacement expands `$&` found
+    // in the *content* (e.g. a Scene7 image URL containing `$sclp-prd-main_large$&fmt=`),
+    // which injects the whole matched tag into the attribute value. The function form
+    // disables all `$` expansion, so the capture groups must be interpolated
+    // explicitly — `$1`/`$2` are NOT expanded inside a function replacement.
+    return html.replace(re, (_m: string, p1: string, p2: string) => `${p1}${esc(content)}${p2}`);
   }
   const reContentFirst = new RegExp(
     `(<meta\\b[^>]*\\bcontent=["'])[^"']*(["'][^>]*\\b${attrRe}[^>]*>)`,
     'i'
   );
   if (reContentFirst.test(html)) {
-    return html.replace(reContentFirst, `$1${esc(content)}$2`);
+    return html.replace(
+      reContentFirst,
+      (_m: string, p1: string, p2: string) => `${p1}${esc(content)}${p2}`
+    );
   }
   return html.replace(
     /<\/head>/i,
-    `    <meta ${attr}="${key}" content="${esc(content)}" />\n  </head>`
+    () => `    <meta ${attr}="${key}" content="${esc(content)}" />\n  </head>`
   );
 }
 
@@ -102,12 +110,12 @@ export function injectOgTags(
   if (!/rel=["']image_src["']/i.test(out)) {
     out = out.replace(
       /<\/head>/i,
-      `    <link rel="image_src" href="${esc(shareImage)}" />\n  </head>`
+      () => `    <link rel="image_src" href="${esc(shareImage)}" />\n  </head>`
     );
   } else {
     out = out.replace(
       /(<link\b[^>]*rel=["']image_src["'][^>]*href=["'])[^"']*(["'][^>]*>)/i,
-      `$1${esc(shareImage)}$2`
+      (_m: string, p1: string, p2: string) => `${p1}${esc(shareImage)}${p2}`
     );
   }
   return out;
