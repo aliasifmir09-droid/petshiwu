@@ -190,7 +190,11 @@ const injectHreflang = (html: string, pageUrl: string): string => {
  * Inject a block of meta/script tags immediately before </head>
  */
 const injectBeforeHeadClose = (html: string, tags: string): string =>
-  html.replace('</head>', `${tags}\n</head>`);
+  // Use the function form of replace so `$&`, `$'` etc. inside `tags`
+  // (e.g. a Scene7 URL carrying the literal `$&` size directive) are NOT
+  // treated as replacement patterns -- that spliced a literal `</head>`
+  // into published og:image URLs and corrupted the tag stream.
+  html.replace('</head>', () => `${tags}\n</head>`);
 
 /**
  * Inject an <h1> tag for crawlers.
