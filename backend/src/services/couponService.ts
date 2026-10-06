@@ -12,6 +12,7 @@ export type Coupon = {
 
 export const COUPONS: Record<string, Coupon> = {
   WELCOME10: { type: 'percent', value: 10, description: '10% off your first order' },
+  WELCOME15: { type: 'percent', value: 15, description: '15% off your next order' },
   NYC10: { type: 'percent', value: 10, description: '10% off for NYC pet parents' },
   PETDAY10: { type: 'percent', value: 10, description: '10% off — National Pet Day' },
   WORLDCUP: { type: 'percent', value: 10, description: '10% off — World Cup 2026 🇺🇸⚽' },
