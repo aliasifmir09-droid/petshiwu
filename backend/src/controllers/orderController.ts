@@ -1454,24 +1454,19 @@ const finalizePendingPayPalCheckout = async (pending: IPendingPayPalCheckout | n
   }
 
   let session: mongoose.ClientSession | null = null;
-  try {
-    if (process.env.NODE_ENV !== 'test') {
-      session = await mongoose.startSession();
-      session.startTransaction();
-    }
-
-    await decrementPendingCheckoutStock(pending, session);
+  const runFinalize = async (useSession: mongoose.ClientSession | null) => {
+    await decrementPendingCheckoutStock(pending, useSession);
 
     if (pending.couponCode) {
       const couponEmail = pending.guestEmail || (pending.user
-        ? (await User.findById(pending.user).select('email').session(session || null).lean())?.email
+        ? (await User.findById(pending.user).select('email').session(useSession || null).lean())?.email
         : undefined);
       const normalizedCoupon = normalizeCouponCode(pending.couponCode);
       if (couponEmail && !isReusableCoupon(normalizedCoupon)) {
         const existingCouponUsage = await CouponUsage.findOne({
           email: couponEmail.trim().toLowerCase(),
           code: normalizedCoupon
-        }).session(session || null);
+        }).session(useSession || null);
         if (existingCouponUsage && existingCouponUsage.orderId && existingCouponUsage.orderId !== String(pending.finalizedOrder || '')) {
           throw new Error('This coupon has already been used on this account.');
         }
@@ -1481,7 +1476,7 @@ const finalizePendingPayPalCheckout = async (pending: IPendingPayPalCheckout | n
             code: normalizedCoupon,
             orderId: pending.paypalOrderId || '',
             usedAt: new Date()
-          }], session ? { session } : undefined);
+          }], useSession ? { session: useSession } : undefined);
         }
       }
     }
@@ -1505,17 +1500,43 @@ const finalizePendingPayPalCheckout = async (pending: IPendingPayPalCheckout | n
       totalPrice: pending.totalPrice,
       notes: pending.notes
     });
-    const savedOrder = await order.save(session ? { session } : {});
+    const savedOrder = await order.save(useSession ? { session: useSession } : {});
 
-    if (session) {
+    if (useSession) {
       await PendingPayPalCheckout.updateOne(
         { _id: pending._id, status: 'finalizing' },
         { $set: { status: 'finalized', finalizedOrder: savedOrder._id } },
-        { session }
+        { session: useSession }
       );
-      await session.commitTransaction();
     }
     return savedOrder;
+  };
+
+  try {
+    if (process.env.NODE_ENV !== 'test') {
+      session = await mongoose.startSession();
+      session.startTransaction();
+      try {
+        const savedOrder = await runFinalize(session);
+        await session.commitTransaction();
+        return savedOrder;
+      } catch (txError: unknown) {
+        const txMessage = txError instanceof Error ? txError.message : String(txError);
+        const clientMismatch = txMessage.includes('ClientSession must be from the same MongoClient');
+        if (session.inTransaction()) await session.abortTransaction();
+        await session.endSession();
+        session = null;
+        if (!clientMismatch) throw txError;
+        // A session bound to a different MongoClient (duplicated mongoose client in
+        // the built bundle) fails every transactional op. Retry best-effort without a
+        // transaction: the paypalOrderId unique index still blocks double orders.
+        logger.warn('PayPal finalize transaction failed with a Mongo client/session mismatch; retrying without a transaction', {
+          paypalOrderId: pending.paypalOrderId
+        });
+        return await runFinalize(null);
+      }
+    }
+    return await runFinalize(null);
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'code' in error && (error as { code?: number }).code === 11000 && pending.paypalOrderId) {
       const duplicate = await Order.findOne({ paypalOrderId: pending.paypalOrderId });
