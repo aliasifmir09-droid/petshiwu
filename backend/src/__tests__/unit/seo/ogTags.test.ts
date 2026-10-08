@@ -115,6 +115,42 @@ describe('injectOgTags', () => {
     expect(html).toContain(`property="og:image" content="${DEFAULT_OG_IMAGE}"`);
     expect(html).toContain('property="og:url" content="https://www.petshiwu.com/dog-food-delivery-nyc"');
   });
+
+  // Regression: a Scene7 image URL containing the `$&` size directive used to be
+  // passed as a String.replace() REPLACEMENT string, where `$&` expands to the whole
+  // matched tag — injecting a complete <meta> tag inside the content="" attribute and
+  // corrupting the <head>. Verified live on 9 products (Oct 3 2026).
+  test('does not let $& in an image URL corrupt the head', () => {
+    const s7 = 'https://s7d2.scene7.com/is/image/PetSmart/5284286?$sclp-prd-main_large$&fmt=jpeg&qlt=80';
+    const template = [
+      '<html><head>',
+      '<meta property="og:image" content="https://www.petshiwu.com/og-image.jpg" />',
+      '</head><body></body></html>',
+    ].join('\n');
+
+    const html = injectOgTags(template, 'T', 'D', 'https://www.petshiwu.com/cat/dry-food/x', 'product', s7);
+
+    // exactly one og:image tag — no nested injection
+    expect(html.match(/property="og:image"/g)).toHaveLength(1);
+    // exactly one head close — no stray </head> injected into an attribute
+    expect(html.match(/<\/head>/g)).toHaveLength(1);
+    // no raw unescaped $& left in the attribute value
+    expect(html).not.toContain('$&fmt');
+    // the URL survives, HTML-escaped
+    expect(html).toContain('$sclp-prd-main_large$&amp;fmt=jpeg&amp;qlt=80');
+  });
+
+  test('preserves the tag structure when the template already has an og:image', () => {
+    const s7 = 'https://s7d2.scene7.com/is/image/PetSmart/1234?$sclp-prd-main_large$&fmt=jpeg';
+    const template = '<html><head><meta property="og:image" content="https://old/x.jpg" /></head><body></body></html>';
+    const html = injectOgTags(template, 'T', 'D', 'https://www.petshiwu.com/p', 'product', s7);
+    // the old value is replaced, not nested
+    expect(html).not.toContain('https://old/x.jpg');
+    expect(html.match(/property="og:image"/g)).toHaveLength(1);
+    expect(html.match(/<\/head>/g)).toHaveLength(1);
+    expect(html.match(/<link rel="image_src"/g)).toHaveLength(1);
+    expect(html).toContain('$sclp-prd-main_large$&amp;fmt=jpeg');
+  });
 });
 
 describe('looksLikeStaticAsset', () => {
