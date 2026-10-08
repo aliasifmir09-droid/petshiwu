@@ -209,7 +209,7 @@ const injectH1 = (html: string, h1Text: string): string => {
     return html.replace(/<h1[^>]*>[\s\S]*?<\/h1>/i, tag);
   }
   // Fallback: inject inside root div if no H1 found
-  return html.replace('<div id="root">', `<div id="root">\n${tag}`);
+  return html.replace('<div id="root">', () => `<div id="root">\n${tag}`);
 };
 
 // Remove the static hero section (which contains the homepage H1) from the
@@ -601,9 +601,9 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
   if (cleanPath === '/delivery-zips') {
     const zipHtml = buildNextDayZipDirectoryHtml();
     if (html.includes('<div id="root"></div>')) {
-      html = html.replace('<div id="root"></div>', `<div id="root">${zipHtml}</div>`);
+      html = html.replace('<div id="root"></div>', () => `<div id="root">${zipHtml}</div>`);
     } else {
-      html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${zipHtml}</div>`);
+      html = html.replace(/<div id="root">[\s\S]*?<\/div>/, () => `<div id="root">${zipHtml}</div>`);
     }
   }
   // FIX: Inject X-Robots-Tag noindex for any URL with query string. Filter/pagination/sort
@@ -1176,9 +1176,9 @@ export const buildProductHtml = (template: string, product: any, slug: string): 
   html = injectH1(html, productName);
   // Replace entire root div with full crawlable body content (H2 — H1 already replaced in noscript)
   html = removeStaticHero(html);
-  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${bodyContent}</div>`);
+  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, () => `<div id="root">${bodyContent}</div>`);
   if (!html.includes(bodyContent)) {
-    html = html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+    html = html.replace('<div id="root"></div>', () => `<div id="root">${bodyContent}</div>`);
   }
   return html;
 };
@@ -1309,9 +1309,9 @@ export const buildBlogHtml = (template: string, blog: any): string => {
   html = injectBeforeHeadClose(html, injectedTags);
   html = injectH1(html, blog.title);
   html = removeStaticHero(html);
-  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${blogBodyContent}</div>`);
+  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, () => `<div id="root">${blogBodyContent}</div>`);
   if (!html.includes(blogBodyContent)) {
-    html = html.replace('<div id="root"></div>', `<div id="root">${blogBodyContent}</div>`);
+    html = html.replace('<div id="root"></div>', () => `<div id="root">${blogBodyContent}</div>`);
   }
   return html;
 };
@@ -1401,9 +1401,9 @@ export const buildCareGuideHtml = (template: string, guide: any): string => {
   html = injectBeforeHeadClose(html, injectedTags);
   html = injectH1(html, guide.title);
   html = removeStaticHero(html);
-  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${guideBodyContent}</div>`);
+  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, () => `<div id="root">${guideBodyContent}</div>`);
   if (!html.includes(guideBodyContent)) {
-    html = html.replace('<div id="root"></div>', `<div id="root">${guideBodyContent}</div>`);
+    html = html.replace('<div id="root"></div>', () => `<div id="root">${guideBodyContent}</div>`);
   }
   return html;
 };
@@ -1483,8 +1483,8 @@ export const buildCategoryHtml = (
   html = injectOgTags(html, title, description, url);
   html = injectBeforeHeadClose(html, injectedTags);
   html = injectH1(html, catName);
-  html = html.replace(/<div id="root">.*?<\/div>/s, `<div id="root">${bodyContent}</div>`) ||
-         html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+  html = html.replace(/<div id="root">.*?<\/div>/s, () => `<div id="root">${bodyContent}</div>`) ||
+         html.replace('<div id="root"></div>', () => `<div id="root">${bodyContent}</div>`);
   return html;
 };
 
@@ -1528,8 +1528,8 @@ export const buildPetTypeCollectionHtml = (
       `<script type="application/ld+json">${JSON.stringify(itemList)}</script>`
     );
   }
-  html = html.replace(/<div id="root">.*?<\/div>/s, `<div id="root">${bodyContent}</div>`) ||
-         html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+  html = html.replace(/<div id="root">.*?<\/div>/s, () => `<div id="root">${bodyContent}</div>`) ||
+         html.replace('<div id="root"></div>', () => `<div id="root">${bodyContent}</div>`);
   return html;
 };
 
@@ -1651,9 +1651,9 @@ const buildNeighborhoodHtml = (
   html = injectOgTags(html, title, description, pageUrl);
   html = injectBeforeHeadClose(html, injectedTags);
   html = injectH1(html, h1);
-  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${bodyContent}</div>`);
+  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, () => `<div id="root">${bodyContent}</div>`);
   if (!html.includes(bodyContent)) {
-    html = html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+    html = html.replace('<div id="root"></div>', () => `<div id="root">${bodyContent}</div>`);
   }
   return html;
 };
@@ -1894,7 +1894,7 @@ export const buildHomepageHtml = (template: string, products: any[] = []): strin
     : '';
   const hubNav = `<div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">${buildShopDepartmentLinkHtml()}${buildNycHubLinkHtml()}${productBlock}</div>`;
   if (html.includes('<div id="root"></div>')) {
-    html = html.replace('<div id="root"></div>', `<div id="root">${hubNav}</div>`);
+    html = html.replace('<div id="root"></div>', () => `<div id="root">${hubNav}</div>`);
   }
   return html;
 };
@@ -1924,8 +1924,8 @@ const buildProductListHtml = async (template: string): Promise<string> => {
   html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
   html = injectH1(html, 'Pet food & supplies – Same-day NYC');
   // Inject product list into body for Google to crawl (H2 — H1 already replaced in noscript)
-  html = html.replace(/<div id="root">.*?<\/div>/s, `<div id="root">${bodyContent}</div>`) ||
-         html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+  html = html.replace(/<div id="root">.*?<\/div>/s, () => `<div id="root">${bodyContent}</div>`) ||
+         html.replace('<div id="root"></div>', () => `<div id="root">${bodyContent}</div>`);
   return html;
 };
 
@@ -1994,9 +1994,9 @@ export const buildEducationHubHtml = (
   html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
   html = injectH1(html, options.heading);
   html = injectBeforeHeadClose(html, `<script type="application/ld+json">${JSON.stringify(collectionSchema)}</script>`);
-  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, `<div id="root">${bodyContent}</div>`);
+  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, () => `<div id="root">${bodyContent}</div>`);
   if (!html.includes(bodyContent)) {
-    html = html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+    html = html.replace('<div id="root"></div>', () => `<div id="root">${bodyContent}</div>`);
   }
   return html;
 };
@@ -2127,8 +2127,8 @@ export const buildSeoLandingHtmlFromProducts = (
       `<script type="application/ld+json">${JSON.stringify(itemListSchema)}</script>`
     );
   }
-  html = html.replace(/<div id="root">.*?<\/div>/s, `<div id="root">${bodyContent}</div>`) ||
-         html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+  html = html.replace(/<div id="root">.*?<\/div>/s, () => `<div id="root">${bodyContent}</div>`) ||
+         html.replace('<div id="root"></div>', () => `<div id="root">${bodyContent}</div>`);
   return html;
 };
 
@@ -2242,8 +2242,8 @@ export const buildBrandCollectionHtml = (
     html,
     `<script type="application/ld+json">${JSON.stringify(itemListSchema)}</script>`
   );
-  html = html.replace(/<div id="root">.*?<\/div>/s, `<div id="root">${bodyContent}</div>`) ||
-         html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+  html = html.replace(/<div id="root">.*?<\/div>/s, () => `<div id="root">${bodyContent}</div>`) ||
+         html.replace('<div id="root"></div>', () => `<div id="root">${bodyContent}</div>`);
   return html;
 };
 
