@@ -25,13 +25,31 @@ import Blog from '../models/Blog';
 import CareGuide from '../models/CareGuide';
 import Category from '../models/Category';
 import logger from '../utils/logger';
-import { classifyRoute, INDEXABLE_LANDING_PATHS } from '../seo/routeClassifier';
+import { canonicalPetSlug, classifyRoute, INDEXABLE_LANDING_PATHS } from '../seo/routeClassifier';
 import {
   NEIGHBORHOOD_PAGE_REGISTRY,
   getNeighborhoodRoute,
 } from '../seo/neighborhoodRegistry';
+import { BLOG_REDIRECTS } from '../seo/blogRedirects';
+import { isStaticLearningSlug, STATIC_LEARNING_PAGES } from '../seo/staticLearningPages';
+import { FEATURED_LEARNING_SLUGS, LEARNING_AUTHOR } from '../seo/featuredLearning';
 import { DEFAULT_OG_IMAGE, injectOgTags, resolveShareImage } from '../seo/ogTags';
+import { productSearchDescription, productSearchTitle } from '../seo/productSearchSnippet';
 import { merchantMpn } from '../utils/googleMerchantFeed';
+import { plannedStock } from '../utils/productStock';
+import { buildNycHubLinkHtml, buildNycHubShopHtml, isNycShoppableHub } from '../seo/nycShopHub';
+import { buildNextDayZipDirectoryHtml } from '../seo/nextDayZipDirectory';
+import {
+  BRAND_INDEX_META,
+  SHOP_BRANDS,
+  getShopBrand,
+  isShopBrandSlug,
+  shopBrandForPath,
+  shopBrandStaticPages,
+} from '../seo/shopBrands';
+import { brandMatchQuery } from '../utils/catalogText';
+import { resolveLegacyRedirect } from './slugRedirect';
+import { RETIRED_URL_301 } from '../seo/retiredUrlMap';
 
 // ---------------------------------------------------------------------------
 // Bot detection
@@ -73,6 +91,46 @@ const esc = (s: string): string =>
 
 const stripTags = (html: string): string => html.replace(/<[^>]*>/g, '');
 
+/** Keep article HTML crawlable without scripts, handlers, or a second H1. */
+export const sanitizeArticleHtml = (html: string): string => {
+  if (!html) return '';
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
+    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    .replace(/javascript:/gi, '')
+    .replace(/<h1(\s[^>]*)?>/gi, '<h2$1>')
+    .replace(/<\/h1>/gi, '</h2>')
+    .trim();
+};
+
+const organizationAuthorName = (author: unknown): string => {
+  if (typeof author === 'string' && author.trim() && !/^[a-f0-9]{24}$/i.test(author.trim())) {
+    return author.trim();
+  }
+  if (author && typeof author === 'object' && typeof (author as { name?: unknown }).name === 'string') {
+    const name = (author as { name: string }).name.trim();
+    if (name) return name;
+  }
+  return 'Petshiwu';
+};
+
+const careGuideArticleHtml = (guide: {
+  content?: string;
+  sections?: Array<{ title?: string; content?: string; order?: number }>;
+}): string => {
+  const parts: string[] = [guide.content || ''];
+  if (Array.isArray(guide.sections)) {
+    const sections = [...guide.sections].sort((a, b) => (a.order || 0) - (b.order || 0));
+    for (const section of sections) {
+      if (section.title) parts.push(`<h2>${esc(section.title)}</h2>`);
+      if (section.content) parts.push(section.content);
+    }
+  }
+  return sanitizeArticleHtml(parts.join('\n'));
+};
+
 /** Decode HTML entities so DB-stored descriptions don't get double-encoded by esc() */
 const decodeEntities = (s: string): string =>
   s
@@ -96,7 +154,7 @@ const escRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
  * Replace <title> tag in the HTML template
  */
 const injectTitle = (html: string, title: string): string =>
-  html.replace(/<title>[^<]*<\/title>/, () => `<title>${esc(title)}</title>`);
+  html.replace(/<title[^>]*>[^<]*<\/title>/, () => `<title>${esc(title)}</title>`);
 
 /**
  * Replace meta description content
@@ -114,7 +172,7 @@ const injectCanonical = (html: string, canonicalUrl: string): string => {
   const tag = `<link rel="canonical" href="${esc(canonicalUrl)}" />`;
   // Replace existing canonical if present
   if (/<link\s+rel=["']canonical["'][^>]*>/i.test(html)) {
-    return html.replace(/<link\s+rel=["']canonical["'][^>]*>/i, tag);
+    return html.replace(/<link\s+rel=["']canonical["'][^>]*>/i, () => tag);
   }
   // Otherwise inject before </head>
   return html.replace('</head>', () => `${tag}\n</head>`);
@@ -132,6 +190,10 @@ const injectHreflang = (html: string, pageUrl: string): string => {
  * Inject a block of meta/script tags immediately before </head>
  */
 const injectBeforeHeadClose = (html: string, tags: string): string =>
+  // Use the function form of replace so `$&`, `$'` etc. inside `tags`
+  // (e.g. a Scene7 URL carrying the literal `$&` size directive) are NOT
+  // treated as replacement patterns -- that spliced a literal `</head>`
+  // into published og:image URLs and corrupted the tag stream.
   html.replace('</head>', () => `${tags}\n</head>`);
 
 /**
@@ -144,7 +206,7 @@ const injectH1 = (html: string, h1Text: string): string => {
   const tag = `<h1>${esc(h1Text)}</h1>`;
   // Replace the first existing H1 found in the document (avoids duplicate H1s)
   if (/<h1[^>]*>[\s\S]*?<\/h1>/i.test(html)) {
-    return html.replace(/<h1[^>]*>[\s\S]*?<\/h1>/i, tag);
+    return html.replace(/<h1[^>]*>[\s\S]*?<\/h1>/i, () => tag);
   }
   // Fallback: inject inside root div if no H1 found
   return html.replace('<div id="root">', () => `<div id="root">\n${tag}`);
@@ -167,20 +229,20 @@ const removeStaticHero = (html: string): string => {
 
 const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   '/': {
-    title: 'Premium Pet Food & Supplies Delivered to NYC | Petshiwu',
-    description: 'Shop 10,000+ premium pet products for dogs, cats, birds, fish, and reptiles. Free delivery in Queens, Brooklyn & all NYC boroughs. Free shipping on orders over $49.',
+    title: 'Petshiwu | Pet Food & Supplies – Free Shipping $49+, No Autoship',
+    description: '4,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. Same-day NYC. Free shipping over $49. No autoship. Nationwide shipping soon.',
   },
   '/products': {
-    title: 'All Pet Products — Dog, Cat, Bird, Fish & More | Petshiwu',
-    description: 'Browse 10,000+ pet products for dogs, cats, birds, fish, reptiles, and small animals. Top brands, fast NYC delivery. Free shipping over $49.',
+    title: 'Pet food & supplies – Same-day NYC | Petshiwu',
+    description: 'Browse 4,000+ foods, treats, and supplies for dogs, cats, birds, fish, reptiles, and small animals. Top brands. Free shipping over $49.',
   },
   '/dog': {
-    title: 'Dog Food, Treats, Toys & Supplies | Petshiwu',
-    description: 'Shop premium dog food, treats, toys, and accessories. Top brands — Purina, Blue Buffalo, Royal Canin. Fast NYC delivery. Free shipping over $49.',
+    title: 'Dog food & supplies – Same-day NYC | Petshiwu',
+    description: 'Shop dog food, treats, toys, and accessories. Purina, Blue Buffalo, Royal Canin. Same-day NYC. Free shipping over $49. No autoship.',
   },
   '/cat': {
-    title: 'Cat Food, Litter, Toys & Accessories | Petshiwu',
-    description: 'Discover premium cat food, litter, toys, and accessories. Top brands delivered fast to Queens, Brooklyn, Manhattan & all of NYC. Free shipping over $49.',
+    title: 'Cat food & supplies – Same-day NYC | Petshiwu',
+    description: 'Shop cat food, litter, toys, and accessories. Same-day NYC. Free shipping over $49. No autoship.',
   },
   '/bird': {
     title: 'Bird Food, Cages & Accessories | Petshiwu',
@@ -203,8 +265,24 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     description: 'Shop food, cages, bedding, and toys for hamsters, rabbits, guinea pigs, and more. Fast NYC delivery. Free shipping over $49.',
   },
   '/about': {
-    title: 'About Petshiwu — NYC Pet Supply Delivery',
-    description: 'Petshiwu is NYC same-day pet supply delivery. Jackson Heights is office and warehouse only — not a walk-in store. We deliver to all five boroughs.',
+    title: 'About Petshiwu — Online Pet Store',
+    description: 'Petshiwu is an online pet store for food, treats, and supplies. Currently delivering in NYC, with nationwide shipping opening soon. Warehouse only — not a walk-in store.',
+  },
+  '/our-promise': {
+    title: 'Our Promise | Petshiwu',
+    description: 'Fair prices, fast delivery, and no autoship. Free shipping over $49. 365-day returns. Currently delivering in NYC, with nationwide shipping opening soon.',
+  },
+  '/for-pet-parents': {
+    title: 'For Pet Parents | Petshiwu',
+    description: 'Food, treats, and care without a subscription. Shop Hill\'s, Royal Canin, Purina, and more. Free shipping over $49. No autoship.',
+  },
+  '/from-queens': {
+    title: 'How We Ship | Petshiwu',
+    description: 'Petshiwu is an online pet store. Currently delivering in NYC, with nationwide shipping opening in a few days. Warehouse only — not a walk-in store.',
+  },
+  '/editorial-standards': {
+    title: 'How We Write Pet Care Guides | Petshiwu',
+    description: 'Petshiwü Care Desk standards: people-first education, veterinarian-first health advice, and we keep indexed guide URLs live.',
   },
   '/contact': {
     title: 'Contact Us | Petshiwu',
@@ -220,11 +298,15 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/returns': {
     title: 'Start a Return | Petshiwu',
-    description: 'Start a return or exchange for your Petshiwu order. Our simple process makes it easy to return pet food, toys, and supplies.',
+    description: 'Start a Petshiwu return with your order number and email. Unused items can be returned within 365 days of delivery.',
   },
   '/privacy': {
     title: 'Privacy Policy | Petshiwu',
     description: 'Read Petshiwu\'s privacy policy to understand how we collect, use, and protect your personal information.',
+  },
+  '/cookie-policy': {
+    title: 'Cookie Policy | Petshiwu',
+    description: 'Petshiwu cookie policy: which cookies we use, who provides them, why, how long they last, and how to change your consent.',
   },
   '/terms': {
     title: 'Terms of Service | Petshiwu',
@@ -232,7 +314,11 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/shipping': {
     title: 'Shipping Policy | Petshiwu',
-    description: 'Petshiwu ships nationwide with free shipping on orders over $49. Same-day delivery available in select NYC neighborhoods.',
+    description: 'Petshiwu same-day NYC delivery and next-day to every ZIP within 50 miles of Queens. Free shipping over $49. Nationwide shipping opens in a few days.',
+  },
+  '/delivery-zips': {
+    title: 'Next-Day Delivery ZIP Codes Within 50 Miles of Queens | Petshiwu',
+    description: 'Full list of Petshiwü next-day delivery ZIP codes within 50 miles of Queens. Same-day is NYC only. Check your ZIP. Nationwide shipping opens in a few days.',
   },
   // FIX: Plural pet-type entries REMOVED. These (/dogs, /cats, /birds, /reptiles,
   // /small-animals) used to self-canonicalize with duplicate content vs. the real
@@ -245,7 +331,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/search': {
     title: 'Search Products | Petshiwu',
-    description: 'Search 10,000+ pet products for dogs, cats, birds, fish, reptiles, and small animals at Petshiwu. Fast NYC delivery, free shipping over $49.',
+    description: 'Search 4,000+ pet products for dogs, cats, birds, fish, reptiles, and small animals at Petshiwu. Fast NYC delivery, free shipping over $49.',
   },
   '/deals': {
     title: "Today's Deals & Pet Supply Discounts | Petshiwu",
@@ -262,6 +348,16 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   '/care-guides': {
     title: 'Pet Care Guides | Petshiwu',
     description: 'Comprehensive pet care guides for dogs, cats, birds, fish, reptiles, and small animals. Expert advice from the Petshiwu team.',
+  },
+  '/learning/best-dog-food-sensitive-stomach': {
+    title: 'Best Dog Food for Sensitive Stomachs: A 2026 Expert Guide | Petshiwu Learning',
+    description:
+      "Is your dog struggling with digestive issues? Discover the best dog food for sensitive stomachs, including grain-free and limited ingredient diets at Petshiwu.",
+  },
+  '/learning/best-dog-foods-sensitive-stomachs': {
+    title: '10 Best Dog Foods for Sensitive Stomachs [Guide] | Petshiwu Learning',
+    description:
+      'Discover the best dog foods for sensitive stomachs. Expert-reviewed formulas with easily digestible ingredients, probiotics, and limited ingredients.',
   },
 
   // ── High-value SEO landing pages ──────────────────────────────────────────
@@ -308,8 +404,8 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     description: 'Bird food and supplies delivered anywhere in NYC. Seed mixes, pellets, treats, and accessories for parakeets, cockatiels, parrots, and wild birds. Free shipping over $49.',
   },
   '/online-pet-store-nyc': {
-    title: 'Online Pet Store for NYC — 10,000+ Products | Petshiwu',
-    description: 'NYC\'s online pet store with 10,000+ products for dogs, cats, birds, fish & more. Fast delivery across all 5 boroughs. Free shipping on orders over $49.',
+    title: 'Online Pet Store for NYC — 4,000+ Products | Petshiwu',
+    description: 'NYC\'s online pet store with 4,000+ products for dogs, cats, birds, fish & more. Fast delivery across all 5 boroughs. Free shipping on orders over $49.',
   },
   '/affordable-pet-food-nyc': {
     title: 'Affordable Pet Food & Supplies NYC — Free Delivery Over $49 | Petshiwu',
@@ -321,7 +417,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/organic-cat-food-nyc': {
     title: 'Organic Cat Food NYC — Natural & Non-GMO Delivery | Petshiwu',
-    description: 'Organic and natural cat food delivered to all NYC boroughs. No artificial preservatives, no by-products. Wellness, Blue Buffalo and more. Free delivery over $49.',
+    description: 'Organic and natural cat food delivered to all NYC boroughs. No artificial preservatives, no by-products. Wellness, Blue Buffalo, Purina and more. Free delivery over $49.',
   },
   '/luxury-pet-accessories-nyc': {
     title: 'Luxury Pet Accessories NYC — Premium Supplies Delivered | Petshiwu',
@@ -333,11 +429,11 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/pet-store-queens-ny': {
     title: 'Pet Store Queens NY — Delivery to Jackson Heights, Flushing & All of Queens | Petshiwu',
-    description: 'Queens\' premier online pet store. Free delivery throughout Queens — Jackson Heights, Flushing, Astoria, Forest Hills, Jamaica and more. 10,000+ products for dogs, cats, birds, fish and more.',
+    description: 'Queens\' premier online pet store. Free delivery throughout Queens — Jackson Heights, Flushing, Astoria, Forest Hills, Jamaica and more. 4,000+ products for dogs, cats, birds, fish and more.',
   },
   '/pet-supplies-near-me-nyc': {
     title: 'Pet Supplies Near Me — NYC Delivery to Your Door | Petshiwu',
-    description: 'Looking for pet supplies near you in NYC? Petshiwu delivers to your door — Queens, Brooklyn, Manhattan, Bronx, Staten Island. 10,000+ products, free delivery over $49.',
+    description: 'Looking for pet supplies near you in NYC? Petshiwu delivers to your door — Queens, Brooklyn, Manhattan, Bronx, Staten Island. 4,000+ products, free delivery over $49.',
   },
   '/investors': {
     title: 'Invest in Petshiwu — NYC Pet Delivery Startup',
@@ -349,11 +445,11 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/neural': {
     title: 'Neural Twin Scan | Petshiwu',
-    description: 'Scan your pet’s photo. Petshiwu Neural builds a live biometric twin and matches a same-day product kit from 10,000+ SKUs.',
+    description: 'Scan your pet’s photo. Petshiwu Neural builds a live biometric twin and matches a same-day product kit from 4,000+ SKUs.',
   },
   '/scan': {
     title: 'Neural Twin Scan | Petshiwu',
-    description: 'Scan your pet’s photo. Petshiwu Neural builds a live biometric twin and matches a same-day product kit from 10,000+ SKUs.',
+    description: 'Scan your pet’s photo. Petshiwu Neural builds a live biometric twin and matches a same-day product kit from 4,000+ SKUs.',
   },
   '/tech': {
     title: 'Smart Shopping Technology | Petshiwu',
@@ -375,56 +471,57 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   // ── NYC Borough Landing Pages ─────────────────────────────────────────────
   '/pet-supplies-queens-ny': {
     title: 'Pet Supplies Queens NY — Delivery to Flushing, Astoria, Jackson Heights & All of Queens | Petshiwu',
-    description: "Queens' online pet store, based in Jackson Heights. Fast delivery to Flushing, Astoria, Forest Hills, Jamaica, Bayside & every Queens neighborhood. 10,000+ products, free shipping over $49.",
+    description: "Queens' online pet store, based in Jackson Heights. Fast delivery to Flushing, Astoria, Forest Hills, Jamaica, Bayside & every Queens neighborhood. 4,000+ products, free shipping over $49.",
   },
   '/pet-supplies-brooklyn-ny': {
     title: 'Pet Supplies Brooklyn NY — Delivery to Williamsburg, Park Slope & All of Brooklyn | Petshiwu',
-    description: "Brooklyn's online pet store. Fast delivery to Williamsburg, Park Slope, Bushwick, Flatbush, Bay Ridge & every Brooklyn neighborhood. 10,000+ products, free shipping over $49.",
+    description: "Brooklyn's online pet store. Fast delivery to Williamsburg, Park Slope, Bushwick, Flatbush, Bay Ridge & every Brooklyn neighborhood. 4,000+ products, free shipping over $49.",
   },
   '/pet-supplies-manhattan-ny': {
     title: 'Pet Supplies Manhattan NYC — Delivery to Upper West Side, Harlem & All of Manhattan | Petshiwu',
-    description: "Manhattan pet supply delivery. Upper West Side, Upper East Side, Harlem, Hell's Kitchen, Chelsea, Tribeca & more. 10,000+ products, free shipping over $49.",
+    description: "Manhattan pet supply delivery. Upper West Side, Upper East Side, Harlem, Hell's Kitchen, Chelsea, Tribeca & more. 4,000+ products, free shipping over $49.",
   },
   '/pet-supplies-bronx-ny': {
     title: 'Pet Supplies Bronx NY — Delivery to Fordham, Riverdale, Hunts Point & All of the Bronx | Petshiwu',
-    description: 'Bronx pet supply delivery. Fordham, Riverdale, Hunts Point, Mott Haven, Pelham Bay & more. 10,000+ products from top brands. Free shipping on orders over $49.',
+    description: 'Bronx pet supply delivery. Fordham, Riverdale, Hunts Point, Mott Haven, Pelham Bay & more. 4,000+ products from top brands. Free shipping on orders over $49.',
   },
   '/pet-supplies-staten-island-ny': {
     title: 'Pet Supplies Staten Island NY — Delivery to St. George, Tottenville & All of Staten Island | Petshiwu',
-    description: 'Staten Island pet supply delivery. St. George, Tottenville, New Dorp, Stapleton & all neighborhoods. 10,000+ products from top brands. Free shipping on orders over $49.',
+    description: 'Staten Island pet supply delivery. St. George, Tottenville, New Dorp, Stapleton & all neighborhoods. 4,000+ products from top brands. Free shipping on orders over $49.',
   },
   '/pet-supplies-jackson-heights-ny': {
     title: "Pet Supplies Jackson Heights NY — Local Delivery from Your Neighborhood Pet Store | Petshiwu",
-    description: "Petshiwu is based in Jackson Heights, Queens. Local pet supply delivery to Jackson Heights, Elmhurst, Woodside & surrounding neighborhoods. 10,000+ products. Free shipping over $49.",
+    description: "Petshiwu is based in Jackson Heights, Queens. Local pet supply delivery to Jackson Heights, Elmhurst, Woodside & surrounding neighborhoods. 4,000+ products. Free shipping over $49.",
   },
   '/pet-supplies-williamsburg-brooklyn-ny': {
     title: "Pet Supplies Williamsburg Brooklyn NY — Same-Day Delivery | Petshiwu",
-    description: "Pet supply delivery to Williamsburg, Brooklyn. Dog food, cat food, pet accessories delivered to North Side, South Side, East Williamsburg & Greenpoint. 10,000+ products, free shipping over $49.",
+    description: "Pet supply delivery to Williamsburg, Brooklyn. Dog food, cat food, pet accessories delivered to North Side, South Side, East Williamsburg & Greenpoint. 4,000+ products, free shipping over $49.",
   },
   '/pet-supplies-park-slope-brooklyn-ny': {
     title: "Pet Supplies Park Slope Brooklyn NY — Delivery to Your Door | Petshiwu",
-    description: "Pet supply delivery to Park Slope, Brooklyn. Premium dog food, cat food, organic and natural pet products delivered to your Park Slope home. 10,000+ products, free shipping over $49.",
+    description: "Pet supply delivery to Park Slope, Brooklyn. Premium dog food, cat food, organic and natural pet products delivered to your Park Slope home. 4,000+ products, free shipping over $49.",
   },
   '/pet-supplies-upper-west-side-nyc': {
     title: "Pet Supplies Upper West Side NYC — Delivery to Your Manhattan Apartment | Petshiwu",
-    description: "Pet supply delivery to the Upper West Side, Manhattan. Premium dog food, cat food, and pet accessories delivered to your UWS apartment. 10,000+ products, free shipping over $49.",
+    description: "Pet supply delivery to the Upper West Side, Manhattan. Premium dog food, cat food, and pet accessories delivered to your UWS apartment. 4,000+ products, free shipping over $49.",
   },
   '/pet-supplies-dumbo-brooklyn-ny': {
     title: "Pet Supplies DUMBO Brooklyn NY — Delivery to Your Apartment | Petshiwu",
-    description: "Pet supply delivery to DUMBO, Brooklyn Heights, and Vinegar Hill. Premium dog food, cat food, and pet accessories delivered fast. 10,000+ products, free shipping over $49.",
+    description: "Pet supply delivery to DUMBO, Brooklyn Heights, and Vinegar Hill. Premium dog food, cat food, and pet accessories delivered fast. 4,000+ products, free shipping over $49.",
   },
   '/pet-supplies-long-island-city-queens-ny': {
     title: "Pet Supplies Long Island City Queens NY — Fast Delivery | Petshiwu",
-    description: "Pet supply delivery to Long Island City, Queens. Dog food, cat food, and pet supplies delivered to LIC, Hunters Point, Sunnyside & Woodside. 10,000+ products, free shipping over $49.",
+    description: "Pet supply delivery to Long Island City, Queens. Dog food, cat food, and pet supplies delivered to LIC, Hunters Point, Sunnyside & Woodside. 4,000+ products, free shipping over $49.",
   },
   '/pet-supplies-soho-nyc': {
     title: "Pet Supplies SoHo NYC — Premium Delivery to Your Manhattan Loft | Petshiwu",
-    description: "Pet supply delivery to SoHo, Tribeca, NoHo, and Lower Manhattan. Luxury and premium dog food, cat food, and pet accessories delivered to your SoHo loft. 10,000+ products, free shipping over $49.",
+    description: "Pet supply delivery to SoHo, Tribeca, NoHo, and Lower Manhattan. Luxury and premium dog food, cat food, and pet accessories delivered to your SoHo loft. 4,000+ products, free shipping over $49.",
   },
   '/pet-supplies-astoria-queens-ny': {
     title: "Pet Supplies Astoria Queens NY — Local Delivery | Petshiwu",
-    description: "Pet supply delivery to Astoria, Queens. Dog food, cat food, and pet accessories delivered to Astoria, Long Island City, Ditmars, and Steinway. Queens-based service. 10,000+ products, free shipping over $49.",
+    description: "Pet supply delivery to Astoria, Queens. Dog food, cat food, and pet accessories delivered to Astoria, Long Island City, Ditmars, and Steinway. Queens-based service. 4,000+ products, free shipping over $49.",
   },
+  ...shopBrandStaticPages(),
 };
 
 /**
@@ -462,10 +559,9 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
     const productSlug = segments[segments.length - 1];
     const productName = slugToTitle(productSlug);
     const petType = segments[0];
-    const petLabel = petType === 'cat' ? 'cat' : petType === 'dog' ? 'dog' : 'pet';
     meta = {
-      title: `${productName} | Petshiwu`,
-      description: `Shop ${productName} — premium ${petLabel} supplies delivered across NYC. Free shipping on orders over $49 at Petshiwu.`,
+      title: productSearchTitle({ name: productName }),
+      description: productSearchDescription({ name: productName, petType }),
     };
   }
 
@@ -502,6 +598,14 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
     if (cleanPath !== '/') {
       html = injectH1(html, h1Text);
     }
+  if (cleanPath === '/delivery-zips') {
+    const zipHtml = buildNextDayZipDirectoryHtml();
+    if (html.includes('<div id="root"></div>')) {
+      html = html.replace('<div id="root"></div>', () => `<div id="root">${zipHtml}</div>`);
+    } else {
+      html = html.replace(/<div id="root">[\s\S]*?<\/div>/, () => `<div id="root">${zipHtml}</div>`);
+    }
+  }
   // FIX: Inject X-Robots-Tag noindex for any URL with query string. Filter/pagination/sort
   // variants are duplicates of the base URL — by stripping them from canonical we
   // consolidate, but Google also needs to know NOT to index them. The frontend
@@ -541,7 +645,7 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
   const isLegitimateSingle = ['products', 'learning', 'care-guides', 'about',
       'faq', 'returns', 'return-policy', 'donate', 'search', 'symptom-checker', 'press',
       'investors', 'sell-with-us', 'vendors', 'partners', 'other-animals', 'shop',
-      'privacy', 'privacy-policy', 'terms', 'terms-of-service', 'shipping', 'shipping-policy', 'contact'].includes(segments[0] || '')
+      'privacy', 'privacy-policy', 'terms', 'terms-of-service', 'shipping', 'shipping-policy', 'delivery-zips', 'contact', 'brand'].includes(segments[0] || '')
     || PET_TYPES.has(segments[0] || '')
     || INDEXABLE_LANDING_PATHS.has(cleanPath);
   const isDoorway = isSingleSegment && !isLegitimateSingle && !isProductPath;
@@ -565,6 +669,7 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
 type PageType =
   | { type: 'product'; slug: string }
   | { type: 'blog'; slug: string }
+  | { type: 'static-learning'; slug: string }
   | { type: 'care-guide'; slug: string }
   | { type: 'category'; slug: string }
   | { type: 'neighborhood'; slug: string; categorySlug: string; neighborhoodName: string; borough: string; nearbyAreas: string }
@@ -581,9 +686,11 @@ const matchRoute = (pathname: string): PageType => {
 
   if (segments.length === 0) return null;
 
-  // /learning/:slug
-  if (segments[0] === 'learning' && segments.length === 2)
+  // /learning/:slug — static React guides are not CMS blogs
+  if (segments[0] === 'learning' && segments.length === 2) {
+    if (isStaticLearningSlug(segments[1])) return { type: 'static-learning', slug: segments[1] };
     return { type: 'blog', slug: segments[1] };
+  }
 
   // /care-guides/:slug
   if (segments[0] === 'care-guides' && segments.length === 2)
@@ -646,7 +753,8 @@ const withTimeout = <T>(promise: Promise<T>, ms = 3000): Promise<T> => {
  */
 export const buildCanonicalProductPath = (product: any): string | null => {
   const slug = typeof product?.slug === 'string' ? product.slug.trim() : '';
-  const petType = typeof product?.petType === 'string' ? product.petType.trim() : '';
+  const rawPet = typeof product?.petType === 'string' ? product.petType.trim() : '';
+  const petType = rawPet ? canonicalPetSlug(rawPet) : '';
   const categorySlug = product?.category && typeof product.category === 'object'
     ? (typeof product.category.slug === 'string' ? product.category.slug.trim() : '')
     : '';
@@ -687,7 +795,8 @@ const fetchProduct = async (slug: string) => {
 const fetchBlog = async (slug: string) => {
   return withTimeout(
     Blog.findOne({ slug, isPublished: true })
-      .select('title slug excerpt content coverImage metaDescription speakable author publishedAt updatedAt')
+      .select('title slug excerpt content featuredImage metaTitle metaDescription speakable author authorByline authorProfileUrl publishedAt createdAt updatedAt')
+      .populate({ path: 'author', select: 'name' })
       .lean()
       .exec()
   );
@@ -696,16 +805,97 @@ const fetchBlog = async (slug: string) => {
 const fetchCareGuide = async (slug: string) => {
   return withTimeout(
     CareGuide.findOne({ slug, isPublished: true })
-      .select('title slug excerpt coverImage petType updatedAt')
+      .select('title slug excerpt content featuredImage metaDescription petType sections author publishedAt createdAt updatedAt')
+      .populate({ path: 'author', select: 'name' })
       .lean()
       .exec()
   );
 };
 
-const fetchCategory = async (slug: string) => {
-  return withTimeout(
-    Category.findOne({ slug, isActive: true })
+const fetchCategory = async (slug: string, petType?: string, categoryId?: unknown) => {
+  const base: Record<string, unknown> = categoryId
+    ? { _id: categoryId, isActive: true }
+    : { slug, isActive: true };
+  const withPet = petType ? { ...base, petType: canonicalPetSlug(petType) } : base;
+
+  // Category slugs are only unique per petType (e.g. "dry-food" exists for both
+  // dog and cat), so always resolve with petType first. Falling back to the
+  // petType-agnostic query is what served the CAT "Dry Food" category on
+  // /dog/dry-food, hiding the 637-product dog category from crawlers.
+  const exact = await withTimeout(
+    Category.findOne(withPet)
       .select('name slug description petType')
+      .lean()
+      .exec()
+  );
+  if (exact || !petType) return exact;
+
+  const canonicalOnly = await withTimeout(
+    Category.findOne({ ...withPet, petType: petType.toLowerCase().trim() })
+      .select('name slug description petType')
+      .lean()
+      .exec()
+  );
+  if (canonicalOnly) return canonicalOnly;
+
+  const fallback = await withTimeout(
+    Category.findOne(base)
+      .select('name slug description petType')
+      .lean()
+      .exec()
+  );
+  if (fallback) {
+    logger.warn(
+      `[BOT RENDER] Category "${slug}" has no record for petType "${petType}" ` +
+        `(resolved ${fallback.petType} instead). Serving the petType-agnostic match.`
+    );
+  }
+  return fallback;
+};
+
+const collectionProductQuery = (): Record<string, unknown> => ({
+  isActive: true,
+  $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+});
+
+const petTypeQueryValue = (petType?: string): unknown => {
+  if (!petType || petType === 'all' || petType === 'products') return undefined;
+  const canonical = canonicalPetSlug(petType);
+  if (canonical === 'small-animal' || petType === 'small-pet') {
+    return { $in: ['small-animal', 'small-pet'] };
+  }
+  return petType;
+};
+
+const fetchCollectionProducts = async (opts: {
+  petType?: string;
+  categoryId?: unknown;
+  limit?: number;
+}): Promise<any[]> => {
+  const query: Record<string, unknown> = collectionProductQuery();
+  const pet = petTypeQueryValue(opts.petType);
+  if (pet) query.petType = pet;
+  if (opts.categoryId) query.category = opts.categoryId;
+  return withTimeout(
+    Product.find(query)
+      .select('name slug basePrice variants.price brand petType description category')
+      .populate({ path: 'category', select: 'name slug' })
+      .sort({ averageRating: -1, inStock: -1, createdAt: -1 })
+      .limit(opts.limit ?? 40)
+      .lean()
+      .exec()
+  );
+};
+
+const fetchPetTypeCategories = async (petType: string): Promise<any[]> => {
+  const pet = petTypeQueryValue(petType);
+  const query: Record<string, unknown> = { isActive: true };
+  if (pet) query.petType = pet;
+  return withTimeout(
+    Category.find(query)
+      .select('name slug petType')
+      .sort({ position: 1, name: 1 })
+      .limit(40)
       .lean()
       .exec()
   );
@@ -716,6 +906,33 @@ const fetchCategory = async (slug: string) => {
 // ---------------------------------------------------------------------------
 
 const BASE = 'https://www.petshiwu.com';
+
+const PET_HUB_PATHS = new Set([
+  '/dog',
+  '/cat',
+  '/bird',
+  '/fish',
+  '/reptile',
+  '/small-animal',
+  '/small-pet',
+  '/other-animals',
+]);
+
+export const SHOP_DEPARTMENT_LINKS: Array<{ path: string; name: string }> = [
+  { path: '/dog', name: 'Dog supplies' },
+  { path: '/cat', name: 'Cat supplies' },
+  { path: '/dog/food', name: 'Dog food' },
+  { path: '/cat/food', name: 'Cat food' },
+  { path: '/dog/dry-food', name: 'Dry dog food' },
+  { path: '/products', name: 'All products' },
+  { path: '/brand', name: 'Shop brands' },
+];
+
+/** Absolute canonical product URL, or null when the record cannot build one. Never /products/{slug}. */
+export const canonicalProductHref = (product: any): string | null => {
+  const path = buildCanonicalProductPath(product);
+  return path ? `${BASE}${path}` : null;
+};
 
 /** Price Google Shopping must see in first-wave HTML (not only after React hydrates). */
 export const productOfferPrice = (product: {
@@ -729,9 +946,57 @@ export const productOfferPrice = (product: {
   return Number.isFinite(variantPrice) && variantPrice > 0 ? variantPrice : 0;
 };
 
+export const productAnchorHtml = (product: any): string => {
+  const href = canonicalProductHref(product);
+  const name = product?.name;
+  if (!href || !name) return '';
+  // Use the shared resolver so a product whose basePrice is 0 but whose variants
+  // carry real prices (the majority of the catalog) never renders "$0.00".
+  const resolved = productOfferPrice(product);
+  const price = resolved > 0 ? ` — $${resolved.toFixed(2)}` : '';
+  const brand = product.brand ? ` by ${esc(String(product.brand))}` : '';
+  return `<li><a href="${href}">${esc(String(name))}${brand}${price}</a></li>`;
+};
+
+export const productAnchorsHtml = (products: any[]): string =>
+  (products || []).map(productAnchorHtml).filter(Boolean).join('\n');
+
+export const buildShopDepartmentLinkHtml = (): string => {
+  const links = SHOP_DEPARTMENT_LINKS.map(
+    (item) => `<li><a href="${BASE}${item.path}">${esc(item.name)}</a></li>`
+  ).join('');
+  return `<h2>Shop pet supplies</h2><ul>${links}</ul>`;
+};
+
+const productItemListSchema = (name: string, products: any[]) => {
+  const items = (products || []).filter((p) => canonicalProductHref(p) && p?.name);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name,
+    numberOfItems: items.length,
+    itemListElement: items.map((p: any, i: number) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: canonicalProductHref(p),
+      name: p.name,
+    })),
+  };
+};
+
+
+/** Prefer variant.stock. Missing totalStock used to emit OutOfStock to Googlebot. */
+export const productOfferInStock = (product: {
+  inStock?: boolean;
+  totalStock?: number;
+  variants?: Array<{ stock?: number }>;
+}): boolean => {
+  return plannedStock(product).inStock;
+};
+
 export const buildProductHtml = (template: string, product: any, slug: string): string => {
   const price: number = productOfferPrice(product);
-  const inStock: boolean = (product.totalStock ?? 0) > 0 && product.inStock !== false;
+  const inStock: boolean = productOfferInStock(product);
   const image: string = resolveShareImage(product.images?.[0]);
   const images: string[] = (product.images ?? [])
     .slice(0, 10)
@@ -750,10 +1015,13 @@ export const buildProductHtml = (template: string, product: any, slug: string): 
     }
   }
   
-  const rawDesc: string = product.description
-    ? clean(product.description)
-    : `${productName} — premium pet supplies at Petshiwu.`;
-  const description = truncate(rawDesc, 160);
+  // GSC Merchant listings requires a NON-EMPTY Product.description. 805 products
+  // have blank/whitespace DB descriptions — trim the cleaned value and fall back
+  // whenever it ends up empty, otherwise we serve description: " " which Google
+  // rejects as "Missing field 'description'".
+  const cleanedDbDesc: string = product.description ? clean(product.description).trim() : '';
+  const rawDesc: string =
+    cleanedDbDesc || `${productName} — premium pet supplies at Petshiwu.`;
 
   const categoryName = typeof product.category === 'object' ? product.category?.name : product.category;
   const categorySlug = typeof product.category === 'object' ? product.category?.slug : undefined;
@@ -762,7 +1030,14 @@ export const buildProductHtml = (template: string, product: any, slug: string): 
 
   const productUrl = `${BASE}/${petType}${categorySlug ? `/${categorySlug}` : ''}/${slug}`;
 
-  const title = `${productName} | Petshiwu`;
+  const title = productSearchTitle({ name: productName, brand: brandName, inStock });
+  const description = productSearchDescription({
+    description: rawDesc,
+    brand: brandName,
+    name: productName,
+    petType,
+    inStock,
+  });
   const mpn = merchantMpn(product.variants?.[0]?.sku);
 
   // JSON-LD Product schema
@@ -779,7 +1054,7 @@ export const buildProductHtml = (template: string, product: any, slug: string): 
       url: productUrl,
       priceCurrency: 'USD',
       price: price.toFixed(2),
-      validFrom: new Date().toISOString().split('T')[0],
+      priceValidFrom: new Date(product.updatedAt || product.createdAt || Date.now()).toISOString().split('T')[0],
       priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',
@@ -913,7 +1188,7 @@ export const buildProductHtml = (template: string, product: any, slug: string): 
  * Pulls H2/H3 headings as questions and their following paragraph(s) as answers.
  * Returns up to 8 pairs — enough for a solid FAQPage schema.
  */
-const extractFaqPairs = (htmlContent: string): Array<{ question: string; answer: string }> => {
+export const extractFaqPairs = (htmlContent: string): Array<{ question: string; answer: string }> => {
   const pairs: Array<{ question: string; answer: string }> = [];
   // Match each H2/H3 heading + content until the next heading or end
   const sections = htmlContent.split(/<h[23][^>]*>/i);
@@ -934,7 +1209,7 @@ const extractFaqPairs = (htmlContent: string): Array<{ question: string; answer:
   return pairs;
 };
 
-const buildBlogHtml = (template: string, blog: any): string => {
+export const buildBlogHtml = (template: string, blog: any): string => {
   const title = `${blog.title} | Petshiwu Learning`;
   const description = truncate(
     blog.metaDescription ?? blog.excerpt ?? stripTags(blog.content ?? '').substring(0, 160),
@@ -962,7 +1237,7 @@ const buildBlogHtml = (template: string, blog: any): string => {
     description,
     image,
     url,
-    author: { '@type': 'Organization', name: blog.author ?? 'Petshiwu' },
+    author: { '@type': 'Organization', name: organizationAuthorName(blog.author) },
     publisher: {
       '@type': 'Organization',
       name: 'Petshiwu',
@@ -1008,6 +1283,7 @@ const buildBlogHtml = (template: string, blog: any): string => {
   ${faqSchema ? `<script type="application/ld+json">${JSON.stringify(faqSchema)}</script>` : ''}
   ${speakableSchema ? `<script type="application/ld+json">${JSON.stringify(speakableSchema)}</script>` : ''}`;
 
+  const articleHtml = sanitizeArticleHtml(blog.content || '');
   const blogExcerpt = blog.excerpt ?? stripTags(blog.content ?? '').substring(0, 400);
   const blogBodyContent = `
 <div style="font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px">
@@ -1017,10 +1293,10 @@ const buildBlogHtml = (template: string, blog: any): string => {
     <span style="color:#555">${esc(blog.title)}</span>
   </nav>
   ${image !== DEFAULT_OG_IMAGE ? `<img src="${esc(image)}" alt="${esc(blog.title)}" style="max-width:100%;height:auto;border-radius:8px;margin-bottom:16px" loading="lazy" />` : ''}
-  <h2 style="font-size:1.6em;margin:0 0 12px">${esc(blog.title)}</h2>
   <p style="color:#555;font-size:0.9em;margin-bottom:16px">${blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}</p>
-  <p style="line-height:1.7;color:#333;font-size:1.05em">${esc(blogExcerpt)}</p>
-  <a href="${esc(url)}" style="display:inline-block;margin-top:16px;padding:10px 24px;background:#1976d2;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Read Full Article</a>
+  ${articleHtml
+    ? `<article style="line-height:1.7;color:#333;font-size:1.05em">${articleHtml}</article>`
+    : `<p style="line-height:1.7;color:#333;font-size:1.05em">${esc(blogExcerpt)}</p>`}
   <hr style="margin:24px 0;border:none;border-top:1px solid #eee" />
   <p style="color:#555;font-size:0.9em"><a href="${BASE}/learning" style="color:#1976d2">More Pet Care Articles</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — NYC&rsquo;s Local Pet Store</a></p>
 </div>`;
@@ -1040,11 +1316,25 @@ const buildBlogHtml = (template: string, blog: any): string => {
   return html;
 };
 
-const buildCareGuideHtml = (template: string, guide: any): string => {
+export const buildCareGuideHtml = (template: string, guide: any): string => {
   const title = `${guide.title} | Petshiwu Care Guides`;
-  const description = truncate(guide.excerpt ?? `Care guide for ${guide.title} at Petshiwu.`, 160);
+  const description = truncate(
+    guide.metaDescription || guide.excerpt || stripTags(guide.content ?? '').substring(0, 160) || `Care guide for ${guide.title} at Petshiwu.`,
+    160
+  );
   const image = resolveShareImage(guide.featuredImage ?? guide.coverImage);
   const url = `${BASE}/care-guides/${guide.slug}`;
+  const articleHtml = careGuideArticleHtml(guide);
+  const faqPairs = extractFaqPairs(articleHtml);
+  const faqSchema = faqPairs.length >= 2 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqPairs.map(({ question, answer }) => ({
+      '@type': 'Question',
+      name: question,
+      acceptedAnswer: { '@type': 'Answer', text: answer },
+    })),
+  } : null;
 
   const schema = {
     '@context': 'https://schema.org',
@@ -1053,13 +1343,14 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
     description,
     image,
     url,
-    author: { '@type': 'Organization', name: 'Petshiwu' },
+    author: { '@type': 'Organization', name: organizationAuthorName(guide.author) },
     publisher: {
       '@type': 'Organization',
       name: 'Petshiwu',
       logo: { '@type': 'ImageObject', url: `${BASE}/logo.png` },
     },
-    dateModified: guide.updatedAt,
+    datePublished: guide.publishedAt ?? guide.createdAt,
+    dateModified: guide.updatedAt ?? guide.publishedAt ?? guide.createdAt,
   };
 
   const breadcrumbSchema = {
@@ -1078,10 +1369,15 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
   <meta property="og:description" content="${esc(description)}" />
   <meta property="og:image" content="${esc(image)}" />
   <meta property="og:url" content="${esc(url)}" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:title" content="${esc(title)}" />
+  <meta name="twitter:description" content="${esc(description)}" />
+  <meta name="twitter:image" content="${esc(image)}" />
   <script type="application/ld+json">${JSON.stringify(schema)}</script>
-  <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>`;
+  <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
+  ${faqSchema ? `<script type="application/ld+json">${JSON.stringify(faqSchema)}</script>` : ''}`;
 
-  const guideExcerpt = guide.excerpt ?? `Complete care guide for ${guide.title} — tips, advice, and expert information for pet owners.`;
+  const guideExcerpt = guide.excerpt || stripTags(guide.content ?? '').substring(0, 400) || `Complete care guide for ${guide.title} — tips, advice, and expert information for pet owners.`;
   const guideBodyContent = `
 <div style="font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px">
   <nav style="font-size:0.85em;margin-bottom:16px;color:#555">
@@ -1090,9 +1386,9 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
     <span style="color:#555">${esc(guide.title)}</span>
   </nav>
   ${image !== DEFAULT_OG_IMAGE ? `<img src="${esc(image)}" alt="${esc(guide.title)}" style="max-width:100%;height:auto;border-radius:8px;margin-bottom:16px" loading="lazy" />` : ''}
-  <h2 style="font-size:1.6em;margin:0 0 12px">${esc(guide.title)}</h2>
-  <p style="line-height:1.7;color:#333;font-size:1.05em">${esc(guideExcerpt)}</p>
-  <a href="${esc(url)}" style="display:inline-block;margin-top:16px;padding:10px 24px;background:#1976d2;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Read Full Guide</a>
+  ${articleHtml
+    ? `<article style="line-height:1.7;color:#333;font-size:1.05em">${articleHtml}</article>`
+    : `<p style="line-height:1.7;color:#333;font-size:1.05em">${esc(guideExcerpt)}</p>`}
   <hr style="margin:24px 0;border:none;border-top:1px solid #eee" />
   <p style="color:#555;font-size:0.9em"><a href="${BASE}/care-guides" style="color:#1976d2">All Care Guides</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — NYC&rsquo;s Local Pet Store</a></p>
 </div>`;
@@ -1112,9 +1408,16 @@ const buildCareGuideHtml = (template: string, guide: any): string => {
   return html;
 };
 
-const buildCategoryHtml = (template: string, category: any, petType?: string, canonicalPath?: string): string => {
+export const buildCategoryHtml = (
+  template: string,
+  category: any,
+  petType?: string,
+  canonicalPath?: string,
+  products: any[] = [],
+): string => {
   const catName = category.name ?? '';
-  const petLabel = petType === 'dog' ? 'Dog' : petType === 'cat' ? 'Cat' : petType === 'bird' ? 'Bird' : petType === 'fish' ? 'Fish' : petType === 'reptile' ? 'Reptile' : petType === 'small-pet' ? 'Small Pet' : '';
+  const petSlug = petType && petType !== 'all' ? canonicalPetSlug(petType) : '';
+  const petLabel = petType === 'dog' ? 'Dog' : petType === 'cat' ? 'Cat' : petType === 'bird' ? 'Bird' : petType === 'fish' ? 'Fish' : petType === 'reptile' ? 'Reptile' : petType === 'small-pet' || petType === 'small-animal' ? 'Small Pet' : '';
   const title = petLabel
     ? `${catName} — ${petLabel} Supplies Delivered NYC | Petshiwu`
     : `${catName} | Petshiwu`;
@@ -1127,14 +1430,14 @@ const buildCategoryHtml = (template: string, category: any, petType?: string, ca
   // between nested URLs like /dog/food--treats/puppy-food and slug-only form)
   const url = canonicalPath
     ? `${BASE}${canonicalPath}`
-    : petType && petType !== 'all'
-      ? `${BASE}/${petType}/${category.slug}`
+    : petSlug
+      ? `${BASE}/${petSlug}/${category.slug}`
       : `${BASE}/category/${category.slug}`;
 
   const breadcrumbItems: unknown[] = [
     { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
-    ...(petLabel && petType ? [{ '@type': 'ListItem', position: 2, name: `${petLabel}s`, item: `${BASE}/${petType}` }] : []),
-    { '@type': 'ListItem', position: petType ? 3 : 2, name: catName, item: url },
+    ...(petLabel && petSlug ? [{ '@type': 'ListItem', position: 2, name: `${petLabel}s`, item: `${BASE}/${petSlug}` }] : []),
+    { '@type': 'ListItem', position: petSlug ? 3 : 2, name: catName, item: url },
   ];
 
   const breadcrumbSchema = {
@@ -1151,6 +1454,8 @@ const buildCategoryHtml = (template: string, category: any, petType?: string, ca
     url,
   };
 
+  const productList = productAnchorsHtml(products);
+  const itemList = productItemListSchema(catName, products);
   const injectedTags = `
   <!-- Bot renderer: category-specific meta -->
   <meta property="og:title" content="${esc(title)}" />
@@ -1158,7 +1463,18 @@ const buildCategoryHtml = (template: string, category: any, petType?: string, ca
   <meta property="og:url" content="${esc(url)}" />
   <meta property="og:type" content="website" />
   <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
-  <script type="application/ld+json">${JSON.stringify(collectionSchema)}</script>`;
+  <script type="application/ld+json">${JSON.stringify(collectionSchema)}</script>
+  ${itemList.numberOfItems > 0 ? `<script type="application/ld+json">${JSON.stringify(itemList)}</script>` : ''}`;
+
+  const bodyContent = `
+<div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
+  <p>${esc(description)}</p>
+  ${petSlug ? `<p><a href="${BASE}/${petSlug}">All ${esc(petLabel || petSlug)} products</a></p>` : ''}
+  ${productList
+    ? `<h2>Products</h2><ul style="list-style:none;padding:0;columns:2">${productList}</ul>`
+    : '<p>Browse this category on Petshiwu.</p>'}
+  <p><a href="${BASE}/products">Browse all products</a></p>
+</div>`;
 
   let html = injectTitle(template, title);
   html = injectDescription(html, description);
@@ -1167,6 +1483,53 @@ const buildCategoryHtml = (template: string, category: any, petType?: string, ca
   html = injectOgTags(html, title, description, url);
   html = injectBeforeHeadClose(html, injectedTags);
   html = injectH1(html, catName);
+  html = html.replace(/<div id="root">.*?<\/div>/s, () => `<div id="root">${bodyContent}</div>`) ||
+         html.replace('<div id="root"></div>', () => `<div id="root">${bodyContent}</div>`);
+  return html;
+};
+
+export const buildPetTypeCollectionHtml = (
+  template: string,
+  petPath: string,
+  products: any[] = [],
+  categories: Array<{ name?: string; slug?: string }> = [],
+): string => {
+  const cleanPath = petPath.split('?')[0].replace(/\/$/, '') || '/';
+  const petSlug = canonicalPetSlug(cleanPath.replace(/^\//, ''));
+  const meta = STATIC_PAGES[cleanPath] ?? STATIC_PAGES[`/${petSlug}`] ?? {
+    title: 'Pet Supplies | Petshiwu',
+    description: 'Shop pet supplies at Petshiwu. Free shipping over $49.',
+  };
+  const h1 = meta.title.replace(/\s*\|\s*Petshiwu\s*$/i, '').trim();
+  const canonicalUrl = `${BASE}/${petSlug}`;
+  const categoryList = categories
+    .filter((c) => c.slug && c.name)
+    .map((c) => `<li><a href="${BASE}/${petSlug}/${esc(String(c.slug))}">${esc(String(c.name))}</a></li>`)
+    .join('\n');
+  const productList = productAnchorsHtml(products);
+  const itemList = productItemListSchema(h1, products);
+  const bodyContent = `
+<div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
+  <p>${esc(meta.description)}</p>
+  ${categoryList ? `<h2>Shop by category</h2><ul>${categoryList}</ul>` : ''}
+  ${productList ? `<h2>Popular products</h2><ul style="list-style:none;padding:0;columns:2">${productList}</ul>` : ''}
+  <p><a href="${BASE}/products">Browse all products</a></p>
+</div>`;
+
+  let html = injectTitle(template, meta.title);
+  html = injectDescription(html, meta.description);
+  html = injectCanonical(html, canonicalUrl);
+  html = injectHreflang(html, canonicalUrl);
+  html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
+  html = injectH1(html, h1);
+  if (itemList.numberOfItems > 0) {
+    html = injectBeforeHeadClose(
+      html,
+      `<script type="application/ld+json">${JSON.stringify(itemList)}</script>`
+    );
+  }
+  html = html.replace(/<div id="root">.*?<\/div>/s, () => `<div id="root">${bodyContent}</div>`) ||
+         html.replace('<div id="root"></div>', () => `<div id="root">${bodyContent}</div>`);
   return html;
 };
 
@@ -1217,7 +1580,7 @@ const buildNeighborhoodHtml = (
   };
   const cat = CATEGORY_LABELS[categorySlug] ?? { label: 'Pet Supplies Delivery', petLabel: 'pet supplies' };
   const title = `${cat.label} in ${neighborhoodName}, ${borough} | Petshiwu`;
-  const description = `Shop premium ${cat.petLabel} and get delivered to ${neighborhoodName}, ${borough}. Free shipping on orders over $49. Queens-based NYC delivery. 10,000+ products.`;
+  const description = `Shop premium ${cat.petLabel} and get delivered to ${neighborhoodName}, ${borough}. Free shipping on orders over $49. Queens-based NYC delivery. 4,000+ products.`;
   const pageUrl = `${BASE}/${slug}`;
   const h1 = `${cat.label} in ${neighborhoodName}, ${borough}`;
 
@@ -1276,7 +1639,7 @@ const buildNeighborhoodHtml = (
     <span>${esc(neighborhoodName)}, ${esc(borough)}</span>
   </nav>
   <h2 style="font-size:1.7em;font-weight:700;margin:0 0 12px">${esc(h1)}</h2>
-  <p style="color:#444;line-height:1.7;margin-bottom:16px">Petshiwu delivers premium ${cat.petLabel} to every address in ${esc(neighborhoodName)}, ${esc(borough)} — including nearby ${esc(nearbyAreas)}. We're Queens-based with 10,000+ products and free shipping on orders over $49.</p>
+  <p style="color:#444;line-height:1.7;margin-bottom:16px">Petshiwu delivers premium ${cat.petLabel} to every address in ${esc(neighborhoodName)}, ${esc(borough)} — including nearby ${esc(nearbyAreas)}. We're Queens-based with 4,000+ products and free shipping on orders over $49.</p>
   <a href="${BASE}/products" style="display:inline-block;padding:10px 24px;background:#1976d2;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-bottom:20px">Shop ${esc(cat.petLabel)} →</a>
   <p style="color:#555;font-size:0.9em"><a href="${BASE}/learning" style="color:#1976d2">Pet Care Blog</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — NYC&rsquo;s Local Pet Store</a></p>`;
 
@@ -1362,7 +1725,7 @@ export const buildReturnPolicyHtml = (template: string): string => {
   return html;
 };
 
-export const buildHomepageHtml = (template: string): string => {
+export const buildHomepageHtml = (template: string, products: any[] = []): string => {
   const meta = STATIC_PAGES['/'];
   const pageUrl = BASE;
 
@@ -1378,7 +1741,7 @@ export const buildHomepageHtml = (template: string): string => {
       width: 512,
       height: 512,
     },
-    description: 'Premium pet food, toys, and supplies delivered to Queens, Brooklyn, Manhattan, Bronx, and all of New York City. 10,000+ products from top brands.',
+    description: 'Premium pet food, toys, and supplies. Same-day in NYC. Nationwide shipping soon. 4,000+ products from top brands.',
     telephone: '+18002592605',
     email: 'support@petshiwu.com',
     address: {
@@ -1405,7 +1768,6 @@ export const buildHomepageHtml = (template: string): string => {
     sameAs: [
       'https://www.facebook.com/petshiwu',
       'https://www.instagram.com/petshiwu',
-      'https://twitter.com/petshiwu',
     ],
     foundingDate: '2024',
     foundingLocation: {
@@ -1422,7 +1784,7 @@ export const buildHomepageHtml = (template: string): string => {
     url: BASE,
     image: `${BASE}/og-image.jpg`,
     logo: `${BASE}/logo-square-512.png`,
-    description: 'Same-day pet food and supplies delivery in New York City. Jackson Heights is office and warehouse only — not a walk-in store. 10,000+ products, free shipping over $49.',
+    description: 'Same-day pet food and supplies in New York City. Nationwide shipping soon. Jackson Heights is office and warehouse only — not a walk-in store. 4,000+ products, free shipping over $49.',
     telephone: '+18002592605',
     email: 'support@petshiwu.com',
     address: {
@@ -1448,7 +1810,7 @@ export const buildHomepageHtml = (template: string): string => {
     ],
     priceRange: '$$',
     currenciesAccepted: 'USD',
-    paymentAccepted: 'Cash, Credit Card, Debit Card',
+    paymentAccepted: 'Credit Card, Debit Card, PayPal',
     areaServed: [
       { '@type': 'City', name: 'New York City' },
       { '@type': 'Borough', name: 'Queens' },
@@ -1457,12 +1819,6 @@ export const buildHomepageHtml = (template: string): string => {
       { '@type': 'Borough', name: 'Bronx' },
       { '@type': 'Borough', name: 'Staten Island' },
     ],
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      reviewCount: '47',
-      bestRating: '5',
-    },
     sameAs: [
       'https://www.facebook.com/petshiwu',
       'https://www.instagram.com/petshiwu',
@@ -1500,6 +1856,8 @@ export const buildHomepageHtml = (template: string): string => {
       'Pet Care Blog',
       'Dog Food Delivery NYC',
       'Cat Food Delivery NYC',
+      'Pet Supplies Delivery NYC',
+      'Pet Supplies Queens NY',
     ],
     url: [
       `${BASE}/`,
@@ -1511,6 +1869,8 @@ export const buildHomepageHtml = (template: string): string => {
       `${BASE}/learning`,
       `${BASE}/dog-food-delivery-nyc`,
       `${BASE}/cat-food-delivery-nyc`,
+      `${BASE}/pet-supplies-delivery-nyc`,
+      `${BASE}/pet-supplies-queens-ny`,
     ],
   };
 
@@ -1528,40 +1888,31 @@ export const buildHomepageHtml = (template: string): string => {
   html = injectHreflang(html, pageUrl);
   html = injectOgTags(html, meta.title, meta.description, pageUrl);
   html = injectBeforeHeadClose(html, injectedTags);
+  const productList = productAnchorsHtml(products);
+  const productBlock = productList
+    ? `<h2>Popular products</h2><ul style="list-style:none;padding:0;columns:2">${productList}</ul>`
+    : '';
+  const hubNav = `<div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">${buildShopDepartmentLinkHtml()}${buildNycHubLinkHtml()}${productBlock}</div>`;
+  if (html.includes('<div id="root"></div>')) {
+    html = html.replace('<div id="root"></div>', () => `<div id="root">${hubNav}</div>`);
+  }
   return html;
 };
 
 const buildProductListHtml = async (template: string): Promise<string> => {
-  const BASE_URL = 'https://www.petshiwu.com';
-  const canonicalUrl = `${BASE_URL}/products`;
-
-  // Fetch up to 60 active products for Google to crawl
-  const products = await Product.find({ isActive: true })
-    .select('name slug basePrice brand petType description')
-    .sort({ createdAt: -1 })
-    .limit(60)
-    .lean();
-
-  const productLinks = products
-    .filter((p: any) => p.slug)
-    .map((p: any) => {
-      const url = `${BASE_URL}/products/${esc(p.slug)}`;
-      const price = p.basePrice ? ` — $${p.basePrice.toFixed(2)}` : '';
-      const brand = p.brand ? ` by ${esc(String(p.brand))}` : '';
-      const desc = p.description ? ` — ${esc(truncate(stripTags(String(p.description)), 80))}` : '';
-      return `<li><a href="${url}">${esc(p.name)}${brand}${price}</a>${desc}</li>`;
-    })
-    .join('\n');
+  const canonicalUrl = `${BASE}/products`;
+  const products = await fetchCollectionProducts({ limit: 80 });
+  const productLinks = productAnchorsHtml(products);
 
   const bodyContent = `
 <div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
-  <h2>All Pet Products — Petshiwu</h2>
-  <p>Browse 10,000+ premium pet products for dogs, cats, birds, fish, reptiles, and small animals.
-     Free shipping on orders over $49. Based in Jackson Heights, NY.</p>
-  <ul style="list-style:none;padding:0;columns:2">
-    ${productLinks}
-  </ul>
-  <p><a href="${BASE_URL}">← Back to Petshiwu</a></p>
+  <h2>Pet food & supplies – Same-day NYC</h2>
+  <p>Browse 4,000+ foods, treats, and supplies for dogs, cats, birds, fish, reptiles, and small animals.
+     Free shipping on orders over $49. Same-day NYC. No autoship.</p>
+  ${productLinks
+    ? `<ul style="list-style:none;padding:0;columns:2">${productLinks}</ul>`
+    : '<p>Browse the catalog on Petshiwu.</p>'}
+  <p><a href="${BASE}">← Back to Petshiwu</a> · <a href="${BASE}/dog">Dog</a> · <a href="${BASE}/cat">Cat</a></p>
 </div>`;
 
   const meta = STATIC_PAGES['/products'];
@@ -1571,11 +1922,131 @@ const buildProductListHtml = async (template: string): Promise<string> => {
   html = injectCanonical(html, canonicalUrl);
   html = injectHreflang(html, canonicalUrl);
   html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
-  html = injectH1(html, 'All Pet Products — Petshiwu');
+  html = injectH1(html, 'Pet food & supplies – Same-day NYC');
   // Inject product list into body for Google to crawl (H2 — H1 already replaced in noscript)
   html = html.replace(/<div id="root">.*?<\/div>/s, () => `<div id="root">${bodyContent}</div>`) ||
          html.replace('<div id="root"></div>', () => `<div id="root">${bodyContent}</div>`);
   return html;
+};
+
+export type EducationHubItem = {
+  title: string;
+  slug: string;
+  excerpt?: string;
+};
+
+/** First-wave HTML for /learning and /care-guides so Google can follow article links. */
+export const buildEducationHubHtml = (
+  template: string,
+  options: {
+    path: '/learning' | '/care-guides';
+    heading: string;
+    intro: string;
+    items: EducationHubItem[];
+  }
+): string => {
+  const canonicalUrl = `${BASE}${options.path}`;
+  const meta = STATIC_PAGES[options.path] ?? {
+    title: options.heading,
+    description: options.intro,
+  };
+  const itemLinks = options.items
+    .filter((item) => item.slug && item.title)
+    .map((item) => {
+      const url = `${BASE}${options.path}/${esc(item.slug)}`;
+      const excerpt = item.excerpt ? ` — ${esc(truncate(stripTags(String(item.excerpt)), 110))}` : '';
+      return `<li><a href="${url}">${esc(item.title)}</a>${excerpt}</li>`;
+    })
+    .join('\n');
+
+  const collectionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: meta.title,
+    description: meta.description,
+    url: canonicalUrl,
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: options.items.slice(0, 60).map((item, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        url: `${BASE}${options.path}/${item.slug}`,
+        name: item.title,
+      })),
+    },
+  };
+
+  const bodyContent = `
+<div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
+  <h2>${esc(options.heading)}</h2>
+  <p>${esc(options.intro)}</p>
+  <ul style="list-style:none;padding:0;line-height:1.8">
+    ${itemLinks}
+  </ul>
+  <p><a href="${BASE}">← Back to Petshiwu</a></p>
+</div>`;
+
+  let html = template;
+  html = injectTitle(html, meta.title);
+  html = injectDescription(html, meta.description);
+  html = injectCanonical(html, canonicalUrl);
+  html = injectHreflang(html, canonicalUrl);
+  html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
+  html = injectH1(html, options.heading);
+  html = injectBeforeHeadClose(html, `<script type="application/ld+json">${JSON.stringify(collectionSchema)}</script>`);
+  html = html.replace(/<div id="root">[\s\S]*?<\/div>/, () => `<div id="root">${bodyContent}</div>`);
+  if (!html.includes(bodyContent)) {
+    html = html.replace('<div id="root"></div>', () => `<div id="root">${bodyContent}</div>`);
+  }
+  return html;
+};
+
+const fetchLearningHubItems = async (): Promise<EducationHubItem[]> => {
+  const featuredRank = new Map<string, number>(FEATURED_LEARNING_SLUGS.map((slug, index) => [slug, index]));
+  const staticItems: EducationHubItem[] = Object.values(STATIC_LEARNING_PAGES)
+    .map((page) => ({
+      title: page.title,
+      slug: page.slug,
+      excerpt: page.description,
+    }))
+    .sort((a, b) => {
+      const aRank = featuredRank.has(a.slug) ? featuredRank.get(a.slug)! : 1000;
+      const bRank = featuredRank.has(b.slug) ? featuredRank.get(b.slug)! : 1000;
+      return aRank - bRank;
+    });
+  const blogs = await Blog.find({ isPublished: true })
+    .select('title slug excerpt')
+    .sort({ publishedAt: -1 })
+    .limit(80)
+    .lean();
+  const cmsItems = (blogs as EducationHubItem[]).filter(
+    (blog) => blog.slug && !BLOG_REDIRECTS[blog.slug] && !isStaticLearningSlug(blog.slug)
+  );
+  return [...staticItems, ...cmsItems].slice(0, 160);
+};
+
+const fetchCareGuideHubItems = async (): Promise<EducationHubItem[]> => {
+  const guides = await CareGuide.find({ isPublished: true })
+    .select('title slug excerpt')
+    .sort({ publishedAt: -1 })
+    .limit(80)
+    .lean();
+  return guides as EducationHubItem[];
+};
+
+export const buildStaticLearningHtml = (template: string, slug: string): string => {
+  const page = STATIC_LEARNING_PAGES[slug];
+  if (!page) return template;
+  return buildBlogHtml(template, {
+    title: page.title,
+    slug: page.slug,
+    content: page.html,
+    excerpt: page.description,
+    metaDescription: page.description,
+    featuredImage: page.featuredImage,
+    publishedAt: page.publishedAt,
+    author: { name: LEARNING_AUTHOR },
+  });
 };
 
 /** Pet-type filter for SEO landings — matches frontend/src/pages/seo/*.tsx. */
@@ -1600,6 +2071,8 @@ export type SeoLandingProduct = {
   slug?: string;
   brand?: string;
   basePrice?: number;
+  /** Needed so anchors can fall back to a variant price when basePrice is 0. */
+  variants?: Array<{ price?: number }>;
   petType?: string;
   description?: string;
   category?: { slug?: string; name?: string } | null;
@@ -1622,36 +2095,18 @@ export const buildSeoLandingHtmlFromProducts = (
   };
   const h1 = meta.title.replace(/\s*\|\s*Petshiwu\s*$/i, '').trim();
 
-  const items = products.filter((p) => p.slug && p.name);
-  const productLinks = items
-    .map((p) => {
-      const path = buildCanonicalProductPath(p) || `/products/${p.slug}`;
-      const url = `${BASE}${path}`;
-      const price = typeof p.basePrice === 'number' ? ` — $${Number(p.basePrice).toFixed(2)}` : '';
-      const brand = p.brand ? ` by ${esc(String(p.brand))}` : '';
-      return `<li><a href="${url}">${esc(String(p.name))}${brand}${price}</a></li>`;
-    })
-    .join('\n');
+  const items = products.filter((p) => canonicalProductHref(p) && p.name);
+  const productLinks = productAnchorsHtml(items);
+  const itemListSchema = productItemListSchema(h1, items);
 
-  const itemListSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    name: h1,
-    numberOfItems: items.length,
-    itemListElement: items.map((p, i) => {
-      const path = buildCanonicalProductPath(p) || `/products/${p.slug}`;
-      return {
-        '@type': 'ListItem',
-        position: i + 1,
-        url: `${BASE}${path}`,
-        name: p.name,
-      };
-    }),
-  };
+  const hubShopHtml = isNycShoppableHub(cleanPath)
+    ? `${buildNycHubShopHtml()}${buildNycHubLinkHtml(cleanPath)}`
+    : '';
 
   const bodyContent = `
 <div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
   <p>${esc(meta.description)}</p>
+  ${hubShopHtml}
   <h2>Recommended Products</h2>
   ${items.length > 0
     ? `<ul style="list-style:none;padding:0;columns:2">\n    ${productLinks}\n  </ul>`
@@ -1683,13 +2138,113 @@ const fetchSeoLandingProducts = async (pathname: string): Promise<SeoLandingProd
   if (petType) query.petType = petType;
   return withTimeout(
     Product.find(query)
-      .select('name slug basePrice brand petType description category')
+      .select('name slug basePrice variants.price brand petType description category')
       .populate({ path: 'category', select: 'name slug' })
       .sort({ averageRating: -1, createdAt: -1 })
       .limit(20)
       .lean()
       .exec()
   ) as Promise<SeoLandingProduct[]>;
+};
+
+const fetchBrandProducts = async (brandQuery: string): Promise<SeoLandingProduct[]> => {
+  return withTimeout(
+    Product.find({ isActive: true, inStock: true, ...brandMatchQuery(brandQuery) })
+      .select('name slug basePrice variants.price brand petType description category')
+      .populate({ path: 'category', select: 'name slug' })
+      .sort({ averageRating: -1, createdAt: -1 })
+      .limit(20)
+      .lean()
+      .exec()
+  ) as Promise<SeoLandingProduct[]>;
+};
+
+/** First-wave HTML for allowlisted /brand and /brand/:slug collection pages. */
+export const buildBrandCollectionHtml = (
+  template: string,
+  pathname: string,
+  products: SeoLandingProduct[] = []
+): string => {
+  const cleanPath = pathname.split('?')[0].replace(/\/$/, '') || '/';
+  const brand = shopBrandForPath(cleanPath);
+  const canonicalUrl = `${BASE}${cleanPath}`;
+  const meta = brand
+    ? { title: brand.title, description: brand.description, h1: brand.h1, intro: brand.intro }
+    : {
+        title: BRAND_INDEX_META.title,
+        description: BRAND_INDEX_META.description,
+        h1: BRAND_INDEX_META.h1,
+        intro: BRAND_INDEX_META.intro,
+      };
+
+  const items = products.filter((p) => canonicalProductHref(p) && p.name);
+  const productLinks = productAnchorsHtml(items);
+
+  const related = (brand?.relatedSlugs || [])
+    .map((slug) => getShopBrand(slug))
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+  const relatedHtml = related.length
+    ? `<h2>Related brands</h2>
+  <ul>${related.map((item) => `<li><a href="${BASE}/brand/${item.slug}">${esc(item.name)}</a></li>`).join('\n')}</ul>`
+    : '';
+
+  const brandDirectory = SHOP_BRANDS.map(
+    (item) => `<li><a href="${BASE}/brand/${item.slug}">${esc(item.name)}</a></li>`
+  ).join('\n');
+
+  const itemListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: meta.h1,
+    numberOfItems: brand ? items.length : SHOP_BRANDS.length,
+    itemListElement: brand
+      ? items.map((p, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          url: canonicalProductHref(p),
+          name: p.name,
+        }))
+      : SHOP_BRANDS.map((item, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          url: `${BASE}/brand/${item.slug}`,
+          name: item.name,
+        })),
+  };
+
+  const productsBlock = brand
+    ? `<h2>In stock now</h2>
+  ${items.length > 0
+    ? `<ul style="list-style:none;padding:0;columns:2">\n    ${productLinks}\n  </ul>`
+    : '<p>Browse our catalog for this brand.</p>'}`
+    : `<h2>Shop by brand</h2>
+  <ul style="list-style:none;padding:0;columns:2">
+    ${brandDirectory}
+  </ul>`;
+
+  const bodyContent = `
+<div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
+  <p>${esc(meta.intro)}</p>
+  ${productsBlock}
+  ${relatedHtml}
+  <p>In stock. Free shipping over $49. No autoship. Nationwide shipping soon.</p>
+  <p><a href="${BASE}/brand">All brands</a> · <a href="${BASE}/products">Browse all products</a></p>
+</div>`;
+
+  let html = template;
+  html = injectTitle(html, meta.title);
+  html = injectDescription(html, meta.description);
+  html = injectCanonical(html, canonicalUrl);
+  html = injectHreflang(html, canonicalUrl);
+  html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
+  html = injectH1(html, meta.h1);
+  html = injectBeforeHeadClose(
+    html,
+    `<script type="application/ld+json">${JSON.stringify(itemListSchema)}</script>`
+  );
+  html = html.replace(/<div id="root">.*?<\/div>/s, () => `<div id="root">${bodyContent}</div>`) ||
+         html.replace('<div id="root"></div>', () => `<div id="root">${bodyContent}</div>`);
+  return html;
 };
 
 /**
@@ -1703,10 +2258,11 @@ const VALID_SPA_PATHS = new Set([
   '/profile', '/orders', '/track-order', '/donate', '/favorites', '/compare',
   '/returns', '/return-policy', '/addresses', '/stock-alerts', '/search',
   '/learning', '/care-guides', '/faq', '/symptom-checker', '/about', '/press',
+  '/our-promise', '/for-pet-parents', '/from-queens', '/editorial-standards',
   '/contact', '/403', '/404', '/privacy', '/privacy-policy', '/terms',
-  '/terms-of-service', '/shipping', '/shipping-policy', '/accessibility',
+  '/terms-of-service', '/shipping', '/shipping-policy', '/delivery-zips', '/accessibility',
   '/shop', '/deals', '/sell-with-us', '/vendors', '/partners', '/investors',
-  '/innovation', '/tech', '/neural', '/scan',
+  '/innovation', '/tech', '/neural', '/scan', '/brand',
 ]);
 
 /**
@@ -1733,8 +2289,11 @@ const isKnownRoute = (pathname: string): boolean => {
   }
   if (segments.length === 2) {
     // /learning/:slug, /care-guides/:slug, /category/:slug, /products/:slug
-    const validPrefixes = ['learning', 'care-guides', 'category', 'products', 'blog'];
-    if (validPrefixes.includes(segments[0])) return true;
+    const validPrefixes = ['learning', 'care-guides', 'category', 'products', 'blog', 'brand'];
+    if (validPrefixes.includes(segments[0])) {
+      if (segments[0] === 'brand') return isShopBrandSlug(segments[1]);
+      return true;
+    }
     // /:petType/:category — e.g. /dog/food
     const petTypes = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet', 'small-animal', 'other-animals']);
     if (petTypes.has(segments[0])) return true;
@@ -1750,7 +2309,7 @@ const applyRobotsMeta = (html: string, content: string): string => {
     const pattern = new RegExp(`<meta\\b[^>]*\\bname=["']${name}["'][^>]*>`, 'gi');
     if (pattern.test(source)) {
       pattern.lastIndex = 0;
-      return source.replace(pattern, tag);
+      return source.replace(pattern, () => tag);
     }
     return source.replace(/<\/head>/i, () => `${tag}\n</head>`);
   };
@@ -1766,7 +2325,7 @@ const build404Html = (template: string): string => {
   const title = 'Page Not Found | Petshiwu';
   const description = 'The page you are looking for could not be found. Browse our pet supplies or use the search above.';
   let html = template;
-  html = html.replace(/<title>[^<]*<\/title>/, () => `<title>${esc(title)}</title>`);
+  html = html.replace(/<title[^>]*>[^<]*<\/title>/, () => `<title>${esc(title)}</title>`);
   html = html.replace(
     /<meta[\s\S]*?name="description"[\s\S]*?content="[^"]*"/,
     `<meta name="description" content="${esc(description)}"`
@@ -1816,6 +2375,15 @@ export const createBotRenderer = (distPath: string) => {
               return;
             }
           } else if (isLegacyProductPath) {
+            // No live product matched. Fall back to the retired-URL map so a
+            // still-ranked dead product in an aisle we sell lands on a real
+            // aisle instead of a dead end (see backend/src/seo/retiredUrlMap.ts).
+            const retired = RETIRED_URL_301[req.path.replace(/\/+$/, '') || '/'];
+            if (retired) {
+              res.setHeader('Cache-Control', 'public, max-age=3600');
+              res.redirect(301, retired);
+              return;
+            }
             res.status(404);
             res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -1849,6 +2417,22 @@ export const createBotRenderer = (distPath: string) => {
       // fallback below. This prevents malformed encoded product paths from becoming
       // 200 noindex shells merely because they have three URL segments.
       if (routeClassification.status === 'notFound' || !isKnownRoute(req.path)) {
+        // Retired-product rescue. When the catalog rebuild removes a product, the old
+        // URL 404s but Google keeps ranking it: 233 of the top 500 ranked pages were
+        // 404s at positions 1.3-2.9 (4,946 impressions / 269 clicks a month landing on
+        // a dead end). If the slug is a known legacy alias of a live product, 301 to
+        // it instead of 404ing. Only reached on a URL that would have 404'd anyway,
+        // so no serving page pays this lookup.
+        try {
+          const rescue = await resolveLegacyRedirect(req.path);
+          if (rescue) {
+            res.setHeader('Cache-Control', 'public, max-age=3600');
+            res.redirect(301, rescue);
+            return;
+          }
+        } catch (err) {
+          logger.warn('[botRenderer] legacy slug rescue failed:', err instanceof Error ? err.message : err);
+        }
         const notFoundHtml = build404Html(template);
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.status(404);
@@ -1857,6 +2441,20 @@ export const createBotRenderer = (distPath: string) => {
         res.setHeader('Cache-Control', 'public, max-age=3600');
         res.send(notFoundHtml);
         return;
+      }
+
+      // Decision-gated retired-URL map. These are retired products in aisles we
+      // STILL sell (verified live + in-sitemap inventory-backed targets), so a 301
+      // is a genuine move, not a soft-404. Handled before any DB enrichment: the
+      // path is dead by construction, so nothing that 200s ever pays this lookup.
+      // Paths NOT in the map keep whatever behaviour they already had.
+      {
+        const mapped = RETIRED_URL_301[req.path.replace(/\/+$/, '') || '/'];
+        if (mapped) {
+          res.setHeader('Cache-Control', 'public, max-age=3600');
+          res.redirect(301, mapped);
+          return;
+        }
       }
 
       // DB-backed page enrichment. Product pages must include a visible price and
@@ -1870,6 +2468,8 @@ export const createBotRenderer = (distPath: string) => {
       if (page?.type === 'blog') {
         const exists = await Blog.exists({ slug: page.slug, isPublished: true });
         if (!exists) notFound = true;
+      } else if (page?.type === 'static-learning') {
+        notFound = !isStaticLearningSlug(page.slug);
       } else if (page?.type === 'care-guide') {
         const exists = await CareGuide.exists({ slug: page.slug, isPublished: true });
         if (!exists) notFound = true;
@@ -1893,11 +2493,24 @@ export const createBotRenderer = (distPath: string) => {
           } else {
             // URL had 3+ segments but no product matched — likely a nested category URL
             // e.g. /dog/food--treats/puppy-food where "puppy-food" is a category slug
-            const category = await fetchCategory(page.slug);
+            const petTypeFromPath = req.path.split('/').filter(Boolean)[0] ?? '';
+            const category = await fetchCategory(page.slug, petTypeFromPath);
             if (category) {
-              // Derive petType from first URL segment, pass actual path as canonical
-              const petTypeFromPath = req.path.split('/').filter(Boolean)[0] ?? '';
-              html = buildCategoryHtml(template, category, petTypeFromPath, req.path);
+              // petType derived from the first URL segment; actual path as canonical
+              let nestedProducts: any[] = [];
+              try {
+                nestedProducts = await fetchCollectionProducts({
+                  petType: petTypeFromPath,
+                  categoryId: category._id,
+                  limit: 40,
+                });
+              } catch (err) {
+                logger.warn(
+                  'Nested category product fetch failed:',
+                  err instanceof Error ? err.message : err
+                );
+              }
+              html = buildCategoryHtml(template, category, petTypeFromPath, req.path, nestedProducts);
             } else {
               notFound = true;
             }
@@ -1909,6 +2522,8 @@ export const createBotRenderer = (distPath: string) => {
           } else {
             notFound = true;
           }
+        } else if (page?.type === 'static-learning') {
+          html = buildStaticLearningHtml(template, page.slug);
         } else if (page?.type === 'care-guide') {
           const guide = await fetchCareGuide(page.slug);
           if (guide) {
@@ -1917,8 +2532,43 @@ export const createBotRenderer = (distPath: string) => {
             notFound = true;
           }
         } else if (page?.type === 'category') {
-          const category = await fetchCategory(page.slug);
-          if (category) html = buildCategoryHtml(template, category, (page as any).petType);
+          const category = await fetchCategory(page.slug, (page as any).petType);
+          if (category) {
+            let categoryProducts: any[] = [];
+            try {
+              categoryProducts = await fetchCollectionProducts({
+                petType: (page as any).petType,
+                categoryId: category._id,
+                limit: 40,
+              });
+            } catch (err) {
+              logger.warn(
+                'Category product fetch failed:',
+                err instanceof Error ? err.message : err
+              );
+            }
+            html = buildCategoryHtml(
+              template,
+              category,
+              (page as any).petType,
+              req.path,
+              categoryProducts
+            );
+          }
+        } else if (PET_HUB_PATHS.has(reqPathClean)) {
+          try {
+            const petType = reqPathClean.slice(1);
+            const [petProducts, petCategories] = await Promise.all([
+              fetchCollectionProducts({ petType, limit: 40 }),
+              fetchPetTypeCategories(petType),
+            ]);
+            html = buildPetTypeCollectionHtml(template, reqPathClean, petProducts, petCategories);
+          } catch (err) {
+            logger.warn(
+              'Pet type collection fetch failed:',
+              err instanceof Error ? err.message : err
+            );
+          }
         } else if (page?.type === 'neighborhood') {
           html = buildNeighborhoodHtml(
             template,
@@ -1929,10 +2579,51 @@ export const createBotRenderer = (distPath: string) => {
             page.nearbyAreas,
           );
         } else if (req.path === '/' || req.path === '') {
-          html = buildHomepageHtml(template);
+          let homeProducts: any[] = [];
+          try {
+            homeProducts = await fetchCollectionProducts({ limit: 24 });
+          } catch (err) {
+            logger.warn(
+              'Homepage product fetch failed:',
+              err instanceof Error ? err.message : err
+            );
+          }
+          html = buildHomepageHtml(template, homeProducts);
         } else if (req.path === '/products' || req.path === '/products/') {
           // SSR product listing for Google — inject real product links
           html = await buildProductListHtml(template);
+        } else if (reqPathClean === '/learning') {
+          try {
+            const items = await fetchLearningHubItems();
+            html = buildEducationHubHtml(template, {
+              path: '/learning',
+              heading: 'Pet Care Blog, Guides & Tips',
+              intro:
+                "Expert pet care guides, nutrition tips, and training advice for dogs, cats, birds, fish, and reptiles from the Petshiwu team.",
+              items,
+            });
+          } catch (err) {
+            logger.warn(
+              'Learning hub article fetch failed:',
+              err instanceof Error ? err.message : err
+            );
+          }
+        } else if (reqPathClean === '/care-guides') {
+          try {
+            const items = await fetchCareGuideHubItems();
+            html = buildEducationHubHtml(template, {
+              path: '/care-guides',
+              heading: 'Pet Care Guides',
+              intro:
+                'Comprehensive pet care guides for dogs, cats, birds, fish, reptiles, and small animals.',
+              items,
+            });
+          } catch (err) {
+            logger.warn(
+              'Care-guide hub fetch failed:',
+              err instanceof Error ? err.message : err
+            );
+          }
         } else if (INDEXABLE_LANDING_PATHS.has(reqPathClean)) {
           try {
             const landingProducts = await fetchSeoLandingProducts(reqPathClean);
@@ -1940,6 +2631,19 @@ export const createBotRenderer = (distPath: string) => {
           } catch (err) {
             logger.warn(
               'SEO landing product fetch failed:',
+              err instanceof Error ? err.message : err
+            );
+          }
+        } else if (reqPathClean === '/brand') {
+          html = buildBrandCollectionHtml(template, reqPathClean);
+        } else if (shopBrandForPath(reqPathClean)) {
+          try {
+            const brand = shopBrandForPath(reqPathClean)!;
+            const brandProducts = await fetchBrandProducts(brand.query);
+            html = buildBrandCollectionHtml(template, reqPathClean, brandProducts);
+          } catch (err) {
+            logger.warn(
+              'Brand collection product fetch failed:',
               err instanceof Error ? err.message : err
             );
           }
@@ -1960,6 +2664,22 @@ export const createBotRenderer = (distPath: string) => {
       // Soft 404 fix: return a clean 404 document when a DB-backed page was
       // expected but not found. Do not send the generic shell with a self-canonical.
       if (notFound) {
+        // Retired-product rescue. A catalog rebuild removes an old product, the URL
+        // 404s, but Google keeps ranking it — 233 of the top 500 ranked pages were
+        // 404s at positions 1.3-2.9 (4,946 impressions / 269 clicks a month landing
+        // on a dead end). If the slug is a known legacy alias of a live product,
+        // 301 to that product instead of serving a 404.
+        try {
+          const rescue = await resolveLegacyRedirect(req.path);
+          if (rescue) {
+            res.setHeader('Cache-Control', 'public, max-age=3600');
+            res.redirect(301, rescue);
+            return;
+          }
+        } catch (err) {
+          logger.warn('[botRenderer] legacy slug rescue failed:',
+            err instanceof Error ? err.message : err);
+        }
         res.status(404);
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
@@ -1999,7 +2719,7 @@ export const createBotRenderer = (distPath: string) => {
       if (bot) res.setHeader('X-Bot-Rendered', 'error');
       let errorHtml = build404Html(template);
       errorHtml = errorHtml.replace(/<script[^>]+type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>\s*/gi, '');
-      errorHtml = errorHtml.replace(/<title>[^<]*<\/title>/i, '<title>Temporarily Unavailable | Petshiwu</title>');
+      errorHtml = errorHtml.replace(/<title[^>]*>[^<]*<\/title>/i, '<title>Temporarily Unavailable | Petshiwu</title>');
       res.send(errorHtml);
       return;
     }
