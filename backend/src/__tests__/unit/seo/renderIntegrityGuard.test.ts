@@ -183,18 +183,27 @@ describe('render integrity guard ($& corruption class)', () => {
     });
 
     test('PROOF OF TEETH — the OLD string-form replacement FAILS these assertions', () => {
-      // Reproduce the exact pre-fix shape on the image_src branch of injectOgTags.
       const esc = (s: string) =>
         s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+      // TARGETING FIX (Oct 8): this test previously targeted an `<link rel="image_src">`
+      // tag that MINIMAL_TEMPLATE does NOT contain - the regex matched nothing, replace()
+      // returned the template unchanged, and the assertion below FAILED. That made the
+      // "proof of teeth" vacuously broken: it failed for the wrong reason and could never
+      // have proved the guard works. Target the og:image meta tag the template ACTUALLY has,
+      // which is the same shape the real ogTags.ts upsertMeta path operates on.
       const broken = legacyStringReplace(
         MINIMAL_TEMPLATE,
-        /(<link\b[^>]*rel=["']image_src["'][^>]*href=["'])[^"']*(["'][^>]*>)/i,
+        /(<meta\b[^>]*property=["']og:image["'][^>]*content=["'])[^"']*(["'])/i,
         `$1${esc(DOLLAR_AMP_URL)}$2`
       );
-      // The corrupted output contains an injected tag inside the attribute — exactly the
+      // The corrupted output contains an injected tag inside the attribute - exactly the
       // signature the guard above forbids. If this ever stops being true, the guard has
       // lost its teeth and the test file must be revisited.
       expect(/="[^"]*<(link|head|div|meta)\b/i.test(broken)).toBe(true);
+      // Prove the corruption is attributable to the `$&` expansion, not a bad regex:
+      // the raw `$&` in the stored URL is what splices the matched tag into the output.
+      expect(broken).not.toBe(MINIMAL_TEMPLATE);
     });
   });
 
