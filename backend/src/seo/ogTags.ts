@@ -55,23 +55,19 @@ function upsertMeta(html: string, attr: 'property' | 'name', key: string, conten
     `(<meta\\b[^>]*\\b${attrRe}[^>]*\\bcontent=["'])[^"']*(["'][^>]*>)`,
     'i'
   );
+  // NOTE: replacements use the FUNCTION form, never a string with $1/$2.
+  // A stored value containing a literal `$&` would otherwise expand to the matched
+  // substring (the whole `<meta ...>` tag) and be spliced into the attribute value,
+  // corrupting the head. See renderIntegrityGuard.test.ts for the regression proof.
   if (re.test(html)) {
-    // Use the function form of replace. A string replacement expands `$&` found
-    // in the *content* (e.g. a Scene7 image URL containing `$sclp-prd-main_large$&fmt=`),
-    // which injects the whole matched tag into the attribute value. The function form
-    // disables all `$` expansion, so the capture groups must be interpolated
-    // explicitly — `$1`/`$2` are NOT expanded inside a function replacement.
-    return html.replace(re, (_m: string, p1: string, p2: string) => `${p1}${esc(content)}${p2}`);
+    return html.replace(re, (_m, p1: string, p2: string) => `${p1}${esc(content)}${p2}`);
   }
   const reContentFirst = new RegExp(
     `(<meta\\b[^>]*\\bcontent=["'])[^"']*(["'][^>]*\\b${attrRe}[^>]*>)`,
     'i'
   );
   if (reContentFirst.test(html)) {
-    return html.replace(
-      reContentFirst,
-      (_m: string, p1: string, p2: string) => `${p1}${esc(content)}${p2}`
-    );
+    return html.replace(reContentFirst, (_m, p1: string, p2: string) => `${p1}${esc(content)}${p2}`);
   }
   return html.replace(
     /<\/head>/i,
@@ -115,7 +111,7 @@ export function injectOgTags(
   } else {
     out = out.replace(
       /(<link\b[^>]*rel=["']image_src["'][^>]*href=["'])[^"']*(["'][^>]*>)/i,
-      (_m: string, p1: string, p2: string) => `${p1}${esc(shareImage)}${p2}`
+      (_m, p1: string, p2: string) => `${p1}${esc(shareImage)}${p2}`
     );
   }
   return out;
