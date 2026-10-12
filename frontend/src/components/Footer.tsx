@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram, Mail, MapPin, Phone } from 'lucide-react';
+import { Facebook, Instagram, Mail, MapPin, Phone, Youtube } from 'lucide-react';
 import api from '@/services/api';
 import { ORDERS_OPEN_LABEL, areOrdersOpen } from '@/config/launch';
 import { ORDERING_PAUSED, ORDERING_PAUSED_HEADLINE } from '@/config/ordering';
@@ -45,7 +45,7 @@ const Footer = () => {
             </p>
             <div className="flex gap-4">
               {FOOTER_SOCIAL.map((item) => {
-                const Icon = item.network === 'facebook' ? Facebook : Instagram;
+                const Icon = item.network === 'facebook' ? Facebook : item.network === 'youtube' ? Youtube : Instagram;
                 return (
                   <a
                     key={item.href}
