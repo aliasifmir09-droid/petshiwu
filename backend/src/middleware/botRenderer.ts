@@ -1766,7 +1766,8 @@ export const buildHomepageHtml = (template: string, products: any[] = []): strin
       },
     },
     sameAs: [
-      'https://www.facebook.com/petshiwu',
+      'https://www.facebook.com/1386014131242363',
+      'https://www.youtube.com/@petshiwuinc',
       'https://www.instagram.com/petshiwu',
     ],
     foundingDate: '2024',
@@ -1820,7 +1821,8 @@ export const buildHomepageHtml = (template: string, products: any[] = []): strin
       { '@type': 'Borough', name: 'Staten Island' },
     ],
     sameAs: [
-      'https://www.facebook.com/petshiwu',
+      'https://www.facebook.com/1386014131242363',
+      'https://www.youtube.com/@petshiwuinc',
       'https://www.instagram.com/petshiwu',
     ],
   };
