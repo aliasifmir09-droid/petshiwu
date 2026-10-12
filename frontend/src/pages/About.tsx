@@ -40,7 +40,8 @@ const About = () => {
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
           sameAs: [
-            'https://www.facebook.com/petshiwu',
+            'https://www.facebook.com/1386014131242363',
+            'https://www.youtube.com/@petshiwuinc',
             'https://www.instagram.com/petshiwu'
           ]
         }}
