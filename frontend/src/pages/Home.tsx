@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { productService } from '@/services/products';
+import { productService, ProductFilters } from '@/services/products';
 import ProductCard from '@/components/ProductCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import HeroSlideshow from '@/components/HeroSlideshow';
@@ -27,50 +27,64 @@ import { useMemo, useState } from 'react';
 import { hasImageFailed } from '@/hooks/useImageLoadTracker';
 import { generateProductUrl } from '@/utils/productUrl';
 import { useAuthStore } from '@/stores/authStore';
+import { Product } from '@/types';
 
-const TodaysDeals = () => {
+const visibleProducts = (products: Product[] | undefined) => {
+  if (!products) return [];
+  return products.filter((product) => {
+    const productId = product._id ? String(product._id) : null;
+    return Boolean(productId && !hasImageFailed(productId));
+  });
+};
+
+const ProductGrid = ({
+  title,
+  subtitle,
+  href,
+  linkLabel,
+  filters,
+  queryKey,
+  limit = 4,
+  wide = false,
+}: {
+  title: string;
+  subtitle: string;
+  href: string;
+  linkLabel: string;
+  filters: ProductFilters;
+  queryKey: string;
+  limit?: number;
+  wide?: boolean;
+}) => {
   const { data, isLoading } = useQuery({
-    queryKey: ['products', 'hills-deals'],
-    queryFn: () => productService.getProducts({ brand: "Hill's Science Diet", limit: 6, inStock: true }),
+    queryKey: ['products', queryKey],
+    queryFn: () => productService.getProducts({ ...filters, limit }),
     staleTime: 5 * 60 * 1000,
   });
-
-  const products = data?.data || [];
+  const products = visibleProducts(data?.data);
   if (!isLoading && products.length === 0) return null;
 
   return (
-    <section className="py-14 bg-white">
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A] leading-tight">
-              Hill's Science Diet
-            </h2>
-            <p className="text-sm text-slate-500 mt-1">
-              Vet-recommended nutrition
-            </p>
-          </div>
-          <Link
-            to="/brand/hills-science-diet"
-            className="text-sm font-semibold text-[#1E3A8A] hover:underline"
-          >
-            Shop all Hill's
-          </Link>
+    <div>
+      <div className="flex items-end justify-between gap-3 mb-4">
+        <div>
+          <h2 className="text-xl md:text-2xl font-extrabold text-[#1E3A8A] leading-tight">{title}</h2>
+          <p className="text-sm text-slate-500 mt-0.5">{subtitle}</p>
         </div>
-
-        {isLoading ? (
-          <LoadingSpinner size="lg" />
-        ) : (
-          <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide">
-            {products.map((product, index) => (
-                <div key={product._id} className="flex-shrink-0 w-56 md:w-64 relative">
-                  <ProductCard product={product} hideCartButton={false} index={index} />
-                </div>
-            ))}
-          </div>
-        )}
+        <Link to={href} className="shrink-0 text-sm font-semibold text-[#1E3A8A] hover:underline">
+          {linkLabel}
+        </Link>
       </div>
-    </section>
+      {isLoading ? (
+        <LoadingSpinner size="md" />
+      ) : (
+        <div className={wide ? 'grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4' : 'grid grid-cols-2 gap-3 md:gap-4'}>
+          {products.map((product, index) => (
+            <ProductCard key={String(product._id)} product={product} hideCartButton={false} index={index} />
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 // ─────────────────────────────────────────────────────────────────────────────
@@ -87,13 +101,10 @@ const Home = () => {
     refetchOnMount: false,
   });
 
-  const filteredFeaturedProducts = useMemo(() => {
-    if (!featuredProducts?.data) return [];
-    return featuredProducts.data.filter((product) => {
-      const productId = product._id ? String(product._id) : null;
-      return productId && !hasImageFailed(productId);
-    });
-  }, [featuredProducts?.data]);
+  const filteredFeaturedProducts = useMemo(
+    () => visibleProducts(featuredProducts?.data),
+    [featuredProducts?.data]
+  );
 
   return (
     <div className="relative bg-white">
@@ -190,30 +201,23 @@ const Home = () => {
 
       <HomeHeroSlogans />
 
-      <HomeWelcomeTrust />
-
       <ShopByPet />
 
-      <CategoryIcons />
-
-      <TrustBadges />
-
-      <HomeFeaturedLearning />
-
-      <OrdersOpenBanner />
-
-      <div className="mt-4">
-        <HeroSlideshow />
-      </div>
-
-      <TodaysDeals />
-
-      <section className="py-16 bg-[#F7F4EE] text-center">
+      <section className="bg-white pb-6">
         <div className="container mx-auto px-4 lg:px-8">
-          <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-[#1E3A8A]/60 mb-2">Featured</p>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-[#1E3A8A] mb-8">
-            Top picks for dogs and cats
-          </h2>
+          <div className="flex items-end justify-between gap-3 mb-4">
+            <div>
+              <h2 className="text-xl md:text-2xl font-extrabold text-[#1E3A8A]">Top picks for dogs and cats</h2>
+              <p className="text-sm text-slate-500 mt-0.5">Prices, ratings, and add to cart. No subscription.</p>
+            </div>
+            <Link
+              to="/products?featured=true"
+              className="shrink-0 inline-flex items-center gap-1 text-sm font-semibold text-[#1E3A8A] hover:underline"
+            >
+              Shop all
+              <ChevronRight size={16} />
+            </Link>
+          </div>
           {isLoading ? (
             <LoadingSpinner size="lg" />
           ) : filteredFeaturedProducts.length === 0 ? (
@@ -221,28 +225,59 @@ const Home = () => {
               Browse the shop — featured picks from {CATALOG_BRANDS_SHORT} will appear here.
             </p>
           ) : (
-            <div className="flex overflow-x-auto gap-4 md:gap-5 pb-4 scrollbar-hide">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {filteredFeaturedProducts.map((product, index) => (
-                <div key={product._id} className="flex-shrink-0 w-56 md:w-64">
-                  <ProductCard product={product} hideCartButton={false} index={index} />
-                </div>
+                <ProductCard key={product._id} product={product} hideCartButton={false} index={index} priority={index < 4} />
               ))}
             </div>
           )}
-          <div className="mt-8">
-            <Link
-              to="/products?featured=true"
-              className="inline-flex items-center gap-2 bg-[#1E3A8A] text-white px-7 py-3 rounded-full font-semibold shadow-sm hover:bg-[#163074] hover:shadow-md transition-all"
-            >
-              <span>Shop all products</span>
-              <ChevronRight size={20} />
-            </Link>
-          </div>
         </div>
       </section>
 
+      <section className="bg-[#F7F4EE] py-8">
+        <div className="container mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-8">
+          <ProductGrid
+            title="Popular for dogs"
+            subtitle="In stock for same-day NYC"
+            href="/products?petType=dog"
+            linkLabel="Shop dogs"
+            queryKey="home-dogs"
+            filters={{ petType: 'dog', inStock: true, sort: 'rating' }}
+          />
+          <ProductGrid
+            title="Popular for cats"
+            subtitle="Food, litter, and everyday care"
+            href="/products?petType=cat"
+            linkLabel="Shop cats"
+            queryKey="home-cats"
+            filters={{ petType: 'cat', inStock: true, sort: 'rating' }}
+          />
+        </div>
+      </section>
+
+      <section className="bg-white py-8">
+        <div className="container mx-auto px-4 lg:px-8">
+          <ProductGrid
+            title="Hill's Science Diet"
+            subtitle="Vet-recommended nutrition"
+            href="/brand/hills-science-diet"
+            linkLabel="Shop all Hill's"
+            queryKey="hills-deals"
+            filters={{ brand: "Hill's Science Diet", inStock: true }}
+            limit={4}
+            wide
+          />
+        </div>
+      </section>
+
+      <CategoryIcons />
+
+      <TrustBadges />
+
+      <HomeWelcomeTrust />
+
       {/* Brands We Carry */}
-      <section className="py-16 bg-white">
+      <section className="py-10 bg-white">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -307,6 +342,14 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      <OrdersOpenBanner />
+
+      <HomeFeaturedLearning />
+
+      <div className="py-6 bg-white">
+        <HeroSlideshow />
+      </div>
 
       <TonightPromiseCard />
 

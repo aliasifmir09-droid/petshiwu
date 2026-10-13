@@ -50,15 +50,12 @@ const ShopByPet = () => {
 
   return (
     <section className="bg-white">
-      <div className="container mx-auto px-3 sm:px-6 lg:px-8 py-4 md:py-12">
-        <p className="md:hidden text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
-          Shop by pet
-        </p>
-        <div className="hidden md:block text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1E3A8A] mb-2">
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8 py-3 md:py-4">
+        <div className="flex items-baseline justify-between mb-2 md:mb-3">
+          <h2 className="text-lg md:text-xl font-extrabold text-[#1E3A8A]">
             Shop by pet
           </h2>
-          <p className="text-gray-500 text-base max-w-2xl mx-auto">Dogs, cats, birds, fish, reptiles, and small pets.</p>
+          <p className="hidden sm:block text-sm text-slate-500">Dogs, cats, birds, fish, reptiles, and small pets.</p>
         </div>
 
         {/* Mobile: all six pets on the first screen */}
@@ -113,7 +110,7 @@ const ShopByPet = () => {
           )}
           <div
             ref={petTypesScrollRef}
-            className="flex justify-center items-center gap-8 overflow-x-auto pb-6 pt-6 scrollbar-hide snap-x px-8"
+            className="flex justify-start items-center gap-6 overflow-x-auto pb-2 pt-1 scrollbar-hide snap-x"
           >
             {PET_CATEGORIES.map((category) => (
               <button
@@ -123,12 +120,12 @@ const ShopByPet = () => {
                 onClick={() => goToPet(category.slug)}
               >
                 <div className="flex flex-col items-center gap-3">
-                  <div className="relative w-32 h-32 rounded-full bg-[#1E3A8A] p-[3px] group-hover:scale-[1.04] transition-transform shadow-md ring-4 ring-[#1E3A8A]/5">
+                  <div className="relative w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-[#1E3A8A] p-[2px] group-hover:scale-[1.04] transition-transform shadow-sm">
                     <div className="w-full h-full rounded-full overflow-hidden bg-white">
                       <img src={category.image} alt={category.name} className="w-full h-full object-cover" loading="lazy" />
                     </div>
                   </div>
-                  <p className="text-lg font-bold text-gray-800 group-hover:text-[#1E3A8A] transition-colors">{category.name}</p>
+                  <p className="text-sm font-bold text-gray-800 group-hover:text-[#1E3A8A] transition-colors">{category.name}</p>
                 </div>
               </button>
             ))}
