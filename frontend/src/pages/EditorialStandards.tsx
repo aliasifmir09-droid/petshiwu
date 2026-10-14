@@ -65,7 +65,7 @@ const EditorialStandards = () => {
             to="/learning/next-day-pet-delivery-within-50-miles-of-queens"
             className="text-[#1E3A8A] font-semibold hover:underline"
           >
-            next-day delivery guide
+            NYC same-day delivery guide
           </Link>
           , the{' '}
           <Link to="/learning/fall-2026-pet-care-playbook" className="text-[#1E3A8A] font-semibold hover:underline">

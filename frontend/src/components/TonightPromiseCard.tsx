@@ -12,6 +12,7 @@ import {
   isValidZip,
   lookupZip,
   normalizeZip,
+  SAME_DAY_PRODUCT_ELIGIBILITY,
   saveLastZip,
   type ZipLookupResult,
 } from '@/utils/deliveryZip';
@@ -150,10 +151,16 @@ const TonightPromiseCard = ({ variant = 'hero', shopHref = '/products' }: Tonigh
   }
 
   if (variant === 'pdp') {
+    const eligibleHere = result?.speed === 'same-day' && !countdown.passed;
     return (
       <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
         <p className="text-sm font-semibold text-[#1E3A8A]">
-          {result?.headline || 'Check delivery for your ZIP'}
+          {eligibleHere && result
+            ? `This product is eligible for same-day delivery in ${result.area}`
+            : SAME_DAY_PRODUCT_ELIGIBILITY}
+        </p>
+        <p className="text-xs text-slate-600 mt-0.5">
+          {result?.headline || 'Check your ZIP to confirm this product can arrive today.'}
         </p>
         <p className="text-xs text-slate-600 mt-0.5">{cutoffLine}</p>
         <p className="text-xs text-slate-500 mt-1">{status}</p>

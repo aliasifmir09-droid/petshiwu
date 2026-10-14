@@ -439,8 +439,9 @@ PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
 - FREE shipping automatically applied on all orders over $49 — no code needed
 - NYC (Queens, Brooklyn, Manhattan, Bronx, Staten Island): same-day if ordered by 3 PM weekdays (1 PM weekends), otherwise next day
 - Same-day delivery: all five NYC boroughs — order by 3 PM EST weekdays (1 PM weekends)
-- Next-day delivery: every ZIP within 50 miles of Queens (NY, NJ, CT)
-- Nationwide shipping is not available yet — checkout will refuse addresses outside that zone
+- In-stock products are eligible for same-day delivery in NYC
+- Delivery outside New York City is closed, including New Jersey, Connecticut, and New York suburbs
+- Nationwide shipping is not available yet — checkout will refuse addresses outside NYC
 - Checkout is open now: guests and accounts can pay with PayPal, Apple Pay, Google Pay, or card
 - Tracking number emailed immediately after shipment
 - USA only — no international shipping
@@ -492,7 +493,7 @@ const CUSTOMER_SERVICE_QA = `
 PETSHIWU CUSTOMER SERVICE EXPERT Q&A:
 
 Q: How do I place an order?
-A: Browse our 4,000+ products, add items to your cart, and check out as a guest or with a free account. Checkout is open now. We accept all major credit cards, PayPal, Apple Pay, and Google Pay. You'll receive a confirmation email the moment your order is placed. We currently deliver same-day in NYC and next-day within 50 miles of Queens.
+A: Browse our 4,000+ products, add items to your cart, and check out as a guest or with a free account. Checkout is open now. We accept all major credit cards, PayPal, Apple Pay, and Google Pay. You'll receive a confirmation email the moment your order is placed. In-stock products are eligible for same-day delivery in NYC. Delivery outside New York City is closed.
 
 Q: Do I need an account to order?
 A: No — guest checkout is available. But a free account at petshiwu.com gives you order tracking, saved pet profiles, wishlist access, personalized recommendations, and member deals. It takes 30 seconds to create.

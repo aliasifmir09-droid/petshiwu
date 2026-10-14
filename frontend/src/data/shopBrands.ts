@@ -33,7 +33,7 @@ export const BRAND_INDEX_META = {
   description:
     "Shop Hill's, Merrick, Purina, Blue Buffalo, Royal Canin, and more at Petshiwu. In stock. Free shipping over $49. No autoship. Nationwide shipping soon.",
   intro:
-    "Choose a brand and shop in-stock food, treats, and supplies. Same-day in NYC. Next-day within 50 miles of Queens. Nationwide shipping soon. No autoship.",
+    "Choose a brand and shop in-stock food, treats, and supplies. Same-day in NYC. Eligible for same-day delivery. Nationwide shipping soon. No autoship.",
 };
 
 export const SHOP_BRANDS: ShopBrand[] = [

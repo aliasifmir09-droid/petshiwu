@@ -20,13 +20,13 @@ describe('checkoutFlow', () => {
     expect(isCheckoutDeliveryReady({ ...nycAddress, street: '' }, true)).toBe(false);
   });
 
-  test('50-mile metro ZIPs unlock checkout; far ZIPs stay blocked', () => {
+  test('tri-state ZIPs stay blocked; NYC ZIPs unlock checkout', () => {
     expect(
       isCheckoutDeliveryReady(
         { ...nycAddress, city: 'Hicksville', zipCode: '11801' },
         false
       )
-    ).toBe(true);
+    ).toBe(false);
     expect(
       isCheckoutDeliveryReady(
         { ...nycAddress, city: 'Jamaica', zipCode: '11432' },
@@ -38,13 +38,13 @@ describe('checkoutFlow', () => {
         { ...nycAddress, city: 'Hoboken', state: 'NJ', zipCode: '07030' },
         false
       )
-    ).toBe(true);
+    ).toBe(false);
     expect(
       isCheckoutDeliveryReady(
         { ...nycAddress, city: 'Greenwich', state: 'CT', zipCode: '06830' },
         false
       )
-    ).toBe(true);
+    ).toBe(false);
     expect(
       isCheckoutDeliveryReady(
         { ...nycAddress, city: 'New Haven', state: 'CT', zipCode: '06511' },

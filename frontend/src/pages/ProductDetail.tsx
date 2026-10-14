@@ -28,6 +28,7 @@ import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import ProductVariantPicker from '@/components/ProductVariantPicker';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
+import { SAME_DAY_PRODUCT_ELIGIBILITY } from '@/utils/deliveryZip';
 
 // Lazy load heavy dependencies
 const RecentlyViewed = lazy(() => import('@/components/RecentlyViewed'));
@@ -853,9 +854,17 @@ const ProductDetail = () => {
           {/* Stock Availability — no unit counts until inventory is maintained */}
           <div className="mb-4">
             {isReadyToShip ? (
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-                <span className="text-green-700 font-medium">{inStockLabel(true)}</span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                  <span className="text-green-700 font-medium">{inStockLabel(true)}</span>
+                </div>
+                <p className="mt-2 text-sm font-semibold text-[#1E3A8A]">
+                  {SAME_DAY_PRODUCT_ELIGIBILITY}
+                </p>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  This selection is eligible for same-day delivery across the five boroughs when you order by cutoff.
+                </p>
               </div>
             ) : (
               <div className="flex items-center gap-2">
@@ -1396,7 +1405,7 @@ const ProductDetail = () => {
           </button>
           {isReadyToShip ? (
             <p className="text-[11px] text-slate-500 text-center mt-1.5">
-              Free shipping over $49 · no autoship
+              {SAME_DAY_PRODUCT_ELIGIBILITY} · free shipping over $49
             </p>
           ) : null}
         </div>

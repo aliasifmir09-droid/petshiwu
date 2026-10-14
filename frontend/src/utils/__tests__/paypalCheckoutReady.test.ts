@@ -30,10 +30,22 @@ describe('paypalCheckoutBlocker', () => {
     ).toMatch(/delivery address/i);
   });
 
-  test('blocks ZIPs outside NYC and the 50-mile zone', () => {
+  test('blocks ZIPs outside New York City', () => {
     expect(
       paypalCheckoutBlocker({
         shippingAddress: { ...nyc, city: 'San Francisco', state: 'CA', zipCode: '94105' },
+        guestEmail: 'ada@example.com',
+      })
+    ).toBe(OUT_OF_AREA_DELIVERY_MESSAGE);
+    expect(
+      paypalCheckoutBlocker({
+        shippingAddress: { ...nyc, city: 'Hoboken', state: 'NJ', zipCode: '07030' },
+        guestEmail: 'ada@example.com',
+      })
+    ).toBe(OUT_OF_AREA_DELIVERY_MESSAGE);
+    expect(
+      paypalCheckoutBlocker({
+        shippingAddress: { ...nyc, city: 'Hicksville', state: 'NY', zipCode: '11801' },
         guestEmail: 'ada@example.com',
       })
     ).toBe(OUT_OF_AREA_DELIVERY_MESSAGE);

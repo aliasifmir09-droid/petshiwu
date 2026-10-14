@@ -13,6 +13,7 @@ import Toast from '@/components/Toast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { availableCartStock } from '@/utils/cartStock';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
+import { SAME_DAY_PRODUCT_ELIGIBILITY } from '@/utils/deliveryZip';
 
 interface QuickViewModalProps {
   productSlug: string;
@@ -217,8 +218,9 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
                 {isReadyToShip ? (
                   <>
                     <p className="text-green-700 font-medium">{inStockLabel(true)}</p>
+                    <p className="text-sm font-semibold text-[#1E3A8A]">{SAME_DAY_PRODUCT_ELIGIBILITY}</p>
                     <p className="text-xs text-slate-500">
-                      Free shipping over $49 · no autoship
+                      This selection is eligible for same-day delivery in NYC. Free shipping over $49.
                     </p>
                   </>
                 ) : (
