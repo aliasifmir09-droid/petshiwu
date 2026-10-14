@@ -32,7 +32,7 @@ import {
 } from '../services/paypalService';
 import { calculateTrustedOrderPricing } from '../services/orderPricingService';
 import { isReusableCoupon, normalizeCouponCode } from '../services/couponService';
-import { isDeliverableShippingAddress, OUT_OF_AREA_DELIVERY_MESSAGE } from '../utils/nycDelivery';
+import { DeliveryAreaError } from '../utils/deliveryLane';
 import { firstInStockVariantSku, plannedStock } from '../utils/productStock';
 import {
   getOrCreateStripeCustomer,
@@ -110,15 +110,6 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       });
     }
 
-    // NYC same-day only. Tri-state next-day is closed.
-    if (!isDeliverableShippingAddress(shippingAddress.state, shippingAddress.zipCode)) {
-      return res.status(400).json({
-        success: false,
-        message: OUT_OF_AREA_DELIVERY_MESSAGE,
-        errors: [OUT_OF_AREA_DELIVERY_MESSAGE],
-      });
-    }
-
     // PayPal can retry callbacks. Return the existing order instead of
     // decrementing inventory or creating a duplicate order.
     if (paymentMethod === 'paypal' && req.body.paypalOrderId) {
@@ -172,7 +163,9 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         typeof couponCode === 'string' ? couponCode : undefined,
         Number(donationAmount) || 0,
         session,
-        typeof shippingAddress?.state === 'string' ? shippingAddress.state : undefined
+        typeof shippingAddress?.state === 'string' ? shippingAddress.state : undefined,
+        typeof shippingAddress?.zipCode === 'string' ? shippingAddress.zipCode : undefined,
+        typeof shippingAddress?.country === 'string' ? shippingAddress.country : undefined
       );
       const normalizedItems = trustedPricing.items;
 
@@ -539,6 +532,9 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
     } catch (error: unknown) {
       if (session) {
         await session.abortTransaction();
+      }
+      if (error instanceof DeliveryAreaError) {
+        return res.status(400).json({ success: false, message: error.message, errors: [error.message] });
       }
       const errorMessage = error instanceof Error ? error.message : String(error);
       if (errorMessage.includes('not found') || errorMessage.includes('out of stock') || errorMessage.includes('Insufficient stock')) {
@@ -1647,9 +1643,6 @@ export const createPayPalCheckoutOrder = async (req: AuthRequest, res: Response,
     if (!isCompleteShippingAddress(shippingAddress)) {
       return res.status(400).json({ success: false, message: 'A complete shipping address is required before starting PayPal checkout.' });
     }
-    if (!isDeliverableShippingAddress(shippingAddress.state, shippingAddress.zipCode)) {
-      return res.status(400).json({ success: false, message: OUT_OF_AREA_DELIVERY_MESSAGE });
-    }
     const isGuest = !req.user?._id;
     const customerEmail = isGuest ? (guestEmail || '').trim() : undefined;
     if (isGuest && !customerEmail) {
@@ -1661,7 +1654,9 @@ export const createPayPalCheckoutOrder = async (req: AuthRequest, res: Response,
       typeof couponCode === 'string' ? couponCode : undefined,
       Number(donationAmount) || 0,
       undefined,
-      typeof shippingAddress?.state === 'string' ? shippingAddress.state : undefined
+      typeof shippingAddress?.state === 'string' ? shippingAddress.state : undefined,
+      typeof shippingAddress?.zipCode === 'string' ? shippingAddress.zipCode : undefined,
+      typeof shippingAddress?.country === 'string' ? shippingAddress.country : undefined
     );
     if (pricing.totalPrice < 0.5) {
       return res.status(400).json({ success: false, message: 'Order total must be at least $0.50' });
@@ -1783,6 +1778,9 @@ export const createPayPalCheckoutOrder = async (req: AuthRequest, res: Response,
       throw error;
     }
   } catch (error: unknown) {
+    if (error instanceof DeliveryAreaError) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
     logger.error('PayPal order creation error:', error);
     const message = error instanceof Error ? error.message : 'Failed to create PayPal order';
     return res.status(502).json({ success: false, message });

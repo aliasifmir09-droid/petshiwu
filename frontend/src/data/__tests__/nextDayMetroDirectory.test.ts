@@ -25,8 +25,8 @@ describe('next-day ZIP directory', () => {
     expect(app).toContain('/delivery-zips');
     expect(page).toContain('url="/delivery-zips"');
     expect(page).toContain('Same-day delivery in New York City');
-    expect(page).toMatch(/Delivery outside/);
-    expect(page).toMatch(/Nationwide shipping soon/);
+    expect(page).toMatch(/NYC same-day only/);
+    expect(page).toMatch(/Nationwide shipping in 3-5 business days on shipped items/);
     expect(page).toMatch(/eligible for same-day delivery/i);
     expect(page).not.toMatch(/do not claim/i);
     expect(page).not.toContain('NEXT_DAY_ZIP_COUNT');

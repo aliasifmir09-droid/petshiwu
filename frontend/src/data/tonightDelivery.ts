@@ -18,7 +18,7 @@ export const TONIGHT = {
 export const TONIGHT_STEPS = [
   {
     title: 'Enter your ZIP',
-    text: 'See if we deliver to you now. Nationwide shipping opens in a few days.',
+    text: 'See if we deliver to you now. Shipped items go nationwide in 3-5 business days.',
   },
   {
     title: 'Order before cutoff',

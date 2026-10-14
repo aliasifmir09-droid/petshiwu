@@ -13,6 +13,13 @@ import OrdersHoldNotice from '@/components/OrdersHoldNotice';
 import { ORDERING_PAUSED } from '@/config/ordering';
 import { TAX_RATE } from '@/config/constants';
 import { amountUntilFreeShipping, shippingCostForSubtotal } from '@/utils/orderTotals';
+import {
+  cartShipsNationwide,
+  LOCAL_ITEM_NATIONWIDE_MESSAGE,
+  localItemsBlockedOutsideNyc,
+  productDeliveryPromise,
+} from '@/utils/deliveryLane';
+import { useSavedDeliveryZip } from '@/hooks/useSavedDeliveryZip';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import cartService from '@/services/cart';
 import { useToast } from '@/hooks/useToast';
@@ -103,6 +110,7 @@ const Cart = () => {
   }
 
   const { toast, showToast, hideToast } = useToast();
+  const savedZip = useSavedDeliveryZip();
 
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
@@ -228,10 +236,12 @@ const Cart = () => {
     }
   })();
 
-  const shipping = shippingCostForSubtotal(subtotal);
+  const nationwideOrder = cartShipsNationwide(items, { zipCode: savedZip, country: 'USA' });
+  const localBlocked = localItemsBlockedOutsideNyc(items, { zipCode: savedZip, country: 'USA' });
+  const shipping = shippingCostForSubtotal(subtotal, false, nationwideOrder);
   const tax = subtotal * TAX_RATE; // Estimate only — exact state tax (NY 8.875% / NJ 6.625% / CT 6.35%) is applied at checkout.
   const total = subtotal + shipping + tax;
-  const remainingForFreeShipping = amountUntilFreeShipping(subtotal);
+  const remainingForFreeShipping = nationwideOrder ? 0 : amountUntilFreeShipping(subtotal);
 
   const handleConfirmAction = () => {
     try {
@@ -283,6 +293,16 @@ const Cart = () => {
               <div className="mb-6">
                 <OrdersHoldNotice variant="compact" />
               </div>
+              {localBlocked && (
+                <p className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  {LOCAL_ITEM_NATIONWIDE_MESSAGE}
+                </p>
+              )}
+              {nationwideOrder && (
+                <p className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900">
+                  Shipped items arrive in 3-5 business days. Flat $7 shipping.
+                </p>
+              )}
 
               <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">Shopping Cart</h1>
@@ -333,6 +353,7 @@ const Cart = () => {
                           <h3 className="font-semibold mb-1">{name}</h3>
                         </Link>
                         {brand && <p className="text-sm text-gray-600 mb-2">{brand}</p>}
+                        <p className="text-sm text-gray-600 mb-2">{productDeliveryPromise(item?.product, savedZip)}</p>
                         {item?.product?.inStock === false && (
                           <p className="text-sm font-medium text-red-600 mb-2">
                             ⚠️ Out of stock - please remove before checkout

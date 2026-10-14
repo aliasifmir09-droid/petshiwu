@@ -22,7 +22,7 @@ const NextDayDeliveryZips = () => {
     <div className="min-h-screen bg-white">
       <SEO
         title="NYC Same-Day Delivery | Petshiwu"
-        description="Petshiwü delivers same-day in New York City — Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. In-stock products are eligible for same-day delivery. Nationwide shipping opens in a few days."
+        description="Petshiwü delivers same-day in New York City — Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. In-stock products are eligible for same-day delivery. Shipped items go nationwide in 3-5 business days."
         url="/delivery-zips"
         keywords="NYC same-day pet delivery, Queens pet delivery, Brooklyn pet delivery, Manhattan pet delivery"
       />
@@ -38,8 +38,8 @@ const NextDayDeliveryZips = () => {
         <p className="text-lg text-gray-700 mb-6 max-w-3xl">
           We deliver same-day across Manhattan, Brooklyn, Queens, the Bronx, and Staten Island
           when you order by {TONIGHT.weekdayCutoff} weekdays or {TONIGHT.weekendCutoff} weekends.
-          In-stock products are {SAME_DAY_PRODUCT_ELIGIBILITY.toLowerCase()}. Delivery outside
-          New York City is closed. Nationwide shipping soon.{' '}
+          In-stock local products are {SAME_DAY_PRODUCT_ELIGIBILITY.toLowerCase()}. Local items
+          are NYC same-day only. Nationwide shipping in 3-5 business days on shipped items.{' '}
           <Link
             to="/learning/next-day-pet-delivery-within-50-miles-of-queens"
             className="text-[#1E3A8A] font-semibold hover:underline"

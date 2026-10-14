@@ -1,4 +1,13 @@
-import { isDeliverableShippingAddress } from '@/utils/deliveryZip';
+import { isDeliverableShippingAddress, isValidZip } from '@/utils/deliveryZip';
+import {
+  cartShipsNationwide,
+  isUnitedStatesCountry,
+  localItemsBlockedOutsideNyc,
+} from '@/utils/deliveryLane';
+
+type CheckoutCartItem = {
+  product?: { tags?: string[]; deliveryLane?: string; name?: string } | null;
+};
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -15,7 +24,8 @@ export type CheckoutShippingFields = {
 
 export const isCheckoutDeliveryReady = (
   shipping: CheckoutShippingFields,
-  isAuthenticated: boolean
+  isAuthenticated: boolean,
+  items: CheckoutCartItem[] = [{ product: { tags: [] } }]
 ): boolean => {
   if (!shipping.firstName?.trim() || !shipping.lastName?.trim()) return false;
   if (!shipping.phone?.trim()) return false;
@@ -27,7 +37,13 @@ export const isCheckoutDeliveryReady = (
   ) {
     return false;
   }
-  if (!isDeliverableShippingAddress(shipping.state, shipping.zipCode)) return false;
+  if (!isValidZip(shipping.zipCode)) return false;
+  const address = { state: shipping.state, zipCode: shipping.zipCode, country: 'USA' };
+  const nyc = isDeliverableShippingAddress(shipping.state, shipping.zipCode);
+  const nationwide = cartShipsNationwide(items, address);
+  if (!nyc && !nationwide) return false;
+  if (localItemsBlockedOutsideNyc(items, address)) return false;
+  if (!isUnitedStatesCountry(address.country)) return false;
   if (!isAuthenticated && !EMAIL_PATTERN.test(shipping.email?.trim() || '')) return false;
   return true;
 };

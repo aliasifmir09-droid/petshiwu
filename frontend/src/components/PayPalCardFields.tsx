@@ -13,6 +13,7 @@ import { AlertCircle, Loader2, Lock } from 'lucide-react';
 import { paypalClientId, paypalSdkEnvironment } from '@/config/paypal';
 import { orderService } from '@/services/orders';
 import { paypalCheckoutBlocker } from '@/utils/paypalCheckoutReady';
+import { useCartStore } from '@/stores/cartStore';
 
 interface PayPalItemInput {
   product: string;
@@ -231,6 +232,7 @@ const PayPalCardFields = ({ skipProvider = false, onFieldsReady, ...props }: Pay
     const blocked = paypalCheckoutBlocker({
       shippingAddress: props.shippingAddress,
       guestEmail: props.guestEmail,
+      items: useCartStore.getState().items,
     });
     if (blocked) {
       setError(blocked);

@@ -200,8 +200,8 @@ export function lookupZip(input: string, now: Date = new Date()): ZipLookupResul
     speed: 'standard',
     headline: 'Same-day delivery is NYC only',
     detail: place
-      ? `${place} is outside our current delivery area. We deliver same-day across the five boroughs. Nationwide shipping opens in a few days.`
-      : 'We deliver same-day across Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. Nationwide shipping opens in a few days.',
+      ? `${place} is outside same-day delivery. Local items are NYC same-day only. Shipped items arrive in 3-5 business days.`
+      : 'Local items are NYC same-day only. Shipped items arrive nationwide in 3-5 business days.',
     cutoffPassed: countdown.passed,
   };
 }
@@ -216,10 +216,10 @@ export function isCoordinateInNyc(lat: number, lng: number): boolean {
 }
 
 export const OUT_OF_AREA_DELIVERY_MESSAGE =
-  'We currently deliver same-day in New York City only — Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. Nationwide shipping opens in a few days.';
+  'Some items in your cart are NYC same-day only and cannot ship nationwide. Remove those items or use a New York City address.';
 
-/** Shown on an in-stock product the shopper has selected. */
-export const SAME_DAY_PRODUCT_ELIGIBILITY = 'Eligible for same-day delivery in NYC';
+/** Shown on an in-stock local product when the shopper's ZIP is in NYC or still unknown. */
+export const SAME_DAY_PRODUCT_ELIGIBILITY = 'Same-day delivery in NYC';
 
 export const LAST_ZIP_STORAGE_KEY = 'petshiwu_last_zip';
 export const LAST_ZIP_EVENT = 'petshiwu:zip';

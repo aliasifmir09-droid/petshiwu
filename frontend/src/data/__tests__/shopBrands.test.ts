@@ -40,9 +40,9 @@ describe('shoppable brand catalog', () => {
       expect(brand.title).toMatch(/In stock · free ship \$49\+ \| Petshiwu$/);
       expect(brand.title).not.toContain('...');
       expect(brand.description.length).toBeLessThanOrEqual(160);
-      expect(brand.description).toMatch(/Nationwide shipping soon/);
+      expect(brand.description).toMatch(/Shipped items arrive in 3-5 days/);
       expect(brand.description).not.toMatch(/do not claim/i);
-      expect(brand.intro).toMatch(/Nationwide shipping soon/);
+      expect(brand.intro).toMatch(/Nationwide shipping in 3-5 business days on shipped items|Shipped items arrive in 3-5 days/);
     }
   });
 

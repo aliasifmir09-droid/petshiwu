@@ -19,7 +19,7 @@ describe('brand collection pages', () => {
     expect(page).not.toMatch(/noindex=\{true\}/);
     expect(page).toContain('id="in-stock"');
     expect(page).toContain('ProductCard');
-    expect(page).toContain('Nationwide shipping soon');
+    expect(page).toContain('Nationwide shipping in 3-5 business days on shipped items');
     expect(page).not.toMatch(/do not claim/i);
     expect(page).toContain("getShopBrand(slug)");
   });

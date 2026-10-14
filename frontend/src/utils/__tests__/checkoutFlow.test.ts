@@ -54,6 +54,18 @@ describe('checkoutFlow', () => {
     expect(isCheckoutDeliveryReady({ ...nycAddress, zipCode: '94105' }, false)).toBe(false);
   });
 
+  test('a non-NYC address can check out only when every item is TopDawg', () => {
+    const hoboken = { ...nycAddress, city: 'Hoboken', state: 'NJ', zipCode: '07030' };
+    const topDawg = [{ product: { tags: ['topdawg', 'td-category'], name: 'Dropship toy' } }];
+    const mixed = [
+      ...topDawg,
+      { product: { tags: ['dog'], name: 'Queens kibble' } },
+    ];
+    expect(isCheckoutDeliveryReady(hoboken, false, topDawg)).toBe(true);
+    expect(isCheckoutDeliveryReady(hoboken, false, mixed)).toBe(false);
+    expect(isCheckoutDeliveryReady(nycAddress, false, mixed)).toBe(true);
+  });
+
   test('logged-in shoppers can skip email on the form', () => {
     expect(isCheckoutDeliveryReady({ ...nycAddress, email: '' }, true)).toBe(true);
   });

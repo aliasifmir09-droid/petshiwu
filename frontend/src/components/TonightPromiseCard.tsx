@@ -101,7 +101,7 @@ const TonightPromiseCard = ({ variant = 'hero', shopHref = '/products' }: Tonigh
         aria-labelledby="hub-zip-heading"
       >
         <h2 id="hub-zip-heading" className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-2">
-          Check your ZIP — same-day NYC or nationwide soon
+          Check your ZIP — same-day NYC, or 3-5 business days on shipped items
         </h2>
         <p className="text-slate-600 mb-5">
           {NATIONWIDE_SOON_NOTE} Same-day is the five boroughs only. Free over ${TONIGHT.freeOver}. No autoship.

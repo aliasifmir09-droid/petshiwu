@@ -230,7 +230,7 @@ const removeStaticHero = (html: string): string => {
 const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   '/': {
     title: 'Petshiwu | Pet Food & Supplies – Free Shipping $49+, No Autoship',
-    description: '4,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. Same-day NYC. Free shipping over $49. No autoship. Nationwide shipping soon.',
+    description: '4,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. Same-day NYC. Free shipping over $49. No autoship. Nationwide shipping in 3-5 business days on shipped items.',
   },
   '/products': {
     title: 'Pet food & supplies – Same-day NYC | Petshiwu',
@@ -266,11 +266,11 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/about': {
     title: 'About Petshiwu — Online Pet Store',
-    description: 'Petshiwu is an online pet store for food, treats, and supplies. Currently delivering in NYC, with nationwide shipping opening soon. Warehouse only — not a walk-in store.',
+    description: 'Petshiwu is an online pet store for food, treats, and supplies. Currently delivering in NYC, with nationwide shipping in 3-5 business days on shipped items. Warehouse only — not a walk-in store.',
   },
   '/our-promise': {
     title: 'Our Promise | Petshiwu',
-    description: 'Fair prices, fast delivery, and no autoship. Free shipping over $49. 365-day returns. Currently delivering in NYC, with nationwide shipping opening soon.',
+    description: 'Fair prices, fast delivery, and no autoship. Free shipping over $49. 365-day returns. Currently delivering in NYC, with nationwide shipping in 3-5 business days on shipped items.',
   },
   '/for-pet-parents': {
     title: 'For Pet Parents | Petshiwu',
@@ -278,7 +278,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/from-queens': {
     title: 'How We Ship | Petshiwu',
-    description: 'Petshiwu is an online pet store. Currently delivering in NYC, with nationwide shipping opening in a few days. Warehouse only — not a walk-in store.',
+    description: 'Petshiwu is an online pet store. Currently delivering in NYC, with nationwide shipping in 3-5 business days on shipped items. Warehouse only — not a walk-in store.',
   },
   '/editorial-standards': {
     title: 'How We Write Pet Care Guides | Petshiwu',
@@ -314,11 +314,11 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/shipping': {
     title: 'Shipping Policy | Petshiwu',
-    description: 'Petshiwu same-day delivery in New York City. In-stock products are eligible for same-day delivery. Free shipping over $49. Nationwide shipping opens in a few days.',
+    description: 'Petshiwu same-day delivery in New York City. In-stock products are eligible for same-day delivery. Free shipping over $49. Shipped items go nationwide in 3-5 business days.',
   },
   '/delivery-zips': {
     title: 'NYC Same-Day Delivery | Petshiwu',
-    description: 'Petshiwü delivers same-day in New York City — all five boroughs. In-stock products are eligible for same-day delivery. Check your ZIP. Nationwide shipping opens in a few days.',
+    description: 'Petshiwü delivers same-day in New York City — all five boroughs. In-stock products are eligible for same-day delivery. Check your ZIP. Shipped items go nationwide in 3-5 business days.',
   },
   // FIX: Plural pet-type entries REMOVED. These (/dogs, /cats, /birds, /reptiles,
   // /small-animals) used to self-canonicalize with duplicate content vs. the real
@@ -1741,7 +1741,7 @@ export const buildHomepageHtml = (template: string, products: any[] = []): strin
       width: 512,
       height: 512,
     },
-    description: 'Premium pet food, toys, and supplies. Same-day in NYC. Nationwide shipping soon. 4,000+ products from top brands.',
+    description: 'Premium pet food, toys, and supplies. Same-day in NYC. Nationwide shipping in 3-5 business days on shipped items. 4,000+ products from top brands.',
     telephone: '+18002592605',
     email: 'support@petshiwu.com',
     address: {
@@ -1785,7 +1785,7 @@ export const buildHomepageHtml = (template: string, products: any[] = []): strin
     url: BASE,
     image: `${BASE}/og-image.jpg`,
     logo: `${BASE}/logo-square-512.png`,
-    description: 'Same-day pet food and supplies in New York City. Nationwide shipping soon. Jackson Heights is office and warehouse only — not a walk-in store. 4,000+ products, free shipping over $49.',
+    description: 'Same-day pet food and supplies in New York City. Nationwide shipping in 3-5 business days on shipped items. Jackson Heights is office and warehouse only — not a walk-in store. 4,000+ products, free shipping over $49.',
     telephone: '+18002592605',
     email: 'support@petshiwu.com',
     address: {
@@ -2229,7 +2229,7 @@ export const buildBrandCollectionHtml = (
   <p>${esc(meta.intro)}</p>
   ${productsBlock}
   ${relatedHtml}
-  <p>In stock. Free shipping over $49. No autoship. Nationwide shipping soon.</p>
+  <p>In stock. Free shipping over $49. No autoship. Nationwide shipping in 3-5 business days on shipped items.</p>
   <p><a href="${BASE}/brand">All brands</a> · <a href="${BASE}/products">Browse all products</a></p>
 </div>`;
 

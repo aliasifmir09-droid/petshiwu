@@ -50,4 +50,14 @@ describe('paypalCheckoutBlocker', () => {
       })
     ).toBe(OUT_OF_AREA_DELIVERY_MESSAGE);
   });
+
+  test('lets an all-TopDawg cart ship to a non-NYC address', () => {
+    expect(
+      paypalCheckoutBlocker({
+        shippingAddress: { ...nyc, city: 'Hoboken', state: 'NJ', zipCode: '07030' },
+        guestEmail: 'ada@example.com',
+        items: [{ product: { tags: ['topdawg'] } }],
+      })
+    ).toBeNull();
+  });
 });

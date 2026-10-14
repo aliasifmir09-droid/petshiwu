@@ -13,7 +13,8 @@ import Toast from '@/components/Toast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { availableCartStock } from '@/utils/cartStock';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
-import { SAME_DAY_PRODUCT_ELIGIBILITY } from '@/utils/deliveryZip';
+import { productDeliveryPromise } from '@/utils/deliveryLane';
+import { useSavedDeliveryZip } from '@/hooks/useSavedDeliveryZip';
 
 interface QuickViewModalProps {
   productSlug: string;
@@ -28,6 +29,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
   const { toast, showToast, hideToast } = useToast();
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState(0);
+  const savedZip = useSavedDeliveryZip();
 
   const { data: product, isLoading } = useQuery({
     queryKey: ['product', productSlug],
@@ -36,6 +38,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
     staleTime: 2 * 60 * 1000,
     gcTime: 10 * 60 * 1000
   });
+  const deliveryPromise = productDeliveryPromise(product, savedZip);
 
   // Close modal on Escape key
   useEffect(() => {
@@ -218,9 +221,11 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
                 {isReadyToShip ? (
                   <>
                     <p className="text-green-700 font-medium">{inStockLabel(true)}</p>
-                    <p className="text-sm font-semibold text-[#1E3A8A]">{SAME_DAY_PRODUCT_ELIGIBILITY}</p>
+                    <p className="text-sm font-semibold text-[#1E3A8A]">{deliveryPromise}</p>
                     <p className="text-xs text-slate-500">
-                      This selection is eligible for same-day delivery in NYC. Free shipping over $49.
+                      {deliveryPromise === 'Ships nationwide - arrives in 3-5 business days'
+                        ? 'This selection ships nationwide. Flat $7 outside NYC.'
+                        : 'This selection is NYC same-day only. Free shipping over $49 in NYC.'}
                     </p>
                   </>
                 ) : (

@@ -18,6 +18,7 @@ import {
   catalogFlexPattern,
   decodeHtmlEntities,
 } from '../utils/catalogText';
+import { deliveryLaneFromTags } from '../utils/deliveryLane';
 
 // Type definitions for product normalization
 interface ProductVariant {
@@ -114,7 +115,8 @@ const normalizeProductId = (product: ProductWithVariants | null | unknown): Norm
     inStock: stockData.inStock,
     petType: plainProduct.petType
       ? String(plainProduct.petType).toLowerCase().trim().replace(/\s+/g, '-')
-      : plainProduct.petType
+      : plainProduct.petType,
+    deliveryLane: deliveryLaneFromTags((plainProduct as { tags?: string[] }).tags),
   } as NormalizedProduct;
   
   // Normalize category._id if category is populated

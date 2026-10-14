@@ -88,6 +88,7 @@ export interface Product {
   reviewCount?: number;
   petType: 'dog' | 'cat' | 'other-animals';
   tags: string[];
+  deliveryLane?: 'local' | 'nationwide';
   features: string[];
   ingredients?: string;
   isActive: boolean;

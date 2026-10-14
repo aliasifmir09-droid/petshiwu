@@ -36,6 +36,13 @@ import {
   OUT_OF_AREA_DELIVERY_MESSAGE,
 } from '@/utils/deliveryZip';
 import { shippingCostForSubtotal } from '@/utils/orderTotals';
+import {
+  LOCAL_ITEM_NATIONWIDE_MESSAGE,
+  NATIONWIDE_PRODUCT_PROMISE,
+  cartShipsNationwide,
+  isUnitedStatesCountry,
+  localItemsBlockedOutsideNyc,
+} from '@/utils/deliveryLane';
 import { checkoutCodeFromError, checkoutCodeFromResponse } from '@/utils/checkoutCoupon';
 import { shouldHoldCheckoutOnEmptyCart } from '@/utils/checkoutFlow';
 import { clearRestockCoupon, clearRestockPay, readRestockCoupon, readRestockPay, isRestockPayMethod } from '@/utils/restock';
@@ -231,7 +238,14 @@ const Checkout = () => {
   });
 
   const zipLookup = isValidZip(shippingInfo.zipCode) ? lookupZip(shippingInfo.zipCode) : null;
-  const zipOutOfArea = Boolean(zipLookup && zipLookup.speed === 'standard');
+  const addressForLane = {
+    state: shippingInfo.state,
+    zipCode: shippingInfo.zipCode,
+    country: shippingInfo.country,
+  };
+  const nationwideOrder = cartShipsNationwide(items, addressForLane);
+  const localItemsBlocked = localItemsBlockedOutsideNyc(items, addressForLane) || !isUnitedStatesCountry(shippingInfo.country);
+  const zipOutOfArea = localItemsBlocked && Boolean(zipLookup);
   const zipNeedsState =
     Boolean(zipLookup && zipLookup.speed !== 'standard') &&
     !isDeliverableShippingAddress(shippingInfo.state, shippingInfo.zipCode);
@@ -398,7 +412,7 @@ const Checkout = () => {
     }
   };
 
-  const shipping = shippingCostForSubtotal(subtotal, couponWaivesShipping);
+  const shipping = shippingCostForSubtotal(subtotal, couponWaivesShipping, nationwideOrder);
   const tax = Number((subtotal * getTaxRateForState(shippingInfo.state)).toFixed(2));
   const onlineTotal = Math.max(0, subtotal + shipping + tax - couponDiscount);
   const total = Math.max(0, onlineTotal + donationAmount);
@@ -593,7 +607,11 @@ const Checkout = () => {
       return;
     }
 
-    if (!isDeliverableShippingAddress(shippingInfo.state, shippingInfo.zipCode)) {
+    if (localItemsBlocked) {
+      showToast(isUnitedStatesCountry(shippingInfo.country) ? OUT_OF_AREA_DELIVERY_MESSAGE : 'We ship inside the United States.', 'error');
+      return;
+    }
+    if (!isDeliverableShippingAddress(shippingInfo.state, shippingInfo.zipCode) && !nationwideOrder) {
       showToast(OUT_OF_AREA_DELIVERY_MESSAGE, 'error');
       return;
     }
@@ -1106,11 +1124,15 @@ const Checkout = () => {
                     </div>
                     {zipOutOfArea ? (
                       <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-                        {OUT_OF_AREA_DELIVERY_MESSAGE}
+                        {LOCAL_ITEM_NATIONWIDE_MESSAGE}
+                      </p>
+                    ) : nationwideOrder ? (
+                      <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                        {NATIONWIDE_PRODUCT_PROMISE}. Flat $7 shipping.
                       </p>
                     ) : zipNeedsState ? (
                       <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-                        Enter NY, NJ, or CT to match this delivery ZIP.
+                        Enter NY to match this New York City ZIP.
                       </p>
                     ) : zipLookup ? (
                       <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">

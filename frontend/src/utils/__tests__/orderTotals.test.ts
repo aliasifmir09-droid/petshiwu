@@ -13,6 +13,11 @@ describe('orderTotals', () => {
     expect(shippingCostForSubtotal(48.99, true)).toBe(0);
   });
 
+  test('nationwide TopDawg orders stay a flat $7 past $49 and with a free-shipping coupon', () => {
+    expect(shippingCostForSubtotal(80, false, true)).toBe(7);
+    expect(shippingCostForSubtotal(10, true, true)).toBe(7);
+  });
+
   test('shows remaining dollars until free shipping, including $49 even', () => {
     expect(amountUntilFreeShipping(40)).toBe(9);
     expect(amountUntilFreeShipping(49)).toBe(0);
