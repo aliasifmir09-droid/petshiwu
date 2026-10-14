@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import CouponUsage from '../models/CouponUsage';
 import logger from '../utils/logger';
-import { COUPONS, getCouponDiscount, isFreeShippingCoupon, isReusableCoupon, normalizeCouponCode } from '../services/couponService';
+import { COUPONS, getCouponDiscount, isCouponExpired, isFreeShippingCoupon, isReusableCoupon, normalizeCouponCode } from '../services/couponService';
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST } from '../services/orderPricingService';
 
 const router = express.Router();
@@ -22,6 +22,10 @@ router.post('/validate', async (req: Request, res: Response) => {
 
     if (!coupon) {
       return res.status(200).json({ valid: false, message: 'Invalid coupon code. Please check and try again.' });
+    }
+
+    if (isCouponExpired(coupon)) {
+      return res.status(200).json({ valid: false, message: 'This coupon code has expired.' });
     }
 
     // One-use-per-email lock — skip reusable private codes (FAMILY15)

@@ -8,6 +8,8 @@ export type Coupon = {
   reusable?: boolean;
   /** When true, never list or advertise this code on public pages. */
   hidden?: boolean;
+  /** Optional ISO timestamp after which the code stops working. */
+  expiresAt?: string;
 };
 
 export const COUPONS: Record<string, Coupon> = {
@@ -27,13 +29,14 @@ export const COUPONS: Record<string, Coupon> = {
     reusable: true,
     hidden: true,
   },
-  // Private customer-care code: 15% off for a specific customer (issued after an out-of-stock cancellation).
+  // Private customer-care code: 15% off for a specific customer (issued after an out-of-stock
+  // cancellation). One use, expires 30 days after issue (Nov 13 2026).
   ARI15: {
     type: 'percent',
     value: 15,
     description: '15% off your next order',
-    reusable: true,
     hidden: true,
+    expiresAt: '2026-11-13T23:59:59Z',
   },
   // Ask first / reorder: 10% off, max $10. Autoship stays 7% off, max $10, unadvertised on checkout.
   RESTOCK5: {
@@ -77,10 +80,14 @@ export const isFreeShippingCoupon = (code: string | undefined): boolean => {
   return coupon?.type === 'free_shipping';
 };
 
+export const isCouponExpired = (coupon: Coupon | undefined): boolean =>
+  Boolean(coupon?.expiresAt && new Date(coupon.expiresAt).getTime() <= Date.now());
+
 export const getCouponDiscount = (code: string | undefined, subtotal: number): number => {
   if (!code) return 0;
   const coupon = COUPONS[normalizeCouponCode(code)];
   if (!coupon || coupon.type === 'free_shipping') return 0;
+  if (isCouponExpired(coupon)) return 0;
 
   const amount = Number(subtotal) || 0;
   if (amount <= 0) return 0;
