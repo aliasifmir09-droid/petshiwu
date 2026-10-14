@@ -3,6 +3,11 @@ import { isNycDeliveryZip, isValidZip } from '@/utils/deliveryZip';
 export const TOPDAWG_TAG = 'topdawg';
 export const NATIONWIDE_SHIPPING_COST = 7;
 export const NATIONWIDE_PRODUCT_PROMISE = 'Ships nationwide - arrives in 3-5 business days';
+/** TopDawg is never stocked locally, including for an NYC ZIP. */
+export const TOPDAWG_NOT_SAME_DAY_PROMISE =
+  'Not eligible for same-day delivery - ships nationwide, arrives in 3-5 business days (flat $7)';
+export const MIXED_CART_DELIVERY_SUMMARY =
+  'Same-day items deliver today, shipped items arrive separately in 3-5 business days.';
 export const LOCAL_SAME_DAY_PROMISE = 'Same-day delivery in NYC';
 export const LOCAL_ONLY_PROMISE = 'NYC same-day delivery only';
 export const LOCAL_ITEM_NATIONWIDE_MESSAGE =
@@ -44,9 +49,30 @@ export function isUnitedStatesCountry(country?: string): boolean {
 }
 
 export function productDeliveryPromise(product: LaneProduct | null | undefined, zip?: string | null): string {
-  if (isNationwideProduct(product)) return NATIONWIDE_PRODUCT_PROMISE;
+  if (isNationwideProduct(product)) return TOPDAWG_NOT_SAME_DAY_PROMISE;
   if (zip && isValidZip(zip) && !isNycDeliveryZip(zip)) return LOCAL_ONLY_PROMISE;
   return LOCAL_SAME_DAY_PROMISE;
+}
+
+export function cartHasMixedLanes(items: Array<{ product?: LaneProduct | null }>): boolean {
+  let nationwide = false;
+  let local = false;
+  for (const item of items) {
+    if (isNationwideProduct(item?.product)) nationwide = true;
+    else local = true;
+  }
+  return nationwide && local;
+}
+
+export function cartIsNationwideOnly(items: Array<{ product?: LaneProduct | null }>): boolean {
+  return items.length > 0 && items.every((item) => isNationwideProduct(item?.product));
+}
+
+/** Cart-level promise. Null when every line is a local same-day item. */
+export function cartDeliverySummary(items: Array<{ product?: LaneProduct | null }>): string | null {
+  if (cartHasMixedLanes(items)) return MIXED_CART_DELIVERY_SUMMARY;
+  if (cartIsNationwideOnly(items)) return TOPDAWG_NOT_SAME_DAY_PROMISE;
+  return null;
 }
 
 export function cartShipsNationwide(

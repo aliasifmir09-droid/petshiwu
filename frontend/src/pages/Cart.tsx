@@ -14,6 +14,7 @@ import { ORDERING_PAUSED } from '@/config/ordering';
 import { TAX_RATE } from '@/config/constants';
 import { amountUntilFreeShipping, shippingCostForSubtotal } from '@/utils/orderTotals';
 import {
+  cartDeliverySummary,
   cartShipsNationwide,
   LOCAL_ITEM_NATIONWIDE_MESSAGE,
   localItemsBlockedOutsideNyc,
@@ -238,6 +239,7 @@ const Cart = () => {
 
   const nationwideOrder = cartShipsNationwide(items, { zipCode: savedZip, country: 'USA' });
   const localBlocked = localItemsBlockedOutsideNyc(items, { zipCode: savedZip, country: 'USA' });
+  const deliverySummary = localBlocked ? null : cartDeliverySummary(items);
   const shipping = shippingCostForSubtotal(subtotal, false, nationwideOrder);
   const tax = subtotal * TAX_RATE; // Estimate only — exact state tax (NY 8.875% / NJ 6.625% / CT 6.35%) is applied at checkout.
   const total = subtotal + shipping + tax;
@@ -298,9 +300,9 @@ const Cart = () => {
                   {LOCAL_ITEM_NATIONWIDE_MESSAGE}
                 </p>
               )}
-              {nationwideOrder && (
+              {deliverySummary && (
                 <p className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900">
-                  Shipped items arrive in 3-5 business days. Flat $7 shipping.
+                  {deliverySummary}
                 </p>
               )}
 
@@ -432,12 +434,15 @@ const Cart = () => {
                   <span className="text-gray-600">Tax</span>
                   <span className="font-medium">${tax.toFixed(2)}</span>
                 </div>
+                {deliverySummary && (
+                  <p className="text-sm text-gray-700 pt-2 border-t">{deliverySummary}</p>
+                )}
                 {ORDERING_PAUSED ? (
                   <div className="flex justify-between text-sm text-gray-600 pt-2 border-t">
                     <span>Estimated delivery</span>
                     <span className="font-medium">Shown when checkout opens</span>
                   </div>
-                ) : estimatedDelivery && (
+                ) : !deliverySummary && estimatedDelivery && (
                   <div className="flex justify-between text-sm text-gray-600 pt-2 border-t">
                     <span>Estimated Delivery</span>
                     <span className="font-medium">
@@ -487,7 +492,9 @@ const Cart = () => {
               <div>
                 <span className="text-sm text-gray-600 block">Total</span>
                 <span className="text-2xl font-bold text-gray-900">${total.toFixed(2)}</span>
-                {ORDERING_PAUSED ? (
+                {deliverySummary ? (
+                  <span className="text-xs text-gray-600 block mt-1">{deliverySummary}</span>
+                ) : ORDERING_PAUSED ? (
                   <span className="text-xs text-gray-500 block mt-1">Delivery dates when checkout opens</span>
                 ) : estimatedDelivery && (
                   <span className="text-xs text-gray-500 block mt-1">
