@@ -110,7 +110,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       });
     }
 
-    // NYC same-day plus next-day to every ZIP within 50 miles of Queens
+    // NYC same-day only. Tri-state next-day is closed.
     if (!isDeliverableShippingAddress(shippingAddress.state, shippingAddress.zipCode)) {
       return res.status(400).json({
         success: false,

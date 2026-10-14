@@ -47,7 +47,7 @@ describe('nycDelivery', () => {
     expect(isNycShippingAddress('New York', '11372')).toBe(true);
   });
 
-  test('next-day covers every ZIP within 50 miles of Queens', () => {
+  test('tri-state next-day ZIPs stay closed at checkout', () => {
     expect(NEXT_DAY_RADIUS_MILES).toBe(50);
     expect(Object.keys(NEXT_DAY_ZIPS).length).toBeGreaterThan(500);
     expect(isNycDeliveryZip('11801')).toBe(false);
@@ -57,18 +57,19 @@ describe('nycDelivery', () => {
     expect(isNextDayDeliveryZip('06830')).toBe(true);
     expect(isNextDayDeliveryZip('11706')).toBe(true);
     expect(isNycShippingAddress('NY', '11801')).toBe(false);
-    expect(isDeliverableShippingAddress('NY', '11801')).toBe(true);
-    expect(isDeliverableShippingAddress('New York', '11804')).toBe(true);
-    expect(isDeliverableShippingAddress('NJ', '07205')).toBe(true);
-    expect(isDeliverableShippingAddress('New Jersey', '07030')).toBe(true);
-    expect(isDeliverableShippingAddress('CT', '06830')).toBe(true);
+    expect(isDeliverableShippingAddress('NY', '11801')).toBe(false);
+    expect(isDeliverableShippingAddress('New York', '11804')).toBe(false);
+    expect(isDeliverableShippingAddress('NJ', '07205')).toBe(false);
+    expect(isDeliverableShippingAddress('New Jersey', '07030')).toBe(false);
+    expect(isDeliverableShippingAddress('CT', '06830')).toBe(false);
     expect(isConnecticutState('Connecticut')).toBe(true);
     expect(normalizeShippingState('connecticut')).toBe('CT');
     expect(isNewJerseyState('NJ')).toBe(true);
     expect(isDeliverableShippingAddress('NJ', '11801')).toBe(false);
     expect(isDeliverableShippingAddress('CT', '06511')).toBe(false);
     expect(isDeliverableShippingAddress('CA', '94105')).toBe(false);
-    expect(OUT_OF_AREA_DELIVERY_MESSAGE).toMatch(/50 miles of Queens/);
+    expect(OUT_OF_AREA_DELIVERY_MESSAGE).toMatch(/New York City only/);
+    expect(OUT_OF_AREA_DELIVERY_MESSAGE).not.toMatch(/50 miles/);
   });
 
   test('Queens Hillside 11432 stays NYC same-day', () => {

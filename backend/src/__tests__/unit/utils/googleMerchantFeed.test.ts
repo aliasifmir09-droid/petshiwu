@@ -167,9 +167,9 @@ describe('googleMerchantFeed helpers', () => {
     expect(xml).toContain('<g:unit_pricing_measure>30 lb</g:unit_pricing_measure>');
     expect(xml).toContain('<g:service>Same-day NYC</g:service>');
     expect(xml).toContain('<g:region>NY</g:region>');
-    expect(xml).toContain('<g:region>NJ</g:region>');
-    expect(xml).toContain('<g:region>CT</g:region>');
-    expect(xml).toContain('<g:service>Next-day metro</g:service>');
+    expect(xml).not.toContain('<g:region>NJ</g:region>');
+    expect(xml).not.toContain('<g:region>CT</g:region>');
+    expect(xml).not.toContain('<g:service>Next-day metro</g:service>');
     expect(xml).toContain('<g:included_destination>Free_listings</g:included_destination>');
     expect(xml).toContain('<g:min_transit_time>0</g:min_transit_time>');
     expect(xml).not.toContain('<g:identifier_exists>no</g:identifier_exists>');

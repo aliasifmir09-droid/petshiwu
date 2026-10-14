@@ -3,7 +3,7 @@
  * Same-day cutoff matches ShippingPolicy: 3 PM EST weekdays, 1 PM EST weekends.
  */
 
-import { NEXT_DAY_ZIPS, type MetroState } from '@/data/nextDayMetroZips';
+import { NEXT_DAY_ZIPS } from '@/data/nextDayMetroZips';
 import { DEFAULT_TAX_RATE, TAX_RATES_BY_STATE } from '@/config/constants';
 
 export type DeliverySpeed = 'same-day' | 'next-day' | 'standard';
@@ -130,24 +130,14 @@ export function isConnecticutState(state: string): boolean {
   return normalized === 'CT' || normalized === 'CONNECTICUT';
 }
 
-function stateMatchesZone(state: string, zoneState: MetroState): boolean {
-  if (zoneState === 'NY') return isNewYorkState(state);
-  if (zoneState === 'NJ') return isNewJerseyState(state);
-  return isConnecticutState(state);
-}
-
 export function isNextDayDeliveryZip(input: string): boolean {
   const zip = normalizeZip(input);
   return isValidZip(zip) && Boolean(NEXT_DAY_ZIPS[zip]);
 }
 
-/** NYC same-day, or next-day to any ZIP within 50 miles of Queens. */
+/** NYC five-borough addresses only. Tri-state next-day is closed. */
 export function isDeliverableShippingAddress(state: string, zipCode: string): boolean {
-  const zip = normalizeZip(zipCode);
-  if (isNycDeliveryZip(zip)) return isNewYorkState(state);
-  const zone = NEXT_DAY_ZIPS[zip];
-  if (!zone) return false;
-  return stateMatchesZone(state, zone.state);
+  return isNewYorkState(state) && isNycDeliveryZip(zipCode);
 }
 
 /** Accept NY, N.Y., New York, and New York State. */
@@ -203,24 +193,15 @@ export function lookupZip(input: string, now: Date = new Date()): ZipLookupResul
   }
 
   const nearby = NEXT_DAY_ZIPS[zip];
-  if (nearby) {
-    return {
-      zip,
-      area: nearby.area,
-      speed: 'next-day',
-      headline: `Next-day delivery to ${nearby.area}`,
-      detail:
-        'Next-day delivery to every ZIP within 50 miles of Queens. Same-day is NYC only (all 5 boroughs).',
-      cutoffPassed: countdown.passed,
-    };
-  }
-
+  const place = nearby?.area;
   return {
     zip,
-    area: 'the US',
+    area: place || 'the US',
     speed: 'standard',
-    headline: 'Nationwide shipping opens soon',
-    detail: 'We are delivering in NYC now. U.S. shipping launches in a few days. Free over $49 when it opens.',
+    headline: 'Same-day delivery is NYC only',
+    detail: place
+      ? `${place} is outside our current delivery area. We deliver same-day across the five boroughs. Nationwide shipping opens in a few days.`
+      : 'We deliver same-day across Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. Nationwide shipping opens in a few days.',
     cutoffPassed: countdown.passed,
   };
 }
@@ -235,7 +216,10 @@ export function isCoordinateInNyc(lat: number, lng: number): boolean {
 }
 
 export const OUT_OF_AREA_DELIVERY_MESSAGE =
-  'We currently deliver same-day in NYC and next-day to every ZIP within 50 miles of Queens. Nationwide shipping opens in a few days.';
+  'We currently deliver same-day in New York City only — Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. Nationwide shipping opens in a few days.';
+
+/** Shown on an in-stock product the shopper has selected. */
+export const SAME_DAY_PRODUCT_ELIGIBILITY = 'Eligible for same-day delivery in NYC';
 
 export const LAST_ZIP_STORAGE_KEY = 'petshiwu_last_zip';
 export const LAST_ZIP_EVENT = 'petshiwu:zip';

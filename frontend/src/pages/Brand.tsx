@@ -159,7 +159,7 @@ const BrandCollection = ({ brand }: { brand: ShopBrand }) => {
     {
       question: `Can I get ${brand.name} delivered today?`,
       answer:
-        'Same-day is NYC (five boroughs) when you order by cutoff. Next-day covers ZIPs within 50 miles of Queens. Nationwide shipping soon.',
+        'Same-day is NYC (five boroughs) when you order by cutoff. In-stock products are eligible for same-day delivery. Nationwide shipping soon.',
     },
   ];
 

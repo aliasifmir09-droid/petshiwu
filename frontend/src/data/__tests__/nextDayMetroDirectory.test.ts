@@ -18,17 +18,18 @@ describe('next-day ZIP directory', () => {
     expect(groups.flatMap((group) => group.cities.flatMap((city) => city.zips))).not.toContain('11432');
   });
 
-  test('the public page publishes the ZIP list and is routed', () => {
+  test('the public page says NYC same-day only and is routed', () => {
     const page = readFileSync(join(dir, '../../pages/NextDayDeliveryZips.tsx'), 'utf8');
     const app = readFileSync(join(dir, '../../App.tsx'), 'utf8');
     const sitemapScript = readFileSync(join(dir, '../../../scripts/generate-sitemap.js'), 'utf8');
     expect(app).toContain('/delivery-zips');
     expect(page).toContain('url="/delivery-zips"');
-    expect(page).toContain('{NEXT_DAY_RADIUS_MILES} miles of Queens');
-    expect(page).toContain('50 Miles of Queens');
+    expect(page).toContain('Same-day delivery in New York City');
+    expect(page).toMatch(/Delivery outside/);
     expect(page).toMatch(/Nationwide shipping soon/);
+    expect(page).toMatch(/eligible for same-day delivery/i);
     expect(page).not.toMatch(/do not claim/i);
-    expect(page).toContain('NEXT_DAY_ZIP_COUNT');
+    expect(page).not.toContain('NEXT_DAY_ZIP_COUNT');
     expect(sitemapScript).toContain("'delivery-zips'");
   });
 

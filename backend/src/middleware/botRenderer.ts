@@ -314,11 +314,11 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/shipping': {
     title: 'Shipping Policy | Petshiwu',
-    description: 'Petshiwu same-day NYC delivery and next-day to every ZIP within 50 miles of Queens. Free shipping over $49. Nationwide shipping opens in a few days.',
+    description: 'Petshiwu same-day delivery in New York City. In-stock products are eligible for same-day delivery. Free shipping over $49. Nationwide shipping opens in a few days.',
   },
   '/delivery-zips': {
-    title: 'Next-Day Delivery ZIP Codes Within 50 Miles of Queens | Petshiwu',
-    description: 'Full list of Petshiwü next-day delivery ZIP codes within 50 miles of Queens. Same-day is NYC only. Check your ZIP. Nationwide shipping opens in a few days.',
+    title: 'NYC Same-Day Delivery | Petshiwu',
+    description: 'Petshiwü delivers same-day in New York City — all five boroughs. In-stock products are eligible for same-day delivery. Check your ZIP. Nationwide shipping opens in a few days.',
   },
   // FIX: Plural pet-type entries REMOVED. These (/dogs, /cats, /birds, /reptiles,
   // /small-animals) used to self-canonicalize with duplicate content vs. the real

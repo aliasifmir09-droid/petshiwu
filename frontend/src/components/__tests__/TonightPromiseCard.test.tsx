@@ -39,10 +39,10 @@ describe('TonightPromiseCard', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/check delivery for your zip/i)).toBeInTheDocument();
+    expect(screen.getByText(/eligible for same-day delivery in nyc/i)).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText(/check delivery by zip code/i), {
       target: { value: '11201' },
     });
-    expect(screen.getAllByText(/brooklyn/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/eligible for same-day delivery in brooklyn/i)).toBeInTheDocument();
   });
 });

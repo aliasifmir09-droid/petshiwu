@@ -17,11 +17,13 @@ describe('frontend static learning catalog', () => {
 
   test('publishes the next-day ZIP guide with crawlable HTML', () => {
     const blog = getStaticLearningBlog('next-day-pet-delivery-within-50-miles-of-queens');
-    expect(blog?.title).toMatch(/50 Miles of Queens/i);
+    expect(blog?.title).toMatch(/NYC Same-Day/i);
     expect(blog?.content).toContain('/delivery-zips');
     expect(blog?.content).toMatch(/Nationwide shipping/i);
+    expect(blog?.content).toMatch(/eligible for same-day delivery/i);
+    expect(blog?.content).toMatch(/Delivery outside New York City is closed/i);
     expect(blog?.content).not.toMatch(/do not claim/i);
-    expect(blog?.content).toContain('11801');
+    expect(blog?.content).not.toMatch(/checkout will accept/i);
   });
 
   test('merge ignores a broken CMS payload instead of crashing the hub', () => {

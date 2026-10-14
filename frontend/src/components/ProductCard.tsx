@@ -15,6 +15,7 @@ import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { getListingPrice, getListingVariant, getProductImage, getValidCompareAtPrice } from '@/utils/productPrice';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
 import { FIRST_ORDER_CARD_LINE, REPEAT_ORDER_CARD_LINE } from '@/config/publicPromos';
+import { SAME_DAY_PRODUCT_ELIGIBILITY } from '@/utils/deliveryZip';
 
 interface ProductCardProps {
   product: Product;
@@ -241,9 +242,12 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
 
           <div className="mt-2 min-h-[1.25rem]">
             {isReadyToShip ? (
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                <span className="text-xs text-stone-500">{inStockLabel(true)}</span>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                  <span className="text-xs text-stone-500">{inStockLabel(true)}</span>
+                </div>
+                <p className="text-[11px] font-semibold text-[#1E3A8A] mt-0.5">{SAME_DAY_PRODUCT_ELIGIBILITY}</p>
               </div>
             ) : (
               <div className="flex items-center gap-1.5">

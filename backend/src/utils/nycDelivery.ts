@@ -1,8 +1,8 @@
 /**
- * NYC same-day ZIPs plus next-day metro ZIPs within 50 miles of Queens.
+ * NYC same-day ZIPs. Tri-state next-day delivery is closed.
  */
 
-import { NEXT_DAY_ZIPS, type MetroState } from '../data/nextDayMetroZips';
+import { NEXT_DAY_ZIPS } from '../data/nextDayMetroZips';
 
 const NYC_RANGES: Array<{ start: number; end: number }> = [
   { start: 10001, end: 10282 }, // Manhattan
@@ -54,12 +54,6 @@ export function isConnecticutState(state: string): boolean {
   return normalized === 'CT' || normalized === 'CONNECTICUT';
 }
 
-function stateMatchesZone(state: string, zoneState: MetroState): boolean {
-  if (zoneState === 'NY') return isNewYorkState(state);
-  if (zoneState === 'NJ') return isNewJerseyState(state);
-  return isConnecticutState(state);
-}
-
 export function normalizeShippingState(state: string): string {
   const trimmed = String(state || '').trim();
   if (isNewYorkState(trimmed)) return 'NY';
@@ -72,14 +66,10 @@ export function isNycShippingAddress(state: string, zipCode: string): boolean {
   return isNewYorkState(state) && isNycDeliveryZip(zipCode);
 }
 
-/** NYC same-day, or next-day to any ZIP within 50 miles of Queens. */
+/** NYC five-borough addresses only. Tri-state next-day is closed. */
 export function isDeliverableShippingAddress(state: string, zipCode: string): boolean {
-  const zip = normalizeZip(zipCode);
-  if (isNycDeliveryZip(zip)) return isNewYorkState(state);
-  const zone = NEXT_DAY_ZIPS[zip];
-  if (!zone) return false;
-  return stateMatchesZone(state, zone.state);
+  return isNewYorkState(state) && isNycDeliveryZip(zipCode);
 }
 
 export const OUT_OF_AREA_DELIVERY_MESSAGE =
-  'We currently deliver same-day in NYC and next-day to every ZIP within 50 miles of Queens. Nationwide shipping opens in a few days.';
+  'We currently deliver same-day in New York City only — Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. Nationwide shipping opens in a few days.';

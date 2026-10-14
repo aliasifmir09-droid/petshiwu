@@ -257,14 +257,10 @@ function shippingService(
       </g:shipping>`;
 }
 
-/** Checkout delivers NYC same-day plus the 50-mile NY/NJ/CT metro. Not nationwide. */
+/** Checkout delivers NYC same-day only. Tri-state next-day is closed. */
 function shippingXml(price: number): string {
   const shipPrice = price >= 49 ? '0.00' : '6.00';
-  return [
-    shippingService('NY', 'Same-day NYC', 0, 1, shipPrice),
-    shippingService('NJ', 'Next-day metro', 1, 1, shipPrice),
-    shippingService('CT', 'Next-day metro', 1, 1, shipPrice),
-  ].join('\n');
+  return shippingService('NY', 'Same-day NYC', 0, 1, shipPrice);
 }
 
 export function buildMerchantItemXml(opts: {

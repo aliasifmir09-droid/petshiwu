@@ -96,7 +96,7 @@ const Footer = () => {
             <ul className="space-y-2 text-sm text-blue-100">
               <li><Link to="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
               <li><Link to="/shipping" className="hover:text-white transition-colors">Shipping Information</Link></li>
-              <li><Link to="/delivery-zips" className="hover:text-white transition-colors">Next-day ZIP codes</Link></li>
+              <li><Link to="/delivery-zips" className="hover:text-white transition-colors">NYC delivery area</Link></li>
               <li><Link to="/return-policy" className="hover:text-white transition-colors">365-Day Return Policy</Link></li>
               <li><Link to="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
               <li><Link to="/search?snap=1" className="hover:text-white transition-colors">Search by photo</Link></li>
@@ -112,7 +112,7 @@ const Footer = () => {
               <li><Link to="/products" className="hover:text-white transition-colors">Shop All Products</Link></li>
               <li><Link to="/products?featured=true" className="hover:text-white transition-colors">Featured</Link></li>
               <li><Link to="/learning" className="hover:text-white transition-colors">Pet Care Blog</Link></li>
-              <li><Link to="/learning/next-day-pet-delivery-within-50-miles-of-queens" className="hover:text-white transition-colors">Next-day delivery guide</Link></li>
+              <li><Link to="/learning/next-day-pet-delivery-within-50-miles-of-queens" className="hover:text-white transition-colors">NYC same-day delivery</Link></li>
               <li><Link to="/learning/fall-2026-pet-care-playbook" className="hover:text-white transition-colors">Fall 2026 Playbook</Link></li>
               <li><Link to="/editorial-standards" className="hover:text-white transition-colors">How we write guides</Link></li>
               <li><Link to="/care-guides" className="hover:text-white transition-colors">Care Guides</Link></li>

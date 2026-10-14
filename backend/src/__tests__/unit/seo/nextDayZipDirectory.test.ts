@@ -12,18 +12,17 @@ describe('next-day ZIP directory for Google', () => {
     });
   });
 
-  test('bot HTML publishes Hicksville, Greenwich, and the 50-mile rule', () => {
+  test('bot HTML publishes NYC same-day only and closes the metro list', () => {
     const html = buildNextDayZipDirectoryHtml();
     expect(NEXT_DAY_ZIP_COUNT).toBeGreaterThan(500);
-    expect(html).toContain('11801');
-    expect(html).toContain('Hicksville');
-    expect(html).toContain('06830');
-    expect(html).toContain('Greenwich');
-    expect(html).toContain('11706');
-    expect(html).toMatch(/50 miles of Queens/);
+    expect(html).toMatch(/Same-day delivery in New York City/);
+    expect(html).toMatch(/eligible for same-day delivery/i);
+    expect(html).toMatch(/Delivery outside New York City/);
     expect(html).toMatch(/Nationwide shipping soon/);
+    expect(html).not.toMatch(/accepts orders for next-day/i);
+    expect(html).not.toContain('11801');
+    expect(html).not.toContain('Hicksville');
     expect(html).not.toMatch(/do not claim/i);
-    expect(html).not.toContain('11432');
   });
 
   test('sitemap lists /delivery-zips', () => {
