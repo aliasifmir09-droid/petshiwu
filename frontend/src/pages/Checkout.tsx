@@ -38,10 +38,13 @@ import {
 import { shippingCostForSubtotal } from '@/utils/orderTotals';
 import {
   LOCAL_ITEM_NATIONWIDE_MESSAGE,
-  NATIONWIDE_PRODUCT_PROMISE,
+  cartDeliverySummary,
+  cartHasMixedLanes,
+  cartIsNationwideOnly,
   cartShipsNationwide,
   isUnitedStatesCountry,
   localItemsBlockedOutsideNyc,
+  productDeliveryPromise,
 } from '@/utils/deliveryLane';
 import { checkoutCodeFromError, checkoutCodeFromResponse } from '@/utils/checkoutCoupon';
 import { shouldHoldCheckoutOnEmptyCart } from '@/utils/checkoutFlow';
@@ -245,6 +248,9 @@ const Checkout = () => {
   };
   const nationwideOrder = cartShipsNationwide(items, addressForLane);
   const localItemsBlocked = localItemsBlockedOutsideNyc(items, addressForLane) || !isUnitedStatesCountry(shippingInfo.country);
+  const deliverySummary = localItemsBlocked ? null : cartDeliverySummary(items);
+  const mixedCart = cartHasMixedLanes(items);
+  const nationwideOnly = cartIsNationwideOnly(items);
   const zipOutOfArea = localItemsBlocked && Boolean(zipLookup);
   const zipNeedsState =
     Boolean(zipLookup && zipLookup.speed !== 'standard') &&
@@ -913,11 +919,18 @@ const Checkout = () => {
             <p className="mt-2 max-w-xl text-stone-600">
               {ORDERING_PAUSED
                 ? 'Same-day NYC delivery, PayPal-secured payment, and 24/7 support will be ready when we start accepting orders.'
-                : 'Same-day Queens delivery, PayPal-secured payment, and a 24/7 call center — the kind of checkout a pet parent should trust.'}
+                : deliverySummary
+                  ? deliverySummary
+                  : 'Same-day Queens delivery, PayPal-secured payment, and a 24/7 call center — the kind of checkout a pet parent should trust.'}
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> NYC same-day</span>
+            {!nationwideOnly ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> NYC same-day</span>
+            ) : null}
+            {mixedCart || nationwideOnly ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> 3-5 business days</span>
+            ) : null}
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><ShieldCheck size={13} className="text-[#1E3A8A]" /> PayPal protected</span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><RotateCcw size={13} className="text-[#1E3A8A]" /> 365-day returns</span>
           </div>
@@ -1126,9 +1139,9 @@ const Checkout = () => {
                       <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
                         {LOCAL_ITEM_NATIONWIDE_MESSAGE}
                       </p>
-                    ) : nationwideOrder ? (
+                    ) : deliverySummary ? (
                       <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-                        {NATIONWIDE_PRODUCT_PROMISE}. Flat $7 shipping.
+                        {deliverySummary}
                       </p>
                     ) : zipNeedsState ? (
                       <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
@@ -1331,6 +1344,9 @@ const Checkout = () => {
                   <p className="mt-1 text-sm text-blue-100">{items.length} {items.length === 1 ? 'item' : 'items'} · packed in Queens</p>
                 </div>
                 <div className="p-6">
+                {deliverySummary ? (
+                  <p className="mb-4 rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-900">{deliverySummary}</p>
+                ) : null}
                 <div className="space-y-4 mb-6">
                   {items.map((item) => {
                     const price = item.variant?.price || item.product.basePrice;
@@ -1341,6 +1357,7 @@ const Checkout = () => {
                           className="h-[4.5rem] w-[4.5rem] rounded-2xl object-cover ring-1 ring-stone-200" />
                         <div className="flex-1">
                           <p className="font-semibold text-sm text-stone-900 leading-snug">{decodeHtmlEntities(item.product.name)}</p>
+                          <p className="text-xs font-semibold text-[#1E3A8A] mt-1">{productDeliveryPromise(item.product, shippingInfo.zipCode)}</p>
                           <p className="text-xs text-stone-500 mt-1">Qty {item.quantity}</p>
                           {item.variant && <p className="text-xs text-stone-500">{item.variant.size || item.variant.weight}</p>}
                         </div>

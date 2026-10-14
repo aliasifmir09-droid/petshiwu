@@ -857,20 +857,24 @@ const ProductDetail = () => {
           {/* Stock Availability — no unit counts until inventory is maintained */}
           <div className="mb-4">
             {isReadyToShip ? (
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-                  <span className="text-green-700 font-medium">{inStockLabel(true)}</span>
-                </div>
-                <p className="mt-2 text-sm font-semibold text-[#1E3A8A]">
+              isNationwideProduct(product) ? (
+                <p className="text-sm font-semibold text-[#1E3A8A]">
                   {productDeliveryPromise(product, savedZip)}
                 </p>
-                <p className="text-xs text-slate-600 mt-0.5">
-                  {isNationwideProduct(product)
-                    ? 'This selection ships nationwide and arrives in 3-5 business days.'
-                    : 'This selection is NYC same-day only. It cannot ship outside New York City.'}
-                </p>
-              </div>
+              ) : (
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                    <span className="text-green-700 font-medium">{inStockLabel(true)}</span>
+                  </div>
+                  <p className="mt-2 text-sm font-semibold text-[#1E3A8A]">
+                    {productDeliveryPromise(product, savedZip)}
+                  </p>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    This selection is NYC same-day only. It cannot ship outside New York City.
+                  </p>
+                </div>
+              )
             ) : (
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 bg-red-500 rounded-full"></span>

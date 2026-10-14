@@ -13,7 +13,7 @@ import Toast from '@/components/Toast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { availableCartStock } from '@/utils/cartStock';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
-import { productDeliveryPromise } from '@/utils/deliveryLane';
+import { isNationwideProduct, productDeliveryPromise } from '@/utils/deliveryLane';
 import { useSavedDeliveryZip } from '@/hooks/useSavedDeliveryZip';
 
 interface QuickViewModalProps {
@@ -219,15 +219,17 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
 
                 {/* Stock Status — no unit counts until inventory is maintained */}
                 {isReadyToShip ? (
-                  <>
-                    <p className="text-green-700 font-medium">{inStockLabel(true)}</p>
+                  isNationwideProduct(product) ? (
                     <p className="text-sm font-semibold text-[#1E3A8A]">{deliveryPromise}</p>
-                    <p className="text-xs text-slate-500">
-                      {deliveryPromise === 'Ships nationwide - arrives in 3-5 business days'
-                        ? 'This selection ships nationwide. Flat $7 outside NYC.'
-                        : 'This selection is NYC same-day only. Free shipping over $49 in NYC.'}
-                    </p>
-                  </>
+                  ) : (
+                    <>
+                      <p className="text-green-700 font-medium">{inStockLabel(true)}</p>
+                      <p className="text-sm font-semibold text-[#1E3A8A]">{deliveryPromise}</p>
+                      <p className="text-xs text-slate-500">
+                        This selection is NYC same-day only. Free shipping over $49 in NYC.
+                      </p>
+                    </>
+                  )
                 ) : (
                   <p className="text-red-600 font-medium">Out of stock</p>
                 )}
