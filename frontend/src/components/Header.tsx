@@ -182,9 +182,10 @@ const Header = () => {
       });
   };
 
-  const getSubcategories = (categoryId: string) => {
+  const getSubcategories = (categoryId: string, petTypeSlug?: string) => {
     return categories
       .filter((cat: any) => cat.parentCategory?._id === categoryId || cat.parentCategory === categoryId)
+      .filter((cat: any) => !petTypeSlug || cat.petType === petTypeSlug)
       .sort((a: any, b: any) => {
         const posA = a.position !== undefined ? a.position : 999999;
         const posB = b.position !== undefined ? b.position : 999999;
@@ -211,7 +212,7 @@ const Header = () => {
       });
     return mainCategories.map((mainCat: any): MenuSection => {
       const categoryId = mainCat._id || String(mainCat._id);
-      const subcategories = getSubcategories(categoryId)
+      const subcategories = getSubcategories(categoryId, petTypeSlug)
         .filter((sub: any) => sub.isActive !== false)
         .map((sub: any) => ({ name: sub.name, slug: sub.slug, position: sub.position !== undefined ? sub.position : 999999 }))
         .sort((a: any, b: any) => {
