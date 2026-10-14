@@ -27,6 +27,14 @@ export const COUPONS: Record<string, Coupon> = {
     reusable: true,
     hidden: true,
   },
+  // Private customer-care code: 15% off for a specific customer (issued after an out-of-stock cancellation).
+  ARI15: {
+    type: 'percent',
+    value: 15,
+    description: '15% off your next order',
+    reusable: true,
+    hidden: true,
+  },
   // Ask first / reorder: 10% off, max $10. Autoship stays 7% off, max $10, unadvertised on checkout.
   RESTOCK5: {
     type: 'percent',
