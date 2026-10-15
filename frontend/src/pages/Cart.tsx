@@ -12,15 +12,15 @@ import SEO from '@/components/SEO';
 import OrdersHoldNotice from '@/components/OrdersHoldNotice';
 import { ORDERING_PAUSED } from '@/config/ordering';
 import { TAX_RATE } from '@/config/constants';
-import { amountUntilFreeShipping, shippingCostForSubtotal } from '@/utils/orderTotals';
+import { amountUntilFreeShipping } from '@/utils/orderTotals';
 import {
   EXCLUDED_SHIPPING_MESSAGE,
+  LOCAL_UNAVAILABLE_MESSAGE,
   cartDeliverySummary,
-  cartShipsNationwide,
   isAlaskaOrHawaiiAddress,
-  LOCAL_ITEM_NATIONWIDE_MESSAGE,
   localItemsBlockedOutsideNyc,
   productDeliveryPromise,
+  quoteStorefrontDelivery,
 } from '@/utils/deliveryLane';
 import { useSavedDeliveryZip } from '@/hooks/useSavedDeliveryZip';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -239,18 +239,28 @@ const Cart = () => {
     }
   })();
 
-  const nationwideOrder = cartShipsNationwide(items, { zipCode: savedZip, country: 'USA' });
-  const localBlocked = localItemsBlockedOutsideNyc(items, { zipCode: savedZip, country: 'USA' });
+  const addressForLane = { zipCode: savedZip, country: 'USA' };
+  const localBlocked = localItemsBlockedOutsideNyc(items, addressForLane);
   const excludedZip = isAlaskaOrHawaiiAddress(undefined, savedZip);
+  const deliveryQuote = quoteStorefrontDelivery({
+    zipCode: savedZip,
+    country: 'USA',
+    items: items.map((item) => ({
+      product: item?.product,
+      price: safePrice(item),
+      quantity: safeQuantity(item),
+    })),
+  });
   const deliverySummary = excludedZip
     ? EXCLUDED_SHIPPING_MESSAGE
     : localBlocked
-      ? null
-      : cartDeliverySummary(items);
-  const shipping = shippingCostForSubtotal(subtotal, false, nationwideOrder);
+      ? LOCAL_UNAVAILABLE_MESSAGE
+      : cartDeliverySummary(items, addressForLane);
+  const shipping = deliveryQuote.ok ? deliveryQuote.shippingPrice : 0;
+  const nationwideOnly = items.length > 0 && items.every((item) => item?.product?.tags?.some((tag: string) => String(tag).toLowerCase() === 'topdawg'));
   const tax = subtotal * TAX_RATE; // Estimate only — exact state tax (NY 8.875% / NJ 6.625% / CT 6.35%) is applied at checkout.
   const total = subtotal + shipping + tax;
-  const remainingForFreeShipping = nationwideOrder ? 0 : amountUntilFreeShipping(subtotal);
+  const remainingForFreeShipping = nationwideOnly || !deliveryQuote.ok ? 0 : amountUntilFreeShipping(subtotal);
 
   const handleConfirmAction = () => {
     try {
@@ -304,7 +314,7 @@ const Cart = () => {
               </div>
               {localBlocked && (
                 <p className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                  {LOCAL_ITEM_NATIONWIDE_MESSAGE}
+                  {LOCAL_UNAVAILABLE_MESSAGE}
                 </p>
               )}
               {deliverySummary && (

@@ -21,7 +21,7 @@ describe('frontend static learning catalog', () => {
     expect(blog?.content).toContain('/delivery-zips');
     expect(blog?.content).toMatch(/Nationwide shipping/i);
     expect(blog?.content).toMatch(/eligible for same-day delivery/i);
-    expect(blog?.content).toMatch(/NYC same-day only/i);
+    expect(blog?.content).toMatch(/2-5 business days across NY, NJ, and CT/i);
     expect(blog?.content).not.toMatch(/do not claim/i);
     expect(blog?.content).not.toMatch(/checkout will accept/i);
   });

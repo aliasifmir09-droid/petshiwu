@@ -189,7 +189,7 @@ const Products = () => {
 
   // Build dynamic SEO based on filters
   const getProductsTitle = () => {
-    if (search) return `${search} – Same-day NYC | Petshiwu`;
+    if (search) return `${search} – Fast delivery across America | Petshiwu`;
     return collectionSearchTitle({ petType: petType || undefined, featured });
   };
 

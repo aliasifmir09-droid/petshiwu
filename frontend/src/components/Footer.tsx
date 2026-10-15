@@ -41,7 +41,7 @@ const Footer = () => {
               <BrandLogo variant="on-navy" />
             </Link>
             <p className="text-blue-100 text-sm mb-4 leading-relaxed">
-              Food, treats, and supplies for every pet. Free shipping over $49. No autoship.
+              Food, treats, and supplies for every pet. Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items.
             </p>
             <div className="flex gap-4">
               {FOOTER_SOCIAL.map((item) => {

@@ -1,4 +1,5 @@
 import { decodeHtmlEntities } from './catalogText';
+import { resolveDeliveryZone } from './deliveryZones';
 
 const SITE_ORIGIN = 'https://www.petshiwu.com';
 const BRAND_NAVY = '#1E3A8A';
@@ -111,6 +112,12 @@ export function buildOrderConfirmationEmail(
     ? `${origin}/forgot-password?guest=1&email=${encodeURIComponent(customerEmail)}`
     : `${origin}/forgot-password?guest=1`;
   const showGuestPasswordHelp = Boolean(orderData.isGuestCheckout);
+  const addressZone = resolveDeliveryZone(addr, { tags: [] });
+  const deliveryLine = addressZone === 'UNAVAILABLE'
+    ? 'Arrives in 3-5 business days.'
+    : addressZone === 'TRI_STATE'
+      ? 'Delivered in 2-5 business days. TopDawg items arrive separately in 3-5 business days.'
+      : 'Same-day delivery in NYC. TopDawg items arrive separately in 3-5 business days.';
   const preheader = isCod
     ? `Packing slip for Petshiwu order ${orderNumber}. ${formatUsd(orderData.totalPrice)} is due when your driver arrives.`
     : `Packing slip and official receipt for Petshiwu order ${orderNumber} · ${formatUsd(orderData.totalPrice)}.`;
@@ -238,6 +245,7 @@ export function buildOrderConfirmationEmail(
                             ${escapeHtml(addr.city)}, ${escapeHtml(addr.state)} ${escapeHtml(addr.zipCode)}<br>
                             ${escapeHtml(addr.country)}
                           </div>
+                          <div style="margin-top:8px;font-size:13px;line-height:1.45;font-weight:700;color:${BRAND_NAVY};">${escapeHtml(deliveryLine)}</div>
                           ${customerEmail ? `<div style="margin-top:8px;font-size:13px;color:${BRAND_NAVY};">${escapeHtml(customerEmail)}</div>` : ''}
                           ${addr.phone ? `<div style="margin-top:4px;font-size:13px;color:#111827;">${escapeHtml(addr.phone)}</div>` : ''}
                         </td>
@@ -361,7 +369,7 @@ export function buildOrderConfirmationEmail(
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E5E7EB;">
                 <tr>
                   <td width="33%" style="padding:12px 8px;text-align:center;font-size:12px;color:#1F2937;font-weight:700;">365-day returns</td>
-                  <td width="33%" style="padding:12px 8px;text-align:center;font-size:12px;color:#1F2937;font-weight:700;border-left:1px solid #E5E7EB;border-right:1px solid #E5E7EB;">NYC same-day delivery</td>
+                  <td width="33%" style="padding:12px 8px;text-align:center;font-size:12px;color:#1F2937;font-weight:700;border-left:1px solid #E5E7EB;border-right:1px solid #E5E7EB;">Fast delivery across America</td>
                   <td width="33%" style="padding:12px 8px;text-align:center;font-size:12px;color:#1F2937;font-weight:700;">Secure checkout</td>
                 </tr>
               </table>
@@ -404,6 +412,7 @@ export function buildOrderConfirmationEmail(
     `${totalLabel}: ${formatUsd(orderData.totalPrice)}`,
     '',
     `Payment: ${paymentLabel} — ${paymentStatus}`,
+    `Delivery: ${deliveryLine}`,
     'Ship to:',
     shipName,
     addr.street,
@@ -420,7 +429,7 @@ export function buildOrderConfirmationEmail(
     '',
     `Call support 24/7: ${SUPPORT_PHONE_DISPLAY}`,
     'support@petshiwu.com',
-    '365-day returns · NYC same-day delivery · Secure checkout',
+    '365-day returns · Fast delivery across America · Secure checkout',
   ].filter((line) => line !== '').join('\n');
 
   return {

@@ -13,7 +13,7 @@ export const DAMAGED_ITEM_REPORT_DAYS = 7;
 export const REFUND_BUSINESS_DAYS = '5–10';
 
 export const DELIVERY_STATEMENT =
-  'Same-day NYC: order by 3 PM ET weekdays or 1 PM ET weekends for delivery before 11 PM across all five boroughs. After cutoff we deliver the next day. Local items are NYC same-day only. Shipped items arrive in 3-5 business days for a flat $7 outside NYC. Same-day is our target, not a guarantee. If we miss the window, email support@petshiwu.com and we will reship the next day free or refund the order.';
+  'Fast delivery across America. Same-day NYC: order by 3 PM ET weekdays or 1 PM ET weekends for delivery before 11 PM across all five boroughs. After cutoff we deliver the next day. Locally stocked items outside the five boroughs are delivered in 2-5 business days across NY, NJ, and CT ($7 under $49, free at $49+). TopDawg items arrive in 3-5 business days for a flat $7 and are never free-shipping. Alaska and Hawaii are excluded. Same-day is our target, not a guarantee. If we miss the window, email support@petshiwu.com and we will reship the next day free or refund the order.';
 
 export const CANCELLATION_STATEMENT =
   'You can cancel an unshipped order within 2 hours of placing it by emailing support@petshiwu.com. After it ships, use the 365-day return policy.';

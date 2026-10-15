@@ -71,5 +71,4 @@ export function isDeliverableShippingAddress(state: string, zipCode: string): bo
   return isNewYorkState(state) && isNycDeliveryZip(zipCode);
 }
 
-export const OUT_OF_AREA_DELIVERY_MESSAGE =
-  'Some items in your cart are NYC same-day only and cannot ship nationwide. Remove those items or use a New York City address.';
+export const OUT_OF_AREA_DELIVERY_MESSAGE = 'Not available for this address yet';

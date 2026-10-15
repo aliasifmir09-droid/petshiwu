@@ -238,7 +238,7 @@ const Home = () => {
         <div className="container mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-8">
           <ProductGrid
             title="Popular for dogs"
-            subtitle="In stock for same-day NYC"
+            subtitle="Same-day NYC · 2-5 days NY, NJ & CT"
             href="/products?petType=dog"
             linkLabel="Shop dogs"
             queryKey="home-dogs"
@@ -378,7 +378,7 @@ const Home = () => {
               },
               {
                 title: '365-day returns, PayPal, and 24/7 support',
-                text: 'Unused items come back easy. Pay with PayPal or card. Call +1 (800) 259-2605 any time. Currently delivering in NYC. Shipped items go nationwide in 3-5 business days.',
+                text: 'Unused items come back easy. Pay with PayPal or card. Call +1 (800) 259-2605 any time. Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items.',
               },
             ].map((item) => (
               <div key={item.title} className="bg-white rounded-3xl p-7 border border-[#1E3A8A]/8 shadow-sm hover:shadow-md transition-shadow">

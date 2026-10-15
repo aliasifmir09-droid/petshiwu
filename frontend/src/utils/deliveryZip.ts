@@ -5,6 +5,7 @@
 
 import { NEXT_DAY_ZIPS } from '@/data/nextDayMetroZips';
 import { DEFAULT_TAX_RATE, TAX_RATES_BY_STATE } from '@/config/constants';
+import { canonicalStateCode } from '@/utils/usStates';
 
 export type DeliverySpeed = 'same-day' | 'next-day' | 'standard';
 
@@ -135,7 +136,7 @@ export function isNextDayDeliveryZip(input: string): boolean {
   return isValidZip(zip) && Boolean(NEXT_DAY_ZIPS[zip]);
 }
 
-/** NYC five-borough addresses only. Tri-state next-day is closed. */
+/** NYC five-borough same-day addresses. Tri-state 2–5 day delivery is a separate zone. */
 export function isDeliverableShippingAddress(state: string, zipCode: string): boolean {
   return isNewYorkState(state) && isNycDeliveryZip(zipCode);
 }
@@ -147,11 +148,9 @@ export function isNewYorkState(state: string): boolean {
 }
 
 export function normalizeShippingState(state: string): string {
-  const trimmed = String(state || '').trim();
-  if (isNewYorkState(trimmed)) return 'NY';
-  if (isNewJerseyState(trimmed)) return 'NJ';
-  if (isConnecticutState(trimmed)) return 'CT';
-  return trimmed;
+  const code = canonicalStateCode(state);
+  if (code === 'NY' || code === 'NJ' || code === 'CT' || /^[A-Z]{2}$/.test(code)) return code;
+  return String(state || '').trim();
 }
 
 /**
@@ -194,14 +193,15 @@ export function lookupZip(input: string, now: Date = new Date()): ZipLookupResul
 
   const nearby = NEXT_DAY_ZIPS[zip];
   const place = nearby?.area;
+  const triState = isTriStateDeliveryZip(zip);
   return {
     zip,
-    area: place || 'the US',
+    area: place || (triState ? 'NY, NJ & CT' : 'the US'),
     speed: 'standard',
-    headline: 'Same-day delivery is NYC only',
-    detail: place
-      ? `${place} is outside same-day delivery. Local items are NYC same-day only. Shipped items arrive in 3-5 business days.`
-      : 'Local items are NYC same-day only. Shipped items arrive nationwide in 3-5 business days.',
+    headline: triState ? 'Delivered in 2-5 business days' : 'Not available for this address yet',
+    detail: triState
+      ? 'Delivered in 2-5 business days across NY, NJ & CT. $7 under $49, free at $49+.'
+      : 'Local items are not available for this address yet. Shipped items arrive in 3-5 business days.',
     cutoffPassed: countdown.passed,
   };
 }
@@ -215,8 +215,20 @@ export function isCoordinateInNyc(lat: number, lng: number): boolean {
   );
 }
 
-export const OUT_OF_AREA_DELIVERY_MESSAGE =
-  'Some items in your cart are NYC same-day only and cannot ship nationwide. Remove those items or use a New York City address.';
+export const OUT_OF_AREA_DELIVERY_MESSAGE = 'Not available for this address yet';
+
+function isTriStateDeliveryZip(input: string): boolean {
+  const zipNum = Number(input);
+  if (isNycDeliveryZip(input)) return false;
+  return (
+    (zipNum >= 6001 && zipNum <= 6999) ||
+    (zipNum >= 7001 && zipNum <= 8999) ||
+    (zipNum >= 10501 && zipNum <= 10998) ||
+    (zipNum >= 11001 && zipNum <= 11096) ||
+    (zipNum >= 11701 && zipNum <= 11980) ||
+    (zipNum >= 12001 && zipNum <= 14925)
+  );
+}
 
 /** Shown on an in-stock local product when the shopper's ZIP is in NYC or still unknown. */
 export const SAME_DAY_PRODUCT_ELIGIBILITY = 'Same-day delivery in NYC';

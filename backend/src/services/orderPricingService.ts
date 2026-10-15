@@ -128,6 +128,7 @@ export const calculateTrustedOrderPricing = async (
   const shippingPrice = shippingPriceForLane(itemsPrice, lane, {
     freeByThreshold: itemsPrice >= FREE_SHIPPING_THRESHOLD,
     couponWaivesShipping: isFreeShippingCoupon(couponCode),
+    hasNationwide: laneItems.some((item) => item.tags?.some((tag) => String(tag).trim().toLowerCase() === 'topdawg')),
   });
   const taxPrice = Number((itemsPrice * getTaxRateForState(shippingState)).toFixed(2));
   const discountAmount = getCouponDiscount(couponCode, itemsPrice);

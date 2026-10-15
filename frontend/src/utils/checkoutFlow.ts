@@ -1,9 +1,5 @@
-import { isDeliverableShippingAddress, isValidZip } from '@/utils/deliveryZip';
-import {
-  cartShipsNationwide,
-  isUnitedStatesCountry,
-  localItemsBlockedOutsideNyc,
-} from '@/utils/deliveryLane';
+import { isValidZip } from '@/utils/deliveryZip';
+import { isCartDeliverable, isUnitedStatesCountry } from '@/utils/deliveryLane';
 
 type CheckoutCartItem = {
   product?: { tags?: string[]; deliveryLane?: string; name?: string } | null;
@@ -39,11 +35,8 @@ export const isCheckoutDeliveryReady = (
   }
   if (!isValidZip(shipping.zipCode)) return false;
   const address = { state: shipping.state, zipCode: shipping.zipCode, country: 'USA' };
-  const nyc = isDeliverableShippingAddress(shipping.state, shipping.zipCode);
-  const nationwide = cartShipsNationwide(items, address);
-  if (!nyc && !nationwide) return false;
-  if (localItemsBlockedOutsideNyc(items, address)) return false;
   if (!isUnitedStatesCountry(address.country)) return false;
+  if (!isCartDeliverable(items, address)) return false;
   if (!isAuthenticated && !EMAIL_PATTERN.test(shipping.email?.trim() || '')) return false;
   return true;
 };

@@ -70,6 +70,8 @@ describe('order confirmation email', () => {
     expect(email.html).toContain('tel:+18002592605');
     expect(email.html).toContain('+1 (800) 259-2605');
     expect(email.html).toContain('We pack and deliver this order on August 28, 2026');
+    expect(email.html).toContain('Same-day delivery in NYC');
+    expect(email.text).toContain('Same-day delivery in NYC');
   });
 
   test('guest receipts explain Google sign-in and how to create a password', () => {
@@ -157,6 +159,15 @@ describe('order confirmation email', () => {
     expect(paymentMethodLabel('cod')).toBe('Cash on delivery');
     expect(paymentMethodLabel('paypal')).toBe('PayPal');
     expect(absoluteImageUrl('/logo.png')).toBe('https://www.petshiwu.com/logo.png');
+  });
+
+  test('states the tri-state window on a New Jersey receipt', () => {
+    const nj = buildOrderConfirmationEmail('ada', 'ORD-NJ-1', {
+      ...sample,
+      shippingAddress: { ...sample.shippingAddress, city: 'Hoboken', state: 'NJ', zipCode: '07030' },
+    });
+    expect(nj.html).toContain('Delivered in 2-5 business days');
+    expect(nj.text).toContain('TopDawg items arrive separately in 3-5 business days');
   });
 
   test('confirmation email sender accepts guest checkout on the order payload', () => {

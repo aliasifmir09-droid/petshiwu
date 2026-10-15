@@ -22,7 +22,7 @@ describe('TonightPromiseCard', () => {
     );
 
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(/check delivery for your zip/i);
-    expect(screen.getByText(/shipped items go nationwide in 3-5 business days/i)).toBeInTheDocument();
+    expect(screen.getByText(/nationwide on thousands of items/i)).toBeInTheDocument();
     expect(screen.getAllByText(/no autoship/i).length).toBeGreaterThan(0);
     expect(screen.getByRole('link', { name: /shop now/i })).toHaveAttribute('href', '/products');
 

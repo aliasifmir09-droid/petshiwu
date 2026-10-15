@@ -2,8 +2,9 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, test } from 'vitest';
 import HomeHeroSlogans from '../HomeHeroSlogans';
-import { HOME_PROMO_TILES, HOME_SLOGAN, HOME_SLOGAN_SUPPORT } from '@/data/brandStories';
+import { HOME_PROMO_TILES, HOME_SLOGAN_SUPPORT } from '@/data/brandStories';
 import { FIRST_ORDER_CODE } from '@/config/publicPromos';
+import { HERO_H1 } from '@/utils/deliveryZones';
 
 describe('HomeHeroSlogans', () => {
   test('leads with the first-order offer and two campaign tiles', () => {
@@ -14,7 +15,7 @@ describe('HomeHeroSlogans', () => {
     );
 
     expect(screen.getByText(FIRST_ORDER_CODE)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(HOME_SLOGAN);
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(HERO_H1);
     expect(screen.getByText(HOME_SLOGAN_SUPPORT)).toBeInTheDocument();
     expect(screen.getByRole('img', { name: /dog, cat, and macaw/i })).toHaveAttribute(
       'src',
