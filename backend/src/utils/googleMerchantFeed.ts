@@ -91,6 +91,19 @@ export function cleanText(str: string, max = 5000): string {
   return xmlEscape(stripHtml(str).slice(0, max));
 }
 
+/**
+ * Return the first candidate that is non-blank once trimmed.
+ *
+ * Differs from `a || b || c`: a whitespace-only string (' ') is truthy and would win the
+ * `||` chain, then get trimmed away downstream. Blank means "no usable value", so skip it.
+ */
+export function firstNonBlank(...values: Array<string | undefined | null>): string {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value;
+  }
+  return '';
+}
+
 export function categoryName(category: FeedCategory): string {
   if (!category) return 'Pet Supplies';
   if (typeof category === 'string') return category || 'Pet Supplies';
@@ -358,7 +371,14 @@ export function feedItemsForProduct(product: FeedProduct): string {
 
   const link = canonicalProductUrl(product);
   const catName = categoryName(product.category);
-  const description = cleanText(product.shortDescription || product.description || product.name, 5000);
+  // `||` is not enough here: a whitespace-only stored description (' ') is TRUTHY, so it
+  // short-circuits the fallback chain and cleanText() trims it to ''. Google then sees
+  // <g:description></g:description> and rejects the item as "Missing field: description".
+  // Pick the first candidate that is non-blank AFTER trimming, not merely truthy.
+  const description = cleanText(
+    firstNonBlank(product.shortDescription, product.description, product.name),
+    5000,
+  );
   const brand = product.brand?.trim() || STORE_NAME;
   const productType = `${petTypeLabel(product.petType || '')} Supplies > ${catName}`;
   const googleCategory = googleProductCategory(product.petType || '', catName);

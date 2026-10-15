@@ -3,6 +3,7 @@ import {
   buildMerchantItemXml,
   canonicalProductUrl,
   cleanText,
+  firstNonBlank,
   feedItemsForProduct,
   googleProductCategory,
   isLiveAnimalOffer,
@@ -364,5 +365,61 @@ describe('googleMerchantFeed helpers', () => {
     expect(xml).toContain('</channel>');
     expect(xml.trimEnd().endsWith('</rss>')).toBe(true);
     expect((xml.match(/<item>/g) || []).length).toBe(1);
+  });
+});
+
+describe('feed descriptions survive a whitespace-only stored value', () => {
+  // Real shape from live Mongo: 40 Sheba products carry description: ' ' (a single space),
+  // shortDescription absent. ' ' is TRUTHY, so `shortDescription || description || name`
+  // selected it, cleanText() trimmed it to '', and every Sheba item shipped to Google as
+  // <g:description></g:description> — the "Missing field: description" rejection class.
+  const shebaShape = {
+    _id: '507f1f77bcf86cd799439099',
+    name: 'SHEBA Wet Cat Food, Salmon, Tuna, Trout, Variety Pack, 24 CT, 31.7 OZ',
+    slug: 'sheba-wet-cat-food-salmon-tuna-trout-variety-pack-24-ct-317-oz',
+    petType: 'cat',
+    brand: 'Sheba',
+    category: { name: 'Wet Food', slug: 'wet-food' },
+    images: ['https://petshiwu-cdn.b-cdn.net/products/sheba-cat-v2/5367551/base.webp'],
+    inStock: true,
+    description: ' ',
+    variants: [{ price: 27.98, stock: 5, sku: '5367551' }],
+  };
+
+  test('firstNonBlank skips whitespace-only values (the root cause)', () => {
+    expect(firstNonBlank(' ', ' ', 'real name')).toBe('real name');
+    expect(firstNonBlank(undefined, null, '  ', 'kept')).toBe('kept');
+    expect(firstNonBlank()).toBe('');
+  });
+
+  test('a whitespace-only description falls back to the product name', () => {
+    const xml = feedItemsForProduct(shebaShape);
+    expect(xml).toContain(
+      '<g:description>SHEBA Wet Cat Food, Salmon, Tuna, Trout, Variety Pack, 24 CT, 31.7 OZ</g:description>',
+    );
+  });
+
+  test('no feed item ever ships an empty <g:description>', () => {
+    const xml = feedItemsForProduct(shebaShape);
+    expect(xml).not.toMatch(/<g:description>\s*<\/g:description>/);
+  });
+
+  test('TEETH PROOF — the old `||` chain ships the empty description', () => {
+    // Reproduce the pre-fix expression exactly: it picks the truthy ' ' and cleanText wipes it.
+    // Stored through a variable so the truthiness is a runtime fact, not a compile-time literal.
+    const storedDescription: string | undefined = ' ';
+    const oldChain = cleanText(storedDescription || undefined || shebaShape.name, 5000);
+    expect(oldChain).toBe('');
+    expect(`<g:description>${oldChain}</g:description>`).toMatch(/<g:description>\s*<\/g:description>/);
+  });
+
+  test('a real description still wins over the name fallback', () => {
+    const xml = feedItemsForProduct({
+      ...shebaShape,
+      description: 'Tender cuts of salmon, tuna and trout in a savory gravy.',
+    });
+    expect(xml).toContain(
+      '<g:description>Tender cuts of salmon, tuna and trout in a savory gravy.</g:description>',
+    );
   });
 });
