@@ -13,7 +13,7 @@ describe('tonight delivery promise', () => {
   test('Google Business description fits the 750-character limit', () => {
     expect(GBP_DESCRIPTION.length).toBeGreaterThan(200);
     expect(GBP_DESCRIPTION.length).toBeLessThanOrEqual(750);
-    expect(GBP_DESCRIPTION).toMatch(/not a walk-in store/i);
+    expect(GBP_DESCRIPTION).toMatch(/not a store. We only deliver/i);
     expect(GBP_DESCRIPTION).toMatch(/3 PM/);
     expect(GBP_DESCRIPTION).toMatch(/1 PM/);
     expect(GBP_DESCRIPTION).toMatch(/11 PM/);

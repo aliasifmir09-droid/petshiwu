@@ -5,7 +5,7 @@ export const POLICY_EFFECTIVE_DATE = 'September 16, 2026';
 export const SELLER_OF_RECORD = 'Petshiwu';
 export const SELLER_ADDRESS = '37-68 74th St, Jackson Heights, NY 11372';
 export const SELLER_DISCLOSURE =
-  'Petshiwu is the seller of record for purchases made at petshiwu.com. We pack orders from our office and warehouse at 37-68 74th St, Jackson Heights, NY 11372. That address is not a walk-in store.';
+  'Petshiwu is the seller of record for purchases made at petshiwu.com. We pack orders from our office and warehouse at 37-68 74th St, Jackson Heights, NY 11372. That address is not a store. We only deliver.';
 
 export const RETURN_WINDOW_DAYS = 365;
 export const ORDER_CANCEL_WINDOW_HOURS = 2;
@@ -13,7 +13,7 @@ export const DAMAGED_ITEM_REPORT_DAYS = 7;
 export const REFUND_BUSINESS_DAYS = '5–10';
 
 export const DELIVERY_STATEMENT =
-  'Fast delivery across America. Same-day NYC is only for locally stocked items: order by 3 PM ET weekdays or 1 PM ET weekends for delivery before 11 PM across all five boroughs. After cutoff we deliver the next day. The whole catalog ships nationwide in 3-5 business days. Shipping is $7 under $49 and free at $49, including NYC. Alaska and Hawaii are excluded. Same-day is our target, not a guarantee. If we miss the window, email support@petshiwu.com and we will reship the next day free or refund the order.';
+  'Same-day NYC is only for locally stocked items: order by 3 PM ET weekdays or 1 PM ET weekends for delivery before 11 PM across all five boroughs. After cutoff we deliver the next day. The whole catalog ships nationwide in 2-5 business days. Shipping is $7 under $49 and free at $49, including NYC. Alaska and Hawaii are excluded. Same-day is our target, not a guarantee. If we miss the window, email support@petshiwu.com and we will reship the next day free or refund the order.';
 
 export const CANCELLATION_STATEMENT =
   'You can cancel an unshipped order within 2 hours of placing it by emailing support@petshiwu.com. After it ships, use the 365-day return policy.';

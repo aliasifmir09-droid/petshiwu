@@ -130,18 +130,18 @@ export function collectionSearchTitle(opts: {
     '';
 
   if (opts.featured) {
-    return 'Featured pet food & supplies – Fast delivery across America | Petshiwu';
+    return 'Featured pet food & supplies – Ships nationwide | Petshiwu';
   }
   if (category && petLabel) {
-    return `${category} for ${petLabel.toLowerCase()}s – Fast delivery across America | Petshiwu`;
+    return `${category} for ${petLabel.toLowerCase()}s – Ships nationwide | Petshiwu`;
   }
   if (category) {
-    return `${category} – Fast delivery across America | Petshiwu`;
+    return `${category} – Ships nationwide | Petshiwu`;
   }
-  if (pet === 'dog') return 'Dog food & supplies – Fast delivery across America | Petshiwu';
-  if (pet === 'cat') return 'Cat food & supplies – Fast delivery across America | Petshiwu';
-  if (petLabel) return `${petLabel} supplies – Fast delivery across America | Petshiwu`;
-  return 'Pet food & supplies – Fast delivery across America | Petshiwu';
+  if (pet === 'dog') return 'Dog food & supplies – Ships nationwide | Petshiwu';
+  if (pet === 'cat') return 'Cat food & supplies – Ships nationwide | Petshiwu';
+  if (petLabel) return `${petLabel} supplies – Ships nationwide | Petshiwu`;
+  return 'Pet food & supplies – Ships nationwide | Petshiwu';
 }
 
 /**
@@ -376,7 +376,7 @@ export const generateMetaKeywords = (
   // Add common pet-related keywords
   keywords.push(
     'pet supplies',
-    'online pet store',
+    'pet delivery platform',
     'pet food',
     'pet accessories',
     'pet care'

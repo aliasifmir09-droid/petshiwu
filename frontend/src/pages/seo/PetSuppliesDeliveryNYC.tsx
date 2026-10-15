@@ -1,7 +1,7 @@
 import SEOLandingPage from '../SEOLandingPage';
 
 /**
- * Targets: "pet supplies delivery NYC", "pet store delivery New York", "online pet store New York"
+ * Targets: "pet supplies delivery NYC", "pet store delivery New York", "pet delivery platform New York"
  * Captures the same intent as competitor brand searches — people want fast NYC pet supply delivery
  */
 const PetSuppliesDeliveryNYC = () => {
@@ -11,7 +11,7 @@ const PetSuppliesDeliveryNYC = () => {
       title="Same-Day Pet Supplies Delivery NYC — Order by 3 PM | Petshiwu"
       description="Same-day pet supplies delivery in NYC. Order by 3 PM weekdays (1 PM weekends), before 11 PM. No autoship. Free over $49. Dogs, cats, birds, fish, reptiles. All 5 boroughs."
       h1="Same-Day Pet Supplies Delivery in New York City"
-      introContent="Need pet food tonight in NYC? Order by 3 PM weekdays (1 PM weekends) and Petshiwu delivers before 11 PM to Queens, Brooklyn, Manhattan, the Bronx, and Staten Island. No autoship. 4,000+ products from Purina, Blue Buffalo, and Royal Canin. Free over $49. Check your ZIP on this page. Same-day is the five boroughs only; shipped items go nationwide in 3-5 business days."
+      introContent="Need pet food tonight in NYC? Order by 3 PM weekdays (1 PM weekends) and Petshiwu delivers before 11 PM to Queens, Brooklyn, Manhattan, the Bronx, and Staten Island. No autoship. 4,000+ products from Purina, Blue Buffalo, and Royal Canin. Free over $49. Check your ZIP on this page. Same-day is the five boroughs only; shipped items go nationwide in 2-5 business days."
       shoppableHub
       problemPoints={[
         "Lugging heavy bags of pet food from a store",

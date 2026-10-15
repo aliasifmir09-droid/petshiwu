@@ -101,7 +101,7 @@ const TonightPromiseCard = ({ variant = 'hero', shopHref = '/products' }: Tonigh
         aria-labelledby="hub-zip-heading"
       >
         <h2 id="hub-zip-heading" className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-2">
-          Check your ZIP — same-day NYC, or 3-5 business days on shipped items
+          Check your ZIP — same-day NYC, or 2-5 business days on shipped items
         </h2>
         <p className="text-slate-600 mb-5">
           {NATIONWIDE_SOON_NOTE} Free over ${TONIGHT.freeOver}. No autoship.
@@ -194,7 +194,7 @@ const TonightPromiseCard = ({ variant = 'hero', shopHref = '/products' }: Tonigh
             Check delivery for your ZIP
           </h2>
           <p className="text-base md:text-lg text-slate-600 mb-6 max-w-xl">
-            {NATIONWIDE_SOON_NOTE} Shipped items arrive in 3-5 business days. Free shipping over ${TONIGHT.freeOver} on local orders. No autoship.
+            {NATIONWIDE_SOON_NOTE} Shipped items arrive in 2-5 business days. Free shipping over ${TONIGHT.freeOver} on local orders. No autoship.
           </p>
           {cutoffLine ? <p className="text-sm font-medium text-slate-800 mb-1">{cutoffLine}</p> : null}
           <p className="text-sm text-slate-600 mb-5">{status}</p>

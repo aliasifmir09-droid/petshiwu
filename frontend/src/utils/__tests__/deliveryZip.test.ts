@@ -60,7 +60,7 @@ describe('deliveryZip', () => {
     const result = lookupZip('07030', new Date('2026-08-13T14:00:00Z'));
     expect(result?.area).toBe('Hoboken');
     expect(result?.speed).toBe('standard');
-    expect(result?.headline).toMatch(/3-5 business days/i);
+    expect(result?.headline).toMatch(/2-5 business days/i);
     expect(isDeliverableShippingAddress('NJ', '07030')).toBe(false);
   });
 
@@ -69,7 +69,7 @@ describe('deliveryZip', () => {
     const hicksville = lookupZip('11801', morning);
     expect(hicksville?.area).toBe('Hicksville');
     expect(hicksville?.speed).toBe('standard');
-    expect(hicksville?.headline).toMatch(/3-5 business days/i);
+    expect(hicksville?.headline).toMatch(/2-5 business days/i);
     expect(lookupZip('11803', morning)?.area).toBe('Plainview');
     expect(isNextDayDeliveryZip('11801')).toBe(true);
     expect(isDeliverableShippingAddress('NY', '11801')).toBe(false);
@@ -124,7 +124,7 @@ describe('deliveryZip', () => {
   test('lookupZip tells out-of-area ZIPs that delivery is NYC only', () => {
     const result = lookupZip('94105', new Date('2026-08-13T14:00:00Z'));
     expect(result?.speed).toBe('standard');
-    expect(result?.headline).toMatch(/3-5 business days/i);
+    expect(result?.headline).toMatch(/2-5 business days/i);
   });
 
   test('lookupZip returns null for incomplete input', () => {

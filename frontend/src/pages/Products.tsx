@@ -189,7 +189,7 @@ const Products = () => {
 
   // Build dynamic SEO based on filters
   const getProductsTitle = () => {
-    if (search) return `${search} – Fast delivery across America | Petshiwu`;
+    if (search) return `${search} – Ships nationwide | Petshiwu`;
     return collectionSearchTitle({ petType: petType || undefined, featured });
   };
 
@@ -209,7 +209,7 @@ const Products = () => {
   };
 
   const getProductsKeywords = () => {
-    const baseKeywords = ['pet supplies', 'online pet store'];
+    const baseKeywords = ['pet supplies', 'pet delivery platform'];
     if (featured) {
       return [...baseKeywords, 'featured products', 'dog food', 'cat food', 'pet toys'].join(', ');
     }

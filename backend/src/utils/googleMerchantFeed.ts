@@ -261,7 +261,7 @@ function shippingService(
 /** One order fee for the US. Same-day is an extra NY service on locally stocked items. */
 function shippingXml(price: number, sameDayNyc: boolean): string {
   const shipPrice = price >= 49 ? '0.00' : '7.00';
-  const ground = shippingService('', 'Ground', 3, 5, shipPrice);
+  const ground = shippingService('', 'Ground', 2, 5, shipPrice);
   if (!sameDayNyc) return ground;
   return `${shippingService('NY', 'Same-day NYC', 0, 1, shipPrice)}\n${ground}`;
 }
@@ -445,7 +445,7 @@ export function feedHeader(): string {
   <channel>
     <title>${xmlEscape(FEED_TITLE)}</title>
     <link>${SITE_ORIGIN}</link>
-    <description>Same-day NYC for locally stocked items. Nationwide delivery in 3-5 business days. $7 under $49, free at $49. Does not ship to Alaska or Hawaii.</description>
+    <description>Same-day NYC for locally stocked items. Nationwide delivery in 2-5 business days. $7 under $49, free at $49. Does not ship to Alaska or Hawaii.</description>
 `;
 }
 

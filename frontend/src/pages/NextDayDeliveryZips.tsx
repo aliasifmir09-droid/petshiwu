@@ -22,7 +22,7 @@ const NextDayDeliveryZips = () => {
     <div className="min-h-screen bg-white">
       <SEO
         title="NYC Same-Day Delivery | Petshiwu"
-        description="Petshiwü delivers same-day in New York City — Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. In-stock products are eligible for same-day delivery. Shipped items go nationwide in 3-5 business days."
+        description="Petshiwü delivers same-day in New York City — Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. In-stock products are eligible for same-day delivery. Shipped items go nationwide in 2-5 business days."
         url="/delivery-zips"
         keywords="NYC same-day pet delivery, Queens pet delivery, Brooklyn pet delivery, Manhattan pet delivery"
       />
@@ -39,7 +39,7 @@ const NextDayDeliveryZips = () => {
           We deliver same-day across Manhattan, Brooklyn, Queens, the Bronx, and Staten Island
           when you order by {TONIGHT.weekdayCutoff} weekdays or {TONIGHT.weekendCutoff} weekends.
           In-stock local products are {SAME_DAY_PRODUCT_ELIGIBILITY.toLowerCase()}. Locally stocked items
-          arrive in 3-5 business days anywhere in the US except Alaska and Hawaii. Same-day is only for locally stocked items in New York City.{' '}
+          arrive in 2-5 business days anywhere in the US except Alaska and Hawaii. Same-day is only for locally stocked items in New York City.{' '}
           <Link
             to="/learning/next-day-pet-delivery-within-50-miles-of-queens"
             className="text-[#1E3A8A] font-semibold hover:underline"
@@ -49,7 +49,7 @@ const NextDayDeliveryZips = () => {
           .
         </p>
         <p className="text-sm text-gray-600 mb-8">
-          Packed from Jackson Heights. Not a walk-in store.{' '}
+          Packed from Jackson Heights. Not a store. We only deliver.{' '}
           <Link to="/shipping" className="text-[#1E3A8A] font-semibold hover:underline">
             Shipping information
           </Link>

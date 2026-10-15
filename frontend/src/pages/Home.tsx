@@ -7,6 +7,7 @@ import HeroSlideshow from '@/components/HeroSlideshow';
 import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import TrustBadges from '@/components/TrustBadges';
+import DeliveryWindowExplainer from '@/components/DeliveryWindowExplainer';
 import CategoryIcons from '@/components/CategoryIcons';
 import ShopByPet from '@/components/ShopByPet';
 import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
@@ -141,7 +142,7 @@ const Home = () => {
               name: 'How much does Petshiwu shipping cost?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Shipping is $7 under $49 and free at $49, anywhere in the US except Alaska and Hawaii. Same-day in NYC for locally stocked items. Everything else arrives in 3-5 business days.'
+                text: 'Shipping is $7 under $49 and free at $49, anywhere in the US except Alaska and Hawaii. Same-day in NYC for locally stocked items. Everything else arrives in 2-5 business days.'
               }
             },
             {
@@ -157,7 +158,7 @@ const Home = () => {
               name: 'Where does Petshiwu deliver right now?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Same-day in New York City. Nationwide shipping in 3-5 business days on shipped items. The Jackson Heights address is warehouse and office, not a walk-in shop.'
+                text: 'Same-day in New York City. Nationwide delivery in 2-5 business days. The Jackson Heights address is warehouse and office, not a walk-in shop.'
               }
             },
             {
@@ -200,6 +201,8 @@ const Home = () => {
       {!authLoading && isAuthenticated ? <RestockDashboard /> : null}
 
       <HomeHeroSlogans />
+      <TrustBadges />
+      <DeliveryWindowExplainer />
 
       <ShopByPet />
 
@@ -238,7 +241,7 @@ const Home = () => {
         <div className="container mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-8">
           <ProductGrid
             title="Popular for dogs"
-            subtitle="Same-day NYC · nationwide delivery"
+            subtitle="Nationwide delivery in 2-5 business days"
             href="/products?petType=dog"
             linkLabel="Shop dogs"
             queryKey="home-dogs"
@@ -264,15 +267,13 @@ const Home = () => {
             linkLabel="Shop all Hill's"
             queryKey="hills-deals"
             filters={{ brand: "Hill's Science Diet", inStock: true }}
-            limit={4}
+            limit={8}
             wide
           />
         </div>
       </section>
 
       <CategoryIcons />
-
-      <TrustBadges />
 
       <HomeWelcomeTrust />
 
@@ -370,7 +371,7 @@ const Home = () => {
             {[
               {
                 title: 'Shop by pet, then by aisle',
-                text: 'Dogs, cats, birds, fish, reptiles, and small pets. Food, treats, litter, toys, and prescription diets — the aisles you expect from a national pet retailer.',
+                text: 'Dogs, cats, birds, fish, reptiles, and small pets. Food, treats, litter, toys, and prescription diets — delivered to your door.',
               },
               {
                 title: 'Vet-quality brands, no subscription trap',
@@ -378,7 +379,7 @@ const Home = () => {
               },
               {
                 title: '365-day returns, PayPal, and 24/7 support',
-                text: 'Unused items come back easy. Pay with PayPal or card. Call +1 (800) 259-2605 any time. Fast delivery across America. Same-day NYC · nationwide delivery across the US.',
+                text: 'Unused items come back easy. Pay with PayPal or card. Call +1 (800) 259-2605 any time. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.',
               },
             ].map((item) => (
               <div key={item.title} className="bg-white rounded-3xl p-7 border border-[#1E3A8A]/8 shadow-sm hover:shadow-md transition-shadow">

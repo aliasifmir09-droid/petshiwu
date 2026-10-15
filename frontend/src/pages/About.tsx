@@ -8,8 +8,8 @@ const About = () => {
     <>
       <SEO
       title="About Petshiwu | Online Pet Food & Supplies"
-      description="Petshiwu is an online pet store for food, treats, and supplies. Fast delivery across America. Same-day NYC · nationwide delivery across the US. No autoship. Free shipping over $49."
-      keywords="about Petshiwu, online pet store, pet food, pet supplies, no autoship"
+      description="Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. No autoship. Free shipping over $49."
+      keywords="about Petshiwu, pet delivery platform, pet food, pet supplies, no autoship"
       url="/about"
       />
       <StructuredData
@@ -35,7 +35,7 @@ const About = () => {
             closes: '23:59',
           }],
           priceRange: '$$',
-          description: 'Online pet store for food, treats, and supplies. Fast delivery across America. Same-day NYC · nationwide delivery across the US. Warehouse and office only — not a walk-in store.',
+          description: 'A pet delivery platform and company for food, treats, and supplies. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse and office only — not a store. We only deliver.',
           areaServed: ['United States', 'New York', 'New Jersey', 'Connecticut', 'Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'],
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
@@ -57,7 +57,7 @@ const About = () => {
                   About Petshiwu
                 </p>
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4">
-                  Your online pet store
+                  A pet delivery platform and company
                 </h1>
                 <p className="text-base sm:text-lg text-blue-100 max-w-xl mb-6">
                   Rooted in a deep love for animals and over a decade of hands-on pet care experience,
@@ -78,13 +78,13 @@ const About = () => {
                       <p className="text-xs uppercase tracking-wide text-blue-100/80 font-semibold">
                         Our Story
                       </p>
-                      <p className="text-lg font-bold">A nationwide pet store, online</p>
+                      <p className="text-lg font-bold">A delivery company, nationwide</p>
                     </div>
                   </div>
                   <p className="text-sm sm:text-base text-blue-50 mb-4">
-                    Petshiwu is an online pet store for food, treats, toys, and everyday care.
-                    We currently deliver in New York City, and shipped items go nationwide in 3-5 business days.
-                    Our warehouse packs orders — it is not a walk-in store.
+                    Petshiwu is a pet delivery platform and company. We deliver food, treats, toys, and everyday care.
+                    We ship nationwide in 2-5 business days, with same-day delivery in New York City for locally stocked items.
+                    Our warehouse packs orders — it is not a store. We only deliver.
                   </p>
                   <p className="text-xs sm:text-sm text-blue-100/90">
                     We continuously listen to American pet owners to better understand their unique needs
@@ -139,7 +139,7 @@ const About = () => {
                   A Community of Pet Enthusiasts
                 </h3>
                 <p className="text-sm text-gray-600">
-                  We&apos;re more than a store—we&apos;re a community. Our team is passionate about
+                  We&apos;re a delivery company and a community. Our team is passionate about
                   sharing expert advice and supporting pet parents at every stage of their journey.
                 </p>
               </div>
@@ -153,7 +153,7 @@ const About = () => {
                 </h3>
                 <p className="text-sm text-gray-600">
                   Enjoy easy online shopping, free shipping over $49, and a smooth experience from
-                  browsing to delivery. Fast delivery across America. Same-day NYC · nationwide delivery across the US.
+                  browsing to delivery. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.
                 </p>
               </div>
             </div>
@@ -172,7 +172,7 @@ const About = () => {
                   Thoughtfully Designed for Modern Pet Parents
                 </h2>
                 <p className="text-sm sm:text-base text-gray-600 mb-6">
-                  From nutrition and play to comfort and care, every product in our store is selected
+                  From nutrition and play to comfort and care, every product we deliver is selected
                   with your pet&apos;s health and happiness in mind.
                 </p>
 

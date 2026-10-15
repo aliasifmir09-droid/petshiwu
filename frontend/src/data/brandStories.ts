@@ -18,13 +18,13 @@ export type BrandStory = {
 };
 
 export const HOME_SLOGAN = '20% off first order.';
-export const HOME_SLOGAN_SUPPORT = 'Max $10 · no autoship. Same-day NYC · nationwide delivery across the US.';
+export const HOME_SLOGAN_SUPPORT = 'Max $10 · no autoship. Free shipping at $49+. $7 under $49.';
 export const HOME_HERO_IMAGE = '/hero-side-family.webp';
 export const HOME_HERO_IMAGE_JPG = '/hero-side-family.jpg';
 export const HOME_HERO_IMAGE_WIDE = '/hero-wide-family.webp';
 export const HOME_HERO_IMAGE_WIDE_JPG = '/hero-wide-family.jpg';
 export const NATIONWIDE_SOON_NOTE =
-  'Fast delivery across America. Same-day NYC · nationwide delivery across the US.';
+  'Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.';
 export const HOME_OFFER_STRIP =
   'FREEDOM20 · 20% off first order, max $10 · No autoship · Free shipping over $49';
 
@@ -65,9 +65,9 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
     slogan: 'Fair prices. Fast delivery. No autoship.',
     title: 'Our Promise | Petshiwu',
     description:
-      'Petshiwu is an online pet store for food, treats, and supplies. Free shipping over $49. No autoship. 365-day returns. Fast delivery across America. Same-day NYC · nationwide delivery across the US.',
+      'Petshiwu is a pet delivery platform and company. Free shipping over $49. No autoship. 365-day returns. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.',
     intro:
-      'Shop the brands you already buy, at a fair price, without a subscription. Free shipping over $49. Unused items come back for 365 days. Same-day in NYC for locally stocked items, and nationwide delivery in 3-5 business days.',
+      'Shop the brands you already buy, at a fair price, without a subscription. Free shipping over $49. Unused items come back for 365 days. Same-day in NYC for locally stocked items, and nationwide delivery in 2-5 business days.',
     image: '/hero-side-family.webp',
     imageJpg: '/hero-side-family.jpg',
     imageWide: '/hero-wide-family.webp',
@@ -84,7 +84,7 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
       },
       {
         heading: 'A return you can trust',
-        body: 'Unused items come back for 365 days. Call +1 (800) 259-2605 any time. Our warehouse packs orders — it is not a walk-in store.',
+        body: 'Unused items come back for 365 days. Call +1 (800) 259-2605 any time. Our warehouse packs orders — it is not a store. We only deliver.',
       },
     ],
     ctaLabel: 'Shop now',
@@ -98,7 +98,7 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
     description:
       'Petshiwu is for pet parents who want vet-quality food and supplies at the door — without a subscription lock-in. Free shipping over $49. No autoship.',
     intro:
-      'You already remember breakfast, dinner, and the late-night water bowl. We remember the bag, the litter, and the chew that lasts past Tuesday. Shop like a national pet store: by pet, by brand, and by what they eat every day.',
+      'You already remember breakfast, dinner, and the late-night water bowl. We remember the bag, the litter, and the chew that lasts past Tuesday. Order by pet, by brand, and by what they eat every day.',
     image: '/hero-side-play.webp',
     imageJpg: '/hero-side-play.jpg',
     imageWide: '/hero-wide-play.webp',
@@ -107,7 +107,7 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
     sections: [
       {
         heading: 'Shop by pet, then by aisle',
-        body: 'Dogs, cats, birds, fish, reptiles, and small pets. Food, treats, litter, toys, and prescription diets — the same aisles you expect from a national pet retailer.',
+        body: 'Dogs, cats, birds, fish, reptiles, and small pets. Food, treats, litter, toys, and prescription diets — delivered to your door.',
       },
       {
         heading: 'Vet-quality nutrition',
@@ -124,12 +124,12 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
     slug: 'from-queens',
     path: '/from-queens',
     kicker: 'How we ship',
-    slogan: 'Online pet store. We bring it to your door.',
+    slogan: 'A delivery platform and company. We bring it to your door.',
     title: 'How We Ship | Petshiwu',
     description:
-      'Petshiwu is an online pet store. Fast delivery across America. Same-day NYC · nationwide delivery across the US. Office and warehouse only — not a walk-in store. Free shipping over $49. No autoship.',
+      'Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Office and warehouse only — not a store. We only deliver. Free shipping over $49. No autoship.',
     intro:
-      'Every order is packed at our warehouse and sent to your door. Same-day in NYC for locally stocked items, and 3-5 business days nationwide — same brands, same 24/7 phone line, same 365-day returns.',
+      'Every order is packed at our warehouse and sent to your door. Same-day in NYC for locally stocked items, and 2-5 business days nationwide — same brands, same 24/7 phone line, same 365-day returns.',
     image: '/hero-side-delivery.webp',
     imageJpg: '/hero-side-delivery.jpg',
     imageWide: '/hero-wide-delivery.webp',
@@ -142,7 +142,7 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
       },
       {
         heading: 'Same-day NYC and nationwide delivery',
-        body: 'Same-day in the five boroughs when you order by cutoff (3 PM weekdays, 1 PM weekends), for locally stocked items only. The whole catalog arrives in 3-5 business days anywhere in the US except Alaska and Hawaii. Shipping is $7 under $49 and free at $49.',
+        body: 'Same-day in the five boroughs when you order by cutoff (3 PM weekdays, 1 PM weekends), for locally stocked items only. The whole catalog arrives in 2-5 business days anywhere in the US except Alaska and Hawaii. Shipping is $7 under $49 and free at $49.',
       },
       {
         heading: 'One standard, every order',

@@ -38,7 +38,7 @@ const Contact = () => {
     <>
       <SEO
         title="Contact Us | Petshiwu"
-        description="Contact Petshiwu for NYC pet delivery orders and questions. Jackson Heights is office and warehouse only — not a walk-in store."
+        description="Contact Petshiwu for NYC pet delivery orders and questions. Jackson Heights is office and warehouse only — not a store. We only deliver."
         keywords="contact petshiwu, pet delivery nyc contact, jackson heights pet delivery, pet care support"
       />
       <StructuredData
@@ -64,7 +64,7 @@ const Contact = () => {
             closes: '23:59',
           }],
           priceRange: '$$',
-          description: 'NYC same-day pet supply delivery. Jackson Heights is office and warehouse only — not a walk-in store. Contact us for orders, questions, or partnership inquiries.',
+          description: 'NYC same-day pet supply delivery. Jackson Heights is office and warehouse only — not a store. We only deliver. Contact us for orders, questions, or partnership inquiries.',
           areaServed: ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'],
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
@@ -115,7 +115,7 @@ const Contact = () => {
                     <p className="font-semibold text-gray-900 text-sm mb-0.5">Office & warehouse — not open to the public</p>
                     <p className="text-gray-600 text-sm">37-68 74th Street</p>
                     <p className="text-gray-600 text-sm">Jackson Heights, NY 11372</p>
-                    <p className="text-gray-500 text-xs mt-1">Not a walk-in store. Delivery only — shop online.</p>
+                    <p className="text-gray-500 text-xs mt-1">A delivery platform and company. Not a store.</p>
                   </div>
                 </div>
 

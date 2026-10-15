@@ -1,17 +1,17 @@
 import SEOLandingPage from '../SEOLandingPage';
 
 /**
- * Targets: "online pet store NYC", "best online pet store New York", "buy pet food online New York"
+ * Targets: "pet delivery platform NYC", "best pet delivery platform New York", "buy pet food online New York"
  * Broad national brand replacement intent
  */
 const OnlinePetStoreNYC = () => {
   return (
     <SEOLandingPage
       keyword="online-pet-store-nyc"
-      title="Online Pet Store NYC — Same-Day Delivery, No Autoship | Petshiwu"
-      description="NYC online pet store with same-day delivery. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Not a walk-in store. No autoship. Free over $49. All 5 boroughs."
-      h1="NYC's Online Pet Store — Delivered Tonight"
-      introContent="Petshiwu is the online pet store built for New York City apartments and no-car life. Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM to all five boroughs. We are not a walk-in store. No autoship. 4,000+ products. Free over $49. Packed in Queens, not a warehouse in the Midwest."
+      title="NYC pet delivery — Same-Day Delivery, No Autoship | Petshiwu"
+      description="NYC pet delivery platform with same-day delivery. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Not a store. We only deliver. No autoship. Free over $49. All 5 boroughs."
+      h1="NYC pet delivery — Delivered Tonight"
+      introContent="Petshiwu is the pet delivery platform built for New York City apartments and no-car life. Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM to all five boroughs. We are not a store. We only deliver. No autoship. 4,000+ products. Free over $49. Packed in Queens, not a warehouse in the Midwest."
       problemPoints={[
         "National online retailers that take days to ship to NYC",
         "No car to load up on heavy pet food and litter",
@@ -46,7 +46,7 @@ const OnlinePetStoreNYC = () => {
         },
         {
           question: "Is Petshiwu a local NYC business?",
-          answer: "Yes — our office and warehouse are in Jackson Heights, Queens. We are delivery only, not a walk-in store. Your order supports a New York City company, not a national chain."
+          answer: "Yes — our office and warehouse are in Jackson Heights, Queens. We are delivery only, not a store. We only deliver. Your order supports a New York City company, not a national chain."
         }
       ]}
       searchTerms={['dog food', 'cat food', 'pet food', 'pet supplies', 'pet toys', 'pet accessories', 'bird food', 'fish food']}

@@ -446,7 +446,7 @@ export const visualSearch = async (req: Request, res: Response, _next: NextFunct
     }
     const imageMime = mimeFromDataUrl(image, mimeType || 'image/jpeg');
 
-    const prompt = `You are a pet store product identifier. Look at this image carefully.
+    const prompt = `You are a pet product identifier for a delivery platform. Look at this image carefully.
 If you see a product package, READ the label (brand + product name). If you see an animal, say what supplies it likely needs.
 Return ONLY a JSON object (no markdown):
 {
@@ -530,7 +530,7 @@ Set productType to "unknown" only if the photo has nothing pet-related.`;
   }
 };
 
-const NEURAL_PROMPT = `You are Petshiwu Neural, a veterinary-informed computer vision system for a premium pet store.
+const NEURAL_PROMPT = `You are Petshiwu Neural, a veterinary-informed computer vision system for a pet delivery platform.
 Look at this image. If a pet is visible, identify it. If only a pet product is visible, say so.
 Return ONLY a JSON object (no markdown) in this exact shape:
 {

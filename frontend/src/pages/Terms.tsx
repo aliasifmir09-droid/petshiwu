@@ -23,7 +23,7 @@ const Terms = () => {
           </p>
           <p className="mt-2">
             Petshiwu is the seller of record for purchases on this site. We pack orders from
-            37-68 74th St, Jackson Heights, NY 11372 (office and warehouse only — not a walk-in store). Contact us
+            37-68 74th St, Jackson Heights, NY 11372 (office and warehouse only — not a store. We only deliver). Contact us
             at{' '}
             <a href="mailto:support@petshiwu.com" className="text-blue-600 hover:underline">
               support@petshiwu.com

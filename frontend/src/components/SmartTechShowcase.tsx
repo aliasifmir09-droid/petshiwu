@@ -50,7 +50,7 @@ const SmartTechShowcase = () => {
               Technology that gets treats to the door faster
             </h2>
             <p className="mt-3 text-white/80 text-base md:text-lg max-w-xl">
-              Instant same-day ZIP check, AI product advice, photo search, and voice search — built for NYC pet parents who do not have time to guess.
+              Instant ZIP check, AI product advice, photo search, and voice search — built for pet parents who do not have time to guess.
             </p>
 
             <div className="mt-6">

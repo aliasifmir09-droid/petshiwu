@@ -117,7 +117,7 @@ const Innovation = () => {
             Built to impress pet parents — then actually help them
           </h1>
           <p className="mt-5 text-lg md:text-xl text-white/80 max-w-2xl">
-            Chewy-class catalog. NYC same-day logistics. AI that knows your pet. Try the tools below — they are live on the store, not a pitch deck.
+            A nationwide catalog. Same-day in NYC on local stock. AI that knows your pet. Try the tools below — they are live on the store, not a pitch deck.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link

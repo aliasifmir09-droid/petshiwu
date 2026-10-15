@@ -10,7 +10,7 @@ const DogFoodDeliveryNYC = () => {
       title="Same-Day Dog Food Delivery NYC — Order by 3 PM | Petshiwu"
       description="Same-day dog food delivery in NYC. Order by 3 PM weekdays (1 PM weekends), at your door before 11 PM. No autoship. Free over $49. All 5 boroughs."
       h1="Same-Day Dog Food Delivery in New York City"
-      introContent="Stop carrying heavy bags of dog food on the subway. Petshiwu delivers dog food to your NYC door tonight when you order by 3 PM weekdays (1 PM weekends) — dry kibble, wet food, grain-free, raw, puppy, and senior. Purina, Blue Buffalo, Royal Canin, Hill's. No autoship. Free delivery over $49. Enter your ZIP below to confirm same-day in your neighborhood. Same-day is NYC only; shipped items go nationwide in 3-5 business days."
+      introContent="Stop carrying heavy bags of dog food on the subway. Petshiwu delivers dog food to your NYC door tonight when you order by 3 PM weekdays (1 PM weekends) — dry kibble, wet food, grain-free, raw, puppy, and senior. Purina, Blue Buffalo, Royal Canin, Hill's. No autoship. Free delivery over $49. Enter your ZIP below to confirm same-day in your neighborhood. Same-day is NYC only; shipped items go nationwide in 2-5 business days."
       shoppableHub
       problemPoints={[
         "Carrying 30-pound bags of dog food on the subway or in a cab",
@@ -47,7 +47,7 @@ const DogFoodDeliveryNYC = () => {
         },
         {
           question: "Is dog food delivery available in Brooklyn and Manhattan?",
-          answer: "Yes — all five boroughs. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. Jackson Heights is our warehouse, not a walk-in store."
+          answer: "Yes — all five boroughs. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. Jackson Heights is our warehouse, not a store. We only deliver."
         }
       ]}
       searchTerms={['dog food', 'kibble', 'dry dog food', 'wet dog food', 'grain free dog food', 'puppy food']}

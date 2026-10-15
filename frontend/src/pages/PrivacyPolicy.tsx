@@ -20,7 +20,7 @@ const PrivacyPolicy = () => {
           <p>
             Petshiwu (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is the seller of record for pet supplies
             sold at petshiwu.com. Our office and warehouse is 37-68 74th St,
-            Jackson Heights, NY 11372 (not a walk-in store). We operate the website <strong>petshiwu.com</strong> and are
+            Jackson Heights, NY 11372 (not a store. We only deliver). We operate the website <strong>petshiwu.com</strong> and are
             committed to protecting the privacy of every customer and visitor.
           </p>
           <p className="mt-2">

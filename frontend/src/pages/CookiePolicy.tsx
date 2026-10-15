@@ -19,7 +19,7 @@ const CookiePolicy = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-3">1. Who we are</h2>
           <p>
             Petshiwu is the seller of record at petshiwu.com, packed from 37-68 74th St,
-            Jackson Heights, NY 11372 (office and warehouse, not a walk-in store). This page
+            Jackson Heights, NY 11372 (office and warehouse, not a store. We only deliver). This page
             lists the cookies and similar technologies we actually use — it is not a copy of the{' '}
             <Link to="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>.
           </p>

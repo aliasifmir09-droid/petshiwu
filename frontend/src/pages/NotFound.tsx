@@ -43,7 +43,7 @@ const NotFound = () => {
             Page Not Found
           </h2>
           <p className="text-gray-600 mb-8">
-            The page you're looking for doesn't exist or has been moved.
+            That page is not on the platform. Shop the nationwide catalog, or call +1 (800) 259-2605.
           </p>
 
           {/* Action Buttons */}

@@ -31,23 +31,23 @@ export const NYC_HUB_LINKS: Array<{
   {
     path: '/pet-supplies-delivery-nyc',
     title: 'Pet supplies delivery NYC',
-    text: '4,000+ SKUs. Free over $49. Check your ZIP for same-day NYC vs 3-5 business days on shipped items.',
+    text: '4,000+ SKUs. Free over $49. Check your ZIP for same-day NYC vs 2-5 business days on shipped items.',
   },
   {
     path: '/pet-supplies-queens-ny',
     title: 'Pet supplies Queens',
-    text: 'Packed in Jackson Heights. Delivery only — not a walk-in store.',
+    text: 'Packed in Jackson Heights. Delivery only — not a store. We only deliver.',
   },
 ];
 
-export const NYC_HUB_ZIP_HEADING = 'Check your ZIP — same-day NYC, or 3-5 business days on shipped items';
+export const NYC_HUB_ZIP_HEADING = 'Check your ZIP — same-day NYC, or 2-5 business days on shipped items';
 
 export const NYC_HUB_ZIP_INTRO =
-  'NYC same-day: order by 3 PM weekdays or 1 PM weekends, at your door before 11 PM. Nationwide shipping in 3-5 business days on shipped items.';
+  'NYC same-day: order by 3 PM weekdays or 1 PM weekends, at your door before 11 PM. Nationwide delivery in 2-5 business days.';
 
-export const NYC_HUB_NATIONWIDE_HEADING = 'Nationwide shipping in 3-5 business days on shipped items';
+export const NYC_HUB_NATIONWIDE_HEADING = 'Nationwide delivery in 2-5 business days';
 
-export const NYC_HUB_NATIONWIDE_BODY = `${NATIONWIDE_SOON_NOTE} Free shipping over $${TONIGHT.freeOver}. No autoship. Jackson Heights is warehouse and office, not a walk-in store.`;
+export const NYC_HUB_NATIONWIDE_BODY = `${NATIONWIDE_SOON_NOTE} Free shipping over $${TONIGHT.freeOver}. No autoship. Jackson Heights is warehouse and office, not a store. We only deliver.`;
 
 export const NYC_HUB_COMPARE_HEADING = 'Why NYC shoppers pick Petshiwü first';
 
@@ -93,7 +93,7 @@ export const NYC_HUB_FAQS: Array<{ question: string; answer: string }> = [
   {
     question: 'Do you deliver same-day outside New York City?',
     answer:
-      'Same-day is New York City — Queens, Brooklyn, Manhattan, the Bronx, and Staten Island — when you order by 3 PM weekdays or 1 PM weekends. Nationwide shipping in 3-5 business days on shipped items.',
+      'Same-day is New York City — Queens, Brooklyn, Manhattan, the Bronx, and Staten Island — when you order by 3 PM weekdays or 1 PM weekends. Nationwide delivery in 2-5 business days.',
   },
   {
     question: 'Do you deliver to Staten Island the same day?',

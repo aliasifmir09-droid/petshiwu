@@ -169,6 +169,7 @@ describe('googleMerchantFeed helpers', () => {
     expect(xml).toContain('<g:region>NY</g:region>');
     expect(xml).toContain('<g:service>Ground</g:service>');
     expect(xml).toContain('<g:price>7.00 USD</g:price>');
+    expect(xml).toContain('<g:min_transit_time>2</g:min_transit_time>');
     expect(xml).toContain('<g:max_transit_time>5</g:max_transit_time>');
     expect(xml).not.toContain('<g:price>6.00 USD</g:price>');
     expect(xml).not.toContain('<g:region>NJ</g:region>');

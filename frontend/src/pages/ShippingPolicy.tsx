@@ -14,7 +14,7 @@ const ShippingPolicy = () => {
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <SEO
         title="Shipping Information | Petshiwu"
-        description="Petshiwu shipping: same-day in NYC for locally stocked items, 3-5 business days nationwide for the rest of the catalog. $7 under $49, free at $49. Does not ship to Alaska or Hawaii."
+        description="Petshiwu shipping: same-day in NYC for locally stocked items, 2-5 business days nationwide for the rest of the catalog. $7 under $49, free at $49. Does not ship to Alaska or Hawaii."
         url="/shipping"
       />
 
@@ -108,7 +108,7 @@ const ShippingPolicy = () => {
           <p>
             <strong>Same-day:</strong> Manhattan, Brooklyn, Queens, the Bronx, and Staten Island,
             when you order by cutoff — including Queens Hillside. Same-day is only for locally stocked items.
-            The rest of the catalog arrives in 3-5 business days anywhere in the US except Alaska and Hawaii.{' '}
+            The rest of the catalog arrives in 2-5 business days anywhere in the US except Alaska and Hawaii.{' '}
             <Link to="/delivery-zips" className="text-blue-600 hover:underline">
               Check your ZIP
             </Link>
@@ -122,8 +122,8 @@ const ShippingPolicy = () => {
             .
           </p>
           <p className="mt-2">
-            <strong>Nationwide:</strong> the whole catalog ships in 3-5 business days. Shipping is $7 under $49 and free at $49, including NYC.
-            Does not ship to Alaska or Hawaii. We pack from our warehouse — it is not a walk-in store.
+            <strong>Nationwide:</strong> the whole catalog ships in 2-5 business days. Shipping is $7 under $49 and free at $49, including NYC.
+            Does not ship to Alaska or Hawaii. We pack from our warehouse — it is not a store. We only deliver.
           </p>
         </section>
 

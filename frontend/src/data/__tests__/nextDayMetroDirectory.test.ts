@@ -25,7 +25,7 @@ describe('next-day ZIP directory', () => {
     expect(app).toContain('/delivery-zips');
     expect(page).toContain('url="/delivery-zips"');
     expect(page).toContain('Same-day delivery in New York City');
-    expect(page).toMatch(/3-5 business days anywhere in the US except Alaska and Hawaii/);
+    expect(page).toMatch(/2-5 business days anywhere in the US except Alaska and Hawaii/);
     expect(page).toMatch(/Same-day is only for locally stocked items in New York City/);
     expect(page).toMatch(/eligible for same-day delivery/i);
     expect(page).not.toMatch(/do not claim/i);

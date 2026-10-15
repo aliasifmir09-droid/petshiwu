@@ -207,7 +207,7 @@ export function lookupZip(input: string, now: Date = new Date()): ZipLookupResul
     zip,
     area: place || 'the US',
     speed: 'standard',
-    headline: 'Arrives in 3-5 business days',
+    headline: 'Arrives in 2-5 business days',
     detail: '$7 under $49, free at $49+.',
     cutoffPassed: countdown.passed,
   };

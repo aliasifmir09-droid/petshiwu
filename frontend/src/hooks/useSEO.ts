@@ -80,7 +80,7 @@ export const useSEO = (options: UseSEOOptions = {}) => {
         context
       );
     }
-    return 'pet supplies, dog food, cat food, pet toys, pet accessories, pet care, online pet store, premium pet food';
+    return 'pet supplies, dog food, cat food, pet toys, pet accessories, pet care, pet delivery platform, premium pet food';
   }, [keywords, context]);
 
   const ogImage = useMemo(() => generateOGImage(image), [image]);
