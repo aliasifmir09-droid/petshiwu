@@ -46,7 +46,7 @@ const PetStoreQueensNY = () => {
         },
         {
           question: "Is there a minimum order for delivery in Queens?",
-          answer: "No minimum order required! Delivery is $6 for orders under $49, and completely free for orders $49 and above. Most orders of pet food or supplies easily reach the free delivery threshold."
+          answer: "No minimum order required! Delivery is $7 for orders under $49, and completely free for orders $49 and above. Most orders of pet food or supplies easily reach the free delivery threshold."
         },
         {
           question: "Do you carry supplies for birds and exotic pets in Queens?",

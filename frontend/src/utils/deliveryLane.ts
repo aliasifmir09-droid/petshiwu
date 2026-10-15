@@ -1,9 +1,8 @@
-import { isNycDeliveryZip, isValidZip } from '@/utils/deliveryZip';
+import { isAlaskaOrHawaiiAddress, isNycDeliveryZip, isValidZip } from '@/utils/deliveryZip';
 import {
   DELIVERY_ZONE,
   LOCAL_UNAVAILABLE_MESSAGE,
-  MIXED_TRISTATE_DELIVERY_SUMMARY,
-  TRI_STATE_WINDOW,
+  NATIONWIDE_WINDOW,
   combineDeliveryFees,
   isNationwideProduct as zoneIsNationwideProduct,
   isTopDawgTags as zoneIsTopDawgTags,
@@ -26,7 +25,7 @@ export const NATIONWIDE_SHIPPING_COST = 7;
 export const NATIONWIDE_PRODUCT_PROMISE = 'Ships nationwide - arrives in 3-5 business days';
 /** TopDawg is never stocked locally, including for an NYC ZIP. */
 export const TOPDAWG_NOT_SAME_DAY_PROMISE =
-  'Not eligible for same-day delivery - ships nationwide, arrives in 3-5 business days (flat $7)';
+  'Not eligible for same-day delivery - ships nationwide, arrives in 3-5 business days ($7 under $49, free at $49+)';
 export const MIXED_CART_DELIVERY_SUMMARY =
   'Same-day items deliver today, shipped items arrive separately in 3-5 business days.';
 export const LOCAL_SAME_DAY_PROMISE = 'Same-day delivery in NYC';
@@ -35,25 +34,11 @@ export const LOCAL_ITEM_NATIONWIDE_MESSAGE =
   'Some items in your cart are NYC same-day only and cannot ship nationwide. Remove those items or use a New York City address.';
 
 export const INTERNATIONAL_DELIVERY_MESSAGE =
-  'We ship inside the United States. Local items deliver same-day in NYC or in 2-5 business days across NY, NJ, and CT. Shipped items arrive in 3-5 business days.';
+  'We ship inside the United States. Locally stocked items are same-day in NYC and arrive in 3-5 business days everywhere else. Does not ship to Alaska or Hawaii.';
 
 export const EXCLUDED_SHIPPING_MESSAGE = 'Does not ship to Alaska or Hawaii.';
 
-/** Alaska 99501–99950 and Hawaii 96701–96898. */
-export function isAlaskaOrHawaiiAddress(state?: string, zipCode?: string): boolean {
-  const normalized = String(state || '')
-    .trim()
-    .toUpperCase()
-    .replace(/\./g, '')
-    .replace(/\s+/g, ' ');
-  if (normalized === 'AK' || normalized === 'ALASKA' || normalized === 'HI' || normalized === 'HAWAII') {
-    return true;
-  }
-  const zip = String(zipCode || '').replace(/\D/g, '').slice(0, 5);
-  if (!/^\d{5}$/.test(zip)) return false;
-  const zipNum = Number(zip);
-  return (zipNum >= 99501 && zipNum <= 99950) || (zipNum >= 96701 && zipNum <= 96898);
-}
+export { isAlaskaOrHawaiiAddress };
 
 export type DeliveryLane = 'local' | 'nationwide';
 
@@ -92,9 +77,13 @@ export function productDeliveryPromise(
 ): string {
   if (isNationwideProduct(product)) return TOPDAWG_NOT_SAME_DAY_PROMISE;
   const zone = resolveDeliveryZone({ state: state || undefined, zipCode: zip || undefined }, product);
-  if (zone === DELIVERY_ZONE.TRI_STATE) return TRI_STATE_WINDOW;
-  if (zone === DELIVERY_ZONE.UNAVAILABLE) return LOCAL_UNAVAILABLE_MESSAGE;
-  return LOCAL_SAME_DAY_PROMISE;
+  if (zone === DELIVERY_ZONE.UNAVAILABLE) {
+    return isAlaskaOrHawaiiAddress(state || undefined, zip || undefined)
+      ? EXCLUDED_SHIPPING_MESSAGE
+      : LOCAL_UNAVAILABLE_MESSAGE;
+  }
+  if (zone === DELIVERY_ZONE.SAME_DAY_NYC) return LOCAL_SAME_DAY_PROMISE;
+  return NATIONWIDE_WINDOW;
 }
 
 export function cartHasMixedLanes(items: Array<{ product?: LaneProduct | null }>): boolean {
@@ -117,12 +106,16 @@ export function cartDeliverySummary(
   address?: { state?: string; zipCode?: string }
 ): string | null {
   const localZone = resolveDeliveryZone(address || {}, { tags: [] });
+  if (localZone === DELIVERY_ZONE.UNAVAILABLE && (address?.zipCode || address?.state)) {
+    return isAlaskaOrHawaiiAddress(address?.state, address?.zipCode)
+      ? EXCLUDED_SHIPPING_MESSAGE
+      : LOCAL_UNAVAILABLE_MESSAGE;
+  }
   if (cartHasMixedLanes(items)) {
-    return localZone === DELIVERY_ZONE.TRI_STATE ? MIXED_TRISTATE_DELIVERY_SUMMARY : MIXED_CART_DELIVERY_SUMMARY;
+    return localZone === DELIVERY_ZONE.SAME_DAY_NYC ? MIXED_CART_DELIVERY_SUMMARY : NATIONWIDE_WINDOW;
   }
   if (cartIsNationwideOnly(items)) return TOPDAWG_NOT_SAME_DAY_PROMISE;
-  if (localZone === DELIVERY_ZONE.TRI_STATE) return TRI_STATE_WINDOW;
-  if (localZone === DELIVERY_ZONE.UNAVAILABLE && (address?.zipCode || address?.state)) return LOCAL_UNAVAILABLE_MESSAGE;
+  if (localZone === DELIVERY_ZONE.NATIONWIDE) return NATIONWIDE_WINDOW;
   return null;
 }
 
@@ -136,18 +129,14 @@ export function cartShipsNationwide(
   return Boolean(address.zipCode && isValidZip(address.zipCode) && !isNycDeliveryZip(address.zipCode));
 }
 
-/** Local items outside NY/NJ/CT. Tri-state addresses are allowed. */
+/** Local items only fail this gate outside the United States. Alaska and Hawaii use the exclusion message. */
 export function localItemsBlockedOutsideNyc(
   items: Array<{ product?: LaneProduct | null }>,
   address: { state?: string; zipCode?: string; country?: string }
 ): boolean {
   if (!items.some((item) => !isNationwideProduct(item.product))) return false;
   if (address.country && !isUnitedStatesCountry(address.country)) return true;
-  if (isAlaskaOrHawaiiAddress(address.state, address.zipCode)) return false;
-  const hasZip = Boolean(address.zipCode && isValidZip(address.zipCode));
-  if (!hasZip && !String(address.state || '').trim()) return false;
-  const zone = resolveDeliveryZone(address, { tags: [] });
-  return zone !== DELIVERY_ZONE.SAME_DAY_NYC && zone !== DELIVERY_ZONE.TRI_STATE;
+  return false;
 }
 
 export function isCartDeliverable(
@@ -157,9 +146,7 @@ export function isCartDeliverable(
   if (!isUnitedStatesCountry(address.country)) return false;
   if (isAlaskaOrHawaiiAddress(address.state, address.zipCode)) return false;
   if (!address.zipCode || !isValidZip(address.zipCode)) return false;
-  if (items.length > 0 && items.every((item) => isNationwideProduct(item.product))) return true;
-  const zone = resolveDeliveryZone(address, { tags: [] });
-  return zone === DELIVERY_ZONE.SAME_DAY_NYC || zone === DELIVERY_ZONE.TRI_STATE;
+  return true;
 }
 
 export function quoteStorefrontDelivery(input: {
@@ -179,8 +166,8 @@ export function quoteStorefrontDelivery(input: {
   const hasNationwide = laneItems.some((item) => isNationwideProduct(item));
   const hasLocal = laneItems.some((item) => !isNationwideProduct(item));
   const zone = resolveDeliveryZone({ state: input.state, zipCode: input.zipCode }, hasLocal ? { tags: [] } : { tags: ['topdawg'] });
-  if (hasLocal && zone !== DELIVERY_ZONE.SAME_DAY_NYC && zone !== DELIVERY_ZONE.TRI_STATE) {
-    return { ok: false, message: LOCAL_UNAVAILABLE_MESSAGE };
+  if (zone === DELIVERY_ZONE.UNAVAILABLE) {
+    return { ok: false, message: EXCLUDED_SHIPPING_MESSAGE };
   }
   const merchandiseSubtotal = Number(
     input.items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1), 0).toFixed(2)

@@ -40,7 +40,7 @@ const PetSuppliesSoHoNYC = () => (
       },
       {
         question: "Do you deliver to Tribeca from SoHo?",
-        answer: "Yes — Tribeca is part of our delivery zone. Same great selection, same delivery pricing: $6 under $49, free over $49."
+        answer: "Yes — Tribeca is part of our delivery zone. Same great selection, same delivery pricing: $7 under $49, free over $49."
       },
       {
         question: "What makes Petshiwu different from boutique SoHo pet stores?",

@@ -941,17 +941,14 @@ const Checkout = () => {
                 ? 'Fast delivery across America. PayPal-secured payment and 24/7 support will be ready when we start accepting orders.'
                 : deliverySummary
                   ? deliverySummary
-                  : 'Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items.'}
+                  : 'Same-day NYC · nationwide delivery across the US.'}
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
             {!nationwideOnly && !excludedState && !localItemsBlocked && addressZone === DELIVERY_ZONE.SAME_DAY_NYC ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> NYC same-day</span>
             ) : null}
-            {!nationwideOnly && !excludedState && !localItemsBlocked && addressZone === DELIVERY_ZONE.TRI_STATE ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> 2-5 business days</span>
-            ) : null}
-            {!excludedState && (mixedCart || nationwideOnly) ? (
+            {!excludedState && (addressZone === DELIVERY_ZONE.NATIONWIDE || mixedCart || nationwideOnly) ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> 3-5 business days</span>
             ) : null}
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><ShieldCheck size={13} className="text-[#1E3A8A]" /> PayPal protected</span>

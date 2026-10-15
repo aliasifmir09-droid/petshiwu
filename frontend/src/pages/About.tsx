@@ -8,7 +8,7 @@ const About = () => {
     <>
       <SEO
       title="About Petshiwu | Online Pet Food & Supplies"
-      description="Petshiwu is an online pet store for food, treats, and supplies. Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items. No autoship. Free shipping over $49 on local orders."
+      description="Petshiwu is an online pet store for food, treats, and supplies. Fast delivery across America. Same-day NYC · nationwide delivery across the US. No autoship. Free shipping over $49."
       keywords="about Petshiwu, online pet store, pet food, pet supplies, no autoship"
       url="/about"
       />
@@ -35,7 +35,7 @@ const About = () => {
             closes: '23:59',
           }],
           priceRange: '$$',
-          description: 'Online pet store for food, treats, and supplies. Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items. Warehouse and office only — not a walk-in store.',
+          description: 'Online pet store for food, treats, and supplies. Fast delivery across America. Same-day NYC · nationwide delivery across the US. Warehouse and office only — not a walk-in store.',
           areaServed: ['United States', 'New York', 'New Jersey', 'Connecticut', 'Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'],
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
@@ -153,7 +153,7 @@ const About = () => {
                 </h3>
                 <p className="text-sm text-gray-600">
                   Enjoy easy online shopping, free shipping over $49, and a smooth experience from
-                  browsing to delivery. Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items.
+                  browsing to delivery. Fast delivery across America. Same-day NYC · nationwide delivery across the US.
                 </p>
               </div>
             </div>

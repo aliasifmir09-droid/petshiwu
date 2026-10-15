@@ -34,7 +34,7 @@ const PetSuppliesQueensNY = () => (
       },
       {
         question: "How much does pet supply delivery cost in Queens?",
-        answer: "Delivery is $6 for orders under $49. Orders over $49 get free delivery. Most orders of dog food or cat food easily hit the free delivery threshold — a single bag of kibble often qualifies."
+        answer: "Delivery is $7 for orders under $49. Orders over $49 get free delivery. Most orders of dog food or cat food easily hit the free delivery threshold — a single bag of kibble often qualifies."
       },
       {
         question: "What pet brands do you carry for Queens customers?",

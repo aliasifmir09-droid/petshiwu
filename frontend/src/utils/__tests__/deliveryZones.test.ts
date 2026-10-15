@@ -25,16 +25,19 @@ describe('resolveDeliveryZone', () => {
     expect(resolveDeliveryZone('NJ', shipped)).toBe(DELIVERY_ZONE.NATIONWIDE);
   });
 
-  test('NY, NJ, and CT outside NYC are tri-state for local stock', () => {
-    expect(resolveDeliveryZone({ state: 'NJ', zipCode: '07030' }, local)).toBe(DELIVERY_ZONE.TRI_STATE);
-    expect(resolveDeliveryZone({ state: 'CT', zipCode: '06103' }, local)).toBe(DELIVERY_ZONE.TRI_STATE);
-    expect(resolveDeliveryZone({ zipCode: '11801' }, local)).toBe(DELIVERY_ZONE.TRI_STATE);
+  test('local items outside NYC ship nationwide, including former tri-state ZIPs', () => {
+    expect(resolveDeliveryZone({ state: 'NJ', zipCode: '07030' }, local)).toBe(DELIVERY_ZONE.NATIONWIDE);
+    expect(resolveDeliveryZone({ state: 'CT', zipCode: '06103' }, local)).toBe(DELIVERY_ZONE.NATIONWIDE);
+    expect(resolveDeliveryZone({ zipCode: '11801' }, local)).toBe(DELIVERY_ZONE.NATIONWIDE);
     expect(resolveDeliveryZone({ state: 'CA', zipCode: '90001' }, local)).toBe(LOCAL_OUTSIDE_TRISTATE_ZONE);
+    expect(LOCAL_OUTSIDE_TRISTATE_ZONE).toBe(DELIVERY_ZONE.NATIONWIDE);
+    expect(resolveDeliveryZone({ state: 'AK', zipCode: '99501' }, local)).toBe(DELIVERY_ZONE.UNAVAILABLE);
+    expect(resolveDeliveryZone({ state: 'HI', zipCode: '96813' }, shipped)).toBe(DELIVERY_ZONE.UNAVAILABLE);
   });
 });
 
 describe('per-item fees', () => {
-  test('mixed carts add the same-day or tri-state fee to the flat $7', () => {
+  test('one $7 fee under $49 and free at $49, including NYC, mixed carts, and California', () => {
     const nyc = quoteStorefrontDelivery({
       state: 'NY',
       zipCode: '10001',
@@ -44,9 +47,9 @@ describe('per-item fees', () => {
         { product: shipped, price: 10, quantity: 1 },
       ],
     });
-    expect(nyc.ok && nyc.shippingPrice).toBe(13);
+    expect(nyc.ok && nyc.shippingPrice).toBe(7);
 
-    const freeLocalPlusTopDawg = quoteStorefrontDelivery({
+    const freeMixed = quoteStorefrontDelivery({
       state: 'NY',
       zipCode: '11372',
       country: 'USA',
@@ -55,8 +58,7 @@ describe('per-item fees', () => {
         { product: shipped, price: 9, quantity: 1 },
       ],
     });
-    expect(freeLocalPlusTopDawg.ok && freeLocalPlusTopDawg.localFee).toBe(0);
-    expect(freeLocalPlusTopDawg.ok && freeLocalPlusTopDawg.nationwideFee).toBe(7);
+    expect(freeMixed.ok && freeMixed.shippingPrice).toBe(0);
 
     const nj = quoteStorefrontDelivery({
       state: 'NJ',
@@ -67,15 +69,15 @@ describe('per-item fees', () => {
         { product: shipped, price: 10, quantity: 1 },
       ],
     });
-    expect(nj.ok && nj.shippingPrice).toBe(14);
+    expect(nj.ok && nj.shippingPrice).toBe(7);
 
-    const njFree = quoteStorefrontDelivery({
+    const free = quoteStorefrontDelivery({
       state: 'CT',
       zipCode: '06103',
       country: 'USA',
       items: [{ product: local, price: 49, quantity: 1 }],
     });
-    expect(njFree.ok && njFree.shippingPrice).toBe(0);
+    expect(free.ok && free.shippingPrice).toBe(0);
 
     const californiaLocal = quoteStorefrontDelivery({
       state: 'CA',
@@ -83,7 +85,7 @@ describe('per-item fees', () => {
       country: 'USA',
       items: [{ product: local, price: 20, quantity: 1 }],
     });
-    expect(californiaLocal.ok).toBe(false);
+    expect(californiaLocal.ok && californiaLocal.shippingPrice).toBe(7);
 
     const californiaShipped = quoteStorefrontDelivery({
       state: 'CA',
@@ -91,7 +93,15 @@ describe('per-item fees', () => {
       country: 'USA',
       items: [{ product: shipped, price: 80, quantity: 1 }],
     });
-    expect(californiaShipped.ok && californiaShipped.shippingPrice).toBe(7);
+    expect(californiaShipped.ok && californiaShipped.shippingPrice).toBe(0);
+
+    const alaska = quoteStorefrontDelivery({
+      state: 'AK',
+      zipCode: '99501',
+      country: 'USA',
+      items: [{ product: shipped, price: 20, quantity: 1 }],
+    });
+    expect(alaska.ok).toBe(false);
   });
 });
 

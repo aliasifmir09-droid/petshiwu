@@ -32,7 +32,7 @@ const PetSuppliesBronxNY = () => (
       },
       {
         question: "How much is delivery for pet supplies in the Bronx?",
-        answer: "Delivery is $6 for orders under $49, and completely free for orders $49 and above. A bag of dog food or cat food alone usually qualifies for free delivery."
+        answer: "Delivery is $7 for orders under $49, and completely free for orders $49 and above. A bag of dog food or cat food alone usually qualifies for free delivery."
       },
       {
         question: "What dog food brands do you deliver to the Bronx?",

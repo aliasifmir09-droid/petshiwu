@@ -161,13 +161,13 @@ describe('order confirmation email', () => {
     expect(absoluteImageUrl('/logo.png')).toBe('https://www.petshiwu.com/logo.png');
   });
 
-  test('states the tri-state window on a New Jersey receipt', () => {
+  test('states the nationwide window on a New Jersey receipt', () => {
     const nj = buildOrderConfirmationEmail('ada', 'ORD-NJ-1', {
       ...sample,
       shippingAddress: { ...sample.shippingAddress, city: 'Hoboken', state: 'NJ', zipCode: '07030' },
     });
-    expect(nj.html).toContain('Delivered in 2-5 business days');
-    expect(nj.text).toContain('TopDawg items arrive separately in 3-5 business days');
+    expect(nj.html).toContain('Arrives in 3-5 business days');
+    expect(nj.text).toContain('Arrives in 3-5 business days');
   });
 
   test('confirmation email sender accepts guest checkout on the order payload', () => {

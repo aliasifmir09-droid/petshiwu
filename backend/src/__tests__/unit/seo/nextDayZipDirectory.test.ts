@@ -16,9 +16,9 @@ describe('next-day ZIP directory for Google', () => {
     const html = buildNextDayZipDirectoryHtml();
     expect(NEXT_DAY_ZIP_COUNT).toBeGreaterThan(500);
     expect(html).toMatch(/Same-day delivery in New York City/);
-    expect(html).toMatch(/eligible for same-day delivery/i);
-    expect(html).toMatch(/2-5 business days across NY, NJ, and CT/);
-    expect(html).toMatch(/Nationwide shipping in 3-5 business days on shipped items/);
+    expect(html).toMatch(/locally stocked items/);
+    expect(html).toMatch(/3-5 business days anywhere in the US except Alaska and Hawaii/);
+    expect(html).toMatch(/whole catalog arrives in 3-5 business days/);
     expect(html).not.toMatch(/accepts orders for next-day/i);
     expect(html).not.toContain('11801');
     expect(html).not.toContain('Hicksville');

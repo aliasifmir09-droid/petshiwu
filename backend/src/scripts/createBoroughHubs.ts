@@ -59,7 +59,7 @@ const hubs = [
 <ol>
   <li>Browse 10,000+ products at petshiwu.com</li>
   <li>Add to cart — no account required to shop</li>
-  <li>Checkout: shipping is <strong>$6 for orders under $49</strong>, <strong>FREE for orders $49 and over</strong></li>
+  <li>Checkout: shipping is <strong>$7 for orders under $49</strong>, <strong>FREE for orders $49 and over</strong></li>
   <li>Your order ships directly to your Queens address</li>
 </ol>
 
@@ -80,7 +80,7 @@ const hubs = [
   <div itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
     <h3 itemprop="name">How much does delivery cost in Queens?</h3>
     <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-      <p itemprop="text">Shipping is $6 flat for orders under $49. Orders $49 and over ship completely free — no minimum orders, no membership required.</p>
+      <p itemprop="text">Shipping is $7 flat for orders under $49. Orders $49 and over ship completely free — no minimum orders, no membership required.</p>
     </div>
   </div>
 
@@ -123,7 +123,7 @@ const hubs = [
 
 <p>Brooklyn is the most populated borough in New York City — and home to some of the most devoted pet owners in the country. Petshiwu delivers 10,000+ pet food and supply products to every Brooklyn neighborhood, from Williamsburg to Bay Ridge, from Greenpoint to Brownsville. No membership, no subscription — just the brands your pet loves, shipped straight to your door.</p>
 
-<p>Free delivery on every order over $49. Flat $6 shipping for smaller orders. Brooklyn pet owners have been waiting for a better option than hauling 30-pound kibble bags home on the subway — we built that option.</p>
+<p>Free delivery on every order over $49. $7 shipping for smaller orders. Brooklyn pet owners have been waiting for a better option than hauling 30-pound kibble bags home on the subway — we built that option.</p>
 
 <h2>Neighborhoods We Serve in Brooklyn</h2>
 <p>Petshiwu delivers pet food and supplies to every neighborhood across Brooklyn, including:</p>
@@ -158,7 +158,7 @@ const hubs = [
 <ol>
   <li>Browse 10,000+ products at petshiwu.com</li>
   <li>Add to cart — no account required</li>
-  <li>Shipping: <strong>$6 flat for orders under $49</strong>, <strong>FREE for orders $49 and over</strong></li>
+  <li>Shipping: <strong>$7 flat for orders under $49</strong>, <strong>FREE for orders $49 and over</strong></li>
   <li>Your order ships to your Brooklyn address</li>
 </ol>
 
@@ -179,7 +179,7 @@ const hubs = [
   <div itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
     <h3 itemprop="name">How much is shipping to Brooklyn?</h3>
     <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-      <p itemprop="text">Shipping to Brooklyn is $6 for orders under $49. Orders totaling $49 or more ship free. No membership needed.</p>
+      <p itemprop="text">Shipping to Brooklyn is $7 for orders under $49. Orders totaling $49 or more ship free. No membership needed.</p>
     </div>
   </div>
 
@@ -254,7 +254,7 @@ const hubs = [
 <ol>
   <li>Browse 10,000+ products at petshiwu.com</li>
   <li>Add to cart — no account required</li>
-  <li>Shipping: <strong>$6 flat for orders under $49</strong>, <strong>FREE for orders $49 and over</strong></li>
+  <li>Shipping: <strong>$7 flat for orders under $49</strong>, <strong>FREE for orders $49 and over</strong></li>
   <li>Your order ships to your Manhattan address with apartment/unit delivery instructions</li>
 </ol>
 
@@ -272,7 +272,7 @@ const hubs = [
   <div itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
     <h3 itemprop="name">How much is shipping to Manhattan?</h3>
     <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-      <p itemprop="text">$6 flat for orders under $49. Free for orders of $49 or more. No membership, no subscription, no minimum order size.</p>
+      <p itemprop="text">$7 for orders under $49. Free for orders of $49 or more. No membership, no subscription, no minimum order size.</p>
     </div>
   </div>
 
@@ -293,7 +293,7 @@ const hubs = [
   <div itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
     <h3 itemprop="name">Is there a minimum order for Manhattan delivery?</h3>
     <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-      <p itemprop="text">No minimum order. Order as little or as much as you need. Shipping is just $6 for orders under $49, and free above that threshold.</p>
+      <p itemprop="text">No minimum order. Order as little or as much as you need. Shipping is just $7 for orders under $49, and free above that threshold.</p>
     </div>
   </div>
 
@@ -342,7 +342,7 @@ const hubs = [
 <h2>How Delivery Works</h2>
 <ol>
   <li>Shop petshiwu.com — 10,000+ products, no account required</li>
-  <li>Shipping is <strong>$6 for orders under $49</strong>, <strong>FREE for orders $49 and over</strong></li>
+  <li>Shipping is <strong>$7 for orders under $49</strong>, <strong>FREE for orders $49 and over</strong></li>
   <li>Add building-specific delivery instructions at checkout</li>
   <li>Your order ships to your Bronx address</li>
 </ol>
@@ -361,7 +361,7 @@ const hubs = [
   <div itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
     <h3 itemprop="name">How much does delivery cost to the Bronx?</h3>
     <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-      <p itemprop="text">Shipping to the Bronx is $6 flat for orders under $49. Orders of $49 or more ship completely free.</p>
+      <p itemprop="text">Shipping to the Bronx is $7 for orders under $49. Orders of $49 or more ship completely free.</p>
     </div>
   </div>
 
@@ -421,7 +421,7 @@ const hubs = [
 <h2>How Delivery Works</h2>
 <ol>
   <li>Shop petshiwu.com — 10,000+ products</li>
-  <li>Shipping: <strong>$6 for orders under $49</strong>, <strong>FREE for $49 and over</strong></li>
+  <li>Shipping: <strong>$7 for orders under $49</strong>, <strong>FREE for $49 and over</strong></li>
   <li>Enter delivery instructions for your home</li>
   <li>Order ships to your Staten Island address</li>
 </ol>
@@ -440,7 +440,7 @@ const hubs = [
   <div itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
     <h3 itemprop="name">How much does delivery cost to Staten Island?</h3>
     <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-      <p itemprop="text">Shipping to Staten Island is $6 for orders under $49 and completely free for orders of $49 or more. No membership needed.</p>
+      <p itemprop="text">Shipping to Staten Island is $7 for orders under $49 and completely free for orders of $49 or more. No membership needed.</p>
     </div>
   </div>
 
