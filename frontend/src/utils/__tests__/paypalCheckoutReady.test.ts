@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { EXCLUDED_SHIPPING_MESSAGE } from '@/utils/deliveryLane';
 import { OUT_OF_AREA_DELIVERY_MESSAGE } from '@/utils/deliveryZip';
 import { paypalCheckoutBlocker } from '@/utils/paypalCheckoutReady';
 
@@ -59,5 +60,19 @@ describe('paypalCheckoutBlocker', () => {
         items: [{ product: { tags: ['topdawg'] } }],
       })
     ).toBeNull();
+    expect(
+      paypalCheckoutBlocker({
+        shippingAddress: { ...nyc, city: 'Anchorage', state: 'AK', zipCode: '99501' },
+        guestEmail: 'ada@example.com',
+        items: [{ product: { tags: ['topdawg'] } }],
+      })
+    ).toBe(EXCLUDED_SHIPPING_MESSAGE);
+    expect(
+      paypalCheckoutBlocker({
+        shippingAddress: { ...nyc, city: 'Honolulu', state: 'HI', zipCode: '96813' },
+        guestEmail: 'ada@example.com',
+        items: [{ product: { tags: ['topdawg'] } }],
+      })
+    ).toBe(EXCLUDED_SHIPPING_MESSAGE);
   });
 });

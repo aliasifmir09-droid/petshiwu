@@ -14,8 +14,10 @@ import { ORDERING_PAUSED } from '@/config/ordering';
 import { TAX_RATE } from '@/config/constants';
 import { amountUntilFreeShipping, shippingCostForSubtotal } from '@/utils/orderTotals';
 import {
+  EXCLUDED_SHIPPING_MESSAGE,
   cartDeliverySummary,
   cartShipsNationwide,
+  isAlaskaOrHawaiiAddress,
   LOCAL_ITEM_NATIONWIDE_MESSAGE,
   localItemsBlockedOutsideNyc,
   productDeliveryPromise,
@@ -239,7 +241,12 @@ const Cart = () => {
 
   const nationwideOrder = cartShipsNationwide(items, { zipCode: savedZip, country: 'USA' });
   const localBlocked = localItemsBlockedOutsideNyc(items, { zipCode: savedZip, country: 'USA' });
-  const deliverySummary = localBlocked ? null : cartDeliverySummary(items);
+  const excludedZip = isAlaskaOrHawaiiAddress(undefined, savedZip);
+  const deliverySummary = excludedZip
+    ? EXCLUDED_SHIPPING_MESSAGE
+    : localBlocked
+      ? null
+      : cartDeliverySummary(items);
   const shipping = shippingCostForSubtotal(subtotal, false, nationwideOrder);
   const tax = subtotal * TAX_RATE; // Estimate only — exact state tax (NY 8.875% / NJ 6.625% / CT 6.35%) is applied at checkout.
   const total = subtotal + shipping + tax;

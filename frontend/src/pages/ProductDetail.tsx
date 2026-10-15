@@ -29,7 +29,7 @@ import ProductVariantPicker from '@/components/ProductVariantPicker';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
 import { isNycDeliveryZip, isValidZip } from '@/utils/deliveryZip';
-import { isNationwideProduct, productDeliveryPromise } from '@/utils/deliveryLane';
+import { EXCLUDED_SHIPPING_MESSAGE, isNationwideProduct, productDeliveryPromise } from '@/utils/deliveryLane';
 import { useSavedDeliveryZip } from '@/hooks/useSavedDeliveryZip';
 
 // Lazy load heavy dependencies
@@ -858,9 +858,12 @@ const ProductDetail = () => {
           <div className="mb-4">
             {isReadyToShip ? (
               isNationwideProduct(product) ? (
-                <p className="text-sm font-semibold text-[#1E3A8A]">
-                  {productDeliveryPromise(product, savedZip)}
-                </p>
+                <div>
+                  <p className="text-sm font-semibold text-[#1E3A8A]">
+                    {productDeliveryPromise(product, savedZip)}
+                  </p>
+                  <p className="text-xs text-slate-600 mt-0.5">{EXCLUDED_SHIPPING_MESSAGE}</p>
+                </div>
               ) : (
                 <div>
                   <div className="flex items-center gap-2">

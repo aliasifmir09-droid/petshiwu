@@ -64,6 +64,8 @@ describe('checkoutFlow', () => {
     expect(isCheckoutDeliveryReady(hoboken, false, topDawg)).toBe(true);
     expect(isCheckoutDeliveryReady(hoboken, false, mixed)).toBe(false);
     expect(isCheckoutDeliveryReady(nycAddress, false, mixed)).toBe(true);
+    expect(isCheckoutDeliveryReady({ ...nycAddress, city: 'Anchorage', state: 'AK', zipCode: '99501' }, false, topDawg)).toBe(false);
+    expect(isCheckoutDeliveryReady({ ...nycAddress, city: 'Honolulu', state: 'HI', zipCode: '96813' }, false, topDawg)).toBe(false);
   });
 
   test('logged-in shoppers can skip email on the form', () => {

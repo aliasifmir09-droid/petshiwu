@@ -13,7 +13,7 @@ import Toast from '@/components/Toast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { availableCartStock } from '@/utils/cartStock';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
-import { isNationwideProduct, productDeliveryPromise } from '@/utils/deliveryLane';
+import { EXCLUDED_SHIPPING_MESSAGE, isNationwideProduct, productDeliveryPromise } from '@/utils/deliveryLane';
 import { useSavedDeliveryZip } from '@/hooks/useSavedDeliveryZip';
 
 interface QuickViewModalProps {
@@ -220,7 +220,10 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
                 {/* Stock Status — no unit counts until inventory is maintained */}
                 {isReadyToShip ? (
                   isNationwideProduct(product) ? (
-                    <p className="text-sm font-semibold text-[#1E3A8A]">{deliveryPromise}</p>
+                    <>
+                      <p className="text-sm font-semibold text-[#1E3A8A]">{deliveryPromise}</p>
+                      <p className="text-xs text-slate-500">{EXCLUDED_SHIPPING_MESSAGE}</p>
+                    </>
                   ) : (
                     <>
                       <p className="text-green-700 font-medium">{inStockLabel(true)}</p>

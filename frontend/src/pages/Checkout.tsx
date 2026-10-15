@@ -37,11 +37,13 @@ import {
 } from '@/utils/deliveryZip';
 import { shippingCostForSubtotal } from '@/utils/orderTotals';
 import {
+  EXCLUDED_SHIPPING_MESSAGE,
   LOCAL_ITEM_NATIONWIDE_MESSAGE,
   cartDeliverySummary,
   cartHasMixedLanes,
   cartIsNationwideOnly,
   cartShipsNationwide,
+  isAlaskaOrHawaiiAddress,
   isUnitedStatesCountry,
   localItemsBlockedOutsideNyc,
   productDeliveryPromise,
@@ -247,8 +249,13 @@ const Checkout = () => {
     country: shippingInfo.country,
   };
   const nationwideOrder = cartShipsNationwide(items, addressForLane);
+  const excludedState = isAlaskaOrHawaiiAddress(shippingInfo.state, shippingInfo.zipCode);
   const localItemsBlocked = localItemsBlockedOutsideNyc(items, addressForLane) || !isUnitedStatesCountry(shippingInfo.country);
-  const deliverySummary = localItemsBlocked ? null : cartDeliverySummary(items);
+  const deliverySummary = excludedState
+    ? EXCLUDED_SHIPPING_MESSAGE
+    : localItemsBlocked
+      ? null
+      : cartDeliverySummary(items);
   const mixedCart = cartHasMixedLanes(items);
   const nationwideOnly = cartIsNationwideOnly(items);
   const zipOutOfArea = localItemsBlocked && Boolean(zipLookup);
@@ -418,7 +425,7 @@ const Checkout = () => {
     }
   };
 
-  const shipping = shippingCostForSubtotal(subtotal, couponWaivesShipping, nationwideOrder);
+  const shipping = excludedState ? 0 : shippingCostForSubtotal(subtotal, couponWaivesShipping, nationwideOrder);
   const tax = Number((subtotal * getTaxRateForState(shippingInfo.state)).toFixed(2));
   const onlineTotal = Math.max(0, subtotal + shipping + tax - couponDiscount);
   const total = Math.max(0, onlineTotal + donationAmount);
@@ -613,6 +620,10 @@ const Checkout = () => {
       return;
     }
 
+    if (isAlaskaOrHawaiiAddress(shippingInfo.state, shippingInfo.zipCode)) {
+      showToast(EXCLUDED_SHIPPING_MESSAGE, 'error');
+      return;
+    }
     if (localItemsBlocked) {
       showToast(isUnitedStatesCountry(shippingInfo.country) ? OUT_OF_AREA_DELIVERY_MESSAGE : 'We ship inside the United States.', 'error');
       return;
@@ -925,10 +936,10 @@ const Checkout = () => {
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
-            {!nationwideOnly ? (
+            {!nationwideOnly && !excludedState ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> NYC same-day</span>
             ) : null}
-            {mixedCart || nationwideOnly ? (
+            {!excludedState && (mixedCart || nationwideOnly) ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> 3-5 business days</span>
             ) : null}
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><ShieldCheck size={13} className="text-[#1E3A8A]" /> PayPal protected</span>
@@ -1135,7 +1146,11 @@ const Checkout = () => {
                           className={fieldClass} />
                       </div>
                     </div>
-                    {zipOutOfArea ? (
+                    {excludedState ? (
+                      <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+                        {EXCLUDED_SHIPPING_MESSAGE}
+                      </p>
+                    ) : zipOutOfArea ? (
                       <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
                         {LOCAL_ITEM_NATIONWIDE_MESSAGE}
                       </p>
@@ -1374,7 +1389,13 @@ const Checkout = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-stone-500">Shipping</span>
                     <span className="font-semibold text-stone-800">
-                      {shipping === 0 ? <span className="text-emerald-600">FREE</span> : `$${shipping.toFixed(2)}`}
+                      {excludedState ? (
+                        <span className="text-amber-800">Unavailable</span>
+                      ) : shipping === 0 ? (
+                        <span className="text-emerald-600">FREE</span>
+                      ) : (
+                        `$${shipping.toFixed(2)}`
+                      )}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">

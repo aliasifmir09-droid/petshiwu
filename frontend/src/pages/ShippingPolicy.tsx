@@ -127,6 +127,7 @@ const ShippingPolicy = () => {
           </p>
           <p className="mt-2">
             <strong>Shipped items go nationwide in 3-5 business days</strong> for other U.S. addresses, flat $7.
+            Does not ship to Alaska or Hawaii.
             Local items cannot ship outside New York City. We ship inside the United States. We pack from our warehouse — it is not a walk-in store.
           </p>
         </section>

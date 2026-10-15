@@ -13,9 +13,11 @@ import {
   LOCAL_ONLY_PROMISE,
   LOCAL_SAME_DAY_PROMISE,
   MIXED_CART_DELIVERY_SUMMARY,
+  EXCLUDED_SHIPPING_MESSAGE,
   TOPDAWG_NOT_SAME_DAY_PROMISE,
   cartDeliverySummary,
   cartShipsNationwide,
+  isAlaskaOrHawaiiAddress,
   localItemsBlockedOutsideNyc,
   productDeliveryPromise,
 } from '../deliveryLane';
@@ -192,6 +194,10 @@ describe('TopDawg same-day exclusion on the item page', () => {
 
     expect(await screen.findByRole('heading', { name: 'Lick mat' })).toBeInTheDocument();
     expect(screen.getAllByText(TOPDAWG_NOT_SAME_DAY_PROMISE).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(EXCLUDED_SHIPPING_MESSAGE).length).toBeGreaterThan(0);
+    expect(isAlaskaOrHawaiiAddress('AK', '99501')).toBe(true);
+    expect(isAlaskaOrHawaiiAddress('Hawaii', '96813')).toBe(true);
+    expect(isAlaskaOrHawaiiAddress('CA', '94105')).toBe(false);
     expect(screen.queryByText(/ready to ship/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/eligible for same-day delivery in/i)).not.toBeInTheDocument();
     expect(screen.queryByText(LOCAL_SAME_DAY_PROMISE)).not.toBeInTheDocument();
