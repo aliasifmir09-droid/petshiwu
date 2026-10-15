@@ -1,4 +1,9 @@
-import { isDeliverableShippingAddress } from '@/utils/deliveryZip';
+import { isValidZip } from '@/utils/deliveryZip';
+import { isCartDeliverable, isUnitedStatesCountry } from '@/utils/deliveryLane';
+
+type CheckoutCartItem = {
+  product?: { tags?: string[]; deliveryLane?: string; name?: string } | null;
+};
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -15,7 +20,8 @@ export type CheckoutShippingFields = {
 
 export const isCheckoutDeliveryReady = (
   shipping: CheckoutShippingFields,
-  isAuthenticated: boolean
+  isAuthenticated: boolean,
+  items: CheckoutCartItem[] = [{ product: { tags: [] } }]
 ): boolean => {
   if (!shipping.firstName?.trim() || !shipping.lastName?.trim()) return false;
   if (!shipping.phone?.trim()) return false;
@@ -27,7 +33,10 @@ export const isCheckoutDeliveryReady = (
   ) {
     return false;
   }
-  if (!isDeliverableShippingAddress(shipping.state, shipping.zipCode)) return false;
+  if (!isValidZip(shipping.zipCode)) return false;
+  const address = { state: shipping.state, zipCode: shipping.zipCode, country: 'USA' };
+  if (!isUnitedStatesCountry(address.country)) return false;
+  if (!isCartDeliverable(items, address)) return false;
   if (!isAuthenticated && !EMAIL_PATTERN.test(shipping.email?.trim() || '')) return false;
   return true;
 };

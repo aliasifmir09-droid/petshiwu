@@ -71,5 +71,4 @@ export function isDeliverableShippingAddress(state: string, zipCode: string): bo
   return isNewYorkState(state) && isNycDeliveryZip(zipCode);
 }
 
-export const OUT_OF_AREA_DELIVERY_MESSAGE =
-  'We currently deliver same-day in New York City only — Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. Nationwide shipping opens in a few days.';
+export const OUT_OF_AREA_DELIVERY_MESSAGE = 'Not available for this address yet';

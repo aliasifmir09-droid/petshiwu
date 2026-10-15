@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { Order, ShippingAddress } from '@/types';
 import { orderService } from '@/services/orders';
 import { paypalCheckoutBlocker } from '@/utils/paypalCheckoutReady';
+import { useCartStore } from '@/stores/cartStore';
 
 interface PayPalItemInput {
   product: string;
@@ -256,7 +257,7 @@ const PayPalApplePay = ({
   const handleApplePayClick = () => {
     if (!applePay || !applePayConfig || !window.ApplePaySession || isProcessing) return;
 
-    const blocked = paypalCheckoutBlocker({ shippingAddress, guestEmail });
+    const blocked = paypalCheckoutBlocker({ shippingAddress, guestEmail, items: useCartStore.getState().items });
     if (blocked) {
       setError(blocked);
       if (/email/i.test(blocked)) onGuestEmailInvalid?.();

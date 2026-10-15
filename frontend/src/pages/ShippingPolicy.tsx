@@ -14,7 +14,7 @@ const ShippingPolicy = () => {
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <SEO
         title="Shipping Information | Petshiwu"
-        description="Petshiwu shipping: currently delivering in NYC. Nationwide shipping opens in a few days. Free over $49. No autoship."
+        description="Petshiwu shipping: same-day in NYC, 2-5 business days across NY, NJ, and CT, and 3-5 business days nationwide on shipped items. Flat $7 on TopDawg orders."
         url="/shipping"
       />
 
@@ -92,12 +92,24 @@ const ShippingPolicy = () => {
             </thead>
             <tbody>
               <tr>
-                <td className="p-3 border border-gray-200">Under ${TONIGHT.freeOver}</td>
+                <td className="p-3 border border-gray-200">NYC same-day under ${TONIGHT.freeOver}</td>
                 <td className="p-3 border border-gray-200 font-semibold">${TONIGHT.underFee}</td>
               </tr>
               <tr className="bg-green-50">
-                <td className="p-3 border border-gray-200 font-semibold">${TONIGHT.freeOver} and over</td>
+                <td className="p-3 border border-gray-200 font-semibold">NYC same-day orders ${TONIGHT.freeOver} and over</td>
                 <td className="p-3 border border-gray-200 font-bold text-green-700">FREE</td>
+              </tr>
+              <tr>
+                <td className="p-3 border border-gray-200">NY, NJ, and CT outside NYC, under $49</td>
+                <td className="p-3 border border-gray-200 font-semibold">$7</td>
+              </tr>
+              <tr className="bg-green-50">
+                <td className="p-3 border border-gray-200 font-semibold">NY, NJ, and CT outside NYC, $49 and over</td>
+                <td className="p-3 border border-gray-200 font-bold text-green-700">FREE</td>
+              </tr>
+              <tr>
+                <td className="p-3 border border-gray-200">TopDawg shipped items, any US state except Alaska and Hawaii</td>
+                <td className="p-3 border border-gray-200 font-semibold">Flat $7. The $49 free-shipping rule does not apply, including on mixed carts.</td>
               </tr>
             </tbody>
           </table>
@@ -106,9 +118,9 @@ const ShippingPolicy = () => {
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-3">Where we deliver</h2>
           <p>
-            <strong>Currently delivering:</strong> Manhattan, Brooklyn, Queens, the Bronx, and Staten Island,
-            with same-day when you order by cutoff — including Queens Hillside. In-stock products are
-            eligible for same-day delivery in NYC. Delivery outside New York City is closed.{' '}
+            <strong>Same-day:</strong> Manhattan, Brooklyn, Queens, the Bronx, and Staten Island,
+            when you order by cutoff — including Queens Hillside. Locally stocked items are
+            delivered in 2-5 business days across NY, NJ, and CT.{' '}
             <Link to="/delivery-zips" className="text-blue-600 hover:underline">
               Check your ZIP
             </Link>
@@ -122,8 +134,9 @@ const ShippingPolicy = () => {
             .
           </p>
           <p className="mt-2">
-            <strong>Nationwide shipping opens in a few days</strong> for other U.S. addresses, free over $49.
-            International shipping is not available yet. We pack from our warehouse — it is not a walk-in store.
+            <strong>Shipped items go nationwide in 3-5 business days</strong> for a flat $7.
+            Does not ship to Alaska or Hawaii.
+            Locally stocked items are not available for addresses outside NY, NJ, and CT yet. We ship inside the United States. We pack from our warehouse — it is not a walk-in store.
           </p>
         </section>
 

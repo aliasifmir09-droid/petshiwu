@@ -28,7 +28,9 @@ import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import ProductVariantPicker from '@/components/ProductVariantPicker';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
-import { SAME_DAY_PRODUCT_ELIGIBILITY } from '@/utils/deliveryZip';
+import { EXCLUDED_SHIPPING_MESSAGE, isNationwideProduct, productDeliveryPromise } from '@/utils/deliveryLane';
+import { DELIVERY_ZONE, LOCAL_UNAVAILABLE_MESSAGE, TRI_STATE_FEE_NOTE, TRI_STATE_PAGE_PROMISE, resolveDeliveryZone } from '@/utils/deliveryZones';
+import { useSavedDeliveryZip } from '@/hooks/useSavedDeliveryZip';
 
 // Lazy load heavy dependencies
 const RecentlyViewed = lazy(() => import('@/components/RecentlyViewed'));
@@ -101,6 +103,7 @@ const ProductDetail = () => {
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState(0);
+  const savedZip = useSavedDeliveryZip();
   const [zoomPosition, setZoomPosition] = useState<{ x: number; y: number } | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -854,18 +857,34 @@ const ProductDetail = () => {
           {/* Stock Availability — no unit counts until inventory is maintained */}
           <div className="mb-4">
             {isReadyToShip ? (
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-                  <span className="text-green-700 font-medium">{inStockLabel(true)}</span>
+              isNationwideProduct(product) ? (
+                <div>
+                  <p className="text-sm font-semibold text-[#1E3A8A]">
+                    {productDeliveryPromise(product, savedZip)}
+                  </p>
+                  <p className="text-xs text-slate-600 mt-0.5">{EXCLUDED_SHIPPING_MESSAGE}</p>
                 </div>
-                <p className="mt-2 text-sm font-semibold text-[#1E3A8A]">
-                  {SAME_DAY_PRODUCT_ELIGIBILITY}
-                </p>
-                <p className="text-xs text-slate-600 mt-0.5">
-                  This selection is eligible for same-day delivery across the five boroughs when you order by cutoff.
-                </p>
-              </div>
+              ) : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.TRI_STATE ? (
+                <div>
+                  <p className="text-sm font-semibold text-[#1E3A8A]">{TRI_STATE_PAGE_PROMISE}</p>
+                  <p className="text-xs text-slate-600 mt-0.5">{TRI_STATE_FEE_NOTE}</p>
+                </div>
+              ) : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.UNAVAILABLE ? (
+                <p className="text-sm font-semibold text-[#1E3A8A]">{LOCAL_UNAVAILABLE_MESSAGE}</p>
+              ) : (
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                    <span className="text-green-700 font-medium">{inStockLabel(true)}</span>
+                  </div>
+                  <p className="mt-2 text-sm font-semibold text-[#1E3A8A]">
+                    {productDeliveryPromise(product, savedZip)}
+                  </p>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    Same-day in New York City when you order by cutoff.
+                  </p>
+                </div>
+              )
             ) : (
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 bg-red-500 rounded-full"></span>
@@ -874,7 +893,7 @@ const ProductDetail = () => {
             )}
           </div>
 
-          {isReadyToShip ? <TonightPromiseCard variant="pdp" /> : null}
+          {isReadyToShip && !isNationwideProduct(product) && resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.SAME_DAY_NYC ? <TonightPromiseCard variant="pdp" /> : null}
 
           {/* Actions */}
           <div className="mb-8">
@@ -1003,8 +1022,22 @@ const ProductDetail = () => {
             <div className="flex items-center gap-3">
               <Truck className="text-primary-600" size={24} />
               <div>
-                <p className="font-medium">Free Shipping</p>
-                <p className="text-sm text-gray-600">On orders over ${FREE_SHIPPING_THRESHOLD}</p>
+                <p className="font-medium">
+                  {isNationwideProduct(product)
+                    ? 'Flat $7 shipping'
+                    : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.TRI_STATE
+                      ? 'Free delivery at $49+'
+                      : 'Free shipping over $49'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {isNationwideProduct(product)
+                    ? 'Arrives in 3-5 business days. The $49 rule does not apply.'
+                    : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.TRI_STATE
+                      ? TRI_STATE_FEE_NOTE
+                      : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.UNAVAILABLE
+                        ? LOCAL_UNAVAILABLE_MESSAGE
+                        : `On NYC orders over $${FREE_SHIPPING_THRESHOLD}`}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -1405,7 +1438,7 @@ const ProductDetail = () => {
           </button>
           {isReadyToShip ? (
             <p className="text-[11px] text-slate-500 text-center mt-1.5">
-              {SAME_DAY_PRODUCT_ELIGIBILITY} · free shipping over $49
+              {productDeliveryPromise(product, savedZip)}
             </p>
           ) : null}
         </div>

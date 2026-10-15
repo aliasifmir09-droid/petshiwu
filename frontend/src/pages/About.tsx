@@ -8,7 +8,7 @@ const About = () => {
     <>
       <SEO
       title="About Petshiwu | Online Pet Food & Supplies"
-      description="Petshiwu is an online pet store for food, treats, and supplies. Currently delivering in NYC, with nationwide shipping opening soon. No autoship. Free shipping over $49."
+      description="Petshiwu is an online pet store for food, treats, and supplies. Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items. No autoship. Free shipping over $49 on local orders."
       keywords="about Petshiwu, online pet store, pet food, pet supplies, no autoship"
       url="/about"
       />
@@ -35,8 +35,8 @@ const About = () => {
             closes: '23:59',
           }],
           priceRange: '$$',
-          description: 'Online pet store for food, treats, and supplies. Currently delivering in NYC, with nationwide shipping opening soon. Warehouse and office only — not a walk-in store.',
-          areaServed: ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'],
+          description: 'Online pet store for food, treats, and supplies. Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items. Warehouse and office only — not a walk-in store.',
+          areaServed: ['United States', 'New York', 'New Jersey', 'Connecticut', 'Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'],
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
           sameAs: [
@@ -61,7 +61,7 @@ const About = () => {
                 </h1>
                 <p className="text-base sm:text-lg text-blue-100 max-w-xl mb-6">
                   Rooted in a deep love for animals and over a decade of hands-on pet care experience,
-                  Petshiwu brings premium products and expert guidance to pet parents across New York City.
+                  Petshiwu brings premium products and expert guidance to pet parents across America.
                 </p>
                 <p className="text-sm sm:text-base text-blue-100/90 max-w-xl">
                   We&apos;re here to support the special bond you share with your furry, feathered, or scaly
@@ -83,7 +83,7 @@ const About = () => {
                   </div>
                   <p className="text-sm sm:text-base text-blue-50 mb-4">
                     Petshiwu is an online pet store for food, treats, toys, and everyday care.
-                    We currently deliver in New York City, and nationwide shipping opens in a few days.
+                    We currently deliver in New York City, and shipped items go nationwide in 3-5 business days.
                     Our warehouse packs orders — it is not a walk-in store.
                   </p>
                   <p className="text-xs sm:text-sm text-blue-100/90">
@@ -153,7 +153,7 @@ const About = () => {
                 </h3>
                 <p className="text-sm text-gray-600">
                   Enjoy easy online shopping, free shipping over $49, and a smooth experience from
-                  browsing to delivery. Currently delivering in NYC, with nationwide shipping opening soon.
+                  browsing to delivery. Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items.
                 </p>
               </div>
             </div>

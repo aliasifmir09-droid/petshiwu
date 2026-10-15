@@ -2,6 +2,7 @@ import Product from '../models/Product';
 import { getCouponDiscount, isFreeShippingCoupon } from './couponService';
 import type { NormalizedOrderItem } from '../types/common';
 import { decodeHtmlEntities } from '../utils/catalogText';
+import { shippingLaneForCart, shippingPriceForLane } from '../utils/deliveryLane';
 import { normalizeShippingState } from '../utils/nycDelivery';
 
 /**
@@ -59,9 +60,12 @@ export const calculateTrustedOrderPricing = async (
   couponCode?: string,
   donationAmount = 0,
   session?: any,
-  shippingState?: string
+  shippingState?: string,
+  shippingZip?: string,
+  shippingCountry?: string
 ): Promise<TrustedOrderPricing> => {
   const trustedItems: NormalizedOrderItem[] = [];
+  const laneItems: Array<{ tags?: string[]; name?: string }> = [];
 
   for (const item of items) {
     const product = session
@@ -110,12 +114,22 @@ export const calculateTrustedOrderPricing = async (
         }
         : undefined
     });
+    laneItems.push({ tags: product.tags, name: decodeHtmlEntities(product.name) });
   }
 
+  const lane = shippingLaneForCart({
+    state: shippingState,
+    zipCode: shippingZip,
+    country: shippingCountry,
+    items: laneItems,
+  });
+
   const itemsPrice = Number(trustedItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2));
-  const shippingPrice = itemsPrice >= FREE_SHIPPING_THRESHOLD || isFreeShippingCoupon(couponCode)
-    ? 0
-    : STANDARD_SHIPPING_COST;
+  const shippingPrice = shippingPriceForLane(itemsPrice, lane, {
+    freeByThreshold: itemsPrice >= FREE_SHIPPING_THRESHOLD,
+    couponWaivesShipping: isFreeShippingCoupon(couponCode),
+    hasNationwide: laneItems.some((item) => item.tags?.some((tag) => String(tag).trim().toLowerCase() === 'topdawg')),
+  });
   const taxPrice = Number((itemsPrice * getTaxRateForState(shippingState)).toFixed(2));
   const discountAmount = getCouponDiscount(couponCode, itemsPrice);
   const safeDonationAmount = Number.isFinite(Number(donationAmount)) && Number(donationAmount) > 0

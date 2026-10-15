@@ -13,7 +13,9 @@ import Toast from '@/components/Toast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { availableCartStock } from '@/utils/cartStock';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
-import { SAME_DAY_PRODUCT_ELIGIBILITY } from '@/utils/deliveryZip';
+import { EXCLUDED_SHIPPING_MESSAGE, isNationwideProduct, productDeliveryPromise } from '@/utils/deliveryLane';
+import { DELIVERY_ZONE, LOCAL_UNAVAILABLE_MESSAGE, TRI_STATE_FEE_NOTE, TRI_STATE_PAGE_PROMISE, resolveDeliveryZone } from '@/utils/deliveryZones';
+import { useSavedDeliveryZip } from '@/hooks/useSavedDeliveryZip';
 
 interface QuickViewModalProps {
   productSlug: string;
@@ -28,6 +30,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
   const { toast, showToast, hideToast } = useToast();
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState(0);
+  const savedZip = useSavedDeliveryZip();
 
   const { data: product, isLoading } = useQuery({
     queryKey: ['product', productSlug],
@@ -36,6 +39,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
     staleTime: 2 * 60 * 1000,
     gcTime: 10 * 60 * 1000
   });
+  const deliveryPromise = productDeliveryPromise(product, savedZip);
 
   // Close modal on Escape key
   useEffect(() => {
@@ -216,13 +220,27 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
 
                 {/* Stock Status — no unit counts until inventory is maintained */}
                 {isReadyToShip ? (
-                  <>
-                    <p className="text-green-700 font-medium">{inStockLabel(true)}</p>
-                    <p className="text-sm font-semibold text-[#1E3A8A]">{SAME_DAY_PRODUCT_ELIGIBILITY}</p>
-                    <p className="text-xs text-slate-500">
-                      This selection is eligible for same-day delivery in NYC. Free shipping over $49.
-                    </p>
-                  </>
+                  isNationwideProduct(product) ? (
+                    <>
+                      <p className="text-sm font-semibold text-[#1E3A8A]">{deliveryPromise}</p>
+                      <p className="text-xs text-slate-500">{EXCLUDED_SHIPPING_MESSAGE}</p>
+                    </>
+                  ) : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.TRI_STATE ? (
+                    <>
+                      <p className="text-sm font-semibold text-[#1E3A8A]">{TRI_STATE_PAGE_PROMISE}</p>
+                      <p className="text-xs text-slate-500">{TRI_STATE_FEE_NOTE}</p>
+                    </>
+                  ) : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.UNAVAILABLE ? (
+                    <p className="text-sm font-semibold text-[#1E3A8A]">{LOCAL_UNAVAILABLE_MESSAGE}</p>
+                  ) : (
+                    <>
+                      <p className="text-green-700 font-medium">{inStockLabel(true)}</p>
+                      <p className="text-sm font-semibold text-[#1E3A8A]">{deliveryPromise}</p>
+                      <p className="text-xs text-slate-500">
+                        Same-day in New York City when you order by cutoff.
+                      </p>
+                    </>
+                  )
                 ) : (
                   <p className="text-red-600 font-medium">Out of stock</p>
                 )}

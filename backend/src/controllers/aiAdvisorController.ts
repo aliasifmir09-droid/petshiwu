@@ -436,12 +436,12 @@ PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
 - Top brands: Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Iams, Pedigree, Nutro
 
 === SHIPPING ===
-- FREE shipping automatically applied on all orders over $49 — no code needed
+- NYC local orders: free shipping over $49, otherwise $6. NY, NJ, and CT outside NYC: locally stocked items are $7, free over $49. TopDawg shipped items are a flat $7 in any US state except Alaska and Hawaii, including NYC, and that fee is never free
 - NYC (Queens, Brooklyn, Manhattan, Bronx, Staten Island): same-day if ordered by 3 PM weekdays (1 PM weekends), otherwise next day
 - Same-day delivery: all five NYC boroughs — order by 3 PM EST weekdays (1 PM weekends)
 - In-stock products are eligible for same-day delivery in NYC
-- Delivery outside New York City is closed, including New Jersey, Connecticut, and New York suburbs
-- Nationwide shipping is not available yet — checkout will refuse addresses outside NYC
+- Locally stocked items are same-day in NYC and delivered in 2-5 business days across NY, NJ, and CT. They are not available outside those states yet.
+- TopDawg items arrive in 3-5 business days for a flat $7 in any US state except Alaska and Hawaii, including NY, NJ, and CT. That fee is never free, even when the cart reaches $49.
 - Checkout is open now: guests and accounts can pay with PayPal, Apple Pay, Google Pay, or card
 - Tracking number emailed immediately after shipment
 - USA only — no international shipping
@@ -493,7 +493,7 @@ const CUSTOMER_SERVICE_QA = `
 PETSHIWU CUSTOMER SERVICE EXPERT Q&A:
 
 Q: How do I place an order?
-A: Browse our 4,000+ products, add items to your cart, and check out as a guest or with a free account. Checkout is open now. We accept all major credit cards, PayPal, Apple Pay, and Google Pay. You'll receive a confirmation email the moment your order is placed. In-stock products are eligible for same-day delivery in NYC. Delivery outside New York City is closed.
+A: Browse our 4,000+ products, add items to your cart, and check out as a guest or with a free account. Checkout is open now. We accept all major credit cards, PayPal, Apple Pay, and Google Pay. You'll receive a confirmation email the moment your order is placed. In-stock products are eligible for same-day delivery in NYC. Locally stocked items outside NYC are delivered in 2-5 business days across NY, NJ, and CT.
 
 Q: Do I need an account to order?
 A: No — guest checkout is available. But a free account at petshiwu.com gives you order tracking, saved pet profiles, wishlist access, personalized recommendations, and member deals. It takes 30 seconds to create.
@@ -502,7 +502,7 @@ Q: How do I track my order?
 A: Check petshiwu.com/track-order with your order number, or log in and go to My Orders. Petshiwü delivers with our own drivers from Queens — you will not get a UPS or FedEx tracking number. The page shows where the order is and when it should arrive. NYC orders arrive same-day before 11 PM if you order by cutoff, otherwise the next day. Call (800) 259-2605 anytime.
 
 Q: Do you offer free shipping?
-A: Yes — all orders over $49 ship free automatically, no code needed. Same-day delivery is available across all five NYC boroughs for orders before 3 PM weekdays (1 PM weekends).
+A: NYC local orders over $49 ship free. Orders under $49 are $6. Locally stocked orders in the rest of NY, NJ, and CT are $7, free over $49. TopDawg shipped items are a flat $7, and the $49 rule does not apply. Same-day delivery is available across all five NYC boroughs for local items ordered before 3 PM weekdays (1 PM weekends).
 
 Q: How do I return something?
 A: Go to petshiwu.com/return-policy or email support@petshiwu.com within 365 days of delivery. Unused items in original packaging can be returned. Opened food, treats, or supplements can only be returned if they arrived damaged, defective, or incorrect. Refunds go back to your original payment method in 5–10 business days.

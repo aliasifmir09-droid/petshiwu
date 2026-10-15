@@ -12,7 +12,17 @@ import SEO from '@/components/SEO';
 import OrdersHoldNotice from '@/components/OrdersHoldNotice';
 import { ORDERING_PAUSED } from '@/config/ordering';
 import { TAX_RATE } from '@/config/constants';
-import { amountUntilFreeShipping, shippingCostForSubtotal } from '@/utils/orderTotals';
+import { amountUntilFreeShipping } from '@/utils/orderTotals';
+import {
+  EXCLUDED_SHIPPING_MESSAGE,
+  LOCAL_UNAVAILABLE_MESSAGE,
+  cartDeliverySummary,
+  isAlaskaOrHawaiiAddress,
+  localItemsBlockedOutsideNyc,
+  productDeliveryPromise,
+  quoteStorefrontDelivery,
+} from '@/utils/deliveryLane';
+import { useSavedDeliveryZip } from '@/hooks/useSavedDeliveryZip';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import cartService from '@/services/cart';
 import { useToast } from '@/hooks/useToast';
@@ -103,6 +113,7 @@ const Cart = () => {
   }
 
   const { toast, showToast, hideToast } = useToast();
+  const savedZip = useSavedDeliveryZip();
 
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
@@ -228,10 +239,28 @@ const Cart = () => {
     }
   })();
 
-  const shipping = shippingCostForSubtotal(subtotal);
+  const addressForLane = { zipCode: savedZip, country: 'USA' };
+  const localBlocked = localItemsBlockedOutsideNyc(items, addressForLane);
+  const excludedZip = isAlaskaOrHawaiiAddress(undefined, savedZip);
+  const deliveryQuote = quoteStorefrontDelivery({
+    zipCode: savedZip,
+    country: 'USA',
+    items: items.map((item) => ({
+      product: item?.product,
+      price: safePrice(item),
+      quantity: safeQuantity(item),
+    })),
+  });
+  const deliverySummary = excludedZip
+    ? EXCLUDED_SHIPPING_MESSAGE
+    : localBlocked
+      ? LOCAL_UNAVAILABLE_MESSAGE
+      : cartDeliverySummary(items, addressForLane);
+  const shipping = deliveryQuote.ok ? deliveryQuote.shippingPrice : 0;
+  const nationwideOnly = items.length > 0 && items.every((item) => item?.product?.tags?.some((tag: string) => String(tag).toLowerCase() === 'topdawg'));
   const tax = subtotal * TAX_RATE; // Estimate only — exact state tax (NY 8.875% / NJ 6.625% / CT 6.35%) is applied at checkout.
   const total = subtotal + shipping + tax;
-  const remainingForFreeShipping = amountUntilFreeShipping(subtotal);
+  const remainingForFreeShipping = nationwideOnly || !deliveryQuote.ok ? 0 : amountUntilFreeShipping(subtotal);
 
   const handleConfirmAction = () => {
     try {
@@ -283,6 +312,16 @@ const Cart = () => {
               <div className="mb-6">
                 <OrdersHoldNotice variant="compact" />
               </div>
+              {localBlocked && (
+                <p className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  {LOCAL_UNAVAILABLE_MESSAGE}
+                </p>
+              )}
+              {deliverySummary && (
+                <p className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900">
+                  {deliverySummary}
+                </p>
+              )}
 
               <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">Shopping Cart</h1>
@@ -333,6 +372,7 @@ const Cart = () => {
                           <h3 className="font-semibold mb-1">{name}</h3>
                         </Link>
                         {brand && <p className="text-sm text-gray-600 mb-2">{brand}</p>}
+                        <p className="text-sm text-gray-600 mb-2">{productDeliveryPromise(item?.product, savedZip)}</p>
                         {item?.product?.inStock === false && (
                           <p className="text-sm font-medium text-red-600 mb-2">
                             ⚠️ Out of stock - please remove before checkout
@@ -411,12 +451,15 @@ const Cart = () => {
                   <span className="text-gray-600">Tax</span>
                   <span className="font-medium">${tax.toFixed(2)}</span>
                 </div>
+                {deliverySummary && (
+                  <p className="text-sm text-gray-700 pt-2 border-t">{deliverySummary}</p>
+                )}
                 {ORDERING_PAUSED ? (
                   <div className="flex justify-between text-sm text-gray-600 pt-2 border-t">
                     <span>Estimated delivery</span>
                     <span className="font-medium">Shown when checkout opens</span>
                   </div>
-                ) : estimatedDelivery && (
+                ) : !deliverySummary && estimatedDelivery && (
                   <div className="flex justify-between text-sm text-gray-600 pt-2 border-t">
                     <span>Estimated Delivery</span>
                     <span className="font-medium">
@@ -466,7 +509,9 @@ const Cart = () => {
               <div>
                 <span className="text-sm text-gray-600 block">Total</span>
                 <span className="text-2xl font-bold text-gray-900">${total.toFixed(2)}</span>
-                {ORDERING_PAUSED ? (
+                {deliverySummary ? (
+                  <span className="text-xs text-gray-600 block mt-1">{deliverySummary}</span>
+                ) : ORDERING_PAUSED ? (
                   <span className="text-xs text-gray-500 block mt-1">Delivery dates when checkout opens</span>
                 ) : estimatedDelivery && (
                   <span className="text-xs text-gray-500 block mt-1">

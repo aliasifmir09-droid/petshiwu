@@ -32,7 +32,7 @@ describe('shoppable brand catalog', () => {
     expect(pages['/brand/merrick'].title).toMatch(/Merrick \| In stock · free ship \$49\+/);
     for (const brand of SHOP_BRANDS) {
       expect(brand.description.length).toBeLessThanOrEqual(160);
-      expect(brand.description).toMatch(/Nationwide shipping soon/);
+      expect(brand.description).toMatch(/Shipped items arrive in 3-5 days/);
       expect(brand.description).not.toMatch(/do not claim/i);
     }
   });

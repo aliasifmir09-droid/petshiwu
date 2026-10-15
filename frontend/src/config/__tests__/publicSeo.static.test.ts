@@ -30,7 +30,7 @@ const structuredData = read('../../components/StructuredData.tsx');
 describe('public SEO copy stays one launch story', () => {
   test('homepage Google snippet stays locked', () => {
     expect(HOMEPAGE_TITLE).toContain('Petshiwu | Pet Food & Supplies');
-    expect(HOMEPAGE_DESCRIPTION).toContain('Nationwide shipping soon');
+    expect(HOMEPAGE_DESCRIPTION).toContain('Nationwide shipping in 3-5 business days on shipped items');
     expect(HOMEPAGE_DESCRIPTION).toContain('Same-day NYC');
     expect(HOMEPAGE_DESCRIPTION).not.toMatch(/start accepting orders soon/i);
     expect(indexHtml).toContain(HOMEPAGE_TITLE);
@@ -56,7 +56,7 @@ describe('public SEO copy stays one launch story', () => {
   });
 
   test('organization copy is NYC ops plus nationwide soon, not USA shipping now', () => {
-    expect(ORGANIZATION_DESCRIPTION).toMatch(/nationwide shipping opening soon/i);
+    expect(ORGANIZATION_DESCRIPTION).toMatch(/nationwide shipping in 3-5 business days on shipped items/i);
     expect(ORGANIZATION_DESCRIPTION).toMatch(/not a walk-in store/i);
     expect(ORGANIZATION_DESCRIPTION).not.toMatch(/across the USA/i);
     expect(ORGANIZATION_DESCRIPTION).not.toMatch(/fast shipping/i);
@@ -74,7 +74,7 @@ describe('public SEO copy stays one launch story', () => {
   });
 
   test('catalog metadata does not claim live nationwide fast shipping', () => {
-    expect(CATALOG_META_PROOF).toContain('Nationwide shipping soon');
+    expect(CATALOG_META_PROOF).toContain('Nationwide shipping in 3-5 business days on shipped items');
     expect(CATALOG_META_PROOF).not.toMatch(/fast shipping/i);
     expect(products).toContain('CATALOG_META_PROOF');
     expect(category).toContain('CATALOG_META_PROOF');

@@ -4,6 +4,7 @@ import { AlertCircle, Loader2 } from 'lucide-react';
 import { paypalCheckoutScriptOptions, paypalClientId } from '@/config/paypal';
 import { orderService } from '@/services/orders';
 import { paypalCheckoutBlocker } from '@/utils/paypalCheckoutReady';
+import { useCartStore } from '@/stores/cartStore';
 
 interface PayPalItemInput {
   product: string;
@@ -44,6 +45,7 @@ const PayPalButtonContent = ({ items, shippingAddress, guestEmail, notes, coupon
       const blocked = paypalCheckoutBlocker({
         shippingAddress,
         guestEmail,
+        items: useCartStore.getState().items,
       });
       if (blocked) {
         setError(blocked);

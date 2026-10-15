@@ -35,7 +35,21 @@ import {
   normalizeShippingState,
   OUT_OF_AREA_DELIVERY_MESSAGE,
 } from '@/utils/deliveryZip';
-import { shippingCostForSubtotal } from '@/utils/orderTotals';
+import {
+  EXCLUDED_SHIPPING_MESSAGE,
+  LOCAL_UNAVAILABLE_MESSAGE,
+  cartDeliverySummary,
+  cartHasMixedLanes,
+  cartIsNationwideOnly,
+  isAlaskaOrHawaiiAddress,
+  isCartDeliverable,
+  isUnitedStatesCountry,
+  localItemsBlockedOutsideNyc,
+  productDeliveryPromise,
+  quoteStorefrontDelivery,
+} from '@/utils/deliveryLane';
+import { US_STATE_OPTIONS } from '@/utils/usStates';
+import { DELIVERY_ZONE, resolveDeliveryZone } from '@/utils/deliveryZones';
 import { checkoutCodeFromError, checkoutCodeFromResponse } from '@/utils/checkoutCoupon';
 import { shouldHoldCheckoutOnEmptyCart } from '@/utils/checkoutFlow';
 import { clearRestockCoupon, clearRestockPay, readRestockCoupon, readRestockPay, isRestockPayMethod } from '@/utils/restock';
@@ -231,7 +245,22 @@ const Checkout = () => {
   });
 
   const zipLookup = isValidZip(shippingInfo.zipCode) ? lookupZip(shippingInfo.zipCode) : null;
-  const zipOutOfArea = Boolean(zipLookup && zipLookup.speed === 'standard');
+  const addressForLane = {
+    state: shippingInfo.state,
+    zipCode: shippingInfo.zipCode,
+    country: shippingInfo.country,
+  };
+  const excludedState = isAlaskaOrHawaiiAddress(shippingInfo.state, shippingInfo.zipCode);
+  const localItemsBlocked = localItemsBlockedOutsideNyc(items, addressForLane) || !isUnitedStatesCountry(shippingInfo.country);
+  const addressZone = resolveDeliveryZone(addressForLane, { tags: [] });
+  const deliverySummary = excludedState
+    ? EXCLUDED_SHIPPING_MESSAGE
+    : localItemsBlocked
+      ? null
+      : cartDeliverySummary(items, addressForLane);
+  const mixedCart = cartHasMixedLanes(items);
+  const nationwideOnly = cartIsNationwideOnly(items);
+  const zipOutOfArea = localItemsBlocked && Boolean(zipLookup);
   const zipNeedsState =
     Boolean(zipLookup && zipLookup.speed !== 'standard') &&
     !isDeliverableShippingAddress(shippingInfo.state, shippingInfo.zipCode);
@@ -242,7 +271,7 @@ const Checkout = () => {
         ...prev,
         street: address.street,
         city: address.city,
-        state: address.state,
+        state: normalizeShippingState(address.state),
         zipCode: address.zipCode,
         country: address.country || 'USA'
       }));
@@ -398,7 +427,18 @@ const Checkout = () => {
     }
   };
 
-  const shipping = shippingCostForSubtotal(subtotal, couponWaivesShipping);
+  const deliveryQuote = quoteStorefrontDelivery({
+    state: shippingInfo.state,
+    zipCode: shippingInfo.zipCode,
+    country: shippingInfo.country,
+    couponWaivesShipping,
+    items: items.map((item) => ({
+      product: item?.product,
+      price: Number(item?.variant?.price ?? item?.product?.basePrice ?? 0),
+      quantity: Number(item?.quantity || 1),
+    })),
+  });
+  const shipping = excludedState || !deliveryQuote.ok ? 0 : deliveryQuote.shippingPrice;
   const tax = Number((subtotal * getTaxRateForState(shippingInfo.state)).toFixed(2));
   const onlineTotal = Math.max(0, subtotal + shipping + tax - couponDiscount);
   const total = Math.max(0, onlineTotal + donationAmount);
@@ -593,8 +633,12 @@ const Checkout = () => {
       return;
     }
 
-    if (!isDeliverableShippingAddress(shippingInfo.state, shippingInfo.zipCode)) {
-      showToast(OUT_OF_AREA_DELIVERY_MESSAGE, 'error');
+    if (isAlaskaOrHawaiiAddress(shippingInfo.state, shippingInfo.zipCode)) {
+      showToast(EXCLUDED_SHIPPING_MESSAGE, 'error');
+      return;
+    }
+    if (!isCartDeliverable(items, addressForLane)) {
+      showToast(isUnitedStatesCountry(shippingInfo.country) ? OUT_OF_AREA_DELIVERY_MESSAGE : 'We ship inside the United States.', 'error');
       return;
     }
 
@@ -894,12 +938,22 @@ const Checkout = () => {
             </h1>
             <p className="mt-2 max-w-xl text-stone-600">
               {ORDERING_PAUSED
-                ? 'Same-day NYC delivery, PayPal-secured payment, and 24/7 support will be ready when we start accepting orders.'
-                : 'Same-day Queens delivery, PayPal-secured payment, and a 24/7 call center — the kind of checkout a pet parent should trust.'}
+                ? 'Fast delivery across America. PayPal-secured payment and 24/7 support will be ready when we start accepting orders.'
+                : deliverySummary
+                  ? deliverySummary
+                  : 'Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items.'}
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> NYC same-day</span>
+            {!nationwideOnly && !excludedState && !localItemsBlocked && addressZone === DELIVERY_ZONE.SAME_DAY_NYC ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> NYC same-day</span>
+            ) : null}
+            {!nationwideOnly && !excludedState && !localItemsBlocked && addressZone === DELIVERY_ZONE.TRI_STATE ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> 2-5 business days</span>
+            ) : null}
+            {!excludedState && (mixedCart || nationwideOnly) ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> 3-5 business days</span>
+            ) : null}
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><ShieldCheck size={13} className="text-[#1E3A8A]" /> PayPal protected</span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><RotateCcw size={13} className="text-[#1E3A8A]" /> 365-day returns</span>
           </div>
@@ -1084,12 +1138,15 @@ const Checkout = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">State *</label>
-                        <input type="text" required value={shippingInfo.state}
+                        <select required value={normalizeShippingState(shippingInfo.state)}
                           onChange={(e) => setShippingInfo({ ...shippingInfo, state: e.target.value })}
-                          onBlur={() => setShippingInfo((prev) => ({ ...prev, state: normalizeShippingState(prev.state) }))}
-                          placeholder="NY"
                           autoComplete="address-level1"
-                          className={fieldClass} />
+                          className={fieldClass}>
+                          <option value="">State</option>
+                          {US_STATE_OPTIONS.map((state) => (
+                            <option key={state.code} value={state.code}>{state.name}</option>
+                          ))}
+                        </select>
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">ZIP Code *</label>
@@ -1104,13 +1161,21 @@ const Checkout = () => {
                           className={fieldClass} />
                       </div>
                     </div>
-                    {zipOutOfArea ? (
+                    {excludedState ? (
                       <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-                        {OUT_OF_AREA_DELIVERY_MESSAGE}
+                        {EXCLUDED_SHIPPING_MESSAGE}
+                      </p>
+                    ) : zipOutOfArea ? (
+                      <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+                        {LOCAL_UNAVAILABLE_MESSAGE}
+                      </p>
+                    ) : deliverySummary ? (
+                      <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                        {deliverySummary}
                       </p>
                     ) : zipNeedsState ? (
                       <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-                        Enter NY, NJ, or CT to match this delivery ZIP.
+                        Enter NY to match this New York City ZIP.
                       </p>
                     ) : zipLookup ? (
                       <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
@@ -1309,6 +1374,9 @@ const Checkout = () => {
                   <p className="mt-1 text-sm text-blue-100">{items.length} {items.length === 1 ? 'item' : 'items'} · packed in Queens</p>
                 </div>
                 <div className="p-6">
+                {deliverySummary ? (
+                  <p className="mb-4 rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-900">{deliverySummary}</p>
+                ) : null}
                 <div className="space-y-4 mb-6">
                   {items.map((item) => {
                     const price = item.variant?.price || item.product.basePrice;
@@ -1319,6 +1387,7 @@ const Checkout = () => {
                           className="h-[4.5rem] w-[4.5rem] rounded-2xl object-cover ring-1 ring-stone-200" />
                         <div className="flex-1">
                           <p className="font-semibold text-sm text-stone-900 leading-snug">{decodeHtmlEntities(item.product.name)}</p>
+                          <p className="text-xs font-semibold text-[#1E3A8A] mt-1">{productDeliveryPromise(item.product, shippingInfo.zipCode, shippingInfo.state)}</p>
                           <p className="text-xs text-stone-500 mt-1">Qty {item.quantity}</p>
                           {item.variant && <p className="text-xs text-stone-500">{item.variant.size || item.variant.weight}</p>}
                         </div>
@@ -1335,7 +1404,13 @@ const Checkout = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-stone-500">Shipping</span>
                     <span className="font-semibold text-stone-800">
-                      {shipping === 0 ? <span className="text-emerald-600">FREE</span> : `$${shipping.toFixed(2)}`}
+                      {excludedState || (localItemsBlocked && isValidZip(shippingInfo.zipCode)) ? (
+                        <span className="text-amber-800">Unavailable</span>
+                      ) : shipping === 0 ? (
+                        <span className="text-emerald-600">FREE</span>
+                      ) : (
+                        `$${shipping.toFixed(2)}`
+                      )}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">

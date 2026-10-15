@@ -141,7 +141,7 @@ const Home = () => {
               name: 'How much does Petshiwu shipping cost?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Shipping is free on orders over $49. Orders under $49 have a flat $6 shipping fee. Same-day in NYC. Nationwide shipping soon.'
+                text: 'Shipping is free on orders over $49. Orders under $49 have a flat $6 shipping fee. Same-day in NYC. Nationwide shipping in 3-5 business days on shipped items.'
               }
             },
             {
@@ -157,7 +157,7 @@ const Home = () => {
               name: 'Where does Petshiwu deliver right now?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Same-day in New York City. Nationwide shipping soon. The Jackson Heights address is warehouse and office, not a walk-in shop.'
+                text: 'Same-day in New York City. Nationwide shipping in 3-5 business days on shipped items. The Jackson Heights address is warehouse and office, not a walk-in shop.'
               }
             },
             {
@@ -238,7 +238,7 @@ const Home = () => {
         <div className="container mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-8">
           <ProductGrid
             title="Popular for dogs"
-            subtitle="In stock for same-day NYC"
+            subtitle="Same-day NYC · 2-5 days NY, NJ & CT"
             href="/products?petType=dog"
             linkLabel="Shop dogs"
             queryKey="home-dogs"
@@ -378,7 +378,7 @@ const Home = () => {
               },
               {
                 title: '365-day returns, PayPal, and 24/7 support',
-                text: 'Unused items come back easy. Pay with PayPal or card. Call +1 (800) 259-2605 any time. Currently delivering in NYC. Nationwide shipping opens in a few days.',
+                text: 'Unused items come back easy. Pay with PayPal or card. Call +1 (800) 259-2605 any time. Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items.',
               },
             ].map((item) => (
               <div key={item.title} className="bg-white rounded-3xl p-7 border border-[#1E3A8A]/8 shadow-sm hover:shadow-md transition-shadow">

@@ -68,7 +68,7 @@ describe('nycDelivery', () => {
     expect(isDeliverableShippingAddress('NJ', '11801')).toBe(false);
     expect(isDeliverableShippingAddress('CT', '06511')).toBe(false);
     expect(isDeliverableShippingAddress('CA', '94105')).toBe(false);
-    expect(OUT_OF_AREA_DELIVERY_MESSAGE).toMatch(/New York City only/);
+    expect(OUT_OF_AREA_DELIVERY_MESSAGE).toMatch(/not available for this address yet/i);
     expect(OUT_OF_AREA_DELIVERY_MESSAGE).not.toMatch(/50 miles/);
   });
 
