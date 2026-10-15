@@ -423,3 +423,51 @@ describe('feed descriptions survive a whitespace-only stored value', () => {
     );
   });
 });
+
+describe('per-variant images are not collapsed to the product photo', () => {
+  // Live shape: variants store `images` (array). The old code read `image` (singular),
+  // which is absent on 17,135 of 17,656 variants, so every variant of a multi-variant
+  // product shipped the same images[0]. 11,146 of 17,498 live feed items were affected.
+  const mk = (n: number) => ({
+    size: `Size ${n}`,
+    price: 24.99,
+    stock: 5,
+    sku: `SKU${n}`,
+    images: [
+      `https://petshiwu-cdn.b-cdn.net/products/x/v${String(n).padStart(2, '0')}/base.webp`,
+      `https://petshiwu-cdn.b-cdn.net/products/x/v${String(n).padStart(2, '0')}/alt1.webp`,
+    ],
+  });
+  const prod = {
+    _id: '507f1f77bcf86cd799439011',
+    name: 'Custom Pet Shirt',
+    slug: 'custom-pet-shirt',
+    petType: 'dog',
+    brand: 'Bark Fifth Avenue',
+    category: { name: 'Apparel', slug: 'apparel' },
+    images: ['https://petshiwu-cdn.b-cdn.net/products/x/v01/base.webp'],
+    inStock: true,
+    description: 'A custom pet shirt.',
+    variants: [mk(1), mk(2), mk(3)],
+  } as any;
+
+  test('every variant emits its OWN image, not the product photo', () => {
+    const xml = feedItemsForProduct(prod);
+    const imgs = [...xml.matchAll(/<g:image_link>([\s\S]*?)<\/g:image_link>/g)].map((m) => m[1]);
+    expect(imgs.length).toBe(3);
+    expect(new Set(imgs).size).toBe(3);
+    expect(imgs[1]).toContain('/v02/');
+    expect(imgs[2]).toContain('/v03/');
+  });
+
+  test('the variant image also becomes the additional_image_link source', () => {
+    const xml = feedItemsForProduct(prod);
+    expect(xml).toContain('/v02/alt1.webp');
+  });
+
+  test('a variant with no images still falls back to the product photo', () => {
+    const p2 = { ...prod, variants: [{ size: 'One', price: 9.99, stock: 1, sku: 'S1' }] };
+    const xml = feedItemsForProduct(p2 as any);
+    expect(xml).toContain('/v01/base.webp');
+  });
+});

@@ -28,6 +28,9 @@ export interface FeedVariant {
   label?: string;
   flavor?: string;
   image?: string;
+  /** Per-variant image gallery as stored in Mongo. This is the field the catalog actually
+   *  populates (17,135 variants); `image` singular is the older shape. */
+  images?: string[];
   attributes?: Record<string, string> | Map<string, string>;
 }
 
@@ -396,8 +399,21 @@ export function feedItemsForProduct(product: FeedProduct): string {
       if (!price || price <= 0) return;
       const label = variantLabel(variant);
       const title = label ? `${product.name} - ${label}` : product.name;
-      const variantImage = variant.image ? productImages({ ...product, cloudinaryImage: variant.image, images: [] })[0] : images[0];
+      // Variant images are stored as `images` (an ARRAY), not `image` (singular).
+      // Reading the singular field meant this was always falsy, so every variant of a
+      // multi-variant product fell back to images[0] — the same photo for all of them.
+      // Live impact: 11,146 of 17,498 feed items shared an image_link across 5,541 products.
+      const variantImages = Array.isArray(variant.images) ? variant.images : [];
+      const resolvedVariantImages = variantImages.length
+        ? productImages({ ...product, cloudinaryImage: undefined, bunnyImage: undefined, images: variantImages })
+        : variant.image
+          ? productImages({ ...product, cloudinaryImage: variant.image, images: [] })
+          : [];
+      const variantImage = resolvedVariantImages[0] || images[0];
       if (!variantImage) return;
+      // Keep the variant's own gallery as the extra images; falling back to the product
+      // gallery only when the variant carries no gallery of its own.
+      const variantExtraImages = resolvedVariantImages.length > 1 ? resolvedVariantImages.slice(1) : extraImages;
       const sku = String(variant.sku || '').trim();
       const compare = Number(variant.compareAtPrice || 0);
       const stock = variant.stock ?? 0;
@@ -409,7 +425,7 @@ export function feedItemsForProduct(product: FeedProduct): string {
         description,
         link,
         image: variantImage,
-        extraImages,
+        extraImages: variantExtraImages,
         price: compare > price ? compare : price,
         salePrice: compare > price ? price : undefined,
         availability: available ? 'in stock' : 'out of stock',
