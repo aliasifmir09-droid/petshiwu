@@ -1,5 +1,5 @@
 import { decodeHtmlEntities } from './catalogText';
-import { resolveDeliveryZone } from './deliveryZones';
+import { resolveDeliveryZone, isTopDawgTags } from './deliveryZones';
 
 const SITE_ORIGIN = 'https://www.petshiwu.com';
 const BRAND_NAVY = '#1E3A8A';
@@ -15,6 +15,8 @@ export type OrderConfirmationItem = {
   quantity: number;
   price: number;
   image?: string;
+  /** Lane tags from the product record ('topdawg' = ships nationwide, never same-day). Internal only — never rendered. */
+  tags?: string[];
 };
 
 export type OrderConfirmationAddress = {
@@ -113,11 +115,20 @@ export function buildOrderConfirmationEmail(
     : `${origin}/forgot-password?guest=1`;
   const showGuestPasswordHelp = Boolean(orderData.isGuestCheckout);
   const addressZone = resolveDeliveryZone(addr, { tags: [] });
-  const deliveryLine = addressZone === 'SAME_DAY_NYC'
-    ? 'Same-day delivery in NYC. Shipped items arrive separately in 2-5 business days.'
-    : addressZone === 'UNAVAILABLE'
-      ? 'Does not ship to Alaska or Hawaii.'
-      : 'Arrives in 2-5 business days.';
+  // The delivery line must describe THIS cart's real lanes, never a fixed script:
+  // - an all-local NYC cart gets the same-day promise only (nothing ships separately);
+  // - a cart containing nationwide-lane items mentions a separate shipment ONLY when
+  //   such items are actually present, and NEVER names the supplier ("TopDawg" is internal).
+  const cartItems = Array.isArray(orderData.items) ? orderData.items : [];
+  const hasShippedItems = cartItems.some((item) => isTopDawgTags(item?.tags));
+  const hasLocalItems = cartItems.some((item) => !isTopDawgTags(item?.tags));
+  const deliveryLine = addressZone === 'UNAVAILABLE'
+    ? 'Does not ship to Alaska or Hawaii.'
+    : addressZone === 'SAME_DAY_NYC' && hasLocalItems && hasShippedItems
+      ? 'Same-day delivery in NYC for locally stocked items. The rest of your order arrives separately in 2-5 business days.'
+      : addressZone === 'SAME_DAY_NYC' && hasLocalItems
+        ? 'Same-day delivery in NYC.'
+        : 'Arrives in 2-5 business days.';
   const preheader = isCod
     ? `Packing slip for Petshiwu order ${orderNumber}. ${formatUsd(orderData.totalPrice)} is due when your driver arrives.`
     : `Packing slip and official receipt for Petshiwu order ${orderNumber} · ${formatUsd(orderData.totalPrice)}.`;

@@ -11,12 +11,39 @@ import { safeToString, extractObjectId } from '../utils/types';
 import { extractHexId, findOrderByIdentifier, isOrderIdentifier } from '../utils/orderIdentity';
 import { asyncHandler, NotFoundError, UnauthorizedError, ValidationError } from '../utils/errors';
 import { sendOrderConfirmationEmail, sendOrderCancellationEmail, sendAdminNewOrderEmail } from '../utils/emailService';
+import type { OrderConfirmationItem } from '../utils/orderConfirmationEmail';
 import { notifyCustomerOfOrderStatusChange } from '../utils/orderCustomerNotify';
 import logger from '../utils/logger';
 import { executeCachedAggregation } from '../utils/aggregationCache';
 import { addEmailJob } from '../utils/jobQueue';
 import { cache } from '../utils/cache';
 import { attachGuestOrdersToUser } from '../utils/claimGuestOrders';
+
+/**
+ * Resolve each order item's lane tags from the live product record so the receipt
+ * email can describe the cart's REAL delivery lanes. The tags are used internally
+ * by the email builder only and are NEVER rendered to the customer (the supplier
+ * name behind the 'topdawg' tag must stay internal).
+ */
+const withLaneTags = async (
+  items: Array<OrderConfirmationItem & { product?: mongoose.Types.ObjectId | string }>
+): Promise<OrderConfirmationItem[]> => {
+  const ids = items.map((item) => item.product).filter((id): id is NonNullable<typeof id> => Boolean(id));
+  const docs = ids.length
+    ? await Product.find({ _id: { $in: ids as mongoose.Types.ObjectId[] } }).select('tags').lean()
+    : [];
+  const tagsByProduct = new Map<string, string[]>();
+  for (const doc of docs) {
+    tagsByProduct.set(
+      String((doc as { _id: unknown })._id),
+      Array.isArray((doc as { tags?: unknown[] }).tags) ? (doc as { tags: unknown[] }).tags.map(String) : []
+    );
+  }
+  return items.map((item) => ({
+    ...item,
+    tags: tagsByProduct.get(String(item.product)) || []
+  }));
+};
 
 import type { OrderItemInput, NormalizedOrderItem, NormalizedOrder } from '../types/common';
 import Stripe from 'stripe';
@@ -425,6 +452,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
           const fullOrder = await Order.findById(normalizedOrder._id).lean();
           if (fullOrder && fullOrder.orderNumber) {
             const orderIdStr = String(fullOrder._id);
+            // Lane tags let the receipt describe the cart's real delivery lanes (internal use only).
+            const emailItems = await withLaneTags(fullOrder.items);
             await addEmailJob(
               'order-confirmation',
               {
@@ -433,12 +462,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
                 orderNumber: fullOrder.orderNumber,
                 orderData: {
                   orderId: orderIdStr,
-                  items: fullOrder.items.map((item) => ({
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.price,
-                    image: item.image
-                  })),
+                  items: emailItems,
                   totalPrice: fullOrder.totalPrice,
                   itemsPrice: fullOrder.itemsPrice,
                   shippingPrice: fullOrder.shippingPrice,
@@ -458,12 +482,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
                   fullOrder.orderNumber,
                   {
                     orderId: orderIdStr,
-                    items: fullOrder.items.map((item) => ({
-                      name: item.name,
-                      quantity: item.quantity,
-                      price: item.price,
-                      image: item.image
-                    })),
+                    items: emailItems,
                     totalPrice: fullOrder.totalPrice,
                     itemsPrice: fullOrder.itemsPrice,
                     shippingPrice: fullOrder.shippingPrice,
@@ -1574,6 +1593,8 @@ const sendPayPalOrderSideEffects = async (order: Awaited<ReturnType<typeof final
 
     if (emailAddress && fullOrder.orderNumber) {
       const orderIdStr = String(fullOrder._id);
+      // Lane tags let the receipt describe the cart's real delivery lanes (internal use only).
+      const emailItems = await withLaneTags(fullOrder.items);
       await addEmailJob(
         'order-confirmation',
         {
@@ -1582,7 +1603,7 @@ const sendPayPalOrderSideEffects = async (order: Awaited<ReturnType<typeof final
           orderNumber: fullOrder.orderNumber,
           orderData: {
             orderId: orderIdStr,
-            items: fullOrder.items.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price, image: item.image })),
+            items: emailItems,
             totalPrice: fullOrder.totalPrice,
             itemsPrice: fullOrder.itemsPrice,
             shippingPrice: fullOrder.shippingPrice,
@@ -1598,7 +1619,7 @@ const sendPayPalOrderSideEffects = async (order: Awaited<ReturnType<typeof final
         async () => {
           await sendOrderConfirmationEmail(emailAddress, firstName, fullOrder.orderNumber, {
             orderId: orderIdStr,
-            items: fullOrder.items.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price, image: item.image })),
+            items: emailItems,
             totalPrice: fullOrder.totalPrice,
             itemsPrice: fullOrder.itemsPrice,
             shippingPrice: fullOrder.shippingPrice,
