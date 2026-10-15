@@ -20,7 +20,7 @@ describe('product search snippets', () => {
     });
     expect(snippet.length).toBeLessThanOrEqual(160);
     expect(snippet).not.toMatch(/Front and In stock/);
-    expect(snippet).toMatch(/multiple sizes\. In stock/);
+    expect(snippet).toMatch(/safety\. In stock/);
     expect(snippet).toMatch(/In stock/);
   });
 
@@ -34,7 +34,8 @@ describe('product search snippets', () => {
     });
     expect(snippet.length).toBeLessThanOrEqual(160);
     expect(snippet).toMatch(/In stock/);
-    expect(snippet).toMatch(/Free shipping over \$49/);
-    expect(snippet).toMatch(/No autoship/);
+    expect(snippet).toMatch(/Free shipping on orders \$49\+/);
+    expect(snippet).toMatch(/\$7 delivery under \$49/);
+    expect(snippet).not.toMatch(/No autoship/);
   });
 });

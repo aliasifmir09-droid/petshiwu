@@ -17,7 +17,7 @@ export type ShopBrand = {
 };
 
 const SNIPPET_SUFFIX =
-  'In stock. Free shipping over $49. No autoship. Shipped items arrive in 3-5 days.';
+  'In stock. Free shipping on orders $49+. Shipped items arrive in 3-5 days.';
 
 export function shopBrandTitle(name: string): string {
   return `${name} | In stock · free ship $49+ | Petshiwu`;
@@ -31,9 +31,9 @@ export const BRAND_INDEX_META = {
   h1: 'Shop pet food brands',
   title: 'Shop Pet Food Brands | In stock · free ship $49+ | Petshiwu',
   description:
-    "Shop Hill's, Merrick, Purina, Blue Buffalo, Royal Canin, and more at Petshiwu. In stock. Free shipping over $49. No autoship. Shipped items arrive in 3-5 days.",
+    "Shop Hill's, Merrick, Purina, Blue Buffalo, Royal Canin, and more at Petshiwu. In stock. Free shipping on orders $49+. Shipped items arrive in 3-5 days.",
   intro:
-    "Choose a brand and shop in-stock food, treats, and supplies. Same-day in NYC. Eligible for same-day delivery. Nationwide delivery in 2-5 business days. No autoship.",
+    "Choose a brand and shop in-stock food, treats, and supplies. Same-day in NYC. Eligible for same-day delivery. Nationwide delivery in 2-5 business days.",
 };
 
 export const SHOP_BRANDS: ShopBrand[] = [
@@ -45,7 +45,7 @@ export const SHOP_BRANDS: ShopBrand[] = [
     title: shopBrandTitle("Hill's Science Diet"),
     description: shopBrandDescription("Hill's Science Diet", 'Vet-formulated food for dogs and cats.'),
     intro:
-      "Hill's Science Diet is in stock for dogs and cats, including sensitive-stomach and adult recipes. Same-day NYC. Nationwide delivery in 2-5 business days. No autoship.",
+      "Hill's Science Diet is in stock for dogs and cats, including sensitive-stomach and adult recipes. Same-day NYC. Nationwide delivery in 2-5 business days.",
     logo: '/brands/hills.png',
     homeStrip: true,
     footer: true,
@@ -58,7 +58,7 @@ export const SHOP_BRANDS: ShopBrand[] = [
     title: shopBrandTitle('Merrick'),
     description: shopBrandDescription('Merrick', 'Real-ingredient recipes for dogs and cats.'),
     intro:
-      'Merrick recipes use real meat and wholesome ingredients for dogs and cats. In stock now. Same-day NYC. Nationwide delivery in 2-5 business days. No autoship.',
+      'Merrick recipes use real meat and wholesome ingredients for dogs and cats. In stock now. Same-day NYC. Nationwide delivery in 2-5 business days.',
     homeStrip: true,
     footer: true,
   },
@@ -83,7 +83,7 @@ export const SHOP_BRANDS: ShopBrand[] = [
     title: shopBrandTitle('Purina'),
     description: shopBrandDescription('Purina', 'Pro Plan, Cat Chow, Friskies, and more.'),
     intro:
-      'Shop the Purina family at Petshiwu — Pro Plan, Cat Chow, Friskies, and everyday Purina recipes. In stock. Same-day NYC. Nationwide delivery in 2-5 business days. No autoship.',
+      'Shop the Purina family at Petshiwu — Pro Plan, Cat Chow, Friskies, and everyday Purina recipes. In stock. Same-day NYC. Nationwide delivery in 2-5 business days.',
     logo: '/brands/purina.svg',
     homeStrip: true,
     footer: true,
@@ -109,7 +109,7 @@ export const SHOP_BRANDS: ShopBrand[] = [
     title: shopBrandTitle('Purina Cat Chow'),
     description: shopBrandDescription('Purina Cat Chow', 'Everyday complete dry cat food.'),
     intro:
-      'Purina Cat Chow complete dry recipes for indoor and adult cats. In stock. Same-day NYC. Nationwide delivery in 2-5 business days. No autoship.',
+      'Purina Cat Chow complete dry recipes for indoor and adult cats. In stock. Same-day NYC. Nationwide delivery in 2-5 business days.',
     footer: true,
     relatedSlugs: ['purina', 'friskies', 'temptations'],
   },
@@ -121,7 +121,7 @@ export const SHOP_BRANDS: ShopBrand[] = [
     title: shopBrandTitle('Royal Canin'),
     description: shopBrandDescription('Royal Canin', 'Breed- and size-specific formulas.'),
     intro:
-      'Royal Canin breed, size, and veterinary-diet recipes for dogs and cats. In stock. Same-day NYC. Nationwide delivery in 2-5 business days. No autoship.',
+      'Royal Canin breed, size, and veterinary-diet recipes for dogs and cats. In stock. Same-day NYC. Nationwide delivery in 2-5 business days.',
     logo: '/brands/royalcanin.svg',
     homeStrip: true,
     footer: true,
@@ -134,7 +134,7 @@ export const SHOP_BRANDS: ShopBrand[] = [
     title: shopBrandTitle('Friskies'),
     description: shopBrandDescription('Friskies', 'Wet and dry cat food cats actually finish.'),
     intro:
-      'Friskies wet and dry cat food, including classic pate and gravy recipes. In stock. Same-day NYC. Nationwide delivery in 2-5 business days. No autoship.',
+      'Friskies wet and dry cat food, including classic pate and gravy recipes. In stock. Same-day NYC. Nationwide delivery in 2-5 business days.',
     homeStrip: true,
     footer: true,
     relatedSlugs: ['purina', 'purina-cat-chow', 'temptations'],
@@ -147,7 +147,7 @@ export const SHOP_BRANDS: ShopBrand[] = [
     title: shopBrandTitle('Temptations'),
     description: shopBrandDescription('Temptations', 'Crunchy cat treats and snack mixes.'),
     intro:
-      'Temptations cat treats and mix-ins for everyday rewards. In stock. Same-day NYC. Nationwide delivery in 2-5 business days. No autoship.',
+      'Temptations cat treats and mix-ins for everyday rewards. In stock. Same-day NYC. Nationwide delivery in 2-5 business days.',
     homeStrip: true,
     footer: true,
     relatedSlugs: ['friskies', 'purina-cat-chow'],
@@ -160,7 +160,7 @@ export const SHOP_BRANDS: ShopBrand[] = [
     title: shopBrandTitle('Simply Nourish'),
     description: shopBrandDescription('Simply Nourish', 'Limited-ingredient recipes for dogs and cats.'),
     intro:
-      'Simply Nourish limited-ingredient and wholesome recipes for dogs and cats. In stock. Same-day NYC. Nationwide delivery in 2-5 business days. No autoship.',
+      'Simply Nourish limited-ingredient and wholesome recipes for dogs and cats. In stock. Same-day NYC. Nationwide delivery in 2-5 business days.',
     homeStrip: true,
     footer: true,
   },
@@ -172,7 +172,7 @@ export const SHOP_BRANDS: ShopBrand[] = [
     title: shopBrandTitle('Wellness'),
     description: shopBrandDescription('Wellness', 'Core and Complete Health lines.'),
     intro:
-      'Wellness Core and Complete Health recipes for dogs and cats. In stock. Same-day NYC. Nationwide delivery in 2-5 business days. No autoship.',
+      'Wellness Core and Complete Health recipes for dogs and cats. In stock. Same-day NYC. Nationwide delivery in 2-5 business days.',
     logo: '/brands/wellness.png',
     homeStrip: true,
   },
@@ -184,7 +184,7 @@ export const SHOP_BRANDS: ShopBrand[] = [
     title: shopBrandTitle('Iams'),
     description: shopBrandDescription('Iams', 'Everyday nutrition for dogs and cats.'),
     intro:
-      'Iams everyday dog and cat food at a fair price. In stock. Same-day NYC. Nationwide delivery in 2-5 business days. No autoship.',
+      'Iams everyday dog and cat food at a fair price. In stock. Same-day NYC. Nationwide delivery in 2-5 business days.',
     logo: '/brands/iams.png',
     homeStrip: true,
   },
@@ -196,7 +196,7 @@ export const SHOP_BRANDS: ShopBrand[] = [
     title: shopBrandTitle('Pedigree'),
     description: shopBrandDescription('Pedigree', 'Dog food and treats at everyday prices.'),
     intro:
-      'Pedigree dry food, wet food, and treats for dogs. In stock. Same-day NYC. Nationwide delivery in 2-5 business days. No autoship.',
+      'Pedigree dry food, wet food, and treats for dogs. In stock. Same-day NYC. Nationwide delivery in 2-5 business days.',
     logo: '/brands/pedigree.png',
     dark: true,
     homeStrip: true,
@@ -209,7 +209,7 @@ export const SHOP_BRANDS: ShopBrand[] = [
     title: shopBrandTitle('Nutro'),
     description: shopBrandDescription('Nutro', 'Natural recipes with farm-grown ingredients.'),
     intro:
-      'Nutro natural dog and cat recipes with farm-grown ingredients. In stock. Same-day NYC. Nationwide delivery in 2-5 business days. No autoship.',
+      'Nutro natural dog and cat recipes with farm-grown ingredients. In stock. Same-day NYC. Nationwide delivery in 2-5 business days.',
     logo: '/brands/nutro.png',
     homeStrip: true,
   },
@@ -221,7 +221,7 @@ export const SHOP_BRANDS: ShopBrand[] = [
     title: shopBrandTitle("Nature's Recipe"),
     description: shopBrandDescription("Nature's Recipe", 'Grain-free and wholesome recipes.'),
     intro:
-      "Nature's Recipe grain-free and wholesome recipes for dogs. In stock. Same-day NYC. Nationwide delivery in 2-5 business days. No autoship.",
+      "Nature's Recipe grain-free and wholesome recipes for dogs. In stock. Same-day NYC. Nationwide delivery in 2-5 business days.",
     logo: '/brands/natures.svg',
     homeStrip: true,
   },

@@ -37,9 +37,10 @@ describe('productSearchDescription', () => {
     });
     expect(snippet.length).toBeLessThanOrEqual(160);
     expect(snippet).toMatch(/In stock/);
-    expect(snippet).toMatch(/Free shipping over \$49/);
-    expect(snippet).toMatch(/No autoship/);
-    const body = snippet.replace(/\s*In stock\.\s*Free shipping over \$49\. No autoship\.?$/, '').trim();
+    expect(snippet).toMatch(/Free shipping on orders \$49\+/);
+    expect(snippet).toMatch(/\$7 delivery under \$49/);
+    expect(snippet).not.toMatch(/No autoship/);
+    const body = snippet.replace(/\s*In stock\.\s*Free shipping on orders \$49\+\. \$7 delivery under \$49\.?$/, '').trim();
     const lastWord = body.split(/\s+/).pop()?.replace(/[.,;:]+$/, '') ?? '';
     expect(lastWord.length).toBeGreaterThan(2);
     expect(description.split(/\s+/).map((w) => w.replace(/[.,;:]+$/, ''))).toContain(lastWord);
@@ -52,9 +53,9 @@ describe('productSearchDescription', () => {
     });
     expect(snippet.length).toBeLessThanOrEqual(160);
     expect(snippet).not.toMatch(/Front and In stock/);
-    expect(snippet).toMatch(/multiple sizes\. In stock/);
+    expect(snippet).toMatch(/safety\. In stock/);
     expect(snippet).toMatch(/In stock/);
-    expect(snippet).toMatch(/Free shipping over \$49/);
+    expect(snippet).toMatch(/Free shipping on orders \$49\+/);
   });
 
   test('builds a fallback snippet when the product has no description', () => {
@@ -66,7 +67,7 @@ describe('productSearchDescription', () => {
     expect(snippet.length).toBeLessThanOrEqual(160);
     expect(snippet).toMatch(/Royal Canin Indoor Adult Cat Food/);
     expect(snippet).toMatch(/In stock/);
-    expect(snippet).toMatch(/Free shipping over \$49/);
+    expect(snippet).toMatch(/Free shipping on orders \$49\+/);
   });
 });
 

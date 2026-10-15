@@ -14,7 +14,7 @@ const ShippingPolicy = () => {
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <SEO
         title="Shipping Information | Petshiwu"
-        description="Petshiwu shipping: same-day in NYC for locally stocked items, 2-5 business days nationwide for the rest of the catalog. $7 under $49, free at $49. Does not ship to Alaska or Hawaii."
+        description="Petshiwu shipping: same-day in NYC for locally stocked items, 2-5 business days nationwide for the rest of the catalog. $7 delivery under $49, free at $49. Does not ship to Alaska or Hawaii."
         url="/shipping"
       />
 
@@ -122,7 +122,7 @@ const ShippingPolicy = () => {
             .
           </p>
           <p className="mt-2">
-            <strong>Nationwide:</strong> the whole catalog ships in 2-5 business days. Shipping is $7 under $49 and free at $49, including NYC.
+            <strong>Nationwide:</strong> the whole catalog ships in 2-5 business days. Shipping is $7 delivery under $49 and free at $49, including NYC.
             Does not ship to Alaska or Hawaii. We pack from our warehouse — it is not a store. We only deliver.
           </p>
         </section>
@@ -146,7 +146,7 @@ const ShippingPolicy = () => {
           <p className="mt-2">
             Contact:{' '}
             <a href="mailto:support@petshiwu.com" className="text-blue-600 hover:underline">support@petshiwu.com</a>
-            {' '}or <a href="tel:+18002592605" className="text-blue-600 hover:underline">+1 (800) 259-2605</a> (24/7).
+            {' '}or <a href="tel:+18002592605" className="text-blue-600 hover:underline">+1 (800) 259-2605</a> .
           </p>
         </section>
 

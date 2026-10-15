@@ -7,9 +7,9 @@ const PetSuppliesBronxNY = () => (
   <SEOLandingPage
     keyword="pet-supplies-bronx-ny"
     title="Same-Day Pet Supplies Bronx — Order by 3 PM | Petshiwu"
-    description="Same-day pet delivery in the Bronx. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Fordham, Riverdale, Mott Haven. No autoship. Free over $49."
+    description="Same-day pet delivery in the Bronx. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Fordham, Riverdale, Mott Haven. Free shipping on orders $49+."
     h1="Same-Day Pet Supplies Across the Bronx, NY"
-    introContent="Petshiwu delivers pet food and supplies tonight across the Bronx — Riverdale, Fordham, Mott Haven, Hunts Point, Pelham Bay. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No autoship. No car needed. Free over $49."
+    introContent="Petshiwu delivers pet food and supplies tonight across the Bronx — Riverdale, Fordham, Mott Haven, Hunts Point, Pelham Bay. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No car needed. Free shipping on orders $49+."
     problemPoints={[
       "Limited pet store options in many Bronx neighborhoods",
       "Having to travel far for quality pet food brands",
@@ -44,7 +44,7 @@ const PetSuppliesBronxNY = () => (
       },
       {
         question: "Do you deliver to Riverdale and Fordham in the Bronx?",
-        answer: "Yes — Riverdale, Fordham, and all Bronx ZIPs. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No autoship."
+        answer: "Yes — Riverdale, Fordham, and all Bronx ZIPs. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM."
       }
     ]}
     searchTerms={['dog food', 'cat food', 'pet food', 'pet supplies', 'cat litter', 'dog treats', 'bird food']}

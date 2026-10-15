@@ -35,6 +35,6 @@ export const FALL_2026_PLAYBOOK = {
       <h2>If digestion is the actual problem</h2>
       <p>Loose stool after a food change is common; blood, repeated vomiting, or a dog that will not drink is not. Start with <a href="/learning/best-dog-food-sensitive-stomach">best dog food for sensitive stomachs</a> and shop only after your veterinarian agrees the issue is diet, not parasites or a blockage.</p>
       <h2>Shop without a subscription</h2>
-      <p>Petshiwü is an online store. We deliver in NYC today and nationwide shipping is opening. There is no autoship. Free shipping over $49. Browse the <a href="/learning">Learning Center</a> for the full indexed library, then <a href="/products">shop products</a> when you already know the food.</p>
+      <p>Petshiwü is an online store. We deliver in NYC today and nationwide shipping is opening. There is no autoship. Free shipping on orders $49+. Browse the <a href="/learning">Learning Center</a> for the full indexed library, then <a href="/products">shop products</a> when you already know the food.</p>
     `,
 };

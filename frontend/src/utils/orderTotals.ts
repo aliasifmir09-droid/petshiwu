@@ -1,6 +1,6 @@
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST } from '@/config/constants';
 
-/** One order fee: $7 under $49, free at $49, including NYC and TopDawg. */
+/** One order fee: $7 delivery under $49, free at $49, including NYC and TopDawg. */
 export const shippingCostForSubtotal = (
   subtotal: number,
   waiveShipping = false,

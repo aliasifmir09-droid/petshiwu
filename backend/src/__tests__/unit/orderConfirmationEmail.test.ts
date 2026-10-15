@@ -70,8 +70,8 @@ describe('order confirmation email', () => {
     expect(email.html).toContain('tel:+18002592605');
     expect(email.html).toContain('+1 (800) 259-2605');
     expect(email.html).toContain('We pack and deliver this order on August 28, 2026');
-    expect(email.html).toContain('Same-day delivery in NYC');
-    expect(email.text).toContain('Same-day delivery in NYC');
+    expect(email.html).toContain('Same-day delivery in NYC on locally stocked items');
+    expect(email.text).toContain('Same-day delivery in NYC on locally stocked items');
   });
 
   test('guest receipts explain Google sign-in and how to create a password', () => {
@@ -148,7 +148,7 @@ describe('order confirmation email', () => {
 
   test('keeps a plain-text receipt for inbox filters', () => {
     expect(email.text).toContain('Whisker City® 2-Door Pet Carrier');
-    expect(email.text).toContain('Call support 24/7: +1 (800) 259-2605');
+    expect(email.text).toContain('Call support: +1 (800) 259-2605');
     expect(email.text).toContain('support@petshiwu.com');
     expect(email.text).toContain('PACKING SLIP');
     expect(email.text).toContain('https://www.petshiwu.com/track-order?order=ORD-1787320995135-7555');

@@ -29,9 +29,9 @@ const structuredData = read('../../components/StructuredData.tsx');
 
 describe('public SEO copy stays one launch story', () => {
   test('homepage Google snippet stays locked', () => {
-    expect(HOMEPAGE_TITLE).toContain('Petshiwu | Pet Food & Supplies');
+    expect(HOMEPAGE_TITLE).toBe('Petshiwu — 10,000+ Pet Products, Ships Nationwide | Same-Day in NYC');
     expect(HOMEPAGE_DESCRIPTION).toContain('Nationwide delivery in 2-5 business days');
-    expect(HOMEPAGE_DESCRIPTION).toMatch(/same-day in NYC/i);
+    expect(HOMEPAGE_DESCRIPTION).toMatch(/same-day delivery in NYC on locally stocked items/i);
     expect(HOMEPAGE_DESCRIPTION).not.toMatch(/start accepting orders soon/i);
     expect(indexHtml).toContain(HOMEPAGE_TITLE);
     expect(indexHtml).toContain(HOMEPAGE_DESCRIPTION);
@@ -55,7 +55,7 @@ describe('public SEO copy stays one launch story', () => {
     expect(seo).not.toContain('application/ld+json');
   });
 
-  test('organization copy is nationwide delivery, with NYC same-day on local stock', () => {
+  test('organization copy is nationwide delivery, with Same-day delivery in NYC on locally stocked items', () => {
     expect(ORGANIZATION_DESCRIPTION).toMatch(/Nationwide delivery in 2-5 business days/);
     expect(ORGANIZATION_DESCRIPTION).toMatch(/not a store. We only deliver/i);
     expect(ORGANIZATION_DESCRIPTION).not.toMatch(/across the USA/i);

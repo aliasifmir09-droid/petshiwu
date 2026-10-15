@@ -40,7 +40,7 @@ export function buildRepeatCustomerPromoEmail(
 </head>
 <body style="margin:0;padding:0;background:#f4f1ea;font-family:Georgia,'Times New Roman',serif;">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;">
-    Use ${REPEAT_PROMO_CODE} at checkout for 10% off your next order, max $10. No autoship. Packed in Queens for NYC pet parents.
+    Use ${REPEAT_PROMO_CODE} at checkout for 10% off your next order, max $10. Packed in Queens for NYC pet parents.
   </div>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ea;padding:24px 12px;">
     <tr>
@@ -52,7 +52,7 @@ export function buildRepeatCustomerPromoEmail(
           <tr>
             <td style="background:${NAVY};padding:28px 32px;text-align:center;">
               <img src="${origin}/logo.png" alt="Petshiwu" width="120" style="display:inline-block;max-width:120px;height:auto;" />
-              <p style="margin:12px 0 0;color:#FDE68A;font-family:Arial,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;">For NYC pet parents</p>
+              <p style="margin:12px 0 0;color:#FDE68A;font-family:Arial,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;">For pet parents nationwide</p>
             </td>
           </tr>
           <tr>
@@ -61,7 +61,7 @@ export function buildRepeatCustomerPromoEmail(
               <h1 style="margin:0 0 16px;font-size:28px;line-height:1.25;color:${NAVY};font-weight:700;">Thank you for trusting us with their bowl.</h1>
               <p style="margin:0 0 16px;font-size:17px;line-height:1.65;color:#44403c;">Hi ${safeName},</p>
               <p style="margin:0 0 16px;font-size:17px;line-height:1.65;color:#44403c;">You already ordered from Petshiwu. We packed that order in Jackson Heights for a neighbor who takes pet care seriously — and we would be glad to pack the next one too.</p>
-              <p style="margin:0 0 8px;font-size:17px;line-height:1.65;color:#44403c;">Here is <strong>10% off your next order</strong> (maximum $10) on food, litter, and everyday supplies. No subscription. No autoship. Just a thank-you.</p>
+              <p style="margin:0 0 8px;font-size:17px;line-height:1.65;color:#44403c;">Here is <strong>10% off your next order</strong> (maximum $10) on food, litter, and everyday supplies. No subscription. Just a thank-you.</p>
             </td>
           </tr>
           <tr>
@@ -128,7 +128,7 @@ export function buildRepeatCustomerPromoEmail(
   const text = [
     `Hi ${firstName},`,
     '',
-    'Thank you for your Petshiwu order. Here is 10% off your next one (maximum $10) on food, litter, and everyday supplies. No autoship.',
+    'Thank you for your Petshiwu order. Here is 10% off your next one (maximum $10) on food, litter, and everyday supplies.',
     '',
     `Code: ${REPEAT_PROMO_CODE}`,
     `Shop: ${shopUrl}`,

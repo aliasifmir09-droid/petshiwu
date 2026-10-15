@@ -41,7 +41,7 @@ const Footer = () => {
               <BrandLogo variant="on-navy" />
             </Link>
             <p className="text-blue-100 text-sm mb-4 leading-relaxed">
-              Food, treats, and supplies for every pet. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.
+              A nationwide pet delivery company. 10,000+ pet products. Free shipping on orders $49+. $7 delivery under $49. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items.
             </p>
             <div className="flex gap-4">
               {FOOTER_SOCIAL.map((item) => {
@@ -96,7 +96,6 @@ const Footer = () => {
             <ul className="space-y-2 text-sm text-blue-100">
               <li><Link to="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
               <li><Link to="/shipping" className="hover:text-white transition-colors">Shipping Information</Link></li>
-              <li><Link to="/delivery-zips" className="hover:text-white transition-colors">NYC delivery area</Link></li>
               <li><Link to="/return-policy" className="hover:text-white transition-colors">365-Day Return Policy</Link></li>
               <li><Link to="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
               <li><Link to="/search?snap=1" className="hover:text-white transition-colors">Search by photo</Link></li>
@@ -112,7 +111,6 @@ const Footer = () => {
               <li><Link to="/products" className="hover:text-white transition-colors">Shop All Products</Link></li>
               <li><Link to="/products?featured=true" className="hover:text-white transition-colors">Featured</Link></li>
               <li><Link to="/learning" className="hover:text-white transition-colors">Pet Care Blog</Link></li>
-              <li><Link to="/learning/next-day-pet-delivery-within-50-miles-of-queens" className="hover:text-white transition-colors">NYC same-day delivery</Link></li>
               <li><Link to="/learning/fall-2026-pet-care-playbook" className="hover:text-white transition-colors">Fall 2026 Playbook</Link></li>
               <li><Link to="/editorial-standards" className="hover:text-white transition-colors">How we write guides</Link></li>
               <li><Link to="/care-guides" className="hover:text-white transition-colors">Care Guides</Link></li>
@@ -128,8 +126,10 @@ const Footer = () => {
 
           {/* Popular pages */}
           <div>
-            <h3 className="text-sm font-bold tracking-wide uppercase text-white mb-4">Popular pages</h3>
+            <h3 className="text-sm font-medium tracking-wide uppercase text-white mb-4">Our home city</h3>
             <ul className="space-y-2 text-sm text-blue-100">
+              <li><Link to="/delivery-zips" className="hover:text-white transition-colors">NYC delivery area</Link></li>
+              <li><Link to="/learning/next-day-pet-delivery-within-50-miles-of-queens" className="hover:text-white transition-colors">Same-day delivery in NYC on locally stocked items</Link></li>
               <li><Link to="/pet-supplies-delivery-nyc" className="hover:text-white transition-colors">Pet Supplies Delivery NYC</Link></li>
               <li><Link to="/pet-supplies-jackson-heights-ny" className="hover:text-white transition-colors">Jackson Heights</Link></li>
               <li><Link to="/pet-supplies-queens-ny" className="hover:text-white transition-colors">Pet Supplies Queens</Link></li>
@@ -150,7 +150,7 @@ const Footer = () => {
               <li>
                 <a href="tel:+18002592605" className="hover:text-white transition-colors inline-flex items-start gap-2">
                   <Phone size={16} className="mt-0.5 flex-shrink-0" aria-hidden />
-                  <span>+1 (800) 259-2605<br /><span className="text-blue-200/80">24/7 phone support</span></span>
+                  <span>+1 (800) 259-2605<br /><span className="text-blue-200/80">Call or email support</span></span>
                 </a>
               </li>
               <li>

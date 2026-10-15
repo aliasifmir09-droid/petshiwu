@@ -23,10 +23,10 @@ interface TonightPromiseCardProps {
 }
 
 const TRUST_CHIPS = [
-  'Free over $49',
-  'No autoship',
-  '365-day unused returns',
-  '24/7 support',
+  'Free shipping on orders $49+',
+  '$7 delivery under $49',
+  '365-day returns',
+  'Nationwide 2-5 day delivery',
 ];
 
 const loadSavedZip = (): string => {
@@ -104,7 +104,7 @@ const TonightPromiseCard = ({ variant = 'hero', shopHref = '/products' }: Tonigh
           Check your ZIP — same-day NYC, or 2-5 business days on shipped items
         </h2>
         <p className="text-slate-600 mb-5">
-          {NATIONWIDE_SOON_NOTE} Free over ${TONIGHT.freeOver}. No autoship.
+          {NATIONWIDE_SOON_NOTE} Free shipping on orders $49+. $7 delivery under $49.
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
           <label className="sr-only" htmlFor={zipId}>
@@ -151,16 +151,13 @@ const TonightPromiseCard = ({ variant = 'hero', shopHref = '/products' }: Tonigh
   }
 
   if (variant === 'pdp') {
-    const eligibleHere = result?.speed === 'same-day' && !countdown.passed;
     return (
       <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
         <p className="text-sm font-semibold text-[#1E3A8A]">
-          {eligibleHere && result
-            ? `This product is eligible for same-day delivery in ${result.area}`
-            : SAME_DAY_PRODUCT_ELIGIBILITY}
+          {SAME_DAY_PRODUCT_ELIGIBILITY}
         </p>
         <p className="text-xs text-slate-600 mt-0.5">
-          {result?.headline || 'Check your ZIP to confirm this product can arrive today.'}
+          {result?.headline || 'Enter your ZIP to check delivery.'}
         </p>
         <p className="text-xs text-slate-600 mt-0.5">{cutoffLine}</p>
         <p className="text-xs text-slate-500 mt-1">{status}</p>
@@ -194,7 +191,7 @@ const TonightPromiseCard = ({ variant = 'hero', shopHref = '/products' }: Tonigh
             Check delivery for your ZIP
           </h2>
           <p className="text-base md:text-lg text-slate-600 mb-6 max-w-xl">
-            {NATIONWIDE_SOON_NOTE} Shipped items arrive in 2-5 business days. Free shipping over ${TONIGHT.freeOver} on local orders. No autoship.
+            {NATIONWIDE_SOON_NOTE} Free shipping on orders $49+. $7 delivery under $49.
           </p>
           {cutoffLine ? <p className="text-sm font-medium text-slate-800 mb-1">{cutoffLine}</p> : null}
           <p className="text-sm text-slate-600 mb-5">{status}</p>

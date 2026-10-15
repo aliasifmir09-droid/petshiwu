@@ -22,6 +22,7 @@ import {
 } from '@/data/nycShopHub';
 import { ORDERING_PAUSED } from '@/config/ordering';
 import { landingProductQuery } from '@/utils/landingProducts';
+import { HOME_CITY_LEAD } from '@/utils/deliveryZones';
 
 interface SEOLandingPageProps {
   keyword: string;
@@ -157,7 +158,8 @@ const SEOLandingPage = ({
             {h1}
           </h1>
           <div className="prose prose-lg max-w-none text-gray-700 mb-6">
-            <p className="text-xl leading-relaxed">{introContent}</p>
+            <p className="text-base leading-relaxed text-stone-800">{HOME_CITY_LEAD}</p>
+            <p className="mt-3 text-base leading-relaxed">{introContent}</p>
           </div>
           <p className="text-[#1E3A8A] font-semibold">{TONIGHT.promise}</p>
         </div>

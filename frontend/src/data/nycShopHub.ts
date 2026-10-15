@@ -31,7 +31,7 @@ export const NYC_HUB_LINKS: Array<{
   {
     path: '/pet-supplies-delivery-nyc',
     title: 'Pet supplies delivery NYC',
-    text: '10,000+ SKUs. Free over $49. Check your ZIP for same-day NYC vs 2-5 business days on shipped items.',
+    text: '10,000+ SKUs. Free shipping on orders $49+. Check your ZIP for same-day NYC vs 2-5 business days on shipped items.',
   },
   {
     path: '/pet-supplies-queens-ny',
@@ -47,7 +47,7 @@ export const NYC_HUB_ZIP_INTRO =
 
 export const NYC_HUB_NATIONWIDE_HEADING = 'Nationwide delivery in 2-5 business days';
 
-export const NYC_HUB_NATIONWIDE_BODY = `${NATIONWIDE_SOON_NOTE} Free shipping over $${TONIGHT.freeOver}. No autoship. Jackson Heights is warehouse and office, not a store. We only deliver.`;
+export const NYC_HUB_NATIONWIDE_BODY = `${NATIONWIDE_SOON_NOTE} Free shipping on orders $49+. $7 delivery under $49. Jackson Heights is warehouse and office, not a store. We only deliver.`;
 
 export const NYC_HUB_COMPARE_HEADING = 'Why NYC shoppers pick Petshiwü first';
 
@@ -71,9 +71,9 @@ export const NYC_HUB_COMPARE_ROWS: Array<{
   },
   {
     label: 'Free delivery',
-    petshiwu: 'Free over $49 ($7 under)',
+    petshiwu: 'Free shipping on orders $49+ ($7 under)',
     manhattanShop: 'Often $100+ or zone fees',
-    national: 'Free over $49, slower',
+    national: 'Free shipping on orders $49+, slower',
   },
   {
     label: 'Autoship',

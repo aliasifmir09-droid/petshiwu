@@ -13,7 +13,7 @@ export const DAMAGED_ITEM_REPORT_DAYS = 7;
 export const REFUND_BUSINESS_DAYS = '5–10';
 
 export const DELIVERY_STATEMENT =
-  'Same-day NYC is only for locally stocked items: order by 3 PM ET weekdays or 1 PM ET weekends for delivery before 11 PM across all five boroughs. After cutoff we deliver the next day. The whole catalog ships nationwide in 2-5 business days. Shipping is $7 under $49 and free at $49, including NYC. Alaska and Hawaii are excluded. Same-day is our target, not a guarantee. If we miss the window, email support@petshiwu.com and we will reship the next day free or refund the order.';
+  'Same-day NYC is only for locally stocked items: order by 3 PM ET weekdays or 1 PM ET weekends for delivery before 11 PM across all five boroughs. After cutoff we deliver the next day. The whole catalog ships nationwide in 2-5 business days. Shipping is $7 delivery under $49 and free at $49, including NYC. Alaska and Hawaii are excluded. Same-day is our target, not a guarantee. If we miss the window, email support@petshiwu.com and we will reship the next day free or refund the order.';
 
 export const CANCELLATION_STATEMENT =
   'You can cancel an unshipped order within 2 hours of placing it by emailing support@petshiwu.com. After it ships, use the 365-day return policy.';

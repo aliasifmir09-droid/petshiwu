@@ -416,7 +416,7 @@ const OrderDetail = () => {
         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h3 className="font-bold mb-2">Need a person?</h3>
           <p className="text-sm text-gray-700 mb-3">
-            A Petshiwü teammate answers 24/7. This is our own delivery from Queens — not UPS or FedEx.
+            A Petshiwü teammate answers by phone or email. This is our own delivery from Queens — not UPS or FedEx.
           </p>
           <a
             href={`tel:${TONIGHT.phone.replace(/[^\d+]/g, '')}`}

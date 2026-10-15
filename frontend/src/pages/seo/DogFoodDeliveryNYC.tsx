@@ -8,9 +8,9 @@ const DogFoodDeliveryNYC = () => {
     <SEOLandingPage
       keyword="dog-food-delivery-nyc"
       title="Same-Day Dog Food Delivery NYC — Order by 3 PM | Petshiwu"
-      description="Same-day dog food delivery in NYC. Order by 3 PM weekdays (1 PM weekends), at your door before 11 PM. No autoship. Free over $49. All 5 boroughs."
+      description="Same-day dog food delivery in NYC. Order by 3 PM weekdays (1 PM weekends), at your door before 11 PM. Free shipping on orders $49+. All 5 boroughs."
       h1="Same-Day Dog Food Delivery in New York City"
-      introContent="Stop carrying heavy bags of dog food on the subway. Petshiwu delivers dog food to your NYC door tonight when you order by 3 PM weekdays (1 PM weekends) — dry kibble, wet food, grain-free, raw, puppy, and senior. Purina, Blue Buffalo, Royal Canin, Hill's. No autoship. Free delivery over $49. Enter your ZIP below to confirm same-day in your neighborhood. Same-day is NYC only; shipped items go nationwide in 2-5 business days."
+      introContent="Stop carrying heavy bags of dog food on the subway. Petshiwu delivers dog food to your NYC door tonight when you order by 3 PM weekdays (1 PM weekends) — dry kibble, wet food, grain-free, raw, puppy, and senior. Purina, Blue Buffalo, Royal Canin, Hill's. Free delivery over $49. Enter your ZIP below to confirm same-day in your neighborhood. Same-day is NYC only; shipped items go nationwide in 2-5 business days."
       shoppableHub
       problemPoints={[
         "Carrying 30-pound bags of dog food on the subway or in a cab",
@@ -39,11 +39,11 @@ const DogFoodDeliveryNYC = () => {
         },
         {
           question: "Can I get puppy food delivered in NYC?",
-          answer: "Absolutely. We carry puppy formulas for all breeds and sizes — small breed puppy, large breed puppy, and all-breed puppy foods from every major brand. Free delivery on orders over $49."
+          answer: "Absolutely. We carry puppy formulas for all breeds and sizes — small breed puppy, large breed puppy, and all-breed puppy foods from every major brand. Free shipping on orders $49+."
         },
         {
           question: "Do you offer subscription or repeat delivery for dog food?",
-          answer: "No autoship. Reorder from your order history when you want. No subscription, no commitment. Same-day if you order by 3 PM weekdays (1 PM weekends)."
+          answer: "Reorder from your order history when you want. No subscription, no commitment. Same-day if you order by 3 PM weekdays (1 PM weekends)."
         },
         {
           question: "Is dog food delivery available in Brooklyn and Manhattan?",

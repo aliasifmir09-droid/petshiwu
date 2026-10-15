@@ -28,19 +28,24 @@ export const NATIONWIDE_SHIPPING_COST = SHIPPING_COST;
 
 export const NATIONWIDE_WINDOW = 'Arrives in 2-5 business days';
 export const NATIONWIDE_PAGE_PROMISE = 'Arrives in 2-5 business days anywhere in the US except Alaska and Hawaii';
-export const NATIONWIDE_FEE_NOTE = '$7 delivery, free at $49+.';
+export const FEE_FREE_LABEL = 'Free shipping on orders $49+';
+export const FEE_UNDER_LABEL = '$7 delivery under $49';
+export const SAME_DAY_LOCAL_PHRASE = 'Same-day delivery in NYC on locally stocked items';
+export const NATIONWIDE_FEE_NOTE = `${FEE_UNDER_LABEL}. ${FEE_FREE_LABEL}.`;
 export const TRI_STATE_WINDOW = NATIONWIDE_WINDOW;
 export const TRI_STATE_PAGE_PROMISE = NATIONWIDE_PAGE_PROMISE;
 export const TRI_STATE_FEE_NOTE = NATIONWIDE_FEE_NOTE;
 export const LOCAL_UNAVAILABLE_MESSAGE = 'Not available for this address yet';
-export const SAME_DAY_WINDOW = 'Same-day delivery in NYC';
+export const SAME_DAY_WINDOW = SAME_DAY_LOCAL_PHRASE;
 
-/** Nationwide-first homepage H1. Same-day stays a NYC fact, not the store identity. */
-export const HERO_H1 = 'The pet delivery platform and company that ships nationwide — and delivers same-day in NYC.';
+/** Nationwide-first homepage H1. Same-day stays a home-city fact, not the brand headline. */
+export const HERO_H1 = '10,000+ pet products, shipped nationwide.';
 export const NATIONWIDE_BRAND_FRAME =
-  'Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.';
+  `Nationwide delivery in 2-5 business days. ${SAME_DAY_LOCAL_PHRASE}.`;
+export const HOME_CITY_LEAD =
+  `New York City is our home city. The catalog ships nationwide in 2-5 business days. ${SAME_DAY_LOCAL_PHRASE}. ${FEE_FREE_LABEL}. ${FEE_UNDER_LABEL}.`;
 export const ANNOUNCEMENT_SHIPPING =
-  'FREE shipping on orders $49+ · Nationwide delivery in 2-5 business days · NYC same-day on local stock';
+  `${FEE_FREE_LABEL} · ${FEE_UNDER_LABEL} · Nationwide delivery in 2-5 business days`;
 
 export const MIXED_TRISTATE_DELIVERY_SUMMARY =
   'Items arrive in 2-5 business days. Same-day is only for locally stocked items in NYC.';
@@ -105,7 +110,7 @@ export function zoneWindow(zone: DeliveryZoneId): string {
   }
 }
 
-/** One shipping charge for the order. $7 under $49, free at $49, including NYC and TopDawg. */
+/** One shipping charge for the order. $7 delivery under $49, free at $49, including NYC and TopDawg. */
 export function combineDeliveryFees(input: {
   zone: DeliveryZoneId;
   merchandiseSubtotal: number;

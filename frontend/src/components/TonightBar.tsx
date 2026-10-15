@@ -62,7 +62,7 @@ const TonightBar = () => {
     ? result.speed === 'same-day' && !countdown.passed
       ? `${result.headline} · ${formatCountdownShort(countdown)}`
       : result.headline
-    : 'FREE shipping on orders $49+ · Nationwide delivery in 2-5 business days · NYC same-day on local stock';
+    : 'Free shipping on orders $49+ · Nationwide delivery in 2-5 business days · Same-day delivery in NYC on locally stocked items';
 
   const zipField = (
     <>

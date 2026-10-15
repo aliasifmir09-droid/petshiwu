@@ -7,7 +7,8 @@ describe('tonight delivery promise', () => {
     expect(TONIGHT.weekendCutoff).toBe('1 PM');
     expect(TONIGHT.deliverBy).toBe('11 PM');
     expect(TONIGHT.freeOver).toBe(49);
-    expect(TONIGHT.promise).toMatch(/no autoship/i);
+    expect(TONIGHT.promise).toMatch(/same-day delivery in NYC on locally stocked items/i);
+    expect(TONIGHT.promise).not.toMatch(/no autoship/i);
   });
 
   test('Google Business description fits the 750-character limit', () => {
@@ -17,7 +18,8 @@ describe('tonight delivery promise', () => {
     expect(GBP_DESCRIPTION).toMatch(/3 PM/);
     expect(GBP_DESCRIPTION).toMatch(/1 PM/);
     expect(GBP_DESCRIPTION).toMatch(/11 PM/);
-    expect(GBP_DESCRIPTION).toMatch(/No autoship/);
+    expect(GBP_DESCRIPTION).toMatch(/nationwide pet delivery company/i);
+    expect(GBP_DESCRIPTION).not.toMatch(/No autoship/);
     expect(GBP_DESCRIPTION).toMatch(/Petshiwu/);
     expect(GBP_DESCRIPTION).not.toMatch(/PetShiwu/);
   });

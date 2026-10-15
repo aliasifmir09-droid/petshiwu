@@ -240,7 +240,7 @@ router.post('/callback', async (req: Request, res: Response) => {
       if (process.env.NODE_ENV === 'production') {
         return res.status(500).json({
           success: false,
-          message: 'Could not reach the call desk. Call +1 (800) 259-2605 and a person answers 24/7.',
+          message: 'Could not reach the call desk. Call +1 (800) 259-2605 and call or email support.',
         });
       }
     }
@@ -248,7 +248,7 @@ router.post('/callback', async (req: Request, res: Response) => {
     if (!submission && process.env.NODE_ENV === 'production') {
       return res.status(500).json({
         success: false,
-        message: 'Could not reach the call desk. Call +1 (800) 259-2605 and a person answers 24/7.',
+        message: 'Could not reach the call desk. Call +1 (800) 259-2605 and call or email support.',
       });
     }
 
@@ -261,7 +261,7 @@ router.post('/callback', async (req: Request, res: Response) => {
     logger.error('Callback request error:', error);
     res.status(500).json({
       success: false,
-      message: 'Could not reach the call desk. Call +1 (800) 259-2605 and a person answers 24/7.',
+      message: 'Could not reach the call desk. Call +1 (800) 259-2605 and call or email support.',
     });
   }
 });

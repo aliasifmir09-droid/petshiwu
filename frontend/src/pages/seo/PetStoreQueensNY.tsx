@@ -9,9 +9,9 @@ const PetStoreQueensNY = () => {
     <SEOLandingPage
       keyword="pet-store-queens-ny"
       title="Pet Delivery Queens NY — Same-Day Delivery, Not a Walk-In | Petshiwu"
-      description="Queens pet delivery from Jackson Heights warehouse. Not a store. We only deliver. Order by 3 PM weekdays (1 PM weekends), before 11 PM. No autoship. Free over $49."
+      description="Queens pet delivery from Jackson Heights warehouse. Not a store. We only deliver. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Free shipping on orders $49+."
       h1="Queens Pet Delivery — We Bring It to Your Door Tonight"
-      introContent="Petshiwu is Queens delivery, not a walk-in shop. Jackson Heights is office and warehouse only. Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM to Flushing, Astoria, Forest Hills, Jamaica, and all of Queens. No autoship. Free over $49."
+      introContent="Petshiwu is Queens delivery, not a walk-in shop. Jackson Heights is office and warehouse only. Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM to Flushing, Astoria, Forest Hills, Jamaica, and all of Queens. Free shipping on orders $49+."
       problemPoints={[
         "No time to visit a pet store in Queens",
         "Having to travel to a big-box store for specialty items",
@@ -24,7 +24,7 @@ const PetStoreQueensNY = () => {
         "Delivery throughout all Queens neighborhoods",
         "10,000+ products for every type of pet",
         "All the top national brands at competitive prices",
-        "Free delivery on orders over $49 — no membership required",
+        "Free shipping on orders $49+ — no membership required",
         "Multilingual customer support for Queens' diverse communities"
       ]}
       faqItems={[

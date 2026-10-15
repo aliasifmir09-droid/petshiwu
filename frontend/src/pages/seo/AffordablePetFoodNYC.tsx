@@ -9,7 +9,7 @@ const AffordablePetFoodNYC = () => {
     <SEOLandingPage
       keyword="affordable-pet-food-nyc"
       title="Affordable Pet Food & Supplies NYC — Free Delivery Over $49 | Petshiwu"
-      description="Get quality pet food at great prices delivered in NYC. Premium brands without the premium markup. Free delivery on orders over $49. Queens, Brooklyn, Manhattan, Bronx, Staten Island."
+      description="Get quality pet food at great prices delivered in NYC. Premium brands without the premium markup. Free shipping on orders $49+. Queens, Brooklyn, Manhattan, Bronx, Staten Island."
       h1="Affordable Pet Food Delivered in New York City"
       introContent="Quality pet food doesn't have to break the bank in NYC. Petshiwu offers competitive prices on 10,000+ products from top brands — Purina, Blue Buffalo, Pedigree, Iams, and more — delivered free to your door on orders over $49. Great prices, trusted brands, NYC delivery."
       problemPoints={[
@@ -21,7 +21,7 @@ const AffordablePetFoodNYC = () => {
       ]}
       solutionPoints={[
         "Competitive prices on all major pet food brands",
-        "Free delivery on orders over $49 — no membership fee",
+        "Free shipping on orders $49+ — no membership fee",
         "Budget brands like Pedigree, Purina, Friskies alongside premium options",
         "No price games — what you see is what you pay",
         "Bulk sizes available for maximum value",
@@ -38,7 +38,7 @@ const AffordablePetFoodNYC = () => {
         },
         {
           question: "Is it cheaper to buy pet food online and get it delivered in NYC?",
-          answer: "Often yes — you avoid the NYC brick-and-mortar markup and save time. With free delivery on orders over $49, buying online and getting it delivered is usually the best value option for NYC pet owners."
+          answer: "Often yes — you avoid the NYC brick-and-mortar markup and save time. With Free shipping on orders $49+, buying online and getting it delivered is usually the best value option for NYC pet owners."
         },
         {
           question: "Do you have deals or promotions on pet food?",

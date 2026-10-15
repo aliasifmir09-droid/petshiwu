@@ -445,7 +445,7 @@ export function feedHeader(): string {
   <channel>
     <title>${xmlEscape(FEED_TITLE)}</title>
     <link>${SITE_ORIGIN}</link>
-    <description>Same-day NYC for locally stocked items. Nationwide delivery in 2-5 business days. $7 under $49, free at $49. Does not ship to Alaska or Hawaii.</description>
+    <description>Nationwide delivery in 2-5 business days. Free shipping on orders $49+. $7 delivery under $49. Same-day delivery in NYC on locally stocked items. Does not ship to Alaska or Hawaii.</description>
 `;
 }
 

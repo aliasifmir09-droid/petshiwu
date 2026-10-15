@@ -131,7 +131,7 @@ const OrderShippingStatus = ({ order, orderNumber }: OrderShippingStatusProps) =
           className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#1E3A8A] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#16307a]"
         >
           <Phone size={16} />
-          Call {tracking.supportPhone} · 24/7
+          Call {tracking.supportPhone}
         </a>
       </div>
     </section>

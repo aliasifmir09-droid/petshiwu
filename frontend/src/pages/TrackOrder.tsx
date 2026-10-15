@@ -269,7 +269,7 @@ const TrackOrder = () => {
             <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl shadow-lg p-6 md:p-8 text-center">
               <h3 className="text-lg font-bold text-gray-900 mb-2">Need a person?</h3>
               <p className="text-gray-600 mb-4">
-                A Petshiwü teammate answers 24/7. This is our own delivery from Queens — not UPS or FedEx.
+                A Petshiwü teammate answers by phone or email. This is our own delivery from Queens — not UPS or FedEx.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a

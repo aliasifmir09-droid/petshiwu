@@ -17,7 +17,7 @@ const hubs = [
     slug: 'pet-food-delivery-queens-ny-petshiwu',
     title: 'Pet Food & Supplies Delivery in Queens, NY — Petshiwu',
     metaTitle: 'Pet Food Delivery Queens NY | Free Shipping Over $49 | Petshiwu',
-    metaDescription: 'Order pet food and supplies online with fast delivery to every Queens neighborhood — Jackson Heights, Flushing, Astoria, Jamaica, Forest Hills and more. Free shipping on orders over $49.',
+    metaDescription: 'Order pet food and supplies online with fast delivery to every Queens neighborhood — Jackson Heights, Flushing, Astoria, Jamaica, Forest Hills and more. Free shipping on orders $49+.',
     petType: 'all',
     category: 'Pet Care Tips',
     tags: ['pet food delivery Queens', 'pet supplies Queens NY', 'dog food Queens', 'cat food Queens', 'Jackson Heights pet store', 'Flushing pet delivery', 'Astoria pet supplies', 'pet delivery platform Queens'],
@@ -115,7 +115,7 @@ const hubs = [
     slug: 'pet-food-delivery-brooklyn-ny-petshiwu',
     title: 'Pet Food & Supplies Delivery in Brooklyn, NY — Petshiwu',
     metaTitle: 'Pet Food Delivery Brooklyn NY | Free Shipping Over $49 | Petshiwu',
-    metaDescription: 'Order pet food and supplies online with fast delivery to all Brooklyn neighborhoods — Williamsburg, Park Slope, Flatbush, Bay Ridge, Bed-Stuy, Crown Heights and more. Free shipping on orders over $49.',
+    metaDescription: 'Order pet food and supplies online with fast delivery to all Brooklyn neighborhoods — Williamsburg, Park Slope, Flatbush, Bay Ridge, Bed-Stuy, Crown Heights and more. Free shipping on orders $49+.',
     petType: 'all',
     category: 'Pet Care Tips',
     tags: ['pet food delivery Brooklyn', 'pet supplies Brooklyn NY', 'dog food Brooklyn', 'cat food Brooklyn', 'Williamsburg pet store', 'Park Slope pet delivery', 'Flatbush pet supplies', 'pet delivery platform Brooklyn'],
@@ -213,13 +213,13 @@ const hubs = [
     slug: 'pet-food-delivery-manhattan-ny-petshiwu',
     title: 'Pet Food & Supplies Delivery in Manhattan, NY — Petshiwu',
     metaTitle: 'Pet Food Delivery Manhattan NY | Free Shipping Over $49 | Petshiwu',
-    metaDescription: 'Premium pet food and supplies delivered to all Manhattan neighborhoods — Upper West Side, Upper East Side, Harlem, Chelsea, Lower East Side, Washington Heights. Free shipping on orders over $49.',
+    metaDescription: 'Premium pet food and supplies delivered to all Manhattan neighborhoods — Upper West Side, Upper East Side, Harlem, Chelsea, Lower East Side, Washington Heights. Free shipping on orders $49+.',
     petType: 'all',
     category: 'Pet Care Tips',
     tags: ['pet food delivery Manhattan', 'pet supplies Manhattan NY', 'dog food Manhattan', 'cat food Manhattan', 'Upper West Side pet store', 'Harlem pet delivery', 'Chelsea pet supplies', 'pet delivery platform Manhattan NYC'],
     content: `<h1>Pet Food &amp; Supplies Delivery in Manhattan, NY</h1>
 
-<p>Manhattan apartments are small. Storage is limited. Carrying heavy bags of pet food through crowded streets, up stairs, and into elevators is nobody's idea of a good time. Petshiwu solves that: 10,000+ pet food and supply products from top brands, delivered directly to your Manhattan address with free shipping on orders over $49.</p>
+<p>Manhattan apartments are small. Storage is limited. Carrying heavy bags of pet food through crowded streets, up stairs, and into elevators is nobody's idea of a good time. Petshiwu solves that: 10,000+ pet food and supply products from top brands, delivered directly to your Manhattan address with Free shipping on orders $49+.</p>
 
 <p>We serve every Manhattan neighborhood from Inwood in the north to the Financial District in the south. Urban apartment living and premium pet care aren't in conflict — you just need the right delivery partner.</p>
 
@@ -306,13 +306,13 @@ const hubs = [
     slug: 'pet-food-delivery-bronx-ny-petshiwu',
     title: 'Pet Food & Supplies Delivery in the Bronx, NY — Petshiwu',
     metaTitle: 'Pet Food Delivery Bronx NY | Free Shipping Over $49 | Petshiwu',
-    metaDescription: 'Order pet food and supplies with fast delivery to the Bronx — Fordham, Riverdale, Pelham Bay, Morris Park, Tremont, Concourse and every neighborhood. Free shipping on orders over $49.',
+    metaDescription: 'Order pet food and supplies with fast delivery to the Bronx — Fordham, Riverdale, Pelham Bay, Morris Park, Tremont, Concourse and every neighborhood. Free shipping on orders $49+.',
     petType: 'all',
     category: 'Pet Care Tips',
     tags: ['pet food delivery Bronx', 'pet supplies Bronx NY', 'dog food Bronx', 'cat food Bronx', 'Fordham pet store', 'Riverdale pet delivery', 'Bronx pet supplies', 'pet delivery platform Bronx NYC'],
     content: `<h1>Pet Food &amp; Supplies Delivery in the Bronx, NY</h1>
 
-<p>The Bronx is home to hundreds of thousands of pets — and Petshiwu delivers premium pet food and supplies to every corner of the borough. From Riverdale in the northwest to Pelham Bay in the east, from Fordham to Tremont, we bring 10,000+ products straight to your door. Free shipping on orders over $49.</p>
+<p>The Bronx is home to hundreds of thousands of pets — and Petshiwu delivers premium pet food and supplies to every corner of the borough. From Riverdale in the northwest to Pelham Bay in the east, from Fordham to Tremont, we bring 10,000+ products straight to your door. Free shipping on orders $49+.</p>
 
 <p>No need to drive to a big-box store or wait for a limited local selection. Petshiwu gives Bronx pet owners the same access to top brands that anyone in the country gets — with delivery built for NYC apartments and neighborhoods.</p>
 
@@ -387,13 +387,13 @@ const hubs = [
     slug: 'pet-food-delivery-staten-island-ny-petshiwu',
     title: 'Pet Food & Supplies Delivery in Staten Island, NY — Petshiwu',
     metaTitle: 'Pet Food Delivery Staten Island NY | Free Shipping Over $49 | Petshiwu',
-    metaDescription: 'Premium pet food and supplies delivered to Staten Island — St. George, Tottenville, New Dorp, Stapleton, and every neighborhood. Free shipping on orders over $49.',
+    metaDescription: 'Premium pet food and supplies delivered to Staten Island — St. George, Tottenville, New Dorp, Stapleton, and every neighborhood. Free shipping on orders $49+.',
     petType: 'all',
     category: 'Pet Care Tips',
     tags: ['pet food delivery Staten Island', 'pet supplies Staten Island NY', 'dog food Staten Island', 'cat food Staten Island', 'St. George pet store', 'Staten Island pet delivery', 'pet delivery platform Staten Island NYC'],
     content: `<h1>Pet Food &amp; Supplies Delivery in Staten Island, NY</h1>
 
-<p>Staten Island pet owners deserve convenient access to premium pet nutrition without an expensive trip to the mainland. Petshiwu delivers 10,000+ pet food and supply products to every Staten Island neighborhood — fast, reliable, with free shipping on orders over $49.</p>
+<p>Staten Island pet owners deserve convenient access to premium pet nutrition without an expensive trip to the mainland. Petshiwu delivers 10,000+ pet food and supply products to every Staten Island neighborhood — fast, reliable, with Free shipping on orders $49+.</p>
 
 <p>Whether you're near the ferry in St. George or down in Tottenville, we bring the brands your pet loves straight to your door. No membership required.</p>
 

@@ -118,7 +118,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
       to={generateProductUrl(product)}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
-      className="group bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-stone-200 hover:border-stone-300 relative flex flex-col h-full w-full"
+      className="group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white transition-colors duration-200 hover:border-stone-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A] focus-visible:ring-offset-2"
     >
       {/* Trending Badge - Top Right Corner */}
       {product.totalReviews > 50 && (
@@ -202,7 +202,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
             </p>
           ) : null}
 
-          <h3 className="font-semibold text-stone-900 line-clamp-2 min-h-[2.5rem] text-sm leading-snug group-hover:text-[#1E3A8A]">
+          <h3 className="min-h-[2.5rem] text-sm font-medium leading-snug text-stone-900 line-clamp-2 group-hover:text-[#1E3A8A]">
             {searchTerm ? highlightSearchTerm(decodeHtmlEntities(product.name), searchTerm) : decodeHtmlEntities(product.name)}
           </h3>
           {Array.isArray(product.variants) && product.variants.length > 1 ? (
@@ -238,7 +238,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
           </div>
 
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-xl font-black text-stone-900 tracking-tight">
+            <span className="text-base font-medium tracking-tight text-stone-900">
               ${listingPrice.toFixed(2)}
             </span>
             {compareAtPrice ? (
@@ -249,7 +249,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
           <p className="mt-2 text-xs font-semibold text-emerald-700">{FIRST_ORDER_CARD_LINE}</p>
           <p className="text-[11px] font-medium text-stone-500">{REPEAT_ORDER_CARD_LINE}</p>
 
-          <div className="mt-2 min-h-[1.25rem]">
+          <div className="mt-2 min-h-[2.5rem]">
             {isReadyToShip ? (
               nationwide ? (
                 <div>
@@ -281,7 +281,7 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
               onClick={handleAddToCart}
               disabled={!product.inStock}
               aria-label={product.inStock ? `${addToCartLabel(true)} ${product.name}` : `${product.name} is out of stock`}
-              className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-md font-semibold text-sm ${
+              className={`btn w-full gap-2 px-3 ${
                 cartAdded
                   ? 'bg-emerald-600 text-white'
                   : product.inStock

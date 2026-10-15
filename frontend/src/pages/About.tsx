@@ -8,7 +8,7 @@ const About = () => {
     <>
       <SEO
       title="About Petshiwu | Online Pet Food & Supplies"
-      description="Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. No autoship. Free shipping over $49."
+      description="Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Free shipping on orders $49+."
       keywords="about Petshiwu, pet delivery platform, pet food, pet supplies, no autoship"
       url="/about"
       />
@@ -35,7 +35,7 @@ const About = () => {
             closes: '23:59',
           }],
           priceRange: '$$',
-          description: 'A pet delivery platform and company for food, treats, and supplies. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse and office only — not a store. We only deliver.',
+          description: 'A pet delivery platform and company for food, treats, and supplies. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items. Warehouse and office only — not a store. We only deliver.',
           areaServed: ['United States', 'New York', 'New Jersey', 'Connecticut', 'Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'],
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
@@ -152,8 +152,8 @@ const About = () => {
                   Convenience & Reliability
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Enjoy easy online shopping, free shipping over $49, and a smooth experience from
-                  browsing to delivery. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.
+                  Enjoy easy online shopping, Free shipping on orders $49+, and a smooth experience from
+                  browsing to delivery. Nationwide delivery in 2-5 business days. Same-day delivery in NYC on locally stocked items.
                 </p>
               </div>
             </div>

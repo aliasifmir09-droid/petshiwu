@@ -34,7 +34,7 @@ const LuxuryPetAccessoriesNYC = () => {
         },
         {
           question: "Do you carry luxury pet products as gifts?",
-          answer: "Yes — many of our premium products make excellent gifts for pet owners. Gourmet treat assortments, premium food bundles, interactive puzzle toys, and high-end grooming kits are all popular gift choices. We deliver to any NYC address with free shipping over $49."
+          answer: "Yes — many of our premium products make excellent gifts for pet owners. Gourmet treat assortments, premium food bundles, interactive puzzle toys, and high-end grooming kits are all popular gift choices. We deliver to any NYC address with Free shipping on orders $49+."
         },
         {
           question: "What are the most popular premium dog products in NYC?",
@@ -46,7 +46,7 @@ const LuxuryPetAccessoriesNYC = () => {
         },
         {
           question: "Can you deliver luxury pet accessories to Manhattan and Brooklyn?",
-          answer: "Yes — we deliver to all five NYC boroughs including Manhattan (all neighborhoods from Battery Park to Inwood), Brooklyn, Queens, the Bronx, and Staten Island. Free shipping on orders over $49. Most orders arrive next day."
+          answer: "Yes — we deliver to all five NYC boroughs including Manhattan (all neighborhoods from Battery Park to Inwood), Brooklyn, Queens, the Bronx, and Staten Island. Free shipping on orders $49+. Most orders arrive next day."
         }
       ]}
       searchTerms={['luxury pet accessories', 'premium pet supplies NYC', 'designer pet products', 'high end dog accessories', 'premium cat accessories', 'gift for pet owner NYC']}

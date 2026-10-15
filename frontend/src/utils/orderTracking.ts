@@ -208,7 +208,7 @@ export const describeOrderTracking = (order: TrackableOrder): OrderTrackingView 
     return {
       headline: 'Delivery did not complete',
       detail: 'The driver could not finish this drop-off. We will call or retry — you will not be left guessing.',
-      nextStep: `Call ${SUPPORT_PHONE}. A person answers 24/7.`,
+      nextStep: `Call ${SUPPORT_PHONE}. A person answers by phone or email.`,
       expectedLabel: 'Needs a quick call',
       expectedHint: '',
       speed: arrival.speed,

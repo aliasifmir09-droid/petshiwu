@@ -32,27 +32,19 @@ const limitedHours = [
   /during business hours/,
 ];
 
-describe('call center hours are 24/7', () => {
-  test.each(customerFacing)('%s does not advertise limited phone hours', (rel) => {
+describe('support copy does not claim a 24/7 call center', () => {
+  test.each(customerFacing)('%s does not advertise 24/7 phone support', (rel) => {
     const src = fs.readFileSync(path.join(frontendRoot, rel), 'utf8');
+    expect(src).not.toMatch(/24\/7/);
     for (const pattern of limitedHours) {
       expect(src).not.toMatch(pattern);
     }
   });
 
-  test('Contact page tells shoppers the call center is 24/7', () => {
-    const src = fs.readFileSync(path.join(frontendRoot, 'src/pages/Contact.tsx'), 'utf8');
-    expect(src).toContain('Call center hours');
-    expect(src).toContain('24/7');
-    expect(src).toContain("opens: '00:00'");
-    expect(src).toContain("closes: '23:59'");
-  });
-
-  test('organization schema marks customer service as 24/7', () => {
+  test('organization schema does not publish call-center hours', () => {
     const schema = generateOrganizationSchema() as {
-      contactPoint: { hoursAvailable: { opens: string; closes: string } };
+      contactPoint: { hoursAvailable?: { opens: string } };
     };
-    expect(schema.contactPoint.hoursAvailable.opens).toBe('00:00');
-    expect(schema.contactPoint.hoursAvailable.closes).toBe('23:59');
+    expect(schema.contactPoint.hoursAvailable).toBeUndefined();
   });
 });

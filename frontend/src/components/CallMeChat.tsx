@@ -75,7 +75,7 @@ const CallMeChat = () => {
       const status = err?.response?.status;
       const fallback =
         err?.response?.data?.message ||
-        `We couldn't reach the desk just now. Call ${SUPPORT_DISPLAY} — a person answers 24/7.`;
+        `We couldn't reach the desk just now. Call ${SUPPORT_DISPLAY} — call or email support.`;
       if (status === 429) setRequested(true);
       setLines((prev) => [...prev, { role: 'desk', text: fallback }]);
     } finally {
@@ -128,7 +128,7 @@ const CallMeChat = () => {
               Need something cleared up? Leave your number. We ring you within a minute.
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">
-              {['No hold', '24/7', 'Same-day NYC'].map((chip) => (
+              {['No hold', 'Phone or email', 'Nationwide delivery'].map((chip) => (
                 <span
                   key={chip}
                   className="text-[10px] font-bold tracking-[0.12em] uppercase text-[#12235A] bg-[#E8C872] rounded-full px-2.5 py-1"

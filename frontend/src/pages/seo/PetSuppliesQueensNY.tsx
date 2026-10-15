@@ -8,9 +8,9 @@ const PetSuppliesQueensNY = () => (
   <SEOLandingPage
     keyword="pet-supplies-queens-ny"
     title="Same-Day Pet Supplies Queens — Order by 3 PM | Petshiwu"
-    description="Same-day pet delivery in Queens from our Jackson Heights warehouse. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Not a store. We only deliver. No autoship. Free over $49."
+    description="Same-day pet delivery in Queens from our Jackson Heights warehouse. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Not a store. We only deliver. Free shipping on orders $49+."
     h1="Same-Day Pet Supplies Across Queens, NY"
-    introContent="Petshiwu packs in Jackson Heights and delivers tonight across Queens — Flushing, Astoria, Forest Hills, Jamaica. We are not a store. We only deliver. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No autoship. Free over $49. Enter your Queens ZIP to confirm same-day. Same-day stays NYC; shipped items go nationwide in 2-5 business days."
+    introContent="Petshiwu packs in Jackson Heights and delivers tonight across Queens — Flushing, Astoria, Forest Hills, Jamaica. We are not a store. We only deliver. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. Free shipping on orders $49+. Enter your Queens ZIP to confirm same-day. Same-day stays NYC; shipped items go nationwide in 2-5 business days."
     shoppableHub
     problemPoints={[
       "Lugging heavy bags of pet food on the 7 train or the Q",
@@ -23,7 +23,7 @@ const PetSuppliesQueensNY = () => (
       "Delivery to all Queens neighborhoods — Flushing, Astoria, Jackson Heights, Forest Hills, Jamaica, Bayside, Woodside, Elmhurst, Ridgewood, Howard Beach, and more",
       "10,000+ products for dogs, cats, birds, fish, reptiles, and small animals",
       "Top brands at fair prices — Purina, Blue Buffalo, Royal Canin, Hill's, Wellness, Iams, and more",
-      "Free delivery on orders over $49 — no membership required",
+      "Free shipping on orders $49+ — no membership required",
       "Same-day: order by 3 PM weekdays (1 PM weekends), before 11 PM",
       "Jackson Heights warehouse — delivery only, not a store. We only deliver"
     ]}

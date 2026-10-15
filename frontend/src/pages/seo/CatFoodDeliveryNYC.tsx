@@ -8,9 +8,9 @@ const CatFoodDeliveryNYC = () => {
     <SEOLandingPage
       keyword="cat-food-delivery-nyc"
       title="Same-Day Cat Food Delivery NYC — Order by 3 PM | Petshiwu"
-      description="Same-day cat food delivery in NYC. Order by 3 PM weekdays (1 PM weekends), before 11 PM. No autoship. Free over $49. Dry, wet, and specialty diets. All 5 boroughs."
+      description="Same-day cat food delivery in NYC. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Free shipping on orders $49+. Dry, wet, and specialty diets. All 5 boroughs."
       h1="Same-Day Cat Food Delivery in New York City"
-      introContent="Get your cat's food delivered tonight — no hauling bags up the stairs. Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM. Dry, wet, grain-free, indoor, kitten, and senior from Purina, Blue Buffalo, Royal Canin, Hill's, and Fancy Feast. No autoship. Free over $49. Enter your ZIP below to confirm same-day. Same-day is NYC only; shipped items go nationwide in 2-5 business days."
+      introContent="Get your cat's food delivered tonight — no hauling bags up the stairs. Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM. Dry, wet, grain-free, indoor, kitten, and senior from Purina, Blue Buffalo, Royal Canin, Hill's, and Fancy Feast. Free shipping on orders $49+. Enter your ZIP below to confirm same-day. Same-day is NYC only; shipped items go nationwide in 2-5 business days."
       shoppableHub
       problemPoints={[
         "Carrying heavy litter and cat food up multiple flights of stairs",
@@ -25,7 +25,7 @@ const CatFoodDeliveryNYC = () => {
         "Specialty formulas: indoor, hairball, urinary, weight control, senior, kitten",
         "Grain-free, limited ingredient, and raw options available",
         "Same-day NYC: order by 3 PM weekdays (1 PM weekends), before 11 PM",
-        "No autoship. Free delivery over $49 — stocking up is always free",
+        "Free delivery over $49 — stocking up is always free",
         "Delivers to all 5 NYC boroughs from our Queens warehouse"
       ]}
       faqItems={[
@@ -35,7 +35,7 @@ const CatFoodDeliveryNYC = () => {
         },
         {
           question: "Do you have wet cat food available for delivery?",
-          answer: "Yes, we carry a huge selection of wet cat food — pate, flaked, shreds, gravy varieties, and more. Perfect for picky cats or those who need extra hydration. Free delivery on orders over $49."
+          answer: "Yes, we carry a huge selection of wet cat food — pate, flaked, shreds, gravy varieties, and more. Perfect for picky cats or those who need extra hydration. Free shipping on orders $49+."
         },
         {
           question: "Do you carry Royal Canin breed-specific cat food?",

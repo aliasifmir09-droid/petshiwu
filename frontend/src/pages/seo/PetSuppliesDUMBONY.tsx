@@ -7,9 +7,9 @@ const PetSuppliesDUMBONY = () => (
   <SEOLandingPage
     keyword="pet-supplies-dumbo-brooklyn-ny"
     title="Pet Supplies DUMBO Brooklyn NY — Delivery to Your Apartment | Petshiwu"
-    description="Pet supply delivery to DUMBO, Brooklyn Heights, and Vinegar Hill. Premium dog food, cat food, and pet accessories delivered fast. 10,000+ products, free shipping over $49."
+    description="Pet supply delivery to DUMBO, Brooklyn Heights, and Vinegar Hill. Premium dog food, cat food, and pet accessories delivered fast. 10,000+ products, Free shipping on orders $49+."
     h1="Pet Supplies Delivered to DUMBO & Brooklyn Heights"
-    introContent="DUMBO's cobblestone streets and converted lofts are home to some of Brooklyn's most pampered pets. Petshiwu delivers premium pet food, supplements, and accessories directly to your DUMBO, Brooklyn Heights, or Vinegar Hill address — no car needed, no bags on the A train. Free delivery on orders over $49."
+    introContent="DUMBO's cobblestone streets and converted lofts are home to some of Brooklyn's most pampered pets. Petshiwu delivers premium pet food, supplements, and accessories directly to your DUMBO, Brooklyn Heights, or Vinegar Hill address — no car needed, no bags on the A train. Free shipping on orders $49+."
     problemPoints={[
       "Limited local pet stores in DUMBO and the immediate area",
       "Carrying bags through Brooklyn Bridge Park or on the subway",
@@ -22,13 +22,13 @@ const PetSuppliesDUMBONY = () => (
       "10,000+ products — the biggest selection without leaving your building",
       "Premium brands: Wellness, Royal Canin, Blue Buffalo, Hill's",
       "Grain-free, raw, limited ingredient, and prescription diets available",
-      "Free delivery on orders over $49",
+      "Free shipping on orders $49+",
       "Fast NYC delivery — order early, receive quickly"
     ]}
     faqItems={[
       {
         question: "Do you deliver pet supplies to DUMBO, Brooklyn?",
-        answer: "Yes — Petshiwu delivers to DUMBO, Brooklyn Heights, Vinegar Hill, and the surrounding waterfront area. Free delivery on orders over $49."
+        answer: "Yes — Petshiwu delivers to DUMBO, Brooklyn Heights, Vinegar Hill, and the surrounding waterfront area. Free shipping on orders $49+."
       },
       {
         question: "What pet food brands do you deliver to DUMBO?",

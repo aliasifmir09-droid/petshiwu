@@ -101,7 +101,7 @@ const FAQ = () => {
   const seoDescription = useMemo(() => {
     const totalFAQs = faqs?.length || 0;
     const categories = Object.keys(faqsByCategory).length;
-    return `Get answers to ${totalFAQs}+ frequently asked questions about pet products, shipping, 365-day returns, orders, payment, and more. Browse ${categories} categories of FAQs to find what you need at Petshiwu.`;
+    return `Answers about nationwide delivery in 2-5 business days, free shipping on orders $49+, $7 delivery under $49, and 365-day returns. ${totalFAQs}+ questions at Petshiwu. Same-day delivery in NYC on locally stocked items.`;
   }, [faqs, faqsByCategory]);
 
   const allCategories = categories || [];
@@ -122,7 +122,7 @@ const FAQ = () => {
       <SEO
       title="Frequently Asked Questions (FAQ) | Petshiwu - Pet Products Help Center"
       description={seoDescription}
-      keywords="FAQ, frequently asked questions, pet store help, shipping questions, 365-day return policy, order tracking, pet product questions, customer support, pet care help, pet delivery platform FAQ"
+      keywords="FAQ, frequently asked questions, nationwide pet delivery, shipping questions, 365-day return policy, order tracking, pet product questions, customer support, pet care help, pet delivery company FAQ"
       url="/faq"
       />
       
@@ -183,7 +183,7 @@ const FAQ = () => {
                 className="flex items-center gap-2 p-3 rounded-lg border border-gray-200 hover:border-primary-500 hover:bg-primary-50 transition-colors"
               >
                 <Clock className="w-5 h-5 text-primary-600" />
-                <span className="text-sm font-medium text-gray-700">Call 24/7 · (800) 259-2605</span>
+                <span className="text-sm font-medium text-gray-700">Call support · (800) 259-2605</span>
               </a>
             </div>
           </div>
@@ -354,7 +354,7 @@ const FAQ = () => {
               </div>
               <p className="text-sm text-gray-600 mt-4 flex items-center justify-center gap-2">
                 <Clock className="w-4 h-4" />
-                Support: Call 24/7 at +1 (800) 259-2605
+                Support: Call support at +1 (800) 259-2605
               </p>
             </div>
           </div>

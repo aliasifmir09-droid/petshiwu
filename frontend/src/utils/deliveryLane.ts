@@ -25,11 +25,11 @@ export const NATIONWIDE_SHIPPING_COST = 7;
 export const NATIONWIDE_PRODUCT_PROMISE = 'Ships nationwide - arrives in 2-5 business days';
 /** Shipped catalog items are never same-day, including for an NYC ZIP. */
 export const TOPDAWG_NOT_SAME_DAY_PROMISE =
-  'Not eligible for same-day delivery - ships nationwide, arrives in 2-5 business days ($7 under $49, free at $49+)';
+  'Ships nationwide. Arrives in 2-5 business days. $7 delivery under $49. Free shipping on orders $49+.';
 export const MIXED_CART_DELIVERY_SUMMARY =
-  'Same-day items deliver today, shipped items arrive separately in 2-5 business days.';
-export const LOCAL_SAME_DAY_PROMISE = 'Same-day delivery in NYC';
-export const LOCAL_ONLY_PROMISE = 'Same-day delivery in NYC for locally stocked items';
+  'Same-day delivery in NYC on locally stocked items. Shipped items arrive separately in 2-5 business days.';
+export const LOCAL_SAME_DAY_PROMISE = 'Same-day delivery in NYC on locally stocked items';
+export const LOCAL_ONLY_PROMISE = 'Same-day delivery in NYC on locally stocked items';
 export const LOCAL_ITEM_NATIONWIDE_MESSAGE =
   'Locally stocked items arrive in 2-5 business days outside NYC. Does not ship to Alaska or Hawaii.';
 
