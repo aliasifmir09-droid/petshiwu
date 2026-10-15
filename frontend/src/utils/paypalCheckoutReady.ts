@@ -1,7 +1,9 @@
 import { isDeliverableShippingAddress, isValidZip, OUT_OF_AREA_DELIVERY_MESSAGE } from '@/utils/deliveryZip';
 import {
+  EXCLUDED_SHIPPING_MESSAGE,
   INTERNATIONAL_DELIVERY_MESSAGE,
   cartShipsNationwide,
+  isAlaskaOrHawaiiAddress,
   isUnitedStatesCountry,
   localItemsBlockedOutsideNyc,
   type DeliveryLane,
@@ -48,6 +50,9 @@ export const paypalCheckoutBlocker = ({
   }
   const country = shippingAddress.country || 'USA';
   if (!isUnitedStatesCountry(country)) return INTERNATIONAL_DELIVERY_MESSAGE;
+  if (isAlaskaOrHawaiiAddress(shippingAddress.state, shippingAddress.zipCode)) {
+    return EXCLUDED_SHIPPING_MESSAGE;
+  }
   const laneItems = (items && items.length ? items : [{ tags: [] }]).map((item) =>
     item && 'product' in item ? { product: item.product } : { product: item as LaneItem }
   );

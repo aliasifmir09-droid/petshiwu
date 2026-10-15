@@ -11,6 +11,24 @@ export const LOCAL_ITEM_NATIONWIDE_MESSAGE =
 export const INTERNATIONAL_DELIVERY_MESSAGE =
   'We ship inside the United States. Local items are NYC same-day only. Shipped items arrive in 3-5 business days.';
 
+export const EXCLUDED_SHIPPING_MESSAGE = 'Does not ship to Alaska or Hawaii.';
+
+/** Alaska 99501–99950 and Hawaii 96701–96898. */
+export function isAlaskaOrHawaiiAddress(state?: string, zipCode?: string): boolean {
+  const normalized = String(state || '')
+    .trim()
+    .toUpperCase()
+    .replace(/\./g, '')
+    .replace(/\s+/g, ' ');
+  if (normalized === 'AK' || normalized === 'ALASKA' || normalized === 'HI' || normalized === 'HAWAII') {
+    return true;
+  }
+  const zip = String(zipCode || '').replace(/\D/g, '').slice(0, 5);
+  if (!/^\d{5}$/.test(zip)) return false;
+  const zipNum = Number(zip);
+  return (zipNum >= 99501 && zipNum <= 99950) || (zipNum >= 96701 && zipNum <= 96898);
+}
+
 export class DeliveryAreaError extends Error {
   readonly status = 400;
 
@@ -50,6 +68,9 @@ export function shippingLaneForCart(input: {
 }): ShippingLane {
   if (!isUnitedStatesCountry(input.country)) {
     throw new DeliveryAreaError(INTERNATIONAL_DELIVERY_MESSAGE);
+  }
+  if (isAlaskaOrHawaiiAddress(input.state, input.zipCode)) {
+    throw new DeliveryAreaError(EXCLUDED_SHIPPING_MESSAGE);
   }
   if (isNycShippingAddress(input.state || '', input.zipCode || '')) {
     return 'nyc';

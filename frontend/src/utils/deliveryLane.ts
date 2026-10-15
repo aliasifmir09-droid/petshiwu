@@ -16,6 +16,24 @@ export const LOCAL_ITEM_NATIONWIDE_MESSAGE =
 export const INTERNATIONAL_DELIVERY_MESSAGE =
   'We ship inside the United States. Local items are NYC same-day only. Shipped items arrive in 3-5 business days.';
 
+export const EXCLUDED_SHIPPING_MESSAGE = 'Does not ship to Alaska or Hawaii.';
+
+/** Alaska 99501–99950 and Hawaii 96701–96898. */
+export function isAlaskaOrHawaiiAddress(state?: string, zipCode?: string): boolean {
+  const normalized = String(state || '')
+    .trim()
+    .toUpperCase()
+    .replace(/\./g, '')
+    .replace(/\s+/g, ' ');
+  if (normalized === 'AK' || normalized === 'ALASKA' || normalized === 'HI' || normalized === 'HAWAII') {
+    return true;
+  }
+  const zip = String(zipCode || '').replace(/\D/g, '').slice(0, 5);
+  if (!/^\d{5}$/.test(zip)) return false;
+  const zipNum = Number(zip);
+  return (zipNum >= 99501 && zipNum <= 99950) || (zipNum >= 96701 && zipNum <= 96898);
+}
+
 export type DeliveryLane = 'local' | 'nationwide';
 
 type LaneProduct = {
@@ -81,6 +99,7 @@ export function cartShipsNationwide(
 ): boolean {
   if (!items.length || items.some((item) => !isNationwideProduct(item.product))) return false;
   if (!isUnitedStatesCountry(address.country)) return false;
+  if (isAlaskaOrHawaiiAddress(address.state, address.zipCode)) return false;
   return Boolean(address.zipCode && isValidZip(address.zipCode) && !isNycDeliveryZip(address.zipCode));
 }
 

@@ -15,7 +15,7 @@ import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { getListingPrice, getListingVariant, getProductImage, getValidCompareAtPrice } from '@/utils/productPrice';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
 import { FIRST_ORDER_CARD_LINE, REPEAT_ORDER_CARD_LINE } from '@/config/publicPromos';
-import { isNationwideProduct, productDeliveryPromise } from '@/utils/deliveryLane';
+import { EXCLUDED_SHIPPING_MESSAGE, isNationwideProduct, productDeliveryPromise } from '@/utils/deliveryLane';
 import { useSavedDeliveryZip } from '@/hooks/useSavedDeliveryZip';
 
 interface ProductCardProps {
@@ -247,7 +247,10 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
           <div className="mt-2 min-h-[1.25rem]">
             {isReadyToShip ? (
               nationwide ? (
-                <p className="text-[11px] font-semibold leading-snug text-[#1E3A8A]">{deliveryPromise}</p>
+                <div>
+                  <p className="text-[11px] font-semibold leading-snug text-[#1E3A8A]">{deliveryPromise}</p>
+                  <p className="text-[11px] text-stone-500">{EXCLUDED_SHIPPING_MESSAGE}</p>
+                </div>
               ) : (
                 <div>
                   <div className="flex items-center gap-1.5">

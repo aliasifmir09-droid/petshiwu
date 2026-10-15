@@ -132,6 +132,29 @@ describe('two delivery lanes', () => {
     expect(pricing.items.map((item) => item.product)).toEqual([topDawg._id, local._id]);
   });
 
+  test('Alaska and Hawaii are refused for a TopDawg cart', () => {
+    const item = [{ tags: ['topdawg'], name: 'Dropship toy', price: 20, quantity: 1 }];
+    for (const address of [
+      { state: 'AK', zipCode: '99501' },
+      { state: 'Alaska', zipCode: '99501' },
+      { state: 'HI', zipCode: '96813' },
+      { state: 'Hawaii', zipCode: '96815' },
+      { state: 'CA', zipCode: '96813' },
+    ]) {
+      const quote = quoteCartDelivery({ ...address, country: 'USA', items: item });
+      expect(quote.status).toBe(400);
+      if (quote.status === 400) expect(quote.message).toMatch(/Alaska or Hawaii/);
+    }
+
+    const california = quoteCartDelivery({
+      state: 'CA',
+      zipCode: '94105',
+      country: 'USA',
+      items: item,
+    });
+    expect(california.status).toBe(200);
+  });
+
   test('international addresses stay rejected', () => {
     const quote = quoteCartDelivery({
       state: 'ON',
