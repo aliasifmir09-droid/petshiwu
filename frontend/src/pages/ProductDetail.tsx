@@ -26,9 +26,11 @@ import { safeError } from '@/utils/safeLogger';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import ProductVariantPicker from '@/components/ProductVariantPicker';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
+import TrustBadges from '@/components/TrustBadges';
+import DeliveryWindowExplainer from '@/components/DeliveryWindowExplainer';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
 import { EXCLUDED_SHIPPING_MESSAGE, isNationwideProduct, productDeliveryPromise } from '@/utils/deliveryLane';
-import { DELIVERY_ZONE, NATIONWIDE_FEE_NOTE, NATIONWIDE_PAGE_PROMISE, resolveDeliveryZone } from '@/utils/deliveryZones';
+import { DELIVERY_ZONE, NATIONWIDE_FEE_NOTE, resolveDeliveryZone } from '@/utils/deliveryZones';
 import { useSavedDeliveryZip } from '@/hooks/useSavedDeliveryZip';
 
 // Lazy load heavy dependencies
@@ -664,6 +666,8 @@ const ProductDetail = () => {
         product={product}
         selectedVariant={selectedVariantData}
       />
+      <TrustBadges />
+      <DeliveryWindowExplainer />
       <div className="container mx-auto px-4 lg:px-8 py-8 pb-44 lg:pb-8">
       {/* Breadcrumb */}
       <nav className="mb-6" aria-label="Breadcrumb">
@@ -857,28 +861,21 @@ const ProductDetail = () => {
           <div className="mb-4">
             {isReadyToShip ? (
               isNationwideProduct(product) ? (
-                <div>
-                  <p className="text-sm font-semibold text-[#1E3A8A]">
-                    {productDeliveryPromise(product, savedZip)}
-                  </p>
-                  <p className="text-xs text-slate-600 mt-0.5">{EXCLUDED_SHIPPING_MESSAGE}</p>
-                </div>
+                <p className="text-xs text-slate-600">{EXCLUDED_SHIPPING_MESSAGE}</p>
               ) : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.NATIONWIDE ? (
-                <div>
-                  <p className="text-sm font-semibold text-[#1E3A8A]">{NATIONWIDE_PAGE_PROMISE}</p>
-                  <p className="text-xs text-slate-600 mt-0.5">{NATIONWIDE_FEE_NOTE}</p>
-                </div>
-              ) : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.UNAVAILABLE ? (
-                <p className="text-sm font-semibold text-[#1E3A8A]">{productDeliveryPromise(product, savedZip)}</p>
-              ) : (
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 bg-green-500 rounded-full"></span>
                     <span className="text-green-700 font-medium">{inStockLabel(true)}</span>
                   </div>
-                  <p className="mt-2 text-sm font-semibold text-[#1E3A8A]">
-                    {productDeliveryPromise(product, savedZip)}
-                  </p>
+                  <p className="text-xs text-slate-600 mt-0.5">{NATIONWIDE_FEE_NOTE}</p>
+                </div>
+              ) : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.UNAVAILABLE ? null : (
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                    <span className="text-green-700 font-medium">{inStockLabel(true)}</span>
+                  </div>
                   <p className="text-xs text-slate-600 mt-0.5">
                     Same-day in New York City when you order by cutoff.
                   </p>
@@ -914,6 +911,9 @@ const ProductDetail = () => {
                 Adds 1 bag. Change quantity in your cart.
               </p>
             ) : null}
+            <p className="mt-3 text-sm font-semibold text-center text-[#1E3A8A]">
+              {productDeliveryPromise(product, savedZip)}
+            </p>
             {/* Secondary row — wishlist + share */}
             <div className="flex gap-3 mt-3">
               <button

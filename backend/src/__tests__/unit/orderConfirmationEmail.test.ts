@@ -166,8 +166,8 @@ describe('order confirmation email', () => {
       ...sample,
       shippingAddress: { ...sample.shippingAddress, city: 'Hoboken', state: 'NJ', zipCode: '07030' },
     });
-    expect(nj.html).toContain('Arrives in 3-5 business days');
-    expect(nj.text).toContain('Arrives in 3-5 business days');
+    expect(nj.html).toContain('Arrives in 2-5 business days');
+    expect(nj.text).toContain('Arrives in 2-5 business days');
   });
 
   test('confirmation email sender accepts guest checkout on the order payload', () => {

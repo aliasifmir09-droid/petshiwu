@@ -159,12 +159,22 @@ const Header = () => {
     ? getCachedPetTypes()
     : (petTypesResponse?.data || getCachedPetTypes());
 
-  if (!petTypes || petTypes.length === 0) {
-    petTypes = [
-      { name: 'Dog', slug: 'dog', icon: '🐕' },
-      { name: 'Cat', slug: 'cat', icon: '🐱' },
-      { name: 'Other Animals', slug: 'other-animals', icon: '🐾' }
-    ];
+  const requiredPetTypes = [
+    { name: 'Dog', slug: 'dog', icon: '🐕' },
+    { name: 'Cat', slug: 'cat', icon: '🐱' },
+    { name: 'Bird', slug: 'bird', icon: '🐦' },
+    { name: 'Fish', slug: 'fish', icon: '🐟' },
+    { name: 'Reptile', slug: 'reptile', icon: '🦎' },
+    { name: 'Small Pet', slug: 'small-pet', icon: '🐹' },
+  ];
+  const loadedPetTypes = Array.isArray(petTypes) ? petTypes : [];
+  petTypes = requiredPetTypes.map(
+    (required) => loadedPetTypes.find((pet: { slug?: string }) => pet.slug === required.slug) || required
+  );
+  for (const pet of loadedPetTypes) {
+    if (pet?.slug && !petTypes.some((item: { slug?: string }) => item.slug === pet.slug)) {
+      petTypes.push(pet);
+    }
   }
 
   const categories = categoriesError
@@ -563,7 +573,7 @@ const Header = () => {
               </div>
             </div>
 
-            {/* Mobile search — always on the first screen, Chewy-style */}
+            {/* Mobile search — always on the first screen */}
             <form onSubmit={handleSearch} className="lg:hidden mt-2 pb-0.5">
               <div className="relative">
                 <input

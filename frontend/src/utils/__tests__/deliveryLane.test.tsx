@@ -21,7 +21,7 @@ import {
   productDeliveryPromise,
   quoteStorefrontDelivery,
 } from '../deliveryLane';
-import { NATIONWIDE_PAGE_PROMISE, NATIONWIDE_WINDOW } from '../deliveryZones';
+import { NATIONWIDE_WINDOW } from '../deliveryZones';
 
 vi.mock('@/stores/wishlistStore', () => ({
   useWishlistStore: () => ({
@@ -209,7 +209,7 @@ describe('TopDawg same-day exclusion on the item page', () => {
     expect(screen.queryByText(/eligible for same-day delivery in/i)).not.toBeInTheDocument();
     expect(screen.queryByText(LOCAL_SAME_DAY_PROMISE)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/check delivery by zip code/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/order by 3 pm/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/same-day in new york city when you order by cutoff/i)).not.toBeInTheDocument();
   });
 
   test('a local item page in New Jersey shows the 2-5 day window and hides the same-day widget', async () => {
@@ -217,9 +217,9 @@ describe('TopDawg same-day exclusion on the item page', () => {
     renderItemPage('kibble');
 
     expect(await screen.findByRole('heading', { name: 'Queens kibble' })).toBeInTheDocument();
-    expect(screen.getByText(NATIONWIDE_PAGE_PROMISE)).toBeInTheDocument();
+    expect(screen.getAllByText(NATIONWIDE_WINDOW).length).toBeGreaterThan(0);
     expect(screen.queryByLabelText(/check delivery by zip code/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/order by 3 pm/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/same-day in new york city when you order by cutoff/i)).not.toBeInTheDocument();
   });
 
   test('a local item page still shows the same-day widget for an NYC ZIP', async () => {

@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ANNOUNCEMENT_SHIPPING } from '@/utils/deliveryZones'
 
 const MESSAGES = [
+  { text: ANNOUNCEMENT_SHIPPING },
   { text: 'FREEDOM20 — 20% off first order, max $10. No autoship.' },
-  { text: 'Free shipping over $49' },
-  { text: 'Same-day NYC · nationwide delivery across the US' },
+  { text: '365-day returns on unused items' },
   { text: 'Repeat orders: 10% off, max $10. No subscription.' },
-  { text: 'Fast delivery across America · PayPal or card · 365-day returns' },
+  { text: 'PayPal or card · 365-day returns · real human support 24/7' },
   { text: 'Call support 24/7 — +1 (800) 259-2605' },
 ]
 

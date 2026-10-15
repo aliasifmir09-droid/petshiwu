@@ -42,7 +42,7 @@ describe('shoppable brand catalog', () => {
       expect(brand.description.length).toBeLessThanOrEqual(160);
       expect(brand.description).toMatch(/Shipped items arrive in 3-5 days/);
       expect(brand.description).not.toMatch(/do not claim/i);
-      expect(brand.intro).toMatch(/Nationwide shipping in 3-5 business days on shipped items|Shipped items arrive in 3-5 days/);
+      expect(brand.intro).toMatch(/Nationwide delivery in 2-5 business days|Shipped items arrive in 3-5 days/);
     }
   });
 

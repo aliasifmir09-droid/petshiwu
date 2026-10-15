@@ -14,7 +14,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { availableCartStock } from '@/utils/cartStock';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
 import { EXCLUDED_SHIPPING_MESSAGE, isNationwideProduct, productDeliveryPromise } from '@/utils/deliveryLane';
-import { DELIVERY_ZONE, NATIONWIDE_FEE_NOTE, NATIONWIDE_PAGE_PROMISE, resolveDeliveryZone } from '@/utils/deliveryZones';
+import { DELIVERY_ZONE, NATIONWIDE_FEE_NOTE, resolveDeliveryZone } from '@/utils/deliveryZones';
 import { useSavedDeliveryZip } from '@/hooks/useSavedDeliveryZip';
 
 interface QuickViewModalProps {
@@ -227,7 +227,7 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
                     </>
                   ) : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.NATIONWIDE ? (
                     <>
-                      <p className="text-sm font-semibold text-[#1E3A8A]">{NATIONWIDE_PAGE_PROMISE}</p>
+                      <p className="text-sm font-semibold text-[#1E3A8A]">{deliveryPromise}</p>
                       <p className="text-xs text-slate-500">{NATIONWIDE_FEE_NOTE}</p>
                     </>
                   ) : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.UNAVAILABLE ? (

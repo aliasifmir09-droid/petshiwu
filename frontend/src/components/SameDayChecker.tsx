@@ -125,7 +125,7 @@ const SameDayChecker = () => {
       )}
       {geoStatus === 'outside' && (
         <p className="mt-2 text-xs text-white/70">
-          You appear to be outside NYC. Enter your ZIP to see 3-5 day delivery.
+          You appear to be outside NYC. Enter your ZIP to see 2-5 business day delivery.
         </p>
       )}
 

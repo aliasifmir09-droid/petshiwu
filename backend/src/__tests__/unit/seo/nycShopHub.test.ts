@@ -18,7 +18,7 @@ describe('nycShopHub first-wave extras', () => {
     expect(html).toContain('Check your ZIP');
     expect(html).toContain('Petshiwü');
     expect(html).toContain('All 5 boroughs');
-    expect(html).toMatch(/Nationwide shipping in 3-5 business days on shipped items/i);
+    expect(html).toMatch(/Nationwide delivery in 2-5 business days/i);
     expect(html).not.toMatch(/same-day nationwide/i);
     expect(html).not.toMatch(/do not claim/i);
   });
@@ -29,6 +29,6 @@ describe('nycShopHub first-wave extras', () => {
     expect(html).toContain('/pet-supplies-delivery-nyc');
     expect(html).toContain('/pet-supplies-queens-ny');
     expect(html).not.toContain('href="https://www.petshiwu.com/dog-food-delivery-nyc"');
-    expect(html).toMatch(/shipped items in 3-5 business days/i);
+    expect(html).toMatch(/shipped items in 2-5 business days/i);
   });
 });

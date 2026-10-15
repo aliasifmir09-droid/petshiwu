@@ -16,7 +16,7 @@ export type ShippingLane = 'nyc' | 'tri_state' | 'nationwide';
 export const LOCAL_ITEM_NATIONWIDE_MESSAGE = LOCAL_UNAVAILABLE_MESSAGE;
 
 export const INTERNATIONAL_DELIVERY_MESSAGE =
-  'We ship inside the United States. Locally stocked items are same-day in NYC and arrive in 3-5 business days everywhere else. Does not ship to Alaska or Hawaii.';
+  'We ship inside the United States. Locally stocked items are same-day in NYC and arrive in 2-5 business days everywhere else. Does not ship to Alaska or Hawaii.';
 
 export const EXCLUDED_SHIPPING_MESSAGE = 'Does not ship to Alaska or Hawaii.';
 

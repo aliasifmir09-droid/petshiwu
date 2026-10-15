@@ -22,19 +22,19 @@ export {
 
 export const TOPDAWG_TAG = 'topdawg';
 export const NATIONWIDE_SHIPPING_COST = 7;
-export const NATIONWIDE_PRODUCT_PROMISE = 'Ships nationwide - arrives in 3-5 business days';
-/** TopDawg is never stocked locally, including for an NYC ZIP. */
+export const NATIONWIDE_PRODUCT_PROMISE = 'Ships nationwide - arrives in 2-5 business days';
+/** Shipped catalog items are never same-day, including for an NYC ZIP. */
 export const TOPDAWG_NOT_SAME_DAY_PROMISE =
-  'Not eligible for same-day delivery - ships nationwide, arrives in 3-5 business days ($7 under $49, free at $49+)';
+  'Not eligible for same-day delivery - ships nationwide, arrives in 2-5 business days ($7 under $49, free at $49+)';
 export const MIXED_CART_DELIVERY_SUMMARY =
-  'Same-day items deliver today, shipped items arrive separately in 3-5 business days.';
+  'Same-day items deliver today, shipped items arrive separately in 2-5 business days.';
 export const LOCAL_SAME_DAY_PROMISE = 'Same-day delivery in NYC';
-export const LOCAL_ONLY_PROMISE = 'NYC same-day delivery only';
+export const LOCAL_ONLY_PROMISE = 'Same-day delivery in NYC for locally stocked items';
 export const LOCAL_ITEM_NATIONWIDE_MESSAGE =
-  'Some items in your cart are NYC same-day only and cannot ship nationwide. Remove those items or use a New York City address.';
+  'Locally stocked items arrive in 2-5 business days outside NYC. Does not ship to Alaska or Hawaii.';
 
 export const INTERNATIONAL_DELIVERY_MESSAGE =
-  'We ship inside the United States. Locally stocked items are same-day in NYC and arrive in 3-5 business days everywhere else. Does not ship to Alaska or Hawaii.';
+  'We ship inside the United States. Locally stocked items are same-day in NYC and arrive in 2-5 business days everywhere else. Does not ship to Alaska or Hawaii.';
 
 export const EXCLUDED_SHIPPING_MESSAGE = 'Does not ship to Alaska or Hawaii.';
 

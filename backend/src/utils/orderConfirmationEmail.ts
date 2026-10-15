@@ -114,10 +114,10 @@ export function buildOrderConfirmationEmail(
   const showGuestPasswordHelp = Boolean(orderData.isGuestCheckout);
   const addressZone = resolveDeliveryZone(addr, { tags: [] });
   const deliveryLine = addressZone === 'SAME_DAY_NYC'
-    ? 'Same-day delivery in NYC. Shipped items arrive separately in 3-5 business days.'
+    ? 'Same-day delivery in NYC. Shipped items arrive separately in 2-5 business days.'
     : addressZone === 'UNAVAILABLE'
       ? 'Does not ship to Alaska or Hawaii.'
-      : 'Arrives in 3-5 business days.';
+      : 'Arrives in 2-5 business days.';
   const preheader = isCod
     ? `Packing slip for Petshiwu order ${orderNumber}. ${formatUsd(orderData.totalPrice)} is due when your driver arrives.`
     : `Packing slip and official receipt for Petshiwu order ${orderNumber} · ${formatUsd(orderData.totalPrice)}.`;
@@ -369,7 +369,7 @@ export function buildOrderConfirmationEmail(
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E5E7EB;">
                 <tr>
                   <td width="33%" style="padding:12px 8px;text-align:center;font-size:12px;color:#1F2937;font-weight:700;">365-day returns</td>
-                  <td width="33%" style="padding:12px 8px;text-align:center;font-size:12px;color:#1F2937;font-weight:700;border-left:1px solid #E5E7EB;border-right:1px solid #E5E7EB;">Fast delivery across America</td>
+                  <td width="33%" style="padding:12px 8px;text-align:center;font-size:12px;color:#1F2937;font-weight:700;border-left:1px solid #E5E7EB;border-right:1px solid #E5E7EB;">Ships nationwide</td>
                   <td width="33%" style="padding:12px 8px;text-align:center;font-size:12px;color:#1F2937;font-weight:700;">Secure checkout</td>
                 </tr>
               </table>
@@ -429,7 +429,7 @@ export function buildOrderConfirmationEmail(
     '',
     `Call support 24/7: ${SUPPORT_PHONE_DISPLAY}`,
     'support@petshiwu.com',
-    '365-day returns · Fast delivery across America · Secure checkout',
+    '365-day returns · Ships nationwide · Secure checkout',
   ].filter((line) => line !== '').join('\n');
 
   return {

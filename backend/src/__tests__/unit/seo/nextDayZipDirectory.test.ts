@@ -17,8 +17,8 @@ describe('next-day ZIP directory for Google', () => {
     expect(NEXT_DAY_ZIP_COUNT).toBeGreaterThan(500);
     expect(html).toMatch(/Same-day delivery in New York City/);
     expect(html).toMatch(/locally stocked items/);
-    expect(html).toMatch(/3-5 business days anywhere in the US except Alaska and Hawaii/);
-    expect(html).toMatch(/whole catalog arrives in 3-5 business days/);
+    expect(html).toMatch(/2-5 business days anywhere in the US except Alaska and Hawaii/);
+    expect(html).toMatch(/whole catalog arrives in 2-5 business days/);
     expect(html).not.toMatch(/accepts orders for next-day/i);
     expect(html).not.toContain('11801');
     expect(html).not.toContain('Hicksville');

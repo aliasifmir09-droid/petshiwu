@@ -9,6 +9,8 @@ import EmptyState from '@/components/EmptyState';
 import { normalizeImageUrl, handleImageError } from '@/utils/imageUtils';
 import { generateProductUrl } from '@/utils/productUrl';
 import SEO from '@/components/SEO';
+import TrustBadges from '@/components/TrustBadges';
+import DeliveryWindowExplainer from '@/components/DeliveryWindowExplainer';
 import OrdersHoldNotice from '@/components/OrdersHoldNotice';
 import { ORDERING_PAUSED } from '@/config/ordering';
 import { TAX_RATE } from '@/config/constants';
@@ -306,7 +308,9 @@ const Cart = () => {
 
   return (
     <>
-            <SEO title="Shopping Cart | petshiwu" description="Your shopping cart at petshiwu" noindex={true} />
+            <SEO title="Shopping Cart | petshiwu" description="Your shopping cart at petshiwu. Nationwide delivery in 2-5 business days. Free shipping over $49." noindex={true} />
+            <TrustBadges />
+            <DeliveryWindowExplainer />
             <div className="container mx-auto px-4 lg:px-8 py-8">
 
               <div className="mb-6">

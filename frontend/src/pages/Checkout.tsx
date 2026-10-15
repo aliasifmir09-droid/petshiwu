@@ -20,6 +20,8 @@ import { trackPurchase } from '@/utils/analytics';
 import { rememberGoogleReviewOptIn } from '@/utils/googleCustomerReviews';
 import { rememberGuestCheckoutAccount } from '@/utils/guestCheckoutAccount';
 import SEO from '@/components/SEO';
+import TrustBadges from '@/components/TrustBadges';
+import DeliveryWindowExplainer from '@/components/DeliveryWindowExplainer';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import OrdersHoldNotice from '@/components/OrdersHoldNotice';
 import { ORDERING_PAUSED } from '@/config/ordering';
@@ -926,6 +928,8 @@ const Checkout = () => {
           </Link>
         </div>
       </header>
+      <TrustBadges />
+      <DeliveryWindowExplainer />
       <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#fff8e8,_#f4f0e8_42%,_#eef2f7_100%)] pb-16">
       <div className="container mx-auto px-4 lg:px-8 py-8">
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -938,10 +942,10 @@ const Checkout = () => {
             </h1>
             <p className="mt-2 max-w-xl text-stone-600">
               {ORDERING_PAUSED
-                ? 'Fast delivery across America. PayPal-secured payment and 24/7 support will be ready when we start accepting orders.'
+                ? 'Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. PayPal-secured payment and 24/7 support will be ready when we start accepting orders.'
                 : deliverySummary
                   ? deliverySummary
-                  : 'Same-day NYC · nationwide delivery across the US.'}
+                  : 'Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.'}
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
@@ -949,7 +953,7 @@ const Checkout = () => {
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> NYC same-day</span>
             ) : null}
             {!excludedState && (addressZone === DELIVERY_ZONE.NATIONWIDE || mixedCart || nationwideOnly) ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> 3-5 business days</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><Truck size={13} className="text-[#1E3A8A]" /> 2-5 business days</span>
             ) : null}
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><ShieldCheck size={13} className="text-[#1E3A8A]" /> PayPal protected</span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-stone-200"><RotateCcw size={13} className="text-[#1E3A8A]" /> 365-day returns</span>

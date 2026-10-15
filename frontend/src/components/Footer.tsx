@@ -41,7 +41,7 @@ const Footer = () => {
               <BrandLogo variant="on-navy" />
             </Link>
             <p className="text-blue-100 text-sm mb-4 leading-relaxed">
-              Food, treats, and supplies for every pet. Fast delivery across America. Same-day NYC · nationwide delivery across the US.
+              Food, treats, and supplies for every pet. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.
             </p>
             <div className="flex gap-4">
               {FOOTER_SOCIAL.map((item) => {

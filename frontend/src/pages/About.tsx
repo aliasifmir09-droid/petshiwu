@@ -8,7 +8,7 @@ const About = () => {
     <>
       <SEO
       title="About Petshiwu | Online Pet Food & Supplies"
-      description="Petshiwu is an online pet store for food, treats, and supplies. Fast delivery across America. Same-day NYC · nationwide delivery across the US. No autoship. Free shipping over $49."
+      description="Petshiwu is an online pet store for food, treats, and supplies. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. No autoship. Free shipping over $49."
       keywords="about Petshiwu, online pet store, pet food, pet supplies, no autoship"
       url="/about"
       />
@@ -35,7 +35,7 @@ const About = () => {
             closes: '23:59',
           }],
           priceRange: '$$',
-          description: 'Online pet store for food, treats, and supplies. Fast delivery across America. Same-day NYC · nationwide delivery across the US. Warehouse and office only — not a walk-in store.',
+          description: 'Online pet store for food, treats, and supplies. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse and office only — not a walk-in store.',
           areaServed: ['United States', 'New York', 'New Jersey', 'Connecticut', 'Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'],
           paymentAccepted: 'Cash, Credit Card, Debit Card',
           currenciesAccepted: 'USD',
@@ -83,7 +83,7 @@ const About = () => {
                   </div>
                   <p className="text-sm sm:text-base text-blue-50 mb-4">
                     Petshiwu is an online pet store for food, treats, toys, and everyday care.
-                    We currently deliver in New York City, and shipped items go nationwide in 3-5 business days.
+                    We ship nationwide in 2-5 business days, with same-day delivery in New York City for locally stocked items.
                     Our warehouse packs orders — it is not a walk-in store.
                   </p>
                   <p className="text-xs sm:text-sm text-blue-100/90">
@@ -153,7 +153,7 @@ const About = () => {
                 </h3>
                 <p className="text-sm text-gray-600">
                   Enjoy easy online shopping, free shipping over $49, and a smooth experience from
-                  browsing to delivery. Fast delivery across America. Same-day NYC · nationwide delivery across the US.
+                  browsing to delivery. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.
                 </p>
               </div>
             </div>

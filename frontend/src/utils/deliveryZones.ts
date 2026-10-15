@@ -26,8 +26,8 @@ export const SAME_DAY_SHIPPING_COST = SHIPPING_COST;
 export const SAME_DAY_FREE_SHIPPING_THRESHOLD = FREE_SHIPPING_THRESHOLD;
 export const NATIONWIDE_SHIPPING_COST = SHIPPING_COST;
 
-export const NATIONWIDE_WINDOW = 'Arrives in 3-5 business days';
-export const NATIONWIDE_PAGE_PROMISE = 'Arrives in 3-5 business days anywhere in the US except Alaska and Hawaii';
+export const NATIONWIDE_WINDOW = 'Arrives in 2-5 business days';
+export const NATIONWIDE_PAGE_PROMISE = 'Arrives in 2-5 business days anywhere in the US except Alaska and Hawaii';
 export const NATIONWIDE_FEE_NOTE = '$7 delivery, free at $49+.';
 export const TRI_STATE_WINDOW = NATIONWIDE_WINDOW;
 export const TRI_STATE_PAGE_PROMISE = NATIONWIDE_PAGE_PROMISE;
@@ -35,12 +35,15 @@ export const TRI_STATE_FEE_NOTE = NATIONWIDE_FEE_NOTE;
 export const LOCAL_UNAVAILABLE_MESSAGE = 'Not available for this address yet';
 export const SAME_DAY_WINDOW = 'Same-day delivery in NYC';
 
-/** Owner placeholder for the homepage H1. */
-export const HERO_H1 = 'Fast delivery across America';
-export const NATIONWIDE_BRAND_FRAME = 'Same-day NYC · nationwide delivery across the US';
+/** Nationwide-first homepage H1. Same-day stays a NYC fact, not the store identity. */
+export const HERO_H1 = 'The pet store that ships nationwide — and delivers same-day in NYC.';
+export const NATIONWIDE_BRAND_FRAME =
+  'Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.';
+export const ANNOUNCEMENT_SHIPPING =
+  'FREE shipping on orders $49+ · Nationwide delivery in 2-5 business days · NYC same-day on local stock';
 
 export const MIXED_TRISTATE_DELIVERY_SUMMARY =
-  'Items arrive in 3-5 business days. Same-day is only for locally stocked items in NYC.';
+  'Items arrive in 2-5 business days. Same-day is only for locally stocked items in NYC.';
 
 export const ZONE_FEES: Record<string, { cost: number; freeShippingThreshold: number | null }> = {
   [DELIVERY_ZONE.SAME_DAY_NYC]: { cost: SHIPPING_COST, freeShippingThreshold: FREE_SHIPPING_THRESHOLD },

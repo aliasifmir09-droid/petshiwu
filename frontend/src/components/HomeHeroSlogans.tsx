@@ -20,7 +20,7 @@ const HomeHeroSlogans = () => {
               <p className="text-[11px] sm:text-xs font-semibold tracking-[0.18em] uppercase text-white/70">
                 {FIRST_ORDER_CODE}
               </p>
-              <h1 className="mt-1.5 text-3xl sm:text-4xl font-extrabold leading-[0.95] tracking-tight">
+              <h1 className="mt-1.5 text-2xl sm:text-[1.85rem] font-extrabold leading-tight tracking-tight">
                 {HERO_H1}
               </h1>
               <p className="mt-2 text-sm text-white/80 max-w-xs">{HOME_SLOGAN_SUPPORT}</p>

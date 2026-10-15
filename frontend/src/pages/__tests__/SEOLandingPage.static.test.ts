@@ -32,9 +32,9 @@ describe('NYC shoppable hubs keep every indexed URL', () => {
   test('hubs do not noindex the page or send shoppers to a search dead-end', () => {
     expect(landing).toContain('noindex={hasQueryVariant}');
     expect(landing).not.toMatch(/noindex=\{true\}/);
-    expect(dog).toMatch(/shipped items go nationwide in 3-5 business days/i);
-    expect(cat).toMatch(/shipped items go nationwide in 3-5 business days/i);
-    expect(city).toMatch(/shipped items go nationwide in 3-5 business days/i);
-    expect(queens).toMatch(/shipped items go nationwide in 3-5 business days/i);
+    expect(dog).toMatch(/shipped items go nationwide in 2-5 business days/i);
+    expect(cat).toMatch(/shipped items go nationwide in 2-5 business days/i);
+    expect(city).toMatch(/shipped items go nationwide in 2-5 business days/i);
+    expect(queens).toMatch(/shipped items go nationwide in 2-5 business days/i);
   });
 });

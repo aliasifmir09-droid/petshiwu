@@ -436,12 +436,12 @@ PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
 - Top brands: Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Iams, Pedigree, Nutro
 
 === SHIPPING ===
-- Every US order except Alaska and Hawaii: $7 under $49, free at $49, including NYC and TopDawg items
+- Every US order except Alaska and Hawaii: $7 under $49, free at $49, including NYC and shipped catalog items
 - NYC (Queens, Brooklyn, Manhattan, Bronx, Staten Island): same-day if ordered by 3 PM weekdays (1 PM weekends), otherwise next day
 - Same-day delivery: all five NYC boroughs — order by 3 PM EST weekdays (1 PM weekends)
 - In-stock products are eligible for same-day delivery in NYC
-- Locally stocked items are same-day in NYC only. Everywhere else in the US they arrive in 3-5 business days.
-- TopDawg items are never same-day. They arrive in 3-5 business days anywhere in the US except Alaska and Hawaii. The $49 free-shipping rule applies to the whole order.
+- Locally stocked items are same-day in NYC only. Everywhere else in the US they arrive in 2-5 business days.
+- Shipped catalog items are never same-day. They arrive in 2-5 business days anywhere in the US except Alaska and Hawaii. The $49 free-shipping rule applies to the whole order. Never name a supplier or wholesaler to the customer.
 - Checkout is open now: guests and accounts can pay with PayPal, Apple Pay, Google Pay, or card
 - Tracking number emailed immediately after shipment
 - USA only — no international shipping
@@ -493,16 +493,16 @@ const CUSTOMER_SERVICE_QA = `
 PETSHIWU CUSTOMER SERVICE EXPERT Q&A:
 
 Q: How do I place an order?
-A: Browse our 4,000+ products, add items to your cart, and check out as a guest or with a free account. Checkout is open now. We accept all major credit cards, PayPal, Apple Pay, and Google Pay. You'll receive a confirmation email the moment your order is placed. Locally stocked items are eligible for same-day delivery in NYC. The whole catalog ships nationwide in 3-5 business days. We do not ship to Alaska or Hawaii.
+A: Browse our 4,000+ products, add items to your cart, and check out as a guest or with a free account. Checkout is open now. We accept all major credit cards, PayPal, Apple Pay, and Google Pay. You'll receive a confirmation email the moment your order is placed. Locally stocked items are eligible for same-day delivery in NYC. The whole catalog ships nationwide in 2-5 business days. We do not ship to Alaska or Hawaii.
 
 Q: Do I need an account to order?
 A: No — guest checkout is available. But a free account at petshiwu.com gives you order tracking, saved pet profiles, wishlist access, personalized recommendations, and member deals. It takes 30 seconds to create.
 
 Q: How do I track my order?
-A: Check petshiwu.com/track-order with your order number, or log in and go to My Orders. Petshiwü delivers with our own drivers from Queens — you will not get a UPS or FedEx tracking number. The page shows where the order is and when it should arrive. NYC orders arrive same-day before 11 PM if you order by cutoff, otherwise the next day. Call (800) 259-2605 anytime.
+A: Check petshiwu.com/track-order with your order number, or log in and go to My Orders. Locally stocked NYC orders arrive same-day before 11 PM if you order by cutoff, otherwise the next day. Everywhere else in the US, orders arrive in 2-5 business days. We do not ship to Alaska or Hawaii. Call (800) 259-2605 anytime.
 
 Q: Do you offer free shipping?
-A: Orders over $49 ship free anywhere in the US except Alaska and Hawaii. Orders under $49 are $7, including NYC. Same-day delivery is only for locally stocked items in the five boroughs, ordered before 3 PM weekdays (1 PM weekends). TopDawg items arrive in 3-5 business days and are never same-day.
+A: Orders over $49 ship free anywhere in the US except Alaska and Hawaii. Orders under $49 are $7, including NYC. Same-day delivery is only for locally stocked items in the five boroughs, ordered before 3 PM weekdays (1 PM weekends). Shipped catalog items arrive in 2-5 business days and are never same-day.
 
 Q: How do I return something?
 A: Go to petshiwu.com/return-policy or email support@petshiwu.com within 365 days of delivery. Unused items in original packaging can be returned. Opened food, treats, or supplements can only be returned if they arrived damaged, defective, or incorrect. Refunds go back to your original payment method in 5–10 business days.

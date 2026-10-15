@@ -30,8 +30,8 @@ const structuredData = read('../../components/StructuredData.tsx');
 describe('public SEO copy stays one launch story', () => {
   test('homepage Google snippet stays locked', () => {
     expect(HOMEPAGE_TITLE).toContain('Petshiwu | Pet Food & Supplies');
-    expect(HOMEPAGE_DESCRIPTION).toContain('Nationwide shipping in 3-5 business days on shipped items');
-    expect(HOMEPAGE_DESCRIPTION).toContain('Same-day NYC');
+    expect(HOMEPAGE_DESCRIPTION).toContain('Nationwide delivery in 2-5 business days');
+    expect(HOMEPAGE_DESCRIPTION).toMatch(/same-day in NYC/i);
     expect(HOMEPAGE_DESCRIPTION).not.toMatch(/start accepting orders soon/i);
     expect(indexHtml).toContain(HOMEPAGE_TITLE);
     expect(indexHtml).toContain(HOMEPAGE_DESCRIPTION);
@@ -55,8 +55,8 @@ describe('public SEO copy stays one launch story', () => {
     expect(seo).not.toContain('application/ld+json');
   });
 
-  test('organization copy is NYC ops plus nationwide soon, not USA shipping now', () => {
-    expect(ORGANIZATION_DESCRIPTION).toMatch(/nationwide shipping in 3-5 business days on shipped items/i);
+  test('organization copy is nationwide delivery, with NYC same-day on local stock', () => {
+    expect(ORGANIZATION_DESCRIPTION).toMatch(/Nationwide delivery in 2-5 business days/);
     expect(ORGANIZATION_DESCRIPTION).toMatch(/not a walk-in store/i);
     expect(ORGANIZATION_DESCRIPTION).not.toMatch(/across the USA/i);
     expect(ORGANIZATION_DESCRIPTION).not.toMatch(/fast shipping/i);
@@ -74,7 +74,7 @@ describe('public SEO copy stays one launch story', () => {
   });
 
   test('catalog metadata does not claim live nationwide fast shipping', () => {
-    expect(CATALOG_META_PROOF).toContain('Nationwide shipping in 3-5 business days on shipped items');
+    expect(CATALOG_META_PROOF).toContain('Nationwide delivery in 2-5 business days');
     expect(CATALOG_META_PROOF).not.toMatch(/fast shipping/i);
     expect(products).toContain('CATALOG_META_PROOF');
     expect(category).toContain('CATALOG_META_PROOF');
@@ -92,14 +92,14 @@ describe('public SEO copy stays one launch story', () => {
       const parsed = JSON.parse(block[1]);
       const sameAs = JSON.stringify(parsed.sameAs || []);
       expect(sameAs).not.toContain('twitter.com');
-      expect(sameAs).not.toContain('youtube.com');
+      expect(sameAs).not.toMatch(/youtube\.com\/@petshiwu(?!inc)/);
       const blob = JSON.stringify(parsed);
       expect(blob).not.toMatch(/across the USA/i);
     }
     expect(social).not.toContain('twitter.com/petshiwu');
-    expect(social).not.toContain('youtube.com/@petshiwu');
+    expect(social).not.toMatch(/youtube\.com\/@petshiwu(?!inc)/);
     expect(indexHtml).not.toContain('twitter.com/petshiwu');
-    expect(indexHtml).not.toContain('youtube.com/@petshiwu');
+    expect(indexHtml).not.toMatch(/youtube\.com\/@petshiwu(?!inc)/);
     expect(app).not.toContain('twitter.com/petshiwu');
     expect(footer).toContain('FOOTER_SOCIAL');
     expect(footer).not.toContain('youtube.com');

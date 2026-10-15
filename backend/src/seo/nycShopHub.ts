@@ -10,15 +10,15 @@ export const NYC_HUB_PATHS = new Set([
   '/pet-supplies-queens-ny',
 ]);
 
-export const NYC_HUB_ZIP_HEADING = 'Check your ZIP — same-day NYC, or 3-5 business days on shipped items';
+export const NYC_HUB_ZIP_HEADING = 'Check your ZIP — same-day NYC, or 2-5 business days on shipped items';
 export const NYC_HUB_COMPARE_HEADING = 'Why NYC shoppers pick Petshiwü first';
-export const NYC_HUB_NATIONWIDE_HEADING = 'Nationwide shipping in 3-5 business days on shipped items';
+export const NYC_HUB_NATIONWIDE_HEADING = 'Nationwide delivery in 2-5 business days';
 
 export const NYC_HUB_ZIP_INTRO =
-  'NYC same-day: order by 3 PM weekdays or 1 PM weekends, at your door before 11 PM. Nationwide shipping in 3-5 business days on shipped items.';
+  'NYC same-day: order by 3 PM weekdays or 1 PM weekends, at your door before 11 PM. Nationwide delivery in 2-5 business days.';
 
 export const NYC_HUB_NATIONWIDE_BODY =
-  'Fast delivery across America. Same-day NYC · nationwide delivery across the US. Free shipping over $49. No autoship. Jackson Heights is warehouse and office, not a walk-in store.';
+  'Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49. No autoship. Jackson Heights is warehouse and office, not a walk-in store.';
 
 export const NYC_HUB_COMPARE_ROWS: Array<{
   label: string;
@@ -85,7 +85,7 @@ export function buildNycHubLinkHtml(excludePath = ''): string {
   const links = NYC_HUB_LINKS.filter((item) => item.path !== excludePath)
     .map((item) => `<li><a href="https://www.petshiwu.com${item.path}">${item.title}</a> — ${item.text}</li>`)
     .join('');
-  return `<h2>NYC same-day now · shipped items in 3-5 business days</h2><ul>${links}</ul>`;
+  return `<h2>NYC same-day now · shipped items in 2-5 business days</h2><ul>${links}</ul>`;
 }
 
 export function isNycShoppableHub(pathname: string): boolean {

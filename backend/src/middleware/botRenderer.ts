@@ -230,47 +230,47 @@ const removeStaticHero = (html: string): string => {
 const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   '/': {
     title: 'Petshiwu | Pet Food & Supplies – Free Shipping $49+, No Autoship',
-    description: '4,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. Fast delivery across America. Same-day NYC · nationwide delivery across the US. Free shipping over $49. No autoship.',
+    description: '4,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. The pet store that ships nationwide — and delivers same-day in NYC. Free shipping over $49. Nationwide delivery in 2-5 business days. No autoship.',
   },
   '/products': {
-    title: 'Pet food & supplies – Fast delivery across America | Petshiwu',
+    title: 'Pet food & supplies – Ships nationwide | Petshiwu',
     description: 'Browse 4,000+ foods, treats, and supplies for dogs, cats, birds, fish, reptiles, and small animals. Top brands. Free shipping over $49.',
   },
   '/dog': {
-    title: 'Dog food & supplies – Fast delivery across America | Petshiwu',
-    description: 'Shop dog food, treats, toys, and accessories. Purina, Blue Buffalo, Royal Canin. Fast delivery across America. Free shipping over $49. No autoship.',
+    title: 'Dog food & supplies – Ships nationwide | Petshiwu',
+    description: 'Shop dog food, treats, toys, and accessories. Purina, Blue Buffalo, Royal Canin. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49. No autoship.',
   },
   '/cat': {
-    title: 'Cat food & supplies – Fast delivery across America | Petshiwu',
-    description: 'Shop cat food, litter, toys, and accessories. Fast delivery across America. Free shipping over $49. No autoship.',
+    title: 'Cat food & supplies – Ships nationwide | Petshiwu',
+    description: 'Shop cat food, litter, toys, and accessories. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49. No autoship.',
   },
   '/bird': {
     title: 'Bird Food, Cages & Accessories | Petshiwu',
-    description: 'Shop bird food, cages, perches, and accessories for all bird species. Premium brands. Fast delivery across America. Free shipping over $49.',
+    description: 'Shop bird food, cages, perches, and accessories for all bird species. Premium brands. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49.',
   },
   '/fish': {
     title: 'Fish Food, Aquarium Supplies & Tanks | Petshiwu',
-    description: 'Find fish food, filters, aquarium supplies, and tanks for freshwater and saltwater fish. Fast delivery across America. Free shipping over $49.',
+    description: 'Find fish food, filters, aquarium supplies, and tanks for freshwater and saltwater fish. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49.',
   },
   '/reptile': {
     title: 'Reptile Food, Terrariums & Supplies | Petshiwu',
-    description: 'Shop reptile food, terrariums, heating, and accessories for snakes, lizards, and turtles. Fast delivery across America. Free shipping over $49.',
+    description: 'Shop reptile food, terrariums, heating, and accessories for snakes, lizards, and turtles. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49.',
   },
   '/other-animals': {
-    title: 'Other Animal Supplies | Fast delivery across America | Petshiwu',
-    description: 'Shop supplies for rabbits, guinea pigs, hamsters, reptiles, birds, fish, and other companion animals. Fast delivery across America from Petshiwu.',
+    title: 'Other Animal Supplies | Ships nationwide | Petshiwu',
+    description: 'Shop supplies for rabbits, guinea pigs, hamsters, reptiles, birds, fish, and other companion animals. Nationwide delivery in 2-5 business days from Petshiwu. Same-day in NYC on local stock.',
   },
   '/small-animal': {
     title: 'Small Animal Food, Cages & Accessories | Petshiwu',
-    description: 'Shop food, cages, bedding, and toys for hamsters, rabbits, guinea pigs, and more. Fast delivery across America. Free shipping over $49.',
+    description: 'Shop food, cages, bedding, and toys for hamsters, rabbits, guinea pigs, and more. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49.',
   },
   '/about': {
     title: 'About Petshiwu — Online Pet Store',
-    description: 'Petshiwu is an online pet store for food, treats, and supplies. Fast delivery across America. Same-day NYC · nationwide delivery across the US. Warehouse only — not a walk-in store.',
+    description: 'Petshiwu is an online pet store for food, treats, and supplies. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse only — not a walk-in store.',
   },
   '/our-promise': {
     title: 'Our Promise | Petshiwu',
-    description: 'Fair prices, fast delivery, and no autoship. Free shipping over $49. 365-day returns. Fast delivery across America. Same-day NYC · nationwide delivery across the US.',
+    description: 'Fair prices and no autoship. Free shipping over $49. 365-day returns. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.',
   },
   '/for-pet-parents': {
     title: 'For Pet Parents | Petshiwu',
@@ -278,7 +278,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/from-queens': {
     title: 'How We Ship | Petshiwu',
-    description: 'Petshiwu is an online pet store. Fast delivery across America. Same-day NYC · nationwide delivery across the US. Warehouse only — not a walk-in store.',
+    description: 'Petshiwu is an online pet store. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse only — not a walk-in store.',
   },
   '/editorial-standards': {
     title: 'How We Write Pet Care Guides | Petshiwu',
@@ -290,7 +290,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/faq': {
     title: 'Frequently Asked Questions | Petshiwu',
-    description: 'Answers to common questions about ordering, shipping, returns, and products at Petshiwu. Fast delivery across America.',
+    description: 'Answers to common questions about ordering, shipping, returns, and products at Petshiwu. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.',
   },
   '/return-policy': {
     title: 'Return & Exchange Policy | Petshiwu',
@@ -314,11 +314,11 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/shipping': {
     title: 'Shipping Policy | Petshiwu',
-    description: 'Same-day NYC for locally stocked items. Nationwide delivery in 3-5 business days. $7 under $49, free at $49. Does not ship to Alaska or Hawaii.',
+    description: 'Same-day NYC for locally stocked items. Nationwide delivery in 2-5 business days. $7 under $49, free at $49. Does not ship to Alaska or Hawaii.',
   },
   '/delivery-zips': {
     title: 'NYC Same-Day Delivery | Petshiwu',
-    description: 'Petshiwü delivers same-day in New York City — all five boroughs. In-stock products are eligible for same-day delivery. Check your ZIP. Shipped items go nationwide in 3-5 business days.',
+    description: 'Petshiwü delivers same-day in New York City — all five boroughs. In-stock products are eligible for same-day delivery. Check your ZIP. Shipped items go nationwide in 2-5 business days.',
   },
   // FIX: Plural pet-type entries REMOVED. These (/dogs, /cats, /birds, /reptiles,
   // /small-animals) used to self-canonicalize with duplicate content vs. the real
@@ -327,15 +327,15 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   // singular URLs before the botRenderer runs.
   '/fish-tanks': {
     title: 'Aquarium Supplies & Fish Tanks | Petshiwu',
-    description: 'Shop aquariums, filters, and accessories for freshwater and saltwater fish. Fast delivery across America. Free shipping on local orders over $49.',
+    description: 'Shop aquariums, filters, and accessories for freshwater and saltwater fish. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping on orders over $49.',
   },
   '/search': {
     title: 'Search Products | Petshiwu',
-    description: 'Search 4,000+ pet products for dogs, cats, birds, fish, reptiles, and small animals at Petshiwu. Fast delivery across America. Free shipping over $49.',
+    description: 'Search 4,000+ pet products for dogs, cats, birds, fish, reptiles, and small animals at Petshiwu. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49.',
   },
   '/deals': {
     title: "Today's Deals & Pet Supply Discounts | Petshiwu",
-    description: 'Save on premium pet food, treats, toys, and supplies. Daily deals and discounts on top brands for dogs, cats, birds, fish, and more. Fast delivery across America.',
+    description: 'Save on premium pet food, treats, toys, and supplies. Daily deals and discounts on top brands for dogs, cats, birds, fish, and more. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.',
   },
   '/donate': {
     title: 'Donate to Pet Shelters | Petshiwu',
@@ -567,7 +567,7 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
 
   const finalMeta = meta ?? {
     title: 'Premium Pet Food & Supplies | Petshiwu',
-    description: 'Shop premium pet food, toys, and supplies for all pets at Petshiwu. Fast delivery across America. Free shipping on local orders over $49.',
+    description: 'Shop premium pet food, toys, and supplies for all pets at Petshiwu. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping on orders over $49.',
   };
 
   let html = template;
@@ -592,7 +592,7 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
       const productSlug = segments[segments.length - 1];
       h1Text = slugToTitle(productSlug);
     } else {
-      h1Text = 'Fast delivery across America';
+      h1Text = 'The pet store that ships nationwide — and delivers same-day in NYC.';
     }
     // For homepage, keep the branded H1 — don't replace it
     if (cleanPath !== '/') {
@@ -1168,11 +1168,11 @@ export const buildProductHtml = (template: string, product: any, slug: string): 
   <hr style="margin:24px 0;border:none;border-top:1px solid #eee" />
   <p style="color:#555;font-size:0.9em">
     ${Array.isArray(product.tags) && product.tags.some((tag: unknown) => String(tag).toLowerCase() === 'topdawg')
-      ? 'Not eligible for same-day delivery - ships nationwide, arrives in 3-5 business days ($7 under $49, free at $49+). Does not ship to Alaska or Hawaii.'
-      : 'Same-day delivery in NYC for locally stocked items. Arrives in 3-5 business days everywhere else in the US. Does not ship to Alaska or Hawaii.'}
+      ? 'Not eligible for same-day delivery - ships nationwide, arrives in 2-5 business days ($7 under $49, free at $49+). Does not ship to Alaska or Hawaii.'
+      : 'Same-day delivery in NYC for locally stocked items. Arrives in 2-5 business days everywhere else in the US. Does not ship to Alaska or Hawaii.'}
     ${petType ? `<a href="${BASE}/${petType}" style="color:#1976d2">Browse more ${petLabel} products</a> &bull;` : ''}
     ${categoryName && categorySlug ? `<a href="${BASE}/${petType}/${categorySlug}" style="color:#1976d2">${esc(categoryName)}</a>` : ''}
-    <a href="${BASE}" style="color:#1976d2">Petshiwu — Fast delivery across America</a>
+    <a href="${BASE}" style="color:#1976d2">Petshiwu — Ships nationwide</a>
   </p>
 </div>`;
 
@@ -1307,7 +1307,7 @@ export const buildBlogHtml = (template: string, blog: any): string => {
     ? `<article style="line-height:1.7;color:#333;font-size:1.05em">${articleHtml}</article>`
     : `<p style="line-height:1.7;color:#333;font-size:1.05em">${esc(blogExcerpt)}</p>`}
   <hr style="margin:24px 0;border:none;border-top:1px solid #eee" />
-  <p style="color:#555;font-size:0.9em"><a href="${BASE}/learning" style="color:#1976d2">More Pet Care Articles</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — Fast delivery across America</a></p>
+  <p style="color:#555;font-size:0.9em"><a href="${BASE}/learning" style="color:#1976d2">More Pet Care Articles</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — Ships nationwide</a></p>
 </div>`;
 
   let html = injectTitle(template, title);
@@ -1399,7 +1399,7 @@ export const buildCareGuideHtml = (template: string, guide: any): string => {
     ? `<article style="line-height:1.7;color:#333;font-size:1.05em">${articleHtml}</article>`
     : `<p style="line-height:1.7;color:#333;font-size:1.05em">${esc(guideExcerpt)}</p>`}
   <hr style="margin:24px 0;border:none;border-top:1px solid #eee" />
-  <p style="color:#555;font-size:0.9em"><a href="${BASE}/care-guides" style="color:#1976d2">All Care Guides</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — Fast delivery across America</a></p>
+  <p style="color:#555;font-size:0.9em"><a href="${BASE}/care-guides" style="color:#1976d2">All Care Guides</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — Ships nationwide</a></p>
 </div>`;
 
   let html = injectTitle(template, title);
@@ -1650,7 +1650,7 @@ const buildNeighborhoodHtml = (
   <h2 style="font-size:1.7em;font-weight:700;margin:0 0 12px">${esc(h1)}</h2>
   <p style="color:#444;line-height:1.7;margin-bottom:16px">Petshiwu delivers premium ${cat.petLabel} to every address in ${esc(neighborhoodName)}, ${esc(borough)} — including nearby ${esc(nearbyAreas)}. We're Queens-based with 4,000+ products and free shipping on orders over $49.</p>
   <a href="${BASE}/products" style="display:inline-block;padding:10px 24px;background:#1976d2;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin-bottom:20px">Shop ${esc(cat.petLabel)} →</a>
-  <p style="color:#555;font-size:0.9em"><a href="${BASE}/learning" style="color:#1976d2">Pet Care Blog</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — Fast delivery across America</a></p>`;
+  <p style="color:#555;font-size:0.9em"><a href="${BASE}/learning" style="color:#1976d2">Pet Care Blog</a> &bull; <a href="${BASE}" style="color:#1976d2">Petshiwu — Ships nationwide</a></p>`;
 
   let html = template;
   html = injectCanonical(html, pageUrl);
@@ -1750,7 +1750,7 @@ export const buildHomepageHtml = (template: string, products: any[] = []): strin
       width: 512,
       height: 512,
     },
-    description: 'Premium pet food, toys, and supplies. Fast delivery across America. Same-day NYC · nationwide delivery across the US.',
+    description: 'Petshiwu is an online pet store for food, treats, and supplies. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse and office only — not a walk-in store.',
     telephone: '+18002592605',
     email: 'support@petshiwu.com',
     address: {
@@ -1794,7 +1794,7 @@ export const buildHomepageHtml = (template: string, products: any[] = []): strin
     url: BASE,
     image: `${BASE}/og-image.jpg`,
     logo: `${BASE}/logo-square-512.png`,
-    description: 'Fast delivery across America. Same-day in New York City for locally stocked items, and nationwide delivery in 3-5 business days across the US. Jackson Heights is office and warehouse only — not a walk-in store.',
+    description: 'Nationwide delivery in 2-5 business days. Same-day in New York City for locally stocked items. Jackson Heights is office and warehouse only — not a walk-in store.',
     telephone: '+18002592605',
     email: 'support@petshiwu.com',
     address: {
@@ -1822,6 +1822,7 @@ export const buildHomepageHtml = (template: string, products: any[] = []): strin
     currenciesAccepted: 'USD',
     paymentAccepted: 'Credit Card, Debit Card, PayPal',
     areaServed: [
+      { '@type': 'Country', name: 'United States' },
       { '@type': 'City', name: 'New York City' },
       { '@type': 'Borough', name: 'Queens' },
       { '@type': 'Borough', name: 'Brooklyn' },
@@ -1917,9 +1918,9 @@ const buildProductListHtml = async (template: string): Promise<string> => {
 
   const bodyContent = `
 <div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
-  <h2>Pet food & supplies – Fast delivery across America</h2>
+  <h2>Pet food & supplies – Ships nationwide</h2>
   <p>Browse 4,000+ foods, treats, and supplies for dogs, cats, birds, fish, reptiles, and small animals.
-     Free shipping over $49. Same-day NYC · nationwide delivery across the US. No autoship.</p>
+     Free shipping over $49. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. No autoship.</p>
   ${productLinks
     ? `<ul style="list-style:none;padding:0;columns:2">${productLinks}</ul>`
     : '<p>Browse the catalog on Petshiwu.</p>'}
@@ -1933,7 +1934,7 @@ const buildProductListHtml = async (template: string): Promise<string> => {
   html = injectCanonical(html, canonicalUrl);
   html = injectHreflang(html, canonicalUrl);
   html = injectOgTags(html, meta.title, meta.description, canonicalUrl);
-  html = injectH1(html, 'Pet food & supplies – Fast delivery across America');
+  html = injectH1(html, 'Pet food & supplies – Ships nationwide');
   // Inject product list into body for Google to crawl (H2 — H1 already replaced in noscript)
   html = html.replace(/<div id="root">.*?<\/div>/s, () => `<div id="root">${bodyContent}</div>`) ||
          html.replace('<div id="root"></div>', () => `<div id="root">${bodyContent}</div>`);
@@ -2238,7 +2239,7 @@ export const buildBrandCollectionHtml = (
   <p>${esc(meta.intro)}</p>
   ${productsBlock}
   ${relatedHtml}
-  <p>In stock. Free shipping over $49. No autoship. Nationwide shipping in 3-5 business days on shipped items.</p>
+  <p>In stock. Free shipping over $49. No autoship. Nationwide delivery in 2-5 business days.</p>
   <p><a href="${BASE}/brand">All brands</a> · <a href="${BASE}/products">Browse all products</a></p>
 </div>`;
 

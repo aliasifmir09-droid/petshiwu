@@ -12,6 +12,8 @@ import SEO from '@/components/SEO';
 import StructuredData from '@/components/StructuredData';
 import { useSEO } from '@/hooks/useSEO';
 import { CATALOG_META_PROOF } from '@/config/publicSeo';
+import TrustBadges from '@/components/TrustBadges';
+import DeliveryWindowExplainer from '@/components/DeliveryWindowExplainer';
 import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import { generateCategoryUrl, generateProductUrl } from '@/utils/productUrl';
 import { collectionSearchTitle } from '@/utils/seoUtils';
@@ -305,6 +307,8 @@ const Category = () => {
       {seoData.breadcrumbSchema && (
         <StructuredData type="breadcrumb" data={seoData.breadcrumbSchema} />
       )}
+      <TrustBadges />
+      <DeliveryWindowExplainer />
       <div className="container mx-auto px-4 lg:px-8 py-8">
         {/* Breadcrumbs */}
       <nav className="mb-6" aria-label="Breadcrumb">

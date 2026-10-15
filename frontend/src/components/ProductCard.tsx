@@ -205,6 +205,11 @@ const ProductCard = memo(({ product, hideCartButton = false, index, priority = f
           <h3 className="font-semibold text-stone-900 line-clamp-2 min-h-[2.5rem] text-sm leading-snug group-hover:text-[#1E3A8A]">
             {searchTerm ? highlightSearchTerm(decodeHtmlEntities(product.name), searchTerm) : decodeHtmlEntities(product.name)}
           </h3>
+          {Array.isArray(product.variants) && product.variants.length > 1 ? (
+            <p className="mt-1 text-xs font-semibold text-stone-600">
+              {product.variants.length} options
+            </p>
+          ) : null}
 
           <div className="mt-1.5 flex items-center gap-1.5 min-h-[1.25rem]">
             <div className="flex items-center">

@@ -113,6 +113,7 @@ describe('buildHomepageHtml delivery-only schema', () => {
     expect(localBusiness.description).toMatch(/not a walk-in store/i);
     expect(localBusiness.areaServed).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({ name: 'United States' }),
         expect.objectContaining({ name: 'New York City' }),
         expect.objectContaining({ name: 'Queens' }),
       ])
@@ -126,7 +127,7 @@ describe('buildHomepageHtml delivery-only schema', () => {
     expect(html).toContain('href="https://www.petshiwu.com/cat-food-delivery-nyc"');
     expect(html).toContain('href="https://www.petshiwu.com/pet-supplies-delivery-nyc"');
     expect(html).toContain('href="https://www.petshiwu.com/pet-supplies-queens-ny"');
-    expect(html).toMatch(/shipped items in 3-5 business days/i);
+    expect(html).toMatch(/shipped items in 2-5 business days/i);
     expect(html).toContain('href="https://www.petshiwu.com/dog/food"');
     expect(html).toContain('href="https://www.petshiwu.com/dog"');
     expect(html).toContain('href="https://www.petshiwu.com/products"');
@@ -263,9 +264,9 @@ describe('SEO landing first-wave HTML', () => {
   });
 
   it('adds ZIP, compare, and nationwide copy without dropping products', () => {
-    expect(html).toContain('Check your ZIP — same-day NYC, or 3-5 business days on shipped items');
+    expect(html).toContain('Check your ZIP — same-day NYC, or 2-5 business days on shipped items');
     expect(html).toContain('Why NYC shoppers pick Petshiwü first');
-    expect(html).toContain('Nationwide shipping in 3-5 business days on shipped items');
+    expect(html).toContain('Nationwide delivery in 2-5 business days');
     expect(html).not.toContain('not same-day outside NYC');
     expect(html).not.toMatch(/do not claim/i);
     expect(html).toContain('<h2>Recommended Products</h2>');
@@ -297,7 +298,7 @@ describe('shoppable brand collection HTML', () => {
     expect(html).toContain('<title>Merrick | In stock · free ship $49+ | Petshiwu</title>');
     expect(html).toContain('<h1>Shop Merrick</h1>');
     expect(html).toContain('href="https://www.petshiwu.com/dog/dry-food/merrick-grain-free-real-texas-beef-dry-dog-food"');
-    expect(html).toContain('Nationwide shipping in 3-5 business days on shipped items');
+    expect(html).toContain('Nationwide delivery in 2-5 business days');
     expect(html).not.toMatch(/do not claim/i);
   });
 
@@ -385,7 +386,7 @@ describe('product offer price in first-wave HTML', () => {
     expect(html).toContain('"@type":"Offer"');
     expect(html).toContain('In stock · free ship $49+');
     expect(html).not.toContain('... | Petshiwu');
-    expect(html).toContain('Same-day delivery in NYC for locally stocked items. Arrives in 3-5 business days everywhere else in the US.');
+    expect(html).toContain('Same-day delivery in NYC for locally stocked items. Arrives in 2-5 business days everywhere else in the US.');
     expect(html).toContain('Does not ship to Alaska or Hawaii.');
     expect(html).not.toContain('Not eligible for same-day delivery');
   });
@@ -407,7 +408,7 @@ describe('product offer price in first-wave HTML', () => {
       'durable-rope-tug-toy'
     );
     expect(html).toContain(
-      'Not eligible for same-day delivery - ships nationwide, arrives in 3-5 business days ($7 under $49, free at $49+)'
+      'Not eligible for same-day delivery - ships nationwide, arrives in 2-5 business days ($7 under $49, free at $49+)'
     );
     expect(html).toContain('Does not ship to Alaska or Hawaii');
     expect(html).toContain('"value":"7"');

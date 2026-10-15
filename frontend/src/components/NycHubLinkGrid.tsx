@@ -15,10 +15,10 @@ const NycHubLinkGrid = ({ excludePath }: NycHubLinkGridProps) => {
           Delivery
         </p>
         <h2 id="nyc-hub-links-heading" className="text-2xl md:text-3xl font-bold text-[#1E3A8A] mb-2">
-          NYC same-day now · shipped items in 3-5 business days
+          NYC same-day now · shipped items in 2-5 business days
         </h2>
         <p className="text-slate-600 mb-6 max-w-2xl">
-          Same-day in New York City. Nationwide shipping in 3-5 business days on shipped items.
+          Same-day in New York City. Nationwide delivery in 2-5 business days.
         </p>
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {links.map((item) => (
