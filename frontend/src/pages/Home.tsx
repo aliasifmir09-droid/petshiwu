@@ -371,7 +371,7 @@ const Home = () => {
             {[
               {
                 title: 'Shop by pet, then by aisle',
-                text: 'Dogs, cats, birds, fish, reptiles, and small pets. Food, treats, litter, toys, and prescription diets — the aisles you expect from a national pet retailer.',
+                text: 'Dogs, cats, birds, fish, reptiles, and small pets. Food, treats, litter, toys, and prescription diets — delivered to your door.',
               },
               {
                 title: 'Vet-quality brands, no subscription trap',

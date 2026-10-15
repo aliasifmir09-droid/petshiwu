@@ -376,7 +376,7 @@ export const generateMetaKeywords = (
   // Add common pet-related keywords
   keywords.push(
     'pet supplies',
-    'online pet store',
+    'pet delivery platform',
     'pet food',
     'pet accessories',
     'pet care'

@@ -47,7 +47,7 @@ const CatFoodDeliveryNYC = () => {
         },
         {
           question: "Do you deliver cat food to apartments in Manhattan and Brooklyn?",
-          answer: "Yes — all five boroughs. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. No walk-in store. Perfect if you do not want to carry litter up the stairs."
+          answer: "Yes — all five boroughs. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. Not a store. We only deliver. Perfect if you do not want to carry litter up the stairs."
         }
       ]}
       searchTerms={['cat food', 'cat litter', 'kitten food', 'wet cat food', 'dry cat food', 'cat treats', 'cat supplies']}

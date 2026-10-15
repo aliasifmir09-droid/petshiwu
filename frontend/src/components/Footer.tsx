@@ -133,7 +133,7 @@ const Footer = () => {
               <li><Link to="/pet-supplies-delivery-nyc" className="hover:text-white transition-colors">Pet Supplies Delivery NYC</Link></li>
               <li><Link to="/pet-supplies-jackson-heights-ny" className="hover:text-white transition-colors">Jackson Heights</Link></li>
               <li><Link to="/pet-supplies-queens-ny" className="hover:text-white transition-colors">Pet Supplies Queens</Link></li>
-              <li><Link to="/pet-store-queens-ny" className="hover:text-white transition-colors">Queens delivery, not a walk-in</Link></li>
+                  <li><Link to="/pet-store-queens-ny" className="hover:text-white transition-colors">Queens delivery only</Link></li>
               <li><Link to="/pet-supplies-brooklyn-ny" className="hover:text-white transition-colors">Brooklyn</Link></li>
               <li><Link to="/pet-supplies-manhattan-ny" className="hover:text-white transition-colors">Manhattan</Link></li>
               <li><Link to="/pet-supplies-bronx-ny" className="hover:text-white transition-colors">The Bronx</Link></li>
@@ -165,7 +165,7 @@ const Footer = () => {
                   Office & warehouse<br />
                   37-68 74th St<br />
                   Jackson Heights, NY 11372<br />
-                  <span className="text-blue-200/80">Not a walk-in store — delivery only</span>
+                  <span className="text-blue-200/80">A delivery platform and company — not a store</span>
                 </span>
               </li>
             </ul>

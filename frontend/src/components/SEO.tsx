@@ -28,7 +28,7 @@ const SITE_NAME = 'Petshiwu';
 const SEO = ({
   title = HOMEPAGE_TITLE,
   description = HOMEPAGE_DESCRIPTION,
-  keywords = 'pet supplies, dog food, cat food, pet toys, pet accessories, pet care, online pet store, premium pet food, dog treats, cat treats, pet bedding, pet grooming, pet health, pet nutrition, pet shop online, buy pet food online, pet supplies near me',
+  keywords = 'pet supplies, dog food, cat food, pet toys, pet accessories, pet care, pet delivery platform, premium pet food, dog treats, cat treats, pet bedding, pet grooming, pet health, pet nutrition, pet shop online, buy pet food online, pet supplies near me',
   image = `${SITE_URL}/og-image.jpg`,
   url,
   type = 'website',

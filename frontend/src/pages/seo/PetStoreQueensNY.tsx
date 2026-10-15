@@ -8,8 +8,8 @@ const PetStoreQueensNY = () => {
   return (
     <SEOLandingPage
       keyword="pet-store-queens-ny"
-      title="Pet Store Queens NY — Same-Day Delivery, Not a Walk-In | Petshiwu"
-      description="Queens pet delivery from Jackson Heights warehouse. Not a walk-in store. Order by 3 PM weekdays (1 PM weekends), before 11 PM. No autoship. Free over $49."
+      title="Pet Delivery Queens NY — Same-Day Delivery, Not a Walk-In | Petshiwu"
+      description="Queens pet delivery from Jackson Heights warehouse. Not a store. We only deliver. Order by 3 PM weekdays (1 PM weekends), before 11 PM. No autoship. Free over $49."
       h1="Queens Pet Delivery — We Bring It to Your Door Tonight"
       introContent="Petshiwu is Queens delivery, not a walk-in shop. Jackson Heights is office and warehouse only. Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM to Flushing, Astoria, Forest Hills, Jamaica, and all of Queens. No autoship. Free over $49."
       problemPoints={[
@@ -20,7 +20,7 @@ const PetStoreQueensNY = () => {
         "Carrying heavy supplies on the subway or bus"
       ]}
       solutionPoints={[
-        "Delivery from our Jackson Heights warehouse — not a walk-in store",
+        "Delivery from our Jackson Heights warehouse — not a store. We only deliver",
         "Delivery throughout all Queens neighborhoods",
         "4,000+ products for every type of pet",
         "All the top national brands at competitive prices",
@@ -29,7 +29,7 @@ const PetStoreQueensNY = () => {
       ]}
       faqItems={[
         {
-          question: "Can I visit your pet store in Jackson Heights?",
+          question: "Can I visit the Jackson Heights address?",
           answer: "No. Petshiwu is delivery only. Our Jackson Heights location is office and warehouse — not a retail shop. Order online and we deliver to your door."
         },
         {

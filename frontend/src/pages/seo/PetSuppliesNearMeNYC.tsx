@@ -9,7 +9,7 @@ const PetSuppliesNearMeNYC = () => {
     <SEOLandingPage
       keyword="pet-supplies-near-me-nyc"
       title="Pet Supplies Near Me NYC — Same-Day Delivery, Not a Store | Petshiwu"
-      description="Pet supplies near you in NYC means delivery to your door. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Not a walk-in store. No autoship. Free over $49."
+      description="Pet supplies near you in NYC means delivery to your door. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Not a store. We only deliver. No autoship. Free over $49."
       h1="Pet Supplies Near You — Delivered Tonight in NYC"
       introContent="Searching pet supplies near me in NYC? We do not have a walk-in shop. We deliver 4,000+ products to your door tonight if you order by 3 PM weekdays (1 PM weekends). All 5 boroughs. No autoship. Free over $49."
       problemPoints={[
@@ -30,7 +30,7 @@ const PetSuppliesNearMeNYC = () => {
       faqItems={[
         {
           question: "Is there a pet supply delivery service near me in NYC?",
-          answer: "Yes — Petshiwu delivers pet supplies to all five NYC boroughs: Queens, Brooklyn, Manhattan, the Bronx, and Staten Island. We warehouse in Jackson Heights, Queens. We are not a walk-in store."
+          answer: "Yes — Petshiwu delivers pet supplies to all five NYC boroughs: Queens, Brooklyn, Manhattan, the Bronx, and Staten Island. We warehouse in Jackson Heights, Queens. We are not a store. We only deliver."
         },
         {
           question: "Can I get same-day pet supply delivery in NYC?",

@@ -34,7 +34,7 @@ export const TRI_STATE_PAGE_PROMISE = NATIONWIDE_PAGE_PROMISE;
 export const LOCAL_UNAVAILABLE_MESSAGE = 'Not available for this address yet';
 export const SAME_DAY_WINDOW = 'Same-day delivery in NYC';
 
-export const HERO_H1 = 'The pet store that ships nationwide — and delivers same-day in NYC.';
+export const HERO_H1 = 'The pet delivery platform that ships nationwide — and delivers same-day in NYC.';
 export const NATIONWIDE_BRAND_FRAME =
   'Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.';
 

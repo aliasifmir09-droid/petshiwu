@@ -8,9 +8,9 @@ const PetSuppliesJacksonHeightsNY = () => (
   <SEOLandingPage
     keyword="pet-supplies-jackson-heights-ny"
     title="Pet Supplies Jackson Heights NY — Local Delivery from Our Warehouse | Petshiwu"
-    description="Petshiwu delivers pet supplies in Jackson Heights, Queens. We are not a walk-in store — office and warehouse only. Delivery to Jackson Heights, Elmhurst, Woodside & nearby. Free shipping over $49."
+    description="Petshiwu delivers pet supplies in Jackson Heights, Queens. We are not a store. We only deliver — office and warehouse only. Delivery to Jackson Heights, Elmhurst, Woodside & nearby. Free shipping over $49."
     h1="Jackson Heights Pet Supply Delivery"
-    introContent="Petshiwu delivers pet food and supplies in Jackson Heights from our office and warehouse at 37-68 74th Street. We are not a walk-in store. Order online and we bring premium pet food, toys, and supplies to Jackson Heights, Elmhurst, Woodside, Corona, and all surrounding areas. 4,000+ products, free delivery on orders over $49."
+    introContent="Petshiwu delivers pet food and supplies in Jackson Heights from our office and warehouse at 37-68 74th Street. We are not a store. We only deliver. Order online and we bring premium pet food, toys, and supplies to Jackson Heights, Elmhurst, Woodside, Corona, and all surrounding areas. 4,000+ products, free delivery on orders over $49."
     problemPoints={[
       "Having to travel to big pet stores outside the neighborhood",
       "Local stores with limited selection and inconsistent stock",
@@ -30,7 +30,7 @@ const PetSuppliesJacksonHeightsNY = () => (
     faqItems={[
       {
         question: "Can I visit Petshiwu in Jackson Heights?",
-        answer: "No. We are not a walk-in store. 37-68 74th Street is our office and warehouse only. Shop online and we deliver to your door in Jackson Heights and across NYC."
+        answer: "No. We are not a store. We only deliver. 37-68 74th Street is our office and warehouse only. Shop online and we deliver to your door in Jackson Heights and across NYC."
       },
       {
         question: "Is Petshiwu based in Jackson Heights?",

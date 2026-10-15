@@ -23,7 +23,7 @@ export const NEXT_DAY_DELIVERY_GUIDE_META: TrendingLearningMeta = {
 };
 
 export const NEXT_DAY_DELIVERY_GUIDE_HTML = `
-      <p>Petshiwü packs from Jackson Heights, Queens — warehouse and office, not a walk-in store. In-stock products are eligible for same-day delivery in New York City.</p>
+      <p>Petshiwü packs from Jackson Heights, Queens — warehouse and office, not a store. We only deliver. In-stock products are eligible for same-day delivery in New York City.</p>
       <figure>
         <picture>
           <source srcset="/blog/kibble-bowl.webp" type="image/webp" />

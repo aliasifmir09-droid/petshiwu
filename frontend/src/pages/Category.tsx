@@ -196,7 +196,7 @@ const Category = () => {
       category?.name || '',
       petTypeDisplay,
       'pet supplies',
-      'online pet store'
+      'pet delivery platform'
     ].filter(Boolean),
     type: 'collection',
     context: {

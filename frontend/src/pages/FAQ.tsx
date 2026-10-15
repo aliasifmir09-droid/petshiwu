@@ -122,7 +122,7 @@ const FAQ = () => {
       <SEO
       title="Frequently Asked Questions (FAQ) | Petshiwu - Pet Products Help Center"
       description={seoDescription}
-      keywords="FAQ, frequently asked questions, pet store help, shipping questions, 365-day return policy, order tracking, pet product questions, customer support, pet care help, online pet store FAQ"
+      keywords="FAQ, frequently asked questions, pet store help, shipping questions, 365-day return policy, order tracking, pet product questions, customer support, pet care help, pet delivery platform FAQ"
       url="/faq"
       />
       

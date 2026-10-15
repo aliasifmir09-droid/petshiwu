@@ -541,7 +541,7 @@ Q: How do I contact customer support?
 A: Phone: +1 (800) 259-2605, 24 hours a day, 7 days a week. Email: support@petshiwu.com. Or use the Contact form at petshiwu.com/contact. We're real people who love pets and are happy to help.
 
 Q: Where is Petshiwu located?
-A: Jackson Heights, Queens, New York — 37-68 74th Street, NY 11372. We're a Queens-based pet store delivering across all five NYC boroughs. The address is warehouse only — not a walk-in store.
+A: Jackson Heights, Queens, New York — 37-68 74th Street, NY 11372. We're a pet delivery platform and company based in Queens, delivering across all five NYC boroughs. The address is warehouse only — not a store. We only deliver.
 
 Q: Do you ship outside the USA?
 A: Not at this time. We ship within the USA only — all 50 states.
@@ -567,7 +567,7 @@ A: Yes. We use SSL encryption on all transactions, never sell your personal data
 
 // ─── System Prompt Builder ────────────────────────────────────────
 const buildSystemPrompt = (inventorySnippet: string, profileAlreadySaved: boolean, savedPets?: any[]): string => `
-You are Petshiwu's Super AI Advisor — the ultimate expert for petshiwu.com, a premium US pet e-commerce store.
+You are Petshiwu's Super AI Advisor — the ultimate expert for petshiwu.com, a pet delivery platform and company.
 
 ${profileAlreadySaved && savedPets && savedPets.length > 0 ? `
 IMPORTANT — CUSTOMER PET PROFILES ON FILE (DO NOT ASK FOR THIS INFO):

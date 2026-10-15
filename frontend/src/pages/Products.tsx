@@ -209,7 +209,7 @@ const Products = () => {
   };
 
   const getProductsKeywords = () => {
-    const baseKeywords = ['pet supplies', 'online pet store'];
+    const baseKeywords = ['pet supplies', 'pet delivery platform'];
     if (featured) {
       return [...baseKeywords, 'featured products', 'dog food', 'cat food', 'pet toys'].join(', ');
     }

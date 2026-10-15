@@ -1,7 +1,7 @@
 import SEOLandingPage from '../SEOLandingPage';
 
 /**
- * Targets: "pet supplies delivery NYC", "pet store delivery New York", "online pet store New York"
+ * Targets: "pet supplies delivery NYC", "pet store delivery New York", "pet delivery platform New York"
  * Captures the same intent as competitor brand searches — people want fast NYC pet supply delivery
  */
 const PetSuppliesDeliveryNYC = () => {

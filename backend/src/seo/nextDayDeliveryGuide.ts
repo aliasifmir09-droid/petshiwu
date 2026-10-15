@@ -20,7 +20,7 @@ export const NEXT_DAY_DELIVERY_GUIDE = {
     'Locally stocked products are eligible for same-day delivery in NYC. Everywhere else in the US they arrive in 2-5 business days. Shipped catalog items are never same-day.',
   shopPath: '/products',
   html: `
-      <p>Petshiwü packs from Jackson Heights, Queens — warehouse and office, not a walk-in store. In-stock products are eligible for same-day delivery in New York City.</p>
+      <p>Petshiwü packs from Jackson Heights, Queens — warehouse and office, not a store. We only deliver. In-stock products are eligible for same-day delivery in New York City.</p>
       <figure>
         <picture>
           <source srcset="/blog/kibble-bowl.webp" type="image/webp" />

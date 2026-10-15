@@ -261,7 +261,7 @@ export function buildOrderConfirmationEmail(
                           <div style="margin-top:6px;font-size:14px;line-height:1.55;color:#374151;">
                             ${WAREHOUSE_ADDRESS}<br>
                             Office and warehouse only<br>
-                            Not a walk-in store
+                            Not a store. We only deliver
                           </div>
                           <div style="margin-top:8px;font-size:13px;font-weight:700;color:${BRAND_NAVY};">
                             <a href="tel:${SUPPORT_PHONE_TEL}" style="color:${BRAND_NAVY};text-decoration:none;">${SUPPORT_PHONE_DISPLAY}</a>
@@ -381,7 +381,7 @@ export function buildOrderConfirmationEmail(
               Include this packing slip in the shipment. Returns: unused items within 365 days; customer pays return shipping unless the item is damaged, defective, or incorrect.
               <a href="${origin}/return-policy" style="color:${BRAND_NAVY};font-weight:700;">petshiwu.com/return-policy</a><br><br>
               Petshiwü · ${WAREHOUSE_ADDRESS}<br>
-              Office and warehouse only — delivery, not a walk-in store.
+              Office and warehouse only — delivery, not a store. We only deliver.
             </td>
           </tr>
         </table>

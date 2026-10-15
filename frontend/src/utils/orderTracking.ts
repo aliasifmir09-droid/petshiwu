@@ -226,7 +226,7 @@ export const describeOrderTracking = (order: TrackableOrder): OrderTrackingView 
     received: {
       headline: 'We have your order',
       detail: paid
-        ? 'Payment is in. We are lining this up to pack in Queens — that is our warehouse, not a walk-in store.'
+        ? 'Payment is in. We are lining this up to pack in Queens — that is our warehouse, not a store. We only deliver.'
         : 'We received the order. Payment still needs to clear before we pack.',
       nextStep: `Next: we pack in Queens, then a driver comes to your door. Expected ${arrival.label}.`,
     },

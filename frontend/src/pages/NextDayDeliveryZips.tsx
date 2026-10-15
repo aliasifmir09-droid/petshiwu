@@ -49,7 +49,7 @@ const NextDayDeliveryZips = () => {
           .
         </p>
         <p className="text-sm text-gray-600 mb-8">
-          Packed from Jackson Heights. Not a walk-in store.{' '}
+          Packed from Jackson Heights. Not a store. We only deliver.{' '}
           <Link to="/shipping" className="text-[#1E3A8A] font-semibold hover:underline">
             Shipping information
           </Link>

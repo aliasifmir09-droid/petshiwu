@@ -286,7 +286,7 @@ const BrandCollection = ({ brand }: { brand: ShopBrand }) => {
         <section className="mb-12 rounded-2xl border border-slate-200 bg-slate-50 p-6 md:p-8">
           <h2 className="text-2xl font-bold text-[#1E3A8A] mb-3">Nationwide delivery in 2-5 business days</h2>
           <p className="text-slate-700 leading-relaxed">
-            {NATIONWIDE_SOON_NOTE} Free shipping over $49. No autoship. Jackson Heights is warehouse and office, not a walk-in store.
+            {NATIONWIDE_SOON_NOTE} Free shipping over $49. No autoship. Jackson Heights is warehouse and office, not a store. We only deliver.
           </p>
         </section>
 

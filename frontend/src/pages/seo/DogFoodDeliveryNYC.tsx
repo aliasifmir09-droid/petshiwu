@@ -47,7 +47,7 @@ const DogFoodDeliveryNYC = () => {
         },
         {
           question: "Is dog food delivery available in Brooklyn and Manhattan?",
-          answer: "Yes — all five boroughs. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. Jackson Heights is our warehouse, not a walk-in store."
+          answer: "Yes — all five boroughs. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. Jackson Heights is our warehouse, not a store. We only deliver."
         }
       ]}
       searchTerms={['dog food', 'kibble', 'dry dog food', 'wet dog food', 'grain free dog food', 'puppy food']}

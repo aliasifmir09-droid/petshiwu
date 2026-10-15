@@ -57,7 +57,7 @@ describe('public SEO copy stays one launch story', () => {
 
   test('organization copy is nationwide delivery, with NYC same-day on local stock', () => {
     expect(ORGANIZATION_DESCRIPTION).toMatch(/Nationwide delivery in 2-5 business days/);
-    expect(ORGANIZATION_DESCRIPTION).toMatch(/not a walk-in store/i);
+    expect(ORGANIZATION_DESCRIPTION).toMatch(/not a store. We only deliver/i);
     expect(ORGANIZATION_DESCRIPTION).not.toMatch(/across the USA/i);
     expect(ORGANIZATION_DESCRIPTION).not.toMatch(/fast shipping/i);
     expect(indexHtml).toContain(ORGANIZATION_DESCRIPTION);

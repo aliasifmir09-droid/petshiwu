@@ -110,7 +110,7 @@ describe('buildHomepageHtml delivery-only schema', () => {
 
   it('tells crawlers the Jackson Heights site is office/warehouse only', () => {
     expect(localBusiness.description).toMatch(/office and warehouse only/i);
-    expect(localBusiness.description).toMatch(/not a walk-in store/i);
+    expect(localBusiness.description).toMatch(/not a store. We only deliver/i);
     expect(localBusiness.areaServed).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: 'United States' }),

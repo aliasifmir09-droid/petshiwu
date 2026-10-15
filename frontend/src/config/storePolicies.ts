@@ -5,7 +5,7 @@ export const POLICY_EFFECTIVE_DATE = 'September 16, 2026';
 export const SELLER_OF_RECORD = 'Petshiwu';
 export const SELLER_ADDRESS = '37-68 74th St, Jackson Heights, NY 11372';
 export const SELLER_DISCLOSURE =
-  'Petshiwu is the seller of record for purchases made at petshiwu.com. We pack orders from our office and warehouse at 37-68 74th St, Jackson Heights, NY 11372. That address is not a walk-in store.';
+  'Petshiwu is the seller of record for purchases made at petshiwu.com. We pack orders from our office and warehouse at 37-68 74th St, Jackson Heights, NY 11372. That address is not a store. We only deliver.';
 
 export const RETURN_WINDOW_DAYS = 365;
 export const ORDER_CANCEL_WINDOW_HOURS = 2;

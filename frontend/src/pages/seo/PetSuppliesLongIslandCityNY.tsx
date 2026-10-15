@@ -9,7 +9,7 @@ const PetSuppliesLongIslandCityNY = () => (
     title="Same-Day Pet Supplies Long Island City — Order by 3 PM | Petshiwu"
     description="Same-day pet delivery in Long Island City. Order by 3 PM weekdays (1 PM weekends), before 11 PM. LIC, Hunters Point, Sunnyside. No autoship. Free over $49."
     h1="Same-Day Pet Supplies in Long Island City, Queens"
-    introContent="Petshiwu delivers tonight to Long Island City high-rises — LIC, Hunters Point, Sunnyside, Woodside. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. Not a walk-in store. No autoship. Free over $49."
+    introContent="Petshiwu delivers tonight to Long Island City high-rises — LIC, Hunters Point, Sunnyside, Woodside. Order by 3 PM weekdays (1 PM weekends) for delivery before 11 PM. Not a store. We only deliver. No autoship. Free over $49."
     problemPoints={[
       "Getting heavy pet food to high-rise apartments in LIC without a car",
       "Limited specialty pet stores in the immediate neighborhood",

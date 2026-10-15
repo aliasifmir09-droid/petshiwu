@@ -289,7 +289,7 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
         '@type': business.businessType || ['OnlineStore', 'LocalBusiness'],
         name: business.name,
         url: business.url,
-        description: business.description || 'Online pet store for food, treats, and supplies. Free shipping over $49.',
+        description: business.description || 'A pet delivery platform and company for food, treats, and supplies. Free shipping over $49.',
         telephone: business.telephone,
         address: {
           '@type': 'PostalAddress',

@@ -123,7 +123,7 @@ const ShippingPolicy = () => {
           </p>
           <p className="mt-2">
             <strong>Nationwide:</strong> the whole catalog ships in 2-5 business days. Shipping is $7 under $49 and free at $49, including NYC.
-            Does not ship to Alaska or Hawaii. We pack from our warehouse — it is not a walk-in store.
+            Does not ship to Alaska or Hawaii. We pack from our warehouse — it is not a store. We only deliver.
           </p>
         </section>
 

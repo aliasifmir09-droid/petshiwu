@@ -36,7 +36,7 @@ export const NYC_HUB_LINKS: Array<{
   {
     path: '/pet-supplies-queens-ny',
     title: 'Pet supplies Queens',
-    text: 'Packed in Jackson Heights. Delivery only — not a walk-in store.',
+    text: 'Packed in Jackson Heights. Delivery only — not a store. We only deliver.',
   },
 ];
 
@@ -47,7 +47,7 @@ export const NYC_HUB_ZIP_INTRO =
 
 export const NYC_HUB_NATIONWIDE_HEADING = 'Nationwide delivery in 2-5 business days';
 
-export const NYC_HUB_NATIONWIDE_BODY = `${NATIONWIDE_SOON_NOTE} Free shipping over $${TONIGHT.freeOver}. No autoship. Jackson Heights is warehouse and office, not a walk-in store.`;
+export const NYC_HUB_NATIONWIDE_BODY = `${NATIONWIDE_SOON_NOTE} Free shipping over $${TONIGHT.freeOver}. No autoship. Jackson Heights is warehouse and office, not a store. We only deliver.`;
 
 export const NYC_HUB_COMPARE_HEADING = 'Why NYC shoppers pick Petshiwü first';
 

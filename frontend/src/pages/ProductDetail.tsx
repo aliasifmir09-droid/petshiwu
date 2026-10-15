@@ -632,7 +632,7 @@ const ProductDetail = () => {
     'pet supplies',
     product.petType === 'dog' ? 'dog food' : '',
     product.petType === 'cat' ? 'cat food' : '',
-    'online pet store'
+    'pet delivery platform'
   ].filter(Boolean).join(', ');
 
   // Build product URL

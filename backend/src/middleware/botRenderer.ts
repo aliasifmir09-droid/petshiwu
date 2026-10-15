@@ -230,7 +230,7 @@ const removeStaticHero = (html: string): string => {
 const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   '/': {
     title: 'Petshiwu | Pet Food & Supplies – Free Shipping $49+, No Autoship',
-    description: '4,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. The pet store that ships nationwide — and delivers same-day in NYC. Free shipping over $49. Nationwide delivery in 2-5 business days. No autoship.',
+    description: '4,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. The pet delivery platform that ships nationwide — and delivers same-day in NYC. Free shipping over $49. Nationwide delivery in 2-5 business days. No autoship.',
   },
   '/products': {
     title: 'Pet food & supplies – Ships nationwide | Petshiwu',
@@ -265,8 +265,8 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     description: 'Shop food, cages, bedding, and toys for hamsters, rabbits, guinea pigs, and more. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49.',
   },
   '/about': {
-    title: 'About Petshiwu — Online Pet Store',
-    description: 'Petshiwu is an online pet store for food, treats, and supplies. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse only — not a walk-in store.',
+    title: 'About Petshiwu — Pet Delivery Platform',
+    description: 'Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse only — not a store. We only deliver.',
   },
   '/our-promise': {
     title: 'Our Promise | Petshiwu',
@@ -278,7 +278,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/from-queens': {
     title: 'How We Ship | Petshiwu',
-    description: 'Petshiwu is an online pet store. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse only — not a walk-in store.',
+    description: 'Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse only — not a store. We only deliver.',
   },
   '/editorial-standards': {
     title: 'How We Write Pet Care Guides | Petshiwu',
@@ -286,7 +286,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/contact': {
     title: 'Contact Us | Petshiwu',
-    description: 'Contact Petshiwu about orders and delivery. Jackson Heights is office and warehouse only — not a walk-in store.',
+    description: 'Contact Petshiwu about orders and delivery. Jackson Heights is office and warehouse only — not a store. We only deliver.',
   },
   '/faq': {
     title: 'Frequently Asked Questions | Petshiwu',
@@ -404,8 +404,8 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     description: 'Bird food and supplies delivered anywhere in NYC. Seed mixes, pellets, treats, and accessories for parakeets, cockatiels, parrots, and wild birds. Free shipping over $49.',
   },
   '/online-pet-store-nyc': {
-    title: 'Online Pet Store for NYC — 4,000+ Products | Petshiwu',
-    description: 'NYC\'s online pet store with 4,000+ products for dogs, cats, birds, fish & more. Fast delivery across all 5 boroughs. Free shipping on orders over $49.',
+    title: 'Pet Delivery for NYC — 4,000+ Products | Petshiwu',
+    description: 'NYC pet delivery from our platform with 4,000+ products for dogs, cats, birds, fish & more. Fast delivery across all 5 boroughs. Free shipping on orders over $49.',
   },
   '/affordable-pet-food-nyc': {
     title: 'Affordable Pet Food & Supplies NYC — Free Delivery Over $49 | Petshiwu',
@@ -428,8 +428,8 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     description: 'Keep your pet stocked with their favorite food delivered in NYC. Easy reordering, no subscription traps. Free delivery over $49. Queens, Brooklyn, Manhattan, Bronx, Staten Island.',
   },
   '/pet-store-queens-ny': {
-    title: 'Pet Store Queens NY — Delivery to Jackson Heights, Flushing & All of Queens | Petshiwu',
-    description: 'Queens\' premier online pet store. Free delivery throughout Queens — Jackson Heights, Flushing, Astoria, Forest Hills, Jamaica and more. 4,000+ products for dogs, cats, birds, fish and more.',
+    title: 'Pet Delivery Queens NY — Delivery to Jackson Heights, Flushing & All of Queens | Petshiwu',
+    description: 'Queens pet delivery from our platform. Free delivery throughout Queens — Jackson Heights, Flushing, Astoria, Forest Hills, Jamaica and more. 4,000+ products for dogs, cats, birds, fish and more.',
   },
   '/pet-supplies-near-me-nyc': {
     title: 'Pet Supplies Near Me — NYC Delivery to Your Door | Petshiwu',
@@ -471,11 +471,11 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   // ── NYC Borough Landing Pages ─────────────────────────────────────────────
   '/pet-supplies-queens-ny': {
     title: 'Pet Supplies Queens NY — Delivery to Flushing, Astoria, Jackson Heights & All of Queens | Petshiwu',
-    description: "Queens' online pet store, based in Jackson Heights. Fast delivery to Flushing, Astoria, Forest Hills, Jamaica, Bayside & every Queens neighborhood. 4,000+ products, free shipping over $49.",
+    description: "Queens' pet delivery platform, based in Jackson Heights. Fast delivery to Flushing, Astoria, Forest Hills, Jamaica, Bayside & every Queens neighborhood. 4,000+ products, free shipping over $49.",
   },
   '/pet-supplies-brooklyn-ny': {
     title: 'Pet Supplies Brooklyn NY — Delivery to Williamsburg, Park Slope & All of Brooklyn | Petshiwu',
-    description: "Brooklyn's online pet store. Fast delivery to Williamsburg, Park Slope, Bushwick, Flatbush, Bay Ridge & every Brooklyn neighborhood. 4,000+ products, free shipping over $49.",
+    description: "Brooklyn's pet delivery platform. Fast delivery to Williamsburg, Park Slope, Bushwick, Flatbush, Bay Ridge & every Brooklyn neighborhood. 4,000+ products, free shipping over $49.",
   },
   '/pet-supplies-manhattan-ny': {
     title: 'Pet Supplies Manhattan NYC — Delivery to Upper West Side, Harlem & All of Manhattan | Petshiwu',
@@ -490,7 +490,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     description: 'Staten Island pet supply delivery. St. George, Tottenville, New Dorp, Stapleton & all neighborhoods. 4,000+ products from top brands. Free shipping on orders over $49.',
   },
   '/pet-supplies-jackson-heights-ny': {
-    title: "Pet Supplies Jackson Heights NY — Local Delivery from Your Neighborhood Pet Store | Petshiwu",
+    title: "Pet Supplies Jackson Heights NY — Local Delivery from Your Neighborhood Delivery Company | Petshiwu",
     description: "Petshiwu is based in Jackson Heights, Queens. Local pet supply delivery to Jackson Heights, Elmhurst, Woodside & surrounding neighborhoods. 4,000+ products. Free shipping over $49.",
   },
   '/pet-supplies-williamsburg-brooklyn-ny': {
@@ -592,7 +592,7 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
       const productSlug = segments[segments.length - 1];
       h1Text = slugToTitle(productSlug);
     } else {
-      h1Text = 'The pet store that ships nationwide — and delivers same-day in NYC.';
+      h1Text = 'The pet delivery platform that ships nationwide — and delivers same-day in NYC.';
     }
     // For homepage, keep the branded H1 — don't replace it
     if (cleanPath !== '/') {
@@ -1750,7 +1750,7 @@ export const buildHomepageHtml = (template: string, products: any[] = []): strin
       width: 512,
       height: 512,
     },
-    description: 'Petshiwu is an online pet store for food, treats, and supplies. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse and office only — not a walk-in store.',
+    description: 'Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse and office only — not a store. We only deliver.',
     telephone: '+18002592605',
     email: 'support@petshiwu.com',
     address: {
@@ -1794,7 +1794,7 @@ export const buildHomepageHtml = (template: string, products: any[] = []): strin
     url: BASE,
     image: `${BASE}/og-image.jpg`,
     logo: `${BASE}/logo-square-512.png`,
-    description: 'Nationwide delivery in 2-5 business days. Same-day in New York City for locally stocked items. Jackson Heights is office and warehouse only — not a walk-in store.',
+    description: 'Nationwide delivery in 2-5 business days. Same-day in New York City for locally stocked items. Jackson Heights is office and warehouse only — not a store. We only deliver.',
     telephone: '+18002592605',
     email: 'support@petshiwu.com',
     address: {
