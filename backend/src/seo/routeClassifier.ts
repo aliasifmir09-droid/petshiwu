@@ -18,6 +18,7 @@ const PET_TYPES = new Set(['dog', 'cat', 'bird', 'fish', 'reptile', 'small-pet',
 // Real storefront pages with unique copy in App.tsx. These were previously
 // noindexed by the doorway heuristic because the slug contains "food" / "nyc".
 export const INDEXABLE_LANDING_PATHS = new Set([
+  '/halloween',
   '/best-dog-food-sensitive-stomach-diarrhea',
   '/high-protein-dog-food-picky-eaters',
   '/durable-dog-toys-aggressive-chewers',
