@@ -385,6 +385,33 @@ describe('product offer price in first-wave HTML', () => {
     expect(html).toContain('"@type":"Offer"');
     expect(html).toContain('In stock · free ship $49+');
     expect(html).not.toContain('... | Petshiwu');
+    expect(html).toContain('Same-day delivery in NYC. Delivered in 2-5 business days across NY, NJ & CT.');
+    expect(html).toContain('Not available for this address yet outside those states.');
+    expect(html).not.toContain('Not eligible for same-day delivery');
+  });
+
+  it('prints the nationwide window and $7 offer for a TopDawg product', () => {
+    const html = buildProductHtml(
+      template,
+      {
+        name: 'Durable Rope Tug Toy',
+        slug: 'durable-rope-tug-toy',
+        brand: 'TopDawg',
+        basePrice: 12,
+        inStock: true,
+        tags: ['topdawg'],
+        petType: 'dog',
+        category: { slug: 'toys', name: 'Toys' },
+        description: 'A rope toy.',
+      },
+      'durable-rope-tug-toy'
+    );
+    expect(html).toContain(
+      'Not eligible for same-day delivery - ships nationwide, arrives in 3-5 business days (flat $7)'
+    );
+    expect(html).toContain('Does not ship to Alaska or Hawaii');
+    expect(html).toContain('"value":"7"');
+    expect(html).not.toContain('Delivered in 2-5 business days across NY, NJ');
   });
 });
 

@@ -58,10 +58,10 @@ describe('two delivery lanes', () => {
     expect(pricing.totalPrice).toBe(Number((40 + 7).toFixed(2)));
   });
 
-  test('non-NYC + one local item is rejected', async () => {
+  test('a local item outside NY, NJ, and CT is refused without a crash', async () => {
     const quote = quoteCartDelivery({
-      state: 'NJ',
-      zipCode: '07030',
+      state: 'CA',
+      zipCode: '90001',
       country: 'USA',
       items: [
         { tags: ['topdawg'], name: 'Dropship toy', price: 20, quantity: 1 },
@@ -70,7 +70,7 @@ describe('two delivery lanes', () => {
     });
     expect(quote.status).toBe(400);
     if (quote.status === 400) {
-      expect(quote.message).toMatch(/NYC same-day only/);
+      expect(quote.message).toMatch(/not available for this address yet/i);
       expect(quote.message).toMatch(/Queens kibble/);
     }
 
@@ -84,14 +84,14 @@ describe('two delivery lanes', () => {
         undefined,
         0,
         undefined,
-        'NJ',
-        '07030',
+        'CA',
+        '90001',
         'USA'
       )
-    ).rejects.toThrow(/NYC same-day only/);
+    ).rejects.toThrow(/not available for this address yet/i);
   });
 
-  test('NYC mixed cart keeps the $6 / free-over-$49 rule', async () => {
+  test('NYC mixed cart adds the TopDawg flat fee to the same-day fee', async () => {
     const under = quoteCartDelivery({
       state: 'NY',
       zipCode: '11372',
@@ -102,7 +102,7 @@ describe('two delivery lanes', () => {
       ],
     });
     expect(under.status).toBe(200);
-    if (under.status === 200) expect(under.shippingPrice).toBe(6);
+    if (under.status === 200) expect(under.shippingPrice).toBe(13);
 
     const free = quoteCartDelivery({
       state: 'New York',
@@ -113,7 +113,7 @@ describe('two delivery lanes', () => {
       ],
     });
     expect(free.status).toBe(200);
-    if (free.status === 200) expect(free.shippingPrice).toBe(0);
+    if (free.status === 200) expect(free.shippingPrice).toBe(7);
 
     findById.mockImplementation((id: string) => Promise.resolve(id === local._id ? local : topDawg));
     const pricing = await calculateTrustedOrderPricing(
@@ -128,7 +128,7 @@ describe('two delivery lanes', () => {
       '11372',
       'USA'
     );
-    expect(pricing.shippingPrice).toBe(6);
+    expect(pricing.shippingPrice).toBe(13);
     expect(pricing.items.map((item) => item.product)).toEqual([topDawg._id, local._id]);
   });
 
@@ -153,6 +153,59 @@ describe('two delivery lanes', () => {
       items: item,
     });
     expect(california.status).toBe(200);
+  });
+
+  test('tri-state local carts are $7 under $49 and free at $49', () => {
+    const hoboken = quoteCartDelivery({
+      state: 'NJ',
+      zipCode: '07030',
+      country: 'USA',
+      items: [{ tags: ['dog'], name: 'Queens kibble', price: 30, quantity: 1 }],
+    });
+    expect(hoboken.status).toBe(200);
+    if (hoboken.status === 200) {
+      expect(hoboken.lane).toBe('tri_state');
+      expect(hoboken.shippingPrice).toBe(7);
+    }
+
+    const hartford = quoteCartDelivery({
+      state: 'CT',
+      zipCode: '06103',
+      country: 'USA',
+      items: [{ tags: ['dog'], name: 'Queens kibble', price: 49, quantity: 1 }],
+    });
+    expect(hartford.status).toBe(200);
+    if (hartford.status === 200) expect(hartford.shippingPrice).toBe(0);
+
+    const nycLocal = quoteCartDelivery({
+      state: 'NY',
+      zipCode: '10001',
+      country: 'USA',
+      items: [{ tags: ['dog'], name: 'Queens kibble', price: 20, quantity: 1 }],
+    });
+    expect(nycLocal.status).toBe(200);
+    if (nycLocal.status === 200) expect(nycLocal.shippingPrice).toBe(6);
+
+    const topDawgNj = quoteCartDelivery({
+      state: 'NJ',
+      zipCode: '07030',
+      country: 'USA',
+      items: [{ tags: ['topdawg'], name: 'Dropship toy', price: 80, quantity: 1 }],
+    });
+    expect(topDawgNj.status).toBe(200);
+    if (topDawgNj.status === 200) expect(topDawgNj.shippingPrice).toBe(7);
+
+    const mixed = quoteCartDelivery({
+      state: 'NJ',
+      zipCode: '07030',
+      country: 'USA',
+      items: [
+        { tags: ['dog'], name: 'Queens kibble', price: 20, quantity: 1 },
+        { tags: ['topdawg'], name: 'Dropship toy', price: 10, quantity: 1 },
+      ],
+    });
+    expect(mixed.status).toBe(200);
+    if (mixed.status === 200) expect(mixed.shippingPrice).toBe(14);
   });
 
   test('international addresses stay rejected', () => {

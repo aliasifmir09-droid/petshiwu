@@ -8,6 +8,7 @@ import {
   HOME_SLOGAN_SUPPORT,
 } from '@/data/brandStories';
 import { FIRST_ORDER_CODE } from '@/config/publicPromos';
+import { HERO_H1 } from '@/utils/deliveryZones';
 
 const HomeHeroSlogans = () => {
   return (
@@ -20,9 +21,7 @@ const HomeHeroSlogans = () => {
                 {FIRST_ORDER_CODE}
               </p>
               <h1 className="mt-1.5 text-3xl sm:text-4xl font-extrabold leading-[0.95] tracking-tight">
-                20% off{' '}
-                <br />
-                first order.
+                {HERO_H1}
               </h1>
               <p className="mt-2 text-sm text-white/80 max-w-xs">{HOME_SLOGAN_SUPPORT}</p>
               <div className="mt-4">

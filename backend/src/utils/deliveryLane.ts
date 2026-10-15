@@ -1,15 +1,22 @@
 import { isNycShippingAddress } from './nycDelivery';
+import {
+  DELIVERY_ZONE,
+  LOCAL_UNAVAILABLE_MESSAGE,
+  NATIONWIDE_SHIPPING_COST,
+  combineDeliveryFees,
+  isTopDawgTags as zoneIsTopDawgTags,
+  resolveDeliveryZone,
+} from './deliveryZones';
 
 export const TOPDAWG_TAG = 'topdawg';
-export const NATIONWIDE_SHIPPING_COST = 7;
+export { NATIONWIDE_SHIPPING_COST };
 export type DeliveryLane = 'local' | 'nationwide';
-export type ShippingLane = 'nyc' | 'nationwide';
+export type ShippingLane = 'nyc' | 'tri_state' | 'nationwide';
 
-export const LOCAL_ITEM_NATIONWIDE_MESSAGE =
-  'Some items in your cart are NYC same-day only and cannot ship nationwide. Remove those items or use a New York City address.';
+export const LOCAL_ITEM_NATIONWIDE_MESSAGE = LOCAL_UNAVAILABLE_MESSAGE;
 
 export const INTERNATIONAL_DELIVERY_MESSAGE =
-  'We ship inside the United States. Local items are NYC same-day only. Shipped items arrive in 3-5 business days.';
+  'We ship inside the United States. Local items deliver same-day in NYC or in 2-5 business days across NY, NJ, and CT. Shipped items arrive in 3-5 business days.';
 
 export const EXCLUDED_SHIPPING_MESSAGE = 'Does not ship to Alaska or Hawaii.';
 
@@ -39,7 +46,7 @@ export class DeliveryAreaError extends Error {
 }
 
 export function isTopDawgTags(tags?: readonly string[] | null): boolean {
-  return Array.isArray(tags) && tags.some((tag) => String(tag).trim().toLowerCase() === TOPDAWG_TAG);
+  return zoneIsTopDawgTags(tags);
 }
 
 export function deliveryLaneFromTags(tags?: readonly string[] | null): DeliveryLane {
@@ -72,28 +79,35 @@ export function shippingLaneForCart(input: {
   if (isAlaskaOrHawaiiAddress(input.state, input.zipCode)) {
     throw new DeliveryAreaError(EXCLUDED_SHIPPING_MESSAGE);
   }
-  if (isNycShippingAddress(input.state || '', input.zipCode || '')) {
+  const localItems = input.items.filter((item) => !isTopDawgTags(item.tags));
+  if (localItems.length === 0 && input.items.length > 0) return 'nationwide';
+  const zone = resolveDeliveryZone(input, { tags: [] });
+  if (zone === DELIVERY_ZONE.SAME_DAY_NYC && isNycShippingAddress(input.state || '', input.zipCode || '')) {
     return 'nyc';
   }
-  const localItems = input.items.filter((item) => !isTopDawgTags(item.tags));
-  if (input.items.length === 0 || localItems.length > 0) {
-    const names = localItems.map((item) => item.name).filter(Boolean).slice(0, 3) as string[];
-    const named = names.length
-      ? `${names.join(', ')} ${names.length === 1 ? 'is' : 'are'} NYC same-day only. `
-      : '';
-    throw new DeliveryAreaError(`${named}${LOCAL_ITEM_NATIONWIDE_MESSAGE}`);
-  }
-  return 'nationwide';
+  if (zone === DELIVERY_ZONE.TRI_STATE) return 'tri_state';
+  if (zone === DELIVERY_ZONE.SAME_DAY_NYC) return 'nyc';
+  const names = localItems.map((item) => item.name).filter(Boolean).slice(0, 3) as string[];
+  const named = names.length ? `${names.join(', ')}: ` : '';
+  throw new DeliveryAreaError(`${named}${LOCAL_UNAVAILABLE_MESSAGE}`);
 }
 
 export function shippingPriceForLane(
   itemsPrice: number,
   lane: ShippingLane,
-  options: { freeByThreshold: boolean; couponWaivesShipping: boolean }
+  options: { freeByThreshold: boolean; couponWaivesShipping: boolean; hasNationwide?: boolean }
 ): number {
-  if (lane === 'nationwide') return NATIONWIDE_SHIPPING_COST;
-  if (options.couponWaivesShipping || options.freeByThreshold) return 0;
-  return 6;
+  const hasNationwide = options.hasNationwide ?? lane === 'nationwide';
+  const hasLocal = lane !== 'nationwide';
+  const zone =
+    lane === 'tri_state' ? DELIVERY_ZONE.TRI_STATE : lane === 'nationwide' ? DELIVERY_ZONE.NATIONWIDE : DELIVERY_ZONE.SAME_DAY_NYC;
+  return combineDeliveryFees({
+    zone,
+    merchandiseSubtotal: itemsPrice,
+    hasNationwide,
+    hasLocal,
+    couponWaivesShipping: options.couponWaivesShipping,
+  }).shippingPrice;
 }
 
 /** Gate used by both order-creation paths. 200 means the address can take this cart. */
@@ -109,12 +123,14 @@ export function quoteCartDelivery(input: {
     const itemsPrice = Number(
       input.items.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0).toFixed(2)
     );
+    const hasNationwide = input.items.some((item) => isTopDawgTags(item.tags));
     return {
       status: 200,
       lane,
       shippingPrice: shippingPriceForLane(itemsPrice, lane, {
         freeByThreshold: itemsPrice >= 49,
         couponWaivesShipping: Boolean(input.couponWaivesShipping),
+        hasNationwide,
       }),
     };
   } catch (error) {

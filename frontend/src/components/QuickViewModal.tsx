@@ -14,6 +14,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { availableCartStock } from '@/utils/cartStock';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
 import { EXCLUDED_SHIPPING_MESSAGE, isNationwideProduct, productDeliveryPromise } from '@/utils/deliveryLane';
+import { DELIVERY_ZONE, LOCAL_UNAVAILABLE_MESSAGE, TRI_STATE_FEE_NOTE, TRI_STATE_PAGE_PROMISE, resolveDeliveryZone } from '@/utils/deliveryZones';
 import { useSavedDeliveryZip } from '@/hooks/useSavedDeliveryZip';
 
 interface QuickViewModalProps {
@@ -224,12 +225,19 @@ const QuickViewModal = ({ productSlug, isOpen, onClose }: QuickViewModalProps) =
                       <p className="text-sm font-semibold text-[#1E3A8A]">{deliveryPromise}</p>
                       <p className="text-xs text-slate-500">{EXCLUDED_SHIPPING_MESSAGE}</p>
                     </>
+                  ) : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.TRI_STATE ? (
+                    <>
+                      <p className="text-sm font-semibold text-[#1E3A8A]">{TRI_STATE_PAGE_PROMISE}</p>
+                      <p className="text-xs text-slate-500">{TRI_STATE_FEE_NOTE}</p>
+                    </>
+                  ) : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.UNAVAILABLE ? (
+                    <p className="text-sm font-semibold text-[#1E3A8A]">{LOCAL_UNAVAILABLE_MESSAGE}</p>
                   ) : (
                     <>
                       <p className="text-green-700 font-medium">{inStockLabel(true)}</p>
                       <p className="text-sm font-semibold text-[#1E3A8A]">{deliveryPromise}</p>
                       <p className="text-xs text-slate-500">
-                        This selection is NYC same-day only. Free shipping over $49 in NYC.
+                        Same-day in New York City when you order by cutoff.
                       </p>
                     </>
                   )

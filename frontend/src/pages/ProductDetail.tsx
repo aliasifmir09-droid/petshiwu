@@ -28,8 +28,8 @@ import { decodeHtmlEntities } from '@/utils/htmlUtils';
 import ProductVariantPicker from '@/components/ProductVariantPicker';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
-import { isNycDeliveryZip, isValidZip } from '@/utils/deliveryZip';
 import { EXCLUDED_SHIPPING_MESSAGE, isNationwideProduct, productDeliveryPromise } from '@/utils/deliveryLane';
+import { DELIVERY_ZONE, LOCAL_UNAVAILABLE_MESSAGE, TRI_STATE_FEE_NOTE, TRI_STATE_PAGE_PROMISE, resolveDeliveryZone } from '@/utils/deliveryZones';
 import { useSavedDeliveryZip } from '@/hooks/useSavedDeliveryZip';
 
 // Lazy load heavy dependencies
@@ -864,6 +864,13 @@ const ProductDetail = () => {
                   </p>
                   <p className="text-xs text-slate-600 mt-0.5">{EXCLUDED_SHIPPING_MESSAGE}</p>
                 </div>
+              ) : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.TRI_STATE ? (
+                <div>
+                  <p className="text-sm font-semibold text-[#1E3A8A]">{TRI_STATE_PAGE_PROMISE}</p>
+                  <p className="text-xs text-slate-600 mt-0.5">{TRI_STATE_FEE_NOTE}</p>
+                </div>
+              ) : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.UNAVAILABLE ? (
+                <p className="text-sm font-semibold text-[#1E3A8A]">{LOCAL_UNAVAILABLE_MESSAGE}</p>
               ) : (
                 <div>
                   <div className="flex items-center gap-2">
@@ -874,7 +881,7 @@ const ProductDetail = () => {
                     {productDeliveryPromise(product, savedZip)}
                   </p>
                   <p className="text-xs text-slate-600 mt-0.5">
-                    This selection is NYC same-day only. It cannot ship outside New York City.
+                    Same-day in New York City when you order by cutoff.
                   </p>
                 </div>
               )
@@ -886,7 +893,7 @@ const ProductDetail = () => {
             )}
           </div>
 
-          {isReadyToShip && !isNationwideProduct(product) ? <TonightPromiseCard variant="pdp" /> : null}
+          {isReadyToShip && !isNationwideProduct(product) && resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.SAME_DAY_NYC ? <TonightPromiseCard variant="pdp" /> : null}
 
           {/* Actions */}
           <div className="mb-8">
@@ -1016,16 +1023,20 @@ const ProductDetail = () => {
               <Truck className="text-primary-600" size={24} />
               <div>
                 <p className="font-medium">
-                  {isNationwideProduct(product) && savedZip && isValidZip(savedZip) && !isNycDeliveryZip(savedZip)
+                  {isNationwideProduct(product)
                     ? 'Flat $7 shipping'
-                    : 'Free shipping over $49'}
+                    : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.TRI_STATE
+                      ? 'Free delivery at $49+'
+                      : 'Free shipping over $49'}
                 </p>
                 <p className="text-sm text-gray-600">
                   {isNationwideProduct(product)
-                    ? savedZip && isValidZip(savedZip) && !isNycDeliveryZip(savedZip)
-                      ? 'Shipped items outside NYC. The $49 rule does not apply.'
-                      : `Free over $${FREE_SHIPPING_THRESHOLD} in NYC. Flat $7 outside NYC.`
-                    : `On NYC orders over $${FREE_SHIPPING_THRESHOLD}`}
+                    ? 'Arrives in 3-5 business days. The $49 rule does not apply.'
+                    : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.TRI_STATE
+                      ? TRI_STATE_FEE_NOTE
+                      : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.UNAVAILABLE
+                        ? LOCAL_UNAVAILABLE_MESSAGE
+                        : `On NYC orders over $${FREE_SHIPPING_THRESHOLD}`}
                 </p>
               </div>
             </div>

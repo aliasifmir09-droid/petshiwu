@@ -130,18 +130,18 @@ export function collectionSearchTitle(opts: {
     '';
 
   if (opts.featured) {
-    return 'Featured pet food & supplies – Same-day NYC | Petshiwu';
+    return 'Featured pet food & supplies – Fast delivery across America | Petshiwu';
   }
   if (category && petLabel) {
-    return `${category} for ${petLabel.toLowerCase()}s – Same-day NYC | Petshiwu`;
+    return `${category} for ${petLabel.toLowerCase()}s – Fast delivery across America | Petshiwu`;
   }
   if (category) {
-    return `${category} – Same-day NYC | Petshiwu`;
+    return `${category} – Fast delivery across America | Petshiwu`;
   }
-  if (pet === 'dog') return 'Dog food & supplies – Same-day NYC | Petshiwu';
-  if (pet === 'cat') return 'Cat food & supplies – Same-day NYC | Petshiwu';
-  if (petLabel) return `${petLabel} supplies – Same-day NYC | Petshiwu`;
-  return 'Pet food & supplies – Same-day NYC | Petshiwu';
+  if (pet === 'dog') return 'Dog food & supplies – Fast delivery across America | Petshiwu';
+  if (pet === 'cat') return 'Cat food & supplies – Fast delivery across America | Petshiwu';
+  if (petLabel) return `${petLabel} supplies – Fast delivery across America | Petshiwu`;
+  return 'Pet food & supplies – Fast delivery across America | Petshiwu';
 }
 
 /**

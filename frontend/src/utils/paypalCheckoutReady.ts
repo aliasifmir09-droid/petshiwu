@@ -1,11 +1,10 @@
-import { isDeliverableShippingAddress, isValidZip, OUT_OF_AREA_DELIVERY_MESSAGE } from '@/utils/deliveryZip';
+import { isValidZip, OUT_OF_AREA_DELIVERY_MESSAGE } from '@/utils/deliveryZip';
 import {
   EXCLUDED_SHIPPING_MESSAGE,
   INTERNATIONAL_DELIVERY_MESSAGE,
-  cartShipsNationwide,
   isAlaskaOrHawaiiAddress,
+  isCartDeliverable,
   isUnitedStatesCountry,
-  localItemsBlockedOutsideNyc,
   type DeliveryLane,
 } from '@/utils/deliveryLane';
 
@@ -61,12 +60,6 @@ export const paypalCheckoutBlocker = ({
     zipCode: shippingAddress.zipCode,
     country,
   };
-  if (cartShipsNationwide(laneItems, address)) return null;
-  if (
-    !isDeliverableShippingAddress(shippingAddress.state, shippingAddress.zipCode || '') ||
-    localItemsBlockedOutsideNyc(laneItems, address)
-  ) {
-    return OUT_OF_AREA_DELIVERY_MESSAGE;
-  }
-  return null;
+  if (isCartDeliverable(laneItems, address)) return null;
+  return OUT_OF_AREA_DELIVERY_MESSAGE;
 };

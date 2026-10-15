@@ -3,10 +3,10 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const MESSAGES = [
   { text: 'FREEDOM20 — 20% off first order, max $10. No autoship.' },
-  { text: 'Free shipping on orders $49+' },
-  { text: 'Same-day NYC · PayPal or card · 365-day returns' },
+  { text: 'Free shipping over $49 on local orders' },
+  { text: 'Same-day NYC · 2-5 days NY, NJ & CT · nationwide on thousands of items' },
   { text: 'Repeat orders: 10% off, max $10. No subscription.' },
-  { text: 'Currently delivering in NYC · nationwide shipping opens soon' },
+  { text: 'Fast delivery across America · PayPal or card · 365-day returns' },
   { text: 'Call support 24/7 — +1 (800) 259-2605' },
 ]
 

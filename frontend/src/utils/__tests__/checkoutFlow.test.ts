@@ -16,17 +16,17 @@ describe('checkoutFlow', () => {
   test('guest checkout needs a valid NYC address and email to be delivery-ready', () => {
     expect(isCheckoutDeliveryReady(nycAddress, false)).toBe(true);
     expect(isCheckoutDeliveryReady({ ...nycAddress, email: '' }, false)).toBe(false);
-    expect(isCheckoutDeliveryReady({ ...nycAddress, zipCode: '07030' }, false)).toBe(false);
+    expect(isCheckoutDeliveryReady({ ...nycAddress, state: 'CA', zipCode: '90001' }, false)).toBe(false);
     expect(isCheckoutDeliveryReady({ ...nycAddress, street: '' }, true)).toBe(false);
   });
 
-  test('tri-state ZIPs stay blocked; NYC ZIPs unlock checkout', () => {
+  test('tri-state addresses can check out; California local carts cannot', () => {
     expect(
       isCheckoutDeliveryReady(
         { ...nycAddress, city: 'Hicksville', zipCode: '11801' },
         false
       )
-    ).toBe(false);
+    ).toBe(true);
     expect(
       isCheckoutDeliveryReady(
         { ...nycAddress, city: 'Jamaica', zipCode: '11432' },
@@ -38,20 +38,20 @@ describe('checkoutFlow', () => {
         { ...nycAddress, city: 'Hoboken', state: 'NJ', zipCode: '07030' },
         false
       )
-    ).toBe(false);
+    ).toBe(true);
     expect(
       isCheckoutDeliveryReady(
-        { ...nycAddress, city: 'Greenwich', state: 'CT', zipCode: '06830' },
+        { ...nycAddress, city: 'Hartford', state: 'CT', zipCode: '06103' },
         false
       )
-    ).toBe(false);
+    ).toBe(true);
     expect(
       isCheckoutDeliveryReady(
         { ...nycAddress, city: 'New Haven', state: 'CT', zipCode: '06511' },
         false
       )
-    ).toBe(false);
-    expect(isCheckoutDeliveryReady({ ...nycAddress, zipCode: '94105' }, false)).toBe(false);
+    ).toBe(true);
+    expect(isCheckoutDeliveryReady({ ...nycAddress, state: 'CA', city: 'Los Angeles', zipCode: '90001' }, false)).toBe(false);
   });
 
   test('a non-NYC address can check out only when every item is TopDawg', () => {
@@ -62,7 +62,7 @@ describe('checkoutFlow', () => {
       { product: { tags: ['dog'], name: 'Queens kibble' } },
     ];
     expect(isCheckoutDeliveryReady(hoboken, false, topDawg)).toBe(true);
-    expect(isCheckoutDeliveryReady(hoboken, false, mixed)).toBe(false);
+    expect(isCheckoutDeliveryReady(hoboken, false, mixed)).toBe(true);
     expect(isCheckoutDeliveryReady(nycAddress, false, mixed)).toBe(true);
     expect(isCheckoutDeliveryReady({ ...nycAddress, city: 'Anchorage', state: 'AK', zipCode: '99501' }, false, topDawg)).toBe(false);
     expect(isCheckoutDeliveryReady({ ...nycAddress, city: 'Honolulu', state: 'HI', zipCode: '96813' }, false, topDawg)).toBe(false);

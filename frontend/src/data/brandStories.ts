@@ -18,13 +18,13 @@ export type BrandStory = {
 };
 
 export const HOME_SLOGAN = '20% off first order.';
-export const HOME_SLOGAN_SUPPORT = 'Max $10 · no autoship. Same-day NYC.';
+export const HOME_SLOGAN_SUPPORT = 'Max $10 · no autoship. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items.';
 export const HOME_HERO_IMAGE = '/hero-side-family.webp';
 export const HOME_HERO_IMAGE_JPG = '/hero-side-family.jpg';
 export const HOME_HERO_IMAGE_WIDE = '/hero-wide-family.webp';
 export const HOME_HERO_IMAGE_WIDE_JPG = '/hero-wide-family.jpg';
 export const NATIONWIDE_SOON_NOTE =
-  'Currently delivering in NYC. Shipped items go nationwide in 3-5 business days.';
+  'Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items.';
 export const HOME_OFFER_STRIP =
   'FREEDOM20 · 20% off first order, max $10 · No autoship · Free shipping over $49';
 
@@ -65,9 +65,9 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
     slogan: 'Fair prices. Fast delivery. No autoship.',
     title: 'Our Promise | Petshiwu',
     description:
-      'Petshiwu is an online pet store for food, treats, and supplies. Free shipping over $49. No autoship. 365-day returns. Currently delivering in NYC, with nationwide shipping in 3-5 business days on shipped items.',
+      'Petshiwu is an online pet store for food, treats, and supplies. Free shipping over $49 on local orders. No autoship. 365-day returns. Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items.',
     intro:
-      'Shop the brands you already buy, at a fair price, without a subscription. Free shipping over $49. Unused items come back for 365 days. We are delivering in NYC now, and shipped items go nationwide in 3-5 business days.',
+      'Shop the brands you already buy, at a fair price, without a subscription. Free shipping over $49 on local orders. Unused items come back for 365 days. Same-day in NYC, 2-5 business days across NY, NJ, and CT, and nationwide shipping in 3-5 business days on shipped items.',
     image: '/hero-side-family.webp',
     imageJpg: '/hero-side-family.jpg',
     imageWide: '/hero-wide-family.webp',
@@ -127,9 +127,9 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
     slogan: 'Online pet store. We bring it to your door.',
     title: 'How We Ship | Petshiwu',
     description:
-      'Petshiwu is an online pet store. Currently delivering in NYC, with nationwide shipping in 3-5 business days on shipped items. Office and warehouse only — not a walk-in store. Free shipping over $49. No autoship.',
+      'Petshiwu is an online pet store. Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items. Office and warehouse only — not a walk-in store. Free shipping over $49 on local orders. No autoship.',
     intro:
-      'Every order is packed at our warehouse and sent to your door. We are delivering in NYC today. Shipped items go nationwide in 3-5 business days — same brands, same 24/7 phone line, same 365-day returns.',
+      'Every order is packed at our warehouse and sent to your door. Same-day in NYC, 2-5 business days across NY, NJ, and CT, and shipped items go nationwide in 3-5 business days — same brands, same 24/7 phone line, same 365-day returns.',
     image: '/hero-side-delivery.webp',
     imageJpg: '/hero-side-delivery.jpg',
     imageWide: '/hero-wide-delivery.webp',
@@ -141,8 +141,8 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
         body: 'You cannot walk in. That keeps the line for packing, not browsing. Order online and we bring it to your door.',
       },
       {
-        heading: 'NYC same-day, and shipped items nationwide',
-        body: 'Same-day in the five boroughs when you order by cutoff (3 PM weekdays, 1 PM weekends). Shipped items go nationwide in 3-5 business days. Free over $49. Flat $6 under that.',
+        heading: 'Same-day NYC, tri-state, and nationwide shipped items',
+        body: 'Same-day in the five boroughs when you order by cutoff (3 PM weekdays, 1 PM weekends). Locally stocked items are delivered in 2-5 business days across NY, NJ, and CT ($7 under $49, free at $49+). Shipped items go nationwide in 3-5 business days for a flat $7.',
       },
       {
         heading: 'One standard, every order',

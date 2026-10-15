@@ -5,7 +5,7 @@ export const NEXT_DAY_ZIP_COUNT = Object.keys(NEXT_DAY_ZIPS).length;
 export function buildNextDayZipDirectoryHtml(): string {
   return `<div>
 <h1>Same-day delivery in New York City</h1>
-<p>Petshiwü delivers same-day across Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. In-stock products are eligible for same-day delivery in NYC. Local items are NYC same-day only, including New Jersey and Connecticut addresses. Nationwide shipping in 3-5 business days on shipped items.</p>
+<p>Petshiwü delivers same-day across Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. In-stock products are eligible for same-day delivery in NYC. Locally stocked items are delivered in 2-5 business days across NY, NJ, and CT. Nationwide shipping in 3-5 business days on shipped items.</p>
 <p><a href="https://www.petshiwu.com/shipping">Shipping information</a> · <a href="https://www.petshiwu.com/products">Shop in-stock</a></p>
 </div>`;
 }

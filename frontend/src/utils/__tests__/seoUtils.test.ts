@@ -96,18 +96,18 @@ describe('productSearchTitle', () => {
 describe('collectionSearchTitle', () => {
   test('does not use the word Products so we stop ranking for product', () => {
     expect(collectionSearchTitle({ petType: 'dog' })).toBe(
-      'Dog food & supplies – Same-day NYC | Petshiwu'
+      'Dog food & supplies – Fast delivery across America | Petshiwu'
     );
     expect(collectionSearchTitle({ petType: 'cat' })).toBe(
-      'Cat food & supplies – Same-day NYC | Petshiwu'
+      'Cat food & supplies – Fast delivery across America | Petshiwu'
     );
-    expect(collectionSearchTitle({})).toBe('Pet food & supplies – Same-day NYC | Petshiwu');
+    expect(collectionSearchTitle({})).toBe('Pet food & supplies – Fast delivery across America | Petshiwu');
     expect(collectionSearchTitle({ petType: 'dog' }).toLowerCase()).not.toContain('product');
   });
 
   test('names a category with the pet and the click reason', () => {
     expect(collectionSearchTitle({ petType: 'dog', categoryName: 'Dry Food' })).toBe(
-      'Dry Food for dogs – Same-day NYC | Petshiwu'
+      'Dry Food for dogs – Fast delivery across America | Petshiwu'
     );
   });
 });
