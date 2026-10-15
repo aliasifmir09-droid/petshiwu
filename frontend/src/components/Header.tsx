@@ -173,7 +173,18 @@ const Header = () => {
 
   const getCategoriesForPetType = (petTypeSlug: string) => {
     return categories
-      .filter((cat: any) => cat.petType === petTypeSlug && !cat.parentCategory)
+      .filter((cat: any) => !cat.parentCategory && cat.isActive !== false)
+      // shared multi-pet parents (e.g. Supplies) must appear in every pet
+      // menu that has active children under them, even when the parent
+      // itself is filed under a different petType
+      .filter((cat: any) =>
+        cat.petType === petTypeSlug ||
+        categories.some((c: any) =>
+          c.isActive !== false &&
+          (c.parentCategory?._id === cat._id || c.parentCategory === cat._id) &&
+          c.petType === petTypeSlug
+        )
+      )
       .sort((a: any, b: any) => {
         const posA = a.position !== undefined ? a.position : 999999;
         const posB = b.position !== undefined ? b.position : 999999;
@@ -199,17 +210,7 @@ const Header = () => {
 
   const buildDynamicMegaMenu = (petTypeSlug: string): MenuSection[] => {
     if (!categories || categories.length === 0) return [];
-    const petTypeCategories = categories.filter((cat: any) =>
-      cat.petType === petTypeSlug && cat.isActive !== false
-    );
-    const mainCategories = petTypeCategories
-      .filter((cat: any) => !cat.parentCategory)
-      .sort((a: any, b: any) => {
-        const posA = a.position !== undefined ? a.position : 999999;
-        const posB = b.position !== undefined ? b.position : 999999;
-        if (posA !== posB) return posA - posB;
-        return a.name.localeCompare(b.name);
-      });
+    const mainCategories = getCategoriesForPetType(petTypeSlug);
     return mainCategories.map((mainCat: any): MenuSection => {
       const categoryId = mainCat._id || String(mainCat._id);
       const subcategories = getSubcategories(categoryId, petTypeSlug)
