@@ -39,7 +39,7 @@ const NextDayDeliveryZips = () => {
           We deliver same-day across Manhattan, Brooklyn, Queens, the Bronx, and Staten Island
           when you order by {TONIGHT.weekdayCutoff} weekdays or {TONIGHT.weekendCutoff} weekends.
           In-stock local products are {SAME_DAY_PRODUCT_ELIGIBILITY.toLowerCase()}. Locally stocked items
-          are delivered in 2-5 business days across NY, NJ, and CT. Nationwide shipping in 3-5 business days on shipped items.{' '}
+          arrive in 3-5 business days anywhere in the US except Alaska and Hawaii. Same-day is only for locally stocked items in New York City.{' '}
           <Link
             to="/learning/next-day-pet-delivery-within-50-miles-of-queens"
             className="text-[#1E3A8A] font-semibold hover:underline"

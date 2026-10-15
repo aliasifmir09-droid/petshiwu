@@ -11,9 +11,10 @@ import {
   HILLS_CD_OCEAN_FISH_IMAGE,
   HILLS_CD_OCEAN_FISH_SLUG,
 } from '../services/launchCatalogRepair';
+import { isNationwideProduct } from './deliveryZones';
 
 export const STORE_NAME = 'Petshiwu';
-export const FEED_TITLE = 'Petshiwu — NYC same-day pet supplies';
+export const FEED_TITLE = 'Petshiwu — same-day NYC and nationwide pet supplies';
 
 export type FeedCategory = { name?: string; slug?: string } | string | null | undefined;
 
@@ -245,9 +246,9 @@ function shippingService(
   maxTransit: number,
   shipPrice: string
 ): string {
+  const regionLine = region ? `\n        <g:region>${region}</g:region>` : '';
   return `      <g:shipping>
-        <g:country>US</g:country>
-        <g:region>${region}</g:region>
+        <g:country>US</g:country>${regionLine}
         <g:service>${service}</g:service>
         <g:price>${shipPrice} USD</g:price>
         <g:min_handling_time>0</g:min_handling_time>
@@ -257,10 +258,12 @@ function shippingService(
       </g:shipping>`;
 }
 
-/** Checkout delivers NYC same-day only. Tri-state next-day is closed. */
-function shippingXml(price: number): string {
-  const shipPrice = price >= 49 ? '0.00' : '6.00';
-  return shippingService('NY', 'Same-day NYC', 0, 1, shipPrice);
+/** One order fee for the US. Same-day is an extra NY service on locally stocked items. */
+function shippingXml(price: number, sameDayNyc: boolean): string {
+  const shipPrice = price >= 49 ? '0.00' : '7.00';
+  const ground = shippingService('', 'Ground', 3, 5, shipPrice);
+  if (!sameDayNyc) return ground;
+  return `${shippingService('NY', 'Same-day NYC', 0, 1, shipPrice)}\n${ground}`;
 }
 
 export function buildMerchantItemXml(opts: {
@@ -282,6 +285,7 @@ export function buildMerchantItemXml(opts: {
   size?: string;
   itemGroupId?: string;
   featured?: boolean;
+  sameDayNyc?: boolean;
 }): string {
   const extra = (opts.extraImages || [])
     .filter((url) => url && url !== opts.image)
@@ -317,14 +321,17 @@ export function buildMerchantItemXml(opts: {
     `      <g:google_product_category>${xmlEscape(opts.googleCategory)}</g:google_product_category>`,
     `      <g:custom_label_0>${xmlEscape(opts.petLabel)}</g:custom_label_0>`,
     `      <g:custom_label_1>${opts.featured ? 'Featured' : 'Catalog'}</g:custom_label_1>`,
-    '      <g:custom_label_2>NYC same-day</g:custom_label_2>',
+    `      <g:custom_label_2>${opts.sameDayNyc === false ? 'Nationwide' : 'NYC same-day'}</g:custom_label_2>`,
     '      <g:included_destination>Free_listings</g:included_destination>',
     '      <g:included_destination>Shopping_ads</g:included_destination>',
     opts.itemGroupId ? `      <g:item_group_id>${xmlEscape(opts.itemGroupId.slice(0, 50))}</g:item_group_id>` : '',
     opts.size ? `      <g:size>${xmlEscape(opts.size.slice(0, 100))}</g:size>` : '',
     unit ? `      <g:unit_pricing_measure>${unit.measure}</g:unit_pricing_measure>` : '',
     unit ? `      <g:unit_pricing_base_measure>${unit.base}</g:unit_pricing_base_measure>` : '',
-    shippingXml(opts.salePrice && opts.salePrice < opts.price ? opts.salePrice : opts.price),
+    shippingXml(
+      opts.salePrice && opts.salePrice < opts.price ? opts.salePrice : opts.price,
+      opts.sameDayNyc !== false
+    ),
     '    </item>',
   ];
 
@@ -395,6 +402,7 @@ export function feedItemsForProduct(product: FeedProduct): string {
         size: label || undefined,
         itemGroupId: groupId,
         featured: Boolean(product.isFeatured),
+        sameDayNyc: !isNationwideProduct(product),
       });
     });
     return xml;
@@ -427,6 +435,7 @@ export function feedItemsForProduct(product: FeedProduct): string {
     petLabel,
     size: label || undefined,
     featured: Boolean(product.isFeatured),
+    sameDayNyc: !isNationwideProduct(product),
   });
 }
 
@@ -436,7 +445,7 @@ export function feedHeader(): string {
   <channel>
     <title>${xmlEscape(FEED_TITLE)}</title>
     <link>${SITE_ORIGIN}</link>
-    <description>NYC same-day pet food and supplies from Petshiwu. Order by 3 PM for delivery tonight.</description>
+    <description>Same-day NYC for locally stocked items. Nationwide delivery in 3-5 business days. $7 under $49, free at $49. Does not ship to Alaska or Hawaii.</description>
 `;
 }
 

@@ -24,7 +24,7 @@ export function getTaxRateForState(state?: string): number {
 }
 
 export const FREE_SHIPPING_THRESHOLD = 49;
-export const STANDARD_SHIPPING_COST = 6;
+export const STANDARD_SHIPPING_COST = 7;
 
 interface PricingItemInput {
   product: string;

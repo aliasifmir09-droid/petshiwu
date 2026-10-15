@@ -44,7 +44,7 @@ const PetSuppliesUpperWestSideNYC = () => (
       },
       {
         question: "How much does pet delivery cost on the Upper West Side?",
-        answer: "Delivery is $6 for orders under $49. Orders over $49 ship free. Most premium pet food orders easily reach the free delivery threshold."
+        answer: "Delivery is $7 for orders under $49. Orders over $49 ship free. Most premium pet food orders easily reach the free delivery threshold."
       }
     ]}
     searchTerms={['dog food', 'cat food', 'premium pet food', 'dog harness', 'cat litter', 'dog treats', 'pet supplies']}

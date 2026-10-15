@@ -1,13 +1,11 @@
 import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST } from '@/config/constants';
-import { NATIONWIDE_SHIPPING_COST } from '@/utils/deliveryLane';
 
-/** Matches checkout and the API: free shipping at $49, not only above it. Nationwide TopDawg orders are a flat $7. */
+/** One order fee: $7 under $49, free at $49, including NYC and TopDawg. */
 export const shippingCostForSubtotal = (
   subtotal: number,
   waiveShipping = false,
-  nationwideFlat = false
+  _nationwideFlat = false
 ): number => {
-  if (nationwideFlat) return NATIONWIDE_SHIPPING_COST;
   return waiveShipping || subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
 };
 

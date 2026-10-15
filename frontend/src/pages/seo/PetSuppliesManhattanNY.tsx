@@ -32,7 +32,7 @@ const PetSuppliesManhattanNY = () => (
       },
       {
         question: "Is pet food delivery expensive in Manhattan?",
-        answer: "Not with Petshiwu. Delivery is just $6 for orders under $49, and completely free for orders $49 and above. Our prices are competitive — no Manhattan markup."
+        answer: "Not with Petshiwu. Delivery is just $7 for orders under $49, and completely free for orders $49 and above. Our prices are competitive — no Manhattan markup."
       },
       {
         question: "Do you carry Royal Canin and Hill's Science Diet in Manhattan?",

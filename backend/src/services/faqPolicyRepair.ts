@@ -40,7 +40,7 @@ export const FAQ_POLICY_REPAIRS: FaqRepairPlan[] = [
   {
     match: /how much does shipping cost/i,
     answer:
-      'Delivery is $6 on orders under $49 and free on orders $49 and over. Same-day in NYC. Nationwide shipping in 3-5 business days on shipped items.',
+      'Delivery is $7 on orders under $49 and free on orders $49 and over, anywhere in the US except Alaska and Hawaii. Same-day in NYC for locally stocked items. Nationwide shipping in 3-5 business days.',
   },
 ];
 

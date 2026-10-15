@@ -44,7 +44,7 @@ const PetSuppliesParkSlopeNY = () => (
       },
       {
         question: "How much does pet food delivery cost in Park Slope?",
-        answer: "Delivery is $6 for orders under $49. Orders over $49 ship free. A single bag of premium dry dog food typically hits the free threshold."
+        answer: "Delivery is $7 for orders under $49. Orders over $49 ship free. A single bag of premium dry dog food typically hits the free threshold."
       }
     ]}
     searchTerms={['organic dog food', 'natural cat food', 'premium pet food', 'dog food', 'cat food', 'pet supplies', 'grain-free dog food']}

@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'vitest';
 import { EXCLUDED_SHIPPING_MESSAGE } from '@/utils/deliveryLane';
-import { OUT_OF_AREA_DELIVERY_MESSAGE } from '@/utils/deliveryZip';
 import { paypalCheckoutBlocker } from '@/utils/paypalCheckoutReady';
 
 const nyc = {
@@ -37,7 +36,7 @@ describe('paypalCheckoutBlocker', () => {
         shippingAddress: { ...nyc, city: 'Los Angeles', state: 'CA', zipCode: '90001' },
         guestEmail: 'ada@example.com',
       })
-    ).toBe(OUT_OF_AREA_DELIVERY_MESSAGE);
+    ).toBeNull();
     expect(
       paypalCheckoutBlocker({
         shippingAddress: { ...nyc, city: 'Hoboken', state: 'NJ', zipCode: '07030' },

@@ -100,7 +100,7 @@ Yes. Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM across a
 No. No autoship. Buy once. First order: FREEDOM20 (20% off, max $10).
 
 **How much is delivery?**  
-Free over $49. $6 under that.
+Free over $49. $7 under that.
 
 ---
 

@@ -385,8 +385,8 @@ describe('product offer price in first-wave HTML', () => {
     expect(html).toContain('"@type":"Offer"');
     expect(html).toContain('In stock · free ship $49+');
     expect(html).not.toContain('... | Petshiwu');
-    expect(html).toContain('Same-day delivery in NYC. Delivered in 2-5 business days across NY, NJ & CT.');
-    expect(html).toContain('Not available for this address yet outside those states.');
+    expect(html).toContain('Same-day delivery in NYC for locally stocked items. Arrives in 3-5 business days everywhere else in the US.');
+    expect(html).toContain('Does not ship to Alaska or Hawaii.');
     expect(html).not.toContain('Not eligible for same-day delivery');
   });
 
@@ -407,11 +407,11 @@ describe('product offer price in first-wave HTML', () => {
       'durable-rope-tug-toy'
     );
     expect(html).toContain(
-      'Not eligible for same-day delivery - ships nationwide, arrives in 3-5 business days (flat $7)'
+      'Not eligible for same-day delivery - ships nationwide, arrives in 3-5 business days ($7 under $49, free at $49+)'
     );
     expect(html).toContain('Does not ship to Alaska or Hawaii');
     expect(html).toContain('"value":"7"');
-    expect(html).not.toContain('Delivered in 2-5 business days across NY, NJ');
+    expect(html).not.toContain('Delivered in 2-5 business days');
   });
 });
 

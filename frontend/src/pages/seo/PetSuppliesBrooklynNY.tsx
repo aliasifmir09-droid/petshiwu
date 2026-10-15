@@ -32,7 +32,7 @@ const PetSuppliesBrooklynNY = () => (
       },
       {
         question: "How much does pet food delivery cost in Brooklyn?",
-        answer: "Delivery is $6 for orders under $49. Orders over $49 get free delivery. Most orders of dog food or cat food easily hit the free delivery threshold — a bag of kibble alone often qualifies."
+        answer: "Delivery is $7 for orders under $49. Orders over $49 get free delivery. Most orders of dog food or cat food easily hit the free delivery threshold — a bag of kibble alone often qualifies."
       },
       {
         question: "What pet brands do you carry for Brooklyn customers?",

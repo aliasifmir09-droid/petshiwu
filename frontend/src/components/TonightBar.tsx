@@ -62,7 +62,7 @@ const TonightBar = () => {
     ? result.speed === 'same-day' && !countdown.passed
       ? `${result.headline} · ${formatCountdownShort(countdown)}`
       : result.headline
-    : 'Free shipping over $49 · no autoship · nationwide shipping opens soon';
+    : 'Free shipping over $49 · $7 under $49 · same-day NYC · nationwide except Alaska and Hawaii';
 
   const zipField = (
     <>

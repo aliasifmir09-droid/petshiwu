@@ -16,7 +16,7 @@ describe('checkoutFlow', () => {
   test('guest checkout needs a valid NYC address and email to be delivery-ready', () => {
     expect(isCheckoutDeliveryReady(nycAddress, false)).toBe(true);
     expect(isCheckoutDeliveryReady({ ...nycAddress, email: '' }, false)).toBe(false);
-    expect(isCheckoutDeliveryReady({ ...nycAddress, state: 'CA', zipCode: '90001' }, false)).toBe(false);
+    expect(isCheckoutDeliveryReady({ ...nycAddress, state: 'CA', zipCode: '90001' }, false)).toBe(true);
     expect(isCheckoutDeliveryReady({ ...nycAddress, street: '' }, true)).toBe(false);
   });
 
@@ -51,7 +51,7 @@ describe('checkoutFlow', () => {
         false
       )
     ).toBe(true);
-    expect(isCheckoutDeliveryReady({ ...nycAddress, state: 'CA', city: 'Los Angeles', zipCode: '90001' }, false)).toBe(false);
+    expect(isCheckoutDeliveryReady({ ...nycAddress, state: 'CA', city: 'Los Angeles', zipCode: '90001' }, false)).toBe(true);
   });
 
   test('a non-NYC address can check out only when every item is TopDawg', () => {

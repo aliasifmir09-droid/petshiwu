@@ -128,7 +128,7 @@ const dogFoodGenerator: PageGenerator = (n) => ({
     },
     {
       question: `How much does dog food delivery cost in ${n.name}?`,
-      answer: `Delivery to ${n.name} is $6 for orders under $49 and completely free for orders over $49. Most dog food orders — especially larger bags — easily hit the free shipping threshold. No subscription required.`,
+      answer: `Delivery to ${n.name} is $7 for orders under $49 and completely free for orders over $49. Most dog food orders — especially larger bags — easily hit the free shipping threshold. No subscription required.`,
     },
     {
       question: `Can I get prescription dog food delivered to ${n.name}?`,
@@ -175,7 +175,7 @@ const catFoodGenerator: PageGenerator = (n) => ({
     },
     {
       question: `How much does cat food delivery cost in ${n.name}?`,
-      answer: `Delivery to ${n.name} is $6 for orders under $49 and free for orders over $49. A case of wet food typically reaches the free shipping threshold on its own. No subscription required.`,
+      answer: `Delivery to ${n.name} is $7 for orders under $49 and free for orders over $49. A case of wet food typically reaches the free shipping threshold on its own. No subscription required.`,
     },
     {
       question: `Can I get prescription cat food delivered to ${n.name}?`,
@@ -221,7 +221,7 @@ const petSuppliesGenerator: PageGenerator = (n) => ({
     },
     {
       question: `How much does pet supply delivery cost in ${n.name}?`,
-      answer: `Delivery to ${n.name} is $6 for orders under $49 and completely free for orders over $49. Most orders with a bag of food plus a few supplies easily reach the free shipping threshold.`,
+      answer: `Delivery to ${n.name} is $7 for orders under $49 and completely free for orders over $49. Most orders with a bag of food plus a few supplies easily reach the free shipping threshold.`,
     },
     {
       question: `Can I get same-day pet supply delivery in ${n.name}?`,
@@ -276,7 +276,7 @@ const dogTreatsGenerator: PageGenerator = (n) => ({
     },
     {
       question: `How much does dog accessory delivery cost in ${n.name}?`,
-      answer: `Delivery to ${n.name} is $6 on orders under $49 and free on orders over $49. Combine dog food with treats and accessories to easily hit the free shipping threshold.`,
+      answer: `Delivery to ${n.name} is $7 on orders under $49 and free on orders over $49. Combine dog food with treats and accessories to easily hit the free shipping threshold.`,
     },
   ],
   searchTerms: ['dog treats', 'dog chews', 'dental chews', 'dog toys', 'dog leash', 'dog harness', 'training treats', 'bully sticks'],
@@ -323,7 +323,7 @@ const puppyFoodGenerator: PageGenerator = (n) => ({
     },
     {
       question: `How much does puppy food delivery cost in ${n.name}?`,
-      answer: `Delivery to ${n.name} is $6 for orders under $49 and completely free for orders over $49. Most puppy food bags hit the free shipping threshold on their own.`,
+      answer: `Delivery to ${n.name} is $7 for orders under $49 and completely free for orders over $49. Most puppy food bags hit the free shipping threshold on their own.`,
     },
   ],
   searchTerms: ['puppy food', 'puppy food delivery', 'large breed puppy food', 'small breed puppy food', 'best puppy food', "Hill's Science Diet Puppy", 'Royal Canin Puppy', 'Purina Pro Plan Puppy'],
