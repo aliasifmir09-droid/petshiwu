@@ -383,6 +383,10 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     title: 'Same-Day Pet Supplies Delivery NYC — Order by 3 PM | Petshiwu',
     description: 'Same-day pet supplies delivery in NYC. Order by 3 PM weekdays (1 PM weekends), before 11 PM. No autoship. Free over $49. Dogs, cats, birds, fish, reptiles. All 5 boroughs.',
   },
+  '/halloween': {
+    title: 'Dog Halloween Costumes & Treats — The Halloween Shop | Petshiwu',
+    description: 'Shop 45+ Halloween picks for dogs: costumes, dresses, tees, bandanas, spooky toys and Halloween treats. Ships nationwide in 2-5 business days, free over $49. Same-day in NYC on local stock.',
+  },
   '/cat-food-delivery-nyc': {
     title: 'Cat Food Delivery NYC — Premium Brands | Petshiwu',
     description: 'Get premium cat food delivered anywhere in NYC. Wet food, dry food, prescription diets. Royal Canin, Blue Buffalo, Hill\'s Science Diet. Free shipping over $49.',

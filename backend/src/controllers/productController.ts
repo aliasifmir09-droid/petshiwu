@@ -1738,6 +1738,18 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       Object.assign(baseQuery, brandMatchQuery(String(req.query.brand)));
     }
 
+    // Filter by tags — comma-separated, ANY match. Used by collection pages
+    // (e.g. the Halloween shop) that cut across categories and pet types.
+    if (req.query.tags) {
+      const tagList = String(req.query.tags)
+        .split(',')
+        .map((t) => t.trim().toLowerCase())
+        .filter(Boolean);
+      if (tagList.length > 0) {
+        baseQuery.tags = { $in: tagList };
+      }
+    }
+
     // Filter by price range with validation
     if (req.query.minPrice || req.query.maxPrice) {
       baseQuery.basePrice = {};

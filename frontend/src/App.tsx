@@ -68,6 +68,7 @@ const SensitiveStomachDogs = lazyWithRetry(() => import('./pages/seo/SensitiveSt
 const PickyEaters = lazyWithRetry(() => import('./pages/seo/PickyEaters'));
 const AggressiveChewers = lazyWithRetry(() => import('./pages/seo/AggressiveChewers'));
 const PetSuppliesDeliveryNYC = lazyWithRetry(() => import('./pages/seo/PetSuppliesDeliveryNYC'));
+const HalloweenShop = lazyWithRetry(() => import('./pages/HalloweenShop'));
 const DogFoodDeliveryNYC = lazyWithRetry(() => import('./pages/seo/DogFoodDeliveryNYC'));
 const CatFoodDeliveryNYC = lazyWithRetry(() => import('./pages/seo/CatFoodDeliveryNYC'));
 const PetStoreQueensNY = lazyWithRetry(() => import('./pages/seo/PetStoreQueensNY'));
@@ -407,6 +408,7 @@ function App() {
                   <Route path="/durable-dog-toys-aggressive-chewers" element={<AggressiveChewers />} />
                   {/* NYC local SEO pages — targets delivery + near me + competitor intent searches */}
                   <Route path="/pet-supplies-delivery-nyc" element={<PetSuppliesDeliveryNYC />} />
+                  <Route path="/halloween" element={<HalloweenShop />} />
                   <Route path="/dog-food-delivery-nyc" element={<DogFoodDeliveryNYC />} />
                   <Route path="/cat-food-delivery-nyc" element={<CatFoodDeliveryNYC />} />
                   <Route path="/pet-store-queens-ny" element={<PetStoreQueensNY />} />

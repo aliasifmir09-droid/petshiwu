@@ -35,6 +35,8 @@ interface SEOLandingPageProps {
   searchTerms: string[];
   petType?: 'dog' | 'cat' | 'other-animals';
   category?: string;
+  /** Comma-separated product tags to filter the grid (e.g. 'halloween' for the seasonal shop). */
+  productTags?: string;
   /** ZIP + compare + ratings + nationwide. Default on for the four NYC #1 hubs. */
   shoppableHub?: boolean;
 }
@@ -56,6 +58,7 @@ const SEOLandingPage = ({
   searchTerms,
   petType,
   category,
+  productTags,
   shoppableHub
 }: SEOLandingPageProps) => {
   const [searchParams] = useSearchParams();
@@ -73,10 +76,10 @@ const SEOLandingPage = ({
   );
 
   const { data: products, isLoading } = useQuery({
-    queryKey: ['products', 'seo-landing', keyword, page, sort, petType, category],
+    queryKey: ['products', 'seo-landing', keyword, page, sort, petType, category, productTags],
     queryFn: () =>
       productService.getProducts({
-        ...landingProductQuery({ page, sort, petType, category }),
+        ...landingProductQuery({ page, sort, petType, category, tags: productTags }),
       }),
     staleTime: 30 * 1000,
     gcTime: 5 * 60 * 1000

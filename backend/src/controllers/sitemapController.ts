@@ -323,6 +323,7 @@ export const generateSitemap = async (req: Request, res: Response) => {
       { path: '/high-protein-dog-food-picky-eaters', priority: '0.8', changefreq: 'monthly' },
       { path: '/durable-dog-toys-aggressive-chewers', priority: '0.8', changefreq: 'monthly' },
       // NYC local SEO pages — competitor intent + delivery + near me searches
+      { path: '/halloween', priority: '0.8', changefreq: 'daily' },
       { path: '/pet-supplies-delivery-nyc', priority: '0.9', changefreq: 'weekly' },
       { path: '/dog-food-delivery-nyc', priority: '0.9', changefreq: 'weekly' },
       { path: '/cat-food-delivery-nyc', priority: '0.9', changefreq: 'weekly' },

@@ -10,6 +10,7 @@ export function landingProductQuery(opts: {
   sort: string;
   petType?: string;
   category?: string;
+  tags?: string;
 }): ProductFilters {
   return {
     page: opts.page,
@@ -17,6 +18,7 @@ export function landingProductQuery(opts: {
     sort: opts.sort as ProductFilters['sort'],
     petType: opts.petType || undefined,
     category: opts.category || undefined,
+    tags: opts.tags || undefined,
     inStock: true,
   };
 }

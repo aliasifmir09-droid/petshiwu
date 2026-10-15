@@ -10,6 +10,7 @@ export interface ProductFilters {
   minPrice?: number;
   maxPrice?: number;
   search?: string;
+  tags?: string;
   sort?: 'price-asc' | 'price-desc' | 'rating' | 'newest';
   featured?: boolean;
   minRating?: number;
