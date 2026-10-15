@@ -32,7 +32,7 @@ const PetSuppliesWilliamsburgNY = () => (
       },
       {
         question: "What is the delivery fee for pet supplies in Williamsburg?",
-        answer: "Delivery is $6 for orders under $49. Orders over $49 ship free. A standard bag of dog food or two cans of cat food typically hits the free threshold."
+        answer: "Delivery is $7 for orders under $49. Orders over $49 ship free. A standard bag of dog food or two cans of cat food typically hits the free threshold."
       },
       {
         question: "Can I get raw or grain-free dog food delivered in Williamsburg?",

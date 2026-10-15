@@ -44,7 +44,7 @@ const PetSuppliesDUMBONY = () => (
       },
       {
         question: "How much does pet delivery cost in DUMBO?",
-        answer: "Delivery is $6 for orders under $49. Orders over $49 ship free. Most premium food orders reach the free threshold easily."
+        answer: "Delivery is $7 for orders under $49. Orders over $49 ship free. Most premium food orders reach the free threshold easily."
       }
     ]}
     searchTerms={['dog food', 'cat food', 'pet supplies', 'cat litter', 'dog treats', 'premium pet food', 'pet accessories']}

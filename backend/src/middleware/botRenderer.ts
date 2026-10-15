@@ -230,7 +230,7 @@ const removeStaticHero = (html: string): string => {
 const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   '/': {
     title: 'Petshiwu | Pet Food & Supplies – Free Shipping $49+, No Autoship',
-    description: '4,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items. Free shipping over $49 on local orders. No autoship.',
+    description: '4,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. Fast delivery across America. Same-day NYC · nationwide delivery across the US. Free shipping over $49. No autoship.',
   },
   '/products': {
     title: 'Pet food & supplies – Fast delivery across America | Petshiwu',
@@ -238,23 +238,23 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/dog': {
     title: 'Dog food & supplies – Fast delivery across America | Petshiwu',
-    description: 'Shop dog food, treats, toys, and accessories. Purina, Blue Buffalo, Royal Canin. Fast delivery across America. Free shipping over $49 on local orders. No autoship.',
+    description: 'Shop dog food, treats, toys, and accessories. Purina, Blue Buffalo, Royal Canin. Fast delivery across America. Free shipping over $49. No autoship.',
   },
   '/cat': {
     title: 'Cat food & supplies – Fast delivery across America | Petshiwu',
-    description: 'Shop cat food, litter, toys, and accessories. Fast delivery across America. Free shipping over $49 on local orders. No autoship.',
+    description: 'Shop cat food, litter, toys, and accessories. Fast delivery across America. Free shipping over $49. No autoship.',
   },
   '/bird': {
     title: 'Bird Food, Cages & Accessories | Petshiwu',
-    description: 'Shop bird food, cages, perches, and accessories for all bird species. Premium brands. Fast delivery across America. Free shipping over $49 on local orders.',
+    description: 'Shop bird food, cages, perches, and accessories for all bird species. Premium brands. Fast delivery across America. Free shipping over $49.',
   },
   '/fish': {
     title: 'Fish Food, Aquarium Supplies & Tanks | Petshiwu',
-    description: 'Find fish food, filters, aquarium supplies, and tanks for freshwater and saltwater fish. Fast delivery across America. Free shipping over $49 on local orders.',
+    description: 'Find fish food, filters, aquarium supplies, and tanks for freshwater and saltwater fish. Fast delivery across America. Free shipping over $49.',
   },
   '/reptile': {
     title: 'Reptile Food, Terrariums & Supplies | Petshiwu',
-    description: 'Shop reptile food, terrariums, heating, and accessories for snakes, lizards, and turtles. Fast delivery across America. Free shipping over $49 on local orders.',
+    description: 'Shop reptile food, terrariums, heating, and accessories for snakes, lizards, and turtles. Fast delivery across America. Free shipping over $49.',
   },
   '/other-animals': {
     title: 'Other Animal Supplies | Fast delivery across America | Petshiwu',
@@ -262,15 +262,15 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/small-animal': {
     title: 'Small Animal Food, Cages & Accessories | Petshiwu',
-    description: 'Shop food, cages, bedding, and toys for hamsters, rabbits, guinea pigs, and more. Fast delivery across America. Free shipping over $49 on local orders.',
+    description: 'Shop food, cages, bedding, and toys for hamsters, rabbits, guinea pigs, and more. Fast delivery across America. Free shipping over $49.',
   },
   '/about': {
     title: 'About Petshiwu — Online Pet Store',
-    description: 'Petshiwu is an online pet store for food, treats, and supplies. Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items. Warehouse only — not a walk-in store.',
+    description: 'Petshiwu is an online pet store for food, treats, and supplies. Fast delivery across America. Same-day NYC · nationwide delivery across the US. Warehouse only — not a walk-in store.',
   },
   '/our-promise': {
     title: 'Our Promise | Petshiwu',
-    description: 'Fair prices, fast delivery, and no autoship. Free shipping over $49 on local orders. 365-day returns. Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items.',
+    description: 'Fair prices, fast delivery, and no autoship. Free shipping over $49. 365-day returns. Fast delivery across America. Same-day NYC · nationwide delivery across the US.',
   },
   '/for-pet-parents': {
     title: 'For Pet Parents | Petshiwu',
@@ -278,7 +278,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/from-queens': {
     title: 'How We Ship | Petshiwu',
-    description: 'Petshiwu is an online pet store. Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items. Warehouse only — not a walk-in store.',
+    description: 'Petshiwu is an online pet store. Fast delivery across America. Same-day NYC · nationwide delivery across the US. Warehouse only — not a walk-in store.',
   },
   '/editorial-standards': {
     title: 'How We Write Pet Care Guides | Petshiwu',
@@ -314,7 +314,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/shipping': {
     title: 'Shipping Policy | Petshiwu',
-    description: 'Same-day NYC. Delivered in 2-5 business days across NY, NJ and CT. Nationwide on thousands of items in 3-5 business days. Free shipping over $49 on local orders.',
+    description: 'Same-day NYC for locally stocked items. Nationwide delivery in 3-5 business days. $7 under $49, free at $49. Does not ship to Alaska or Hawaii.',
   },
   '/delivery-zips': {
     title: 'NYC Same-Day Delivery | Petshiwu',
@@ -331,7 +331,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   },
   '/search': {
     title: 'Search Products | Petshiwu',
-    description: 'Search 4,000+ pet products for dogs, cats, birds, fish, reptiles, and small animals at Petshiwu. Fast delivery across America. Free shipping over $49 on local orders.',
+    description: 'Search 4,000+ pet products for dogs, cats, birds, fish, reptiles, and small animals at Petshiwu. Fast delivery across America. Free shipping over $49.',
   },
   '/deals': {
     title: "Today's Deals & Pet Supply Discounts | Petshiwu",
@@ -1075,19 +1075,17 @@ export const buildProductHtml = (template: string, product: any, slug: string): 
         '@type': 'OfferShippingDetails',
         shippingRate: {
           '@type': 'MonetaryAmount',
-          value: nationwideItem ? '7' : price >= 49 ? '0' : '6',
+          value: price >= 49 ? '0' : '7',
           currency: 'USD',
         },
-        shippingDestination: nationwideItem
-          ? { '@type': 'DefinedRegion', addressCountry: 'US' }
-          : { '@type': 'DefinedRegion', addressCountry: 'US', addressRegion: 'NY' },
+        shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'US' },
         deliveryTime: {
           '@type': 'ShippingDeliveryTime',
           handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: nationwideItem ? 1 : 0, unitCode: 'DAY' },
           transitTime: {
             '@type': 'QuantitativeValue',
             minValue: nationwideItem ? 3 : 0,
-            maxValue: nationwideItem ? 5 : 1,
+            maxValue: 5,
             unitCode: 'DAY',
           },
         },
@@ -1170,8 +1168,8 @@ export const buildProductHtml = (template: string, product: any, slug: string): 
   <hr style="margin:24px 0;border:none;border-top:1px solid #eee" />
   <p style="color:#555;font-size:0.9em">
     ${Array.isArray(product.tags) && product.tags.some((tag: unknown) => String(tag).toLowerCase() === 'topdawg')
-      ? 'Not eligible for same-day delivery - ships nationwide, arrives in 3-5 business days (flat $7). Does not ship to Alaska or Hawaii.'
-      : 'Same-day delivery in NYC. Delivered in 2-5 business days across NY, NJ & CT. Not available for this address yet outside those states.'}
+      ? 'Not eligible for same-day delivery - ships nationwide, arrives in 3-5 business days ($7 under $49, free at $49+). Does not ship to Alaska or Hawaii.'
+      : 'Same-day delivery in NYC for locally stocked items. Arrives in 3-5 business days everywhere else in the US. Does not ship to Alaska or Hawaii.'}
     ${petType ? `<a href="${BASE}/${petType}" style="color:#1976d2">Browse more ${petLabel} products</a> &bull;` : ''}
     ${categoryName && categorySlug ? `<a href="${BASE}/${petType}/${categorySlug}" style="color:#1976d2">${esc(categoryName)}</a>` : ''}
     <a href="${BASE}" style="color:#1976d2">Petshiwu — Fast delivery across America</a>
@@ -1752,7 +1750,7 @@ export const buildHomepageHtml = (template: string, products: any[] = []): strin
       width: 512,
       height: 512,
     },
-    description: 'Premium pet food, toys, and supplies. Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items.',
+    description: 'Premium pet food, toys, and supplies. Fast delivery across America. Same-day NYC · nationwide delivery across the US.',
     telephone: '+18002592605',
     email: 'support@petshiwu.com',
     address: {
@@ -1796,7 +1794,7 @@ export const buildHomepageHtml = (template: string, products: any[] = []): strin
     url: BASE,
     image: `${BASE}/og-image.jpg`,
     logo: `${BASE}/logo-square-512.png`,
-    description: 'Fast delivery across America. Same-day in New York City, 2-5 business days across NY, NJ, and CT, and nationwide shipping in 3-5 business days on shipped items. Jackson Heights is office and warehouse only — not a walk-in store.',
+    description: 'Fast delivery across America. Same-day in New York City for locally stocked items, and nationwide delivery in 3-5 business days across the US. Jackson Heights is office and warehouse only — not a walk-in store.',
     telephone: '+18002592605',
     email: 'support@petshiwu.com',
     address: {
@@ -1921,7 +1919,7 @@ const buildProductListHtml = async (template: string): Promise<string> => {
 <div style="font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px">
   <h2>Pet food & supplies – Fast delivery across America</h2>
   <p>Browse 4,000+ foods, treats, and supplies for dogs, cats, birds, fish, reptiles, and small animals.
-     Free shipping on local orders over $49. Same-day NYC · 2-5 days across NY, NJ and CT · nationwide on thousands of items. No autoship.</p>
+     Free shipping over $49. Same-day NYC · nationwide delivery across the US. No autoship.</p>
   ${productLinks
     ? `<ul style="list-style:none;padding:0;columns:2">${productLinks}</ul>`
     : '<p>Browse the catalog on Petshiwu.</p>'}

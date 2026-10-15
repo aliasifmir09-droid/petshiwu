@@ -113,11 +113,11 @@ export function buildOrderConfirmationEmail(
     : `${origin}/forgot-password?guest=1`;
   const showGuestPasswordHelp = Boolean(orderData.isGuestCheckout);
   const addressZone = resolveDeliveryZone(addr, { tags: [] });
-  const deliveryLine = addressZone === 'UNAVAILABLE'
-    ? 'Arrives in 3-5 business days.'
-    : addressZone === 'TRI_STATE'
-      ? 'Delivered in 2-5 business days. TopDawg items arrive separately in 3-5 business days.'
-      : 'Same-day delivery in NYC. TopDawg items arrive separately in 3-5 business days.';
+  const deliveryLine = addressZone === 'SAME_DAY_NYC'
+    ? 'Same-day delivery in NYC. Shipped items arrive separately in 3-5 business days.'
+    : addressZone === 'UNAVAILABLE'
+      ? 'Does not ship to Alaska or Hawaii.'
+      : 'Arrives in 3-5 business days.';
   const preheader = isCod
     ? `Packing slip for Petshiwu order ${orderNumber}. ${formatUsd(orderData.totalPrice)} is due when your driver arrives.`
     : `Packing slip and official receipt for Petshiwu order ${orderNumber} · ${formatUsd(orderData.totalPrice)}.`;

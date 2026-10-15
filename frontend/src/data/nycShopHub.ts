@@ -71,7 +71,7 @@ export const NYC_HUB_COMPARE_ROWS: Array<{
   },
   {
     label: 'Free delivery',
-    petshiwu: 'Free over $49 ($6 under)',
+    petshiwu: 'Free over $49 ($7 under)',
     manhattanShop: 'Often $100+ or zone fees',
     national: 'Free over $49, slower',
   },

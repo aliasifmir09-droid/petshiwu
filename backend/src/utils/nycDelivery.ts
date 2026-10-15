@@ -71,4 +71,16 @@ export function isDeliverableShippingAddress(state: string, zipCode: string): bo
   return isNewYorkState(state) && isNycDeliveryZip(zipCode);
 }
 
+/** Alaska 99501–99950 and Hawaii 96701–96898. */
+export function isAlaskaOrHawaiiAddress(state?: string, zipCode?: string): boolean {
+  const normalized = normalizeStateName(state || '');
+  if (normalized === 'AK' || normalized === 'ALASKA' || normalized === 'HI' || normalized === 'HAWAII') {
+    return true;
+  }
+  const zip = normalizeZip(zipCode || '');
+  if (!/^\d{5}$/.test(zip)) return false;
+  const zipNum = Number(zip);
+  return (zipNum >= 99501 && zipNum <= 99950) || (zipNum >= 96701 && zipNum <= 96898);
+}
+
 export const OUT_OF_AREA_DELIVERY_MESSAGE = 'Not available for this address yet';

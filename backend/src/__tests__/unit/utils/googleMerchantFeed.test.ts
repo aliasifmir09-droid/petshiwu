@@ -167,14 +167,18 @@ describe('googleMerchantFeed helpers', () => {
     expect(xml).toContain('<g:unit_pricing_measure>30 lb</g:unit_pricing_measure>');
     expect(xml).toContain('<g:service>Same-day NYC</g:service>');
     expect(xml).toContain('<g:region>NY</g:region>');
+    expect(xml).toContain('<g:service>Ground</g:service>');
+    expect(xml).toContain('<g:price>7.00 USD</g:price>');
+    expect(xml).toContain('<g:max_transit_time>5</g:max_transit_time>');
+    expect(xml).not.toContain('<g:price>6.00 USD</g:price>');
     expect(xml).not.toContain('<g:region>NJ</g:region>');
     expect(xml).not.toContain('<g:region>CT</g:region>');
     expect(xml).not.toContain('<g:service>Next-day metro</g:service>');
     expect(xml).toContain('<g:included_destination>Free_listings</g:included_destination>');
     expect(xml).toContain('<g:min_transit_time>0</g:min_transit_time>');
     expect(xml).not.toContain('<g:identifier_exists>no</g:identifier_exists>');
-    expect(xml).not.toContain('<g:region>CA</g:region>');
-    expect(xml).not.toMatch(/nationwide/i);
+    expect(xml).not.toContain('<g:region>AK</g:region>');
+    expect(xml).not.toContain('<g:region>HI</g:region>');
   });
 
   test('does not emit a truncated MPN when the SKU is longer than 70 characters', () => {

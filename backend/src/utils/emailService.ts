@@ -1196,7 +1196,7 @@ export const sendWelcomeEmail = async (email: string, firstName: string): Promis
     <tr>
       <td class="stat"><div class="stat-val">10K+</div><div class="stat-label">Products</div></td>
       <td class="stat"><div class="stat-val">50+</div><div class="stat-label">Top Brands</div></td>
-      <td class="stat"><div class="stat-val">2-5d</div><div class="stat-label">Delivery</div></td>
+      <td class="stat"><div class="stat-val">3-5d</div><div class="stat-label">Delivery</div></td>
     </tr>
   </table>
 

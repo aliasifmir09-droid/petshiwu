@@ -14,7 +14,7 @@ const ShippingPolicy = () => {
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <SEO
         title="Shipping Information | Petshiwu"
-        description="Petshiwu shipping: same-day in NYC, 2-5 business days across NY, NJ, and CT, and 3-5 business days nationwide on shipped items. Flat $7 on TopDawg orders."
+        description="Petshiwu shipping: same-day in NYC for locally stocked items, 3-5 business days nationwide for the rest of the catalog. $7 under $49, free at $49. Does not ship to Alaska or Hawaii."
         url="/shipping"
       />
 
@@ -92,24 +92,12 @@ const ShippingPolicy = () => {
             </thead>
             <tbody>
               <tr>
-                <td className="p-3 border border-gray-200">NYC same-day under ${TONIGHT.freeOver}</td>
+                <td className="p-3 border border-gray-200">Orders under ${TONIGHT.freeOver}, anywhere in the US except Alaska and Hawaii</td>
                 <td className="p-3 border border-gray-200 font-semibold">${TONIGHT.underFee}</td>
               </tr>
               <tr className="bg-green-50">
-                <td className="p-3 border border-gray-200 font-semibold">NYC same-day orders ${TONIGHT.freeOver} and over</td>
+                <td className="p-3 border border-gray-200 font-semibold">Orders ${TONIGHT.freeOver} and over, whole catalog</td>
                 <td className="p-3 border border-gray-200 font-bold text-green-700">FREE</td>
-              </tr>
-              <tr>
-                <td className="p-3 border border-gray-200">NY, NJ, and CT outside NYC, under $49</td>
-                <td className="p-3 border border-gray-200 font-semibold">$7</td>
-              </tr>
-              <tr className="bg-green-50">
-                <td className="p-3 border border-gray-200 font-semibold">NY, NJ, and CT outside NYC, $49 and over</td>
-                <td className="p-3 border border-gray-200 font-bold text-green-700">FREE</td>
-              </tr>
-              <tr>
-                <td className="p-3 border border-gray-200">TopDawg shipped items, any US state except Alaska and Hawaii</td>
-                <td className="p-3 border border-gray-200 font-semibold">Flat $7. The $49 free-shipping rule does not apply, including on mixed carts.</td>
               </tr>
             </tbody>
           </table>
@@ -119,8 +107,8 @@ const ShippingPolicy = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-3">Where we deliver</h2>
           <p>
             <strong>Same-day:</strong> Manhattan, Brooklyn, Queens, the Bronx, and Staten Island,
-            when you order by cutoff — including Queens Hillside. Locally stocked items are
-            delivered in 2-5 business days across NY, NJ, and CT.{' '}
+            when you order by cutoff — including Queens Hillside. Same-day is only for locally stocked items.
+            The rest of the catalog arrives in 3-5 business days anywhere in the US except Alaska and Hawaii.{' '}
             <Link to="/delivery-zips" className="text-blue-600 hover:underline">
               Check your ZIP
             </Link>
@@ -134,9 +122,8 @@ const ShippingPolicy = () => {
             .
           </p>
           <p className="mt-2">
-            <strong>Shipped items go nationwide in 3-5 business days</strong> for a flat $7.
-            Does not ship to Alaska or Hawaii.
-            Locally stocked items are not available for addresses outside NY, NJ, and CT yet. We ship inside the United States. We pack from our warehouse — it is not a walk-in store.
+            <strong>Nationwide:</strong> the whole catalog ships in 3-5 business days. Shipping is $7 under $49 and free at $49, including NYC.
+            Does not ship to Alaska or Hawaii. We pack from our warehouse — it is not a walk-in store.
           </p>
         </section>
 

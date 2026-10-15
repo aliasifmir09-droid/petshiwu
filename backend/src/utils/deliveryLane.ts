@@ -1,4 +1,4 @@
-import { isNycShippingAddress } from './nycDelivery';
+import { isAlaskaOrHawaiiAddress, isNycShippingAddress } from './nycDelivery';
 import {
   DELIVERY_ZONE,
   LOCAL_UNAVAILABLE_MESSAGE,
@@ -16,25 +16,11 @@ export type ShippingLane = 'nyc' | 'tri_state' | 'nationwide';
 export const LOCAL_ITEM_NATIONWIDE_MESSAGE = LOCAL_UNAVAILABLE_MESSAGE;
 
 export const INTERNATIONAL_DELIVERY_MESSAGE =
-  'We ship inside the United States. Local items deliver same-day in NYC or in 2-5 business days across NY, NJ, and CT. Shipped items arrive in 3-5 business days.';
+  'We ship inside the United States. Locally stocked items are same-day in NYC and arrive in 3-5 business days everywhere else. Does not ship to Alaska or Hawaii.';
 
 export const EXCLUDED_SHIPPING_MESSAGE = 'Does not ship to Alaska or Hawaii.';
 
-/** Alaska 99501–99950 and Hawaii 96701–96898. */
-export function isAlaskaOrHawaiiAddress(state?: string, zipCode?: string): boolean {
-  const normalized = String(state || '')
-    .trim()
-    .toUpperCase()
-    .replace(/\./g, '')
-    .replace(/\s+/g, ' ');
-  if (normalized === 'AK' || normalized === 'ALASKA' || normalized === 'HI' || normalized === 'HAWAII') {
-    return true;
-  }
-  const zip = String(zipCode || '').replace(/\D/g, '').slice(0, 5);
-  if (!/^\d{5}$/.test(zip)) return false;
-  const zipNum = Number(zip);
-  return (zipNum >= 99501 && zipNum <= 99950) || (zipNum >= 96701 && zipNum <= 96898);
-}
+export { isAlaskaOrHawaiiAddress };
 
 export class DeliveryAreaError extends Error {
   readonly status = 400;
@@ -79,17 +65,16 @@ export function shippingLaneForCart(input: {
   if (isAlaskaOrHawaiiAddress(input.state, input.zipCode)) {
     throw new DeliveryAreaError(EXCLUDED_SHIPPING_MESSAGE);
   }
-  const localItems = input.items.filter((item) => !isTopDawgTags(item.tags));
-  if (localItems.length === 0 && input.items.length > 0) return 'nationwide';
+  if (input.items.length > 0 && input.items.every((item) => isTopDawgTags(item.tags))) return 'nationwide';
   const zone = resolveDeliveryZone(input, { tags: [] });
+  if (zone === DELIVERY_ZONE.UNAVAILABLE) {
+    throw new DeliveryAreaError(EXCLUDED_SHIPPING_MESSAGE);
+  }
   if (zone === DELIVERY_ZONE.SAME_DAY_NYC && isNycShippingAddress(input.state || '', input.zipCode || '')) {
     return 'nyc';
   }
-  if (zone === DELIVERY_ZONE.TRI_STATE) return 'tri_state';
   if (zone === DELIVERY_ZONE.SAME_DAY_NYC) return 'nyc';
-  const names = localItems.map((item) => item.name).filter(Boolean).slice(0, 3) as string[];
-  const named = names.length ? `${names.join(', ')}: ` : '';
-  throw new DeliveryAreaError(`${named}${LOCAL_UNAVAILABLE_MESSAGE}`);
+  return 'nationwide';
 }
 
 export function shippingPriceForLane(

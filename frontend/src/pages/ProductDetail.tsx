@@ -16,7 +16,6 @@ import { generateProductUrl, generateCategoryUrl } from '@/utils/productUrl';
 import { productSearchDescription, productSearchTitle } from '@/utils/seoUtils';
 import { getProductImages, getValidCompareAtPrice } from '@/utils/productPrice';
 import { availableCartStock } from '@/utils/cartStock';
-import { FREE_SHIPPING_THRESHOLD } from '@/config/constants';
 import { useToast } from '@/hooks/useToast';
 import Toast from '@/components/Toast';
 import { trackProductView, trackAddToWishlist, trackProductComparison, trackShare } from '@/utils/analytics';
@@ -29,7 +28,7 @@ import ProductVariantPicker from '@/components/ProductVariantPicker';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
 import { addToCartLabel, inStockLabel } from '@/config/ordering';
 import { EXCLUDED_SHIPPING_MESSAGE, isNationwideProduct, productDeliveryPromise } from '@/utils/deliveryLane';
-import { DELIVERY_ZONE, LOCAL_UNAVAILABLE_MESSAGE, TRI_STATE_FEE_NOTE, TRI_STATE_PAGE_PROMISE, resolveDeliveryZone } from '@/utils/deliveryZones';
+import { DELIVERY_ZONE, NATIONWIDE_FEE_NOTE, NATIONWIDE_PAGE_PROMISE, resolveDeliveryZone } from '@/utils/deliveryZones';
 import { useSavedDeliveryZip } from '@/hooks/useSavedDeliveryZip';
 
 // Lazy load heavy dependencies
@@ -864,13 +863,13 @@ const ProductDetail = () => {
                   </p>
                   <p className="text-xs text-slate-600 mt-0.5">{EXCLUDED_SHIPPING_MESSAGE}</p>
                 </div>
-              ) : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.TRI_STATE ? (
+              ) : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.NATIONWIDE ? (
                 <div>
-                  <p className="text-sm font-semibold text-[#1E3A8A]">{TRI_STATE_PAGE_PROMISE}</p>
-                  <p className="text-xs text-slate-600 mt-0.5">{TRI_STATE_FEE_NOTE}</p>
+                  <p className="text-sm font-semibold text-[#1E3A8A]">{NATIONWIDE_PAGE_PROMISE}</p>
+                  <p className="text-xs text-slate-600 mt-0.5">{NATIONWIDE_FEE_NOTE}</p>
                 </div>
               ) : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.UNAVAILABLE ? (
-                <p className="text-sm font-semibold text-[#1E3A8A]">{LOCAL_UNAVAILABLE_MESSAGE}</p>
+                <p className="text-sm font-semibold text-[#1E3A8A]">{productDeliveryPromise(product, savedZip)}</p>
               ) : (
                 <div>
                   <div className="flex items-center gap-2">
@@ -1022,21 +1021,9 @@ const ProductDetail = () => {
             <div className="flex items-center gap-3">
               <Truck className="text-primary-600" size={24} />
               <div>
-                <p className="font-medium">
-                  {isNationwideProduct(product)
-                    ? 'Flat $7 shipping'
-                    : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.TRI_STATE
-                      ? 'Free delivery at $49+'
-                      : 'Free shipping over $49'}
-                </p>
+                <p className="font-medium">Free shipping over $49</p>
                 <p className="text-sm text-gray-600">
-                  {isNationwideProduct(product)
-                    ? 'Arrives in 3-5 business days. The $49 rule does not apply.'
-                    : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.TRI_STATE
-                      ? TRI_STATE_FEE_NOTE
-                      : resolveDeliveryZone({ zipCode: savedZip }, product) === DELIVERY_ZONE.UNAVAILABLE
-                        ? LOCAL_UNAVAILABLE_MESSAGE
-                        : `On NYC orders over $${FREE_SHIPPING_THRESHOLD}`}
+                  $7 under $49, free at $49+, anywhere in the US except Alaska and Hawaii.
                 </p>
               </div>
             </div>

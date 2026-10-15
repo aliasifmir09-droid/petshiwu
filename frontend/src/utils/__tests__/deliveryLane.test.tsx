@@ -11,7 +11,6 @@ import type { Product } from '@/types';
 import { LAST_ZIP_STORAGE_KEY } from '@/utils/deliveryZip';
 import {
   LOCAL_SAME_DAY_PROMISE,
-  LOCAL_UNAVAILABLE_MESSAGE,
   MIXED_CART_DELIVERY_SUMMARY,
   EXCLUDED_SHIPPING_MESSAGE,
   TOPDAWG_NOT_SAME_DAY_PROMISE,
@@ -22,7 +21,7 @@ import {
   productDeliveryPromise,
   quoteStorefrontDelivery,
 } from '../deliveryLane';
-import { MIXED_TRISTATE_DELIVERY_SUMMARY, TRI_STATE_WINDOW } from '../deliveryZones';
+import { NATIONWIDE_PAGE_PROMISE, NATIONWIDE_WINDOW } from '../deliveryZones';
 
 vi.mock('@/stores/wishlistStore', () => ({
   useWishlistStore: () => ({
@@ -148,12 +147,12 @@ function renderItemPage(slug: string) {
 }
 
 describe('product delivery promises', () => {
-  test('old-catalog items never promise nationwide shipping', () => {
+  test('old-catalog items are same-day in NYC and nationwide everywhere else', () => {
     expect(productDeliveryPromise(local, '11372')).toBe(LOCAL_SAME_DAY_PROMISE);
     expect(productDeliveryPromise(local, '')).toBe(LOCAL_SAME_DAY_PROMISE);
-    expect(productDeliveryPromise(local, '07030')).toBe(TRI_STATE_WINDOW);
-    expect(productDeliveryPromise(local, '94105')).toBe(LOCAL_UNAVAILABLE_MESSAGE);
-    expect(productDeliveryPromise(local, '94105')).not.toMatch(/nationwide/i);
+    expect(productDeliveryPromise(local, '07030')).toBe(NATIONWIDE_WINDOW);
+    expect(productDeliveryPromise(local, '94105')).toBe(NATIONWIDE_WINDOW);
+    expect(productDeliveryPromise(local, '99501', 'AK')).toBe(EXCLUDED_SHIPPING_MESSAGE);
   });
 
   test('topdawg items are not eligible for same-day delivery, including NYC zips', () => {
@@ -167,9 +166,9 @@ describe('product delivery promises', () => {
   test('a mixed cart promises each lane separately', () => {
     expect(cartDeliverySummary([{ product: shipped }, { product: local }])).toBe(MIXED_CART_DELIVERY_SUMMARY);
     expect(cartDeliverySummary([{ product: shipped }, { product: local }], { state: 'NJ', zipCode: '07030' })).toBe(
-      MIXED_TRISTATE_DELIVERY_SUMMARY
+      NATIONWIDE_WINDOW
     );
-    expect(cartDeliverySummary([{ product: local }], { state: 'NJ', zipCode: '07030' })).toBe(TRI_STATE_WINDOW);
+    expect(cartDeliverySummary([{ product: local }], { state: 'CA', zipCode: '90001' })).toBe(NATIONWIDE_WINDOW);
     expect(cartDeliverySummary([{ product: shipped }])).toBe(TOPDAWG_NOT_SAME_DAY_PROMISE);
     expect(cartDeliverySummary([{ product: local }])).toBeNull();
     expect(productDeliveryPromise(shipped, '11372')).not.toBe(productDeliveryPromise(local, '11372'));
@@ -180,7 +179,7 @@ describe('product delivery promises', () => {
     expect(cartShipsNationwide([{ product: shipped }], hoboken)).toBe(true);
     expect(cartShipsNationwide([{ product: shipped }, { product: local }], hoboken)).toBe(false);
     expect(localItemsBlockedOutsideNyc([{ product: local }], hoboken)).toBe(false);
-    expect(localItemsBlockedOutsideNyc([{ product: local }], { state: 'CA', zipCode: '90001', country: 'USA' })).toBe(true);
+    expect(localItemsBlockedOutsideNyc([{ product: local }], { state: 'CA', zipCode: '90001', country: 'USA' })).toBe(false);
     expect(localItemsBlockedOutsideNyc([{ product: shipped }, { product: local }], { state: 'NY', zipCode: '11372', country: 'USA' })).toBe(false);
   });
 });
@@ -218,7 +217,7 @@ describe('TopDawg same-day exclusion on the item page', () => {
     renderItemPage('kibble');
 
     expect(await screen.findByRole('heading', { name: 'Queens kibble' })).toBeInTheDocument();
-    expect(screen.getByText(/Delivered in 2-5 business days across NY, NJ & CT/)).toBeInTheDocument();
+    expect(screen.getByText(NATIONWIDE_PAGE_PROMISE)).toBeInTheDocument();
     expect(screen.queryByLabelText(/check delivery by zip code/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/order by 3 pm/i)).not.toBeInTheDocument();
   });

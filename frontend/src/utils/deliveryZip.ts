@@ -136,7 +136,7 @@ export function isNextDayDeliveryZip(input: string): boolean {
   return isValidZip(zip) && Boolean(NEXT_DAY_ZIPS[zip]);
 }
 
-/** NYC five-borough same-day addresses. Tri-state 2–5 day delivery is a separate zone. */
+/** NYC five-borough same-day addresses. Nationwide 3–5 day delivery is a separate zone. */
 export function isDeliverableShippingAddress(state: string, zipCode: string): boolean {
   return isNewYorkState(state) && isNycDeliveryZip(zipCode);
 }
@@ -193,15 +193,22 @@ export function lookupZip(input: string, now: Date = new Date()): ZipLookupResul
 
   const nearby = NEXT_DAY_ZIPS[zip];
   const place = nearby?.area;
-  const triState = isTriStateDeliveryZip(zip);
+  if (isAlaskaOrHawaiiAddress(undefined, zip)) {
+    return {
+      zip,
+      area: place || 'Alaska or Hawaii',
+      speed: 'standard',
+      headline: 'Does not ship to Alaska or Hawaii.',
+      detail: 'We ship to the rest of the United States.',
+      cutoffPassed: countdown.passed,
+    };
+  }
   return {
     zip,
-    area: place || (triState ? 'NY, NJ & CT' : 'the US'),
+    area: place || 'the US',
     speed: 'standard',
-    headline: triState ? 'Delivered in 2-5 business days' : 'Not available for this address yet',
-    detail: triState
-      ? 'Delivered in 2-5 business days across NY, NJ & CT. $7 under $49, free at $49+.'
-      : 'Local items are not available for this address yet. Shipped items arrive in 3-5 business days.',
+    headline: 'Arrives in 3-5 business days',
+    detail: '$7 under $49, free at $49+.',
     cutoffPassed: countdown.passed,
   };
 }
@@ -217,17 +224,20 @@ export function isCoordinateInNyc(lat: number, lng: number): boolean {
 
 export const OUT_OF_AREA_DELIVERY_MESSAGE = 'Not available for this address yet';
 
-function isTriStateDeliveryZip(input: string): boolean {
-  const zipNum = Number(input);
-  if (isNycDeliveryZip(input)) return false;
-  return (
-    (zipNum >= 6001 && zipNum <= 6999) ||
-    (zipNum >= 7001 && zipNum <= 8999) ||
-    (zipNum >= 10501 && zipNum <= 10998) ||
-    (zipNum >= 11001 && zipNum <= 11096) ||
-    (zipNum >= 11701 && zipNum <= 11980) ||
-    (zipNum >= 12001 && zipNum <= 14925)
-  );
+/** Alaska 99501–99950 and Hawaii 96701–96898. */
+export function isAlaskaOrHawaiiAddress(state?: string, zipCode?: string): boolean {
+  const normalized = String(state || '')
+    .trim()
+    .toUpperCase()
+    .replace(/\./g, '')
+    .replace(/\s+/g, ' ');
+  if (normalized === 'AK' || normalized === 'ALASKA' || normalized === 'HI' || normalized === 'HAWAII') {
+    return true;
+  }
+  const zip = String(zipCode || '').replace(/\D/g, '').slice(0, 5);
+  if (!/^\d{5}$/.test(zip)) return false;
+  const zipNum = Number(zip);
+  return (zipNum >= 99501 && zipNum <= 99950) || (zipNum >= 96701 && zipNum <= 96898);
 }
 
 /** Shown on an in-stock local product when the shopper's ZIP is in NYC or still unknown. */

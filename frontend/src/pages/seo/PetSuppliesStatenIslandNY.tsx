@@ -32,7 +32,7 @@ const PetSuppliesStatenIslandNY = () => (
       },
       {
         question: "Is there free delivery to Staten Island?",
-        answer: "Yes — orders over $49 ship free to Staten Island. Orders under $49 are just $6. A standard bag of dog food or cat food easily hits the free delivery threshold."
+        answer: "Yes — orders over $49 ship free to Staten Island. Orders under $49 are $7. A standard bag of dog food or cat food easily hits the free delivery threshold."
       },
       {
         question: "What pet supplies can I order for delivery to Staten Island?",

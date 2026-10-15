@@ -18,7 +18,7 @@ export const NYC_HUB_ZIP_INTRO =
   'NYC same-day: order by 3 PM weekdays or 1 PM weekends, at your door before 11 PM. Nationwide shipping in 3-5 business days on shipped items.';
 
 export const NYC_HUB_NATIONWIDE_BODY =
-  'Fast delivery across America. Same-day NYC · 2-5 days across NY, NJ & CT · nationwide on thousands of items. Free shipping over $49 on local orders. No autoship. Jackson Heights is warehouse and office, not a walk-in store.';
+  'Fast delivery across America. Same-day NYC · nationwide delivery across the US. Free shipping over $49. No autoship. Jackson Heights is warehouse and office, not a walk-in store.';
 
 export const NYC_HUB_COMPARE_ROWS: Array<{
   label: string;
@@ -40,7 +40,7 @@ export const NYC_HUB_COMPARE_ROWS: Array<{
   },
   {
     label: 'Free delivery',
-    petshiwu: 'Free over $49 ($6 under)',
+    petshiwu: 'Free over $49 ($7 under)',
     manhattanShop: 'Often $100+ or zone fees',
     national: 'Free over $49, slower',
   },

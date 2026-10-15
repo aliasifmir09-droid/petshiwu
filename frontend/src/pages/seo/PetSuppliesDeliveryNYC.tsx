@@ -35,7 +35,7 @@ const PetSuppliesDeliveryNYC = () => {
         },
         {
           question: "How much does pet supply delivery cost in NYC?",
-          answer: "Delivery is $6 for orders under $49. Orders over $49 ship completely free. Most of our customers hit the free shipping threshold with a single order of pet food."
+          answer: "Delivery is $7 for orders under $49. Orders over $49 ship completely free. Most of our customers hit the free shipping threshold with a single order of pet food."
         },
         {
           question: "What pet supplies can I order for delivery in NYC?",

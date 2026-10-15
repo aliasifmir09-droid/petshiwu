@@ -38,7 +38,7 @@ const OnlinePetStoreNYC = () => {
         },
         {
           question: "How fast is delivery in NYC?",
-          answer: "Same-day if you order by 3 PM weekdays (1 PM weekends) — at the door before 11 PM. After cutoff, next day. $6 under $49, free over $49. No autoship. Call (800) 259-2605 if you need help."
+          answer: "Same-day if you order by 3 PM weekdays (1 PM weekends) — at the door before 11 PM. After cutoff, next day. $7 under $49, free over $49. No autoship. Call (800) 259-2605 if you need help."
         },
         {
           question: "What kinds of pets do you support?",
