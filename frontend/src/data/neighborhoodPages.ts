@@ -111,7 +111,7 @@ const dogFoodGenerator: PageGenerator = (n) => ({
   ],
   solutionPoints: [
     `NYC-based delivery covering all of ${n.name} and nearby ${n.nearbyAreas}`,
-    `4,000+ dog food products — dry, wet, raw, grain-free, prescription, and puppy`,
+    `10,000+ dog food products — dry, wet, raw, grain-free, prescription, and puppy`,
     `All top brands: Purina Pro Plan, Blue Buffalo, Hill's Science Diet, Royal Canin, Merrick, and more`,
     `Free delivery on orders over $49 — most dog food orders qualify automatically`,
     `Queens-based operation: faster, more reliable NYC delivery than national chains`,
@@ -191,10 +191,10 @@ const catFoodGenerator: PageGenerator = (n) => ({
 
 const petSuppliesGenerator: PageGenerator = (n) => ({
   keyword: `pet-supplies-delivery-${n.slug}`,
-  title: `Pet Supplies Delivery in ${n.name}, ${n.borough} — 4,000+ Products | Petshiwu`,
-  description: `Shop 4,000+ pet supplies and get delivered in ${n.name}, ${n.borough}. Dog food, cat food, toys, treats, litter, leashes, and more. Free shipping over $49. Queens-based, NYC-wide.`,
+  title: `Pet Supplies Delivery in ${n.name}, ${n.borough} — 10,000+ Products | Petshiwu`,
+  description: `Shop 10,000+ pet supplies and get delivered in ${n.name}, ${n.borough}. Dog food, cat food, toys, treats, litter, leashes, and more. Free shipping over $49. Queens-based, NYC-wide.`,
   h1: `Pet Supplies Delivery in ${n.name}, ${n.borough}`,
-  introContent: `${n.flavor} Petshiwu is a Queens-based pet supply store that delivers 4,000+ products to every address in ${n.name} — dog food, cat food, toys, treats, leashes, litter, and everything else your pet needs. Free delivery on orders over $49. No subscription, no membership fee.`,
+  introContent: `${n.flavor} Petshiwu is a Queens-based pet supply store that delivers 10,000+ products to every address in ${n.name} — dog food, cat food, toys, treats, leashes, litter, and everything else your pet needs. Free delivery on orders over $49. No subscription, no membership fee.`,
   problemPoints: [
     `Limited selection at local ${n.borough} pet stores near ${n.name}`,
     `Carrying multiple heavy items home from the store`,
@@ -204,7 +204,7 @@ const petSuppliesGenerator: PageGenerator = (n) => ({
   ],
   solutionPoints: [
     `Delivery to all of ${n.name} and nearby ${n.nearbyAreas}`,
-    `4,000+ products: dog food, cat food, toys, treats, litter, leashes, beds, supplements, and more`,
+    `10,000+ products: dog food, cat food, toys, treats, litter, leashes, beds, supplements, and more`,
     `All major brands: Purina, Blue Buffalo, Royal Canin, Hill's, Kong, Frisco, and hundreds more`,
     `Dogs, cats, birds, fish, reptiles, and small animals all covered`,
     `Free delivery on orders over $49 — Queens-based for faster NYC shipping`,
@@ -213,7 +213,7 @@ const petSuppliesGenerator: PageGenerator = (n) => ({
   faqItems: [
     {
       question: `Do you deliver pet supplies to ${n.name}, ${n.borough}?`,
-      answer: `Yes — Petshiwu delivers pet supplies throughout ${n.name} and the surrounding ${n.borough} area including ${n.nearbyAreas}. We carry 4,000+ products for dogs, cats, birds, fish, reptiles, and small animals. Free delivery on orders over $49.`,
+      answer: `Yes — Petshiwu delivers pet supplies throughout ${n.name} and the surrounding ${n.borough} area including ${n.nearbyAreas}. We carry 10,000+ products for dogs, cats, birds, fish, reptiles, and small animals. Free delivery on orders over $49.`,
     },
     {
       question: `What kinds of pet supplies do you deliver to ${n.name}?`,

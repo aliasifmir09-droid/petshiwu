@@ -24,13 +24,13 @@ const LuxuryPetAccessoriesNYC = () => {
         "Orthopedic and memory foam dog beds — delivered, no subway carry required",
         "High-end grooming accessories, interactive toys, and enrichment products",
         "Free delivery to all 5 NYC boroughs on orders over $49",
-        "4,000+ products — the widest selection of premium pet supplies in NYC delivery",
+        "10,000+ products — the widest selection of premium pet supplies in NYC delivery",
         "Queens-based operation — faster delivery than national retailers"
       ]}
       faqItems={[
         {
           question: "What premium pet accessories do you carry?",
-          answer: "We stock a wide range of premium pet products including high-protein dog and cat food from Wellness and Wellness, interactive enrichment toys from Kong, premium grooming tools, orthopedic dog beds, and gourmet treat options. Our 4,000+ product catalog covers the full range from everyday essentials to luxury splurges."
+          answer: "We stock a wide range of premium pet products including high-protein dog and cat food from Wellness and Wellness, interactive enrichment toys from Kong, premium grooming tools, orthopedic dog beds, and gourmet treat options. Our 10,000+ product catalog covers the full range from everyday essentials to luxury splurges."
         },
         {
           question: "Do you carry luxury pet products as gifts?",

@@ -7,7 +7,7 @@ const PetSuppliesDUMBONY = () => (
   <SEOLandingPage
     keyword="pet-supplies-dumbo-brooklyn-ny"
     title="Pet Supplies DUMBO Brooklyn NY — Delivery to Your Apartment | Petshiwu"
-    description="Pet supply delivery to DUMBO, Brooklyn Heights, and Vinegar Hill. Premium dog food, cat food, and pet accessories delivered fast. 4,000+ products, free shipping over $49."
+    description="Pet supply delivery to DUMBO, Brooklyn Heights, and Vinegar Hill. Premium dog food, cat food, and pet accessories delivered fast. 10,000+ products, free shipping over $49."
     h1="Pet Supplies Delivered to DUMBO & Brooklyn Heights"
     introContent="DUMBO's cobblestone streets and converted lofts are home to some of Brooklyn's most pampered pets. Petshiwu delivers premium pet food, supplements, and accessories directly to your DUMBO, Brooklyn Heights, or Vinegar Hill address — no car needed, no bags on the A train. Free delivery on orders over $49."
     problemPoints={[
@@ -19,7 +19,7 @@ const PetSuppliesDUMBONY = () => (
     ]}
     solutionPoints={[
       "Delivery throughout DUMBO, Brooklyn Heights, Vinegar Hill, and Dumbo waterfront",
-      "4,000+ products — the biggest selection without leaving your building",
+      "10,000+ products — the biggest selection without leaving your building",
       "Premium brands: Wellness, Royal Canin, Blue Buffalo, Hill's",
       "Grain-free, raw, limited ingredient, and prescription diets available",
       "Free delivery on orders over $49",

@@ -31,7 +31,7 @@ export const NYC_HUB_LINKS: Array<{
   {
     path: '/pet-supplies-delivery-nyc',
     title: 'Pet supplies delivery NYC',
-    text: '4,000+ SKUs. Free over $49. Check your ZIP for same-day NYC vs 2-5 business days on shipped items.',
+    text: '10,000+ SKUs. Free over $49. Check your ZIP for same-day NYC vs 2-5 business days on shipped items.',
   },
   {
     path: '/pet-supplies-queens-ny',

@@ -7,7 +7,7 @@ const PetSuppliesUpperWestSideNYC = () => (
   <SEOLandingPage
     keyword="pet-supplies-upper-west-side-nyc"
     title="Pet Supplies Upper West Side NYC — Delivery to Your Manhattan Apartment | Petshiwu"
-    description="Pet supply delivery to the Upper West Side, Manhattan. Premium dog food, cat food, and pet accessories delivered to your UWS apartment. Central Park dog owners love us. 4,000+ products, free shipping over $49."
+    description="Pet supply delivery to the Upper West Side, Manhattan. Premium dog food, cat food, and pet accessories delivered to your UWS apartment. Central Park dog owners love us. 10,000+ products, free shipping over $49."
     h1="Pet Supplies Delivered to the Upper West Side, Manhattan"
     introContent="The Upper West Side is one of Manhattan's most dog-friendly neighborhoods — from Riverside Park to Central Park West, UWS pet owners take their animals seriously. Petshiwu delivers premium pet food, supplements, toys, and accessories right to your doorman building or walk-up. Skip the elevator + bags combo and let us bring it to you. Free delivery on orders over $49."
     problemPoints={[
@@ -19,7 +19,7 @@ const PetSuppliesUpperWestSideNYC = () => (
     ]}
     solutionPoints={[
       "Delivery throughout the Upper West Side, Morningside Heights, and Lincoln Square",
-      "4,000+ products from premium and specialty brands",
+      "10,000+ products from premium and specialty brands",
       "Purina Pro Plan, Royal Canin, Hill's Science Diet, Blue Buffalo, and more",
       "Grain-free, raw, prescription diets, and senior formulas all available",
       "Free delivery on orders over $49 — no boutique markup",

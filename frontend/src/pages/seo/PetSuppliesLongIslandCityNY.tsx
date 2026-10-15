@@ -20,7 +20,7 @@ const PetSuppliesLongIslandCityNY = () => (
     solutionPoints={[
       "Queens-based delivery — we're right across the Queensboro Bridge",
       "Delivery to LIC, Hunters Point, Sunnyside, Woodside, and Astoria",
-      "4,000+ products from premium brands at competitive prices",
+      "10,000+ products from premium brands at competitive prices",
       "Purina, Blue Buffalo, Royal Canin, Hill's, Wellness, and more",
       "Free delivery on orders over $49",
       "Dogs, cats, birds, fish, reptiles, and small animals all covered"

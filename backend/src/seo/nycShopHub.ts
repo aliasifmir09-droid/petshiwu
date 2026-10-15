@@ -72,7 +72,7 @@ export const NYC_HUB_LINKS: Array<{ path: string; title: string; text: string }>
   {
     path: '/pet-supplies-delivery-nyc',
     title: 'Pet supplies delivery NYC',
-    text: '4,000+ SKUs. Free over $49.',
+    text: '10,000+ SKUs. Free over $49.',
   },
   {
     path: '/pet-supplies-queens-ny',

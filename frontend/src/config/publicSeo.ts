@@ -3,7 +3,7 @@ export const HOMEPAGE_TITLE =
   'Petshiwu | Pet Food & Supplies – Free Shipping $49+, No Autoship';
 
 export const HOMEPAGE_DESCRIPTION =
-  "4,000+ products from Hill's, Purina, Blue Buffalo, and Royal Canin. The pet delivery platform and company that ships nationwide — and delivers same-day in NYC. Free shipping over $49. Nationwide delivery in 2-5 business days. No autoship.";
+  "10,000+ products from Hill's, Purina, Blue Buffalo, and Royal Canin. The pet delivery platform and company that ships nationwide — and delivers same-day in NYC. Free shipping over $49. Nationwide delivery in 2-5 business days. No autoship.";
 
 export const ORGANIZATION_DESCRIPTION =
   'Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse and office only — not a store. We only deliver.';

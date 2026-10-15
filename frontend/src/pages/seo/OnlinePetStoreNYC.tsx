@@ -11,7 +11,7 @@ const OnlinePetStoreNYC = () => {
       title="NYC pet delivery — Same-Day Delivery, No Autoship | Petshiwu"
       description="NYC pet delivery platform with same-day delivery. Order by 3 PM weekdays (1 PM weekends), before 11 PM. Not a store. We only deliver. No autoship. Free over $49. All 5 boroughs."
       h1="NYC pet delivery — Delivered Tonight"
-      introContent="Petshiwu is the pet delivery platform built for New York City apartments and no-car life. Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM to all five boroughs. We are not a store. We only deliver. No autoship. 4,000+ products. Free over $49. Packed in Queens, not a warehouse in the Midwest."
+      introContent="Petshiwu is the pet delivery platform built for New York City apartments and no-car life. Order by 3 PM weekdays (1 PM weekends) and we deliver before 11 PM to all five boroughs. We are not a store. We only deliver. No autoship. 10,000+ products. Free over $49. Packed in Queens, not a warehouse in the Midwest."
       problemPoints={[
         "National online retailers that take days to ship to NYC",
         "No car to load up on heavy pet food and litter",
@@ -21,7 +21,7 @@ const OnlinePetStoreNYC = () => {
       ]}
       solutionPoints={[
         "NYC-based — we understand the city and its pet owners",
-        "4,000+ products for every pet under one roof",
+        "10,000+ products for every pet under one roof",
         "Free delivery on orders over $49 — no membership, no games",
         "Dogs, cats, birds, fish, reptiles, small pets — all covered",
         "Top brands you trust: Purina, Blue Buffalo, Royal Canin, Hill's Science Diet",

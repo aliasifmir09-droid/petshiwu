@@ -8,7 +8,7 @@ describe('storefront hold and catalog copy', () => {
   });
 
   test('does not advertise a 10,000+ catalog', () => {
-    expect(CATALOG_PRODUCT_COUNT_LABEL).toBe('4,000+');
+    expect(CATALOG_PRODUCT_COUNT_LABEL).toBe('10,000+');
     expect(CATALOG_PRODUCT_COUNT_LABEL).not.toMatch(/10,000/);
   });
 

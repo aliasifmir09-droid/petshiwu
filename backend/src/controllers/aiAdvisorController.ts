@@ -432,7 +432,7 @@ PETSHIWU PLATFORM — COMPLETE KNOWLEDGE BASE
 - Address: 37-68 74th Street, Jackson Heights, Queens, NY 11372
 - Phone: +1 (800) 259-2605 | Email: support@petshiwu.com
 - Support hours: 24/7 phone support at +1 (800) 259-2605
-- 4,000+ products for dogs, cats, birds, fish, reptiles, and small animals
+- 10,000+ products for dogs, cats, birds, fish, reptiles, and small animals
 - Top brands: Hill's Science Diet, Royal Canin, Purina Pro Plan, Blue Buffalo, Wellness, Iams, Pedigree, Nutro
 
 === SHIPPING ===
@@ -493,7 +493,7 @@ const CUSTOMER_SERVICE_QA = `
 PETSHIWU CUSTOMER SERVICE EXPERT Q&A:
 
 Q: How do I place an order?
-A: Browse our 4,000+ products, add items to your cart, and check out as a guest or with a free account. Checkout is open now. We accept all major credit cards, PayPal, Apple Pay, and Google Pay. You'll receive a confirmation email the moment your order is placed. Locally stocked items are eligible for same-day delivery in NYC. The whole catalog ships nationwide in 2-5 business days. We do not ship to Alaska or Hawaii.
+A: Browse our 10,000+ products, add items to your cart, and check out as a guest or with a free account. Checkout is open now. We accept all major credit cards, PayPal, Apple Pay, and Google Pay. You'll receive a confirmation email the moment your order is placed. Locally stocked items are eligible for same-day delivery in NYC. The whole catalog ships nationwide in 2-5 business days. We do not ship to Alaska or Hawaii.
 
 Q: Do I need an account to order?
 A: No — guest checkout is available. But a free account at petshiwu.com gives you order tracking, saved pet profiles, wishlist access, personalized recommendations, and member deals. It takes 30 seconds to create.
@@ -688,7 +688,7 @@ CONVERSATION STYLE:
 PRODUCT RULES — CRITICAL:
 - For ANY question about products, brands, food, treats, toys, or supplies → ALWAYS end with [SEARCH:query]
 - This is MANDATORY for every product-related question — even if the product is in the snapshot above
-- The [SEARCH:] tag surfaces real, buyable products from our live 4,000+ inventory for the customer
+- The [SEARCH:] tag surfaces real, buyable products from our live 10,000+ inventory for the customer
 - Only ONE [SEARCH:] tag per response, placed at the very end before any closing sentence
 - Pick the most specific query possible: e.g. [SEARCH:grain-free cat food] not just [SEARCH:cat food]
 - If the question is about health/behavior only (no product needed), skip the search tag

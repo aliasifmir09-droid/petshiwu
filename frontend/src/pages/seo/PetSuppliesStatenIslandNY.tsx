@@ -19,7 +19,7 @@ const PetSuppliesStatenIslandNY = () => (
     ]}
     solutionPoints={[
       "Delivery to all Staten Island neighborhoods — St. George, New Dorp, Tottenville, Stapleton, Richmond, Eltingville, Great Kills, and more",
-      "4,000+ products for every type of pet",
+      "10,000+ products for every type of pet",
       "All top national brands at competitive prices",
       "Free delivery on orders $49+ — saves on gas too",
       "Consistent stock — never backordered on the basics",
