@@ -206,7 +206,7 @@ const hubs = [
 
 </div>
 
-<h2>Brooklyn's Best Pet Delivery Platform</h2>
+<h2>Brooklyn's Best Pet Delivery Platform and Company</h2>
 <p>Brooklyn pet owners shouldn't have to lug heavy bags home on the G train or overpay at the corner pet shop. Petshiwu gives you access to a full national-scale catalog at competitive prices, delivered to your door. Visit <a href="https://www.petshiwu.com">petshiwu.com</a> and place your first order today.</p>`
   },
   {

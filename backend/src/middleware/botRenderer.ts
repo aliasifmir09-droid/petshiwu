@@ -230,7 +230,7 @@ const removeStaticHero = (html: string): string => {
 const STATIC_PAGES: Record<string, { title: string; description: string }> = {
   '/': {
     title: 'Petshiwu | Pet Food & Supplies – Free Shipping $49+, No Autoship',
-    description: '4,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. The pet delivery platform that ships nationwide — and delivers same-day in NYC. Free shipping over $49. Nationwide delivery in 2-5 business days. No autoship.',
+    description: '4,000+ products from Hill\'s, Purina, Blue Buffalo, and Royal Canin. The pet delivery platform and company that ships nationwide — and delivers same-day in NYC. Free shipping over $49. Nationwide delivery in 2-5 business days. No autoship.',
   },
   '/products': {
     title: 'Pet food & supplies – Ships nationwide | Petshiwu',
@@ -265,7 +265,7 @@ const STATIC_PAGES: Record<string, { title: string; description: string }> = {
     description: 'Shop food, cages, bedding, and toys for hamsters, rabbits, guinea pigs, and more. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Free shipping over $49.',
   },
   '/about': {
-    title: 'About Petshiwu — Pet Delivery Platform',
+    title: 'About Petshiwu — Pet Delivery Platform and Company',
     description: 'Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Warehouse only — not a store. We only deliver.',
   },
   '/our-promise': {
@@ -592,7 +592,7 @@ const buildGenericPageHtml = (template: string, reqPath: string, reqOriginalUrl:
       const productSlug = segments[segments.length - 1];
       h1Text = slugToTitle(productSlug);
     } else {
-      h1Text = 'The pet delivery platform that ships nationwide — and delivers same-day in NYC.';
+      h1Text = 'The pet delivery platform and company that ships nationwide — and delivers same-day in NYC.';
     }
     // For homepage, keep the branded H1 — don't replace it
     if (cleanPath !== '/') {

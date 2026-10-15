@@ -36,7 +36,7 @@ export const LOCAL_UNAVAILABLE_MESSAGE = 'Not available for this address yet';
 export const SAME_DAY_WINDOW = 'Same-day delivery in NYC';
 
 /** Nationwide-first homepage H1. Same-day stays a NYC fact, not the store identity. */
-export const HERO_H1 = 'The pet delivery platform that ships nationwide — and delivers same-day in NYC.';
+export const HERO_H1 = 'The pet delivery platform and company that ships nationwide — and delivers same-day in NYC.';
 export const NATIONWIDE_BRAND_FRAME =
   'Nationwide delivery in 2-5 business days. Same-day in NYC on local stock.';
 export const ANNOUNCEMENT_SHIPPING =

@@ -124,7 +124,7 @@ export const BRAND_STORIES: Record<BrandStorySlug, BrandStory> = {
     slug: 'from-queens',
     path: '/from-queens',
     kicker: 'How we ship',
-    slogan: 'A delivery platform. We bring it to your door.',
+    slogan: 'A delivery platform and company. We bring it to your door.',
     title: 'How We Ship | Petshiwu',
     description:
       'Petshiwu is a pet delivery platform and company. Nationwide delivery in 2-5 business days. Same-day in NYC on local stock. Office and warehouse only — not a store. We only deliver. Free shipping over $49. No autoship.',
