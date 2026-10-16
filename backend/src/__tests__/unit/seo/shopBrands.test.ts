@@ -16,7 +16,7 @@ describe('shoppable brand catalog', () => {
       'purina-cat-chow',
       'friskies',
       'temptations',
-    ]);
+    ]));
     expect(SHOP_BRANDS.length).toBeLessThanOrEqual(20);
     expect(SHOP_BRAND_PATHS).toContain('/brand/merrick');
     expect(shopBrandForPath('/brand/blue-buffalo')?.query).toBe('Blue Buffalo');
