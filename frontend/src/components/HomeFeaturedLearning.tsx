@@ -15,11 +15,11 @@ const HomeFeaturedLearning = () => {
   if (posts.length === 0) return null;
 
   return (
-    <section className="py-14 bg-[#F8FAFC] border-y border-slate-100">
+    <section className="border-y border-orange-100 bg-[#FAF6EF] py-14">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8">
           <div>
-            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500 mb-2">
+            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-brand-orange">
               New for Fall 2026
             </p>
             <h2 className="text-2xl md:text-3xl font-bold text-[#1E3A8A] leading-tight">

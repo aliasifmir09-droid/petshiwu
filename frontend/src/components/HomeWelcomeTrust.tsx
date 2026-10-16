@@ -29,7 +29,7 @@ const ITEMS = [
 
 const HomeWelcomeTrust = () => {
   return (
-    <section className="bg-white">
+    <section className="bg-[#FAF6EF]">
       <div className="container mx-auto px-4 lg:px-8 py-6 md:py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
           {ITEMS.map((item) => {
@@ -47,7 +47,7 @@ const HomeWelcomeTrust = () => {
               </>
             );
             const className =
-              'flex items-start gap-4 rounded-2xl border border-[#1E3A8A]/10 bg-[#F7F4EE] px-5 py-5 hover:bg-white hover:shadow-md hover:border-[#1E3A8A]/20 transition-all';
+              'flex items-start gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-sm hover:shadow-md transition-all';
             if ('href' in item && item.href) {
               return (
                 <a key={item.title} href={item.href} className={className}>

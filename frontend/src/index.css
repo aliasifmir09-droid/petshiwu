@@ -516,19 +516,12 @@ body > iframe[title="PayPal Pay Later"] {
   min-height: 48px !important;
 }
 
-/* Type scale: 12 caption, 13 meta, 15 body, 20 title, 28–32 display. Weights stay 400–500. */
+/* Body stays regular. Headings and CTAs use real bold weights. */
 body {
   font-size: 15px;
   font-weight: 400;
   line-height: 1.55;
   letter-spacing: 0;
-}
-
-.font-extrabold,
-.font-black,
-.font-bold {
-  font-weight: 500;
-  letter-spacing: -0.015em;
 }
 
 a:focus-visible,
@@ -548,7 +541,7 @@ textarea:focus-visible {
   padding: 0 1.25rem;
   border-radius: 9999px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: 0;
   line-height: 1;
   transition: background-color 150ms ease, color 150ms ease;

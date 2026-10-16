@@ -5,32 +5,55 @@ const FACTS = [
   {
     title: 'Nationwide',
     body: NATIONWIDE_WINDOW,
+    rule: 'bg-[#1E3A8A]',
+    pill: '2-5 business days',
+    pillClass: 'bg-blue-50 text-[#1E3A8A]',
   },
   {
     title: 'Our home city',
     body: SAME_DAY_LOCAL_PHRASE,
+    rule: 'bg-[#F59E0B]',
+    pill: 'same-day',
+    pillClass: 'bg-orange-100 text-[#D97706]',
   },
   {
     title: 'One delivery fee',
     body: `${FEE_FREE_LABEL}. ${FEE_UNDER_LABEL}.`,
+    rule: 'bg-[#1E3A8A]',
+    pill: '',
+    pillClass: '',
   },
   {
     title: 'Alaska and Hawaii',
     body: `Not yet available. ${EXCLUDED_SHIPPING_MESSAGE}`,
+    rule: 'bg-slate-300',
+    pill: '',
+    pillClass: '',
   },
 ];
 
 const DeliveryWindowExplainer = () => (
-  <section className="border-y border-stone-200 bg-white" aria-labelledby="delivery-window-heading">
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
-      <h2 id="delivery-window-heading" className="text-xl font-medium tracking-[-0.02em] text-stone-900 md:text-2xl">
+  <section className="bg-white" aria-labelledby="delivery-window-heading" data-home-section="delivery">
+    <div className="container mx-auto px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+      <p className="text-xs font-bold uppercase tracking-wide text-brand-orange">Delivery</p>
+      <h2 id="delivery-window-heading" className="mt-1 text-2xl font-extrabold text-[#1E3A8A]">
         Wherever you are, here&apos;s when it arrives
       </h2>
-      <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {FACTS.map((fact) => (
-          <li key={fact.title} className="rounded-2xl border border-stone-200 bg-[#F7F6F3] p-5">
-            <p className="text-sm font-medium text-stone-900">{fact.title}</p>
-            <p className="mt-2 text-sm leading-relaxed text-stone-600">{fact.body}</p>
+          <li key={fact.title} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className={`h-1.5 ${fact.rule}`} />
+            <div className="p-5">
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-base font-bold text-[#1E3A8A]">{fact.title}</p>
+                {fact.pill ? (
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${fact.pillClass}`}>
+                    {fact.pill}
+                  </span>
+                ) : null}
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">{fact.body}</p>
+            </div>
           </li>
         ))}
       </ul>

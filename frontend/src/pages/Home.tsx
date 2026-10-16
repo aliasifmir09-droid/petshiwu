@@ -13,6 +13,7 @@ import ShopByPet from '@/components/ShopByPet';
 import TonightDeliveryHowItWorks from '@/components/TonightDeliveryHowItWorks';
 import TonightPromiseCard from '@/components/TonightPromiseCard';
 import HomeHeroSlogans from '@/components/HomeHeroSlogans';
+import SeasonalPromoBand from '@/components/SeasonalPromoBand';
 import HomeWelcomeTrust from '@/components/HomeWelcomeTrust';
 import HomeFeaturedLearning from '@/components/HomeFeaturedLearning';
 import NycHubLinkGrid from '@/components/NycHubLinkGrid';
@@ -41,6 +42,7 @@ const visibleProducts = (products: Product[] | undefined) => {
 const ProductGrid = ({
   title,
   subtitle,
+  eyebrow,
   href,
   linkLabel,
   filters,
@@ -50,6 +52,7 @@ const ProductGrid = ({
 }: {
   title: string;
   subtitle: string;
+  eyebrow: string;
   href: string;
   linkLabel: string;
   filters: ProductFilters;
@@ -69,8 +72,9 @@ const ProductGrid = ({
     <div>
       <div className="flex items-end justify-between gap-3 mb-4">
         <div>
-          <h2 className="text-xl md:text-2xl font-extrabold text-[#1E3A8A] leading-tight">{title}</h2>
-          <p className="text-sm text-slate-500 mt-0.5">{subtitle}</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-brand-orange">{eyebrow}</p>
+          <h2 className="mt-1 text-2xl font-extrabold text-[#1E3A8A] leading-tight">{title}</h2>
+          <p className="text-sm text-slate-600 mt-1">{subtitle}</p>
         </div>
         <Link to={href} className="shrink-0 text-sm font-semibold text-[#1E3A8A] hover:underline">
           {linkLabel}
@@ -206,12 +210,13 @@ const Home = () => {
 
       <ShopByPet />
 
-      <section className="bg-white pb-6">
+      <section className="bg-white py-12 md:py-16" data-home-section="top-picks">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="flex items-end justify-between gap-3 mb-4">
+          <div className="flex items-end justify-between gap-3 mb-6">
             <div>
-              <h2 className="text-xl md:text-2xl font-extrabold text-[#1E3A8A]">Top picks for dogs and cats</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Prices, ratings, and add to cart. No subscription.</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-brand-orange">Featured</p>
+              <h2 className="mt-1 text-2xl font-extrabold text-[#1E3A8A]">Top picks for dogs and cats</h2>
+              <p className="text-sm text-slate-600 mt-1">Prices, ratings, and add to cart. No subscription.</p>
             </div>
             <Link
               to="/products?featured=true"
@@ -237,9 +242,19 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="bg-[#F7F4EE] py-8">
-        <div className="container mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-8">
+      <SeasonalPromoBand
+        to="/halloween"
+        title="The Halloween Shop"
+        subtitle="Costumes, treats & spooky toys — shipped nationwide"
+        cta="Shop Halloween"
+        image="/blog/dog-toys.jpg"
+        imageAlt="Dog toys ready to ship nationwide"
+      />
+
+      <section className="bg-white py-12 md:py-16" data-home-section="dogs-cats">
+        <div className="container mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-10">
           <ProductGrid
+            eyebrow="Dogs"
             title="Popular for dogs"
             subtitle="Nationwide delivery in 2-5 business days"
             href="/products?petType=dog"
@@ -248,6 +263,7 @@ const Home = () => {
             filters={{ petType: 'dog', inStock: true, sort: 'rating' }}
           />
           <ProductGrid
+            eyebrow="Cats"
             title="Popular for cats"
             subtitle="Food, litter, and everyday care"
             href="/products?petType=cat"
@@ -258,9 +274,10 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="bg-white py-8">
+      <section className="bg-[#FAF6EF] py-12 md:py-16">
         <div className="container mx-auto px-4 lg:px-8">
           <ProductGrid
+            eyebrow="Brand"
             title="Hill's Science Diet"
             subtitle="Vet-recommended nutrition"
             href="/brand/hills-science-diet"
@@ -278,11 +295,12 @@ const Home = () => {
       <HomeWelcomeTrust />
 
       {/* Brands We Carry */}
-      <section className="py-10 bg-white">
+      <section className="bg-white py-12 md:py-16">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-extrabold text-[#1E3A8A]">Shop top brands</h2>
+              <p className="text-xs font-bold uppercase tracking-wide text-brand-orange">Brands</p>
+              <h2 className="mt-1 text-2xl font-extrabold text-[#1E3A8A]">Shop top brands</h2>
               <p className="text-gray-500 text-sm mt-1">Hill’s, Royal Canin, Purina, Blue Buffalo, and more</p>
             </div>
             <Link
@@ -358,11 +376,11 @@ const Home = () => {
 
       <TonightDeliveryHowItWorks />
 
-      <section className="py-16 bg-[#F7F4EE]">
+      <section className="bg-white py-16">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-10">
-            <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-[#1E3A8A]/60 mb-2">Why Petshiwu</p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-[#1E3A8A] mb-2">
+            <p className="text-xs font-bold uppercase tracking-wide text-brand-orange mb-2">Why Petshiwu</p>
+            <h2 className="text-2xl md:text-4xl font-extrabold text-[#1E3A8A] mb-2">
               What you get
             </h2>
             <p className="text-slate-500">Hill’s, Royal Canin, Purina. 365-day returns.</p>
@@ -458,7 +476,7 @@ const NewsletterSection = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-white text-[#1E3A8A] font-semibold px-8 py-3.5 rounded-full whitespace-nowrap disabled:opacity-60 hover:bg-slate-100 shadow-sm"
+                  className="whitespace-nowrap rounded-full bg-brand-orange px-8 py-3.5 font-bold text-white shadow-sm hover:bg-brand-orange-dark disabled:opacity-60"
                 >
                   {loading ? 'Sending...' : 'Subscribe'}
                 </button>
